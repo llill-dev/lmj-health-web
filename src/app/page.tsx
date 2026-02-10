@@ -5,11 +5,19 @@ import { useState } from 'react';
 import doctorImg from '../../public/images/doctor.png';
 import LoginForm from '@/components/auth/login/login-form';
 import SignUpForm from '@/components/auth/signUp/signup-form';
+import SignupSuccess from '@/components/auth/signUp/signup-success';
 import VerifyAccount from '@/components/auth/verify/verify-account';
+import NewPassword from '@/components/auth/newPassword/new-password';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-type View = 'welcome' | 'login' | 'signup' | 'verify';
+type View =
+  | 'welcome'
+  | 'login'
+  | 'signup'
+  | 'signup-success'
+  | 'verify'
+  | 'new-password';
 
 export default function Home() {
   const [view, setView] = useState<View>('welcome');
@@ -19,7 +27,9 @@ export default function Home() {
     welcome: 0,
     login: 1,
     signup: 2,
+    'signup-success': 3,
     verify: 3,
+    'new-password': 4,
   };
 
   const goTo = (next: View) => {
@@ -180,6 +190,7 @@ export default function Home() {
             <LoginForm
               onBack={() => goTo('welcome')}
               onSignUp={() => goTo('signup')}
+              onForgotPassword={() => goTo('new-password')}
             />
           ) : view === 'verify' ? (
             <VerifyAccount
@@ -187,11 +198,19 @@ export default function Home() {
               onBack={() => goTo('signup')}
               onVerify={() => goTo('login')}
             />
+          ) : view === 'signup-success' ? (
+            <SignupSuccess onContinue={() => goTo('verify')} />
+          ) : view === 'new-password' ? (
+            <NewPassword
+              onBack={() => goTo('login')}
+              onSubmit={() => goTo('login')}
+            />
           ) : (
             <SignUpForm
               onBack={() => goTo('welcome')}
               onLogin={() => goTo('login')}
               onVerify={() => goTo('verify')}
+              onSuccess={() => goTo('signup-success')}
             />
           )}
         </motion.div>
