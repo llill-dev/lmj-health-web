@@ -11,9 +11,11 @@ type LoginMethod = 'phone' | 'email';
 export default function LoginForm({
   onBack,
   onSignUp,
+  onForgotPassword,
 }: {
   onBack: () => void;
   onSignUp: () => void;
+  onForgotPassword: () => void;
 }) {
   const [method, setMethod] = useState<LoginMethod>('phone');
   const [methodDirection, setMethodDirection] = useState<1 | -1>(1);
@@ -195,6 +197,7 @@ export default function LoginForm({
                   <button
                     type='button'
                     className='transition-colors hover:text-[#14B3AE]'
+                    onClick={onForgotPassword}
                   >
                     نسيت كلمة المرور
                   </button>

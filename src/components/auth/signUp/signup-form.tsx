@@ -24,10 +24,12 @@ export default function SignUpForm({
   onBack,
   onLogin,
   onVerify,
+  onSuccess,
 }: {
   onBack: () => void;
   onLogin: () => void;
   onVerify: () => void;
+  onSuccess: () => void;
 }) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [direction, setDirection] = useState<1 | -1>(1);
@@ -75,7 +77,7 @@ export default function SignUpForm({
       setStep(1);
       return;
     }
-    onVerify();
+    onSuccess();
   };
 
   return (
