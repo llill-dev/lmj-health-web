@@ -110,7 +110,6 @@ export default function VerifyAccount({
         التحقق من حسابك
       </h1>
       <div
-        dir='rtl'
         lang='ar'
         className='relative'
       >

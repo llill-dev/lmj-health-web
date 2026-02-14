@@ -2,13 +2,18 @@ import type { Metadata } from 'next';
 import { Cairo } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
-import { QueryProvider } from '@/providers/query-provider';
+import { QueryProvider } from './providers';
 
 const cairo = Cairo({
   variable: '--font-cairo',
   subsets: ['latin', 'arabic'],
   display: 'swap',
 });
+// const arimo = Arimo({
+//   variable: '--font-cairo',
+//   subsets: ['latin'],
+//   display: 'swap',
+// });
 
 export const metadata: Metadata = {
   title: {

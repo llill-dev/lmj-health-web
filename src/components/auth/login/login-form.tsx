@@ -12,12 +12,14 @@ export default function LoginForm({
   onBack,
   onSignUp,
   onForgotPassword,
+  onOtpLogin,
 }: {
   onBack: () => void;
   onSignUp: () => void;
   onForgotPassword: () => void;
+  onOtpLogin: () => void;
 }) {
-  const [method, setMethod] = useState<LoginMethod>('phone');
+  const [method, setMethod] = useState<LoginMethod>('email');
   const [methodDirection, setMethodDirection] = useState<1 | -1>(1);
 
   const methodLabel = useMemo(() => {
@@ -191,15 +193,16 @@ export default function LoginForm({
                   <button
                     type='button'
                     className='transition-colors hover:text-[#14B3AE]'
+                    onClick={onForgotPassword}
                   >
-                    تسجيل دخول برمز OTP
+                    نسيت كلمة المرور
                   </button>
                   <button
                     type='button'
                     className='transition-colors hover:text-[#14B3AE]'
-                    onClick={onForgotPassword}
+                    onClick={onOtpLogin}
                   >
-                    نسيت كلمة المرور
+                    تسجيل دخول برمز OTP
                   </button>
                 </div>
               </div>

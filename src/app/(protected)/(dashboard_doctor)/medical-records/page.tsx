@@ -1,0 +1,217 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import {
+  FileText,
+  Plus,
+  Search,
+  Activity,
+  ClipboardList,
+  Files,
+  CalendarDays,
+  ChevronRight,
+  Clock,
+  Link,
+} from 'lucide-react';
+import DoctorDashboardOverview from '@/components/dashboard/doctor-dashboard-overview';
+
+type MedicalRecordItem = {
+  id: string;
+  patientName: string;
+  patientInitial: string;
+  date: string;
+  statusLabel: string;
+  diagnosisTitle: string;
+  diagnosisSubtitle: string;
+  symptoms: string[];
+  medicinesCount: number;
+  vitals: {
+    label: string;
+    value: string;
+  }[];
+  followUpDate: string;
+};
+
+const mockRecords: MedicalRecordItem[] = [
+  {
+    id: 'mr-1',
+    patientName: 'أحمد محمد',
+    patientInitial: 'أ',
+    date: '2024-02-08',
+    statusLabel: 'يحتاج متابعة',
+    diagnosisTitle: 'التشخيص',
+    diagnosisSubtitle: 'التهاب الحلق',
+    symptoms: ['ألم في الحلق', 'سعال', 'التهاب شديد في الحلق'],
+    medicinesCount: 2,
+    vitals: [
+      { label: 'ضغط الدم', value: '120/80' },
+      { label: 'النبض', value: '75' },
+      { label: 'الحرارة', value: '37.5' },
+      { label: 'الوزن', value: '75' },
+    ],
+    followUpDate: '15-02-2024',
+  },
+];
+
+export default function MedicalRecordsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!searchTerm.trim()) return mockRecords;
+    const q = searchTerm.toLowerCase();
+    return mockRecords.filter((r) => r.patientName.toLowerCase().includes(q));
+  }, [searchTerm]);
+
+  return (
+    <div
+      dir='rtl'
+      lang='ar'
+      className='mx-auto w-full max-w-[1120px]'
+    >
+      <DoctorDashboardOverview
+        variant='medical-records'
+        title='السجلات الطبية'
+        subtitle='تتبع الحالات والوصفات'
+        actionLabel='إضافة سجل جديد'
+        kpis={[
+          {
+            key: 'totalRecords',
+            icon: <Files />,
+            value: 1,
+            label: 'إجمالي السجلات',
+          },
+          {
+            key: 'activePrescriptions',
+            icon: <ClipboardList />,
+            value: 2,
+            label: 'الوصفات النشطة',
+          },
+          {
+            key: 'needsFollowUp',
+            icon: <Activity />,
+            value: 1,
+            label: 'يحتاج متابعة',
+          },
+        ]}
+      />
+
+      <section className='mt-5 rounded-[16px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
+        <div className='relative'>
+          <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
+            <Search className='h-4 w-4' />
+          </div>
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder='بحث عن مريض أو تشخيص...'
+            className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
+          />
+        </div>
+      </section>
+
+      <section className='mt-5 space-y-4'>
+        {filtered.map((r) => (
+          <div
+            key={r.id}
+            className='rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
+          >
+            <div className='flex justify-between px-6 pt-5 gap-4'>
+              <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[14px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
+                <span className='font-cairo text-[18px] font-extrabold'>
+                  {r.patientInitial}
+                </span>
+              </div>
+
+              <div className='flex-1'>
+                <div>
+                  <div className='flex items-start justify-between'>
+                    <div className='text-right'>
+                      <div className='font-cairo text-[16px] font-extrabold leading-[20px] text-[#111827]'>
+                        {r.patientName}
+                      </div>
+                      <div className='mt-1 flex items-center justify-end gap-2 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+                        <CalendarDays className='h-4 w-4 text-[#98A2B3]' />
+                        <span>{r.date}</span>
+                      </div>
+                    </div>
+                    <div className='flex h-[22px] items-center gap-2 py-2 rounded-full bg-[#FEF6EE] px-3 font-cairo text-[11px] font-extrabold text-[#F79009]'>
+                      <span>{r.statusLabel}</span>
+                      <Activity className='w-4 h-4' />
+                    </div>
+                  </div>
+                </div>
+                <div className='my-4 rounded-[14px] bg-[#E9FFFE] px-5 py-4'>
+                  <div className='flex items-center justify-between'>
+                    <div className='text-right'>
+                      <div className='font-cairo text-[12px] font-extrabold text-[#667085]'>
+                        {r.diagnosisTitle}
+                      </div>
+                      <div className='mt-1 font-cairo text-[14px] font-extrabold text-[#0FA6A3]'>
+                        {r.diagnosisSubtitle}
+                      </div>
+                    </div>
+                    <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[12px] bg-white'>
+                      <FileText className='h-4 w-4 text-[#0FA6A3]' />
+                    </div>
+                  </div>
+                </div>
+                <div className='mt-4 text-right'>
+                  <div className='fJont-cairo text-[12px] font-extrabold text-[#111827]'>
+                    الأعراض :
+                  </div>
+                  <div className='mt-2 flex flex-wrap gap-2'>
+                    {r.symptoms.map((s) => (
+                      <div
+                        key={s}
+                        className='inline-flex h-[24px] items-center justify-center rounded-full border-[1.82px] border-[#16C5C0] px-3 font-cairo text-[11px] font-extrabold bg-[#16C5C026] text-[#0FA6A3]'
+                      >
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                  <div className='inline-flex gap-2 mt-4 h-[36px] items-center justify-center rounded-full  px-3 font-cairo text-[11px] font-extrabold bg-[#16C5C026] text-[#0FA6A3]'>
+                    <Link className='w-4 h-4' />
+                    <span>{r.medicinesCount} دواء موصوف</span>
+                  </div>
+                </div>
+
+                <div className='mt-4 grid grid-cols-4 gap-3'>
+                  {r.vitals.map((v) => (
+                    <div
+                      key={v.label}
+                      className='rounded-[12px] bg-[#F9FAFB] px-4 py-3 text-right'
+                    >
+                      <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+                        {v.label}
+                      </div>
+                      <div className='mt-1 font-cairo text-[12px] font-extrabold text-[#111827]'>
+                        {v.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className='my-4 flex items-center justify-start gap-2 rounded-[12px] bg-[#FFF6ED] px-4 py-3 text-right'>
+                  <Clock className='w-4 h-4 text-[#F54900]' />
+                  <div className='font-cairo text-[12px] font-extrabold text-[#B54708]'>
+                    موعد المتابعة:
+                  </div>
+                  <div className='font-cairo text-[12px] font-extrabold text-[#B54708]'>
+                    {r.followUpDate}
+                  </div>
+                </div>
+              </div>
+              <button
+                type='button'
+                className='flex h-9 w-9 items-center justify-center rounded-full border border-[#EEF2F6] bg-white text-[#667085]'
+                aria-label='تفاصيل'
+              >
+                <ChevronRight className='h-5 w-5' />
+              </button>
+            </div>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
