@@ -191,6 +191,7 @@ export default function Home() {
               onBack={() => goTo('welcome')}
               onSignUp={() => goTo('signup')}
               onForgotPassword={() => goTo('new-password')}
+              onOtpLogin={() => goTo('verify')}
             />
           ) : view === 'verify' ? (
             <VerifyAccount
