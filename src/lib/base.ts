@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/authStore'; // من useAuth اللي عم�
 export const API_BASE_URL =
   typeof window !== 'undefined' && process.env.NODE_ENV === 'development'
     ? ''
-    : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    : process.env.NEXT_PUBLIC_API_URL || '';
 
 export type ApiOptions = RequestInit & {
   token?: string; // optional، رح يجيب من authStore تلقائي
@@ -15,7 +15,7 @@ export type ApiOptions = RequestInit & {
 
 export async function apiRequest<T = any>(
   endpoint: string,
-  options: ApiOptions = {}
+  options: ApiOptions = {},
 ): Promise<T> {
   const {
     token: providedToken,
@@ -77,7 +77,7 @@ export async function apiRequest<T = any>(
 export async function apiMultipart<T = any>(
   endpoint: string,
   formData: FormData,
-  options: ApiOptions = {}
+  options: ApiOptions = {},
 ) {
   const { onProgress, locale = 'ar', ...rest } = options;
 
@@ -103,8 +103,8 @@ export async function apiMultipart<T = any>(
             new Error(
               locale === 'ar'
                 ? `خطأ رفع: ${xhr.status}`
-                : `Upload error: ${xhr.status}`
-            )
+                : `Upload error: ${xhr.status}`,
+            ),
           );
         }
       };
@@ -128,7 +128,7 @@ export const get = <T = any>(endpoint: string, options?: ApiOptions) =>
 export const post = <T = any>(
   endpoint: string,
   body?: any,
-  options?: ApiOptions
+  options?: ApiOptions,
 ) =>
   apiRequest<T>(endpoint, {
     ...options,
@@ -139,7 +139,7 @@ export const post = <T = any>(
 export const put = <T = any>(
   endpoint: string,
   body?: any,
-  options?: ApiOptions
+  options?: ApiOptions,
 ) =>
   apiRequest<T>(endpoint, {
     ...options,
