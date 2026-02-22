@@ -5,6 +5,8 @@ export const API_BASE_URL =
     ? ''
     : process.env.NEXT_PUBLIC_API_URL || '';
 
+const UI_ONLY = process.env.NEXT_PUBLIC_UI_ONLY === 'true';
+
 export type ApiOptions = RequestInit & {
   token?: string; // optional، رح يجيب من authStore تلقائي
   signal?: AbortSignal;
@@ -17,6 +19,8 @@ export async function apiRequest<T = any>(
   endpoint: string,
   options: ApiOptions = {},
 ): Promise<T> {
+  if (UI_ONLY) return undefined as unknown as T;
+
   const {
     token: providedToken,
     headers,
@@ -79,6 +83,8 @@ export async function apiMultipart<T = any>(
   formData: FormData,
   options: ApiOptions = {},
 ) {
+  if (UI_ONLY) return undefined as unknown as T;
+
   const { onProgress, locale = 'ar', ...rest } = options;
 
   // جديد: progress مع XMLHttpRequest (لرفع CV أو فيديو في JobFit Scour ميزة 7)
