@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Calendar, FileText, Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
 import DashboardOverviewSection from '@/components/dashboard/dashboard-overview-section';
 import OverviewKpiCard, {
   type OverviewKpiCardVariant,
@@ -23,21 +24,28 @@ export default function DoctorDashboardOverview({
   headerIcon,
   actionLabel,
   actionIcon,
+  mode,
+  onActionClick,
+  overlay,
   kpis,
 }: {
   variant: DoctorDashboardOverviewVariant;
   title: ReactNode;
   subtitle: ReactNode;
+  mode?: 'list' | 'create';
   headerIcon?: ReactNode;
   actionLabel?: ReactNode;
   actionIcon?: ReactNode;
+  onActionClick?: () => void;
+  overlay?: ReactNode;
   kpis: OverviewKpiItem[];
 }) {
   const kpiVariant: OverviewKpiCardVariant = variant;
 
   return (
     <DashboardOverviewSection
-      sectionClassName='flex flex-col gap-[24px] mb-6 py-[32px] px-[32px] rounded-[24px] bg-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+      sectionClassName='relative flex flex-col gap-[24px] mb-6 py-[32px] px-[32px] rounded-[24px] bg-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+      overlay={overlay}
       headerLeft={
         <div className='flex gap-[16px]'>
           <div className='bg-[#FFFFFF33] w-[64px] h-[64px] flex items-center justify-center rounded-[16px]'>
@@ -63,8 +71,15 @@ export default function DoctorDashboardOverview({
         </div>
       }
       headerRight={
-        actionLabel ? (
-          <button className='flex items-center justify-between rounded-[16px] h-[48px] min-w-[146px] bg-[#FFFFFF] px-4 py-3 font-cairo text-[14px] font-bold text-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'>
+        actionLabel && mode !== 'create' ? (
+          <motion.button
+            type='button'
+            onClick={onActionClick}
+            className='flex items-center justify-between rounded-[16px] h-[48px] min-w-[146px] bg-[#FFFFFF] px-4 py-3 font-cairo text-[14px] font-bold text-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
+          >
             {actionIcon ?? (
               <>
                 {variant === 'appointments' ? (
@@ -77,7 +92,7 @@ export default function DoctorDashboardOverview({
             <span className='font-cairo leading-[20px] text-[14px] font-bold'>
               {actionLabel}
             </span>
-          </button>
+          </motion.button>
         ) : undefined
       }
       kpiGridClassName={`grid gap-4 ${variant === 'appointments' ? 'grid-cols-4' : 'grid-cols-3 '}`}

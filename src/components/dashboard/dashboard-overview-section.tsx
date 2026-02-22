@@ -15,6 +15,7 @@ export type OverviewKpiCard = {
 
 export default function DashboardOverviewSection({
   sectionClassName,
+  overlay,
   headerLeft,
   headerRight,
   kpiGridClassName,
@@ -22,6 +23,7 @@ export default function DashboardOverviewSection({
   cards,
 }: {
   sectionClassName: string;
+  overlay?: ReactNode;
   headerLeft: ReactNode;
   headerRight?: ReactNode;
   kpiGridClassName: string;
@@ -29,7 +31,8 @@ export default function DashboardOverviewSection({
   cards?: ReactNode[];
 }) {
   return (
-    <section className={sectionClassName}>
+    <section className={`relative ${sectionClassName}`}>
+      {overlay ? overlay : null}
       <div className='flex justify-between'>
         <div>{headerLeft}</div>
         {headerRight ? <div>{headerRight}</div> : <div />}

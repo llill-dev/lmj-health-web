@@ -77,6 +77,13 @@ export default function NewPassword({
             <h1 className='text-[#1F2937] font-cairo text-[22px] font-bold leading-[24px] py-10'>
               تعيين كلمة مرور جديدة
             </h1>
+            <button
+              type='button'
+              onClick={onBack}
+              className='-mt-6 font-cairo text-[14px] font-bold text-[#16C5C0] transition-colors hover:text-[#14B3AE]'
+            >
+              العودة لتسجيل الدخول
+            </button>
           </div>
 
           <form
