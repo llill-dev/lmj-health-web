@@ -5,8 +5,46 @@ import Image from 'next/image';
 import { useMemo, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 type LoginMethod = 'phone' | 'email';
+
+const loginSchema = z
+  .object({
+    method: z.enum(['phone', 'email']),
+    identifier: z.string().min(1, 'هذا الحقل مطلوب'),
+    password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+  })
+  .superRefine((val, ctx) => {
+    if (val.method === 'email') {
+      const res = z.string().email().safeParse(val.identifier);
+      if (!res.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['identifier'],
+          message: 'أدخل بريد إلكتروني صحيح',
+        });
+      }
+    }
+
+    if (val.method === 'phone') {
+      const phone = val.identifier.replace(/[\s-]/g, '');
+      const ok = /^\+?[0-9]{7,15}$/.test(phone);
+      if (!ok) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['identifier'],
+          message: 'أدخل رقم هاتف صحيح',
+        });
+      }
+    }
+  });
+
+type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm({
   onBack,
@@ -19,8 +57,25 @@ export default function LoginForm({
   onForgotPassword: () => void;
   onOtpLogin: () => void;
 }) {
+  const router = useRouter();
   const [method, setMethod] = useState<LoginMethod>('email');
   const [methodDirection, setMethodDirection] = useState<1 | -1>(1);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      method: 'email',
+      identifier: '',
+      password: '',
+    },
+    mode: 'onSubmit',
+  });
 
   const methodLabel = useMemo(() => {
     return method === 'phone' ? 'رقم الهاتف' : 'البريد الإلكتروني';
@@ -31,6 +86,30 @@ export default function LoginForm({
   }, [method]);
 
   const MethodIcon = method === 'phone' ? Phone : Mail;
+
+  const onSubmit = handleSubmit(async (values) => {
+    const uiOnly = process.env.NEXT_PUBLIC_UI_ONLY === 'true';
+
+    if (uiOnly) {
+      useAuthStore.setState({
+        user: {
+          id: 'demo-doctor',
+          verified: true,
+          email:
+            values.method === 'email' ? values.identifier : 'doctor@demo.local',
+          phone: values.method === 'phone' ? values.identifier : '+0000000000',
+          role: 'doctor',
+          name: 'Demo Doctor',
+        },
+        token: 'demo-token',
+        isAuthenticated: true,
+      });
+      router.push('/dashboard');
+      return;
+    }
+
+    useAuthStore.getState().login(values.identifier, values.password);
+  });
 
   return (
     <section className='mx-auto flex flex-col items-center'>
@@ -66,7 +145,10 @@ export default function LoginForm({
               </p>
             </div>
 
-            <form className=''>
+            <form
+              className=''
+              onSubmit={onSubmit}
+            >
               <div className='mx-auto max-w-[330px] gap-[24px] py-[35px] px-[24px]'>
                 <div className='relative flex h-[35px] w-full rounded-full bg-[#F2F4F7] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.10)]'>
                   <div className='relative flex flex-1'>
@@ -86,6 +168,9 @@ export default function LoginForm({
                       onClick={() => {
                         setMethodDirection(-1);
                         setMethod('phone');
+                        setValue('method', 'phone');
+                        setValue('identifier', '');
+                        clearErrors('identifier');
                       }}
                       className={
                         method === 'phone'
@@ -114,6 +199,9 @@ export default function LoginForm({
                       onClick={() => {
                         setMethodDirection(1);
                         setMethod('email');
+                        setValue('method', 'email');
+                        setValue('identifier', '');
+                        clearErrors('identifier');
                       }}
                       className={
                         method === 'email'
@@ -162,10 +250,16 @@ export default function LoginForm({
                           inputMode={method === 'phone' ? 'tel' : 'email'}
                           type={method === 'phone' ? 'tel' : 'email'}
                           placeholder={methodPlaceholder}
+                          {...register('identifier')}
                           className='h-full w-full bg-[#F3F3F5] font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
                         />
                       </motion.div>
                     </AnimatePresence>
+                    {errors.identifier ? (
+                      <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                        {errors.identifier.message}
+                      </div>
+                    ) : null}
                   </div>
                   <div>
                     <label className='mt-5 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
@@ -177,12 +271,19 @@ export default function LoginForm({
                         dir='ltr'
                         type='password'
                         placeholder='password123'
+                        {...register('password')}
                         className='h-full w-full bg-[#F3F3F5] font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
                       />
                     </div>
+                    {errors.password ? (
+                      <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                        {errors.password.message}
+                      </div>
+                    ) : null}
                   </div>
                   <button
                     type='submit'
+                    disabled={isSubmitting}
                     className='mt-6 flex h-[36px] w-full max-w-[330px] items-center justify-center rounded-[8px] bg-[#16C5C0] text-[14px] text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
                   >
                     تسجيل الدخول

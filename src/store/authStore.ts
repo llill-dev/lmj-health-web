@@ -5,7 +5,7 @@ interface User {
   id: string;
   email: string;
   phone: string;
-  role: 'jobseeker' | 'company' | 'admin';
+  role: 'jobseeker' | 'admin' | 'doctor';
   name?: string;
   verified: boolean;
 }
@@ -47,7 +47,7 @@ interface AuthState {
   register: (
     email: string,
     password: string,
-    role: 'jobseeker' | 'company',
+    role: 'jobseeker' | 'company' | 'doctor',
   ) => Promise<void>;
   logout: () => void;
   setAuth: (payload: {
