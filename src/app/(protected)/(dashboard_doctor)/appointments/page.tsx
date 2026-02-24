@@ -23,12 +23,29 @@ import {
 } from '@/hooks';
 import { useState } from 'react';
 import DoctorDashboardOverview from '@/components/dashboard/doctor-dashboard-overview';
+import BookAppointmentDialog from '@/components/dashboard/book-appointment-dialog';
+import ConfirmActionDialog from '@/components/dashboard/confirm-action-dialog';
+import CancelAppointmentDialog from '@/components/dashboard/cancel-appointment-dialog';
 
 export default function AppointmentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
   );
+  const [bookOpen, setBookOpen] = useState(false);
+  const [finishOpen, setFinishOpen] = useState(false);
+  const [finishTarget, setFinishTarget] = useState<{
+    id: string;
+    patientName: string;
+  } | null>(null);
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
+  const [confirmAbsenceOpen, setConfirmAbsenceOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<{
+    id: string;
+    patientName: string;
+    date: string;
+    time: string;
+  } | null>(null);
   const [statusTab, setStatusTab] = useState<
     'scheduled' | 'completed' | 'cancelled' | 'absent'
   >('scheduled');
@@ -113,6 +130,7 @@ export default function AppointmentsPage() {
         variant='appointments'
         title='إدارة المواعيد'
         subtitle='جدول المرضى والاستشارات'
+        onActionClick={() => setBookOpen(true)}
         actionLabel='حجز موعد جديد'
         kpis={[
           {
@@ -142,10 +160,79 @@ export default function AppointmentsPage() {
         ]}
       />
 
+      <BookAppointmentDialog
+        open={bookOpen}
+        onOpenChange={setBookOpen}
+        patients={[
+          { id: 'p-1', name: 'أحمد محمد' },
+          { id: 'p-2', name: 'سارة عبدالله' },
+          { id: 'p-3', name: 'محمد علي' },
+        ]}
+        onSubmit={() => {
+          setBookOpen(false);
+        }}
+      />
+
+      <ConfirmActionDialog
+        open={confirmCancelOpen}
+        onOpenChange={(open) => {
+          setConfirmCancelOpen(open);
+          if (!open) setConfirmTarget(null);
+        }}
+        title='تأكيد إلغاء الموعد'
+        description={
+          <span>
+            هل أنت متأكد من إلغاء موعد {confirmTarget?.patientName ?? ''} في{' '}
+            {confirmTarget?.date ?? ''} الساعة {confirmTarget?.time ?? ''}؟
+          </span>
+        }
+        confirmLabel='تأكيد'
+        confirmDisabled={cancelling}
+        onConfirm={async () => {
+          if (!confirmTarget) return;
+          await handleCancelAppointment(confirmTarget.id);
+        }}
+      />
+
+      <ConfirmActionDialog
+        open={confirmAbsenceOpen}
+        onOpenChange={(open) => {
+          setConfirmAbsenceOpen(open);
+          if (!open) setConfirmTarget(null);
+        }}
+        title='تأكيد غياب المريض'
+        description={
+          <span>
+            هل أنت متأكد من تسجيل غياب {confirmTarget?.patientName ?? ''} في
+            موعده في {confirmTarget?.date ?? ''} الساعة{' '}
+            {confirmTarget?.time ?? ''}؟
+          </span>
+        }
+        confirmLabel='تأكيد'
+        confirmDisabled={false}
+        onConfirm={async () => {
+          setConfirmAbsenceOpen(false);
+        }}
+      />
+
+      <CancelAppointmentDialog
+        open={finishOpen}
+        onOpenChange={(open) => {
+          setFinishOpen(open);
+          if (!open) setFinishTarget(null);
+        }}
+        patientName={finishTarget?.patientName ?? ''}
+        confirmDisabled={completing}
+        onConfirm={async (_medicalNotes) => {
+          if (!finishTarget) return;
+          await handleCompleteAppointment(finishTarget.id);
+        }}
+      />
+
       {/* Search and Filter Bar */}
       <section className='mb-6 flex items-center justify-between rounded-[16px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
         <div className='flex items-center gap-4 flex-1'>
-          <div className='relative flex-1 max-w-md'>
+          <div className='relative flex-1'>
             <Search className='absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400' />
             <input
               type='text'
@@ -155,19 +242,7 @@ export default function AppointmentsPage() {
               className='w-full rounded-[12px] border border-[#E5E7EB] pr-10 pl-4 py-3 font-cairo text-[14px] placeholder:text-gray-400 focus:border-[#16C5C0] focus:outline-none focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20'
             />
           </div>
-          <div className='relative'>
-            <input
-              type='date'
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className='rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-cairo text-[14px] focus:border-[#16C5C0] focus:outline-none focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20'
-            />
-          </div>
         </div>
-        <button className='flex items-center gap-2 rounded-[12px] bg-[#F3F4F6] px-4 py-3 font-cairo text-[14px] font-bold text-[#374151] hover:bg-[#E5E7EB] transition-colors'>
-          <Filter className='h-4 w-4' />
-          فلترة
-        </button>
       </section>
 
       {/* Today's Appointments: list of upcoming appointments for day */}
@@ -363,9 +438,15 @@ export default function AppointmentsPage() {
                       <div className='grid grid-cols-3 gap-3'>
                         <button
                           type='button'
-                          onClick={() =>
-                            handleCancelAppointment(appointment.id)
-                          }
+                          onClick={() => {
+                            setConfirmTarget({
+                              id: appointment.id,
+                              patientName: appointment.patientName,
+                              date: appointment.date,
+                              time: appointment.time,
+                            });
+                            setConfirmCancelOpen(true);
+                          }}
                           disabled={cancelling}
                           className='flex h-[44px] items-center justify-center gap-2 rounded-[14px] border-[1.82px] border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#FF000C] disabled:opacity-50'
                         >
@@ -375,7 +456,16 @@ export default function AppointmentsPage() {
 
                         <button
                           type='button'
-                          disabled
+                          onClick={() => {
+                            setConfirmTarget({
+                              id: appointment.id,
+                              patientName: appointment.patientName,
+                              date: appointment.date,
+                              time: appointment.time,
+                            });
+                            setConfirmAbsenceOpen(true);
+                          }}
+                          disabled={false}
                           className='flex h-[44px] items-center justify-center gap-2 rounded-[14px] border-[1.82px] border-[#F97316] bg-white font-cairo text-[14px] font-extrabold text-[#FF6900]'
                         >
                           <UserX className='h-4 w-4' />
@@ -384,9 +474,13 @@ export default function AppointmentsPage() {
 
                         <button
                           type='button'
-                          onClick={() =>
-                            handleCompleteAppointment(appointment.id)
-                          }
+                          onClick={() => {
+                            setFinishTarget({
+                              id: appointment.id,
+                              patientName: appointment.patientName,
+                            });
+                            setFinishOpen(true);
+                          }}
                           disabled={completing}
                           className='flex h-[44px] items-center justify-center gap-2 border-[1.82px] rounded-[14px] border-[#16C5C0] bg-[#16C5C0] font-cairo text-[14px] font-extrabold text-white disabled:opacity-50'
                         >

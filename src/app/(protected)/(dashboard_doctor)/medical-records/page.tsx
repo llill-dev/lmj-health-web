@@ -17,6 +17,9 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import DoctorDashboardOverview from '@/components/dashboard/doctor-dashboard-overview';
 import CreateMedicalRecordForm from '@/components/dashboard/create-medical-record-form';
+import MedicalRecordDetailsDialog, {
+  type MedicalRecordDetails,
+} from '@/components/dashboard/medical-record-details-dialog';
 
 type MedicalRecordItem = {
   id: string;
@@ -59,6 +62,9 @@ const mockRecords: MedicalRecordItem[] = [
 export default function MedicalRecordsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [mode, setMode] = useState<'list' | 'create'>('list');
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsRecord, setDetailsRecord] =
+    useState<MedicalRecordDetails | null>(null);
 
   const filtered = useMemo(() => {
     if (!searchTerm.trim()) return mockRecords;
@@ -72,6 +78,15 @@ export default function MedicalRecordsPage() {
       lang='ar'
       className='mx-auto w-full max-w-[1120px]'
     >
+      <MedicalRecordDetailsDialog
+        open={detailsOpen}
+        onOpenChange={(open) => {
+          setDetailsOpen(open);
+          if (!open) setDetailsRecord(null);
+        }}
+        record={detailsRecord}
+      />
+
       <DoctorDashboardOverview
         variant='medical-records'
         title='السجلات الطبية'
@@ -258,6 +273,38 @@ export default function MedicalRecordsPage() {
                     </div>
                     <button
                       type='button'
+                      onClick={() => {
+                        const mapped: MedicalRecordDetails = {
+                          id: r.id,
+                          patientName: r.patientName,
+                          date: r.date,
+                          diagnosisSubtitle: r.diagnosisSubtitle,
+                          symptoms: r.symptoms,
+                          vitals: r.vitals,
+                          medicinesCount: r.medicinesCount,
+                          prescriptions: [
+                            {
+                              name: 'أموكسيسيلين 500mg',
+                              dosage: 'حبّة واحدة',
+                              duration: '7 أيام',
+                              frequency: '3 مرات يومياً',
+                              notes: 'بعد الأكل',
+                            },
+                            {
+                              name: 'باراسيتامول 500mg',
+                              dosage: 'حبّة واحدة',
+                              duration: '5 أيام',
+                              frequency: 'عند الحاجة',
+                              notes: 'للحمى فقط',
+                            },
+                          ].slice(0, r.medicinesCount),
+                          followUpDate: r.followUpDate,
+                          additionalNotes:
+                            'المريض يعاني من التهاب بكتيري في الحلق، تم وصف المضاد الحيوي، متابعة بعد أسبوع.',
+                        };
+                        setDetailsRecord(mapped);
+                        setDetailsOpen(true);
+                      }}
                       className='flex h-9 w-9 items-center justify-center rounded-full border border-[#EEF2F6] bg-white text-[#667085]'
                       aria-label='تفاصيل'
                     >

@@ -87,7 +87,7 @@ export async function apiMultipart<T = any>(
 
   const { onProgress, locale = 'ar', ...rest } = options;
 
-  // جديد: progress مع XMLHttpRequest (لرفع CV أو فيديو في JobFit Scour ميزة 7)
+  // جديد: progress مع XMLHttpRequest (لرفع CV أو فيديو في  ميزة 7)
   if (onProgress) {
     const xhr = new XMLHttpRequest();
     xhr.open(rest.method || 'POST', `${API_BASE_URL}${endpoint}`);
