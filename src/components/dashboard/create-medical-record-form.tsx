@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Save, X } from 'lucide-react';
+import { ChevronDown, Save, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -82,10 +82,10 @@ export default function CreateMedicalRecordForm({
   }, [patientId, patients]);
 
   const inputBase =
-    'h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
+    'h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
 
   const textAreaBase =
-    'min-h-[88px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
+    'min-h-[88px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
 
   const labelBase =
     'mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]';
@@ -117,7 +117,7 @@ export default function CreateMedicalRecordForm({
         <button
           type='button'
           onClick={onCancel}
-          className='absolute left-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[12px] border border-[#EEF2F6] bg-white text-[#667085]'
+          className='absolute left-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[6px] border border-[#EEF2F6] bg-white text-[#667085]'
           aria-label='إغلاق'
         >
           <X className='h-4 w-4' />
@@ -152,7 +152,7 @@ export default function CreateMedicalRecordForm({
                 ))}
               </select>
               <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <span className='font-cairo text-[12px] font-extrabold'>⌄</span>
+                <ChevronDown />
               </div>
             </div>
             {errors.patientId?.message ? (
@@ -254,7 +254,7 @@ export default function CreateMedicalRecordForm({
             <motion.button
               type='button'
               onClick={onCancel}
-              className='flex h-[44px] w-[220px] items-center justify-center rounded-[12px] border border-[#16C5C0] bg-white font-cairo text-[13px] font-extrabold text-[#16C5C0]'
+              className='flex h-[44px] w-[220px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[13px] font-extrabold text-[#16C5C0]'
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
@@ -265,7 +265,7 @@ export default function CreateMedicalRecordForm({
             <motion.button
               type='submit'
               disabled={isSubmitting}
-              className='flex h-[44px] w-[220px] items-center justify-center gap-2 rounded-[12px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
+              className='flex h-[44px] w-[220px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}

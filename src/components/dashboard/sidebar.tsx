@@ -1,19 +1,6 @@
 'use client';
 
-import {
-  Activity,
-  BookOpen,
-  CalendarDays,
-  ChevronLeft,
-  FileText,
-  LayoutGrid,
-  LogOut,
-  MapPin,
-  Settings,
-  ShieldCheck,
-  Stethoscope,
-  Users,
-} from 'lucide-react';
+import { ChevronLeft, LogOut, Stethoscope } from 'lucide-react';
 import Link from 'next/link';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
 
@@ -36,7 +23,7 @@ export default function Sidebar({
         <div className='px-[24px] pt-[24px] pb-[24px] border-b-[1.82px] border-[#E5E7EB] gap-[24px]'>
           <div className='flex items-start justify-between'>
             <div className='flex items-center gap-2'>
-              <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[12px] bg-[#16C5C0] shadow-[0_14px_30px_rgba(22,197,192,0.35)]'>
+              <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] shadow-[0_14px_30px_rgba(22,197,192,0.35)]'>
                 <Stethoscope className='h-6 w-6 text-white' />
               </div>
               <div className='flex flex-col items-center text-center'>
@@ -58,9 +45,9 @@ export default function Sidebar({
             </button>
           </div>
 
-          <div className='mt-6 rounded-[14px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
+          <div className='mt-6 rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
             <div className='flex items-center gap-3'>
-              <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[14px] bg-[#16C5C0] text-white shadow-[0_12px_25px_rgba(22,197,192,0.35)]'>
+              <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_12px_25px_rgba(22,197,192,0.35)]'>
                 <span className='font-cairo text-[18px] font-extrabold leading-none'>
                   د
                 </span>
@@ -89,8 +76,8 @@ export default function Sidebar({
                   href={`/${item.path}`}
                   className={
                     isActive
-                      ? 'relative flex w-full items-center rounded-[14px] bg-gradient-to-l from-[#18C6C0] via-[#12B9B4] to-[#0FA6A3] px-4 py-[10px] text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
-                      : 'relative flex w-full items-center rounded-[14px] px-4 py-[10px] text-[#344054] hover:bg-[#F2F4F7]'
+                      ? 'relative flex w-full items-center rounded-[6px] bg-gradient-to-l from-[#18C6C0] via-[#12B9B4] to-[#0FA6A3] px-4 py-[10px] text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
+                      : 'relative flex w-full items-center rounded-[6px] px-4 py-[10px] text-[#344054] hover:bg-[#F2F4F7]'
                   }
                 >
                   <div className='flex items-center gap-3'>

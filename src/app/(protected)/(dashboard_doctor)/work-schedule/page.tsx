@@ -185,7 +185,7 @@ export default function WorkScheduleForm() {
       <section className='mt-6 rounded-[16px] border border-[#E5E7EB] bg-white p-6 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
         <div className='text-right'>
           <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-            إعدادات الموعد
+            إعدادات الموعيد
           </div>
           <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
             تحديد مدة الموعد ووقت الاستراحة
@@ -204,7 +204,7 @@ export default function WorkScheduleForm() {
               <select
                 value={appointmentDuration}
                 onChange={(e) => setAppointmentDuration(e.target.value)}
-                className='h-[40px] w-full rounded-[12px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-[#16C5C0]'
+                className='h-[40px] w-full rounded-[6px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-[#16C5C0]'
               >
                 <option value='15'>15 دقيقة</option>
                 <option value='30'>30 دقيقة</option>
@@ -330,7 +330,7 @@ export default function WorkScheduleForm() {
             type='button'
             onClick={handleSave}
             disabled={saving || workScheduleLoading}
-            className='flex h-[40px] items-center justify-center gap-2 rounded-[12px] bg-[#16C5C0] px-5 font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)]'
+            className='flex h-[40px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] px-5 font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)]'
           >
             <Save className='h-4 w-4' />
             {saving ? 'جارٍ الحفظ...' : 'حفظ الجدول'}
@@ -428,8 +428,8 @@ export default function WorkScheduleForm() {
               key={d.key}
               className={
                 d.enabled
-                  ? 'rounded-[12px] border border-[#BFEDEC] bg-[#F2FFFE] px-3 py-3 text-right'
-                  : 'rounded-[12px] border border-[#EEF2F6] bg-white px-3 py-3 text-right'
+                  ? 'rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-3 py-3 text-right'
+                  : 'rounded-[6px] border border-[#EEF2F6] bg-white px-3 py-3 text-right'
               }
             >
               <div className='font-cairo text-[12px] font-extrabold text-[#111827]'>
@@ -453,7 +453,7 @@ export default function WorkScheduleForm() {
           ))}
         </div>
 
-        <div className='mt-4 rounded-[14px] bg-[#16C5C026] px-[16px] py-[16px]'>
+        <div className='mt-4 rounded-[6px] bg-[#16C5C026] px-[16px] py-[16px]'>
           <div className='flex items-start justify-between'>
             <div className='text-right'>
               <div className='flex items-start gap-4'>

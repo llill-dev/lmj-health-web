@@ -157,7 +157,7 @@ export default function MedicalRecordDetailsDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] w-[720px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed left-1/2 top-1/2 z-[10000] w-[720px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             dir='rtl'
             lang='ar'
           >
@@ -199,9 +199,9 @@ export default function MedicalRecordDetailsDialog({
               <div className='mt-6 h-px w-full bg-[#EEF2F6]' />
 
               <div className='max-h-[calc(100vh-220px)] overflow-auto px-8 pb-6 pt-6'>
-                <div className='rounded-[14px] bg-gradient-to-r from-[#F0FDF4] to-[#ECFDF5] px-5 py-4'>
+                <div className='rounded-[6px] bg-gradient-to-r from-[#F0FDF4] to-[#ECFDF5] px-5 py-4'>
                   <div className='flex items-center justify-start gap-4'>
-                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[12px] bg-[#16C5C0] text-white font-bold'>
+                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white font-bold'>
                       {record.patientName[0]}
                     </div>
                     <div className='text-right'>
@@ -221,7 +221,7 @@ export default function MedicalRecordDetailsDialog({
                     <Stethoscope className='h-4 w-4 text-[#2563EB]' />
                     التشخيص
                   </div>
-                  <div className='rounded-[12px] bg-[#EEF6FF] px-5 py-4 text-right font-cairo text-[14px] font-extrabold text-[#111827]'>
+                  <div className='rounded-[6px] bg-[#EEF6FF] px-5 py-4 text-right font-cairo text-[14px] font-extrabold text-[#111827]'>
                     {record.diagnosisSubtitle}
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export default function MedicalRecordDetailsDialog({
                     {record.symptoms.map((s) => (
                       <div
                         key={s}
-                        className='inline-flex h-[30px] items-center justify-center rounded-[8px] bg-[#FEE4E2] px-4 font-cairo text-[12px] font-extrabold text-[#B42318]'
+                        className='inline-flex h-[30px] items-center justify-center rounded-[6px] bg-[#FEE4E2] px-4 font-cairo text-[12px] font-extrabold text-[#B42318]'
                       >
                         {s}
                       </div>
@@ -258,7 +258,7 @@ export default function MedicalRecordDetailsDialog({
                         return (
                           <div
                             key={v.label}
-                            className={`rounded-[12px] px-4 py-3 ${styles.wrapper}`}
+                            className={`rounded-[6px] px-4 py-3 ${styles.wrapper}`}
                           >
                             <div
                               className={`font-cairo text-[12px] font-extrabold ${styles.label}`}
@@ -331,7 +331,7 @@ export default function MedicalRecordDetailsDialog({
                   </div>
                 </div>
 
-                <div className='mt-5 flex items-center justify-between rounded-[12px] bg-[#FFF6ED] px-5 py-4'>
+                <div className='mt-5 flex items-center justify-between rounded-[6px] bg-[#FFF6ED] px-5 py-4'>
                   <div className='flex items-center gap-2'>
                     <Activity className='h-5 w-5 text-[#F54900]' />
                     <div className='space-y-1'>
@@ -351,7 +351,7 @@ export default function MedicalRecordDetailsDialog({
                     <ClipboardList className='h-4 w-4 text-[#667085]' />
                     ملاحظات إضافية
                   </div>
-                  <div className='rounded-[12px] bg-[#F2F4F7] px-5 py-4 text-right font-cairo text-[13px] font-semibold leading-[22px] text-[#344054]'>
+                  <div className='rounded-[6px] bg-[#F2F4F7] px-5 py-4 text-right font-cairo text-[13px] font-semibold leading-[22px] text-[#344054]'>
                     {record.additionalNotes}
                   </div>
                 </div>
@@ -360,7 +360,7 @@ export default function MedicalRecordDetailsDialog({
                   <Dialog.Close asChild>
                     <button
                       type='button'
-                      className='h-[46px] w-full rounded-[12px] bg-[#EAECF0] font-cairo text-[14px] font-extrabold text-[#344054]'
+                      className='h-[46px] w-full rounded-[6px] bg-[#EAECF0] font-cairo text-[14px] font-extrabold text-[#344054]'
                     >
                       إغلاق
                     </button>

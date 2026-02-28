@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import {
   FileText,
-  Plus,
   Search,
   Activity,
   ClipboardList,
@@ -99,7 +98,7 @@ export default function MedicalRecordsPage() {
             <motion.button
               type='button'
               onClick={() => setMode('list')}
-              className='absolute left-[24px] top-[24px] flex h-[44px] w-[44px] items-center justify-center rounded-[12px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)]'
+              className='absolute left-[24px] top-[24px] flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)]'
               aria-label='إغلاق'
               initial={{ opacity: 0, scale: 0.96, y: -4 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -165,7 +164,7 @@ export default function MedicalRecordsPage() {
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <section className='mt-5 rounded-[16px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
+            <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
               <div className='relative'>
                 <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
                   <Search className='h-4 w-4' />
@@ -183,10 +182,10 @@ export default function MedicalRecordsPage() {
               {filtered.map((r) => (
                 <div
                   key={r.id}
-                  className='rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
+                  className='rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
                 >
                   <div className='flex justify-between px-6 pt-5 gap-4'>
-                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[14px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
+                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
                       <span className='font-cairo text-[18px] font-extrabold'>
                         {r.patientInitial}
                       </span>
@@ -194,7 +193,7 @@ export default function MedicalRecordsPage() {
 
                     <div className='flex-1'>
                       <div>
-                        <div className='flex items-start justify-between'>
+                        <div className='flex items-center justify-between'>
                           <div className='text-right'>
                             <div className='font-cairo text-[16px] font-extrabold leading-[20px] text-[#111827]'>
                               {r.patientName}
@@ -204,13 +203,13 @@ export default function MedicalRecordsPage() {
                               <span>{r.date}</span>
                             </div>
                           </div>
-                          <div className='flex h-[22px] items-center gap-2 py-2 rounded-full bg-[#FEF6EE] px-3 font-cairo text-[11px] font-extrabold text-[#F79009]'>
+                          <div className='flex h-[22px] items-center gap-2 py-3 rounded-[12px] bg-[#FEF6EE] px-3 font-cairo text-[11px] font-extrabold text-[#F79009]'>
                             <span>{r.statusLabel}</span>
                             <Activity className='w-4 h-4' />
                           </div>
                         </div>
                       </div>
-                      <div className='my-4 rounded-[14px] bg-[#E9FFFE] px-5 py-4'>
+                      <div className='my-4 rounded-[6px] bg-[#E9FFFE] px-5 py-4'>
                         <div className='flex items-center justify-between'>
                           <div className='text-right'>
                             <div className='font-cairo text-[12px] font-extrabold text-[#667085]'>
@@ -220,7 +219,7 @@ export default function MedicalRecordsPage() {
                               {r.diagnosisSubtitle}
                             </div>
                           </div>
-                          <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[12px] bg-white'>
+                          <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-white'>
                             <FileText className='h-4 w-4 text-[#0FA6A3]' />
                           </div>
                         </div>
@@ -233,13 +232,13 @@ export default function MedicalRecordsPage() {
                           {r.symptoms.map((s) => (
                             <div
                               key={s}
-                              className='inline-flex h-[24px] items-center justify-center rounded-full border-[1.82px] border-[#16C5C0] px-3 font-cairo text-[11px] font-extrabold bg-[#16C5C026] text-[#0FA6A3]'
+                              className='inline-flex h-[24px] items-center justify-center rounded-[6px] border-[1.82px] border-[#16C5C0] px-3 font-cairo text-[11px] font-extrabold bg-[#16C5C026] text-[#0FA6A3]'
                             >
                               {s}
                             </div>
                           ))}
                         </div>
-                        <div className='inline-flex gap-2 mt-4 h-[36px] items-center justify-center rounded-full  px-3 font-cairo text-[11px] font-extrabold bg-[#16C5C026] text-[#0FA6A3]'>
+                        <div className='inline-flex gap-2 mt-4 h-[36px] items-center justify-center rounded-f6l  px-3 font-cairo text-[11px] font-extrabold bg-[#16C5C026] text-[#0FA6A3]'>
                           <Link className='w-4 h-4' />
                           <span>{r.medicinesCount} دواء موصوف</span>
                         </div>
@@ -249,7 +248,7 @@ export default function MedicalRecordsPage() {
                         {r.vitals.map((v) => (
                           <div
                             key={v.label}
-                            className='rounded-[12px] bg-[#F9FAFB] px-4 py-3 text-right'
+                            className='rounded-[6px] bg-[#F9FAFB] px-4 py-3 text-right'
                           >
                             <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
                               {v.label}
@@ -261,7 +260,7 @@ export default function MedicalRecordsPage() {
                         ))}
                       </div>
 
-                      <div className='my-4 flex items-center justify-start gap-2 rounded-[12px] bg-[#FFF6ED] px-4 py-3 text-right'>
+                      <div className='my-4 flex items-center justify-start gap-2 rounded-[6px] bg-[#FFF6ED] px-4 py-3 text-right'>
                         <Clock className='w-4 h-4 text-[#F54900]' />
                         <div className='font-cairo text-[12px] font-extrabold text-[#B54708]'>
                           موعد المتابعة:

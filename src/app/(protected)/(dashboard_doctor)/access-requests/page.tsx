@@ -72,10 +72,10 @@ function statusChipClassName(status: AccessRequestStatus) {
 function bottomBarClassName(status: AccessRequestStatus) {
   // screenshot shows a pale yellow bar for info messages
   return status === 'approved'
-    ? 'mt-4 flex items-center justify-start gap-2 rounded-[12px] bg-[#F0FDF4] px-4 py-3'
+    ? 'mt-4 flex items-center justify-start gap-2 rounded-[6px] bg-[#F0FDF4] px-4 py-3'
     : status === 'rejected'
-      ? 'mt-4 flex items-center justify-start gap-2 rounded-[12px] bg-[#FEF3F2] px-4 py-3'
-      : 'mt-4 flex items-center justify-start gap-2 rounded-[12px] bg-[#FFFAEB] px-4 py-3';
+      ? 'mt-4 flex items-center justify-start gap-2 rounded-[6px] bg-[#FEF3F2] px-4 py-3'
+      : 'mt-4 flex items-center justify-start gap-2 rounded-[6px] bg-[#FFFAEB] px-4 py-3';
 }
 
 function bottomBarIcon(status: AccessRequestStatus) {
@@ -127,7 +127,7 @@ export default function AccessRequestsPage() {
             <motion.button
               type='button'
               onClick={() => setMode('list')}
-              className='absolute left-[16px] top-[16px] flex h-[40px] w-[40px] items-center justify-center rounded-[12px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)]'
+              className='absolute left-[16px] top-[16px] flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)]'
               aria-label='إغلاق'
               initial={{ opacity: 0, scale: 0.96, y: -4 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -142,7 +142,7 @@ export default function AccessRequestsPage() {
         headerLeft={
           <div className='flex w-full flex-row-reverse items-start justify-between gap-[16px]'>
             <div className='flex flex-row-reverse items-start gap-[12px]'>
-              <div className='bg-[#FFFFFF33] w-[56px] h-[56px] flex items-center justify-center rounded-[16px]'>
+              <div className='bg-[#FFFFFF33] w-[56px] h-[56px] flex items-center justify-center rounded-[6px]'>
                 <Shield className='text-white w-[28px] h-[28px]' />
               </div>
               <div className='flex flex-col gap-1 text-right'>
@@ -161,7 +161,7 @@ export default function AccessRequestsPage() {
             <motion.button
               type='button'
               onClick={() => setMode('create')}
-              className='flex items-center justify-center gap-2 rounded-[16px] h-[40px] bg-[#FFFFFF] px-4 font-cairo text-[12px] font-extrabold text-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+              className='flex items-center justify-center gap-2 rounded-[6px] h-[40px] bg-[#FFFFFF] px-4 font-cairo text-[12px] font-extrabold text-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
@@ -175,7 +175,7 @@ export default function AccessRequestsPage() {
         cards={[
           <div
             key='rejected'
-            className='flex h-[64px] items-center justify-center rounded-[16px] bg-white/15 px-4'
+            className='flex h-[64px] items-center justify-center rounded-[6px] bg-white/15 px-4'
           >
             <div className='text-center'>
               <div className='font-cairo text-[18px] font-black text-white'>
@@ -188,7 +188,7 @@ export default function AccessRequestsPage() {
           </div>,
           <div
             key='approved'
-            className='flex h-[64px] items-center justify-center rounded-[16px] bg-white/15 px-4'
+            className='flex h-[64px] items-center justify-center rounded-[6px] bg-white/15 px-4'
           >
             <div className='text-center'>
               <div className='font-cairo text-[18px] font-black text-white'>
@@ -201,7 +201,7 @@ export default function AccessRequestsPage() {
           </div>,
           <div
             key='pending'
-            className='flex h-[64px] items-center justify-center rounded-[16px] bg-white/15 px-4'
+            className='flex h-[64px] items-center justify-center rounded-[6px] bg-white/15 px-4'
           >
             <div className='text-center'>
               <div className='font-cairo text-[18px] font-black text-white'>
@@ -247,7 +247,7 @@ export default function AccessRequestsPage() {
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <section className='mb-6 rounded-[16px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
+            <section className='mb-6 rounded-[6px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
               <div className='relative'>
                 <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
                   <Search className='h-4 w-4' />
@@ -256,7 +256,7 @@ export default function AccessRequestsPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder='ابحث في الطلبات...'
-                  className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
+                  className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
                 />
               </div>
             </section>
@@ -265,12 +265,12 @@ export default function AccessRequestsPage() {
               {filtered.map((r) => (
                 <div
                   key={r.id}
-                  className='rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
+                  className='rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
                 >
                   <div className='flex flex-col items-start gap-2 px-6 pt-5'>
                     <div className='flex w-full items-start justify-between'>
                       <div className='flex flex-1 items-start gap-3'>
-                        <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[14px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
+                        <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
                           <span className='font-cairo text-[18px] font-extrabold'>
                             {r.patientInitial}
                           </span>
@@ -297,7 +297,7 @@ export default function AccessRequestsPage() {
 
                     <div className='flex ms-2 items-center gap-3'>
                       <Calendar className='h-4 w-4 text-[#98A2B3]' />
-                      <div className='rounded-[12px] bg-[#F9FAFB] px-4 py-3'>
+                      <div className='rounded-[6px] bg-[#F9FAFB] px-4 py-3'>
                         <p className=' font-cairo text-[11px] font-semibold text-[#98A2B3]'>
                           تاريخ الطلب
                         </p>

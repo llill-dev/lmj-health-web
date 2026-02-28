@@ -1,10 +1,12 @@
 import {
   Activity,
   BookOpen,
+  Bell,
   CalendarDays,
   FileText,
   LayoutGrid,
   MapPin,
+  MessageCircle,
   Settings,
   ShieldCheck,
   Users,
@@ -15,11 +17,13 @@ export type SidebarItemId =
   | 'dashboard'
   | 'appointments'
   | 'patients'
+  | 'online-consultations'
   | 'work-schedule'
   | 'medical-records'
   | 'access-requests'
   | 'doctors-directory'
   | 'clinic-location'
+  | 'notification'
   | 'profile-settings';
 
 export const sidebarItems: Array<{
@@ -41,6 +45,13 @@ export const sidebarItems: Array<{
     label: 'المواعيد',
     icon: CalendarDays,
     badge: 3,
+  },
+  {
+    id: 'online-consultations',
+    path: 'online-consultations',
+    label: 'الاستشارات',
+    icon: MessageCircle,
+    badge: 5,
   },
   { id: 'patients', path: 'patients', label: 'المرضى', icon: Users },
   {
@@ -72,6 +83,12 @@ export const sidebarItems: Array<{
     path: 'clinic-location',
     label: 'موقع العيادة',
     icon: MapPin,
+  },
+  {
+    id: 'notification',
+    path: 'notification',
+    label: 'الإشعارات',
+    icon: Bell,
   },
   {
     id: 'profile-settings',

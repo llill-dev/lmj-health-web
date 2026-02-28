@@ -230,7 +230,7 @@ export default function AppointmentsPage() {
       />
 
       {/* Search and Filter Bar */}
-      <section className='mb-6 flex items-center justify-between rounded-[16px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
+      <section className='mb-6 flex items-center justify-between rounded-[6px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
         <div className='flex items-center gap-4 flex-1'>
           <div className='relative flex-1'>
             <Search className='absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400' />
@@ -239,7 +239,7 @@ export default function AppointmentsPage() {
               placeholder='ابحث بالاسم أو رقم الهاتف...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full rounded-[12px] border border-[#E5E7EB] pr-10 pl-4 py-3 font-cairo text-[14px] placeholder:text-gray-400 focus:border-[#16C5C0] focus:outline-none focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20'
+              className='w-full rounded-[6px] border border-[#E5E7EB] pr-10 pl-4 py-3 font-cairo text-[14px] placeholder:text-gray-400 focus:border-[#16C5C0] focus:outline-none focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20'
             />
           </div>
         </div>
@@ -247,113 +247,107 @@ export default function AppointmentsPage() {
 
       {/* Today's Appointments: list of upcoming appointments for day */}
       <section className='mb-6'>
-        <div className='rounded-[16px] border border-[#E5E7EB] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
-            <div className='font-cairo text-[16px] font-extrabold text-[#111827]'>
-              مواعيد اليوم
-            </div>
-
-            <div className='flex items-center gap-2'>
-              <button
-                type='button'
-                onClick={() => setStatusTab('scheduled')}
+        <div className='rounded-[6px] border border-[#E5E7EB] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
+          <div className='flex items-center px-6 py-4 gap-2'>
+            <button
+              type='button'
+              onClick={() => setStatusTab('scheduled')}
+              className={
+                statusTab === 'scheduled'
+                  ? 'flex items-center gap-2 rounded-[6px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                  : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+              }
+            >
+              <span className='whitespace-nowrap'>المجدولة</span>
+              <span
                 className={
                   statusTab === 'scheduled'
-                    ? 'flex items-center gap-2 rounded-[12px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+                    ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                    : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
                 }
               >
-                <span className='whitespace-nowrap'>المجدولة</span>
-                <span
-                  className={
-                    statusTab === 'scheduled'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
-                  }
-                >
-                  {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
-                  ) : (
-                    scheduledCount
-                  )}
-                </span>
-              </button>
+                {appointmentsLoading ? (
+                  <Loader2 className='h-3 w-3 animate-spin' />
+                ) : (
+                  scheduledCount
+                )}
+              </span>
+            </button>
 
-              <button
-                type='button'
-                onClick={() => setStatusTab('completed')}
+            <button
+              type='button'
+              onClick={() => setStatusTab('completed')}
+              className={
+                statusTab === 'completed'
+                  ? 'flex items-center gap-2 rounded-[6px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                  : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+              }
+            >
+              <span className='whitespace-nowrap'>المكتملة</span>
+              <span
                 className={
                   statusTab === 'completed'
-                    ? 'flex items-center gap-2 rounded-[12px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+                    ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                    : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
                 }
               >
-                <span className='whitespace-nowrap'>المكتملة</span>
-                <span
-                  className={
-                    statusTab === 'completed'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
-                  }
-                >
-                  {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
-                  ) : (
-                    completedCount
-                  )}
-                </span>
-              </button>
+                {appointmentsLoading ? (
+                  <Loader2 className='h-3 w-3 animate-spin' />
+                ) : (
+                  completedCount
+                )}
+              </span>
+            </button>
 
-              <button
-                type='button'
-                onClick={() => setStatusTab('cancelled')}
+            <button
+              type='button'
+              onClick={() => setStatusTab('cancelled')}
+              className={
+                statusTab === 'cancelled'
+                  ? 'flex items-center gap-2 rounded-[6px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                  : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+              }
+            >
+              <span className='whitespace-nowrap'>الملغية</span>
+              <span
                 className={
                   statusTab === 'cancelled'
-                    ? 'flex items-center gap-2 rounded-[12px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+                    ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                    : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
                 }
               >
-                <span className='whitespace-nowrap'>الملغية</span>
-                <span
-                  className={
-                    statusTab === 'cancelled'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
-                  }
-                >
-                  {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
-                  ) : (
-                    cancelledCount
-                  )}
-                </span>
-              </button>
+                {appointmentsLoading ? (
+                  <Loader2 className='h-3 w-3 animate-spin' />
+                ) : (
+                  cancelledCount
+                )}
+              </span>
+            </button>
 
-              <button
-                type='button'
-                onClick={() => setStatusTab('absent')}
+            <button
+              type='button'
+              onClick={() => setStatusTab('absent')}
+              className={
+                statusTab === 'absent'
+                  ? 'flex items-center gap-2 rounded-[6px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                  : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+              }
+            >
+              <span className='whitespace-nowrap'>الغياب</span>
+              <span
                 className={
                   statusTab === 'absent'
-                    ? 'flex items-center gap-2 rounded-[12px] bg-[#16C5C0] px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
+                    ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                    : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
                 }
               >
-                <span className='whitespace-nowrap'>الغياب</span>
-                <span
-                  className={
-                    statusTab === 'absent'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
-                  }
-                >
-                  {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
-                  ) : (
-                    absentCount
-                  )}
-                </span>
-              </button>
-            </div>
+                {appointmentsLoading ? (
+                  <Loader2 className='h-3 w-3 animate-spin' />
+                ) : (
+                  absentCount
+                )}
+              </span>
+            </button>
           </div>
 
           <div className='px-6 py-4'>
@@ -373,12 +367,12 @@ export default function AppointmentsPage() {
                 {visibleTodayAppointments.map((appointment) => (
                   <div
                     key={appointment.id}
-                    className='rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+                    className='rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
                   >
                     <div className='px-6 pt-5'>
                       <div className='flex items-start justify-between'>
                         <div className='flex items-start gap-3'>
-                          <div className='flex h-[64px] w-[64px] items-center justify-center rounded-[16px] bg-[#16C5C0] text-white shadow-[0_10px_20px_rgba(22,197,192,0.25)]'>
+                          <div className='flex h-[64px] w-[64px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_10px_20px_rgba(22,197,192,0.25)]'>
                             <span className='font-cairo text-[16px] font-extrabold'>
                               {appointment.patientInitials}
                             </span>
@@ -406,11 +400,11 @@ export default function AppointmentsPage() {
                                 </span>
                               </div>
                               <div className='flex items-center gap-2'>
-                                <div className='flex h-[36px] items-center gap-2 rounded-full bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-[#16C5C0]'>
+                                <div className='flex h-[36px] items-center gap-2 rounded-[6px] bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-[#16C5C0]'>
                                   <Calendar className='h-4 w-4' />
                                   {appointment.date}
                                 </div>
-                                <div className='flex h-[36px] items-center gap-2 rounded-full bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-[#16C5C0]'>
+                                <div className='flex h-[36px] items-center gap-2 rounded-[6px] bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-[#16C5C0]'>
                                   <Clock className='h-4 w-4' />
                                   {appointment.time}
                                 </div>
@@ -421,14 +415,14 @@ export default function AppointmentsPage() {
 
                         <div className='flex items-center gap-3'>
                           <div className='flex flex-col items-end gap-2'>
-                            <div className='flex h-[24px] items-center justify-center rounded-full bg-[#16C5C0] px-[8px] py-[2px] font-cairo text-[12px] leading-[16px] font-semibold text-[#FFFFFF]'>
+                            <div className='flex h-[24px] items-center justify-center rounded-[8px] bg-[#16C5C0] px-[8px] py-[2px] font-cairo text-[12px] leading-[16px] font-semibold text-[#FFFFFF]'>
                               مجدول
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className='mt-4 h-[44px] w-full rounded-[12px] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[14px] font-bold text-[#667085]'>
+                      <div className='mt-4 h-[44px] w-full rounded-[6px] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[14px] font-bold text-[#667085]'>
                         <span className='text-[#364153]'>السبب : </span>
                         {appointment.notes || 'السبب: فحص دوري'}
                       </div>
@@ -448,7 +442,7 @@ export default function AppointmentsPage() {
                             setConfirmCancelOpen(true);
                           }}
                           disabled={cancelling}
-                          className='flex h-[44px] items-center justify-center gap-2 rounded-[14px] border-[1.82px] border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#FF000C] disabled:opacity-50'
+                          className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border-[1.82px] border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#FF000C] disabled:opacity-50'
                         >
                           <X className='h-4 w-4' />
                           إلغاء
@@ -466,7 +460,7 @@ export default function AppointmentsPage() {
                             setConfirmAbsenceOpen(true);
                           }}
                           disabled={false}
-                          className='flex h-[44px] items-center justify-center gap-2 rounded-[14px] border-[1.82px] border-[#F97316] bg-white font-cairo text-[14px] font-extrabold text-[#FF6900]'
+                          className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border-[1.82px] border-[#F97316] bg-white font-cairo text-[14px] font-extrabold text-[#FF6900]'
                         >
                           <UserX className='h-4 w-4' />
                           غياب
@@ -482,7 +476,7 @@ export default function AppointmentsPage() {
                             setFinishOpen(true);
                           }}
                           disabled={completing}
-                          className='flex h-[44px] items-center justify-center gap-2 border-[1.82px] rounded-[14px] border-[#16C5C0] bg-[#16C5C0] font-cairo text-[14px] font-extrabold text-white disabled:opacity-50'
+                          className='flex h-[44px] items-center justify-center gap-2 border-[1.82px] rounded-[6px] border-[#16C5C0] bg-[#16C5C0] font-cairo text-[14px] font-extrabold text-white disabled:opacity-50'
                         >
                           <Check className='h-4 w-4' />
                           إنهاء

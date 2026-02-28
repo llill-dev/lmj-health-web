@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Check,
   Link,
+  ChevronDown,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -106,10 +107,10 @@ export default function AddAccessRequestForm({
   }, [patientId, patients]);
 
   const inputBase =
-    'h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
+    'h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
 
   const textAreaBase =
-    'min-h-[104px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
+    'min-h-[104px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
 
   const labelBase =
     'mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]';
@@ -165,7 +166,7 @@ export default function AddAccessRequestForm({
                 ))}
               </select>
               <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <span className='font-cairo text-[12px] font-extrabold'>⌄</span>
+                <ChevronDown />
               </div>
             </div>
             {errors.patientId?.message ? (
@@ -186,7 +187,7 @@ export default function AddAccessRequestForm({
                     معلومات المريض الطبية العامة
                   </div>
                 </div>
-                <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[12px] bg-[#16C5C0] text-white'>
+                <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white'>
                   <span className='font-cairo text-[14px] font-extrabold'>
                     {patientLabel?.trim()?.[0] ?? 'م'}
                   </span>
@@ -195,7 +196,7 @@ export default function AddAccessRequestForm({
             </div>
 
             <div className='mt-4 grid grid-cols-3 gap-3'>
-              <div className='rounded-[12px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
+              <div className='rounded-[6px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
                 <FileText className='h-4 w-4 text-[#0FA6A3]' />
                 <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                   2
@@ -204,7 +205,7 @@ export default function AddAccessRequestForm({
                   سجل طبي
                 </div>
               </div>
-              <div className='rounded-[12px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
+              <div className='rounded-[6px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
                 <Pill className='h-4 w-4 text-[#00A63E]' />
                 <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                   1
@@ -213,7 +214,7 @@ export default function AddAccessRequestForm({
                   دواء
                 </div>
               </div>
-              <div className='rounded-[12px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
+              <div className='rounded-[6px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
                 <Activity className='h-4 w-4 text-[#9810FA]' />
                 <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                   2
@@ -243,7 +244,7 @@ export default function AddAccessRequestForm({
                     key={s}
                     type='button'
                     onClick={() => handlePickScope(s)}
-                    className={`w-full rounded-[12px] border px-4 py-3 text-right ${active ? meta.border : 'border-[#E5E7EB]'} ${active ? meta.bg : 'bg-white'}`}
+                    className={`w-full rounded-[6px] border px-4 py-3 text-right ${active ? meta.border : 'border-[#E5E7EB]'} ${active ? meta.bg : 'bg-white'}`}
                   >
                     <div className='flex items-center justify-between'>
                       <div className='flex items-start gap-3'>
@@ -299,7 +300,7 @@ export default function AddAccessRequestForm({
             ) : null}
           </div>
 
-          <div className='rounded-[12px] bg-[#E9FFFE] px-5 py-4 text-right'>
+          <div className='rounded-[6px] bg-[#E9FFFE] px-5 py-4 text-right'>
             <div className='flex items-start justify-start gap-3'>
               <ShieldCheck className='h-4 w-4 text-[#0FA6A3]' />
               <div className='flex flex-col gap-1'>
@@ -318,7 +319,7 @@ export default function AddAccessRequestForm({
             <motion.button
               type='button'
               onClick={onCancel}
-              className='flex h-[48px] flex-1 items-center justify-center rounded-[12px] bg-[#F2F4F7] font-cairo text-[13px] font-extrabold text-[#667085]'
+              className='flex h-[48px] flex-1 items-center justify-center rounded-[6px] bg-[#F2F4F7] font-cairo text-[13px] font-extrabold text-[#667085]'
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
@@ -329,7 +330,7 @@ export default function AddAccessRequestForm({
             <motion.button
               type='submit'
               disabled={isSubmitting}
-              className='flex h-[48px] flex-1 items-center justify-center gap-2 rounded-[12px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
+              className='flex h-[48px] flex-1 items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
