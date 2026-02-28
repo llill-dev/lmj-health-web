@@ -239,7 +239,7 @@ export default function AppointmentsPage() {
               placeholder='ابحث بالاسم أو رقم الهاتف...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full rounded-[6px] border border-[#E5E7EB] pr-10 pl-4 py-3 font-cairo text-[14px] placeholder:text-gray-400 focus:border-[#16C5C0] focus:outline-none focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20'
+              className='w-full rounded-[6px] bg-[#FFFFFF] border border-[#E5E7EB] pr-10 pl-4 py-3 font-cairo text-[14px] placeholder:text-gray-400 focus:border-[#16C5C0] focus:outline-none focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20'
             />
           </div>
         </div>
