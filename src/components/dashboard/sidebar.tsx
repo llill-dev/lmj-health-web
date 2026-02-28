@@ -17,10 +17,10 @@ export default function Sidebar({
     <aside
       dir='rtl'
       lang='ar'
-      className='relative w-[320px] shrink-0 border-l-[1.82px] border-[#E5E7EB] bg-[#FFFFFF]'
+      className='relative w-[320px] shrink-0 border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF]'
     >
       <div className='flex flex-col justify-between min-h-screen'>
-        <div className='px-[24px] pt-[24px] pb-[24px] border-b-[1.82px] border-[#E5E7EB] gap-[24px]'>
+        <div className='px-[24px] pt-[24px] pb-[24px] border-b-[1.82px] border-b-[#E5E7EB] gap-[24px]'>
           <div className='flex items-start justify-between'>
             <div className='flex items-center gap-2'>
               <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] shadow-[0_14px_30px_rgba(22,197,192,0.35)]'>
@@ -64,7 +64,7 @@ export default function Sidebar({
           </div>
         </div>
 
-        <nav className='pt-[15.99px] px-[15.99px]'>
+        <nav className='p-[15.99px]'>
           <div className='space-y-1'>
             {sidebarItems.map((item) => {
               const Icon = item.icon;
