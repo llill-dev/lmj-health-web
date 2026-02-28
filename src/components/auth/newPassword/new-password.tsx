@@ -88,14 +88,14 @@ export default function NewPassword({
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className='w-[557px] h-[300px] rounded-[12px] border-[1.9px] border-[#E5E7EB] bg-[#FFFFFF] px-[108px] py-[18px] mt-8 shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.1),0px_10px_15px_-3px_rgba(0,0,0,0.1)]'
+            className='w-[557px] h-[300px] rounded-[6px] border-[1.9px] border-[#E5E7EB] bg-[#FFFFFF] px-[108px] py-[18px] mt-8 shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.1),0px_10px_15px_-3px_rgba(0,0,0,0.1)]'
           >
             <div className='mt-6'>
               <div>
                 <label className='block text-right font-cairo text-[14px] font-bold leading-[24px] text-[#1F2937]'>
                   عين كلمة مرور جديدة
                 </label>
-                <div className='flex h-[36px] items-center rounded-[10px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] py-[4px] px-[12px] shadow-[0_10px_25px_rgba(0,0,0,0.06)]'>
+                <div className='flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] py-[4px] px-[12px] shadow-[0_10px_25px_rgba(0,0,0,0.06)]'>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder='password123'
@@ -129,7 +129,7 @@ export default function NewPassword({
                 <label className='block text-right font-cairo text-[14px] font-bold leading-[24px] text-[#1F2937]'>
                   تأكيد كلمة المرور
                 </label>
-                <div className='flex h-[36px] items-center rounded-[10px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] py-[4px] px-[12px] shadow-[0_10px_25px_rgba(0,0,0,0.06)]'>
+                <div className='flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] py-[4px] px-[12px] shadow-[0_10px_25px_rgba(0,0,0,0.06)]'>
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder='password123'
@@ -163,7 +163,7 @@ export default function NewPassword({
 
               <button
                 type='submit'
-                className='mt-2 w-[329.15px] flex h-[44px]  items-center justify-center rounded-[8px] bg-[#16C5C0] font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
+                className='mt-2 w-[329.15px] flex h-[44px]  items-center justify-center rounded-[10px] bg-[#16C5C0] font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
               >
                 تعيين كلمة المرور
               </button>

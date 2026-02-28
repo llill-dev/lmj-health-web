@@ -125,7 +125,7 @@ export default function LoginForm({
       <div
         dir='rtl'
         lang='ar'
-        className='relative gap-4 rounded-[16px]  max-w-[448px] max-h-[591px]'
+        className='relative gap-4 rounded-[6px]  max-w-[448px] max-h-[591px]'
       >
         <div className='relative'>
           <div className='pointer-events-none absolute -right-[70px] -top-[60px] z-0'>
@@ -135,7 +135,7 @@ export default function LoginForm({
             </div>
           </div>
           <div className='relative z-10  h-[4px] w-[448px] bg-gradient-to-b from-[#16C5C0] via-[#65BFEC] to-[#16C5C0]' />
-          <div className='relative z-10 rounded-[24px] bg-[#FFFFFFF2] px-7 py-8 shadow-[0_28px_80px_rgba(0,0,0,0.22)]'>
+          <div className='relative z-10 rounded-[6px] bg-[#FFFFFFF2] px-7 py-8 shadow-[0_28px_80px_rgba(0,0,0,0.22)]'>
             <div className='text-start'>
               <h1 className='font-cairo text-[16px] font-bold leading-[32px] text-[#1F2937]'>
                 تسجيل الدخول
@@ -150,12 +150,12 @@ export default function LoginForm({
               onSubmit={onSubmit}
             >
               <div className='mx-auto max-w-[330px] gap-[24px] py-[35px] px-[24px]'>
-                <div className='relative flex h-[35px] w-full rounded-full bg-[#F2F4F7] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.10)]'>
+                <div className='relative flex h-[35px] w-full rounded-[6px] bg-[#F2F4F7] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.10)]'>
                   <div className='relative flex flex-1'>
                     {method === 'phone' && (
                       <motion.div
                         layoutId='loginMethodPill'
-                        className='absolute inset-0 rounded-full bg-[#16C5C0]'
+                        className='absolute inset-0 rounded-[6px] bg-[#16C5C0]'
                         transition={{
                           type: 'spring',
                           stiffness: 520,
@@ -174,8 +174,8 @@ export default function LoginForm({
                       }}
                       className={
                         method === 'phone'
-                          ? 'relative z-10 flex-1 rounded-full font-cairo text-[14px] font-normal text-[#FFFFFF]'
-                          : 'relative z-10 flex-1 rounded-full font-cairo text-[14px] font-bold text-[#667085]'
+                          ? 'relative z-10 flex-1 rounded-[6px] font-cairo text-[14px] font-normal text-[#FFFFFF]'
+                          : 'relative z-10 flex-1 rounded-[6px] font-cairo text-[14px] font-bold text-[#667085]'
                       }
                     >
                       رقم الهاتف
@@ -186,7 +186,7 @@ export default function LoginForm({
                     {method === 'email' && (
                       <motion.div
                         layoutId='loginMethodPill'
-                        className='absolute inset-0 rounded-full bg-[#16C5C0]'
+                        className='absolute inset-0 rounded-[6px] bg-[#16C5C0]'
                         transition={{
                           type: 'spring',
                           stiffness: 520,
@@ -205,8 +205,8 @@ export default function LoginForm({
                       }}
                       className={
                         method === 'email'
-                          ? 'relative z-10 flex-1 rounded-full font-cairo text-[14px] font-normal text-[#FFFFFF]'
-                          : 'relative z-10 flex-1 rounded-full font-cairo text-[14px] font-bold text-[#667085]'
+                          ? 'relative z-10 flex-1 rounded-[6px] font-cairo text-[14px] font-normal text-[#FFFFFF]'
+                          : 'relative z-10 flex-1 rounded-[6px] font-cairo text-[14px] font-bold text-[#667085]'
                       }
                     >
                       البريد الإلكتروني
@@ -242,7 +242,7 @@ export default function LoginForm({
                         animate='center'
                         exit='exit'
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className='flex h-[35px] max-w-[330px] items-center rounded-[14px] bg-[#F2F4F7] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)]'
+                        className='flex h-[35px] max-w-[330px] items-center rounded-[8px] bg-[#F2F4F7] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)]'
                       >
                         <MethodIcon className='h-5 w-5 text-[#B5B7BA]' />
                         <input
@@ -265,7 +265,7 @@ export default function LoginForm({
                     <label className='mt-5 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
                       كلمة المرور
                     </label>
-                    <div className=' flex h-[35px] max-w-[330px] items-center rounded-[14px] bg-[#F2F4F7] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)]'>
+                    <div className=' flex h-[35px] max-w-[330px] items-center rounded-[8px] bg-[#F2F4F7] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)]'>
                       <LockKeyhole className=' h-5 w-5 text-[#B5B7BA]' />
                       <input
                         dir='ltr'
