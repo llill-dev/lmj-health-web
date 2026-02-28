@@ -197,7 +197,7 @@ export default function DoctorDetailsDialog({
             <div className='grid grid-cols-2 gap-4 px-7 pb-6'>
               <button
                 type='button'
-                className='flex h-[46px] items-center justify-center gap-2 rounded-[14px] border border-[#16C5C0] bg-white font-cairo text-[13px] font-extrabold text-[#16C5C0]'
+                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[13px] font-extrabold text-[#16C5C0]'
               >
                 <Mail className='h-4 w-4' />
                 إرسال رسالة
@@ -205,11 +205,12 @@ export default function DoctorDetailsDialog({
 
               <button
                 type='button'
-                className='flex h-[46px] items-center justify-center gap-2 rounded-[14px] bg-gradient-to-b from-[#16C5C0] to-[#14B3AE] font-cairo text-[13px] font-extrabold text-white'
+                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-gradient-to-b from-[#16C5C0] to-[#14B3AE] font-cairo text-[13px] font-extrabold text-white'
               >
                 <Phone className='h-4 w-4' />
                 اتصال
               </button>
+              
             </div>
           </motion.div>
         </motion.div>

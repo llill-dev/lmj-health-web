@@ -19,7 +19,7 @@ export default function OverviewKpiCard({
 
 
   return (
-    <div className=' px-[18px] py-[18px] border-[1.82px] border-[#FFFFFF4D] text-[#FFFFFF33] rounded-[16px]'>
+    <div className=' px-[18px] py-[18px] border-[1.82px] border-[#FFFFFF4D] text-[#FFFFFF33] rounded-[6px]'>
       <div className='flex justify-between text-[#FFFFFF]'>
         {icon}
         <span className='font-black text-[24px] leading-[34px]'>{value}</span>

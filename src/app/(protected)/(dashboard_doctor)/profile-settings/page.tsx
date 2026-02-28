@@ -104,7 +104,7 @@ export default function ProfileSettingsPage() {
       lang='ar'
       className='mx-auto w-full max-w-[1120px] px-4'
     >
-      <section className='relative overflow-hidden rounded-[24px] bg-[#16C5C0] px-6 pb-6 pt-8 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'>
+      <section className='relative overflow-hidden rounded-[6px] bg-[#16C5C0] px-6 pb-6 pt-8 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'>
         <div className='pointer-events-none absolute -right-16 -top-16 h-[220px] w-[220px] rounded-full bg-white/10' />
         <div className='pointer-events-none absolute -left-24 -bottom-24 h-[260px] w-[260px] rounded-full bg-white/10' />
 
@@ -144,7 +144,7 @@ export default function ProfileSettingsPage() {
         {stats.map((s) => (
           <div
             key={s.label}
-            className='rounded-[14px] border border-[#EEF2F6] bg-white px-6 py-4 text-center shadow-[0_14px_24px_rgba(0,0,0,0.08)]'
+            className='rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-4 text-center shadow-[0_14px_24px_rgba(0,0,0,0.08)]'
           >
             <div
               className={`font-cairo text-[24px] font-black ${
@@ -160,7 +160,7 @@ export default function ProfileSettingsPage() {
         ))}
       </section>
 
-      <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
           نبذة عن الطبيب
         </div>
@@ -169,7 +169,7 @@ export default function ProfileSettingsPage() {
         </div>
       </section>
 
-      <section className='mt-5 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='border-b border-[#EEF2F6] px-6 py-4'>
           <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
             معلومات الاتصال
@@ -183,7 +183,7 @@ export default function ProfileSettingsPage() {
               className='flex items-center justify-between px-6 py-4'
             >
               <div className='flex items-center gap-3'>
-                <div className='flex h-[32px] w-[32px] items-center justify-center rounded-[12px] bg-[#16C5C0]'>
+                <div className='flex h-[32px] w-[32px] items-center justify-center rounded-[6px] bg-[#16C5C0]'>
                   {row.icon}
                 </div>
                 <div className='text-right'>
@@ -200,7 +200,7 @@ export default function ProfileSettingsPage() {
         </div>
       </section>
 
-      <section className='mt-5 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='border-b border-[#EEF2F6] px-6 py-4'>
           <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
             طرق الاستشارة
@@ -228,10 +228,10 @@ export default function ProfileSettingsPage() {
             ].map((m) => (
               <div
                 key={m.title}
-                className='flex h-[64px] items-center justify-between rounded-[14px] bg-[#16C5C026] px-2 py-2'
+                className='flex h-[64px] items-center justify-between rounded-[6px] bg-[#16C5C026] px-2 py-2'
               >
                 <div className='flex items-center gap-3'>
-                  <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0]'>
+                  <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-[#16C5C0]'>
                     {m.icon}
                   </div>
                   <div className='text-right'>
@@ -250,7 +250,7 @@ export default function ProfileSettingsPage() {
         </div>
       </section>
 
-      <section className='mt-5 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='border-b border-[#EEF2F6] px-6 py-4'>
           <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
             المعلومات المهنية
@@ -262,10 +262,10 @@ export default function ProfileSettingsPage() {
             {professional.map((row) => (
               <div
                 key={row.label}
-                className='h-[64px] flex items-center justify-between rounded-[14px] bg-[#E9FFFE] px-2 py-2'
+                className='h-[64px] flex items-center justify-between rounded-[6px] bg-[#E9FFFE] px-2 py-2'
               >
                 <div className='flex items-center gap-3'>
-                  <div className='flex h-[28px] w-[28px] items-center justify-center rounded-[10px] bg-[#16C5C0]'>
+                  <div className='flex h-[28px] w-[28px] items-center justify-center rounded-[6px] bg-[#16C5C0]'>
                     {row.icon}
                   </div>
                   <div className='text-right'>
@@ -283,7 +283,7 @@ export default function ProfileSettingsPage() {
         </div>
       </section>
 
-      <section className='mt-6 overflow-hidden rounded-[18px] bg-[#16C5C0] px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-6 overflow-hidden rounded-[6px] bg-[#16C5C0] px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
             <button
@@ -291,7 +291,7 @@ export default function ProfileSettingsPage() {
               onClick={() =>
                 setStatus((s) => (s === 'active' ? 'inactive' : 'active'))
               }
-              className='flex h-[36px] w-[36px] items-center justify-center rounded-[12px] bg-white/15'
+              className='flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-white/15'
               aria-label='تبديل الحالة'
             >
               {status === 'active' ? (
@@ -311,7 +311,7 @@ export default function ProfileSettingsPage() {
           </div>
           <button
             type='button'
-            className='h-[36px] rounded-[12px] bg-[#FFFFFF33] px-4 font-cairo text-[12px] font-extrabold text-[#FFFFFF]'
+            className='h-[36px] rounded-[6px] bg-[#FFFFFF33] px-4 font-cairo text-[12px] font-extrabold text-[#FFFFFF]'
           >
             تعديل الملف
           </button>

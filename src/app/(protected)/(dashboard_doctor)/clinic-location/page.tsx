@@ -34,12 +34,12 @@ export default function ClinicLocationPage() {
       lang='ar'
       className='mx-auto w-full max-w-[1120px] px-4'
     >
-      <section className='rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='flex items-start justify-between'>
           <div className='flex items-start gap-3'>
             <button
               type='button'
-              className='flex h-[36px] w-[36px] items-center justify-center rounded-[12px] bg-[#16C5C0] text-white'
+              className='flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white'
               aria-label='موقع'
             >
               <MapPin className='h-4 w-4' />
@@ -61,7 +61,7 @@ export default function ClinicLocationPage() {
         </div>
       </section>
 
-      <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white p-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white p-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='relative'>
           <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
             <Search className='h-4 w-4' />
@@ -70,7 +70,7 @@ export default function ClinicLocationPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder='ابحث عن عنوان...'
-            className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
+            className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
           />
         </div>
 
@@ -79,14 +79,14 @@ export default function ClinicLocationPage() {
           onClick={() => {
             setStatus('pending');
           }}
-          className='mt-4 flex h-[44px] w-full items-center justify-center gap-2 rounded-[12px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(22,197,192,0.30)] transition-colors hover:bg-[#14B3AE]'
+          className='mt-4 flex h-[44px] w-full items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(22,197,192,0.30)] transition-colors hover:bg-[#14B3AE]'
         >
           <Locate className='h-4 w-4' />
           الحصول على موقعي الحالي
         </button>
       </section>
 
-      <section className='mt-5 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='relative h-[340px] bg-gradient-to-br from-gray-100 to-gray-200'>
           <div className='absolute inset-0 flex items-center justify-center'>
             <div className='flex flex-col items-center'>
@@ -126,10 +126,10 @@ export default function ClinicLocationPage() {
         </div>
       </section>
 
-      <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='flex items-start justify-between'>
           <div className='flex items-center gap-2'>
-            <div className='flex h-[30px] w-[30px] items-center justify-center rounded-[12px] bg-[#E9FFFE] text-[#16C5C0]'>
+            <div className='flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-[#E9FFFE] text-[#16C5C0]'>
               <Navigation className='h-4 w-4' />
             </div>
             <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
@@ -146,7 +146,7 @@ export default function ClinicLocationPage() {
             <input
               value={lat}
               onChange={(e) => setLat(e.target.value)}
-              className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
+              className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
             />
           </div>
           <div>
@@ -156,7 +156,7 @@ export default function ClinicLocationPage() {
             <input
               value={lng}
               onChange={(e) => setLng(e.target.value)}
-              className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
+              className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
             />
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function ClinicLocationPage() {
           <input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#6B7280] outline-none'
+            className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#6B7280] outline-none'
           />
         </div>
 
@@ -186,14 +186,14 @@ export default function ClinicLocationPage() {
         <button
           type='button'
           onClick={() => setStatus('pending')}
-          className='mt-5 flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(22,197,192,0.30)] transition-colors hover:bg-[#14B3AE]'
+          className='mt-5 flex h-[48px] w-full items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(22,197,192,0.30)] transition-colors hover:bg-[#14B3AE]'
         >
           <Navigation className='h-4 w-4' />
           إرسال المراجعة
         </button>
       </section>
 
-      <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
             <div className='flex h-[30px] w-[30px] items-center justify-center text-[#16C5C0]'>

@@ -116,7 +116,7 @@ export default function DoctorsDirectoryPage() {
       lang='ar'
       className='mx-auto w-full max-w-[1120px] px-4'
     >
-      <section className='rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='flex items-start justify-between'>
           <div className='text-right'>
             <div className='font-cairo text-[18px] font-extrabold text-[#111827]'>
@@ -127,7 +127,7 @@ export default function DoctorsDirectoryPage() {
             </div>
           </div>
 
-          <span className='inline-flex h-[28px] items-center justify-center rounded-[10px] bg-[#16C5C0] px-4 font-cairo text-[12px] font-extrabold text-white'>
+          <span className='inline-flex h-[32px] items-center justify-center rounded-[6px] bg-[#16C5C0] px-4 font-cairo text-[12px] font-extrabold text-white'>
             {total} طبيب
           </span>
         </div>
@@ -150,7 +150,7 @@ export default function DoctorsDirectoryPage() {
 
           <button
             type='button'
-            className='flex h-[44px] items-center justify-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)]'
+            className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)]'
           >
             <Navigation className='h-4 w-4 text-[#16C5C0]' />
             استخدم موقعي
@@ -158,7 +158,7 @@ export default function DoctorsDirectoryPage() {
 
           <button
             type='button'
-            className='flex h-[44px] items-center justify-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)]'
+            className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)]'
           >
             <SlidersHorizontal className='h-4 w-4 text-[#667085]' />
             فلاتر متقدمة
@@ -170,7 +170,7 @@ export default function DoctorsDirectoryPage() {
         {current.map((d) => (
           <div
             key={d.id}
-            className='relative overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-white px-6 pb-5 pt-6 text-center shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
+            className='relative overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white px-6 pb-5 pt-6 text-center shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
           >
             <div className='mx-auto flex h-[78px] w-[78px] items-center justify-center rounded-full border-2 border-[#C7F3F1] bg-[#F8FAFC]'>
               <span className='font-cairo text-[18px] font-extrabold text-[#98A2B3]'></span>
@@ -242,7 +242,7 @@ export default function DoctorsDirectoryPage() {
         onClose={() => setSelectedDoctorId(null)}
       />
 
-      <section className='mt-8 rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+      <section className='mt-8 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
         <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
           <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
             عرض {showingFrom}-{showingTo} من أصل {total} طبيب
@@ -259,7 +259,7 @@ export default function DoctorsDirectoryPage() {
               <ChevronRight className='h-4 w-4' />
             </button>
 
-            <div className='flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2'>
+            <div className='flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2'>
               <div className='font-cairo text-[12px] font-semibold text-[#98A2B3]'>
                 صفحة
               </div>
@@ -283,7 +283,7 @@ export default function DoctorsDirectoryPage() {
             <div className='font-cairo text-[12px] font-semibold text-[#98A2B3]'>
               عدد النتائج:
             </div>
-            <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#111827]'>
+            <div className='rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#111827]'>
               {total}
             </div>
           </div>
