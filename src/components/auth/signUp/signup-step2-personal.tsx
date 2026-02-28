@@ -47,7 +47,7 @@ export default function SignUpStep2Personal({
   return (
     <>
       <div className='mt-7 flex flex-col items-center text-center'>
-        <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[16px] bg-[#16C5C0] shadow-[0_18px_40px_rgba(22,197,192,0.35)]'>
+        <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[6px] bg-[#16C5C0] shadow-[0_18px_40px_rgba(22,197,192,0.35)]'>
           <Heart className='h-9 w-9 text-white' />
         </div>
         <div className='mt-4 flex items-center justify-center gap-3'>
@@ -93,8 +93,8 @@ export default function SignUpStep2Personal({
                 onClick={() => setValue('gender', 'male')}
                 className={
                   gender === 'male'
-                    ? 'flex h-[54px] items-center justify-center rounded-[12px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[16px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
-                    : 'flex h-[54px] items-center justify-center rounded-[12px] border border-[#16C5C0] bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
+                    ? 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[16px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+                    : 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
                 }
               >
                 ذكر
@@ -105,8 +105,8 @@ export default function SignUpStep2Personal({
                 onClick={() => setValue('gender', 'female')}
                 className={
                   gender === 'female'
-                    ? 'flex h-[54px] items-center justify-center rounded-[12px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[16px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
-                    : 'flex h-[54px] items-center justify-center rounded-[12px] border border-[#16C5C0] bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
+                    ? 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[16px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+                    : 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
                 }
               >
                 أنثى
@@ -132,7 +132,7 @@ export default function SignUpStep2Personal({
             <input
               type='text'
               {...register('birthDate')}
-              className='mt-2 h-[48px] w-full rounded-[10px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
             />
             {errors.birthDate?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
@@ -155,7 +155,7 @@ export default function SignUpStep2Personal({
               type='text'
               placeholder='المدينة, الحي, الشارع'
               {...register('address')}
-              className='mt-2 h-[48px] w-full rounded-[10px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
             />
             {errors.address?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
@@ -168,14 +168,14 @@ export default function SignUpStep2Personal({
             <button
               type='button'
               onClick={onPrev}
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[14px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
             >
               <ArrowRight className='h-4 w-4' />
               السابق
             </button>
             <button
               type='submit'
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[14px] bg-[#16C5C0] font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
             >
               التالي
               <ArrowLeft className='h-4 w-4' />

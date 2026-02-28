@@ -121,7 +121,7 @@ export default function VerifyAccount({
             </div>
           </div>
 
-          <div className='w-[557px] min-h-[300px] rounded-[18px] bg-white px-[108px] py-[28px] mt-8 shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.1),0px_10px_15px_-3px_rgba(0,0,0,0.1)]'>
+          <div className='w-[557px] min-h-[300px] rounded-[6px] bg-white px-[108px] py-[28px] mt-8 shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.1),0px_10px_15px_-3px_rgba(0,0,0,0.1)]'>
             <form onSubmit={handleSubmit((values) => onVerify?.(values.code))}>
               <div className='text-center'>
                 <div className='font-cairo text-[14px] leading-[14px] text-[#B5B7BA]'>

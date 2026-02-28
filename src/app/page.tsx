@@ -108,7 +108,7 @@ export default function Home() {
           {view === 'welcome' ? (
             <section className='mx-auto flex w-full max-w-[480px] flex-col items-center gap-4 sm:py-16'>
               <div className='flex w-full justify-center'>
-                <div className='mx-auto min-h-[70px] min-w-[265px] rounded-[20px] border border-[#FFFFFFCC] border-t-[1.27px] bg-[#FFFFFF99] px-3 py-1 shadow-[0px_25px_50px_-12px_#00000040] backdrop-blur'>
+                <div className='mx-auto min-h-[70px] min-w-[265px] rounded-[6px] border border-[#FFFFFFCC] border-t-[1.27px] bg-[#FFFFFF99] px-3 py-1 shadow-[0px_25px_50px_-12px_#00000040] backdrop-blur'>
                   <div className='flex items-center gap-1'>
                     <div className='flex flex-col items-start justify-start text-center'>
                       <h1 className='h-[32px] w-[151px] text-[24px] font-bold leading-[32px] text-[#16C5C0]'>
@@ -160,7 +160,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className='flex h-[235px] w-[345px] flex-col items-center justify-center rounded-[32px] border-[1.82px] border-t-[1.82px] border-t-white/80 bg-transparent shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]'>
+              <div className='flex h-[235px] w-[345px] flex-col items-center justify-center rounded-[6px] border-[1.82px] border-t-[1.82px] bg-[#FFFFFFCC] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]'>
                 <h1 className='bg-[#101828] bg-clip-text text-center font-cairo text-[24px] font-bold leading-[32px] text-transparent'>
                   مرحبًا بك في عالم الصحة
                 </h1>
@@ -177,7 +177,7 @@ export default function Home() {
 
                 <div className='mt-5 flex items-center justify-center'>
                   <button
-                    className='h-[63px] w-[297px] gap-[11.99px] rounded-[24px] bg-[#16C5C0] pl-[0.03px] font-cairo text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
+                    className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-[#16C5C0] pl-[0.03px] font-cairo text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
                     type='button'
                     onClick={() => goTo('login')}
                   >

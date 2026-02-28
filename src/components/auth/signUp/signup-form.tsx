@@ -108,7 +108,7 @@ export default function SignUpForm({
           </div>
 
           <div
-            className={`w-[672px] ${step === 1 ? 'min-h-[947.175px] pb-12 mb-8' : step === 2 ? 'min-h-[727.17px] pb-12 mb-8' : step === 3 ? 'min-h-[999.16px] pb-12 mb-8' : 'min-h-[727.1749877929688px] pb-12 mb-8'} top-[212px] rounded-[32px] pt-8 px-8 gap-8 bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]`}
+            className={`w-[672px] ${step === 1 ? 'min-h-[947.175px] pb-12 mb-8' : step === 2 ? 'min-h-[727.17px] pb-12 mb-8' : step === 3 ? 'min-h-[999.16px] pb-12 mb-8' : 'min-h-[727.1749877929688px] pb-12 mb-8'} top-[212px] rounded-[6px] pt-8 px-8 gap-8 bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]`}
           >
             <SignUpStepper step={step} />
 
