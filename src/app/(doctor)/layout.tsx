@@ -13,7 +13,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     sidebarItems.find(
       (item) =>
         pathname === `/${item.path}` || pathname.startsWith(`/${item.path}/`),
-    )?.path ?? 'doctor';
+    )?.path ?? 'dashboard';
 
   return (
     <div className='h-screen bg-white scrollbar-hide overflow-hidden'>
