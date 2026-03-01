@@ -118,7 +118,7 @@ export default function Sidebar({
           </div>
         </nav>
 
-        <div className='h-[69.8px] border-t-[1.82px] border-b-[#E5E7EB] px-[16px] py-[17.81px]'>
+        <div className='h-[69.8px] border-t-[1.82px] border-t-[#E5E7EB] px-[16px] py-[17.81px]'>
           <button
             type='button'
             onClick={onLogout}
