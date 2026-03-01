@@ -118,11 +118,11 @@ export default function Sidebar({
           </div>
         </nav>
 
-        <div className='h-[69.8px] border-t-[1.82px] px-[16px] py-[17.81px]'>
+        <div className='h-[69.8px] border-t-[1.82px] border-b-[#E5E7EB] px-[16px] py-[17.81px]'>
           <button
             type='button'
             onClick={onLogout}
-            className='mt-6 flex w-full items-center justify-start gap-2 font-cairo text-[14px] font-extrabold text-[#E11D48] hover:text-[#BE123C]'
+            className='flex w-full items-center justify-start gap-2 font-cairo text-[14px] font-extrabold text-[#E11D48] hover:text-[#BE123C]'
           >
             <LogOut className='h-4 w-4' />
             تسجيل الخروج
