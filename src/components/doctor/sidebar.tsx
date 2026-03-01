@@ -17,9 +17,9 @@ export default function Sidebar({
     <aside
       dir='rtl'
       lang='ar'
-      className='relative w-[320px] shrink-0 border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF]'
+      className='fixed right-0 top-0 z-50 h-screen w-[320px] shrink-0 border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF]'
     >
-      <div className='flex flex-col justify-between min-h-screen'>
+      <div className='flex h-full flex-col'>
         <div className='px-[24px] pt-[24px] pb-[24px] border-b-[1.82px] border-b-[#E5E7EB] gap-[24px]'>
           <div className='flex items-start justify-between'>
             <div className='flex items-center gap-2'>
@@ -64,7 +64,7 @@ export default function Sidebar({
           </div>
         </div>
 
-        <nav className='p-[15.99px]'>
+        <nav className='flex-1 overflow-y-auto scrollbar-hide p-[15.99px]'>
           <div className='space-y-1'>
             {sidebarItems.map((item) => {
               const Icon = item.icon;
@@ -118,7 +118,7 @@ export default function Sidebar({
           </div>
         </nav>
 
-        <div className='h-[69.8px] border-t-[1.82px] px-[16px] [17.81px]'>
+        <div className='h-[69.8px] border-t-[1.82px] px-[16px] py-[17.81px]'>
           <button
             type='button'
             onClick={onLogout}

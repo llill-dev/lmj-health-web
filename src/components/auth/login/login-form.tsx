@@ -3,7 +3,6 @@
 import { LockKeyhole, Mail, Phone } from 'lucide-react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -104,7 +103,7 @@ export default function LoginForm({
         token: 'demo-token',
         isAuthenticated: true,
       });
-      router.push('/dashboard');
+      router.push('/doctor');
       return;
     }
 

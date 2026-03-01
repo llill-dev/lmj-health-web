@@ -14,8 +14,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import DashboardOverviewSection from '@/components/dashboard/dashboard-overview-section';
-import AddAccessRequestForm from '@/components/dashboard/add-access-request-form';
+import DashboardOverviewSection from '@/components/doctor/dashboard-overview-section';
+import AddAccessRequestForm from '@/components/doctor/add-access-request-form';
 
 type AccessRequestStatus = 'pending' | 'approved' | 'rejected';
 

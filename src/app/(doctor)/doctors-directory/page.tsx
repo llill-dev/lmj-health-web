@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import DoctorDetailsDialog, {
   type DoctorCardItem,
-} from '@/components/dashboard/doctor-details-dialog';
+} from '@/components/doctor/doctor-details-dialog';
 
 const mockDoctors: DoctorCardItem[] = [
   {
