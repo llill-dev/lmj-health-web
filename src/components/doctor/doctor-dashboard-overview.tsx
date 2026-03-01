@@ -3,10 +3,10 @@
 import type { ReactNode } from 'react';
 import { Calendar, FileText, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import DashboardOverviewSection from '@/components/dashboard/dashboard-overview-section';
+import DashboardOverviewSection from '@/components/doctor/dashboard-overview-section';
 import OverviewKpiCard, {
   type OverviewKpiCardVariant,
-} from '@/components/dashboard/overview-kpi-card';
+} from '@/components/doctor/overview-kpi-card';
 
 type OverviewKpiItem = {
   key: string;

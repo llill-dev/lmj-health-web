@@ -11,12 +11,12 @@ import {
   Loader2,
   AlertCircle,
   Search,
-  ChevronRight,  
+  ChevronRight,
 } from 'lucide-react';
 import { useAppointments, useDashboardStats } from '@/hooks';
 import { useState } from 'react';
 
-export default function DashboardPage() {
+export default function HomeDoctor() {
   const [selectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [activeStatus, setActiveStatus] = useState('الكل');
   const searchTerm = '';
@@ -50,12 +50,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div
-      dir='rtl'
-      lang='ar'
-      className='mx-auto w-full max-w-[1120px]'
-    >
-      {/* Appointments Overview: top KPI/stat cards */}
+    <div dir='rtl' lang='ar' className='mx-auto w-full max-w-[1120px]'>
       <section className='grid grid-cols-4 gap-4'>
         <div className='border-b-[3.98px] border-[#16C5C0] rounded-[14px] bg-[#FFFFFF] p-4 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1),0px_1px_3px_0px_rgba(0,0,0,0.1)]'>
           <div className='flex items-start justify-between'>
@@ -146,9 +141,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Middle widgets: Patients + Today's Appointments */}
       <section className='mt-6 grid grid-cols-2 gap-6'>
-        {/* Today's Appointments widget */}
         <div>
           <div className='border-b border-[#EEF2F6] px-6 py-8'>
             <div className='font-cairo text-[18px] font-extrabold text-[#111827]'>
@@ -204,7 +197,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        {/* Patients widget */}
+
         <div>
           <div className='border-b border-[#EEF2F6] px-6 py-8'>
             <div className='font-cairo text-[18px] font-extrabold text-[#111827]'>
@@ -238,10 +231,7 @@ export default function DashboardPage() {
                     { day: 'الخميس', h: 20 },
                     { day: 'الجمعة', h: 10 },
                   ].map((item) => (
-                    <div
-                      key={item.day}
-                      className='flex flex-1 flex-col items-center gap-2'
-                    >
+                    <div key={item.day} className='flex flex-1 flex-col items-center gap-2'>
                       <div
                         className='w-full max-w-[42px] rounded-t-[12px] bg-[#16C5C0]'
                         style={{ height: `${item.h}px` }}
@@ -262,7 +252,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Patients table */}
       <section className='mt-6'>
         <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
           <div className='font-cairo text-[18px] font-extrabold mb-4 text-[#111827]'>
@@ -350,7 +339,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Bottom stats */}
       <section className='mt-6 grid grid-cols-3 gap-6'>
         <div className='rounded-[16px] border border-[#E5E7EB] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='flex items-center justify-between'>

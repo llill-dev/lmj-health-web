@@ -14,11 +14,11 @@ import {
   X,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import DoctorDashboardOverview from '@/components/dashboard/doctor-dashboard-overview';
-import CreateMedicalRecordForm from '@/components/dashboard/create-medical-record-form';
+import DoctorDashboardOverview from '@/components/doctor/doctor-dashboard-overview';
+import CreateMedicalRecordForm from '@/components/doctor/create-medical-record-form';
 import MedicalRecordDetailsDialog, {
   type MedicalRecordDetails,
-} from '@/components/dashboard/medical-record-details-dialog';
+} from '@/components/doctor/medical-record-details-dialog';
 
 type MedicalRecordItem = {
   id: string;

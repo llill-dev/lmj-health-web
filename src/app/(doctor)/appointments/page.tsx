@@ -22,10 +22,10 @@ import {
   useCompleteAppointment,
 } from '@/hooks';
 import { useState } from 'react';
-import DoctorDashboardOverview from '@/components/dashboard/doctor-dashboard-overview';
-import BookAppointmentDialog from '@/components/dashboard/book-appointment-dialog';
-import ConfirmActionDialog from '@/components/dashboard/confirm-action-dialog';
-import CancelAppointmentDialog from '@/components/dashboard/cancel-appointment-dialog';
+import DoctorDashboardOverview from '@/components/doctor/doctor-dashboard-overview';
+import BookAppointmentDialog from '@/components/doctor/book-appointment-dialog';
+import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import CancelAppointmentDialog from '@/components/doctor/cancel-appointment-dialog';
 
 export default function AppointmentsPage() {
   const [searchTerm, setSearchTerm] = useState('');

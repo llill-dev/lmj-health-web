@@ -1,8 +1,8 @@
 'use client';
 import type { ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import Sidebar from '@/components/dashboard/sidebar';
-import DashboardHeader from '@/components/dashboard/dashboard-header';
+import Sidebar from '@/components/doctor/sidebar';
+import DashboardHeader from '@/components/doctor/dashboard-header';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
@@ -13,17 +13,11 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     sidebarItems.find(
       (item) =>
         pathname === `/${item.path}` || pathname.startsWith(`/${item.path}/`),
-    )?.path ?? 'dashboard';
+    )?.path ?? 'doctor';
 
   return (
-    <div className='min-h-screen bg-white'>
-      <div className='mx-auto flex w-full max-w-screen-2xl'>
-        <main className='min-h-screen flex-1'>
-          <DashboardHeader />
-          <div className='bg-white px-6 py-[31.99px] pr-[31.99px] pl-[59.26px]'>
-            {children}
-          </div>
-        </main>
+    <div className='h-screen bg-white scrollbar-hide overflow-hidden'>
+      <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
         <Sidebar
           active={active}
           onBack={() => router.back()}
@@ -31,6 +25,16 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
             router.push('/');
           }}
         />
+
+        <main className='flex h-screen flex-1 flex-col pr-[320px]'>
+          <div className='sticky top-0 z-40'>
+            <DashboardHeader />
+          </div>
+
+          <div className='flex-1 overflow-y-auto bg-white px-6 py-[31.99px] pr-[31.99px] pl-[59.26px]'>
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );
