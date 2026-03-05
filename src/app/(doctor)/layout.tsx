@@ -26,12 +26,12 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
           }}
         />
 
-        <main className='flex h-screen flex-1 flex-col pr-[320px]'>
+        <main className='flex h-screen flex-1 flex-col pr-[290px]'>
           <div className='sticky top-0 z-40'>
             <DashboardHeader />
           </div>
 
-          <div className='flex-1 overflow-y-auto bg-white px-6 py-[31.99px] pr-[31.99px] pl-[59.26px]'>
+          <div className='flex-1 overflow-y-auto py-8 bg-white mx-auto scrollbar-hide'>
             {children}
           </div>
         </main>

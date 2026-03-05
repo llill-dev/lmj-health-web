@@ -109,7 +109,7 @@ export default function CreateMedicalRecordForm({
   };
 
   return (
-    <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+    <section className='min-w-[1120px] mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
       <div className='relative border-b border-[#EEF2F6] px-8 py-5'>
         <div className='text-right font-cairo text-[16px] font-extrabold text-[#111827]'>
           إنشاء سجل طبي جديد
