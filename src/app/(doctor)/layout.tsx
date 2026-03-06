@@ -31,7 +31,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
             <DashboardHeader />
           </div>
 
-          <div className='flex-1 overflow-y-auto py-8 bg-white mx-auto scrollbar-hide'>
+          <div className='flex-1 overflow-y-auto py-8 bg-white scrollbar-hide'>
             {children}
           </div>
         </main>

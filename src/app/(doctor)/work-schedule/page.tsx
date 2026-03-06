@@ -45,6 +45,18 @@ const days: Array<{ key: DayKey; label: string }> = [
   { key: 'saturday', label: 'السبت' },
 ];
 
+function buildTimeSlots(stepMinutes = 15) {
+  const slots: string[] = [];
+  for (let h = 0; h < 24; h += 1) {
+    for (let m = 0; m < 60; m += stepMinutes) {
+      const hh = String(h).padStart(2, '0');
+      const mm = String(m).padStart(2, '0');
+      slots.push(`${hh}:${mm}`);
+    }
+  }
+  return slots;
+}
+
 function uid() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -62,6 +74,8 @@ export default function WorkScheduleForm() {
   const [appointmentDuration, setAppointmentDuration] = useState('30');
   const [breakStart, setBreakStart] = useState('');
   const [breakEnd, setBreakEnd] = useState('');
+
+  const timeSlots = useMemo(() => buildTimeSlots(15), []);
 
   const [weekly, setWeekly] = useState<Record<DayKey, DaySchedule>>({
     sunday: { enabled: true, from: '09:00', to: '17:00' },
@@ -221,12 +235,23 @@ export default function WorkScheduleForm() {
                 بداية الاستراحة
               </div>
             </div>
-            <input
-              type='time'
-              value={breakStart}
-              onChange={(e) => setBreakStart(e.target.value)}
-              className='h-[40px] w-full rounded-[12px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
-            />
+            <div className='relative'>
+              <select
+                value={breakStart}
+                onChange={(e) => setBreakStart(e.target.value)}
+                className='h-[40px] w-full rounded-[6px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-[#16C5C0]'
+              >
+                <option value=''>—</option>
+                {timeSlots.map((t) => (
+                  <option
+                    key={t}
+                    value={t}
+                  >
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>
@@ -236,12 +261,23 @@ export default function WorkScheduleForm() {
                 نهاية الاستراحة
               </div>
             </div>
-            <input
-              type='time'
-              value={breakEnd}
-              onChange={(e) => setBreakEnd(e.target.value)}
-              className='h-[40px] w-full rounded-[12px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
-            />
+            <div className='relative'>
+              <select
+                value={breakEnd}
+                onChange={(e) => setBreakEnd(e.target.value)}
+                className='h-[40px] w-full rounded-[6px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-[#16C5C0]'
+              >
+                <option value=''>—</option>
+                {timeSlots.map((t) => (
+                  <option
+                    key={t}
+                    value={t}
+                  >
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </section>
