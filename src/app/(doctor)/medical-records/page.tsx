@@ -114,7 +114,8 @@ const mockRecords: MedicalRecordItem[] = [
     statusLabel: 'مغلق',
     facility: 'عيادة القلب',
     diagnosisTitle: 'التشخيص',
-    diagnosisSubtitle: 'مراجعة فحوصات/تقييم عام',
+    diagnosisSubtitle:
+      'المريضة أُحيلت للفحص القلبي بسبب تاريخ عائلي. الفحوصات طبيعية ولا توجد مشاكل قلبية حالياً.',
     symptoms: ['ألم خفيف'],
     medicinesCount: 1,
     vitals: [
@@ -271,7 +272,7 @@ export default function MedicalRecordsPage() {
             <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)] overflow-hidden'>
               <div className='w-full overflow-x-auto'>
                 <div className='min-w-max'>
-                  <div className='grid grid-cols-[repeat(14,minmax(0,1fr))] items-center gap-3 border-b border-[#EEF2F6] bg-[#F9FAFB] px-6 py-4'>
+                  <div className='grid grid-cols-[repeat(14,minmax(60px,80px))] items-center gap-8 border-b border-[#EEF2F6] bg-[#F9FAFB] px-6 py-4'>
                     <div className='col-span-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
                       System ID
                     </div>
@@ -311,7 +312,7 @@ export default function MedicalRecordsPage() {
                       return (
                         <div
                           key={r.id}
-                          className='grid grid-cols-[repeat(14,minmax(0,1fr))] items-start gap-8 border-b border-[#EEF2F6] px-6 py-4 last:border-b-0'
+                          className='grid items-center grid-cols-[repeat(14,minmax(60px,80px))] gap-8 border-b border-[#EEF2F6] px-6 py-4 last:border-b-0'
                         >
                           <div className='col-span-2 flex items-start justify-between gap-3 pt-1'>
                             <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
@@ -375,7 +376,7 @@ export default function MedicalRecordsPage() {
                             </div>
                           </div>
 
-                          <div className='col-span-2 flex items-start justify-end gap-4 pt-1'>
+                          <div className='col-span-2 flex items-center justify-center gap-4 pt-1'>
                             <button
                               type='button'
                               onClick={() => {

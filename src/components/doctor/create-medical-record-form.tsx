@@ -1,7 +1,6 @@
 'use client';
-
 import { useMemo } from 'react';
-import { ChevronDown, Save, X } from 'lucide-react';
+import { ChevronDown, PenLine, Plus, Save, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -109,7 +108,7 @@ export default function CreateMedicalRecordForm({
   };
 
   return (
-    <section className='min-w-[1120px] mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+    <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
       <div className='relative border-b border-[#EEF2F6] px-8 py-5'>
         <div className='text-right font-cairo text-[16px] font-extrabold text-[#111827]'>
           إنشاء سجل طبي جديد
@@ -223,6 +222,49 @@ export default function CreateMedicalRecordForm({
             </div>
           </div>
 
+          <div className='mt-1 rounded-[10px] border-[1.82px] border-[#16C5C0] bg-[#0B1220] px-4 py-4 shadow-[0_18px_30px_rgba(0,0,0,0.22)]'>
+            <div className='mb-4 flex items-center justify-between'>
+              <div className='text-right font-cairo text-[14px] font-extrabold text-[#98A2B3]'>
+                الأدوية الموصوفة
+              </div>
+              <PenLine className='h-4 w-4 text-[#16C5C0]' />
+            </div>
+
+            <div className='grid grid-cols-2 gap-3'>
+              <input
+                className={inputBase}
+                placeholder='اسم الدواء *'
+              />
+              <input
+                className={inputBase}
+                placeholder='الجرعة (مثال: قرص واحد) *'
+              />
+              <input
+                className={inputBase}
+                placeholder='التكرار (مثال: 3 مرات يومياً) *'
+              />
+              <input
+                className={inputBase}
+                placeholder='المدة (مثال: 7 أيام) *'
+              />
+            </div>
+
+            <div className='mt-4'>
+              <input
+                className={inputBase}
+                placeholder='تعليمات إضافية (مثال: بعد الأكل)'
+              />
+            </div>
+
+            <button
+              type='button'
+              className='mt-4 flex h-[52px] w-full items-center justify-center gap-3 rounded-[8px] bg-gradient-to-r from-[#16C5C0] to-[#0FA6A3] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'
+            >
+              <span>إضافة الدواء</span>
+              <Plus className='h-5 w-5' />
+            </button>
+          </div>
+
           <div>
             <div className={labelBase}>العلاج</div>
             <textarea
@@ -250,7 +292,7 @@ export default function CreateMedicalRecordForm({
             />
           </div>
 
-          <div className='mt-2 flex items-center justify-between gap-4'>
+          <div className='mt-2 flex items-center justify-end gap-4'>
             <motion.button
               type='button'
               onClick={onCancel}
