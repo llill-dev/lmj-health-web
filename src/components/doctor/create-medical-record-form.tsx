@@ -222,7 +222,7 @@ export default function CreateMedicalRecordForm({
             </div>
           </div>
 
-          <div className='mt-1 rounded-[10px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 py-4 shadow-[0_18px_30px_rgba(0,0,0,0.22)]'>
+          <div className='mt-1 rounded-[10px] border-[1.82px] border-[#EEF2F6] bg-[#FFFFFF] px-4 py-4'>
             <div className='mb-4 flex items-center justify-between'>
               <div className='text-right font-cairo text-[14px] font-extrabold text-[#98A2B3]'>
                 الأدوية الموصوفة
