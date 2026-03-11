@@ -128,7 +128,6 @@ export default function DoctorAppointmentsPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px] px-4'
       >
         <DoctorDashboardOverview
           variant='appointments'

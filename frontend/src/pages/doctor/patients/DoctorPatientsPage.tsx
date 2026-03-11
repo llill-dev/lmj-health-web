@@ -65,7 +65,6 @@ export default function DoctorPatientsPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px]'
       >
         <section className='rounded-[16px] bg-[#16C5C0] px-6 py-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]'>
           <div className='flex items-start justify-between'>

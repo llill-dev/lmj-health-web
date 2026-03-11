@@ -39,7 +39,9 @@ export default function ProtectedLayout({
             <MotionProvider>
               <AnimatePresence mode='wait'>
                 <PageTransition key={pathname}>
-                  {children ?? <Outlet />}
+                  <div className='mx-auto w-full max-w-[1420px] px-12'>
+                    {children ?? <Outlet />}
+                  </div>
                 </PageTransition>
               </AnimatePresence>
             </MotionProvider>

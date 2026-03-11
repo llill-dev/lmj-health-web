@@ -159,7 +159,6 @@ export default function DoctorWorkSchedulePage() {
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px]'
       >
         <AddExceptionDialog
           open={isAddExceptionOpen}

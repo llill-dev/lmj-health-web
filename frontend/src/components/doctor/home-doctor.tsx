@@ -50,7 +50,10 @@ export default function HomeDoctor() {
   }
 
   return (
-    <div dir='rtl' lang='ar' className='mx-auto w-full max-w-[1120px]'>
+    <div
+      dir='rtl'
+      lang='ar'
+    >
       <section className='grid grid-cols-4 gap-4'>
         <div className='border-b-[3.98px] border-[#16C5C0] rounded-[14px] bg-[#FFFFFF] p-4 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1),0px_1px_3px_0px_rgba(0,0,0,0.1)]'>
           <div className='flex items-start justify-between'>
@@ -231,7 +234,10 @@ export default function HomeDoctor() {
                     { day: 'الخميس', h: 20 },
                     { day: 'الجمعة', h: 10 },
                   ].map((item) => (
-                    <div key={item.day} className='flex flex-1 flex-col items-center gap-2'>
+                    <div
+                      key={item.day}
+                      className='flex flex-1 flex-col items-center gap-2'
+                    >
                       <div
                         className='w-full max-w-[42px] rounded-t-[12px] bg-[#16C5C0]'
                         style={{ height: `${item.h}px` }}
@@ -388,6 +394,8 @@ export default function HomeDoctor() {
           </div>
         </div>
       </section>
+
+      <div className='h-8' />
     </div>
   );
 }
