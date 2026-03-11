@@ -113,6 +113,10 @@ export default function DoctorAccessRequestsPage() {
 
   return (
     <>
+      <Helmet>
+        <title>Access Requests • LMJ Health</title>
+      </Helmet>
+
       <div
         dir='rtl'
         lang='ar'

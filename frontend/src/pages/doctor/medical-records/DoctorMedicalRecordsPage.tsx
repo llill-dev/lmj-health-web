@@ -162,6 +162,10 @@ export default function DoctorMedicalRecordsPage() {
 
   return (
     <>
+      <Helmet>
+        <title>Medical Records • LMJ Health</title>
+      </Helmet>
+
       <div
         dir='rtl'
         lang='ar'
