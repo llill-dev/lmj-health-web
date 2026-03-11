@@ -33,7 +33,6 @@ export default function DoctorClinicLocationPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px] px-4'
       >
         <section className='rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
           <div className='flex items-start justify-between'>

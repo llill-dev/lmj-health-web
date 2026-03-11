@@ -155,7 +155,6 @@ export default function DoctorOnlineConsultationsPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px]'
       >
         <section className='rounded-[16px] border border-[#E5E7EB] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='flex items-start justify-between'>

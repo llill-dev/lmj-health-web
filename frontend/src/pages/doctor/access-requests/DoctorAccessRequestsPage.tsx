@@ -113,14 +113,9 @@ export default function DoctorAccessRequestsPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Access Requests • LMJ Health</title>
-      </Helmet>
-
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px] px-4'
       >
         <DashboardOverviewSection
           sectionClassName='flex flex-col gap-[18px] mb-6 py-[22px] px-[24px] rounded-[24px] bg-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'

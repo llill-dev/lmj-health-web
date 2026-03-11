@@ -106,7 +106,6 @@ export default function DoctorProfileSettingsPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px] px-4'
       >
         <section className='relative overflow-hidden rounded-[6px] bg-[#16C5C0] px-6 pb-6 pt-8 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'>
           <div className='pointer-events-none absolute -right-16 -top-16 h-[220px] w-[220px] rounded-full bg-white/10' />

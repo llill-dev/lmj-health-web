@@ -162,14 +162,9 @@ export default function DoctorMedicalRecordsPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Medical Records • LMJ Health</title>
-      </Helmet>
-
       <div
         dir='rtl'
         lang='ar'
-        className='mx-auto w-full max-w-[1120px]'
       >
         <MedicalRecordDetailsDialog
           open={detailsOpen}
@@ -272,34 +267,35 @@ export default function DoctorMedicalRecordsPage() {
                 </div>
               </section>
 
-              <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)] overflow-hidden'>
-                <div className='w-full overflow-x-auto'>
-                  <div className='min-w-max'>
-                    <div className='grid grid-cols-[repeat(14,minmax(60px,80px))] items-center gap-8 border-b border-[#EEF2F6] bg-[#F9FAFB] px-6 py-4'>
-                      <div className='col-span-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
-                        System ID
-                      </div>
-                      <div className='col-span-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
-                        اسم المريض
-                      </div>
-                      <div className='col-span-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
-                        التشخيص
-                      </div>
-                      <div className='col-span-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
-                        المنشأة
-                      </div>
-                      <div className='col-span-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
-                        التاريخ
-                      </div>
-                      <div className='col-span-2 text-center font-cairo text-[13px] font-extrabold text-[#111827]'>
-                        الحالة
-                      </div>
-                      <div className='col-span-2 text-center font-cairo text-[13px] font-extrabold text-[#111827]'>
-                        الإجراءات
-                      </div>
-                    </div>
-
-                    <div>
+              <section className='mt-5 mb-8 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)] overflow-hidden'>
+                <div className='overflow-x-auto'>
+                  <table className='w-full min-w-[800px] border-collapse'>
+                    <thead>
+                      <tr className='border-b border-[#EEF2F6] bg-[#F9FAFB]'>
+                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[100px]'>
+                          System ID
+                        </th>
+                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[150px]'>
+                          اسم المريض
+                        </th>
+                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[200px]'>
+                          التشخيص
+                        </th>
+                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[120px]'>
+                          المنشأة
+                        </th>
+                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[100px]'>
+                          التاريخ
+                        </th>
+                        <th className='px-4 py-3 text-center font-cairo text-[13px] font-extrabold text-[#111827] w-[100px]'>
+                          الحالة
+                        </th>
+                        <th className='px-4 py-3 text-center font-cairo text-[13px] font-extrabold text-[#111827] w-[120px]'>
+                          الإجراءات
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
                       {filtered.map((r) => {
                         const statusStyle =
                           r.statusLabel === 'نشط'
@@ -313,157 +309,161 @@ export default function DoctorMedicalRecordsPage() {
                                   : 'bg-[#667085] text-white';
 
                         return (
-                          <div
+                          <tr
                             key={r.id}
-                            className='grid items-center grid-cols-[repeat(14,minmax(60px,80px))] gap-8 border-b border-[#EEF2F6] px-6 py-4 last:border-b-0'
+                            className='border-b border-[#EEF2F6] hover:bg-[#F9FAFB] transition-colors'
                           >
-                            <div className='col-span-2 flex items-start justify-between gap-3 pt-1'>
-                              <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
-                                <FileText className='h-5 w-5' />
-                              </div>
-                              <div className='min-w-0 text-left'>
-                                <div className='break-words font-cairo text-[13px] font-extrabold text-[#0FA6A3]'>
-                                  {r.systemId}
+                            <td className='px-4 py-3'>
+                              <div className='flex items-center gap-3'>
+                                <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
+                                  <FileText className='h-5 w-5' />
                                 </div>
-                                <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#0FA6A3]'>
-                                  {r.id.replace('mr-', '').padStart(4, '0')}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className='col-span-2 flex items-start justify-start gap-3 pt-1'>
-                              <div className='flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[#16C5C0] text-white'>
-                                <span className='font-cairo text-[14px] font-extrabold'>
-                                  {r.patientInitial}
-                                </span>
-                              </div>
-                              <div className='text-right'>
-                                <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                                  {r.patientName}
-                                </div>
-                                <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                                  {r.patientPhone}
+                                <div className='min-w-0'>
+                                  <div className='break-words font-cairo text-[13px] font-extrabold text-[#0FA6A3]'>
+                                    {r.systemId}
+                                  </div>
+                                  <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#0FA6A3]'>
+                                    {r.id.replace('mr-', '').padStart(4, '0')}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-
-                            <div className='col-span-2 flex justify-start pt-1'>
+                            </td>
+                            <td className='px-4 py-3'>
+                              <div className='flex items-center gap-3'>
+                                <div className='flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[#16C5C0] text-white'>
+                                  <span className='font-cairo text-[14px] font-extrabold'>
+                                    {r.patientInitial}
+                                  </span>
+                                </div>
+                                <div className='text-right'>
+                                  <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
+                                    {r.patientName}
+                                  </div>
+                                  <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                                    {r.patientPhone}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className='px-4 py-3'>
                               <div className='w-full max-w-full rounded-[12px] border border-[#B8D3FF] bg-[#EEF5FF] px-4 py-3 text-right'>
                                 <div className='whitespace-normal break-words font-cairo text-[13px] font-extrabold leading-[18px] text-[#111827]'>
                                   {r.diagnosisSubtitle}
                                 </div>
                               </div>
-                            </div>
-
-                            <div className='col-span-2 flex items-start justify-start gap-2 text-right pt-1'>
-                              <Building2 className='h-4 w-4 text-[#F79009]' />
-                              <div className='min-w-0'>
-                                <div className='whitespace-normal break-words font-cairo text-[13px] font-extrabold text-[#667085]'>
-                                  {r.facility}
+                            </td>
+                            <td className='px-4 py-3'>
+                              <div className='flex items-center gap-2'>
+                                <Building2 className='h-4 w-4 text-[#F79009]' />
+                                <div className='min-w-0'>
+                                  <div className='whitespace-normal break-words font-cairo text-[13px] font-extrabold text-[#667085]'>
+                                    {r.facility}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-
-                            <div className='col-span-2 flex items-start justify-start gap-2 text-right pt-1'>
-                              <Calendar className='h-4 w-4 text-[#98A2B3]' />
-                              <span className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                                {r.date}
-                              </span>
-                            </div>
-
-                            <div className='col-span-2 flex justify-center pt-1'>
+                            </td>
+                            <td className='px-4 py-3'>
+                              <div className='flex items-center gap-2'>
+                                <Calendar className='h-4 w-4 text-[#98A2B3]' />
+                                <span className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                                  {r.date}
+                                </span>
+                              </div>
+                            </td>
+                            <td className='px-4 py-3 text-center'>
                               <div
                                 className={`inline-flex h-[30px] items-center justify-center rounded-[8px] px-4 font-cairo text-[12px] font-extrabold ${statusStyle}`}
                               >
                                 {r.statusLabel}
                               </div>
-                            </div>
+                            </td>
+                            <td className='px-4 py-3 text-center'>
+                              <div className='flex items-center justify-center gap-2'>
+                                <button
+                                  type='button'
+                                  onClick={() => {
+                                    const mapped: MedicalRecordDetails = {
+                                      id: r.id,
+                                      patientName: r.patientName,
+                                      date: r.date,
+                                      diagnosisSubtitle: r.diagnosisSubtitle,
+                                      symptoms: r.symptoms,
+                                      vitals: r.vitals,
+                                      medicinesCount: r.medicinesCount,
+                                      prescriptions: [
+                                        {
+                                          name: 'أموكسيسيلين 500mg',
+                                          dosage: 'حبّة واحدة',
+                                          duration: '7 أيام',
+                                          frequency: '3 مرات يومياً',
+                                          notes: 'بعد الأكل',
+                                        },
+                                        {
+                                          name: 'باراسيتامول 500mg',
+                                          dosage: 'حبّة واحدة',
+                                          duration: '5 أيام',
+                                          frequency: 'عند الحاجة',
+                                          notes: 'للحمى فقط',
+                                        },
+                                      ].slice(0, r.medicinesCount),
+                                      followUpDate: r.followUpDate,
+                                      additionalNotes:
+                                        'المريض يعاني من التهاب بكتيري في الحلق، تم وصف المضاد الحيوي، متابعة بعد أسبوع.',
+                                    };
+                                    setDetailsRecord(mapped);
+                                    setDetailsOpen(true);
+                                  }}
+                                  className='flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#16C5C0]'
+                                >
+                                  <span>عرض التفاصيل</span>
+                                </button>
 
-                            <div className='col-span-2 flex items-center justify-center gap-4 pt-1'>
-                              <button
-                                type='button'
-                                onClick={() => {
-                                  const mapped: MedicalRecordDetails = {
-                                    id: r.id,
-                                    patientName: r.patientName,
-                                    date: r.date,
-                                    diagnosisSubtitle: r.diagnosisSubtitle,
-                                    symptoms: r.symptoms,
-                                    vitals: r.vitals,
-                                    medicinesCount: r.medicinesCount,
-                                    prescriptions: [
-                                      {
-                                        name: 'أموكسيسيلين 500mg',
-                                        dosage: 'حبّة واحدة',
-                                        duration: '7 أيام',
-                                        frequency: '3 مرات يومياً',
-                                        notes: 'بعد الأكل',
-                                      },
-                                      {
-                                        name: 'باراسيتامول 500mg',
-                                        dosage: 'حبّة واحدة',
-                                        duration: '5 أيام',
-                                        frequency: 'عند الحاجة',
-                                        notes: 'للحمى فقط',
-                                      },
-                                    ].slice(0, r.medicinesCount),
-                                    followUpDate: r.followUpDate,
-                                    additionalNotes:
-                                      'المريض يعاني من التهاب بكتيري في الحلق، تم وصف المضاد الحيوي، متابعة بعد أسبوع.',
-                                  };
-                                  setDetailsRecord(mapped);
-                                  setDetailsOpen(true);
-                                }}
-                                className='flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#16C5C0]'
-                              >
-                                <span>عرض التفاصيل</span>
-                              </button>
-
-                              <button
-                                type='button'
-                                onClick={() => {
-                                  const mapped: MedicalRecordDetails = {
-                                    id: r.id,
-                                    patientName: r.patientName,
-                                    date: r.date,
-                                    diagnosisSubtitle: r.diagnosisSubtitle,
-                                    symptoms: r.symptoms,
-                                    vitals: r.vitals,
-                                    medicinesCount: r.medicinesCount,
-                                    prescriptions: [
-                                      {
-                                        name: 'أموكسيسيلين 500mg',
-                                        dosage: 'حبّة واحدة',
-                                        duration: '7 أيام',
-                                        frequency: '3 مرات يومياً',
-                                        notes: 'بعد الأكل',
-                                      },
-                                      {
-                                        name: 'باراسيتامول 500mg',
-                                        dosage: 'حبّة واحدة',
-                                        duration: '5 أيام',
-                                        frequency: 'عند الحاجة',
-                                        notes: 'للحمى فقط',
-                                      },
-                                    ].slice(0, r.medicinesCount),
-                                    followUpDate: r.followUpDate,
-                                    additionalNotes:
-                                      'المريض يعاني من التهاب بكتيري في الحلق، تم وصف المضاد الحيوي، متابعة بعد أسبوع.',
-                                  };
-                                  setDetailsRecord(mapped);
-                                  setDetailsOpen(true);
-                                }}
-                                className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0] text-white shadow-[0_10px_18px_rgba(22,197,192,0.28)]'
-                                aria-label='تفاصيل'
-                              >
-                                <ChevronRight className='h-5 w-5' />
-                              </button>
-                            </div>
-                          </div>
+                                <button
+                                  type='button'
+                                  onClick={() => {
+                                    const mapped: MedicalRecordDetails = {
+                                      id: r.id,
+                                      patientName: r.patientName,
+                                      date: r.date,
+                                      diagnosisSubtitle: r.diagnosisSubtitle,
+                                      symptoms: r.symptoms,
+                                      vitals: r.vitals,
+                                      medicinesCount: r.medicinesCount,
+                                      prescriptions: [
+                                        {
+                                          name: 'أموكسيسيلين 500mg',
+                                          dosage: 'حبّة واحدة',
+                                          duration: '7 أيام',
+                                          frequency: '3 مرات يومياً',
+                                          notes: 'بعد الأكل',
+                                        },
+                                        {
+                                          name: 'باراسيتامول 500mg',
+                                          dosage: 'حبّة واحدة',
+                                          duration: '5 أيام',
+                                          frequency: 'عند الحاجة',
+                                          notes: 'للحمى فقط',
+                                        },
+                                      ].slice(0, r.medicinesCount),
+                                      followUpDate: r.followUpDate,
+                                      additionalNotes:
+                                        'المريض يعاني من التهاب بكتيري في الحلق، تم وصف المضاد الحيوي، متابعة بعد أسبوع.',
+                                    };
+                                    setDetailsRecord(mapped);
+                                    setDetailsOpen(true);
+                                  }}
+                                  className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0] text-white shadow-[0_10px_18px_rgba(22,197,192,0.28)]'
+                                  aria-label='تفاصيل'
+                                >
+                                  <ChevronRight className='h-5 w-5' />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
                         );
                       })}
-                    </div>
-                  </div>
+                    </tbody>
+                  </table>
                 </div>
 
                 <div className='flex items-center justify-between gap-4 bg-white px-6 py-4'>
@@ -475,6 +475,7 @@ export default function DoctorMedicalRecordsPage() {
                   </div>
                 </div>
               </section>
+              <div className='h-8' />
             </motion.div>
           )}
         </AnimatePresence>
