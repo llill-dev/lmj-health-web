@@ -4,7 +4,7 @@ import { Bell, MessageCircle, Search } from 'lucide-react';
 
 export default function DashboardHeader({
   title = 'لوحة التحكم',
-  subtitle = 'مرحباً، د. خالد عبدالله',
+  subtitle = 'مرحباً، د. خالد عبدالله (وضع العرض)',
   searchPlaceholder = 'بحث...',
 }: {
   title?: string;

@@ -51,7 +51,7 @@ export default function ProtectedLayout({
           onToggleCollapse={() => setIsSidebarCollapsed((v) => !v)}
           onLogout={() => {
             useAuthStore.getState().logout();
-            navigate('/');
+            navigate('/login');
           }}
         />
       </div>
