@@ -35,76 +35,72 @@ export default function App() {
     <AnimatePresence mode='wait'>
       {isDoctorArea ? (
         <Routes location={location}>
-          <Route element={<ProtectedRoute allowedRoles={['doctor']} />}>
+          <Route
+            path='/'
+            element={
+              <DoctorLayout>
+                <DashboardPage />
+              </DoctorLayout>
+            }
+          />
+
+          <Route
+            path='/doctor'
+            element={<DoctorLayout />}
+          >
             <Route
-              path='/'
+              index
               element={
-                <DoctorLayout>
-                  <DashboardPage />
-                </DoctorLayout>
+                <Navigate
+                  to='dashboard'
+                  replace
+                />
               }
             />
-          </Route>
-
-          <Route element={<ProtectedRoute allowedRoles={['doctor']} />}>
             <Route
-              path='/doctor'
-              element={<DoctorLayout />}
-            >
-              <Route
-                index
-                element={
-                  <Navigate
-                    to='dashboard'
-                    replace
-                  />
-                }
-              />
-              <Route
-                path='dashboard'
-                element={<DoctorDashboardPage />}
-              />
-              <Route
-                path='appointments'
-                element={<DoctorAppointmentsPage />}
-              />
-              <Route
-                path='patients'
-                element={<DoctorPatientsPage />}
-              />
-              <Route
-                path='online-consultations'
-                element={<DoctorOnlineConsultationsPage />}
-              />
-              <Route
-                path='work-schedule'
-                element={<DoctorWorkSchedulePage />}
-              />
-              <Route
-                path='medical-records'
-                element={<DoctorMedicalRecordsPage />}
-              />
-              <Route
-                path='access-requests'
-                element={<DoctorAccessRequestsPage />}
-              />
-              <Route
-                path='doctors-directory'
-                element={<DoctorDoctorsDirectoryPage />}
-              />
-              <Route
-                path='clinic-location'
-                element={<DoctorClinicLocationPage />}
-              />
-              <Route
-                path='notification'
-                element={<DoctorNotificationPage />}
-              />
-              <Route
-                path='profile-settings'
-                element={<DoctorProfileSettingsPage />}
-              />
-            </Route>
+              path='dashboard'
+              element={<DoctorDashboardPage />}
+            />
+            <Route
+              path='appointments'
+              element={<DoctorAppointmentsPage />}
+            />
+            <Route
+              path='patients'
+              element={<DoctorPatientsPage />}
+            />
+            <Route
+              path='online-consultations'
+              element={<DoctorOnlineConsultationsPage />}
+            />
+            <Route
+              path='work-schedule'
+              element={<DoctorWorkSchedulePage />}
+            />
+            <Route
+              path='medical-records'
+              element={<DoctorMedicalRecordsPage />}
+            />
+            <Route
+              path='access-requests'
+              element={<DoctorAccessRequestsPage />}
+            />
+            <Route
+              path='doctors-directory'
+              element={<DoctorDoctorsDirectoryPage />}
+            />
+            <Route
+              path='clinic-location'
+              element={<DoctorClinicLocationPage />}
+            />
+            <Route
+              path='notification'
+              element={<DoctorNotificationPage />}
+            />
+            <Route
+              path='profile-settings'
+              element={<DoctorProfileSettingsPage />}
+            />
           </Route>
 
           <Route
