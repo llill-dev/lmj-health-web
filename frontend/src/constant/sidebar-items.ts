@@ -41,6 +41,7 @@ export type AdminSidebarItemId =
   | 'medical-records'
   | 'medical-content'
   | 'content-review'
+  | 'medical-news'
   | 'services'
   | 'service-types'
   | 'medical-file-options'
@@ -162,6 +163,12 @@ export const adminSidebarItems: Array<{
     label: 'مراجعة المحتوى',
     icon: ClipboardCheck,
     badge: 5,
+  },
+  {
+    id: 'medical-news',
+    path: 'medical-news',
+    label: 'الأخبار الطبية',
+    icon: ScrollText,
   },
   {
     id: 'services',

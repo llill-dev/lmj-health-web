@@ -1,23 +1,19 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
-const adminSearchFiltersSchema = z.object({
-  query: z.string().optional(),
-  specialty: z.string().optional(),
-  status: z.string().optional(),
-});
-
-export type AdminSearchFiltersValues = z.input<typeof adminSearchFiltersSchema>;
+export type AdminSearchFiltersValues = {
+  query?: string;
+  specialty?: string;
+  status?: string;
+};
 
 export default function AdminSearchFiltersBar({
   queryPlaceholder,
   queryEndAdornment,
+  order = 'query-first',
   specialtyPlaceholder,
   specialtyOptions,
   statusPlaceholder,
@@ -28,6 +24,7 @@ export default function AdminSearchFiltersBar({
 }: {
   queryPlaceholder: string;
   queryEndAdornment?: ReactNode;
+  order?: 'query-first' | 'filters-first';
   specialtyPlaceholder?: string;
   specialtyOptions?: Array<{ label: string; value: string }>;
   statusPlaceholder?: string;
@@ -45,13 +42,13 @@ export default function AdminSearchFiltersBar({
     } satisfies AdminSearchFiltersValues;
   }, [defaultValues]);
 
-  const { register, watch } = useForm<AdminSearchFiltersValues>({
-    resolver: zodResolver(adminSearchFiltersSchema),
-    defaultValues: resolvedDefaultValues,
-    mode: 'onChange',
-  });
+  const [values, setValues] = useState<AdminSearchFiltersValues>(
+    resolvedDefaultValues,
+  );
 
-  const values = watch();
+  useEffect(() => {
+    setValues(resolvedDefaultValues);
+  }, [resolvedDefaultValues]);
 
   useEffect(() => {
     onChange?.(values);
@@ -63,11 +60,20 @@ export default function AdminSearchFiltersBar({
 
   return (
     <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-      <div className='flex items-center justify-between gap-4'>
+      <div
+        className={
+          order === 'filters-first'
+            ? 'flex flex-row-reverse items-center justify-between gap-4'
+            : 'flex items-center justify-between gap-4'
+        }
+      >
         <div className='relative flex-1'>
           <input
             placeholder={queryPlaceholder}
-            {...register('query')}
+            value={values.query ?? ''}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, query: e.target.value }))
+            }
             className={
               queryEndAdornment
                 ? 'h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
@@ -87,7 +93,10 @@ export default function AdminSearchFiltersBar({
             {hasSpecialty ? (
               <div className='relative'>
                 <select
-                  {...register('specialty')}
+                  value={values.specialty ?? ''}
+                  onChange={(e) =>
+                    setValues((v) => ({ ...v, specialty: e.target.value }))
+                  }
                   className='h-[42px] w-[160px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'
                 >
                   <option value=''>{specialtyPlaceholder ?? 'الاختصاص'}</option>
@@ -109,7 +118,10 @@ export default function AdminSearchFiltersBar({
             {hasStatus ? (
               <div className='relative'>
                 <select
-                  {...register('status')}
+                  value={values.status ?? ''}
+                  onChange={(e) =>
+                    setValues((v) => ({ ...v, status: e.target.value }))
+                  }
                   className='h-[42px] w-[140px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'
                 >
                   <option value=''>{statusPlaceholder ?? 'الحالة'}</option>
