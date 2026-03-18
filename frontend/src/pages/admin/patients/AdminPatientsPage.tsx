@@ -8,10 +8,10 @@ import {
   Phone,
   MapPin,
   CalendarDays,
-  Search,
-  Filter,
   Activity,
 } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
+import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 
 type PatientStatus = 'نشط' | 'معلق' | 'موقوف';
 
@@ -90,37 +90,22 @@ export default function AdminPatientsPage() {
           </div>
         </div>
 
-        <section className='mt-6 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex items-center justify-between gap-4'>
-            <div className='flex items-center gap-3'>
-              <div className='flex h-[42px] w-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#98A2B3]'>
-                <Filter className='h-4 w-4' />
-              </div>
-
-              <div className='relative'>
-                <select className='h-[42px] w-[160px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'>
-                  <option>جميع الحالات</option>
-                  <option>نشط</option>
-                  <option>معلق</option>
-                  <option>موقوف</option>
-                </select>
-                <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                  <ChevronLeft className='h-4 w-4 rotate-[-90deg]' />
-                </div>
-              </div>
+        <AdminSearchFiltersBar
+          queryPlaceholder='البحث عن مريض...'
+          queryEndAdornment={<Search className='h-4 w-4' />}
+          statusPlaceholder='جميع الحالات'
+          statusOptions={[
+            { label: 'نشط', value: 'active' },
+            { label: 'معلق', value: 'suspended' },
+            { label: 'موقوف', value: 'blocked' },
+          ]}
+          filtersLeading={
+            <div className='flex h-[42px] w-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#98A2B3]'>
+              <Filter className='h-4 w-4' />
             </div>
-
-            <div className='relative flex-1'>
-              <input
-                placeholder='البحث عن مريض...'
-                className='h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
-              />
-              <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <Search className='h-4 w-4' />
-              </div>
-            </div>
-          </div>
-        </section>
+          }
+          onChange={() => {}}
+        />
 
         <section className='mt-5 space-y-5'>
           {patients.map((p) => {

@@ -4,12 +4,12 @@ import {
   Clock,
   Ban,
   Stethoscope,
-  ChevronLeft,
   Mail,
   Phone,
   BadgeCheck,
-  Eye,
+  ChevronLeft,
 } from 'lucide-react';
+import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 
 type DoctorStatus = 'مرفوض' | 'معلّق' | 'مقبول' | 'إجمالي الأطباء';
 
@@ -190,40 +190,21 @@ export default function AdminDoctorsPage() {
           })}
         </section>
 
-        <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex items-center justify-between gap-4'>
-            <div className='flex-1'>
-              <input
-                placeholder='ابحث عن طبيب...'
-                className='h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
-              />
-            </div>
-            <div className='flex items-center gap-3'>
-              <div className='relative'>
-                <select className='h-[42px] w-[160px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'>
-                  <option>الاختصاص</option>
-                  <option>طب الأطفال</option>
-                  <option>طب الأسرة</option>
-                </select>
-                <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                  <ChevronLeft className='h-4 w-4 rotate-[-90deg]' />
-                </div>
-              </div>
-
-              <div className='relative'>
-                <select className='h-[42px] w-[140px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'>
-                  <option>الحالة</option>
-                  <option>مقبول</option>
-                  <option>معلّق</option>
-                  <option>مرفوض</option>
-                </select>
-                <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                  <ChevronLeft className='h-4 w-4 rotate-[-90deg]' />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <AdminSearchFiltersBar
+          queryPlaceholder='ابحث عن طبيب...'
+          specialtyPlaceholder='الاختصاص'
+          specialtyOptions={[
+            { label: 'طب الأطفال', value: 'pediatrics' },
+            { label: 'طب الأسرة', value: 'family' },
+          ]}
+          statusPlaceholder='الحالة'
+          statusOptions={[
+            { label: 'مقبول', value: 'approved' },
+            { label: 'معلّق', value: 'pending' },
+            { label: 'مرفوض', value: 'rejected' },
+          ]}
+          onChange={() => {}}
+        />
 
         <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden'>
           <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
