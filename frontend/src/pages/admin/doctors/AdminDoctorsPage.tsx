@@ -226,7 +226,7 @@ export default function AdminDoctorsPage() {
                   <div className='flex-1 px-5 py-4'>
                     <div className='flex items-start justify-between'>
                       <div className='flex items-start gap-2'>
-                        <div className='flex h-[64px] w-[64px] items-center justify-center rounded-[6px] bg-primary text-[20px] font-bold text-white'>
+                        <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-[18px] font-bold text-white'>
                           {d.name.charAt(3)}
                         </div>
                         <div className='text-right'>
