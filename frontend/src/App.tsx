@@ -27,6 +27,18 @@ import AdminLayout from '@/layouts/AdminLayout';
 import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage';
 import AdminDoctorsPage from '@/pages/admin/doctors/AdminDoctorsPage';
 import AdminPatientsPage from '@/pages/admin/patients/AdminPatientsPage';
+import AdminSecretariesPage from '@/pages/admin/secretaries/AdminSecretariesPage';
+import AdminMedicalContentPage from '@/pages/admin/medical-content/AdminMedicalContentPage';
+import AdminContentReviewPage from '@/pages/admin/content-review/AdminContentReviewPage';
+import AdminMedicalNewsPage from '@/pages/admin/medical-news/AdminMedicalNewsPage';
+import AdminServiceTypesPage from '@/pages/admin/service-types/AdminServiceTypesPage';
+import AdminAppointmentsPage from '@/pages/admin/appointments/AdminAppointmentsPage';
+import AdminMedicalFileOptionsPage from '@/pages/admin/medical-file-options/AdminMedicalFileOptionsPage';
+import AdminVerificationRequestsPage from '@/pages/admin/verification-requests/AdminVerificationRequestsPage';
+import AdminSystemLogsPage from '@/pages/admin/system-logs/AdminSystemLogsPage';
+import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage';
+import AdminServicesPage from '@/pages/admin/services/AdminServicesPage';
+import AdminAnalyticsPage from '@/pages/admin/analytics/AdminAnalyticsPage';
 import NotFoundPage from '@/pages/not-found/NotFoundPage';
 import { PageTransition } from '@/motion';
 
@@ -139,6 +151,54 @@ export default function App() {
             <Route
               path='patients'
               element={<AdminPatientsPage />}
+            />
+            <Route
+              path='secretaries'
+              element={<AdminSecretariesPage />}
+            />
+            <Route
+              path='medical-content'
+              element={<AdminMedicalContentPage />}
+            />
+            <Route
+              path='content-review'
+              element={<AdminContentReviewPage />}
+            />
+            <Route
+              path='medical-news'
+              element={<AdminMedicalNewsPage />}
+            />
+            <Route
+              path='service-types'
+              element={<AdminServiceTypesPage />}
+            />
+            <Route
+              path='appointments'
+              element={<AdminAppointmentsPage />}
+            />
+            <Route
+              path='medical-file-options'
+              element={<AdminMedicalFileOptionsPage />}
+            />
+            <Route
+              path='verification-requests'
+              element={<AdminVerificationRequestsPage />}
+            />
+            <Route
+              path='system-logs'
+              element={<AdminSystemLogsPage />}
+            />
+            <Route
+              path='settings'
+              element={<AdminSettingsPage />}
+            />
+            <Route
+              path='services'
+              element={<AdminServicesPage />}
+            />
+            <Route
+              path='analytics'
+              element={<AdminAnalyticsPage />}
             />
             <Route
               path='dashboard'
