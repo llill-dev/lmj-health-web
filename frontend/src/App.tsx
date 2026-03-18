@@ -25,6 +25,7 @@ import DoctorNotificationPage from '@/pages/doctor/notification/DoctorNotificati
 import DoctorProfileSettingsPage from '@/pages/doctor/profile-settings/DoctorProfileSettingsPage';
 import AdminLayout from '@/layouts/AdminLayout';
 import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage';
+import AdminDoctorsPage from '@/pages/admin/doctors/AdminDoctorsPage';
 import NotFoundPage from '@/pages/not-found/NotFoundPage';
 import { PageTransition } from '@/motion';
 
@@ -129,6 +130,19 @@ export default function App() {
             <Route
               path='overview'
               element={<AdminDashboardPage />}
+            />
+            <Route
+              path='doctors'
+              element={<AdminDoctorsPage />}
+            />
+            <Route
+              path='dashboard'
+              element={
+                <Navigate
+                  to='/admin/overview'
+                  replace
+                />
+              }
             />
           </Route>
 
