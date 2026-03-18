@@ -55,7 +55,7 @@ export default function HomeDoctor() {
       lang='ar'
     >
       <section className='grid grid-cols-4 gap-4'>
-        <div className='border-b-[3.98px] border-[#16C5C0] rounded-[14px] bg-[#FFFFFF] p-4 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1),0px_1px_3px_0px_rgba(0,0,0,0.1)]'>
+        <div className='border-b-[3.98px] border-primary rounded-[14px] bg-[#FFFFFF] p-4 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.1),0px_1px_3px_0px_rgba(0,0,0,0.1)]'>
           <div className='flex items-start justify-between'>
             <div className='text-right'>
               <div className='font-cairo text-[13px] font-bold text-[#667085]'>
@@ -66,11 +66,11 @@ export default function HomeDoctor() {
               </div>
             </div>
             <div className='flex h-10 w-10 items-center justify-center rounded-[6px] bg-[#EFFFFE]'>
-              <Calendar className='h-[18px] w-[18px] text-[#16C5C0]' />
+              <Calendar className='h-[18px] w-[18px] text-primary' />
             </div>
           </div>
           <div className='mt-4 flex items-center justify-end'>
-            <span className='rounded-full bg-[#EFFFFE] px-2 py-1 font-cairo text-[11px] font-extrabold text-[#16C5C0]'>
+            <span className='rounded-full bg-[#EFFFFE] px-2 py-1 font-cairo text-[11px] font-extrabold text-primary'>
               +12%
             </span>
           </div>
@@ -173,7 +173,7 @@ export default function HomeDoctor() {
                   className='flex items-center justify-between rounded-[12px] bg-[#F9FAFB] px-4 py-3'
                 >
                   <div className='flex items-center gap-3'>
-                    <div className='flex h-[38px] w-[38px] items-center justify-center rounded-[8px] bg-[#16C5C0] text-white'>
+                    <div className='flex h-[38px] w-[38px] items-center justify-center rounded-[8px] bg-primary text-white'>
                       <span className='font-cairo text-[14px] font-extrabold'>
                         {row.initial}
                       </span>
@@ -191,7 +191,7 @@ export default function HomeDoctor() {
                     <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                       {row.time}
                     </div>
-                    <div className='mt-1 inline-flex h-[22px] items-center justify-center border-[1.82px] border-[#16C5C01A] rounded-[6px] text-[#16C5C0] px-2 font-cairo text-[11px] font-extrabold bg-[#16C5C01A]'>
+                    <div className='mt-1 inline-flex h-[22px] items-center justify-center border-[1.82px] border-[#0F8F8B1A] rounded-[6px] text-primary px-2 font-cairo text-[11px] font-extrabold bg-[#0F8F8B1A]'>
                       مجدول
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export default function HomeDoctor() {
               </div>
             </div>
 
-            <div className='flex flex-col justify-between mt-4 rounded-[12px] bg-[#16C5C01A] min-h-[220px] p-5'>
+            <div className='flex flex-col justify-between mt-4 rounded-[12px] bg-[#0F8F8B1A] min-h-[220px] p-5'>
               <div className='font-cairo text-[13px] px-4 font-bold text-[#667085]'>
                 نشاط المواعيد - آخر 7 أيام
               </div>
@@ -239,7 +239,7 @@ export default function HomeDoctor() {
                       className='flex flex-1 flex-col items-center gap-2'
                     >
                       <div
-                        className='w-full max-w-[42px] rounded-t-[12px] bg-[#16C5C0]'
+                        className='w-full max-w-[42px] rounded-t-[12px] bg-primary'
                         style={{ height: `${item.h}px` }}
                       />
                       <div className='font-cairo text-[11px] font-bold text-[#667085]'>
@@ -303,7 +303,7 @@ export default function HomeDoctor() {
               className='grid grid-cols-12 items-center border-b border-[#EEF2F6] px-6 py-4'
             >
               <div className='col-span-4 flex items-center gap-3'>
-                <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[8px] bg-[#16C5C0] text-white shadow-[0_10px_18px_rgba(22,197,192,0.25)]'>
+                <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[8px] bg-primary text-white shadow-[0_10px_18px_rgba(15, 143, 139,0.25)]'>
                   <span className='font-cairo text-[14px] font-extrabold'>
                     {idx === 0 ? 'أ' : 'ف'}
                   </span>
@@ -334,10 +334,10 @@ export default function HomeDoctor() {
               <div className='col-span-2 text-left'>
                 <button
                   type='button'
-                  className='flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#16C5C0]'
+                  className='flex items-center gap-2 font-cairo text-[12px] font-extrabold text-primary'
                 >
                   عرض التفاصيل
-                  <ChevronRight className='text-[#16C5C0] w-4 h-4' />
+                  <ChevronRight className='text-primary w-4 h-4' />
                 </button>
               </div>
             </div>

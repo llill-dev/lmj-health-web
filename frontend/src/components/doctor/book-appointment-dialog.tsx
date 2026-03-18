@@ -211,7 +211,7 @@ export default function BookAppointmentDialog({
                     <div className='relative'>
                       <select
                         {...register('patientId')}
-                        className={`h-[46px] w-full appearance-none rounded-[12px] border-[1.82px] ${errors.patientId ? 'border-[#F04438]' : 'border-[#16C5C0]'} bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none`}
+                        className={`h-[46px] w-full appearance-none rounded-[12px] border-[1.82px] ${errors.patientId ? 'border-[#F04438]' : 'border-primary'} bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none`}
                       >
                         <option
                           value=''
@@ -247,7 +247,7 @@ export default function BookAppointmentDialog({
                       <input
                         type='time'
                         {...register('time')}
-                        className={`h-[46px] w-full rounded-[12px] border-[1.82px] ${errors.time ? 'border-[#F04438]' : 'border-[#16C5C0]'} bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none`}
+                        className={`h-[46px] w-full rounded-[12px] border-[1.82px] ${errors.time ? 'border-[#F04438]' : 'border-primary'} bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none`}
                       />
                       {errors.time ? (
                         <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
@@ -263,7 +263,7 @@ export default function BookAppointmentDialog({
                       <input
                         type='date'
                         {...register('date')}
-                        className={`h-[46px] w-full rounded-[12px] border-[1.82px] ${errors.date ? 'border-[#F04438]' : 'border-[#16C5C0]'} bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none`}
+                        className={`h-[46px] w-full rounded-[12px] border-[1.82px] ${errors.date ? 'border-[#F04438]' : 'border-primary'} bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none`}
                       />
                       {errors.date ? (
                         <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
@@ -280,7 +280,7 @@ export default function BookAppointmentDialog({
                     <div className='relative'>
                       <select
                         {...register('consultationType')}
-                        className={`h-[46px] w-full appearance-none rounded-[12px] border-[1.82px] ${errors.consultationType ? 'border-[#F04438]' : 'border-[#16C5C0]'} bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none`}
+                        className={`h-[46px] w-full appearance-none rounded-[12px] border-[1.82px] ${errors.consultationType ? 'border-[#F04438]' : 'border-primary'} bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none`}
                       >
                         <option value='clinic'>حضوري</option>
                         <option value='video'>أونلاين</option>
@@ -303,7 +303,7 @@ export default function BookAppointmentDialog({
                     <textarea
                       {...register('notes')}
                       placeholder='أضف أي ملاحظات...'
-                      className={`min-h-[96px] w-full resize-none rounded-[12px] border-[1.82px] ${errors.notes ? 'border-[#F04438]' : 'border-[#16C5C0]'} bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]`}
+                      className={`min-h-[96px] w-full resize-none rounded-[12px] border-[1.82px] ${errors.notes ? 'border-[#F04438]' : 'border-primary'} bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]`}
                     />
                     {errors.notes ? (
                       <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
@@ -326,7 +326,7 @@ export default function BookAppointmentDialog({
                   <button
                     type='submit'
                     disabled={isSubmitting}
-                    className='h-[46px] w-full rounded-[10px] bg-gradient-to-b from-[#16C5C0] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)]'
+                    className='h-[46px] w-full rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)]'
                   >
                     تأكيد الحجز
                   </button>

@@ -152,7 +152,7 @@ export default function ConfirmActionDialog({
                       await onConfirm();
                       onOpenChange(false);
                     }}
-                    className='h-[40px] rounded-[10px] bg-gradient-to-b from-[#16C5C0] to-[#14B3AE] px-8 font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.22)] disabled:opacity-60'
+                    className='h-[40px] rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] px-8 font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.22)] disabled:opacity-60'
                   >
                     {confirmLabel}
                   </button>

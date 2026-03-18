@@ -80,7 +80,7 @@ export default function NewPassword({
             <button
               type='button'
               onClick={onBack}
-              className='-mt-6 font-cairo text-[14px] font-bold text-[#16C5C0] transition-colors hover:text-[#14B3AE]'
+              className='-mt-6 font-cairo text-[14px] font-bold text-primary transition-colors hover:text-[#14B3AE]'
             >
               العودة لتسجيل الدخول
             </button>
@@ -163,7 +163,7 @@ export default function NewPassword({
 
               <button
                 type='submit'
-                className='mt-2 w-[329.15px] flex h-[44px]  items-center justify-center rounded-[10px] bg-[#16C5C0] font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
+                className='mt-2 w-[329.15px] flex h-[44px]  items-center justify-center rounded-[10px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
               >
                 تعيين كلمة المرور
               </button>

@@ -183,15 +183,15 @@ export default function DoctorWorkSchedulePage() {
           </div>
         ) : null}
 
-        <section className='rounded-[16px] border-[1.82px] border-[#BFEDEC] bg-[#16C5C026] px-6 py-5'>
+        <section className='rounded-[16px] border-[1.82px] border-[#BFEDEC] bg-[#0F8F8B26] px-6 py-5'>
           <div className='flex items-start justify-start gap-2'>
             <div className='flex items-start gap-[16px]'>
-              <Info className='h-[20px] w-[20px] text-[#16C5C0]' />
+              <Info className='h-[20px] w-[20px] text-primary' />
               <div className='space-y-[12px]'>
-                <div className='font-cairo text-[16px] font-bold leading-[20px] text-[#16C5C0]'>
+                <div className='font-cairo text-[16px] font-bold leading-[20px] text-primary'>
                   إدارة جدول المواعيد
                 </div>
-                <div className='font-cairo text-[16px] text-normal leading-[18px] text-[#16C5C0]'>
+                <div className='font-cairo text-[16px] text-normal leading-[18px] text-primary'>
                   حدد أوقات العمل الأسبوعية، ويمكنك إضافة استثناءات لإنشاء
                   المواعيد المتاحة للحجز.
                 </div>
@@ -213,7 +213,7 @@ export default function DoctorWorkSchedulePage() {
           <div className='mt-5 grid grid-cols-3 gap-4'>
             <div>
               <div className='flex mb-2 items-center gap-1'>
-                <Clock className='w-[16px] h-[16px] text-[#16C5C0]' />
+                <Clock className='w-[16px] h-[16px] text-primary' />
                 <div className=' text-right font-cairo text-[12px] font-bold text-[#344054]'>
                   مدة الموعد (دقيقة)
                 </div>
@@ -222,7 +222,7 @@ export default function DoctorWorkSchedulePage() {
                 <select
                   value={appointmentDuration}
                   onChange={(e) => setAppointmentDuration(e.target.value)}
-                  className='h-[40px] w-full rounded-[6px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-[#16C5C0]'
+                  className='h-[40px] w-full rounded-[6px] border-[1.82px] border-primary bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary'
                 >
                   <option value='15'>15 دقيقة</option>
                   <option value='30'>30 دقيقة</option>
@@ -234,7 +234,7 @@ export default function DoctorWorkSchedulePage() {
 
             <div>
               <div className='flex mb-2 items-center gap-1'>
-                <Coffee className='w-[16px] h-[16px] text-[#16C5C0]' />
+                <Coffee className='w-[16px] h-[16px] text-primary' />
                 <div className='text-right font-cairo text-[12px] font-bold text-[#344054]'>
                   بداية الاستراحة
                 </div>
@@ -243,7 +243,7 @@ export default function DoctorWorkSchedulePage() {
                 <select
                   value={breakStart}
                   onChange={(e) => setBreakStart(e.target.value)}
-                  className='h-[40px] w-full rounded-[6px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-[#16C5C0]'
+                  className='h-[40px] w-full rounded-[6px] border-[1.82px] border-primary bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary'
                 >
                   <option value=''>—</option>
                   {timeSlots.map((t) => (
@@ -260,7 +260,7 @@ export default function DoctorWorkSchedulePage() {
 
             <div>
               <div className='flex mb-2 items-center gap-1'>
-                <Coffee className='w-[16px] h-[16px] text-[#16C5C0]' />
+                <Coffee className='w-[16px] h-[16px] text-primary' />
                 <div className='text-right font-cairo text-[12px] font-bold text-[#344054]'>
                   نهاية الاستراحة
                 </div>
@@ -269,7 +269,7 @@ export default function DoctorWorkSchedulePage() {
                 <select
                   value={breakEnd}
                   onChange={(e) => setBreakEnd(e.target.value)}
-                  className='h-[40px] w-full rounded-[6px] border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-[#16C5C0]'
+                  className='h-[40px] w-full rounded-[6px] border-[1.82px] border-primary bg-[#FFFFFF] px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary'
                 >
                   <option value=''>—</option>
                   {timeSlots.map((t) => (
@@ -310,7 +310,7 @@ export default function DoctorWorkSchedulePage() {
                     <div
                       className={
                         value.enabled
-                          ? 'flex h-[28px] items-center justify-center rounded-[10px] bg-[#16C5C0] px-3 font-cairo text-[12px] font-extrabold text-white'
+                          ? 'flex h-[28px] items-center justify-center rounded-[10px] bg-primary px-3 font-cairo text-[12px] font-extrabold text-white'
                           : 'flex h-[28px] items-center justify-center rounded-[10px] bg-[#F2F4F7] px-3 font-cairo text-[12px] font-extrabold text-[#667085]'
                       }
                     >
@@ -333,7 +333,7 @@ export default function DoctorWorkSchedulePage() {
                                 },
                               }))
                             }
-                            className='h-[28px] w-[86px] rounded-[8px] border border-[#16C5C0] bg-white px-2 font-cairo text-[12px] font-extrabold text-[#111827] outline-none'
+                            className='h-[28px] w-[86px] rounded-[8px] border border-primary bg-white px-2 font-cairo text-[12px] font-extrabold text-[#111827] outline-none'
                           />
                         </div>
                         <div className='flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
@@ -350,7 +350,7 @@ export default function DoctorWorkSchedulePage() {
                                 },
                               }))
                             }
-                            className='h-[28px] w-[86px] rounded-[8px] border border-[#16C5C0] bg-white px-2 font-cairo text-[12px] font-extrabold text-[#111827] outline-none'
+                            className='h-[28px] w-[86px] rounded-[8px] border border-primary bg-white px-2 font-cairo text-[12px] font-extrabold text-[#111827] outline-none'
                           />
                         </div>
                       </div>
@@ -370,7 +370,7 @@ export default function DoctorWorkSchedulePage() {
               type='button'
               onClick={handleSave}
               disabled={saving || workScheduleLoading}
-              className='flex h-[40px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] px-5 font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)]'
+              className='flex h-[40px] items-center justify-center gap-2 rounded-[6px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)]'
             >
               <Save className='h-4 w-4' />
               {saving ? 'جارٍ الحفظ...' : 'حفظ الجدول'}
@@ -407,7 +407,7 @@ export default function DoctorWorkSchedulePage() {
               >
                 <div className='flex flex-1 items-center justify-start gap-3'>
                   <div className='flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-3 py-2'>
-                    <Clock className='h-4 w-4 text-[#16C5C0]' />
+                    <Clock className='h-4 w-4 text-primary' />
                     <input
                       type='text'
                       value={ex.title}
@@ -424,7 +424,7 @@ export default function DoctorWorkSchedulePage() {
                     />
                   </div>
                   <div className='flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-3 py-2'>
-                    <CalendarDays className='h-4 w-4 text-[#16C5C0]' />
+                    <CalendarDays className='h-4 w-4 text-primary' />
                     <input
                       type='date'
                       value={ex.date}
@@ -479,10 +479,10 @@ export default function DoctorWorkSchedulePage() {
                 </div>
                 {d.enabled ? (
                   <>
-                    <div className='mt-2 font-cairo text-[11px] font-bold text-[#16C5C0]'>
+                    <div className='mt-2 font-cairo text-[11px] font-bold text-primary'>
                       {d.from} - {d.to}
                     </div>
-                    <div className='mt-2 inline-flex h-[20px] items-center justify-center rounded-full bg-[#16C5C0] px-2 font-cairo text-[11px] font-extrabold text-white'>
+                    <div className='mt-2 inline-flex h-[20px] items-center justify-center rounded-full bg-primary px-2 font-cairo text-[11px] font-extrabold text-white'>
                       متاح
                     </div>
                   </>
@@ -495,26 +495,26 @@ export default function DoctorWorkSchedulePage() {
             ))}
           </div>
 
-          <div className='mt-4 rounded-[6px] bg-[#16C5C026] px-[16px] py-[16px]'>
+          <div className='mt-4 rounded-[6px] bg-[#0F8F8B26] px-[16px] py-[16px]'>
             <div className='flex items-start justify-between'>
               <div className='text-right'>
                 <div className='flex items-start gap-4'>
-                  <Info className='h-4 w-4 text-[#16C5C0]' />
+                  <Info className='h-4 w-4 text-primary' />
                   <div className='space-y-[12px]'>
-                    <div className='font-cairo text-[1epx] font-bold text-[#16C5C0] leading-[20px]'>
+                    <div className='font-cairo text-[1epx] font-bold text-primary leading-[20px]'>
                       معلومات إضافية:
                     </div>
                     <nav className='mt-2 font-cairo text-[12px] font-semibold leading-[18px] text-[#667085]'>
-                      <li className='text-[14px] leading-[20px] text-[#16C5C0]'>
+                      <li className='text-[14px] leading-[20px] text-primary'>
                         مدة كل الموعد : {appointmentDuration} دقيقة
                       </li>
-                      <li className='text-[14px] leading-[20px] text-[#16C5C0]'>
+                      <li className='text-[14px] leading-[20px] text-primary'>
                         وقت الاستراحة :{' '}
                         {breakStart && breakEnd
                           ? `${breakStart} - ${breakEnd}`
                           : '—'}
                       </li>
-                      <li className='text-[14px] leading-[20px] text-[#16C5C0]'>
+                      <li className='text-[14px] leading-[20px] text-primary'>
                         عدد ايام العمل : {workingDaysCount} أيام
                       </li>
                     </nav>

@@ -81,10 +81,10 @@ export default function CreateMedicalRecordForm({
   }, [patientId, patients]);
 
   const inputBase =
-    'h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
+    'h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-[#0F8F8B] focus:ring-opacity-20';
 
   const textAreaBase =
-    'min-h-[88px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-[#16C5C0] focus:ring-2 focus:ring-[#16C5C0] focus:ring-opacity-20';
+    'min-h-[88px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-[#0F8F8B] focus:ring-opacity-20';
 
   const labelBase =
     'mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]';
@@ -227,7 +227,7 @@ export default function CreateMedicalRecordForm({
               <div className='text-right font-cairo text-[14px] font-extrabold text-[#98A2B3]'>
                 الأدوية الموصوفة
               </div>
-              <PenLine className='h-4 w-4 text-[#16C5C0]' />
+              <PenLine className='h-4 w-4 text-primary' />
             </div>
 
             <div className='grid grid-cols-2 gap-3'>
@@ -258,7 +258,7 @@ export default function CreateMedicalRecordForm({
 
             <button
               type='button'
-              className='mt-4 flex h-[52px] w-full items-center justify-center gap-3 rounded-[8px] bg-gradient-to-r from-[#16C5C0] to-[#0FA6A3] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'
+              className='mt-4 flex h-[52px] w-full items-center justify-center gap-3 rounded-[8px] bg-gradient-to-r from-[#0F8F8B] to-[#0F8F8B] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.28)]'
             >
               <span>إضافة الدواء</span>
               <Plus className='h-5 w-5' />
@@ -296,7 +296,7 @@ export default function CreateMedicalRecordForm({
             <motion.button
               type='button'
               onClick={onCancel}
-              className='flex h-[44px] w-[220px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[13px] font-extrabold text-[#16C5C0]'
+              className='flex h-[44px] w-[220px] items-center justify-center rounded-[6px] border border-primary bg-white font-cairo text-[13px] font-extrabold text-primary'
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
@@ -307,7 +307,7 @@ export default function CreateMedicalRecordForm({
             <motion.button
               type='submit'
               disabled={isSubmitting}
-              className='flex h-[44px] w-[220px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
+              className='flex h-[44px] w-[220px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_24px_rgba(15, 143, 139,0.30)]'
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}

@@ -66,7 +66,7 @@ export default function DoctorPatientsPage() {
         dir='rtl'
         lang='ar'
       >
-        <section className='rounded-[16px] bg-[#16C5C0] px-6 py-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]'>
+        <section className='rounded-[16px] bg-primary px-6 py-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]'>
           <div className='flex items-start justify-between'>
             <div className='flex items-center gap-3'>
               <div className='flex h-10 w-10 items-center justify-center rounded-[6px] bg-white/15'>
@@ -122,7 +122,7 @@ export default function DoctorPatientsPage() {
           <div className='mt-3 grid grid-cols-3 gap-3'>
             <button
               type='button'
-              className='h-[34px] rounded-[6px] bg-[#16C5C0] font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)]'
+              className='h-[34px] rounded-[6px] bg-primary font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)]'
             >
               الكل
             </button>
@@ -155,7 +155,7 @@ export default function DoctorPatientsPage() {
               >
                 <div className='flex items-start justify-between px-6 pb-4 pt-5'>
                   <div className='flex items-start gap-3'>
-                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_12px_25px_rgba(22,197,192,0.35)]'>
+                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15, 143, 139,0.35)]'>
                       <span className='font-cairo text-[18px] font-extrabold leading-none'>
                         {patient.initials}
                       </span>
@@ -190,8 +190,8 @@ export default function DoctorPatientsPage() {
                 <div className='px-6 pb-4'>
                   <div className='grid grid-cols-3 gap-3'>
                     <div className='rounded-[6px] bg-[#EFFFFE] px-4 py-3 text-center'>
-                      <Heart className='mx-auto h-[18px] w-[18px] text-[#16C5C0]' />
-                      <div className='mt-1 font-cairo text-[14px] font-extrabold text-[#16C5C0]'>
+                      <Heart className='mx-auto h-[18px] w-[18px] text-primary' />
+                      <div className='mt-1 font-cairo text-[14px] font-extrabold text-primary'>
                         {patient.bloodType}
                       </div>
                       <div className='mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]'>
@@ -250,14 +250,14 @@ export default function DoctorPatientsPage() {
                   <div className='mt-4 grid grid-cols-2 gap-4'>
                     <button
                       type='button'
-                      className='flex h-[42px] items-center justify-center gap-2 rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[13px] font-extrabold text-[#16C5C0]'
+                      className='flex h-[42px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-white font-cairo text-[13px] font-extrabold text-primary'
                     >
                       <CalendarDays className='h-4 w-4' />
                       موعد جديد
                     </button>
                     <button
                       type='button'
-                      className='flex h-[42px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(22,197,192,0.28)]'
+                      className='flex h-[42px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.28)]'
                     >
                       <FileText className='h-4 w-4' />
                       السجلات

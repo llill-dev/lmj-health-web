@@ -16,7 +16,7 @@ export default function WelcomePage() {
           <div className='relative flex h-10 w-10 rotate-12 items-center justify-center rounded-xl bg-transparent text-teal-500 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
             <Pill size={18} />
           </div>
-          <div className='relative ml-10 flex h-12 w-12 translate-x-1/2 -translate-y-1/2 rotate-8 items-center justify-center rounded-2xl bg-[#16C5C0] text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
+          <div className='relative ml-10 flex h-12 w-12 translate-x-1/2 -translate-y-1/2 rotate-8 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
             <Heart
               size={20}
               className='fill-white'
@@ -25,7 +25,7 @@ export default function WelcomePage() {
           <div className='relative -left-10 -top-10 ml-10 flex h-12 w-12 -rotate-12 items-center justify-center rounded-2xl bg-transparent text-teal-500 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
             <Heart
               size={20}
-              className='fill-[#16C5C0]'
+              className='fill-[#0F8F8B]'
             />
           </div>
         </div>
@@ -38,14 +38,14 @@ export default function WelcomePage() {
           <div className='mx-auto min-h-[70px] min-w-[265px] rounded-[6px] border border-[#FFFFFFCC] border-t-[1.27px] bg-[#FFFFFF99] px-3 py-1 shadow-[0px_25px_50px_-12px_#00000040] backdrop-blur'>
             <div className='flex items-center gap-1'>
               <div className='flex flex-col items-start justify-start text-center'>
-                <h1 className='h-[32px] w-[151px] text-[24px] font-bold leading-[32px] text-[#16C5C0]'>
+                <h1 className='h-[32px] w-[151px] text-[24px] font-bold leading-[32px] text-primary'>
                   LMJ HEALTH
                 </h1>
                 <div className='ms-10 flex items-center justify-start gap-1'>
-                  <p className='text-[10px] font-bold leading-[16px] text-[#16C5C0B2]'>
+                  <p className='text-[10px] font-bold leading-[16px] text-[#0F8F8BB2]'>
                     بوّابة صحية متكامل
                   </p>
-                  <Sparkles className='h-[11px] w-[11px] text-[#16C5C0B2]' />
+                  <Sparkles className='h-[11px] w-[11px] text-[#0F8F8BB2]' />
                 </div>
               </div>
               <div className='h-6 w-px bg-teal-200' />
@@ -100,7 +100,7 @@ export default function WelcomePage() {
 
           <div className='mt-5 flex items-center justify-center'>
             <button
-              className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-[#16C5C0] pl-[0.03px] font-cairo text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
+              className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-primary pl-[0.03px] font-cairo text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
               type='button'
               onClick={() => navigate('/login')}
             >

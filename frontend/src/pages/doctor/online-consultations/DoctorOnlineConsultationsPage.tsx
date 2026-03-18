@@ -92,7 +92,7 @@ function statusTabLabel(tab: 'all' | ConsultationStatus) {
 
 function statusChipStyle(status: ConsultationStatus) {
   if (status === 'in_progress') {
-    return 'bg-[#EFFFFE] text-[#16C5C0]';
+    return 'bg-[#EFFFFE] text-primary';
   }
   if (status === 'waiting') {
     return 'bg-[#FFF7ED] text-[#F97316]';
@@ -182,7 +182,7 @@ export default function DoctorOnlineConsultationsPage() {
         </section>
 
         <section className='mt-6 grid grid-cols-4 gap-4'>
-          <div className='rounded-[6px] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] border-b-[3.98px] border-[#16C5C0]'>
+          <div className='rounded-[6px] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] border-b-[3.98px] border-primary'>
             <div className='flex items-start justify-between'>
               <div className='text-right'>
                 <div className='font-cairo text-[13px] font-bold text-[#667085]'>
@@ -193,7 +193,7 @@ export default function DoctorOnlineConsultationsPage() {
                 </div>
               </div>
               <div className='flex h-10 w-10 items-center justify-center rounded-[6px] bg-[#EFFFFE]'>
-                <MessageCircle className='h-[18px] w-[18px] text-[#16C5C0]' />
+                <MessageCircle className='h-[18px] w-[18px] text-primary' />
               </div>
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function DoctorOnlineConsultationsPage() {
                   onClick={() => setTab(key)}
                   className={
                     isActive
-                      ? 'h-[38px] rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)]'
+                      ? 'h-[38px] rounded-[6px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)]'
                       : 'h-[38px] rounded-[6px] bg-white font-cairo text-[13px] font-extrabold text-[#667085]'
                   }
                 >
@@ -295,7 +295,7 @@ export default function DoctorOnlineConsultationsPage() {
           <section className='mt-5 rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='flex items-center justify-between border-b border-[#EEF2F6] px-5 py-4'>
               <div className='flex items-center gap-3'>
-                <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_10px_18px_rgba(22,197,192,0.25)]'>
+                <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_10px_18px_rgba(15, 143, 139,0.25)]'>
                   <Ticket className='font-cairo text-[16px] font-extrabold' />
                 </div>
                 <div className='text-right'>
@@ -303,7 +303,7 @@ export default function DoctorOnlineConsultationsPage() {
                     <div className='font-cairo text-[15px] font-extrabold text-[#111827]'>
                       {active.title}
                     </div>
-                    <span className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-[#16C5C0] px-2 font-cairo text-[11px] font-extrabold text-white'>
+                    <span className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-primary px-2 font-cairo text-[11px] font-extrabold text-white'>
                       جديد
                     </span>
                   </div>
@@ -375,19 +375,19 @@ export default function DoctorOnlineConsultationsPage() {
 
               <div className='mt-4 rounded-[12px] border border-[#D1E9FF] bg-[#EFF8FF] px-4 py-4'>
                 <div className='flex items-center justify-start gap-3'>
-                  <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_10px_18px_rgba(22,197,192,0.25)]'>
+                  <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_10px_18px_rgba(15, 143, 139,0.25)]'>
                     <span className='font-cairo text-[16px] font-extrabold'>
                       {active.patientInitial}
                     </span>
                   </div>
                   <div className='text-right'>
-                    <div className='font-cairo text-[12px]  text-[#16C5C0]'>
+                    <div className='font-cairo text-[12px]  text-primary'>
                       معلومات المريض
                     </div>
-                    <div className='mt-2 font-cairo text-[14px] font-extrabold text-[#16C5C0]'>
+                    <div className='mt-2 font-cairo text-[14px] font-extrabold text-primary'>
                       {active.patientName}
                     </div>
-                    <div className='mt-1 font-cairo text-[12px]  text-[#16C5C0]'>
+                    <div className='mt-1 font-cairo text-[12px]  text-primary'>
                       {active.patientEmail} • {active.patientPhone}
                     </div>
                   </div>
@@ -438,7 +438,7 @@ export default function DoctorOnlineConsultationsPage() {
                         onClick={() => setSelectedMessageId(m.id)}
                         className={
                           isSelected
-                            ? 'w-full rounded-[10px] border border-[#EEF2F6] bg-[#16C5C01A] px-4 py-3 text-right'
+                            ? 'w-full rounded-[10px] border border-[#EEF2F6] bg-[#0F8F8B1A] px-4 py-3 text-right'
                             : 'w-full rounded-[10px] border border-[#EEF2F6] bg-white px-4 py-3 text-right'
                         }
                       >
@@ -489,7 +489,7 @@ export default function DoctorOnlineConsultationsPage() {
 
                   <button
                     type='button'
-                    className='flex h-[40px] flex-1 items-center justify-center gap-2 rounded-[6px] bg-gradient-to-l from-[#18C6C0] via-[#12B9B4] to-[#0FA6A3] px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.30)]'
+                    className='flex h-[40px] flex-1 items-center justify-center gap-2 rounded-[6px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.30)]'
                   >
                     <Send className='h-4 w-4' />
                     إرسال الرد

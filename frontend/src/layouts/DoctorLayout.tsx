@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import Sidebar from '@/components/doctor/sidebar';
+import Sidebar from '@/components/layout/sidebar';
 import DashboardHeader from '@/components/doctor/dashboard-header';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
 import { useAuthStore } from '@/store/authStore';
@@ -22,7 +22,6 @@ export default function DoctorLayout() {
       <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
         <Sidebar
           active={active}
-          onBack={() => navigate(-1)}
           onLogout={() => {
             useAuthStore.getState().logout();
             navigate('/');

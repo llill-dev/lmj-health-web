@@ -4,8 +4,8 @@ import { AnimatePresence } from 'framer-motion';
 import WelcomePage from '@/pages/welcome/WelcomePage';
 import LoginPage from '@/pages/auth/login/LoginPage';
 import SignupPage from '@/pages/auth/signup/SignupPage';
-import ForgotPasswordPage from '@/pages/auth/forgot-password/ForgotPasswordPage';
-import ResetPasswordPage from '@/pages/auth/reset-password/ResetPasswordPage';
+import ForgotPasswordPage from '@/pages/auth/password/forgot-password/ForgotPasswordPage';
+import ResetPasswordPage from '@/pages/auth/password/reset-password/ResetPasswordPage';
 import VerifyOtpPage from '@/pages/auth/verify-otp/VerifyOtpPage';
 import SignupSuccessPage from '@/pages/auth/signup-success/SignupSuccessPage';
 import OnboardingPage from '@/pages/onboarding/OnboardingPage';
@@ -23,6 +23,8 @@ import DoctorDoctorsDirectoryPage from '@/pages/doctor/doctors-directory/DoctorD
 import DoctorClinicLocationPage from '@/pages/doctor/clinic-location/DoctorClinicLocationPage';
 import DoctorNotificationPage from '@/pages/doctor/notification/DoctorNotificationPage';
 import DoctorProfileSettingsPage from '@/pages/doctor/profile-settings/DoctorProfileSettingsPage';
+import AdminLayout from '@/layouts/AdminLayout';
+import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage';
 import NotFoundPage from '@/pages/not-found/NotFoundPage';
 import { PageTransition } from '@/motion';
 
@@ -30,6 +32,7 @@ export default function App() {
   const location = useLocation();
   const isDoctorArea =
     location.pathname === '/' || location.pathname.startsWith('/doctor');
+  const isAdminArea = location.pathname.startsWith('/admin');
 
   return (
     <AnimatePresence mode='wait'>
@@ -100,6 +103,32 @@ export default function App() {
             <Route
               path='profile-settings'
               element={<DoctorProfileSettingsPage />}
+            />
+          </Route>
+
+          <Route
+            path='*'
+            element={<NotFoundPage />}
+          />
+        </Routes>
+      ) : isAdminArea ? (
+        <Routes location={location}>
+          <Route
+            path='/admin'
+            element={<AdminLayout />}
+          >
+            <Route
+              index
+              element={
+                <Navigate
+                  to='overview'
+                  replace
+                />
+              }
+            />
+            <Route
+              path='overview'
+              element={<AdminDashboardPage />}
             />
           </Route>
 

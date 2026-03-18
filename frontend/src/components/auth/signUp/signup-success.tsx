@@ -25,7 +25,7 @@ export default function SignupSuccess({
           className='group relative mx-auto mt-24 block w-full max-w-[520px] select-none text-center'
         >
           <div className='mx-auto flex h-[150px] w-[150px] items-center justify-center rounded-full bg-white shadow-[0_25px_70px_rgba(0,0,0,0.14)]'>
-            <div className='flex h-[120px] w-[120px] items-center justify-center rounded-full border-[10px] border-[#16C5C0]'>
+            <div className='flex h-[120px] w-[120px] items-center justify-center rounded-full border-[10px] border-primary'>
               <svg
                 width='60'
                 height='44'
@@ -35,7 +35,7 @@ export default function SignupSuccess({
               >
                 <path
                   d='M5 24L22 39L55 5'
-                  stroke='#16C5C0'
+                  stroke='#0F8F8B'
                   strokeWidth='8'
                   strokeLinecap='round'
                   strokeLinejoin='round'

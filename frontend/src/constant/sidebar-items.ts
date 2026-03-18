@@ -3,13 +3,19 @@ import {
   BookOpen,
   Bell,
   CalendarDays,
+  ClipboardCheck,
   FileText,
   LayoutGrid,
   MapPin,
   MessageCircle,
+  ScrollText,
+  UserCog,
+  UserPen,
   Settings,
   ShieldCheck,
+  Stethoscope,
   Users,
+  BarChart3,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
@@ -25,6 +31,24 @@ export type SidebarItemId =
   | 'clinic-location'
   | 'notification'
   | 'profile-settings';
+
+export type AdminSidebarItemId =
+  | 'overview'
+  | 'doctors'
+  | 'patients'
+  | 'secretaries'
+  | 'data-entry'
+  | 'medical-records'
+  | 'medical-content'
+  | 'content-review'
+  | 'services'
+  | 'service-types'
+  | 'medical-file-options'
+  | 'appointments'
+  | 'system-logs'
+  | 'analytics'
+  | 'settings'
+  | 'verification-requests';
 
 export const sidebarItems: Array<{
   id: string;
@@ -95,5 +119,97 @@ export const sidebarItems: Array<{
     path: 'profile-settings',
     label: 'الملف الشخصي',
     icon: Settings,
+  },
+];
+
+export const adminSidebarItems: Array<{
+  id: string;
+  path: AdminSidebarItemId;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  badge?: number;
+}> = [
+  { id: 'overview', path: 'overview', label: 'نظرة عامة', icon: LayoutGrid },
+  { id: 'doctors', path: 'doctors', label: 'الأطباء', icon: Stethoscope },
+  { id: 'patients', path: 'patients', label: 'المرضى', icon: Users },
+  {
+    id: 'secretaries',
+    path: 'secretaries',
+    label: 'السكرتارية',
+    icon: UserCog,
+  },
+  {
+    id: 'data-entry',
+    path: 'data-entry',
+    label: 'مدخل البيانات',
+    icon: UserPen,
+  },
+  {
+    id: 'medical-records',
+    path: 'medical-records',
+    label: 'الأرشيف الطبي',
+    icon: FileText,
+  },
+  {
+    id: 'medical-content',
+    path: 'medical-content',
+    label: 'المحتوى الطبي',
+    icon: BookOpen,
+  },
+  {
+    id: 'content-review',
+    path: 'content-review',
+    label: 'مراجعة المحتوى',
+    icon: ClipboardCheck,
+    badge: 5,
+  },
+  {
+    id: 'services',
+    path: 'services',
+    label: 'دليل الخدمات',
+    icon: LayoutGrid,
+  },
+  {
+    id: 'service-types',
+    path: 'service-types',
+    label: 'أنواع الخدمات',
+    icon: Settings,
+  },
+  {
+    id: 'medical-file-options',
+    path: 'medical-file-options',
+    label: 'خيارات الملف الطبي',
+    icon: ScrollText,
+  },
+  {
+    id: 'appointments',
+    path: 'appointments',
+    label: 'جميع المواعيد',
+    icon: CalendarDays,
+  },
+  {
+    id: 'system-logs',
+    path: 'system-logs',
+    label: 'سجلات النظام',
+    icon: ScrollText,
+  },
+  {
+    id: 'analytics',
+    path: 'analytics',
+    label: 'التحليلات',
+    icon: BarChart3,
+  },
+  {
+    id: 'settings',
+    path: 'settings',
+    label: 'الإعدادات',
+    icon: Settings,
+  },
+  {
+    id: 'verification-requests',
+    path: 'verification-requests',
+    label: 'طلبات التحقق',
+    icon: ShieldCheck,
+    badge: 2,
   },
 ];

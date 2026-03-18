@@ -145,7 +145,7 @@ export default function VerifyAccount({
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     onPaste={handlePaste}
-                    className='h-[47.99px] w-[47.99px] rounded-[8px] border-[1.9px] border-[#E5E7EB] bg-[#EFEFEF] text-center font-cairo text-[18px] font-extrabold text-[#101828] shadow-[0_10px_25px_rgba(0,0,0,0.06)] outline-none focus:border-[#16C5C0] focus:bg-white'
+                    className='h-[47.99px] w-[47.99px] rounded-[8px] border-[1.9px] border-[#E5E7EB] bg-[#EFEFEF] text-center font-cairo text-[18px] font-extrabold text-[#101828] shadow-[0_10px_25px_rgba(0,0,0,0.06)] outline-none focus:border-primary focus:bg-white'
                   />
                 ))}
               </div>
@@ -157,7 +157,7 @@ export default function VerifyAccount({
               <div className='mt-10 w-[341.21px] flex items-center justify-center'>
                 <button
                   type='submit'
-                  className='flex h-[43.98px] w-[341.22px] text-[#FFFFFF] items-center justify-center gap-2 rounded-[8px] bg-[#16C5C0] font-cairo text-[14px]  shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
+                  className='flex h-[43.98px] w-[341.22px] text-[#FFFFFF] items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px]  shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
                 >
                   <CircleCheck className='h-4 w-4' />
                   التحقق من الحساب

@@ -44,7 +44,7 @@ export default function DoctorDashboardOverview({
 
   return (
     <DashboardOverviewSection
-      sectionClassName='relative flex flex-col gap-[24px] mb-6 py-[32px] px-[32px] rounded-[6px] bg-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+      sectionClassName='relative flex flex-col gap-[24px] mb-6 py-[32px] px-[32px] rounded-[6px] bg-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
       overlay={overlay}
       headerLeft={
         <div className='flex gap-[16px]'>
@@ -75,7 +75,7 @@ export default function DoctorDashboardOverview({
           <motion.button
             type='button'
             onClick={onActionClick}
-            className='flex items-center justify-between rounded-[6px] h-[48px] min-w-[146px] bg-[#FFFFFF] px-4 py-3 font-cairo text-[14px] font-bold text-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+            className='flex items-center justify-between rounded-[6px] h-[48px] min-w-[146px] bg-[#FFFFFF] px-4 py-3 font-cairo text-[14px] font-bold text-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.12, ease: 'easeOut' }}

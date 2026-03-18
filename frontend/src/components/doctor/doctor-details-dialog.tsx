@@ -103,8 +103,8 @@ export default function DoctorDetailsDialog({
                       <CircleCheck className='h-4 w-4' />
                     </span>
                   </div>
-                  <div className='flex items-center justify-center gap-2 font-cairo text-[18px] font-semibold text-[#16C5C0]'>
-                    <Stethoscope className='h-5 w-5 text-[#16C5C0]' />
+                  <div className='flex items-center justify-center gap-2 font-cairo text-[18px] font-semibold text-primary'>
+                    <Stethoscope className='h-5 w-5 text-primary' />
                     {doctor.specialty}
                   </div>
                   <div className=' flex items-center justify-center gap-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
@@ -120,11 +120,11 @@ export default function DoctorDetailsDialog({
                     </span>
                   </div>
                   <div className=' flex items-center justify-center gap-2'>
-                    <span className='flex h-[24px] w-[124px] items-center justify-center gap-2 rounded-full border-[1.82px] border-[#16C5C0] bg-[#FFFFFF] px-2 font-cairo text-[12px] font-semibold text-[#16C5C0]'>
+                    <span className='flex h-[24px] w-[124px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-[#FFFFFF] px-2 font-cairo text-[12px] font-semibold text-primary'>
                       <Video className='h-[12px] w-[12px]' />
                       استشارة أونلاين
                     </span>
-                    <span className='flex h-[24px] w-[124px] items-center justify-center gap-2 rounded-full border-[1.82px] border-[#16C5C0] bg-[#16C5C0] px-2 font-cairo text-[12px] font-semibold text-[#E9FFFE]'>
+                    <span className='flex h-[24px] w-[124px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-primary px-2 font-cairo text-[12px] font-semibold text-[#E9FFFE]'>
                       <Building className='h-[12px] w-[12px]' />
                       استشارة حضورية
                     </span>
@@ -147,7 +147,7 @@ export default function DoctorDetailsDialog({
                 </div>
                 <div className='text-right'>
                   <div className='flex gap-2 items-center'>
-                    <Phone className='h-4 w-4 text-[#16C5C0]' />
+                    <Phone className='h-4 w-4 text-primary' />
                     <div>
                       <p className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
                         رقم الهاتف
@@ -177,7 +177,7 @@ export default function DoctorDetailsDialog({
 
             <div className='px-7 py-6'>
               <div className='flex items-start justify-start gap-2'>
-                <MapPin className='h-5 w-5 text-[#16C5C0]' />
+                <MapPin className='h-5 w-5 text-primary' />
                 <div className='space-y-6'>
                   <div className='font-cairo text-[16px] font-extrabold text-[#111827]'>
                     موقع العيادة
@@ -197,7 +197,7 @@ export default function DoctorDetailsDialog({
             <div className='grid grid-cols-2 gap-4 px-7 pb-6'>
               <button
                 type='button'
-                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[13px] font-extrabold text-[#16C5C0]'
+                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-white font-cairo text-[13px] font-extrabold text-primary'
               >
                 <Mail className='h-4 w-4' />
                 إرسال رسالة
@@ -205,7 +205,7 @@ export default function DoctorDetailsDialog({
 
               <button
                 type='button'
-                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-gradient-to-b from-[#16C5C0] to-[#14B3AE] font-cairo text-[13px] font-extrabold text-white'
+                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[13px] font-extrabold text-white'
               >
                 <Phone className='h-4 w-4' />
                 اتصال

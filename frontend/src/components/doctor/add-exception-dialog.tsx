@@ -160,7 +160,7 @@ export default function AddExceptionDialog({
                       type='date'
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className='h-[44px] w-full rounded-[6px] border-[1.82px] border-[#16C5C0] bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none'
+                      className='h-[44px] w-full rounded-[6px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none'
                       required
                     />
                   </div>
@@ -178,7 +178,7 @@ export default function AddExceptionDialog({
                               .value as ExceptionFormValues['exceptionType'],
                           )
                         }
-                        className='h-[44px] w-full appearance-none rounded-[6px] border-[1.82px] border-[#16C5C0] bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none'
+                        className='h-[44px] w-full appearance-none rounded-[6px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none'
                       >
                         <option value='vacation'>إجازة</option>
                         <option value='unavailable'>غير متاح</option>
@@ -197,7 +197,7 @@ export default function AddExceptionDialog({
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
                       placeholder='مثال: إجازة رسمية - عيد الفطر'
-                      className='min-h-[88px] w-full resize-none rounded-[6px] border-[1.82px] border-[#16C5C0] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
+                      className='min-h-[88px] w-full resize-none rounded-[6px] border-[1.82px] border-primary bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
                       required
                     />
                   </div>
@@ -214,7 +214,7 @@ export default function AddExceptionDialog({
 
                     <button
                       type='submit'
-                      className='h-[40px] rounded-[6px] bg-[#16C5C0] px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)]'
+                      className='h-[40px] rounded-[6px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)]'
                     >
                       إضافة
                     </button>
