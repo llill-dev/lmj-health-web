@@ -26,6 +26,7 @@ import DoctorProfileSettingsPage from '@/pages/doctor/profile-settings/DoctorPro
 import AdminLayout from '@/layouts/AdminLayout';
 import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage';
 import AdminDoctorsPage from '@/pages/admin/doctors/AdminDoctorsPage';
+import AdminPatientsPage from '@/pages/admin/patients/AdminPatientsPage';
 import NotFoundPage from '@/pages/not-found/NotFoundPage';
 import { PageTransition } from '@/motion';
 
@@ -134,6 +135,10 @@ export default function App() {
             <Route
               path='doctors'
               element={<AdminDoctorsPage />}
+            />
+            <Route
+              path='patients'
+              element={<AdminPatientsPage />}
             />
             <Route
               path='dashboard'
