@@ -47,7 +47,7 @@ export default function SignUpStep2Personal({
   return (
     <>
       <div className='mt-7 flex flex-col items-center text-center'>
-        <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[6px] bg-[#16C5C0] shadow-[0_18px_40px_rgba(22,197,192,0.35)]'>
+        <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[6px] bg-primary shadow-[0_18px_40px_rgba(15, 143, 139,0.35)]'>
           <Heart className='h-9 w-9 text-white' />
         </div>
         <div className='mt-4 flex items-center justify-center gap-3'>
@@ -61,7 +61,7 @@ export default function SignUpStep2Personal({
               setValue('birthDate', '1990-01-01', { shouldDirty: true });
               setValue('address', 'دمشق - المزة', { shouldDirty: true });
             }}
-            className='rounded-full border border-[#16C5C0]/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-[#16C5C0]'
+            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
           >
             ملء البيانات
           </button>
@@ -78,7 +78,7 @@ export default function SignUpStep2Personal({
         <div className='space-y-5'>
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
-              <User className='h-4 w-4 text-[#16C5C0]' />
+              <User className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 الجنس
               </span>
@@ -93,8 +93,8 @@ export default function SignUpStep2Personal({
                 onClick={() => setValue('gender', 'male')}
                 className={
                   gender === 'male'
-                    ? 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[16px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
-                    : 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
+                    ? 'flex h-[54px] items-center justify-center rounded-[6px] border border-primary bg-[#EFFFFD] font-cairo text-[16px] font-bold text-primary shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+                    : 'flex h-[54px] items-center justify-center rounded-[6px] border border-primary bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
                 }
               >
                 ذكر
@@ -105,8 +105,8 @@ export default function SignUpStep2Personal({
                 onClick={() => setValue('gender', 'female')}
                 className={
                   gender === 'female'
-                    ? 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[16px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
-                    : 'flex h-[54px] items-center justify-center rounded-[6px] border border-[#16C5C0] bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
+                    ? 'flex h-[54px] items-center justify-center rounded-[6px] border border-primary bg-[#EFFFFD] font-cairo text-[16px] font-bold text-primary shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+                    : 'flex h-[54px] items-center justify-center rounded-[6px] border border-primary bg-white font-cairo text-[16px] font-bold text-[#6B7280]'
                 }
               >
                 أنثى
@@ -121,7 +121,7 @@ export default function SignUpStep2Personal({
 
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
-              <CalendarDays className='h-4 w-4 text-[#16C5C0]' />
+              <CalendarDays className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 تاريخ الميلاد
               </span>
@@ -132,7 +132,7 @@ export default function SignUpStep2Personal({
             <input
               type='text'
               {...register('birthDate')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             {errors.birthDate?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
@@ -143,7 +143,7 @@ export default function SignUpStep2Personal({
 
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
-              <MapPin className='h-4 w-4 text-[#16C5C0]' />
+              <MapPin className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 العنوان
               </span>
@@ -155,7 +155,7 @@ export default function SignUpStep2Personal({
               type='text'
               placeholder='المدينة, الحي, الشارع'
               {...register('address')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             {errors.address?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
@@ -175,7 +175,7 @@ export default function SignUpStep2Personal({
             </button>
             <button
               type='submit'
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
             >
               التالي
               <ArrowLeft className='h-4 w-4' />

@@ -201,7 +201,7 @@ export default function MedicalRecordDetailsDialog({
               <div className='max-h-[calc(100vh-220px)] overflow-auto px-8 pb-6 pt-6'>
                 <div className='rounded-[6px] bg-gradient-to-r from-[#F0FDF4] to-[#ECFDF5] px-5 py-4'>
                   <div className='flex items-center justify-start gap-4'>
-                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white font-bold'>
+                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white font-bold'>
                       {record.patientName[0]}
                     </div>
                     <div className='text-right'>
@@ -291,7 +291,7 @@ export default function MedicalRecordDetailsDialog({
                         <div className='flex items-center justify-between gap-4'>
                           <div className='flex items-start gap-2'>
                             {' '}
-                            <div className='flex h-[32px] w-[32px] items-center justify-center rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white'>
+                            <div className='flex h-[32px] w-[32px] items-center justify-center rounded-[6px] bg-primary font-cairo text-[13px] font-extrabold text-white'>
                               {idx + 1}
                             </div>
                             <div className='text-right'>

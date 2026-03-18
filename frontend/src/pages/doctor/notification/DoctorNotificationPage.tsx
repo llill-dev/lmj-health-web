@@ -93,11 +93,11 @@ const mockNotifications: NotificationItem[] = [
 function getTypeIcon(type: NotificationType) {
   switch (type) {
     case 'appointment':
-      return <CalendarDays className='h-[18px] w-[18px] text-[#16C5C0]' />;
+      return <CalendarDays className='h-[18px] w-[18px] text-primary' />;
     case 'message':
-      return <MessageSquare className='h-[18px] w-[18px] text-[#16C5C0]' />;
+      return <MessageSquare className='h-[18px] w-[18px] text-primary' />;
     case 'access-request':
-      return <UserPlus className='h-[18px] w-[18px] text-[#16C5C0]' />;
+      return <UserPlus className='h-[18px] w-[18px] text-primary' />;
     case 'reminder':
       return <Clock className='h-[18px] w-[18px] text-[#F97316]' />;
     case 'cancel':
@@ -105,7 +105,7 @@ function getTypeIcon(type: NotificationType) {
     case 'record':
       return <FileText className='h-[18px] w-[18px] text-[#2563EB]' />;
     default:
-      return <Bell className='h-[18px] w-[18px] text-[#16C5C0]' />;
+      return <Bell className='h-[18px] w-[18px] text-primary' />;
   }
 }
 
@@ -165,7 +165,7 @@ export default function DoctorNotificationPage() {
             </div>
 
             <div className='flex flex-col items-end gap-3'>
-              <div className='inline-flex h-[34px] items-center justify-center rounded-[6px] bg-[#16C5C0] px-3 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(22,197,192,0.25)]'>
+              <div className='inline-flex h-[34px] items-center justify-center rounded-[6px] bg-primary px-3 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15, 143, 139,0.25)]'>
                 {newCount} جديد
               </div>
 
@@ -175,7 +175,7 @@ export default function DoctorNotificationPage() {
                   onClick={markAllRead}
                   className='flex h-[34px] items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]'
                 >
-                  <Check className='h-4 w-4 text-[#16C5C0]' />
+                  <Check className='h-4 w-4 text-primary' />
                   تحديد الكل كمقروء
                 </button>
 
@@ -203,7 +203,7 @@ export default function DoctorNotificationPage() {
                 key={n.id}
                 className={
                   isAccent
-                    ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#16C5C0]'
+                    ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#0F8F8B]'
                     : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]'
                 }
               >
@@ -229,7 +229,7 @@ export default function DoctorNotificationPage() {
                     </div>
                     <div className='flex items-start gap-3'>
                       {n.isNew ? (
-                        <div className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-[#16C5C0] px-2 font-cairo text-[12px] font-semibold text-white'>
+                        <div className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-primary px-2 font-cairo text-[12px] font-semibold text-white'>
                           جديد
                         </div>
                       ) : (

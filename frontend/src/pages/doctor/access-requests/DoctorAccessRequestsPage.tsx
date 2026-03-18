@@ -80,7 +80,7 @@ function bottomBarIcon(status: AccessRequestStatus) {
     return <CheckCircle2 className='h-4 w-4 text-[#12B76A]' />;
   if (status === 'rejected')
     return <XCircle className='h-4 w-4 text-[#F04438]' />;
-  return <Clock className='h-4 w-4 text-[#16C5C0]' />;
+  return <Clock className='h-4 w-4 text-primary' />;
 }
 
 function bottomBarTextClassName(status: AccessRequestStatus) {
@@ -122,7 +122,7 @@ export default function DoctorAccessRequestsPage() {
         lang='ar'
       >
         <DashboardOverviewSection
-          sectionClassName='flex flex-col gap-[18px] mb-6 py-[22px] px-[24px] rounded-[24px] bg-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+          sectionClassName='flex flex-col gap-[18px] mb-6 py-[22px] px-[24px] rounded-[24px] bg-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
           overlay={
             mode === 'create' ? (
               <motion.button
@@ -136,7 +136,7 @@ export default function DoctorAccessRequestsPage() {
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 whileTap={{ scale: 0.98 }}
               >
-                <X className='h-5 w-5 text-[#0FA6A3]' />
+                <X className='h-5 w-5 text-[#0F8F8B]' />
               </motion.button>
             ) : null
           }
@@ -162,7 +162,7 @@ export default function DoctorAccessRequestsPage() {
               <motion.button
                 type='button'
                 onClick={() => setMode('create')}
-                className='flex items-center justify-center gap-2 rounded-[6px] h-[40px] bg-[#FFFFFF] px-4 font-cairo text-[12px] font-extrabold text-[#16C5C0] shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+                className='flex items-center justify-center gap-2 rounded-[6px] h-[40px] bg-[#FFFFFF] px-4 font-cairo text-[12px] font-extrabold text-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
@@ -271,7 +271,7 @@ export default function DoctorAccessRequestsPage() {
                     <div className='flex flex-col items-start gap-2 px-6 pt-5'>
                       <div className='flex w-full items-start justify-between'>
                         <div className='flex flex-1 items-start gap-3'>
-                          <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
+                          <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.28)]'>
                             <span className='font-cairo text-[18px] font-extrabold'>
                               {r.patientInitial}
                             </span>

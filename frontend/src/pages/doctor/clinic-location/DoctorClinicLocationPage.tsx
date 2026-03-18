@@ -39,7 +39,7 @@ export default function DoctorClinicLocationPage() {
             <div className='flex items-start gap-3'>
               <button
                 type='button'
-                className='flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white'
+                className='flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-primary text-white'
                 aria-label='موقع'
               >
                 <MapPin className='h-4 w-4' />
@@ -79,7 +79,7 @@ export default function DoctorClinicLocationPage() {
             onClick={() => {
               setStatus('pending');
             }}
-            className='mt-4 flex h-[44px] w-full items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(22,197,192,0.30)] transition-colors hover:bg-[#14B3AE]'
+            className='mt-4 flex h-[44px] w-full items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.30)] transition-colors hover:bg-[#14B3AE]'
           >
             <Locate className='h-4 w-4' />
             الحصول على موقعي الحالي
@@ -90,7 +90,7 @@ export default function DoctorClinicLocationPage() {
           <div className='relative h-[340px] bg-gradient-to-br from-gray-100 to-gray-200'>
             <div className='absolute inset-0 flex items-center justify-center'>
               <div className='flex flex-col items-center'>
-                <div className='relative flex h-[80px] w-[80px] items-center justify-center rounded-full bg-[#16C5C0] text-white shadow-[0_18px_40px_rgba(22,197,192,0.28)]'>
+                <div className='relative flex h-[80px] w-[80px] items-center justify-center rounded-full bg-primary text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.28)]'>
                   <MapIcon className='h-[40px] w-[40px]' />
                   <MapPin className='absolute -bottom-4 h-[48px] w-[48px] fill-[#F04438] stroke-[#F04438]' />
                 </div>
@@ -129,7 +129,7 @@ export default function DoctorClinicLocationPage() {
         <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
           <div className='flex items-start justify-between'>
             <div className='flex items-center gap-2'>
-              <div className='flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-[#E9FFFE] text-[#16C5C0]'>
+              <div className='flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-[#E9FFFE] text-primary'>
                 <Navigation className='h-4 w-4' />
               </div>
               <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
@@ -186,7 +186,7 @@ export default function DoctorClinicLocationPage() {
           <button
             type='button'
             onClick={() => setStatus('pending')}
-            className='mt-5 flex h-[48px] w-full items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(22,197,192,0.30)] transition-colors hover:bg-[#14B3AE]'
+            className='mt-5 flex h-[48px] w-full items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.30)] transition-colors hover:bg-[#14B3AE]'
           >
             <Navigation className='h-4 w-4' />
             إرسال المراجعة
@@ -196,7 +196,7 @@ export default function DoctorClinicLocationPage() {
         <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
-              <div className='flex h-[30px] w-[30px] items-center justify-center text-[#16C5C0]'>
+              <div className='flex h-[30px] w-[30px] items-center justify-center text-primary'>
                 <MapPin className='h-4 w-4' />
               </div>
               <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
@@ -219,7 +219,7 @@ export default function DoctorClinicLocationPage() {
                   key={t}
                   className='flex items-start gap-3'
                 >
-                  <div className='mt-[1px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#16C5C0] font-cairo text-[12px] font-extrabold text-[#E9FFFE]'>
+                  <div className='mt-[1px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-primary font-cairo text-[12px] font-extrabold text-[#E9FFFE]'>
                     {idx + 1}
                   </div>
                   <div className='font-cairo text-[14px] leading-[20px] text-[#667085]'>

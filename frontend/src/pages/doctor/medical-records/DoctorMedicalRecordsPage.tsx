@@ -199,7 +199,7 @@ export default function DoctorMedicalRecordsPage() {
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 whileTap={{ scale: 0.98 }}
               >
-                <X className='h-5 w-5 text-[#0FA6A3]' />
+                <X className='h-5 w-5 text-[#0F8F8B]' />
               </motion.button>
             ) : null
           }
@@ -303,7 +303,7 @@ export default function DoctorMedicalRecordsPage() {
                       {filtered.map((r) => {
                         const statusStyle =
                           r.statusLabel === 'نشط'
-                            ? 'bg-[#16C5C0] text-white'
+                            ? 'bg-primary text-white'
                             : r.statusLabel === 'طارئة'
                               ? 'bg-[#F04438] text-white'
                               : r.statusLabel === 'يحتاج متابعة'
@@ -319,14 +319,14 @@ export default function DoctorMedicalRecordsPage() {
                           >
                             <td className='px-4 py-3'>
                               <div className='flex items-center gap-3'>
-                                <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0] text-white shadow-[0_14px_24px_rgba(22,197,192,0.28)]'>
+                                <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.28)]'>
                                   <FileText className='h-5 w-5' />
                                 </div>
                                 <div className='min-w-0'>
-                                  <div className='break-words font-cairo text-[13px] font-extrabold text-[#0FA6A3]'>
+                                  <div className='break-words font-cairo text-[13px] font-extrabold text-[#0F8F8B]'>
                                     {r.systemId}
                                   </div>
-                                  <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#0FA6A3]'>
+                                  <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#0F8F8B]'>
                                     {r.id.replace('mr-', '').padStart(4, '0')}
                                   </div>
                                 </div>
@@ -334,7 +334,7 @@ export default function DoctorMedicalRecordsPage() {
                             </td>
                             <td className='px-4 py-3'>
                               <div className='flex items-center gap-3'>
-                                <div className='flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[#16C5C0] text-white'>
+                                <div className='flex h-[34px] w-[34px] items-center justify-center rounded-full bg-primary text-white'>
                                   <span className='font-cairo text-[14px] font-extrabold'>
                                     {r.patientInitial}
                                   </span>
@@ -417,7 +417,7 @@ export default function DoctorMedicalRecordsPage() {
                                     setDetailsRecord(mapped);
                                     setDetailsOpen(true);
                                   }}
-                                  className='flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#16C5C0]'
+                                  className='flex items-center gap-2 font-cairo text-[13px] font-extrabold text-primary'
                                 >
                                   <span>عرض التفاصيل</span>
                                 </button>
@@ -456,7 +456,7 @@ export default function DoctorMedicalRecordsPage() {
                                     setDetailsRecord(mapped);
                                     setDetailsOpen(true);
                                   }}
-                                  className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-[#16C5C0] text-white shadow-[0_10px_18px_rgba(22,197,192,0.28)]'
+                                  className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_10px_18px_rgba(15, 143, 139,0.28)]'
                                   aria-label='تفاصيل'
                                 >
                                   <ChevronRight className='h-5 w-5' />
@@ -474,7 +474,7 @@ export default function DoctorMedicalRecordsPage() {
                   <div className='font-cairo text-[13px] font-semibold text-[#98A2B3]'>
                     عرض {filtered.length} من {mockRecords.length} سجل
                   </div>
-                  <div className='inline-flex h-[36px] items-center justify-center rounded-[999px] bg-[#16C5C0] px-4 font-cairo text-[13px] font-extrabold text-white'>
+                  <div className='inline-flex h-[36px] items-center justify-center rounded-[999px] bg-primary px-4 font-cairo text-[13px] font-extrabold text-white'>
                     إجمالي {mockRecords.length} سجل طبي
                   </div>
                 </div>

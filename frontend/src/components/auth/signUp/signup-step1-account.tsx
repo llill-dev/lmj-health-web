@@ -48,7 +48,7 @@ export default function SignUpStep1Account({
   return (
     <>
       <div className='mt-7 flex flex-col items-center text-center'>
-        <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[6px] bg-[#16C5C0] shadow-[0_18px_40px_rgba(22,197,192,0.35)]'>
+        <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[6px] bg-primary shadow-[0_18px_40px_rgba(15, 143, 139,0.35)]'>
           <User className='h-9 w-9 text-white' />
         </div>
         <div className='mt-4 flex items-center justify-center gap-3'>
@@ -64,7 +64,7 @@ export default function SignUpStep1Account({
               setValue('phone', '+966501234567', { shouldDirty: true });
               setValue('channel', 'whatsapp', { shouldDirty: true });
             }}
-            className='rounded-full border border-[#16C5C0]/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-[#16C5C0]'
+            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
           >
             ملء البيانات
           </button>
@@ -81,7 +81,7 @@ export default function SignUpStep1Account({
         <div className='space-y-5'>
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
-              <User className='h-4 w-4 text-[#16C5C0]' />
+              <User className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 الاسم الكامل
               </span>
@@ -93,7 +93,7 @@ export default function SignUpStep1Account({
               type='text'
               placeholder='د. محمد أحمد'
               {...register('fullName')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             <div
               className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
@@ -106,7 +106,7 @@ export default function SignUpStep1Account({
 
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
-              <Mail className='h-4 w-4 text-[#16C5C0]' />
+              <Mail className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 البريد الإلكتروني
               </span>
@@ -118,7 +118,7 @@ export default function SignUpStep1Account({
               type='email'
               placeholder='doctor@example.com'
               {...register('email')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             <div
               className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
@@ -131,7 +131,7 @@ export default function SignUpStep1Account({
 
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
-              <LockKeyhole className='h-4 w-4 text-[#16C5C0]' />
+              <LockKeyhole className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 كلمة المرور
               </span>
@@ -143,7 +143,7 @@ export default function SignUpStep1Account({
               type='password'
               placeholder='••••••••'
               {...register('password')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             <div
               className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
@@ -156,7 +156,7 @@ export default function SignUpStep1Account({
 
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
-              <Phone className='h-4 w-4 text-[#16C5C0]' />
+              <Phone className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 رقم الهاتف
               </span>
@@ -168,7 +168,7 @@ export default function SignUpStep1Account({
               type='tel'
               placeholder='+966 50 123 4567'
               {...register('phone')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-[#16C5C0]'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             <div
               className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
@@ -184,7 +184,7 @@ export default function SignUpStep1Account({
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 قناة التحقق
               </span>
-              <span className='font-cairo text-[14px] font-bold text-[#16C5C0]'>
+              <span className='font-cairo text-[14px] font-bold text-primary'>
                 *
               </span>
             </div>
@@ -195,7 +195,7 @@ export default function SignUpStep1Account({
                 onClick={() => setValue('channel', 'whatsapp')}
                 className={
                   channel === 'whatsapp'
-                    ? 'flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[14px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+                    ? 'flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-[#EFFFFD] font-cairo text-[14px] font-bold text-primary shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
                     : 'flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#6B7280]'
                 }
               >
@@ -208,7 +208,7 @@ export default function SignUpStep1Account({
                 onClick={() => setValue('channel', 'email')}
                 className={
                   channel === 'email'
-                    ? 'flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-[#16C5C0] bg-[#EFFFFD] font-cairo text-[14px] font-bold text-[#16C5C0] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+                    ? 'flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-[#EFFFFD] font-cairo text-[14px] font-bold text-primary shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
                     : 'flex h-[70px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#6B7280]'
                 }
               >
@@ -237,7 +237,7 @@ export default function SignUpStep1Account({
 
             <button
               type='submit'
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-[#16C5C0] font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
             >
               التالي
               <ArrowLeft className='h-4 w-4' />

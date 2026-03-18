@@ -16,7 +16,7 @@ export default function NotFoundPage() {
       </div>
       <Link
         to='/welcome'
-        className='mt-2 inline-flex h-[44px] items-center justify-center rounded-[10px] bg-[#16C5C0] px-6 font-cairo text-[14px] font-extrabold text-white'
+        className='mt-2 inline-flex h-[44px] items-center justify-center rounded-[10px] bg-primary px-6 font-cairo text-[14px] font-extrabold text-white'
       >
         العودة للرئيسية
       </Link>

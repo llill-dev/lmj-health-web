@@ -133,7 +133,7 @@ export default function LoginForm({
               <div className='absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-500/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
             </div>
           </div>
-          <div className='relative z-10  h-[4px] w-[448px] bg-gradient-to-b from-[#16C5C0] via-[#65BFEC] to-[#16C5C0]' />
+          <div className='relative z-10  h-[4px] w-[448px] bg-gradient-to-b from-[#0F8F8B] via-[#65BFEC] to-[#0F8F8B]' />
           <div className='relative z-10 rounded-[6px] bg-[#FFFFFFF2] px-7 py-8 shadow-[0_28px_80px_rgba(0,0,0,0.22)]'>
             <div className='text-start'>
               <h1 className='font-cairo text-[16px] font-bold leading-[32px] text-[#1F2937]'>
@@ -154,7 +154,7 @@ export default function LoginForm({
                     {method === 'phone' && (
                       <motion.div
                         layoutId='loginMethodPill'
-                        className='absolute inset-0 rounded-[6px] bg-[#16C5C0]'
+                        className='absolute inset-0 rounded-[6px] bg-primary'
                         transition={{
                           type: 'spring',
                           stiffness: 520,
@@ -185,7 +185,7 @@ export default function LoginForm({
                     {method === 'email' && (
                       <motion.div
                         layoutId='loginMethodPill'
-                        className='absolute inset-0 rounded-[6px] bg-[#16C5C0]'
+                        className='absolute inset-0 rounded-[6px] bg-primary'
                         transition={{
                           type: 'spring',
                           stiffness: 520,
@@ -283,13 +283,13 @@ export default function LoginForm({
                   <button
                     type='submit'
                     disabled={isSubmitting}
-                    className='mt-6 flex h-[36px] w-full max-w-[330px] items-center justify-center rounded-[8px] bg-[#16C5C0] text-[14px] text-white shadow-[0_18px_40px_rgba(22,197,192,0.35)] transition-colors hover:bg-[#14B3AE]'
+                    className='mt-6 flex h-[36px] w-full max-w-[330px] items-center justify-center rounded-[8px] bg-primary text-[14px] text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
                   >
                     تسجيل الدخول
                   </button>
                 </div>
 
-                <div className='mt-5 flex items-center justify-between px-1 font-cairo text-[14px] text-[#16C5C0]'>
+                <div className='mt-5 flex items-center justify-between px-1 font-cairo text-[14px] text-primary'>
                   <button
                     type='button'
                     className='transition-colors hover:text-[#14B3AE]'
@@ -312,7 +312,7 @@ export default function LoginForm({
                 <button
                   type='button'
                   onClick={onSignUp}
-                  className='ps-2 text-[#16C5C0] transition-colors hover:text-[#14B3AE]'
+                  className='ps-2 text-primary transition-colors hover:text-[#14B3AE]'
                 >
                   إنشاء حساب جديد
                 </button>

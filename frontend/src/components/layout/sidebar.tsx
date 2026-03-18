@@ -1,23 +1,40 @@
 'use client';
 
-import { ChevronLeft, ChevronsRight, LogOut, Stethoscope } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronsRight, LogOut, Stethoscope } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
+import {
+  adminSidebarItems,
+  sidebarItems,
+  type AdminSidebarItemId,
+  type SidebarItemId,
+} from '@/constant/sidebar-items';
 
 export default function Sidebar({
-  active = 'appointments',
+  active,
+  role = 'doctor',
   collapsed = false,
   onToggleCollapse,
   onLogout,
 }: {
-  active?: SidebarItemId;
+  active?: SidebarItemId | AdminSidebarItemId;
+  role?: 'doctor' | 'admin';
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   onLogout?: () => void;
 }) {
   const [isHovering, setIsHovering] = useState(false);
   const effectiveCollapsed = collapsed && !isHovering;
+
+  const navItems = useMemo(() => {
+    return role === 'admin' ? adminSidebarItems : sidebarItems;
+  }, [role]);
+
+  const basePath = role === 'admin' ? '/admin' : '/doctor';
+
+  const resolvedActive =
+    (active as (SidebarItemId | AdminSidebarItemId) | undefined) ??
+    (role === 'admin' ? 'overview' : 'dashboard');
 
   const handleCollapse = () => {
     setIsHovering(false);
@@ -52,7 +69,7 @@ export default function Sidebar({
         >
           <div className='flex items-start justify-between'>
             <div className='flex items-center gap-2'>
-              <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-[#16C5C0] shadow-[0_14px_30px_rgba(22,197,192,0.35)]'>
+              <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
                 <Stethoscope className='h-6 w-6 text-white' />
               </div>
               {!effectiveCollapsed ? (
@@ -60,8 +77,8 @@ export default function Sidebar({
                   <div className='font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
                     LMJ HEALTH
                   </div>
-                  <div className='mt-1 font-cairo text-[12px] font-bold leading-[14px] text-[#16C5C0]'>
-                    بوابة الطبيب
+                  <div className='mt-1 font-cairo text-[12px] font-bold leading-[14px] text-primary'>
+                    {role === 'admin' ? 'بوابة الإدارة' : 'بوابة الطبيب'}
                   </div>
                 </div>
               ) : null}
@@ -84,17 +101,19 @@ export default function Sidebar({
           {!effectiveCollapsed ? (
             <div className='mt-6 rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
               <div className='flex items-center gap-3'>
-                <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[6px] bg-[#16C5C0] text-white shadow-[0_12px_25px_rgba(22,197,192,0.35)]'>
+                <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15,143,139,0.30)]'>
                   <span className='font-cairo text-[18px] font-extrabold leading-none'>
-                    د
+                    {role === 'admin' ? 'م' : 'د'}
                   </span>
                 </div>
                 <div className='flex-1'>
                   <div className='text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]'>
-                    د. خالد عبدالله
+                    {role === 'admin' ? 'المدير' : 'د. خالد عبدالله'}
                   </div>
                   <div className='mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]'>
-                    doctor1@example.com
+                    {role === 'admin'
+                      ? 'admin@lmjhealth.com'
+                      : 'doctor1@example.com'}
                   </div>
                 </div>
               </div>
@@ -110,19 +129,19 @@ export default function Sidebar({
           }
         >
           <div className='space-y-1'>
-            {sidebarItems.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = item.path === active;
+              const isActive = item.path === resolvedActive;
 
               return (
                 <Link
                   key={item.path}
-                  to={`/doctor/${item.path}`}
+                  to={`${basePath}/${item.path}`}
                   className={
                     isActive
                       ? effectiveCollapsed
-                        ? 'relative flex w-full items-center justify-center rounded-[10px] bg-gradient-to-l from-[#18C6C0] via-[#12B9B4] to-[#0FA6A3] px-3 py-3 text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
-                        : 'relative flex w-full items-center rounded-[6px] bg-gradient-to-l from-[#18C6C0] via-[#12B9B4] to-[#0FA6A3] px-4 py-[10px] text-white shadow-[0_12px_24px_rgba(22,197,192,0.30)]'
+                        ? 'relative flex w-full items-center justify-center rounded-[10px] bg-primary px-3 py-3 text-white shadow-[0_12px_24px_rgba(15,143,139,0.30)]'
+                        : 'relative flex w-full items-center rounded-[6px] bg-primary px-4 py-[10px] text-white shadow-[0_12px_24px_rgba(15,143,139,0.30)]'
                       : effectiveCollapsed
                         ? 'relative flex w-full items-center justify-center rounded-[10px] px-3 py-3 text-[#344054] hover:bg-[#F2F4F7]'
                         : 'relative flex w-full items-center rounded-[6px] px-4 py-[10px] text-[#344054] hover:bg-[#F2F4F7]'
@@ -159,8 +178,8 @@ export default function Sidebar({
                     <div
                       className={
                         isActive
-                          ? 'ms-auto flex h-[26px] min-w-[26px] items-center justify-center rounded-full bg-white px-2 font-cairo text-[12px] font-extrabold text-[#16C5C0] shadow-[0_10px_20px_rgba(0,0,0,0.10)]'
-                          : 'ms-auto flex h-[26px] min-w-[26px] items-center justify-center rounded-full bg-[#16C5C0] px-2 font-cairo text-[12px] font-extrabold text-white shadow-[0_10px_20px_rgba(22,197,192,0.25)]'
+                          ? 'ms-auto flex h-[26px] min-w-[26px] items-center justify-center rounded-full bg-white px-2 font-cairo text-[12px] font-extrabold text-primary shadow-[0_10px_20px_rgba(0,0,0,0.10)]'
+                          : 'ms-auto flex h-[26px] min-w-[26px] items-center justify-center rounded-full bg-primary px-2 font-cairo text-[12px] font-extrabold text-white shadow-[0_10px_20px_rgba(15,143,139,0.25)]'
                       }
                     >
                       {item.badge}

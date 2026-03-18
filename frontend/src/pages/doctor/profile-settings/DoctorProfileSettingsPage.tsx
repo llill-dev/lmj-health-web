@@ -37,9 +37,9 @@ export default function DoctorProfileSettingsPage() {
   }, [status]);
 
   const stats: StatItem[] = [
-    { label: 'استشارة', value: '1', valueClassName: 'text-[#16C5C0] ' },
-    { label: 'سنوات خبرة', value: '15', valueClassName: 'text-[#16C5C0] ' },
-    { label: 'التقييم', value: '4.8', valueClassName: 'text-[#16C5C0] ' },
+    { label: 'استشارة', value: '1', valueClassName: 'text-primary ' },
+    { label: 'سنوات خبرة', value: '15', valueClassName: 'text-primary ' },
+    { label: 'التقييم', value: '4.8', valueClassName: 'text-primary ' },
   ];
 
   const contact: InfoRow[] = [
@@ -107,7 +107,7 @@ export default function DoctorProfileSettingsPage() {
         dir='rtl'
         lang='ar'
       >
-        <section className='relative overflow-hidden rounded-[6px] bg-[#16C5C0] px-6 pb-6 pt-8 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'>
+        <section className='relative overflow-hidden rounded-[6px] bg-primary px-6 pb-6 pt-8 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'>
           <div className='pointer-events-none absolute -right-16 -top-16 h-[220px] w-[220px] rounded-full bg-white/10' />
           <div className='pointer-events-none absolute -left-24 -bottom-24 h-[260px] w-[260px] rounded-full bg-white/10' />
 
@@ -186,7 +186,7 @@ export default function DoctorProfileSettingsPage() {
                 className='flex items-center justify-between px-6 py-4'
               >
                 <div className='flex items-center gap-3'>
-                  <div className='flex h-[32px] w-[32px] items-center justify-center rounded-[6px] bg-[#16C5C0]'>
+                  <div className='flex h-[32px] w-[32px] items-center justify-center rounded-[6px] bg-primary'>
                     {row.icon}
                   </div>
                   <div className='text-right'>
@@ -231,10 +231,10 @@ export default function DoctorProfileSettingsPage() {
               ].map((m) => (
                 <div
                   key={m.title}
-                  className='flex h-[64px] items-center justify-between rounded-[6px] bg-[#16C5C026] px-2 py-2'
+                  className='flex h-[64px] items-center justify-between rounded-[6px] bg-[#0F8F8B26] px-2 py-2'
                 >
                   <div className='flex items-center gap-3'>
-                    <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-[#16C5C0]'>
+                    <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-primary'>
                       {m.icon}
                     </div>
                     <div className='text-right'>
@@ -246,7 +246,7 @@ export default function DoctorProfileSettingsPage() {
                       </p>
                     </div>
                   </div>
-                  <CheckCircle2 className='h-4 w-4 text-[#16C5C0]' />
+                  <CheckCircle2 className='h-4 w-4 text-primary' />
                 </div>
               ))}
             </div>
@@ -268,7 +268,7 @@ export default function DoctorProfileSettingsPage() {
                   className='h-[64px] flex items-center justify-between rounded-[6px] bg-[#E9FFFE] px-2 py-2'
                 >
                   <div className='flex items-center gap-3'>
-                    <div className='flex h-[28px] w-[28px] items-center justify-center rounded-[6px] bg-[#16C5C0]'>
+                    <div className='flex h-[28px] w-[28px] items-center justify-center rounded-[6px] bg-primary'>
                       {row.icon}
                     </div>
                     <div className='text-right'>
@@ -286,7 +286,7 @@ export default function DoctorProfileSettingsPage() {
           </div>
         </section>
 
-        <section className='mt-6 overflow-hidden rounded-[6px] bg-[#16C5C0] px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
+        <section className='mt-6 overflow-hidden rounded-[6px] bg-primary px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-3'>
               <button

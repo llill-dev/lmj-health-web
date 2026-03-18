@@ -191,7 +191,7 @@ export default function CancelAppointmentDialog({
                       onOpenChange(false);
                       reset({ medicalNotes: '' });
                     })}
-                    className='flex h-[46px] w-full items-center justify-center gap-3 rounded-[10px] bg-gradient-to-b from-[#16C5C0] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(22,197,192,0.25)] disabled:opacity-60'
+                    className='flex h-[46px] w-full items-center justify-center gap-3 rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)] disabled:opacity-60'
                   >
                     <span>حفظ وإنهاء</span>
                     <Check className='h-5 w-5' />

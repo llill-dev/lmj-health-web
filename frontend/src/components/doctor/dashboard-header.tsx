@@ -45,7 +45,7 @@ export default function DashboardHeader({
           className='flex h-10 w-10 items-center justify-center rounded-[12px] bg-white shadow-[0_10px_25px_rgba(0,0,0,0.06)]'
           aria-label='الإشعارات'
         >
-          <Bell className='h-[18px] w-[18px] text-[#16C5C0]' />
+          <Bell className='h-[18px] w-[18px] text-primary' />
         </button>
         <div className='h-9 w-px bg-[#E5E7EB]' />
         <button
@@ -53,7 +53,7 @@ export default function DashboardHeader({
           className='flex h-10 w-10 items-center justify-center rounded-[12px] bg-white shadow-[0_10px_25px_rgba(0,0,0,0.06)]'
           aria-label='الرسائل'
         >
-          <MessageCircle className='h-[18px] w-[18px] text-[#16C5C0]' />
+          <MessageCircle className='h-[18px] w-[18px] text-primary' />
         </button>
       </div>
     </header>

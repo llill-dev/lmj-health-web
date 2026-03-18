@@ -74,7 +74,7 @@ function tagChipClassName(tag: string) {
   if (tag === 'حضوري') {
     return 'border-[#2E90FA] text-[#2E90FA]';
   }
-  return 'border-[#16C5C0] text-[#16C5C0]';
+  return 'border-primary text-primary';
 }
 
 export default function DoctorDoctorsDirectoryPage() {
@@ -130,7 +130,7 @@ export default function DoctorDoctorsDirectoryPage() {
               </div>
             </div>
 
-            <span className='inline-flex h-[32px] items-center justify-center rounded-[6px] bg-[#16C5C0] px-4 font-cairo text-[12px] font-extrabold text-white'>
+            <span className='inline-flex h-[32px] items-center justify-center rounded-[6px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'>
               {total} طبيب
             </span>
           </div>
@@ -155,7 +155,7 @@ export default function DoctorDoctorsDirectoryPage() {
               type='button'
               className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)]'
             >
-              <Navigation className='h-4 w-4 text-[#16C5C0]' />
+              <Navigation className='h-4 w-4 text-primary' />
               استخدم موقعي
             </button>
 
@@ -182,8 +182,8 @@ export default function DoctorDoctorsDirectoryPage() {
               <div className='mt-4 font-cairo text-[14px] font-extrabold text-[#111827]'>
                 {d.name}
               </div>
-              <div className='mt-1 flex items-center justify-center gap-2 font-cairo text-[12px] font-semibold text-[#16C5C0]'>
-                <Stethoscope className='h-4 w-4 text-[#16C5C0]' />
+              <div className='mt-1 flex items-center justify-center gap-2 font-cairo text-[12px] font-semibold text-primary'>
+                <Stethoscope className='h-4 w-4 text-primary' />
                 {d.specialty}
               </div>
 
@@ -207,7 +207,7 @@ export default function DoctorDoctorsDirectoryPage() {
                     className={`flex gap-1 h-[22px] items-center justify-center rounded-full border-[1.82px] px-3 font-cairo text-[11px] font-extrabold ${tagChipClassName(t)}`}
                   >
                     {t === 'أونلاين' ? (
-                      <Video className='h-4 w-4 text-[#16C5C0]' />
+                      <Video className='h-4 w-4 text-primary' />
                     ) : (
                       <Building className='h-3 w-3 text-[#2E90FA]' />
                     )}
@@ -231,7 +231,7 @@ export default function DoctorDoctorsDirectoryPage() {
               <button
                 type='button'
                 onClick={() => setSelectedDoctorId(d.id)}
-                className='mt-5 flex h-[36px] w-[290px] items-center justify-center rounded-[16px] bg-gradient-to-b from-[#16C5C0] to-[#14B3AE] font-cairo text-[14px] font-semibold  text-white transition-colors hover:from-[#14B3AE] hover:to-[#12A8A4]'
+                className='mt-5 flex h-[36px] w-[290px] items-center justify-center rounded-[16px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-semibold  text-white transition-colors hover:from-[#14B3AE] hover:to-[#12A8A4]'
               >
                 عرض التفاصيل
               </button>
