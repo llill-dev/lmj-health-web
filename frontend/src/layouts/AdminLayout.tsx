@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
             <MotionProvider>
               <AnimatePresence mode='wait'>
                 <PageTransition key={pathname}>
-                  <div className='mx-auto w-full max-w-[1420px] px-12'>
+                  <div className='mx-auto w-full max-w-[1420px] px-12 pb-6'>
                     {children ?? <Outlet />}
                   </div>
                 </PageTransition>
