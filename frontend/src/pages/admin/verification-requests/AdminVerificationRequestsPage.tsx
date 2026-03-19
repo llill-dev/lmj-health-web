@@ -10,6 +10,8 @@ import {
   Users,
   UserCog,
   AlertCircle,
+  Clock,
+  CheckCheck,
 } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -131,9 +133,14 @@ export default function AdminVerificationRequestsPage() {
             return (
               <div
                 key={s.title}
-                className={`h-[130px] rounded-[12px] border bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${s.tone.border}`}
+                className={`rounded-[12px] border bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${s.tone.border}`}
               >
                 <div className='flex items-start justify-between'>
+                  <div
+                    className={`flex h-[44px] w-[44px] items-center justify-center rounded-[10px] ${s.tone.iconBg}`}
+                  >
+                    <Icon className='h-6 w-6 text-white' />
+                  </div>
                   <div className='inline-flex h-[22px] items-center rounded-[8px] px-3 font-cairo text-[11px] font-extrabold '>
                     <span
                       className={
@@ -143,12 +150,6 @@ export default function AdminVerificationRequestsPage() {
                     >
                       {s.subtitle}
                     </span>
-                  </div>
-
-                  <div
-                    className={`flex h-[44px] w-[44px] items-center justify-center rounded-[10px] ${s.tone.iconBg}`}
-                  >
-                    <Icon className='h-6 w-6 text-white' />
                   </div>
                 </div>
 
@@ -169,16 +170,16 @@ export default function AdminVerificationRequestsPage() {
 
         <section className='mt-6 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden'>
           <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
-            <div className='flex h-[32px] items-center rounded-[8px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'>
-              {locationRequests.length} موقع
-            </div>
             <div className='flex items-center gap-2'>
-              <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                مواقع بإنتظار التحقق
-              </div>
               <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-primary'>
                 <MapPin className='h-5 w-5 text-white' />
               </div>
+              <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
+                مواقع بإنتظار التحقق
+              </div>
+            </div>
+            <div className='flex h-[32px] items-center rounded-[8px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'>
+              {locationRequests.length} موقع
             </div>
           </div>
 
@@ -190,12 +191,10 @@ export default function AdminVerificationRequestsPage() {
                   className='rounded-[12px] border border-[#D1E9FF] bg-white p-5'
                 >
                   <div className='flex items-start justify-between'>
-                    <div className='inline-flex h-[22px] items-center gap-2 rounded-[8px] bg-primary px-3 font-cairo text-[11px] font-extrabold text-white'>
-                      <span className='h-[6px] w-[6px] rounded-full bg-white' />
-                      معلق
-                    </div>
-
                     <div className='flex items-start gap-4'>
+                      <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[10px] bg-primary'>
+                        <MapPin className='h-6 w-6 text-white' />
+                      </div>
                       <div className='text-right'>
                         <div className='font-cairo text-[14px] font-black text-[#111827]'>
                           {r.doctor}
@@ -207,9 +206,10 @@ export default function AdminVerificationRequestsPage() {
                           {r.city}
                         </div>
                       </div>
-                      <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[10px] bg-primary'>
-                        <MapPin className='h-6 w-6 text-white' />
-                      </div>
+                    </div>
+                    <div className='flex h-[22px] items-center gap-2 rounded-[6px] bg-primary px-3 font-cairo text-[11px] text-white'>
+                      <Clock className='w-3 h-3' />
+                      معلق
                     </div>
                   </div>
 
@@ -224,19 +224,19 @@ export default function AdminVerificationRequestsPage() {
                       type='button'
                       className='inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-[#00C950] px-5 font-cairo text-[12px] font-extrabold text-white'
                     >
-                      <Check className='h-4 w-4' />
+                      <CheckCheck className='h-4 w-4' />
                       قبول الموقع
                     </button>
                     <button
                       type='button'
-                      className='inline-flex h-[34px] items-center gap-2 rounded-[8px] border border-[#FCA5A5] bg-white px-5 font-cairo text-[12px] font-extrabold text-[#EF4444]'
+                      className='inline-flex h-[34px] items-center gap-2 rounded-[8px] border-[1.82px] border-[#FCA5A5] bg-white px-5 font-cairo text-[12px] font-extrabold text-[#EF4444]'
                     >
                       <X className='h-4 w-4' />
                       رفض
                     </button>
                     <button
                       type='button'
-                      className='inline-flex h-[34px] items-center gap-2 rounded-[8px] border border-primary bg-white px-5 font-cairo text-[12px] font-extrabold text-primary'
+                      className='inline-flex h-[34px] items-center gap-2 rounded-[8px] border-[1.82px] border-primary bg-white px-5 font-cairo text-[12px] font-extrabold text-primary'
                     >
                       <MapPin className='h-4 w-4' />
                       عرض الخريطة

@@ -38,7 +38,7 @@ export default function AdminMedicalFileOptionsPage() {
         dir='rtl'
         lang='ar'
       >
-        <div className='rounded-[14px] px-6 pb-8 pt-6'>
+        <div>
           <div className='text-right'>
             <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
               خيارات الملف الطبي
@@ -159,7 +159,7 @@ export default function AdminMedicalFileOptionsPage() {
           </div>
 
           <div className='mt-6 rounded-[10px] bg-white px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.18)]'>
-            <div className='flex items-center justify-start'>
+            <div className='flex items-center gap-2 justify-start'>
               <FileCog className='h-5 w-5 text-primary' />
               <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
                 إدارة الخيارات
@@ -179,7 +179,7 @@ export default function AdminMedicalFileOptionsPage() {
                 />
               </div>
 
-              <div className='lg:col-span-1'>
+              <div className='mt-6 lg:col-span-1'>
                 <button
                   type='button'
                   className='mx-auto flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white'
