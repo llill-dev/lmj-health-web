@@ -111,7 +111,10 @@ export default function AdminAppointmentsPage() {
         <title>إدارة المواعيد • LMJ Health</title>
       </Helmet>
 
-      <div dir='rtl' lang='ar'>
+      <div
+        dir='rtl'
+        lang='ar'
+      >
         <div className='text-right'>
           <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
             إدارة المواعيد
@@ -151,6 +154,15 @@ export default function AdminAppointmentsPage() {
 
         <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='flex items-center justify-between gap-4'>
+            <div className='relative flex-1'>
+              <input
+                placeholder='بحث بالطبيب او المريض...'
+                className='h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+              />
+              <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
+                <Search className='h-5 w-5' />
+              </div>
+            </div>
             <div className='flex items-center gap-3'>
               <button
                 type='button'
@@ -162,16 +174,6 @@ export default function AdminAppointmentsPage() {
                 5 نتيجة
               </div>
             </div>
-
-            <div className='relative flex-1'>
-              <input
-                placeholder='بحث بالطبيب او المريض...'
-                className='h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
-              />
-              <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <Search className='h-5 w-5' />
-              </div>
-            </div>
           </div>
         </section>
 
@@ -181,62 +183,66 @@ export default function AdminAppointmentsPage() {
               key={a.id}
               className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'
             >
-              <div className='flex items-start justify-between'>
-                <div className='flex items-start gap-4'>
-                  <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.25)]'>
-                    <CalendarDays className='h-5 w-5' />
-                  </div>
-
+              <div className='flex gap-4'>
+                <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.25)]'>
+                  <CalendarDays className='h-5 w-5' />
+                </div>
+                <div className='flex-1 space-y-6'>
                   <div className='text-right'>
-                    <div className='flex items-center justify-end gap-2'>
-                      <span
-                        className={`inline-flex h-[22px] items-center rounded-full px-3 font-cairo text-[11px] font-extrabold ${statusPill(a.status)}`}
-                      >
-                        {a.status}
-                      </span>
+                    <div className='flex items-center justify-start gap-2'>
                       <div className='font-cairo text-[14px] font-black text-[#111827]'>
                         {a.typeLabel}
                       </div>
+                      <span
+                        className={`flex gap-1 items-center h-[22px] rounded-[6px] px-3 font-cairo text-[11px] font-extrabold ${statusPill(a.status)}`}
+                      >
+                        <Clock className='h-3 w-3' />
+                        {a.status}
+                      </span>
                     </div>
                     <div className='mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]'>
                       موعد: {a.code}
                     </div>
                   </div>
-                </div>
 
-                <div className='flex-1'>
-                  <div className='flex items-center justify-between'>
-                    <div className='text-right'>
-                      <div className='inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                        <User className='h-4 w-4 text-primary' />
-                        {a.patientName}
+                  <div className='flex-1'>
+                    <div className='flex items-center justify-between'>
+                      <div className='text-right'>
+                        <div className='flex flex-col items-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
+                          <div className='flex items-center gap-2'>
+                            <User className='h-4 w-4 text-primary' />
+                            {a.patientName}
+                          </div>
+                        </div>
+                        <div className='mt-2 flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
+                          <Clock className='h-4 w-4 text-primary' />
+                          {a.time}
+                        </div>
                       </div>
-                      <div className='mt-2 inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                        <Clock className='h-4 w-4 text-primary' />
-                        {a.time}
+
+                      <div className='text-right'>
+                        <div className='flex flex-col items-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
+                          <div className='flex items-center gap-2'>
+                            <User className='h-4 w-4 text-primary' />
+                            {a.doctorName}
+                          </div>
+                        </div>
+                        <div className='mt-2 flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
+                          <CalendarDays className='h-4 w-4 text-primary' />
+                          {a.date}
+                        </div>
                       </div>
                     </div>
 
-                    <div className='text-right'>
-                      <div className='inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                        <User className='h-4 w-4 text-primary' />
-                        {a.doctorName}
-                      </div>
-                      <div className='mt-2 inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                        <CalendarDays className='h-4 w-4 text-primary' />
-                        {a.date}
-                      </div>
+                    <div className='mt-4 flex justify-end'>
+                      <button
+                        type='button'
+                        className='inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#4B5563]'
+                      >
+                        <Eye className='h-4 w-4' />
+                        عرض التفاصيل
+                      </button>
                     </div>
-                  </div>
-
-                  <div className='mt-4 flex justify-end'>
-                    <button
-                      type='button'
-                      className='inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#4B5563]'
-                    >
-                      <Eye className='h-4 w-4' />
-                      عرض التفاصيل
-                    </button>
                   </div>
                 </div>
               </div>

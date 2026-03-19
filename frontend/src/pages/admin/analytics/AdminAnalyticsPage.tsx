@@ -11,7 +11,7 @@ import {
 type StatCardTone = {
   border: string;
   icon: string;
-  iconBg: string;
+  bg: string;
   delta: string;
 };
 
@@ -32,8 +32,8 @@ export default function AdminAnalyticsPage() {
       icon: Eye,
       tone: {
         border: 'border-[#86EFAC]',
+        bg: 'bg-gradient-to-br from-[#F0FDF4] to-white',
         icon: 'text-[#16A34A]',
-        iconBg: 'bg-[#DCFCE7]',
         delta: 'text-[#16A34A]',
       },
     },
@@ -45,8 +45,8 @@ export default function AdminAnalyticsPage() {
       icon: FileText,
       tone: {
         border: 'border-[#67E8F9]',
+        bg: 'bg-gradient-to-br from-[#ECFEFF] to-white',
         icon: 'text-primary',
-        iconBg: 'bg-[#E7FBFA]',
         delta: 'text-primary',
       },
     },
@@ -58,8 +58,8 @@ export default function AdminAnalyticsPage() {
       icon: CalendarDays,
       tone: {
         border: 'border-[#86EFAC]',
+        bg: 'bg-gradient-to-br from-[#F0FDF4] to-white',
         icon: 'text-[#16A34A]',
-        iconBg: 'bg-[#DCFCE7]',
         delta: 'text-[#16A34A]',
       },
     },
@@ -71,8 +71,8 @@ export default function AdminAnalyticsPage() {
       icon: Users,
       tone: {
         border: 'border-[#67E8F9]',
+        bg: 'bg-gradient-to-br from-[#ECFEFF] to-white',
         icon: 'text-primary',
-        iconBg: 'bg-[#E7FBFA]',
         delta: 'text-primary',
       },
     },
@@ -114,7 +114,10 @@ export default function AdminAnalyticsPage() {
         <title>التحليلات • LMJ Health</title>
       </Helmet>
 
-      <div className='space-y-4' dir='rtl' lang='ar'>
+      <div
+        dir='rtl'
+        lang='ar'
+      >
         <div className='text-right'>
           <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
             التحليلات والإحصائيات
@@ -130,7 +133,7 @@ export default function AdminAnalyticsPage() {
             return (
               <div
                 key={c.id}
-                className={`rounded-[12px] border bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${c.tone.border}`}
+                className={`h-[147px] rounded-[12px] border px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${c.tone.border} ${c.tone.bg}`}
               >
                 <div className='flex items-start justify-between'>
                   <div className='text-right'>
@@ -140,15 +143,15 @@ export default function AdminAnalyticsPage() {
                     <div className='mt-2 font-cairo text-[22px] font-black leading-[26px] text-[#111827]'>
                       {c.value}
                     </div>
-                    <div className={`mt-2 font-cairo text-[11px] font-extrabold ${c.tone.delta}`}>
+                    <div
+                      className={`mt-2 font-cairo text-[11px] font-extrabold ${c.tone.delta}`}
+                    >
                       {c.delta}
                     </div>
                   </div>
 
-                  <div
-                    className={`flex h-[40px] w-[40px] items-center justify-center rounded-[10px] ${c.tone.iconBg}`}
-                  >
-                    <Icon className={`h-5 w-5 ${c.tone.icon}`} />
+                  <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[12px] bg-white'>
+                    <Icon className={`h-6 w-6 ${c.tone.icon}`} />
                   </div>
                 </div>
               </div>
@@ -159,8 +162,8 @@ export default function AdminAnalyticsPage() {
         <section className='mt-6 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='flex items-center justify-between px-6 py-5'>
             <div className='inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
-              تحليلات الأطباء
               <TrendingUp className='h-4 w-4 text-primary' />
+              تحليلات الأطباء
             </div>
           </div>
 
@@ -191,7 +194,10 @@ export default function AdminAnalyticsPage() {
                 </thead>
                 <tbody className='divide-y divide-[#EEF2F6]'>
                   {doctorRows.map((r) => (
-                    <tr key={r.id} className='bg-white'>
+                    <tr
+                      key={r.id}
+                      className='bg-white'
+                    >
                       <td className='px-4 py-4 text-right font-cairo text-[12px] font-extrabold text-[#111827]'>
                         {r.name}
                       </td>
@@ -219,7 +225,7 @@ export default function AdminAnalyticsPage() {
           </div>
         </section>
 
-        <section className='mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2'>
+        <section className='my-6 grid grid-cols-1 gap-6 lg:grid-cols-2'>
           <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='flex items-center justify-between'>
               <div className='inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
