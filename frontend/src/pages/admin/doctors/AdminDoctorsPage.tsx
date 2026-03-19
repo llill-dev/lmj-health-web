@@ -238,20 +238,20 @@ export default function AdminDoctorsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className='flex mt-5 justify-between'>
-                        <div className='flex flex-wrap items-center gap-4 text-[#98A2B3]'>
-                          <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
-                            <BadgeCheck className='h-4 w-4 text-primary' />
-                            {d.code}
-                          </div>
-                          <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
-                            <Mail className='h-4 w-4 text-primary' />
-                            {d.email}
-                          </div>
-                          <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
-                            <Phone className='h-4 w-4 text-primary' />
-                            {d.phone}
-                          </div>
+                    </div>
+                    <div className='flex mt-5 justify-between'>
+                      <div className='flex flex-wrap items-center gap-4 text-[#98A2B3]'>
+                        <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
+                          <BadgeCheck className='h-4 w-4 text-primary' />
+                          {d.code}
+                        </div>
+                        <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
+                          <Mail className='h-4 w-4 text-primary' />
+                          {d.email}
+                        </div>
+                        <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
+                          <Phone className='h-4 w-4 text-primary' />
+                          {d.phone}
                         </div>
                       </div>
                     </div>

@@ -139,26 +139,6 @@ export default function AdminPatientsPage() {
                         >
                           {p.status}
                         </div>
-
-                        <div className='w-[190px] shrink-0 border-[#EEF2F6] bg-white px-5'>
-                          <div className='space-y-3'>
-                            <button
-                              type='button'
-                              className='flex h-[34px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] font-cairo text-[12px] font-extrabold text-[#111827]'
-                            >
-                              <Eye className='h-4 w-4 text-[#667085]' />
-                              عرض التفاصيل
-                            </button>
-
-                            <button
-                              type='button'
-                              className='flex h-[34px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316]'
-                            >
-                              <Ban className='h-4 w-4' />
-                              تعليق الحساب
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     </div>
 
@@ -181,14 +161,35 @@ export default function AdminPatientsPage() {
                       </div>
                     </div>
 
-                    <div className='mt-4 rounded-[10px] bg-[#F9FAFB] px-4 py-3'>
-                      <div className='flex items-center justify-between'>
-                        <div className='flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#111827]'>
-                          <Activity className='h-4 w-4 text-primary' />
-                          {p.appointmentsCount} مواعيد
-                          <span className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
-                            ({p.pendingAppointmentsCount} محتمل)
-                          </span>
+                    <div className='flex items-end justify-between'>
+                      <div className='mt-4 rounded-[10px] bg-[#F9FAFB] px-4 py-3'>
+                        <div className='flex items-center justify-between'>
+                          <div className='flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#111827]'>
+                            <Activity className='h-4 w-4 text-primary' />
+                            {p.appointmentsCount} مواعيد
+                            <span className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
+                              ({p.pendingAppointmentsCount} محتمل)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className='border-[#EEF2F6] bg-white px-5'>
+                        <div className='flex gap-2'>
+                          <button
+                            type='button'
+                            className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] font-cairo text-[12px] font-extrabold text-[#111827]'
+                          >
+                            <Eye className='h-4 w-4 text-[#667085]' />
+                            عرض التفاصيل
+                          </button>
+
+                          <button
+                            type='button'
+                            className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316]'
+                          >
+                            <Ban className='h-4 w-4' />
+                            تعليق الحساب
+                          </button>
                         </div>
                       </div>
                     </div>
