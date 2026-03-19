@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronsRight, LogOut, Stethoscope } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   adminSidebarItems,
@@ -23,9 +23,6 @@ export default function Sidebar({
   onToggleCollapse?: () => void;
   onLogout?: () => void;
 }) {
-  const [isHovering, setIsHovering] = useState(false);
-  const effectiveCollapsed = collapsed && !isHovering;
-
   const navItems = useMemo(() => {
     return role === 'admin' ? adminSidebarItems : sidebarItems;
   }, [role]);
@@ -36,25 +33,12 @@ export default function Sidebar({
     (active as (SidebarItemId | AdminSidebarItemId) | undefined) ??
     (role === 'admin' ? 'overview' : 'dashboard');
 
-  const handleCollapse = () => {
-    setIsHovering(false);
-    if (!collapsed) {
-      onToggleCollapse?.();
-    }
-  };
-
   return (
     <aside
       dir='rtl'
       lang='ar'
-      onMouseEnter={() => {
-        if (collapsed) setIsHovering(true);
-      }}
-      onMouseLeave={() => {
-        if (collapsed) setIsHovering(false);
-      }}
       className={
-        effectiveCollapsed
+        collapsed
           ? 'relative z-50 h-screen w-[88px] shrink-0 border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] transition-[width] duration-300'
           : 'relative z-50 h-screen w-[320px] shrink-0 border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] transition-[width] duration-300'
       }
@@ -62,43 +46,49 @@ export default function Sidebar({
       <div className='flex h-full flex-col'>
         <div
           className={
-            effectiveCollapsed
+            collapsed
               ? 'px-[16px] pt-[16px] pb-[16px] border-b-[1.82px] border-b-[#E5E7EB]'
               : 'px-[24px] pt-[24px] pb-[24px] border-b-[1.82px] border-b-[#E5E7EB]'
           }
         >
           <div className='flex items-start justify-between'>
             <div className='flex items-center gap-2'>
-              <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
-                <Stethoscope className='h-6 w-6 text-white' />
-              </div>
-              {!effectiveCollapsed ? (
-                <div className='flex flex-col items-center text-center'>
-                  <div className='font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
-                    LMJ HEALTH
+              {!collapsed ? (
+                <>
+                  <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
+                    <Stethoscope className='h-6 w-6 text-white' />
                   </div>
-                  <div className='mt-1 font-cairo text-[12px] font-bold leading-[14px] text-primary'>
-                    {role === 'admin' ? 'بوابة الإدارة' : 'بوابة الطبيب'}
+                  <div className='flex flex-col items-center text-center'>
+                    <div className='font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
+                      LMJ HEALTH
+                    </div>
+                    <div className='mt-1 font-cairo text-[12px] font-bold leading-[14px] text-primary'>
+                      {role === 'admin' ? 'بوابة الإدارة' : 'بوابة الطبيب'}
+                    </div>
                   </div>
-                </div>
+                </>
               ) : null}
             </div>
 
             <div className='flex items-center gap-2'>
-              {!effectiveCollapsed ? (
-                <button
-                  type='button'
-                  onClick={handleCollapse}
-                  className='mt-1 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
-                  aria-label='طي القائمة'
-                >
-                  <ChevronsRight className='h-5 w-5' />
-                </button>
-              ) : null}
+              <button
+                type='button'
+                onClick={onToggleCollapse}
+                className={
+                  collapsed
+                    ? 'mt-1 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
+                    : 'mt-1 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
+                }
+                aria-label={collapsed ? 'فتح القائمة' : 'طي القائمة'}
+              >
+                <ChevronsRight
+                  className={collapsed ? 'h-5 w-5 rotate-180' : 'h-5 w-5'}
+                />
+              </button>
             </div>
           </div>
 
-          {!effectiveCollapsed ? (
+          {!collapsed ? (
             <div className='mt-6 rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
               <div className='flex items-center gap-3'>
                 <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15,143,139,0.30)]'>
@@ -123,7 +113,7 @@ export default function Sidebar({
 
         <nav
           className={
-            effectiveCollapsed
+            collapsed
               ? 'flex-1 overflow-y-auto scrollbar-hide p-3'
               : 'flex-1 overflow-y-auto scrollbar-hide p-[15.99px]'
           }
@@ -139,17 +129,17 @@ export default function Sidebar({
                   to={`${basePath}/${item.path}`}
                   className={
                     isActive
-                      ? effectiveCollapsed
+                      ? collapsed
                         ? 'relative flex w-full items-center justify-center rounded-[10px] bg-primary px-3 py-3 text-white shadow-[0_12px_24px_rgba(15,143,139,0.30)]'
                         : 'relative flex w-full items-center rounded-[6px] bg-primary px-4 py-[10px] text-white shadow-[0_12px_24px_rgba(15,143,139,0.30)]'
-                      : effectiveCollapsed
+                      : collapsed
                         ? 'relative flex w-full items-center justify-center rounded-[10px] px-3 py-3 text-[#344054] hover:bg-[#F2F4F7]'
                         : 'relative flex w-full items-center rounded-[6px] px-4 py-[10px] text-[#344054] hover:bg-[#F2F4F7]'
                   }
                 >
                   <div
                     className={
-                      effectiveCollapsed
+                      collapsed
                         ? 'flex items-center'
                         : 'flex items-center gap-3'
                     }
@@ -161,7 +151,7 @@ export default function Sidebar({
                           : 'h-[18px] w-[18px] text-[#4A5565]'
                       }
                     />
-                    {!effectiveCollapsed ? (
+                    {!collapsed ? (
                       <span
                         className={
                           isActive
@@ -174,7 +164,7 @@ export default function Sidebar({
                     ) : null}
                   </div>
 
-                  {!effectiveCollapsed && typeof item.badge === 'number' ? (
+                  {!collapsed && typeof item.badge === 'number' ? (
                     <div
                       className={
                         isActive
@@ -184,7 +174,7 @@ export default function Sidebar({
                     >
                       {item.badge}
                     </div>
-                  ) : !effectiveCollapsed ? (
+                  ) : !collapsed ? (
                     <span className='ms-auto w-6' />
                   ) : null}
                 </Link>
@@ -195,7 +185,7 @@ export default function Sidebar({
 
         <div
           className={
-            effectiveCollapsed
+            collapsed
               ? 'border-t-[1.82px] border-t-[#E5E7EB] p-3'
               : 'h-[69.8px] border-t-[1.82px] border-t-[#E5E7EB] px-[16px] py-[17.81px]'
           }
@@ -204,13 +194,13 @@ export default function Sidebar({
             type='button'
             onClick={onLogout}
             className={
-              effectiveCollapsed
+              collapsed
                 ? 'flex w-full items-center justify-center rounded-[10px] p-3 text-[#E11D48] hover:bg-[#FFF1F2] hover:text-[#BE123C]'
                 : 'flex w-full items-center justify-start gap-2 font-cairo text-[14px] font-extrabold text-[#E11D48] hover:text-[#BE123C]'
             }
           >
             <LogOut className='h-4 w-4' />
-            {!effectiveCollapsed ? 'تسجيل الخروج' : null}
+            {!collapsed ? 'تسجيل الخروج' : null}
           </button>
         </div>
       </div>
