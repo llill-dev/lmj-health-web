@@ -14,8 +14,21 @@ import {
   CheckCheck,
 } from 'lucide-react';
 import { useMemo } from 'react';
+import { useState } from 'react';
+import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVerificationRequestDialog';
 
 export default function AdminVerificationRequestsPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<
+    'approve' | 'reject' | 'map'
+  >('map');
+  const [selected, setSelected] = useState<{
+    id: string;
+    doctor: string;
+    lat: string;
+    lng: string;
+  } | null>(null);
+
   const stats = [
     {
       title: 'إجمالي الأطباء',
@@ -222,6 +235,11 @@ export default function AdminVerificationRequestsPage() {
                   <div className='mt-4 flex flex-wrap items-center justify-start gap-3'>
                     <button
                       type='button'
+                      onClick={() => {
+                        setSelected(r);
+                        setDialogMode('approve');
+                        setDialogOpen(true);
+                      }}
                       className='inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-[#00C950] px-5 font-cairo text-[12px] font-extrabold text-white'
                     >
                       <CheckCheck className='h-4 w-4' />
@@ -229,6 +247,11 @@ export default function AdminVerificationRequestsPage() {
                     </button>
                     <button
                       type='button'
+                      onClick={() => {
+                        setSelected(r);
+                        setDialogMode('reject');
+                        setDialogOpen(true);
+                      }}
                       className='inline-flex h-[34px] items-center gap-2 rounded-[8px] border-[1.82px] border-[#FCA5A5] bg-white px-5 font-cairo text-[12px] font-extrabold text-[#EF4444]'
                     >
                       <X className='h-4 w-4' />
@@ -236,6 +259,11 @@ export default function AdminVerificationRequestsPage() {
                     </button>
                     <button
                       type='button'
+                      onClick={() => {
+                        setSelected(r);
+                        setDialogMode('map');
+                        setDialogOpen(true);
+                      }}
                       className='inline-flex h-[34px] items-center gap-2 rounded-[8px] border-[1.82px] border-primary bg-white px-5 font-cairo text-[12px] font-extrabold text-primary'
                     >
                       <MapPin className='h-4 w-4' />
@@ -247,6 +275,16 @@ export default function AdminVerificationRequestsPage() {
             </div>
           </div>
         </section>
+
+        <ReviewVerificationRequestDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          requestId={selected?.id ?? null}
+          doctorName={selected?.doctor ?? ''}
+          lat={selected?.lat}
+          lng={selected?.lng}
+          mode={dialogMode}
+        />
       </div>
     </>
   );

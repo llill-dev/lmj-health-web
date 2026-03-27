@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 import { Filter, Search } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import SuspendAccountDialog from '@/components/admin/dialogs/SuspendAccountDialog';
 
 type PatientStatus = 'نشط' | 'معلق' | 'موقوف';
 
@@ -28,6 +31,13 @@ type PatientCard = {
 };
 
 export default function AdminPatientsPage() {
+  const navigate = useNavigate();
+  const [suspendOpen, setSuspendOpen] = useState(false);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null,
+  );
+  const [selectedPatientLabel, setSelectedPatientLabel] = useState('');
+
   const patients: PatientCard[] = [
     {
       name: 'أحمد محمد العلي',
@@ -177,6 +187,11 @@ export default function AdminPatientsPage() {
                         <div className='flex gap-2'>
                           <button
                             type='button'
+                            onClick={() =>
+                              navigate(
+                                `/admin/patients/${encodeURIComponent(p.email)}`,
+                              )
+                            }
                             className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] font-cairo text-[12px] font-extrabold text-[#111827]'
                           >
                             <Eye className='h-4 w-4 text-[#667085]' />
@@ -185,6 +200,11 @@ export default function AdminPatientsPage() {
 
                           <button
                             type='button'
+                            onClick={() => {
+                              setSelectedPatientId(p.email);
+                              setSelectedPatientLabel(p.name);
+                              setSuspendOpen(true);
+                            }}
                             className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316]'
                           >
                             <Ban className='h-4 w-4' />
@@ -202,6 +222,14 @@ export default function AdminPatientsPage() {
 
         <div className='h-8' />
       </div>
+
+      <SuspendAccountDialog
+        open={suspendOpen}
+        onOpenChange={setSuspendOpen}
+        kind='patient'
+        targetId={selectedPatientId}
+        targetLabel={selectedPatientLabel}
+      />
     </>
   );
 }

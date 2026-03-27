@@ -7,6 +7,9 @@ import {
   AlertTriangle,
   Users,
 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { get } from '@/lib/base';
 
 type SystemLog = {
   id: string;
@@ -19,6 +22,8 @@ type SystemLog = {
 };
 
 export default function AdminSystemLogsPage() {
+  const [q, setQ] = useState('');
+
   const stats = [
     {
       title: 'هذا الأسبوع',
@@ -114,6 +119,58 @@ export default function AdminSystemLogsPage() {
     },
   ];
 
+  const auditQuery = useQuery({
+    queryKey: ['admin', 'audit-logs', q],
+    queryFn: async () => {
+      // ABI: System-wide audit logs are admin-only via GET /admin/audit-logs
+      // With API base URL = /api, the full path becomes /api/admin/audit-logs
+      const params = new URLSearchParams();
+      params.set('page', '1');
+      params.set('limit', '20');
+      if (q.trim()) params.set('q', q.trim());
+
+      return await get<any>(`/api/admin/audit-logs?${params.toString()}`, {
+        locale: 'ar',
+      });
+    },
+    staleTime: 10_000,
+  });
+
+  const resolvedLogs: SystemLog[] = useMemo(() => {
+    const apiLogs: any[] =
+      auditQuery.data?.auditLogs ||
+      auditQuery.data?.logs ||
+      auditQuery.data?.items ||
+      [];
+
+    if (Array.isArray(apiLogs) && apiLogs.length) {
+      return apiLogs.map((l: any, idx: number) => ({
+        id: String(l._id || l.id || idx),
+        action: String(l.action || l.event || l.actionKey || l.actionName || '—'),
+        actorName: String(
+          l.actorUserName || l.actorName || l.userName || l.performedByName || '—',
+        ),
+        actorRole:
+          (l.actorRole === 'admin'
+            ? 'مدير'
+            : l.actorRole === 'doctor'
+              ? 'طبيب'
+              : l.actorRole === 'secretary'
+                ? 'سكرتير'
+                : 'مدير') as SystemLog['actorRole'],
+        createdAt: String(l.createdAt || l.time || l.timestamp || '—'),
+        ip: String(l.ip || '—'),
+        details: String(
+          l.route
+            ? `${l.method || ''} ${l.route}`.trim()
+            : l.details || l.message || '—',
+        ),
+      }));
+    }
+
+    return logs;
+  }, [auditQuery.data, logs]);
+
   const actionPill = (action: string) => {
     return 'border border-[#E5E7EB] bg-white text-[#344054]';
   };
@@ -177,12 +234,19 @@ export default function AdminSystemLogsPage() {
             <div className='relative'>
               <input
                 placeholder='بحث في السجلات...'
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
                 className='h-[56px] w-full rounded-[12px] border border-[#EEF2F6] bg-white pe-14 ps-5 text-right font-cairo text-[13px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
               />
               <div className='pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
                 <Search className='h-5 w-5' />
               </div>
             </div>
+            {auditQuery.isFetching ? (
+              <div className='mt-3 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                جارِ تحديث السجلات...
+              </div>
+            ) : null}
           </div>
 
           <div className='grid grid-cols-12 px-6 py-4 font-cairo text-[13px] font-extrabold text-[#667085]'>
@@ -194,7 +258,7 @@ export default function AdminSystemLogsPage() {
           </div>
 
           <div className='divide-y divide-[#EEF2F6]'>
-            {logs.map((l) => (
+            {resolvedLogs.map((l) => (
               <div
                 key={l.id}
                 className='grid grid-cols-12 px-6 py-5'

@@ -9,6 +9,13 @@ import {
   Eye,
   AlertCircle,
 } from 'lucide-react';
+import { useState } from 'react';
+import {
+  ConfirmActionDialog,
+  CancelAppointmentDialog,
+} from '../../../components/admin/dialogs';
+import AdminAppointmentDetailsDialog from '@/components/admin/dialogs/AdminAppointmentDetailsDialog';
+import { adminApi } from '@/lib/admin/client';
 
 type AppointmentStatus = 'مجدولة' | 'مكتملة' | 'عدم حضور' | 'ملغية';
 
@@ -24,6 +31,14 @@ type AppointmentCard = {
 };
 
 export default function AdminAppointmentsPage() {
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
+  const [cancelAppointmentOpen, setCancelAppointmentOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<AppointmentCard | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    string | null
+  >(null);
   const stats = [
     {
       title: 'ملغية',
@@ -166,6 +181,7 @@ export default function AdminAppointmentsPage() {
             <div className='flex items-center gap-3'>
               <button
                 type='button'
+                onClick={() => setConfirmResetOpen(true)}
                 className='inline-flex h-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]'
               >
                 إعادة تعيين
@@ -234,9 +250,24 @@ export default function AdminAppointmentsPage() {
                       </div>
                     </div>
 
-                    <div className='mt-4 flex justify-end'>
+                    <div className='mt-4 flex justify-end gap-2'>
                       <button
                         type='button'
+                        onClick={() => {
+                          setSelectedAppointment(a);
+                          setCancelAppointmentOpen(true);
+                        }}
+                        className='inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#FEF2F2] px-4 font-cairo text-[12px] font-extrabold text-[#EF4444]'
+                      >
+                        <AlertCircle className='h-4 w-4' />
+                        إلغاء الموعد
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setSelectedAppointmentId(a.id);
+                          setDetailsOpen(true);
+                        }}
                         className='inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#4B5563]'
                       >
                         <Eye className='h-4 w-4' />
@@ -249,6 +280,33 @@ export default function AdminAppointmentsPage() {
             </div>
           ))}
         </section>
+
+        <ConfirmActionDialog
+          open={confirmResetOpen}
+          onOpenChange={setConfirmResetOpen}
+          title='إعادة تعيين المواعيد'
+          description='هل أنت متأكد من أنك تريد إعادة تعيين جميع المواعيد؟ هذا الإجراء لا يمكن التراجع عنه.'
+          confirmLabel='إعادة تعيين'
+          onConfirm={async () => {
+            console.log('Reset appointments confirmed');
+          }}
+        />
+
+        <CancelAppointmentDialog
+          open={cancelAppointmentOpen}
+          onOpenChange={setCancelAppointmentOpen}
+          targetName={selectedAppointment?.patientName || ''}
+          onConfirm={async (reason) => {
+            if (!selectedAppointment?.id) return;
+            await adminApi.appointments.cancel(selectedAppointment.id, reason);
+          }}
+        />
+
+        <AdminAppointmentDetailsDialog
+          open={detailsOpen}
+          onOpenChange={setDetailsOpen}
+          appointmentId={selectedAppointmentId}
+        />
       </div>
     </>
   );
