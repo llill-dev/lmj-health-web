@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/layout/sidebar';
-import DashboardHeader from '@/components/doctor/dashboard-header';
+import AdminHeader from '@/components/admin/AdminHeader';
 import {
   adminSidebarItems,
   type AdminSidebarItemId,
@@ -31,9 +31,9 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
       <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
         <main className='flex h-screen flex-1 flex-col'>
           <div className='sticky top-0 z-40'>
-            <DashboardHeader
-              title='لوحة التحكم الرئيسية'
-              subtitle='لوحة التحكم الشاملة لإدارة المنصة'
+            <AdminHeader
+              title='لوحة التحكم'
+              subtitle='مرحباً، المدير (وضع العرض)'
             />
           </div>
           <div className='flex-1 overflow-y-auto py-8 bg-white scrollbar-hide'>

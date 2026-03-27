@@ -10,6 +10,7 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
+import { useNavigate } from 'react-router-dom';
 
 type DoctorStatus = 'مرفوض' | 'معلّق' | 'مقبول' | 'إجمالي الأطباء';
 
@@ -25,6 +26,7 @@ type DoctorCard = {
 };
 
 export default function AdminDoctorsPage() {
+  const navigate = useNavigate();
   const stats: Array<{
     title: DoctorStatus;
     value: number;
@@ -284,6 +286,9 @@ export default function AdminDoctorsPage() {
                   </div>
                   <button
                     type='button'
+                    onClick={() =>
+                      navigate(`/admin/doctors/${encodeURIComponent(d.code)}`)
+                    }
                     className='flex w-[54px] shrink-0 items-center justify-center bg-primary text-white'
                     aria-label='فتح ملف الطبيب'
                   >

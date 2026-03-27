@@ -9,6 +9,9 @@ import {
   Users,
 } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import SuspendAccountDialog from '@/components/admin/dialogs/SuspendAccountDialog';
 
 type SecretaryStatus = 'نشط' | 'معلق' | 'موقوف';
 
@@ -23,6 +26,13 @@ type SecretaryCard = {
 };
 
 export default function AdminSecretariesPage() {
+  const navigate = useNavigate();
+  const [suspendOpen, setSuspendOpen] = useState(false);
+  const [selectedSecretaryId, setSelectedSecretaryId] = useState<string | null>(
+    null,
+  );
+  const [selectedSecretaryLabel, setSelectedSecretaryLabel] = useState('');
+
   const secretaries: SecretaryCard[] = [
     {
       name: 'فاطمة أحمد',
@@ -108,6 +118,11 @@ export default function AdminSecretariesPage() {
                     <div className='flex items-center gap-3'>
                       <button
                         type='button'
+                        onClick={() => {
+                          setSelectedSecretaryId(s.email);
+                          setSelectedSecretaryLabel(s.name);
+                          setSuspendOpen(true);
+                        }}
                         className='flex h-[34px] w-[100px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316]'
                       >
                         <Ban className='h-4 w-4' />
@@ -157,18 +172,33 @@ export default function AdminSecretariesPage() {
                       {' '}
                       <button
                         type='button'
+                        onClick={() =>
+                          navigate(
+                            `/admin/secretaries/${encodeURIComponent(s.email)}/appointments/manage`,
+                          )
+                        }
                         className='h-[30px] rounded-[8px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[12px] font-extrabold text-primary'
                       >
                         إدارة المواعيد
                       </button>
                       <button
                         type='button'
+                        onClick={() =>
+                          navigate(
+                            `/admin/secretaries/${encodeURIComponent(s.email)}/appointments`,
+                          )
+                        }
                         className='h-[30px] rounded-[8px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[12px] font-extrabold text-primary'
                       >
                         عرض المواعيد
                       </button>
                       <button
                         type='button'
+                        onClick={() =>
+                          navigate(
+                            `/admin/secretaries/${encodeURIComponent(s.email)}/appointments/manage`,
+                          )
+                        }
                         className='h-[30px] rounded-[8px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[12px] font-extrabold text-primary'
                       >
                         إلغاء المواعيد
@@ -179,6 +209,11 @@ export default function AdminSecretariesPage() {
                         type='button'
                         className='ms-auto flex h-[40px] w-[40px] items-center justify-center rounded-[12px] bg-primary text-white'
                         aria-label='فتح ملف السكرتير'
+                        onClick={() =>
+                          navigate(
+                            `/admin/secretaries/${encodeURIComponent(s.email)}`,
+                          )
+                        }
                       >
                         <ChevronLeft className='h-5 w-5' />
                       </button>
@@ -192,6 +227,14 @@ export default function AdminSecretariesPage() {
 
         <div className='h-8' />
       </div>
+
+      <SuspendAccountDialog
+        open={suspendOpen}
+        onOpenChange={setSuspendOpen}
+        kind='secretary'
+        targetId={selectedSecretaryId}
+        targetLabel={selectedSecretaryLabel}
+      />
     </>
   );
 }

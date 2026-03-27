@@ -28,6 +28,11 @@ import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage';
 import AdminDoctorsPage from '@/pages/admin/doctors/AdminDoctorsPage';
 import AdminPatientsPage from '@/pages/admin/patients/AdminPatientsPage';
 import AdminSecretariesPage from '@/pages/admin/secretaries/AdminSecretariesPage';
+import AdminPatientDetailsPage from '@/pages/admin/patients/AdminPatientDetailsPage';
+import AdminDoctorDetailsPage from '@/pages/admin/doctors/AdminDoctorDetailsPage';
+import AdminSecretaryDetailsPage from '@/pages/admin/secretaries/AdminSecretaryDetailsPage';
+import AdminSecretaryAppointmentsPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsPage';
+import AdminSecretaryAppointmentsManagementPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsManagementPage';
 import AdminMedicalContentPage from '@/pages/admin/medical-content/AdminMedicalContentPage';
 import AdminContentReviewPage from '@/pages/admin/content-review/AdminContentReviewPage';
 import AdminMedicalNewsPage from '@/pages/admin/medical-news/AdminMedicalNewsPage';
@@ -149,12 +154,32 @@ export default function App() {
               element={<AdminDoctorsPage />}
             />
             <Route
+              path='doctors/:doctorId'
+              element={<AdminDoctorDetailsPage />}
+            />
+            <Route
               path='patients'
               element={<AdminPatientsPage />}
             />
             <Route
+              path='patients/:patientId'
+              element={<AdminPatientDetailsPage />}
+            />
+            <Route
               path='secretaries'
               element={<AdminSecretariesPage />}
+            />
+            <Route
+              path='secretaries/:secretaryId'
+              element={<AdminSecretaryDetailsPage />}
+            />
+            <Route
+              path='secretaries/:secretaryId/appointments'
+              element={<AdminSecretaryAppointmentsPage />}
+            />
+            <Route
+              path='secretaries/:secretaryId/appointments/manage'
+              element={<AdminSecretaryAppointmentsManagementPage />}
             />
             <Route
               path='medical-content'

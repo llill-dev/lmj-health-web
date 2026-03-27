@@ -82,11 +82,11 @@ export default function AdminDashboardPage() {
                 className='relative overflow-hidden rounded-[12px] bg-primary px-5 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
               >
                 <div className='flex items-start justify-between'>
+                  <div className='flex h-[34px] w-[34px] items-center justify-center  rounded-[6px] bg-[#FFFFFF33]'>
+                    <Icon className='h-[18px] w-[18px] text-white' />
+                  </div>
                   <div className='inline-flex h-[26px] items-center justify-center rounded-full bg-white/15 px-3 font-cairo text-[11px] font-extrabold text-white'>
                     {c.badge}
-                  </div>
-                  <div className='flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-white/12'>
-                    <Icon className='h-[18px] w-[18px] text-white' />
                   </div>
                 </div>
 
@@ -146,7 +146,9 @@ export default function AdminDashboardPage() {
                   <div
                     className={`flex h-[40px] w-[40px] items-center justify-center rounded-[12px] ${c.iconBg}`}
                   >
-                    <Icon className={`h-[18px] w-[18px] ${c.iconColor}`} />
+                    <Icon
+                      className={`h-[18px] w-[18px] ${c.iconColor}`}
+                    />
                   </div>
                 </div>
               </div>

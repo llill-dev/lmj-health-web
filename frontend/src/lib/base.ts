@@ -153,5 +153,16 @@ export const put = <T = any>(
     body: body instanceof FormData ? body : JSON.stringify(body),
   });
 
+export const patch = <T = any>(
+  endpoint: string,
+  body?: any,
+  options?: ApiOptions,
+) =>
+  apiRequest<T>(endpoint, {
+    ...options,
+    method: 'PATCH',
+    body: body instanceof FormData ? body : JSON.stringify(body),
+  });
+
 export const del = <T = any>(endpoint: string, options?: ApiOptions) =>
   apiRequest<T>(endpoint, { ...options, method: 'DELETE' });
