@@ -50,13 +50,13 @@ export default function NewPassword({
 
   return (
     <section className='mx-auto flex flex-col items-center'>
-      <div>
+      <div className='my-[50px]'>
         <img
-          src='/images/logo.png'
+          src='/images/syr-health-logo.png'
           alt='LMJ Health'
           width={300}
           height={200}
-          className='max-h-[200px] -mt-8'
+          className='max-h-[200px]'
           loading='eager'
         />
       </div>

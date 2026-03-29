@@ -19,9 +19,9 @@ import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVe
 
 export default function AdminVerificationRequestsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState<
-    'approve' | 'reject' | 'map'
-  >('map');
+  const [dialogMode, setDialogMode] = useState<'approve' | 'reject' | 'map'>(
+    'map',
+  );
   const [selected, setSelected] = useState<{
     id: string;
     doctor: string;
@@ -228,7 +228,7 @@ export default function AdminVerificationRequestsPage() {
 
                   <div className='mt-5 rounded-[12px] bg-[#F2F4F7] px-4 py-10' />
 
-                  <div className='mt-4 text-right font-mono text-[12px] font-semibold text-[#98A2B3]'>
+                  <div className='mt-4 text-right font-cairo text-[12px] font-semibold text-[#98A2B3]'>
                     Lat: {r.lat}, Lng: {r.lng}
                   </div>
 
