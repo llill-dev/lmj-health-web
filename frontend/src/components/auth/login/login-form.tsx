@@ -110,7 +110,7 @@ export default function LoginForm({
   });
 
   return (
-    <section className='mx-auto bg-[#14B3AE] min-h-svh flex flex-col items-center'>
+    <section className='mx-auto min-h-svh flex flex-col items-center'>
       <div className='my-[50px]'>
         <img
           src='/images/syr-health-logo.png'

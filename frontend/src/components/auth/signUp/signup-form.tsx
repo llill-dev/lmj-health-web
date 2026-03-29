@@ -133,8 +133,8 @@ export default function SignUpForm({
   };
 
   return (
-    <section className='mx-auto bg-[#14B3AE] flex flex-col items-center'>
-      <div>
+    <section className='mx-auto flex flex-col items-center'>
+      <div className='my-[10px]'>
         <img
           src='/images/syr-health-logo.png'
           alt='LMJ Health'

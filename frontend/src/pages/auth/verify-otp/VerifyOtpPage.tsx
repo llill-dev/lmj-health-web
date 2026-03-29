@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import VerifyAccount from '@/components/auth/verify/verify-account';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/lib/auth/client';
+import AuthBackground from '@/components/auth/AuthBackground';
 
 function VerifyOtpContent() {
   const navigate = useNavigate();
@@ -44,9 +45,11 @@ export default function VerifyOtpPage() {
       <Helmet>
         <title>Verify OTP • LMJ Health</title>
       </Helmet>
-      <Suspense fallback={null}>
-        <VerifyOtpContent />
-      </Suspense>
+      <AuthBackground>
+        <Suspense fallback={null}>
+          <VerifyOtpContent />
+        </Suspense>
+      </AuthBackground>
     </>
   );
 }
