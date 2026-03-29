@@ -30,11 +30,20 @@ interface UserProfile {
   };
 }
 
+interface PendingVerification {
+  userId: string;
+  role: User['role'];
+  email: string;
+  phone: string;
+  channel: 'email' | 'whatsapp';
+}
+
 interface AuthState {
   user: User | null;
   userProfile: UserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
+  pendingVerification: PendingVerification | null;
   // General/settings
   platformName: string;
   primaryEmail: string;
@@ -56,6 +65,7 @@ interface AuthState {
     password: string,
     role: 'jobseeker' | 'company' | 'doctor',
   ) => Promise<void>;
+  setPendingVerification: (payload: PendingVerification | null) => void;
   logout: () => void;
   setAuth: (payload: {
     user: Partial<User> & {
@@ -135,6 +145,7 @@ let state: AuthState = {
   userProfile: null,
   token: null,
   isAuthenticated: false,
+  pendingVerification: null,
   platformName: 'JobFind',
   primaryEmail: '',
   phone: '',
@@ -196,11 +207,15 @@ let state: AuthState = {
   },
   login: async () => {},
   register: async () => {},
+  setPendingVerification: (payload) => {
+    setState({ pendingVerification: payload });
+  },
   logout: () => {
     setState({
       user: null,
       token: null,
       isAuthenticated: false,
+      pendingVerification: null,
       userProfile: null,
     });
     writePersistedToken(null);
