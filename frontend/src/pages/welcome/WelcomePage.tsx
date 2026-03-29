@@ -74,11 +74,11 @@ export default function WelcomePage() {
           </div>
 
           <div className='flex h-[235px] w-[345px] flex-col items-center justify-center rounded-[6px] border-[1.82px] border-white border-t-[1.82px] bg-[#FFFFFFCC] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]'>
-            <h1 className='bg-[#101828] bg-clip-text text-center font-cairo text-[24px] font-bold leading-[32px] text-transparent'>
+            <h1 className='bg-[#101828] bg-clip-text text-center text-[24px] font-bold leading-[32px] text-transparent'>
               مرحبًا بك في عالم الصحة
             </h1>
 
-            <p className='mt-4 text-center font-cairo text-[14px] font-bold leading-[24.8px] text-[#4A5565]'>
+            <p className='mt-4 text-center text-[14px] font-bold leading-[24.8px] text-[#4A5565]'>
               ابدأ رحلتك في البحث عن طبيبك المناسب
               <br />
               واحصل على رعاية صحية متكاملة ومتطورة
@@ -90,7 +90,7 @@ export default function WelcomePage() {
 
             <div className='mt-5 flex items-center justify-center'>
               <button
-                className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-primary pl-[0.03px] font-cairo text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
+                className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-primary pl-[0.03px] text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
                 type='button'
                 onClick={() => navigate('/login')}
               >

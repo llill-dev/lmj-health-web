@@ -1,9 +1,11 @@
+@import '@fontsource/cairo';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    --font-cairo: 'Cairo', system-ui, sans-serif;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -52,7 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased overflow-x-hidden;
+    @apply bg-background text-foreground antialiased overflow-x-hidden font-cairo;
   }
 }
 
@@ -92,6 +94,9 @@ html {
 }
 
 @layer utilities {
+  .font-cairo {
+    font-family: 'Cairo', system-ui, sans-serif;
+  }
   .scrollbar-hide {
     -ms-overflow-style: none;
     -moz-overflow-style: none;
