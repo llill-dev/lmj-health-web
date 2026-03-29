@@ -37,6 +37,7 @@ export async function apiRequest<T = any>(
   const isFormData = rest.body instanceof FormData;
 
   const finalHeaders: HeadersInit = {
+    ...(!('x-lang' in ((headers || {}) as any)) ? { 'x-lang': locale } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(headers || {}),
   };

@@ -16,10 +16,12 @@ export default function VerifyAccount({
   email,
   onBack,
   onVerify,
+  onResend,
 }: {
   email: string;
   onBack: () => void;
   onVerify?: (code: string) => void;
+  onResend?: () => void | Promise<void>;
 }) {
   const {
     handleSubmit,
@@ -37,6 +39,7 @@ export default function VerifyAccount({
     Array.from({ length: 6 }, () => ''),
   );
   const [secondsLeft, setSecondsLeft] = useState<number>(60);
+  const [isResending, setIsResending] = useState(false);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -165,7 +168,27 @@ export default function VerifyAccount({
               </div>
 
               <div className='mt-8 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]'>
-                أعد إرسال الرمز خلال {secondsLeft} ثانية
+                {secondsLeft > 0 ? (
+                  <>أعد إرسال الرمز خلال {secondsLeft} ثانية</>
+                ) : (
+                  <button
+                    type='button'
+                    disabled={isResending}
+                    onClick={async () => {
+                      if (!onResend) return;
+                      setIsResending(true);
+                      try {
+                        await onResend();
+                        setSecondsLeft(60);
+                      } finally {
+                        setIsResending(false);
+                      }
+                    }}
+                    className='text-primary transition-colors hover:text-[#14B3AE] disabled:opacity-60'
+                  >
+                    إعادة إرسال الرمز
+                  </button>
+                )}
               </div>
             </form>
           </div>
