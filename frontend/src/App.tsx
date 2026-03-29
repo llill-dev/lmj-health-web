@@ -54,235 +54,237 @@ export default function App() {
   const isAdminArea = location.pathname.startsWith('/admin');
 
   return (
-    <AnimatePresence mode='wait'>
-      {isDoctorArea ? (
-        <Routes location={location}>
-          <Route
-            path='/'
-            element={
-              <DoctorLayout>
-                <DashboardPage />
-              </DoctorLayout>
-            }
-          />
-
-          <Route
-            path='/doctor'
-            element={<DoctorLayout />}
-          >
-            <Route
-              index
-              element={
-                <Navigate
-                  to='dashboard'
-                  replace
-                />
-              }
-            />
-            <Route
-              path='dashboard'
-              element={<DoctorDashboardPage />}
-            />
-            <Route
-              path='appointments'
-              element={<DoctorAppointmentsPage />}
-            />
-            <Route
-              path='patients'
-              element={<DoctorPatientsPage />}
-            />
-            <Route
-              path='online-consultations'
-              element={<DoctorOnlineConsultationsPage />}
-            />
-            <Route
-              path='work-schedule'
-              element={<DoctorWorkSchedulePage />}
-            />
-            <Route
-              path='medical-records'
-              element={<DoctorMedicalRecordsPage />}
-            />
-            <Route
-              path='access-requests'
-              element={<DoctorAccessRequestsPage />}
-            />
-            <Route
-              path='doctors-directory'
-              element={<DoctorDoctorsDirectoryPage />}
-            />
-            <Route
-              path='clinic-location'
-              element={<DoctorClinicLocationPage />}
-            />
-            <Route
-              path='notification'
-              element={<DoctorNotificationPage />}
-            />
-            <Route
-              path='profile-settings'
-              element={<DoctorProfileSettingsPage />}
-            />
-          </Route>
-
-          <Route
-            path='*'
-            element={<NotFoundPage />}
-          />
-        </Routes>
-      ) : isAdminArea ? (
-        <Routes location={location}>
-          <Route
-            path='/admin'
-            element={<AdminLayout />}
-          >
-            <Route
-              index
-              element={
-                <Navigate
-                  to='overview'
-                  replace
-                />
-              }
-            />
-            <Route
-              path='overview'
-              element={<AdminDashboardPage />}
-            />
-            <Route
-              path='doctors'
-              element={<AdminDoctorsPage />}
-            />
-            <Route
-              path='doctors/:doctorId'
-              element={<AdminDoctorDetailsPage />}
-            />
-            <Route
-              path='patients'
-              element={<AdminPatientsPage />}
-            />
-            <Route
-              path='patients/:patientId'
-              element={<AdminPatientDetailsPage />}
-            />
-            <Route
-              path='secretaries'
-              element={<AdminSecretariesPage />}
-            />
-            <Route
-              path='secretaries/:secretaryId'
-              element={<AdminSecretaryDetailsPage />}
-            />
-            <Route
-              path='secretaries/:secretaryId/appointments'
-              element={<AdminSecretaryAppointmentsPage />}
-            />
-            <Route
-              path='secretaries/:secretaryId/appointments/manage'
-              element={<AdminSecretaryAppointmentsManagementPage />}
-            />
-            <Route
-              path='medical-content'
-              element={<AdminMedicalContentPage />}
-            />
-            <Route
-              path='content-review'
-              element={<AdminContentReviewPage />}
-            />
-            <Route
-              path='medical-news'
-              element={<AdminMedicalNewsPage />}
-            />
-            <Route
-              path='service-types'
-              element={<AdminServiceTypesPage />}
-            />
-            <Route
-              path='appointments'
-              element={<AdminAppointmentsPage />}
-            />
-            <Route
-              path='medical-file-options'
-              element={<AdminMedicalFileOptionsPage />}
-            />
-            <Route
-              path='verification-requests'
-              element={<AdminVerificationRequestsPage />}
-            />
-            <Route
-              path='system-logs'
-              element={<AdminSystemLogsPage />}
-            />
-            <Route
-              path='settings'
-              element={<AdminSettingsPage />}
-            />
-            <Route
-              path='services'
-              element={<AdminServicesPage />}
-            />
-            <Route
-              path='analytics'
-              element={<AdminAnalyticsPage />}
-            />
-            <Route
-              path='dashboard'
-              element={
-                <Navigate
-                  to='/admin/overview'
-                  replace
-                />
-              }
-            />
-          </Route>
-
-          <Route
-            path='*'
-            element={<NotFoundPage />}
-          />
-        </Routes>
-      ) : (
-        <PageTransition key={location.pathname}>
+    <div className='font-cairo'>
+      <AnimatePresence mode='wait'>
+        {isDoctorArea ? (
           <Routes location={location}>
             <Route
-              path='/welcome'
-              element={<WelcomePage />}
+              path='/'
+              element={
+                <DoctorLayout>
+                  <DashboardPage />
+                </DoctorLayout>
+              }
             />
+
             <Route
-              path='/login'
-              element={<LoginPage />}
-            />
-            <Route
-              path='/signup'
-              element={<SignupPage />}
-            />
-            <Route
-              path='/forgot-password'
-              element={<ForgotPasswordPage />}
-            />
-            <Route
-              path='/reset-password'
-              element={<ResetPasswordPage />}
-            />
-            <Route
-              path='/verify-otp'
-              element={<VerifyOtpPage />}
-            />
-            <Route
-              path='/signup-success'
-              element={<SignupSuccessPage />}
-            />
-            <Route
-              path='/onboarding'
-              element={<OnboardingPage />}
-            />
+              path='/doctor'
+              element={<DoctorLayout />}
+            >
+              <Route
+                index
+                element={
+                  <Navigate
+                    to='dashboard'
+                    replace
+                  />
+                }
+              />
+              <Route
+                path='dashboard'
+                element={<DoctorDashboardPage />}
+              />
+              <Route
+                path='appointments'
+                element={<DoctorAppointmentsPage />}
+              />
+              <Route
+                path='patients'
+                element={<DoctorPatientsPage />}
+              />
+              <Route
+                path='online-consultations'
+                element={<DoctorOnlineConsultationsPage />}
+              />
+              <Route
+                path='work-schedule'
+                element={<DoctorWorkSchedulePage />}
+              />
+              <Route
+                path='medical-records'
+                element={<DoctorMedicalRecordsPage />}
+              />
+              <Route
+                path='access-requests'
+                element={<DoctorAccessRequestsPage />}
+              />
+              <Route
+                path='doctors-directory'
+                element={<DoctorDoctorsDirectoryPage />}
+              />
+              <Route
+                path='clinic-location'
+                element={<DoctorClinicLocationPage />}
+              />
+              <Route
+                path='notification'
+                element={<DoctorNotificationPage />}
+              />
+              <Route
+                path='profile-settings'
+                element={<DoctorProfileSettingsPage />}
+              />
+            </Route>
+
             <Route
               path='*'
               element={<NotFoundPage />}
             />
           </Routes>
-        </PageTransition>
-      )}
-    </AnimatePresence>
+        ) : isAdminArea ? (
+          <Routes location={location}>
+            <Route
+              path='/admin'
+              element={<AdminLayout />}
+            >
+              <Route
+                index
+                element={
+                  <Navigate
+                    to='overview'
+                    replace
+                  />
+                }
+              />
+              <Route
+                path='overview'
+                element={<AdminDashboardPage />}
+              />
+              <Route
+                path='doctors'
+                element={<AdminDoctorsPage />}
+              />
+              <Route
+                path='doctors/:doctorId'
+                element={<AdminDoctorDetailsPage />}
+              />
+              <Route
+                path='patients'
+                element={<AdminPatientsPage />}
+              />
+              <Route
+                path='patients/:patientId'
+                element={<AdminPatientDetailsPage />}
+              />
+              <Route
+                path='secretaries'
+                element={<AdminSecretariesPage />}
+              />
+              <Route
+                path='secretaries/:secretaryId'
+                element={<AdminSecretaryDetailsPage />}
+              />
+              <Route
+                path='secretaries/:secretaryId/appointments'
+                element={<AdminSecretaryAppointmentsPage />}
+              />
+              <Route
+                path='secretaries/:secretaryId/appointments/manage'
+                element={<AdminSecretaryAppointmentsManagementPage />}
+              />
+              <Route
+                path='medical-content'
+                element={<AdminMedicalContentPage />}
+              />
+              <Route
+                path='content-review'
+                element={<AdminContentReviewPage />}
+              />
+              <Route
+                path='medical-news'
+                element={<AdminMedicalNewsPage />}
+              />
+              <Route
+                path='service-types'
+                element={<AdminServiceTypesPage />}
+              />
+              <Route
+                path='appointments'
+                element={<AdminAppointmentsPage />}
+              />
+              <Route
+                path='medical-file-options'
+                element={<AdminMedicalFileOptionsPage />}
+              />
+              <Route
+                path='verification-requests'
+                element={<AdminVerificationRequestsPage />}
+              />
+              <Route
+                path='system-logs'
+                element={<AdminSystemLogsPage />}
+              />
+              <Route
+                path='settings'
+                element={<AdminSettingsPage />}
+              />
+              <Route
+                path='services'
+                element={<AdminServicesPage />}
+              />
+              <Route
+                path='analytics'
+                element={<AdminAnalyticsPage />}
+              />
+              <Route
+                path='dashboard'
+                element={
+                  <Navigate
+                    to='/admin/overview'
+                    replace
+                  />
+                }
+              />
+            </Route>
+
+            <Route
+              path='*'
+              element={<NotFoundPage />}
+            />
+          </Routes>
+        ) : (
+          <PageTransition key={location.pathname}>
+            <Routes location={location}>
+              <Route
+                path='/welcome'
+                element={<WelcomePage />}
+              />
+              <Route
+                path='/login'
+                element={<LoginPage />}
+              />
+              <Route
+                path='/signup'
+                element={<SignupPage />}
+              />
+              <Route
+                path='/forgot-password'
+                element={<ForgotPasswordPage />}
+              />
+              <Route
+                path='/reset-password'
+                element={<ResetPasswordPage />}
+              />
+              <Route
+                path='/verify-otp'
+                element={<VerifyOtpPage />}
+              />
+              <Route
+                path='/signup-success'
+                element={<SignupSuccessPage />}
+              />
+              <Route
+                path='/onboarding'
+                element={<OnboardingPage />}
+              />
+              <Route
+                path='*'
+                element={<NotFoundPage />}
+              />
+            </Routes>
+          </PageTransition>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
