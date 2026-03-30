@@ -19,6 +19,8 @@ export default function AdminSearchFiltersBar({
   statusPlaceholder,
   statusOptions,
   filtersLeading,
+  filtersTrailing,
+  resetSignal,
   defaultValues,
   onChange,
 }: {
@@ -30,6 +32,8 @@ export default function AdminSearchFiltersBar({
   statusPlaceholder?: string;
   statusOptions?: Array<{ label: string; value: string }>;
   filtersLeading?: ReactNode;
+  filtersTrailing?: ReactNode;
+  resetSignal?: number;
   defaultValues?: AdminSearchFiltersValues;
   onChange?: (values: AdminSearchFiltersValues) => void;
 }) {
@@ -48,7 +52,7 @@ export default function AdminSearchFiltersBar({
 
   useEffect(() => {
     setValues(resolvedDefaultValues);
-  }, [resolvedDefaultValues]);
+  }, [resolvedDefaultValues, resetSignal]);
 
   useEffect(() => {
     onChange?.(values);
@@ -139,6 +143,7 @@ export default function AdminSearchFiltersBar({
                 </div>
               </div>
             ) : null}
+            {filtersTrailing}
           </div>
         ) : null}
       </div>

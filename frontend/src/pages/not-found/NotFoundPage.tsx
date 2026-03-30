@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 
 export default function NotFoundPage() {
   return (
-    <div className='mx-auto flex min-h-[60vh] w-full max-w-[680px] flex-col items-center justify-center gap-3 px-6 text-center'>
-      <Helmet>
-        <title>404 • LMJ Health</title>
-      </Helmet>
+    <AuthBackground>
+      <div className='mx-auto flex min-h-[60vh] w-full max-w-[680px] flex-col items-center justify-center gap-3 px-6 text-center'>
+        <Helmet>
+          <title>404 • LMJ Health</title>
+        </Helmet>
 
-      <AuthBackground>
         <div className='font-cairo text-[24px] font-extrabold text-[#111827]'>
           الصفحة غير موجودة
         </div>
@@ -22,7 +22,7 @@ export default function NotFoundPage() {
         >
           العودة للرئيسية
         </Link>
-      </AuthBackground>
-    </div>
+      </div>
+    </AuthBackground>
   );
 }

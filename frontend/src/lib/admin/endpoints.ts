@@ -1,8 +1,13 @@
 export const adminEndpoints = {
+  doctors: {
+    list: '/api/admin/doctors',
+    details: (doctorId: string) => `/api/admin/doctors/${doctorId}`,
+  },
   appointments: {
     list: '/api/appointments',
     details: (appointmentId: string) => `/api/appointments/${appointmentId}`,
-    cancel: (appointmentId: string) => `/api/appointments/${appointmentId}/cancel`,
+    cancel: (appointmentId: string) =>
+      `/api/appointments/${appointmentId}/cancel`,
   },
   verificationRequests: {
     details: (requestId: string) =>
@@ -14,4 +19,3 @@ export const adminEndpoints = {
     list: '/api/admin/audit-logs',
   },
 } as const;
-
