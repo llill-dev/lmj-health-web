@@ -1,9 +1,6 @@
 import { useAuthStore } from '@/store/authStore'; // من useAuth اللي عملنا
 
-export const API_BASE_URL =
-  typeof window !== 'undefined' && import.meta.env.DEV
-    ? ''
-    : import.meta.env.VITE_API_URL || '';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
 
