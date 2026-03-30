@@ -89,6 +89,7 @@ export default function LoginForm({
     const uiOnly = import.meta.env.VITE_UI_ONLY === 'true';
 
     if (uiOnly) {
+      // Demo mode for UI testing
       useAuthStore.setState({
         user: {
           id: 'demo-doctor',
@@ -97,7 +98,6 @@ export default function LoginForm({
             values.method === 'email' ? values.identifier : 'doctor@demo.local',
           phone: values.method === 'phone' ? values.identifier : '+0000000000',
           role: 'doctor',
-          name: 'Demo Doctor',
         },
         token: 'demo-token',
         isAuthenticated: true,
@@ -106,7 +106,44 @@ export default function LoginForm({
       return;
     }
 
-    useAuthStore.getState().login(values.identifier, values.password);
+    // Real API integration
+    try {
+      await useAuthStore.getState().login(
+        values.method === 'email'
+          ? values.identifier
+          : values.identifier.replace(/[\s-]/g, ''),
+        values.password,
+        'web', // Default client type for web application
+      );
+
+      // Navigate based on user role
+      const authState = useAuthStore.getState();
+      const userRole = authState.user?.role;
+
+      switch (userRole) {
+        case 'doctor':
+          navigate('/doctor');
+          break;
+        case 'admin':
+          navigate('/admin');
+          break;
+        case 'secretary':
+        case 'data-entry':
+          navigate('/admin');
+          break;
+        case 'patient':
+          navigate('/doctor'); // Patients navigate to doctor area for now
+          break;
+        default:
+          navigate('/doctor');
+      }
+    } catch (error: any) {
+      // Handle login errors
+      console.error('Login failed:', error.message);
+
+      // You can add toast notifications here
+      // Example: toast.error(error.message);
+    }
   });
 
   return (

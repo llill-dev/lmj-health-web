@@ -76,3 +76,73 @@ export type AuditLogsResponse = ApiSuccessEnvelope & {
   auditLogs?: AuditLogItem[];
 };
 
+export type AdminDoctorApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export type AdminDoctorSummary = {
+  _id: string;
+  specialization?: string;
+  medicalLicenseNumber?: string;
+  education?: string;
+  clinicAddress?: string;
+  bio?: string;
+  consultationFee?: number;
+  consultationTypes?: Array<'online' | 'offline' | string>;
+  locationCity?: string;
+  locationCountry?: string;
+  isApproved?: boolean;
+  approvalStatus?: AdminDoctorApprovalStatus;
+  approvalNote?: string | null;
+  createdAt?: string;
+  user?: {
+    fullName: string;
+    email?: string;
+    phone?: string;
+    gender?: string;
+    photoUrl?: string;
+  };
+};
+
+export type AdminDoctorsListParams = {
+  status?: AdminDoctorApprovalStatus;
+  search?: string;
+  specialization?: string;
+  city?: string;
+  country?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type AdminDoctorsListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  doctors: AdminDoctorSummary[];
+};
+
+export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
+  doctor: {
+    _id: string;
+    specialization?: string;
+    medicalLicenseNumber?: string;
+    isApproved?: boolean;
+    approvalStatus?: AdminDoctorApprovalStatus;
+    approvalNote?: string | null;
+    approvedBy?: string | null;
+    approvedAt?: string | null;
+    user?: {
+      fullName: string;
+      email?: string;
+      phone?: string;
+      gender?: string;
+      photoUrl?: string;
+    };
+    userId?: {
+      _id?: string;
+      fullName?: string;
+      email?: string;
+    };
+  };
+};

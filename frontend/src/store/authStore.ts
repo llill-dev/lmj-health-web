@@ -1,5 +1,12 @@
 import { useSyncExternalStore } from 'react';
 import { get, post } from '@/lib/base';
+import { authApi } from '@/lib/auth/client';
+import type {
+  LoginRequest,
+  LoginResponse,
+  LogoutResponse,
+  AuthError,
+} from '@/lib/auth/types';
 
 interface User {
   id: string;
@@ -10,9 +17,7 @@ interface User {
     | 'secretary'
     | 'data-entry'
     | 'doctor'
-    | 'admin'
-    | 'jobseeker'
-    | 'company';
+    | 'admin';
   name?: string;
   verified: boolean;
 }
@@ -59,7 +64,11 @@ interface AuthState {
     region: string;
     lang?: 'ar' | 'en';
   }) => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    clientType?: 'web' | 'patient_mobile' | 'doctor_mobile',
+  ) => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -205,12 +214,84 @@ let state: AuthState = {
       return;
     }
   },
-  login: async () => {},
+  login: async (
+    email: string,
+    password: string,
+    clientType: 'web' | 'patient_mobile' | 'doctor_mobile' = 'web',
+  ) => {
+    try {
+      const loginRequest: LoginRequest = {
+        email: email.includes('@') ? email : undefined,
+        phone: email.includes('@') ? undefined : email,
+        password,
+        clientType,
+      };
+
+      const result = await authApi.login(loginRequest);
+
+      if ('error' in result) {
+        throw new Error(result.error.message);
+      }
+
+      const { data } = result;
+
+      // Map API response to store format
+      const mappedUser = {
+        id: data.userId,
+        email: data.email || '',
+        phone: data.phone || '',
+        role: (data.role === 'data_entry'
+          ? 'data-entry'
+          : data.role) as User['role'],
+        verified: data.accountStatus === 'active',
+        name: data.fullName,
+      };
+
+      setState({
+        user: mappedUser,
+        token: data.token,
+        isAuthenticated: true,
+        pendingVerification: null,
+        userProfile: null,
+      });
+
+      writePersistedToken(data.token);
+
+      // Store additional user data if needed
+      try {
+        localStorage.setItem(
+          'userData',
+          JSON.stringify({
+            userId: data.userId,
+            role: data.role,
+            fullName: data.fullName,
+            actorIds: data.actorIds,
+            patientPublicId: data.patientPublicId,
+          }),
+        );
+      } catch {}
+    } catch (error: any) {
+      throw new Error(error.message || 'Login failed');
+    }
+  },
   register: async () => {},
   setPendingVerification: (payload) => {
     setState({ pendingVerification: payload });
   },
-  logout: () => {
+  logout: async () => {
+    const token = state.token;
+
+    // Call logout API if token exists
+    if (token) {
+      try {
+        await authApi.logoutAll(token);
+      } catch (error) {
+        // Continue with local logout even if API fails
+        console.warn('Logout API failed:', error);
+      }
+    }
+
+    // Clear local state
     setState({
       user: null,
       token: null,
@@ -218,9 +299,12 @@ let state: AuthState = {
       pendingVerification: null,
       userProfile: null,
     });
+
     writePersistedToken(null);
+
     try {
       localStorage.removeItem('userRole');
+      localStorage.removeItem('userData');
     } catch {}
   },
   setAuth: ({ user, token }) => {
