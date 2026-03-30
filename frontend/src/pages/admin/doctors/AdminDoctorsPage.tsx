@@ -12,9 +12,10 @@ import {
 } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 import { useNavigate } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useAdminDoctors } from '@/hooks/useAdminDoctors';
 import type { AdminDoctorApprovalStatus } from '@/lib/admin/types';
+import type { AdminSearchFiltersValues } from '@/components/admin/AdminSearchFiltersBar';
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
@@ -56,6 +57,24 @@ export default function AdminDoctorsPage() {
     page: filters.page,
     limit: filters.limit,
   });
+
+  const handleFiltersChange = useCallback(
+    (values: AdminSearchFiltersValues) => {
+      setFilters((prev) => ({
+        ...prev,
+        search: values.query ?? '',
+        specialization: values.specialty ?? '',
+        status: (values.status as AdminDoctorApprovalStatus) ?? '',
+        page: 1,
+      }));
+    },
+    [],
+  );
+
+  const handleResetFilters = useCallback(() => {
+    setFilters(defaultFilters);
+    setFiltersResetSignal((s) => s + 1);
+  }, [defaultFilters]);
 
   const hasActiveFilters = useMemo(() => {
     return (
@@ -272,10 +291,7 @@ export default function AdminDoctorsPage() {
             <button
               type='button'
               disabled={!hasActiveFilters}
-              onClick={() => {
-                setFilters(defaultFilters);
-                setFiltersResetSignal((s) => s + 1);
-              }}
+              onClick={handleResetFilters}
               className={
                 !hasActiveFilters
                   ? 'h-[42px] cursor-not-allowed rounded-[10px] border border-[#E5E7EB] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3]'
@@ -288,15 +304,7 @@ export default function AdminDoctorsPage() {
               </span>
             </button>
           }
-          onChange={(values) => {
-            setFilters((prev) => ({
-              ...prev,
-              search: values.query ?? '',
-              specialization: values.specialty ?? '',
-              status: (values.status as AdminDoctorApprovalStatus) ?? '',
-              page: 1,
-            }));
-          }}
+          onChange={handleFiltersChange}
         />
 
         <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden'>
