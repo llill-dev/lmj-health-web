@@ -1,6 +1,8 @@
 import { useAuthStore } from '@/store/authStore'; // من useAuth اللي عملنا
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+export const API_BASE_URL = import.meta.env.PROD
+  ? '' // Use local API proxy in production
+  : import.meta.env.VITE_API_URL || ''; // Use direct API in development
 
 const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
 
