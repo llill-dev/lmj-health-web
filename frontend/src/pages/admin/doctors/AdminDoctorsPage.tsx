@@ -8,30 +8,15 @@ import {
   Phone,
   BadgeCheck,
   ChevronLeft,
-  SlidersHorizontal,
 } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 import { useNavigate } from 'react-router-dom';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { useAdminDoctors } from '@/hooks/useAdminDoctors';
 import type { AdminDoctorApprovalStatus } from '@/lib/admin/types';
-import type { AdminSearchFiltersValues } from '@/components/admin/AdminSearchFiltersBar';
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
-  const [filtersResetSignal, setFiltersResetSignal] = useState(0);
-  const defaultFilters = {
-    search: '',
-    specialization: '',
-    status: '' as AdminDoctorApprovalStatus | '',
-    city: '',
-    country: '',
-    from: '',
-    to: '',
-    page: 1,
-    limit: 20,
-  };
-
   const [filters, setFilters] = useState<{
     search: string;
     specialization: string;
@@ -43,7 +28,15 @@ export default function AdminDoctorsPage() {
     page: number;
     limit: number;
   }>({
-    ...defaultFilters,
+    search: '',
+    specialization: '',
+    status: '',
+    city: '',
+    country: '',
+    from: '',
+    to: '',
+    page: 1,
+    limit: 20,
   });
 
   const { doctors, total, results, isLoading, error } = useAdminDoctors({
@@ -57,50 +50,6 @@ export default function AdminDoctorsPage() {
     page: filters.page,
     limit: filters.limit,
   });
-
-  const handleFiltersChange = useCallback(
-    (values: AdminSearchFiltersValues) => {
-      setFilters((prev) => ({
-        ...prev,
-        search: values.query ?? '',
-        specialization: values.specialty ?? '',
-        status: (values.status as AdminDoctorApprovalStatus) ?? '',
-        page: 1,
-      }));
-    },
-    [],
-  );
-
-  const handleResetFilters = useCallback(() => {
-    setFilters(defaultFilters);
-    setFiltersResetSignal((s) => s + 1);
-  }, [defaultFilters]);
-
-  const hasActiveFilters = useMemo(() => {
-    return (
-      Boolean(filters.search) ||
-      Boolean(filters.specialization) ||
-      Boolean(filters.status) ||
-      Boolean(filters.city) ||
-      Boolean(filters.country) ||
-      Boolean(filters.from) ||
-      Boolean(filters.to) ||
-      filters.page !== defaultFilters.page ||
-      filters.limit !== defaultFilters.limit
-    );
-  }, [
-    defaultFilters.limit,
-    defaultFilters.page,
-    filters.city,
-    filters.country,
-    filters.from,
-    filters.limit,
-    filters.page,
-    filters.search,
-    filters.specialization,
-    filters.status,
-    filters.to,
-  ]);
 
   const totalPages = useMemo(() => {
     const safeLimit = Math.max(1, filters.limit);
@@ -223,7 +172,6 @@ export default function AdminDoctorsPage() {
 
         <AdminSearchFiltersBar
           queryPlaceholder='ابحث عن طبيب...'
-          resetSignal={filtersResetSignal}
           specialtyPlaceholder='الاختصاص'
           specialtyOptions={[
             { label: 'طب الأطفال', value: 'pediatrics' },
@@ -287,24 +235,15 @@ export default function AdminDoctorsPage() {
               />
             </div>
           }
-          filtersTrailing={
-            <button
-              type='button'
-              disabled={!hasActiveFilters}
-              onClick={handleResetFilters}
-              className={
-                !hasActiveFilters
-                  ? 'h-[42px] cursor-not-allowed rounded-[10px] border border-[#E5E7EB] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3]'
-                  : 'h-[42px] rounded-[10px] border border-primary/25 bg-primary/10 px-4 font-cairo text-[12px] font-extrabold text-primary transition-colors hover:bg-primary/15'
-              }
-            >
-              <span className='inline-flex items-center gap-2'>
-                <SlidersHorizontal className='h-4 w-4' />
-                مسح الفلاتر
-              </span>
-            </button>
-          }
-          onChange={handleFiltersChange}
+          onChange={(values) => {
+            setFilters((prev) => ({
+              ...prev,
+              search: values.query ?? '',
+              specialization: values.specialty ?? '',
+              status: (values.status as AdminDoctorApprovalStatus) ?? '',
+              page: 1,
+            }));
+          }}
         />
 
         <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden'>
@@ -404,13 +343,13 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }));
                 }}
-                className='h-[38px] w-[130px] appearance-none rounded-[10px] border border-primary/25 bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] outline-none transition-colors hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-primary/25'
+                className='h-[38px] w-[120px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'
               >
                 <option value={20}>20 / صفحة</option>
                 <option value={50}>50 / صفحة</option>
                 <option value={100}>100 / صفحة</option>
               </select>
-              <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-primary'>
+              <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
                 <ChevronLeft className='h-4 w-4 rotate-[-90deg]' />
               </div>
             </div>
