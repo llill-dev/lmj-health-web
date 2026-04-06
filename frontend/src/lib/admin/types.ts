@@ -11,7 +11,12 @@ export type AppointmentStatus =
   | 'no-show';
 
 export type AppointmentSummary = {
-  _id: string;
+  _id: string; /* `AdminDoctorsListParams` is a TypeScript interface that defines the shape of the
+  parameters that can be passed to the `list` method in the `doctors` object of the
+  `adminApi`. It includes optional properties such as `status`, `search`,
+  `specialization`, `city`, `country`, `from`, `to`, `page`, and `limit` that can
+  be used to filter and paginate the list of doctors returned by the API endpoint. */
+
   status: AppointmentStatus;
   startTime?: string;
   date?: string; // sometimes returned as ISO date string
@@ -41,6 +46,65 @@ export type AppointmentCancelResponse = ApiSuccessEnvelope & {
     AppointmentSummary,
     '_id' | 'status' | 'cancelledAt' | 'cancelledBy' | 'cancelReason'
   >;
+};
+
+export type AdminAppointmentsListParams = {
+  page?: number;
+  limit?: number;
+  status?: AppointmentStatus;
+  date?: string; // YYYY-MM-DD
+};
+
+export type AdminAppointmentsListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  appointments: AppointmentSummary[];
+};
+
+export type PatientAccountStatus =
+  | 'active'
+  | 'temporary'
+  | 'suspended'
+  | 'locked';
+
+export type AdminPatientSummary = {
+  _id: string;
+  publicId: string;
+  user: {
+    fullName: string;
+    email?: string;
+    phone?: string;
+    accountStatus: PatientAccountStatus;
+    mustChangePassword?: boolean;
+  };
+  isClaimed?: boolean;
+  claimedAt?: string | null;
+};
+
+export type AdminPatientsAccountStatusFilter = PatientAccountStatus | 'all';
+
+export type AdminPatientsListParams = {
+  account_status?: AdminPatientsAccountStatusFilter;
+  search?: string;
+  includeDeleted?: boolean;
+  page?: number;
+  limit?: number;
+};
+
+export type AdminPatientsListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  patients: AdminPatientSummary[];
+};
+
+export type AdminPatientAccountActionResponse = ApiSuccessEnvelope & {
+  patientId: string;
+  userId: string;
+  accountStatus: PatientAccountStatus;
 };
 
 export type VerificationRequestReviewDecision = 'approved' | 'rejected';
