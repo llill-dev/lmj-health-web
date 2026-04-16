@@ -1,185 +1,254 @@
 import { Helmet } from 'react-helmet-async';
 import {
   Activity,
-  CalendarDays,
-  FileText,
-  Search,
   AlertTriangle,
-  Users,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Search,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/base';
+import { useDebounce } from 'use-debounce';
+import { useAdminAuditLogs } from '@/hooks/useAdminAuditLogs';
+import type { AuditLogCategory, AuditLogItem, AuditLogOutcome } from '@/lib/admin/types';
 
-type SystemLog = {
-  id: string;
-  action: string;
-  actorName: string;
-  actorRole: 'طبيب' | 'سكرتير' | 'مدير';
-  createdAt: string;
-  ip: string;
-  details: string;
+// ─── helpers ──────────────────────────────────────────────────────────────────
+
+const CATEGORY_LABELS: Record<AuditLogCategory, string> = {
+  AUTH: 'مصادقة',
+  AUTHZ: 'صلاحيات',
+  PHI: 'بيانات طبية',
+  DATA: 'بيانات',
+  ADMIN: 'إدارة',
+  SYSTEM: 'نظام',
 };
 
+const CATEGORY_STYLES: Record<AuditLogCategory, { bg: string; text: string; dot: string }> = {
+  AUTH:   { bg: 'bg-[#EFF6FF]',  text: 'text-[#1D4ED8]', dot: 'bg-[#3B82F6]' },
+  AUTHZ:  { bg: 'bg-[#FEF3C7]',  text: 'text-[#92400E]', dot: 'bg-[#F59E0B]' },
+  PHI:    { bg: 'bg-[#FDF2F8]',  text: 'text-[#9D174D]', dot: 'bg-[#EC4899]' },
+  DATA:   { bg: 'bg-[#ECFDF5]',  text: 'text-[#065F46]', dot: 'bg-[#10B981]' },
+  ADMIN:  { bg: 'bg-[#F5F3FF]',  text: 'text-[#5B21B6]', dot: 'bg-[#8B5CF6]' },
+  SYSTEM: { bg: 'bg-[#F0F9FF]',  text: 'text-[#0369A1]', dot: 'bg-[#0EA5E9]' },
+};
+
+const OUTCOME_STYLES: Record<AuditLogOutcome, { bg: string; text: string; icon: React.ReactNode }> = {
+  SUCCESS: {
+    bg:   'bg-[#ECFDF5] border border-[#A7F3D0]',
+    text: 'text-[#065F46]',
+    icon: <ShieldCheck className='h-3.5 w-3.5' />,
+  },
+  FAIL: {
+    bg:   'bg-[#FEF2F2] border border-[#FECACA]',
+    text: 'text-[#991B1B]',
+    icon: <ShieldAlert className='h-3.5 w-3.5' />,
+  },
+  DENY: {
+    bg:   'bg-[#FFF7ED] border border-[#FED7AA]',
+    text: 'text-[#92400E]',
+    icon: <Shield className='h-3.5 w-3.5' />,
+  },
+};
+
+const OUTCOME_LABELS: Record<AuditLogOutcome, string> = {
+  SUCCESS: 'ناجح',
+  FAIL: 'فشل',
+  DENY: 'مرفوض',
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  admin:      'مدير',
+  doctor:     'طبيب',
+  patient:    'مريض',
+  secretary:  'سكرتير',
+  data_entry: 'إدخال بيانات',
+};
+
+function formatDateTime(iso: string): { date: string; time: string } {
+  try {
+    const d = new Date(iso);
+    return {
+      date: d.toLocaleDateString('ar-SY', { year: 'numeric', month: 'short', day: 'numeric' }),
+      time: d.toLocaleTimeString('ar-SY', { hour: '2-digit', minute: '2-digit' }),
+    };
+  } catch {
+    return { date: iso, time: '' };
+  }
+}
+
+// ─── skeleton row ────────────────────────────────────────────────────────────
+
+function SkeletonRow() {
+  return (
+    <div className='grid grid-cols-12 gap-2 px-6 py-4 animate-pulse'>
+      <div className='col-span-3 flex flex-col gap-1.5'>
+        <div className='h-3 w-3/4 rounded-full bg-[#EEF2F6]' />
+        <div className='h-5 w-1/2 rounded-full bg-[#EEF2F6]' />
+      </div>
+      <div className='col-span-2'>
+        <div className='h-3 w-2/3 rounded-full bg-[#EEF2F6]' />
+      </div>
+      <div className='col-span-2'>
+        <div className='h-5 w-16 rounded-full bg-[#EEF2F6]' />
+      </div>
+      <div className='col-span-2'>
+        <div className='h-3 w-full rounded-full bg-[#EEF2F6]' />
+      </div>
+      <div className='col-span-3 flex flex-col gap-1'>
+        <div className='h-3 w-5/6 rounded-full bg-[#EEF2F6]' />
+        <div className='h-3 w-1/2 rounded-full bg-[#EEF2F6]' />
+      </div>
+    </div>
+  );
+}
+
+// ─── log row ─────────────────────────────────────────────────────────────────
+
+function LogRow({ log }: { log: AuditLogItem }) {
+  const catStyle    = CATEGORY_STYLES[log.category] ?? CATEGORY_STYLES.SYSTEM;
+  const outStyle    = OUTCOME_STYLES[log.outcome]   ?? OUTCOME_STYLES.FAIL;
+  const { date, time } = formatDateTime(log.createdAt);
+  const actorLabel  = log.actorRole ? (ROLE_LABELS[log.actorRole] ?? log.actorRole) : '—';
+
+  return (
+    <div className='grid grid-cols-12 gap-2 px-6 py-4 transition-colors hover:bg-[#FAFBFC]'>
+      {/* Action + Category */}
+      <div className='col-span-3 text-right'>
+        <div className='font-cairo text-[13px] font-black text-[#111827] leading-snug break-all'>
+          {log.action}
+        </div>
+        <span
+          className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-cairo text-[11px] font-bold ${catStyle.bg} ${catStyle.text}`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${catStyle.dot}`} />
+          {CATEGORY_LABELS[log.category]}
+        </span>
+      </div>
+
+      {/* Actor */}
+      <div className='col-span-2 text-right'>
+        <div className='font-cairo text-[13px] font-bold text-[#344054] leading-snug'>
+          {log.actorUserName || '—'}
+        </div>
+        <div className='mt-0.5 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+          {actorLabel}
+        </div>
+      </div>
+
+      {/* Outcome */}
+      <div className='col-span-2 flex items-start justify-end pt-0.5'>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-cairo text-[11px] font-bold ${outStyle.bg} ${outStyle.text}`}
+        >
+          {outStyle.icon}
+          {OUTCOME_LABELS[log.outcome]}
+        </span>
+      </div>
+
+      {/* IP */}
+      <div className='col-span-2 text-right'>
+        <div className='font-cairo text-[12px] font-semibold text-[#667085] leading-snug'>
+          {log.ip || '—'}
+        </div>
+        {log.method && log.route ? (
+          <div className='mt-0.5 font-cairo text-[10px] font-semibold text-[#98A2B3] break-all'>
+            {log.method} {log.route}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Time */}
+      <div className='col-span-3 text-right'>
+        <div className='font-cairo text-[12px] font-bold text-[#344054]'>{date}</div>
+        <div className='mt-0.5 font-cairo text-[11px] font-semibold text-[#98A2B3]'>{time}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── page ─────────────────────────────────────────────────────────────────────
+
+const CATEGORIES: Array<{ value: AuditLogCategory | ''; label: string }> = [
+  { value: '', label: 'جميع الفئات' },
+  { value: 'AUTH',   label: 'مصادقة (AUTH)' },
+  { value: 'AUTHZ',  label: 'صلاحيات (AUTHZ)' },
+  { value: 'PHI',    label: 'بيانات طبية (PHI)' },
+  { value: 'DATA',   label: 'بيانات (DATA)' },
+  { value: 'ADMIN',  label: 'إدارة (ADMIN)' },
+  { value: 'SYSTEM', label: 'نظام (SYSTEM)' },
+];
+
+const OUTCOMES: Array<{ value: AuditLogOutcome | ''; label: string }> = [
+  { value: '',        label: 'جميع النتائج' },
+  { value: 'SUCCESS', label: 'ناجح' },
+  { value: 'FAIL',    label: 'فشل' },
+  { value: 'DENY',    label: 'مرفوض' },
+];
+
+const ROLES: Array<{ value: string; label: string }> = [
+  { value: '',           label: 'جميع الأدوار' },
+  { value: 'admin',      label: 'مدير' },
+  { value: 'doctor',     label: 'طبيب' },
+  { value: 'patient',    label: 'مريض' },
+  { value: 'secretary',  label: 'سكرتير' },
+  { value: 'data_entry', label: 'إدخال بيانات' },
+];
+
+const PAGE_SIZE = 20;
+
 export default function AdminSystemLogsPage() {
-  const [q, setQ] = useState('');
+  const [search, setSearch]     = useState('');
+  const [category, setCategory] = useState<AuditLogCategory | ''>('');
+  const [outcome, setOutcome]   = useState<AuditLogOutcome | ''>('');
+  const [actorRole, setActorRole] = useState('');
+  const [from, setFrom]         = useState('');
+  const [to, setTo]             = useState('');
+  const [page, setPage]         = useState(1);
 
-  const stats = [
-    {
-      title: 'هذا الأسبوع',
-      value: '892',
-      icon: CalendarDays,
-      tone: {
-        border: 'border-[#BBF7D0]',
-        bg: 'bg-gradient-to-br from-[#F0FDF4] to-white',
-        iconFg: 'text-[#16A34A]',
-        valueFg: 'text-[#16A34A]',
-      },
-    },
-    {
-      title: 'اليوم',
-      value: '145',
-      icon: FileText,
-      tone: {
-        border: 'border-[#67E8F9]',
-        bg: 'bg-gradient-to-br from-[#ECFEFF] to-white',
-        iconFg: 'text-primary',
-        valueFg: 'text-primary',
-      },
-    },
-    {
-      title: 'مستخدمون نشطون',
-      value: '87',
-      icon: Users,
-      tone: {
-        border: 'border-[#BBF7D0]',
-        bg: 'bg-gradient-to-br from-[#F0FDF4] to-white',
-        iconFg: 'text-[#16A34A]',
-        valueFg: 'text-[#16A34A]',
-      },
-    },
-    {
-      title: 'إجمالي الأنشطة',
-      value: '2,340',
-      icon: Activity,
-      tone: {
-        border: 'border-[#67E8F9]',
-        bg: 'bg-gradient-to-br from-[#ECFEFF] to-white',
-        iconFg: 'text-primary',
-        valueFg: 'text-primary',
-      },
-    },
-  ] as const;
+  const [debouncedSearch] = useDebounce(search, 350);
 
-  const logs: SystemLog[] = [
-    {
-      id: '1',
-      action: 'تسجيل دخول',
-      actorName: 'د. سارة محمود',
-      actorRole: 'طبيب',
-      createdAt: '2024-02-11 14:30:25',
-      ip: '192.168.1.10',
-      details: 'تسجيل دخول ناجح',
-    },
-    {
-      id: '2',
-      action: 'إنشاء موعد',
-      actorName: 'أحمد السكرتير',
-      actorRole: 'سكرتير',
-      createdAt: '2024-02-11 14:25:10',
-      ip: '192.168.1.15',
-      details: 'موعد جديد للمريض محمد أحمد',
-    },
-    {
-      id: '3',
-      action: 'تحديث بيانات',
-      actorName: 'مدير النظام',
-      actorRole: 'مدير',
-      createdAt: '2024-02-11 13:45:00',
-      ip: '192.168.1.5',
-      details: 'تحديث بيانات الطبيب أحمد حسن',
-    },
-    {
-      id: '4',
-      action: 'موافقة على محتوى',
-      actorName: 'مدير النظام',
-      actorRole: 'مدير',
-      createdAt: '2024-02-11 12:30:15',
-      ip: '192.168.1.5',
-      details: 'الموافقة على مقالة "داء السكري"',
-    },
-    {
-      id: '5',
-      action: 'حذف سجل',
-      actorName: 'د. أحمد حسن',
-      actorRole: 'طبيب',
-      createdAt: '2024-02-11 11:15:30',
-      ip: '192.168.1.12',
-      details: 'حذف سجل طبي قديم',
-    },
-  ];
+  const params = useMemo(
+    () => ({
+      page,
+      limit: PAGE_SIZE,
+      ...(debouncedSearch ? { search: debouncedSearch } : {}),
+      ...(category   ? { category }   : {}),
+      ...(outcome    ? { outcome }    : {}),
+      ...(actorRole  ? { actorRole }  : {}),
+      ...(from       ? { from: new Date(from).toISOString() } : {}),
+      ...(to         ? { to: new Date(to).toISOString() }   : {}),
+    }),
+    [page, debouncedSearch, category, outcome, actorRole, from, to],
+  );
 
-  const auditQuery = useQuery({
-    queryKey: ['admin', 'audit-logs', q],
-    queryFn: async () => {
-      // ABI: System-wide audit logs are admin-only via GET /admin/audit-logs
-      // With API base URL = /api, the full path becomes /api/admin/audit-logs
-      const params = new URLSearchParams();
-      params.set('page', '1');
-      params.set('limit', '20');
-      if (q.trim()) params.set('q', q.trim());
+  const { data, isFetching, isLoading, isError, error } = useAdminAuditLogs(params);
 
-      return await get<any>(`/api/admin/audit-logs?${params.toString()}`, {
-        locale: 'ar',
-      });
-    },
-    staleTime: 10_000,
-  });
+  const logs       = data?.auditLogs ?? [];
+  const total      = data?.total     ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const resolvedLogs: SystemLog[] = useMemo(() => {
-    const apiLogs: any[] =
-      auditQuery.data?.auditLogs ||
-      auditQuery.data?.logs ||
-      auditQuery.data?.items ||
-      [];
+  // count badges derived from current result set (fast approximation)
+  const failCount = useMemo(() => logs.filter((l) => l.outcome === 'FAIL').length, [logs]);
+  const denyCount = useMemo(() => logs.filter((l) => l.outcome === 'DENY').length, [logs]);
+  const phiCount  = useMemo(() => logs.filter((l) => l.category === 'PHI').length,  [logs]);
 
-    if (Array.isArray(apiLogs) && apiLogs.length) {
-      return apiLogs.map((l: any, idx: number) => ({
-        id: String(l._id || l.id || idx),
-        action: String(l.action || l.event || l.actionKey || l.actionName || '—'),
-        actorName: String(
-          l.actorUserName || l.actorName || l.userName || l.performedByName || '—',
-        ),
-        actorRole:
-          (l.actorRole === 'admin'
-            ? 'مدير'
-            : l.actorRole === 'doctor'
-              ? 'طبيب'
-              : l.actorRole === 'secretary'
-                ? 'سكرتير'
-                : 'مدير') as SystemLog['actorRole'],
-        createdAt: String(l.createdAt || l.time || l.timestamp || '—'),
-        ip: String(l.ip || '—'),
-        details: String(
-          l.route
-            ? `${l.method || ''} ${l.route}`.trim()
-            : l.details || l.message || '—',
-        ),
-      }));
-    }
+  function resetFilters() {
+    setSearch('');
+    setCategory('');
+    setOutcome('');
+    setActorRole('');
+    setFrom('');
+    setTo('');
+    setPage(1);
+  }
 
-    return logs;
-  }, [auditQuery.data, logs]);
+  const hasActiveFilters = !!(debouncedSearch || category || outcome || actorRole || from || to);
 
-  const actionPill = (action: string) => {
-    return 'border border-[#E5E7EB] bg-white text-[#344054]';
-  };
-
-  const rolePill = (role: SystemLog['actorRole']) => {
-    if (role === 'طبيب') return 'bg-[#E0F2FE] text-primary';
-    if (role === 'سكرتير') return 'bg-[#ECFDF3] text-[#16A34A]';
-    return 'bg-[#E7FBFA] text-primary';
-  };
+  const selectClass =
+    'h-[40px] rounded-[10px] border border-[#EEF2F6] bg-white px-3 font-cairo text-[13px] font-bold text-[#344054] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer';
 
   return (
     <>
@@ -187,131 +256,280 @@ export default function AdminSystemLogsPage() {
         <title>سجلات النظام • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
+      <div dir='rtl' lang='ar'>
+        {/* ── Header ──────────────────────────────────────────────── */}
         <div className='text-right'>
           <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
             سجلات النظام
           </div>
           <div className='mt-1 font-cairo text-[12px] font-semibold leading-[16px] text-[#98A2B3]'>
-            مراجعة جميع الأنشطة والحركات في النظام
+            مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي
           </div>
         </div>
 
-        <section className='mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4'>
-          {stats.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div
-                key={s.title}
-                className={`h-[147px] rounded-[12px] border px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${s.tone.border} ${s.tone.bg}`}
-              >
-                <div className='flex items-start justify-between'>
-                  <div className='text-right'>
-                    <div className='font-cairo text-[12px] font-bold text-[#667085]'>
-                      {s.title}
-                    </div>
-                    <div
-                      className={`mt-2 font-cairo text-[20px] font-black leading-[20px] ${s.tone.valueFg}`}
-                    >
-                      {s.value}
-                    </div>
-                  </div>
-
-                  <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[12px] bg-white'>
-                    <Icon className={`h-6 w-6 ${s.tone.iconFg}`} />
-                  </div>
-                </div>
+        {/* ── Stats ───────────────────────────────────────────────── */}
+        <section className='mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4'>
+          {/* total */}
+          <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#E0F2FE] bg-gradient-to-br from-[#F0F9FF] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
+            <div className='flex items-center justify-between'>
+              <div className='flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-white shadow-sm'>
+                <Activity className='h-5 w-5 text-primary' />
               </div>
-            );
-          })}
-        </section>
-
-        <section className='mt-5 rounded-[14px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden'>
-          <div className='border-b border-[#EEF2F6] px-6 py-5'>
-            <div className='relative'>
-              <input
-                placeholder='بحث في السجلات...'
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                className='h-[56px] w-full rounded-[12px] border border-[#EEF2F6] bg-white pe-14 ps-5 text-right font-cairo text-[13px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
-              />
-              <div className='pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <Search className='h-5 w-5' />
+              <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                {isLoading ? '—' : total.toLocaleString('ar-SA')}
               </div>
             </div>
-            {auditQuery.isFetching ? (
-              <div className='mt-3 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                جارِ تحديث السجلات...
-              </div>
-            ) : null}
+            <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>
+              إجمالي السجلات
+            </div>
           </div>
 
-          <div className='grid grid-cols-12 px-6 py-4 font-cairo text-[13px] font-extrabold text-[#667085]'>
-            <div className='col-span-2 text-right'>الإجراء</div>
-            <div className='col-span-3 text-right'>المستخدم</div>
-            <div className='col-span-2 text-right'>الوقت</div>
-            <div className='col-span-2 text-right'>IP Address</div>
-            <div className='col-span-3 text-right'>التفاصيل</div>
+          {/* failures */}
+          <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#FECACA] bg-gradient-to-br from-[#FEF2F2] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
+            <div className='flex items-center justify-between'>
+              <div className='flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-white shadow-sm'>
+                <ShieldAlert className='h-5 w-5 text-[#DC2626]' />
+              </div>
+              <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                {isLoading ? '—' : failCount}
+              </div>
+            </div>
+            <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>
+              إجراءات فاشلة
+            </div>
           </div>
 
-          <div className='divide-y divide-[#EEF2F6]'>
-            {resolvedLogs.map((l) => (
-              <div
-                key={l.id}
-                className='grid grid-cols-12 px-6 py-5'
-              >
-                <div className='col-span-2 flex items-center justify-start'>
-                  <span
-                    className={`inline-flex h-[22px] items-center rounded-full px-2 font-cairo text-[12px] font-extrabold ${actionPill(l.action)}`}
-                  >
-                    {l.action}
-                  </span>
-                </div>
-
-                <div className='col-span-3 text-right'>
-                  <div className='font-cairo text-[14px] font-black text-[#111827]'>
-                    {l.actorName}
-                  </div>
-                  <div
-                    className={`mt-2 inline-flex h-[22px] items-center rounded-full px-3 font-cairo text-[11px] font-extrabold ${rolePill(l.actorRole)}`}
-                  >
-                    {l.actorRole}
-                  </div>
-                </div>
-
-                <div className='col-span-2 text-right font-cairo text-[12px] font-bold text-[#667085]'>
-                  {l.createdAt}
-                </div>
-
-                <div className='col-span-2 text-right font-cairo text-[12px] font-bold text-[#667085]'>
-                  {l.ip}
-                </div>
-
-                <div className='col-span-3 text-right'>
-                  <div className='font-cairo text-[12px] font-bold text-[#667085]'>
-                    {l.details}
-                  </div>
-                </div>
+          {/* denials */}
+          <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#FED7AA] bg-gradient-to-br from-[#FFF7ED] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
+            <div className='flex items-center justify-between'>
+              <div className='flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-white shadow-sm'>
+                <Shield className='h-5 w-5 text-[#D97706]' />
               </div>
-            ))}
+              <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                {isLoading ? '—' : denyCount}
+              </div>
+            </div>
+            <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>
+              محاولات مرفوضة
+            </div>
+          </div>
+
+          {/* PHI access */}
+          <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#FBCFE8] bg-gradient-to-br from-[#FDF2F8] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
+            <div className='flex items-center justify-between'>
+              <div className='flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-white shadow-sm'>
+                <ShieldCheck className='h-5 w-5 text-[#DB2777]' />
+              </div>
+              <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                {isLoading ? '—' : phiCount}
+              </div>
+            </div>
+            <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>
+              وصول للبيانات الطبية
+            </div>
           </div>
         </section>
 
+        {/* ── Filters ─────────────────────────────────────────────── */}
+        <section className='mt-5 rounded-[14px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
+          <div className='mb-3 flex items-center justify-between'>
+            <div className='flex items-center gap-2 text-[#344054]'>
+              <Filter className='h-4 w-4' />
+              <span className='font-cairo text-[13px] font-extrabold'>تصفية السجلات</span>
+            </div>
+            {hasActiveFilters && (
+              <button
+                onClick={resetFilters}
+                className='font-cairo text-[12px] font-bold text-primary underline-offset-2 hover:underline'
+              >
+                إعادة تعيين
+              </button>
+            )}
+          </div>
+
+          <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8'>
+            {/* Search */}
+            <div className='relative sm:col-span-2 lg:col-span-2 xl:col-span-2'>
+              <input
+                placeholder='بحث في السجلات...'
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className='h-[40px] w-full rounded-[10px] border border-[#EEF2F6] bg-white pe-10 ps-4 text-right font-cairo text-[13px] font-bold text-[#111827] placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-primary/20'
+              />
+              <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+            </div>
+
+            {/* Category */}
+            <select
+              value={category}
+              onChange={(e) => { setCategory(e.target.value as AuditLogCategory | ''); setPage(1); }}
+              className={selectClass}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+
+            {/* Outcome */}
+            <select
+              value={outcome}
+              onChange={(e) => { setOutcome(e.target.value as AuditLogOutcome | ''); setPage(1); }}
+              className={selectClass}
+            >
+              {OUTCOMES.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+
+            {/* Actor Role */}
+            <select
+              value={actorRole}
+              onChange={(e) => { setActorRole(e.target.value); setPage(1); }}
+              className={selectClass}
+            >
+              {ROLES.map((r) => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+
+            {/* Date Range */}
+            <div className='flex min-w-0 items-center gap-2 sm:col-span-2 lg:col-span-4 xl:col-span-3'>
+              <input
+                type='date'
+                value={from}
+                onChange={(e) => { setFrom(e.target.value); setPage(1); }}
+                className={`${selectClass} min-w-0 flex-1 px-2`}
+                title='من تاريخ'
+              />
+              <span className='font-cairo text-[11px] text-[#98A2B3]'>إلى</span>
+              <input
+                type='date'
+                value={to}
+                onChange={(e) => { setTo(e.target.value); setPage(1); }}
+                className={`${selectClass} min-w-0 flex-1 px-2`}
+                title='إلى تاريخ'
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Table ───────────────────────────────────────────────── */}
+        <section className='mt-4 overflow-hidden rounded-[14px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.07)]'>
+          {/* Table header */}
+          <div className='grid grid-cols-12 gap-2 border-b border-[#EEF2F6] px-6 py-3'>
+            <div className='col-span-3 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>الإجراء / الفئة</div>
+            <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>المستخدم</div>
+            <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>النتيجة</div>
+            <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>IP / المسار</div>
+            <div className='col-span-3 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>التاريخ والوقت</div>
+          </div>
+
+          {/* Loading */}
+          {(isLoading || (isFetching && logs.length === 0)) && (
+            <div className='divide-y divide-[#EEF2F6]'>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonRow key={i} />
+              ))}
+            </div>
+          )}
+
+          {/* Error */}
+          {isError && !isLoading && (
+            <div className='px-6 py-16 text-center'>
+              <ShieldAlert className='mx-auto mb-3 h-10 w-10 text-[#FCA5A5]' />
+              <div className='font-cairo text-[14px] font-black text-[#991B1B]'>
+                تعذّر تحميل السجلات
+              </div>
+              <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                {(error as Error)?.message ?? 'خطأ في الاتصال بالخادم'}
+              </div>
+            </div>
+          )}
+
+          {/* Empty */}
+          {!isLoading && !isError && logs.length === 0 && (
+            <div className='px-6 py-16 text-center'>
+              <Activity className='mx-auto mb-3 h-10 w-10 text-[#E5E7EB]' />
+              <div className='font-cairo text-[14px] font-black text-[#667085]'>
+                لا توجد سجلات مطابقة
+              </div>
+              <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                جرّب تغيير معايير البحث أو التصفية
+              </div>
+            </div>
+          )}
+
+          {/* Rows */}
+          {!isLoading && !isError && logs.length > 0 && (
+            <div className={`divide-y divide-[#EEF2F6] ${isFetching ? 'opacity-60 transition-opacity' : ''}`}>
+              {logs.map((log) => (
+                <LogRow key={log._id} log={log} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── Pagination ──────────────────────────────────────────── */}
+        {!isLoading && !isError && total > PAGE_SIZE && (
+          <section className='mt-4 flex items-center justify-between px-1'>
+            <div className='font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+              عرض {Math.min((page - 1) * PAGE_SIZE + 1, total)}–{Math.min(page * PAGE_SIZE, total)} من {total.toLocaleString('ar-SA')} سجل
+            </div>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1 || isFetching}
+                className='flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[#EEF2F6] bg-white text-[#344054] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-40'
+              >
+                <ChevronRight className='h-4 w-4' />
+              </button>
+
+              <div className='flex items-center gap-1'>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let p = i + 1;
+                  if (totalPages > 5 && page > 3) p = page - 2 + i;
+                  if (p > totalPages) return null;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`flex h-[36px] w-[36px] items-center justify-center rounded-[8px] font-cairo text-[13px] font-extrabold transition-colors ${
+                        p === page
+                          ? 'bg-primary text-white shadow-sm'
+                          : 'border border-[#EEF2F6] bg-white text-[#344054] hover:bg-[#F9FAFB]'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages || isFetching}
+                className='flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[#EEF2F6] bg-white text-[#344054] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-40'
+              >
+                <ChevronLeft className='h-4 w-4' />
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* ── Privacy note ────────────────────────────────────────── */}
         <section className='mt-6 rounded-[12px] border border-[#FDE68A] bg-[#FFFBEB] px-6 py-4'>
           <div className='flex items-start justify-between gap-4'>
             <div className='text-right'>
               <div className='font-cairo text-[14px] font-black text-[#92400E]'>
-                ملاحظة الخصوصية
+                ملاحظة الخصوصية والامتثال
               </div>
-              <div className='mt-1 font-cairo text-[12px] font-semibold leading-[18px] text-[#B45309]'>
-                لا تتضمن سجلات التدقيق البيانات الحساسة للمرضى. يتم تتبع الأنشطة
-                فقط للأغراض الأمنية والإدارية.
+              <div className='mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#B45309]'>
+                لا تتضمن سجلات التدقيق أي محتوى حساس للمرضى (لا مرفقات، لا رسائل استشارة، لا نصوص تشخيص أو وصفات). يتم تتبع الأنشطة فقط للأغراض الأمنية والإدارية والامتثال القانوني.
+                <br />
+                مدد الاحتفاظ: AUTH / AUTHZ / DATA / ADMIN — 3 سنوات | PHI — 7 سنوات | SYSTEM — سنة واحدة.
               </div>
             </div>
-            <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#FDE68A]'>
+            <div className='flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[10px] bg-[#FDE68A]'>
               <AlertTriangle className='h-5 w-5 text-[#B45309]' />
             </div>
           </div>

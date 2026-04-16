@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
 export type AdminSearchFiltersValues = {
@@ -9,6 +9,17 @@ export type AdminSearchFiltersValues = {
   specialty?: string;
   status?: string;
 };
+
+function areValuesEqual(
+  a: AdminSearchFiltersValues,
+  b: AdminSearchFiltersValues,
+) {
+  return (
+    (a.query ?? '') === (b.query ?? '') &&
+    (a.specialty ?? '') === (b.specialty ?? '') &&
+    (a.status ?? '') === (b.status ?? '')
+  );
+}
 
 export default function AdminSearchFiltersBar({
   queryPlaceholder,
@@ -49,14 +60,23 @@ export default function AdminSearchFiltersBar({
   const [values, setValues] = useState<AdminSearchFiltersValues>(
     resolvedDefaultValues,
   );
+  const onChangeRef = useRef(onChange);
 
   useEffect(() => {
-    setValues(resolvedDefaultValues);
+    setValues((prev) =>
+      areValuesEqual(prev, resolvedDefaultValues)
+        ? prev
+        : resolvedDefaultValues,
+    );
   }, [resolvedDefaultValues, resetSignal]);
 
   useEffect(() => {
-    onChange?.(values);
-  }, [onChange, values]);
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    onChangeRef.current?.(values);
+  }, [values]);
 
   const hasSpecialty = (specialtyOptions?.length ?? 0) > 0;
   const hasStatus = (statusOptions?.length ?? 0) > 0;
