@@ -231,6 +231,10 @@ export type AdminDoctorSummary = {
   approvalStatus?: AdminDoctorApprovalStatus;
   approvalNote?: string | null;
   createdAt?: string;
+  /** When backend aggregates list stats (optional) */
+  appointmentsCount?: number;
+  completedAppointmentsCount?: number;
+  linkedPatientsCount?: number;
   user?: {
     fullName: string;
     email?: string;
