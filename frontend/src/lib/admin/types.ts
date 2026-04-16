@@ -268,6 +268,8 @@ export type VerificationRequestSummary = {
   adminNote?: string | null;
   reviewedAt?: string | null;
   createdAt?: string;
+  requestedChanges?: Record<string, unknown>;
+  changes?: Record<string, unknown>;
   doctor?: {
     _id: string;
     specialization?: string;
@@ -306,6 +308,13 @@ export type VerificationRequestsListResponse = ApiSuccessEnvelope & {
   total: number;
   results: number;
   requests: VerificationRequestSummary[];
+};
+
+export type VerificationRequestDetailsResponse = ApiSuccessEnvelope & {
+  request?: VerificationRequestSummary;
+  verificationRequest?: VerificationRequestSummary;
+  item?: VerificationRequestSummary;
+  data?: VerificationRequestSummary;
 };
 
 export type AdminSecretarySummary = {

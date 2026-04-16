@@ -24,6 +24,7 @@ import type {
   AuditLogsListParams,
   AuditLogsListResponse,
   VerificationRequestReviewBody,
+  VerificationRequestDetailsResponse,
   VerificationRequestsListParams,
   VerificationRequestsListResponse,
 } from '@/lib/admin/types';
@@ -163,6 +164,11 @@ export const adminApi = {
       patch<any>(adminEndpoints.verificationRequests.review(requestId), body, {
         locale: 'ar',
       }),
+    getById: (requestId: string) =>
+      get<VerificationRequestDetailsResponse>(
+        adminEndpoints.verificationRequests.details(requestId),
+        { locale: 'ar' },
+      ),
   },
   users: {
     offboard: (userId: string, reason?: string) =>

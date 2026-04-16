@@ -44,6 +44,7 @@ import AdminServiceTypesPage from '@/pages/admin/service-types/AdminServiceTypes
 import AdminAppointmentsPage from '@/pages/admin/appointments/AdminAppointmentsPage';
 import AdminMedicalFileOptionsPage from '@/pages/admin/medical-file-options/AdminMedicalFileOptionsPage';
 import AdminVerificationRequestsPage from '@/pages/admin/verification-requests/AdminVerificationRequestsPage';
+import AdminVerificationRequestDetailsPage from '@/pages/admin/verification-requests/AdminVerificationRequestDetailsPage';
 import AdminSystemLogsPage from '@/pages/admin/system-logs/AdminSystemLogsPage';
 import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage';
 import AdminServicesPage from '@/pages/admin/services/AdminServicesPage';
@@ -145,6 +146,7 @@ export default function App() {
             <Route path='appointments'          element={<AdminAppointmentsPage />} />
             <Route path='medical-file-options'  element={<AdminMedicalFileOptionsPage />} />
             <Route path='verification-requests' element={<AdminVerificationRequestsPage />} />
+            <Route path='verification-requests/:requestId' element={<AdminVerificationRequestDetailsPage />} />
             <Route path='system-logs'           element={<AdminSystemLogsPage />} />
             <Route path='settings'              element={<AdminSettingsPage />} />
             <Route path='services'              element={<AdminServicesPage />} />
