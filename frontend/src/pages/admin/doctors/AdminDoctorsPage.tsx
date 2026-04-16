@@ -6,14 +6,172 @@ import {
   Stethoscope,
   Mail,
   Phone,
-  BadgeCheck,
   ChevronLeft,
+  Eye,
+  Award,
 } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { useAdminDoctors } from '@/hooks/useAdminDoctors';
-import type { AdminDoctorApprovalStatus } from '@/lib/admin/types';
+import type {
+  AdminDoctorApprovalStatus,
+  AdminDoctorSummary,
+} from '@/lib/admin/types';
+
+const TEAL = '#108B8B';
+const STAT_BG = '#E6F4F4';
+
+function doctorInitial(fullName?: string) {
+  const n = (fullName ?? '').trim();
+  if (!n.length) return 'د';
+  return n.charAt(0);
+}
+
+function StatusBadge({ status }: { status?: AdminDoctorApprovalStatus }) {
+  if (status === 'approved') {
+    return (
+      <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#28A745] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
+        <CheckCircle2 className='h-3.5 w-3.5 shrink-0' />
+        مقبول
+      </span>
+    );
+  }
+  if (status === 'rejected') {
+    return (
+      <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#DC3545] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
+        <Ban className='h-3.5 w-3.5 shrink-0' />
+        مرفوض
+      </span>
+    );
+  }
+  return (
+    <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#343A40] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
+      <Clock className='h-3.5 w-3.5 shrink-0' />
+      بانتظار الموافقة
+    </span>
+  );
+}
+
+function DoctorListCard({
+  doctor: d,
+  onDetails,
+}: {
+  doctor: AdminDoctorSummary;
+  onDetails: () => void;
+}) {
+  const appt = d.appointmentsCount;
+  const done = d.completedAppointmentsCount;
+  const pts = d.linkedPatientsCount;
+  const fmt = (n: number | undefined) =>
+    typeof n === 'number' && !Number.isNaN(n) ? String(n) : '—';
+
+  return (
+    <div className='rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
+      <div className='flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-stretch lg:justify-between lg:gap-6'>
+        {/* الهوية — يمين الصفحة في RTL */}
+        <div className='flex shrink-0 items-start gap-3'>
+          <div
+            className='flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] text-[22px] font-black text-white'
+            style={{ backgroundColor: TEAL }}
+          >
+            {doctorInitial(d.user?.fullName)}
+          </div>
+          <div className='min-w-0 text-right'>
+            <div className='font-cairo text-[15px] font-extrabold leading-snug text-[#1F2937]'>
+              {d.user?.fullName ?? '—'}
+            </div>
+            <div className='mt-1 font-cairo text-[13px] font-semibold text-[#6B7280]'>
+              {d.specialization ?? '—'}
+            </div>
+          </div>
+        </div>
+
+        {/* إحصائيات ثلاثية */}
+        <div className='flex flex-1 flex-wrap items-stretch justify-center gap-2'>
+          {[
+            { label: 'المواعيد', value: fmt(appt) },
+            { label: 'مكتملة', value: fmt(done) },
+            { label: 'المرضى', value: fmt(pts) },
+          ].map((box) => (
+            <div
+              key={box.label}
+              className='flex min-w-[88px] flex-1 flex-col items-center justify-center rounded-[8px] px-3 py-2 sm:max-w-[120px]'
+              style={{ backgroundColor: STAT_BG }}
+            >
+              <span
+                className='font-cairo text-[11px] font-bold'
+                style={{ color: TEAL }}
+              >
+                {box.label}
+              </span>
+              <span
+                className='mt-0.5 font-cairo text-[20px] font-black leading-none'
+                style={{ color: TEAL }}
+              >
+                {box.value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* تواصل */}
+        <div className='flex min-w-[200px] flex-col gap-2 text-right lg:max-w-[280px]'>
+          <div className='flex items-start gap-2'>
+            <Award
+              className='h-4 w-4 shrink-0 mt-0.5'
+              style={{ color: TEAL }}
+              aria-hidden
+            />
+            <span className='font-cairo text-[12px] font-semibold text-[#6B7280]'>
+              رخصة:{' '}
+              <span className='text-[#374151]'>
+                {d.medicalLicenseNumber ?? '—'}
+              </span>
+            </span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <Mail
+              className='h-4 w-4 shrink-0'
+              style={{ color: TEAL }}
+              aria-hidden
+            />
+            <span className='truncate font-cairo text-[12px] font-semibold text-[#6B7280]'>
+              {d.user?.email ?? '—'}
+            </span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <Phone
+              className='h-4 w-4 shrink-0'
+              style={{ color: TEAL }}
+              aria-hidden
+            />
+            <span
+              className='font-cairo text-[12px] font-semibold text-[#6B7280]'
+              dir='ltr'
+            >
+              {d.user?.phone ?? '—'}
+            </span>
+          </div>
+        </div>
+
+        {/* الحالة + زر التفاصيل */}
+        <div className='flex shrink-0 flex-col items-stretch gap-3 sm:min-w-[140px] lg:items-end'>
+          <StatusBadge status={d.approvalStatus} />
+          <button
+            type='button'
+            onClick={onDetails}
+            className='inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 sm:w-auto'
+            style={{ backgroundColor: TEAL }}
+          >
+            <span>التفاصيل</span>
+            <Eye className='h-4 w-4 shrink-0' />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
@@ -246,81 +404,42 @@ export default function AdminDoctorsPage() {
           }}
         />
 
-        <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden'>
-          <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
+        <section className='mt-5 overflow-hidden rounded-[12px] border border-[#E8ECEF] bg-[#F8F9FA] shadow-[0_4px_24px_rgba(0,0,0,0.05)]'>
+          <div className='flex items-center justify-between border-b border-[#E8ECEF] bg-white px-6 py-4'>
             <div className='flex items-center gap-2'>
-              <BadgeCheck className='h-4 w-4 text-primary' />
-              <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
+              <Stethoscope
+                className='h-5 w-5 shrink-0'
+                style={{ color: TEAL }}
+                aria-hidden
+              />
+              <div className='font-cairo text-[16px] font-black text-[#1F2937]'>
                 قائمة الأطباء ({results})
               </div>
             </div>
           </div>
 
-          <div className='space-y-4 p-6'>
+          <div className='space-y-4 p-5'>
             {isLoading ? (
-              <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
+              <div className='rounded-[10px] border border-[#E8ECEF] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
                 جاري تحميل قائمة الأطباء...
               </div>
             ) : error ? (
-              <div className='font-cairo text-[12px] font-semibold text-[#B42318]'>
+              <div className='rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>
                 فشل تحميل قائمة الأطباء
               </div>
             ) : doctors.length === 0 ? (
-              <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
+              <div className='rounded-[10px] border border-[#E8ECEF] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
                 لا يوجد أطباء مطابقون لخيارات البحث.
               </div>
             ) : (
               doctors.map((d) => (
-                <div
+                <DoctorListCard
                   key={d._id}
-                  className='rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.06)] overflow-hidden'
-                >
-                  <div className='flex'>
-                    <div className='flex-1 px-5 py-4'>
-                      <div className='flex items-start justify-between'>
-                        <div className='flex items-start gap-2'>
-                          <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-[18px] font-bold text-white'>
-                            {(d.user?.fullName ?? 'د').charAt(0)}
-                          </div>
-                          <div className='text-right'>
-                            <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                              {d.user?.fullName ?? '—'}
-                            </div>
-                            <div className='mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]'>
-                              {d.specialization ?? '—'}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className='flex mt-5 justify-between'>
-                        <div className='flex flex-wrap items-center gap-4 text-[#98A2B3]'>
-                          <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
-                            <BadgeCheck className='h-4 w-4 text-primary' />
-                            {d.medicalLicenseNumber ?? '—'}
-                          </div>
-                          <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
-                            <Mail className='h-4 w-4 text-primary' />
-                            {d.user?.email ?? '—'}
-                          </div>
-                          <div className='inline-flex items-center gap-2 font-cairo text-[11px] font-bold'>
-                            <Phone className='h-4 w-4 text-primary' />
-                            {d.user?.phone ?? '—'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        navigate(`/admin/doctors/${encodeURIComponent(d._id)}`)
-                      }
-                      className='flex w-[54px] shrink-0 items-center justify-center bg-primary text-white'
-                      aria-label='فتح ملف الطبيب'
-                    >
-                      <ChevronLeft className='h-5 w-5' />
-                    </button>
-                  </div>
-                </div>
+                  doctor={d}
+                  onDetails={() =>
+                    navigate(`/admin/doctors/${encodeURIComponent(d._id)}`)
+                  }
+                />
               ))
             )}
           </div>

@@ -80,20 +80,7 @@ function extractRequestFromDetails(details: any): VerificationRequestSummary | n
 
 function buildChangeRows(request: VerificationRequestSummary | null): ChangeRow[] {
   if (!request) {
-    return [
-      {
-        key: 'education',
-        label: 'التعليم',
-        before: 'ماجستير طب الأطفال',
-        after: 'دكتوراه طب الأطفال',
-      },
-      {
-        key: 'medicalLicenseNumber',
-        label: 'رقم الترخيص',
-        before: 'MED-12345',
-        after: 'MED-2468',
-      },
-    ];
+    return [];
   }
 
   const requestAny = request as any;
@@ -185,6 +172,7 @@ export default function AdminVerificationRequestDetailsPage() {
     if (!request) {
       return {
         id: requestId ?? '',
+        doctorId: '',
         doctor: '—',
         specialty: '—',
         address: '—',
@@ -215,6 +203,7 @@ export default function AdminVerificationRequestDetailsPage() {
 
     return {
       id: request._id,
+      doctorId: request.doctor?._id ?? '',
       doctor: doctorName,
       specialty: request.doctor?.specialization || '—',
       address: addressParts.length > 0 ? addressParts.join('، ') : '—',
@@ -332,19 +321,30 @@ export default function AdminVerificationRequestDetailsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {cardData.changeRows.map((row) => (
-                    <tr key={row.key}>
-                      <td className='border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]'>
-                        {row.label}
-                      </td>
-                      <td className='border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-semibold text-[#1F2937]'>
-                        {row.before}
-                      </td>
-                      <td className='border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-semibold text-[#1F2937]'>
-                        {row.after}
+                  {cardData.changeRows.length > 0 ? (
+                    cardData.changeRows.map((row) => (
+                      <tr key={row.key}>
+                        <td className='border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]'>
+                          {row.label}
+                        </td>
+                        <td className='border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-semibold text-[#1F2937]'>
+                          {row.before}
+                        </td>
+                        <td className='border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-semibold text-[#1F2937]'>
+                          {row.after}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className='border border-[#0F8F89] px-4 py-6 text-center font-cairo text-[14px] font-semibold text-[#6B7280]'
+                      >
+                        لا توجد حقول تعديل مرسلة من الخادم لهذا الطلب.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -353,10 +353,12 @@ export default function AdminVerificationRequestDetailsPage() {
               <button
                 type='button'
                 onClick={() => {
-                  setDialogMode('map');
-                  setDialogOpen(true);
+                  if (cardData.doctorId) {
+                    navigate(`/admin/doctors/${encodeURIComponent(cardData.doctorId)}`);
+                  }
                 }}
-                className='inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#129692] px-5 font-cairo text-[16px] font-bold text-white'
+                disabled={!cardData.doctorId}
+                className='inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#129692] px-5 font-cairo text-[16px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-55'
               >
                 <MapPinned className='h-4 w-4' />
                 الملف الشخصي
