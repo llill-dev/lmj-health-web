@@ -11,10 +11,12 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVerificationRequestDialog';
 import { adminApi } from '@/lib/admin/client';
 
 export default function AdminVerificationRequestsPage() {
+  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'approve' | 'reject' | 'map'>(
     'map',
@@ -255,11 +257,9 @@ export default function AdminVerificationRequestsPage() {
                   </div>
                   <button
                     type='button'
-                    aria-label='فتح تفاصيل الموقع'
+                    aria-label='فتح صفحة تفاصيل طلب التحقق'
                     onClick={() => {
-                      setSelected(r);
-                      setDialogMode('map');
-                      setDialogOpen(true);
+                      navigate(`/admin/verification-requests/${encodeURIComponent(r.id)}`);
                     }}
                     className='flex w-[58px] self-stretch items-center justify-center bg-[#129692] text-white transition hover:bg-[#0F8885]'
                   >
