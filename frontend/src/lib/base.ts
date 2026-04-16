@@ -1,20 +1,52 @@
-import { useAuthStore } from '@/store/authStore'; // من useAuth اللي عملنا
+import { useAuthStore } from '@/store/authStore';
 
 export const API_BASE_URL = import.meta.env.PROD
-  ? '' // Use local API proxy in production
-  : import.meta.env.VITE_API_URL || ''; // Use direct API in development
+  ? ''
+  : import.meta.env.VITE_API_URL || '';
 
 const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ApiError — carries the full HTTP context so callers can inspect status codes,
+// messageKey (for i18n), and the raw JSON body without any information loss.
+// ─────────────────────────────────────────────────────────────────────────────
+export class ApiError extends Error {
+  /** HTTP status code (e.g. 401, 403, 404, 500) */
+  readonly status: number;
+  /** Backend i18n key e.g. "errors.auth.invalidCredentials" */
+  readonly messageKey: string | null;
+  /** Full parsed response body */
+  readonly body: Record<string, unknown>;
+
+  constructor(
+    status: number,
+    messageKey: string | null,
+    body: Record<string, unknown>,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.messageKey = messageKey;
+    this.body = body;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Options
+// ─────────────────────────────────────────────────────────────────────────────
 export type ApiOptions = RequestInit & {
-  token?: string; // optional، رح يجيب من authStore تلقائي
+  token?: string;
   signal?: AbortSignal;
   onError?: (error: Error) => void;
-  onProgress?: (progress: number) => void; // للـ upload progress (ميزة 7: رفع CV)
-  locale?: 'ar' | 'en'; // للـ bilingual errors (ميزة 1)
+  onProgress?: (progress: number) => void;
+  locale?: 'ar' | 'en';
 };
 
-export async function apiRequest<T = any>(
+// ─────────────────────────────────────────────────────────────────────────────
+// Core request function
+// ─────────────────────────────────────────────────────────────────────────────
+export async function apiRequest<T = unknown>(
   endpoint: string,
   options: ApiOptions = {},
 ): Promise<T> {
@@ -28,21 +60,21 @@ export async function apiRequest<T = any>(
     locale = 'ar',
     ...rest
   } = options;
+
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
-
-  // جديد: token auto من useAuthStore
   const token = providedToken || useAuthStore.getState().token || '';
-
   const isFormData = rest.body instanceof FormData;
 
-  const finalHeaders: HeadersInit = {
-    ...(!('x-lang' in ((headers || {}) as any)) ? { 'x-lang': locale } : {}),
+  const finalHeaders: Record<string, string> = {
+    ...(!headers || !('x-lang' in (headers as object))
+      ? { 'x-lang': locale }
+      : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(headers || {}),
+    ...(headers as Record<string, string> | undefined),
   };
 
-  if (!isFormData && !(finalHeaders as any)['Content-Type']) {
-    (finalHeaders as any)['Content-Type'] = 'application/json';
+  if (!isFormData && !finalHeaders['Content-Type']) {
+    finalHeaders['Content-Type'] = 'application/json';
   }
 
   const config: RequestInit = {
@@ -54,59 +86,90 @@ export async function apiRequest<T = any>(
 
   try {
     const res = await fetch(url, config);
+
+    // ── Parse body (JSON preferred, fall back to text) ──
+    const contentType = res.headers.get('content-type') ?? '';
+    let body: Record<string, unknown> = {};
+    let rawText = '';
+
+    if (contentType.includes('application/json')) {
+      try {
+        body = (await res.json()) as Record<string, unknown>;
+      } catch {
+        // empty body
+      }
+    } else {
+      rawText = await res.text().catch(() => '');
+    }
+
     if (!res.ok) {
-      let message = await res.text().catch(() => res.statusText);
-      // جديد: bilingual error (ميزة 1)
-      const errMsg =
+      // Prefer messageKey-keyed message, then body.message/error, then statusText
+      const backendMsg =
+        (body.message as string | undefined) ||
+        (body.error as string | undefined) ||
+        rawText ||
+        res.statusText;
+
+      const messageKey = (body.messageKey as string | undefined) ?? null;
+
+      const displayMsg =
         locale === 'ar'
-          ? `خطأ ${res.status}: ${message || 'طلب فاشل'}`
-          : `Error ${res.status}: ${message || 'Request failed'}`;
-      const err = new Error(errMsg);
+          ? `خطأ ${res.status}: ${backendMsg || 'طلب فاشل'}`
+          : `Error ${res.status}: ${backendMsg || 'Request failed'}`;
+
+      const err = new ApiError(res.status, messageKey, body, displayMsg);
       onError?.(err);
       throw err;
     }
-    try {
-      return (await res.json()) as T;
-    } catch {
-      return undefined as unknown as T;
-    }
-  } catch (e: any) {
-    const errMsg = locale === 'ar' ? 'خطأ شبكة' : 'Network error';
-    const err = e instanceof Error ? e : new Error(errMsg);
+
+    return (Object.keys(body).length ? body : undefined) as unknown as T;
+  } catch (e) {
+    if (e instanceof ApiError) throw e;
+
+    const networkMsg = locale === 'ar' ? 'خطأ شبكة' : 'Network error';
+    const err = e instanceof Error ? e : new Error(networkMsg);
     onError?.(err);
     throw err;
   }
 }
 
-export async function apiMultipart<T = any>(
+// ─────────────────────────────────────────────────────────────────────────────
+// Multipart upload with optional XHR progress
+// ─────────────────────────────────────────────────────────────────────────────
+export async function apiMultipart<T = unknown>(
   endpoint: string,
   formData: FormData,
   options: ApiOptions = {},
-) {
+): Promise<T> {
   if (UI_ONLY) return undefined as unknown as T;
 
-  const { onProgress, locale = 'ar', ...rest } = options;
+  const { onProgress, locale = 'ar', token: providedToken, ...rest } = options;
+  const token = providedToken || useAuthStore.getState().token || '';
 
-  // جديد: progress مع XMLHttpRequest (لرفع CV أو فيديو في  ميزة 7)
   if (onProgress) {
     const xhr = new XMLHttpRequest();
     xhr.open(rest.method || 'POST', `${API_BASE_URL}${endpoint}`);
-    if (rest.token)
-      xhr.setRequestHeader('Authorization', `Bearer ${rest.token}`);
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.setRequestHeader('x-lang', locale);
+
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress((e.loaded / e.total) * 100);
     };
-    return new Promise((resolve, reject) => {
+
+    return new Promise<T>((resolve, reject) => {
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             resolve(JSON.parse(xhr.responseText) as T);
           } catch {
-            resolve(undefined as T);
+            resolve(undefined as unknown as T);
           }
         } else {
           reject(
-            new Error(
+            new ApiError(
+              xhr.status,
+              null,
+              {},
               locale === 'ar'
                 ? `خطأ رفع: ${xhr.status}`
                 : `Upload error: ${xhr.status}`,
@@ -120,7 +183,6 @@ export async function apiMultipart<T = any>(
     });
   }
 
-  // fallback
   return apiRequest<T>(endpoint, {
     method: 'POST',
     body: formData,
@@ -128,12 +190,15 @@ export async function apiMultipart<T = any>(
   });
 }
 
-export const get = <T = any>(endpoint: string, options?: ApiOptions) =>
+// ─────────────────────────────────────────────────────────────────────────────
+// Convenience wrappers
+// ─────────────────────────────────────────────────────────────────────────────
+export const get = <T = unknown>(endpoint: string, options?: ApiOptions) =>
   apiRequest<T>(endpoint, { ...options, method: 'GET' });
 
-export const post = <T = any>(
+export const post = <T = unknown>(
   endpoint: string,
-  body?: any,
+  body?: unknown,
   options?: ApiOptions,
 ) =>
   apiRequest<T>(endpoint, {
@@ -142,9 +207,9 @@ export const post = <T = any>(
     body: body instanceof FormData ? body : JSON.stringify(body),
   });
 
-export const put = <T = any>(
+export const put = <T = unknown>(
   endpoint: string,
-  body?: any,
+  body?: unknown,
   options?: ApiOptions,
 ) =>
   apiRequest<T>(endpoint, {
@@ -153,9 +218,9 @@ export const put = <T = any>(
     body: body instanceof FormData ? body : JSON.stringify(body),
   });
 
-export const patch = <T = any>(
+export const patch = <T = unknown>(
   endpoint: string,
-  body?: any,
+  body?: unknown,
   options?: ApiOptions,
 ) =>
   apiRequest<T>(endpoint, {
@@ -164,5 +229,5 @@ export const patch = <T = any>(
     body: body instanceof FormData ? body : JSON.stringify(body),
   });
 
-export const del = <T = any>(endpoint: string, options?: ApiOptions) =>
+export const del = <T = unknown>(endpoint: string, options?: ApiOptions) =>
   apiRequest<T>(endpoint, { ...options, method: 'DELETE' });
