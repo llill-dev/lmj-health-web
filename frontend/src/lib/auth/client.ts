@@ -1,4 +1,5 @@
 import { post } from '@/lib/base';
+import { ApiError } from '@/lib/base';
 import { authEndpoints } from '@/lib/auth/endpoints';
 import type {
   DoctorSignupBody,
@@ -9,58 +10,92 @@ import type {
   LogoutResponse,
   AuthError,
 } from '@/lib/auth/types';
-import { AUTH_ERROR_CODES, AUTH_ERROR_MESSAGES } from '@/lib/auth/types';
+import { AUTH_ERROR_MESSAGES } from '@/lib/auth/types';
 
-// Enhanced error handler for auth endpoints
-const handleAuthError = (error: any): AuthError => {
-  const status = error?.response?.status;
-  const message = error?.response?.data?.message || error?.message;
+// ─────────────────────────────────────────────────────────────────────────────
+// Error normaliser
+// Reads the structured ApiError (status + messageKey + body) produced by
+// base.ts to return a fully typed AuthError with a meaningful code.
+// ─────────────────────────────────────────────────────────────────────────────
+const handleAuthError = (error: unknown): AuthError => {
+  // ── ApiError (the normal path) ──────────────────────────────────────────
+  if (error instanceof ApiError) {
+    const { status, messageKey, body } = error;
+    const backendMessage =
+      (body.message as string | undefined) ||
+      (body.error as string | undefined) ||
+      error.message;
 
-  // Map HTTP status to error code
-  let code: AuthError['code'] = 'UNKNOWN';
-  if (status && AUTH_ERROR_CODES[status]) {
-    code = AUTH_ERROR_CODES[status];
-  }
+    let code: AuthError['code'] = 'UNKNOWN';
 
-  // Refine 403 errors based on message content
-  if (status === 403) {
-    if (message?.toLowerCase().includes('not verified')) {
-      code = 'NOT_VERIFIED';
-    } else if (message?.toLowerCase().includes('inactive')) {
-      code = 'INACTIVE';
-    } else if (message?.toLowerCase().includes('pending')) {
-      code = 'PENDING_APPROVAL';
-    } else if (message?.toLowerCase().includes('not allowed')) {
-      code = 'NOT_ALLOWED';
-    } else if (message?.toLowerCase().includes('activate')) {
-      code = 'TEMPORARY';
-    } else if (message?.toLowerCase().includes('locked')) {
-      code = 'LOCKED';
+    switch (status) {
+      case 401:
+        code = 'INVALID_CREDENTIALS';
+        break;
+      case 410:
+        code = 'DELETED';
+        break;
+      case 403: {
+        // Refine 403 using messageKey first (most reliable), then fall back
+        // to scanning the message text for known phrases.
+        const key = messageKey ?? '';
+        const msg = backendMessage.toLowerCase();
+
+        if (key.includes('notVerified') || msg.includes('not verified')) {
+          code = 'NOT_VERIFIED';
+        } else if (key.includes('inactive') || msg.includes('inactive')) {
+          code = 'INACTIVE';
+        } else if (
+          key.includes('pendingApproval') ||
+          key.includes('pending') ||
+          msg.includes('pending')
+        ) {
+          code = 'PENDING_APPROVAL';
+        } else if (key.includes('notAllowed') || msg.includes('not allowed')) {
+          code = 'NOT_ALLOWED';
+        } else if (key.includes('activate') || msg.includes('activate')) {
+          code = 'TEMPORARY';
+        } else if (key.includes('locked') || msg.includes('locked')) {
+          code = 'LOCKED';
+        } else {
+          code = 'NOT_VERIFIED';
+        }
+        break;
+      }
+      default:
+        code = 'UNKNOWN';
     }
+
+    return {
+      code,
+      message: backendMessage || AUTH_ERROR_MESSAGES[code].ar,
+      details: body,
+    };
   }
 
-  // Handle network errors
-  if (error?.code === 'NETWORK_ERROR' || !error?.response) {
-    code = 'NETWORK_ERROR';
+  // ── Network / unknown error ─────────────────────────────────────────────
+  if (error instanceof Error && error.message) {
+    return { code: 'NETWORK_ERROR', message: error.message };
   }
 
   return {
-    code,
-    message: message || AUTH_ERROR_MESSAGES[code].en,
-    details: error?.response?.data,
+    code: 'UNKNOWN',
+    message: AUTH_ERROR_MESSAGES['UNKNOWN'].ar,
   };
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth API client
+// ─────────────────────────────────────────────────────────────────────────────
 export const authApi = {
-  // Existing signup methods
   signupDoctor: (body: DoctorSignupBody) =>
     post<SignupResponse>(authEndpoints.signup(), body, { locale: 'ar' }),
+
   resendSignupOtp: (body: ResendSignupOtpBody) =>
     post<SignupResponse>(authEndpoints.resendSignupOtp(), body, {
       locale: 'ar',
     }),
 
-  // login method with enhanced error handling
   login: async (
     body: LoginRequest,
   ): Promise<{ data: LoginResponse } | { error: AuthError }> => {
@@ -69,12 +104,11 @@ export const authApi = {
         locale: 'ar',
       });
       return { data: response };
-    } catch (error: any) {
+    } catch (error) {
       return { error: handleAuthError(error) };
     }
   },
 
-  // Logout method with automatic token handling
   logoutAll: async (
     token: string,
   ): Promise<{ data: LogoutResponse } | { error: AuthError }> => {
@@ -82,13 +116,10 @@ export const authApi = {
       const response = await post<LogoutResponse>(
         authEndpoints.logoutAll(),
         {},
-        {
-          locale: 'ar',
-          token, // Explicitly pass token for logout
-        },
+        { locale: 'ar', token },
       );
       return { data: response };
-    } catch (error: any) {
+    } catch (error) {
       return { error: handleAuthError(error) };
     }
   },

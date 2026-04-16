@@ -1,38 +1,27 @@
 import { useSyncExternalStore } from 'react';
 import { get, post } from '@/lib/base';
 import { authApi } from '@/lib/auth/client';
-import type {
-  LoginRequest,
-  LoginResponse,
-  LogoutResponse,
-  AuthError,
-} from '@/lib/auth/types';
+import {
+  readAuthToken,
+  writeAuthToken,
+  clearAuthToken,
+  readAuthUser,
+  writeAuthUser,
+  clearAllAuthCookies,
+} from '@/lib/cookies';
+import type { LoginRequest, AuthError } from '@/lib/auth/types';
 
-interface User {
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface User {
   id: string;
   email: string;
   phone: string;
-  role:
-    | 'patient'
-    | 'secretary'
-    | 'data-entry'
-    | 'doctor'
-    | 'admin';
+  role: 'patient' | 'secretary' | 'data-entry' | 'doctor' | 'admin';
   name?: string;
   verified: boolean;
-}
-interface UserProfile {
-  id: string;
-  name: string;
-  jobTitle: string;
-  email: string;
-  phone: string;
-  location: string;
-  stats: {
-    profileViews: number;
-    applicationsCount: number;
-    savedJobsCount: number;
-  };
 }
 
 interface PendingVerification {
@@ -45,17 +34,16 @@ interface PendingVerification {
 
 interface AuthState {
   user: User | null;
-  userProfile: UserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
   pendingVerification: PendingVerification | null;
-  // General/settings
+  // Platform / general settings
   platformName: string;
   primaryEmail: string;
   phone: string;
   region: string;
   lang: 'ar' | 'en';
-  loadProfile: () => Promise<void>;
+  // Actions
   loadGeneralSettings: () => Promise<void>;
   saveGeneralSettings: (payload: {
     platformName: string;
@@ -65,7 +53,7 @@ interface AuthState {
     lang?: 'ar' | 'en';
   }) => Promise<void>;
   login: (
-    email: string,
+    identifier: string,
     password: string,
     clientType?: 'web' | 'patient_mobile' | 'doctor_mobile',
   ) => Promise<void>;
@@ -76,19 +64,13 @@ interface AuthState {
   ) => Promise<void>;
   setPendingVerification: (payload: PendingVerification | null) => void;
   logout: () => void;
-  setAuth: (payload: {
-    user: Partial<User> & {
-      id: string;
-      verified: boolean;
-      role?: any;
-      email?: string;
-      phone?: string;
-    };
-    token: string;
-  }) => void;
 }
 
 type Listener = () => void;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// localStorage helpers (used only for non-sensitive settings)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function safeJsonParse<T>(raw: string | null): T | null {
   if (!raw) return null;
@@ -97,21 +79,6 @@ function safeJsonParse<T>(raw: string | null): T | null {
   } catch {
     return null;
   }
-}
-
-function readPersistedToken() {
-  try {
-    return localStorage.getItem('token');
-  } catch {
-    return null;
-  }
-}
-
-function writePersistedToken(token: string | null) {
-  try {
-    if (!token) localStorage.removeItem('token');
-    else localStorage.setItem('token', token);
-  } catch {}
 }
 
 function readPersistedGeneralSettings(): Partial<AuthState> | null {
@@ -126,7 +93,7 @@ function readPersistedGeneralSettings(): Partial<AuthState> | null {
 
     if (!saved) return null;
     return {
-      platformName: saved.platformName ?? 'JobFind',
+      platformName: saved.platformName ?? 'LMJ Health',
       primaryEmail: saved.primaryEmail ?? '',
       phone: saved.phone ?? '',
       region: saved.region ?? '',
@@ -149,21 +116,38 @@ function writePersistedGeneralSettings(payload: {
   } catch {}
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Build User from the persisted cookie data
+// ─────────────────────────────────────────────────────────────────────────────
+
+function buildUserFromCookie(): User | null {
+  const data = readAuthUser();
+  if (!data) return null;
+  return {
+    id: data.userId,
+    email: data.email ?? '',
+    phone: data.phone ?? '',
+    role: (data.role === 'data_entry' ? 'data-entry' : data.role) as User['role'],
+    name: data.fullName,
+    verified: true,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Initial state
+// ─────────────────────────────────────────────────────────────────────────────
+
 let state: AuthState = {
   user: null,
-  userProfile: null,
   token: null,
   isAuthenticated: false,
   pendingVerification: null,
-  platformName: 'JobFind',
+  platformName: 'LMJ Health',
   primaryEmail: '',
   phone: '',
   region: '',
   lang: 'ar',
-  loadProfile: async () => {
-    const data = await get<UserProfile>('/api/profile', { locale: 'ar' });
-    setState({ userProfile: data });
-  },
+
   loadGeneralSettings: async () => {
     const persisted = readPersistedGeneralSettings();
     if (persisted) {
@@ -180,13 +164,14 @@ let state: AuthState = {
     }>('/api/admin/settings/general', { locale: 'ar' });
 
     setState({
-      platformName: data.platformName || 'JobFind',
+      platformName: data.platformName || 'LMJ Health',
       primaryEmail: data.primaryEmail || '',
       phone: data.phone || '',
       region: data.region || '',
-      lang: (data.lang as any) || 'ar',
+      lang: (data.lang as 'ar' | 'en' | undefined) || 'ar',
     });
   },
+
   saveGeneralSettings: async (payload) => {
     try {
       const data = await post<{
@@ -200,7 +185,7 @@ let state: AuthState = {
         };
       }>('/api/admin/settings/general', payload, { locale: 'ar' });
 
-      const s = (data as any)?.settings || payload;
+      const s = (data as { settings?: typeof payload })?.settings ?? payload;
       setState({
         platformName: s.platformName,
         primaryEmail: s.primaryEmail,
@@ -214,122 +199,107 @@ let state: AuthState = {
       return;
     }
   },
+
   login: async (
-    email: string,
+    identifier: string,
     password: string,
     clientType: 'web' | 'patient_mobile' | 'doctor_mobile' = 'web',
   ) => {
-    try {
-      const loginRequest: LoginRequest = {
-        email: email.includes('@') ? email : undefined,
-        phone: email.includes('@') ? undefined : email,
-        password,
-        clientType,
-      };
+    const loginRequest: LoginRequest = {
+      email: identifier.includes('@') ? identifier : undefined,
+      phone: identifier.includes('@') ? undefined : identifier,
+      password,
+      clientType,
+    };
 
-      const result = await authApi.login(loginRequest);
+    const result = await authApi.login(loginRequest);
 
-      if ('error' in result) {
-        throw new Error(result.error.message);
-      }
-
-      const { data } = result;
-
-      // Map API response to store format
-      const mappedUser = {
-        id: data.userId,
-        email: data.email || '',
-        phone: data.phone || '',
-        role: (data.role === 'data_entry'
-          ? 'data-entry'
-          : data.role) as User['role'],
-        verified: data.accountStatus === 'active',
-        name: data.fullName,
-      };
-
-      setState({
-        user: mappedUser,
-        token: data.token,
-        isAuthenticated: true,
-        pendingVerification: null,
-        userProfile: null,
-      });
-
-      writePersistedToken(data.token);
-
-      // Store additional user data if needed
-      try {
-        localStorage.setItem(
-          'userData',
-          JSON.stringify({
-            userId: data.userId,
-            role: data.role,
-            fullName: data.fullName,
-            actorIds: data.actorIds,
-            patientPublicId: data.patientPublicId,
-          }),
-        );
-      } catch {}
-    } catch (error: any) {
-      throw new Error(error.message || 'Login failed');
+    if ('error' in result) {
+      const authErr = result.error;
+      const err: Error & { code?: string; authError?: AuthError } =
+        new Error(authErr.message);
+      err.code = authErr.code;
+      err.authError = authErr;
+      throw err;
     }
+
+    const { data } = result;
+
+    const mappedUser: User = {
+      id: data.userId,
+      email: data.email ?? '',
+      phone: data.phone ?? '',
+      role: (data.role === 'data_entry' ? 'data-entry' : data.role) as User['role'],
+      verified: data.accountStatus === 'active',
+      name: data.fullName,
+    };
+
+    setState({
+      user: mappedUser,
+      token: data.token,
+      isAuthenticated: true,
+      pendingVerification: null,
+    });
+
+    // ── Persist to cookies (replaces localStorage for sensitive auth data) ──
+    writeAuthToken(data.token);
+    writeAuthUser({
+      userId: data.userId,
+      role: data.role,
+      fullName: data.fullName,
+      email: data.email ?? '',
+      phone: data.phone ?? '',
+      actorIds: data.actorIds as Record<string, string | undefined>,
+      patientPublicId: data.patientPublicId,
+    });
+
+    // Legacy localStorage keys removed — cookies are the single source of truth.
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('userRole');
+    } catch {}
   },
+
   register: async () => {},
+
   setPendingVerification: (payload) => {
     setState({ pendingVerification: payload });
   },
+
   logout: async () => {
     const token = state.token;
 
-    // Call logout API if token exists
     if (token) {
       try {
         await authApi.logoutAll(token);
-      } catch (error) {
-        // Continue with local logout even if API fails
-        console.warn('Logout API failed:', error);
+      } catch (err) {
+        console.warn('Logout API failed — continuing local logout:', err);
       }
     }
 
-    // Clear local state
     setState({
       user: null,
       token: null,
       isAuthenticated: false,
       pendingVerification: null,
-      userProfile: null,
     });
 
-    writePersistedToken(null);
+    // Clear all auth cookies (token + user).
+    clearAllAuthCookies();
 
+    // Also clear any legacy localStorage keys that may still exist.
     try {
-      localStorage.removeItem('userRole');
+      localStorage.removeItem('token');
       localStorage.removeItem('userData');
-    } catch {}
-  },
-  setAuth: ({ user, token }) => {
-    const mappedRole =
-      (user as any).role === 'candidate' ? 'jobseeker' : (user as any).role;
-
-    setState({
-      user: {
-        id: user.id,
-        email: (user.email as any) || '',
-        phone: (user.phone as any) || '',
-        role: (mappedRole as any) || 'jobseeker',
-        verified: user.verified,
-        name: (user as any).name,
-      },
-      token,
-      isAuthenticated: true,
-    });
-
-    writePersistedToken(token);
-    try {
-      localStorage.setItem('userRole', String(mappedRole));
+      localStorage.removeItem('userRole');
     } catch {}
   },
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Store internals
+// ─────────────────────────────────────────────────────────────────────────────
 
 const listeners = new Set<Listener>();
 
@@ -338,30 +308,38 @@ function setState(patch: Partial<AuthState>) {
   listeners.forEach((l) => l());
 }
 
-function initFromStorage() {
-  const token = typeof window !== 'undefined' ? readPersistedToken() : null;
-  const settings =
-    typeof window !== 'undefined' ? readPersistedGeneralSettings() : null;
+// ─────────────────────────────────────────────────────────────────────────────
+// Initialise from cookies on app start (replaces initFromStorage)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function initFromCookies() {
+  if (typeof window === 'undefined') return;
+
+  const token = readAuthToken();
+  const user = buildUserFromCookie();
+  const settings = readPersistedGeneralSettings();
 
   if (token) {
     state = {
       ...state,
       token,
       isAuthenticated: true,
+      // Restore full User object so ProtectedRoute can read role immediately
+      // after a page refresh — no /me round-trip needed.
+      ...(user ? { user } : {}),
     };
   }
 
   if (settings) {
-    state = {
-      ...state,
-      ...settings,
-    };
+    state = { ...state, ...settings };
   }
 }
 
-if (typeof window !== 'undefined') {
-  initFromStorage();
-}
+initFromCookies();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public hook
+// ─────────────────────────────────────────────────────────────────────────────
 
 type StoreHook = {
   <T>(selector: (s: AuthState) => T): T;
@@ -375,9 +353,9 @@ export const useAuthStore: StoreHook = ((
   selector?: (s: AuthState) => unknown,
 ) => {
   return useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
+    (cb) => {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
     },
     () => (selector ? selector(state) : state),
     () => (selector ? selector(state) : state),

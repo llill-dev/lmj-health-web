@@ -1,12 +1,12 @@
 'use client';
 
-import { LockKeyhole, Mail, Phone } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, Mail, Phone } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 
 type LoginMethod = 'phone' | 'email';
@@ -56,8 +56,11 @@ export default function LoginForm({
   onOtpLogin: () => void;
 }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [method, setMethod] = useState<LoginMethod>('email');
   const [methodDirection, setMethodDirection] = useState<1 | -1>(1);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const {
     register,
@@ -85,11 +88,34 @@ export default function LoginForm({
 
   const MethodIcon = method === 'phone' ? Phone : Mail;
 
+  // Map AuthError codes to user-friendly Arabic messages
+  const AUTH_ERROR_MESSAGES_AR: Record<string, string> = {
+    INVALID_CREDENTIALS: 'البريد الإلكتروني/رقم الهاتف أو كلمة المرور غير صحيحة',
+    NOT_VERIFIED: 'الحساب غير موثق، يرجى التحقق من بريدك الإلكتروني',
+    INACTIVE: 'الحساب غير نشط، تواصل مع الدعم',
+    PENDING_APPROVAL: 'حساب الطبيب في انتظار موافقة الإدارة',
+    NOT_ALLOWED: 'هذا الحساب غير مسموح له باستخدام هذا التطبيق',
+    TEMPORARY: 'يرجى تفعيل حسابك قبل تسجيل الدخول',
+    LOCKED: 'الحساب مقفول مؤقتاً، حاول لاحقاً',
+    DELETED: 'تم حذف هذا الحساب',
+    NETWORK_ERROR: 'تعذّر الاتصال بالخادم، تحقق من الإنترنت',
+    UNKNOWN: 'حدث خطأ غير متوقع، حاول مجدداً',
+  };
+
+  const roleRoot: Record<string, string> = {
+    doctor: '/doctor/dashboard',
+    admin: '/admin/dashboard',
+    secretary: '/secretary/dashboard',
+    'data-entry': '/data-entry/dashboard',
+    patient: '/patient/dashboard',
+  };
+
   const onSubmit = handleSubmit(async (values) => {
+    setLoginError(null);
+
     const uiOnly = import.meta.env.VITE_UI_ONLY === 'true';
 
     if (uiOnly) {
-      // Demo mode for UI testing
       useAuthStore.setState({
         user: {
           id: 'demo-doctor',
@@ -106,49 +132,42 @@ export default function LoginForm({
       return;
     }
 
-    // Real API integration
     try {
       await useAuthStore.getState().login(
         values.method === 'email'
           ? values.identifier
           : values.identifier.replace(/[\s-]/g, ''),
         values.password,
-        'web', // Default client type for web application
+        'web',
       );
 
-      // Navigate based on user role
-      const authState = useAuthStore.getState();
-      const userRole = authState.user?.role;
+      const userRole = useAuthStore.getState().user?.role ?? '';
 
-      switch (userRole) {
-        case 'doctor':
-          navigate('/doctor');
-          break;
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'secretary':
-        case 'data-entry':
-          navigate('/admin');
-          break;
-        case 'patient':
-          navigate('/doctor'); // Patients navigate to doctor area for now
-          break;
-        default:
-          navigate('/doctor');
+      // Honour the ?next= redirect set by ProtectedRoute (safe-guard: only
+      // accept relative paths to prevent open-redirect attacks).
+      const next = searchParams.get('next');
+      if (next) {
+        try {
+          const decoded = decodeURIComponent(next);
+          if (decoded.startsWith('/')) {
+            navigate(decoded, { replace: true });
+            return;
+          }
+        } catch {
+          // malformed next param — fall through to role-based redirect
+        }
       }
-    } catch (error: any) {
-      // Handle login errors
-      console.error('Login failed:', error.message);
 
-      // You can add toast notifications here
-      // Example: toast.error(error.message);
+      navigate(roleRoot[userRole] ?? '/welcome', { replace: true });
+    } catch (error: any) {
+      const code: string = error?.code ?? 'UNKNOWN';
+      setLoginError(AUTH_ERROR_MESSAGES_AR[code] ?? error?.message ?? AUTH_ERROR_MESSAGES_AR['UNKNOWN']);
     }
   });
 
   return (
     <section className='mx-auto min-h-svh flex flex-col items-center'>
-      <div className='my-[50px]'>
+      <div className='my-[35px]'>
         <img
           src='/images/syr-health-logo.png'
           alt='LMJ Health'
@@ -245,7 +264,7 @@ export default function LoginForm({
 
               <div className='gap-[16px] mt-4'>
                 <div>
-                  <label className='block text-right font-cairo text-[14px] font-bold text-[#101828]'>
+                  <label className='block mb-1 text-right font-cairo text-[14px] font-bold text-[#101828]'>
                     {methodLabel}
                   </label>
                   <AnimatePresence
@@ -291,14 +310,28 @@ export default function LoginForm({
                   ) : null}
                 </div>
                 <div>
-                  <label className='mt-5 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
+                  <label className='mt-5 mb-1 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
                     كلمة المرور
                   </label>
                   <div className=' flex h-[35px] bg-[#F3F3F5] max-w-[330px] items-center rounded-[8px] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)]'>
-                    <LockKeyhole className=' h-5 w-5 text-[#B5B7BA]' />
+                    <button
+                      type='button'
+                      onClick={() => setShowPassword((v) => !v)}
+                      className='flex items-center justify-center text-[#B5B7BA] transition-colors hover:text-primary focus:outline-none'
+                      aria-label={
+                        showPassword ? 'Show password' : 'Hide password'
+                      }
+                      title={showPassword ? 'Show password' : 'Hide password'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className='h-4 w-4' />
+                      ) : (
+                        <Eye className='h-4 w-4' />
+                      )}
+                    </button>
                     <input
                       dir='ltr'
-                      type='password'
+                      type={showPassword ? 'text' : 'password'}
                       placeholder='password123'
                       {...register('password')}
                       className='h-full w-full bg-[#F3F3F5] font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium'
@@ -313,10 +346,19 @@ export default function LoginForm({
                 <button
                   type='submit'
                   disabled={isSubmitting}
-                  className='mt-6 flex h-[36px] w-full max-w-[330px] items-center justify-center rounded-[8px] bg-primary text-[14px] text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
+                  className='mt-6 flex h-[36px] w-full max-w-[330px] items-center justify-center rounded-[8px] bg-primary text-[14px] text-white shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60'
                 >
-                  تسجيل الدخول
+                  {isSubmitting ? 'جارٍ تسجيل الدخول...' : 'تسجيل الدخول'}
                 </button>
+
+                {loginError && (
+                  <div
+                    role='alert'
+                    className='mt-3 rounded-[6px] bg-[#FEF2F2] px-3 py-2 text-right font-cairo text-[13px] font-semibold text-[#D92D20]'
+                  >
+                    {loginError}
+                  </div>
+                )}
               </div>
 
               <div className='mt-5 flex items-center justify-between px-1 font-cairo text-[14px] text-primary'>
