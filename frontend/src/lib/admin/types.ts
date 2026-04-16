@@ -72,15 +72,21 @@ export type PatientAccountStatus =
 export type AdminPatientSummary = {
   _id: string;
   publicId: string;
+  createdAt?: string;
   user: {
     fullName: string;
     email?: string;
     phone?: string;
     accountStatus: PatientAccountStatus;
     mustChangePassword?: boolean;
+    photoUrl?: string;
+    gender?: string;
+    dateOfBirth?: string;
   };
   isClaimed?: boolean;
   claimedAt?: string | null;
+  suspendedAt?: string | null;
+  suspendReason?: string | null;
 };
 
 export type AdminPatientsAccountStatusFilter = PatientAccountStatus | 'all';
@@ -101,6 +107,45 @@ export type AdminPatientsListResponse = ApiSuccessEnvelope & {
   patients: AdminPatientSummary[];
 };
 
+export type AdminPatientDetailsResponse = ApiSuccessEnvelope & {
+  patient: AdminPatientSummary;
+};
+
+export type AdminPatientFileItem = {
+  _id: string;
+  id?: string;
+  patientId: string;
+  originalName?: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  isArchived?: boolean;
+  createdAt?: string;
+  note?: string;
+  tags?: string[];
+};
+
+export type AdminPatientFilesListParams = {
+  page?: number;
+  limit?: number;
+  archived?: boolean;
+  search?: string;
+};
+
+export type AdminPatientFilesListResponse = ApiSuccessEnvelope & {
+  items: AdminPatientFileItem[];
+  pageInfo?: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+};
+
+export type AdminPatientFileDownloadUrlResponse = ApiSuccessEnvelope & {
+  url?: string;
+  downloadUrl?: string;
+  expiresIn?: number;
+};
+
 export type AdminPatientAccountActionResponse = ApiSuccessEnvelope & {
   patientId: string;
   userId: string;
@@ -117,27 +162,56 @@ export type VerificationRequestReviewBody = {
   verifyLocation?: boolean;
 };
 
+export type AuditLogCategory = 'AUTH' | 'AUTHZ' | 'PHI' | 'DATA' | 'ADMIN' | 'SYSTEM';
+export type AuditLogOutcome = 'SUCCESS' | 'FAIL' | 'DENY';
+
 export type AuditLogItem = {
   _id: string;
-  category: 'AUTH' | 'AUTHZ' | 'PHI' | 'DATA' | 'ADMIN' | 'SYSTEM';
-  outcome: 'SUCCESS' | 'FAIL' | 'DENY';
+  category: AuditLogCategory;
+  outcome: AuditLogOutcome;
   action: string;
   createdAt: string;
+  actorUserId?: string;
+  actorUserName?: string;
   actorRole?: string;
-  actorId?: string;
-  ip?: string;
-  method?: string;
-  route?: string;
+  entityType?: string;
+  entityId?: string;
+  patientId?: string | null;
+  patientName?: string | null;
+  patientPublicId?: string | null;
+  targetUserId?: string | null;
+  targetUserName?: string | null;
   requestId?: string;
+  ip?: string;
+  route?: string;
+  method?: string;
 };
 
-export type AuditLogsResponse = ApiSuccessEnvelope & {
+export type AuditLogsListParams = {
+  page?: number;
+  limit?: number;
+  actorUserId?: string;
+  actorRole?: string;
+  category?: AuditLogCategory;
+  action?: string;
+  outcome?: AuditLogOutcome;
+  entityType?: string;
+  entityId?: string;
+  patientId?: string;
+  targetUserId?: string;
+  requestId?: string;
+  ip?: string;
+  from?: string;
+  to?: string;
+  search?: string;
+};
+
+export type AuditLogsListResponse = ApiSuccessEnvelope & {
   page: number;
   limit: number;
   total: number;
   results: number;
-  logs: AuditLogItem[] | AuditLogItem[];
-  auditLogs?: AuditLogItem[];
+  auditLogs: AuditLogItem[];
 };
 
 export type AdminDoctorApprovalStatus = 'pending' | 'approved' | 'rejected';
@@ -186,6 +260,97 @@ export type AdminDoctorsListResponse = ApiSuccessEnvelope & {
   doctors: AdminDoctorSummary[];
 };
 
+export type VerificationRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export type VerificationRequestSummary = {
+  _id: string;
+  status: VerificationRequestStatus;
+  adminNote?: string | null;
+  reviewedAt?: string | null;
+  createdAt?: string;
+  doctor?: {
+    _id: string;
+    specialization?: string;
+    medicalLicenseNumber?: string;
+    clinicAddress?: string;
+    locationCity?: string;
+    locationCountry?: string;
+    clinicLocation?: {
+      type?: 'Point';
+      coordinates?: [number, number];
+    };
+    userId?: {
+      _id?: string;
+      fullName?: string;
+      email?: string;
+      phone?: string;
+      photoUrl?: string;
+    };
+  };
+  requestedBy?: {
+    _id?: string;
+    fullName?: string;
+    email?: string;
+  };
+};
+
+export type VerificationRequestsListParams = {
+  status?: VerificationRequestStatus;
+  page?: number;
+  limit?: number;
+};
+
+export type VerificationRequestsListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  requests: VerificationRequestSummary[];
+};
+
+export type AdminSecretarySummary = {
+  _id: string;
+  userId?: string;
+  permissions?: string[];
+  assignedDoctor?: string;
+  user?: {
+    _id?: string;
+    fullName: string;
+    email?: string;
+    phone?: string;
+    gender?: string;
+    photoUrl?: string;
+    accountStatus?: string;
+  };
+  doctor?: {
+    _id: string;
+    specialization?: string;
+    isApproved?: boolean;
+    approvalStatus?: AdminDoctorApprovalStatus;
+    user?: { fullName: string; email?: string; phone?: string };
+  };
+};
+
+export type AdminUserOffboardResponse = ApiSuccessEnvelope & {
+  userId: string;
+  role: string;
+};
+
+export type AdminSecretariesListParams = {
+  search?: string;
+  doctorId?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type AdminSecretariesListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  secretaries: AdminSecretarySummary[];
+};
+
 export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
   doctor: {
     _id: string;
@@ -209,4 +374,90 @@ export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
       email?: string;
     };
   };
+};
+
+export type AdminContentType =
+  | 'CONDITION'
+  | 'SYMPTOM'
+  | 'GENERAL_ADVICE'
+  | 'NEWS';
+
+export type AdminContentStatus =
+  | 'DRAFT'
+  | 'IN_REVIEW'
+  | 'PUBLISHED'
+  | 'ARCHIVED';
+
+export type AdminContentListParams = {
+  type?: AdminContentType;
+  status?: AdminContentStatus;
+  language?: 'ar' | 'en';
+  page?: number;
+  limit?: number;
+};
+
+export type AdminContentItem = {
+  _id: string;
+  type: AdminContentType;
+  status: AdminContentStatus;
+  title?: string;
+  summary?: string;
+  language?: string;
+  slug?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  viewCount?: number;
+  views?: number;
+  createdBy?: string | { _id?: string; fullName?: string; email?: string };
+  reviewedBy?: string | { _id?: string; fullName?: string; email?: string };
+  publishedAt?: string;
+};
+
+export type AdminContentListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  items?: AdminContentItem[];
+  content?: AdminContentItem[];
+  contentItems?: AdminContentItem[];
+};
+
+export type AdminContentBlock =
+  | { type: 'heading'; level?: number; text?: string }
+  | { type: 'paragraph'; text?: string }
+  | { type: 'list'; items?: string[]; ordered?: boolean }
+  | {
+      type: 'callout';
+      variant?: 'info' | 'warn' | 'danger';
+      title?: string;
+      text?: string;
+    }
+  | {
+      type: 'linkCard';
+      title?: string;
+      url?: string;
+      description?: string;
+    }
+  | {
+      type: 'faq';
+      items?: Array<{ question?: string; answer?: string }>;
+    }
+  | { type: 'divider' }
+  | { type: string; [key: string]: unknown };
+
+export type AdminContentDetailsItem = AdminContentItem & {
+  contentBlocks?: AdminContentBlock[];
+  tags?: string[];
+  sources?: Array<{ title?: string; url?: string }>;
+  disclaimerVersion?: number | string;
+  rejectionReason?: string | null;
+  templateId?: string | null;
+};
+
+export type AdminContentDetailsResponse = ApiSuccessEnvelope & {
+  item?: AdminContentDetailsItem;
+  content?: AdminContentDetailsItem;
+  contentItem?: AdminContentDetailsItem;
+  data?: AdminContentDetailsItem;
 };
