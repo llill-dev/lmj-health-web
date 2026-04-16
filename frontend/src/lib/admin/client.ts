@@ -1,4 +1,4 @@
-import { get, patch } from '@/lib/base';
+import { get, patch, post } from '@/lib/base';
 import { adminEndpoints } from '@/lib/admin/endpoints';
 import type {
   AppointmentCancelResponse,
@@ -9,9 +9,23 @@ import type {
   AdminDoctorsListParams,
   AdminDoctorsListResponse,
   AdminPatientAccountActionResponse,
+  AdminPatientFilesListParams,
+  AdminPatientFilesListResponse,
+  AdminPatientFileDownloadUrlResponse,
+  AdminPatientDetailsResponse,
   AdminPatientsListParams,
   AdminPatientsListResponse,
+  AdminSecretariesListParams,
+  AdminSecretariesListResponse,
+  AdminUserOffboardResponse,
+  AdminContentListParams,
+  AdminContentListResponse,
+  AdminContentDetailsResponse,
+  AuditLogsListParams,
+  AuditLogsListResponse,
   VerificationRequestReviewBody,
+  VerificationRequestsListParams,
+  VerificationRequestsListResponse,
 } from '@/lib/admin/types';
 
 export const adminApi = {
@@ -62,6 +76,10 @@ export const adminApi = {
 
       return get<AdminPatientsListResponse>(endpoint, { locale: 'ar' });
     },
+    getById: (patientId: string) =>
+      get<AdminPatientDetailsResponse>(adminEndpoints.patients.details(patientId), {
+        locale: 'ar',
+      }),
     activate: (patientId: string) =>
       patch<AdminPatientAccountActionResponse>(
         adminEndpoints.patients.activate(patientId),
@@ -80,6 +98,26 @@ export const adminApi = {
         undefined,
         { locale: 'ar' },
       ),
+    files: {
+      list: (patientId: string, params: AdminPatientFilesListParams = {}) => {
+        const qs = new URLSearchParams();
+        if (params.page) qs.set('page', String(params.page));
+        if (params.limit) qs.set('limit', String(params.limit));
+        if (typeof params.archived === 'boolean')
+          qs.set('archived', String(params.archived));
+        if (params.search) qs.set('search', params.search);
+
+        const base = adminEndpoints.patients.files.list(patientId);
+        const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
+
+        return get<AdminPatientFilesListResponse>(endpoint, { locale: 'ar' });
+      },
+      getDownloadUrl: (patientId: string, fileId: string) =>
+        get<AdminPatientFileDownloadUrlResponse>(
+          `${adminEndpoints.patients.files.download(patientId, fileId)}?mode=url`,
+          { locale: 'ar' },
+        ),
+    },
   },
   appointments: {
     list: (params: AdminAppointmentsListParams = {}) => {
@@ -111,8 +149,104 @@ export const adminApi = {
       ),
   },
   verificationRequests: {
+    list: (params: VerificationRequestsListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.status) qs.set('status', params.status);
+      if (params.page) qs.set('page', String(params.page));
+      if (params.limit) qs.set('limit', String(params.limit));
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.verificationRequests.list}?${qs.toString()}`
+        : adminEndpoints.verificationRequests.list;
+      return get<VerificationRequestsListResponse>(endpoint, { locale: 'ar' });
+    },
     review: (requestId: string, body: VerificationRequestReviewBody) =>
       patch<any>(adminEndpoints.verificationRequests.review(requestId), body, {
+        locale: 'ar',
+      }),
+  },
+  users: {
+    offboard: (userId: string, reason?: string) =>
+      post<AdminUserOffboardResponse>(
+        adminEndpoints.users.offboard(userId),
+        reason ? { reason } : undefined,
+        { locale: 'ar' },
+      ),
+  },
+  secretaries: {
+    list: (params: AdminSecretariesListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.search) qs.set('search', params.search);
+      if (params.doctorId) qs.set('doctorId', params.doctorId);
+      if (params.page) qs.set('page', String(params.page));
+      if (params.limit) qs.set('limit', String(params.limit));
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.secretaries.list}?${qs.toString()}`
+        : adminEndpoints.secretaries.list;
+      return get<AdminSecretariesListResponse>(endpoint, { locale: 'ar' });
+    },
+  },
+  auditLogs: {
+    list: (params: AuditLogsListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page) qs.set('page', String(params.page));
+      if (params.limit) qs.set('limit', String(params.limit));
+      if (params.search) qs.set('search', params.search);
+      if (params.category) qs.set('category', params.category);
+      if (params.outcome) qs.set('outcome', params.outcome);
+      if (params.actorRole) qs.set('actorRole', params.actorRole);
+      if (params.actorUserId) qs.set('actorUserId', params.actorUserId);
+      if (params.action) qs.set('action', params.action);
+      if (params.entityType) qs.set('entityType', params.entityType);
+      if (params.entityId) qs.set('entityId', params.entityId);
+      if (params.patientId) qs.set('patientId', params.patientId);
+      if (params.targetUserId) qs.set('targetUserId', params.targetUserId);
+      if (params.requestId) qs.set('requestId', params.requestId);
+      if (params.ip) qs.set('ip', params.ip);
+      if (params.from) qs.set('from', params.from);
+      if (params.to) qs.set('to', params.to);
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.auditLogs.list}?${qs.toString()}`
+        : adminEndpoints.auditLogs.list;
+      return get<AuditLogsListResponse>(endpoint, { locale: 'ar' });
+    },
+  },
+  content: {
+    list: (params: AdminContentListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.type) qs.set('type', params.type);
+      if (params.status) qs.set('status', params.status);
+      if (params.language) qs.set('language', params.language);
+      if (params.page) qs.set('page', String(params.page));
+      if (params.limit) qs.set('limit', String(params.limit));
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.content.list}?${qs.toString()}`
+        : adminEndpoints.content.list;
+      return get<AdminContentListResponse>(endpoint, { locale: 'ar' });
+    },
+    getById: (id: string) =>
+      get<AdminContentDetailsResponse>(adminEndpoints.content.details(id), {
+        locale: 'ar',
+      }),
+    submitReview: (id: string) =>
+      post<any>(adminEndpoints.content.submitReview(id), undefined, {
+        locale: 'ar',
+      }),
+    approve: (id: string) =>
+      post<any>(adminEndpoints.content.approve(id), undefined, {
+        locale: 'ar',
+      }),
+    reject: (id: string, rejectionReason: string) =>
+      post<any>(
+        adminEndpoints.content.reject(id),
+        rejectionReason ? { rejectionReason } : undefined,
+        { locale: 'ar' },
+      ),
+    publish: (id: string) =>
+      post<any>(adminEndpoints.content.publish(id), undefined, {
+        locale: 'ar',
+      }),
+    archive: (id: string) =>
+      post<any>(adminEndpoints.content.archive(id), undefined, {
         locale: 'ar',
       }),
   },
