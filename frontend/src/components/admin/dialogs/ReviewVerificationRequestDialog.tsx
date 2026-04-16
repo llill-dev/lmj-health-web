@@ -32,6 +32,7 @@ type Mode = 'approve' | 'reject' | 'map';
 export default function ReviewVerificationRequestDialog({
   open,
   onOpenChange,
+  onReviewed,
   requestId,
   doctorName,
   lat,
@@ -40,6 +41,7 @@ export default function ReviewVerificationRequestDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onReviewed?: () => void | Promise<void>;
   requestId: string | null;
   doctorName: string;
   lat?: string;
@@ -222,12 +224,14 @@ export default function ReviewVerificationRequestDialog({
                               : true,
                         });
                         setDone('تم قبول الطلب بنجاح');
+                        await onReviewed?.();
                       } else {
                         await adminApi.verificationRequests.review(requestId, {
                           decision: 'rejected',
                           adminNote: values.adminNote,
                         });
                         setDone('تم رفض الطلب');
+                        await onReviewed?.();
                       }
                     } catch (e: any) {
                       setError(e?.message || 'فشل تنفيذ العملية');

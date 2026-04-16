@@ -16,6 +16,7 @@ import SuspendAccountDialog from '@/components/admin/dialogs/SuspendAccountDialo
 import { useAdminPatients } from '@/hooks/useAdminPatients';
 import type {
   AdminPatientsAccountStatusFilter,
+  AdminPatientSummary,
   PatientAccountStatus,
 } from '@/lib/admin/types';
 
@@ -266,23 +267,16 @@ export default function AdminPatientsPage() {
                         </div>
                       </div>
 
-                      <div className='mt-4 grid grid-cols-2 gap-x-10 gap-y-3'>
-                        <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                          <Phone className='h-4 w-4 text-primary' />
-                          {p.user.phone ?? '—'}
-                        </div>
-                        <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                          <Mail className='h-4 w-4 text-primary' />
-                          {p.user.email ?? '—'}
-                        </div>
-                      </div>
-
                       <div className='flex items-end justify-between'>
                         <div className='mt-4 rounded-[10px] bg-[#F9FAFB] px-4 py-3'>
-                          <div className='flex items-center justify-between'>
-                            <div className='flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#111827]'>
-                              <Activity className='h-4 w-4 text-primary' />
-                              حالة الحساب: {statusLabel[p.user.accountStatus]}
+                          <div className='flex flex-col gap-2 items-start justify-start'>
+                            <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
+                              <Phone className='h-4 w-4 text-primary' />
+                              {p.user.phone ?? '—'}
+                            </div>
+                            <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
+                              <Mail className='h-4 w-4 text-primary' />
+                              {p.user.email ?? '—'}
                             </div>
                           </div>
                         </div>
@@ -293,6 +287,9 @@ export default function AdminPatientsPage() {
                               onClick={() =>
                                 navigate(
                                   `/admin/patients/${encodeURIComponent(p._id)}`,
+                                  {
+                                    state: { patient: p satisfies AdminPatientSummary },
+                                  },
                                 )
                               }
                               className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] font-cairo text-[12px] font-extrabold text-[#111827]'
@@ -393,6 +390,9 @@ export default function AdminPatientsPage() {
         kind='patient'
         targetId={selectedPatientId}
         targetLabel={selectedPatientLabel}
+        onSuccess={() => {
+          setSuspendOpen(false);
+        }}
       />
     </>
   );

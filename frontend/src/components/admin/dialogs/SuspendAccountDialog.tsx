@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { patch } from '@/lib/base';
+import { adminApi } from '@/lib/admin/client';
 
 const schema = z.object({
   reason: z.string().trim().min(1, 'سبب التعليق مطلوب'),
@@ -26,12 +27,14 @@ export default function SuspendAccountDialog({
   kind,
   targetId,
   targetLabel,
+  onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   kind: 'patient' | 'doctor' | 'secretary';
   targetId: string | null;
   targetLabel: string;
+  onSuccess?: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
@@ -156,11 +159,17 @@ export default function SuspendAccountDialog({
                   if (!targetId) return;
 
                   try {
-                    await patch(endpointFor(kind, targetId), {
-                      status: 'suspended',
-                      reason: values.reason,
-                    });
+                    if (kind === 'patient') {
+                      await adminApi.patients.suspend(targetId, values.reason);
+                    } else {
+                      await patch(endpointFor(kind, targetId), {
+                        status: 'suspended',
+                        reason: values.reason,
+                      });
+                    }
                     setDone('تم تعليق الحساب بنجاح');
+                    onSuccess?.();
+                    setTimeout(() => onOpenChange(false), 900);
                   } catch (e: any) {
                     setError(e?.message || 'فشل تعليق الحساب');
                   }
