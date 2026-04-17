@@ -1,7 +1,22 @@
-import { defineConfig, globalIgnores } from 'eslint/config';
+import js from '@eslint/js';
 
-const eslintConfig = defineConfig([
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'dist/**', 'next-env.d.ts']),
-]);
-
-export default eslintConfig;
+export default [
+  {
+    ignores: [
+      '.next/**',
+      'out/**',
+      'build/**',
+      'dist/**',
+      'node_modules/**',
+      'next-env.d.ts',
+    ],
+  },
+  js.configs.recommended,
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+  },
+];

@@ -1,0 +1,36 @@
+name: ${COMPOSE_PROJECT_NAME:-lmj-frontend}
+
+services:
+  lmj-frontend:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ${FRONTEND_IMAGE_NAME:-lmj-health-frontend}:${FRONTEND_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - traefik-public
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: ${TRAEFIK_PUBLIC_NETWORK:-lmj-health-api-proxy}
+      traefik.http.routers.lmj-frontend.rule: Host(`${APP_DOMAIN:-app.syrhealth.com}`)
+      traefik.http.routers.lmj-frontend.entrypoints: ${TRAEFIK_ENTRYPOINTS:-websecure}
+      traefik.http.routers.lmj-frontend.priority: "10"
+      traefik.http.routers.lmj-frontend.tls: "true"
+      traefik.http.routers.lmj-frontend.tls.certresolver: letsencrypt
+      traefik.http.services.lmj-frontend.loadbalancer.server.port: "8080"
+
+networks:
+  traefik-public:
+    external: true
+    name: ${TRAEFIK_PUBLIC_NETWORK:-lmj-health-api-proxy}

@@ -1,8 +1,12 @@
 import { useAuthStore } from '@/store/authStore';
 
-export const API_BASE_URL = import.meta.env.PROD
-  ? ''
-  : import.meta.env.VITE_API_URL || '';
+function normalizeApiOrigin(value: string | undefined): string {
+  const trimmed = value?.trim() ?? '';
+  if (!trimmed) return '';
+  return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
+}
+
+export const API_BASE_URL = normalizeApiOrigin(import.meta.env.VITE_API_ORIGIN);
 
 const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
 
