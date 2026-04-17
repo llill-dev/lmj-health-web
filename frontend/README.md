@@ -40,7 +40,7 @@ The frontend is designed as a secure presentation layer on top of a centralized 
 - **State & Data Fetching**: TanStack Query (React Query)
 - **Forms & Validation**: react-hook-form + Zod
 - **Authentication**: JWT via httpOnly cookies
-- **Routing**: React Router v6
+- **Routing**: React Router
 - **Animations**: Framer Motion
 - **Build Tool**: Vite
 
@@ -103,8 +103,8 @@ Each role has isolated UI flows and permission-aware interfaces.
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 20+
+- npm
 
 ### Installation
 
@@ -179,7 +179,7 @@ frontend/
 
 ### Modern SPA Architecture
 
-- **React Router v6** for client-side routing
+- **React Router** for client-side routing
 - **Protected routes** with role-based access control
 - **Smooth page transitions** with Framer Motion
 - **Component-based architecture** for maintainability
@@ -204,12 +204,34 @@ frontend/
 
 ### Environment Variables
 
-Create a `.env.local` file:
+Copy `.env.example` to `.env.local` when you need local overrides.
 
 ```env
-VITE_API_URL=http://localhost:3001
-VITE_APP_NAME=LMJ Health
+# Optional: leave empty to use same-origin /api requests.
+VITE_API_ORIGIN=
+VITE_UI_ONLY=false
 ```
+
+The app endpoints are already defined as `/api/...`. The intended production
+contract is same-origin API routing behind Traefik, so the production build
+should normally keep `VITE_API_ORIGIN` empty.
+
+### Production Deploy Contract
+
+The frontend production deployment layer uses `deploy/.env.prod` for a small
+set of Traefik-facing values. Start from `deploy/.env.prod.example`.
+
+```env
+APP_DOMAIN=app.syrhealth.com
+COMPOSE_PROJECT_NAME=lmj-frontend
+TRAEFIK_PUBLIC_NETWORK=lmj-health-api-proxy
+TRAEFIK_ENTRYPOINTS=websecure
+FRONTEND_IMAGE_NAME=lmj-health-frontend
+FRONTEND_IMAGE_TAG=latest
+```
+
+`VITE_API_ORIGIN` should stay empty in production so browser requests continue
+to use same-origin `/api`.
 
 ### Build Configuration
 
@@ -229,6 +251,75 @@ The project uses Vite with the following optimizations:
 - **Production bundle**: Optimized for fast loading
 - **Animation performance**: 60fps on modern devices
 - **Bundle size**: Optimized with code splitting
+
+---
+
+## 🚢 VPS Deployment
+
+This repository is prepared to be deployed independently from the backend
+repository on the same VPS. Traefik remains the only external reverse proxy.
+
+### Frontend stack files
+
+- Compose: `deploy/docker-compose.prod.yml`
+- Deploy script: `deploy/prod-deploy.sh`
+- Container server: `deploy/Caddyfile`
+- Deploy env example: `deploy/.env.prod.example`
+
+### Expected production routing
+
+- `https://app.syrhealth.com` -> frontend container
+- `https://app.syrhealth.com/api/*` -> existing backend service
+
+The frontend compose file only defines the frontend router. The `/api` route
+must be added on the backend side because the frontend intentionally keeps
+same-origin API calls.
+
+### VPS prerequisites
+
+- Docker and Docker Compose plugin installed
+- Existing Traefik stack already running
+- External Docker network already created for Traefik, matching
+  `TRAEFIK_PUBLIC_NETWORK`
+- Traefik certificate resolver `letsencrypt` available on the existing Traefik
+  instance
+- DNS for `app.syrhealth.com` pointed at the VPS
+
+### Manual deploy
+
+```bash
+cd frontend
+cp deploy/.env.prod.example deploy/.env.prod
+./deploy/prod-deploy.sh
+```
+
+The deploy script validates the compose file, builds the image, starts the
+frontend service, and waits for `/healthz`.
+
+### Required backend-side Traefik addition
+
+Add an extra router to the existing backend service so same-origin API traffic
+from `app.syrhealth.com` reaches the backend without changing the frontend
+code.
+
+Required rule:
+
+```text
+Host(`app.syrhealth.com`) && PathPrefix(`/api`)
+```
+
+Required behavior:
+
+- Attach that backend router to the same Traefik external network
+- Use the existing TLS/entrypoint model already used by the backend stack
+- Point the router at the existing backend service port
+- Give the backend `/api` router a higher priority than the frontend host-only
+  router
+
+Practical priority guidance:
+
+- Frontend router priority in this repo: `10`
+- Backend `/api` router priority: any higher value, for example `100`
 
 ---
 
