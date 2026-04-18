@@ -1,0 +1,82 @@
+name: Frontend Deploy Prod
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-prod-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FRONTEND_VPS_HOST: ${{ vars.FRONTEND_VPS_HOST }}
+      FRONTEND_VPS_PORT: ${{ vars.FRONTEND_VPS_PORT }}
+      FRONTEND_VPS_USER: ${{ vars.FRONTEND_VPS_USER }}
+      FRONTEND_VPS_APP_DIR: ${{ vars.FRONTEND_VPS_APP_DIR }}
+    steps:
+      - name: Validate required deploy settings
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -n "${FRONTEND_VPS_HOST}"
+          test -n "${FRONTEND_VPS_PORT}"
+          test -n "${FRONTEND_VPS_USER}"
+          test -n "${FRONTEND_VPS_APP_DIR}"
+          test -n "${{ secrets.FRONTEND_VPS_SSH_PRIVATE_KEY }}"
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${{ secrets.FRONTEND_VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${FRONTEND_VPS_PORT}" -H "${FRONTEND_VPS_HOST}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy on VPS
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ssh -i ~/.ssh/id_ed25519 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "${FRONTEND_VPS_PORT}" \
+            "${FRONTEND_VPS_USER}@${FRONTEND_VPS_HOST}" \
+            "cd '${FRONTEND_VPS_APP_DIR}' && set -euo pipefail && git fetch --prune origin main && git reset --hard origin/main && bash deploy/prod-deploy.sh"
+
+      - name: Post-deploy health check
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://app.syrhealth.com/healthz >/dev/null
+
+      - name: Post-deploy frontend check
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://app.syrhealth.com/ >/dev/null
+
+      - name: Post-deploy API check
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://app.syrhealth.com/api/health >/dev/null
+
+      - name: Clean up SSH key
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f ~/.ssh/id_ed25519
