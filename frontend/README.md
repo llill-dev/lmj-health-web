@@ -227,7 +227,7 @@ COMPOSE_PROJECT_NAME=lmj-frontend
 TRAEFIK_PUBLIC_NETWORK=lmj-health-api-proxy
 TRAEFIK_ENTRYPOINTS=websecure
 FRONTEND_IMAGE_NAME=lmj-health-frontend
-FRONTEND_IMAGE_TAG=latest
+FRONTEND_IMAGE_TAG=prod
 ```
 
 `VITE_API_ORIGIN` should stay empty in production so browser requests continue
@@ -295,6 +295,46 @@ cp deploy/.env.prod.example deploy/.env.prod
 
 The deploy script validates the compose file, builds the image, starts the
 frontend service, and waits for `/healthz`.
+
+## 🔁 CI/CD
+
+This repository includes two GitHub Actions workflows:
+
+- `frontend-ci.yml`
+  Runs on pull requests and pushes to `main`, using Node 20 in the `frontend/`
+  directory for `npm ci`, `npm run lint`, `npm run typecheck`, and
+  `npm run build`.
+
+- `frontend-deploy-prod.yml`
+  Runs on pushes to `main` and manual `workflow_dispatch`. It connects to the
+  VPS over SSH, updates the frontend repo at
+  `/srv/lmj-frontend/lmj-health-web/frontend`, runs
+  `bash deploy/prod-deploy.sh`, and verifies
+  `https://app.syrhealth.com/healthz`,
+  `https://app.syrhealth.com/`, and
+  `https://app.syrhealth.com/api/health`.
+
+### Required GitHub secrets and variables
+
+Secret:
+
+- `FRONTEND_VPS_SSH_PRIVATE_KEY`
+
+Variables:
+
+- `FRONTEND_VPS_HOST`
+- `FRONTEND_VPS_PORT`
+- `FRONTEND_VPS_USER`
+- `FRONTEND_VPS_APP_DIR`
+
+Expected `FRONTEND_VPS_APP_DIR` value:
+
+- `/srv/lmj-frontend/lmj-health-web/frontend`
+
+### Manual deploy workflow run
+
+Use GitHub Actions `Frontend Deploy Prod` and trigger `Run workflow` from the
+Actions tab when you need a manual production deployment.
 
 ### Required backend-side Traefik addition
 
