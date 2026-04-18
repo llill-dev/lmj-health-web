@@ -10,6 +10,7 @@ import ResetPasswordPage from '@/pages/auth/password/reset-password/ResetPasswor
 import VerifyOtpPage from '@/pages/auth/verify-otp/VerifyOtpPage';
 import SignupSuccessPage from '@/pages/auth/signup-success/SignupSuccessPage';
 import OnboardingPage from '@/pages/onboarding/OnboardingPage';
+import ConnectionTestPage from '@/pages/connection-test/ConnectionTestPage';
 import NotFoundPage from '@/pages/not-found/NotFoundPage';
 
 // ─── Doctor pages ─────────────────────────────────────────────────────────────
@@ -102,6 +103,7 @@ export default function App() {
           <Route path='/verify-otp'     element={<VerifyOtpPage />} />
           <Route path='/signup-success' element={<SignupSuccessPage />} />
           <Route path='/onboarding'     element={<OnboardingPage />} />
+          <Route path='/connection-test' element={<ConnectionTestPage />} />
         </Route>
 
         {/* ── Doctor protected routes ──────────────────────────────────
