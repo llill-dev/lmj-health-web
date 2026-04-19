@@ -27,13 +27,16 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
     )?.path ?? 'overview';
 
   return (
-    <div className='h-screen bg-white scrollbar-hide overflow-hidden'>
-      <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
-        <main className='flex h-screen flex-1 flex-col'>
+    <div className='overflow-hidden h-screen bg-white scrollbar-hide'>
+      <div className='flex relative mx-auto w-full max-w-screen-2xl h-screen'>
+        <main className='flex flex-col flex-1 h-screen'>
           <div className='sticky top-0 z-40'>
-            <AdminHeader title='لوحة التحكم' subtitle='مرحباً، المدير' />
+            <AdminHeader
+              title='لوحة التحكم'
+              subtitle='مرحباً، المدير'
+            />
           </div>
-          <div className='flex-1 overflow-y-auto py-8 bg-white scrollbar-hide'>
+          <div className='overflow-y-auto flex-1 py-8 bg-[#F9FAFB] scrollbar-hide'>
             <MotionProvider>
               <AnimatePresence mode='wait'>
                 <PageTransition key={pathname}>
