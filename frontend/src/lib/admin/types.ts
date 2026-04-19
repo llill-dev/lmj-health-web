@@ -162,7 +162,13 @@ export type VerificationRequestReviewBody = {
   verifyLocation?: boolean;
 };
 
-export type AuditLogCategory = 'AUTH' | 'AUTHZ' | 'PHI' | 'DATA' | 'ADMIN' | 'SYSTEM';
+export type AuditLogCategory =
+  | 'AUTH'
+  | 'AUTHZ'
+  | 'PHI'
+  | 'DATA'
+  | 'ADMIN'
+  | 'SYSTEM';
 export type AuditLogOutcome = 'SUCCESS' | 'FAIL' | 'DENY';
 
 export type AuditLogItem = {
@@ -369,6 +375,17 @@ export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
     _id: string;
     specialization?: string;
     medicalLicenseNumber?: string;
+    education?: string;
+    bio?: string;
+    clinicAddress?: string;
+    locationCity?: string;
+    locationCountry?: string;
+    consultationFee?: number;
+    consultationTypes?: Array<'online' | 'offline' | string>;
+    clinicLocation?: {
+      type?: 'Point';
+      coordinates?: [number, number];
+    };
     isApproved?: boolean;
     approvalStatus?: AdminDoctorApprovalStatus;
     approvalNote?: string | null;
@@ -380,6 +397,7 @@ export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
       phone?: string;
       gender?: string;
       photoUrl?: string;
+      dateOfBirth?: string;
     };
     userId?: {
       _id?: string;
