@@ -150,7 +150,7 @@ export default function AdminDoctorDetailsPage() {
                         <img
                           src={doctor.user.photoUrl}
                           alt=''
-                          className='object-cover h-[150px] w-[150px] rounded-xl border border-primary'
+                          className='object-cover h-[150px] w-[150px] rounded-xl border border-[#0F8F8B]'
                         />
                       ) : (
                         <div className='flex h-[150px]  w-[150px]  flex-col items-center justify-center  bg-[#E6F4F3] font-cairo text-[12px] font-semibold text-primary border-[0.5] border-text-primary rounded-[10px]'>
