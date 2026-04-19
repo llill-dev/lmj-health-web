@@ -327,6 +327,107 @@ export type VerificationRequestDetailsResponse = ApiSuccessEnvelope & {
   data?: VerificationRequestSummary;
 };
 
+/** Matches backend Complaint model (API-3.pdf). */
+export type ComplaintType =
+  | 'appointment'
+  | 'consultation'
+  | 'access_request'
+  | 'technical'
+  | 'other';
+
+export type ComplaintLifecycleStatus =
+  | 'submitted'
+  | 'under_review'
+  | 'in_progress'
+  | 'resolved'
+  | 'closed';
+
+export type ComplaintContactSnapshot = {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+};
+
+export type AdminComplaintListItem = {
+  _id: string;
+  patientId?: string;
+  userId?: string;
+  type: ComplaintType;
+  subject?: string;
+  message: string;
+  status: ComplaintLifecycleStatus;
+  attachmentCount?: number;
+  contactSnapshot?: ComplaintContactSnapshot;
+  adminRespondedAt?: string | null;
+  statusUpdatedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AdminComplaintsListParams = {
+  page?: number;
+  limit?: number;
+  status?: ComplaintLifecycleStatus;
+  type?: ComplaintType;
+  patientId?: string;
+  from?: string;
+  to?: string;
+  search?: string;
+};
+
+export type AdminComplaintsListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  complaints: AdminComplaintListItem[];
+};
+
+export type ComplaintStatusHistoryEntry = {
+  status: ComplaintLifecycleStatus;
+  changedAt: string;
+  changedBy: string;
+  actorRole: string;
+};
+
+export type ComplaintAttachmentRef = {
+  fileId: string;
+  label?: string;
+};
+
+export type AdminComplaintDetail = AdminComplaintListItem & {
+  attachments?: ComplaintAttachmentRef[];
+  statusHistory?: ComplaintStatusHistoryEntry[];
+  adminResponse?: string | null;
+  adminRespondedBy?: string;
+  resolvedAt?: string | null;
+  closedAt?: string | null;
+};
+
+export type AdminComplaintDetailsResponse = ApiSuccessEnvelope & {
+  complaint: AdminComplaintDetail;
+};
+
+export type ComplaintStatusUpdateBody = {
+  status: ComplaintLifecycleStatus;
+  adminResponse?: string | null;
+};
+
+export type ComplaintStatusUpdateResponse = ApiSuccessEnvelope & {
+  complaint: {
+    _id: string;
+    status: ComplaintLifecycleStatus;
+    statusUpdatedAt?: string;
+    statusHistory?: ComplaintStatusHistoryEntry[];
+    adminResponse?: string | null;
+    adminRespondedAt?: string | null;
+    adminRespondedBy?: string;
+    resolvedAt?: string | null;
+    closedAt?: string | null;
+    updatedAt?: string;
+  };
+};
+
 export type AdminSecretarySummary = {
   _id: string;
   userId?: string;

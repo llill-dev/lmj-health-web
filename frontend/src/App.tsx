@@ -51,6 +51,7 @@ import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage';
 import AdminServicesPage from '@/pages/admin/services/AdminServicesPage';
 import AdminAnalyticsPage from '@/pages/admin/analytics/AdminAnalyticsPage';
 import AdminComplaintsPage from '@/pages/admin/complaints/AdminComplaintsPage';
+import AdminComplaintDetailsPage from '@/pages/admin/complaints/AdminComplaintDetailsPage';
 
 // ─── Routing guards ───────────────────────────────────────────────────────────
 import ProtectedRoute, { GuestRoute, RootRedirect } from '@/routes/ProtectedRoute';
@@ -151,6 +152,7 @@ export default function App() {
             <Route path='verification-requests' element={<AdminVerificationRequestsPage />} />
             <Route path='verification-requests/:requestId' element={<AdminVerificationRequestDetailsPage />} />
             <Route path='complaints' element={<AdminComplaintsPage />} />
+            <Route path='complaints/:complaintId' element={<AdminComplaintDetailsPage />} />
             <Route path='system-logs'           element={<AdminSystemLogsPage />} />
             <Route path='settings'              element={<AdminSettingsPage />} />
             <Route path='services'              element={<AdminServicesPage />} />

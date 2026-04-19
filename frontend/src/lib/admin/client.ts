@@ -27,6 +27,11 @@ import type {
   VerificationRequestDetailsResponse,
   VerificationRequestsListParams,
   VerificationRequestsListResponse,
+  AdminComplaintsListParams,
+  AdminComplaintsListResponse,
+  AdminComplaintDetailsResponse,
+  ComplaintStatusUpdateBody,
+  ComplaintStatusUpdateResponse,
 } from '@/lib/admin/types';
 
 export const adminApi = {
@@ -146,6 +151,34 @@ export const adminApi = {
       patch<AppointmentCancelResponse>(
         adminEndpoints.appointments.cancel(appointmentId),
         { reason },
+        { locale: 'ar' },
+      ),
+  },
+  complaints: {
+    list: (params: AdminComplaintsListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page) qs.set('page', String(params.page));
+      if (params.limit) qs.set('limit', String(params.limit));
+      if (params.status) qs.set('status', params.status);
+      if (params.type) qs.set('type', params.type);
+      if (params.patientId) qs.set('patientId', params.patientId);
+      if (params.from) qs.set('from', params.from);
+      if (params.to) qs.set('to', params.to);
+      if (params.search) qs.set('search', params.search.trim());
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.complaints.list}?${qs.toString()}`
+        : adminEndpoints.complaints.list;
+      return get<AdminComplaintsListResponse>(endpoint, { locale: 'ar' });
+    },
+    getById: (complaintId: string) =>
+      get<AdminComplaintDetailsResponse>(
+        adminEndpoints.complaints.details(complaintId),
+        { locale: 'ar' },
+      ),
+    updateStatus: (complaintId: string, body: ComplaintStatusUpdateBody) =>
+      patch<ComplaintStatusUpdateResponse>(
+        adminEndpoints.complaints.updateStatus(complaintId),
+        body,
         { locale: 'ar' },
       ),
   },
