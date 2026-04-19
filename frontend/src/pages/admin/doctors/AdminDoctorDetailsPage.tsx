@@ -6,9 +6,9 @@ import { Ban, CheckCircle2 } from 'lucide-react';
 import { useAdminDoctor } from '@/hooks/useAdminDoctor';
 import { adminApi } from '@/lib/admin/client';
 import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVerificationRequestDialog';
-import type { AdminDoctorDetailsResponse } from '@/lib/admin/types';
+import type { AdminDoctorDetailsDoctor } from '@/lib/admin/types';
 
-type DoctorRow = NonNullable<AdminDoctorDetailsResponse['doctor']>;
+type DoctorRow = AdminDoctorDetailsDoctor;
 
 function formatGender(g?: string) {
   if (!g) return '—';
@@ -127,15 +127,15 @@ export default function AdminDoctorDetailsPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='-mx-12 -mt-8 mb-0 min-h-[calc(100vh-5.5rem)] bg-black px-6 py-8 font-cairo sm:px-8 md:px-12'
+        className='-mx-  -mt-8 mb-0 min-h-[calc(100vh-5.5rem)] px-6 py-8 font-cairo sm:px-8 md:px-12'
       >
-        <div className='mx-auto flex max-w-5xl flex-col gap-8'>
+        <div className='flex flex-col gap-8 mx-auto w-[1100px]'>
           {isLoading ? (
-            <div className='rounded-xl bg-white/5 px-4 py-8 text-center font-cairo text-sm text-slate-400'>
+            <div className='px-4 py-8 text-sm text-center rounded-xl bg-white/5 font-cairo text-slate-400'>
               جاري تحميل بيانات الطبيب...
             </div>
           ) : error ? (
-            <div className='rounded-xl bg-white/5 px-4 py-8 text-center font-cairo text-sm text-red-400'>
+            <div className='px-4 py-8 text-sm text-center text-red-400 rounded-xl bg-white/5 font-cairo'>
               فشل تحميل بيانات الطبيب
             </div>
           ) : doctor ? (
@@ -232,13 +232,13 @@ export default function AdminDoctorDetailsPage() {
               </section>
 
               {doctor.approvalStatus === 'pending' ? (
-                <div className='flex flex-col items-center gap-3 pb-6 pt-2'>
+                <div className='flex flex-col gap-3 items-center pt-2 pb-6'>
                   {vrLoading ? (
                     <p className='text-center font-cairo text-[13px] font-semibold text-slate-500'>
                       جاري تحميل طلب التحقق المرتبط...
                     </p>
                   ) : pendingRequest?._id ? (
-                    <div className='flex w-full max-w-2xl flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4'>
+                    <div className='flex flex-col gap-3 w-full max-w-2xl sm:flex-row sm:justify-center sm:gap-4'>
                       <button
                         type='button'
                         onClick={() => {
@@ -248,7 +248,7 @@ export default function AdminDoctorDetailsPage() {
                         className='inline-flex h-[52px] min-w-[140px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#00C853] px-6 font-cairo text-[15px] font-extrabold text-white shadow-[0_8px_24px_rgba(0,200,83,0.35)] transition hover:brightness-110'
                       >
                         <CheckCircle2
-                          className='h-6 w-6 shrink-0'
+                          className='w-6 h-6 shrink-0'
                           strokeWidth={2.25}
                         />
                         قبول
@@ -262,7 +262,7 @@ export default function AdminDoctorDetailsPage() {
                         className='inline-flex h-[52px] min-w-[140px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF1744] px-6 font-cairo text-[15px] font-extrabold text-white shadow-[0_8px_24px_rgba(255,23,68,0.35)] transition hover:brightness-110'
                       >
                         <Ban
-                          className='h-6 w-6 shrink-0'
+                          className='w-6 h-6 shrink-0'
                           strokeWidth={2.25}
                         />
                         رفض
@@ -299,7 +299,7 @@ export default function AdminDoctorDetailsPage() {
               />
             </>
           ) : (
-            <div className='rounded-xl bg-white/5 px-4 py-8 text-center font-cairo text-sm text-slate-400'>
+            <div className='px-4 py-8 text-sm text-center rounded-xl bg-white/5 font-cairo text-slate-400'>
               لا توجد بيانات.
             </div>
           )}
