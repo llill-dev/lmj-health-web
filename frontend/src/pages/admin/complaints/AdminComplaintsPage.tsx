@@ -1,89 +1,92 @@
 import { Helmet } from 'react-helmet-async';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import {
+  useQueries,
+  useQuery,
+} from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   Check,
   ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
   FileText,
-  MapPin,
+  MessageSquare,
   Search,
   SlidersHorizontal,
-  Users,
+  Stethoscope,
 } from 'lucide-react';
 import { staggerContainer, staggerItem } from '@/motion';
+import { adminApi } from '@/lib/admin/client';
+import type {
+  AdminComplaintListItem,
+  ComplaintLifecycleStatus,
+  ComplaintType,
+} from '@/lib/admin/types';
 
-/** Template data — replace with API when backend is ready. */
-type ComplaintStatus = 'processed' | 'review' | 'new';
+function complaintTypeAr(t: ComplaintType): string {
+  const m: Record<ComplaintType, string> = {
+    appointment: 'موعد',
+    consultation: 'استشارة',
+    access_request: 'طلب وصول',
+    technical: 'تقني',
+    other: 'أخرى',
+  };
+  return m[t] ?? t;
+}
 
-type ComplaintRow = {
-  id: string;
-  patientName: string;
-  typeLabel: string;
-  locationLine: string;
-  timeLabel: string;
-  status: ComplaintStatus;
-};
-
-const MOCK_COMPLAINTS: ComplaintRow[] = [
-  {
-    id: '1',
-    patientName: 'خالد الأسعد',
-    typeLabel: 'موعد',
-    locationLine: 'سوريا، دمشق، شارع العابد',
-    timeLabel: 'اليوم 12:45 ص',
-    status: 'processed',
-  },
-  {
-    id: '2',
-    patientName: 'خالد الأسعد',
-    typeLabel: 'موعد',
-    locationLine: 'سوريا، دمشق، شارع العابد',
-    timeLabel: 'اليوم 12:45 ص',
-    status: 'review',
-  },
-  {
-    id: '3',
-    patientName: 'خالد الأسعد',
-    typeLabel: 'موعد',
-    locationLine: 'سوريا، دمشق، شارع العابد',
-    timeLabel: 'اليوم 12:45 ص',
-    status: 'processed',
-  },
-  {
-    id: '4',
-    patientName: 'نزار الأحمد',
-    typeLabel: 'خدمة',
-    locationLine: 'سوريا، حلب',
-    timeLabel: 'أمس 4:20 م',
-    status: 'new',
-  },
-];
-
-function statusBadge(status: ComplaintStatus) {
+function statusBadgeClasses(status: ComplaintLifecycleStatus) {
   switch (status) {
-    case 'processed':
-      return (
-        <span className='inline-flex items-center bg-[#00C950] border-[1.82px] border-[#00C950] h-[23px] text-white rounded-[6px] px-2 py-1 font-cairo text-[12px] font-semibold leading-[16px]'>
-          معالَج
-        </span>
-      );
-    case 'review':
-      return (
-        <span className='inline-flex items-center bg-[#4A5565] border-[1.82px] border-[#4A5565] h-[23px] text-white rounded-[6px] px-2 py-1 font-cairo text-[12px] font-semibold leading-[16px]'>
-          قيد المراجعة
-        </span>
-      );
+    case 'resolved':
+    case 'closed':
+      return 'bg-[#00C950] border-[#00C950] text-white';
+    case 'under_review':
+    case 'in_progress':
+      return 'bg-[#4A5565] border-[#4A5565] text-white';
+    case 'submitted':
     default:
-      return (
-        <span className='inline-flex items-center rounded-lg bg-amber-50 px-2.5 py-1 font-cairo text-[11px] font-extrabold text-amber-900 ring-1 ring-amber-200/80'>
-          جديد
-        </span>
-      );
+      return 'bg-amber-100 border-amber-300 text-amber-950';
   }
 }
 
-/** Top statistics row only — matches reference: icon tile + label + number. */
+function statusLabelAr(s: ComplaintLifecycleStatus): string {
+  const m: Record<ComplaintLifecycleStatus, string> = {
+    submitted: 'مقدّمة',
+    under_review: 'قيد المراجعة',
+    in_progress: 'قيد المعالجة',
+    resolved: 'تم الحل',
+    closed: 'مغلقة',
+  };
+  return m[s] ?? s;
+}
+
+function formatListTime(iso?: string) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  const now = new Date();
+  const sameDay =
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate();
+  const time = d.toLocaleTimeString('ar-SY', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return sameDay ? `اليوم ${time}` : d.toLocaleDateString('ar-SY');
+}
+
+function listPreviewLine(c: AdminComplaintListItem) {
+  const sub = c.subject?.trim();
+  if (sub) return sub;
+  if (c.message.length > 100) return `${c.message.slice(0, 100)}…`;
+  return c.message;
+}
+
+/** Top statistics row — icon tile + label + number. */
 function ComplaintsSummaryStatCard({
   variant,
   value,
@@ -172,39 +175,129 @@ function ComplaintsSummaryStatCard({
   );
 }
 
+const COMPLAINT_TYPES: ComplaintType[] = [
+  'appointment',
+  'consultation',
+  'access_request',
+  'technical',
+  'other',
+];
+
 export default function AdminComplaintsPage() {
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | ComplaintStatus>(
-    'all',
-  );
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const [limit] = useState(15);
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | ComplaintLifecycleStatus
+  >('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | ComplaintType>('all');
+
+  useEffect(() => {
+    const t = window.setTimeout(
+      () => setDebouncedSearch(searchInput.trim()),
+      350,
+    );
+    return () => window.clearTimeout(t);
+  }, [searchInput]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter, typeFilter]);
+
+  const countQueries = useQueries({
+    queries: [
+      {
+        queryKey: ['admin', 'complaints', 'count', 'all'],
+        queryFn: () => adminApi.complaints.list({ page: 1, limit: 1 }),
+        staleTime: 30_000,
+      },
+      {
+        queryKey: ['admin', 'complaints', 'count', 'under_review'],
+        queryFn: () =>
+          adminApi.complaints.list({
+            page: 1,
+            limit: 1,
+            status: 'under_review',
+          }),
+        staleTime: 30_000,
+      },
+      {
+        queryKey: ['admin', 'complaints', 'count', 'in_progress'],
+        queryFn: () =>
+          adminApi.complaints.list({
+            page: 1,
+            limit: 1,
+            status: 'in_progress',
+          }),
+        staleTime: 30_000,
+      },
+      {
+        queryKey: ['admin', 'complaints', 'count', 'resolved'],
+        queryFn: () =>
+          adminApi.complaints.list({ page: 1, limit: 1, status: 'resolved' }),
+        staleTime: 30_000,
+      },
+      {
+        queryKey: ['admin', 'complaints', 'count', 'closed'],
+        queryFn: () =>
+          adminApi.complaints.list({ page: 1, limit: 1, status: 'closed' }),
+        staleTime: 30_000,
+      },
+    ],
+  });
+
+  const submittedPreview = useQuery({
+    queryKey: ['admin', 'complaints', 'first-submitted'],
+    queryFn: () =>
+      adminApi.complaints.list({ status: 'submitted', page: 1, limit: 1 }),
+    staleTime: 25_000,
+  });
+
+  const listQuery = useQuery({
+    queryKey: [
+      'admin',
+      'complaints',
+      'list',
+      page,
+      limit,
+      statusFilter,
+      typeFilter,
+      debouncedSearch,
+    ],
+    queryFn: () =>
+      adminApi.complaints.list({
+        page,
+        limit,
+        ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
+        ...(typeFilter !== 'all' ? { type: typeFilter } : {}),
+        ...(debouncedSearch ? { search: debouncedSearch } : {}),
+      }),
+    staleTime: 15_000,
+    placeholderData: (prev) => prev,
+  });
 
   const stats = useMemo(() => {
-    const total = MOCK_COMPLAINTS.length;
-    const processed = MOCK_COMPLAINTS.filter(
-      (c) => c.status === 'processed',
-    ).length;
-    const review = MOCK_COMPLAINTS.filter((c) => c.status === 'review').length;
-    return { total, processed, review };
-  }, []);
+    const total = countQueries[0].data?.total ?? 0;
+    const review =
+      (countQueries[1].data?.total ?? 0) + (countQueries[2].data?.total ?? 0);
+    const closed =
+      (countQueries[3].data?.total ?? 0) + (countQueries[4].data?.total ?? 0);
+    return { total, review, closed };
+  }, [countQueries]);
 
-  const filtered = useMemo(() => {
-    return MOCK_COMPLAINTS.filter((c) => {
-      if (statusFilter !== 'all' && c.status !== statusFilter) return false;
-      if (typeFilter !== 'all' && c.typeLabel !== typeFilter) return false;
-      if (!search.trim()) return true;
-      const q = search.trim().toLowerCase();
-      return (
-        c.patientName.toLowerCase().includes(q) ||
-        c.locationLine.toLowerCase().includes(q)
-      );
-    });
-  }, [search, statusFilter, typeFilter]);
+  const countsLoading = countQueries.some((q) => q.isLoading);
 
-  const typeOptions = useMemo(() => {
-    const set = new Set(MOCK_COMPLAINTS.map((c) => c.typeLabel));
-    return ['all', ...Array.from(set)];
-  }, []);
+  const complaints = listQuery.data?.complaints ?? [];
+  const totalList = listQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalList / Math.max(limit, 1)));
+  const canPrev = page > 1;
+  const canNext = page < totalPages;
+
+  const bannerName =
+    submittedPreview.data?.complaints?.[0]?.contactSnapshot?.fullName;
+  const showNewBanner = (submittedPreview.data?.total ?? 0) > 0;
 
   return (
     <>
@@ -226,49 +319,48 @@ export default function AdminComplaintsPage() {
             الشكاوي
           </h1>
           <p className='mt-1 font-cairo text-[13px] font-semibold text-[#64748B]'>
-            متابعة شكاوى المرضى وحالاتها في مكان واحد
+            متابعة شكاوى المرضى عبر GET /api/complaints (إداري)
           </p>
         </motion.div>
 
-        {/* تنبيه — شكوى جديدة */}
-        <motion.section
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.38, delay: 0.05, ease: 'easeOut' }}
-          className='mt-6 flex items-start gap-3 rounded-xl border border-[#FED7AA] bg-[#FFF7ED] px-5 py-4 shadow-[0_12px_32px_rgba(249,115,22,0.12)]'
-        >
-          <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-[#F97316] text-white shadow-[0_6px_16px_rgba(249,115,22,0.35)]'>
-            <AlertTriangle
-              className='h-5 w-5'
-              strokeWidth={2.25}
-            />
-          </div>
-          <p className='min-w-0 pt-0.5 font-cairo text-[14px] font-bold leading-relaxed text-[#9A3412]'>
-            يوجد شكوى جديدة مقدمة من المريض{' '}
-            <span className='font-black text-[#7C2D12]'>نزار الأحمد</span>!
-          </p>
-        </motion.section>
+        {showNewBanner && bannerName ? (
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.38, delay: 0.05, ease: 'easeOut' }}
+            className='mt-6 flex items-start gap-3 rounded-xl border border-[#FED7AA] bg-[#FFF7ED] px-5 py-4 shadow-[0_12px_32px_rgba(249,115,22,0.12)]'
+          >
+            <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-[#F97316] text-white shadow-[0_6px_16px_rgba(249,115,22,0.35)]'>
+              <AlertTriangle
+                className='h-5 w-5'
+                strokeWidth={2.25}
+              />
+            </div>
+            <p className='min-w-0 pt-0.5 font-cairo text-[14px] font-bold leading-relaxed text-[#9A3412]'>
+              يوجد شكوى جديدة (حالة مقدّمة) مقدمة من المريض{' '}
+              <span className='font-black text-[#7C2D12]'>{bannerName}</span>.
+            </p>
+          </motion.section>
+        ) : null}
 
-        {/* بطاقات الإحصاء الثلاث — أيقونة + نص كما في التصميم */}
         <div className='mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3'>
           <ComplaintsSummaryStatCard
             variant='total'
-            value={stats.total}
+            value={countsLoading ? 0 : stats.total}
             delay={0.08}
           />
           <ComplaintsSummaryStatCard
             variant='closed'
-            value={stats.processed}
+            value={countsLoading ? 0 : stats.closed}
             delay={0.14}
           />
           <ComplaintsSummaryStatCard
             variant='review'
-            value={stats.review}
+            value={countsLoading ? 0 : stats.review}
             delay={0.2}
           />
         </div>
 
-        {/* شريط التصفية */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -278,9 +370,9 @@ export default function AdminComplaintsPage() {
           <div className='relative min-w-0 flex-1 md:max-w-md'>
             <input
               type='search'
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder='بحث بالاسم أو الموقع...'
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder='بحث (اسم، بريد، موضوع، النص...)'
               className='h-11 w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] py-2.5 pl-3 pr-11 font-cairo text-[13px] font-medium text-[#111827] placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20'
             />
             <Search className='pointer-events-none absolute right-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#94A3B8]' />
@@ -297,97 +389,146 @@ export default function AdminComplaintsPage() {
               onChange={(e) =>
                 setStatusFilter(e.target.value as typeof statusFilter)
               }
-              className='h-10 min-w-[140px] cursor-pointer rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#334155] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15'
+              className='h-10 min-w-[160px] cursor-pointer rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#334155] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15'
             >
               <option value='all'>الحالة — الكل</option>
-              <option value='processed'>معالَج</option>
-              <option value='review'>قيد المراجعة</option>
-              <option value='new'>جديد</option>
+              <option value='submitted'>مقدّمة</option>
+              <option value='under_review'>قيد المراجعة</option>
+              <option value='in_progress'>قيد المعالجة</option>
+              <option value='resolved'>تم الحل</option>
+              <option value='closed'>مغلقة</option>
             </select>
             <select
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className='h-10 min-w-[160px] cursor-pointer rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#334155] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15'
+              onChange={(e) =>
+                setTypeFilter(e.target.value as typeof typeFilter)
+              }
+              className='h-10 min-w-[180px] cursor-pointer rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#334155] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15'
             >
-              {typeOptions.map((t) => (
+              <option value='all'>نوع الشكوى — الكل</option>
+              {COMPLAINT_TYPES.map((t) => (
                 <option
                   key={t}
                   value={t}
                 >
-                  {t === 'all' ? 'نوع الشكوى — الكل' : `نوع: ${t}`}
+                  {complaintTypeAr(t)}
                 </option>
               ))}
             </select>
           </div>
         </motion.div>
 
-        {/* قائمة البطاقات */}
-        <motion.ul
-          variants={staggerContainer(0.07, 0.06)}
-          initial='hidden'
-          animate='show'
-          className='mt-6 flex list-none flex-col gap-4 p-0'
-        >
-          {filtered.map((c) => (
-            <motion.li
-              key={c.id}
-              variants={staggerItem}
-              className='block'
-            >
-              <motion.button
-                type='button'
-                whileHover={{ scale: 1.005 }}
-                whileTap={{ scale: 0.998 }}
-                transition={{ duration: 0.2 }}
-                className='flex w-full cursor-pointer items-stretch gap-0 overflow-hidden rounded-xl border border-[#E8ECF2] bg-white text-right shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_14px_36px_rgba(15,23,42,0.09)]'
-              >
-                <div className='flex min-w-0 flex-1 flex-col gap-2 px-5 py-4'>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex flex-items-center gap-4'>
-                      <div className='flex h-[64px] w-[64px] items-center justify-center rounded-[6px] bg-primary text-white'>
-                        <Users className='h-6 w-6' />
-                      </div>
-                      <div className='text-right flex flex-col gap-2'>
-                        <div className='font-cairo text-[17px] font-black text-[#0F172A]'>
-                          {c.patientName}
-                        </div>
-                        <div className='font-cairo leading-[20px] text-[18px] font-semibold text-primary'>
-                          نوع الشكوى:{' '}
-                          <span className='text-[#1F2937]'>{c.typeLabel}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className='flex flex-wrap items-center gap-2'>
-                      {statusBadge(c.status)}
-                    </div>
-                  </div>
-
-                  <div className='flex justify-between gap-2 ms-[70px]'>
-                    <div className='flex items-center gap-1.5 font-cairo font-cairo text-[17px] font-black text-[#4A5565]'>
-                      <MapPin className='h-4 w-4 shrink-0 text-primary' />
-                      <span>{c.locationLine}</span>
-                    </div>
-                    <div className='font-cairo text-[17px] font-black text-[#99A1AF]'>
-                      {c.timeLabel}
-                    </div>
-                  </div>
-                </div>
-                <div className='flex w-[56px] shrink-0 items-center justify-center bg-primary text-white transition-colors hover:bg-[#3e8f89]'>
-                  <ChevronLeft
-                    className='h-6 w-6'
-                    strokeWidth={2.25}
-                  />
-                </div>
-              </motion.button>
-            </motion.li>
-          ))}
-        </motion.ul>
-
-        {filtered.length === 0 ? (
-          <p className='mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]'>
-            لا توجد نتائج مطابقة للتصفية الحالية.
+        {listQuery.isError ? (
+          <p className='mt-8 text-center font-cairo text-sm font-semibold text-red-600'>
+            فشل تحميل قائمة الشكاوي. تحقق من الصلاحيات والاتصال بالخادم.
           </p>
-        ) : null}
+        ) : listQuery.isLoading && !listQuery.data ? (
+          <p className='mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]'>
+            جاري تحميل الشكاوي...
+          </p>
+        ) : (
+          <>
+            <motion.ul
+              variants={staggerContainer(0.07, 0.06)}
+              initial='hidden'
+              animate='show'
+              className='mt-6 flex list-none flex-col gap-4 p-0'
+            >
+              {complaints.map((c) => (
+                <motion.li
+                  key={c._id}
+                  variants={staggerItem}
+                  className='block'
+                >
+                  <motion.button
+                    type='button'
+                    onClick={() => navigate(`/admin/complaints/${c._id}`)}
+                    whileHover={{ scale: 1.005 }}
+                    whileTap={{ scale: 0.998 }}
+                    transition={{ duration: 0.2 }}
+                    className='flex w-full cursor-pointer items-stretch gap-0 overflow-hidden rounded-xl border border-[#E8ECF2] bg-white text-right shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_14px_36px_rgba(15,23,42,0.09)]'
+                  >
+                    <div className='flex min-w-0 flex-1 flex-col gap-2 px-5 py-4'>
+                      <div className='flex items-start justify-between gap-3'>
+                        <div className='flex min-w-0 items-start gap-4'>
+                          <div className='flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-[6px] bg-primary text-white'>
+                            <Stethoscope className='h-6 w-6' />
+                          </div>
+                          <div className='min-w-0 text-right'>
+                            <div className='font-cairo text-[17px] font-black text-[#0F172A]'>
+                              {c.contactSnapshot?.fullName ?? '—'}
+                            </div>
+                            <div className='mt-1 font-cairo text-[18px] font-semibold leading-[22px] text-primary'>
+                              نوع الشكوى:{' '}
+                              <span className='text-[#1F2937]'>
+                                {complaintTypeAr(c.type)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <span
+                          className={`inline-flex h-[23px] shrink-0 items-center rounded-[6px] border-[1.82px] px-2 py-1 font-cairo text-[12px] font-semibold leading-[16px] ${statusBadgeClasses(
+                            c.status,
+                          )}`}
+                        >
+                          {statusLabelAr(c.status)}
+                        </span>
+                      </div>
+
+                      <div className='flex flex-wrap items-start justify-between gap-2 ms-0 sm:ms-[80px]'>
+                        <div className='flex min-w-0 items-start gap-1.5 font-cairo text-[15px] font-semibold text-[#4A5565]'>
+                          <MessageSquare className='mt-0.5 h-4 w-4 shrink-0 text-primary' />
+                          <span className='break-words'>{listPreviewLine(c)}</span>
+                        </div>
+                        <div className='shrink-0 font-cairo text-[14px] font-bold text-[#99A1AF]'>
+                          {formatListTime(c.createdAt)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className='flex w-[56px] shrink-0 items-center justify-center bg-primary text-white transition-colors hover:bg-[#3e8f89]'>
+                      <ChevronLeft
+                        className='h-6 w-6'
+                        strokeWidth={2.25}
+                      />
+                    </div>
+                  </motion.button>
+                </motion.li>
+              ))}
+            </motion.ul>
+
+            {complaints.length === 0 ? (
+              <p className='mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]'>
+                لا توجد شكاوٍ مطابقة.
+              </p>
+            ) : null}
+
+            {totalPages > 1 ? (
+              <div className='mt-6 flex flex-wrap items-center justify-center gap-2'>
+                <button
+                  type='button'
+                  disabled={!canPrev}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className='inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:opacity-40'
+                >
+                  <ChevronsRight className='h-4 w-4' />
+                  السابق
+                </button>
+                <span className='font-cairo text-[12px] font-semibold text-[#64748B]'>
+                  صفحة {page} / {totalPages} · {totalList} شكوى
+                </span>
+                <button
+                  type='button'
+                  disabled={!canNext}
+                  onClick={() => setPage((p) => p + 1)}
+                  className='inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:opacity-40'
+                >
+                  التالي
+                  <ChevronsLeft className='h-4 w-4' />
+                </button>
+              </div>
+            ) : null}
+          </>
+        )}
       </div>
     </>
   );

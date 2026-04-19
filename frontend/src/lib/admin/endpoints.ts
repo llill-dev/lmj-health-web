@@ -39,6 +39,12 @@ export const adminEndpoints = {
   auditLogs: {
     list: '/api/admin/audit-logs',
   },
+  complaints: {
+    list: '/api/complaints',
+    details: (complaintId: string) => `/api/complaints/${complaintId}`,
+    updateStatus: (complaintId: string) =>
+      `/api/complaints/${complaintId}/status`,
+  },
   content: {
     list: '/api/admin/content',
     details: (id: string) => `/api/admin/content/${id}`,
