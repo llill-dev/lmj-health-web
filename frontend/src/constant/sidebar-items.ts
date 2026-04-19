@@ -16,6 +16,7 @@ import {
   Stethoscope,
   Users,
   BarChart3,
+  MessageSquareWarning,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
@@ -49,7 +50,8 @@ export type AdminSidebarItemId =
   | 'system-logs'
   | 'analytics'
   | 'settings'
-  | 'verification-requests';
+  | 'verification-requests'
+  | 'complaints';
 
 export const sidebarItems: Array<{
   id: string;
@@ -218,5 +220,12 @@ export const adminSidebarItems: Array<{
     label: 'طلبات التحقق',
     icon: ShieldCheck,
     badge: 2,
+  },
+  {
+    id: 'complaints',
+    path: 'complaints',
+    label: 'الشكاوي',
+    icon: MessageSquareWarning,
+    badge: 1,
   },
 ];
