@@ -370,41 +370,44 @@ export type AdminSecretariesListResponse = ApiSuccessEnvelope & {
   secretaries: AdminSecretarySummary[];
 };
 
-export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
-  doctor: {
-    _id: string;
-    specialization?: string;
-    medicalLicenseNumber?: string;
-    education?: string;
-    bio?: string;
-    clinicAddress?: string;
-    locationCity?: string;
-    locationCountry?: string;
-    consultationFee?: number;
-    consultationTypes?: Array<'online' | 'offline' | string>;
-    clinicLocation?: {
-      type?: 'Point';
-      coordinates?: [number, number];
-    };
-    isApproved?: boolean;
-    approvalStatus?: AdminDoctorApprovalStatus;
-    approvalNote?: string | null;
-    approvedBy?: string | null;
-    approvedAt?: string | null;
-    user?: {
-      fullName: string;
-      email?: string;
-      phone?: string;
-      gender?: string;
-      photoUrl?: string;
-      dateOfBirth?: string;
-    };
-    userId?: {
-      _id?: string;
-      fullName?: string;
-      email?: string;
-    };
+/** Payload for `doctor` on GET admin doctor details — aligned with API + admin UI. */
+export type AdminDoctorDetailsDoctor = {
+  _id: string;
+  specialization?: string;
+  medicalLicenseNumber?: string;
+  education?: string;
+  bio?: string;
+  clinicAddress?: string;
+  locationCity?: string;
+  locationCountry?: string;
+  consultationFee?: number;
+  consultationTypes?: Array<'online' | 'offline' | string>;
+  clinicLocation?: {
+    type?: 'Point';
+    coordinates?: [number, number];
   };
+  isApproved?: boolean;
+  approvalStatus?: AdminDoctorApprovalStatus;
+  approvalNote?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  user?: {
+    fullName: string;
+    email?: string;
+    phone?: string;
+    gender?: string;
+    photoUrl?: string;
+    dateOfBirth?: string;
+  };
+  userId?: {
+    _id?: string;
+    fullName?: string;
+    email?: string;
+  };
+};
+
+export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
+  doctor: AdminDoctorDetailsDoctor;
 };
 
 export type AdminContentType =
