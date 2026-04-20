@@ -30,7 +30,13 @@ const OUTCOME_STYLES: Record<
   },
 };
 
-export function AuditLogRow({ log }: { log: AuditLogItem }) {
+export function AuditLogRow({
+  log,
+  onOpenDetails,
+}: {
+  log: AuditLogItem;
+  onOpenDetails: (log: AuditLogItem) => void;
+}) {
   const catStyle = CATEGORY_STYLES[log.category] ?? CATEGORY_STYLES.SYSTEM;
   const outStyle = OUTCOME_STYLES[log.outcome] ?? OUTCOME_STYLES.FAIL;
   const { date, time } = formatAuditLogDateTime(log.createdAt);
@@ -57,7 +63,7 @@ export function AuditLogRow({ log }: { log: AuditLogItem }) {
         <div className='mt-0.5 font-cairo text-[11px] font-semibold text-[#98A2B3]'>{actorLabel}</div>
       </div>
 
-      <div className='col-span-2 flex items-start justify-start text-right pt-0.5'>
+      <div className='col-span-2 flex items-start justify-end pt-0.5'>
         <span
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-cairo text-[11px] font-bold ${outStyle.bg} ${outStyle.text}`}
         >
@@ -67,12 +73,16 @@ export function AuditLogRow({ log }: { log: AuditLogItem }) {
       </div>
 
       <div className='col-span-2 text-right'>
-        <div className='font-cairo text-[12px] font-semibold leading-snug text-[#667085]'>{log.ip || '—'}</div>
-        {log.method && log.route ? (
-          <div className='mt-0.5 break-all font-cairo text-[10px] font-semibold text-[#98A2B3]'>
-            {log.method} {log.route}
-          </div>
-        ) : null}
+        <div className='font-cairo text-[12px] font-semibold leading-snug text-[#667085]' dir='ltr'>
+          {log.ip || '—'}
+        </div>
+        <button
+          type='button'
+          onClick={() => onOpenDetails(log)}
+          className='mt-2 font-cairo text-[11px] font-extrabold text-primary underline-offset-2 hover:underline'
+        >
+          تفاصيل تقنية
+        </button>
       </div>
 
       <div className='col-span-3 text-right'>
