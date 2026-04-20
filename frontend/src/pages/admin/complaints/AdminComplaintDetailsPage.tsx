@@ -180,16 +180,16 @@ export default function AdminComplaintDetailsPage() {
           onClick={() => navigate('/admin/complaints')}
           className='mb-5 inline-flex items-center gap-1 font-cairo text-[13px] font-bold text-primary hover:underline'
         >
-          <ChevronRight className='h-4 w-4' />
+          <ChevronRight className='w-4 h-4' />
           العودة إلى الشكاوي
         </button>
 
         {detailQuery.isLoading ? (
           <div className='flex justify-center py-16'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
+            <Loader2 className='w-8 h-8 animate-spin text-primary' />
           </div>
         ) : detailQuery.isError || !c ? (
-          <div className='rounded-xl border border-red-200 bg-red-50 px-4 py-6 font-cairo text-sm font-semibold text-red-800'>
+          <div className='px-4 py-6 text-sm font-semibold text-red-800 bg-red-50 rounded-xl border border-red-200 font-cairo'>
             تعذر تحميل الشكوى.
           </div>
         ) : (
@@ -208,14 +208,14 @@ export default function AdminComplaintDetailsPage() {
               <div className='p-6 sm:p-8'>
                 {/* رأس البطاقة: وقت يسار الشاشة | اسم + أيقونة يمين */}
                 <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
-                  <div className='flex min-w-0 flex-1 items-start gap-4'>
+                  <div className='flex flex-1 gap-4 items-start min-w-0'>
                     <div className='flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-[#148283] text-white shadow-[0_6px_16px_rgba(20,130,131,0.25)]'>
                       <Stethoscope
-                        className='h-7 w-7'
+                        className='w-7 h-7'
                         strokeWidth={2.25}
                       />
                     </div>
-                    <div className='min-w-0 flex-1 text-right'>
+                    <div className='flex-1 min-w-0 text-right'>
                       <div className='font-cairo text-[18px] font-black text-[#0F172A] sm:text-[19px]'>
                         {c.contactSnapshot?.fullName ?? '—'}
                       </div>
@@ -276,13 +276,13 @@ export default function AdminComplaintDetailsPage() {
                           key={att.fileId}
                           className='flex items-center justify-between gap-3 rounded-[8px] border border-[#C5E8E4] bg-[#E6F7F6] px-4 py-3'
                         >
-                          <div className='flex min-w-0 flex-1 items-center justify-end gap-2'>
+                          <div className='flex flex-1 gap-2 justify-end items-center min-w-0'>
                             <span className='truncate font-cairo text-[14px] font-bold text-[#1F2937]'>
                               {att.label?.trim() || 'photo'}
                             </span>
                             <FileText className='h-5 w-5 shrink-0 text-[#148283]' />
                           </div>
-                          <div className='flex shrink-0 items-center gap-2'>
+                          <div className='flex gap-2 items-center shrink-0'>
                             <button
                               type='button'
                               disabled={
@@ -294,10 +294,10 @@ export default function AdminComplaintDetailsPage() {
                               aria-label='عرض الملف'
                             >
                               {fileActionId === `${att.fileId}-view` ? (
-                                <Loader2 className='h-5 w-5 animate-spin' />
+                                <Loader2 className='w-5 h-5 animate-spin' />
                               ) : (
                                 <Eye
-                                  className='h-5 w-5'
+                                  className='w-5 h-5'
                                   strokeWidth={2.25}
                                 />
                               )}
@@ -313,10 +313,10 @@ export default function AdminComplaintDetailsPage() {
                               aria-label='تحميل الملف'
                             >
                               {fileActionId === `${att.fileId}-download` ? (
-                                <Loader2 className='h-5 w-5 animate-spin' />
+                                <Loader2 className='w-5 h-5 animate-spin' />
                               ) : (
                                 <Download
-                                  className='h-5 w-5'
+                                  className='w-5 h-5'
                                   strokeWidth={2.25}
                                 />
                               )}
@@ -337,7 +337,7 @@ export default function AdminComplaintDetailsPage() {
                   <h2 className='mb-3 font-cairo text-[15px] font-black text-primary'>
                     سجل الحالات
                   </h2>
-                  <ul className='list-none space-y-2 p-0'>
+                  <ul className='p-0 space-y-2 list-none'>
                     {c.statusHistory.map((h, i) => (
                       <li
                         key={`${h.changedAt}-${i}`}
@@ -378,7 +378,7 @@ export default function AdminComplaintDetailsPage() {
                 <strong>{statusLabelAr(c.status)}</strong>. يتم التحقق من انتقال
                 الحالة على الخادم.
               </p>
-              <div className='flex max-w-xl flex-col gap-3'>
+              <div className='flex flex-col gap-3 max-w-xl'>
                 <label className='block'>
                   <span className='mb-1 block font-cairo text-[12px] font-bold text-[#475467]'>
                     الحالة الجديدة
@@ -426,7 +426,7 @@ export default function AdminComplaintDetailsPage() {
                   className='inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 font-cairo text-[14px] font-extrabold text-white disabled:opacity-50'
                 >
                   {updateMutation.isPending ? (
-                    <Loader2 className='h-5 w-5 animate-spin' />
+                    <Loader2 className='w-5 h-5 animate-spin' />
                   ) : (
                     'حفظ التحديث'
                   )}
