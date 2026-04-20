@@ -68,27 +68,27 @@ function DoctorListCard({
 
   return (
     <div className='rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
-      <div className='flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-stretch lg:justify-between lg:gap-6'>
+      <div className='flex flex-col gap-4 px-3 py-4 sm:px-4 lg:flex-row lg:items-stretch lg:justify-between lg:gap-6'>
         {/* الهوية — يمين الصفحة في RTL */}
-        <div className='flex shrink-0 items-start gap-3'>
+        <div className='flex min-w-0 shrink-0 items-start gap-3'>
           <div
             className='flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] text-[22px] font-black text-white'
             style={{ backgroundColor: TEAL }}
           >
             {doctorInitial(d.user?.fullName)}
           </div>
-          <div className='min-w-0 text-right'>
-            <div className='font-cairo text-[15px] font-extrabold leading-snug text-[#1F2937]'>
+          <div className='min-w-0 flex-1 text-right'>
+            <div className='break-words font-cairo text-sm font-extrabold leading-snug text-[#1F2937] sm:text-[15px]'>
               {d.user?.fullName ?? '—'}
             </div>
-            <div className='mt-1 font-cairo text-[13px] font-semibold text-[#6B7280]'>
+            <div className='mt-1 break-words font-cairo text-[12px] font-semibold text-[#6B7280] sm:text-[13px]'>
               {d.specialization ?? '—'}
             </div>
           </div>
         </div>
 
         {/* إحصائيات ثلاثية */}
-        <div className='flex flex-1 flex-wrap items-stretch justify-center gap-2'>
+        <div className='flex min-w-0 flex-1 flex-wrap items-stretch justify-stretch gap-2 sm:justify-center'>
           {[
             { label: 'المواعيد', value: fmt(appt) },
             { label: 'مكتملة', value: fmt(done) },
@@ -96,17 +96,17 @@ function DoctorListCard({
           ].map((box) => (
             <div
               key={box.label}
-              className='flex min-w-[88px] flex-1 flex-col items-center justify-center rounded-[8px] px-3 py-2 sm:max-w-[120px]'
+              className='flex min-w-[72px] flex-1 flex-col items-center justify-center rounded-[8px] px-2 py-2 sm:min-w-[88px] sm:px-3 sm:max-w-[120px]'
               style={{ backgroundColor: STAT_BG }}
             >
               <span
-                className='font-cairo text-[11px] font-bold'
+                className='font-cairo text-[10px] font-bold sm:text-[11px]'
                 style={{ color: TEAL }}
               >
                 {box.label}
               </span>
               <span
-                className='mt-0.5 font-cairo text-[20px] font-black leading-none'
+                className='mt-0.5 font-cairo text-lg font-black leading-none sm:text-[20px]'
                 style={{ color: TEAL }}
               >
                 {box.value}
@@ -116,7 +116,7 @@ function DoctorListCard({
         </div>
 
         {/* تواصل */}
-        <div className='flex min-w-[200px] flex-col gap-2 text-right lg:max-w-[280px]'>
+        <div className='flex w-full min-w-0 flex-col gap-2 text-right lg:w-auto lg:min-w-[200px] lg:max-w-[280px]'>
           <div className='flex items-start gap-2'>
             <Award
               className='h-4 w-4 shrink-0 mt-0.5'
@@ -156,12 +156,14 @@ function DoctorListCard({
         </div>
 
         {/* الحالة + زر التفاصيل */}
-        <div className='flex shrink-0 flex-col items-stretch gap-3 sm:min-w-[140px] lg:items-end'>
-          <StatusBadge status={d.approvalStatus} />
+        <div className='flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:min-w-[140px] sm:border-t-0 sm:pt-0 lg:w-auto lg:items-end'>
+          <div className='flex justify-end lg:justify-end'>
+            <StatusBadge status={d.approvalStatus} />
+          </div>
           <button
             type='button'
             onClick={onDetails}
-            className='inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 sm:w-auto'
+            className='inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 lg:w-auto'
             style={{ backgroundColor: TEAL }}
           >
             <span>التفاصيل</span>
@@ -287,41 +289,42 @@ export default function AdminDoctorsPage() {
       <div
         dir='rtl'
         lang='ar'
+        className='mx-auto w-full max-w-[1600px] px-3 pb-6 sm:px-4 md:px-6'
       >
-        <div className='flex items-start justify-between'>
-          <div>
-            <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
+        <div className='flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between'>
+          <div className='min-w-0 text-right'>
+            <div className='font-cairo text-lg font-black leading-snug text-[#111827] sm:text-[20px] sm:leading-[26px]'>
               إدارة الأطباء
             </div>
-            <div className='mt-1 font-cairo text-[12px] font-semibold leading-[14px] text-[#98A2B3]'>
+            <div className='mt-1 font-cairo text-[11px] font-semibold leading-snug text-[#98A2B3] sm:text-[12px] sm:leading-[14px]'>
               إدارة ومتابعة بيانات الأطباء
             </div>
           </div>
         </div>
 
-        <section className='mt-6 grid grid-cols-4 gap-5'>
+        <section className='mt-4 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4'>
           {stats.map((c) => {
             const Icon = c.icon;
             return (
               <div
                 key={c.title}
-                className={`flex items-center justify-between rounded-[12px] border px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${c.tone.border} ${c.tone.bg}`}
+                className={`flex items-center justify-between gap-3 rounded-[12px] border px-3 py-3 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-5 sm:py-4 ${c.tone.border} ${c.tone.bg}`}
               >
-                <div className='text-right'>
-                  <div className='font-cairo text-[12px] font-bold text-[#667085]'>
+                <div className='min-w-0 text-right'>
+                  <div className='font-cairo text-[11px] font-bold text-[#667085] sm:text-[12px]'>
                     {c.title}
                   </div>
                   <div
-                    className={`mt-2 font-cairo text-[22px] font-black leading-[22px] ${c.tone.valueColor}`}
+                    className={`mt-1 font-cairo text-lg font-black leading-none sm:mt-2 sm:text-[22px] sm:leading-[22px] ${c.tone.valueColor}`}
                   >
                     {c.value}
                   </div>
                 </div>
 
                 <div
-                  className={`flex h-[44px] w-[44px] items-center justify-center rounded-[12px] ${c.tone.iconBg}`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] sm:h-[44px] sm:w-[44px] ${c.tone.iconBg}`}
                 >
-                  <Icon className={`h-5 w-5 ${c.tone.iconColor}`} />
+                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${c.tone.iconColor}`} />
                 </div>
               </div>
             );
@@ -342,7 +345,7 @@ export default function AdminDoctorsPage() {
             { label: 'مرفوض', value: 'rejected' },
           ]}
           filtersLeading={
-            <div className='flex items-center gap-3'>
+            <div className='flex w-full min-w-0 flex-wrap content-stretch items-center gap-2 sm:gap-3'>
               <input
                 value={filters.city}
                 onChange={(e) =>
@@ -353,7 +356,7 @@ export default function AdminDoctorsPage() {
                   }))
                 }
                 placeholder='المدينة'
-                className='h-[42px] w-[140px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+                className='h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4'
               />
               <input
                 value={filters.country}
@@ -365,7 +368,7 @@ export default function AdminDoctorsPage() {
                   }))
                 }
                 placeholder='الدولة'
-                className='h-[42px] w-[140px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+                className='h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4'
               />
               <input
                 type='date'
@@ -377,7 +380,7 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                className='h-[42px] w-[150px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827]'
+                className='h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-2 text-right font-cairo text-[12px] font-bold text-[#111827] sm:w-[150px] sm:flex-none sm:px-4'
               />
               <input
                 type='date'
@@ -389,7 +392,7 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                className='h-[42px] w-[150px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827]'
+                className='h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-2 text-right font-cairo text-[12px] font-bold text-[#111827] sm:w-[150px] sm:flex-none sm:px-4'
               />
             </div>
           }
@@ -404,21 +407,21 @@ export default function AdminDoctorsPage() {
           }}
         />
 
-        <section className='mt-5 overflow-hidden rounded-[12px] border border-[#E8ECEF] bg-[#F8F9FA] shadow-[0_4px_24px_rgba(0,0,0,0.05)]'>
-          <div className='flex items-center justify-between border-b border-[#E8ECEF] bg-white px-6 py-4'>
-            <div className='flex items-center gap-2'>
+        <section className='mt-4 overflow-hidden rounded-[12px] border border-[#E8ECEF] bg-[#F8F9FA] shadow-[0_4px_24px_rgba(0,0,0,0.05)] sm:mt-5'>
+          <div className='flex items-center justify-between border-b border-[#E8ECEF] bg-white px-4 py-3 sm:px-6 sm:py-4'>
+            <div className='flex min-w-0 items-center gap-2'>
               <Stethoscope
-                className='h-5 w-5 shrink-0'
+                className='h-4 w-4 shrink-0 sm:h-5 sm:w-5'
                 style={{ color: TEAL }}
                 aria-hidden
               />
-              <div className='font-cairo text-[16px] font-black text-[#1F2937]'>
+              <div className='truncate font-cairo text-sm font-black text-[#1F2937] sm:text-[16px]'>
                 قائمة الأطباء ({results})
               </div>
             </div>
           </div>
 
-          <div className='space-y-4 p-5'>
+          <div className='space-y-3 p-3 sm:space-y-4 sm:p-5'>
             {isLoading ? (
               <div className='rounded-[10px] border border-[#E8ECEF] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
                 جاري تحميل قائمة الأطباء...
@@ -445,12 +448,12 @@ export default function AdminDoctorsPage() {
           </div>
         </section>
 
-        <div className='mt-4 flex items-center justify-between'>
-          <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
+        <div className='mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4'>
+          <div className='text-center font-cairo text-[11px] font-semibold text-[#667085] sm:text-right sm:text-[12px]'>
             الصفحة {filters.page} من {totalPages}
           </div>
 
-          <div className='flex items-center gap-3'>
+          <div className='flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-3'>
             <div className='relative'>
               <select
                 value={filters.limit}
@@ -462,7 +465,7 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }));
                 }}
-                className='h-[38px] w-[120px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'
+                className='h-[38px] w-full min-w-[110px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#111827] sm:w-[120px] sm:px-4'
               >
                 <option value={20}>20 / صفحة</option>
                 <option value={50}>50 / صفحة</option>
@@ -484,8 +487,8 @@ export default function AdminDoctorsPage() {
               }
               className={
                 isLoading || filters.page <= 1
-                  ? 'h-[38px] rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3]'
-                  : 'h-[38px] rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)]'
+                  ? 'h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none'
+                  : 'h-[38px] flex-1 rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] sm:flex-none'
               }
             >
               السابق
@@ -501,8 +504,8 @@ export default function AdminDoctorsPage() {
               }
               className={
                 isLoading || filters.page >= totalPages
-                  ? 'h-[38px] rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3]'
-                  : 'h-[38px] rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15, 143, 139,0.25)]'
+                  ? 'h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none'
+                  : 'h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15, 143, 139,0.25)] sm:flex-none'
               }
             >
               التالي
@@ -510,7 +513,7 @@ export default function AdminDoctorsPage() {
           </div>
         </div>
 
-        <div className='h-8' />
+        <div className='h-4 sm:h-8' />
       </div>
     </>
   );

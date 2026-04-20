@@ -63,11 +63,11 @@ function coordsToLatLng(d: DoctorRow) {
 
 function FieldBlock({ label, value }: { label: string; value: string }) {
   return (
-    <div className='flex gap-1 text-right'>
-      <div className='font-cairo text-[22px] leading-[28px] font-semibold text-primary'>
+    <div className='flex flex-col gap-0.5 text-right sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-0'>
+      <div className='shrink-0 font-cairo text-sm font-semibold leading-snug text-primary sm:text-base md:text-lg lg:text-[22px] lg:leading-[28px]'>
         {label} :
       </div>
-      <div className='mt-1 font-cairo text-[22px] font-medium leading-[28px] text-[#1F2937]'>
+      <div className='min-w-0 break-words font-cairo text-sm font-medium leading-relaxed text-[#1F2937] sm:text-base md:text-lg lg:text-[22px] lg:leading-[28px]'>
         {value}
       </div>
     </div>
@@ -76,7 +76,7 @@ function FieldBlock({ label, value }: { label: string; value: string }) {
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className='mb-3 text-primary text-[25px] font-bold leading-[35px]'>
+    <h2 className='mb-2 text-xl font-bold leading-snug text-primary sm:mb-3 sm:text-2xl md:text-[25px] md:leading-[35px]'>
       {children}
     </h2>
   );
@@ -131,9 +131,9 @@ export default function AdminDoctorDetailsPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='-mx-6 -mt-8 mb-0 min-h-[calc(100vh-5.5rem)] px-6 py-8 font-cairo sm:px-8 md:px-12'
+        className='-mx-3 -mt-6 mb-0 min-h-[calc(100vh-5.5rem)] px-3 py-6 font-cairo sm:-mx-6 sm:-mt-8 sm:px-6 sm:py-8 md:px-8 lg:px-12'
       >
-        <div className='flex flex-col gap-8 mx-auto w-[1100px]'>
+        <div className='mx-auto flex w-full max-w-[1100px] flex-col gap-6 sm:gap-8'>
           {isLoading ? (
             <div className='px-4 py-8 text-sm text-center rounded-xl bg-white/5 font-cairo text-slate-400'>
               جاري تحميل بيانات الطبيب...
@@ -147,22 +147,22 @@ export default function AdminDoctorDetailsPage() {
               {/* المعلومات الشخصية */}
               <section>
                 <SectionTitle>المعلومات الشخصية</SectionTitle>
-                <div className='border-[1.82px] border-[#F3F4F6] rounded-[6px] bg-[#FFFFFF] p-5 sm:p-6 h-[190px] shadow-[0px_1px_3px_0px_#0000001A]'>
-                  <div className='flex flex-col gap-[15px] md:flex-row md:items-start md:justify-between'>
-                    <div className='rounded-[10px] mx-auto shrink-0 md:mx-0 text-primary'>
+                <div className='rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]'>
+                  <div className='flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-[15px]'>
+                    <div className='mx-auto shrink-0 rounded-[10px] text-primary md:mx-0'>
                       {doctor.user?.photoUrl ? (
                         <img
                           src={doctor.user.photoUrl}
                           alt=''
-                          className='object-cover h-[150px] w-[150px] rounded-xl border border-[#0F8F8B]'
+                          className='h-[120px] w-[120px] rounded-xl border border-[#0F8F8B] object-cover sm:h-[140px] sm:w-[140px] md:h-[150px] md:w-[150px]'
                         />
                       ) : (
-                        <div className='flex h-[150px]  w-[150px]  flex-col items-center justify-center  bg-[#E6F4F3] font-cairo text-[12px] font-semibold text-primary border-[0.5] border-text-primary rounded-[10px]'>
+                        <div className='flex h-[120px] w-[120px] flex-col items-center justify-center rounded-[10px] border border-[#0F8F8B]/40 bg-[#E6F4F3] font-cairo text-[12px] font-semibold text-primary sm:h-[140px] sm:w-[140px] md:h-[150px] md:w-[150px]'>
                           photo
                         </div>
                       )}
                     </div>
-                    <div className='flex flex-col flex-1 gap-6 min-w-0 sm:flex-row sm:gap-8'>
+                    <div className='flex min-w-0 flex-1 flex-col gap-5 sm:flex-row sm:gap-6 md:gap-8'>
                       <div className='flex flex-col flex-1 gap-4 min-w-0'>
                         <FieldBlock
                           label='الاسم'
@@ -199,8 +199,8 @@ export default function AdminDoctorDetailsPage() {
               {/* المعلومات المهنية */}
               <section>
                 <SectionTitle>المعلومات المهنية</SectionTitle>
-                <div className='border-[1.82px] border-[#F3F4F6] rounded-[6px] bg-[#FFFFFF] p-5 sm:p-6 h-[190px] shadow-[0px_1px_3px_0px_#0000001A]'>
-                  <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-10'>
+                <div className='rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]'>
+                  <div className='grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 md:gap-10'>
                     <div className='flex flex-col gap-4'>
                       <FieldBlock
                         label='التخصص'
