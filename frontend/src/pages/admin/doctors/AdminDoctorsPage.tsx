@@ -68,9 +68,16 @@ function DoctorListCard({
 
   return (
     <div className='rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
-      <div className='flex flex-col gap-4 px-3 py-4 sm:px-4 lg:flex-row lg:items-stretch lg:justify-between lg:gap-6'>
+      {/*
+        على الشاشات الواسعة: شبكة بأعمدة ثابتة حتى يبقى عمود الإحصائيات على نفس المحور الأفقي
+        في كل الصفوف (مثل المصطرة)، بغض النظر عن طول اسم الطبيب أو التخصص.
+        RTL: العمود الأول في الشبكة = يمين الصفحة = الهوية.
+      */}
+      <div
+        className='flex flex-col gap-4 px-3 py-4 sm:px-4 lg:grid lg:grid-cols-[minmax(0,16rem)_17.5rem_minmax(0,1fr)_auto] lg:items-stretch lg:gap-x-6 lg:gap-y-0 xl:grid-cols-[minmax(0,18rem)_17.5rem_minmax(0,1fr)_auto]'
+      >
         {/* الهوية — يمين الصفحة في RTL */}
-        <div className='flex min-w-0 shrink-0 items-start gap-3'>
+        <div className='flex min-w-0 items-start gap-3 lg:min-w-0 lg:max-w-[16rem] xl:max-w-[18rem]'>
           <div
             className='flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] text-[22px] font-black text-white'
             style={{ backgroundColor: TEAL }}
@@ -87,8 +94,8 @@ function DoctorListCard({
           </div>
         </div>
 
-        {/* إحصائيات ثلاثية */}
-        <div className='flex min-w-0 flex-1 flex-wrap items-stretch justify-stretch gap-2 sm:justify-center'>
+        {/* إحصائيات ثلاثية — عرض ثابت + شبكة 1fr داخلية لمحاذاة موحّدة */}
+        <div className='grid w-full shrink-0 grid-cols-3 gap-2 lg:w-[17.5rem] lg:justify-self-start'>
           {[
             { label: 'المواعيد', value: fmt(appt) },
             { label: 'مكتملة', value: fmt(done) },
@@ -96,17 +103,17 @@ function DoctorListCard({
           ].map((box) => (
             <div
               key={box.label}
-              className='flex min-w-[72px] flex-1 flex-col items-center justify-center rounded-[8px] px-2 py-2 sm:min-w-[88px] sm:px-3 sm:max-w-[120px]'
+              className='flex min-w-0 flex-col items-center justify-center rounded-[8px] px-1.5 py-2 sm:px-2'
               style={{ backgroundColor: STAT_BG }}
             >
               <span
-                className='font-cairo text-[10px] font-bold sm:text-[11px]'
+                className='text-center font-cairo text-[10px] font-bold sm:text-[11px]'
                 style={{ color: TEAL }}
               >
                 {box.label}
               </span>
               <span
-                className='mt-0.5 font-cairo text-lg font-black leading-none sm:text-[20px]'
+                className='mt-0.5 font-cairo text-base font-black leading-none sm:text-lg md:text-[20px]'
                 style={{ color: TEAL }}
               >
                 {box.value}
@@ -116,7 +123,7 @@ function DoctorListCard({
         </div>
 
         {/* تواصل */}
-        <div className='flex w-full min-w-0 flex-col gap-2 text-right lg:w-auto lg:min-w-[200px] lg:max-w-[280px]'>
+        <div className='flex w-full min-w-0 flex-col gap-2 text-right lg:min-w-0'>
           <div className='flex items-start gap-2'>
             <Award
               className='h-4 w-4 shrink-0 mt-0.5'
@@ -156,14 +163,14 @@ function DoctorListCard({
         </div>
 
         {/* الحالة + زر التفاصيل */}
-        <div className='flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:min-w-[140px] sm:border-t-0 sm:pt-0 lg:w-auto lg:items-end'>
-          <div className='flex justify-end lg:justify-end'>
+        <div className='flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:border-t-0 sm:pt-0 lg:w-auto lg:items-end lg:justify-self-end'>
+          <div className='flex justify-end'>
             <StatusBadge status={d.approvalStatus} />
           </div>
           <button
             type='button'
             onClick={onDetails}
-            className='inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 lg:w-auto'
+            className='inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 lg:w-auto lg:min-w-[8.5rem]'
             style={{ backgroundColor: TEAL }}
           >
             <span>التفاصيل</span>
