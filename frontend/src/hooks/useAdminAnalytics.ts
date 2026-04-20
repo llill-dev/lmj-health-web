@@ -43,7 +43,11 @@ export function useAdminPlatformStats() {
   const pendingVerifications = useQuery({
     queryKey: ['admin', 'stats', 'verifications', 'pending'],
     queryFn: () =>
-      adminApi.verificationRequests.list({ status: 'pending', limit: 1 }),
+      adminApi.verificationRequests.list({
+        status: 'pending',
+        page: 1,
+        limit: 1,
+      }),
     staleTime: STALE,
   });
 

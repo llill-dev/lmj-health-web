@@ -101,7 +101,11 @@ export default function AdminDoctorDetailsPage() {
   const { data: vrList, isLoading: vrLoading } = useQuery({
     queryKey: ['admin-verification-requests', 'pending-for-doctor', doctorId],
     queryFn: () =>
-      adminApi.verificationRequests.list({ status: 'pending', limit: 200 }),
+      adminApi.verificationRequests.list({
+        status: 'pending',
+        page: 1,
+        limit: 200,
+      }),
     enabled: Boolean(doctorId) && doctor?.approvalStatus === 'pending',
     staleTime: 30_000,
   });
@@ -127,7 +131,7 @@ export default function AdminDoctorDetailsPage() {
       <div
         dir='rtl'
         lang='ar'
-        className='-mx-  -mt-8 mb-0 min-h-[calc(100vh-5.5rem)] px-6 py-8 font-cairo sm:px-8 md:px-12'
+        className='-mx-6 -mt-8 mb-0 min-h-[calc(100vh-5.5rem)] px-6 py-8 font-cairo sm:px-8 md:px-12'
       >
         <div className='flex flex-col gap-8 mx-auto w-[1100px]'>
           {isLoading ? (
