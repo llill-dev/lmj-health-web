@@ -191,6 +191,8 @@ export type AuditLogItem = {
   ip?: string;
   route?: string;
   method?: string;
+  /** If backend adds client metadata (optional). */
+  userAgent?: string;
 };
 
 export type AuditLogsListParams = {
