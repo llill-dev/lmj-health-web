@@ -1,21 +1,11 @@
 import type { ChangeEvent, ComponentType, ReactNode } from 'react';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Bell,
-  ChevronLeft,
-  ChevronRight,
-  CloudUpload,
-  Loader2,
-  Settings,
-} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { CloudUpload, Settings } from 'lucide-react';
 import { get } from '@/lib/base';
 import { adminApi } from '@/lib/admin/client';
-import {
-  notificationsApi,
-  notificationItemId,
-} from '@/lib/notifications/client';
+import { notificationsApi } from '@/lib/notifications/client';
 
 type AdminLocalSettings = {
   general: {
@@ -43,7 +33,6 @@ type HealthResponse = {
 };
 
 const SETTINGS_STORAGE_KEY = 'admin.settings.v1';
-const NOTIFICATIONS_PAGE_SIZE = 20;
 
 const DEFAULT_SETTINGS: AdminLocalSettings = {
   general: {
@@ -177,7 +166,6 @@ function Field({
 }
 
 export default function AdminSettingsPage() {
-  const queryClient = useQueryClient();
   const [settings, setSettings] = useState<AdminLocalSettings>(
     loadSettingsFromStorage,
   );
@@ -186,11 +174,6 @@ export default function AdminSettingsPage() {
     logo: 'idle',
   });
   const logoInputRef = useRef<HTMLInputElement | null>(null);
-  const [notificationsPage, setNotificationsPage] = useState(1);
-  const [notificationsUnreadOnly, setNotificationsUnreadOnly] = useState(false);
-  const [selectedNotificationIds, setSelectedNotificationIds] = useState<
-    Set<string>
-  >(() => new Set());
 
   const weekRange = useMemo(() => {
     const to = new Date();
@@ -218,62 +201,6 @@ export default function AdminSettingsPage() {
     retry: 1,
   });
 
-  const notificationsListQuery = useQuery({
-    queryKey: [
-      'admin',
-      'settings',
-      'notifications-list',
-      notificationsPage,
-      NOTIFICATIONS_PAGE_SIZE,
-      notificationsUnreadOnly,
-    ],
-    queryFn: () =>
-      notificationsApi.list({
-        page: notificationsPage,
-        limit: NOTIFICATIONS_PAGE_SIZE,
-        unread_only: notificationsUnreadOnly ? true : undefined,
-      }),
-    staleTime: 15_000,
-    retry: 1,
-  });
-
-  const invalidateNotificationQueries = () =>
-    Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: ['admin', 'settings', 'notifications-unread'],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ['admin', 'settings', 'notifications-list'],
-      }),
-    ]);
-
-  const markAllNotificationsReadMutation = useMutation({
-    mutationFn: () => notificationsApi.readAll(),
-    onSuccess: invalidateNotificationQueries,
-  });
-
-  const markOneNotificationReadMutation = useMutation({
-    mutationFn: (id: string) => notificationsApi.readOne(id),
-    onSuccess: invalidateNotificationQueries,
-  });
-
-  const markBatchNotificationsReadMutation = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const settled = await Promise.allSettled(
-        ids.map((id) => notificationsApi.readOne(id)),
-      );
-      const failed = settled.filter((r) => r.status === 'rejected').length;
-      if (failed === ids.length) {
-        throw new Error('batch_all_failed');
-      }
-      return { updated: ids.length - failed, failed };
-    },
-    onSuccess: async () => {
-      setSelectedNotificationIds(new Set());
-      await invalidateNotificationQueries();
-    },
-  });
-
   const auditSummaryQuery = useQuery({
     queryKey: [
       'admin',
@@ -296,48 +223,6 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
-
-  useEffect(() => {
-    setNotificationsPage(1);
-  }, [notificationsUnreadOnly]);
-
-  useEffect(() => {
-    setSelectedNotificationIds(new Set());
-  }, [notificationsPage, notificationsUnreadOnly]);
-
-  const notificationRows = notificationsListQuery.data?.notifications ?? [];
-  const notificationsTotal = notificationsListQuery.data?.total ?? 0;
-  const notificationsTotalPages = Math.max(
-    1,
-    Math.ceil(notificationsTotal / NOTIFICATIONS_PAGE_SIZE) || 1,
-  );
-
-  const unreadIdsOnPage = useMemo(() => {
-    const ids: string[] = [];
-    for (const n of notificationRows) {
-      if (n.isRead) continue;
-      const id = notificationItemId(n);
-      if (id) ids.push(id);
-    }
-    return ids;
-  }, [notificationRows]);
-
-  function toggleNotificationSelected(id: string) {
-    setSelectedNotificationIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  function selectAllUnreadOnPage() {
-    setSelectedNotificationIds(new Set(unreadIdsOnPage));
-  }
-
-  function clearNotificationSelection() {
-    setSelectedNotificationIds(new Set());
-  }
 
   /** شكل الرد الموثَّق في API-3.pdf: total + notifications[] */
   const unreadCount =
@@ -525,262 +410,6 @@ export default function AdminSettingsPage() {
                       تم حفظ الشعار محلياً
                     </div>
                   ) : null}
-                </div>
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              title='الإشعارات'
-              icon={Bell}
-              className='xl:col-span-12'
-            >
-              <div className='space-y-5'>
-                <div className='flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between'>
-                  <div className='flex flex-wrap gap-2'>
-                    <button
-                      type='button'
-                      onClick={() => setNotificationsUnreadOnly(false)}
-                      className={`inline-flex h-[36px] items-center rounded-[8px] px-4 font-cairo text-[12px] font-extrabold transition ${
-                        !notificationsUnreadOnly
-                          ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.22)]'
-                          : 'border border-[#EAECF0] bg-white text-[#344054]'
-                      }`}
-                    >
-                      الكل
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() => setNotificationsUnreadOnly(true)}
-                      className={`inline-flex h-[36px] items-center rounded-[8px] px-4 font-cairo text-[12px] font-extrabold transition ${
-                        notificationsUnreadOnly
-                          ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.22)]'
-                          : 'border border-[#EAECF0] bg-white text-[#344054]'
-                      }`}
-                    >
-                      غير المقروء فقط
-                    </button>
-                  </div>
-                  <div className='flex flex-wrap gap-2'>
-                    <button
-                      type='button'
-                      disabled={selectedNotificationIds.size === 0}
-                      onClick={clearNotificationSelection}
-                      className='inline-flex h-[36px] items-center justify-center rounded-[8px] border border-[#D0D5DD] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-50'
-                    >
-                      إلغاء التحديد
-                    </button>
-
-                    <button
-                      type='button'
-                      disabled={markAllNotificationsReadMutation.isPending}
-                      onClick={() => markAllNotificationsReadMutation.mutate()}
-                      className='inline-flex h-[36px] shrink-0 items-center justify-center rounded-[8px] border border-primary bg-white px-4 font-cairo text-[12px] font-extrabold text-primary disabled:cursor-not-allowed disabled:opacity-60'
-                    >
-                      {markAllNotificationsReadMutation.isPending ? (
-                        <Loader2
-                          className='w-4 h-4 animate-spin'
-                          aria-hidden
-                        />
-                      ) : null}
-                      تعليم الكل كمقروء
-                    </button>
-                  </div>
-                </div>
-
-                {markBatchNotificationsReadMutation.isError ? (
-                  <p className='text-right font-cairo text-[11px] font-semibold text-red-600'>
-                    تعذر تعليم المجموعة المحددة بالكامل. تحقق من الشبكة أو حاول
-                    مجدداً.
-                  </p>
-                ) : null}
-                {markBatchNotificationsReadMutation.isSuccess ? (
-                  <p className='text-right font-cairo text-[11px] font-semibold text-[#16A34A]'>
-                    تم تحديث{' '}
-                    {markBatchNotificationsReadMutation.data?.updated ?? '—'}{' '}
-                    إشعاراً
-                    {(markBatchNotificationsReadMutation.data?.failed ?? 0) > 0
-                      ? ` (تعذر تحديث ${markBatchNotificationsReadMutation.data?.failed})`
-                      : ''}
-                    .
-                  </p>
-                ) : null}
-                {markAllNotificationsReadMutation.isError ? (
-                  <p className='text-right font-cairo text-[11px] font-semibold text-red-600'>
-                    تعذر تعليم الكل. تحقق من الجلسة أو حاول لاحقاً.
-                  </p>
-                ) : null}
-
-                <div className='rounded-[12px] border border-[#EEF2F6] bg-[#F9FAFB]'>
-                  {notificationsListQuery.isLoading ? (
-                    <div className='flex items-center justify-center gap-2 px-4 py-16 font-cairo text-[13px] font-semibold text-[#667085]'>
-                      <Loader2
-                        className='w-5 h-5 animate-spin text-primary'
-                        aria-hidden
-                      />
-                      جارِ تحميل الإشعارات...
-                    </div>
-                  ) : notificationsListQuery.isError ? (
-                    <div className='px-4 py-12 text-center font-cairo text-[13px] font-semibold text-red-700'>
-                      تعذر تحميل القائمة.
-                    </div>
-                  ) : notificationRows.length === 0 ? (
-                    <div className='px-4 py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-                      لا توجد إشعارات في هذا العرض.
-                    </div>
-                  ) : (
-                    <ul className='divide-y divide-[#EEF2F6]'>
-                      {notificationRows.map((item, index) => {
-                        const nid = notificationItemId(item);
-                        const unread = !item.isRead;
-                        const selected =
-                          nid != null && selectedNotificationIds.has(nid);
-                        const rowPending =
-                          markOneNotificationReadMutation.isPending &&
-                          markOneNotificationReadMutation.variables === nid;
-                        return (
-                          <li
-                            key={
-                              nid ??
-                              `notification-${notificationsPage}-${index}`
-                            }
-                            className={`flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 ${
-                              unread ? 'bg-white' : 'bg-[#FAFAFA]'
-                            }`}
-                          >
-                            <div className='flex flex-1 gap-3 min-w-0'>
-                              {unread && nid ? (
-                                <input
-                                  type='checkbox'
-                                  className='mt-1 h-4 w-4 shrink-0 rounded border-[#D0D5DD] text-primary focus:ring-primary'
-                                  checked={selected}
-                                  onChange={() =>
-                                    toggleNotificationSelected(nid)
-                                  }
-                                  aria-label='تحديد الإشعار'
-                                />
-                              ) : (
-                                <span className='mt-1 w-4 shrink-0' />
-                              )}
-                              <div className='flex-1 min-w-0 text-right'>
-                                <div className='flex flex-wrap gap-2 justify-end items-center'>
-                                  <span
-                                    className={`inline-flex rounded-full px-2.5 py-0.5 font-cairo text-[10px] font-extrabold ${
-                                      unread
-                                        ? 'bg-[#E6F4F3] text-primary'
-                                        : 'bg-[#E5E7EB] text-[#4B5563]'
-                                    }`}
-                                  >
-                                    {unread ? 'غير مقروء' : 'مقروء'}
-                                  </span>
-                                </div>
-                                <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                                  {item.title?.trim() || '—'}
-                                </div>
-                                {item.body ? (
-                                  <p className='mt-1 line-clamp-3 font-cairo text-[12px] font-medium leading-relaxed text-[#667085]'>
-                                    {item.body}
-                                  </p>
-                                ) : null}
-                                {nid ? (
-                                  <p
-                                    className='mt-2 font-mono text-[10px] text-[#98A2B3]'
-                                    dir='ltr'
-                                  >
-                                    {nid}
-                                  </p>
-                                ) : null}
-                              </div>
-                            </div>
-                            <div className='flex justify-end shrink-0 sm:pt-0'>
-                              {unread && nid ? (
-                                <button
-                                  type='button'
-                                  disabled={rowPending}
-                                  onClick={() =>
-                                    markOneNotificationReadMutation.mutate(nid)
-                                  }
-                                  className='inline-flex h-[34px] items-center justify-center gap-1.5 rounded-[8px] border border-[#0F8F8B] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#0F8F8B] transition hover:bg-[#E6F4F3] disabled:cursor-not-allowed disabled:opacity-60'
-                                >
-                                  {rowPending ? (
-                                    <Loader2
-                                      className='h-3.5 w-3.5 animate-spin'
-                                      aria-hidden
-                                    />
-                                  ) : null}
-                                  تعليم كمقروء
-                                </button>
-                              ) : null}
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-
-                {notificationRows.length > 0 ? (
-                  <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-                    <p className='text-right font-cairo text-[12px] font-semibold text-[#667085]'>
-                      الصفحة {notificationsPage} من {notificationsTotalPages} —
-                      إجمالي{' '}
-                      <span
-                        dir='ltr'
-                        className='inline font-mono'
-                      >
-                        {notificationsTotal}
-                      </span>
-                    </p>
-                    <div className='flex gap-2 justify-end'>
-                      <button
-                        type='button'
-                        disabled={
-                          notificationsPage <= 1 ||
-                          notificationsListQuery.isFetching
-                        }
-                        onClick={() =>
-                          setNotificationsPage((p) => Math.max(1, p - 1))
-                        }
-                        className='inline-flex h-[36px] items-center gap-1 rounded-[8px] border border-[#D0D5DD] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-50'
-                      >
-                        <ChevronRight
-                          className='w-4 h-4'
-                          aria-hidden
-                        />
-                        السابق
-                      </button>
-                      <button
-                        type='button'
-                        disabled={
-                          notificationsPage >= notificationsTotalPages ||
-                          notificationsListQuery.isFetching
-                        }
-                        onClick={() =>
-                          setNotificationsPage((p) =>
-                            Math.min(notificationsTotalPages, p + 1),
-                          )
-                        }
-                        className='inline-flex h-[36px] items-center gap-1 rounded-[8px] border border-[#D0D5DD] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-50'
-                      >
-                        التالي
-                        <ChevronLeft
-                          className='w-4 h-4'
-                          aria-hidden
-                        />
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className='rounded-[10px] border border-[#E8EDF2] bg-[#FCFDFE] px-4 py-3 text-right font-cairo text-[11px] font-semibold leading-relaxed text-[#98A2B3]'>
-                  لم يُعرّف مسار خادم واحد لتعليم عدة معرّفات دفعة واحدة؛ زر
-                  «تعليم المحدد» ينفّذ عدة طلبات{' '}
-                  <span
-                    className='font-mono'
-                    dir='ltr'
-                  >
-                    PATCH …/read
-                  </span>{' '}
-                  بشكل متوازٍ للمعرّفات التي تختارها.
                 </div>
               </div>
             </SectionCard>
