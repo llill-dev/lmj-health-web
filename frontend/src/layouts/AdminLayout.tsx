@@ -27,20 +27,20 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
     )?.path ?? 'overview';
 
   return (
-    <div className='overflow-hidden h-screen bg-white scrollbar-hide'>
-      <div className='flex relative mx-auto w-full max-w-screen-2xl h-screen'>
-        <main className='flex flex-col flex-1 h-screen'>
-          <div className='sticky top-0 z-40'>
+    <div className='h-screen overflow-hidden bg-[#F5F7FA] scrollbar-hide'>
+      <div className='relative flex mx-auto h-screen w-full max-w-screen-2xl'>
+        <main className='flex h-screen min-h-0 min-w-0 flex-1 flex-col bg-[#F5F7FA]'>
+          <div className='sticky top-0 z-40 shrink-0 bg-white'>
             <AdminHeader
               title='لوحة التحكم'
               subtitle='مرحباً، المدير'
             />
           </div>
-          <div className='overflow-y-auto flex-1 py-8 bg-[#F9FAFB] scrollbar-hide'>
+          <div className='min-h-0 flex-1 overflow-y-auto bg-[#F5F7FA] py-8 scrollbar-hide'>
             <MotionProvider>
               <AnimatePresence mode='wait'>
                 <PageTransition key={pathname}>
-                  <div className='mx-auto w-full max-w-[1420px] px-12 pb-6'>
+                  <div className='mx-auto min-h-full w-full max-w-[1420px] px-6 pb-6 sm:px-10 lg:px-12'>
                     {children ?? <Outlet />}
                   </div>
                 </PageTransition>
