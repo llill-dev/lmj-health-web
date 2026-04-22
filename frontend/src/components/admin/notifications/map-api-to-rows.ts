@@ -2,6 +2,28 @@ import type { NotificationItem } from '@/lib/notifications/client';
 import { notificationItemId } from '@/lib/notifications/client';
 import type { AdminNotificationKind, AdminNotificationRow } from './types';
 
+/**
+ * يحدد إن كان الإشعار مقروءاً وفقاً لما قد يرسله الخادم (camelCase أو snake_case).
+ * الافتراضي: غير مقروء إن لم تكن هناك إشارة صريحة للقراءة.
+ */
+export function normalizeNotificationRead(item: NotificationItem): boolean {
+  if (item.isRead === true) return true;
+  if (item.isRead === false) return false;
+  if (item.read === true) return true;
+  if (item.read === false) return false;
+  if (item.is_read === true) return true;
+  if (item.is_read === false) return false;
+
+  const at = item.readAt ?? item.read_at;
+  if (typeof at === 'string' && at.trim() !== '') return true;
+
+  const st = String(item.status ?? '').toLowerCase();
+  if (st === 'read' || st === 'seen' || st === 'done') return true;
+  if (st === 'unread' || st === 'new' || st === 'pending') return false;
+
+  return false;
+}
+
 function inferKind(item: NotificationItem): AdminNotificationKind {
   const raw = `${item.type ?? ''} ${item.category ?? ''}`.toLowerCase();
   if (
@@ -82,7 +104,7 @@ export function mapNotificationItemToAdminRow(
   const id = notificationItemId(item);
   if (!id) return null;
 
-  const isRead = item.isRead === true;
+  const isRead = normalizeNotificationRead(item);
   const isUnread = !isRead;
 
   return {

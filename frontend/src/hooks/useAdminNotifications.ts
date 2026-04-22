@@ -7,6 +7,7 @@ import {
 import type { NotificationItem, NotificationsListResponse } from '@/lib/notifications/client';
 import { notificationItemId, notificationsApi } from '@/lib/notifications/client';
 import { ADMIN_NOTIFICATIONS_MOCK } from '@/components/admin/notifications/admin-notifications-mock';
+import { normalizeNotificationRead } from '@/components/admin/notifications/map-api-to-rows';
 
 const PAGE_SIZE = 20;
 
@@ -100,8 +101,8 @@ function applyReadOneToCache(queryClient: QueryClient, id: string) {
       if (!old?.notifications) return old;
       const next = old.notifications.map((n) => {
         if (notificationItemId(n) !== id) return n;
-        if (n.isRead !== true) wasUnread = true;
-        return { ...n, isRead: true };
+        if (!normalizeNotificationRead(n)) wasUnread = true;
+        return { ...n, isRead: true, read: true, is_read: true };
       });
       return { ...old, notifications: next };
     },
@@ -121,7 +122,12 @@ function applyReadAllToCache(queryClient: QueryClient) {
       if (!old?.notifications) return old;
       return {
         ...old,
-        notifications: old.notifications.map((n) => ({ ...n, isRead: true })),
+        notifications: old.notifications.map((n) => ({
+          ...n,
+          isRead: true,
+          read: true,
+          is_read: true,
+        })),
       };
     },
   );
