@@ -11,7 +11,6 @@ import {
   MessageCircle,
   ScrollText,
   UserCog,
-  UserPen,
   Settings,
   ShieldCheck,
   Stethoscope,
@@ -39,8 +38,6 @@ export type AdminSidebarItemId =
   | 'doctors'
   | 'patients'
   | 'secretaries'
-  | 'data-entry'
-  | 'medical-records'
   | 'medical-content'
   | 'content-review'
   | 'medical-news'
@@ -142,18 +139,6 @@ export const adminSidebarItems: Array<{
     path: 'secretaries',
     label: 'السكرتارية',
     icon: UserCog,
-  },
-  {
-    id: 'data-entry',
-    path: 'data-entry',
-    label: 'مدخل البيانات',
-    icon: UserPen,
-  },
-  {
-    id: 'medical-records',
-    path: 'medical-records',
-    label: 'الأرشيف الطبي',
-    icon: FileText,
   },
   {
     id: 'medical-content',
