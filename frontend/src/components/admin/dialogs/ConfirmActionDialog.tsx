@@ -130,30 +130,30 @@ export default function ConfirmActionDialog({
               }}
               style={{ transformOrigin: 'center' }}
             >
-              <div className='relative px-7 pb-6 pt-5'>
+              <div className='relative px-7 pt-5 pb-6'>
                 <Dialog.Close asChild>
                   <button
                     type='button'
                     className='absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#F2F4F7]'
                     aria-label='إغلاق'
                   >
-                    <X className='h-5 w-5' />
+                    <X className='w-5 h-5' />
                   </button>
                 </Dialog.Close>
 
-                <div className='flex flex-row-reverse items-start gap-4 pr-1'>
+                <div className='flex gap-4 items-start pr-1'>
                   {icon ? (
                     <div
                       className={
                         variant === 'destructive'
-                          ? 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FEF2F2] text-[#DC2626] shadow-[inset_0_0_0_1px_rgba(220,38,38,0.12)]'
-                          : 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F0FDFC] text-[#0F8F8B] shadow-[inset_0_0_0_1px_rgba(15,143,139,0.15)]'
+                          ? 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#FEF2F2] text-[#DC2626] shadow-[inset_0_0_0_1px_rgba(220,38,38,0.12)]'
+                          : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#F0FDFC] text-[#0F8F8B] shadow-[inset_0_0_0_1px_rgba(15,143,139,0.15)]'
                       }
                     >
                       {icon}
                     </div>
                   ) : null}
-                  <div className='min-w-0 flex-1'>
+                  <div className='flex-1 min-w-0'>
                     <Dialog.Title className='text-start font-cairo text-[20px] font-extrabold leading-[28px] text-[#101828]'>
                       {title}
                     </Dialog.Title>
@@ -164,7 +164,7 @@ export default function ConfirmActionDialog({
                   </div>
                 </div>
 
-                <div className='mt-6 flex flex-row-reverse flex-wrap items-center justify-end gap-3'>
+                <div className='flex flex-wrap gap-3 justify-end items-center mt-6'>
                   <Dialog.Close asChild>
                     <button
                       type='button'
