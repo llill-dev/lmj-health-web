@@ -1,7 +1,16 @@
 import { get, patch } from '@/lib/base';
 import type { ApiSuccessEnvelope } from '@/lib/admin/types';
 
-/** يطابق API-3.pdf: GET /notifications */
+/**
+ * عقد REST للإشعارات (المرجع في المشروع: API-3.pdf):
+ *
+ * - GET `/api/notifications` — استعلام مع `page`, `limit`, `unread_only` (اختياري).
+ *   رد ناجح يتضمن عادةً: `total`, `page`, `limit`, `notifications[]`.
+ * - PATCH `/api/notifications/read-all` — تعليم كل الإشعارات كمقروءة.
+ * - PATCH `/api/notifications/:id/read` — تعليم إشعار واحد كمقروء.
+ *
+ * عناصر `notifications[]` تُستخرج كحقول اختيارية إضافية إن أرسلها الخادم (`type`, `createdAt`, …).
+ */
 export type NotificationsListParams = {
   page?: number;
   limit?: number;
@@ -14,6 +23,11 @@ export type NotificationItem = {
   title?: string;
   body?: string;
   isRead?: boolean;
+  /** نوع منطقي للإشعار إن وُجد (نص حر من الخادم) */
+  type?: string;
+  category?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export function notificationItemId(item: NotificationItem): string | undefined {

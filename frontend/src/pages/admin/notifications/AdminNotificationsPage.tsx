@@ -1,52 +1,56 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import AdminNotificationsHeading from '@/components/admin/notifications/AdminNotificationsHeading';
 import AdminNotificationsList from '@/components/admin/notifications/AdminNotificationsList';
 import AdminNotificationsToolbar from '@/components/admin/notifications/AdminNotificationsToolbar';
 import type { NotificationFilterTab } from '@/components/admin/notifications/AdminNotificationsToolbar';
-import { ADMIN_NOTIFICATIONS_MOCK } from '@/components/admin/notifications/admin-notifications-mock';
-import type { AdminNotificationRow } from '@/components/admin/notifications/types';
+import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
+import { useAdminNotificationsPage } from '@/hooks/useAdminNotifications';
 
 export default function AdminNotificationsPage() {
-  const [items, setItems] = useState<AdminNotificationRow[]>(
-    ADMIN_NOTIFICATIONS_MOCK,
-  );
   const [filter, setFilter] = useState<NotificationFilterTab>('all');
+  const [page, setPage] = useState(1);
+  const filterUnread = filter === 'unread';
 
-  const newCount = useMemo(
-    () => items.filter((n) => n.isNew && n.isUnread).length,
-    [items],
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
+  const {
+    listQuery,
+    unreadTotal,
+    allTotal,
+    total,
+    totalPages,
+    markOneReadMutation,
+    markAllReadMutation,
+  } = useAdminNotificationsPage(filterUnread, page);
+
+  const rows = useMemo(
+    () => mapNotificationsToRows(listQuery.data?.notifications),
+    [listQuery.data?.notifications],
   );
 
-  const unreadCount = useMemo(
-    () => items.filter((n) => n.isUnread).length,
-    [items],
-  );
-
-  const visibleItems = useMemo(() => {
-    if (filter === 'unread') return items.filter((n) => n.isUnread);
-    return items;
-  }, [items, filter]);
-
-  const markAllRead = () => {
-    setItems((prev) =>
-      prev.map((n) => ({ ...n, isUnread: false, isNew: false })),
-    );
+  const handleMarkRead = (id: string) => {
+    const row = rows.find((r) => r.id === id);
+    if (!row?.isUnread) return;
+    markOneReadMutation.mutate(id);
   };
 
-  const toggleRead = (id: string) => {
-    setItems((prev) =>
-      prev.map((n) => {
-        if (n.id !== id) return n;
-        const nextUnread = !n.isUnread;
-        return {
-          ...n,
-          isUnread: nextUnread,
-          isNew: nextUnread ? n.isNew : false,
-        };
-      }),
-    );
+  const handleMarkAll = () => {
+    if (unreadTotal === 0) return;
+    markAllReadMutation.mutate();
   };
+
+  const canPrev = page > 1;
+  const canNext = page < totalPages;
+
+  const pendingMarkId =
+    markOneReadMutation.isPending &&
+    typeof markOneReadMutation.variables === 'string'
+      ? markOneReadMutation.variables
+      : null;
 
   return (
     <>
@@ -59,22 +63,70 @@ export default function AdminNotificationsPage() {
         lang='ar'
         className='space-y-6'
       >
-        <AdminNotificationsHeading newCount={newCount} />
+        <AdminNotificationsHeading newCount={unreadTotal} />
 
         <div className='rounded-[14px] border border-[#EAECF0] bg-white p-5 shadow-[0_10px_28px_rgba(0,0,0,0.05)] md:p-6'>
           <AdminNotificationsToolbar
             filter={filter}
             onFilterChange={setFilter}
-            totalCount={items.length}
-            unreadCount={unreadCount}
-            onMarkAllRead={markAllRead}
+            totalCount={allTotal}
+            unreadCount={unreadTotal}
+            onMarkAllRead={handleMarkAll}
+            markAllPending={markAllReadMutation.isPending}
+            listFetching={listQuery.isFetching}
           />
         </div>
 
-        <AdminNotificationsList
-          items={visibleItems}
-          onToggleRead={toggleRead}
-        />
+        {listQuery.isError ? (
+          <div
+            role='alert'
+            className='rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-right font-cairo text-[13px] font-semibold text-red-800'
+          >
+            تعذر تحميل الإشعارات.
+            <button
+              type='button'
+              onClick={() => listQuery.refetch()}
+              className='me-2 underline decoration-red-800 underline-offset-2'
+            >
+              إعادة المحاولة
+            </button>
+          </div>
+        ) : (
+          <>
+            <AdminNotificationsList
+              items={rows}
+              onMarkRead={handleMarkRead}
+              pendingMarkId={pendingMarkId}
+              isLoading={listQuery.isLoading}
+            />
+
+            {totalPages > 1 && !listQuery.isLoading ? (
+              <div className='flex flex-wrap items-center justify-center gap-2'>
+                <button
+                  type='button'
+                  disabled={!canPrev || listQuery.isFetching}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className='inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:cursor-not-allowed disabled:opacity-40'
+                >
+                  <ChevronsRight className='h-4 w-4' aria-hidden />
+                  السابق
+                </button>
+                <span className='font-cairo text-[12px] font-semibold text-[#64748B]'>
+                  صفحة {page} من {totalPages} — إجمالي {total}
+                </span>
+                <button
+                  type='button'
+                  disabled={!canNext || listQuery.isFetching}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className='inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:cursor-not-allowed disabled:opacity-40'
+                >
+                  التالي
+                  <ChevronsLeft className='h-4 w-4' aria-hidden />
+                </button>
+              </div>
+            ) : null}
+          </>
+        )}
       </div>
     </>
   );

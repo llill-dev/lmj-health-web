@@ -45,6 +45,12 @@ export {
 // Admin — Audit Logs
 export { AUDIT_LOGS_KEYS, useAdminAuditLogs } from './useAdminAuditLogs';
 
+// Admin — Notifications (GET/PATCH حسب API-3.pdf)
+export {
+  adminNotificationsQueryKeys,
+  useAdminNotificationsPage,
+} from './useAdminNotifications';
+
 // Admin — Services (Facilities, Service Types, Providers)
 export {
   SERVICES_KEYS,

@@ -1,4 +1,4 @@
-import { CheckCheck, Clock, ListFilter } from 'lucide-react';
+import { CheckCheck, Clock, ListFilter, Loader2 } from 'lucide-react';
 
 export type NotificationFilterTab = 'all' | 'unread';
 
@@ -8,12 +8,16 @@ export default function AdminNotificationsToolbar({
   totalCount,
   unreadCount,
   onMarkAllRead,
+  markAllPending,
+  listFetching,
 }: {
   filter: NotificationFilterTab;
   onFilterChange: (v: NotificationFilterTab) => void;
   totalCount: number;
   unreadCount: number;
   onMarkAllRead: () => void;
+  markAllPending?: boolean;
+  listFetching?: boolean;
 }) {
   return (
     <div
@@ -49,10 +53,18 @@ export default function AdminNotificationsToolbar({
 
       <button
         type='button'
+        disabled={unreadCount === 0 || markAllPending || listFetching}
         onClick={onMarkAllRead}
-        className='inline-flex h-[40px] items-center justify-center gap-2 rounded-[8px] border border-[#EAECF0] bg-white px-4 font-cairo text-[13px] font-extrabold text-[#344054] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition hover:bg-[#F9FAFB]'
+        className='inline-flex h-[40px] items-center justify-center gap-2 rounded-[8px] border border-[#EAECF0] bg-white px-4 font-cairo text-[13px] font-extrabold text-[#344054] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50'
       >
-        <CheckCheck className='h-4 w-4 text-primary' aria-hidden />
+        {markAllPending ? (
+          <Loader2
+            className='h-4 w-4 animate-spin text-primary'
+            aria-hidden
+          />
+        ) : (
+          <CheckCheck className='h-4 w-4 text-primary' aria-hidden />
+        )}
         تحديد الكل كمقروء
       </button>
     </div>

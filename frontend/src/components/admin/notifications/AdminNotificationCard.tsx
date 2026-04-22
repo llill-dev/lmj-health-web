@@ -4,6 +4,7 @@ import {
   Check,
   Clock,
   FileText,
+  Loader2,
   MessageSquare,
   UserPlus,
   XCircle,
@@ -33,13 +34,16 @@ function KindIcon({ kind }: { kind: AdminNotificationRow['kind'] }) {
 
 export default function AdminNotificationCard({
   item,
-  onToggleRead,
+  onMarkRead,
+  markReadPending = false,
 }: {
   item: AdminNotificationRow;
-  onToggleRead: (id: string) => void;
+  onMarkRead: (id: string) => void;
+  markReadPending?: boolean;
 }) {
   const stripe = stripeColor(item.kind);
   const iconWrap = iconBoxClass(item.kind);
+  const canMark = item.isUnread && !markReadPending;
 
   return (
     <article
@@ -48,21 +52,21 @@ export default function AdminNotificationCard({
     >
       <div
         dir='rtl'
-        className='flex gap-4 items-start px-5 py-4 sm:gap-5'
+        className='flex items-start gap-4 px-5 py-4 sm:gap-5'
       >
         <div
-          className={`flex justify-center items-center w-12 h-12 shrink-0 rounded-[10px] ${iconWrap}`}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] ${iconWrap}`}
         >
           <KindIcon kind={item.kind} />
         </div>
 
-        <div className='flex-1 min-w-0 text-right'>
-          <div className='flex flex-wrap gap-2 justify-start items-center'>
+        <div className='min-w-0 flex-1 text-right'>
+          <div className='flex flex-wrap items-center justify-end gap-2'>
             <h2 className='font-cairo text-[16px] font-extrabold leading-[22px] text-[#111827]'>
               {item.title}
             </h2>
             {item.isNew && item.isUnread ? (
-              <span className='inline-flex gap-2 items-center rounded-[6px] bg-primary px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-white'>
+              <span className='inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-white'>
                 جديد
               </span>
             ) : null}
@@ -70,7 +74,7 @@ export default function AdminNotificationCard({
           <p className='mt-1 font-cairo text-[13px] font-medium leading-[20px] text-[#667085]'>
             {item.description}
           </p>
-          <div className='flex gap-1.5 justify-start items-center mt-3 text-[#98A2B3]'>
+          <div className='mt-3 flex items-center justify-end gap-1.5 text-[#98A2B3]'>
             <Clock
               className='h-3.5 w-3.5 shrink-0'
               aria-hidden
@@ -84,11 +88,26 @@ export default function AdminNotificationCard({
         <div className='flex shrink-0 items-start pt-0.5'>
           <button
             type='button'
-            onClick={() => onToggleRead(item.id)}
-            className='w-8 h-8 flex justify-center items-center cursor-pointer rounded bg-[##F8FAFB] border-[1.82px] border-[##E5E7EB]'
-            aria-label={item.isUnread ? 'تعليم كمقروء' : 'تعليم كغير مقروء'}
+            disabled={!item.isUnread || markReadPending}
+            onClick={() => onMarkRead(item.id)}
+            className={
+              item.isUnread
+                ? 'flex h-8 w-8 cursor-pointer items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F8FAFB] transition hover:border-primary/40 hover:bg-[#F2FFFE]'
+                : 'flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] opacity-60'
+            }
+            aria-label='تعليم كمقروء'
           >
-            <Check className='w-4 h-4 font-bold text-primary' />
+            {markReadPending ? (
+              <Loader2
+                className='h-4 w-4 animate-spin text-primary'
+                aria-hidden
+              />
+            ) : (
+              <Check
+                className={`h-4 w-4 ${canMark || !item.isUnread ? 'text-primary' : 'text-[#98A2B3]'}`}
+                aria-hidden
+              />
+            )}
           </button>
         </div>
       </div>
