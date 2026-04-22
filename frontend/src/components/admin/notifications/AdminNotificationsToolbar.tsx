@@ -9,7 +9,7 @@ export default function AdminNotificationsToolbar({
   unreadCount,
   onMarkAllRead,
   markAllPending,
-  listFetching,
+  hasUnreadInView,
 }: {
   filter: NotificationFilterTab;
   onFilterChange: (v: NotificationFilterTab) => void;
@@ -17,7 +17,8 @@ export default function AdminNotificationsToolbar({
   unreadCount: number;
   onMarkAllRead: () => void;
   markAllPending?: boolean;
-  listFetching?: boolean;
+  /** إن ظهرت بطاقات غير مقروءة في الصفحة الحالية رغم اختلاف العدد من الـ API */
+  hasUnreadInView?: boolean;
 }) {
   return (
     <div
@@ -53,7 +54,10 @@ export default function AdminNotificationsToolbar({
 
       <button
         type='button'
-        disabled={unreadCount === 0 || markAllPending || listFetching}
+        disabled={
+          markAllPending ||
+          (unreadCount === 0 && !hasUnreadInView)
+        }
         onClick={onMarkAllRead}
         className='inline-flex h-[40px] items-center justify-center gap-2 rounded-[8px] border border-[#EAECF0] bg-white px-4 font-cairo text-[13px] font-extrabold text-[#344054] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50'
       >

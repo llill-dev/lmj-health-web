@@ -23,6 +23,12 @@ export type NotificationItem = {
   title?: string;
   body?: string;
   isRead?: boolean;
+  /** بدائل شائعة من الـ API إن لم يُرسل `isRead` */
+  read?: boolean;
+  is_read?: boolean;
+  readAt?: string;
+  read_at?: string;
+  status?: string;
   /** نوع منطقي للإشعار إن وُجد (نص حر من الخادم) */
   type?: string;
   category?: string;

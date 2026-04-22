@@ -32,6 +32,11 @@ export default function AdminNotificationsPage() {
     [listQuery.data?.notifications],
   );
 
+  const hasUnreadInView = useMemo(
+    () => rows.some((r) => r.isUnread),
+    [rows],
+  );
+
   const handleMarkRead = (id: string) => {
     const row = rows.find((r) => r.id === id);
     if (!row?.isUnread) return;
@@ -39,7 +44,7 @@ export default function AdminNotificationsPage() {
   };
 
   const handleMarkAll = () => {
-    if (unreadTotal === 0) return;
+    if (unreadTotal === 0 && !hasUnreadInView) return;
     markAllReadMutation.mutate();
   };
 
@@ -73,7 +78,7 @@ export default function AdminNotificationsPage() {
             unreadCount={unreadTotal}
             onMarkAllRead={handleMarkAll}
             markAllPending={markAllReadMutation.isPending}
-            listFetching={listQuery.isFetching}
+            hasUnreadInView={hasUnreadInView}
           />
         </div>
 

@@ -52,16 +52,16 @@ export default function AdminNotificationCard({
     >
       <div
         dir='rtl'
-        className='flex items-start gap-4 px-5 py-4 sm:gap-5'
+        className='flex gap-4 items-start px-5 py-4 sm:gap-5'
       >
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] ${iconWrap}`}
+          className={`flex justify-center items-center w-12 h-12 shrink-0 rounded-[10px] ${iconWrap}`}
         >
           <KindIcon kind={item.kind} />
         </div>
 
-        <div className='min-w-0 flex-1 text-right'>
-          <div className='flex flex-wrap items-center justify-end gap-2'>
+        <div className='flex-1 min-w-0 text-right'>
+          <div className='flex flex-wrap gap-2 justify-start items-center'>
             <h2 className='font-cairo text-[16px] font-extrabold leading-[22px] text-[#111827]'>
               {item.title}
             </h2>
@@ -74,7 +74,7 @@ export default function AdminNotificationCard({
           <p className='mt-1 font-cairo text-[13px] font-medium leading-[20px] text-[#667085]'>
             {item.description}
           </p>
-          <div className='mt-3 flex items-center justify-end gap-1.5 text-[#98A2B3]'>
+          <div className='mt-3 flex items-center justify-start gap-1.5 text-[#98A2B3]'>
             <Clock
               className='h-3.5 w-3.5 shrink-0'
               aria-hidden
@@ -99,7 +99,7 @@ export default function AdminNotificationCard({
           >
             {markReadPending ? (
               <Loader2
-                className='h-4 w-4 animate-spin text-primary'
+                className='w-4 h-4 animate-spin text-primary'
                 aria-hidden
               />
             ) : (
