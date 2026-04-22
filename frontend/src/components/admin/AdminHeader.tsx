@@ -1,6 +1,7 @@
 'use client';
 
 import { Bell, Search, User, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function AdminHeader({
   title = 'لوحة التحكم الرئيسية',
@@ -56,8 +57,8 @@ export default function AdminHeader({
         </button>
 
         {/* Notifications */}
-        <button
-          type='button'
+        <Link
+          to='/admin/notifications'
           className='relative flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors'
           aria-label='الإشعارات'
         >
@@ -65,7 +66,7 @@ export default function AdminHeader({
           <span className='absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white'>
             3
           </span>
-        </button>
+        </Link>
 
         {/* Settings */}
         <button

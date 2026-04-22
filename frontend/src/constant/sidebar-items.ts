@@ -35,6 +35,7 @@ export type SidebarItemId =
 
 export type AdminSidebarItemId =
   | 'overview'
+  | 'notifications'
   | 'doctors'
   | 'patients'
   | 'secretaries'
@@ -207,6 +208,12 @@ export const adminSidebarItems: Array<{
     label: 'طلبات التحقق',
     icon: ShieldCheck,
     badge: 2,
+  },
+  {
+    id: 'notifications',
+    path: 'notifications',
+    label: 'الإشعارات',
+    icon: Bell,
   },
   {
     id: 'complaints',
