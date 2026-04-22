@@ -4,6 +4,7 @@ import {
   Bell,
   CalendarDays,
   ClipboardCheck,
+  ClipboardList,
   FileText,
   LayoutGrid,
   MapPin,
@@ -46,6 +47,7 @@ export type AdminSidebarItemId =
   | 'services'
   | 'service-types'
   | 'medical-file-options'
+  | 'medical-orders'
   | 'appointments'
   | 'system-logs'
   | 'analytics'
@@ -191,6 +193,12 @@ export const adminSidebarItems: Array<{
     icon: ScrollText,
   },
   {
+    id: 'medical-orders',
+    path: 'medical-orders',
+    label: 'كتالوج الطلبات الطبية',
+    icon: ClipboardList,
+  },
+  {
     id: 'appointments',
     path: 'appointments',
     label: 'جميع المواعيد',
@@ -209,12 +217,6 @@ export const adminSidebarItems: Array<{
     icon: BarChart3,
   },
   {
-    id: 'settings',
-    path: 'settings',
-    label: 'الإعدادات',
-    icon: Settings,
-  },
-  {
     id: 'verification-requests',
     path: 'verification-requests',
     label: 'طلبات التحقق',
@@ -227,5 +229,11 @@ export const adminSidebarItems: Array<{
     label: 'الشكاوي',
     icon: MessageSquareWarning,
     badge: 1,
+  },
+  {
+    id: 'settings',
+    path: 'settings',
+    label: 'الإعدادات',
+    icon: Settings,
   },
 ];

@@ -19,6 +19,7 @@ export function useAdminDoctor(doctorId?: string) {
 
   return {
     doctor: data?.doctor,
+    verificationRequest: data?.verificationRequest,
     isLoading,
     error,
     refetch,

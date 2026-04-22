@@ -54,4 +54,10 @@ export const adminEndpoints = {
     publish: (id: string) => `/api/admin/content/${id}/publish`,
     archive: (id: string) => `/api/admin/content/${id}/archive`,
   },
+  medicalOrderCatalog: {
+    list: '/api/admin/medical-order-catalog',
+    create: '/api/admin/medical-order-catalog',
+    update: (id: string) => `/api/admin/medical-order-catalog/${id}`,
+    remove: (id: string) => `/api/admin/medical-order-catalog/${id}`,
+  },
 } as const;

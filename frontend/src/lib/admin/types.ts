@@ -507,10 +507,16 @@ export type AdminDoctorDetailsDoctor = {
     fullName?: string;
     email?: string;
   };
+  /** إن خزّن الباكند معرف طلب التحقق على ملف الطبيب مباشرةً */
+  pendingVerificationRequestId?: string;
 };
 
 export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
   doctor: AdminDoctorDetailsDoctor;
+  /** إن ردّ الباكند طلب التحقق المرتبط (API-3.pdf) نستخدمه مباشرةً دون الاعتماد على القائمة فقط. */
+  verificationRequest?: VerificationRequestSummary | null;
+  /** أحياناً يُرجع الباكند المعرف في جذر الرد بدل تضمين كائن الطلب كاملاً */
+  pendingVerificationRequestId?: string;
 };
 
 export type AdminContentType =
@@ -597,4 +603,34 @@ export type AdminContentDetailsResponse = ApiSuccessEnvelope & {
   content?: AdminContentDetailsItem;
   contentItem?: AdminContentDetailsItem;
   data?: AdminContentDetailsItem;
+};
+
+/** فئات كتالوج الطلبات الطبية (تحاليل / أشعة / إجراءات / تحويلات) */
+export type MedicalOrderCatalogKind =
+  | 'lab'
+  | 'imaging'
+  | 'procedure'
+  | 'referral';
+
+export type MedicalOrderCatalogItem = {
+  _id: string;
+  label: string;
+};
+
+export type AdminMedicalOrderCatalogListParams = {
+  type: MedicalOrderCatalogKind;
+  search?: string;
+};
+
+export type AdminMedicalOrderCatalogListResponse = ApiSuccessEnvelope & {
+  items?: MedicalOrderCatalogItem[];
+};
+
+export type AdminMedicalOrderCatalogUpsertBody = {
+  kind: MedicalOrderCatalogKind;
+  label: string;
+};
+
+export type AdminMedicalOrderCatalogMutationResponse = ApiSuccessEnvelope & {
+  item?: MedicalOrderCatalogItem;
 };
