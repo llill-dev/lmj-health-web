@@ -27,7 +27,11 @@ import {
   useRejectContent,
   useSubmitContentReview,
 } from '@/hooks/useAdminContent';
-import type { AdminContentItem, AdminContentStatus, AdminContentType } from '@/lib/admin/types';
+import type {
+  AdminContentItem,
+  AdminContentStatus,
+  AdminContentType,
+} from '@/lib/admin/types';
 
 type UiContentStatus = 'منشور' | 'قيد المراجعة' | 'مسودة' | 'مؤرشف';
 
@@ -77,11 +81,15 @@ function normalizeContentItems(payload: unknown): AdminContentItem[] {
           const createdBy =
             createdByRaw && typeof createdByRaw === 'object'
               ? {
-                  _id: toDisplayText((createdByRaw as Record<string, unknown>)._id),
+                  _id: toDisplayText(
+                    (createdByRaw as Record<string, unknown>)._id,
+                  ),
                   fullName: toDisplayText(
                     (createdByRaw as Record<string, unknown>).fullName,
                   ),
-                  email: toDisplayText((createdByRaw as Record<string, unknown>).email),
+                  email: toDisplayText(
+                    (createdByRaw as Record<string, unknown>).email,
+                  ),
                 }
               : toDisplayText(createdByRaw);
 
@@ -100,7 +108,9 @@ function normalizeContentItems(payload: unknown): AdminContentItem[] {
                 ? item.viewCount
                 : Number(item.viewCount ?? item.views ?? 0),
             views:
-              typeof item.views === 'number' ? item.views : Number(item.views ?? 0),
+              typeof item.views === 'number'
+                ? item.views
+                : Number(item.views ?? 0),
             createdBy,
             reviewedBy: toDisplayText(item.reviewedBy),
             publishedAt: toDisplayText(item.publishedAt),
@@ -113,13 +123,19 @@ function normalizeContentItems(payload: unknown): AdminContentItem[] {
 
 export default function AdminMedicalContentPage() {
   const [query, setQuery] = useState('');
-  const [activeStatus, setActiveStatus] = useState<'الكل' | UiContentStatus>('الكل');
-  const [activeType, setActiveType] = useState<'الكل' | AdminContentType>('الكل');
+  const [activeStatus, setActiveStatus] = useState<'الكل' | UiContentStatus>(
+    'الكل',
+  );
+  const [activeType, setActiveType] = useState<'الكل' | AdminContentType>(
+    'الكل',
+  );
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewingContentId, setViewingContentId] = useState<string | null>(null);
 
-  const statusToApi = useMemo<Partial<Record<UiContentStatus, AdminContentStatus>>>(
+  const statusToApi = useMemo<
+    Partial<Record<UiContentStatus, AdminContentStatus>>
+  >(
     () => ({
       منشور: 'PUBLISHED',
       'قيد المراجعة': 'IN_REVIEW',
@@ -156,7 +172,9 @@ export default function AdminMedicalContentPage() {
       const title = String(it.title ?? '').toLowerCase();
       const summary = String(it.summary ?? '').toLowerCase();
       const slug = String(it.slug ?? '').toLowerCase();
-      return title.includes(text) || summary.includes(text) || slug.includes(text);
+      return (
+        title.includes(text) || summary.includes(text) || slug.includes(text)
+      );
     });
   }, [items, query]);
 
@@ -169,7 +187,14 @@ export default function AdminMedicalContentPage() {
       (acc, it) => acc + Number(it.viewCount ?? it.views ?? 0),
       0,
     );
-    return { published, draft, inReview, archived, totalViews, total: items.length };
+    return {
+      published,
+      draft,
+      inReview,
+      archived,
+      totalViews,
+      total: items.length,
+    };
   }, [items]);
 
   const statusBadge = (s: AdminContentStatus) => {
@@ -208,7 +233,10 @@ export default function AdminMedicalContentPage() {
   }
 
   async function handleReject(id: string) {
-    const reason = window.prompt('سبب الرفض (إجباري):', 'المحتوى يحتاج تعديلات قبل الموافقة');
+    const reason = window.prompt(
+      'سبب الرفض (إجباري):',
+      'المحتوى يحتاج تعديلات قبل الموافقة',
+    );
     if (!reason || !reason.trim()) return;
     setRejectingId(id);
     try {
@@ -235,7 +263,7 @@ export default function AdminMedicalContentPage() {
         dir='rtl'
         lang='ar'
       >
-        <div className='flex items-start justify-between'>
+        <div className='flex justify-between items-start'>
           <div>
             <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
               إدارة المحتوى الطبي
@@ -250,12 +278,12 @@ export default function AdminMedicalContentPage() {
             className='inline-flex h-[36px] items-center gap-2 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.20)]'
             disabled
           >
-            <Plus className='h-4 w-4' />
+            <Plus className='w-4 h-4' />
             إضافة محتوى جديد
           </button>
         </div>
 
-        <section className='mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5'>
+        <section className='grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 xl:grid-cols-5'>
           {[
             {
               title: 'المشاهدات',
@@ -319,7 +347,7 @@ export default function AdminMedicalContentPage() {
                 key={c.title}
                 className={`h-[92px] rounded-[10px] border-[1.82px] px-[16px] py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${c.tone.border} ${c.tone.bg}`}
               >
-                <div className='flex items-start justify-between'>
+                <div className='flex justify-between items-start'>
                   <div>
                     <div className='font-cairo text-[12px] font-bold text-[#667085]'>
                       {c.title}
@@ -334,7 +362,7 @@ export default function AdminMedicalContentPage() {
                   <div
                     className={`flex h-[40px] w-[40px] items-center justify-center rounded-[6px] ${c.tone.iconBg}`}
                   >
-                    <Icon className='h-5 w-5 text-white' />
+                    <Icon className='w-5 h-5 text-white' />
                   </div>
                 </div>
               </div>
@@ -351,11 +379,11 @@ export default function AdminMedicalContentPage() {
               className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
             />
             <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-              <Search className='h-5 w-5' />
+              <Search className='w-5 h-5' />
             </div>
           </div>
 
-          <div className='mt-5 flex items-center justify-start gap-2'>
+          <div className='flex gap-2 justify-start items-center mt-5'>
             <button
               type='button'
               onClick={() => setActiveType('الكل')}
@@ -365,7 +393,7 @@ export default function AdminMedicalContentPage() {
                   : 'inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]'
               }
             >
-              <BookOpen className='h-4 w-4' />
+              <BookOpen className='w-4 h-4' />
               الكل
             </button>
             <button
@@ -418,7 +446,7 @@ export default function AdminMedicalContentPage() {
             </button>
           </div>
 
-          <div className='mt-4 flex items-center justify-start gap-2'>
+          <div className='flex gap-2 justify-start items-center mt-4'>
             <button
               type='button'
               onClick={() => setActiveStatus('الكل')}
@@ -479,8 +507,8 @@ export default function AdminMedicalContentPage() {
 
         <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden'>
           <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
-            <div className='flex items-center gap-2'>
-              <BookOpen className='h-4 w-4 text-primary' />
+            <div className='flex gap-2 items-center'>
+              <BookOpen className='w-4 h-4 text-primary' />
               <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
                 المحتوى الطبي ({filteredItems.length})
               </div>
@@ -502,122 +530,136 @@ export default function AdminMedicalContentPage() {
               </div>
             ) : (
               filteredItems.map((it) => (
-              <div
-                key={it._id}
-                className='flex items-center justify-between px-6 py-5'
-              >
-                <div className='flex-1 text-right'>
-                  <div className='flex items-center justify-start gap-3'>
-                    <div className='font-cairo text-[14px] font-black text-[#111827]'>
-                      {it.title ?? '—'}
+                <div
+                  key={it._id}
+                  className='flex justify-between items-center px-6 py-5'
+                >
+                  <div className='flex-1 text-right'>
+                    <div className='flex gap-3 justify-start items-center'>
+                      <div className='font-cairo text-[14px] font-black text-[#111827]'>
+                        {it.title ?? '—'}
+                      </div>
+                      <div
+                        className={`inline-flex h-[22px] items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
+                      >
+                        {statusLabel(it.status)}
+                      </div>
                     </div>
-                    <div
-                      className={`inline-flex h-[22px] items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
-                    >
-                      {statusLabel(it.status)}
+
+                    <div className='mt-2 flex flex-wrap items-center justify-start gap-6 font-cairo text-[11px] font-bold text-[#98A2B3]'>
+                      <div className='inline-flex gap-2 items-center'>
+                        <LayoutGrid className='w-4 h-4' />
+                        {typeLabel(it.type)}
+                      </div>
+                      <div className='inline-flex gap-2 items-center'>
+                        <ClipboardCheck className='w-4 h-4' />
+                        الكاتب:{' '}
+                        {typeof it.createdBy === 'object'
+                          ? (it.createdBy?.fullName ?? '—')
+                          : (it.createdBy ?? '—')}
+                      </div>
+                      <div className='inline-flex gap-2 items-center'>
+                        <Eye className='w-4 h-4' />
+                        {Number(it.viewCount ?? it.views ?? 0).toLocaleString(
+                          'ar-SA',
+                        )}{' '}
+                        مشاهدة
+                      </div>
+                      <div className='inline-flex gap-2 items-center'>
+                        <Clock className='w-4 h-4' />
+                        آخر تحديث: {formatDate(it.updatedAt)}
+                      </div>
                     </div>
                   </div>
-
-                  <div className='mt-2 flex flex-wrap items-center justify-start gap-6 font-cairo text-[11px] font-bold text-[#98A2B3]'>
-                    <div className='inline-flex items-center gap-2'>
-                      <LayoutGrid className='h-4 w-4' />
-                      {typeLabel(it.type)}
-                    </div>
-                    <div className='inline-flex items-center gap-2'>
-                      <ClipboardCheck className='h-4 w-4' />
-                      الكاتب: {typeof it.createdBy === 'object' ? (it.createdBy?.fullName ?? '—') : (it.createdBy ?? '—')}
-                    </div>
-                    <div className='inline-flex items-center gap-2'>
-                      <Eye className='h-4 w-4' />
-                      {Number(it.viewCount ?? it.views ?? 0).toLocaleString('ar-SA')} مشاهدة
-                    </div>
-                    <div className='inline-flex items-center gap-2'>
-                      <Clock className='h-4 w-4' />
-                      آخر تحديث: {formatDate(it.updatedAt)}
-                    </div>
-                  </div>
-                </div>
-                <div className='flex items-center gap-3'>
-                  {it.status === 'DRAFT' ? (
-                    <button
-                      type='button'
-                      disabled={actionBusy}
-                      onClick={() => submitReviewMutation.mutate(it._id)}
-                      className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] disabled:opacity-50'
-                      aria-label='إرسال للمراجعة'
-                    >
-                      <ClipboardCheck className='h-4 w-4' />
-                      <span className='font-cairo text-[11px] font-extrabold'>إرسال للمراجعة</span>
-                    </button>
-                  ) : null}
-
-                  {it.status === 'IN_REVIEW' ? (
-                    <>
+                  <div className='flex gap-3 items-center'>
+                    {it.status === 'DRAFT' ? (
                       <button
                         type='button'
                         disabled={actionBusy}
-                        onClick={() => approveMutation.mutate(it._id)}
-                        className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50'
-                        aria-label='موافقة'
+                        onClick={() => submitReviewMutation.mutate(it._id)}
+                        className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] disabled:opacity-50'
+                        aria-label='إرسال للمراجعة'
                       >
-                        <Check className='h-4 w-4' />
-                        <span className='font-cairo text-[11px] font-extrabold'>موافقة</span>
-                      </button>
-                      <button
-                        type='button'
-                        disabled={actionBusy}
-                        onClick={() => handleReject(it._id)}
-                        className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] px-3 text-[#EF4444] disabled:opacity-50'
-                        aria-label='رفض'
-                      >
-                        <X className='h-4 w-4' />
+                        <ClipboardCheck className='w-4 h-4' />
                         <span className='font-cairo text-[11px] font-extrabold'>
-                          {rejectingId === it._id ? '...' : 'رفض'}
+                          إرسال للمراجعة
                         </span>
                       </button>
-                    </>
-                  ) : null}
+                    ) : null}
 
-                  {it.status === 'PUBLISHED' ? (
+                    {it.status === 'IN_REVIEW' ? (
+                      <>
+                        <button
+                          type='button'
+                          disabled={actionBusy}
+                          onClick={() => approveMutation.mutate(it._id)}
+                          className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50'
+                          aria-label='موافقة'
+                        >
+                          <Check className='w-4 h-4' />
+                          <span className='font-cairo text-[11px] font-extrabold'>
+                            موافقة
+                          </span>
+                        </button>
+                        <button
+                          type='button'
+                          disabled={actionBusy}
+                          onClick={() => handleReject(it._id)}
+                          className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] px-3 text-[#EF4444] disabled:opacity-50'
+                          aria-label='رفض'
+                        >
+                          <X className='w-4 h-4' />
+                          <span className='font-cairo text-[11px] font-extrabold'>
+                            {rejectingId === it._id ? '...' : 'رفض'}
+                          </span>
+                        </button>
+                      </>
+                    ) : null}
+
+                    {it.status === 'PUBLISHED' ? (
+                      <button
+                        type='button'
+                        disabled={actionBusy}
+                        onClick={() => archiveMutation.mutate(it._id)}
+                        className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] px-3 text-[#1D4ED8] disabled:opacity-50'
+                        aria-label='أرشفة'
+                      >
+                        <Archive className='w-4 h-4' />
+                        <span className='font-cairo text-[11px] font-extrabold'>
+                          أرشفة
+                        </span>
+                      </button>
+                    ) : null}
+
+                    {it.status === 'IN_REVIEW' ? (
+                      <button
+                        type='button'
+                        disabled={actionBusy}
+                        onClick={() => publishMutation.mutate(it._id)}
+                        className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] px-3 text-[#0891B2] disabled:opacity-50'
+                        aria-label='نشر'
+                      >
+                        <ShieldCheck className='w-4 h-4' />
+                        <span className='font-cairo text-[11px] font-extrabold'>
+                          نشر
+                        </span>
+                      </button>
+                    ) : null}
+
                     <button
                       type='button'
-                      disabled={actionBusy}
-                      onClick={() => archiveMutation.mutate(it._id)}
-                      className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] px-3 text-[#1D4ED8] disabled:opacity-50'
-                      aria-label='أرشفة'
+                      onClick={() => {
+                        setViewingContentId(it._id);
+                        setViewOpen(true);
+                      }}
+                      className='flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB]'
+                      aria-label='عرض'
                     >
-                      <Archive className='h-4 w-4' />
-                      <span className='font-cairo text-[11px] font-extrabold'>أرشفة</span>
+                      <Eye className='w-4 h-4' />
                     </button>
-                  ) : null}
-
-                  {it.status === 'IN_REVIEW' ? (
-                    <button
-                      type='button'
-                      disabled={actionBusy}
-                      onClick={() => publishMutation.mutate(it._id)}
-                      className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] px-3 text-[#0891B2] disabled:opacity-50'
-                      aria-label='نشر'
-                    >
-                      <ShieldCheck className='h-4 w-4' />
-                      <span className='font-cairo text-[11px] font-extrabold'>نشر</span>
-                    </button>
-                  ) : null}
-
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setViewingContentId(it._id);
-                      setViewOpen(true);
-                    }}
-                    className='flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB]'
-                    aria-label='عرض'
-                  >
-                    <Eye className='h-4 w-4' />
-                  </button>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
             )}
           </div>
         </section>
