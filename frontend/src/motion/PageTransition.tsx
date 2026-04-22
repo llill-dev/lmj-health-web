@@ -9,7 +9,7 @@ export default function PageTransition({ children }: PropsWithChildren) {
       initial='hidden'
       animate='show'
       exit='exit'
-      style={{ height: '100%' }}
+      className='w-full min-h-0'
     >
       {children}
     </motion.div>
