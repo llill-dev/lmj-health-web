@@ -49,6 +49,7 @@ import AdminVerificationRequestsPage from '@/pages/admin/verification-requests/A
 import AdminVerificationRequestDetailsPage from '@/pages/admin/verification-requests/AdminVerificationRequestDetailsPage';
 import AdminSystemLogsPage from '@/pages/admin/system-logs/AdminSystemLogsPage';
 import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage';
+import AdminNotificationsPage from '@/pages/admin/notifications/AdminNotificationsPage';
 import AdminServicesPage from '@/pages/admin/services/AdminServicesPage';
 import AdminAnalyticsPage from '@/pages/admin/analytics/AdminAnalyticsPage';
 import AdminComplaintsPage from '@/pages/admin/complaints/AdminComplaintsPage';
@@ -136,6 +137,7 @@ export default function App() {
           <Route path='/admin' element={<AdminLayout />}>
             <Route index                         element={<Navigate to='overview' replace />} />
             <Route path='overview'               element={<AdminDashboardPage />} />
+            <Route path='notifications'         element={<AdminNotificationsPage />} />
             <Route path='doctors'                element={<AdminDoctorsPage />} />
             <Route path='doctors/:doctorId'      element={<AdminDoctorDetailsPage />} />
             <Route path='patients'               element={<AdminPatientsPage />} />
