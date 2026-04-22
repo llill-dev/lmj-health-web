@@ -10,6 +10,44 @@ import type { AdminDoctorDetailsDoctor } from '@/lib/admin/types';
 
 type DoctorRow = AdminDoctorDetailsDoctor;
 
+function verificationRequestId(
+  r: { _id?: string; id?: string } | null | undefined,
+): string | undefined {
+  if (!r) return undefined;
+  return r._id ?? r.id;
+}
+
+/**
+ * API-3.pdf: طلب التحقق عند التسجيل يُراجع عبر PATCH …/doctor-verification-requests
+ * بينما الطبيب غير معتمد بعد. نعرض أزرار المراجعة إذا لم يكن الطبيب approved/rejected
+ * صراحةً؛ و`pending` (بأي حالة أحرف) يكفي. إن غاب `approvalStatus` لكن `isApproved`
+ * ليس true نعتبره نفس سياق «بانتظار الموافقة» في القائمة.
+ */
+function doctorNeedsSignupVerificationReview(
+  d: AdminDoctorDetailsDoctor | undefined,
+): boolean {
+  if (!d) return false;
+  const s = d.approvalStatus?.toString().toLowerCase().trim() ?? '';
+  if (s === 'approved' || s === 'rejected') return false;
+  if (s === 'pending') return true;
+  return d.isApproved !== true;
+}
+
+function extractRequestRowDoctorId(row: unknown): string | undefined {
+  if (!row || typeof row !== 'object') return undefined;
+  const r = row as Record<string, unknown>;
+  if (typeof r.doctorId === 'string') return r.doctorId;
+  if (typeof r.doctor_id === 'string') return r.doctor_id;
+  const doc = r.doctor;
+  if (typeof doc === 'string') return doc;
+  if (doc && typeof doc === 'object') {
+    const o = doc as Record<string, unknown>;
+    const id = o._id ?? o.id;
+    if (id != null && id !== '') return String(id);
+  }
+  return undefined;
+}
+
 function formatGender(g?: string) {
   if (!g) return '—';
   const x = g.toLowerCase();
@@ -87,6 +125,7 @@ export default function AdminDoctorDetailsPage() {
   const queryClient = useQueryClient();
   const {
     doctor,
+    verificationRequest: verificationFromDetails,
     isLoading,
     error,
     refetch: refetchDoctor,
@@ -98,7 +137,10 @@ export default function AdminDoctorDetailsPage() {
 
   const displayName = doctor?.user?.fullName ?? doctor?.userId?.fullName ?? '—';
 
-  const { data: vrList, isLoading: vrLoading } = useQuery({
+  const vrQueryEnabled =
+    Boolean(doctorId) && doctorNeedsSignupVerificationReview(doctor);
+
+  const { data: vrList, isFetching: vrFetching } = useQuery({
     queryKey: ['admin-verification-requests', 'pending-for-doctor', doctorId],
     queryFn: () =>
       adminApi.verificationRequests.list({
@@ -106,17 +148,38 @@ export default function AdminDoctorDetailsPage() {
         page: 1,
         limit: 200,
       }),
-    enabled: Boolean(doctorId) && doctor?.approvalStatus === 'pending',
+    enabled: vrQueryEnabled,
     staleTime: 30_000,
   });
 
-  const pendingRequest = useMemo(
-    () =>
-      vrList?.requests?.find(
-        (r) => r.doctor?._id === doctorId && r.status === 'pending',
-      ),
-    [vrList?.requests, doctorId],
-  );
+  const pendingRequest = useMemo(() => {
+    /** طلب لا يزال قابلاً لمراجعة الإدارة (ليس approved/rejected على مستوى الطلب) */
+    const requestStillOpen = (s: string | undefined) => {
+      const x = s?.toString().toLowerCase().trim() ?? '';
+      return x !== 'approved' && x !== 'rejected';
+    };
+    if (
+      verificationFromDetails &&
+      requestStillOpen(verificationFromDetails.status) &&
+      verificationRequestId(verificationFromDetails)
+    ) {
+      return verificationFromDetails;
+    }
+    const raw = vrList?.requests ?? (vrList as { data?: unknown } | null)?.data;
+    const list = Array.isArray(raw) ? raw : [];
+    return list.find((r) => {
+      if (!r || !requestStillOpen((r as { status?: string }).status))
+        return false;
+      const rec = r as {
+        doctor?: { _id?: string };
+        doctorId?: string;
+      };
+      const did = rec.doctor?._id ?? rec.doctorId;
+      return did != null && String(did) === String(doctorId);
+    });
+  }, [verificationFromDetails, vrList, doctorId]);
+
+  const activeVerificationId = verificationRequestId(pendingRequest);
 
   const { lat: clinicLat, lng: clinicLng } = doctor
     ? coordsToLatLng(doctor)
@@ -135,11 +198,11 @@ export default function AdminDoctorDetailsPage() {
       >
         <div className='mx-auto flex w-full max-w-[1100px] flex-col gap-6 sm:gap-8'>
           {isLoading ? (
-            <div className='px-4 py-8 text-sm text-center rounded-xl bg-white/5 font-cairo text-slate-400'>
+            <div className='rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-10 text-center font-cairo text-sm font-semibold text-[#667085] shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
               جاري تحميل بيانات الطبيب...
             </div>
           ) : error ? (
-            <div className='px-4 py-8 text-sm text-center text-red-400 rounded-xl bg-white/5 font-cairo'>
+            <div className='rounded-[10px] border border-red-200 bg-red-50 px-4 py-8 text-center font-cairo text-sm font-semibold text-red-800'>
               فشل تحميل بيانات الطبيب
             </div>
           ) : doctor ? (
@@ -162,7 +225,7 @@ export default function AdminDoctorDetailsPage() {
                         </div>
                       )}
                     </div>
-                    <div className='flex min-w-0 flex-1 flex-col gap-5 sm:flex-row sm:gap-6 md:gap-8'>
+                    <div className='flex flex-col flex-1 gap-5 min-w-0 sm:flex-row sm:gap-6 md:gap-8'>
                       <div className='flex flex-col flex-1 gap-4 min-w-0'>
                         <FieldBlock
                           label='الاسم'
@@ -234,28 +297,34 @@ export default function AdminDoctorDetailsPage() {
                   </div>
                 </div>
               </section>
-
-              {doctor.approvalStatus === 'pending' ? (
+              {doctorNeedsSignupVerificationReview(doctor) ? (
                 <div className='flex flex-col gap-3 items-center pt-2 pb-6'>
-                  {vrLoading ? (
-                    <p className='text-center font-cairo text-[13px] font-semibold text-slate-500'>
-                      جاري تحميل طلب التحقق المرتبط...
-                    </p>
-                  ) : pendingRequest?._id ? (
-                    <div className='flex flex-col gap-3 w-full max-w-2xl sm:flex-row sm:justify-center sm:gap-4'>
+                  {activeVerificationId ? (
+                    <div className='flex flex-col gap-3 justify-center items-stretch w-full max-w-2xl sm:flex-row sm:items-center sm:justify-center sm:gap-4'>
                       <button
                         type='button'
                         onClick={() => {
                           setActionDialogMode('approve');
                           setActionDialogOpen(true);
                         }}
-                        className='inline-flex h-[52px] min-w-[140px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#00C853] px-6 font-cairo text-[15px] font-extrabold text-white shadow-[0_8px_24px_rgba(0,200,83,0.35)] transition hover:brightness-110'
+                        className='inline-flex h-12 min-w-[148px] flex-1 items-center justify-center rounded-lg bg-[#00C853] px-8 font-cairo text-[15px] font-extrabold text-white transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00C853]'
                       >
-                        <CheckCircle2
-                          className='w-6 h-6 shrink-0'
-                          strokeWidth={2.25}
-                        />
-                        قبول
+                        <span
+                          dir='ltr'
+                          className='inline-flex gap-2 justify-center items-center'
+                        >
+                          <CheckCircle2
+                            className='w-6 h-6 text-white shrink-0'
+                            strokeWidth={2.25}
+                            aria-hidden
+                          />
+                          <span
+                            dir='rtl'
+                            className='leading-none'
+                          >
+                            قبول
+                          </span>
+                        </span>
                       </button>
                       <button
                         type='button'
@@ -263,17 +332,32 @@ export default function AdminDoctorDetailsPage() {
                           setActionDialogMode('reject');
                           setActionDialogOpen(true);
                         }}
-                        className='inline-flex h-[52px] min-w-[140px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF1744] px-6 font-cairo text-[15px] font-extrabold text-white shadow-[0_8px_24px_rgba(255,23,68,0.35)] transition hover:brightness-110'
+                        className='inline-flex h-12 min-w-[148px] flex-1 items-center justify-center rounded-lg bg-[#F44336] px-8 font-cairo text-[15px] font-extrabold text-white transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F44336]'
                       >
-                        <Ban
-                          className='w-6 h-6 shrink-0'
-                          strokeWidth={2.25}
-                        />
-                        رفض
+                        <span
+                          dir='ltr'
+                          className='inline-flex gap-2 justify-center items-center'
+                        >
+                          <Ban
+                            className='w-6 h-6 text-white shrink-0'
+                            strokeWidth={2.25}
+                            aria-hidden
+                          />
+                          <span
+                            dir='rtl'
+                            className='leading-none'
+                          >
+                            رفض
+                          </span>
+                        </span>
                       </button>
                     </div>
+                  ) : vrQueryEnabled && vrFetching ? (
+                    <p className='text-center font-cairo text-[13px] font-semibold text-[#667085]'>
+                      جاري تحميل طلب التحقق المرتبط...
+                    </p>
                   ) : (
-                    <p className='max-w-md text-center font-cairo text-[13px] font-semibold text-slate-500'>
+                    <p className='max-w-md text-center font-cairo text-[13px] font-semibold text-[#667085]'>
                       لا يوجد طلب تحقق معلّق مرتبط بهذا الطبيب في القائمة
                       الحالية. يمكنك المراجعة من صفحة طلبات التحقق.
                     </p>
@@ -295,7 +379,7 @@ export default function AdminDoctorDetailsPage() {
                     queryKey: ['admin', 'verification-requests'],
                   });
                 }}
-                requestId={pendingRequest?._id ?? null}
+                requestId={activeVerificationId ?? null}
                 doctorName={displayName}
                 lat={clinicLat}
                 lng={clinicLng}
@@ -303,7 +387,7 @@ export default function AdminDoctorDetailsPage() {
               />
             </>
           ) : (
-            <div className='px-4 py-8 text-sm text-center rounded-xl bg-white/5 font-cairo text-slate-400'>
+            <div className='rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-8 text-center font-cairo text-sm font-semibold text-[#667085] shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
               لا توجد بيانات.
             </div>
           )}

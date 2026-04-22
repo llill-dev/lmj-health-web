@@ -44,6 +44,7 @@ import AdminMedicalNewsPage from '@/pages/admin/medical-news/AdminMedicalNewsPag
 import AdminServiceTypesPage from '@/pages/admin/service-types/AdminServiceTypesPage';
 import AdminAppointmentsPage from '@/pages/admin/appointments/AdminAppointmentsPage';
 import AdminMedicalFileOptionsPage from '@/pages/admin/medical-file-options/AdminMedicalFileOptionsPage';
+import AdminMedicalOrdersPage from '@/pages/admin/medical-orders/AdminMedicalOrdersPage';
 import AdminVerificationRequestsPage from '@/pages/admin/verification-requests/AdminVerificationRequestsPage';
 import AdminVerificationRequestDetailsPage from '@/pages/admin/verification-requests/AdminVerificationRequestDetailsPage';
 import AdminSystemLogsPage from '@/pages/admin/system-logs/AdminSystemLogsPage';
@@ -149,6 +150,7 @@ export default function App() {
             <Route path='service-types'         element={<AdminServiceTypesPage />} />
             <Route path='appointments'          element={<AdminAppointmentsPage />} />
             <Route path='medical-file-options'  element={<AdminMedicalFileOptionsPage />} />
+            <Route path='medical-orders'        element={<AdminMedicalOrdersPage />} />
             <Route path='verification-requests' element={<AdminVerificationRequestsPage />} />
             <Route path='verification-requests/:requestId' element={<AdminVerificationRequestDetailsPage />} />
             <Route path='complaints' element={<AdminComplaintsPage />} />

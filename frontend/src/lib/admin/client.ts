@@ -1,4 +1,4 @@
-import { get, patch, post } from '@/lib/base';
+import { ApiError, del, get, patch, post } from '@/lib/base';
 import { adminEndpoints } from '@/lib/admin/endpoints';
 import type {
   AppointmentCancelResponse,
@@ -25,6 +25,7 @@ import type {
   AuditLogsListResponse,
   VerificationRequestReviewBody,
   VerificationRequestDetailsResponse,
+  VerificationRequestSummary,
   VerificationRequestsListParams,
   VerificationRequestsListResponse,
   AdminComplaintsListParams,
@@ -32,7 +33,52 @@ import type {
   AdminComplaintDetailsResponse,
   ComplaintStatusUpdateBody,
   ComplaintStatusUpdateResponse,
+  ApiSuccessEnvelope,
+  AdminMedicalOrderCatalogListParams,
+  AdminMedicalOrderCatalogListResponse,
+  AdminMedicalOrderCatalogMutationResponse,
+  AdminMedicalOrderCatalogUpsertBody,
+  MedicalOrderCatalogItem,
+  MedicalOrderCatalogKind,
 } from '@/lib/admin/types';
+
+function normalizeMedicalOrderCatalogList(
+  raw: AdminMedicalOrderCatalogListResponse | Record<string, unknown>,
+): MedicalOrderCatalogItem[] {
+  const body = raw as Record<string, unknown>;
+  const candidates = body.items ?? body.catalog ?? body.results ?? body.data;
+  if (!Array.isArray(candidates)) return [];
+  return candidates
+    .map((x) => {
+      const r = x as Record<string, unknown>;
+      const id = r._id ?? r.id;
+      const label = r.label ?? r.name ?? r.title;
+      if (id == null || label == null) return null;
+      return { _id: String(id), label: String(label) };
+    })
+    .filter((x): x is MedicalOrderCatalogItem => x != null);
+}
+
+function verificationRequestsFromListEnvelope(
+  raw: VerificationRequestsListResponse | Record<string, unknown>,
+): VerificationRequestSummary[] {
+  const o = raw as Record<string, unknown>;
+  for (const key of ['requests', 'data', 'items', 'results'] as const) {
+    const v = o[key];
+    if (Array.isArray(v)) return v as VerificationRequestSummary[];
+  }
+  return [];
+}
+
+const DEV_MEDICAL_ORDER_PLACEHOLDERS: Record<
+  MedicalOrderCatalogKind,
+  MedicalOrderCatalogItem[]
+> = {
+  lab: [{ _id: '__dev_lab__', label: 'complete blood count (CBC)' }],
+  imaging: [],
+  procedure: [],
+  referral: [],
+};
 
 export const adminApi = {
   doctors: {
@@ -83,9 +129,12 @@ export const adminApi = {
       return get<AdminPatientsListResponse>(endpoint, { locale: 'ar' });
     },
     getById: (patientId: string) =>
-      get<AdminPatientDetailsResponse>(adminEndpoints.patients.details(patientId), {
-        locale: 'ar',
-      }),
+      get<AdminPatientDetailsResponse>(
+        adminEndpoints.patients.details(patientId),
+        {
+          locale: 'ar',
+        },
+      ),
     activate: (patientId: string) =>
       patch<AdminPatientAccountActionResponse>(
         adminEndpoints.patients.activate(patientId),
@@ -286,6 +335,48 @@ export const adminApi = {
       }),
     archive: (id: string) =>
       post<any>(adminEndpoints.content.archive(id), undefined, {
+        locale: 'ar',
+      }),
+  },
+  medicalOrderCatalog: {
+    list: async (params: AdminMedicalOrderCatalogListParams) => {
+      const qs = new URLSearchParams();
+      qs.set('type', params.type);
+      if (params.search?.trim()) qs.set('search', params.search.trim());
+      const endpoint = `${adminEndpoints.medicalOrderCatalog.list}?${qs.toString()}`;
+      try {
+        const raw = await get<
+          AdminMedicalOrderCatalogListResponse | Record<string, unknown>
+        >(endpoint, { locale: 'ar' });
+        return { items: normalizeMedicalOrderCatalogList(raw) };
+      } catch (e) {
+        if (
+          import.meta.env.DEV &&
+          e instanceof ApiError &&
+          (e.status === 404 || e.status === 501)
+        ) {
+          return { items: DEV_MEDICAL_ORDER_PLACEHOLDERS[params.type] };
+        }
+        throw e;
+      }
+    },
+    create: (body: AdminMedicalOrderCatalogUpsertBody) =>
+      post<AdminMedicalOrderCatalogMutationResponse>(
+        adminEndpoints.medicalOrderCatalog.create,
+        body,
+        { locale: 'ar' },
+      ),
+    update: (
+      id: string,
+      body: Pick<AdminMedicalOrderCatalogUpsertBody, 'label'>,
+    ) =>
+      patch<AdminMedicalOrderCatalogMutationResponse>(
+        adminEndpoints.medicalOrderCatalog.update(id),
+        body,
+        { locale: 'ar' },
+      ),
+    remove: (id: string) =>
+      del<ApiSuccessEnvelope>(adminEndpoints.medicalOrderCatalog.remove(id), {
         locale: 'ar',
       }),
   },
