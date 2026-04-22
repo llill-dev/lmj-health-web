@@ -155,8 +155,8 @@ export default function Sidebar({
                       <span
                         className={
                           isActive
-                            ? 'font-cairo leading-[24px] text-[#4A5565] text-[16px] font-extrabold'
-                            : 'font-cairo leading-[24px] text-[#4A5565] text-[16px] font-bold'
+                            ? 'font-cairo text-[16px] font-extrabold leading-[24px] text-white'
+                            : 'font-cairo text-[16px] font-bold leading-[24px] text-[#4A5565]'
                         }
                       >
                         {item.label}
