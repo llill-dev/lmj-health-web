@@ -1,4 +1,10 @@
-import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+} from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 // ─── Public / Auth pages ──────────────────────────────────────────────────────
@@ -39,7 +45,6 @@ import AdminSecretaryDetailsPage from '@/pages/admin/secretaries/AdminSecretaryD
 import AdminSecretaryAppointmentsPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsPage';
 import AdminSecretaryAppointmentsManagementPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsManagementPage';
 import AdminMedicalContentPage from '@/pages/admin/medical-content/AdminMedicalContentPage';
-import AdminContentReviewPage from '@/pages/admin/content-review/AdminContentReviewPage';
 import AdminMedicalNewsPage from '@/pages/admin/medical-news/AdminMedicalNewsPage';
 import AdminServiceTypesPage from '@/pages/admin/service-types/AdminServiceTypesPage';
 import AdminAppointmentsPage from '@/pages/admin/appointments/AdminAppointmentsPage';
@@ -147,7 +152,15 @@ export default function App() {
             <Route path='secretaries/:secretaryId/appointments'        element={<AdminSecretaryAppointmentsPage />} />
             <Route path='secretaries/:secretaryId/appointments/manage' element={<AdminSecretaryAppointmentsManagementPage />} />
             <Route path='medical-content'       element={<AdminMedicalContentPage />} />
-            <Route path='content-review'        element={<AdminContentReviewPage />} />
+            <Route
+              path='content-review'
+              element={
+                <Navigate
+                  to='/admin/medical-content?queue=review'
+                  replace
+                />
+              }
+            />
             <Route path='medical-news'          element={<AdminMedicalNewsPage />} />
             <Route path='service-types'         element={<AdminServiceTypesPage />} />
             <Route path='appointments'          element={<AdminAppointmentsPage />} />
