@@ -3,7 +3,6 @@ import {
   BookOpen,
   Bell,
   CalendarDays,
-  ClipboardCheck,
   ClipboardList,
   FileText,
   LayoutGrid,
@@ -40,7 +39,6 @@ export type AdminSidebarItemId =
   | 'patients'
   | 'secretaries'
   | 'medical-content'
-  | 'content-review'
   | 'medical-news'
   | 'services'
   | 'service-types'
@@ -146,13 +144,6 @@ export const adminSidebarItems: Array<{
     path: 'medical-content',
     label: 'المحتوى الطبي',
     icon: BookOpen,
-  },
-  {
-    id: 'content-review',
-    path: 'content-review',
-    label: 'مراجعة المحتوى',
-    icon: ClipboardCheck,
-    badge: 5,
   },
   {
     id: 'medical-news',
