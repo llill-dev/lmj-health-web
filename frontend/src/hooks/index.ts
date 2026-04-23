@@ -63,6 +63,7 @@ export {
   useServiceTypesList,
   useCreateServiceType,
   useUpdateServiceType,
+  useMutateServiceType,
   useServiceProvidersList,
   useCreateProvider,
   useUpdateProvider,

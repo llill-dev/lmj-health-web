@@ -175,6 +175,28 @@ export function useUpdateServiceType(id: string) {
   });
 }
 
+/** تحديث نوع خدمة بأي `id` (مثلاً حوار تعديل ديناميكي) */
+export function useMutateServiceType() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: UpdateServiceTypeBody;
+    }) =>
+      put<ServiceTypeResponse>(
+        servicesEndpoints.serviceTypes.update(id),
+        body,
+        { locale: 'ar' },
+      ),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceTypes() });
+    },
+  });
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Service Providers
 // ─────────────────────────────────────────────────────────────────────────────

@@ -119,7 +119,10 @@ export type CreateServiceTypeBody = {
   fields: ServiceTypeField[];
 };
 
-export type UpdateServiceTypeBody = Partial<CreateServiceTypeBody>;
+export type UpdateServiceTypeBody = Partial<CreateServiceTypeBody> & {
+  /** مذكور في API-3 لـ PUT /service-types/:id */
+  isActive?: boolean;
+};
 
 export type ServiceTypeResponse = {
   serviceType: ServiceType;
@@ -134,7 +137,9 @@ export type ProviderStatus = 'active' | 'inactive' | 'draft';
 export type ServiceProvider = {
   _id: string;
   id?: string;
-  serviceType: string | { id: string; slug: string; name: string | { en: string; ar: string } };
+  serviceType:
+    | string
+    | { id: string; slug: string; name: string | { en: string; ar: string } };
   status: ProviderStatus;
   schemaVersionAtWrite?: number;
   data: Record<string, unknown>;
