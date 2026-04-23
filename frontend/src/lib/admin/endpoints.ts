@@ -47,7 +47,9 @@ export const adminEndpoints = {
   },
   content: {
     list: '/api/admin/content',
+    create: '/api/admin/content',
     details: (id: string) => `/api/admin/content/${id}`,
+    update: (id: string) => `/api/admin/content/${id}`,
     submitReview: (id: string) => `/api/admin/content/${id}/submit-review`,
     approve: (id: string) => `/api/admin/content/${id}/approve`,
     reject: (id: string) => `/api/admin/content/${id}/reject`,

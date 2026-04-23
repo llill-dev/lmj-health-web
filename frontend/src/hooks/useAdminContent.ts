@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
-import type { AdminContentListParams } from '@/lib/admin/types';
+import type {
+  AdminContentListParams,
+  CreateAdminContentBody,
+  UpdateAdminContentBody,
+} from '@/lib/admin/types';
 
 const CONTENT_LIST_KEY = ['admin', 'content'];
 const STALE = 30 * 1000;
@@ -67,3 +71,30 @@ export function useArchiveContent() {
   });
 }
 
+export function useCreateAdminContent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateAdminContentBody) => adminApi.content.create(body),
+    onSuccess: () => {
+      invalidateContentQueries(qc);
+      void qc.invalidateQueries({ queryKey: ['admin', 'content', 'count'] });
+    },
+  });
+}
+
+export function useUpdateAdminContent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: UpdateAdminContentBody;
+    }) => adminApi.content.update(id, body),
+    onSuccess: () => {
+      invalidateContentQueries(qc);
+      void qc.invalidateQueries({ queryKey: ['admin', 'content', 'count'] });
+    },
+  });
+}

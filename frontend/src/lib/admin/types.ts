@@ -605,6 +605,31 @@ export type AdminContentDetailsResponse = ApiSuccessEnvelope & {
   data?: AdminContentDetailsItem;
 };
 
+/**
+ * جسم إنشاء محتوى (POST /api/admin/content) — مُطابَق مع API-3 (يُنصح بإرسال contentBlocks).
+ * @see LMJ Health Backend API Reference — «Admin/editor content / POST /admin/content»
+ */
+export type CreateAdminContentBody = {
+  type: AdminContentType;
+  title: string;
+  summary?: string;
+  language: 'ar' | 'en';
+  slug?: string;
+  contentBlocks?: AdminContentBlock[];
+  sources?: Array<{ title?: string; url?: string }>;
+};
+
+export type UpdateAdminContentBody = Partial<CreateAdminContentBody> & {
+  status?: AdminContentStatus;
+};
+
+export type AdminContentMutationResponse = ApiSuccessEnvelope & {
+  item?: AdminContentDetailsItem;
+  content?: AdminContentDetailsItem;
+  contentItem?: AdminContentDetailsItem;
+  data?: AdminContentDetailsItem;
+};
+
 /** فئات كتالوج الطلبات الطبية (تحاليل / أشعة / إجراءات / تحويلات) */
 export type MedicalOrderCatalogKind =
   | 'lab'

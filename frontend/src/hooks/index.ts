@@ -27,7 +27,10 @@ export {
   useRejectContent,
   usePublishContent,
   useArchiveContent,
+  useCreateAdminContent,
+  useUpdateAdminContent,
 } from './useAdminContent';
+export { useAdminContentStatusCounts } from './useAdminContentStatusCounts';
 
 // Admin — Analytics
 export {
