@@ -68,15 +68,13 @@ const panel = {
     opacity: 1,
     visibility: 'visible' as const,
     pointerEvents: 'auto' as const,
-    x: '-50%',
-    y: '-50%',
+    y: 0,
     scale: 1,
     transition: { type: 'spring' as const, stiffness: 400, damping: 34 },
   },
   closed: {
     opacity: 0,
-    x: '-50%',
-    y: 'calc(-50% + 20px)',
+    y: 20,
     scale: 0.97,
     pointerEvents: 'none' as const,
     transition: { duration: 0.2 },
@@ -255,14 +253,20 @@ export default function UpsertServiceTypeDialog({
             style={{ touchAction: 'none' }}
           />
         </Dialog.Overlay>
-        <Dialog.Content forceMount asChild>
+        <Dialog.Content
+          forceMount
+          className='fixed left-1/2 top-1/2 z-[10040] flex max-h-[min(90vh,760px)] w-[min(100vw-1.5rem,640px)] -translate-x-1/2 -translate-y-1/2 flex-col border-0 bg-transparent p-0 shadow-none outline-none'
+          dir='rtl'
+          lang='ar'
+        >
+          <Dialog.Description className='sr-only'>
+            نموذج لإضافة نوع خدمة جديد أو تعديل النوع ومخطط الحقول.
+          </Dialog.Description>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
             variants={panel}
-            className='fixed left-1/2 top-1/2 z-[10040] flex max-h-[min(90vh,760px)] w-[min(100vw-1.5rem,640px)] flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_24px_64px_rgba(0,0,0,0.22)] outline-none'
-            dir='rtl'
-            lang='ar'
+            className='flex h-full max-h-full w-full flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_24px_64px_rgba(0,0,0,0.22)]'
           >
             <div className='flex shrink-0 items-center justify-between border-b border-[#F2F4F7] px-6 py-4'>
               <div className='flex items-center gap-2'>

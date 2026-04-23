@@ -35,16 +35,14 @@ const panelOpen = {
   opacity: 1,
   visibility: 'visible' as const,
   pointerEvents: 'auto' as const,
-  x: '-50%',
-  y: '-50%',
+  y: 0,
   scale: 1,
   transition: { type: 'spring' as const, stiffness: 420, damping: 32 },
 };
 
 const panelClosed = {
   opacity: 0,
-  x: '-50%',
-  y: 'calc(-50% + 16px)',
+  y: 16,
   scale: 0.96,
   pointerEvents: 'none' as const,
   transition: { duration: 0.2, ease: 'easeOut' as const },
@@ -91,15 +89,21 @@ export default function ServiceTypeStatusConfirmDialog({
             style={{ touchAction: 'none' }}
           />
         </Dialog.Overlay>
-        <Dialog.Content forceMount asChild>
+        <Dialog.Content
+          forceMount
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
+          dir='rtl'
+          lang='ar'
+        >
+          <Dialog.Description className='sr-only'>
+            تأكيد تغيير حالة تفعيل نوع الخدمة في النظام.
+          </Dialog.Description>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
             variants={{ open: panelOpen, closed: panelClosed }}
-            className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] rounded-[16px] bg-white p-0 shadow-[0_24px_60px_rgba(0,0,0,0.2)] outline-none'
-            dir='rtl'
-            lang='ar'
-            onOpenAutoFocus={(e) => e.preventDefault()}
+            className='w-full rounded-[16px] bg-white p-0 shadow-[0_24px_60px_rgba(0,0,0,0.2)]'
           >
             <div className='flex items-start justify-between border-b border-[#F2F4F7] px-5 py-4'>
               <div className='flex items-center gap-2'>
