@@ -122,7 +122,7 @@ export default function AdminPatientsPage() {
         dir='rtl'
         lang='ar'
       >
-        <div className='flex items-start justify-between'>
+        <div className='flex justify-between items-start'>
           <div>
             <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
               إدارة المرضى
@@ -137,7 +137,7 @@ export default function AdminPatientsPage() {
           <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
             <div className='flex flex-col gap-3 lg:flex-row lg:items-center'>
               <div className='flex h-[42px] w-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#98A2B3]'>
-                <Filter className='h-4 w-4' />
+                <Filter className='w-4 h-4' />
               </div>
 
               <div className='relative'>
@@ -174,7 +174,7 @@ export default function AdminPatientsPage() {
                       page: 1,
                     }))
                   }
-                  className='h-4 w-4 accent-primary'
+                  className='w-4 h-4 accent-primary'
                 />
                 إظهار المحذوفين
               </label>
@@ -194,11 +194,11 @@ export default function AdminPatientsPage() {
                 }
               />
               <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <Search className='h-5 w-5' />
+                <Search className='w-5 h-5' />
               </div>
             </div>
 
-            <div className='flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end'>
+            <div className='flex flex-col gap-3 items-stretch sm:flex-row sm:items-center sm:justify-end'>
               <button
                 type='button'
                 disabled={!hasActiveFilters}
@@ -242,10 +242,10 @@ export default function AdminPatientsPage() {
                 >
                   <div className='flex'>
                     <div className='flex-1 px-6 py-5'>
-                      <div className='flex items-start justify-between'>
-                        <div className='flex items-start gap-3'>
+                      <div className='flex justify-between items-start'>
+                        <div className='flex gap-3 items-start'>
                           <div className='flex h-[52px] w-[52px] items-center justify-center rounded-[12px] bg-primary text-white'>
-                            <Users className='h-6 w-6' />
+                            <Users className='w-6 h-6' />
                           </div>
 
                           <div className='text-right'>
@@ -258,7 +258,7 @@ export default function AdminPatientsPage() {
                           </div>
                         </div>
 
-                        <div className='flex items-start gap-3'>
+                        <div className='flex gap-3 items-start'>
                           <div
                             className={`inline-flex h-[24px] items-center justify-center rounded-[6px] px-3 font-cairo text-[11px] font-extrabold ${tone.chip}`}
                           >
@@ -267,15 +267,15 @@ export default function AdminPatientsPage() {
                         </div>
                       </div>
 
-                      <div className='flex items-end justify-between'>
+                      <div className='flex justify-between items-end'>
                         <div className='mt-4 rounded-[10px] bg-[#F9FAFB] px-4 py-3'>
-                          <div className='flex flex-col gap-2 items-start justify-start'>
+                          <div className='flex flex-col gap-2 justify-start items-start'>
                             <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                              <Phone className='h-4 w-4 text-primary' />
+                              <Phone className='w-4 h-4 text-primary' />
                               {p.user.phone ?? '—'}
                             </div>
                             <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                              <Mail className='h-4 w-4 text-primary' />
+                              <Mail className='w-4 h-4 text-primary' />
                               {p.user.email ?? '—'}
                             </div>
                           </div>
@@ -292,9 +292,9 @@ export default function AdminPatientsPage() {
                                   },
                                 )
                               }
-                              className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] font-cairo text-[12px] font-extrabold text-[#111827]'
+                              className='flex h-[34px] w-[150px] bg-primary items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] font-cairo text-[12px] font-extrabold text-white'
                             >
-                              <Eye className='h-4 w-4 text-[#667085]' />
+                              <Eye className='w-4 h-4' />
                               عرض التفاصيل
                             </button>
 
@@ -307,7 +307,7 @@ export default function AdminPatientsPage() {
                               }}
                               className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316]'
                             >
-                              <Ban className='h-4 w-4' />
+                              <Ban className='w-4 h-4' />
                               تعليق الحساب
                             </button>
                           </div>
@@ -326,7 +326,7 @@ export default function AdminPatientsPage() {
             الصفحة {filters.page} من {totalPages}
           </div>
 
-          <div className='flex items-center gap-3'>
+          <div className='flex gap-3 items-center'>
             <div className='relative'>
               <select
                 value={filters.limit}
@@ -348,7 +348,7 @@ export default function AdminPatientsPage() {
                   </option>
                 ))}
               </select>
-              <ChevronLeft className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-primary' />
+              <ChevronLeft className='absolute left-3 top-1/2 w-4 h-4 rotate-90 -translate-y-1/2 pointer-events-none text-primary' />
             </div>
 
             <button
