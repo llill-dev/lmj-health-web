@@ -21,6 +21,9 @@ import type {
   AdminContentListParams,
   AdminContentListResponse,
   AdminContentDetailsResponse,
+  CreateAdminContentBody,
+  UpdateAdminContentBody,
+  AdminContentMutationResponse,
   AuditLogsListParams,
   AuditLogsListResponse,
   VerificationRequestReviewBody,
@@ -315,6 +318,16 @@ export const adminApi = {
       get<AdminContentDetailsResponse>(adminEndpoints.content.details(id), {
         locale: 'ar',
       }),
+    create: (body: CreateAdminContentBody) =>
+      post<AdminContentMutationResponse>(adminEndpoints.content.create, body, {
+        locale: 'ar',
+      }),
+    update: (id: string, body: UpdateAdminContentBody) =>
+      patch<AdminContentMutationResponse>(
+        adminEndpoints.content.update(id),
+        body,
+        { locale: 'ar' },
+      ),
     submitReview: (id: string) =>
       post<any>(adminEndpoints.content.submitReview(id), undefined, {
         locale: 'ar',
