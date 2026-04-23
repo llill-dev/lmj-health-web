@@ -4,6 +4,8 @@
 @tailwind utilities;
 
 @layer base {
+  /* Brand primary: one token — Tailwind `text-primary` and `bg-primary` both resolve
+     to `hsl(var(--primary))` (see tailwind.config.js). Change only --primary / --ring here. */
   :root {
     --font-cairo: 'Cairo', system-ui, sans-serif;
     --background: 0 0% 100%;
@@ -70,7 +72,7 @@ html {
 * {
   scrollbar-width: thin;
   scroll-behavior: smooth;
-  scrollbar-color: rgba(15, 143, 139, 0.85) rgba(148, 163, 184, 0.25);
+  scrollbar-color: hsl(var(--primary) / 0.88) rgba(148, 163, 184, 0.25);
 }
 
 *::-webkit-scrollbar {
@@ -84,16 +86,23 @@ html {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(15, 143, 139, 0.85);
+  background: hsl(var(--primary) / 0.88);
   border-radius: 999px;
   border: 2px solid rgba(148, 163, 184, 0.18);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(13, 128, 124, 0.95);
+  background: hsl(var(--primary) / 0.95);
 }
 
 @layer utilities {
+  /* Optional aliases — same as Tailwind `text-primary` / `bg-primary` */
+  .text-site-primary {
+    color: hsl(var(--primary));
+  }
+  .bg-site-primary {
+    background-color: hsl(var(--primary));
+  }
   .font-cairo {
     font-family: 'Cairo', system-ui, sans-serif;
   }
