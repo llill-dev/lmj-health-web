@@ -3,6 +3,8 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Mail,
   Phone,
   Search,
@@ -11,10 +13,12 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useAdminSecretariesList } from '@/hooks/useAdminSecretaries';
+import { useAdminDoctors } from '@/hooks/useAdminDoctors';
 import OffboardDialog from '@/components/admin/dialogs/OffboardDialog';
+import { cn } from '@/lib/utils';
 import type { AdminSecretarySummary } from '@/lib/admin/types';
 
 /* ─── permission label map ──────────────────────────────────── */
@@ -40,11 +44,26 @@ function resolveUserId(s: AdminSecretarySummary): string | null {
   return s.userId ?? s.user?._id ?? null;
 }
 
+/** نافذة أرقام صفحات (تجنّب عرض 50 زرّاً) */
+function buildVisiblePageNumbers(
+  current: number,
+  total: number,
+  max = 7,
+): number[] {
+  if (total <= 0) return [];
+  if (total <= max) return Array.from({ length: total }, (_, i) => i + 1);
+  const half = Math.floor(max / 2);
+  let start = Math.max(1, current - half);
+  const end = Math.min(total, start + max - 1);
+  if (end - start < max - 1) start = Math.max(1, end - max + 1);
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
 function CardSkeleton() {
   return (
     <div className='animate-pulse rounded-[12px] border border-[#EEF2F6] bg-white p-6 shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
-      <div className='flex items-start justify-between'>
-        <div className='flex items-center gap-3'>
+      <div className='flex justify-between items-start'>
+        <div className='flex gap-3 items-center'>
           <div className='h-11 w-11 rounded-[8px] bg-[#EEF2F6]' />
           <div>
             <div className='h-4 w-36 rounded bg-[#EEF2F6]' />
@@ -53,7 +72,7 @@ function CardSkeleton() {
         </div>
         <div className='h-8 w-24 rounded-[8px] bg-[#EEF2F6]' />
       </div>
-      <div className='mt-4 flex gap-4'>
+      <div className='flex gap-4 mt-4'>
         <div className='h-3 w-32 rounded bg-[#EEF2F6]' />
         <div className='h-3 w-40 rounded bg-[#EEF2F6]' />
       </div>
@@ -68,8 +87,9 @@ export default function AdminSecretariesPage() {
 
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch] = useDebounce(searchInput, 380);
+  const [doctorIdFilter, setDoctorIdFilter] = useState<string>('');
   const [page, setPage] = useState(1);
-  const LIMIT = 10;
+  const LIMIT = 20;
 
   /* offboard dialog state */
   const [offboardOpen, setOffboardOpen] = useState(false);
@@ -78,13 +98,36 @@ export default function AdminSecretariesPage() {
     label: string;
   } | null>(null);
 
+  const { doctors: doctorOptions, isLoading: doctorsListLoading } =
+    useAdminDoctors({
+      page: 1,
+      limit: 200,
+      status: 'approved',
+    });
+
   const { data, isLoading, isError, refetch } = useAdminSecretariesList({
     search: debouncedSearch || undefined,
+    doctorId: doctorIdFilter || undefined,
     page,
     limit: LIMIT,
   });
 
-  const totalPages = data ? Math.ceil(data.total / LIMIT) : 1;
+  const totalPages =
+    data && data.total > 0 ? Math.max(1, Math.ceil(data.total / LIMIT)) : 0;
+
+  const paginationRange = useMemo(() => {
+    if (!data || data.total <= 0) return { start: 0, end: 0 };
+    const start = (page - 1) * LIMIT + 1;
+    const end = Math.min(page * LIMIT, data.total);
+    return { start, end };
+  }, [data, page]);
+
+  const visiblePageNumbers = useMemo(
+    () => buildVisiblePageNumbers(page, totalPages, 7),
+    [page, totalPages],
+  );
+
+  const showPaginationBar = !isLoading && !isError && data && data.total > 0;
 
   const openOffboard = useCallback((s: AdminSecretarySummary) => {
     const userId = resolveUserId(s);
@@ -93,7 +136,6 @@ export default function AdminSecretariesPage() {
     setOffboardOpen(true);
   }, []);
 
-  /* reset page on search change */
   const handleSearchChange = (val: string) => {
     setSearchInput(val);
     setPage(1);
@@ -110,7 +152,7 @@ export default function AdminSecretariesPage() {
         lang='ar'
       >
         {/* ── header ── */}
-        <div className='flex items-start justify-between'>
+        <div className='flex justify-between items-start'>
           <div>
             <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
               إدارة السكرتارية
@@ -132,9 +174,9 @@ export default function AdminSecretariesPage() {
           )}
         </div>
 
-        {/* ── search bar ── */}
-        <div className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='relative'>
+        {/* ── فلاتر: بحث + طبيب (مطابقة GET /api/admin/secretaries) ── */}
+        <div className='flex justify-between gap-16  items-center mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
+          <div className='relative flex-1'>
             <input
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
@@ -143,6 +185,33 @@ export default function AdminSecretariesPage() {
             />
             <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
           </div>
+
+          <select
+            id='admin-secretary-doctor-filter'
+            value={doctorIdFilter}
+            disabled={doctorsListLoading}
+            onChange={(e) => {
+              setDoctorIdFilter(e.target.value);
+              setPage(1);
+            }}
+            className='h-[42px] w-36 cursor-pointer rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary disabled:cursor-wait disabled:opacity-60'
+          >
+            <option value=''>كل الأطباء</option>
+            {doctorOptions.map((d) => (
+              <option
+                key={d._id}
+                value={d._id}
+              >
+                {d.user?.fullName ?? d._id}
+                {d.specialization ? ` — ${d.specialization}` : ''}
+              </option>
+            ))}
+          </select>
+          {doctorOptions.length >= 200 ? (
+            <p className='mt-1.5 text-right font-cairo text-[10px] font-semibold text-[#98A2B3]'>
+              عُرضت أول 200 طبيب معتمد. استخدم البحث أعلاه لتضييق السكرتيرين.
+            </p>
+          ) : null}
         </div>
 
         {/* ── list ── */}
@@ -170,7 +239,9 @@ export default function AdminSecretariesPage() {
             <div className='flex flex-col items-center gap-3 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-16 text-center'>
               <Users className='h-10 w-10 text-[#D0D5DD]' />
               <div className='font-cairo text-[14px] font-extrabold text-[#667085]'>
-                {debouncedSearch ? 'لا توجد نتائج مطابقة للبحث' : 'لا يوجد سكرتيرون مسجلون'}
+                {debouncedSearch
+                  ? 'لا توجد نتائج مطابقة للبحث'
+                  : 'لا يوجد سكرتيرون مسجلون'}
               </div>
             </div>
           ) : (
@@ -185,10 +256,10 @@ export default function AdminSecretariesPage() {
                 >
                   <div className='px-6 py-5'>
                     {/* top row */}
-                    <div className='flex items-start justify-between gap-3'>
-                      <div className='flex items-center gap-3'>
+                    <div className='flex gap-3 justify-between items-start'>
+                      <div className='flex gap-3 items-center'>
                         <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm'>
-                          <Users className='h-5 w-5' />
+                          <Users className='w-5 h-5' />
                         </div>
                         <div className='text-right'>
                           <div className='font-cairo text-[16px] font-black leading-[22px] text-[#111827]'>
@@ -203,7 +274,7 @@ export default function AdminSecretariesPage() {
                         </div>
                       </div>
 
-                      <div className='flex items-center gap-2'>
+                      <div className='flex gap-2 items-center'>
                         {userId && (
                           <button
                             type='button'
@@ -225,22 +296,22 @@ export default function AdminSecretariesPage() {
                           title='ملف السكرتير'
                           className='flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary text-white shadow-sm transition hover:bg-primary/90'
                         >
-                          <ChevronLeft className='h-4 w-4' />
+                          <ChevronLeft className='w-4 h-4' />
                         </button>
                       </div>
                     </div>
 
                     {/* contact */}
-                    <div className='mt-4 flex flex-wrap items-center gap-5'>
+                    <div className='flex flex-wrap gap-5 items-center mt-4'>
                       {s.user?.phone && (
                         <div className='flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                          <Phone className='h-4 w-4 text-primary' />
+                          <Phone className='w-4 h-4 text-primary' />
                           {s.user.phone}
                         </div>
                       )}
                       {s.user?.email && (
                         <div className='flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                          <Mail className='h-4 w-4 text-primary' />
+                          <Mail className='w-4 h-4 text-primary' />
                           {s.user.email}
                         </div>
                       )}
@@ -249,9 +320,11 @@ export default function AdminSecretariesPage() {
                     {/* assigned doctor */}
                     {s.doctor && (
                       <div className='mt-4 flex items-center justify-between rounded-[10px] border border-[#BFEDEC] bg-[#E7FBFA] px-5 py-3'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <Stethoscope className='h-4 w-4' />
-                          <span className='font-cairo text-[12px] font-extrabold'>الطبيب المسؤول</span>
+                        <div className='flex gap-2 items-center text-primary'>
+                          <Stethoscope className='w-4 h-4' />
+                          <span className='font-cairo text-[12px] font-extrabold'>
+                            الطبيب المسؤول
+                          </span>
                         </div>
                         <div className='text-right'>
                           <div className='font-cairo text-[12px] font-extrabold text-[#111827]'>
@@ -286,7 +359,7 @@ export default function AdminSecretariesPage() {
                     )}
 
                     {/* action buttons */}
-                    <div className='mt-4 flex items-center justify-between'>
+                    <div className='flex justify-between items-center mt-4'>
                       <div className='flex gap-2'>
                         <button
                           type='button'
@@ -321,40 +394,145 @@ export default function AdminSecretariesPage() {
           )}
         </section>
 
-        {/* ── pagination ── */}
-        {totalPages > 1 && !isLoading && (
-          <div className='mt-6 flex items-center justify-center gap-2'>
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-              className='flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#667085] disabled:opacity-40 hover:border-primary hover:text-primary'
-            >
-              <ChevronRight className='h-4 w-4' />
-            </button>
+        {showPaginationBar ? (
+          <div className='mt-6 rounded-[12px] border border-[#EEF2F6] bg-gradient-to-b from-[#FAFBFC] to-white px-4 py-4 sm:px-5'>
+            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+              <p className='text-right font-cairo text-[12px] font-semibold text-[#667085]'>
+                <span className='text-[#101828]'>
+                  عرض{' '}
+                  <span className='font-extrabold tabular-nums'>
+                    {paginationRange.start.toLocaleString('ar-SA')}–
+                    {paginationRange.end.toLocaleString('ar-SA')}
+                  </span>
+                </span>
+                <span> من </span>
+                <span className='font-extrabold text-[#101828] tabular-nums'>
+                  {data!.total.toLocaleString('ar-SA')}
+                </span>
+                <span> سكرتيراً</span>
+                {totalPages > 1 ? (
+                  <span className='font-extrabold ms-1 text-primary'>
+                    · صفحة {page.toLocaleString('ar-SA')} /{' '}
+                    {totalPages.toLocaleString('ar-SA')}
+                  </span>
+                ) : null}
+              </p>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`flex h-9 min-w-[36px] items-center justify-center rounded-[8px] border font-cairo text-[12px] font-extrabold transition ${
-                  p === page
-                    ? 'border-primary bg-primary text-white'
-                    : 'border-[#E5E7EB] bg-white text-[#667085] hover:border-primary hover:text-primary'
-                }`}
-              >
-                {p.toLocaleString('ar-EG')}
-              </button>
-            ))}
+              {totalPages > 1 ? (
+                <div
+                  className='flex flex-wrap gap-1 justify-center items-center min-w-0 sm:justify-end'
+                  role='navigation'
+                  aria-label='تصفح الصفحات'
+                >
+                  <button
+                    type='button'
+                    disabled={page <= 1}
+                    onClick={() => setPage(1)}
+                    className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
+                    aria-label='الصفحة الأولى'
+                  >
+                    <ChevronsRight className='w-4 h-4' />
+                  </button>
+                  <button
+                    type='button'
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
+                    aria-label='السابق'
+                  >
+                    <ChevronRight className='w-4 h-4' />
+                  </button>
 
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-              className='flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#667085] disabled:opacity-40 hover:border-primary hover:text-primary'
-            >
-              <ChevronLeft className='h-4 w-4' />
-            </button>
+                  <div className='mx-0.5 flex max-w-full flex-wrap items-center justify-center gap-1 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+                    {visiblePageNumbers[0] > 1 ? (
+                      <>
+                        <button
+                          type='button'
+                          onClick={() => setPage(1)}
+                          className='min-w-[2.25rem] rounded-[10px] border border-[#E5E7EB] bg-white px-2 py-1.5 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:border-primary/30 hover:bg-[#F0FDFA]'
+                        >
+                          1
+                        </button>
+                        {visiblePageNumbers[0] > 2 ? (
+                          <span
+                            className='px-0.5 font-cairo text-[12px] font-bold text-[#98A2B3]'
+                            aria-hidden
+                          >
+                            …
+                          </span>
+                        ) : null}
+                      </>
+                    ) : null}
+
+                    {visiblePageNumbers.map((n) => (
+                      <button
+                        key={n}
+                        type='button'
+                        onClick={() => setPage(n)}
+                        className={cn(
+                          'min-w-[2.25rem] rounded-[10px] border px-2.5 py-1.5 font-cairo text-[12px] font-extrabold transition',
+                          n === page
+                            ? 'border-primary bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.25)]'
+                            : 'border-[#E5E7EB] bg-white text-[#344054] hover:border-primary/30 hover:bg-[#F0FDFA]',
+                        )}
+                        aria-label={`الصفحة ${n}`}
+                        aria-current={n === page ? 'page' : undefined}
+                      >
+                        {n.toLocaleString('ar-SA')}
+                      </button>
+                    ))}
+
+                    {visiblePageNumbers[visiblePageNumbers.length - 1] <
+                    totalPages ? (
+                      <>
+                        {visiblePageNumbers[visiblePageNumbers.length - 1] <
+                        totalPages - 1 ? (
+                          <span
+                            className='px-0.5 font-cairo text-[12px] font-bold text-[#98A2B3]'
+                            aria-hidden
+                          >
+                            …
+                          </span>
+                        ) : null}
+                        <button
+                          type='button'
+                          onClick={() => setPage(totalPages)}
+                          className='min-w-[2.25rem] rounded-[10px] border border-[#E5E7EB] bg-white px-2 py-1.5 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:border-primary/30 hover:bg-[#F0FDFA]'
+                          aria-label='الصفحة الأخيرة'
+                        >
+                          {totalPages.toLocaleString('ar-SA')}
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+
+                  <button
+                    type='button'
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
+                    aria-label='التالي'
+                  >
+                    <ChevronLeft className='w-4 h-4' />
+                  </button>
+                  <button
+                    type='button'
+                    disabled={page >= totalPages}
+                    onClick={() => setPage(totalPages)}
+                    className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
+                    aria-label='الصفحة الأخيرة'
+                  >
+                    <ChevronsLeft className='w-4 h-4' />
+                  </button>
+                </div>
+              ) : (
+                <p className='text-right font-cairo text-[11px] font-bold text-[#98A2B3]'>
+                  كل النتائج في صفحة واحدة
+                </p>
+              )}
+            </div>
           </div>
-        )}
+        ) : null}
 
         <div className='h-8' />
       </div>
