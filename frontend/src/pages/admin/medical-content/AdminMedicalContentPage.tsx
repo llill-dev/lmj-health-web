@@ -945,7 +945,7 @@ export default function AdminMedicalContentPage() {
 
                 {totalPages > 1 ? (
                   <div
-                    className='flex min-w-0 flex-wrap items-center justify-center gap-1 sm:justify-end'
+                    className='flex flex-wrap gap-1 justify-center items-center min-w-0 sm:justify-end'
                     role='navigation'
                     aria-label='تصفح الصفحات'
                   >
@@ -956,7 +956,7 @@ export default function AdminMedicalContentPage() {
                       className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
                       aria-label='الصفحة الأولى'
                     >
-                      <ChevronsRight className='h-4 w-4' />
+                      <ChevronsRight className='w-4 h-4' />
                     </button>
                     <button
                       type='button'
@@ -965,7 +965,7 @@ export default function AdminMedicalContentPage() {
                       className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
                       aria-label='الصفحة السابقة'
                     >
-                      <ChevronRight className='h-4 w-4' />
+                      <ChevronRight className='w-4 h-4' />
                     </button>
 
                     <div className='mx-0.5 flex min-w-0 max-w-full flex-wrap items-center justify-center gap-1 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
@@ -1038,7 +1038,7 @@ export default function AdminMedicalContentPage() {
                       className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
                       aria-label='الصفحة التالية'
                     >
-                      <ChevronLeft className='h-4 w-4' />
+                      <ChevronLeft className='w-4 h-4' />
                     </button>
                     <button
                       type='button'
@@ -1047,7 +1047,7 @@ export default function AdminMedicalContentPage() {
                       className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35'
                       aria-label='الصفحة الأخيرة'
                     >
-                      <ChevronsLeft className='h-4 w-4' />
+                      <ChevronsLeft className='w-4 h-4' />
                     </button>
                   </div>
                 ) : (
