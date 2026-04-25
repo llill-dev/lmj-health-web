@@ -1,7 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { normalizeAdminDoctorDetailsResponse } from '@/lib/admin/normalizeAdminDoctorDetailsResponse';
 import type { AdminDoctorDetailsResponse } from '@/lib/admin/types';
 
 export function useAdminDoctor(doctorId?: string) {
@@ -17,9 +19,15 @@ export function useAdminDoctor(doctorId?: string) {
     staleTime: 1000 * 30,
   });
 
+  const n = useMemo(
+    () => (data ? normalizeAdminDoctorDetailsResponse(data) : {}),
+    [data],
+  );
+
   return {
-    doctor: data?.doctor,
-    verificationRequest: data?.verificationRequest,
+    doctor: n.doctor,
+    verificationRequest: n.verificationRequest,
+    pendingVerificationRequestId: n.pendingVerificationRequestId,
     isLoading,
     error,
     refetch,

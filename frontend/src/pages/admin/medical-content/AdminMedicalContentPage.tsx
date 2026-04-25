@@ -797,7 +797,7 @@ export default function AdminMedicalContentPage() {
                       className={`inline-flex h-[22px] items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
                     >
                         {statusLabel(it.status)}
-                      </div>
+                    </div>
                   </div>
 
                   <div className='mt-2 flex flex-wrap items-center justify-start gap-6 font-cairo text-[11px] font-bold text-[#98A2B3]'>
@@ -843,8 +843,8 @@ export default function AdminMedicalContentPage() {
 
                     {it.status === 'IN_REVIEW' ? (
                       <>
-                        <button
-                          type='button'
+                  <button
+                    type='button'
                           disabled={actionBusy}
                           onClick={() => approveMutation.mutate(it._id)}
                           className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50'
@@ -854,9 +854,9 @@ export default function AdminMedicalContentPage() {
                           <span className='font-cairo text-[11px] font-extrabold'>
                             موافقة
                           </span>
-                        </button>
-                        <button
-                          type='button'
+                  </button>
+                  <button
+                    type='button'
                           disabled={actionBusy}
                           onClick={() => {
                             setRejectTarget(it);
@@ -900,7 +900,7 @@ export default function AdminMedicalContentPage() {
                         <span className='font-cairo text-[11px] font-extrabold'>
                           نشر
                         </span>
-                      </button>
+                  </button>
                     ) : null}
 
                   <button
@@ -909,9 +909,9 @@ export default function AdminMedicalContentPage() {
                         setViewingContentId(it._id);
                         setViewOpen(true);
                       }}
-                      className='flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB]'
-                      aria-label='عرض'
-                    >
+                    className='flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB]'
+                    aria-label='عرض'
+                  >
                       <Eye className='w-4 h-4' />
                   </button>
                   </div>
@@ -1056,7 +1056,7 @@ export default function AdminMedicalContentPage() {
                   </div>
                 )}
               </div>
-            </div>
+          </div>
           ) : null}
         </section>
 

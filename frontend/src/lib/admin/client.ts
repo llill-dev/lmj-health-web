@@ -43,6 +43,9 @@ import type {
   AdminMedicalOrderCatalogUpsertBody,
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,
+  AdminDoctorAnalyticsQuery,
+  DoctorActivitySummaryResponse,
+  DoctorDiagnosisAnalyticsResponse,
 } from '@/lib/admin/types';
 
 function normalizeMedicalOrderCatalogList(
@@ -62,13 +65,21 @@ function normalizeMedicalOrderCatalogList(
     .filter((x): x is MedicalOrderCatalogItem => x != null);
 }
 
-function verificationRequestsFromListEnvelope(
-  raw: VerificationRequestsListResponse | Record<string, unknown>,
+export function verificationRequestsFromListEnvelope(
+  raw: VerificationRequestsListResponse | Record<string, unknown> | null | undefined,
 ): VerificationRequestSummary[] {
+  if (!raw || typeof raw !== 'object') return [];
   const o = raw as Record<string, unknown>;
   for (const key of ['requests', 'data', 'items', 'results'] as const) {
     const v = o[key];
     if (Array.isArray(v)) return v as VerificationRequestSummary[];
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      const inner = v as Record<string, unknown>;
+      for (const k of ['requests', 'items', 'data', 'results'] as const) {
+        const a = inner[k];
+        if (Array.isArray(a)) return a as VerificationRequestSummary[];
+      }
+    }
   }
   return [];
 }
@@ -112,6 +123,30 @@ export const adminApi = {
           locale: 'ar',
         },
       ),
+    analyticsDiagnosis: (
+      doctorId: string,
+      params: AdminDoctorAnalyticsQuery = {},
+    ) => {
+      const qs = new URLSearchParams();
+      if (params.range) qs.set('range', params.range);
+      if (params.from) qs.set('from', params.from);
+      if (params.to) qs.set('to', params.to);
+      const base = adminEndpoints.doctors.analyticsDiagnosis(doctorId);
+      const url = qs.toString() ? `${base}?${qs.toString()}` : base;
+      return get<DoctorDiagnosisAnalyticsResponse>(url, { locale: 'ar' });
+    },
+    analyticsSummary: (
+      doctorId: string,
+      params: AdminDoctorAnalyticsQuery = {},
+    ) => {
+      const qs = new URLSearchParams();
+      if (params.range) qs.set('range', params.range);
+      if (params.from) qs.set('from', params.from);
+      if (params.to) qs.set('to', params.to);
+      const base = adminEndpoints.doctors.analyticsSummary(doctorId);
+      const url = qs.toString() ? `${base}?${qs.toString()}` : base;
+      return get<DoctorActivitySummaryResponse>(url, { locale: 'ar' });
+    },
   },
   patients: {
     list: (params: AdminPatientsListParams = {}) => {
@@ -238,6 +273,7 @@ export const adminApi = {
     list: (params: VerificationRequestsListParams = {}) => {
       const qs = new URLSearchParams();
       if (params.status) qs.set('status', params.status);
+      if (params.doctorId) qs.set('doctorId', params.doctorId);
       if (params.page) qs.set('page', String(params.page));
       if (params.limit) qs.set('limit', String(params.limit));
       const endpoint = qs.toString()

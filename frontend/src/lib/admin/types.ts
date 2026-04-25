@@ -310,6 +310,8 @@ export type VerificationRequestSummary = {
 
 export type VerificationRequestsListParams = {
   status?: VerificationRequestStatus;
+  /** فلترة حسب الطبيب عندما يدعمها المسار (API-3 / لوحة الإدارة) */
+  doctorId?: string;
   page?: number;
   limit?: number;
 };
@@ -509,6 +511,9 @@ export type AdminDoctorDetailsDoctor = {
   };
   /** إن خزّن الباكند معرف طلب التحقق على ملف الطبيب مباشرةً */
   pendingVerificationRequestId?: string;
+  /** من قائمة/تفاصيل الأطباء عندما يعيدها الـ API */
+  averageRating?: number;
+  totalReviews?: number;
 };
 
 export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
@@ -517,6 +522,68 @@ export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
   verificationRequest?: VerificationRequestSummary | null;
   /** أحياناً يُرجع الباكند المعرف في جذر الرد بدل تضمين كائن الطلب كاملاً */
   pendingVerificationRequestId?: string;
+};
+
+/** GET /api/admin/doctors/:id/analytics/* — day | week | month | year (API-3) */
+export type AdminDoctorAnalyticsRange = 'day' | 'week' | 'month' | 'year';
+
+export type AdminDoctorAnalyticsQuery = {
+  range?: AdminDoctorAnalyticsRange;
+  from?: string;
+  to?: string;
+};
+
+export type DiagnosisChartItem = { label: string; value: number };
+
+/**
+ * شكل رد GET /api/doctors/analytics/diagnosis (و GET /api/admin/doctors/:id/.../diagnosis) — API-3.
+ */
+export type DoctorDiagnosisAnalyticsResponse = ApiSuccessEnvelope & {
+  range?: string;
+  from?: string;
+  to?: string;
+  series?: Array<{ periodStart: string; count: number }>;
+  total?: number;
+};
+
+/**
+ * شكل رد GET /api/doctors/analytics/summary — API-3.
+ */
+export type DoctorActivitySummaryResponse = ApiSuccessEnvelope & {
+  range?: string;
+  from?: string;
+  to?: string;
+  series?: Array<{
+    periodStart: string;
+    consultations?: number;
+    ordersCreated?: number;
+    accessRequests?: number;
+    medicalRecords?: number;
+    appointmentsCompleted?: number;
+    appointmentsNoShow?: number;
+    newLinkedPatients?: number;
+  }>;
+  totals?: {
+    consultations?: number;
+    ordersCreated?: number;
+    accessRequests?: number;
+    medicalRecords?: number;
+    appointmentsCompleted?: number;
+    appointmentsNoShow?: number;
+    newLinkedPatients?: number;
+  };
+};
+
+/**
+ * عرض لوحة الإدارة: أربعة أرقام رئيسية + متوسط التقييم من ملف الطبيب عند التوافر.
+ * visits = appointmentsCompleted، diagnoses = medicalRecords (حسب الـ API).
+ */
+export type DoctorSummaryStats = {
+  patients: number;
+  visits: number;
+  diagnoses: number;
+  ratings: number;
+  averageRating: number;
 };
 
 export type AdminContentType =
