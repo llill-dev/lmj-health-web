@@ -2,51 +2,25 @@ import { Helmet } from 'react-helmet-async';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban, CheckCircle2 } from 'lucide-react';
+import { Ban, CheckCircle2, MapPin } from 'lucide-react';
 import { useAdminDoctor } from '@/hooks/useAdminDoctor';
-import { adminApi } from '@/lib/admin/client';
+import { adminApi, verificationRequestsFromListEnvelope } from '@/lib/admin/client';
+import {
+  mergeDoctorProfileIntoSummaryStats,
+  parseDiagnosisAnalytics,
+  parseSummaryAnalytics,
+} from '@/lib/admin/doctorAdminAnalytics';
+import type { AdminDoctorDetailsDoctor, AdminDoctorAnalyticsRange } from '@/lib/admin/types';
+import { AdminDoctorAnalyticsPanels } from '@/components/admin/doctor/AdminDoctorAnalyticsPanels';
 import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVerificationRequestDialog';
-import type { AdminDoctorDetailsDoctor } from '@/lib/admin/types';
 
-type DoctorRow = AdminDoctorDetailsDoctor;
 
-function verificationRequestId(
-  r: { _id?: string; id?: string } | null | undefined,
-): string | undefined {
-  if (!r) return undefined;
-  return r._id ?? r.id;
+function requestStillOpen(status: string | undefined): boolean {
+  const x = status?.toString().toLowerCase().trim() ?? '';
+  return x !== 'approved' && x !== 'rejected';
 }
 
-/**
- * API-3.pdf: طلب التحقق عند التسجيل يُراجع عبر PATCH …/doctor-verification-requests
- * بينما الطبيب غير معتمد بعد. نعرض أزرار المراجعة إذا لم يكن الطبيب approved/rejected
- * صراحةً؛ و`pending` (بأي حالة أحرف) يكفي. إن غاب `approvalStatus` لكن `isApproved`
- * ليس true نعتبره نفس سياق «بانتظار الموافقة» في القائمة.
- */
-function doctorNeedsSignupVerificationReview(
-  d: AdminDoctorDetailsDoctor | undefined,
-): boolean {
-  if (!d) return false;
-  const s = d.approvalStatus?.toString().toLowerCase().trim() ?? '';
-  if (s === 'approved' || s === 'rejected') return false;
-  if (s === 'pending') return true;
-  return d.isApproved !== true;
-}
 
-function extractRequestRowDoctorId(row: unknown): string | undefined {
-  if (!row || typeof row !== 'object') return undefined;
-  const r = row as Record<string, unknown>;
-  if (typeof r.doctorId === 'string') return r.doctorId;
-  if (typeof r.doctor_id === 'string') return r.doctor_id;
-  const doc = r.doctor;
-  if (typeof doc === 'string') return doc;
-  if (doc && typeof doc === 'object') {
-    const o = doc as Record<string, unknown>;
-    const id = o._id ?? o.id;
-    if (id != null && id !== '') return String(id);
-  }
-  return undefined;
-}
 
 function formatGender(g?: string) {
   if (!g) return '—';
@@ -81,14 +55,14 @@ function formatDateAr(iso?: string) {
   });
 }
 
-function buildAddress(d: DoctorRow) {
+function buildAddress(d: AdminDoctorDetailsDoctor) {
   const parts = [d.clinicAddress, d.locationCity, d.locationCountry].filter(
     Boolean,
   );
   return parts.length ? parts.join(' - ') : '—';
 }
 
-function coordsToLatLng(d: DoctorRow) {
+function coordsToLatLng(d: AdminDoctorDetailsDoctor) {
   const c = d.clinicLocation?.coordinates;
   if (!c || c.length < 2)
     return {
@@ -126,64 +100,108 @@ export default function AdminDoctorDetailsPage() {
   const {
     doctor,
     verificationRequest: verificationFromDetails,
+    pendingVerificationRequestId: pendingRequestIdFromApi,
     isLoading,
     error,
     refetch: refetchDoctor,
   } = useAdminDoctor(doctorId);
+
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionDialogMode, setActionDialogMode] = useState<
     'approve' | 'reject' | 'map'
   >('approve');
 
-  const displayName = doctor?.user?.fullName ?? doctor?.userId?.fullName ?? '—';
-
-  const vrQueryEnabled =
-    Boolean(doctorId) && doctorNeedsSignupVerificationReview(doctor);
-
-  const { data: vrList, isFetching: vrFetching } = useQuery({
-    queryKey: ['admin-verification-requests', 'pending-for-doctor', doctorId],
+  const { data: vrListData } = useQuery({
+    queryKey: ['admin-verification-requests', 'by-doctor', doctorId],
     queryFn: () =>
       adminApi.verificationRequests.list({
-        status: 'pending',
+        doctorId: String(doctorId),
         page: 1,
-        limit: 200,
+        limit: 100,
       }),
-    enabled: vrQueryEnabled,
+    enabled: Boolean(doctorId) && doctor?.approvalStatus === 'pending',
     staleTime: 30_000,
   });
 
-  const pendingRequest = useMemo(() => {
-    /** طلب لا يزال قابلاً لمراجعة الإدارة (ليس approved/rejected على مستوى الطلب) */
-    const requestStillOpen = (s: string | undefined) => {
-      const x = s?.toString().toLowerCase().trim() ?? '';
-      return x !== 'approved' && x !== 'rejected';
-    };
+  const pendingFromList = useMemo(() => {
+    const list = verificationRequestsFromListEnvelope(
+      vrListData as Record<string, unknown> | null | undefined,
+    );
+    return list.find(
+      (r) =>
+        String(r.doctor?._id ?? '') === String(doctorId) &&
+        requestStillOpen(r.status),
+    );
+  }, [vrListData, doctorId]);
+
+  const verificationRequestId = useMemo(() => {
     if (
-      verificationFromDetails &&
-      requestStillOpen(verificationFromDetails.status) &&
-      verificationRequestId(verificationFromDetails)
+      verificationFromDetails?._id &&
+      requestStillOpen(verificationFromDetails.status)
     ) {
-      return verificationFromDetails;
+      return verificationFromDetails._id;
     }
-    const raw = vrList?.requests ?? (vrList as { data?: unknown } | null)?.data;
-    const list = Array.isArray(raw) ? raw : [];
-    return list.find((r) => {
-      if (!r || !requestStillOpen((r as { status?: string }).status))
-        return false;
-      const rec = r as {
-        doctor?: { _id?: string };
-        doctorId?: string;
-      };
-      const did = rec.doctor?._id ?? rec.doctorId;
-      return did != null && String(did) === String(doctorId);
+    if (typeof pendingRequestIdFromApi === 'string' && pendingRequestIdFromApi) {
+      return pendingRequestIdFromApi;
+    }
+    return pendingFromList?._id;
+  }, [verificationFromDetails, pendingRequestIdFromApi, pendingFromList]);
+
+  const clinicCoords = useMemo(
+    () => (doctor ? coordsToLatLng(doctor) : { lat: undefined, lng: undefined }),
+    [doctor],
+  );
+
+  const handleReviewed = async () => {
+    await refetchDoctor();
+    await queryClient.invalidateQueries({
+      queryKey: ['admin-verification-requests', 'by-doctor', doctorId],
     });
-  }, [verificationFromDetails, vrList, doctorId]);
+    await queryClient.invalidateQueries({
+      queryKey: ['admin', 'doctor', doctorId, 'analytics'],
+    });
+  };
 
-  const activeVerificationId = verificationRequestId(pendingRequest);
+  const analyticsRange: AdminDoctorAnalyticsRange = 'month';
+  const {
+    data: diagnosisRaw,
+    isLoading: diagnosisLoading,
+    isError: diagnosisError,
+  } = useQuery({
+    queryKey: ['admin', 'doctor', doctorId, 'analytics', 'diagnosis', analyticsRange],
+    queryFn: () =>
+      adminApi.doctors.analyticsDiagnosis(String(doctorId), {
+        range: analyticsRange,
+      }),
+    enabled: Boolean(doctorId) && Boolean(doctor),
+    staleTime: 60_000,
+  });
+  const {
+    data: summaryRaw,
+    isLoading: summaryLoading,
+    isError: summaryError,
+  } = useQuery({
+    queryKey: ['admin', 'doctor', doctorId, 'analytics', 'summary', analyticsRange],
+    queryFn: () =>
+      adminApi.doctors.analyticsSummary(String(doctorId), {
+        range: analyticsRange,
+      }),
+    enabled: Boolean(doctorId) && Boolean(doctor),
+    staleTime: 60_000,
+  });
 
-  const { lat: clinicLat, lng: clinicLng } = doctor
-    ? coordsToLatLng(doctor)
-    : { lat: undefined, lng: undefined };
+  const diagnosisItems = useMemo(
+    () => parseDiagnosisAnalytics(diagnosisRaw, analyticsRange),
+    [diagnosisRaw, analyticsRange],
+  );
+  const summaryStats = useMemo(
+    () =>
+      mergeDoctorProfileIntoSummaryStats(
+        parseSummaryAnalytics(summaryRaw),
+        doctor,
+      ),
+    [summaryRaw, doctor],
+  );
 
   return (
     <>
@@ -207,7 +225,6 @@ export default function AdminDoctorDetailsPage() {
             </div>
           ) : doctor ? (
             <>
-              {/* المعلومات الشخصية */}
               <section>
                 <SectionTitle>المعلومات الشخصية</SectionTitle>
                 <div className='rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]'>
@@ -229,7 +246,7 @@ export default function AdminDoctorDetailsPage() {
                       <div className='flex flex-col flex-1 gap-4 min-w-0'>
                         <FieldBlock
                           label='الاسم'
-                          value={displayName}
+                          value={doctor.user?.fullName ?? '—'}
                         />
                         <FieldBlock
                           label='رقم الهاتف'
@@ -259,7 +276,6 @@ export default function AdminDoctorDetailsPage() {
                 </div>
               </section>
 
-              {/* المعلومات المهنية */}
               <section>
                 <SectionTitle>المعلومات المهنية</SectionTitle>
                 <div className='rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]'>
@@ -297,10 +313,20 @@ export default function AdminDoctorDetailsPage() {
                   </div>
                 </div>
               </section>
-              {doctorNeedsSignupVerificationReview(doctor) ? (
-                <div className='flex flex-col gap-3 items-center pt-2 pb-6'>
-                  {activeVerificationId ? (
-                    <div className='flex flex-col gap-3 justify-center items-stretch w-full max-w-2xl sm:flex-row sm:items-center sm:justify-center sm:gap-4'>
+
+              <AdminDoctorAnalyticsPanels
+                diagnosisItems={diagnosisItems}
+                summary={summaryStats}
+                isDiagnosisLoading={diagnosisLoading}
+                isSummaryLoading={summaryLoading}
+                hasDiagnosisError={diagnosisError}
+                hasSummaryError={summaryError}
+              />
+
+              {doctor.approvalStatus === 'pending' ? (
+                <div className='flex flex-col items-center gap-3 pb-6 pt-2'>
+                  {verificationRequestId ? (
+                    <div className='flex w-full max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4'>
                       <button
                         type='button'
                         onClick={() => {
@@ -311,10 +337,10 @@ export default function AdminDoctorDetailsPage() {
                       >
                         <span
                           dir='ltr'
-                          className='inline-flex gap-2 justify-center items-center'
+                          className='inline-flex items-center justify-center gap-2'
                         >
                           <CheckCircle2
-                            className='w-6 h-6 text-white shrink-0'
+                            className='h-6 w-6 shrink-0 text-white'
                             strokeWidth={2.25}
                             aria-hidden
                           />
@@ -336,10 +362,10 @@ export default function AdminDoctorDetailsPage() {
                       >
                         <span
                           dir='ltr'
-                          className='inline-flex gap-2 justify-center items-center'
+                          className='inline-flex items-center justify-center gap-2'
                         >
                           <Ban
-                            className='w-6 h-6 text-white shrink-0'
+                            className='h-6 w-6 shrink-0 text-white'
                             strokeWidth={2.25}
                             aria-hidden
                           />
@@ -351,40 +377,57 @@ export default function AdminDoctorDetailsPage() {
                           </span>
                         </span>
                       </button>
+                      {clinicCoords.lat && clinicCoords.lng ? (
+                        <button
+                          type='button'
+                          onClick={() => {
+                            setActionDialogMode('map');
+                            setActionDialogOpen(true);
+                          }}
+                          className='inline-flex h-12 min-w-[148px] flex-1 items-center justify-center rounded-lg border-2 border-[#0F8F8B] bg-white px-8 font-cairo text-[15px] font-extrabold text-[#0F8F8B] transition hover:bg-[#E6F4F3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F8F8B] sm:max-w-[10rem] sm:flex-none'
+                        >
+                          <span
+                            dir='ltr'
+                            className='inline-flex items-center justify-center gap-2'
+                          >
+                            <MapPin
+                              className='h-6 w-6 shrink-0'
+                              strokeWidth={2.25}
+                              aria-hidden
+                            />
+                            <span
+                              dir='rtl'
+                              className='leading-none'
+                            >
+                              الموقع
+                            </span>
+                          </span>
+                        </button>
+                      ) : null}
                     </div>
-                  ) : vrQueryEnabled && vrFetching ? (
-                    <p className='text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-                      جاري تحميل طلب التحقق المرتبط...
-                    </p>
                   ) : (
                     <p className='max-w-md text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-                      لا يوجد طلب تحقق معلّق مرتبط بهذا الطبيب في القائمة
-                      الحالية. يمكنك المراجعة من صفحة طلبات التحقق.
+                      تعذّر العثور على طلب التحقق المرتبط بهذا الطبيب. جرّب إعادة
+                      التحميل أو راجع طلبات التحقق من لوحة الإدارة.
                     </p>
                   )}
                 </div>
               ) : null}
 
-              <ReviewVerificationRequestDialog
-                open={actionDialogOpen}
-                onOpenChange={(open) => {
-                  setActionDialogOpen(open);
-                }}
-                onReviewed={async () => {
-                  await refetchDoctor();
-                  await queryClient.invalidateQueries({
-                    queryKey: ['admin-verification-requests'],
-                  });
-                  await queryClient.invalidateQueries({
-                    queryKey: ['admin', 'verification-requests'],
-                  });
-                }}
-                requestId={activeVerificationId ?? null}
-                doctorName={displayName}
-                lat={clinicLat}
-                lng={clinicLng}
-                mode={actionDialogMode}
-              />
+              {doctor && verificationRequestId ? (
+                <ReviewVerificationRequestDialog
+                  key={`${verificationRequestId}-${actionDialogMode}`}
+                  open={actionDialogOpen}
+                  onOpenChange={setActionDialogOpen}
+                  requestId={verificationRequestId}
+                  doctorName={doctor.user?.fullName ?? '—'}
+                  lat={clinicCoords.lat}
+                  lng={clinicCoords.lng}
+                  mode={actionDialogMode}
+                  onReviewed={handleReviewed}
+                />
+              ) : null}
+
             </>
           ) : (
             <div className='rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-8 text-center font-cairo text-sm font-semibold text-[#667085] shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>

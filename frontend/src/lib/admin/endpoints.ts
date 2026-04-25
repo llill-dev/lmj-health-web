@@ -2,6 +2,10 @@ export const adminEndpoints = {
   doctors: {
     list: '/api/admin/doctors',
     details: (doctorId: string) => `/api/admin/doctors/${doctorId}`,
+    analyticsDiagnosis: (doctorId: string) =>
+      `/api/admin/doctors/${doctorId}/analytics/diagnosis`,
+    analyticsSummary: (doctorId: string) =>
+      `/api/admin/doctors/${doctorId}/analytics/summary`,
   },
   patients: {
     list: '/api/admin/patients',
