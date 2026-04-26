@@ -12,7 +12,7 @@ export default function MedicalOrderCategoryTabs({
 }: Props) {
   return (
     <div
-      className='flex flex-wrap gap-2'
+      className='flex flex-wrap gap-2 content-center items-center my-6 min-w-0'
       role='tablist'
       aria-label='فئات كتالوج الطلبات الطبية'
     >

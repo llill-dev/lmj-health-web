@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useMemo, useState } from 'react';
 import {
+  AddOrderTypeButton,
   MedicalOrderCatalogCard,
   MedicalOrderCatalogToolbar,
   MedicalOrderCategoryTabs,
@@ -65,24 +66,34 @@ export default function AdminMedicalOrdersPage() {
         <title>كتالوج الطلبات الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir='rtl' lang='ar' className='space-y-6'>
-        <header className='text-right'>
-          <h1 className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
-            كتالوج الطلبات الطبية
-          </h1>
-          <p className='mt-1 font-cairo text-[13px] font-semibold leading-[18px] text-[#667085]'>
-            إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض
-          </p>
+      <div dir='rtl' lang='ar' className='space-y-5'>
+        <header className='flex flex-col gap-4 justify-between items-stretch sm:flex-row sm:items-center'>
+          <div className='min-w-0 text-right'>
+            <h1 className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
+              كتالوج الطلبات الطبية
+            </h1>
+            <p className='mt-1 font-cairo text-[13px] font-semibold leading-[18px] text-[#667085]'>
+              إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض
+            </p>
+          </div>
+          <AddOrderTypeButton
+            onClick={openAdd}
+            disabled={isLoading}
+            className='self-start shrink-0 sm:self-center'
+          />
         </header>
 
-        <MedicalOrderCategoryTabs active={kind} onChange={setKind} />
-
-        <MedicalOrderCatalogToolbar
-          search={search}
-          onSearchChange={setSearch}
-          onAddClick={openAdd}
-          addDisabled={isLoading}
-        />
+        <div className='flex flex-col gap-3 items-stretch md:flex-row md:items-center md:justify-between'>
+          <div className='order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center'>
+            <MedicalOrderCategoryTabs active={kind} onChange={setKind} />
+          </div>
+          <div className='order-2 w-full md:order-1 md:w-auto md:min-w-[16rem] md:max-w-md md:shrink-0 md:flex md:items-center'>
+            <MedicalOrderCatalogToolbar
+              search={search}
+              onSearchChange={setSearch}
+            />
+          </div>
+        </div>
 
         {isError && (
           <div className='rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-right'>
@@ -126,7 +137,7 @@ export default function AdminMedicalOrdersPage() {
           }}
           variant='destructive'
           title='حذف بند من الكتالوج؟'
-          icon={<Trash2 className='h-6 w-6' strokeWidth={2} aria-hidden />}
+          icon={<Trash2 className='w-6 h-6' strokeWidth={2} aria-hidden />}
           description={
             deleteTarget ? (
               <>

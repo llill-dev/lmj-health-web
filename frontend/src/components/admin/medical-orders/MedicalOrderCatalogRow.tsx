@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import type { MedicalOrderCatalogItem } from '@/lib/admin/types';
 
 type Props = {
@@ -26,7 +26,7 @@ export default function MedicalOrderCatalogRow({
           className='flex h-8 w-8 items-center justify-center rounded-[8px] border border-primary/25 bg-[#E7FBFA] text-primary transition-colors hover:bg-primary/10'
           aria-label={`تعديل ${item.label}`}
         >
-          <Pencil className='h-4 w-4' />
+          <Edit className='w-4 h-4' />
         </button>
         <button
           type='button'
@@ -35,7 +35,7 @@ export default function MedicalOrderCatalogRow({
           className='flex h-8 w-8 items-center justify-center rounded-[8px] text-[#EF4444] transition-colors hover:bg-red-50 disabled:pointer-events-none disabled:opacity-40'
           aria-label={`حذف ${item.label}`}
         >
-          <Trash2 className='h-4 w-4' />
+          <Trash2 className='w-4 h-4' />
         </button>
       </div>
     </div>
