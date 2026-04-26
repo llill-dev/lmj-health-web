@@ -45,7 +45,6 @@ import AdminSecretaryDetailsPage from '@/pages/admin/secretaries/AdminSecretaryD
 import AdminSecretaryAppointmentsPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsPage';
 import AdminSecretaryAppointmentsManagementPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsManagementPage';
 import AdminMedicalContentPage from '@/pages/admin/medical-content/AdminMedicalContentPage';
-import AdminMedicalNewsPage from '@/pages/admin/medical-news/AdminMedicalNewsPage';
 import AdminServiceTypesPage from '@/pages/admin/service-types/AdminServiceTypesPage';
 import AdminAppointmentsPage from '@/pages/admin/appointments/AdminAppointmentsPage';
 import AdminMedicalFileOptionsPage from '@/pages/admin/medical-file-options/AdminMedicalFileOptionsPage';
@@ -161,7 +160,15 @@ export default function App() {
                 />
               }
             />
-            <Route path='medical-news'          element={<AdminMedicalNewsPage />} />
+            <Route
+              path='medical-news'
+              element={
+                <Navigate
+                  to='/admin/medical-content?type=NEWS'
+                  replace
+                />
+              }
+            />
             <Route path='service-types'         element={<AdminServiceTypesPage />} />
             <Route path='appointments'          element={<AdminAppointmentsPage />} />
             <Route path='medical-file-options'  element={<AdminMedicalFileOptionsPage />} />
