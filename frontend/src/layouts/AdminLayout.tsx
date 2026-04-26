@@ -31,10 +31,7 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
       <div className='relative flex mx-auto h-screen w-full max-w-screen-2xl'>
         <main className='flex h-screen min-h-0 min-w-0 flex-1 flex-col bg-[#F5F7FA]'>
           <div className='sticky top-0 z-40 shrink-0 bg-white'>
-            <AdminHeader
-              title='لوحة التحكم'
-              subtitle='مرحباً، المدير'
-            />
+            <AdminHeader />
           </div>
           <div className='min-h-0 flex-1 overflow-y-auto bg-[#F5F7FA] py-8 scrollbar-hide'>
             <MotionProvider>

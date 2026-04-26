@@ -332,22 +332,6 @@ export default function AdminDashboardPage() {
               نظرة عامة شاملة على النظام وإدارة النشاط
             </div>
           </div>
-
-          <div className='flex flex-wrap gap-2 items-center'>
-            {['اليوم', 'الأسبوع', 'الشهر', 'السنة'].map((t) => (
-              <button
-                key={t}
-                type='button'
-                className={
-                  t === 'الشهر'
-                    ? 'h-[34px] rounded-[8px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_10px_18px_rgba(15,143,139,0.25)]'
-                    : 'h-[34px] rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'
-                }
-              >
-                {t}
-              </button>
-            ))}
-          </div>
         </div>
 
         <section className='grid grid-cols-1 gap-5 mt-6 sm:grid-cols-2 lg:grid-cols-4'>

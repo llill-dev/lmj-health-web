@@ -39,7 +39,6 @@ export type AdminSidebarItemId =
   | 'patients'
   | 'secretaries'
   | 'medical-content'
-  | 'medical-news'
   | 'services'
   | 'service-types'
   | 'medical-file-options'
@@ -144,12 +143,6 @@ export const adminSidebarItems: Array<{
     path: 'medical-content',
     label: 'المحتوى الطبي',
     icon: BookOpen,
-  },
-  {
-    id: 'medical-news',
-    path: 'medical-news',
-    label: 'الأخبار الطبية',
-    icon: ScrollText,
   },
   {
     id: 'services',
