@@ -9,7 +9,9 @@ import {
   FileText,
   Loader2,
   Stethoscope,
+  Save,
 } from 'lucide-react';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import { adminApi } from '@/lib/admin/client';
 import type {
   ComplaintAttachmentRef,
@@ -97,6 +99,7 @@ export default function AdminComplaintDetailsPage() {
   );
   const [adminResponse, setAdminResponse] = useState('');
   const [fileActionId, setFileActionId] = useState<string | null>(null);
+  const [saveStatusOpen, setSaveStatusOpen] = useState(false);
 
   const detailQuery = useQuery({
     queryKey: ['admin', 'complaints', 'detail', complaintId],
@@ -422,7 +425,7 @@ export default function AdminComplaintDetailsPage() {
                 <button
                   type='button'
                   disabled={!nextStatus || updateMutation.isPending}
-                  onClick={() => updateMutation.mutate()}
+                  onClick={() => setSaveStatusOpen(true)}
                   className='inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 font-cairo text-[14px] font-extrabold text-white disabled:opacity-50'
                 >
                   {updateMutation.isPending ? (
@@ -436,6 +439,40 @@ export default function AdminComplaintDetailsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmActionDialog
+        open={saveStatusOpen}
+        onOpenChange={setSaveStatusOpen}
+        variant='primary'
+        title='تأكيد تحديث حالة الشكوى'
+        icon={<Save className='h-6 w-6' strokeWidth={2} aria-hidden />}
+        description={
+          nextStatus ? (
+            <>
+              سيتم تغيير حالة الشكوى من «
+              <span className='font-extrabold text-[#344054]'>
+                {statusLabelAr(c?.status as ComplaintLifecycleStatus)}
+              </span>
+              » إلى «
+              <span className='font-extrabold text-[#344054]'>
+                {statusLabelAr(nextStatus)}
+              </span>
+              »
+              {adminResponse.trim()
+                ? '، وإرسال نص الرد للمريض عند دعم الخادم لذلك.'
+                : '.'}
+            </>
+          ) : (
+            'اختر حالة جديدة أولاً.'
+          )
+        }
+        confirmLabel='تأكيد الحفظ'
+        confirmDisabled={!nextStatus || updateMutation.isPending}
+        onConfirm={async () => {
+          if (!nextStatus) return;
+          await updateMutation.mutateAsync();
+        }}
+      />
     </>
   );
 }

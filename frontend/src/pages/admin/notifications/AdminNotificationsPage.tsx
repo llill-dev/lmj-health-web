@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { CheckCheck, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import AdminNotificationsHeading from '@/components/admin/notifications/AdminNotificationsHeading';
 import AdminNotificationsList from '@/components/admin/notifications/AdminNotificationsList';
 import AdminNotificationsToolbar from '@/components/admin/notifications/AdminNotificationsToolbar';
 import type { NotificationFilterTab } from '@/components/admin/notifications/AdminNotificationsToolbar';
 import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
 import { useAdminNotificationsPage } from '@/hooks/useAdminNotifications';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
 
 export default function AdminNotificationsPage() {
   const [filter, setFilter] = useState<NotificationFilterTab>('all');
   const [page, setPage] = useState(1);
+  const [markAllOpen, setMarkAllOpen] = useState(false);
   const filterUnread = filter === 'unread';
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function AdminNotificationsPage() {
 
   const handleMarkAll = () => {
     if (unreadTotal === 0 && !hasUnreadInView) return;
-    markAllReadMutation.mutate();
+    setMarkAllOpen(true);
   };
 
   const canPrev = page > 1;
@@ -103,6 +105,20 @@ export default function AdminNotificationsPage() {
               onMarkRead={handleMarkRead}
               pendingMarkId={pendingMarkId}
               isLoading={listQuery.isLoading}
+            />
+
+            <ConfirmActionDialog
+              open={markAllOpen}
+              onOpenChange={setMarkAllOpen}
+              variant='primary'
+              title='تأكيد تعليم كل الإشعارات كمقروء؟'
+              icon={<CheckCheck className='h-6 w-6' strokeWidth={2} aria-hidden />}
+              description='سيتم وضع علامة مقروء على جميع إشعاراتك غير المقروءة في النظام. يمكنك التراجع فقط بإدخال بيانات جديدة — لا يسترجع الزر حالة «غير مقروء» تلقائياً.'
+              confirmLabel='تعليم الكل كمقروء'
+              confirmDisabled={markAllReadMutation.isPending}
+              onConfirm={async () => {
+                await markAllReadMutation.mutateAsync();
+              }}
             />
 
             {totalPages > 1 && !listQuery.isLoading ? (

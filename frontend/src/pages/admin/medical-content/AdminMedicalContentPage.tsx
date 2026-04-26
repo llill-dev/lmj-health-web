@@ -28,6 +28,7 @@ import {
   CreateAdminContentDialog,
   ContentRejectDialog,
 } from '@/components/admin/medical-content';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import {
   useAdminContentList,
   useApproveContent,
@@ -329,6 +330,11 @@ export default function AdminMedicalContentPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewingContentId, setViewingContentId] = useState<string | null>(null);
+  const [actionConfirm, setActionConfirm] = useState<{
+    kind: 'submitReview' | 'approve' | 'publish' | 'archive';
+    id: string;
+    title: string;
+  } | null>(null);
 
   useEffect(() => {
     if (searchParams.get('queue') === 'review') {
@@ -869,7 +875,13 @@ export default function AdminMedicalContentPage() {
                       <button
                         type='button'
                         disabled={actionBusy}
-                        onClick={() => submitReviewMutation.mutate(it._id)}
+                        onClick={() =>
+                          setActionConfirm({
+                            kind: 'submitReview',
+                            id: it._id,
+                            title: it.title ?? '—',
+                          })
+                        }
                         className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] disabled:opacity-50'
                         aria-label='إرسال للمراجعة'
                       >
@@ -885,7 +897,13 @@ export default function AdminMedicalContentPage() {
                   <button
                     type='button'
                           disabled={actionBusy}
-                          onClick={() => approveMutation.mutate(it._id)}
+                          onClick={() =>
+                            setActionConfirm({
+                              kind: 'approve',
+                              id: it._id,
+                              title: it.title ?? '—',
+                            })
+                          }
                           className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50'
                           aria-label='موافقة'
                         >
@@ -916,7 +934,13 @@ export default function AdminMedicalContentPage() {
                       <button
                         type='button'
                         disabled={actionBusy}
-                        onClick={() => archiveMutation.mutate(it._id)}
+                        onClick={() =>
+                          setActionConfirm({
+                            kind: 'archive',
+                            id: it._id,
+                            title: it.title ?? '—',
+                          })
+                        }
                         className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] px-3 text-[#1D4ED8] disabled:opacity-50'
                         aria-label='أرشفة'
                       >
@@ -931,7 +955,13 @@ export default function AdminMedicalContentPage() {
                       <button
                         type='button'
                         disabled={actionBusy}
-                        onClick={() => publishMutation.mutate(it._id)}
+                        onClick={() =>
+                          setActionConfirm({
+                            kind: 'publish',
+                            id: it._id,
+                            title: it.title ?? '—',
+                          })
+                        }
                         className='flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] px-3 text-[#0891B2] disabled:opacity-50'
                         aria-label='نشر'
                       >
@@ -1108,6 +1138,76 @@ export default function AdminMedicalContentPage() {
           if (!next) setViewingContentId(null);
         }}
         contentId={viewingContentId}
+      />
+
+      <ConfirmActionDialog
+        open={actionConfirm !== null}
+        onOpenChange={(open) => {
+          if (!open) setActionConfirm(null);
+        }}
+        variant={actionConfirm?.kind === 'archive' ? 'destructive' : 'primary'}
+        title={
+          !actionConfirm
+            ? '—'
+            : actionConfirm.kind === 'submitReview'
+              ? 'تأكيد إرسال المحتوى للمراجعة'
+              : actionConfirm.kind === 'approve'
+                ? 'تأكيد موافقة المحتوى'
+                : actionConfirm.kind === 'publish'
+                  ? 'تأكيد نشر المحتوى'
+                  : 'تأكيد أرشفة المحتوى'
+        }
+        icon={
+          actionConfirm
+            ? actionConfirm.kind === 'archive' ? (
+                <Archive className='h-6 w-6' strokeWidth={2} aria-hidden />
+              ) : actionConfirm.kind === 'publish' ? (
+                <ShieldCheck className='h-6 w-6' strokeWidth={2} aria-hidden />
+              ) : actionConfirm.kind === 'approve' ? (
+                <Check className='h-6 w-6' strokeWidth={2} aria-hidden />
+              ) : (
+                <ClipboardCheck className='h-6 w-6' strokeWidth={2} aria-hidden />
+              )
+            : undefined
+        }
+        description={
+          actionConfirm ? (
+            <>
+              العنوان: «
+              <span className='font-extrabold text-[#344054]'>
+                {actionConfirm.title}
+              </span>
+              ». سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.
+            </>
+          ) : (
+            '—'
+          )
+        }
+        confirmLabel={
+          !actionConfirm
+            ? '—'
+            : actionConfirm.kind === 'submitReview'
+              ? 'إرسال'
+              : actionConfirm.kind === 'approve'
+                ? 'موافقة'
+                : actionConfirm.kind === 'publish'
+                  ? 'نشر'
+                  : 'أرشفة'
+        }
+        confirmDisabled={actionBusy}
+        onConfirm={async () => {
+          if (!actionConfirm) return;
+          const { kind, id } = actionConfirm;
+          if (kind === 'submitReview') {
+            await submitReviewMutation.mutateAsync(id);
+          } else if (kind === 'approve') {
+            await approveMutation.mutateAsync(id);
+          } else if (kind === 'publish') {
+            await publishMutation.mutateAsync(id);
+          } else {
+            await archiveMutation.mutateAsync(id);
+          }
+        }}
       />
 
       <ContentRejectDialog

@@ -15,12 +15,17 @@ import type {
   MedicalOrderCatalogKind,
 } from '@/lib/admin/types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import { Trash2 } from 'lucide-react';
 
 export default function AdminMedicalOrdersPage() {
   const [kind, setKind] = useState<MedicalOrderCatalogKind>('lab');
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<MedicalOrderCatalogItem | null>(
+    null,
+  );
+  const [deleteTarget, setDeleteTarget] = useState<MedicalOrderCatalogItem | null>(
     null,
   );
 
@@ -50,12 +55,8 @@ export default function AdminMedicalOrdersPage() {
     setDialogOpen(true);
   }
 
-  function confirmDelete(item: MedicalOrderCatalogItem) {
-    const ok = window.confirm(
-      `هل تريد حذف «${item.label}»؟ لا يمكن التراجع عن هذا الإجراء.`,
-    );
-    if (!ok) return;
-    deleteMut.mutate(item._id);
+  function openDeleteConfirm(item: MedicalOrderCatalogItem) {
+    setDeleteTarget(item);
   }
 
   return (
@@ -113,10 +114,47 @@ export default function AdminMedicalOrdersPage() {
             kind={kind}
             items={filteredItems}
             onEdit={openEdit}
-            onDelete={confirmDelete}
+            onDelete={openDeleteConfirm}
             isBusy={deleteMut.isPending}
           />
         )}
+
+        <ConfirmActionDialog
+          open={deleteTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+          variant='destructive'
+          title='حذف بند من الكتالوج؟'
+          icon={<Trash2 className='h-6 w-6' strokeWidth={2} aria-hidden />}
+          description={
+            deleteTarget ? (
+              <>
+                سيتم حذف «
+                <span className='font-extrabold text-[#344054]'>
+                  {deleteTarget.label}
+                </span>
+                » نهائياً من فئة{' '}
+                {kind === 'lab'
+                  ? 'مختبر'
+                  : kind === 'imaging'
+                    ? 'تصوير'
+                    : kind === 'procedure'
+                      ? 'إجراء'
+                      : 'تحويل'}. لا يمكن التراجع
+                عن الحذف من الواجهة.
+              </>
+            ) : (
+              '—'
+            )
+          }
+          confirmLabel='حذف'
+          confirmDisabled={deleteMut.isPending}
+          onConfirm={async () => {
+            if (!deleteTarget) return;
+            await deleteMut.mutateAsync(deleteTarget._id);
+          }}
+        />
 
         <UpsertMedicalOrderItemDialog
           open={dialogOpen}
