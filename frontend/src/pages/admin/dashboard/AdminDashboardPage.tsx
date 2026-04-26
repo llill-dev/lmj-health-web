@@ -723,6 +723,11 @@ export default function AdminDashboardPage() {
           if (!archiveTarget) return;
           await archiveContent.mutateAsync(archiveTarget._id);
         }}
+        successToast={{
+          title: 'تمت الأرشفة',
+          message: 'أُرشف المحتوى ويُتاح من أرشيف المحتوى عند التوفّر.',
+          variant: 'success',
+        }}
       />
     </>
   );

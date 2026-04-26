@@ -13,8 +13,10 @@ import {
   ServiceTypeActiveToggle,
 } from '@/components/admin/service-types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function AdminServiceTypesPage() {
+  const { toast } = useToast();
   const { data, isLoading, isError, error, refetch } = useServiceTypesList();
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ServiceType | null>(null);
@@ -52,10 +54,27 @@ export default function AdminServiceTypesPage() {
   async function handleStatusConfirm() {
     if (!confirmTarget) return;
     const next = confirmAction === 'activate';
+    const label = resolveLabel(
+      typeof confirmTarget.name === 'string'
+        ? { en: confirmTarget.name, ar: confirmTarget.name }
+        : confirmTarget.name,
+      'ar',
+    );
     await updateMut.mutateAsync({
       id: confirmTarget._id,
       body: { isActive: next },
     });
+    if (next) {
+      toast(
+        `تم تفعيل نوع الخدمة «${label}». سيظهر في القوائم المرتبطة عند اكتمال المزامنة.`,
+        { title: 'تم التفعيل', variant: 'success', durationMs: 3800 },
+      );
+    } else {
+      toast(
+        `عُطّل نوع الخدمة «${label}». لن يُقترح للمستخدمين حتى تُعيد تفعيله.`,
+        { title: 'تم التعطيل', variant: 'info', durationMs: 4000 },
+      );
+    }
     setConfirmOpen(false);
     setConfirmTarget(null);
   }

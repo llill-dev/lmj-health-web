@@ -5,6 +5,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/layout/sidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import AdminInboxToastBridge from '@/components/admin/AdminInboxToastBridge';
 import { AdminAppSettingsProvider } from '@/contexts/AdminAppSettingsContext';
 import {
   adminSidebarItems,
@@ -43,6 +44,7 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
 
   return (
     <AdminAppSettingsProvider>
+    <AdminInboxToastBridge />
     <div className='h-screen overflow-hidden bg-[#F5F7FA] scrollbar-hide'>
       <div className='relative flex mx-auto h-screen w-full max-w-screen-2xl'>
         <main className='flex h-screen min-h-0 min-w-0 flex-1 flex-col bg-[#F5F7FA]'>
@@ -90,6 +92,11 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
         confirmLabel={loggingOut ? 'جاري تسجيل الخروج…' : 'تسجيل الخروج'}
         confirmDisabled={loggingOut}
         onConfirm={performLogout}
+        successToast={{
+          title: 'تم تسجيل الخروج',
+          message: 'نراك في زيارة قادمة.',
+          variant: 'success',
+        }}
       />
     </div>
     </AdminAppSettingsProvider>

@@ -83,6 +83,8 @@ export default function AdminSettingsPage() {
   const { settings, setSettings, applyGeneral } = useAdminAppSettings();
   const [draftGeneral, setDraftGeneral] = useState(() => settings.general);
   const [confirmGeneralOpen, setConfirmGeneralOpen] = useState(false);
+  const [logoConfirmOpen, setLogoConfirmOpen] = useState(false);
+  const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [saveStates, setSaveStates] = useState<SaveStates>({
     general: 'idle',
     logo: 'idle',
@@ -163,24 +165,38 @@ export default function AdminSettingsPage() {
 
   function handleLogoPick(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
 
     if (file.type !== 'image/png') {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === 'string') {
-        setSettings((prev) => ({
-          ...prev,
-          logo: { ...prev.logo, dataUrl: result },
-        }));
-        markSaved('logo');
-      }
-    };
-    reader.readAsDataURL(file);
+    setPendingLogoFile(file);
+    setLogoConfirmOpen(true);
+  }
+
+  function applyPendingLogo(): Promise<void> {
+    const file = pendingLogoFile;
+    if (!file) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result;
+        if (typeof result === 'string') {
+          setSettings((prev) => ({
+            ...prev,
+            logo: { ...prev.logo, dataUrl: result },
+          }));
+          markSaved('logo');
+        }
+        setPendingLogoFile(null);
+        resolve();
+      };
+      reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+      reader.readAsDataURL(file);
+    });
   }
 
   function triggerLogoUpload() {
@@ -344,6 +360,32 @@ export default function AdminSettingsPage() {
         confirmLabel='نعم، احفظ'
         onConfirm={async () => {
           commitGeneralFromDraft();
+        }}
+        successToast={{
+          title: 'تم حفظ الإعدادات',
+          message: 'تم تطبيق اسم التطبيق والوصف في الشريط الجانبي.',
+          variant: 'success',
+        }}
+      />
+
+      <ConfirmActionDialog
+        open={logoConfirmOpen}
+        onOpenChange={(o) => {
+          setLogoConfirmOpen(o);
+          if (!o) setPendingLogoFile(null);
+        }}
+        variant='primary'
+        title='تأكيد تغيير شعار التطبيق؟'
+        icon={<CloudUpload className='h-6 w-6' strokeWidth={2} aria-hidden />}
+        description='سيُستبدل الشعار الحالي بالصورة التي اخترتها (PNG) ويُحفظ محلياً ليظهر في الشريط والهوية داخل اللوحة.'
+        cancelLabel='إلغاء'
+        confirmLabel='نعم، استخدم هذا الشعار'
+        onConfirm={() => applyPendingLogo()}
+        successToast={{
+          title: 'تم تحديث الشعار',
+          message:
+            'يظهر شعارك الجديد فوراً في واجهة الإعدادات. احفظ نسخة احتياطية من الملف عند الحاجة.',
+          variant: 'success',
         }}
       />
     </>

@@ -149,6 +149,19 @@ export default function AdminServicesPage() {
         onConfirm={async () => {
           if (statusToggleTarget) await handleToggleStatus(statusToggleTarget);
         }}
+        successToast={
+          willActivate
+            ? {
+                title: 'تم التفعيل',
+                message: 'أصبحت المنشأة متاحة في القوائم المرتبطة.',
+                variant: 'success',
+              }
+            : {
+                title: 'تم التعطيل',
+                message: 'أُخفيت المنشأة عن الاستخدام حتى يُعاد تفعيلها.',
+                variant: 'info',
+              }
+        }
       />
 
       <div dir='rtl' lang='ar'>

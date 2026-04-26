@@ -8,10 +8,18 @@ import {
   useUpdateMedicalOrderCatalogItem,
 } from '@/hooks/useAdminMedicalOrderCatalog';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { useToast } from '@/components/ui/ToastProvider';
 import type {
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,
 } from '@/lib/admin/types';
+
+const KIND_AR: Record<MedicalOrderCatalogKind, string> = {
+  lab: 'مختبر',
+  imaging: 'تصوير',
+  procedure: 'إجراء',
+  referral: 'تحويل',
+};
 
 type Props = {
   open: boolean;
@@ -26,6 +34,7 @@ export default function UpsertMedicalOrderItemDialog({
   kind,
   editTarget,
 }: Props) {
+  const { toast } = useToast();
   const isEdit = !!editTarget;
   const [label, setLabel] = useState('');
   const createMut = useCreateMedicalOrderCatalogItem();
@@ -51,18 +60,31 @@ export default function UpsertMedicalOrderItemDialog({
     const trimmed = label.trim();
     if (!trimmed) return;
 
+    const kindLabel = KIND_AR[kind] ?? kind;
     if (isEdit && editTarget) {
       updateMut.mutate(
         { id: editTarget._id, label: trimmed },
         {
-          onSuccess: () => onOpenChange(false),
+          onSuccess: () => {
+            toast(
+              `تم تحديث بند «${trimmed}» ضمن فئة ${kindLabel} في كتالوج الطلبات.`,
+              { title: 'تم حفظ التعديل', variant: 'success', durationMs: 3800 },
+            );
+            onOpenChange(false);
+          },
         },
       );
     } else {
       createMut.mutate(
         { kind, label: trimmed },
         {
-          onSuccess: () => onOpenChange(false),
+          onSuccess: () => {
+            toast(
+              `أُضيف بند «${trimmed}» إلى كتالوج ${kindLabel}. سيظهر للأطباء عند طلباتهم.`,
+              { title: 'تمت الإضافة', variant: 'success', durationMs: 4000 },
+            );
+            onOpenChange(false);
+          },
         },
       );
     }

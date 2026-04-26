@@ -28,7 +28,11 @@ import {
   CreateAdminContentDialog,
   ContentRejectDialog,
 } from '@/components/admin/medical-content';
-import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import {
+  ConfirmActionDialog,
+  type ConfirmSuccessToast,
+} from '@/components/admin/dialogs';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   useAdminContentList,
   useApproveContent,
@@ -298,6 +302,7 @@ function LanguageModeToggle({
 }
 
 export default function AdminMedicalContentPage() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState<UiContentStatus>('الكل');
@@ -335,6 +340,39 @@ export default function AdminMedicalContentPage() {
     id: string;
     title: string;
   } | null>(null);
+
+  const contentActionSuccessToast = useMemo(():
+    | ConfirmSuccessToast
+    | undefined => {
+    if (!actionConfirm) return undefined;
+    const { kind } = actionConfirm;
+    if (kind === 'submitReview') {
+      return {
+        title: 'تم',
+        message: 'أُرسل المحتوى للمراجعة.',
+        variant: 'success',
+      };
+    }
+    if (kind === 'approve') {
+      return {
+        title: 'تمت الموافقة',
+        message: 'يمكنك نشر المحتوى متى نضج.',
+        variant: 'success',
+      };
+    }
+    if (kind === 'publish') {
+      return {
+        title: 'تم النشر',
+        message: 'صار المحتوى متاحاً للمستفيدين حسب قواعد العرض.',
+        variant: 'success',
+      };
+    }
+    return {
+      title: 'تمت الأرشفة',
+      message: 'أُرشف العنصر ويُنقل لأرشيف المحتوى.',
+      variant: 'success',
+    };
+  }, [actionConfirm]);
 
   useEffect(() => {
     if (searchParams.get('queue') === 'review') {
@@ -479,10 +517,14 @@ export default function AdminMedicalContentPage() {
     if (!rejectTarget) return;
     try {
       await rejectMutation.mutateAsync({ id: rejectTarget._id, reason });
+      toast('تم رفض المحتوى ويُرسل الملاحظة إلى الفريق عند اكتمال الربط.', {
+        title: 'تم',
+        variant: 'success',
+      });
       setRejectOpen(false);
       setRejectTarget(null);
     } catch {
-      /* toast optional */
+      /* يبقى الحوار */
     }
   }
 
@@ -1208,6 +1250,7 @@ export default function AdminMedicalContentPage() {
             await archiveMutation.mutateAsync(id);
           }
         }}
+        successToast={contentActionSuccessToast}
       />
 
       <ContentRejectDialog

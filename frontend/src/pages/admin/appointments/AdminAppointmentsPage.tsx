@@ -484,9 +484,9 @@ export default function AdminAppointmentsPage() {
         <ConfirmActionDialog
           open={confirmResetOpen}
           onOpenChange={setConfirmResetOpen}
-          title='إعادة تعيين المواعيد'
-          description='هل أنت متأكد من أنك تريد إعادة تعيين جميع المواعيد؟ هذا الإجراء لا يمكن التراجع عنه.'
-          confirmLabel='إعادة تعيين'
+          title='إعادة تعيين عرض المواعيد'
+          description='سيتم إرجاع البحث والتصفية والتاريخ وعدد النتائج في الصفحة إلى الوضع الافتراضي. لا يُعدّل ذلك بيانات المواعيد المخزّنة.'
+          confirmLabel='إعادة التعيين'
           onConfirm={async () => {
             setFilters({
               page: 1,
@@ -495,6 +495,11 @@ export default function AdminAppointmentsPage() {
               date: '',
               search: '',
             });
+          }}
+          successToast={{
+            title: 'تمت إعادة التعيين',
+            message: 'أُعيد ضبط عرض البحث والتصفية والتاريخ. لم تتغيّر المواعيد نفسها.',
+            variant: 'info',
           }}
         />
 
@@ -512,6 +517,12 @@ export default function AdminAppointmentsPage() {
           onConfirm={async (reason) => {
             if (!selectedAppointment?.id) return;
             await adminApi.appointments.cancel(selectedAppointment.id, reason);
+          }}
+          successToast={{
+            title: 'تم إلغاء الموعد',
+            message:
+              'سُجّل إلغاء الموعد في النظام. سيتم إشعار الأطراف عند اكتمال تدفق الإشعارات.',
+            variant: 'success',
           }}
         />
 

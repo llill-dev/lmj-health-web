@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { adminApi } from '@/lib/admin/client';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { useToast } from '@/components/ui/ToastProvider';
 
 const approveSchema = z.object({
   adminNote: z.string().trim().min(1, 'هذا الحقل مطلوب'),
@@ -49,6 +50,7 @@ export default function ReviewVerificationRequestDialog({
   lng?: string;
   mode: Mode;
 }) {
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
@@ -225,6 +227,14 @@ export default function ReviewVerificationRequestDialog({
                               : true,
                         });
                         setDone('تم قبول الطلب بنجاح');
+                        toast(
+                          `تم قبول طلب التحقق للطبيب «${doctorName}». يمكنه الآن استكمال المسار وفق سياسات المنصة.`,
+                          {
+                            title: 'تم قبول الطبيب',
+                            variant: 'success',
+                            durationMs: 4200,
+                          },
+                        );
                         await onReviewed?.();
                       } else {
                         await adminApi.verificationRequests.review(requestId, {
@@ -232,6 +242,14 @@ export default function ReviewVerificationRequestDialog({
                           adminNote: values.adminNote,
                         });
                         setDone('تم رفض الطلب');
+                        toast(
+                          `تم رفض طلب التحقق للطبيب «${doctorName}». أُبلغ الفريق أو الطبيب وفق آلية الإشعارات.`,
+                          {
+                            title: 'تم الرفض',
+                            variant: 'info',
+                            durationMs: 4200,
+                          },
+                        );
                         await onReviewed?.();
                       }
                     } catch (e: unknown) {

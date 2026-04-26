@@ -11,6 +11,7 @@ import {
   useMutateServiceType,
 } from '@/hooks/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { ServiceType, ServiceTypeField } from '@/lib/admin/services/types';
 
 const fieldTypes = [
@@ -193,6 +194,7 @@ export default function UpsertServiceTypeDialog({
   editTarget,
   onSuccess,
 }: Props) {
+  const { toast } = useToast();
   const isEdit = !!editTarget?._id;
   const createMut = useCreateServiceType();
   const updateMut = useMutateServiceType();
@@ -308,8 +310,16 @@ export default function UpsertServiceTypeDialog({
                 try {
                   if (isEdit && editTarget) {
                     await updateMut.mutateAsync({ id: editTarget._id, body });
+                    toast(
+                      `تم حفظ تعديلات نوع الخدمة «${values.nameAr.trim() || values.nameEn.trim()}» والحقول المرتبطة به.`,
+                      { title: 'تم التعديل', variant: 'success', durationMs: 4000 },
+                    );
                   } else {
                     await createMut.mutateAsync(body);
+                    toast(
+                      `أُضيف نوع الخدمة «${values.nameAr.trim() || values.nameEn.trim()}» إلى النظام. راجع حالة التفعيل عند الحاجة.`,
+                      { title: 'تمت الإضافة', variant: 'success', durationMs: 4000 },
+                    );
                   }
                   onOpenChange(false);
                   onSuccess?.();

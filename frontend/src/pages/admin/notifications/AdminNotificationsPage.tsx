@@ -8,8 +8,10 @@ import type { NotificationFilterTab } from '@/components/admin/notifications/Adm
 import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
 import { useAdminNotificationsPage } from '@/hooks/useAdminNotifications';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function AdminNotificationsPage() {
+  const { toast } = useToast();
   const [filter, setFilter] = useState<NotificationFilterTab>('all');
   const [page, setPage] = useState(1);
   const [markAllOpen, setMarkAllOpen] = useState(false);
@@ -42,7 +44,14 @@ export default function AdminNotificationsPage() {
   const handleMarkRead = (id: string) => {
     const row = rows.find((r) => r.id === id);
     if (!row?.isUnread) return;
-    markOneReadMutation.mutate(id);
+    markOneReadMutation.mutate(id, {
+      onSuccess: () => {
+        toast(
+          `تُعامل «${row.title}» كمقروء. يبقى السجل في القائمة للمرجعية.`,
+          { title: 'تمييز كمقروء', variant: 'success', durationMs: 3600 },
+        );
+      },
+    });
   };
 
   const handleMarkAll = () => {
@@ -118,6 +127,11 @@ export default function AdminNotificationsPage() {
               confirmDisabled={markAllReadMutation.isPending}
               onConfirm={async () => {
                 await markAllReadMutation.mutateAsync();
+              }}
+              successToast={{
+                title: 'تم',
+                message: 'تُعامل جميع إشعاراتك كمقروءة.',
+                variant: 'success',
               }}
             />
 
