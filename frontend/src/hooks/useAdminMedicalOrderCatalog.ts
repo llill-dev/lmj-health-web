@@ -42,7 +42,9 @@ export function useUpdateMedicalOrderCatalogItem(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (vars: { id: string; label: string }) =>
-      adminApi.medicalOrderCatalog.update(vars.id, { label: vars.label }),
+      adminApi.medicalOrderCatalog.update(kind, vars.id, {
+        label: vars.label,
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({
         queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
@@ -56,7 +58,7 @@ export function useDeleteMedicalOrderCatalogItem(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => adminApi.medicalOrderCatalog.remove(id),
+    mutationFn: (id: string) => adminApi.medicalOrderCatalog.remove(kind, id),
     onSuccess: () => {
       void qc.invalidateQueries({
         queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
