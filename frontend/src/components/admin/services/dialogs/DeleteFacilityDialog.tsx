@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useDeleteFacility } from '@/hooks/useAdminServices';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { FacilitySummary } from '@/lib/admin/services/types';
 
 interface Props {
@@ -110,7 +111,10 @@ export default function DeleteFacilityDialog({
 
               {deleteMutation.isError && (
                 <div className='mt-3 rounded-[8px] bg-red-50 px-3 py-2 text-center font-cairo text-[12px] font-bold text-red-600'>
-                  {(deleteMutation.error as Error).message}
+                  {userFacingErrorMessage(
+                    deleteMutation.error,
+                    'تعذّر حذف المنشأة',
+                  )}
                 </div>
               )}
 

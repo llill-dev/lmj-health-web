@@ -36,6 +36,34 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * رسائل واجهة المستخدم: لا نعرض رمز HTTP (مثل 400) عندما يعيد السيرفر نصاً
+ * يشرح السبب (قواعد العمل، التحقق، إلخ). الرمز يبقى متاحاً على `ApiError.status`.
+ */
+function userFacingHttpErrorMessage(
+  status: number,
+  backendMsg: string,
+  statusText: string,
+  locale: 'ar' | 'en',
+): string {
+  const trimmed = backendMsg.trim();
+  if (trimmed) return trimmed;
+  if (locale === 'ar') {
+    if (status === 401) return 'انتهت الجلسة أو غير مصرّح بالوصول.';
+    if (status === 403) return 'غير مصرّح بتنفيذ هذه العملية.';
+    if (status === 404) return 'المورد غير موجود.';
+    if (status >= 500)
+      return 'تعذّر إكمال الطلب بسبب خطأ في الخادم. حاول لاحقاً.';
+    return 'تعذّر إكمال الطلب.';
+  }
+  if (status === 401) return 'Session expired or unauthorized.';
+  if (status === 403) return 'You are not allowed to perform this action.';
+  if (status === 404) return 'Resource not found.';
+  if (status >= 500)
+    return 'The server could not complete the request. Please try again later.';
+  return statusText || 'Request failed';
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Options
 // ─────────────────────────────────────────────────────────────────────────────
@@ -116,10 +144,12 @@ export async function apiRequest<T = unknown>(
 
       const messageKey = (body.messageKey as string | undefined) ?? null;
 
-      const displayMsg =
-        locale === 'ar'
-          ? `خطأ ${res.status}: ${backendMsg || 'طلب فاشل'}`
-          : `Error ${res.status}: ${backendMsg || 'Request failed'}`;
+      const displayMsg = userFacingHttpErrorMessage(
+        res.status,
+        typeof backendMsg === 'string' ? backendMsg : String(backendMsg ?? ''),
+        res.statusText,
+        locale,
+      );
 
       const err = new ApiError(res.status, messageKey, body, displayMsg);
       onError?.(err);
@@ -175,8 +205,8 @@ export async function apiMultipart<T = unknown>(
               null,
               {},
               locale === 'ar'
-                ? `خطأ رفع: ${xhr.status}`
-                : `Upload error: ${xhr.status}`,
+                ? 'تعذّر رفع الملف. تحقق من الاتصال والملف والصلاحيات.'
+                : 'Upload failed. Check your connection, file, and permissions.',
             ),
           );
         }

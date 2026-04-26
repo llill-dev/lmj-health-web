@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAdminOffboardUser } from '@/hooks/useAdminSecretaries';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 const schema = z.object({
   reason: z.string().trim().min(1, 'سبب الإيقاف مطلوب'),
@@ -158,7 +159,10 @@ export default function OffboardDialog({
 
                 {offboard.error && !done && (
                   <div className='rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#991B1B]'>
-                    {(offboard.error as Error).message || 'حدث خطأ أثناء إيقاف الحساب'}
+                    {userFacingErrorMessage(
+                      offboard.error,
+                      'حدث خطأ أثناء إيقاف الحساب',
+                    )}
                   </div>
                 )}
 
