@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { adminApi } from '@/lib/admin/client';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 const approveSchema = z.object({
   adminNote: z.string().trim().min(1, 'هذا الحقل مطلوب'),
@@ -233,8 +234,8 @@ export default function ReviewVerificationRequestDialog({
                         setDone('تم رفض الطلب');
                         await onReviewed?.();
                       }
-                    } catch (e: any) {
-                      setError(e?.message || 'فشل تنفيذ العملية');
+                    } catch (e: unknown) {
+                      setError(userFacingErrorMessage(e, 'فشل تنفيذ العملية'));
                     }
                   })}
                 >

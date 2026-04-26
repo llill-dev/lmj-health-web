@@ -12,6 +12,7 @@ import {
   ServiceTypeStatusConfirmDialog,
   ServiceTypeActiveToggle,
 } from '@/components/admin/service-types';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 export default function AdminServiceTypesPage() {
   const { data, isLoading, isError, error, refetch } = useServiceTypesList();
@@ -99,7 +100,7 @@ export default function AdminServiceTypesPage() {
               تعذر تحميل الأنواع.
             </p>
             <p className='mt-1 font-cairo text-[12px] text-red-700'>
-              {(error as Error)?.message ?? '—'}
+              {userFacingErrorMessage(error, '—')}
             </p>
             <button
               type='button'

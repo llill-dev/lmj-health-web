@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateFacility, useUpdateFacility } from '@/hooks/useAdminServices';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { FacilitySummary, FacilityType, FacilityStatus } from '@/lib/admin/services/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -209,9 +210,10 @@ export default function UpsertFacilityDialog({
     }
   });
 
-  const serverError =
-    (createMutation.error as Error | null)?.message ||
-    (updateMutation.error as Error | null)?.message;
+  const serverErr = createMutation.error ?? updateMutation.error;
+  const serverError = serverErr
+    ? userFacingErrorMessage(serverErr)
+    : undefined;
 
   const inputClass =
     'h-[38px] w-full rounded-[8px] border border-[#D0D5DD] bg-white px-3 text-right font-cairo text-[12px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-1 focus:ring-primary/30';
