@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { patch } from '@/lib/base';
 import { adminApi } from '@/lib/admin/client';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { useToast } from '@/components/ui/ToastProvider';
 
 const schema = z.object({
   reason: z.string().trim().min(1, 'سبب التعليق مطلوب'),
@@ -37,6 +38,7 @@ export default function SuspendAccountDialog({
   targetLabel: string;
   onSuccess?: () => void;
 }) {
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
@@ -169,6 +171,25 @@ export default function SuspendAccountDialog({
                       });
                     }
                     setDone('تم تعليق الحساب بنجاح');
+                    if (kind === 'patient') {
+                      toast(
+                        `تم تعليق حساب المريض «${targetLabel}». لن يتمكّن من تسجيل الدخول حتى تُعاد مزامنة الحساب من الإدارة.`,
+                        {
+                          title: 'تعليق الحساب',
+                          variant: 'warning',
+                          durationMs: 4500,
+                        },
+                      );
+                    } else {
+                      toast(
+                        `تم تعليق الحساب «${targetLabel}». يرتبط الوصول بسياسات الإدارة لكل دور.`,
+                        {
+                          title: 'تعليق الحساب',
+                          variant: 'warning',
+                          durationMs: 4200,
+                        },
+                      );
+                    }
                     onSuccess?.();
                     setTimeout(() => onOpenChange(false), 900);
                   } catch (e: any) {

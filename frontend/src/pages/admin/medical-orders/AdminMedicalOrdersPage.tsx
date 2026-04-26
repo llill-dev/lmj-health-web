@@ -165,6 +165,11 @@ export default function AdminMedicalOrdersPage() {
             if (!deleteTarget) return;
             await deleteMut.mutateAsync(deleteTarget._id);
           }}
+          successToast={{
+            title: 'تم الحذف',
+            message: 'حُذف بند الكتالوج من القائمة.',
+            variant: 'success',
+          }}
         />
 
         <UpsertMedicalOrderItemDialog

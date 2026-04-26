@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useDeleteFacility } from '@/hooks/useAdminServices';
+import { useToast } from '@/components/ui/ToastProvider';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { FacilitySummary } from '@/lib/admin/services/types';
 
@@ -18,6 +19,7 @@ export default function DeleteFacilityDialog({
   onOpenChange,
   facility,
 }: Props) {
+  const { toast } = useToast();
   const deleteMutation = useDeleteFacility();
 
   useEffect(() => {
@@ -31,6 +33,10 @@ export default function DeleteFacilityDialog({
     if (!facility) return;
     try {
       await deleteMutation.mutateAsync(facility.id);
+      toast(
+        `حُذفت المنشأة «${facility.name}» نهائياً من دليل الخدمات.`,
+        { title: 'تم الحذف', variant: 'success', durationMs: 3800 },
+      );
       onOpenChange(false);
     } catch {
       // error shown inline

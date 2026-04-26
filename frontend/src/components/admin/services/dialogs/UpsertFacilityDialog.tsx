@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateFacility, useUpdateFacility } from '@/hooks/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { FacilitySummary, FacilityType, FacilityStatus } from '@/lib/admin/services/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -201,8 +202,16 @@ export default function UpsertFacilityDialog({
     try {
       if (isEdit) {
         await updateMutation.mutateAsync(body);
+        toast(
+          `تم حفظ تعديلات المنشأة «${values.name}». تنعكس في دليل الخدمات والقوائم المرتبطة.`,
+          { title: 'تم التعديل', variant: 'success', durationMs: 4000 },
+        );
       } else {
         await createMutation.mutateAsync(body);
+        toast(
+          `تمت إضافة المنشأة «${values.name}» إلى دليل الخدمات. راجع حالتها (نشط/معلّق) عند الحاجة.`,
+          { title: 'تمت إضافة المنشأة', variant: 'success', durationMs: 4000 },
+        );
       }
       onOpenChange(false);
     } catch {

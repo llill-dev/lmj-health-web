@@ -230,6 +230,13 @@ export async function apiMultipart<T = unknown>(
 export const get = <T = unknown>(endpoint: string, options?: ApiOptions) =>
   apiRequest<T>(endpoint, { ...options, method: 'GET' });
 
+function jsonBody(body: unknown): BodyInit | undefined {
+  if (body instanceof FormData) return body;
+  // JSON.stringify(undefined) يعيد undefined فيلغي الجسم بينما Content-Type يبقى json → 400 من الخادم
+  if (body === undefined) return JSON.stringify({});
+  return JSON.stringify(body);
+}
+
 export const post = <T = unknown>(
   endpoint: string,
   body?: unknown,
@@ -238,7 +245,7 @@ export const post = <T = unknown>(
   apiRequest<T>(endpoint, {
     ...options,
     method: 'POST',
-    body: body instanceof FormData ? body : JSON.stringify(body),
+    body: jsonBody(body),
   });
 
 export const put = <T = unknown>(
@@ -249,7 +256,7 @@ export const put = <T = unknown>(
   apiRequest<T>(endpoint, {
     ...options,
     method: 'PUT',
-    body: body instanceof FormData ? body : JSON.stringify(body),
+    body: jsonBody(body),
   });
 
 export const patch = <T = unknown>(
@@ -260,7 +267,7 @@ export const patch = <T = unknown>(
   apiRequest<T>(endpoint, {
     ...options,
     method: 'PATCH',
-    body: body instanceof FormData ? body : JSON.stringify(body),
+    body: jsonBody(body),
   });
 
 export const del = <T = unknown>(endpoint: string, options?: ApiOptions) =>

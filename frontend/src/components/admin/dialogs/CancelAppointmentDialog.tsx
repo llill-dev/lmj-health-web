@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useToast } from '@/components/ui/ToastProvider';
+import type { ToastVariant } from '@/components/ui/ToastProvider';
 
 const cancelAppointmentSchema = z.object({
   reason: z.string().min(1, 'هذا الحقل مطلوب'),
@@ -19,13 +21,16 @@ export default function CancelAppointmentDialog({
   targetName,
   onConfirm,
   confirmDisabled,
+  successToast,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   targetName: string;
   onConfirm: (reason: string) => void | Promise<void>;
   confirmDisabled?: boolean;
+  successToast?: { title?: string; message: string; variant?: ToastVariant };
 }) {
+  const { toast } = useToast();
   const {
     register,
     handleSubmit,
@@ -187,9 +192,20 @@ export default function CancelAppointmentDialog({
                     type='button'
                     disabled={confirmDisabled || isSubmitting}
                     onClick={handleSubmit(async (values) => {
-                      await onConfirm(values.reason.trim());
-                      onOpenChange(false);
-                      reset({ reason: '' });
+                      try {
+                        await onConfirm(values.reason.trim());
+                        if (successToast) {
+                          toast(successToast.message, {
+                            title: successToast.title,
+                            variant: successToast.variant ?? 'success',
+                            durationMs: 4200,
+                          });
+                        }
+                        onOpenChange(false);
+                        reset({ reason: '' });
+                      } catch {
+                        /* فشل — يبقى الحوار مفتوحاً */
+                      }
                     })}
                     className='flex h-[46px] w-full items-center justify-center gap-3 rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)] disabled:opacity-60'
                   >

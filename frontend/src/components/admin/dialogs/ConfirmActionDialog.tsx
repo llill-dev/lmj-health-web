@@ -3,6 +3,14 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
+import type { ToastVariant } from '@/components/ui/ToastProvider';
+
+export type ConfirmSuccessToast = {
+  message: string;
+  title?: string;
+  variant?: ToastVariant;
+};
 
 export default function ConfirmActionDialog({
   open,
@@ -15,6 +23,7 @@ export default function ConfirmActionDialog({
   cancelLabel = 'إلغاء',
   variant = 'primary',
   icon,
+  successToast,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,7 +35,10 @@ export default function ConfirmActionDialog({
   cancelLabel?: string;
   variant?: 'primary' | 'destructive';
   icon?: ReactNode;
+  /** يُظهر إشعاراً بعد نجاح التنفيذ (قبل إغلاق النافذة) */
+  successToast?: ConfirmSuccessToast;
 }) {
+  const { toast } = useToast();
   useEffect(() => {
     if (!open) return;
 
@@ -180,6 +192,12 @@ export default function ConfirmActionDialog({
                     onClick={async () => {
                       try {
                         await Promise.resolve(onConfirm());
+                        if (successToast) {
+                          toast(successToast.message, {
+                            title: successToast.title,
+                            variant: successToast.variant ?? 'success',
+                          });
+                        }
                         onOpenChange(false);
                       } catch {
                         /* يبقى الحوار مفتوحاً لإعادة المحاولة */

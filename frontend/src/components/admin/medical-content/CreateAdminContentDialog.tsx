@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateAdminContent } from '@/hooks/useAdminContent';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { AdminContentBlock, AdminContentType } from '@/lib/admin/types';
 
 /** جسم مبدئي تتوافق مع الـ API ويتجنّب أعطال التحقق عندما يتوقع الخادم مصفوفة بلوكات. */
@@ -83,6 +84,7 @@ export default function CreateAdminContentDialog({
   open,
   onOpenChange,
 }: Props) {
+  const { toast } = useToast();
   const createMut = useCreateAdminContent();
   const {
     register,
@@ -166,6 +168,14 @@ export default function CreateAdminContentDialog({
                     slug: v.slug?.trim() || undefined,
                     contentBlocks: DRAFT_CONTENT_BLOCKS,
                   });
+                  toast(
+                    `أُضيفت مسودة «${v.title.trim()}» إلى المحتوى الطبي. أكمل التحرير والمراجعة والنشر من نفس الصفحة.`,
+                    {
+                      title: 'تم إضافة المحتوى',
+                      variant: 'success',
+                      durationMs: 4200,
+                    },
+                  );
                   onOpenChange(false);
                 } catch {
                   // الخطأ يظهر عبر createMut.isError ورسالة الـ API

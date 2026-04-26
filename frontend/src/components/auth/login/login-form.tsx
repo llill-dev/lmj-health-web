@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useToast } from '@/components/ui/ToastProvider';
 
 type LoginMethod = 'phone' | 'email';
 
@@ -55,6 +56,7 @@ export default function LoginForm({
   onForgotPassword: () => void;
   onOtpLogin: () => void;
 }) {
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [method, setMethod] = useState<LoginMethod>('email');
@@ -142,6 +144,14 @@ export default function LoginForm({
       );
 
       const userRole = useAuthStore.getState().user?.role ?? '';
+
+      if (userRole === 'admin') {
+        toast('تم تسجيل الدخول بنجاح. مرحباً بك في لوحة إدارة LMJ Health.', {
+          title: 'مرحباً',
+          variant: 'success',
+          durationMs: 3800,
+        });
+      }
 
       // Honour the ?next= redirect set by ProtectedRoute (safe-guard: only
       // accept relative paths to prevent open-redirect attacks).

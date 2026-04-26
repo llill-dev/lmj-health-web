@@ -472,6 +472,11 @@ export default function AdminComplaintDetailsPage() {
           if (!nextStatus) return;
           await updateMutation.mutateAsync();
         }}
+        successToast={{
+          title: 'تم التحديث',
+          message: 'حُدّثت حالة الشكوى وستنعكس في القوائم.',
+          variant: 'success',
+        }}
       />
     </>
   );
