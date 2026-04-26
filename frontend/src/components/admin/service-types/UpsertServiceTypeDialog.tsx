@@ -10,6 +10,7 @@ import {
   useCreateServiceType,
   useMutateServiceType,
 } from '@/hooks/useAdminServices';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { ServiceType, ServiceTypeField } from '@/lib/admin/services/types';
 
 const fieldTypes = [
@@ -196,9 +197,10 @@ export default function UpsertServiceTypeDialog({
   const createMut = useCreateServiceType();
   const updateMut = useMutateServiceType();
   const busy = createMut.isPending || updateMut.isPending;
-  const serverError =
-    (createMut.error as Error | null)?.message ||
-    (updateMut.error as Error | null)?.message;
+  const serverErr = createMut.error ?? updateMut.error;
+  const serverError = serverErr
+    ? userFacingErrorMessage(serverErr)
+    : undefined;
 
   const {
     register,

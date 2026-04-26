@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { patch } from '@/lib/base';
 import { adminApi } from '@/lib/admin/client';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 const schema = z.object({
   reason: z.string().trim().min(1, 'سبب التعليق مطلوب'),
@@ -171,7 +172,9 @@ export default function SuspendAccountDialog({
                     onSuccess?.();
                     setTimeout(() => onOpenChange(false), 900);
                   } catch (e: any) {
-                    setError(e?.message || 'فشل تعليق الحساب');
+                    setError(
+                      userFacingErrorMessage(e, 'فشل تعليق الحساب'),
+                    );
                   }
                 })}
               >

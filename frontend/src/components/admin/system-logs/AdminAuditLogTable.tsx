@@ -3,6 +3,7 @@ import { Activity, ShieldAlert } from 'lucide-react';
 import { AuditLogDetailsDialog } from '@/components/admin/system-logs/AuditLogDetailsDialog';
 import { AuditLogRow } from '@/components/admin/system-logs/AuditLogRow';
 import { AuditLogSkeletonRow } from '@/components/admin/system-logs/AuditLogSkeletonRow';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { AuditLogItem } from '@/lib/admin/types';
 
 export function AdminAuditLogTable({
@@ -55,7 +56,7 @@ export function AdminAuditLogTable({
           <ShieldAlert className='mx-auto mb-3 h-10 w-10 text-[#FCA5A5]' />
           <div className='font-cairo text-[14px] font-black text-[#991B1B]'>تعذّر تحميل السجلات</div>
           <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-            {error instanceof Error ? error.message : 'خطأ في الاتصال بالخادم'}
+            {userFacingErrorMessage(error, 'خطأ في الاتصال بالخادم')}
           </div>
         </div>
       )}

@@ -14,6 +14,7 @@ import type {
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,
 } from '@/lib/admin/types';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 export default function AdminMedicalOrdersPage() {
   const [kind, setKind] = useState<MedicalOrderCatalogKind>('lab');
@@ -88,7 +89,10 @@ export default function AdminMedicalOrdersPage() {
               تعذر تحميل الكتالوج.
             </p>
             <p className='mt-1 font-cairo text-[12px] font-semibold text-red-700'>
-              {(error as Error)?.message ?? 'تحقق من الاتصال أو من واجهة الـ API.'}
+              {userFacingErrorMessage(
+                error,
+                'تحقق من الاتصال أو من واجهة الـ API.',
+              )}
             </p>
             <button
               type='button'

@@ -7,6 +7,7 @@ import {
   useCreateMedicalOrderCatalogItem,
   useUpdateMedicalOrderCatalogItem,
 } from '@/hooks/useAdminMedicalOrderCatalog';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type {
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,
@@ -37,9 +38,10 @@ export default function UpsertMedicalOrderItemDialog({
     }
   }, [open, editTarget]);
 
-  const serverError =
-    (createMut.error as Error | null)?.message ||
-    (updateMut.error as Error | null)?.message;
+  const serverErr = createMut.error ?? updateMut.error;
+  const serverError = serverErr
+    ? userFacingErrorMessage(serverErr)
+    : undefined;
 
   const inputClass =
     'h-[42px] w-full rounded-[8px] border border-[#D0D5DD] bg-white px-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20';

@@ -5,6 +5,7 @@ import { X, CalendarDays, Clock, User, Stethoscope, Ban } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import CancelAppointmentDialog from '@/components/admin/dialogs/CancelAppointmentDialog';
 import { useState } from 'react';
 
@@ -260,7 +261,9 @@ export default function AdminAppointmentDetailsDialog({
             // Refetch details to reflect cancelled state
             await detailsQuery.refetch();
           } catch (e: any) {
-            setLastError(e?.message || 'فشل إلغاء الموعد');
+            setLastError(
+              userFacingErrorMessage(e, 'فشل إلغاء الموعد'),
+            );
           }
         }}
       />
