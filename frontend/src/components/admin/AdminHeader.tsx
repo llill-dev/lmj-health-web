@@ -78,34 +78,14 @@ export default function AdminHeader({
         </div>
       </section>
 
-      <div className='flex flex-1 items-center justify-end gap-4 px-4'>
-        <div className='relative hidden max-w-[320px] flex-1 md:block'>
-          <input
-            type='search'
-            placeholder={searchPlaceholder}
-            className='h-[44px] w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 pr-12 text-sm font-medium text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                navigate('/admin/patients');
-              }
-            }}
-            aria-label='بحث سريع، إدخال للانتقال إلى المرضى'
-          />
-          <div className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400'>
-            <Search className='h-5 w-5' aria-hidden />
-          </div>
-        </div>
-      </div>
-
-      <div className='flex shrink-0 items-center gap-3'>
+      <div className='flex gap-3 items-center shrink-0'>
         <Link
           to='/admin/complaints'
-          className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50'
+          className='flex justify-center items-center w-10 h-10 bg-white rounded-lg border border-gray-200 transition-colors hover:bg-gray-50'
           aria-label='الشكاوي والدعم'
           title='الشكاوي والدعم'
         >
-          <HelpCircle className='h-5 w-5 text-gray-600' aria-hidden />
+          <HelpCircle className='w-5 h-5 text-gray-600' aria-hidden />
         </Link>
 
         <NavLink
@@ -120,10 +100,10 @@ export default function AdminHeader({
           aria-label='الإشعارات'
           title='الإشعارات'
         >
-          <Bell className='h-5 w-5 text-gray-600' aria-hidden />
+          <Bell className='w-5 h-5 text-gray-600' aria-hidden />
           {unreadLoading ? (
-            <span className='absolute -end-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100'>
-              <Loader2 className='h-3 w-3 animate-spin text-gray-500' aria-hidden />
+            <span className='flex absolute -top-1 justify-center items-center w-5 h-5 bg-gray-100 rounded-full -end-1'>
+              <Loader2 className='w-3 h-3 text-gray-500 animate-spin' aria-hidden />
             </span>
           ) : unreadBadge ? (
             <span className='absolute -end-1 -top-1 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white'>
@@ -134,11 +114,11 @@ export default function AdminHeader({
 
         <Link
           to='/admin/settings'
-          className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50'
+          className='flex justify-center items-center w-10 h-10 bg-white rounded-lg border border-gray-200 transition-colors hover:bg-gray-50'
           aria-label='الإعدادات'
           title='الإعدادات'
         >
-          <Settings className='h-5 w-5 text-gray-600' aria-hidden />
+          <Settings className='w-5 h-5 text-gray-600' aria-hidden />
         </Link>
 
         <div className='h-[40px] w-[0.8px] bg-gray-200' aria-hidden />
@@ -148,14 +128,14 @@ export default function AdminHeader({
           className='flex max-w-[200px] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-gray-50'
           title='الإعدادات والملف'
         >
-          <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100'>
-            <User className='h-4 w-4 text-blue-600' aria-hidden />
+          <div className='flex justify-center items-center w-8 h-8 bg-blue-100 rounded-full shrink-0'>
+            <User className='w-4 h-4 text-blue-600' aria-hidden />
           </div>
           <div className='min-w-0 text-right'>
-            <div className='truncate text-sm font-medium text-gray-900'>
+            <div className='text-sm font-medium text-gray-900 truncate'>
               {displayName}
             </div>
-            <div className='truncate text-xs text-gray-500'>{displayLine2}</div>
+            <div className='text-xs text-gray-500 truncate'>{displayLine2}</div>
           </div>
         </Link>
 
@@ -163,14 +143,14 @@ export default function AdminHeader({
           type='button'
           disabled={loggingOut}
           onClick={() => void handleLogout()}
-          className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60'
+          className='flex justify-center items-center w-10 h-10 bg-white rounded-lg border border-gray-200 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60'
           aria-label='تسجيل الخروج'
           title='تسجيل الخروج'
         >
           {loggingOut ? (
-            <Loader2 className='h-5 w-5 animate-spin text-gray-500' aria-hidden />
+            <Loader2 className='w-5 h-5 text-gray-500 animate-spin' aria-hidden />
           ) : (
-            <LogOut className='h-5 w-5 text-gray-600' aria-hidden />
+            <LogOut className='w-5 h-5 text-gray-600' aria-hidden />
           )}
         </button>
       </div>
