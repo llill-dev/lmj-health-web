@@ -465,18 +465,6 @@ export default function AdminDashboardPage() {
               <div className='font-cairo text-[16px] font-extrabold text-[#111827]'>
                 آخر الأنشطة
               </div>
-              <div className='mt-1 font-cairo text-[11px] font-semibold leading-relaxed text-[#98A2B3]'>
-                مزامنة مع{' '}
-                <span className='font-mono text-[10px]' dir='ltr'>
-                  GET /admin/audit-logs
-                </span>{' '}
-                — أحدث أحداث النظام المسجّلة (API-3.pdf). أخبار/محتوى منشور يظهر
-                في قسم «آخر الأخبار» عبر{' '}
-                <span className='font-mono text-[10px]' dir='ltr'>
-                  GET /admin/content
-                </span>
-                .
-              </div>
             </div>
             <Link
               to='/admin/system-logs'
@@ -507,15 +495,15 @@ export default function AdminDashboardPage() {
                 return (
                   <div
                     key={log._id}
-                    className='flex justify-between items-center gap-3 px-6 py-4'
+                    className='flex gap-3 justify-between items-center px-6 py-4'
                   >
-                    <div className='flex min-w-0 flex-1 gap-3 items-center'>
+                    <div className='flex flex-1 gap-3 items-center min-w-0'>
                       <div
-                        className={`flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[10px] ${box}`}
+                        className={`flex justify-center items-center h-[36px] w-[36px] shrink-0 rounded-[10px] ${box}`}
                       >
-                        <Icon className={`h-4 w-4 ${iconColor}`} />
+                        <Icon className={`w-4 h-4 ${iconColor}`} />
                       </div>
-                      <div className='min-w-0 flex-1 text-right'>
+                      <div className='flex-1 min-w-0 text-right'>
                         <div className='truncate font-cairo text-[13px] font-extrabold text-[#111827]'>
                           {title}
                         </div>
@@ -734,7 +722,7 @@ export default function AdminDashboardPage() {
         }}
         variant='destructive'
         title='تأكيد الأرشفة'
-        icon={<Archive className='h-6 w-6' strokeWidth={2} />}
+        icon={<Archive className='w-6 h-6' strokeWidth={2} />}
         description={
           <>
             هل تريد أرشفة العنصر «
