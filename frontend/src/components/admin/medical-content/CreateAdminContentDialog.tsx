@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateAdminContent } from '@/hooks/useAdminContent';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { AdminContentBlock, AdminContentType } from '@/lib/admin/types';
 
 /** جسم مبدئي تتوافق مع الـ API ويتجنّب أعطال التحقق عندما يتوقع الخادم مصفوفة بلوكات. */
@@ -277,7 +278,10 @@ export default function CreateAdminContentDialog({
                 </div>
                 {createMut.isError ? (
                   <p className='rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-right font-cairo text-[12px] font-semibold text-red-800'>
-                    {(createMut.error as Error)?.message ?? 'تعذّر الإنشاء'}
+                    {userFacingErrorMessage(
+                      createMut.error,
+                      'تعذّر الإنشاء',
+                    )}
                   </p>
                 ) : null}
               </div>
