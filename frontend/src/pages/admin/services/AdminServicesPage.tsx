@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { Hospital } from 'lucide-react';
+import { Hospital, Power } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { AdminServicesContent } from '@/components/admin/services/AdminServicesContent';
@@ -11,6 +11,7 @@ import {
   ADMIN_SERVICES_PAGE_SIZE,
   ADMIN_SERVICES_TABS,
 } from '@/components/admin/services/tabsConfig';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import {
   useFacilitiesList,
   useUpdateFacilityStatus,
@@ -29,6 +30,8 @@ export default function AdminServicesPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FacilitySummary | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [statusToggleTarget, setStatusToggleTarget] =
+    useState<FacilitySummary | null>(null);
 
   const activeTab = ADMIN_SERVICES_TABS[activeTabIdx];
   const isFacilityTab = activeTab.kind === 'facility';
@@ -75,6 +78,8 @@ export default function AdminServicesPage() {
     }
   };
 
+  const willActivate = statusToggleTarget?.status === 'INACTIVE';
+
   const openEdit = (f: FacilitySummary) => {
     setEditTarget(f);
     setUpsertOpen(true);
@@ -113,6 +118,39 @@ export default function AdminServicesPage() {
         facility={deleteTarget}
       />
 
+      <ConfirmActionDialog
+        open={statusToggleTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setStatusToggleTarget(null);
+        }}
+        variant={willActivate ? 'primary' : 'destructive'}
+        title={
+          willActivate ? 'تفعيل المنشأة الصحية؟' : 'تعطيل المنشأة الصحية؟'
+        }
+        icon={<Power className='h-6 w-6' strokeWidth={2} aria-hidden />}
+        description={
+          statusToggleTarget ? (
+            <>
+              المنشأة: «
+              <span className='font-extrabold text-[#344054]'>
+                {statusToggleTarget.name}
+              </span>
+              ».{' '}
+              {willActivate
+                ? 'ستظهر للمستخدمين عند اختيارها في القوائم المرتبطة.'
+                : 'سيتم إخفاؤها من الاستخدام حتى تُعاد تفعيلها.'}
+            </>
+          ) : (
+            '—'
+          )
+        }
+        confirmLabel={willActivate ? 'تفعيل' : 'تعطيل'}
+        confirmDisabled={statusMutation.isPending}
+        onConfirm={async () => {
+          if (statusToggleTarget) await handleToggleStatus(statusToggleTarget);
+        }}
+      />
+
       <div dir='rtl' lang='ar'>
         <AdminServicesHeader showAddFacility={isFacilityTab} onAddFacility={handleAddNew} />
 
@@ -145,7 +183,7 @@ export default function AdminServicesPage() {
           togglingId={togglingId}
           onEditFacility={openEdit}
           onDeleteFacility={openDelete}
-          onToggleFacilityStatus={handleToggleStatus}
+          onToggleFacilityStatus={(f) => setStatusToggleTarget(f)}
         />
       </div>
     </>
