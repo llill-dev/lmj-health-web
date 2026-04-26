@@ -147,6 +147,11 @@ export default function UpsertMedicalOrderItemDialog({
               <Dialog.Title className='font-cairo text-[16px] font-extrabold text-[#101828]'>
                 {isEdit ? 'تعديل نوع الطلب' : 'إضافة نوع جديد'}
               </Dialog.Title>
+              <Dialog.Description className='sr-only'>
+                {isEdit
+                  ? 'تعديل تسمية بند في كتالوج الطلبات الطبية.'
+                  : 'إضافة بند جديد إلى كتالوج الطلبات الطبية.'}
+              </Dialog.Description>
               <Dialog.Close asChild>
                 <button
                   type='button'
