@@ -134,6 +134,16 @@ function applyReadAllToCache(queryClient: QueryClient) {
   queryClient.setQueryData(adminNotificationsQueryKeys.unreadTotal, 0);
 }
 
+/** شارة الهيدر: إجمالي غير المقروء — نفس مفاتيح صفحة الإشعارات (GET /api/notifications، API-3). */
+export function useAdminUnreadNotificationCount() {
+  return useQuery({
+    queryKey: adminNotificationsQueryKeys.unreadTotal,
+    queryFn: fetchUnreadTotal,
+    staleTime: 15_000,
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useAdminNotificationsPage(filterUnread: boolean, page: number) {
   const queryClient = useQueryClient();
   const unreadOnly = filterUnread;

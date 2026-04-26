@@ -52,6 +52,7 @@ export { AUDIT_LOGS_KEYS, useAdminAuditLogs } from './useAdminAuditLogs';
 export {
   adminNotificationsQueryKeys,
   useAdminNotificationsPage,
+  useAdminUnreadNotificationCount,
 } from './useAdminNotifications';
 
 // Admin — Services (Facilities, Service Types, Providers)

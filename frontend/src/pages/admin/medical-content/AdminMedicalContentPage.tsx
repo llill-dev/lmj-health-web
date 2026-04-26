@@ -14,14 +14,14 @@ import {
   LayoutGrid,
   HeartPulse,
   Stethoscope,
-  Pill,
+  Newspaper,
   ShieldCheck,
   ChevronRight,
   ChevronLeft,
   ChevronsLeft,
   ChevronsRight,
 } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MedicalContentViewDialog from '@/components/admin/dialogs/MedicalContentViewDialog';
 import {
@@ -48,6 +48,22 @@ const PAGE_SIZE = 20;
 
 type UiContentStatus = 'الكل' | 'منشور' | 'قيد المراجعة' | 'مسودة' | 'مؤرشف';
 type LangFilter = 'الكل' | 'ar' | 'en';
+
+const ADMIN_CONTENT_TYPE_VALUES: AdminContentType[] = [
+  'CONDITION',
+  'SYMPTOM',
+  'GENERAL_ADVICE',
+  'NEWS',
+];
+
+function parseTypeQueryParam(
+  value: string | null,
+): 'الكل' | AdminContentType {
+  if (!value) return 'الكل';
+  return ADMIN_CONTENT_TYPE_VALUES.includes(value as AdminContentType)
+    ? (value as AdminContentType)
+    : 'الكل';
+}
 
 /** تطبيع قيمة اللغة من الـ API (لأحرف متعددة/صيغ مختلقة) */
 function normalizeItemLanguage(raw: unknown): 'ar' | 'en' | 'unknown' {
@@ -281,13 +297,30 @@ function LanguageModeToggle({
 }
 
 export default function AdminMedicalContentPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState<UiContentStatus>('الكل');
-  const [activeType, setActiveType] = useState<'الكل' | AdminContentType>(
-    'الكل',
-  );
   const [langFilter, setLangFilter] = useState<LangFilter>('الكل');
+
+  const activeType = useMemo(
+    () => parseTypeQueryParam(searchParams.get('type')),
+    [searchParams],
+  );
+
+  const setTypeFilter = useCallback(
+    (next: 'الكل' | AdminContentType) => {
+      setSearchParams(
+        (prev) => {
+          const p = new URLSearchParams(prev);
+          if (next === 'الكل') p.delete('type');
+          else p.set('type', next);
+          return p;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
   const [page, setPage] = useState(1);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<AdminContentItem | null>(
@@ -457,7 +490,11 @@ export default function AdminMedicalContentPage() {
   return (
     <>
       <Helmet>
-        <title>إدارة المحتوى الطبي • LMJ Health</title>
+        <title>
+          {activeType === 'NEWS'
+            ? 'الأخبار الطبية — إدارة المحتوى • LMJ Health'
+            : 'إدارة المحتوى الطبي • LMJ Health'}
+        </title>
       </Helmet>
 
       <div
@@ -470,7 +507,9 @@ export default function AdminMedicalContentPage() {
               إدارة المحتوى الطبي
             </div>
             <div className='mt-1 font-cairo text-[12px] font-semibold leading-[14px] text-[#98A2B3]'>
-              قائمة، فلاتر، ومراجعة لدورة حياة المحتوى (مسودة → مراجعة → نشر)
+              {activeType === 'NEWS'
+                ? 'عرض وإدارة أخبار المنصة (نفس باقي الأنواع: مسودة → مراجعة → نشر)'
+                : 'قائمة، فلاتر، ومراجعة لدورة حياة المحتوى (مسودة → مراجعة → نشر)'}
             </div>
           </div>
 
@@ -606,7 +645,7 @@ export default function AdminMedicalContentPage() {
           <div className='mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2'>
             <button
               type='button'
-              onClick={() => setActiveType('الكل')}
+              onClick={() => setTypeFilter('الكل')}
               className={
                 activeType === 'الكل'
                   ? 'inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'
@@ -618,7 +657,7 @@ export default function AdminMedicalContentPage() {
             </button>
             <button
               type='button'
-              onClick={() => setActiveType('CONDITION')}
+              onClick={() => setTypeFilter('CONDITION')}
               className={
                 activeType === 'CONDITION'
                   ? 'inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'
@@ -630,7 +669,7 @@ export default function AdminMedicalContentPage() {
             </button>
             <button
               type='button'
-              onClick={() => setActiveType('SYMPTOM')}
+              onClick={() => setTypeFilter('SYMPTOM')}
               className={
                 activeType === 'SYMPTOM'
                   ? 'inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'
@@ -642,7 +681,7 @@ export default function AdminMedicalContentPage() {
             </button>
             <button
               type='button'
-              onClick={() => setActiveType('GENERAL_ADVICE')}
+              onClick={() => setTypeFilter('GENERAL_ADVICE')}
               className={
                 activeType === 'GENERAL_ADVICE'
                   ? 'inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'
@@ -654,14 +693,14 @@ export default function AdminMedicalContentPage() {
             </button>
             <button
               type='button'
-              onClick={() => setActiveType('NEWS')}
+              onClick={() => setTypeFilter('NEWS')}
               className={
                 activeType === 'NEWS'
                   ? 'inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white'
                   : 'inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]'
               }
             >
-              <Pill className='h-4 w-4 text-[#667085]' />
+              <Newspaper className='h-4 w-4 text-[#667085]' />
               الأخبار
             </button>
           </div>
