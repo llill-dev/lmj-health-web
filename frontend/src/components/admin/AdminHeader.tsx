@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   Bell,
   Search,
@@ -10,7 +10,7 @@ import {
   LogOut,
   Loader2,
 } from 'lucide-react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { getAdminPageMeta } from '@/constant/adminPageMeta';
 import { useAdminUnreadNotificationCount } from '@/hooks/useAdminNotifications';
@@ -20,17 +20,21 @@ type Props = {
   title?: string;
   subtitle?: string;
   searchPlaceholder?: string;
+  /** فتح حوار التأكيد (التسجيل الفعلي في الـ layout) */
+  onLogoutClick: () => void;
+  /** أثناء تنفيذ تسجيل الخروج من الـ layout */
+  loggingOut?: boolean;
 };
 
 export default function AdminHeader({
   title: titleOverride,
   subtitle: subtitleOverride,
   searchPlaceholder = 'بحث سريع… اضغط إدخال للانتقال إلى المرضى',
+  onLogoutClick,
+  loggingOut = false,
 }: Props) {
-  const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
-  const [loggingOut, setLoggingOut] = useState(false);
 
   const { data: unreadTotal, isFetching: unreadLoading } =
     useAdminUnreadNotificationCount();
@@ -52,16 +56,6 @@ export default function AdminHeader({
         ? '99+'
         : String(unreadTotal)
       : null;
-
-  async function handleLogout() {
-    setLoggingOut(true);
-    try {
-      await useAuthStore.getState().logout();
-      navigate('/login', { replace: true });
-    } finally {
-      setLoggingOut(false);
-    }
-  }
 
   return (
     <header
@@ -142,7 +136,7 @@ export default function AdminHeader({
         <button
           type='button'
           disabled={loggingOut}
-          onClick={() => void handleLogout()}
+          onClick={onLogoutClick}
           className='flex justify-center items-center w-10 h-10 bg-white rounded-lg border border-gray-200 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60'
           aria-label='تسجيل الخروج'
           title='تسجيل الخروج'

@@ -1,27 +1,13 @@
 import type { ChangeEvent, ComponentType, ReactNode } from 'react';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { CloudUpload, Settings } from 'lucide-react';
 import { get } from '@/lib/base';
 import { adminApi } from '@/lib/admin/client';
 import { notificationsApi } from '@/lib/notifications/client';
-
-type AdminLocalSettings = {
-  general: {
-    appName: string;
-    appDescription: string;
-  };
-  logo: {
-    initials: string;
-    dataUrl: string | null;
-  };
-  notifications: {
-    appointments: boolean;
-    registrations: boolean;
-    requests: boolean;
-  };
-};
+import { useAdminAppSettings } from '@/contexts/AdminAppSettingsContext';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
 
 type SectionState = 'idle' | 'saved';
 type SaveStates = Record<'general' | 'logo', SectionState>;
@@ -31,78 +17,6 @@ type HealthResponse = {
   status?: string;
   storage?: string;
 };
-
-const SETTINGS_STORAGE_KEY = 'admin.settings.v1';
-
-const DEFAULT_SETTINGS: AdminLocalSettings = {
-  general: {
-    appName: 'LMJ HEALTH',
-    appDescription: 'منصة طبية متكاملة',
-  },
-  logo: {
-    initials: 'LMJ',
-    dataUrl: null,
-  },
-  notifications: {
-    appointments: true,
-    registrations: true,
-    requests: true,
-  },
-};
-
-function loadSettingsFromStorage(): AdminLocalSettings {
-  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
-
-  try {
-    const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    const parsed = JSON.parse(raw) as Partial<AdminLocalSettings>;
-    return {
-      general: {
-        ...DEFAULT_SETTINGS.general,
-        ...(parsed.general ?? {}),
-      },
-      logo: {
-        ...DEFAULT_SETTINGS.logo,
-        ...(parsed.logo ?? {}),
-      },
-      notifications: {
-        ...DEFAULT_SETTINGS.notifications,
-        ...(parsed.notifications ?? {}),
-      },
-    };
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-}
-
-function Toggle({
-  checked,
-  onChange,
-  disabled,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  disabled?: boolean;
-}) {
-  const id = useId();
-
-  return (
-    <input
-      id={id}
-      type='checkbox'
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-      disabled={disabled}
-      className={
-        disabled
-          ? "relative h-[18px] w-[34px] cursor-not-allowed appearance-none rounded-full bg-[#E5E7EB] opacity-70 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:shadow-[0_4px_10px_rgba(0,0,0,0.12)]"
-          : "relative h-[18px] w-[34px] cursor-pointer appearance-none rounded-full bg-[#E5E7EB] transition-[background-color,box-shadow] duration-300 ease-smooth after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:shadow-[0_4px_10px_rgba(0,0,0,0.14)] after:transition-[left,background-color,box-shadow] after:duration-300 after:ease-smooth checked:bg-primary checked:shadow-[0_10px_20px_rgba(15,143,139,0.25)] checked:after:left-[18px] checked:after:bg-[#F2FFFE]"
-      }
-      aria-checked={checked}
-    />
-  );
-}
 
 function SectionCard({
   title,
@@ -166,14 +80,18 @@ function Field({
 }
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<AdminLocalSettings>(
-    loadSettingsFromStorage,
-  );
+  const { settings, setSettings, applyGeneral } = useAdminAppSettings();
+  const [draftGeneral, setDraftGeneral] = useState(() => settings.general);
+  const [confirmGeneralOpen, setConfirmGeneralOpen] = useState(false);
   const [saveStates, setSaveStates] = useState<SaveStates>({
     general: 'idle',
     logo: 'idle',
   });
   const logoInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setDraftGeneral(settings.general);
+  }, [settings.general.appName, settings.general.appDescription]);
 
   const weekRange = useMemo(() => {
     const to = new Date();
@@ -220,10 +138,6 @@ export default function AdminSettingsPage() {
     retry: 1,
   });
 
-  useEffect(() => {
-    window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-  }, [settings]);
-
   /** شكل الرد الموثَّق في API-3.pdf: total + notifications[] */
   const unreadCount =
     unreadNotificationsQuery.data?.total ??
@@ -239,13 +153,11 @@ export default function AdminSettingsPage() {
     }, 2200);
   }
 
-  function handleGeneralSave() {
-    const initials =
-      settings.general.appName.trim().slice(0, 3).toUpperCase() || 'LMJ';
-    setSettings((prev) => ({
-      ...prev,
-      logo: prev.logo.dataUrl ? prev.logo : { ...prev.logo, initials },
-    }));
+  function commitGeneralFromDraft() {
+    applyGeneral({
+      appName: draftGeneral.appName,
+      appDescription: draftGeneral.appDescription,
+    });
     markSaved('general');
   }
 
@@ -278,7 +190,7 @@ export default function AdminSettingsPage() {
   return (
     <>
       <Helmet>
-        <title>الإعدادات • LMJ Health</title>
+        <title>الإعدادات • {settings.general.appName}</title>
       </Helmet>
 
       <div
@@ -333,28 +245,22 @@ export default function AdminSettingsPage() {
               <div className='space-y-4'>
                 <Field
                   label='اسم التطبيق'
-                  value={settings.general.appName}
+                  value={draftGeneral.appName}
                   onChange={(v) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      general: { ...prev.general, appName: v },
-                    }))
+                    setDraftGeneral((d) => ({ ...d, appName: v }))
                   }
                 />
                 <Field
                   label='وصف التطبيق'
-                  value={settings.general.appDescription}
+                  value={draftGeneral.appDescription}
                   onChange={(v) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      general: { ...prev.general, appDescription: v },
-                    }))
+                    setDraftGeneral((d) => ({ ...d, appDescription: v }))
                   }
                 />
                 <div className='flex justify-start pt-1'>
                   <button
                     type='button'
-                    onClick={handleGeneralSave}
+                    onClick={() => setConfirmGeneralOpen(true)}
                     className='inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)]'
                   >
                     حفظ التغييرات
@@ -416,6 +322,30 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmActionDialog
+        open={confirmGeneralOpen}
+        onOpenChange={setConfirmGeneralOpen}
+        variant='primary'
+        title='تأكيد حفظ الإعدادات العامة'
+        icon={<Settings className='h-6 w-6' strokeWidth={2} aria-hidden />}
+        description={
+          <>
+            سيتُحدَّث الشريط الجانبي مباشرة بقيم:{' '}
+            <span className='font-extrabold text-[#344054]'>اسم التطبيق</span> و
+            <span className='font-extrabold text-[#344054]'>الوصف</span>، وتُحفظان محلياً
+            عبر
+            {` `}
+            <span className='font-extrabold'>localStorage</span> ليبقيا بعد إعادة تحميل
+            الصفحة.
+          </>
+        }
+        cancelLabel='ليس الآن'
+        confirmLabel='نعم، احفظ'
+        onConfirm={async () => {
+          commitGeneralFromDraft();
+        }}
+      />
     </>
   );
 }

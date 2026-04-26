@@ -9,6 +9,7 @@ import {
   type AdminSidebarItemId,
   type SidebarItemId,
 } from '@/constant/sidebar-items';
+import { useAdminBrandingForSidebar } from '@/contexts/AdminAppSettingsContext';
 
 export default function Sidebar({
   active,
@@ -26,6 +27,14 @@ export default function Sidebar({
   const navItems = useMemo(() => {
     return role === 'admin' ? adminSidebarItems : sidebarItems;
   }, [role]);
+
+  const adminBranding = useAdminBrandingForSidebar();
+  const brandTitle =
+    role === 'admin' ? adminBranding.appName.trim() || 'LMJ HEALTH' : 'LMJ HEALTH';
+  const brandSubtitle =
+    role === 'admin'
+      ? adminBranding.appDescription.trim() || 'بوابة الإدارة'
+      : 'بوابة الطبيب';
 
   const basePath = role === 'admin' ? '/admin' : '/doctor';
 
@@ -55,15 +64,26 @@ export default function Sidebar({
             <div className='flex items-center gap-2'>
               {!collapsed ? (
                 <>
-                  <div className='mt-0.5 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
-                    <Stethoscope className='h-6 w-6 text-white' />
+                  <div className='mt-0.5 flex h-[44px] w-[44px] shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
+                    {role === 'admin' && adminBranding.logo.dataUrl ? (
+                      <img
+                        src={adminBranding.logo.dataUrl}
+                        alt=''
+                        className='h-full w-full object-cover'
+                      />
+                    ) : (
+                      <Stethoscope className='h-6 w-6 text-white' aria-hidden />
+                    )}
                   </div>
-                  <div className='flex flex-col items-center text-center'>
-                    <div className='font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
-                      LMJ HEALTH
+                  <div className='flex min-w-0 flex-col items-center text-center'>
+                    <div className='max-w-[200px] truncate font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
+                      {brandTitle}
                     </div>
-                    <div className='mt-1 font-cairo text-[12px] font-bold leading-[14px] text-primary'>
-                      {role === 'admin' ? 'بوابة الإدارة' : 'بوابة الطبيب'}
+                    <div
+                      className='mt-1 max-w-[220px] line-clamp-2 font-cairo text-[12px] font-bold leading-[14px] text-primary'
+                      title={brandSubtitle}
+                    >
+                      {brandSubtitle}
                     </div>
                   </div>
                 </>
@@ -91,10 +111,20 @@ export default function Sidebar({
           {!collapsed ? (
             <div className='mt-6 rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
               <div className='flex items-center gap-3'>
-                <div className='flex h-[46px] w-[46px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15,143,139,0.30)]'>
-                  <span className='font-cairo text-[18px] font-extrabold leading-none'>
-                    {role === 'admin' ? 'م' : 'د'}
-                  </span>
+                <div className='flex h-[46px] w-[46px] items-center justify-center overflow-hidden rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15,143,139,0.30)]'>
+                  {role === 'admin' && adminBranding.logo.dataUrl ? (
+                    <img
+                      src={adminBranding.logo.dataUrl}
+                      alt=''
+                      className='h-full w-full object-cover'
+                    />
+                  ) : (
+                    <span className='font-cairo text-[18px] font-extrabold leading-none'>
+                      {role === 'admin'
+                        ? (adminBranding.appName.trim().charAt(0) || 'م')
+                        : 'د'}
+                    </span>
+                  )}
                 </div>
                 <div className='flex-1'>
                   <div className='text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]'>
