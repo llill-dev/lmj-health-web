@@ -390,9 +390,9 @@ export const adminApi = {
   medicalOrderCatalog: {
     list: async (params: AdminMedicalOrderCatalogListParams) => {
       const qs = new URLSearchParams();
-      qs.set('type', params.type);
       if (params.search?.trim()) qs.set('search', params.search.trim());
-      const endpoint = `${adminEndpoints.medicalOrderCatalog.list}?${qs.toString()}`;
+      const base = adminEndpoints.orderCatalog.collection(params.type);
+      const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
       try {
         const raw = await get<
           AdminMedicalOrderCatalogListResponse | Record<string, unknown>
@@ -411,21 +411,22 @@ export const adminApi = {
     },
     create: (body: AdminMedicalOrderCatalogUpsertBody) =>
       post<AdminMedicalOrderCatalogMutationResponse>(
-        adminEndpoints.medicalOrderCatalog.create,
-        body,
+        adminEndpoints.orderCatalog.collection(body.kind),
+        { label: body.label },
         { locale: 'ar' },
       ),
     update: (
+      kind: MedicalOrderCatalogKind,
       id: string,
       body: Pick<AdminMedicalOrderCatalogUpsertBody, 'label'>,
     ) =>
       patch<AdminMedicalOrderCatalogMutationResponse>(
-        adminEndpoints.medicalOrderCatalog.update(id),
+        adminEndpoints.orderCatalog.item(kind, id),
         body,
         { locale: 'ar' },
       ),
-    remove: (id: string) =>
-      del<ApiSuccessEnvelope>(adminEndpoints.medicalOrderCatalog.remove(id), {
+    remove: (kind: MedicalOrderCatalogKind, id: string) =>
+      del<ApiSuccessEnvelope>(adminEndpoints.orderCatalog.item(kind, id), {
         locale: 'ar',
       }),
   },

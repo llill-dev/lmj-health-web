@@ -1,3 +1,22 @@
+import type { MedicalOrderCatalogKind } from '@/lib/admin/types';
+
+function orderCatalogSegment(kind: MedicalOrderCatalogKind): string {
+  switch (kind) {
+    case 'lab':
+      return 'lab-tests';
+    case 'imaging':
+      return 'imaging';
+    case 'procedure':
+      return 'procedures';
+    case 'referral':
+      return 'referrals';
+    default: {
+      const _ex: never = kind;
+      return _ex;
+    }
+  }
+}
+
 export const adminEndpoints = {
   doctors: {
     list: '/api/admin/doctors',
@@ -60,10 +79,13 @@ export const adminEndpoints = {
     publish: (id: string) => `/api/admin/content/${id}/publish`,
     archive: (id: string) => `/api/admin/content/${id}/archive`,
   },
-  medicalOrderCatalog: {
-    list: '/api/admin/medical-order-catalog',
-    create: '/api/admin/medical-order-catalog',
-    update: (id: string) => `/api/admin/medical-order-catalog/${id}`,
-    remove: (id: string) => `/api/admin/medical-order-catalog/${id}`,
+  /**
+   * كتالوج الطلبات الطبية — مسار لكل فئة (API-3: GET/POST /admin/order-catalog/lab-tests|imaging|procedures|…).
+   */
+  orderCatalog: {
+    collection: (kind: MedicalOrderCatalogKind) =>
+      `/api/admin/order-catalog/${orderCatalogSegment(kind)}`,
+    item: (kind: MedicalOrderCatalogKind, id: string) =>
+      `/api/admin/order-catalog/${orderCatalogSegment(kind)}/${id}`,
   },
 } as const;
