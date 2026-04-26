@@ -616,6 +616,7 @@ export default function AdminDashboardPage() {
                 {contentRows.map((item) => {
                   const st = contentStatusLabel(item.status);
                   const views = item.viewCount ?? item.views ?? 0;
+                  const canArchive = item.status === 'PUBLISHED';
                   return (
                     <li key={item._id}>
                       <div className='rounded-[12px] border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-4 sm:px-5 sm:py-5'>
@@ -653,8 +654,15 @@ export default function AdminDashboardPage() {
                           <div className='flex gap-2 justify-end shrink-0 lg:pt-1'>
                             <button
                               type='button'
-                              disabled={archiveContent.isPending}
-                              onClick={() => setArchiveTarget(item)}
+                              disabled={!canArchive || archiveContent.isPending}
+                              title={
+                                canArchive
+                                  ? 'أرشفة (للمحتوى المنشور فقط)'
+                                  : 'الأرشفة متاحة للعناصر ذات حالة «منشور» فقط'
+                              }
+                              onClick={() => {
+                                if (canArchive) setArchiveTarget(item);
+                              }}
                               className='flex h-10 w-10 items-center justify-center rounded-full border border-[#FECACA] bg-white text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50'
                               aria-label='أرشفة'
                             >
