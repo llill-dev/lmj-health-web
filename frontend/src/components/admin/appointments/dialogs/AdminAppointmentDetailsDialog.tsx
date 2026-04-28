@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
-import CancelAppointmentDialog from '@/components/admin/dialogs/CancelAppointmentDialog';
+import CancelAppointmentDialog from './CancelAppointmentDialog';
 import { useState } from 'react';
 
 export default function AdminAppointmentDetailsDialog({

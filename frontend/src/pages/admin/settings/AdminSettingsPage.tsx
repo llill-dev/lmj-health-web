@@ -1,4 +1,4 @@
-import type { ChangeEvent, ComponentType, ReactNode } from 'react';
+import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +8,8 @@ import { adminApi } from '@/lib/admin/client';
 import { notificationsApi } from '@/lib/notifications/client';
 import { useAdminAppSettings } from '@/contexts/AdminAppSettingsContext';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import SettingsField from '@/components/admin/settings/SettingsField';
+import SettingsSectionCard from '@/components/admin/settings/SettingsSectionCard';
 
 type SectionState = 'idle' | 'saved';
 type SaveStates = Record<'general' | 'logo', SectionState>;
@@ -17,67 +19,6 @@ type HealthResponse = {
   status?: string;
   storage?: string;
 };
-
-function SectionCard({
-  title,
-  icon: Icon,
-  children,
-  className = '',
-}: {
-  title: string;
-  icon: ComponentType<{ className?: string }>;
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={`overflow-hidden rounded-[14px] border border-[#EAECF0] bg-white shadow-[0_10px_24px_rgba(0,0,0,0.05)] ${className}`}
-    >
-      <div className='flex justify-between items-center px-6 py-4 md:px-7'>
-        <div className='flex gap-2 items-center text-right'>
-          <div className='flex h-7 w-7 items-center justify-center rounded-[8px] bg-primary/10'>
-            <Icon className='w-4 h-4 text-primary' />
-          </div>
-          <div className='font-cairo text-[14px] font-black text-[#111827]'>
-            {title}
-          </div>
-        </div>
-      </div>
-      <div className='border-t border-[#EAECF0] px-6 py-5 md:px-7'>
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function Field({
-  label,
-  placeholder,
-  value,
-  onChange,
-  type = 'text',
-}: {
-  label: string;
-  placeholder?: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-}) {
-  return (
-    <div className='space-y-2'>
-      <div className='text-right font-cairo text-[12px] font-bold text-[#344054]'>
-        {label}
-      </div>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className='h-[40px] w-full rounded-[8px] border border-[#EAECF0] bg-white px-4 font-cairo text-[12px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3] focus:border-[#BFEDEC] focus:ring-2 focus:ring-[#16C5C020]'
-      />
-    </div>
-  );
-}
 
 export default function AdminSettingsPage() {
   const { settings, setSettings, applyGeneral } = useAdminAppSettings();
@@ -253,20 +194,20 @@ export default function AdminSettingsPage() {
           </section>
 
           <div className='grid grid-cols-1 gap-6 xl:grid-cols-12'>
-            <SectionCard
+            <SettingsSectionCard
               title='الإعدادات العامة'
               icon={Settings}
               className='xl:col-span-7'
             >
               <div className='space-y-4'>
-                <Field
+                <SettingsField
                   label='اسم التطبيق'
                   value={draftGeneral.appName}
                   onChange={(v) =>
                     setDraftGeneral((d) => ({ ...d, appName: v }))
                   }
                 />
-                <Field
+                <SettingsField
                   label='وصف التطبيق'
                   value={draftGeneral.appDescription}
                   onChange={(v) =>
@@ -288,9 +229,9 @@ export default function AdminSettingsPage() {
                   </div>
                 ) : null}
               </div>
-            </SectionCard>
+            </SettingsSectionCard>
 
-            <SectionCard
+            <SettingsSectionCard
               title='شعار التطبيق'
               icon={CloudUpload}
               className='xl:col-span-5'
@@ -334,7 +275,7 @@ export default function AdminSettingsPage() {
                   ) : null}
                 </div>
               </div>
-            </SectionCard>
+            </SettingsSectionCard>
           </div>
         </div>
       </div>

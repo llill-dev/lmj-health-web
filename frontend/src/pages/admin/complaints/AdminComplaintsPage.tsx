@@ -8,11 +8,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
-  Check,
   ChevronLeft,
   ChevronsLeft,
   ChevronsRight,
-  FileText,
   MessageSquare,
   Search,
   SlidersHorizontal,
@@ -20,168 +18,16 @@ import {
 } from 'lucide-react';
 import { staggerContainer, staggerItem } from '@/motion';
 import { adminApi } from '@/lib/admin/client';
-import type {
-  AdminComplaintListItem,
-  ComplaintLifecycleStatus,
-  ComplaintType,
-} from '@/lib/admin/types';
-
-function complaintTypeAr(t: ComplaintType): string {
-  const m: Record<ComplaintType, string> = {
-    appointment: 'موعد',
-    consultation: 'استشارة',
-    access_request: 'طلب وصول',
-    technical: 'تقني',
-    other: 'أخرى',
-  };
-  return m[t] ?? t;
-}
-
-function statusBadgeClasses(status: ComplaintLifecycleStatus) {
-  switch (status) {
-    case 'resolved':
-    case 'closed':
-      return 'bg-[#00C950] border-[#00C950] text-white';
-    case 'under_review':
-    case 'in_progress':
-      return 'bg-[#4A5565] border-[#4A5565] text-white';
-    case 'submitted':
-    default:
-      return 'bg-amber-100 border-amber-300 text-amber-950';
-  }
-}
-
-function statusLabelAr(s: ComplaintLifecycleStatus): string {
-  const m: Record<ComplaintLifecycleStatus, string> = {
-    submitted: 'مقدّمة',
-    under_review: 'قيد المراجعة',
-    in_progress: 'قيد المعالجة',
-    resolved: 'تم الحل',
-    closed: 'مغلقة',
-  };
-  return m[s] ?? s;
-}
-
-function formatListTime(iso?: string) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  const now = new Date();
-  const sameDay =
-    d.getFullYear() === now.getFullYear() &&
-    d.getMonth() === now.getMonth() &&
-    d.getDate() === now.getDate();
-  const time = d.toLocaleTimeString('ar-SY', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-  return sameDay ? `اليوم ${time}` : d.toLocaleDateString('ar-SY');
-}
-
-function listPreviewLine(c: AdminComplaintListItem) {
-  const sub = c.subject?.trim();
-  if (sub) return sub;
-  if (c.message.length > 100) return `${c.message.slice(0, 100)}…`;
-  return c.message;
-}
-
-/** Top statistics row — icon tile + label + number. */
-function ComplaintsSummaryStatCard({
-  variant,
-  value,
-  delay = 0,
-}: {
-  variant: 'total' | 'closed' | 'review';
-  value: number;
-  delay?: number;
-}) {
-  const label =
-    variant === 'total'
-      ? 'إجمالي الشكاوي'
-      : variant === 'closed'
-        ? 'مغلقة'
-        : 'قيد المراجعة';
-
-  const icon =
-    variant === 'total' ? (
-      <div className='flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[10px] bg-[#106d6b] shadow-inner'>
-        <FileText
-          className='h-7 w-7 text-white'
-          strokeWidth={2}
-        />
-      </div>
-    ) : variant === 'closed' ? (
-      <div className='flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[10px] bg-[#22c55e] shadow-[0_4px_12px_rgba(34,197,94,0.35)]'>
-        <div className='flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm'>
-          <Check
-            className='h-5 w-5 text-[#16a34a]'
-            strokeWidth={3}
-          />
-        </div>
-      </div>
-    ) : (
-      <div className='flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[10px] bg-[#4A5565] shadow-inner'>
-        <div className='flex h-9 w-9 items-center justify-center rounded-full bg-white'>
-          <span className='font-cairo text-[17px] font-black leading-none text-[#4A5565]'>
-            !
-          </span>
-        </div>
-      </div>
-    );
-
-  const shell =
-    variant === 'total'
-      ? 'border border-[#3db0ad]/50 bg-[#148283] shadow-[0_12px_32px_rgba(20,130,131,0.28)]'
-      : variant === 'closed'
-        ? 'border border-emerald-200/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.06)] ring-1 ring-emerald-100/80'
-        : 'border border-[#E5E7EB] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.06)]';
-
-  const labelClass =
-    variant === 'total'
-      ? 'text-[13px] font-bold text-[#c8f2ef]'
-      : 'text-[13px] font-bold text-[#64748B]';
-
-  const valueClass =
-    variant === 'total'
-      ? 'text-[32px] font-black tabular-nums leading-none tracking-tight text-[#ecfffe]'
-      : 'text-[32px] font-black tabular-nums leading-none tracking-tight text-[#0F172A]';
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay }}
-      whileHover={{
-        y: -3,
-        transition: { duration: 0.2 },
-      }}
-      className={`relative overflow-hidden rounded-xl px-5 py-5 ${shell}`}
-    >
-      <div
-        dir='ltr'
-        className='flex items-center gap-4'
-      >
-        {icon}
-        <div
-          dir='rtl'
-          className='flex min-w-0 flex-1 flex-col gap-1 text-right'
-        >
-          <div className={`font-cairo ${labelClass}`}>{label}</div>
-          <div className={`font-cairo ${valueClass}`}>{value}</div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-const COMPLAINT_TYPES: ComplaintType[] = [
-  'appointment',
-  'consultation',
-  'access_request',
-  'technical',
-  'other',
-];
+import type { ComplaintLifecycleStatus, ComplaintType } from '@/lib/admin/types';
+import ComplaintsSummaryStatCard from '@/components/admin/complaints/ComplaintsSummaryStatCard';
+import {
+  COMPLAINT_TYPES,
+  complaintTypeAr,
+  formatListTime,
+  listPreviewLine,
+  statusBadgeClasses,
+  statusLabelAr,
+} from '@/components/admin/complaints/complaintsListUtils';
 
 export default function AdminComplaintsPage() {
   const navigate = useNavigate();

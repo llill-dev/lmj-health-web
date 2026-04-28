@@ -16,137 +16,17 @@ import {
   useRecentAppointments,
   useTopApprovedDoctors,
 } from '@/hooks/useAdminAnalytics';
-import type { AppointmentSummary } from '@/lib/admin/types';
-
-/* ─── helpers ──────────────────────────────────────────────── */
-const SPECIALIZATION_AR: Record<string, string> = {
-  Cardiology: 'القلب',
-  Dermatology: 'الجلدية',
-  Pediatrics: 'الأطفال',
-  Neurology: 'الأعصاب',
-  Orthopedics: 'العظام',
-  Gynecology: 'النساء والتوليد',
-  Ophthalmology: 'العيون',
-  Urology: 'المسالك البولية',
-  Psychiatry: 'الطب النفسي',
-  'Internal Medicine': 'الباطنة',
-  Surgery: 'الجراحة',
-  Oncology: 'الأورام',
-  Endocrinology: 'الغدد',
-  Pulmonology: 'الرئة',
-  Gastroenterology: 'الجهاز الهضمي',
-};
-
-function localizeSpec(spec?: string) {
-  if (!spec) return '—';
-  return SPECIALIZATION_AR[spec] ?? spec;
-}
-
-const STATUS_LABEL: Record<AppointmentSummary['status'], string> = {
-  scheduled: 'مجدول',
-  rescheduled: 'معاد جدولته',
-  completed: 'مكتمل',
-  cancelled: 'ملغى',
-  'no-show': 'غياب',
-};
-
-const STATUS_COLOR: Record<AppointmentSummary['status'], string> = {
-  scheduled: 'bg-[#E0F2FE] text-[#0369A1]',
-  rescheduled: 'bg-[#FEF9C3] text-[#854D0E]',
-  completed: 'bg-[#DCFCE7] text-[#15803D]',
-  cancelled: 'bg-[#FEE2E2] text-[#B91C1C]',
-  'no-show': 'bg-[#F3F4F6] text-[#6B7280]',
-};
-
-function formatDateTime(appt: AppointmentSummary): string {
-  const raw = appt.startDateTime ?? appt.date;
-  if (!raw) return '—';
-  try {
-    return new Intl.DateTimeFormat('ar-EG', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }).format(new Date(raw));
-  } catch {
-    return raw;
-  }
-}
-
-/* ─── skeleton ──────────────────────────────────────────────── */
-function StatCardSkeleton() {
-  return (
-    <div className='h-[147px] animate-pulse rounded-[12px] border border-[#EEF2F6] bg-[#F9FAFB]' />
-  );
-}
-
-function TableRowSkeleton({ cols }: { cols: number }) {
-  return (
-    <tr>
-      {Array.from({ length: cols }).map((_, i) => (
-        <td
-          key={i}
-          className='px-4 py-4'
-        >
-          <div className='h-3 animate-pulse rounded bg-[#EEF2F6]' />
-        </td>
-      ))}
-    </tr>
-  );
-}
-
-/* ─── stat card ─────────────────────────────────────────────── */
-type StatCardProps = {
-  title: string;
-  value: number | string;
-  icon: React.ElementType;
-  border: string;
-  bg: string;
-  iconColor: string;
-  sub?: string;
-  subColor?: string;
-  loading?: boolean;
-};
-
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  border,
-  bg,
-  iconColor,
-  sub,
-  subColor = 'text-[#667085]',
-  loading,
-}: StatCardProps) {
-  return (
-    <div
-      className={`h-[147px] rounded-[12px] border px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${border} ${bg}`}
-    >
-      <div className='flex items-start justify-between'>
-        <div className='text-right'>
-          <div className='font-cairo text-[12px] font-extrabold text-[#667085]'>
-            {title}
-          </div>
-          {loading ? (
-            <div className='mt-2 h-7 w-20 animate-pulse rounded bg-[#EEF2F6]' />
-          ) : (
-            <div className='mt-2 font-cairo text-[26px] font-black leading-[30px] text-[#111827]'>
-              {typeof value === 'number' ? value.toLocaleString('ar-EG') : value}
-            </div>
-          )}
-          {sub && (
-            <div className={`mt-2 font-cairo text-[11px] font-extrabold ${subColor}`}>
-              {sub}
-            </div>
-          )}
-        </div>
-        <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[12px] bg-white shadow-sm'>
-          <Icon className={`h-6 w-6 ${iconColor}`} />
-        </div>
-      </div>
-    </div>
-  );
-}
+import StatCard from '@/components/admin/analytics/StatCard';
+import {
+  StatCardSkeleton,
+  TableRowSkeleton,
+} from '@/components/admin/analytics/AnalyticsSkeletons';
+import {
+  formatDateTime,
+  localizeSpec,
+  STATUS_COLOR,
+  STATUS_LABEL,
+} from '@/components/admin/analytics/analyticsUtils';
 
 /* ─── page ──────────────────────────────────────────────────── */
 export default function AdminAnalyticsPage() {

@@ -11,52 +11,19 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import CancelAppointmentDialog from '@/components/admin/appointments/dialogs/CancelAppointmentDialog';
+import AdminAppointmentDetailsDialog from '@/components/admin/appointments/dialogs/AdminAppointmentDetailsDialog';
 import {
-  ConfirmActionDialog,
-  CancelAppointmentDialog,
-} from '../../../components/admin/dialogs';
-import AdminAppointmentDetailsDialog from '@/components/admin/dialogs/AdminAppointmentDetailsDialog';
+  formatDateLabel,
+  statusLabel,
+  statusPill,
+  type UiAppointmentCard,
+} from '@/components/admin/appointments/appointmentListUtils';
 import { adminApi } from '@/lib/admin/client';
 
 import { useAdminAppointments } from '@/hooks/useAdminAppointments';
-import type { AppointmentStatus, AppointmentSummary } from '@/lib/admin/types';
-
-type UiAppointmentCard = {
-  id: string;
-  status: AppointmentStatus;
-  typeLabel: 'clinic';
-  code: string;
-  doctorName: string;
-  doctorSpecialization?: string;
-  dateLabel: string;
-  patientLabel: string;
-  time: string;
-};
-
-const statusLabel: Record<AppointmentStatus, string> = {
-  scheduled: 'مجدولة',
-  rescheduled: 'معاد جدولتها',
-  completed: 'مكتملة',
-  cancelled: 'ملغية',
-  'no-show': 'عدم حضور',
-};
-
-const statusPill: Record<AppointmentStatus, string> = {
-  completed: 'bg-[#DCFCE7] text-[#16A34A]',
-  'no-show': 'bg-[#F3F4F6] text-[#4B5563]',
-  cancelled: 'bg-[#FEF2F2] text-[#EF4444]',
-  scheduled: 'bg-[#E0F2FE] text-[#0284C7]',
-  rescheduled: 'bg-[#E0F2FE] text-[#0284C7]',
-};
-
-function formatDateLabel(a: AppointmentSummary) {
-  const iso = a.date ?? a.startDateTime;
-  if (!iso) return '—';
-
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toISOString().slice(0, 10);
-}
+import type { AppointmentStatus } from '@/lib/admin/types';
 
 export default function AdminAppointmentsPage() {
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);

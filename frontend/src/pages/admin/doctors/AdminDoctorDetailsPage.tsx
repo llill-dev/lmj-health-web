@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ban, CheckCircle2, MapPin } from 'lucide-react';
@@ -12,7 +12,8 @@ import {
 } from '@/lib/admin/doctorAdminAnalytics';
 import type { AdminDoctorDetailsDoctor, AdminDoctorAnalyticsRange } from '@/lib/admin/types';
 import { AdminDoctorAnalyticsPanels } from '@/components/admin/doctor/AdminDoctorAnalyticsPanels';
-import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVerificationRequestDialog';
+import { FieldBlock, SectionTitle } from '@/components/admin/doctors/DoctorDetailsPrimitives';
+import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
 
 
 function requestStillOpen(status: string | undefined): boolean {
@@ -71,27 +72,6 @@ function coordsToLatLng(d: AdminDoctorDetailsDoctor) {
     };
   const [lng, lat] = c;
   return { lat: String(lat), lng: String(lng) };
-}
-
-function FieldBlock({ label, value }: { label: string; value: string }) {
-  return (
-    <div className='flex flex-col gap-0.5 text-right sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-0'>
-      <div className='shrink-0 font-cairo text-sm font-semibold leading-snug text-primary sm:text-base md:text-lg lg:text-[22px] lg:leading-[28px]'>
-        {label} :
-      </div>
-      <div className='min-w-0 break-words font-cairo text-sm font-medium leading-relaxed text-[#1F2937] sm:text-base md:text-lg lg:text-[22px] lg:leading-[28px]'>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function SectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <h2 className='mb-2 text-xl font-bold leading-snug text-primary sm:mb-3 sm:text-2xl md:text-[25px] md:leading-[35px]'>
-      {children}
-    </h2>
-  );
 }
 
 export default function AdminDoctorDetailsPage() {
