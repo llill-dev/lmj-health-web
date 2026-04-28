@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVerificationRequestDialog';
+import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
 import { adminApi } from '@/lib/admin/client';
 
 export default function AdminVerificationRequestsPage() {

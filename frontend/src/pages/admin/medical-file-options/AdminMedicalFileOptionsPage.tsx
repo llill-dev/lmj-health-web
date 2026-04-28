@@ -5,9 +5,9 @@ import {
   FileCog,
   Heart,
   Plus,
-  Trash2,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { MedicalFileOptionCard } from '@/components/admin/medical-file-options/MedicalFileOptionCard';
 
 export default function AdminMedicalFileOptionsPage() {
   const chronicDiseases = useMemo(
@@ -49,113 +49,49 @@ export default function AdminMedicalFileOptionsPage() {
           </div>
 
           <div className='mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3'>
-            <div className='rounded-[10px] border border-[#16C5C0] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.18)]'>
-              <div className='flex items-center justify-between rounded-t-[10px] bg-[#E7FBFA] px-5 py-4'>
-                <div className='font-cairo text-[14px] font-extrabold text-primary'>
-                  الأمراض المزمنة
-                </div>
-                <Heart className='h-5 w-5 text-primary' />
-              </div>
-
-              <div className='px-5 py-4'>
-                <div className='space-y-2'>
-                  {chronicDiseases.map((d) => (
-                    <div
-                      key={d}
-                      className='flex h-[40px] items-center justify-between rounded-[6px] bg-[#EFF6FF] px-4'
-                    >
-                      <div className='font-cairo text-[12px] font-bold text-[#667085]'>
-                        {d}
-                      </div>
-                      <button
-                        type='button'
-                        className='flex h-[24px] w-[24px] items-center justify-center rounded-[6px] text-[#EF4444]'
-                        aria-label='حذف'
-                      >
-                        <Trash2 className='h-4 w-4' />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  type='button'
-                  className='mt-4 inline-flex h-[36px] w-full items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[12px] font-extrabold text-primary'
-                >
-                  <Plus className='h-4 w-4' />
-                  إضافة مرض
-                </button>
-              </div>
-            </div>
-
-            <div className='rounded-[10px] border border-[#F59E0B] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.18)]'>
-              <div className='flex items-center justify-between rounded-t-[10px] bg-[#FFF7ED] px-5 py-4'>
-                <div className='font-cairo text-[14px] font-extrabold text-[#F97316]'>
-                  أنواع الحساسية
-                </div>
-                <AlertTriangle className='h-5 w-5 text-[#F97316]' />
-              </div>
-
-              <div className='px-5 py-4'>
-                <div className='space-y-2'>
-                  {allergies.map((a) => (
-                    <div
-                      key={a}
-                      className='flex h-[40px] items-center justify-between rounded-[6px] bg-[#FFF7ED] px-4'
-                    >
-                      <div className='font-cairo text-[12px] font-bold text-[#667085]'>
-                        {a}
-                      </div>
-                      <button
-                        type='button'
-                        className='flex h-[24px] w-[24px] items-center justify-center rounded-[6px] text-[#EF4444]'
-                        aria-label='حذف'
-                      >
-                        <Trash2 className='h-4 w-4' />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  type='button'
-                  className='mt-4 inline-flex h-[36px] w-full items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[12px] font-extrabold text-[#F97316]'
-                >
-                  <Plus className='h-4 w-4' />
-                  إضافة حساسية
-                </button>
-              </div>
-            </div>
-
-            <div className='rounded-[10px] border border-[#FCA5A5] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.18)]'>
-              <div className='flex items-center justify-between rounded-t-[10px] bg-[#FFF1F2] px-5 py-4'>
-                <div className='font-cairo text-[14px] font-extrabold text-[#EF4444]'>
-                  فصائل الدم
-                </div>
-                <Droplets className='h-5 w-5 text-[#EF4444]' />
-              </div>
-
-              <div className='px-5 py-4'>
-                <div className='flex flex-1 flex-wrap justify-end gap-2'>
-                  {bloodTypes.map((b) => (
-                    <span
-                      key={b}
-                      className='inline-flex h-[28px] items-center justify-center rounded-[8px] bg-[#FFE4E6] px-3 font-cairo text-[12px] font-extrabold text-[#EF4444]'
-                    >
-                      {b}
-                    </span>
-                  ))}
-                </div>
-
-                <button
-                  type='button'
-                  className='mt-4 inline-flex h-[36px] w-full items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[12px] font-extrabold text-[#EF4444]'
-                >
-                  <Plus className='h-4 w-4' />
-                  إضافة فصيلة
-                </button>
-              </div>
-            </div>
+            <MedicalFileOptionCard
+              title='الأمراض المزمنة'
+              items={chronicDiseases}
+              icon={Heart}
+              addLabel='إضافة مرض'
+              tone={{
+                border: 'border-[#16C5C0]',
+                headerBg: 'bg-[#E7FBFA]',
+                titleText: 'text-primary',
+                itemBg: 'bg-[#EFF6FF]',
+                itemText: 'text-[#667085]',
+                addText: 'text-primary',
+              }}
+            />
+            <MedicalFileOptionCard
+              title='أنواع الحساسية'
+              items={allergies}
+              icon={AlertTriangle}
+              addLabel='إضافة حساسية'
+              tone={{
+                border: 'border-[#F59E0B]',
+                headerBg: 'bg-[#FFF7ED]',
+                titleText: 'text-[#F97316]',
+                itemBg: 'bg-[#FFF7ED]',
+                itemText: 'text-[#667085]',
+                addText: 'text-[#F97316]',
+              }}
+            />
+            <MedicalFileOptionCard
+              title='فصائل الدم'
+              items={bloodTypes}
+              icon={Droplets}
+              addLabel='إضافة فصيلة'
+              variant='chips'
+              tone={{
+                border: 'border-[#FCA5A5]',
+                headerBg: 'bg-[#FFF1F2]',
+                titleText: 'text-[#EF4444]',
+                itemBg: 'bg-[#FFE4E6]',
+                itemText: 'text-[#EF4444]',
+                addText: 'text-[#EF4444]',
+              }}
+            />
           </div>
 
           <div className='mt-6 rounded-[10px] bg-white px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.18)]'>

@@ -17,70 +17,18 @@ import { useCallback, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useAdminSecretariesList } from '@/hooks/useAdminSecretaries';
 import { useAdminDoctors } from '@/hooks/useAdminDoctors';
-import OffboardDialog from '@/components/admin/dialogs/OffboardDialog';
+import OffboardDialog from '@/components/admin/secretaries/dialogs/OffboardDialog';
+import { SecretaryCardSkeleton } from '@/components/admin/secretaries/SecretaryCardSkeleton';
+import { PERM_LABEL } from '@/components/admin/secretaries/secretaryPermissions';
+import {
+  buildVisiblePageNumbers,
+  resolveUserId,
+} from '@/components/admin/secretaries/secretaryListUtils';
 import { cn } from '@/lib/utils';
 import type { AdminSecretarySummary } from '@/lib/admin/types';
 
 /* ─── permission label map ──────────────────────────────────── */
-const PERM_LABEL: Record<string, string> = {
-  'appointments:book': 'حجز مواعيد',
-  'appointments:view': 'عرض المواعيد',
-  'appointments:edit': 'تعديل المواعيد',
-  'appointments:cancel': 'إلغاء المواعيد',
-  'waitlist:create': 'إنشاء قائمة الانتظار',
-  'waitlist:view': 'عرض قائمة الانتظار',
-  'waitlist:manage': 'إدارة قائمة الانتظار',
-  'waitlist:book': 'حجز من قائمة الانتظار',
-  'patients:view': 'عرض المرضى',
-  'patients:edit': 'تعديل بيانات المرضى',
-  'patients:temporary:create': 'إنشاء مريض مؤقت',
-  'patients:files:view': 'عرض ملفات المرضى',
-  'patients:files:upload': 'رفع ملفات المرضى',
-  'schedule:view': 'عرض الجدول',
-};
-
 /* ─── helpers ──────────────────────────────────────────────── */
-function resolveUserId(s: AdminSecretarySummary): string | null {
-  return s.userId ?? s.user?._id ?? null;
-}
-
-/** نافذة أرقام صفحات (تجنّب عرض 50 زرّاً) */
-function buildVisiblePageNumbers(
-  current: number,
-  total: number,
-  max = 7,
-): number[] {
-  if (total <= 0) return [];
-  if (total <= max) return Array.from({ length: total }, (_, i) => i + 1);
-  const half = Math.floor(max / 2);
-  let start = Math.max(1, current - half);
-  const end = Math.min(total, start + max - 1);
-  if (end - start < max - 1) start = Math.max(1, end - max + 1);
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-}
-
-function CardSkeleton() {
-  return (
-    <div className='animate-pulse rounded-[12px] border border-[#EEF2F6] bg-white p-6 shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
-      <div className='flex justify-between items-start'>
-        <div className='flex gap-3 items-center'>
-          <div className='h-11 w-11 rounded-[8px] bg-[#EEF2F6]' />
-          <div>
-            <div className='h-4 w-36 rounded bg-[#EEF2F6]' />
-            <div className='mt-2 h-3 w-52 rounded bg-[#EEF2F6]' />
-          </div>
-        </div>
-        <div className='h-8 w-24 rounded-[8px] bg-[#EEF2F6]' />
-      </div>
-      <div className='flex gap-4 mt-4'>
-        <div className='h-3 w-32 rounded bg-[#EEF2F6]' />
-        <div className='h-3 w-40 rounded bg-[#EEF2F6]' />
-      </div>
-      <div className='mt-4 h-16 rounded-[10px] bg-[#EEF2F6]' />
-    </div>
-  );
-}
-
 /* ─── page ──────────────────────────────────────────────────── */
 export default function AdminSecretariesPage() {
   const navigate = useNavigate();
@@ -218,9 +166,9 @@ export default function AdminSecretariesPage() {
         <section className='mt-5 space-y-4'>
           {isLoading ? (
             <>
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
+              <SecretaryCardSkeleton />
+              <SecretaryCardSkeleton />
+              <SecretaryCardSkeleton />
             </>
           ) : isError ? (
             <div className='flex flex-col items-center gap-3 rounded-[12px] border border-[#FEE2E2] bg-[#FEF2F2] px-6 py-10 text-center'>

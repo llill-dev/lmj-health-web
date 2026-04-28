@@ -11,131 +11,13 @@ import {
   MapPinned,
   Stethoscope,
 } from 'lucide-react';
-import ReviewVerificationRequestDialog from '@/components/admin/dialogs/ReviewVerificationRequestDialog';
+import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
+import {
+  buildChangeRows,
+  extractRequestFromDetails,
+  formatRequestedAt,
+} from '@/components/admin/verification-requests/verificationRequestDetailsUtils';
 import { adminApi } from '@/lib/admin/client';
-import type { VerificationRequestSummary } from '@/lib/admin/types';
-
-function formatRequestedAt(value?: string) {
-  if (!value) return '—';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return '—';
-  const now = new Date();
-  const sameDay =
-    d.getFullYear() === now.getFullYear() &&
-    d.getMonth() === now.getMonth() &&
-    d.getDate() === now.getDate();
-  const time = d.toLocaleTimeString('ar-SY', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-  return sameDay ? `اليوم ${time}` : d.toLocaleDateString('ar-SY');
-}
-
-type ChangeRow = {
-  key: string;
-  label: string;
-  before: string;
-  after: string;
-};
-
-const FIELD_LABELS: Record<string, string> = {
-  education: 'التعليم',
-  specialization: 'التخصص',
-  medicalLicenseNumber: 'رقم الترخيص',
-  licenseNumber: 'رقم الترخيص',
-  clinicAddress: 'عنوان العيادة',
-  locationCity: 'المدينة',
-  locationCountry: 'الدولة',
-  consultationFee: 'أجرة الاستشارة',
-  bio: 'النبذة التعريفية',
-};
-
-function labelForField(key: string) {
-  return FIELD_LABELS[key] ?? key;
-}
-
-function formatAnyValue(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '—';
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return String(value);
-  }
-  if (Array.isArray(value)) return value.map((v) => formatAnyValue(v)).join('، ');
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return '—';
-  }
-}
-
-function extractRequestFromDetails(details: any): VerificationRequestSummary | null {
-  return (
-    details?.request ??
-    details?.verificationRequest ??
-    details?.item ??
-    details?.data ??
-    null
-  );
-}
-
-function buildChangeRows(request: VerificationRequestSummary | null): ChangeRow[] {
-  if (!request) {
-    return [];
-  }
-
-  const requestAny = request as any;
-  const requestedChanges =
-    requestAny?.requestedChanges ??
-    requestAny?.changes ??
-    requestAny?.profileChanges ??
-    {};
-
-  const doctorSource = requestAny?.doctor ?? {};
-  const rows: ChangeRow[] = [];
-
-  if (requestedChanges && typeof requestedChanges === 'object') {
-    Object.entries(requestedChanges as Record<string, unknown>).forEach(([key, raw]) => {
-      const rawAny = raw as any;
-      if (
-        rawAny &&
-        typeof rawAny === 'object' &&
-        ('before' in rawAny || 'after' in rawAny)
-      ) {
-        rows.push({
-          key,
-          label: labelForField(key),
-          before: formatAnyValue(rawAny.before),
-          after: formatAnyValue(rawAny.after),
-        });
-        return;
-      }
-
-      rows.push({
-        key,
-        label: labelForField(key),
-        before: formatAnyValue(doctorSource?.[key]),
-        after: formatAnyValue(raw),
-      });
-    });
-  }
-
-  if (rows.length === 0) {
-    rows.push({
-      key: 'education',
-      label: 'التعليم',
-      before: formatAnyValue(requestAny?.doctor?.education ?? request.doctor?.specialization),
-      after: formatAnyValue(requestAny?.doctor?.education ?? request.doctor?.specialization),
-    });
-    rows.push({
-      key: 'medicalLicenseNumber',
-      label: 'رقم الترخيص',
-      before: formatAnyValue(request.doctor?.medicalLicenseNumber),
-      after: formatAnyValue(request.doctor?.medicalLicenseNumber),
-    });
-  }
-
-  return rows;
-}
 
 export default function AdminVerificationRequestDetailsPage() {
   const navigate = useNavigate();
@@ -151,7 +33,7 @@ export default function AdminVerificationRequestDetailsPage() {
       if (!requestId) return null;
       try {
         const details = await adminApi.verificationRequests.getById(requestId);
-        const direct = extractRequestFromDetails(details as any);
+        const direct = extractRequestFromDetails(details);
         if (direct?._id) return direct;
       } catch {
         // Fall through to list-based fallback.

@@ -11,21 +11,17 @@ import {
 import { Filter, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import SuspendAccountDialog from '@/components/admin/dialogs/SuspendAccountDialog';
+import SuspendAccountDialog from '@/components/admin/patients/dialogs/SuspendAccountDialog';
+import {
+  patientStatusLabel,
+  patientStatusTone,
+} from '@/components/admin/patients/patientListUtils';
 
 import { useAdminPatients } from '@/hooks/useAdminPatients';
 import type {
   AdminPatientsAccountStatusFilter,
   AdminPatientSummary,
-  PatientAccountStatus,
 } from '@/lib/admin/types';
-
-const statusLabel: Record<PatientAccountStatus, string> = {
-  active: 'نشط',
-  temporary: 'مؤقت',
-  suspended: 'معلق',
-  locked: 'موقوف',
-};
 
 type AdminPatientsFiltersState = {
   account_status: AdminPatientsAccountStatusFilter;
@@ -90,27 +86,6 @@ export default function AdminPatientsPage() {
     filters.page,
     filters.search,
   ]);
-
-  const statusTone = (s: PatientAccountStatus) => {
-    if (s === 'active') {
-      return {
-        chip: 'bg-[#16A34A] text-white',
-      };
-    }
-    if (s === 'temporary') {
-      return {
-        chip: 'bg-[#E0F2FE] text-[#0284C7]',
-      };
-    }
-    if (s === 'suspended') {
-      return {
-        chip: 'bg-[#F59E0B] text-white',
-      };
-    }
-    return {
-      chip: 'bg-[#EF4444] text-white',
-    };
-  };
 
   return (
     <>
@@ -234,7 +209,7 @@ export default function AdminPatientsPage() {
             </div>
           ) : (
             patients.map((p) => {
-              const tone = statusTone(p.user.accountStatus);
+              const tone = patientStatusTone(p.user.accountStatus);
               return (
                 <div
                   key={p._id}
@@ -262,7 +237,7 @@ export default function AdminPatientsPage() {
                           <div
                             className={`inline-flex h-[24px] items-center justify-center rounded-[6px] px-3 font-cairo text-[11px] font-extrabold ${tone.chip}`}
                           >
-                            {statusLabel[p.user.accountStatus]}
+                            {patientStatusLabel[p.user.accountStatus]}
                           </div>
                         </div>
                       </div>

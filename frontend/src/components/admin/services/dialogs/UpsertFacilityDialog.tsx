@@ -104,6 +104,7 @@ export default function UpsertFacilityDialog({
   onOpenChange,
   editTarget,
 }: Props) {
+  const { toast } = useToast();
   const isEdit = !!editTarget;
   const createMutation = useCreateFacility();
   const updateMutation = useUpdateFacility(editTarget?.id ?? '');

@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import MedicalContentViewDialog from '@/components/admin/dialogs/MedicalContentViewDialog';
+import MedicalContentViewDialog from '@/components/admin/medical-content/dialogs/MedicalContentViewDialog';
 import {
   CreateAdminContentDialog,
   ContentRejectDialog,
@@ -48,258 +48,21 @@ import type {
   AdminContentType,
 } from '@/lib/admin/types';
 import { cn } from '@/lib/utils';
-
-const PAGE_SIZE = 20;
-
-type UiContentStatus = 'الكل' | 'منشور' | 'قيد المراجعة' | 'مسودة' | 'مؤرشف';
-type LangFilter = 'الكل' | 'ar' | 'en';
-
-const ADMIN_CONTENT_TYPE_VALUES: AdminContentType[] = [
-  'CONDITION',
-  'SYMPTOM',
-  'GENERAL_ADVICE',
-  'NEWS',
-];
-
-function parseTypeQueryParam(
-  value: string | null,
-): 'الكل' | AdminContentType {
-  if (!value) return 'الكل';
-  return ADMIN_CONTENT_TYPE_VALUES.includes(value as AdminContentType)
-    ? (value as AdminContentType)
-    : 'الكل';
-}
-
-/** تطبيع قيمة اللغة من الـ API (لأحرف متعددة/صيغ مختلقة) */
-function normalizeItemLanguage(raw: unknown): 'ar' | 'en' | 'unknown' {
-  if (raw == null) return 'unknown';
-  const s = String(raw)
-    .trim()
-    .toLowerCase()
-    .normalize('NFKC');
-  if (s.length === 0) return 'unknown';
-  if (
-    s === 'ar' ||
-    s === 'arabic' ||
-    s.startsWith('ar-') ||
-    s.startsWith('ar_') ||
-    s === 'عربي' ||
-    s === 'العربية'
-  ) {
-    return 'ar';
-  }
-  if (
-    s === 'en' ||
-    s === 'english' ||
-    s.startsWith('en-') ||
-    s.startsWith('en_')
-  ) {
-    return 'en';
-  }
-  return 'unknown';
-}
-
-function resolveItemLanguageString(raw: unknown): string {
-  const n = normalizeItemLanguage(raw);
-  if (n === 'ar') return 'ar';
-  if (n === 'en') return 'en';
-  const t = toDisplayText(raw);
-  return t || '—';
-}
-
-function textSearchMatch(hay: string, needle: string) {
-  const n = needle.trim();
-  if (!n) return true;
-  const a = hay.normalize('NFC');
-  const b = n.normalize('NFC');
-  return a.toLowerCase().includes(b.toLowerCase());
-}
-
-function toDisplayText(value: unknown): string {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  if (value && typeof value === 'object') {
-    const obj = value as Record<string, unknown>;
-    const localized = obj.ar ?? obj.en ?? obj.title ?? obj.name ?? obj.value;
-    if (typeof localized === 'string') return localized;
-  }
-  return '';
-}
-
-function toContentStatus(value: unknown): AdminContentStatus {
-  if (value === 'PUBLISHED') return 'PUBLISHED';
-  if (value === 'IN_REVIEW') return 'IN_REVIEW';
-  if (value === 'ARCHIVED') return 'ARCHIVED';
-  return 'DRAFT';
-}
-
-function toContentType(value: unknown): AdminContentType {
-  if (value === 'CONDITION') return 'CONDITION';
-  if (value === 'SYMPTOM') return 'SYMPTOM';
-  if (value === 'GENERAL_ADVICE') return 'GENERAL_ADVICE';
-  if (value === 'NEWS') return 'NEWS';
-  return 'GENERAL_ADVICE';
-}
-
-function normalizeContentItems(payload: unknown): AdminContentItem[] {
-  if (!payload || typeof payload !== 'object') return [];
-  const data = payload as Record<string, unknown>;
-  const candidates = [
-    data.items,
-    data.content,
-    data.contentItems,
-    data.results,
-    data.data,
-  ];
-  for (const entry of candidates) {
-    if (Array.isArray(entry)) {
-      return entry
-        .filter((raw) => raw && typeof raw === 'object')
-        .map((raw) => {
-          const item = raw as Record<string, unknown>;
-          const createdByRaw = item.createdBy;
-          const createdBy =
-            createdByRaw && typeof createdByRaw === 'object'
-              ? {
-                  _id: toDisplayText(
-                    (createdByRaw as Record<string, unknown>)._id,
-                  ),
-                  fullName: toDisplayText(
-                    (createdByRaw as Record<string, unknown>).fullName,
-                  ),
-                  email: toDisplayText(
-                    (createdByRaw as Record<string, unknown>).email,
-                  ),
-                }
-              : toDisplayText(createdByRaw);
-
-          return {
-            _id: toDisplayText(item._id || item.id || item.slug),
-            type: toContentType(item.type),
-            status: toContentStatus(item.status),
-            title: toDisplayText(item.title),
-            summary: toDisplayText(item.summary),
-            language: resolveItemLanguageString(item.language),
-            slug: toDisplayText(item.slug),
-            createdAt: toDisplayText(item.createdAt),
-            updatedAt: toDisplayText(item.updatedAt),
-            viewCount:
-              typeof item.viewCount === 'number'
-                ? item.viewCount
-                : Number(item.viewCount ?? item.views ?? 0),
-            views:
-              typeof item.views === 'number'
-                ? item.views
-                : Number(item.views ?? 0),
-            createdBy,
-            reviewedBy: toDisplayText(item.reviewedBy),
-            publishedAt: toDisplayText(item.publishedAt),
-          } satisfies AdminContentItem;
-        });
-    }
-  }
-  return [];
-}
-
-/** نافذة أرقام صفحات للعرض (مثلاً 1 … 5 … 12) */
-function buildVisiblePageNumbers(
-  current: number,
-  total: number,
-  max = 7,
-): number[] {
-  if (total <= 0) return [];
-  if (total <= max) return Array.from({ length: total }, (_, i) => i + 1);
-  const half = Math.floor(max / 2);
-  let start = Math.max(1, current - half);
-  let end = Math.min(total, start + max - 1);
-  if (end - start < max - 1) start = Math.max(1, end - max + 1);
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-}
-
-function languageKindLabel(
-  languageField: string | undefined,
-): { code: 'ar' | 'en' | 'other'; label: string } {
-  const n = normalizeItemLanguage(languageField);
-  if (n === 'ar') return { code: 'ar', label: 'العربية' };
-  if (n === 'en') return { code: 'en', label: 'English' };
-  return { code: 'other', label: languageField && languageField !== '—' ? languageField : '—' };
-}
-
-/**
- * مفتاح فلتر اللغة: شريط primary، نص أبيض، مزلق يبرز الخيار النشط.
- * «الكل» منفصلة لتصفية دون اختلاط مع ar/en.
- */
-function LanguageModeToggle({
-  value,
-  onChange,
-}: {
-  value: LangFilter;
-  onChange: (v: LangFilter) => void;
-}) {
-  const inBinary = value === 'ar' || value === 'en';
-  return (
-    <div className='flex flex-wrap gap-2 justify-end items-center w-full min-w-0 sm:ms-auto sm:w-auto'>
-      <span className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
-        لغة المحتوى
-      </span>
-      <div className='flex min-w-0 items-center justify-end gap-1.5'>
-        <button
-          type='button'
-          onClick={() => onChange('الكل')}
-          className={cn(
-            'h-9 shrink-0 rounded-full px-3 font-cairo text-[12px] font-extrabold transition',
-            value === 'الكل'
-              ? 'bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.3)]'
-              : 'border border-[#E5E7EB] bg-white text-[#344054] shadow-sm hover:bg-[#F9FAFB]',
-          )}
-        >
-          الكل
-        </button>
-        <div
-          className='relative h-9 w-[11.25rem] max-w-full shrink-0 overflow-hidden rounded-full bg-primary p-0.5 shadow-[0_8px_22px_rgba(15,143,139,0.3)]'
-          dir='rtl'
-          role='group'
-          aria-label='تبديل لغة العرض: العربية أو English'
-        >
-          <div
-            className='pointer-events-none absolute top-0.5 bottom-0.5 w-[calc(50%-0.2rem)] rounded-full bg-white/30 shadow-inner transition-all duration-200 ease-out'
-            style={{
-              opacity: inBinary ? 1 : 0,
-              insetInlineStart:
-                value === 'en' ? 'calc(50% + 0.1rem)' : '0.2rem',
-            }}
-          />
-          <div className='flex relative z-10 items-stretch w-full min-w-0 h-8'>
-            <button
-              type='button'
-              onClick={() => onChange('ar')}
-              className={cn(
-                'flex-1 min-w-0 rounded-full font-cairo text-[12px] font-extrabold transition',
-                value === 'ar'
-                  ? 'text-white'
-                  : 'text-white/75 hover:text-white',
-              )}
-            >
-              العربية
-            </button>
-            <button
-              type='button'
-              onClick={() => onChange('en')}
-              className={cn(
-                'flex-1 min-w-0 rounded-full font-cairo text-[12px] font-extrabold transition',
-                value === 'en'
-                  ? 'text-white'
-                  : 'text-white/75 hover:text-white',
-              )}
-            >
-              English
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import LanguageModeToggle from '@/components/admin/medical-content/LanguageModeToggle';
+import {
+  buildVisiblePageNumbers,
+  contentStatusLabel,
+  contentTypeLabel,
+  formatContentDate,
+  languageKindLabel,
+  normalizeContentItems,
+  normalizeItemLanguage,
+  PAGE_SIZE,
+  parseTypeQueryParam,
+  textSearchMatch,
+  type LangFilter,
+  type UiContentStatus,
+} from '@/components/admin/medical-content/contentListUtils';
 
 export default function AdminMedicalContentPage() {
   const { toast } = useToast();
@@ -490,28 +253,6 @@ export default function AdminMedicalContentPage() {
     }
     return 'bg-[#F3F4F6] text-[#344054] border-[#E5E7EB]';
   };
-
-  const statusLabel = (s: AdminContentStatus) => {
-    if (s === 'PUBLISHED') return 'منشور';
-    if (s === 'IN_REVIEW') return 'قيد المراجعة';
-    if (s === 'ARCHIVED') return 'مؤرشف';
-    return 'مسودة';
-  };
-
-  const typeLabel = (t?: AdminContentType) => {
-    if (t === 'CONDITION') return 'الحالات الطبية';
-    if (t === 'SYMPTOM') return 'الأعراض';
-    if (t === 'GENERAL_ADVICE') return 'نصائح عامة';
-    if (t === 'NEWS') return 'الأخبار';
-    return 'عام';
-  };
-
-  function formatDate(value?: string) {
-    if (!value) return '—';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString('ar-SY');
-  }
 
   async function confirmReject(reason: string) {
     if (!rejectTarget) return;
@@ -883,14 +624,14 @@ export default function AdminMedicalContentPage() {
                     <div
                       className={`inline-flex h-[22px] items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
                     >
-                        {statusLabel(it.status)}
+                        {contentStatusLabel(it.status)}
                     </div>
                   </div>
 
                   <div className='mt-2 flex flex-wrap items-center justify-start gap-6 font-cairo text-[11px] font-bold text-[#98A2B3]'>
                       <div className='inline-flex gap-2 items-center'>
                         <LayoutGrid className='w-4 h-4' />
-                        {typeLabel(it.type)}
+                        {contentTypeLabel(it.type)}
                       </div>
                       <div className='inline-flex gap-2 items-center'>
                         <ClipboardCheck className='w-4 h-4' />
@@ -908,7 +649,7 @@ export default function AdminMedicalContentPage() {
                     </div>
                       <div className='inline-flex gap-2 items-center'>
                         <Clock className='w-4 h-4' />
-                        آخر تحديث: {formatDate(it.updatedAt)}
+                        آخر تحديث: {formatContentDate(it.updatedAt)}
                     </div>
                     </div>
                   </div>
