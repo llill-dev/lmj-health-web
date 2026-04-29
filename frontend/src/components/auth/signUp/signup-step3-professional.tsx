@@ -5,6 +5,7 @@ import {
   ArrowRight,
   GraduationCap,
   IdCard,
+  Loader2,
   MapPin,
   Stethoscope,
   Text,
@@ -12,6 +13,8 @@ import {
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+
+import { useDoctorSignupSpecialties } from '@/hooks/useDoctorSignupSpecialties';
 
 import {
   step3ProfessionalSchema,
@@ -27,6 +30,16 @@ export default function SignUpStep3Professional({
   onNext: (values: Step3ProfessionalValues) => void;
   defaultValues?: Partial<Step3ProfessionalValues>;
 }) {
+  const {
+    data: specialties = [],
+    isLoading: specialtiesLoading,
+    isError: specialtiesError,
+    refetch: refetchSpecialties,
+  } = useDoctorSignupSpecialties();
+
+  const hasSpecialtyCatalog =
+    !specialtiesError && !specialtiesLoading && specialties.length > 0;
+
   const {
     register,
     handleSubmit,
@@ -57,15 +70,17 @@ export default function SignUpStep3Professional({
           <button
             type='button'
             onClick={() => {
-              setValue('specialty', 'طب القلب', { shouldDirty: true });
-              setValue('licenseNumber', 'SY-123456', { shouldDirty: true });
-              setValue('qualification', 'جامعة دمشق - كلية الطب', {
+              const demoSpecialty =
+                specialties[0]?.value ?? 'طب الأسنان';
+              setValue('specialty', demoSpecialty, { shouldDirty: true });
+              setValue('licenseNumber', 'SY-DENT-789012', { shouldDirty: true });
+              setValue('qualification', 'جامعة دمشق - كلية طب الأسنان', {
                 shouldDirty: true,
               });
-              setValue('clinicAddress', 'دمشق - المزة - شارع رئيسي', {
+              setValue('clinicAddress', 'دمشق - عيادة أسنان - شارع رئيسي', {
                 shouldDirty: true,
               });
-              setValue('bio', 'طبيب مختص مع خبرة أكثر من 10 سنوات.', {
+              setValue('bio', 'طبيب أسنان مع خبرة في زراعة الأسنان وتجميل الابتسامة.', {
                 shouldDirty: true,
               });
             }}
@@ -94,12 +109,60 @@ export default function SignUpStep3Professional({
                 *
               </span>
             </div>
-            <input
-              type='text'
-              placeholder='مثال: طب القلب, الأطفال, الأسنان'
-              {...register('specialty')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
-            />
+            {specialtiesError && (
+              <div className='mt-2 flex flex-col gap-2 rounded-[6px] border border-amber-200 bg-amber-50 px-3 py-2 text-right'>
+                <p className='font-cairo text-[12px] font-semibold text-amber-900'>
+                  تعذر تحميل قائمة التخصصات. يمكنك إدخال التخصص يدوياً أو إعادة المحاولة.
+                </p>
+                <button
+                  type='button'
+                  onClick={() => void refetchSpecialties()}
+                  className='self-end rounded-[6px] border border-amber-300 bg-white px-3 py-1 font-cairo text-[12px] font-bold text-amber-900 hover:bg-amber-100'
+                >
+                  إعادة المحاولة
+                </button>
+              </div>
+            )}
+            {specialtiesLoading ? (
+              <div className='relative mt-2'>
+                <select
+                  disabled
+                  className='h-[48px] w-full appearance-none rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#F9FAFB] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#9CA3AF] shadow-[0_10px_25px_rgba(0,0,0,0.05)]'
+                  aria-busy='true'
+                >
+                  <option>جاري تحميل التخصصات…</option>
+                </select>
+                <Loader2 className='pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-primary' />
+              </div>
+            ) : hasSpecialtyCatalog ? (
+              <select
+                {...register('specialty')}
+                className='mt-2 h-[48px] w-full appearance-none rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#374151] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+              >
+                <option value='' disabled hidden>
+                  اختر التخصص
+                </option>
+                {specialties.map((opt) => (
+                  <option key={opt.key} value={opt.value}>
+                    {opt.labelAr}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <>
+                {!specialtiesError && (
+                  <p className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                    لم تُحمَّل قائمة التخصصات. أدخل التخصص يدوياً أو حاول التحديث لاحقاً.
+                  </p>
+                )}
+                <input
+                  type='text'
+                  placeholder='مثال: طب الأسنان، تقويم الأسنان، جراحة الفم'
+                  {...register('specialty')}
+                  className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+                />
+              </>
+            )}
             {errors.specialty?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
                 {errors.specialty.message}

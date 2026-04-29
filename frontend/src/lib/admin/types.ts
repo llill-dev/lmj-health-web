@@ -726,3 +726,63 @@ export type AdminMedicalOrderCatalogUpsertBody = {
 export type AdminMedicalOrderCatalogMutationResponse = ApiSuccessEnvelope & {
   item?: MedicalOrderCatalogItem;
 };
+
+/** مجالات الكتالوج الموثّقة في API-3 لـ GET /admin/lookups */
+export type AdminLookupCategoryDoc =
+  | 'BLOOD_TYPE'
+  | 'ALLERGY'
+  | 'MEDICAL_CONDITION';
+
+/**
+ * كتالوج تخصصات الطبيب عبر Lookups — غير مُدرَجة صراحةً في مقطع API-3 المعروض؛
+ * غالباً ما يُضاف على الخادم كامتداد بجانب الفئات الثلاث.
+ */
+export type AdminLookupDoctorSpecialtyCategory = 'SPECIALIZATION';
+
+export type AdminLookupCategory =
+  | AdminLookupCategoryDoc
+  | AdminLookupDoctorSpecialtyCategory;
+
+export type AdminLocalizedLookupText =
+  | string
+  | { ar?: string; en?: string };
+
+export type AdminLookupRecord = {
+  _id: string;
+  category: AdminLookupCategory;
+  key: string;
+  text: AdminLocalizedLookupText;
+  order: number;
+  isActive: boolean;
+};
+
+export type AdminLookupsListParams = {
+  category: AdminLookupCategory;
+  includeInactive?: boolean;
+  /** إذا كان false يُعاد النص ثنائي اللغة في الحقل text حيثما ينطبق (API-3). */
+  langOnly?: boolean;
+};
+
+export type AdminLookupsListResponse = ApiSuccessEnvelope & {
+  results: number;
+  lookups: AdminLookupRecord[];
+};
+
+export type AdminLookupCreateBody = {
+  category: AdminLookupCategory;
+  key: string;
+  text: AdminLocalizedLookupText;
+  order?: number;
+};
+
+export type AdminLookupPatchBody = Partial<{
+  key: string;
+  text: AdminLocalizedLookupText;
+  order: number;
+  isActive: boolean;
+}>;
+
+export type AdminLookupMutationResponse = ApiSuccessEnvelope & {
+  lookups?: AdminLookupRecord[];
+  lookup?: AdminLookupRecord;
+};

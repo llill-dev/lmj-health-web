@@ -88,4 +88,9 @@ export const adminEndpoints = {
     item: (kind: MedicalOrderCatalogKind, id: string) =>
       `/api/admin/order-catalog/${orderCatalogSegment(kind)}/${id}`,
   },
+  /** API-3.pdf — GET/POST/PATCH/DELETE /api/admin/lookups */
+  lookups: {
+    list: '/api/admin/lookups',
+    detail: (id: string) => `/api/admin/lookups/${id}`,
+  },
 } as const;

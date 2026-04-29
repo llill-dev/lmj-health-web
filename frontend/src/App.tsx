@@ -58,6 +58,7 @@ import AdminServicesPage from '@/pages/admin/services/AdminServicesPage';
 import AdminAnalyticsPage from '@/pages/admin/analytics/AdminAnalyticsPage';
 import AdminComplaintsPage from '@/pages/admin/complaints/AdminComplaintsPage';
 import AdminComplaintDetailsPage from '@/pages/admin/complaints/AdminComplaintDetailsPage';
+import AdminDoctorSpecializationsPage from '@/pages/admin/doctor-specializations/AdminDoctorSpecializationsPage';
 
 // ─── Routing guards ───────────────────────────────────────────────────────────
 import ProtectedRoute, { GuestRoute, RootRedirect } from '@/routes/ProtectedRoute';
@@ -143,6 +144,10 @@ export default function App() {
             <Route path='overview'               element={<AdminDashboardPage />} />
             <Route path='notifications'         element={<AdminNotificationsPage />} />
             <Route path='doctors'                element={<AdminDoctorsPage />} />
+            <Route
+              path='doctor-specializations'
+              element={<AdminDoctorSpecializationsPage />}
+            />
             <Route path='doctors/:doctorId'      element={<AdminDoctorDetailsPage />} />
             <Route path='patients'               element={<AdminPatientsPage />} />
             <Route path='patients/:patientId'    element={<AdminPatientDetailsPage />} />

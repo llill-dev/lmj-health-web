@@ -12,15 +12,20 @@ const verifyAccountSchema = z.object({
 
 type VerifyAccountValues = z.infer<typeof verifyAccountSchema>;
 
+function userFacingError(error: unknown): string {
+  if (error instanceof Error && error.message.trim()) return error.message;
+  return 'تعذّر إكمال التحقق. حاول مرة أخرى.';
+}
+
 export default function VerifyAccount({
-  email,
+  destination,
   onBack,
   onVerify,
   onResend,
 }: {
-  email: string;
+  destination: string;
   onBack: () => void;
-  onVerify?: (code: string) => void;
+  onVerify?: (code: string) => void | Promise<void>;
   onResend?: () => void | Promise<void>;
 }) {
   const {
@@ -40,6 +45,8 @@ export default function VerifyAccount({
   );
   const [secondsLeft, setSecondsLeft] = useState<number>(60);
   const [isResending, setIsResending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [flowError, setFlowError] = useState<string | null>(null);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -97,6 +104,19 @@ export default function VerifyAccount({
     if (lastFilled >= 0) inputsRef.current[lastFilled]?.focus();
   };
 
+  const submitOtp = async (values: VerifyAccountValues) => {
+    if (!onVerify) return;
+    setFlowError(null);
+    setIsVerifying(true);
+    try {
+      await onVerify(values.code);
+    } catch (error) {
+      setFlowError(userFacingError(error));
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   return (
     <section className='mx-auto flex flex-col items-center'>
       <div className='my-[50px]'>
@@ -125,13 +145,13 @@ export default function VerifyAccount({
           </div>
 
           <div className='w-[557px] min-h-[300px] rounded-[6px] bg-white px-[108px] py-[28px] mt-8 shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.1),0px_10px_15px_-3px_rgba(0,0,0,0.1)]'>
-            <form onSubmit={handleSubmit((values) => onVerify?.(values.code))}>
+            <form onSubmit={handleSubmit(submitOtp)}>
               <div className='text-center'>
                 <div className='font-cairo text-[14px] leading-[14px] text-[#B5B7BA]'>
                   لقد أرسلنا رمزاً مكوناً من 6 أرقام إلى
                 </div>
                 <div className='mt-2 font-cairo text-[14px] leading-[20px]  text-[#1F2937]'>
-                  {email}
+                  {destination}
                 </div>
               </div>
 
@@ -148,22 +168,24 @@ export default function VerifyAccount({
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     onPaste={handlePaste}
+                    disabled={isVerifying}
                     className='h-[47.99px] w-[47.99px] rounded-[8px] border-[1.9px] border-[#E5E7EB] bg-[#EFEFEF] text-center font-cairo text-[18px] font-extrabold text-[#101828] shadow-[0_10px_25px_rgba(0,0,0,0.06)] outline-none focus:border-primary focus:bg-white'
                   />
                 ))}
               </div>
 
               <div className='mx-auto mt-2 min-h-[18px] w-[307.84px] text-center font-cairo text-[12px] font-semibold text-red-500'>
-                {errors.code?.message ?? ''}
+                {errors.code?.message ?? flowError ?? ''}
               </div>
 
               <div className='mt-10 w-[341.21px] flex items-center justify-center'>
                 <button
                   type='submit'
-                  className='flex h-[43.98px] w-[341.22px] text-[#FFFFFF] items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px]  shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
+                  disabled={isVerifying}
+                  className='flex h-[43.98px] w-[341.22px] text-[#FFFFFF] items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px]  shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60'
                 >
                   <CircleCheck className='h-4 w-4' />
-                  التحقق من الحساب
+                  {isVerifying ? 'جاري التحقق...' : 'التحقق من الحساب'}
                 </button>
               </div>
 
@@ -179,7 +201,10 @@ export default function VerifyAccount({
                       setIsResending(true);
                       try {
                         await onResend();
+                        setFlowError(null);
                         setSecondsLeft(60);
+                      } catch (error) {
+                        setFlowError(userFacingError(error));
                       } finally {
                         setIsResending(false);
                       }

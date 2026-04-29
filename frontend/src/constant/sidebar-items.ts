@@ -16,6 +16,7 @@ import {
   Users,
   BarChart3,
   MessageSquareWarning,
+  Tags,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
@@ -36,6 +37,7 @@ export type AdminSidebarItemId =
   | 'overview'
   | 'notifications'
   | 'doctors'
+  | 'doctor-specializations'
   | 'patients'
   | 'secretaries'
   | 'medical-content'
@@ -131,6 +133,12 @@ export const adminSidebarItems: Array<{
 }> = [
   { id: 'overview', path: 'overview', label: 'نظرة عامة', icon: LayoutGrid },
   { id: 'doctors', path: 'doctors', label: 'الأطباء', icon: Stethoscope },
+  {
+    id: 'doctor-specializations',
+    path: 'doctor-specializations',
+    label: 'تخصصات الأطباء',
+    icon: Tags,
+  },
   { id: 'patients', path: 'patients', label: 'المرضى', icon: Users },
   {
     id: 'secretaries',

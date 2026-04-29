@@ -86,6 +86,10 @@ export default function SignUpForm({
     const toGender = (g: 'male' | 'female') =>
       g === 'male' ? 'Male' : 'Female';
 
+    const consultationTypes: Array<'online' | 'offline'> = [];
+    if (parsed.data.consultationOnline) consultationTypes.push('online');
+    if (parsed.data.consultationOffline) consultationTypes.push('offline');
+
     authApi
       .signupDoctor({
         fullName: parsed.data.fullName,
@@ -102,8 +106,11 @@ export default function SignUpForm({
         bio: parsed.data.bio,
         education: parsed.data.qualification,
         clinicAddress: parsed.data.clinicAddress,
-        locationCity: parsed.data.city,
-        locationCountry: parsed.data.country,
+        locationCity: parsed.data.city?.trim() || undefined,
+        locationCountry: parsed.data.country?.trim() || undefined,
+        ...(consultationTypes.length > 0
+          ? { consultationTypes }
+          : {}),
       })
       .then((res) => {
         useAuthStore.getState().setPendingVerification({
