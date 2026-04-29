@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateLookup, usePatchLookup } from '@/hooks/useAdminLookupMutations';
 import type { AdminLookupCategory, AdminLookupRecord } from '@/lib/admin/types';
+import { generateLookupMachineKey } from '@/lib/admin/lookupKey';
 import { resolveLookupText, resolveLookupSecondaryText } from '@/lib/admin/lookupUtils';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -47,6 +48,7 @@ export default function UpsertDoctorLookupDialog({
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema) as Resolver<FormValues>,
@@ -73,7 +75,7 @@ export default function UpsertDoctorLookupDialog({
       });
     } else {
       reset({
-        key: '',
+        key: generateLookupMachineKey(),
         textAr: '',
         textEn: '',
         order: 0,
@@ -167,9 +169,26 @@ export default function UpsertDoctorLookupDialog({
             className='px-5 py-5 space-y-4'
           >
             <div>
-              <label className='mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                المفتاح (machine key)
-              </label>
+              <div className='flex gap-4 justify-end items-center my-2'>
+                {!isEdit ? (
+                  <button
+                    type='button'
+                    disabled={busy}
+                    onClick={() =>
+                      setValue('key', generateLookupMachineKey(), {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                    className='rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#475467] transition hover:border-primary/35 hover:bg-[#F0FDFA] hover:text-primary disabled:opacity-50'
+                  >
+                    توليد مفتاح جديد
+                  </button>
+                ) : null}
+                <label className='block font-cairo text-[12px] font-bold text-[#344054]'>
+                  المفتاح (machine key)
+                </label>
+              </div>
               <input
                 {...register('key')}
                 dir='ltr'
