@@ -43,7 +43,6 @@ export default function SignUpStep3Professional({
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<Step3ProfessionalValues>({
     resolver: zodResolver(step3ProfessionalSchema),
@@ -63,31 +62,10 @@ export default function SignUpStep3Professional({
         <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[6px] bg-primary shadow-[0_18px_40px_rgba(15, 143, 139,0.35)]'>
           <Stethoscope className='h-9 w-9 text-white' />
         </div>
-        <div className='mt-4 flex items-center justify-center gap-3'>
+        <div className='mt-4'>
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
             المعلومات المهنية
           </h2>
-          <button
-            type='button'
-            onClick={() => {
-              const demoSpecialty =
-                specialties[0]?.value ?? 'طب الأسنان';
-              setValue('specialty', demoSpecialty, { shouldDirty: true });
-              setValue('licenseNumber', 'SY-DENT-789012', { shouldDirty: true });
-              setValue('qualification', 'جامعة دمشق - كلية طب الأسنان', {
-                shouldDirty: true,
-              });
-              setValue('clinicAddress', 'دمشق - عيادة أسنان - شارع رئيسي', {
-                shouldDirty: true,
-              });
-              setValue('bio', 'طبيب أسنان مع خبرة في زراعة الأسنان وتجميل الابتسامة.', {
-                shouldDirty: true,
-              });
-            }}
-            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
-          >
-            ملء البيانات
-          </button>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
           بياناتك الطبية والمهنية
