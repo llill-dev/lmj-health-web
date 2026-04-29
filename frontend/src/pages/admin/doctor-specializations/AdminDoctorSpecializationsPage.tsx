@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
-  Info,
   Loader2,
   Plus,
   Pencil,
