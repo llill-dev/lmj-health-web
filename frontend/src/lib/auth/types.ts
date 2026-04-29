@@ -1,5 +1,6 @@
 export type SignupChannel = 'email' | 'whatsapp';
 export type SignupRole = 'patient' | 'doctor';
+export type ClientType = 'patient_mobile' | 'doctor_mobile' | 'web';
 
 export type SignupResponse = {
   message: string;
@@ -18,6 +19,7 @@ export type DoctorSignupBody = {
   password: string;
   phone: string;
   gender: string;
+  /** ISO calendar date `YYYY-MM-DD` (API-3 /auth/signup) */
   dateOfBirth: string;
   address: string;
   role: 'doctor';
@@ -29,6 +31,10 @@ export type DoctorSignupBody = {
   clinicAddress: string;
   locationCity?: string;
   locationCountry?: string;
+  /** Optional; values `online` | `offline` per API-3 */
+  consultationTypes?: Array<'online' | 'offline'>;
+  clinicLat?: number;
+  clinicLng?: number;
 };
 
 export type ResendSignupOtpBody =
@@ -41,8 +47,50 @@ export type ResendSignupOtpBody =
       phone: string;
     };
 
-// Login/Logout Types
-export type ClientType = 'patient_mobile' | 'doctor_mobile' | 'web';
+export type VerifySignupOtpBody =
+  | {
+      channel: 'email';
+      email: string;
+      otp: string;
+      clientType?: ClientType;
+    }
+  | {
+      channel: 'whatsapp';
+      phone: string;
+      otp: string;
+      clientType?: ClientType;
+    };
+
+export type AuthActorIds = {
+  patientId?: string | null;
+  doctorId?: string | null;
+  secretaryId?: string | null;
+  assignedDoctorId?: string | null;
+};
+
+export type VerifySignupOtpResponse =
+  | {
+      message: string;
+      token: string;
+      userId: string;
+      role: 'patient' | 'doctor' | 'secretary' | 'admin' | 'data_entry';
+      fullName: string;
+      email?: string;
+      phone?: string;
+      patientPublicId?: string | null;
+      actorIds: AuthActorIds;
+    }
+  | {
+      message: string;
+      userId: string;
+      role: 'doctor';
+      status: 'pending_admin_approval';
+      fullName: string;
+      email?: string;
+      phone?: string;
+      patientPublicId: null;
+      actorIds: AuthActorIds;
+    };
 
 export interface LoginRequest {
   email?: string;
@@ -61,12 +109,7 @@ export interface LoginResponse {
   email?: string;
   phone?: string;
   patientPublicId?: string;
-  actorIds: {
-    patientId?: string;
-    doctorId?: string;
-    secretaryId?: string;
-    assignedDoctorId?: string;
-  };
+  actorIds: AuthActorIds;
   accountDeletionStatus: 'none' | 'pending' | 'requested';
   requestedAt?: string;
   recoverUntil?: string;

@@ -14,6 +14,25 @@ import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
 import type { ServiceType, ServiceTypeField } from '@/lib/admin/services/types';
 
+/**
+ * Script checks for bilingual service-type fields (API-3 accepts any string per locale object;
+ * UX rule: EN inputs Latin-only, AR inputs Arabic-only — avoids pasted text in wrong column).
+ */
+const ARABIC_SCRIPT =
+  /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+function containsArabicScript(value: string): boolean {
+  return ARABIC_SCRIPT.test(value);
+}
+
+function containsLatinLetters(value: string): boolean {
+  return /[A-Za-z]/.test(value);
+}
+
+const MSG_EN_SCRIPT =
+  'يجب أن يكون النص بالإنجليزية فقط: لا تُدخل حروفًا عربية في الحقول الإنجليزية.';
+const MSG_AR_SCRIPT =
+  'يجب أن يكون النص بالعربية فقط: لا تُدخل حروفًا لاتينية (إنجليزية) في الحقول العربية.';
 const fieldTypes = [
   { value: 'string' as const, label: 'نص' },
   { value: 'number' as const, label: 'رقم' },
@@ -23,8 +42,14 @@ const fieldTypes = [
 ];
 
 const formSchema = z.object({
-  nameEn: z.string().min(1, 'مطلوب'),
-  nameAr: z.string().min(1, 'مطلوب'),
+  nameEn: z
+    .string()
+    .min(1, 'مطلوب')
+    .refine((s) => !containsArabicScript(s), MSG_EN_SCRIPT),
+  nameAr: z
+    .string()
+    .min(1, 'مطلوب')
+    .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
   slug: z
     .string()
     .min(1, 'مطلوب')
@@ -32,14 +57,32 @@ const formSchema = z.object({
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
       'للاتيني الصغير، أرقام، شرطة',
     ),
-  descEn: z.string().optional(),
-  descAr: z.string().optional(),
+  descEn: z
+    .string()
+    .optional()
+    .refine(
+      (s) => !(s ?? '').trim() || !containsArabicScript(s),
+      MSG_EN_SCRIPT,
+    ),
+  descAr: z
+    .string()
+    .optional()
+    .refine(
+      (s) => !(s ?? '').trim() || !containsLatinLetters(s),
+      MSG_AR_SCRIPT,
+    ),
   fields: z
     .array(
       z.object({
         key: z.string().min(1, 'مفتاح الحقل مطلوب'),
-        labelEn: z.string().min(1, 'مطلوب'),
-        labelAr: z.string().min(1, 'مطلوب'),
+        labelEn: z
+          .string()
+          .min(1, 'مطلوب')
+          .refine((s) => !containsArabicScript(s), MSG_EN_SCRIPT),
+        labelAr: z
+          .string()
+          .min(1, 'مطلوب')
+          .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
         type: z.enum(['string', 'number', 'boolean', 'array', 'object']),
         required: z.boolean(),
         isPublic: z.boolean(),
@@ -387,6 +430,11 @@ export default function UpsertServiceTypeDialog({
                       className={`${inputClass} min-h-[72px] resize-none py-2`}
                       placeholder='اختياري'
                     />
+                    {errors.descAr && (
+                      <p className='mt-1 text-right font-cairo text-[11px] text-red-600'>
+                        {errors.descAr.message}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <FormLabel>وصف (English)</FormLabel>
@@ -397,6 +445,11 @@ export default function UpsertServiceTypeDialog({
                       dir='ltr'
                       placeholder='optional'
                     />
+                    {errors.descEn && (
+                      <p className='mt-1 text-right font-cairo text-[11px] text-red-600'>
+                        {errors.descEn.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -481,6 +534,11 @@ export default function UpsertServiceTypeDialog({
                               {...register(`fields.${index}.labelAr` as const)}
                               className={inputClass}
                             />
+                            {errors.fields?.[index]?.labelAr && (
+                              <p className='mt-1 text-right font-cairo text-[11px] text-red-600'>
+                                {errors.fields[index]?.labelAr?.message}
+                              </p>
+                            )}
                           </div>
                           <div>
                             <FormLabel required>Label (EN)</FormLabel>
@@ -489,6 +547,11 @@ export default function UpsertServiceTypeDialog({
                               className={inputClass}
                               dir='ltr'
                             />
+                            {errors.fields?.[index]?.labelEn && (
+                              <p className='mt-1 text-right font-cairo text-[11px] text-red-600'>
+                                {errors.fields[index]?.labelEn?.message}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className='mt-2 flex flex-wrap items-center justify-end gap-4'>

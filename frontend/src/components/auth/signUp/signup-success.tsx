@@ -2,8 +2,14 @@
 
 export default function SignupSuccess({
   onContinue,
+  title = 'أهلاً وسهلاً بك في LMJ HEALTH',
+  message = 'تم إنشاء حسابك بنجاح',
+  continueLabel = 'تسجيل الدخول',
 }: {
   onContinue?: () => void;
+  title?: string;
+  message?: string;
+  continueLabel?: string;
 }) {
   return (
     <section
@@ -45,10 +51,13 @@ export default function SignupSuccess({
           </div>
 
           <div className='mt-16 font-cairo text-[16px] font-bold leading-[24px] text-[#1F2937]'>
-            أهلا وسهلا بك في LMJ HEALTH
+            {title}
           </div>
           <div className='mt-1 font-cairo text-[13px] font-semibold leading-[20px] text-[#667085]'>
-            تم إنشاء حسابك بنجاح
+            {message}
+          </div>
+          <div className='mt-8 inline-flex h-[40px] items-center justify-center rounded-[8px] bg-primary px-6 font-cairo text-[13px] font-bold text-white shadow-[0_18px_40px_rgba(15,143,139,0.25)] transition-colors group-hover:bg-[#14B3AE]'>
+            {continueLabel}
           </div>
         </button>
       </div>

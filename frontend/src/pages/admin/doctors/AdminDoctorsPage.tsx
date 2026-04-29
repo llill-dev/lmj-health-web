@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 import DoctorListCard from '@/components/admin/doctors/DoctorListCard';
-import { useNavigate } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import { useAdminDoctors } from '@/hooks/useAdminDoctors';
 import type { AdminDoctorApprovalStatus } from '@/lib/admin/types';
 
@@ -17,6 +17,9 @@ const TEAL = '#108B8B';
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const specializationParam = searchParams.get('specialization') ?? '';
+
   const [filters, setFilters] = useState<{
     search: string;
     specialization: string;
@@ -38,6 +41,14 @@ export default function AdminDoctorsPage() {
     page: 1,
     limit: 20,
   });
+
+  useEffect(() => {
+    setFilters((prev) =>
+      prev.specialization === specializationParam
+        ? prev
+        : { ...prev, specialization: specializationParam, page: 1 },
+    );
+  }, [specializationParam]);
 
   const { doctors, total, results, isLoading, error } = useAdminDoctors({
     search: filters.search || undefined,

@@ -14,10 +14,20 @@ export type Tab =
 
 export const ADMIN_SERVICES_TABS: Tab[] = [
   { kind: 'facility', type: 'hospital', label: 'المشافي', icon: Hospital },
-  { kind: 'facility', type: 'laboratory', label: 'المخابر', icon: FlaskConical },
+  {
+    kind: 'facility',
+    type: 'laboratory',
+    label: 'المخابر',
+    icon: FlaskConical,
+  },
   { kind: 'facility', type: 'pharmacy', label: 'الصيدليات', icon: Pill },
-  { kind: 'facility', type: 'imaging_center', label: 'مراكز الأشعة', icon: Building2 },
-  { kind: 'service-types', label: 'التخصصات', icon: Stethoscope },
+  {
+    kind: 'facility',
+    type: 'imaging_center',
+    label: 'مراكز الأشعة',
+    icon: Building2,
+  },
+  { kind: 'service-types', label: 'أنواع الخدمات', icon: Stethoscope },
 ];
 
 export const ADMIN_SERVICES_PAGE_SIZE = 10;

@@ -32,6 +32,8 @@ interface PendingVerification {
   channel: 'email' | 'whatsapp';
 }
 
+const PENDING_VERIFICATION_KEY = 'pendingSignupVerification';
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -113,6 +115,41 @@ function writePersistedGeneralSettings(payload: {
 }) {
   try {
     localStorage.setItem('generalSettings', JSON.stringify(payload));
+  } catch {}
+}
+
+function readPendingVerification(): PendingVerification | null {
+  if (typeof window === 'undefined') return null;
+  let parsed: PendingVerification | null = null;
+  try {
+    parsed = safeJsonParse<PendingVerification>(
+      sessionStorage.getItem(PENDING_VERIFICATION_KEY),
+    );
+  } catch {
+    return null;
+  }
+
+  if (
+    !parsed?.userId ||
+    !parsed.role ||
+    !parsed.email ||
+    !parsed.phone ||
+    !['email', 'whatsapp'].includes(parsed.channel)
+  ) {
+    return null;
+  }
+
+  return parsed;
+}
+
+function writePendingVerification(payload: PendingVerification | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (!payload) {
+      sessionStorage.removeItem(PENDING_VERIFICATION_KEY);
+      return;
+    }
+    sessionStorage.setItem(PENDING_VERIFICATION_KEY, JSON.stringify(payload));
   } catch {}
 }
 
@@ -240,6 +277,7 @@ let state: AuthState = {
       isAuthenticated: true,
       pendingVerification: null,
     });
+    writePendingVerification(null);
 
     // ── Persist to cookies (replaces localStorage for sensitive auth data) ──
     writeAuthToken(data.token);
@@ -264,6 +302,7 @@ let state: AuthState = {
   register: async () => {},
 
   setPendingVerification: (payload) => {
+    writePendingVerification(payload);
     setState({ pendingVerification: payload });
   },
 
@@ -293,6 +332,7 @@ let state: AuthState = {
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
       localStorage.removeItem('userRole');
+      sessionStorage.removeItem(PENDING_VERIFICATION_KEY);
     } catch {}
   },
 };
@@ -318,6 +358,7 @@ function initFromCookies() {
   const token = readAuthToken();
   const user = buildUserFromCookie();
   const settings = readPersistedGeneralSettings();
+  const pendingVerification = readPendingVerification();
 
   if (token) {
     state = {
@@ -332,6 +373,10 @@ function initFromCookies() {
 
   if (settings) {
     state = { ...state, ...settings };
+  }
+
+  if (pendingVerification && !token) {
+    state = { ...state, pendingVerification };
   }
 }
 

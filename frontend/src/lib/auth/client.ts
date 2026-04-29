@@ -4,6 +4,8 @@ import { authEndpoints } from '@/lib/auth/endpoints';
 import type {
   DoctorSignupBody,
   ResendSignupOtpBody,
+  VerifySignupOtpBody,
+  VerifySignupOtpResponse,
   SignupResponse,
   LoginRequest,
   LoginResponse,
@@ -93,6 +95,11 @@ export const authApi = {
 
   resendSignupOtp: (body: ResendSignupOtpBody) =>
     post<SignupResponse>(authEndpoints.resendSignupOtp(), body, {
+      locale: 'ar',
+    }),
+
+  verifySignupOtp: (body: VerifySignupOtpBody) =>
+    post<VerifySignupOtpResponse>(authEndpoints.verifySignupOtp(), body, {
       locale: 'ar',
     }),
 

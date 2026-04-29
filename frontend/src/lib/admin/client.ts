@@ -46,6 +46,11 @@ import type {
   AdminDoctorAnalyticsQuery,
   DoctorActivitySummaryResponse,
   DoctorDiagnosisAnalyticsResponse,
+  AdminLookupsListParams,
+  AdminLookupsListResponse,
+  AdminLookupCreateBody,
+  AdminLookupPatchBody,
+  AdminLookupMutationResponse,
 } from '@/lib/admin/types';
 
 function normalizeMedicalOrderCatalogList(
@@ -427,6 +432,30 @@ export const adminApi = {
       ),
     remove: (kind: MedicalOrderCatalogKind, id: string) =>
       del<ApiSuccessEnvelope>(adminEndpoints.orderCatalog.item(kind, id), {
+        locale: 'ar',
+      }),
+  },
+  lookups: {
+    list: (params: AdminLookupsListParams) => {
+      const qs = new URLSearchParams();
+      qs.set('category', params.category);
+      if (params.includeInactive === true) qs.set('includeInactive', 'true');
+      if (params.langOnly === true) qs.set('langOnly', 'true');
+      const endpoint = `${adminEndpoints.lookups.list}?${qs.toString()}`;
+      return get<AdminLookupsListResponse>(endpoint, { locale: 'ar' });
+    },
+    create: (body: AdminLookupCreateBody) =>
+      post<AdminLookupMutationResponse>(adminEndpoints.lookups.list, body, {
+        locale: 'ar',
+      }),
+    patch: (id: string, body: AdminLookupPatchBody) =>
+      patch<AdminLookupMutationResponse>(
+        adminEndpoints.lookups.detail(id),
+        body,
+        { locale: 'ar' },
+      ),
+    remove: (id: string) =>
+      del<ApiSuccessEnvelope>(adminEndpoints.lookups.detail(id), {
         locale: 'ar',
       }),
   },
