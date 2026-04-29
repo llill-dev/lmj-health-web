@@ -1,0 +1,372 @@
+ example:
+{
+"category": "ALLERGY",
+"key": "peanut",
+"text": { "ar": ￿￿￿￿￿" "￿￿￿￿￿￿￿￿ , "en": "Peanut" },
+"order": 10
+}
+133PATCH /admin/lookups/:id
+• Description: Update key, text, order, or isActive.
+• Auth: Admin
+• Notes: Partial language updates merge and preserve existing translations.
+• Body example: { "text": { "ar": "￿￿￿￿￿￿" ,{ "order": 2,
+"isActive": true }
+DELETE /admin/lookups/:id
+• Description: Soft-delete a lookup option (sets isActive=false).
+• Auth: Admin
+Service Types (Admin)
+POST /service-types
+• Description: Create a service type with dynamic fields.
+• Auth: Admin
+• Notes: name, description, and fields[].label accept a string or {
+"en": "...", "ar": "..." } .
+• Body example:
+{
+"name": { "en": "Laboratory", "ar": "￿￿￿￿￿" {,
+"slug": "lab",
+"description": { "en": "Lab services" , "ar": ￿￿￿￿￿" "￿￿￿￿￿ {,
+"fields": [
+{
+"key": "name",
+"label": { "en": "Name", "ar": "￿￿￿￿￿" {,
+"type": "string",
+"required": true
+},
+{
+"key": "licenseNumber",
+"label": { "en": "License", "ar": "￿￿￿￿￿￿" {,
+"type": "string",
+"required": true,
+"isPublic": false
+},
+{
+"key": "homeCollection",
+"label": { "en": "Home collection" , "ar": ￿￿￿" "￿￿￿￿￿ {,
+"type": "boolean"
+}
+134]
+}
+• Response (default, bilingual): { "serviceType": { "_id": "...",
+"name": { "en": "Laboratory", "ar": "￿￿￿￿￿" ,{ "schemaVersion":
+1, "fields": [ ... ] } }
+• Response (langOnly=true): name, description, label become
+strings based on x-lang.
+PUT /service-types/:id
+• Description: Update name/description/slug/isActive/fields for a service
+type. If fields changes (key-based comparison), schemaVersion is incre-
+mented automatically.
+• Auth: Admin
+• Notes: Partial language updates merge and preserve existing translations.
+• Body example:
+{
+"name": { "en": "Laboratory v2" },
+"description": { "en": "Updated description" },
+"fields": [
+{
+"key": "name",
+"label": { "en": "Name", "ar": "￿￿￿￿￿" {,
+"type": "string",
+"required": true
+},
+{
+"key": "licenseNumber",
+"label": { "en": "License", "ar": "￿￿￿￿￿￿" {,
+"type": "string",
+"required": true,
+"isPublic": false
+},
+{
+"key": "homeCollection",
+"label": { "en": "Home collection" , "ar": ￿￿￿" "￿￿￿￿￿ {,
+"type": "boolean"
+},
+{
+"key": "tests",
+"label": { "en": "Available Tests" , "ar": ￿￿￿￿￿￿￿￿" "￿￿￿￿￿￿￿ {,
+"type": "array",
+"required": true
+}
+]
+135}
+• Response: { "serviceType": { "_id": "...", "name": "Laboratory
+v2", "schemaVersion": 2, "fields": [ ... ] } }
+GET /service-types
+• Description: List service types; optional active=true|false.
+• Auth: Admin
+• Query: active=true|false, langOnly=true|false
+• Response: { "serviceTypes": [ { "_id": "...", "name":
+"...", "slug": "...", "schemaVersion": 1, "isActive": true,
+"fields": [ ... ] } ] }
+Service Providers (Admin + Data Entry)
+Route map
+• POST /service-providers (admin, data_entry)
+• PUT /service-providers/:id (admin, data_entry)
+• PATCH /service-providers/:id/status (admin)
+• POST /service-types (admin)
+• PUT /service-types/:id (admin)
+• GET /service-types (admin)
+• GET /services/types (public)
+• GET /services (public/patient)
+• GET /services/:id (public/patient)
+• POST /admin/users (admin)
+• GET /admin/users (admin)
+Key behaviors
+• Schema versioning: ServiceType.schemaVersion starts at 1 and auto-
+increments when fields change. Providers store schemaVersionAtWrite
+from the service type at write/activation time.
+• Status transitions: Data-entry users can only save draft. Admin-
+only transitions: draft->active|inactive, active->inactive,
+inactive->active. Activating validates against the current schema and
+refreshes schemaVersionAtWrite.
+• Dynamic validation: Unknown fields rejected; type/enum/min/max/regex
+enforced; forbids keys starting with $ or __proto__/constructor/prototype
+at any depth.
+• Public browsing: Only status=active providers are returned and only
+fields with isPublic=true.
+• Localization: String fields can be { en, ar } objects; admin responses
+return bilingual fields unless ?langOnly=true.
+136• Cursor pagination (preferred): GET /services?type=<slug>&limit=<n>&cursor=<base64>
+→ { "items": [...], "limit": n, "nextCursor": "<base64|null>"
+}. Legacy page/limit remains for compatibility.
+POST /admin/users
+• Description: Create a data-entry user.
+• Auth: Admin
+• Body example:
+{
+"fullName": "Lab Operator" ,
+"email": "lab-operator@example.com",
+"password": "StrongPass!1",
+"role": "data_entry",
+"phoneNumber": "+15551234567"
+}
+• Response: { "message": "User created successfully", "user":
+{ "id": "...", "role": "data_entry", "isActive": true } }
+POST /service-types
+• Description: Create a service type with dynamic fields (schema-as-data).
+• Auth: Admin
+• Notes: name, description, and fields[].label accept a string or {
+"en": "...", "ar": "..." } .
+• Body example:
+{
+"name": { "en": "Laboratory", "ar": "￿￿￿￿￿" {,
+"slug": "lab",
+"description": { "en": "Lab services" , "ar": ￿￿￿￿￿" "￿￿￿￿￿ {,
+"fields": [
+{
+"key": "name",
+"label": { "en": "Name", "ar": "￿￿￿￿￿" {,
+"type": "string",
+"required": true
+},
+{
+"key": "licenseNumber",
+"label": { "en": "License #" , "ar": ￿￿￿" "￿￿￿￿￿￿ {,
+"type": "string",
+"required": true,
+"isPublic": false
+},
+{
+137"key": "homeCollection",
+"label": { "en": "Home collection" , "ar": ￿￿￿" "￿￿￿￿￿ {,
+"type": "boolean"
+},
+{
+"key": "tests",
+"label": { "en": "Available Tests" , "ar": ￿￿￿￿￿￿￿￿" "￿￿￿￿￿￿￿ {,
+"type": "array",
+"required": true
+}
+]
+}
+• Response: { "serviceType": { "_id": "...", "schemaVersion":
+1, "fields": [ ... ] } }
+PUT /service-types/:id
+• Description: Update name/description/slug/isActive/fields; if fields
+changes, schemaVersion auto-increments.
+• Auth: Admin
+• Notes: Partial language updates merge and preserve existing translations.
+• Body example: (adding a new public field)
+{
+"fields": [
+{
+"key": "name",
+"label": { "en": "Name", "ar": "￿￿￿￿￿" {,
+"type": "string",
+"required": true
+},
+{
+"key": "licenseNumber",
+"label": { "en": "License #" , "ar": ￿￿￿" "￿￿￿￿￿￿ {,
+"type": "string",
+"required": true,
+"isPublic": false
+},
+{
+"key": "homeCollection",
+"label": { "en": "Home collection" , "ar": ￿￿￿" "￿￿￿￿￿ {,
+"type": "boolean"
+},
+{
+"key": "tests",
+"label": { "en": "Available Tests" , "ar": ￿￿￿￿￿￿￿￿" "￿￿￿￿￿￿￿ {,
+138"type": "array",
+"required": true
+},
+{
+"key": "city",
+"label": { "en": "City", "ar": "￿￿￿￿￿￿￿" {,
+"type": "string",
+"required": false
+}
+]
+}
+• Response: { "serviceType": { "_id": "...", "schemaVersion":
+2, "fields": [ ... ] } }
+POST /service-providers
+• Description: Create a provider instance against a service type. Data-
+entry users are forced to draft status.
+• Auth: Admin or Data Entry
+• Notes: For string fields, data accepts a string or { "en": "...", "ar":
+"..." } .
+• Body example:
+{
+"serviceType": "<SERVICE_TYPE_ID>",
+"status": "draft",
+"data": {
+"name": { "en": "City Labs" , "ar": ￿￿￿￿￿" "￿￿￿￿￿￿￿ {,
+"licenseNumber": "LIC-12345",
+"homeCollection": true,
+"tests": ["CBC", "Lipid Panel" ],
+"city": { "en": "Cairo", "ar": "￿￿￿￿￿￿￿" {
+}
+}
+• Response: { "provider": { "_id": "...", "status": "draft",
+"schemaVersionAtWrite": 2, "data": { ... } } }
+PUT /service-providers/:id
+• Description: Update provider data/status. Admins may set
+active|inactive|draft; data-entry remains draft.
+• Auth: Admin or Data Entry
+• Body example: { "data": { "name": { "en": "City Labs" },
+"tests": ["CBC"] }, "status": "inactive" }
+• Response: { "provider": { "_id": "...", "status": "inactive",
+"schemaVersionAtWrite": 2, "data": { ... } } }
+139PATCH /service-providers/:id/status
+• Description: Admin-only status transition. Allowed: draft->active|inactive,
+active->inactive, inactive->active. Activations re-validate against
+current schema and refresh schemaVersionAtWrite.
+• Auth: Admin
+• Body example: { "status": "active" }
+• Response: { "provider": { "_id": "...", "status": "active",
+"schemaVersionAtWrite": 2 } }
+GET /services/types (public)
+• Description: List active service types for discovery.
+• Auth: None
+• Notes: name/description are localized strings based on x-lang. Use
+?includeAllLangs=true to return { en, ar } .
+• Response example: { "serviceTypes": [ { "_id": "...",
+"name": "Laboratory", "slug": "lab", "schemaVersion": 2 }
+] }
+GET /services
+• Description: List active providers (public fields only). Supports cursor
+pagination.
+• Auth: None
+• Notes: Public string fields are localized based on x-lang. Use
+?includeAllLangs=true to return { en, ar } objects.
+• Query examples:
+– First page: /services?type=lab&limit=20
+– Next page: /services?type=lab&limit=20&cursor=<nextCursorFromPrevResponse>
+• Cursor response example:
+{
+"limit": 20,
+"items": [
+{
+"id": "657...",
+"serviceType": { "id": "abc...", "slug": "lab", "name": "Laboratory" },
+"data": { "name": "City Labs" , "homeCollection": true, "city": "Cairo" },
+"status": "active",
+"createdAt": "2024-02-01T10:00:00.000Z"
+}
+],
+"nextCursor": "eyJjcmVhdGVkQXQiOiIyMDI0LTAyLTAxVDEwOjAwOjAwLjAwMFoiLCJfaWQiOiI2NTd..."
+}
+140GET /services/:id
+• Description: Fetch one active provider by id (public fields only).
+• Auth: None
+• Notes: Public string fields are localized based on x-lang.
+• Response example: { "provider": { "id": "...", "serviceType":
+{ "slug": "lab" }, "data": { "name": "City Labs", "homeCollection":
+true } } }
+POST /service-providers
+• Description: Create a service provider instance using a service type’s
+dynamic schema.
+• Auth: Admin or Data Entry (data-entry users are forced to draft status)
+• Notes: For string fields, data accepts a string or { "en": "...", "ar":
+"..." } .
+• Body:
+{
+"serviceType": "<SERVICE_TYPE_ID>",
+"status": "draft",
+"data": {
+"name": { "en": "City Labs" , "ar": ￿￿￿￿￿" "￿￿￿￿￿￿￿ {,
+"licenseNumber": "LIC-12345",
+"homeCollection": true
+}
+}
+• Response: { "provider": { "_id": "...", "status": "draft",
+"data": { ... } } }
+PUT /service-providers/:id
+• Description: Update provider data/status (admin can set active|inactive|draft;
+data-entry saves as draft).
+• Auth: Admin or Data Entry
+• Body: { "data": { "name": { "en": "City Labs" } }, "status":
+"active" }
+• Response: { "provider": { "_id": "...", "status": "active",
+"schemaVersionAtWrite": 2, "data": { ... } } }
+PATCH /service-providers/:id/status
+• Description: Admin-only status transition. Allowed: draft->active|inactive,
+active->inactive, inactive->active. Activations re-validate against
+the current schema and refresh schemaVersionAtWrite.
+• Auth: Admin
+• Body: { "status": "active" }
+141• Response: { "provider": { "_id": "...", "status": "active" }
+}
+Validation rules:
+• Unknown fields rejected; types enforced (string|number|boolean|array|object)
+• Required, enum, min/max, regex honored per service type field definition
+• Data-entry users cannot set active; they are restricted to draft.
+Facilities Module (Standalone)
+Facilities are now managed by a dedicated module and stored in the Facility
+collection (not as generic service providers).
+Canonical Data Model
+• doctor.facilityId is the canonical doctor relation.
+• doctor.facilityProviderId is transitional compatibility only.
+• Facility core fields:
+– name
+– normalizedName
+– facilityType
+– city
+– country
+– address
+– phone
+– description
+– status (ACTIVE | PENDING | INACTIVE | DELETED )
+– attributes: [String]
+– ownerDoctorId
+– createdBy, updatedBy, approvedBy, approvedAt
+• facilityType is stored as a canonical machine key (not localized text).
+Supported keys:
+– hospital
+– clinic
+– polyclinic
+– medical_center
+– laboratory
+– imaging_center
+– pharmacy
+– rehabilitation_center
+– dialysis_center
+– emergency_center
+– other
+• Display localization should use i18n keys: facilities.types.<facilityTypeKey>
+(available in English and Arabic).
+142Public Helper Endpoint
+GET /facilities/types
