@@ -132,10 +132,10 @@ export default function AdminDoctorSpecializationsPage() {
       >
         <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
           <div className='min-w-0 text-right'>
-            <div className='inline-flex items-center gap-3'>
+            <div className='inline-flex gap-3 items-center'>
               <div className='flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#ECFEFF] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]'>
                 <Tags
-                  className='h-5 w-5 text-primary'
+                  className='w-5 h-5 text-primary'
                   aria-hidden
                 />
               </div>
@@ -144,22 +144,13 @@ export default function AdminDoctorSpecializationsPage() {
                   تخصصات الأطباء
                 </h1>
                 <p className='mt-1 max-w-[560px] font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]'>
-                  إدارة كتالوج عبر{' '}
-                  <span className='font-mono text-[11px] font-bold text-[#475467]'>
-                    GET /api/admin/lookups?category=
-                    {lookupCategory}
-                  </span>
-                  . الفئة الحالية من المتغير{' '}
-                  <span className='font-mono text-[10px]'>
-                    VITE_ADMIN_DOCTOR_LOOKUP_CATEGORY
-                  </span>{' '}
-                  (الافتراضي المعقول للتوافق مع API-3: MEDICAL_CONDITION).
+                  إدارة كتالوج التخصصات الطبية في الإدارة وكتالوج التسجيل
                 </p>
               </div>
             </div>
           </div>
 
-          <div className='flex flex-wrap items-center gap-2 lg:justify-end'>
+          <div className='flex flex-wrap gap-2 items-center lg:justify-end'>
             <button
               type='button'
               onClick={() => refetch()}
@@ -178,7 +169,7 @@ export default function AdminDoctorSpecializationsPage() {
               className='inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_16px_34px_rgba(15,143,139,0.28)] transition hover:brightness-105'
             >
               <Plus
-                className='h-4 w-4'
+                className='w-4 h-4'
                 aria-hidden
               />
               إضافة تخصص
@@ -189,42 +180,21 @@ export default function AdminDoctorSpecializationsPage() {
             >
               قائمة الأطباء
               <ChevronLeft
-                className='h-4 w-4'
+                className='w-4 h-4'
                 aria-hidden
               />
             </Link>
           </div>
         </div>
 
-        <div
-          role='note'
-          className='mt-5 flex gap-3 rounded-[12px] border border-[#CFFAFE] bg-gradient-to-l from-[#F0FDFF] to-white px-4 py-3 text-right shadow-[0_10px_26px_rgba(15,143,139,0.08)]'
-        >
-          <Info
-            className='mt-0.5 h-5 w-5 shrink-0 text-primary'
-            aria-hidden
-          />
-          <div className='font-cairo text-[12px] font-semibold leading-relaxed text-[#0F172A]'>
-            سبب شائع لخطأ <span className='font-mono'>422</span>: إرسال{' '}
-            <span className='font-mono'>category=SPECIALIZATION</span> بينما API-3
-            يصرّح فقط بـ{' '}
-            <span className='font-mono'>BLOOD_TYPE</span> |{' '}
-            <span className='font-mono'>ALLERGY</span> |{' '}
-            <span className='font-mono'>MEDICAL_CONDITION</span>. تم ضبط الطلب على
-            الفئة <span className='font-mono'>{lookupCategory}</span> عبر المتغير أعلاه؛
-            لتخصصات أطباء مستقلة على الخادم أضف الفئة هناك ثم عيّن{' '}
-            <span className='font-mono'>SPECIALIZATION</span> في الإعدادات.
-          </div>
-        </div>
-
-        <section className='mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3'>
+        <section className='grid grid-cols-1 gap-3 mt-6 sm:grid-cols-3'>
           <div className='rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]'>
-            <div className='flex items-center justify-between gap-2'>
+            <div className='flex gap-2 justify-between items-center'>
               <span className='font-cairo text-[11px] font-bold text-[#667085]'>
                 عناصر الكتالوج
               </span>
               <Tags
-                className='h-4 w-4 text-primary'
+                className='w-4 h-4 text-primary'
                 aria-hidden
               />
             </div>
@@ -236,7 +206,7 @@ export default function AdminDoctorSpecializationsPage() {
             </div>
           </div>
           <div className='rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]'>
-            <div className='flex items-center justify-between gap-2'>
+            <div className='flex gap-2 justify-between items-center'>
               <span className='font-cairo text-[11px] font-bold text-[#667085]'>
                 نشطة
               </span>
@@ -250,7 +220,7 @@ export default function AdminDoctorSpecializationsPage() {
             </div>
           </div>
           <div className='rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]'>
-            <div className='flex items-center justify-between gap-2'>
+            <div className='flex gap-2 justify-between items-center'>
               <span className='font-cairo text-[11px] font-bold text-[#667085]'>
                 غير نشطة
               </span>
@@ -293,7 +263,7 @@ export default function AdminDoctorSpecializationsPage() {
 
         {isLoading ? (
           <div className='mt-8 flex flex-col items-center justify-center gap-3 rounded-[14px] border border-[#EEF2F6] bg-white py-20'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
+            <Loader2 className='w-8 h-8 animate-spin text-primary' />
             <p className='font-cairo text-[13px] font-semibold text-[#667085]'>
               جاري تحميل كتالوج التخصصات…
             </p>
@@ -314,7 +284,7 @@ export default function AdminDoctorSpecializationsPage() {
               onClick={openCreate}
               className='mt-4 inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white'
             >
-              <Plus className='h-4 w-4' />
+              <Plus className='w-4 h-4' />
               إضافة أول تخصص
             </button>
           </div>
@@ -324,7 +294,7 @@ export default function AdminDoctorSpecializationsPage() {
               <motion.ul
                 key={safePage}
                 role='list'
-                className='mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'
+                className='grid grid-cols-1 gap-4 mt-8 md:grid-cols-2 xl:grid-cols-3'
                 variants={staggerContainer(0.055, 0.03)}
                 initial='hidden'
                 animate='show'
@@ -339,13 +309,13 @@ export default function AdminDoctorSpecializationsPage() {
                       key={row._id}
                       variants={staggerItem}
                       layout
-                      className='group h-full'
+                      className='h-full group'
                     >
                       <div className='relative flex h-full min-h-[168px] flex-col overflow-hidden rounded-[14px] border border-[#E8ECEF] bg-white shadow-[0_18px_38px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_26px_52px_rgba(15,143,139,0.14)]'>
                         <div className='pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-l from-primary/90 via-[#2DD4BF]/90 to-transparent opacity-90' />
 
-                        <div className='flex flex-1 flex-col gap-3 p-4'>
-                          <div className='flex flex-wrap items-start justify-between gap-2'>
+                        <div className='flex flex-col flex-1 gap-3 p-4'>
+                          <div className='flex flex-wrap gap-2 justify-between items-start'>
                             <span
                               className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-cairo text-[10px] font-extrabold ${
                                 row.isActive
@@ -392,7 +362,7 @@ export default function AdminDoctorSpecializationsPage() {
                               className='inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#475467] shadow-sm transition hover:border-primary/35 hover:text-primary'
                               aria-label='تعديل'
                             >
-                              <Pencil className='h-4 w-4' />
+                              <Pencil className='w-4 h-4' />
                             </button>
                             <button
                               type='button'
@@ -400,7 +370,7 @@ export default function AdminDoctorSpecializationsPage() {
                               className='inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#FEE2E2] bg-[#FFF7F7] text-[#DC2626] transition hover:bg-[#FEF2F2]'
                               aria-label='تعطيل'
                             >
-                              <Trash2 className='h-4 w-4' />
+                              <Trash2 className='w-4 h-4' />
                             </button>
                           </div>
                         </div>
@@ -426,7 +396,7 @@ export default function AdminDoctorSpecializationsPage() {
                 عنصراً مطابقاً
               </p>
 
-              <div className='flex flex-wrap items-center justify-center gap-2'>
+              <div className='flex flex-wrap gap-2 justify-center items-center'>
                 <button
                   type='button'
                   disabled={safePage <= 1 || busy}
@@ -466,7 +436,7 @@ export default function AdminDoctorSpecializationsPage() {
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         variant='destructive'
         title='تعطيل عنصر التخصص'
-        icon={<Trash2 className='h-6 w-6' strokeWidth={2} aria-hidden />}
+        icon={<Trash2 className='w-6 h-6' strokeWidth={2} aria-hidden />}
         description={
           deleteTarget ? (
             <>

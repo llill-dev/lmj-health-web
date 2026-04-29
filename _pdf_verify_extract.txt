@@ -1,0 +1,319 @@
+doctor-verification-requests
+• Description: List doctor verification requests (seeded on doctor signup).
+Sorted newest first.
+• Query params: status (pending/approved/rejected, optional), page
+(>=1, default 1), limit (1-100, default 20)
+• Response (shape):
+• Geo note: clinicLocation.coordinates is [lng, lat] .
+{
+"page": 1,
+"limit": 20,
+"total": 1,
+"results": 1,
+"requests": [
+{
+"_id": "65a...req",
+"doctor": {
+"_id": "...",
+"specialization": "Cardiology",
+73
+"medicalLicenseNumber": "LIC-1234",
+"education": "Cairo University" ,
+"clinicAddress": "Clinic St" ,
+"bio": "15 years of experience" ,
+"consultationFee": 300,
+"consultationTypes": ["online", "offline"],
+"locationCity": "Cairo",
+"locationCountry": "EG",
+"averageRating": 4.8,
+"totalReviews": 10,
+"isApproved": false,
+"approvalStatus": "pending",
+"approvalNote": null,
+"geoStatus": "pending",
+"geoSource": "doctor_pin",
+"geoUpdatedAt": "2025-12-06T08:55:00.000Z",
+"clinicLocation": {
+"type": "Point",
+"coordinates": [31.2357, 30.0444]
+},
+"userId": {
+"_id": "...",
+"fullName": "Dr Mona" ,
+"email": "dr.mona@example.com",
+"phone": "+20123...",
+"gender": "Female",
+"dateOfBirth": "1985-05-02T00:00:00.000Z",
+"address": "Clinic St" ,
+"photoUrl": "uploads/2025-12-06/photo.jpg"
+}
+},
+"requestedBy": {
+"_id": "...",
+"fullName": "Dr Mona" ,
+"email": "dr.mona@example.com"
+},
+"status": "pending",
+"adminNote": null,
+"reviewedBy": null,
+"reviewedAt": null,
+"createdAt": "2025-12-06T09:00:00.000Z"
+}
+]
+}
+74
+GET /admin/doctor-verification-requests/:requestId
+• Description: Fetch a single verification request with the associated doc-
+tor and requester.
+• Response (shape):
+{
+"request": {
+"_id": "...",
+"doctor": {
+"_id": "...",
+"specialization": "Cardiology",
+"medicalLicenseNumber": "LIC-1234",
+"education": "Cairo University" ,
+"clinicAddress": "Clinic St" ,
+"bio": "15 years of experience" ,
+"consultationFee": 300,
+"consultationTypes": ["online", "offline"],
+"locationCity": "Cairo",
+"locationCountry": "EG",
+"averageRating": 4.8,
+"totalReviews": 10,
+"isApproved": false,
+"approvalStatus": "pending",
+"approvalNote": null,
+"geoStatus": "pending",
+"geoSource": "doctor_pin",
+"geoUpdatedAt": "2025-12-06T08:55:00.000Z",
+"clinicLocation": {
+"type": "Point",
+"coordinates": [31.2357, 30.0444]
+},
+"userId": {
+"_id": "...",
+"fullName": "Dr Mona" ,
+"email": "dr.mona@example.com",
+"phone": "+20123...",
+"gender": "Female",
+"dateOfBirth": "1985-05-02T00:00:00.000Z",
+"address": "Clinic St" ,
+"photoUrl": "uploads/2025-12-06/photo.jpg"
+}
+},
+"requestedBy": {
+"_id": "...",
+"fullName": "Dr Mona" ,
+75
+"email": "dr.mona@example.com"
+},
+"status": "pending",
+"adminNote": null,
+"reviewedBy": null,
+"reviewedAt": null,
+"createdAt": "2025-12-06T09:00:00.000Z"
+}
+}
+• Errors: 404 Verification request not found
+PATCH /admin/doctor-verification-requests/:requestId
+• Body: { "decision": "approved", "adminNote": "Welcome
+aboard", "clinicLat": 30.0444, "clinicLng": 31.2357, "verifyLocation":
+true } or { "decision": "rejected", "adminNote": "Invalid
+license" }
+• Behavior: Only pending requests can be reviewed. Approval sets
+doctor.isApproved=true, approvalStatus=approved, approvalNote=adminNote,
+approvedBy/approvedAt and marks the request approved with reviewer
+metadata. If clinicLat + clinicLng are provided, they overwrite
+the clinic pin and set geoStatus=verified (geoSource=admin). If
+verifyLocation=true and a pending pin exists, it is marked verified.
+Rejection sets doctor.isApproved=false, approvalStatus=rejected,
+approvalNote=adminNote and marks the request rejected.
+• Notifications: doctor is notified when the request is approved or rejected.
+• Response (approved): { "message": "Doctor approved",
+"request": { "_id": "...", "status": "approved", "adminNote":
+"Welcome aboard", "reviewedBy": "64f...admin", "reviewedAt":
+"2025-12-06T10:05:00.000Z" }, "doctor": { "_id": "...",
+"isApproved": true, "approvalStatus": "approved", "approvalNote":
+"Welcome aboard", "approvedBy": "64f...admin", "approvedAt":
+"2025-12-06T10:05:00.000Z" } }
+• Response (rejected): { "message": "Doctor rejected", "request":
+{ "_id": "...", "status": "rejected", "adminNote": "Invalid
+license" } , "doctor": { "_id": "...", "isApproved": false,
+"approvalStatus": "rejected", "approvalNote": "Invalid
+license" } }
+• Errors: 400 Verification request already reviewed , 404
+Verification request not found , 404 Doctor profile not found
+Doctor patient management (doctor-only unless noted)
+Base path for these routes: /api/doctors (patient-management). Scheduling
+routes stay under the same base via the slots router; patient-management routes
+are defined in src/routes/doctor.js.
+76
+GET /doctors/patients
+• Description: List patients linked to the authenticated (approved) doctor
+with filters and pagination.
+• Auth: Doctor, Secretary (secretary is scoped to their assigned doctor and
+requires patients:view)
+• Query params: name (partial match on patient full name), search
+(matches patient name/email/phone/publicId), diagnosis (search diag-
+nosis/title), from, to (ISO dates to filter by appointments in range), page,
+limit, account_status (active | temporary | suspended | all, default
+all).
+• Response: { "page": 1, "limit": 20, "total": 2, "results":
+2, "patients": [ { "_id": "...", "publicId": "P-7F3K9D2Q",
+"user": { "_id": "...", "fullName": "Sara Patient", "email":
+"sara@example.com", "phone": "+20123..." }, "allergies": [],
+"medicalConditions": [], "bloodType": null, "lastVisitAt":
+"2025-12-07T12:00:00.000Z" } ] }
+• Notes: Each patient includes user.accountStatus and isTemporary for
+UI filtering.
+POST /doctors/patients/temp
+• Description: Create a temporary patient (or link an existing patient
+if email/phone matches). Uses a random password, marks account as
+temporary, and links the doctor￿patient.
+• Auth: Doctor, Secretary (secretary is scoped to their assigned doctor and
+requires patients:temporary:create)
+• Body: { "fullName": "Walk-in Patient", "email": "walkin@example.com",
+"phone": "+20123..." } (fullName, email, and phone required)
+• Response: { "message": "Temporary patient created and
+linked", "patientId": "...", "userId": "...", "accountStatus":
+"temporary", "isTemporary": true } or { "message": "Existing
+patient linked to doctor", ... }
+• Notes: New temporary patients are created with accountStatus=temporary
+and isVerified=false until claimed via /auth/claim-account/* (or
+activated by admin).
+GET /doctors/patients/:patientId/public
+• Description: Return non-confidential patient data (basic demographics,
+allergies/conditions, vitals) for a linked patient.
+• Auth: Doctor (patient must already be linked)
+• Response: { "patient": { "_id": "...", "user": { "_id":
+"...", "fullName": "Sara Patient", "email": "sara@example.com",
+"phone": "+20123..." }, "allergies": [], "medicalConditions":
+[], "bloodType": "O+", "heightCm": 170, "weightKg": 70,
+"measurementUnit": "metric" } }
+77
+POST /doctors/orders
+• Role (auth): doctor
+• Description: Backward-compatible create endpoint. Accepts legacy
+shape ( type, orderName, instructions) and canonical typed shape
+(orderType and typed fields).
+• Compatibility behavior:
+– Legacy type values map to typed order kinds:
+∗ lab -> LAB_ORDER
+∗ imaging -> IMAGING_ORDER
+∗ other|procedure|medication -> PROCEDURE_ORDER
+∗ referral -> REFERRAL_ORDER
+– Legacy mirrored fields are still returned in responses: type,
+orderName, instructions, status.
+• Create guardrails:
+– results is rejected on create (use POST /doctors/orders/:orderId/results
+after order creation).
+– If details is provided, only order-type-allowed detail keys are per-
+sisted; unrelated keys are ignored.
+POST /doctors/orders/lab
+• Role (auth): doctor
+• Description: Create LAB_ORDER.
+• Body (summary): patientId, catalog/manual items (or catalogItems
+/ manualItems), optional labInstructions, clinicalReason, urgency,
+instructionsToPatient, attachments.
+POST /doctors/orders/imaging
+• Role (auth): doctor
+• Description: Create IMAGING_ORDER.
+• Body (summary): patientId, catalog/manual items, optional
+imagingCenterInstructions, clinicalQuestion, clinicalReason,
+urgency, instructionsToPatient, attachments.
+POST /doctors/orders/procedures
+• Role (auth): doctor
+• Description: Create PROCEDURE_ORDER.
+• Body (summary): patientId, catalog/manual items, optional
+place, preparation, aftercareInstructions, clinicalReason, notes,
+urgency, attachments.
+POST /doctors/orders/referrals
+• Role (auth): doctor
+78
+• Description: Create REFERRAL_ORDER (structured; no catalog depen-
+dency).
+• Body (required): patientId, specialty, reason.
+• Body (optional): referredDoctorName, institution, clinicalSummary,
+questionsToColleague, notes, urgency.
+GET /doctors/orders
+• Role (auth): doctor
+• Description: List orders owned by the authenticated doctor.
+• Query filters: patientId, orderType, category|type (legacy),
+statusCode|status, priority, q|search, from, to, page, limit, sort.
+• Date filter semantics: date-only values ( YYYY-MM-DD) are interpreted
+as local calendar-day boundaries on the server ( from at 00:00:00.000, to
+at 23:59:59.999). Full datetime values remain exact timestamps.
+• Response: paginated list with canonical and legacy fields (including
+orderType, category, type, orderTitle, orderName, statusCode,
+status).
+GET /doctors/orders/:orderId
+• Role (auth): doctor
+• Description: Full doctor-owned order details.
+PATCH /doctors/orders/:orderId
+• Role (auth): doctor
+• Description: Update editable fields for non-terminal orders.
+• Notes: Type/status mutation via this endpoint is rejected by valida-
+tion/service rules.
+PATCH /doctors/orders/:orderId/cancel
+• Role (auth): doctor
+• Description: Cancel a doctor-owned order with transition checks.
+• Body: optional note.
+PATCH /doctors/orders/:orderId/status
+• Role (auth): doctor
+• Description: Update order status with transition validation.
+POST /doctors/orders/:orderId/results
+• Role (auth): doctor
+• Description: Append structured results to an order.
+• Lifecycle rules:
+79
+– Results can be appended only while status is ACCEPTED or
+IN_PROGRESS.
+– Results cannot be appended to terminal orders ( COMPLETED,
+CANCELLED, REJECTED, EXPIRED).
+– isFinal=true can complete the order only when the same transition
+policy is valid (for example IN_PROGRESS -> COMPLETED ).
+GET /doctors/order-catalog/lab-tests
+GET /doctors/order-catalog/lab-tests/:id
+GET /doctors/order-catalog/imaging
+GET /doctors/order-catalog/imaging/:id
+GET /doctors/order-catalog/procedures
+GET /doctors/order-catalog/procedures/:id
+• Role (auth): doctor
+• Description: Doctor-facing read-only catalog browsing.
+• Behavior: Returns only isActive=true and isVisible=true items; sup-
+ports search|q, category, priorityLevel, pagination, and allow-listed
+sort.
+• Response includes: isFavorited marker for the current doctor.
+POST /doctors/order-favorites
+GET /doctors/order-favorites
+DELETE /doctors/order-favorites/:favoriteId
+• Role (auth): doctor
+• Description: Doctor-specific favorites for catalog sections LAB, IMAGING,
+PROCEDURE.
+• Rules: No referral favorites. Duplicate favorites return 409.
+• List query: catalogSection|section, page, limit.
+• List defaults: sorted newest-first by createdAt desc , then _id desc .
+• List response: { "page": 1, "limit": 20, "total": 3, "results":
+3, "favorites": [...] } .
+GET /admin/order-catalog/lab-tests
+GET /admin/order-catalog/lab-tests/:id
+80
+POST /admin/order-catalog/lab-tests
+PATCH /admin/order-catalog/lab-tests/:id
+GET /admin/order-catalog/imaging
+GET /admin/order-catalog/imaging/:id
+POST /admin/order-catalog/imaging
+PATCH /admin/order-catalog/imaging/:id
+GET /admin/order-catalog/procedures
+GET /admin/order-catalog/procedures/:id
+POST /admin/order-catalog/procedures
+PATCH /admin/order-catalog/procedures/:id
+• Role (auth): admin, data_entry
+• Description: Admin/data-entry CRUD for order master catalogs.
+• Behavior: Supports search/filter/pagination/sort. Operational visibility
+is managed with isActive and isVisible via PATCH.
+• Audit: create/update catalog mutations are audited with admin action
+names; list endpoints are not audited.
+GET /d
