@@ -2,9 +2,9 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
-import { Sparkles, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateLookup, usePatchLookup } from '@/hooks/useAdminLookupMutations';
@@ -24,17 +24,6 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-
-/** قيم تجريبية صالحة للتحقق ولـ POST؛ المفتاح يُولَّد فريداً لتقليل تعارض التكرار أثناء التجربة */
-function buildVirtualSample(): FormValues {
-  const uid = Date.now().toString(36).slice(-8);
-  return {
-    key: `demo_${uid}`,
-    textAr: 'طب القلب',
-    textEn: 'Cardiology',
-    order: 50,
-  };
-}
 
 const inputClass =
   'h-[40px] w-full rounded-[10px] border border-[#D0D5DD] bg-white px-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15';
@@ -60,7 +49,7 @@ export default function UpsertDoctorLookupDialog({
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: {
       key: '',
       textAr: '',
@@ -149,7 +138,10 @@ export default function UpsertDoctorLookupDialog({
       onOpenChange={onOpenChange}
     >
       <Dialog.Portal>
-        <Dialog.Overlay forceMount asChild>
+        <Dialog.Overlay
+          forceMount
+          asChild
+        >
           <motion.div
             initial={false}
             animate={{ opacity: open ? 1 : 0 }}
@@ -159,42 +151,21 @@ export default function UpsertDoctorLookupDialog({
         </Dialog.Overlay>
 
         <Dialog.Content className='fixed left-1/2 top-1/2 z-[121] w-[min(520px,calc(100vw-24px))] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[#E8ECEF] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.18)]'>
-          <div className='flex items-start justify-between gap-3 border-b border-[#F2F4F7] px-5 py-4'>
+          <div className='flex gap-3 justify-between items-start border-b border-[#F2F4F7] px-5 py-4'>
+            <Dialog.Close className='p-1.5 rounded-full text-[#98A2B3] transition hover:bg-[#F9FAFB] hover:text-[#475467]'>
+              <X className='w-5 h-5' />
+            </Dialog.Close>
             <div className='text-right'>
               <Dialog.Title className='font-cairo text-[16px] font-black text-[#111827]'>
                 {isEdit ? 'تعديل تخصص' : 'إضافة تخصص طبيب'}
               </Dialog.Title>
-              <Dialog.Description className='mt-1 font-cairo text-[11px] font-semibold leading-relaxed text-[#667085]'>
-                النص ثنائي اللغة يُخزَّن وفق POST/PATCH لمسار{' '}
-                <span className='font-mono text-[10px]'>/api/admin/lookups</span>
-              </Dialog.Description>
             </div>
-            <Dialog.Close className='rounded-full p-1.5 text-[#98A2B3] transition hover:bg-[#F9FAFB] hover:text-[#475467]'>
-              <X className='h-5 w-5' />
-            </Dialog.Close>
           </div>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className='space-y-4 px-5 py-5'
+            className='px-5 py-5 space-y-4'
           >
-            {!isEdit ? (
-              <div className='flex justify-end'>
-                <button
-                  type='button'
-                  disabled={busy}
-                  onClick={() => reset(buildVirtualSample())}
-                  className='inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-dashed border-primary/45 bg-[#F0FDFA] px-3 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-[#CCFBF1] disabled:opacity-50'
-                >
-                  <Sparkles
-                    className='h-4 w-4 shrink-0'
-                    aria-hidden
-                  />
-                  تعبئة بيانات تجريبية
-                </button>
-              </div>
-            ) : null}
-
             <div>
               <label className='mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
                 المفتاح (machine key)
@@ -202,7 +173,7 @@ export default function UpsertDoctorLookupDialog({
               <input
                 {...register('key')}
                 dir='ltr'
-                className={`${inputClass} font-mono text-[12px]`}
+                className={`font-mono ${inputClass} text-[12px]`}
                 placeholder='cardiology'
                 disabled={busy}
               />
