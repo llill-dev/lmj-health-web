@@ -65,7 +65,7 @@ interface AuthState {
     role: 'jobseeker' | 'company' | 'doctor',
   ) => Promise<void>;
   setPendingVerification: (payload: PendingVerification | null) => void;
-  logout: () => void;
+  logout: (options?: { skipRemoteRevoke?: boolean }) => Promise<void>;
 }
 
 type Listener = () => void;
@@ -306,10 +306,10 @@ let state: AuthState = {
     setState({ pendingVerification: payload });
   },
 
-  logout: async () => {
+  logout: async (options?: { skipRemoteRevoke?: boolean }) => {
     const token = state.token;
 
-    if (token) {
+    if (token && !options?.skipRemoteRevoke) {
       try {
         await authApi.logoutAll(token);
       } catch (err) {
