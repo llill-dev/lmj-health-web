@@ -253,6 +253,8 @@ export const step2PersonalSchema = z.object({
 
 export const step3ProfessionalSchema = z.object({
   specialty: z.string().min(1, 'التخصص الطبي مطلوب.'),
+  /** اختيار من القائمة المحمَّلة أم إدخال يدوي (لمطابقة حقلي الـ API). */
+  specialtySource: z.enum(['catalog', 'manual']),
   licenseNumber: z.string().min(1, 'رقم الرخصة الطبية مطلوب.'),
   qualification: z.string().min(1, 'المؤهل العلمي مطلوب.'),
   clinicAddress: z.string().min(1, 'عنوان العيادة مطلوب.'),
@@ -279,6 +281,7 @@ export const signUpSchema = z.object({
   birthDate: isoDateOnlySchema,
   address: z.string().min(1, 'العنوان مطلوب'),
   specialty: z.string().min(1, 'التخصص الطبي مطلوب.'),
+  specialtySource: z.enum(['catalog', 'manual']).default('manual'),
   licenseNumber: z.string().min(1, 'رقم الرخصة الطبية مطلوب.'),
   qualification: z.string().min(1, 'المؤهل العلمي مطلوب.'),
   clinicAddress: z.string().min(1, 'عنوان العيادة مطلوب.'),

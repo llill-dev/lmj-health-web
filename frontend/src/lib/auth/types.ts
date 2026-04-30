@@ -24,7 +24,12 @@ export type DoctorSignupBody = {
   address: string;
   role: 'doctor';
   channel: SignupChannel;
-  specialization: string;
+  /** Catalog selection from GET /api/meta/doctor-specializations. */
+  specializationKey?: string;
+  /** Free-text specialization when the desired option is not in the catalog. */
+  customSpecializationText?: string;
+  /** Legacy fallback accepted by the backend as a custom specialization request. */
+  specialization?: string;
   medicalLicenseNumber: string;
   bio: string;
   education: string;
@@ -138,6 +143,29 @@ export interface AuthError {
   message: string;
   details?: any;
 }
+export type DoctorSignupSpecialtyOption = {
+  /** Backend specialization key, sent as `specializationKey` during signup. */
+  key: string;
+  /** Localized label shown in the signup dropdown. */
+  labelAr: string;
+  /** English label when the API returns all languages. */
+  labelEn?: string;
+  /** Select value; currently identical to `key`. */
+  value: string;
+};
+
+export type DoctorSpecialtiesMetaResponse = {
+  messageKey?: string;
+  message?: string;
+  doctorSpecializations?: unknown[];
+  specialties?: unknown[];
+  lookups?: unknown[];
+  options?: unknown[];
+  items?: unknown[];
+  results?: unknown[];
+  data?: unknown[];
+};
+
 
 // API Error mapping
 export const AUTH_ERROR_CODES: Record<number, AuthError['code']> = {
@@ -193,3 +221,5 @@ export const AUTH_ERROR_MESSAGES: Record<
     en: 'An unexpected error occurred',
   },
 };
+
+
