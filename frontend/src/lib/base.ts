@@ -1,4 +1,8 @@
 import { useAuthStore } from '@/store/authStore';
+import {
+  isAccessTokenExpired,
+  isSessionExpiry401Exempt,
+} from '@/lib/session/sessionExpiryGuards';
 
 function normalizeApiOrigin(value: string | undefined): string {
   const trimmed = value?.trim() ?? '';
@@ -69,6 +73,8 @@ function userFacingHttpErrorMessage(
 // ─────────────────────────────────────────────────────────────────────────────
 export type ApiOptions = RequestInit & {
   token?: string;
+  /** لا يُرفق Bearer من المخزن (تسجيل دخول، تسجيل، إلخ). */
+  omitAuth?: boolean;
   signal?: AbortSignal;
   onError?: (error: Error) => void;
   onProgress?: (progress: number) => void;
@@ -78,6 +84,44 @@ export type ApiOptions = RequestInit & {
 // ─────────────────────────────────────────────────────────────────────────────
 // Core request function
 // ─────────────────────────────────────────────────────────────────────────────
+function scheduleSessionExpiryHandling(locale: 'ar' | 'en'): void {
+  void import('@/lib/session/sessionExpiryFlow').then((m) =>
+    m.runSessionExpiredFlow(locale),
+  );
+}
+
+/** استجابة 401 مع طلب كان يحمل توكن مصادقة → انتهاء الجلسة (مع استثناء مسارات /api/auth العامة). */
+function maybeHandleUnauthorizedSession(
+  endpoint: string,
+  locale: 'ar' | 'en',
+  hadBearerToken: boolean,
+): void {
+  if (!hadBearerToken) return;
+  if (isSessionExpiry401Exempt(endpoint)) return;
+  scheduleSessionExpiryHandling(locale);
+}
+
+/** فحص JWT محلياً؛ إن انتهت الصلاحية يُفعَّل تسجيل الخروج ثم يُرمى خطأ لإيقاف الطلب */
+function ensureAccessTokenLive(
+  endpoint: string,
+  locale: 'ar' | 'en',
+  token: string,
+  omitAuth: boolean,
+): void {
+  if (omitAuth || !token) return;
+  if (isSessionExpiry401Exempt(endpoint)) return;
+  if (!isAccessTokenExpired(token)) return;
+  scheduleSessionExpiryHandling(locale);
+  throw new ApiError(
+    401,
+    'errors.auth.sessionExpired',
+    {},
+    locale === 'ar'
+      ? 'انتهت صلاحية جلسة الدخول.'
+      : 'Session expired.',
+  );
+}
+
 export async function apiRequest<T = unknown>(
   endpoint: string,
   options: ApiOptions = {},
@@ -86,6 +130,7 @@ export async function apiRequest<T = unknown>(
 
   const {
     token: providedToken,
+    omitAuth = false,
     headers,
     signal,
     onError,
@@ -94,7 +139,15 @@ export async function apiRequest<T = unknown>(
   } = options;
 
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
-  const token = providedToken || useAuthStore.getState().token || '';
+  const token =
+    omitAuth === true
+      ? ''
+      : providedToken !== undefined
+        ? providedToken
+        : useAuthStore.getState().token || '';
+
+  ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
+
   const isFormData = rest.body instanceof FormData;
 
   const finalHeaders: Record<string, string> = {
@@ -104,6 +157,8 @@ export async function apiRequest<T = unknown>(
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(headers as Record<string, string> | undefined),
   };
+
+  const hadBearerToken = Boolean(token && finalHeaders.Authorization);
 
   if (!isFormData && !finalHeaders['Content-Type']) {
     finalHeaders['Content-Type'] = 'application/json';
@@ -135,6 +190,10 @@ export async function apiRequest<T = unknown>(
     }
 
     if (!res.ok) {
+      if (res.status === 401) {
+        maybeHandleUnauthorizedSession(endpoint, locale, hadBearerToken);
+      }
+
       // Prefer messageKey-keyed message, then body.message/error, then statusText
       const backendMsg =
         (body.message as string | undefined) ||
@@ -177,12 +236,27 @@ export async function apiMultipart<T = unknown>(
 ): Promise<T> {
   if (UI_ONLY) return undefined as unknown as T;
 
-  const { onProgress, locale = 'ar', token: providedToken, ...rest } = options;
-  const token = providedToken || useAuthStore.getState().token || '';
+  const {
+    onProgress,
+    locale = 'ar',
+    token: providedToken,
+    omitAuth = false,
+    ...rest
+  } = options;
+  const token =
+    omitAuth === true
+      ? ''
+      : providedToken !== undefined
+        ? providedToken
+        : useAuthStore.getState().token || '';
+
+  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+
+  ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
 
   if (onProgress) {
     const xhr = new XMLHttpRequest();
-    xhr.open(rest.method || 'POST', `${API_BASE_URL}${endpoint}`);
+    xhr.open(rest.method || 'POST', url);
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.setRequestHeader('x-lang', locale);
 
@@ -199,6 +273,9 @@ export async function apiMultipart<T = unknown>(
             resolve(undefined as unknown as T);
           }
         } else {
+          if (xhr.status === 401) {
+            maybeHandleUnauthorizedSession(endpoint, locale, Boolean(token));
+          }
           reject(
             new ApiError(
               xhr.status,
@@ -221,6 +298,8 @@ export async function apiMultipart<T = unknown>(
     method: 'POST',
     body: formData,
     ...rest,
+    omitAuth,
+    locale,
   });
 }
 

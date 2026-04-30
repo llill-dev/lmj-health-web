@@ -91,16 +91,21 @@ const handleAuthError = (error: unknown): AuthError => {
 // ─────────────────────────────────────────────────────────────────────────────
 export const authApi = {
   signupDoctor: (body: DoctorSignupBody) =>
-    post<SignupResponse>(authEndpoints.signup(), body, { locale: 'ar' }),
+    post<SignupResponse>(authEndpoints.signup(), body, {
+      locale: 'ar',
+      omitAuth: true,
+    }),
 
   resendSignupOtp: (body: ResendSignupOtpBody) =>
     post<SignupResponse>(authEndpoints.resendSignupOtp(), body, {
       locale: 'ar',
+      omitAuth: true,
     }),
 
   verifySignupOtp: (body: VerifySignupOtpBody) =>
     post<VerifySignupOtpResponse>(authEndpoints.verifySignupOtp(), body, {
       locale: 'ar',
+      omitAuth: true,
     }),
 
   login: async (
@@ -109,6 +114,7 @@ export const authApi = {
     try {
       const response = await post<LoginResponse>(authEndpoints.login(), body, {
         locale: 'ar',
+        omitAuth: true,
       });
       return { data: response };
     } catch (error) {
