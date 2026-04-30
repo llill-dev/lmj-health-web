@@ -108,7 +108,7 @@ function VerifyOtpContent() {
             state: {
               flow: 'session_ready',
               redirectTo: getRoleRoot(role),
-              title: 'تم التحقق بنجاح',
+              title: 'اكتمل التحقق',
               message: response.message,
             },
           });
@@ -119,7 +119,7 @@ function VerifyOtpContent() {
           replace: true,
           state: {
             flow: 'pending_doctor',
-            title: 'تم التحقق من حسابك',
+            title: 'تم تأكيد رمز التسجيل',
             message: response.message,
           },
         });

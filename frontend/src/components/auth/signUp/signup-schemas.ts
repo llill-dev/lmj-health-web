@@ -1,9 +1,25 @@
 import { z } from 'zod';
 
+/**
+ * رسائل التحقق من البريد في التسجيل (تظهر عند الخروج من الحقل أو عند المتابعة).
+ */
+export const SIGNUP_EMAIL_REQUIRED_MESSAGE_AR = 'البريد الإلكتروني مطلوب.';
+export const SIGNUP_EMAIL_INVALID_MESSAGE_AR =
+  'البريد غير صالح. يُرجى إدخال بريد إلكتروني صالح.';
+
+/**
+ * تسجيل طبيب متعدد الخطوات — محاذاة التحقق مع `POST /auth/signup` (مرجع API PDF).
+ *
+ * طبيب إلزامي عند role=doctor: gender, dateOfBirth (`birthDate` محلياً → `dateOfBirth` في JSON),
+ * address، وواحد فقط من specializationKey | customSpecializationText | specialization؛
+ * ومزاولة: medicalLicenseNumber, bio, education, clinicAddress؛ اختياري: locationCity,
+ * locationCountry, clinicLat+clinicLng, consultationTypes=["online"|"offline"].
+ */
+
 /** Dial codes for signup phone UI; merged into one `phone` string for POST /auth/signup (API-3). */
 export const SIGNUP_PHONE_DIAL_CODES = [
-  '+966',
   '+963',
+  '+966',
   '+971',
   '+962',
   '+961',
@@ -57,7 +73,7 @@ export function splitSignupPhone(phone?: string): {
   phoneLocal: string;
 } {
   const raw = (phone ?? '').replace(/\s/g, '');
-  if (!raw) return { phoneDialCode: '+966', phoneLocal: '' };
+  if (!raw) return { phoneDialCode: '+963', phoneLocal: '' };
 
   const sorted = [...SIGNUP_PHONE_DIAL_CODES].sort(
     (a, b) => b.length - a.length,
@@ -78,7 +94,7 @@ export function splitSignupPhone(phone?: string): {
       }
     }
   }
-  return { phoneDialCode: '+966', phoneLocal: raw.replace(/\D/g, '') };
+  return { phoneDialCode: '+963', phoneLocal: raw.replace(/\D/g, '') };
 }
 
 export const verificationChannelSchema = z.enum(['whatsapp', 'email'], {
@@ -88,6 +104,11 @@ export const verificationChannelSchema = z.enum(['whatsapp', 'email'], {
 export const genderSchema = z.enum(['male', 'female'], {
   message: 'يجب اختيار الجنس (ذكر أو أنثى).',
 });
+
+/** مفاتيح كتالوج التخصصات كما تعيدها الخادم (مثل cardiology، demo_mok5ic19). ليست للنص العربي اليدوي. */
+export const doctorCatalogSpecializationKeyRegex = /^[a-zA-Z0-9_.-]+$/;
+
+const signupStringTrim = z.string().trim();
 
 /** Matches POST /auth/signup `dateOfBirth`: ISO date only, no time (API-3). */
 const isoDateOnlySchema = z
@@ -176,12 +197,22 @@ export function signupLocalLengthErrorMessage(
 
 export const step1AccountSchema = z
   .object({
-    fullName: z.string().min(1, 'الاسم مطلوب'),
-    email: z.string().email('بريد إلكتروني غير صالح'),
+    fullName: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'الاسم مطلوب')
+        .max(200, 'الاسم طويل جداً بالنسبة للحد المسموح في التسجيل'),
+    ),
+    email: z
+      .string()
+      .trim()
+      .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
+      .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
     /** API-3: minimum length 6 */
     password: z
       .string()
-      .min(6, 'كلمة المرور 6 أحرف على الأقل مطلوبة'),
+      .min(6, 'كلمة المرور 6 أحرف على الأقل مطلوبة')
+      .max(256, 'كلمة المرور طويلة جداً'),
     phoneDialCode: signupPhoneDialCodeSchema,
     phoneLocal: phoneLocalPartSchema,
     channel: verificationChannelSchema,
@@ -248,49 +279,142 @@ export const step1AccountSchema = z
 export const step2PersonalSchema = z.object({
   gender: genderSchema,
   birthDate: isoDateOnlySchema,
-  address: z.string().min(1, 'العنوان مطلوب'),
+  address: signupStringTrim.pipe(
+    z
+      .string()
+      .min(1, 'العنوان مطلوب')
+      .max(500, 'العنوان طويل جداً'),
+  ),
 });
 
-export const step3ProfessionalSchema = z.object({
-  specialty: z.string().min(1, 'التخصص الطبي مطلوب.'),
-  /** اختيار من القائمة المحمَّلة أم إدخال يدوي (لمطابقة حقلي الـ API). */
-  specialtySource: z.enum(['catalog', 'manual']),
-  licenseNumber: z.string().min(1, 'رقم الرخصة الطبية مطلوب.'),
-  qualification: z.string().min(1, 'المؤهل العلمي مطلوب.'),
-  clinicAddress: z.string().min(1, 'عنوان العيادة مطلوب.'),
-  bio: z.string().min(1, 'نبذة تعريفية عنك مطلوبة.'),
-});
+export const step3ProfessionalSchema = z
+  .object({
+    specialty: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'التخصص الطبي مطلوب.')
+        .max(
+          500,
+          'نص التخصص طويل جداً؛ استخدم مفتاحاً من القائمة أو اختصر الوصف.',
+        ),
+    ),
+    /** اختيار من القائمة المحمَّلة أم إدخال يدوي (لمطابقة specializationKey vs customSpecializationText). */
+    specialtySource: z.enum(['catalog', 'manual']),
+    licenseNumber: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'رقم الرخصة الطبية مطلوب.')
+        .max(120, 'رقم الرخصة طويل جداً'),
+    ),
+    qualification: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'المؤهل العلمي مطلوب.')
+        .max(400, 'المؤهل العلمي طويل جداً'),
+    ),
+    clinicAddress: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'عنوان العيادة مطلوب.')
+        .max(500, 'عنوان العيادة طويل جداً'),
+    ),
+    bio: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'نبذة تعريفية عنك مطلوبة.')
+        .max(8000, 'النبذة طويلة جداً'),
+    ),
+  })
+  .superRefine((data, ctx) => {
+    if (data.specialtySource !== 'catalog') return;
+    if (!doctorCatalogSpecializationKeyRegex.test(data.specialty)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'عند الاختيار من قائمة التخصصات يجب أن يكون القيمة مفتاحاً إنجليزياً كما تعيده الخادم. للنص الحر اختر الإدخال اليدوي أو انتظر تحميل القائمة.',
+        path: ['specialty'],
+      });
+    }
+  });
+
+const optionalSignupLocationField = () =>
+  z
+    .string()
+    .max(160)
+    .optional()
+    .transform((v): string | undefined => {
+      if (v == null) return undefined;
+      const t = v.trim();
+      return t.length ? t : undefined;
+    });
 
 export const step4AdditionalSchema = z.object({
-  city: z.string().optional(),
-  country: z.string().optional(),
+  city: optionalSignupLocationField(),
+  country: optionalSignupLocationField(),
   /** Maps to `consultationTypes` in API body when non-empty (optional per API-3). */
   consultationOnline: z.boolean().optional(),
   consultationOffline: z.boolean().optional(),
 });
 
-export const signUpSchema = z.object({
-  fullName: z.string().min(1, 'الاسم مطلوب'),
-  email: z.string().email('بريد إلكتروني غير صالح'),
-  password: z
-    .string()
-    .min(6, 'كلمة المرور 6 أحرف على الأقل (متطلب الخادم).'),
-  phone: signupE164PhoneSchema,
-  channel: verificationChannelSchema,
-  gender: genderSchema,
-  birthDate: isoDateOnlySchema,
-  address: z.string().min(1, 'العنوان مطلوب'),
-  specialty: z.string().min(1, 'التخصص الطبي مطلوب.'),
-  specialtySource: z.enum(['catalog', 'manual']).default('manual'),
-  licenseNumber: z.string().min(1, 'رقم الرخصة الطبية مطلوب.'),
-  qualification: z.string().min(1, 'المؤهل العلمي مطلوب.'),
-  clinicAddress: z.string().min(1, 'عنوان العيادة مطلوب.'),
-  bio: z.string().min(1, 'نبذة تعريفية عنك مطلوبة.'),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  consultationOnline: z.boolean().optional(),
-  consultationOffline: z.boolean().optional(),
-});
+export const signUpSchema = z
+  .object({
+    fullName: signupStringTrim.pipe(
+      z.string().min(1, 'الاسم مطلوب').max(200, 'الاسم طويل جداً'),
+    ),
+    email: z
+      .string()
+      .trim()
+      .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
+      .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
+    password: z
+      .string()
+      .min(6, 'كلمة المرور 6 أحرف على الأقل (متطلب الخادم).')
+      .max(256, 'كلمة المرور طويلة جداً'),
+    phone: signupE164PhoneSchema,
+    channel: verificationChannelSchema,
+    gender: genderSchema,
+    birthDate: isoDateOnlySchema,
+    address: signupStringTrim.pipe(
+      z.string().min(1, 'العنوان مطلوب').max(500, 'العنوان طويل جداً'),
+    ),
+    specialty: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'التخصص الطبي مطلوب.')
+        .max(500, 'نص التخصص طويل جداً'),
+    ),
+    specialtySource: z.enum(['catalog', 'manual']).default('manual'),
+    licenseNumber: signupStringTrim.pipe(
+      z.string().min(1, 'رقم الرخصة الطبية مطلوب.').max(120, 'رقم الرخصة طويل جداً'),
+    ),
+    qualification: signupStringTrim.pipe(
+      z
+        .string()
+        .min(1, 'المؤهل العلمي مطلوب.')
+        .max(400, 'المؤهل العلمي طويل جداً'),
+    ),
+    clinicAddress: signupStringTrim.pipe(
+      z.string().min(1, 'عنوان العيادة مطلوب.').max(500, 'عنوان العيادة طويل جداً'),
+    ),
+    bio: signupStringTrim.pipe(
+      z.string().min(1, 'نبذة تعريفية عنك مطلوبة.').max(8000, 'النبذة طويلة جداً'),
+    ),
+    city: optionalSignupLocationField(),
+    country: optionalSignupLocationField(),
+    consultationOnline: z.boolean().optional(),
+    consultationOffline: z.boolean().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.specialtySource !== 'catalog') return;
+    if (!doctorCatalogSpecializationKeyRegex.test(data.specialty)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'وضع «من القائمة» يتطلب مفتاح تخصص كما يعيده GET /meta/doctor-specializations. للنص العربي استخدم الإدخال اليدوي.',
+        path: ['specialty'],
+      });
+    }
+  });
 
 /** Parsed step-1 output (includes single `phone` for the API). */
 export type Step1AccountValues = z.output<typeof step1AccountSchema>;

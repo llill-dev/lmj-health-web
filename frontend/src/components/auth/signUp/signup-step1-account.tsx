@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
+  Loader2,
   LockKeyhole,
   Mail,
   Phone,
@@ -25,14 +26,22 @@ import {
   SIGNUP_PHONE_DIAL_OPTIONS,
 } from './signup-schemas';
 
+import type { SignupFieldConflictMessages } from '@/lib/auth/signupMessaging';
+
 export default function SignUpStep1Account({
   onBack,
   onNext,
   defaultValues,
+  contactFieldErrors,
+  contactPrecheckBusy = false,
+  onDismissContactConflict,
 }: {
   onBack: () => void;
-  onNext: (values: Step1AccountValues) => void;
+  onNext: (values: Step1AccountValues) => void | Promise<void>;
   defaultValues?: Partial<SignUpValues>;
+  contactFieldErrors?: SignupFieldConflictMessages;
+  contactPrecheckBusy?: boolean;
+  onDismissContactConflict?: (field: 'email' | 'phone') => void;
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -46,7 +55,7 @@ export default function SignUpStep1Account({
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<Step1AccountFormInput, unknown, Step1AccountValues>({
     resolver: zodResolver(step1AccountSchema),
     defaultValues: {
@@ -57,10 +66,24 @@ export default function SignUpStep1Account({
       phoneLocal: phoneDefaults.phoneLocal,
       channel: defaultValues?.channel ?? 'whatsapp',
     },
-    mode: 'onSubmit',
+    /** تحقّق من البريد والحقول عند الخروج من الحقل؛ وعند الإرسال للخطوة التالية أيضاً */
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
   });
 
   const channel = watch('channel');
+
+  const emailField = register('email');
+  const phoneLocalField = register('phoneLocal');
+  const phoneDialField = register('phoneDialCode');
+
+  const emailRemote = contactFieldErrors?.email?.trim();
+  const phoneRemote = contactFieldErrors?.phone?.trim();
+  const emailErrText = errors.email?.message ?? emailRemote;
+  const phoneErrText =
+    errors.phoneLocal?.message ??
+    errors.phoneDialCode?.message ??
+    phoneRemote;
 
   return (
     <>
@@ -75,11 +98,12 @@ export default function SignUpStep1Account({
           <button
             type='button'
             onClick={() => {
+              const demoStamp = Date.now().toString();
               setValue('fullName', 'د. محمد أحمد', { shouldDirty: true });
-              setValue('email', 'doctor@example.com', { shouldDirty: true });
+              setValue('email', `doctor+${demoStamp}@example.com`, { shouldDirty: true });
               setValue('password', 'Password123', { shouldDirty: true });
-              setValue('phoneDialCode', '+966', { shouldDirty: true });
-              setValue('phoneLocal', '501234567', { shouldDirty: true });
+              setValue('phoneDialCode', '+963', { shouldDirty: true });
+              setValue('phoneLocal', `9${demoStamp.slice(-8)}`, { shouldDirty: true });
               setValue('channel', 'whatsapp', { shouldDirty: true });
             }}
             className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
@@ -94,7 +118,10 @@ export default function SignUpStep1Account({
 
       <form
         className='mt-6'
-        onSubmit={handleSubmit((values) => onNext(values))}
+        aria-busy={contactPrecheckBusy}
+        onSubmit={handleSubmit(async (values) => {
+          await Promise.resolve(onNext(values));
+        })}
       >
         <div className='space-y-5'>
           <div>
@@ -135,15 +162,20 @@ export default function SignUpStep1Account({
             <input
               type='email'
               placeholder='doctor@example.com'
-              {...register('email')}
+              {...emailField}
+              onBlur={(ev) => {
+                void emailField.onBlur(ev);
+                if (dirtyFields.email)
+                  onDismissContactConflict?.('email');
+              }}
               className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-12 py-[4px] font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             <div
               className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
-                errors.email?.message ? 'text-red-500' : 'text-transparent'
+                emailErrText ? 'text-red-500' : 'text-transparent'
               }`}
             >
-              {errors.email?.message ?? 'x'}
+              {emailErrText ?? 'x'}
             </div>
           </div>
 
@@ -210,12 +242,22 @@ export default function SignUpStep1Account({
                 dir='rlt'
                 inputMode='numeric'
                 autoComplete='tel-national'
-                placeholder='501234567'
-                {...register('phoneLocal')}
+                placeholder='912345678'
+                {...phoneLocalField}
+                onBlur={(ev) => {
+                  void phoneLocalField.onBlur(ev);
+                  if (dirtyFields.phoneLocal || dirtyFields.phoneDialCode)
+                    onDismissContactConflict?.('phone');
+                }}
                 className='h-[48px] min-w-0 flex-1 rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] font-cairo text-[14px] font-semibold tabular-nums text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
               />
               <select
-                {...register('phoneDialCode')}
+                {...phoneDialField}
+                onBlur={(ev) => {
+                  void phoneDialField.onBlur(ev);
+                  if (dirtyFields.phoneLocal || dirtyFields.phoneDialCode)
+                    onDismissContactConflict?.('phone');
+                }}
                 className='h-[48px] w-[11rem] shrink-0 rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-2 font-cairo text-[12px] font-bold text-[#374151] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
               >
                 {SIGNUP_PHONE_DIAL_OPTIONS.map((o) => (
@@ -233,14 +275,10 @@ export default function SignUpStep1Account({
             </p>
             <div
               className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
-                errors.phoneLocal?.message || errors.phoneDialCode?.message
-                  ? 'text-red-500'
-                  : 'text-transparent'
+                phoneErrText ? 'text-red-500' : 'text-transparent'
               }`}
             >
-              {errors.phoneLocal?.message ??
-                errors.phoneDialCode?.message ??
-                'x'}
+              {phoneErrText ?? 'x'}
             </div>
           </div>
 
@@ -262,6 +300,7 @@ export default function SignUpStep1Account({
             <div className='grid grid-cols-2 gap-4 mt-2'>
               <button
                 type='button'
+                disabled={contactPrecheckBusy}
                 onClick={() => setValue('channel', 'whatsapp')}
                 className={
                   channel === 'whatsapp'
@@ -275,6 +314,7 @@ export default function SignUpStep1Account({
 
               <button
                 type='button'
+                disabled={contactPrecheckBusy}
                 onClick={() => setValue('channel', 'email')}
                 className={
                   channel === 'email'
@@ -307,10 +347,19 @@ export default function SignUpStep1Account({
 
             <button
               type='submit'
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
+              disabled={contactPrecheckBusy}
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:pointer-events-none disabled:opacity-70'
             >
-              التالي
-              <ArrowLeft className='w-4 h-4' />
+              {contactPrecheckBusy ? (
+                <Loader2
+                  className='h-5 w-5 shrink-0 animate-spin'
+                  aria-hidden
+                />
+              ) : null}
+              {contactPrecheckBusy ? 'جاري التحقق…' : 'التالي'}
+              {!contactPrecheckBusy ? (
+                <ArrowLeft className='w-4 h-4 shrink-0' />
+              ) : null}
             </button>
           </div>
         </div>

@@ -9,6 +9,8 @@ declare interface ImportMetaEnv {
   readonly VITE_ADMIN_DOCTOR_LOOKUP_CATEGORY?: string;
   /** يتجاوز مسار GET لخيارات تخصص الطبيب في التسجيل العام (افتراضي: من metaEndpoints.doctorSpecialties) */
   readonly VITE_PUBLIC_DOCTOR_SPECIALTIES_PATH?: string;
+  /** إذا كانت `true` يُستدعى `POST /api/auth/check-signup-contact` قبل الخطوة 2؛ الافتراضي بدون استدعاء لتفادي تأخير 404 عند غياب المسار على الخادم. */
+  readonly VITE_ENABLE_SIGNUP_CONTACT_PRECHECK?: ViteBooleanString;
 }
 
 declare interface ImportMeta {
