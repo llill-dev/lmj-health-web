@@ -4,4 +4,6 @@ export const authEndpoints = {
   verifySignupOtp: () => '/api/auth/verify-otp',
   login: () => '/api/auth/login',
   logoutAll: () => '/api/auth/logout-all',
+  /** GET /api/meta/doctor-specializations */
+  doctorSpecialties: () => '/api/meta/doctor-specializations',
 };

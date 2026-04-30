@@ -101,7 +101,9 @@ export default function SignUpForm({
         address: parsed.data.address,
         role: 'doctor',
         channel: parsed.data.channel,
-        specialization: parsed.data.specialty,
+        ...(parsed.data.specialtySource === 'catalog'
+          ? { specializationKey: parsed.data.specialty }
+          : { customSpecializationText: parsed.data.specialty }),
         medicalLicenseNumber: parsed.data.licenseNumber,
         bio: parsed.data.bio,
         education: parsed.data.qualification,

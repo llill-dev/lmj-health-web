@@ -5,21 +5,21 @@ const ALLOWED: readonly AdminLookupCategory[] = [
   'ALLERGY',
   'MEDICAL_CONDITION',
   'SPECIALIZATION',
+  'DOCTOR_SPECIALIZATION',
 ];
 
 /**
- * API-3 (LMJ Health Backend API Reference): `GET /api/admin/lookups` يفرض قيمة
- * `category` من القائمة: BLOOD_TYPE | ALLERGY | MEDICAL_CONDITION فقط.
- * إرسال `SPECIALIZATION` (أو غيرها خارج القائمة) → غالباً **422** من الـ validator.
+ * صفحة «تخصصات الأطباء» تستدعي `GET /api/admin/lookups?category=…`.
+ * مسار التسجيل العام يستدعي `GET /api/meta/doctor-specializations` ويعيد lookups من فئة **`DOCTOR_SPECIALIZATION`** نشطة فقط (حسب المرجع).
  *
- * - للعمل مع خادم يلتزم بـ API-3 حصراً: اضبط
- *   `VITE_ADMIN_DOCTOR_LOOKUP_CATEGORY=MEDICAL_CONDITION` (أو إحدى الفئات الثلاث).
- * - بعد إضافة فئة تخصصات الأطباء في الخادم (مثل SPECIALIZATION): عيّن نفس القيمة هنا.
+ * بدون هذا التطابق: قد ترى التخصصات في لوحة الإدارة (فئة مختلفة، مثل `MEDICAL_CONDITION`) بينما يبقى كتالوج التسجيل فارغاً.
+ *
+ * لتجاوز الافتراضي: في `.env` عيّن `VITE_ADMIN_DOCTOR_LOOKUP_CATEGORY` لإحدى القيم المعروضة ضمن ALLOWED إن كان الخادم يستخدم اسماً آخر بالفعل.
  */
 export function resolveDoctorSpecialtyLookupCategory(): AdminLookupCategory {
   const raw = import.meta.env.VITE_ADMIN_DOCTOR_LOOKUP_CATEGORY?.trim();
   if (raw && (ALLOWED as readonly string[]).includes(raw)) {
     return raw as AdminLookupCategory;
   }
-  return 'MEDICAL_CONDITION';
+  return 'DOCTOR_SPECIALIZATION';
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -42,12 +44,14 @@ export default function SignUpStep3Professional({
 
   const {
     register,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm<Step3ProfessionalValues>({
     resolver: zodResolver(step3ProfessionalSchema),
     defaultValues: {
       specialty: defaultValues?.specialty ?? '',
+      specialtySource: defaultValues?.specialtySource ?? 'manual',
       licenseNumber: defaultValues?.licenseNumber ?? '',
       qualification: defaultValues?.qualification ?? '',
       clinicAddress: defaultValues?.clinicAddress ?? '',
@@ -56,16 +60,70 @@ export default function SignUpStep3Professional({
     mode: 'onSubmit',
   });
 
+  useEffect(() => {
+    const fromCatalog =
+      !specialtiesError && !specialtiesLoading && specialties.length > 0;
+    setValue('specialtySource', fromCatalog ? 'catalog' : 'manual', {
+      shouldValidate: false,
+      shouldDirty: false,
+    });
+  }, [
+    specialtiesError,
+    specialtiesLoading,
+    specialties.length,
+    setValue,
+  ]);
+
   return (
     <>
       <div className='mt-7 flex flex-col items-center text-center'>
         <div className='flex h-[70px] w-[70px] items-center justify-center rounded-[6px] bg-primary shadow-[0_18px_40px_rgba(15, 143, 139,0.35)]'>
           <Stethoscope className='h-9 w-9 text-white' />
         </div>
-        <div className='mt-4'>
+        <div className='mt-4 flex items-center justify-center gap-3'>
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
             المعلومات المهنية
           </h2>
+          <button
+            type='button'
+            onClick={() => {
+              const fromCatalog =
+                !specialtiesError &&
+                !specialtiesLoading &&
+                specialties.length > 0;
+              setValue('specialtySource', fromCatalog ? 'catalog' : 'manual', {
+                shouldDirty: true,
+              });
+              const firstSpecialty =
+                specialties.length > 0 ? specialties[0] : undefined;
+              setValue(
+                'specialty',
+                fromCatalog && firstSpecialty
+                  ? firstSpecialty.value
+                  : 'طب الأسنان التجريبي',
+                { shouldDirty: true },
+              );
+              setValue('licenseNumber', 'DAM-2024-1001', { shouldDirty: true });
+              setValue(
+                'qualification',
+                'دكتوراه في طب الأسنان — جامعة دمشق',
+                { shouldDirty: true },
+              );
+              setValue(
+                'clinicAddress',
+                'دمشق، المزة، شارع العيادات، مبنى 5',
+                { shouldDirty: true },
+              );
+              setValue(
+                'bio',
+                'طبيب أسنان بخبرة سريرية في التركيبات والتقويم؛ أهتم بمتابعة الحالات بعناية.',
+                { shouldDirty: true },
+              );
+            }}
+            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
+          >
+            ملء البيانات
+          </button>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
           بياناتك الطبية والمهنية
@@ -76,6 +134,10 @@ export default function SignUpStep3Professional({
         className='mt-8'
         onSubmit={handleSubmit((values) => onNext(values))}
       >
+        <input
+          type='hidden'
+          {...register('specialtySource')}
+        />
         <div className='space-y-5'>
           <div>
             <div className='flex items-center justify-start gap-2 text-right'>
@@ -130,7 +192,7 @@ export default function SignUpStep3Professional({
               <>
                 {!specialtiesError && (
                   <p className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                    لم تُحمَّل قائمة التخصصات. أدخل التخصص يدوياً أو حاول التحديث لاحقاً.
+                    الخادم أعاد قائمة فارغة (لا توجد تخصصات نشطة ضمن تصنيف DOCTOR_SPECIALIZATION)، فزِر الإدارة → إعدادات lookups لإضافتها. يمكنك المتابعة بإدخال يدوي؛ يُرسَل كنصّ مخصَّص وفق وثيقة الـ API.
                   </p>
                 )}
                 <input

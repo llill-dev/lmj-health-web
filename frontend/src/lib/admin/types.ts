@@ -504,11 +504,29 @@ export type AdminDoctorDetailsDoctor = {
     photoUrl?: string;
     dateOfBirth?: string;
   };
-  userId?: {
-    _id?: string;
-    fullName?: string;
-    email?: string;
-  };
+  /** قد يكون معرفاً فقط؛ أو كائناً معبأً بحقوق المستخدم كما في طلب التحقق. */
+  userId?:
+    | string
+    | {
+        _id?: string;
+        fullName?: string;
+        email?: string;
+        phone?: string;
+        gender?: string;
+        photoUrl?: string;
+        dateOfBirth?: string;
+      };
+  /**
+   * بعض الردود تعيد بيانات الحساب في جذر المستند بدل `user` — ندمجها للعرض في `user`.
+   */
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  photoUrl?: string;
+  /** أسماء بديلة محتملة من الـ API */
+  birthDate?: string;
   /** إن خزّن الباكند معرف طلب التحقق على ملف الطبيب مباشرةً */
   pendingVerificationRequestId?: string;
   /** من قائمة/تفاصيل الأطباء عندما يعيدها الـ API */
@@ -734,10 +752,13 @@ export type AdminLookupCategoryDoc =
   | 'MEDICAL_CONDITION';
 
 /**
- * كتالوج تخصصات الطبيب عبر Lookups — غير مُدرَجة صراحةً في مقطع API-3 المعروض؛
- * غالباً ما يُضاف على الخادم كامتداد بجانب الفئات الثلاث.
+ * كتالوج تخصصات الطبيب عبر Lookups؛ حسب المرجع: `DOCTOR_SPECIALIZATION` يحدد هذا الجدول
+ * ومسار الجمهور `GET /api/meta/doctor-specializations` يعيد خيارات **هذه الفئة فقط**.
+ * قد يبقى `SPECIALIZATION` لبيئات أو نسخ سابقة من الخادم.
  */
-export type AdminLookupDoctorSpecialtyCategory = 'SPECIALIZATION';
+export type AdminLookupDoctorSpecialtyCategory =
+  | 'SPECIALIZATION'
+  | 'DOCTOR_SPECIALIZATION';
 
 export type AdminLookupCategory =
   | AdminLookupCategoryDoc
