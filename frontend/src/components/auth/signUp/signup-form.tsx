@@ -12,6 +12,7 @@ import SignUpStep1Account from "./signup-step1-account";
 import SignUpStep2Personal from "./signup-step2-personal";
 import SignUpStep3Professional from "./signup-step3-professional";
 import SignUpStep4Additional from "./signup-step4-additional";
+import SignUpStep5Legal from "./signup-step5-legal";
 import SignUpStepper from "./signup-stepper";
 
 import {
@@ -42,7 +43,7 @@ export default function SignUpForm({
   onVerify: () => void;
   onSuccess: () => void;
 }) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -112,9 +113,16 @@ export default function SignUpForm({
     setStep(4);
   };
 
-  const handleStep4Complete = (values: Step4AdditionalValues) => {
-    const merged = { ...draft, ...values };
-    const parsed = signUpSchema.safeParse(merged);
+  const handleStep4Next = (values: Step4AdditionalValues) => {
+    setSubmitError(null);
+    setDirection(1);
+    setDraft((prev) => ({ ...prev, ...values }));
+    setStep(5);
+  };
+
+  /** يُستدعى بعد الموافقة على المستندات القانونية (الخطوة ٥ فقط). */
+  const submitSignupAfterLegalConsent = () => {
+    const parsed = signUpSchema.safeParse(draft);
     if (!parsed.success) {
       setStep(1);
       return;
@@ -122,7 +130,6 @@ export default function SignUpForm({
     setSubmitError(null);
     setIsSubmitting(true);
 
-    /** POST /auth/signup — يطابق أمثلة الـ PDF (curl) */
     const toSignupApiGender = (g: "male" | "female"): "Male" | "Female" =>
       g === "male" ? "Male" : "Female";
 
@@ -202,7 +209,7 @@ export default function SignUpForm({
         setSubmitError(
           general ?? (contactOnly ? null : formatSignupApiError(e)),
         );
-        setStep(contactOnly ? 1 : 4);
+        setStep(contactOnly ? 1 : 5);
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -210,8 +217,24 @@ export default function SignUpForm({
   };
 
   return (
-    <section className="mx-auto flex flex-col items-center">
-      <div className="my-[10px]">
+    <section
+      className={`relative mx-auto flex flex-col items-center ${
+        step === 5 ? "min-h-screen w-full pb-16" : ""
+      }`}
+    >
+      {step === 5 ? (
+        <div
+          className="fixed inset-0 z-0 overflow-hidden bg-[#B2E5E5]"
+          aria-hidden
+        >
+          <div className="pointer-events-none absolute -left-28 -top-36 h-[460px] w-[460px] rounded-full bg-[#7DCBCC]/55 blur-2xl" />
+          <div className="pointer-events-none absolute -left-16 top-[8%] h-[380px] w-[380px] rounded-full bg-[#8FD5D2]/40" />
+          <div className="pointer-events-none absolute left-[5%] top-[-12%] h-[520px] w-[520px] rounded-full bg-[#6BBEB9]/30" />
+          <div className="pointer-events-none absolute right-[-8%] bottom-[10%] h-[280px] w-[280px] rounded-full bg-[#94DAD8]/35" />
+        </div>
+      ) : null}
+
+      <div className="relative z-[1] my-[10px]">
         <img
           src="/images/syr-health-logo.png"
           alt="LMJ Health"
@@ -221,13 +244,25 @@ export default function SignUpForm({
           loading="eager"
         />
       </div>
-      <h1 className="mb-[20px] text-[#4A5565] text-[16px] font-bold">
-        تسجيل حساب طبيب جديد
-      </h1>
-      <div dir="rtl" lang="ar" className="relative">
+      {step !== 5 ? (
+        <h1 className="relative z-[1] mb-[20px] text-[#4A5565] text-[16px] font-bold">
+          تسجيل حساب طبيب جديد
+        </h1>
+      ) : null}
+      <div dir="rtl" lang="ar" className="relative z-[1]">
         <div className="relative w-fit">
           <div
-            className={`w-[672px] ${step === 1 ? "min-h-[947.175px] pb-12 mb-8" : step === 2 ? "min-h-[727.17px] pb-12 mb-8" : step === 3 ? "min-h-[999.16px] pb-12 mb-8" : "min-h-[727.1749877929688px] pb-12 mb-8"} top-[212px] rounded-[6px] pt-8 px-8 gap-8 bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]`}
+            className={`w-[672px] top-[212px] rounded-[6px] pb-12 mb-8 pt-8 px-8 gap-8 bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] ${
+              step === 1
+                ? "min-h-[947.175px]"
+                : step === 2
+                  ? "min-h-[727.17px]"
+                  : step === 3
+                    ? "min-h-[999.16px]"
+                    : step === 5
+                      ? "min-h-[760px]"
+                      : "min-h-[727.1749877929688px]"
+            }`}
           >
             <SignUpStepper step={step} />
 
@@ -282,13 +317,18 @@ export default function SignUpForm({
                       setStep(3);
                     }}
                     defaultValues={draft}
-                    isSubmitting={isSubmitting}
-                    onComplete={(values) => {
-                      if (isSubmitting) return;
-                      handleStep4Complete(values);
-                    }}
+                    onNext={handleStep4Next}
                   />
-                ) : null}
+                ) : (
+                  <SignUpStep5Legal
+                    onPrev={() => {
+                      setDirection(-1);
+                      setStep(4);
+                    }}
+                    onAgree={submitSignupAfterLegalConsent}
+                    isSubmitting={isSubmitting}
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>

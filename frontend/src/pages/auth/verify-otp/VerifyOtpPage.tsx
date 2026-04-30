@@ -100,27 +100,15 @@ function VerifyOtpContent() {
 
         if ('token' in response) {
           persistVerifiedSession(response);
-          const role = (response.role === 'data_entry'
-            ? 'data-entry'
-            : response.role) as AppRole;
-          navigate('/signup-success', {
-            replace: true,
-            state: {
-              flow: 'session_ready',
-              redirectTo: getRoleRoot(role),
-              title: 'اكتمل التحقق',
-              message: response.message,
-            },
-          });
+          navigate('/welcome', { replace: true });
           return;
         }
 
-        navigate('/signup-success', {
+        navigate('/welcome', {
           replace: true,
           state: {
-            flow: 'pending_doctor',
-            title: 'تم تأكيد رمز التسجيل',
-            message: response.message,
+            verifiedPendingDoctor: true,
+            signupMessage: response.message,
           },
         });
       }}
