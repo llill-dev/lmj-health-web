@@ -3,10 +3,11 @@
 import {
   ArrowRight,
   CircleCheck,
+  Globe,
+  Loader2,
   MapPin,
   Shield,
   Sparkles,
-  Globe,
 } from 'lucide-react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,10 +22,12 @@ export default function SignUpStep4Additional({
   onPrev,
   onComplete,
   defaultValues,
+  isSubmitting = false,
 }: {
   onPrev: () => void;
   onComplete: (values: Step4AdditionalValues) => void;
   defaultValues?: Partial<Step4AdditionalValues>;
+  isSubmitting?: boolean;
 }) {
   const { register, handleSubmit, setValue } = useForm<Step4AdditionalValues>({
     resolver: zodResolver(step4AdditionalSchema),
@@ -59,12 +62,14 @@ export default function SignUpStep4Additional({
           </button>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
-          اختياري - يمكنك تخطي هذه الخطوة
+          حقول المدينة والدولة اختيارية؛ إذا تُركت الحقول فارغة فلن يُرسَل ذلك
+          إلى الخادم مع طلب التسجيل.
         </p>
       </div>
 
       <form
         className='mt-8'
+        aria-busy={isSubmitting}
         onSubmit={handleSubmit((values) => onComplete(values))}
       >
         <div className='space-y-5'>
@@ -137,8 +142,9 @@ export default function SignUpStep4Additional({
                 ملاحظة هامة
               </div>
               <div className='mt-1 font-cairo text-[13px] font-semibold leading-[22px] text-[#4A5565]'>
-                بعد إتمام التسجيل، سيتم مراجعة بياناتك من قبل الإدارة ليتمكن من
-                استقبال المواعيد أو الظهور في البحث حتى يتم الموافقة على حسابك.
+                بعد إرسال التسجيل، تُراجَع بياناتك من قبل الإدارة وفق سياسات
+                المنصة. لن يكتمل ظهورك في البحث واستقبال المواعيد إلا بعد
+                الموافقة على الحساب.
               </div>
             </div>
           </div>
@@ -146,18 +152,27 @@ export default function SignUpStep4Additional({
           <div className='grid grid-cols-2 gap-4 mt-8'>
             <button
               type='button'
+              disabled={isSubmitting}
               onClick={onPrev}
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)] disabled:pointer-events-none disabled:opacity-60'
             >
               <ArrowRight className='w-4 h-4' />
               السابق
             </button>
             <button
               type='submit'
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
+              disabled={isSubmitting}
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:pointer-events-none disabled:opacity-70'
             >
-              <CircleCheck className='w-4 h-4' />
-              إتمام التسجيل
+              {isSubmitting ? (
+                <Loader2
+                  className='h-5 w-5 shrink-0 animate-spin'
+                  aria-hidden
+                />
+              ) : (
+                <CircleCheck className='w-4 h-4 shrink-0' />
+              )}
+              {isSubmitting ? 'جاري إرسال الطلب…' : 'إرسال الطلب وتفعيل خطوة التحقق OTP'}
             </button>
           </div>
         </div>

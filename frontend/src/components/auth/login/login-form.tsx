@@ -92,7 +92,8 @@ export default function LoginForm({
 
   // Map AuthError codes to user-friendly Arabic messages
   const AUTH_ERROR_MESSAGES_AR: Record<string, string> = {
-    INVALID_CREDENTIALS: 'البريد الإلكتروني/رقم الهاتف أو كلمة المرور غير صحيحة',
+    INVALID_CREDENTIALS:
+      'البريد الإلكتروني/رقم الهاتف أو كلمة المرور غير صحيحة',
     NOT_VERIFIED: 'الحساب غير موثق، يرجى التحقق من بريدك الإلكتروني',
     INACTIVE: 'الحساب غير نشط، تواصل مع الدعم',
     PENDING_APPROVAL: 'حساب الطبيب في انتظار موافقة الإدارة',
@@ -100,7 +101,7 @@ export default function LoginForm({
     TEMPORARY: 'يرجى تفعيل حسابك قبل تسجيل الدخول',
     LOCKED: 'الحساب مقفول مؤقتاً، حاول لاحقاً',
     DELETED: 'تم حذف هذا الحساب',
-    NETWORK_ERROR: 'تعذّر الاتصال بالخادم، تحقق من الإنترنت',
+    NETWORK_ERROR: 'تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة؛ إن استمر الأمر قد يكون سببه الخدمة وليس شبكتك.',
     UNKNOWN: 'حدث خطأ غير متوقع، حاول مجدداً',
   };
 
@@ -135,13 +136,15 @@ export default function LoginForm({
     }
 
     try {
-      await useAuthStore.getState().login(
-        values.method === 'email'
-          ? values.identifier
-          : values.identifier.replace(/[\s-]/g, ''),
-        values.password,
-        'web',
-      );
+      await useAuthStore
+        .getState()
+        .login(
+          values.method === 'email'
+            ? values.identifier
+            : values.identifier.replace(/[\s-]/g, ''),
+          values.password,
+          'web',
+        );
 
       const userRole = useAuthStore.getState().user?.role ?? '';
 
@@ -171,12 +174,16 @@ export default function LoginForm({
       navigate(roleRoot[userRole] ?? '/welcome', { replace: true });
     } catch (error: any) {
       const code: string = error?.code ?? 'UNKNOWN';
-      setLoginError(AUTH_ERROR_MESSAGES_AR[code] ?? error?.message ?? AUTH_ERROR_MESSAGES_AR['UNKNOWN']);
+      setLoginError(
+        AUTH_ERROR_MESSAGES_AR[code] ??
+          error?.message ??
+          AUTH_ERROR_MESSAGES_AR['UNKNOWN'],
+      );
     }
   });
 
   return (
-    <section className='mx-auto min-h-svh flex flex-col items-center'>
+    <section className='flex flex-col items-center mx-auto min-h-svh'>
       <div className='my-[35px]'>
         <img
           src='/images/syr-health-logo.png'
@@ -190,7 +197,7 @@ export default function LoginForm({
       <div
         dir='rtl'
         lang='ar'
-        className='relative gap-4 rounded-[6px]  max-w-[448px] max-h-[591px]'
+        className='relative gap-4 rounded-[6px] mb-8 max-w-[448px] max-h-[591px]'
       >
         <div className='relative z-10  h-[4px] w-[448px] bg-gradient-to-b from-[#0F8F8B] via-[#65BFEC] to-[#0F8F8B]' />
         <div className='z-10 rounded-[6px] bg-[#FFFFFFF2] px-7 py-8 shadow-[0_28px_80px_rgba(0,0,0,0.22)]'>
@@ -209,7 +216,7 @@ export default function LoginForm({
           >
             <div className='mx-auto max-w-[330px] gap-[24px] py-[35px] px-[24px]'>
               <div className='relative flex h-[35px] w-full rounded-[6px] bg-[#F2F4F7] p-1 shadow-[0_12px_30px_rgba(0,0,0,0.10)]'>
-                <div className='relative flex flex-1'>
+                <div className='flex relative flex-1'>
                   {method === 'phone' && (
                     <motion.div
                       layoutId='loginMethodPill'
@@ -240,7 +247,7 @@ export default function LoginForm({
                   </button>
                 </div>
 
-                <div className='relative flex flex-1'>
+                <div className='flex relative flex-1'>
                   {method === 'email' && (
                     <motion.div
                       layoutId='loginMethodPill'
@@ -334,9 +341,9 @@ export default function LoginForm({
                       title={showPassword ? 'Show password' : 'Hide password'}
                     >
                       {showPassword ? (
-                        <EyeOff className='h-4 w-4' />
+                        <EyeOff className='w-4 h-4' />
                       ) : (
-                        <Eye className='h-4 w-4' />
+                        <Eye className='w-4 h-4' />
                       )}
                     </button>
                     <input

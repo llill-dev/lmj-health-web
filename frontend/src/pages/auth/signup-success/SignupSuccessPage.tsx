@@ -60,10 +60,10 @@ export default function SignupSuccessPage() {
         </Helmet>
         <AuthBackground>
           <SignupSuccess
-            title={state.title ?? 'تم التحقق من حسابك'}
+            title={state.title ?? 'تم تأكيد رمز التسجيل'}
             message={
               state.message ??
-              'حساب الطبيب بانتظار موافقة الإدارة. لا يمكن تسجيل الدخول الكامل حتى الموافقة (وفق API).'
+              'تم التحقق من الرمز وفق الخادم. حساب الطبيب قيد موافقة الإدارة قبل تفعيله بالكامل في المنصة؛ يمكنك لاحقاً تسجيل الدخول عند التفعيل.'
             }
             continueLabel='تسجيل الدخول'
             onContinue={() => navigate('/login', { replace: true })}
@@ -83,10 +83,10 @@ export default function SignupSuccessPage() {
       </Helmet>
       <AuthBackground>
         <SignupSuccess
-          title={state.title ?? 'تم التحقق بنجاح'}
+          title={state.title ?? 'اكتمل التحقق'}
           message={
             state.message ??
-            'تم إنشاء الجلسة بنجاح وفق استجابة التحقق من الخادم.'
+            'تم إنشاء الجلسة بنجاح وفق استجابة الخادم بعد التحقق. سيتم توجيهك إلى لوحة التطبيق.'
           }
           continueLabel='المتابعة الآن'
           onContinue={() => navigate(state.redirectTo, { replace: true })}

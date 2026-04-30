@@ -41,9 +41,35 @@ export class ApiError extends Error {
   }
 }
 
+/** نصوص HTTP تلقائية من المتصفح/الوسيط (إنجليزي) لا نعرضها للمستخدم العربي؛ نستبدلها برسالة عربية واضحة. */
+function shouldReplaceArabicBackendMessage(status: number, msg: string): boolean {
+  const m = msg.trim().toLowerCase();
+  if (!m.length) return true;
+  if (/^<!doctype|^<html\b/i.test(msg.trim())) return true;
+  const genericByStatus: Record<number, readonly string[]> = {
+    400: ['bad request'],
+    401: ['unauthorized'],
+    403: ['forbidden'],
+    404: ['not found'],
+    408: ['request timeout'],
+    409: ['conflict'],
+    413: ['payload too large', 'request entity too large', 'content too large'],
+    415: ['unsupported media type'],
+    422: ['unprocessable entity', 'unprocessable'],
+    429: ['too many requests'],
+    500: ['internal server error', 'server error'],
+    502: ['bad gateway'],
+    503: ['service unavailable', 'service temporarily unavailable'],
+    504: ['gateway timeout', 'request timeout'],
+  };
+  const list = genericByStatus[status];
+  if (!list) return status >= 500 && m.length < 120 && /^[a-z\s.-]+$/i.test(m.trim());
+  return list.some((g) => m === g || m.startsWith(`${g}.`) || m.startsWith(`${g} `));
+}
+
 /**
- * رسائل واجهة المستخدم: لا نعرض رمز HTTP (مثل 400) عندما يعيد السيرفر نصاً
- * يشرح السبب (قواعد العمل، التحقق، إلخ). الرمز يبقى متاحاً على `ApiError.status`.
+ * رسائل واجهة المستخدم المركّزة على العربية: نفضّل نصاً مفيداً من الخادم؛
+ * وإذا كان عاماً أو HTML أو إنجليزياً خاماً نستخدم شرحاً عربياً بحسب الرمز HTTP.
  */
 function userFacingHttpErrorMessage(
   status: number,
@@ -52,21 +78,107 @@ function userFacingHttpErrorMessage(
   locale: 'ar' | 'en',
 ): string {
   const trimmed = backendMsg.trim();
-  if (trimmed) return trimmed;
   if (locale === 'ar') {
-    if (status === 401) return 'انتهت الجلسة أو غير مصرّح بالوصول.';
-    if (status === 403) return 'غير مصرّح بتنفيذ هذه العملية.';
-    if (status === 404) return 'المورد غير موجود.';
-    if (status >= 500)
-      return 'تعذّر إكمال الطلب بسبب خطأ في الخادم. حاول لاحقاً.';
-    return 'تعذّر إكمال الطلب.';
+    if (trimmed && !shouldReplaceArabicBackendMessage(status, trimmed)) {
+      return trimmed;
+    }
+
+    switch (status) {
+      case 400:
+        return 'البيانات المرسلة غير مقبولة. راجع الحقول المطلوبة والصيغة ثم أعد المحاولة.';
+      case 401:
+        return 'لم يتم التحقّق من هويتك أو انتهت صلاحية الجلسة. سجّل الدخول من جديد إن لزم.';
+      case 403:
+        return 'لا تملك صلاحية تنفيذ هذه العملية. إذا ظننت أن ذلك خطأ فتواصل مع الدعم.';
+      case 404:
+        return 'لم يُعثَر على المطلوب؛ ربما أُزيل أو العنوان غير صحيح.';
+      case 408:
+        return 'انتهى وقت انتظار الخادم لهذا الطلب. أعد المحاولة.';
+      case 409:
+        return 'تعارض مع بيانات موجودة لدينا (مثلاً حساب أو سجل مسجَّل بالفعل). راجع مدخلاتك.';
+      case 413:
+        return 'حجم البيانات أو الملف كبير أكثر من المسموح. قلّل الحجم ثم أعد المحاولة.';
+      case 415:
+        return 'نوع المحتوى غير مدعوم. حاول بصيغة أخرى أو من متصفّح مختلف.';
+      case 422:
+        return 'البيانات غير متوافقة مع قواعد التحقّق على الخادم؛ صحّح الحقول الظاهرة في الرسالة ثم أعد الإرسال.';
+      case 429:
+        return 'تم إرسال طلبات كثيرة في وقت قصير. انتظر قليلاً ثم حاول مرّة أخرى.';
+      case 502:
+        return 'الخادم تلقّى استجابة غير صالحة من خدمة أخرى؛ حاول لاحقاً.';
+      case 503:
+        return 'الخدمة غير متاحة مؤقتاً بسبب صيانة أو ضغط. حاول بعد دقائق.';
+      case 504:
+        return 'انتهى وقت الاتصال بين الخوادم. تحقّق من الشبكة ثم أعد المحاولة.';
+      default:
+        if (status >= 500)
+          return 'حدث عطل داخلي على خادم الخدمة ولم يُكمل طلبك. أعد المحاولة لاحقاً؛ إذا استمرّ الخطأ فأبلغ الدعم.';
+        if (status >= 400)
+          return 'تعذّر تنفيذ الطلب. راجع البيانات أو حاول لاحقاً.';
+        return 'تعذّر إكمال الطلب.';
+    }
   }
+
+  if (trimmed) return trimmed;
   if (status === 401) return 'Session expired or unauthorized.';
   if (status === 403) return 'You are not allowed to perform this action.';
   if (status === 404) return 'Resource not found.';
+  if (status === 422)
+    return 'The data does not match server validation rules. Review the fields and try again.';
+  if (status === 429) return 'Too many requests. Please wait and try again.';
   if (status >= 500)
     return 'The server could not complete the request. Please try again later.';
   return statusText || 'Request failed';
+}
+
+/** أعطال fetch / TLS / إلغاء الطلب — رسالة عربية واحدة لكل حالة تقريباً. */
+function transportFailureUserMessage(error: unknown, locale: 'ar' | 'en'): string {
+  if (locale === 'en') {
+    if (error instanceof DOMException && error.name === 'AbortError')
+      return 'The request was cancelled.';
+    if (error instanceof Error && error.name === 'AbortError')
+      return 'The request was cancelled.';
+    if (error instanceof TypeError)
+      return 'Could not reach the server. Check your internet connection.';
+    if (error instanceof Error && error.message)
+      return error.message;
+    return 'Network error';
+  }
+
+  if (error instanceof DOMException && error.name === 'AbortError')
+    return 'تم إلغاء الطلب. أعد المحاولة إذا احتجت إكمال العملية.';
+  if (error instanceof Error && error.name === 'AbortError')
+    return 'تم إلغاء الطلب. أعد المحاولة إذا احتجت إكمال العملية.';
+
+  const m = error instanceof Error ? error.message : '';
+  const lower = m.toLowerCase();
+
+  if (
+    error instanceof TypeError ||
+    lower.includes('failed to fetch') ||
+    lower.includes('networkerror when attempting to fetch') ||
+    lower.includes('network request failed') ||
+    lower.includes('load failed')
+  ) {
+    return 'تعذّر الوصول إلى الخادم. تحقّق من اتصال الإنترنت؛ إن كان يعمل فربما الخدمة غير متاحة مؤقتاً—أعد المحاولة بعد قليل.';
+  }
+
+  if (
+    lower.includes('ssl') ||
+    lower.includes('certificate') ||
+    lower.includes('revocation') ||
+    lower.includes('schannel') ||
+    lower.includes('tls') ||
+    lower.includes('secure connection')
+  ) {
+    return 'تعذّر إنشاء اتصال آمن مع الخادم. تأكد من ضبط الوقت والتاريخ على جهازك، أو استخدم شبكة أخرى.';
+  }
+
+  if (lower.includes('aborted')) {
+    return 'انقطع الاتصال أثناء الطلب. تحقّق من الشبكة ثم حاول مرّة أخرى.';
+  }
+
+  return 'تعذّر إتمام الطلب بسبب مشكلة اتصال. تحقّق من الإنترنت ثم أعد المحاولة.';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -196,6 +308,8 @@ export async function apiRequest<T = unknown>(
       // Prefer messageKey-keyed message, then body.message/error, then statusText
       const backendMsg =
         (body.message as string | undefined) ||
+        (body.detail as string | undefined) ||
+        (body.title as string | undefined) ||
         (body.error as string | undefined) ||
         rawText ||
         res.statusText;
@@ -218,8 +332,8 @@ export async function apiRequest<T = unknown>(
   } catch (e) {
     if (e instanceof ApiError) throw e;
 
-    const networkMsg = locale === 'ar' ? 'خطأ شبكة' : 'Network error';
-    const err = e instanceof Error ? e : new Error(networkMsg);
+    const readable = transportFailureUserMessage(e, locale);
+    const err = new Error(readable);
     onError?.(err);
     throw err;
   }
@@ -288,7 +402,13 @@ export async function apiMultipart<T = unknown>(
         }
       };
       xhr.onerror = () =>
-        reject(new Error(locale === 'ar' ? 'خطأ رفع' : 'Upload error'));
+        reject(
+          new Error(
+            locale === 'ar'
+              ? 'تعذّر إرسال الملف بسبب فشل الاتصال. تحقّق من الشبكة وحجم الملف ثم حاول مرّة أخرى.'
+              : 'Upload failed due to a network error. Try again.',
+          ),
+        );
       xhr.send(formData);
     });
   }

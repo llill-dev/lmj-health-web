@@ -13,6 +13,11 @@ import type {
   AuthError,
 } from '@/lib/auth/types';
 import { AUTH_ERROR_MESSAGES } from '@/lib/auth/types';
+import type { SignupFieldConflictMessages } from '@/lib/auth/signupMessaging';
+import {
+  extractSignupConflictFields,
+  signupErrorHasOnlyContactFieldIssues,
+} from '@/lib/auth/signupMessaging';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Error normaliser
@@ -86,6 +91,9 @@ const handleAuthError = (error: unknown): AuthError => {
   };
 };
 
+const signupContactPrecheckEnabled =
+  import.meta.env.VITE_ENABLE_SIGNUP_CONTACT_PRECHECK === 'true';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Auth API client
 // ─────────────────────────────────────────────────────────────────────────────
@@ -95,6 +103,50 @@ export const authApi = {
       locale: 'ar',
       omitAuth: true,
     }),
+
+  /**
+   * فحص توفّر البريد والهاتف قبل الخطوة 2.
+   *
+   * **الافتراضي:** لا يُرسل أي طلب — عيّن `VITE_ENABLE_SIGNUP_CONTACT_PRECHECK=true`
+   * في `.env` عند تنفيذ `POST /api/auth/check-signup-contact` على الخادم لتفادي
+   * طلب 404 وبطء الانتظار عند غياب المسار.
+   *
+   * عند تفعيل الاستدعاء: غياب المسار (404/405) يُكمَّل بتخطّي المحلّي دون احتجاز التدفّق.
+   */
+  signupDoctorContactPrecheck: async (
+    body: Pick<DoctorSignupBody, 'email' | 'phone'>,
+  ): Promise<
+    | { ok: true; skipped?: boolean }
+    | { conflict: SignupFieldConflictMessages }
+  > => {
+    if (!signupContactPrecheckEnabled) {
+      return { ok: true, skipped: true };
+    }
+
+    try {
+      await post<Record<string, unknown>>(
+        authEndpoints.signupContactPrecheck(),
+        {
+          email: body.email.trim().toLowerCase(),
+          phone: body.phone,
+        },
+        { locale: 'ar', omitAuth: true },
+      );
+      return { ok: true };
+    } catch (error) {
+      if (error instanceof ApiError && (error.status === 404 || error.status === 405)) {
+        return { ok: true, skipped: true };
+      }
+      const conflict = extractSignupConflictFields(error);
+      if (
+        (conflict.email || conflict.phone) &&
+        signupErrorHasOnlyContactFieldIssues(error)
+      ) {
+        return { conflict };
+      }
+      throw error;
+    }
+  },
 
   resendSignupOtp: (body: ResendSignupOtpBody) =>
     post<SignupResponse>(authEndpoints.resendSignupOtp(), body, {

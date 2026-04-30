@@ -18,12 +18,17 @@ export type DoctorSignupBody = {
   email: string;
   password: string;
   phone: string;
-  gender: string;
-  /** ISO calendar date `YYYY-MM-DD` (API-3 /auth/signup) */
+  /** وثيقة API: أمثلة curl تستخدم "Male" | "Female" مع حرف كبير */
+  gender: 'Male' | 'Female';
+  /** ISO calendar date `YYYY-MM-DD` (حقل JSON: `dateOfBirth`) */
   dateOfBirth: string;
   address: string;
   role: 'doctor';
   channel: SignupChannel;
+  /**
+   * وثيقة API: اختياري للتسجيل؛ الافتراضي `web`. يُنصح بإرساله من واجهة الويب.
+   */
+  clientType?: ClientType;
   /** Catalog selection from GET /api/meta/doctor-specializations. */
   specializationKey?: string;
   /** Free-text specialization when the desired option is not in the catalog. */
@@ -213,7 +218,7 @@ export const AUTH_ERROR_MESSAGES: Record<
     en: 'Account has been deleted',
   },
   NETWORK_ERROR: {
-    ar: 'خطأ في الاتصال بالشبكة',
+    ar: 'تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة؛ إن استمر الأمر قد يكون الخادم مشغولاً وليس جهازك.',
     en: 'Network connection error',
   },
   UNKNOWN: {
