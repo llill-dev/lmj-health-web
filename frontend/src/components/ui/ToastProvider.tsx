@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -11,6 +12,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, Info, AlertTriangle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { registerSessionExpiryToastSink } from '@/lib/session/sessionExpiryFlow';
 
 export type ToastVariant = 'success' | 'error' | 'info' | 'warning';
 
@@ -75,6 +77,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(() => ({ toast }), [toast]);
+
+  useEffect(() => {
+    registerSessionExpiryToastSink((message, opts) => {
+      toast(message, opts);
+    });
+    return () => registerSessionExpiryToastSink(null);
+  }, [toast]);
 
   return (
     <ToastContext.Provider value={value}>
