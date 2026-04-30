@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/store/authStore';
+import { runSessionExpiredFlow } from '@/lib/session/sessionExpiryFlow';
 import {
   isAccessTokenExpired,
   isSessionExpiry401Exempt,
@@ -85,9 +86,7 @@ export type ApiOptions = RequestInit & {
 // Core request function
 // ─────────────────────────────────────────────────────────────────────────────
 function scheduleSessionExpiryHandling(locale: 'ar' | 'en'): void {
-  void import('@/lib/session/sessionExpiryFlow').then((m) =>
-    m.runSessionExpiredFlow(locale),
-  );
+  runSessionExpiredFlow(locale);
 }
 
 /** استجابة 401 مع طلب كان يحمل توكن مصادقة → انتهاء الجلسة (مع استثناء مسارات /api/auth العامة). */
