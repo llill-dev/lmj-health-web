@@ -33,12 +33,12 @@ export default function DashboardOverviewSection({
   return (
     <section className={`relative ${sectionClassName}`}>
       {overlay ? overlay : null}
-      <div className='flex justify-between'>
+      <div className='relative z-10 flex justify-between'>
         <div>{headerLeft}</div>
         {headerRight ? <div>{headerRight}</div> : <div />}
       </div>
 
-      <div className={kpiGridClassName}>
+      <div className={`relative z-10 ${kpiGridClassName}`}>
         {Array.isArray(cards) && cards.length > 0
           ? cards.map((node, idx) => <Fragment key={idx}>{node}</Fragment>)
           : (kpis ?? []).map((kpi) => (

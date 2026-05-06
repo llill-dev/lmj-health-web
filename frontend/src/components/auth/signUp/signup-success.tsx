@@ -3,8 +3,8 @@
 export default function SignupSuccess({
   onContinue,
   title = 'أهلاً وسهلاً بك في LMJ HEALTH',
-  message = 'تم إنشاء الحساب؛ يُرجى إكمال التحقق برمز OTP عندما يُشير الخادم إلى ذلك.',
-  continueLabel = 'تسجيل الدخول',
+  message = 'تم إنشاء الحساب بنجاح؛ يُرجى الأنتظار حتى يتم التحقق من حسابك من قبل الأدمن   .',
+  continueLabel = 'الذهاب للصفحة الرئيسية',
 }: {
   onContinue?: () => void;
   title?: string;

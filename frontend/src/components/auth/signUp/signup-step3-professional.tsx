@@ -27,10 +27,15 @@ export default function SignUpStep3Professional({
   onPrev,
   onNext,
   defaultValues,
+  serverLicenseMessage,
+  onDismissServerLicenseMessage,
 }: {
   onPrev: () => void;
   onNext: (values: Step3ProfessionalValues) => void;
   defaultValues?: Partial<Step3ProfessionalValues>;
+  /** خطأ الخادم لتعارض رقم الترخيص — لا يخلط مع قناة واتساب/البريد */
+  serverLicenseMessage?: string | null;
+  onDismissServerLicenseMessage?: () => void;
 }) {
   const {
     data: specialties = [],
@@ -223,12 +228,15 @@ export default function SignUpStep3Professional({
             <input
               type='text'
               placeholder='رقم الترخيص الطبي'
-              {...register('licenseNumber')}
+              {...register('licenseNumber', {
+                onChange: () => onDismissServerLicenseMessage?.(),
+              })}
               className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
-            {errors.licenseNumber?.message && (
+            {(errors.licenseNumber?.message?.trim() ||
+              serverLicenseMessage?.trim()) && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
-                {errors.licenseNumber.message}
+                {errors.licenseNumber?.message ?? serverLicenseMessage}
               </div>
             )}
             <p className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
