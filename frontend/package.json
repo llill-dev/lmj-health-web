@@ -8,10 +8,13 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:force": "vite --force",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint eslint.config.mjs postcss.config.js tailwind.config.js --max-warnings=0",
-    "typecheck": "tsc --noEmit"
+    "lint:watch": "eslint eslint.config.mjs postcss.config.js tailwind.config.js --ext .ts,.tsx src --watch",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
     "@fontsource/cairo": "^5.2.7",
