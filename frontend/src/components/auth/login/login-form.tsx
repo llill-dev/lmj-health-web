@@ -7,8 +7,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
+import { AuthFlowError, useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
+import { SIGNUP_EMAIL_INVALID_MESSAGE_AR } from '@/components/auth/signUp/signup-schemas';
 
 type LoginMethod = 'phone' | 'email';
 
@@ -25,7 +26,7 @@ const loginSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['identifier'],
-          message: 'أدخل بريد إلكتروني صحيح',
+          message: SIGNUP_EMAIL_INVALID_MESSAGE_AR,
         });
       }
     }
@@ -172,19 +173,24 @@ export default function LoginForm({
       }
 
       navigate(roleRoot[userRole] ?? '/welcome', { replace: true });
-    } catch (error: any) {
-      const code: string = error?.code ?? 'UNKNOWN';
+    } catch (error: unknown) {
+      const code =
+        error instanceof AuthFlowError ? error.code : 'UNKNOWN';
       setLoginError(
         AUTH_ERROR_MESSAGES_AR[code] ??
-          error?.message ??
+          (error instanceof Error ? error.message : undefined) ??
           AUTH_ERROR_MESSAGES_AR['UNKNOWN'],
       );
+
+      if (!(error instanceof AuthFlowError)) {
+        console.error('Unexpected login failure:', error);
+      }
     }
   });
 
   return (
-    <section className='flex flex-col items-center mx-auto min-h-svh'>
-      <div className='my-[35px]'>
+    <section className='mx-auto flex min-h-svh w-full flex-col items-center px-4 pb-16 pt-2'>
+      <div className='my-[35px] shrink-0'>
         <img
           src='/images/syr-health-logo.png'
           alt='LMJ Health'
@@ -197,9 +203,9 @@ export default function LoginForm({
       <div
         dir='rtl'
         lang='ar'
-        className='relative gap-4 rounded-[6px] mb-8 max-w-[448px] max-h-[591px]'
+        className='relative mb-8 w-full max-w-[448px]'
       >
-        <div className='relative z-10  h-[4px] w-[448px] bg-gradient-to-b from-[#0F8F8B] via-[#65BFEC] to-[#0F8F8B]' />
+        <div className='relative z-10 h-[4px] w-full max-w-[448px] bg-gradient-to-b from-[#0F8F8B] via-[#65BFEC] to-[#0F8F8B]' />
         <div className='z-10 rounded-[6px] bg-[#FFFFFFF2] px-7 py-8 shadow-[0_28px_80px_rgba(0,0,0,0.22)]'>
           <div className='text-start'>
             <h1 className='font-cairo text-[16px] font-bold leading-[32px] text-[#1F2937]'>
@@ -212,6 +218,7 @@ export default function LoginForm({
 
           <form
             className=''
+            noValidate
             onSubmit={onSubmit}
           >
             <div className='mx-auto max-w-[330px] gap-[24px] py-[35px] px-[24px]'>
@@ -321,7 +328,7 @@ export default function LoginForm({
                     </motion.div>
                   </AnimatePresence>
                   {errors.identifier ? (
-                    <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                    <div className='mt-2 break-words text-right font-cairo text-[12px] font-bold leading-snug text-[#D92D20]'>
                       {errors.identifier.message}
                     </div>
                   ) : null}
@@ -355,7 +362,7 @@ export default function LoginForm({
                     />
                   </div>
                   {errors.password ? (
-                    <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                    <div className='mt-2 break-words text-right font-cairo text-[12px] font-bold leading-snug text-[#D92D20]'>
                       {errors.password.message}
                     </div>
                   ) : null}
@@ -371,7 +378,7 @@ export default function LoginForm({
                 {loginError && (
                   <div
                     role='alert'
-                    className='mt-3 rounded-[6px] bg-[#FEF2F2] px-3 py-2 text-right font-cairo text-[13px] font-semibold text-[#D92D20]'
+                    className='mt-3 break-words rounded-[6px] bg-[#FEF2F2] px-3 py-2 text-right font-cairo text-[13px] font-semibold leading-snug text-[#D92D20]'
                   >
                     {loginError}
                   </div>

@@ -1,4 +1,4 @@
-import { post } from '@/lib/base';
+import { post, postResult } from '@/lib/base';
 import { ApiError } from '@/lib/base';
 import { authEndpoints } from '@/lib/auth/endpoints';
 import type {
@@ -164,11 +164,21 @@ export const authApi = {
     body: LoginRequest,
   ): Promise<{ data: LoginResponse } | { error: AuthError }> => {
     try {
-      const response = await post<LoginResponse>(authEndpoints.login(), body, {
-        locale: 'ar',
-        omitAuth: true,
-      });
-      return { data: response };
+      const response = await postResult<LoginResponse>(
+        authEndpoints.login(),
+        body,
+        {
+          locale: 'ar',
+          omitAuth: true,
+          expectedStatuses: [400, 401, 403, 410],
+        },
+      );
+
+      if ('error' in response) {
+        return { error: handleAuthError(response.error) };
+      }
+
+      return { data: response.data };
     } catch (error) {
       return { error: handleAuthError(error) };
     }

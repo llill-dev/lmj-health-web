@@ -194,6 +194,10 @@ export type ApiOptions = RequestInit & {
   locale?: 'ar' | 'en';
 };
 
+export type ApiResult<T, E = Error> =
+  | { ok: true; data: T }
+  | { ok: false; error: E };
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Core request function
 // ─────────────────────────────────────────────────────────────────────────────
@@ -339,6 +343,29 @@ export async function apiRequest<T = unknown>(
   }
 }
 
+export async function apiRequestResult<T = unknown>(
+  endpoint: string,
+  options: ApiOptions & {
+    expectedStatuses?: readonly number[];
+  } = {},
+): Promise<ApiResult<T, ApiError | Error>> {
+  const { expectedStatuses = [], ...requestOptions } = options;
+
+  try {
+    const data = await apiRequest<T>(endpoint, requestOptions);
+    return { ok: true, data };
+  } catch (error) {
+    if (
+      error instanceof ApiError &&
+      expectedStatuses.includes(error.status)
+    ) {
+      return { ok: false, error };
+    }
+
+    throw error;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Multipart upload with optional XHR progress
 // ─────────────────────────────────────────────────────────────────────────────
@@ -441,6 +468,19 @@ export const post = <T = unknown>(
   options?: ApiOptions,
 ) =>
   apiRequest<T>(endpoint, {
+    ...options,
+    method: 'POST',
+    body: jsonBody(body),
+  });
+
+export const postResult = <T = unknown>(
+  endpoint: string,
+  body?: unknown,
+  options?: ApiOptions & {
+    expectedStatuses?: readonly number[];
+  },
+) =>
+  apiRequestResult<T>(endpoint, {
     ...options,
     method: 'POST',
     body: jsonBody(body),

@@ -70,6 +70,18 @@ interface AuthState {
 
 type Listener = () => void;
 
+export class AuthFlowError extends Error {
+  readonly code: string;
+  readonly authError?: AuthError;
+
+  constructor(authError: AuthError) {
+    super(authError.message);
+    this.name = 'AuthFlowError';
+    this.code = authError.code;
+    this.authError = authError;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // localStorage helpers (used only for non-sensitive settings)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -252,12 +264,7 @@ let state: AuthState = {
     const result = await authApi.login(loginRequest);
 
     if ('error' in result) {
-      const authErr = result.error;
-      const err: Error & { code?: string; authError?: AuthError } =
-        new Error(authErr.message);
-      err.code = authErr.code;
-      err.authError = authErr;
-      throw err;
+      throw new AuthFlowError(result.error);
     }
 
     const { data } = result;
