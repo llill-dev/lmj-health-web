@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import DashboardOverviewSection from '@/components/doctor/dashboard-overview-section';
-import AddAccessRequestForm from '@/components/doctor/add-access-request-form';
+import DashboardOverviewSection from '@/components/doctor/dashboard/dashboard-overview-section';
+import AddAccessRequestForm from '@/components/doctor/access-requests/add-access-request-form';
 
 type AccessRequestStatus = 'pending' | 'approved' | 'rejected';
 

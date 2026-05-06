@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import HomeDoctor from '@/components/doctor/home-doctor';
+import HomeDoctor from '@/components/doctor/dashboard/home-doctor';
 
 export default function DoctorDashboardPage() {
   return (

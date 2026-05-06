@@ -15,7 +15,7 @@ import {
 import { Helmet } from 'react-helmet-async';
 import DoctorDetailsDialog, {
   type DoctorCardItem,
-} from '@/components/doctor/doctor-details-dialog';
+} from '@/components/doctor/doctors-directory/doctor-details-dialog';
 
 const mockDoctors: DoctorCardItem[] = [
   {
