@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
+  FileSpreadsheet,
   Loader2,
   Plus,
   Pencil,
@@ -31,6 +32,7 @@ import type { AdminLookupRecord } from '@/lib/admin/types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { staggerContainer, staggerItem } from '@/motion';
 import { ApiError } from '@/lib/base';
+import { downloadUtf8Csv } from '@/lib/export/downloadUtf8Csv';
 
 const TEAL = '#108B8B';
 const PAGE_SIZE = 9;
@@ -111,6 +113,32 @@ export default function AdminDoctorSpecializationsPage() {
     setUpsertOpen(true);
   }
 
+  function exportFilteredTableToExcel() {
+    if (filtered.length === 0) return;
+    const headers = [
+      'المفتاح',
+      'الترتيب',
+      'الحالة',
+      'الاسم بالعربية',
+      'الاسم بالإنجليزية',
+      'المعرف',
+    ];
+    const rows = filtered.map((row) => {
+      const titleAr = resolveLookupText(row.text, 'ar');
+      const titleEn = resolveLookupText(row.text, 'en');
+      return [
+        row.key,
+        String(row.order ?? 0),
+        row.isActive ? 'نشط' : 'غير نشط',
+        titleAr || titleEn || row.key,
+        titleEn || '',
+        row._id,
+      ];
+    });
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadUtf8Csv(`lmj-takhasosat-atibba-${stamp}.csv`, headers, rows);
+  }
+
   const apiErrMsg =
     error != null
       ? error instanceof ApiError
@@ -150,6 +178,19 @@ export default function AdminDoctorSpecializationsPage() {
           </div>
 
           <div className='flex flex-wrap gap-2 items-center lg:justify-end'>
+            <button
+              type='button'
+              onClick={exportFilteredTableToExcel}
+              disabled={busy || filtered.length === 0}
+              className='inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50'
+              title='ملف CSV يفتح كجدول في Microsoft Excel'
+            >
+              <FileSpreadsheet
+                className='h-4 w-4 text-[#16A34A]'
+                aria-hidden
+              />
+              جدول Excel
+            </button>
             <button
               type='button'
               onClick={() => refetch()}
