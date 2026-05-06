@@ -118,6 +118,8 @@ export default function SignUpStep1Account({
 
       <form
         className='mt-6'
+        /** بدون هذا يعترض المتصفح عن الإرسال عند `type="email"` قبل Zod، فلا تظهر رسالة التحقق العربية تحت الحقل. */
+        noValidate
         aria-busy={contactPrecheckBusy}
         onSubmit={handleSubmit(async (values) => {
           await Promise.resolve(onNext(values));

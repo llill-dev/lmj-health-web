@@ -107,7 +107,7 @@ export default function VerifyAccount({
   const inlineError = errors.code?.message ?? flowError;
 
   return (
-    <section className="mx-auto flex flex-col items-center">
+    <section className="flex flex-col items-center mx-auto">
       <div className="my-[50px]">
         <img
           src="/images/syr-health-logo.png"
@@ -124,7 +124,7 @@ export default function VerifyAccount({
       <div lang="ar" className="relative">
         <div className="relative w-fit">
           <div className="pointer-events-none absolute -right-[100px] -top-[170px] z-10">
-            <div className="relative h-44 w-44">
+            <div className="relative w-44 h-44">
               <div className="absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]" />
               <div className="absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-500/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]" />
             </div>
@@ -173,12 +173,12 @@ export default function VerifyAccount({
                   disabled={isVerifying}
                   className="flex h-[43.98px] w-[341.22px] items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px] text-[#FFFFFF] shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60"
                 >
-                  <CircleCheck className="h-4 w-4 shrink-0" />
+                  <CircleCheck className="w-4 h-4 shrink-0" />
                   {isVerifying ? "جاري التحقق…" : "تأكيد"}
                 </button>
               </div>
 
-              <div className="mt-8 flex flex-col items-center gap-3 text-center">
+              <div className="flex flex-col gap-3 items-center mt-8 text-center">
                 <button
                   type="button"
                   onClick={onBack}
