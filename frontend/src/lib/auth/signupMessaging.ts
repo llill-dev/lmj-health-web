@@ -183,21 +183,107 @@ function collectValidationIssues(
 function mapIssueKeyToConflictField(
   key: string,
 ): keyof SignupFieldConflictMessages | null {
-  const k = key
+  const normalizedLeaf =
+    normalizeIssueKey(key)?.split(/[.[/]/).filter(Boolean).at(-1) ?? key;
+
+  /** ترخيص المزاولة — لا يُسقَط خطأ الهاتف/البريد له */
+  const licenseLike = /medicallicense|license|licensenumber|مزاولة|ترخيص/i.test(
+    normalizedLeaf,
+  );
+  if (licenseLike) return null;
+
+  const k = normalizedLeaf
     .toLowerCase()
-    .replace(/[\s._[\]'"]/g, "")
-    .replace(/^\/+/, "");
-  if (k.includes("email") || k === "mail") return "email";
+    .replace(/[\s._[\]'"]/g, '')
+    .replace(/^\/+/, '');
+
+  /** قناة إرسال رمز OTP (واتساب/بريد) — ليست حقلاً لمقارنة «رقم الجوال مسجَّل». */
   if (
-    k.includes("phone") ||
-    k.includes("mobile") ||
-    k.includes("whatsapp") ||
-    k.includes("phonenumber") ||
-    k.includes("msisdn") ||
-    k === "tel"
-  )
-    return "phone";
+    k === 'channel' ||
+    k === 'whatsapp' ||
+    k === 'verificationchannel' ||
+    k.includes('verificationchannel') ||
+    k.includes('otpchannel') ||
+    k.includes('signchannel')
+  ) {
+    return null;
+  }
+
+  if (k.includes('email') || k === 'mail') return 'email';
+
+  /** لا نعتبر كلمة whatsapp وحده مؤشراً على حقول الهاتف (كثيرة الخوادم تُستخدمها لحقل القناة). */
+  if (
+    k.includes('phone') ||
+    k.includes('mobile') ||
+    k.includes('phonenumber') ||
+    k.includes('msisdn') ||
+    k === 'tel'
+  ) {
+    return 'phone';
+  }
+
   return null;
+}
+
+/** حقول خطأ خطوة الترخيص (مزاولة المهنة وما إليها من JSON من الخادم). */
+export function issueKeyIndicatesMedicalLicense(
+  key: string | null | undefined,
+): boolean {
+  if (!key) return false;
+  const leaf =
+    normalizeIssueKey(key)?.split(/[.[/]/).filter(Boolean).at(-1) ??
+    normalizeIssueKey(key) ??
+    key;
+  const k = leaf
+    .toLowerCase()
+    .replace(/[\s._[\]'"]/g, '')
+    .replace(/^\/+/, '');
+  return (
+    k.includes('medicallicensenumber') ||
+    k.includes('medicallicense') ||
+    k.includes('licensenumber') ||
+    k === 'license' ||
+    /^license.+number/.test(k) ||
+    /^medical.+license/.test(k)
+  );
+}
+
+/**
+ * رسالة لتُعرَض تحت «رقم مزاولة المهنة» عند تعارض/رفض الخادم.
+ */
+export function extractSignupMedicalLicenseConflictMessage(
+  error: unknown,
+): string | undefined {
+  if (!(error instanceof ApiError)) return undefined;
+
+  const issues = collectValidationIssues(error.body);
+  const msgs: string[] = [];
+
+  for (const issue of issues) {
+    if (issue.key && issueKeyIndicatesMedicalLicense(issue.key)) {
+      msgs.push(...issue.messages);
+      continue;
+    }
+    /** أحياناً الخادم يرسل key خاطئ (مثل قناة) لكن الرسالة تصف الترخيص */
+    for (const m of issue.messages) {
+      if (/مزاولة|ترخيص|رقم.{0,6}مزاولة|medical\s*license|license\s*number/i.test(m))
+        msgs.push(m);
+    }
+  }
+
+  const primary = error.message.trim();
+  if (
+    primary &&
+    /مزاولة|ترخيص|وزارة.{0,8}صحة|طبيب.*مسجل|\bmedical\s+license\b|\blicense\s+number\b/i.test(
+      primary,
+    )
+  ) {
+    msgs.push(primary);
+  }
+
+  const unified = dedupeMessages(msgs);
+  if (!unified.length) return undefined;
+  return unified.join(' — ');
 }
 
 function mergeFieldConflict(
@@ -241,10 +327,21 @@ export function extractSignupConflictFields(
     }
   }
 
-  const mk = (error.messageKey ?? "").toLowerCase();
   const primary = error.message.trim();
+  const mkRaw = error.messageKey ?? '';
+  const mk = mkRaw.toLowerCase();
 
-  if (!out.email && !out.phone && mk.length && !unrelatedFieldErrorsPresent) {
+  /** لا نربط رسالة عامة بالبريد/الهاتف إن أوضح الخادم أنها عن الترخيص */
+  const messageKeyIndicatesLicense =
+    /\blicense\b|\bmedical\b|medicallicens|مزاولة|ترخيص|r-license/i.test(mkRaw);
+
+  if (
+    !out.email &&
+    !out.phone &&
+    mk.length &&
+    !unrelatedFieldErrorsPresent &&
+    !messageKeyIndicatesLicense
+  ) {
     if (
       mk.includes("email") &&
       (mk.includes("taken") ||

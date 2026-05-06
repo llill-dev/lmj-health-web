@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SignupSuccess from '@/components/auth/signUp/signup-success';
 import AuthBackground from '@/components/auth/AuthBackground';
+import { useAuthStore } from '@/store/authStore';
 
 /** Route state after OTP verification (`VerifyOtpPage`). */
 export type SignupSuccessLocationState =
@@ -25,6 +26,16 @@ export default function SignupSuccessPage() {
   const location = useLocation();
   const state = location.state as SignupSuccessLocationState | null;
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS);
+  /** يمنع الإبقاء على pendingOTP في الجلسة بعد نجاح التحقق من شاشة الـ OTP. */
+  const clearedPendingRef = useRef(false);
+
+  useEffect(() => {
+    if (!state) return undefined;
+    if (clearedPendingRef.current) return undefined;
+    clearedPendingRef.current = true;
+    useAuthStore.getState().setPendingVerification(null);
+    return undefined;
+  }, [state]);
 
   useEffect(() => {
     if (!state || state.flow !== 'session_ready') return undefined;
@@ -83,15 +94,15 @@ export default function SignupSuccessPage() {
       </Helmet>
       <AuthBackground>
         <SignupSuccess
-          title={state.title ?? 'اكتمل التحقق'}
+          title={state.title ?? "اكتمل التحقق"}
           message={
             state.message ??
-            'تم إنشاء الجلسة بنجاح وفق استجابة الخادم بعد التحقق. سيتم توجيهك إلى لوحة التطبيق.'
+            "تم إنشاء الحساب بنجاح؛ يُرجى الأنتظار حتى يتم التحقق من حسابك من قبل الأدمن   ."
           }
-          continueLabel='المتابعة الآن'
+          continueLabel="الذهاب للصفحة الرئيسية"
           onContinue={() => navigate(state.redirectTo, { replace: true })}
         />
-        <p className='mx-auto mt-4 max-w-[520px] text-center font-cairo text-[12px] font-semibold text-[#667085]'>
+        <p className="mx-auto mt-4 max-w-[520px] text-center font-cairo text-[12px] font-semibold text-[#667085]">
           سيتم تحويلك تلقائياً خلال {secondsLeft} ثانية…
         </p>
       </AuthBackground>

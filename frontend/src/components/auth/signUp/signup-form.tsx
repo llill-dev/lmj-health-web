@@ -17,6 +17,7 @@ import SignUpStepper from "./signup-stepper";
 
 import {
   extractSignupConflictFields,
+  extractSignupMedicalLicenseConflictMessage,
   formatSignupGeneralBannerError,
   formatSignupApiError,
   signupErrorHasOnlyContactFieldIssues,
@@ -68,6 +69,8 @@ export default function SignUpForm({
 
   const [step1ContactErrors, setStep1ContactErrors] =
     useState<SignupFieldConflictMessages>({});
+  const [professionalLicenseConflict, setProfessionalLicenseConflict] =
+    useState<string | null>(null);
   const [step1PrecheckBusy, setStep1PrecheckBusy] = useState(false);
 
   const dismissStep1Conflict = (field: "email" | "phone") => {
@@ -108,6 +111,7 @@ export default function SignUpForm({
   };
 
   const handleStep3Next = (values: Step3ProfessionalValues) => {
+    setProfessionalLicenseConflict(null);
     setDirection(1);
     setDraft((prev) => ({ ...prev, ...values }));
     setStep(4);
@@ -128,6 +132,7 @@ export default function SignUpForm({
       return;
     }
     setSubmitError(null);
+    setProfessionalLicenseConflict(null);
     setIsSubmitting(true);
 
     const toSignupApiGender = (g: "male" | "female"): "Male" | "Female" =>
@@ -199,17 +204,26 @@ export default function SignUpForm({
           }
         }
         const conflicts = extractSignupConflictFields(e);
-        const hasContactConflict = Boolean(conflicts.email || conflicts.phone);
+        const licenseConflict = extractSignupMedicalLicenseConflictMessage(e);
         const contactOnly =
-          hasContactConflict && signupErrorHasOnlyContactFieldIssues(e);
+          Boolean(conflicts.email || conflicts.phone) &&
+          signupErrorHasOnlyContactFieldIssues(e) &&
+          !licenseConflict;
         setStep1ContactErrors(contactOnly ? conflicts : {});
         const general = contactOnly
           ? formatSignupGeneralBannerError(e, conflicts)
           : formatSignupApiError(e);
-        setSubmitError(
-          general ?? (contactOnly ? null : formatSignupApiError(e)),
-        );
-        setStep(contactOnly ? 1 : 5);
+        setSubmitError(general ?? (contactOnly ? null : formatSignupApiError(e)));
+        setProfessionalLicenseConflict(licenseConflict ?? null);
+
+        if (contactOnly) {
+          setStep(1);
+        } else if (licenseConflict) {
+          setDirection(-1);
+          setStep(3);
+        } else {
+          setStep(5);
+        }
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -305,10 +319,15 @@ export default function SignUpForm({
                   <SignUpStep3Professional
                     onPrev={() => {
                       setDirection(-1);
+                      setProfessionalLicenseConflict(null);
                       setStep(2);
                     }}
                     defaultValues={draft}
                     onNext={handleStep3Next}
+                    serverLicenseMessage={professionalLicenseConflict}
+                    onDismissServerLicenseMessage={() =>
+                      setProfessionalLicenseConflict(null)
+                    }
                   />
                 ) : step === 4 ? (
                   <SignUpStep4Additional

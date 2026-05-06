@@ -24,6 +24,7 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
 import BookAppointmentDialog from '@/components/doctor/appointments/book-appointment-dialog';
+import AppointmentsEmptyState from '@/components/doctor/appointments/appointments-empty-state';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
 import CancelAppointmentDialog from '@/components/doctor/appointments/cancel-appointment-dialog';
 
@@ -106,11 +107,11 @@ export default function DoctorAppointmentsPage() {
     return (
       <div className='flex h-[400px] items-center justify-center'>
         <div className='text-center'>
-          <AlertCircle className='mx-auto h-12 w-12 text-red-500' />
+          <AlertCircle className='mx-auto w-12 h-12 text-red-500' />
           <p className='mt-2 text-red-600'>فشل تحميل البيانات</p>
           <button
             onClick={() => refetch()}
-            className='mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+            className='px-4 py-2 mt-2 text-white bg-blue-500 rounded hover:bg-blue-600'
           >
             إعادة المحاولة
           </button>
@@ -131,33 +132,34 @@ export default function DoctorAppointmentsPage() {
       >
         <DoctorDashboardOverview
           variant='appointments'
+          surface='mint'
           title='إدارة المواعيد'
           subtitle='جدول المرضى والاستشارات'
           onActionClick={() => setBookOpen(true)}
           actionLabel='حجز موعد جديد'
           kpis={[
             {
-              key: 'absent',
-              icon: <Clock />,
-              value: 2,
-              label: 'غياب',
+              key: 'scheduled',
+              icon: <Clock className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : scheduledCount,
+              label: 'مجدولة',
             },
             {
               key: 'completed',
-              icon: <CheckCircle />,
-              value: 1,
-              label: 'غياب',
+              icon: <CheckCircle className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : completedCount,
+              label: 'مكتملة',
             },
             {
               key: 'cancelled',
-              icon: <XCircle />,
-              value: 0,
-              label: 'غياب',
+              icon: <XCircle className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : cancelledCount,
+              label: 'ملغية',
             },
             {
-              key: 'noShow',
-              icon: <UserX />,
-              value: 0,
+              key: 'absent',
+              icon: <UserX className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : absentCount,
               label: 'غياب',
             },
           ]}
@@ -233,9 +235,9 @@ export default function DoctorAppointmentsPage() {
         />
 
         <section className='mb-6 flex items-center justify-between rounded-[6px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex items-center gap-4 flex-1'>
+          <div className='flex flex-1 gap-4 items-center'>
             <div className='relative flex-1'>
-              <Search className='absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400' />
+              <Search className='absolute right-3 top-1/2 w-5 h-5 text-gray-400 -translate-y-1/2' />
               <input
                 type='text'
                 placeholder='ابحث بالاسم أو رقم الهاتف...'
@@ -249,7 +251,7 @@ export default function DoctorAppointmentsPage() {
 
         <section className='mb-6'>
           <div className='rounded-[6px] border border-[#E5E7EB] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-            <div className='flex items-center px-6 py-4 gap-2'>
+            <div className='flex gap-2 items-center px-6 py-4'>
               <button
                 type='button'
                 onClick={() => setStatusTab('scheduled')}
@@ -268,7 +270,7 @@ export default function DoctorAppointmentsPage() {
                   }
                 >
                   {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
+                    <Loader2 className='w-3 h-3 animate-spin' />
                   ) : (
                     scheduledCount
                   )}
@@ -293,7 +295,7 @@ export default function DoctorAppointmentsPage() {
                   }
                 >
                   {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
+                    <Loader2 className='w-3 h-3 animate-spin' />
                   ) : (
                     completedCount
                   )}
@@ -318,7 +320,7 @@ export default function DoctorAppointmentsPage() {
                   }
                 >
                   {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
+                    <Loader2 className='w-3 h-3 animate-spin' />
                   ) : (
                     cancelledCount
                   )}
@@ -343,7 +345,7 @@ export default function DoctorAppointmentsPage() {
                   }
                 >
                   {appointmentsLoading ? (
-                    <Loader2 className='h-3 w-3 animate-spin' />
+                    <Loader2 className='w-3 h-3 animate-spin' />
                   ) : (
                     absentCount
                   )}
@@ -353,14 +355,16 @@ export default function DoctorAppointmentsPage() {
 
             <div className='px-6 py-4'>
               {appointmentsLoading ? (
-                <div className='flex items-center justify-center py-8'>
-                  <Loader2 className='h-8 w-8 animate-spin text-primary' />
+                <div className='flex justify-center items-center py-8'>
+                  <Loader2 className='w-8 h-8 animate-spin text-primary' />
                 </div>
+              ) : todayAppointments.length === 0 ? (
+                <AppointmentsEmptyState onBookClick={() => setBookOpen(true)} />
               ) : visibleTodayAppointments.length === 0 ? (
-                <div className='text-center py-8'>
+                <div className='py-12 text-center'>
                   <Calendar className='mx-auto h-12 w-12 text-gray-300' />
-                  <p className='mt-2 font-cairo text-[14px] text-gray-500'>
-                    لا توجد مواعيد اليوم
+                  <p className='mt-3 font-cairo text-[14px] font-semibold text-[#667085]'>
+                    لا توجد مواعيد ضمن هذا التبويب للتاريخ المحدد
                   </p>
                 </div>
               ) : (
@@ -371,8 +375,8 @@ export default function DoctorAppointmentsPage() {
                       className='rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
                     >
                       <div className='px-6 pt-5'>
-                        <div className='flex items-start justify-between'>
-                          <div className='flex items-start gap-3'>
+                        <div className='flex justify-between items-start'>
+                          <div className='flex gap-3 items-start'>
                             <div className='flex h-[64px] w-[64px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_10px_20px_rgba(15, 143, 139,0.25)]'>
                               <span className='font-cairo text-[16px] font-extrabold'>
                                 {appointment.patientInitials}
@@ -385,28 +389,28 @@ export default function DoctorAppointmentsPage() {
                               </div>
                               <div className='space-y-2'>
                                 <div className='flex items-center justify-start gap-3 font-cairo text-[13px] font-bold text-[#667085]'>
-                                  <span className='flex items-center gap-1'>
-                                    <Phone className='h-4 w-4' />
+                                  <span className='flex gap-1 items-center'>
+                                    <Phone className='w-4 h-4' />
                                     0501234567
                                   </span>
-                                  <span className='flex items-center gap-1 text-primary'>
+                                  <span className='flex gap-1 items-center text-primary'>
                                     {appointment.type === 'video' ? (
-                                      <Video className='h-4 w-4' />
+                                      <Video className='w-4 h-4' />
                                     ) : (
-                                      <Hospital className='h-4 w-4' />
+                                      <Hospital className='w-4 h-4' />
                                     )}
                                     {appointment.type === 'video'
                                       ? 'أونلاين'
                                       : 'عيادة'}
                                   </span>
                                 </div>
-                                <div className='flex items-center gap-2'>
+                                <div className='flex gap-2 items-center'>
                                   <div className='flex h-[36px] items-center gap-2 rounded-[6px] bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-primary'>
-                                    <Calendar className='h-4 w-4' />
+                                    <Calendar className='w-4 h-4' />
                                     {appointment.date}
                                   </div>
                                   <div className='flex h-[36px] items-center gap-2 rounded-[6px] bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-primary'>
-                                    <Clock className='h-4 w-4' />
+                                    <Clock className='w-4 h-4' />
                                     {appointment.time}
                                   </div>
                                 </div>
@@ -414,8 +418,8 @@ export default function DoctorAppointmentsPage() {
                             </div>
                           </div>
 
-                          <div className='flex items-center gap-3'>
-                            <div className='flex flex-col items-end gap-2'>
+                          <div className='flex gap-3 items-center'>
+                            <div className='flex flex-col gap-2 items-end'>
                               <div className='flex h-[24px] items-center justify-center rounded-[8px] bg-primary px-[8px] py-[2px] font-cairo text-[12px] leading-[16px] font-semibold text-[#FFFFFF]'>
                                 مجدول
                               </div>
@@ -429,7 +433,7 @@ export default function DoctorAppointmentsPage() {
                         </div>
                       </div>
 
-                      <div className='px-6 pb-5 pt-4'>
+                      <div className='px-6 pt-4 pb-5'>
                         <div className='grid grid-cols-3 gap-3'>
                           <button
                             type='button'
@@ -445,7 +449,7 @@ export default function DoctorAppointmentsPage() {
                             disabled={cancelling}
                             className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border-[1.82px] border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#FF000C] disabled:opacity-50'
                           >
-                            <X className='h-4 w-4' />
+                            <X className='w-4 h-4' />
                             إلغاء
                           </button>
 
@@ -463,7 +467,7 @@ export default function DoctorAppointmentsPage() {
                             disabled={false}
                             className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border-[1.82px] border-[#F97316] bg-white font-cairo text-[14px] font-extrabold text-[#FF6900]'
                           >
-                            <UserX className='h-4 w-4' />
+                            <UserX className='w-4 h-4' />
                             غياب
                           </button>
 
@@ -479,7 +483,7 @@ export default function DoctorAppointmentsPage() {
                             disabled={completing}
                             className='flex h-[44px] items-center justify-center gap-2 border-[1.82px] rounded-[6px] border-primary bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-50'
                           >
-                            <Check className='h-4 w-4' />
+                            <Check className='w-4 h-4' />
                             إنهاء
                           </button>
                         </div>
