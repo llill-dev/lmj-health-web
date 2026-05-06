@@ -12,7 +12,7 @@ import {
 import { useUpdateWorkSchedule, useWorkSchedule } from '@/hooks';
 import AddExceptionDialog, {
   type ExceptionFormValues,
-} from '@/components/doctor/add-exception-dialog';
+} from '@/components/doctor/work-schedule/add-exception-dialog';
 
 type DayKey =
   | 'sunday'

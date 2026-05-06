@@ -22,10 +22,10 @@ import {
 } from '@/hooks';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import DoctorDashboardOverview from '@/components/doctor/doctor-dashboard-overview';
-import BookAppointmentDialog from '@/components/doctor/book-appointment-dialog';
+import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
+import BookAppointmentDialog from '@/components/doctor/appointments/book-appointment-dialog';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
-import CancelAppointmentDialog from '@/components/doctor/cancel-appointment-dialog';
+import CancelAppointmentDialog from '@/components/doctor/appointments/cancel-appointment-dialog';
 
 export default function DoctorAppointmentsPage() {
   const [searchTerm, setSearchTerm] = useState('');

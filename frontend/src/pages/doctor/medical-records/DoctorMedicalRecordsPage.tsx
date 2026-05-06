@@ -12,11 +12,11 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import DoctorDashboardOverview from '@/components/doctor/doctor-dashboard-overview';
-import CreateMedicalRecordForm from '@/components/doctor/create-medical-record-form';
+import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
+import CreateMedicalRecordForm from '@/components/doctor/medical-records/create-medical-record-form';
 import MedicalRecordDetailsDialog, {
   type MedicalRecordDetails,
-} from '@/components/doctor/medical-record-details-dialog';
+} from '@/components/doctor/medical-records/medical-record-details-dialog';
 
 type MedicalRecordItem = {
   id: string;
