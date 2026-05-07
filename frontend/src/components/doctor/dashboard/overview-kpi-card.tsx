@@ -41,7 +41,7 @@ export default function OverviewKpiCard({
       <p
         className={
           onLight
-            ? 'mt-1 text-[14px] font-semibold leading-[20px] text-[#4A5565]'
+            ? 'mt-1 text-[14px] font-semibold leading-[20px] text-primary'
             : 'text-[14px] leading-[20px] text-[#FFFFFFE5]'
         }
       >
