@@ -122,7 +122,7 @@ export function useCancelAppointment() {
   });
 
   return {
-    cancelAppointment: mutation.mutate,
+    cancelAppointment: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error,
     isSuccess: mutation.isSuccess,
@@ -145,7 +145,7 @@ export function useCompleteAppointment() {
   });
 
   return {
-    completeAppointment: mutation.mutate,
+    completeAppointment: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error,
     isSuccess: mutation.isSuccess,

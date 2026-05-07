@@ -1,18 +1,12 @@
 import {
   Calendar,
-  Check,
   Clock,
   Loader2,
   AlertCircle,
-  X,
-  Video,
   Search,
-  Filter,
-  Phone,
-  UserX,
   XCircle,
   CheckCircle,
-  Hospital,
+  UserX,
 } from 'lucide-react';
 import {
   useAppointments,
@@ -22,17 +16,18 @@ import {
 } from '@/hooks';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useToast } from '@/components/ui/ToastProvider';
 import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
 import BookAppointmentDialog from '@/components/doctor/appointments/book-appointment-dialog';
+import DoctorAppointmentExpandableCard from '@/components/doctor/appointments/doctor-appointment-expandable-card';
 import AppointmentsEmptyState from '@/components/doctor/appointments/appointments-empty-state';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
 import CancelAppointmentDialog from '@/components/doctor/appointments/cancel-appointment-dialog';
 
 export default function DoctorAppointmentsPage() {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0],
-  );
+  const [selectedDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [bookOpen, setBookOpen] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
   const [finishTarget, setFinishTarget] = useState<{
@@ -40,7 +35,9 @@ export default function DoctorAppointmentsPage() {
     patientName: string;
   } | null>(null);
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
-  const [confirmAbsenceOpen, setConfirmAbsenceOpen] = useState(false);
+  const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [confirmTarget, setConfirmTarget] = useState<{
     id: string;
     patientName: string;
@@ -69,7 +66,6 @@ export default function DoctorAppointmentsPage() {
   const todayAppointments = appointments.filter(
     (apt) => apt.date === selectedDate,
   );
-  const otherPatients = appointments.filter((apt) => apt.date !== selectedDate);
 
   const scheduledCount = todayAppointments.filter(
     (apt) => apt.status === 'scheduled',
@@ -88,19 +84,11 @@ export default function DoctorAppointmentsPage() {
   });
 
   const handleCancelAppointment = async (id: string) => {
-    try {
-      await cancelAppointment(id);
-    } catch (error) {
-      console.error('Failed to cancel appointment:', error);
-    }
+    await cancelAppointment(id);
   };
 
   const handleCompleteAppointment = async (id: string) => {
-    try {
-      await completeAppointment(id);
-    } catch (error) {
-      console.error('Failed to complete appointment:', error);
-    }
+    await completeAppointment(id);
   };
 
   if (statsError || appointmentsError) {
@@ -195,28 +183,16 @@ export default function DoctorAppointmentsPage() {
           confirmDisabled={cancelling}
           onConfirm={async () => {
             if (!confirmTarget) return;
-            await handleCancelAppointment(confirmTarget.id);
-          }}
-        />
-
-        <ConfirmActionDialog
-          open={confirmAbsenceOpen}
-          onOpenChange={(open) => {
-            setConfirmAbsenceOpen(open);
-            if (!open) setConfirmTarget(null);
-          }}
-          title='تأكيد غياب المريض'
-          description={
-            <span>
-              هل أنت متأكد من تسجيل غياب {confirmTarget?.patientName ?? ''} في
-              موعده في {confirmTarget?.date ?? ''} الساعة{' '}
-              {confirmTarget?.time ?? ''}؟
-            </span>
-          }
-          confirmLabel='تأكيد'
-          confirmDisabled={false}
-          onConfirm={async () => {
-            setConfirmAbsenceOpen(false);
+            try {
+              await handleCancelAppointment(confirmTarget.id);
+            } catch {
+              toast('تعذّر إلغاء الموعد. تحقق من الاتصال وحاول مرة أخرى.', {
+                title: 'خطأ',
+                variant: 'error',
+                durationMs: 4800,
+              });
+              throw new Error('cancel-failed');
+            }
           }}
         />
 
@@ -230,7 +206,16 @@ export default function DoctorAppointmentsPage() {
           confirmDisabled={completing}
           onConfirm={async (_medicalNotes) => {
             if (!finishTarget) return;
-            await handleCompleteAppointment(finishTarget.id);
+            try {
+              await handleCompleteAppointment(finishTarget.id);
+            } catch {
+              toast('تعذّر إنهاء الموعد. تحقق من الاتصال وحاول مرة أخرى.', {
+                title: 'خطأ',
+                variant: 'error',
+                durationMs: 4800,
+              });
+              throw new Error('complete-failed');
+            }
           }}
         />
 
@@ -370,125 +355,41 @@ export default function DoctorAppointmentsPage() {
               ) : (
                 <div className='space-y-3'>
                   {visibleTodayAppointments.map((appointment) => (
-                    <div
+                    <DoctorAppointmentExpandableCard
                       key={appointment.id}
-                      className='rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
-                    >
-                      <div className='px-6 pt-5'>
-                        <div className='flex justify-between items-start'>
-                          <div className='flex gap-3 items-start'>
-                            <div className='flex h-[64px] w-[64px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_10px_20px_rgba(15, 143, 139,0.25)]'>
-                              <span className='font-cairo text-[16px] font-extrabold'>
-                                {appointment.patientInitials}
-                              </span>
-                            </div>
-
-                            <div className='flex flex-col gap-1'>
-                              <div className='font-cairo text-[18px] font-extrabold text-[#101828]'>
-                                {appointment.patientName}
-                              </div>
-                              <div className='space-y-2'>
-                                <div className='flex items-center justify-start gap-3 font-cairo text-[13px] font-bold text-[#667085]'>
-                                  <span className='flex gap-1 items-center'>
-                                    <Phone className='w-4 h-4' />
-                                    0501234567
-                                  </span>
-                                  <span className='flex gap-1 items-center text-primary'>
-                                    {appointment.type === 'video' ? (
-                                      <Video className='w-4 h-4' />
-                                    ) : (
-                                      <Hospital className='w-4 h-4' />
-                                    )}
-                                    {appointment.type === 'video'
-                                      ? 'أونلاين'
-                                      : 'عيادة'}
-                                  </span>
-                                </div>
-                                <div className='flex gap-2 items-center'>
-                                  <div className='flex h-[36px] items-center gap-2 rounded-[6px] bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-primary'>
-                                    <Calendar className='w-4 h-4' />
-                                    {appointment.date}
-                                  </div>
-                                  <div className='flex h-[36px] items-center gap-2 rounded-[6px] bg-[#EFFFFE] px-3 font-cairo text-[12px] font-extrabold text-primary'>
-                                    <Clock className='w-4 h-4' />
-                                    {appointment.time}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className='flex gap-3 items-center'>
-                            <div className='flex flex-col gap-2 items-end'>
-                              <div className='flex h-[24px] items-center justify-center rounded-[8px] bg-primary px-[8px] py-[2px] font-cairo text-[12px] leading-[16px] font-semibold text-[#FFFFFF]'>
-                                مجدول
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className='mt-4 h-[44px] w-full rounded-[6px] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[14px] font-bold text-[#667085]'>
-                          <span className='text-[#364153]'>السبب : </span>
-                          {appointment.notes || 'السبب: فحص دوري'}
-                        </div>
-                      </div>
-
-                      <div className='px-6 pt-4 pb-5'>
-                        <div className='grid grid-cols-3 gap-3'>
-                          <button
-                            type='button'
-                            onClick={() => {
-                              setConfirmTarget({
-                                id: appointment.id,
-                                patientName: appointment.patientName,
-                                date: appointment.date,
-                                time: appointment.time,
-                              });
-                              setConfirmCancelOpen(true);
-                            }}
-                            disabled={cancelling}
-                            className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border-[1.82px] border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#FF000C] disabled:opacity-50'
-                          >
-                            <X className='w-4 h-4' />
-                            إلغاء
-                          </button>
-
-                          <button
-                            type='button'
-                            onClick={() => {
-                              setConfirmTarget({
-                                id: appointment.id,
-                                patientName: appointment.patientName,
-                                date: appointment.date,
-                                time: appointment.time,
-                              });
-                              setConfirmAbsenceOpen(true);
-                            }}
-                            disabled={false}
-                            className='flex h-[44px] items-center justify-center gap-2 rounded-[6px] border-[1.82px] border-[#F97316] bg-white font-cairo text-[14px] font-extrabold text-[#FF6900]'
-                          >
-                            <UserX className='w-4 h-4' />
-                            غياب
-                          </button>
-
-                          <button
-                            type='button'
-                            onClick={() => {
-                              setFinishTarget({
-                                id: appointment.id,
-                                patientName: appointment.patientName,
-                              });
-                              setFinishOpen(true);
-                            }}
-                            disabled={completing}
-                            className='flex h-[44px] items-center justify-center gap-2 border-[1.82px] rounded-[6px] border-primary bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-50'
-                          >
-                            <Check className='w-4 h-4' />
-                            إنهاء
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                      appointment={appointment}
+                      expanded={expandedCardIds.has(appointment.id)}
+                      onToggle={() => {
+                        setExpandedCardIds((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(appointment.id)) {
+                            next.delete(appointment.id);
+                          } else {
+                            next.add(appointment.id);
+                          }
+                          return next;
+                        });
+                      }}
+                      cancelling={cancelling}
+                      completing={completing}
+                      onCancel={() => {
+                        setConfirmTarget({
+                          id: appointment.id,
+                          patientName: appointment.patientName,
+                          date: appointment.date,
+                          time: appointment.time,
+                        });
+                        setConfirmCancelOpen(true);
+                      }}
+                      onComplete={() => {
+                        setFinishTarget({
+                          id: appointment.id,
+                          patientName: appointment.patientName,
+                        });
+                        setFinishOpen(true);
+                      }}
+                      onEdit={() => setBookOpen(true)}
+                    />
                   ))}
                 </div>
               )}

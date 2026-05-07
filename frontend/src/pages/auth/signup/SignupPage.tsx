@@ -1,7 +1,7 @@
-import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
-import SignUpForm from '@/components/auth/signUp/signup-form';
-import AuthBackground from '@/components/auth/AuthBackground';
+import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
+import SignUpForm from "@/components/auth/signUp/signup-form";
+import AuthBackground from "@/components/auth/AuthBackground";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -14,10 +14,10 @@ export default function SignupPage() {
 
       <AuthBackground>
         <SignUpForm
-          onBack={() => navigate('/welcome')}
-          onLogin={() => navigate('/login')}
-          onVerify={() => navigate('/verify-otp')}
-          onSuccess={() => navigate('/signup-success')}
+          onBack={() => navigate("/welcome")}
+          onLogin={() => navigate("/login")}
+          onVerify={() => navigate("/verify-otp")}
+          onSuccess={() => navigate("/signup-success")}
         />
       </AuthBackground>
     </>

@@ -61,6 +61,8 @@ export interface Appointment {
   patientName: string;
   patientInitials: string;
   patientEmail?: string;
+  /** رقم الهاتف للعرض في بطاقات المواعيد (اختياري حسب مصدر البيانات) */
+  patientPhone?: string;
   date: string;
   time: string;
   duration: number; // minutes
@@ -70,6 +72,8 @@ export interface Appointment {
   price?: number;
   location?: string;
   videoLink?: string;
+  /** ملفات مرفقة بالموعد (عرض فقط؛ الربط بالخادم لاحقاً) */
+  appointmentFiles?: Array<{ name: string; date: string; url?: string }>;
 }
 
 export interface MedicalRecord {
@@ -336,20 +340,32 @@ class MockDataStore {
         patientId: '1',
         patientName: 'أحمد محمد العلي',
         patientInitials: 'أ',
+        patientPhone: '0501234567',
         date: today.toISOString().split('T')[0],
         time: '10:00',
         duration: 30,
         type: 'clinic',
         status: 'scheduled',
-        notes: 'متابعة حالة الضغط',
+        notes: 'فحص دوري للقلب',
         price: 150,
-        location: 'عيادة الأطباء المتخصصين',
+        location: 'مستشفى القلب التخصصي، دمشق',
+        appointmentFiles: [
+          {
+            name: 'تقرير المختبر',
+            date: '2026-02-18',
+          },
+          {
+            name: 'صورة الدم الكاملة',
+            date: '2026-02-18',
+          },
+        ],
       },
       {
         id: '2',
         patientId: '2',
         patientName: 'فاطمة أحمد السالم',
         patientInitials: 'ف',
+        patientPhone: '0509876543',
         date: today.toISOString().split('T')[0],
         time: '11:30',
         duration: 45,

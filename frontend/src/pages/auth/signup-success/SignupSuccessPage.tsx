@@ -1,33 +1,55 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SignupSuccess from '@/components/auth/signUp/signup-success';
 import AuthBackground from '@/components/auth/AuthBackground';
 import { useAuthStore } from '@/store/authStore';
+import {
+  clearSignupSuccessNavState,
+  peekSignupSuccessNavState,
+  type SignupSuccessLocationState,
+} from '@/lib/auth/signupSuccessNavState';
 
-/** Route state after OTP verification (`VerifyOtpPage`). */
-export type SignupSuccessLocationState =
-  | {
-      flow: 'pending_doctor';
-      message?: string;
-      title?: string;
-    }
-  | {
-      flow: 'session_ready';
-      redirectTo: string;
-      message?: string;
-      title?: string;
-    };
+/** إعادة تصدير النوع للشفرات التي تستورد من هذا الملف تقليدياً. */
+export type { SignupSuccessLocationState };
 
 const REDIRECT_SECONDS = 5;
+
+function resolveSignupSuccessState(
+  raw: unknown,
+): SignupSuccessLocationState | null {
+  if (!raw || typeof raw !== 'object' || !('flow' in raw)) return null;
+  const s = raw as SignupSuccessLocationState;
+  if (s.flow === 'pending_doctor') return s;
+  if (
+    s.flow === 'session_ready' &&
+    typeof s.redirectTo === 'string' &&
+    s.redirectTo.trim()
+  ) {
+    return s;
+  }
+  return null;
+}
 
 export default function SignupSuccessPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as SignupSuccessLocationState | null;
+  const [state, setState] = useState<SignupSuccessLocationState | null>(null);
+  const [resolved, setResolved] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS);
   /** يمنع الإبقاء على pendingOTP في الجلسة بعد نجاح التحقق من شاشة الـ OTP. */
   const clearedPendingRef = useRef(false);
+
+  useLayoutEffect(() => {
+    const fromHistory = resolveSignupSuccessState(location.state);
+    if (fromHistory) {
+      setState(fromHistory);
+      clearSignupSuccessNavState();
+    } else {
+      setState(peekSignupSuccessNavState());
+    }
+    setResolved(true);
+  }, [location.state, location.key]);
 
   useEffect(() => {
     if (!state) return undefined;
@@ -58,6 +80,10 @@ export default function SignupSuccessPage() {
     }, REDIRECT_SECONDS * 1000);
     return () => clearTimeout(go);
   }, [state, navigate]);
+
+  if (!resolved) {
+    return null;
+  }
 
   if (!state) {
     return <Navigate to='/welcome' replace />;

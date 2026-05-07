@@ -180,6 +180,64 @@ function collectValidationIssues(
   return [...grouped.values()];
 }
 
+/** نصوص تدل بوضوح على تعارض رقم مزاولة المهنة/الترخيص وليس البريد أو الهاتف. */
+export function issueMessagesIndicateMedicalLicenseConflict(
+  messages: string[],
+): boolean {
+  if (!messages.length) return false;
+  const joinedAr = messages.join(' ');
+  const joined = `${joinedAr} ${joinedAr.toLowerCase()}`;
+  return (
+    /مزاولة|مزاول|مزاولة المهنة|ترخيص|رقم.{0,8}مزاول|طبيب\s*مزاول|مزاول\s+مهنة|طبيب\s*مسجل|وزارة\s*الصحة|رخصة\s*مزاول|مزاولة\s*\(/i.test(
+      joinedAr,
+    ) ||
+    /\bmedical\b.*\blicen[cs]e\b|\blicen[cs]e\b.*\b(number|already|taken|exist|duplicate|registered)\b|\bpractice\b.*\b(number|license|registration)\b/i.test(
+      joined,
+    )
+  );
+}
+
+/** هل يصف النص بوضوح تعارض بريد/هاتف (وليس رسالة بدون اسم حقل)؟ */
+function issueMessagesExplicitlyDescribeContactField(
+  field: 'email' | 'phone',
+  messages: string[],
+): boolean {
+  if (!messages.length) return false;
+  const t = messages.join(' ');
+  if (/مزاولة|ترخيص|مزاول|medical\s*license|\blicen[cs]e\b/i.test(t)) {
+    return false;
+  }
+  if (field === 'email') {
+    return /بريد|إيميل|ايميل|e-?mail|correo/i.test(t);
+  }
+  return /هاتف|جوال|واتس|phone|mobile|msisdn|رقم\s*الواتس|رقم\s*الجوال|rقم\s+الهاتف/i.test(
+    t,
+  );
+}
+
+function responseBodyLooksLikeMedicalLicenseViolation(
+  body: Record<string, unknown>,
+): boolean {
+  try {
+    const haystack = JSON.stringify(body ?? {}).toLowerCase();
+    const arHaystack =
+      haystack.replace(/\\/g, '') +
+      `${body ? JSON.stringify(body) : ''}`;
+    /** أسماء أشهر من الخلفيات لرمز ترخيص المزاولة في JSON */
+    const licenseKeysOk =
+      /medicallicense|medical_license|medicallicensenumber|license_number|"license"|licensenumber|practiceid|professionalid|مزاولة|ترخيص|مزاول/.test(
+        haystack + arHaystack,
+      );
+
+    /** أحياناً يُشار للحقل الاسم العربي وحده بدون CamelCase بالإنجليزية */
+    const licenseCueAr = /مزاولة|ترخيص|مزاول/.test(arHaystack);
+
+    return licenseKeysOk || licenseCueAr;
+  } catch {
+    return false;
+  }
+}
+
 function mapIssueKeyToConflictField(
   key: string,
 ): keyof SignupFieldConflictMessages | null {
@@ -259,7 +317,31 @@ export function extractSignupMedicalLicenseConflictMessage(
   const issues = collectValidationIssues(error.body);
   const msgs: string[] = [];
 
+  /** توحيد أسلوب رسالة واحدة مهنية عند يُعاد تصنيفها من حقول الهاتف/البريد */
+  const LICENSE_FALLBACK_ALREADY_AR =
+    'رقم مزاولة المهنة مسجل مسبقاً أو مستخدم؛ جرّب رقم الترخيص الصادر عن الجهة المختصة.';
+  const bodyLicenseContext = responseBodyLooksLikeMedicalLicenseViolation(
+    error.body,
+  );
+
   for (const issue of issues) {
+    const contactField = issue.key
+      ? mapIssueKeyToConflictField(issue.key)
+      : null;
+    /** الخادم يربط رسالة تعارض الترخيص بمفتاح phone/email/channel بالخطأ */
+    if (
+      contactField &&
+      (issueMessagesIndicateMedicalLicenseConflict(issue.messages) ||
+        (bodyLicenseContext &&
+          issue.messages.some((m) => m.trim()) &&
+          !issueMessagesExplicitlyDescribeContactField(
+            contactField,
+            issue.messages,
+          )))
+    ) {
+      msgs.push(...issue.messages);
+      continue;
+    }
     if (issue.key && issueKeyIndicatesMedicalLicense(issue.key)) {
       msgs.push(...issue.messages);
       continue;
@@ -271,10 +353,31 @@ export function extractSignupMedicalLicenseConflictMessage(
     }
   }
 
+  /** جسم الرد يصف ترخيصاً والرسالة الأولى عامة («تعارض»، مسجَّل…) — لا نترك المستخدم بدون دليل تحت خانة الرخصة */
+  if (
+    msgs.length === 0 &&
+    bodyLicenseContext &&
+    (error.status === 409 || error.status === 422 || error.status === 400)
+  ) {
+    const primaryTrim = error.message.trim();
+    if (
+      primaryTrim &&
+      /\bمسجل|موجود|مزدوج|تعارض|already|taken|duplicate|exist|registered|conflict\b/i.test(
+        primaryTrim,
+      )
+    ) {
+      msgs.push(primaryTrim);
+    } else if (primaryTrim) {
+      msgs.push(`${LICENSE_FALLBACK_ALREADY_AR} (${primaryTrim})`);
+    } else {
+      msgs.push(LICENSE_FALLBACK_ALREADY_AR);
+    }
+  }
+
   const primary = error.message.trim();
   if (
     primary &&
-    /مزاولة|ترخيص|وزارة.{0,8}صحة|طبيب.*مسجل|\bmedical\s+license\b|\blicense\s+number\b/i.test(
+    /مزاولة|ترخيص|مزاول|وزارة.{0,8}صحة|طبيب.*مسجل|\bmedical\s+license\b|\blicense\s+number\b/i.test(
       primary,
     )
   ) {
@@ -314,9 +417,26 @@ export function extractSignupConflictFields(
 
   let unrelatedFieldErrorsPresent = false;
   const issues = collectValidationIssues(error.body);
+  const bodyLicenseHint = responseBodyLooksLikeMedicalLicenseViolation(
+    error.body,
+  );
+
   if (issues.length) {
     for (const issue of issues) {
-      const field = issue.key ? mapIssueKeyToConflictField(issue.key) : null;
+      let field = issue.key ? mapIssueKeyToConflictField(issue.key) : null;
+      if (field) {
+        if (issueMessagesIndicateMedicalLicenseConflict(issue.messages)) {
+          unrelatedFieldErrorsPresent = true;
+          continue;
+        }
+        if (
+          bodyLicenseHint &&
+          !issueMessagesExplicitlyDescribeContactField(field, issue.messages)
+        ) {
+          unrelatedFieldErrorsPresent = true;
+          continue;
+        }
+      }
       if (!field) {
         unrelatedFieldErrorsPresent = true;
         continue;
@@ -331,6 +451,10 @@ export function extractSignupConflictFields(
   const mkRaw = error.messageKey ?? '';
   const mk = mkRaw.toLowerCase();
 
+  /** لا نربط messageKey ببريد/هاتف إذا كان جسم الرد يشير لحقول ترخيص (تعارض شائع مع مفاتيح مثل PHONE_TAKEN). */
+  const bodyLicenseHintGlobal =
+    responseBodyLooksLikeMedicalLicenseViolation(error.body);
+
   /** لا نربط رسالة عامة بالبريد/الهاتف إن أوضح الخادم أنها عن الترخيص */
   const messageKeyIndicatesLicense =
     /\blicense\b|\bmedical\b|medicallicens|مزاولة|ترخيص|r-license/i.test(mkRaw);
@@ -340,7 +464,8 @@ export function extractSignupConflictFields(
     !out.phone &&
     mk.length &&
     !unrelatedFieldErrorsPresent &&
-    !messageKeyIndicatesLicense
+    !messageKeyIndicatesLicense &&
+    !bodyLicenseHintGlobal
   ) {
     if (
       mk.includes("email") &&
@@ -402,6 +527,31 @@ export function signupErrorHasOnlyContactFieldIssues(error: unknown): boolean {
 
   const issues = collectValidationIssues(error.body);
   if (issues.length) {
+    if (
+      issues.some((issue) =>
+        issueMessagesIndicateMedicalLicenseConflict(issue.messages),
+      )
+    ) {
+      return false;
+    }
+    if (
+      issues.some(
+        (issue) =>
+          issue.key != null && issueKeyIndicatesMedicalLicense(issue.key),
+      )
+    ) {
+      return false;
+    }
+    if (responseBodyLooksLikeMedicalLicenseViolation(error.body)) {
+      const onlyContactKeyed = issues.every((issue) => {
+        const f = issue.key ? mapIssueKeyToConflictField(issue.key) : null;
+        return (
+          !!f &&
+          issueMessagesExplicitlyDescribeContactField(f, issue.messages)
+        );
+      });
+      if (!onlyContactKeyed) return false;
+    }
     return issues.every(
       (issue) => issue.key && mapIssueKeyToConflictField(issue.key) != null,
     );

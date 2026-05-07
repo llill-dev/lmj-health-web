@@ -14,6 +14,7 @@ import SignUpStep3Professional from "./signup-step3-professional";
 import SignUpStep4Additional from "./signup-step4-additional";
 import SignUpStep5Legal from "./signup-step5-legal";
 import SignUpStepper from "./signup-stepper";
+import { useToast } from "@/components/ui/ToastProvider";
 
 import {
   extractSignupConflictFields,
@@ -72,6 +73,7 @@ export default function SignUpForm({
   const [professionalLicenseConflict, setProfessionalLicenseConflict] =
     useState<string | null>(null);
   const [step1PrecheckBusy, setStep1PrecheckBusy] = useState(false);
+  const { toast } = useToast();
 
   const dismissStep1Conflict = (field: "email" | "phone") => {
     setStep1ContactErrors((prev) => {
@@ -98,7 +100,13 @@ export default function SignUpForm({
       setDraft((prev) => ({ ...prev, ...values }));
       setStep(2);
     } catch (e: unknown) {
-      setSubmitError(formatSignupApiError(e));
+      const msg = formatSignupApiError(e);
+      setSubmitError(msg);
+      toast(msg.replace(/\s+/g, " ").trim().slice(0, 280), {
+        title: "تعذّر المتابعة",
+        variant: "error",
+        durationMs: 5200,
+      });
     } finally {
       setStep1PrecheckBusy(false);
     }
@@ -183,6 +191,15 @@ export default function SignUpForm({
           channel: parsed.data.channel,
         });
 
+        toast(
+          "تم إرسال طلب التسجيل. أدخل رمز التحقق الوارد على بريدك أو واتساب.",
+          {
+            title: "تحقّق من الحساب",
+            variant: "success",
+            durationMs: 4500,
+          },
+        );
+
         if (res.status === "verification_pending") {
           onVerify();
           return;
@@ -215,6 +232,21 @@ export default function SignUpForm({
           : formatSignupApiError(e);
         setSubmitError(general ?? (contactOnly ? null : formatSignupApiError(e)));
         setProfessionalLicenseConflict(licenseConflict ?? null);
+
+        if (licenseConflict) {
+          setStep1ContactErrors({});
+        }
+
+        const toastBody =
+          (general ?? formatSignupApiError(e))
+            ?.replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 280) ?? "تعذّر إكمال التسجيل";
+        toast(toastBody, {
+          title: "تعذّر إنشاء الحساب",
+          variant: "error",
+          durationMs: 6000,
+        });
 
         if (contactOnly) {
           setStep(1);

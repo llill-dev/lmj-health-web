@@ -1,83 +1,97 @@
-import { Suspense, useRef } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Navigate, useNavigate } from 'react-router-dom';
-import VerifyAccount from '@/components/auth/verify/verify-account';
-import { useAuthStore } from '@/store/authStore';
-import { authApi } from '@/lib/auth/client';
-import AuthBackground from '@/components/auth/AuthBackground';
-import { writeAuthToken, writeAuthUser } from '@/lib/cookies';
-import { getRoleRoot, type AppRole } from '@/routes/ProtectedRoute';
-import type { SignupSuccessLocationState } from '@/pages/auth/signup-success/SignupSuccessPage';
-import type { VerifySignupOtpResponse } from '@/lib/auth/types';
+import { Suspense, useRef } from "react";
+import { Helmet } from "react-helmet-async";
+import { Navigate, useNavigate } from "react-router-dom";
+import VerifyAccount from "@/components/auth/verify/verify-account";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useAuthStore } from "@/store/authStore";
+import { authApi } from "@/lib/auth/client";
+import AuthBackground from "@/components/auth/AuthBackground";
+import { writeAuthToken, writeAuthUser } from "@/lib/cookies";
+import { getRoleRoot, type AppRole } from "@/routes/ProtectedRoute";
+import {
+  persistSignupSuccessNavState,
+  type SignupSuccessLocationState,
+} from "@/lib/auth/signupSuccessNavState";
+import type { VerifySignupOtpResponse } from "@/lib/auth/types";
 
 /** يدعم الاستجابة المسطّحة أو تحت data، وأشكال أسماء JWT الشائعة. */
 function coerceVerifySignupOtpPayload(
   raw: Record<string, unknown>,
 ): VerifySignupOtpResponse {
   let base: Record<string, unknown> = raw;
-  if ('data' in raw && typeof raw.data === 'object' && raw.data !== null) {
+  if ("data" in raw && typeof raw.data === "object" && raw.data !== null) {
     base = raw.data as Record<string, unknown>;
   }
 
   const pickToken =
-    (typeof base.token === 'string' && base.token) ||
-    (typeof base.accessToken === 'string' && base.accessToken) ||
-    (typeof base.access_token === 'string' && base.access_token) ||
+    (typeof base.token === "string" && base.token) ||
+    (typeof base.accessToken === "string" && base.accessToken) ||
+    (typeof base.access_token === "string" && base.access_token) ||
     undefined;
 
   if (pickToken && base.userId != null) {
     return {
-      message: typeof base.message === 'string' ? base.message : '',
+      message: typeof base.message === "string" ? base.message : "",
       token: pickToken,
       userId:
-        typeof base.userId === 'string' ? base.userId : String(base.userId),
-      role: base.role as Extract<VerifySignupOtpResponse, { token: string }>['role'],
-      fullName: typeof base.fullName === 'string' ? base.fullName : '',
-      email: typeof base.email === 'string' ? base.email : undefined,
-      phone: typeof base.phone === 'string' ? base.phone : undefined,
+        typeof base.userId === "string" ? base.userId : String(base.userId),
+      role: base.role as Extract<
+        VerifySignupOtpResponse,
+        { token: string }
+      >["role"],
+      fullName: typeof base.fullName === "string" ? base.fullName : "",
+      email: typeof base.email === "string" ? base.email : undefined,
+      phone: typeof base.phone === "string" ? base.phone : undefined,
       patientPublicId:
-        typeof base.patientPublicId === 'string' ? base.patientPublicId : undefined,
+        typeof base.patientPublicId === "string"
+          ? base.patientPublicId
+          : undefined,
       actorIds:
-        typeof base.actorIds === 'object' && base.actorIds !== null
-          ? (base.actorIds as Extract<VerifySignupOtpResponse, { token: string }>['actorIds'])
+        typeof base.actorIds === "object" && base.actorIds !== null
+          ? (base.actorIds as Extract<
+              VerifySignupOtpResponse,
+              { token: string }
+            >["actorIds"])
           : {},
     };
   }
 
   return {
-    message: typeof base.message === 'string' ? base.message : '',
+    message: typeof base.message === "string" ? base.message : "",
     userId:
       base.userId != null
-        ? typeof base.userId === 'string'
+        ? typeof base.userId === "string"
           ? base.userId
           : String(base.userId)
-        : '',
-    role: 'doctor',
-    status: 'pending_admin_approval',
-    fullName: typeof base.fullName === 'string' ? base.fullName : '',
-    email: typeof base.email === 'string' ? base.email : undefined,
-    phone: typeof base.phone === 'string' ? base.phone : undefined,
+        : "",
+    role: "doctor",
+    status: "pending_admin_approval",
+    fullName: typeof base.fullName === "string" ? base.fullName : "",
+    email: typeof base.email === "string" ? base.email : undefined,
+    phone: typeof base.phone === "string" ? base.phone : undefined,
     patientPublicId: null,
     actorIds:
-      typeof base.actorIds === 'object' && base.actorIds !== null
+      typeof base.actorIds === "object" && base.actorIds !== null
         ? (base.actorIds as Extract<
             VerifySignupOtpResponse,
-            { status: 'pending_admin_approval' }
-          >['actorIds'])
+            { status: "pending_admin_approval" }
+          >["actorIds"])
         : {},
   };
 }
 
-function persistVerifiedSession(response: Extract<VerifySignupOtpResponse, { token: string }>) {
-  const role = (response.role === 'data_entry'
-    ? 'data-entry'
-    : response.role) as AppRole;
+function persistVerifiedSession(
+  response: Extract<VerifySignupOtpResponse, { token: string }>,
+) {
+  const role = (
+    response.role === "data_entry" ? "data-entry" : response.role
+  ) as AppRole;
 
   useAuthStore.setState({
     user: {
       id: response.userId,
-      email: response.email ?? '',
-      phone: response.phone ?? '',
+      email: response.email ?? "",
+      phone: response.phone ?? "",
       role,
       verified: true,
       name: response.fullName,
@@ -94,8 +108,8 @@ function persistVerifiedSession(response: Extract<VerifySignupOtpResponse, { tok
     userId: response.userId,
     role: response.role,
     fullName: response.fullName,
-    email: response.email ?? '',
-    phone: response.phone ?? '',
+    email: response.email ?? "",
+    phone: response.phone ?? "",
     actorIds: Object.fromEntries(
       Object.entries(response.actorIds ?? {}).map(([key, value]) => [
         key,
@@ -107,6 +121,7 @@ function persistVerifiedSession(response: Extract<VerifySignupOtpResponse, { tok
 }
 
 function VerifyOtpContent() {
+  const { toast } = useToast();
   const navigate = useNavigate();
   /** عند النجاح نوقف بوابة التوجيه لتجنّب الإرسال إلى /signup قبل navigate(). */
   const allowGuardRedirectsRef = useRef(true);
@@ -119,50 +134,50 @@ function VerifyOtpContent() {
       if (token && user?.role) {
         return <Navigate to={getRoleRoot(user.role as AppRole)} replace />;
       }
-      return <Navigate to='/signup' replace />;
+      return <Navigate to="/signup" replace />;
     }
     return (
-      <div className='min-h-[280px]' aria-busy aria-label='جاري إكمال التحقق'>
-        <span className='sr-only'>جاري إكمال التحقق…</span>
+      <div className="min-h-[280px]" aria-busy aria-label="جاري إكمال التحقق">
+        <span className="sr-only">جاري إكمال التحقق…</span>
       </div>
     );
   }
 
   const destination =
-    pending.channel === 'email' ? pending.email : pending.phone;
+    pending.channel === "email" ? pending.email : pending.phone;
 
   return (
     <VerifyAccount
       destination={destination}
       onBack={() => navigate(-1)}
       onResend={async () => {
-        if (pending.channel === 'email') {
+        if (pending.channel === "email") {
           await authApi.resendSignupOtp({
-            channel: 'email',
+            channel: "email",
             email: pending.email,
           });
           return;
         }
 
         await authApi.resendSignupOtp({
-          channel: 'whatsapp',
+          channel: "whatsapp",
           phone: pending.phone,
         });
       }}
       onVerify={async (otp) => {
         const raw = (await authApi.verifySignupOtp(
-          pending.channel === 'email'
+          pending.channel === "email"
             ? {
-                channel: 'email',
+                channel: "email",
                 email: pending.email,
                 otp,
-                clientType: 'web',
+                clientType: "web",
               }
             : {
-                channel: 'whatsapp',
+                channel: "whatsapp",
                 phone: pending.phone,
                 otp,
-                clientType: 'web',
+                clientType: "web",
               },
         )) as unknown as Record<string, unknown>;
 
@@ -170,31 +185,55 @@ function VerifyOtpContent() {
 
         allowGuardRedirectsRef.current = false;
 
-        if ('token' in response && typeof response.token === 'string' && response.token) {
+        if (
+          "token" in response &&
+          typeof response.token === "string" &&
+          response.token
+        ) {
           persistVerifiedSession(response);
-          const role = (response.role === 'data_entry'
-            ? 'data-entry'
-            : response.role) as AppRole;
+          const role = (
+            response.role === "data_entry" ? "data-entry" : response.role
+          ) as AppRole;
 
-          navigate('/signup-success', {
+          toast("تم تأكيد رمز التسجيل. يمكنك المتابعة إلى لوحة التحكم.", {
+            title: "تم التحقق",
+            variant: "success",
+            durationMs: 3800,
+          });
+
+          const successState = {
+            flow: "session_ready" as const,
+            redirectTo: getRoleRoot(role),
+            title: "اكتمل التحقق",
+            message: response.message,
+          };
+          persistSignupSuccessNavState(successState);
+
+          navigate("/signup-success", {
             replace: true,
-            state: {
-              flow: 'session_ready',
-              redirectTo: getRoleRoot(role),
-              title: 'اكتمل التحقق',
-              message: response.message,
-            } satisfies SignupSuccessLocationState,
+            state: successState satisfies SignupSuccessLocationState,
           });
           return;
         }
 
         const pendingState: SignupSuccessLocationState = {
-          flow: 'pending_doctor',
-          title: 'تم تأكيد رمز التسجيل',
+          flow: "pending_doctor",
+          title: "تم تأكيد رمز التسجيل",
           message: response.message,
         };
 
-        navigate('/signup-success', { replace: true, state: pendingState });
+        toast(
+          "تم تأكيد الرمز. حساب الطبيب في انتظار موافقة الإدارة قبل الدخول الكامل.",
+          {
+            title: "في انتظار الموافقة",
+            variant: "info",
+            durationMs: 4500,
+          },
+        );
+
+        persistSignupSuccessNavState(pendingState);
+
+        navigate("/signup-success", { replace: true, state: pendingState });
       }}
     />
   );

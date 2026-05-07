@@ -10,6 +10,7 @@ import {
   VERIFY_CODE_SCHEMA_HINT_AR,
   formatVerifyFlowError,
 } from "@/lib/auth/signupMessaging";
+import { useToast } from "@/components/ui/ToastProvider";
 
 const verifyAccountSchema = z.object({
   code: z.string().regex(new RegExp("^\\d{6}$"), VERIFY_CODE_SCHEMA_HINT_AR),
@@ -46,6 +47,8 @@ export default function VerifyAccount({
   const [isVerifying, setIsVerifying] = useState(false);
   const [flowError, setFlowError] = useState<string | null>(null);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -98,7 +101,13 @@ export default function VerifyAccount({
     try {
       await onVerify(values.code);
     } catch (error) {
-      setFlowError(formatVerifyFlowError(error));
+      const formatted = formatVerifyFlowError(error);
+      setFlowError(formatted);
+      toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
+        title: "تعذّر التحقق",
+        variant: "error",
+        durationMs: 4800,
+      });
     } finally {
       setIsVerifying(false);
     }
@@ -202,8 +211,19 @@ export default function VerifyAccount({
                           await onResend();
                           setFlowError(null);
                           setSecondsLeft(60);
+                          toast("تم إرسال رمز تحقّق جديد.", {
+                            title: "أُعيد الإرسال",
+                            variant: "success",
+                            durationMs: 3200,
+                          });
                         } catch (error) {
-                          setFlowError(formatVerifyFlowError(error));
+                          const formatted = formatVerifyFlowError(error);
+                          setFlowError(formatted);
+                          toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
+                            title: "تعذّر إعادة الإرسال",
+                            variant: "error",
+                            durationMs: 4800,
+                          });
                         } finally {
                           setIsResending(false);
                         }

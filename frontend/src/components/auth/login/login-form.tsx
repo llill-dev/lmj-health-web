@@ -1,12 +1,13 @@
 'use client';
 
-import { Eye, EyeOff, LockKeyhole, Mail, Phone } from 'lucide-react';
+import { Eye, EyeOff, Mail, Phone } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { AuthFlowError, useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
 import { SIGNUP_EMAIL_INVALID_MESSAGE_AR } from '@/components/auth/signUp/signup-schemas';
@@ -58,6 +59,7 @@ export default function LoginForm({
   onOtpLogin: () => void;
 }) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [method, setMethod] = useState<LoginMethod>('email');
@@ -132,6 +134,11 @@ export default function LoginForm({
         token: 'demo-token',
         isAuthenticated: true,
       });
+      toast('تم تسجيل الدخول التجريبي (وضع العرض فقط).', {
+        title: 'وضع العرض',
+        variant: 'info',
+        durationMs: 3400,
+      });
       navigate('/doctor');
       return;
     }
@@ -149,11 +156,25 @@ export default function LoginForm({
 
       const userRole = useAuthStore.getState().user?.role ?? '';
 
-      if (userRole === 'admin') {
-        toast('تم تسجيل الدخول بنجاح. مرحباً بك في لوحة إدارة LMJ Health.', {
+      const LOGIN_SUCCESS_AR: Record<string, string> = {
+        admin: 'تم تسجيل الدخول بنجاح. مرحباً بك في لوحة إدارة LMJ Health.',
+        doctor: 'تم تسجيل الدخول بنجاح. مرحباً بك في LMJ Health.',
+        secretary: 'تم تسجيل الدخول بنجاح. مرحباً بك.',
+        patient: 'تم تسجيل الدخول بنجاح. مرحباً بك.',
+        'data-entry': 'تم تسجيل الدخول بنجاح. مرحباً بك.',
+      };
+      toast(
+        LOGIN_SUCCESS_AR[userRole] ?? 'تم تسجيل الدخول بنجاح. مرحباً بك.',
+        {
           title: 'مرحباً',
           variant: 'success',
           durationMs: 3800,
+        },
+      );
+
+      if (userRole === 'admin') {
+        void queryClient.invalidateQueries({
+          queryKey: ['admin', 'notifications'],
         });
       }
 
@@ -176,11 +197,16 @@ export default function LoginForm({
     } catch (error: unknown) {
       const code =
         error instanceof AuthFlowError ? error.code : 'UNKNOWN';
-      setLoginError(
+      const message =
         AUTH_ERROR_MESSAGES_AR[code] ??
-          (error instanceof Error ? error.message : undefined) ??
-          AUTH_ERROR_MESSAGES_AR['UNKNOWN'],
-      );
+        (error instanceof Error ? error.message : undefined) ??
+        AUTH_ERROR_MESSAGES_AR['UNKNOWN'];
+      setLoginError(message);
+      toast(message, {
+        title: 'تعذّر تسجيل الدخول',
+        variant: 'error',
+        durationMs: 5600,
+      });
 
       if (!(error instanceof AuthFlowError)) {
         console.error('Unexpected login failure:', error);

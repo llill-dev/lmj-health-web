@@ -149,8 +149,12 @@ export default function ConfirmActionDialog({
                     type='button'
                     disabled={confirmDisabled}
                     onClick={async () => {
-                      await onConfirm();
-                      onOpenChange(false);
+                      try {
+                        await onConfirm();
+                        onOpenChange(false);
+                      } catch {
+                        /* خطأ الطلب؛ نُبقي الحوار مفتوحاً */
+                      }
                     }}
                     className='h-[40px] rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] px-8 font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.22)] disabled:opacity-60'
                   >
