@@ -119,30 +119,6 @@ export default function LoginForm({
   const onSubmit = handleSubmit(async (values) => {
     setLoginError(null);
 
-    const uiOnly = import.meta.env.VITE_UI_ONLY === 'true';
-
-    if (uiOnly) {
-      useAuthStore.setState({
-        user: {
-          id: 'demo-doctor',
-          verified: true,
-          email:
-            values.method === 'email' ? values.identifier : 'doctor@demo.local',
-          phone: values.method === 'phone' ? values.identifier : '+0000000000',
-          role: 'doctor',
-        },
-        token: 'demo-token',
-        isAuthenticated: true,
-      });
-      toast('تم تسجيل الدخول التجريبي (وضع العرض فقط).', {
-        title: 'وضع العرض',
-        variant: 'info',
-        durationMs: 3400,
-      });
-      navigate('/doctor');
-      return;
-    }
-
     try {
       await useAuthStore
         .getState()
@@ -215,7 +191,7 @@ export default function LoginForm({
   });
 
   return (
-    <section className='mx-auto flex min-h-svh w-full flex-col items-center px-4 pb-16 pt-2'>
+    <section className='flex flex-col items-center px-4 pt-2 pb-16 mx-auto w-full min-h-svh'>
       <div className='my-[35px] shrink-0'>
         <img
           src='/images/syr-health-logo.png'
