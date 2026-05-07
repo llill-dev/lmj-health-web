@@ -81,6 +81,21 @@ function dedupeMessages(messages: string[]): string[] {
   return out;
 }
 
+/** هل ظهر هذا النص (أو بصيغة مع أقواس) ضمن رسالة موجودة بالفعل؟ يمنع ازدواج «نص أساسي + (نفس النص)». */
+function serverDetailAlreadyContainedIn(messages: string[], detail: string): boolean {
+  const d = detail.trim();
+  if (!d) return true;
+  for (const raw of messages) {
+    const t = raw.trim();
+    if (!t) continue;
+    if (t === d) return true;
+    if (t.includes(d)) return true;
+    if (t.includes(`(${d})`) || t.includes(`(${d}.)`) || t.includes(`(${d}).`))
+      return true;
+  }
+  return false;
+}
+
 function formatValidationDetails(body: Record<string, unknown>): string | null {
   const issues = collectValidationIssues(body);
   if (!issues.length) return null;
@@ -362,7 +377,7 @@ export function extractSignupMedicalLicenseConflictMessage(
     const primaryTrim = error.message.trim();
     if (
       primaryTrim &&
-      /\bمسجل|موجود|مزدوج|تعارض|already|taken|duplicate|exist|registered|conflict\b/i.test(
+      /\bمسجل|موجود|مزدوج|تعارض|مستخدم|مُستخدم|already|taken|duplicate|exist|registered|conflict\b/i.test(
         primaryTrim,
       )
     ) {
@@ -377,6 +392,7 @@ export function extractSignupMedicalLicenseConflictMessage(
   const primary = error.message.trim();
   if (
     primary &&
+    !serverDetailAlreadyContainedIn(msgs, primary) &&
     /مزاولة|ترخيص|مزاول|وزارة.{0,8}صحة|طبيب.*مسجل|\bmedical\s+license\b|\blicense\s+number\b/i.test(
       primary,
     )
