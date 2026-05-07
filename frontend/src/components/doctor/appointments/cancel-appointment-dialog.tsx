@@ -7,11 +7,11 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-const cancelAppointmentSchema = z.object({
+const notesSchema = z.object({
   medicalNotes: z.string().min(1, 'هذا الحقل مطلوب'),
 });
 
-type CancelAppointmentFormValues = z.infer<typeof cancelAppointmentSchema>;
+type NotesFormValues = z.infer<typeof notesSchema>;
 
 export default function CancelAppointmentDialog({
   open,
@@ -19,20 +19,28 @@ export default function CancelAppointmentDialog({
   patientName,
   onConfirm,
   confirmDisabled,
+  title = 'إنهاء الموعد',
+  fieldLabel = 'الملاحظات الطبية',
+  placeholder = 'اكتب التشخيص والملاحظات الطبية هنا...',
+  confirmLabel = 'حفظ وإنهاء',
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patientName: string;
   onConfirm: (medicalNotes: string) => void | Promise<void>;
   confirmDisabled?: boolean;
+  title?: string;
+  fieldLabel?: string;
+  placeholder?: string;
+  confirmLabel?: string;
 }) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { isSubmitting },
-  } = useForm<CancelAppointmentFormValues>({
-    resolver: zodResolver(cancelAppointmentSchema),
+  } = useForm<NotesFormValues>({
+    resolver: zodResolver(notesSchema),
     defaultValues: {
       medicalNotes: '',
     },
@@ -66,10 +74,7 @@ export default function CancelAppointmentDialog({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay
-          forceMount
-          asChild
-        >
+        <Dialog.Overlay forceMount asChild>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
@@ -92,10 +97,7 @@ export default function CancelAppointmentDialog({
           />
         </Dialog.Overlay>
 
-        <Dialog.Content
-          forceMount
-          asChild
-        >
+        <Dialog.Content forceMount asChild>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
@@ -148,7 +150,7 @@ export default function CancelAppointmentDialog({
                 </Dialog.Close>
 
                 <Dialog.Title className='text-right font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]'>
-                  إنهاء الموعد
+                  {title}
                 </Dialog.Title>
 
                 <div className='mt-10 text-right'>
@@ -162,12 +164,12 @@ export default function CancelAppointmentDialog({
 
                 <div className='mt-7'>
                   <div className='mb-2 text-right font-cairo text-[14px] font-extrabold text-[#101828]'>
-                    الملاحظات الطبية:
+                    {fieldLabel}:
                     <span className='ms-1 text-[#F04438]'>*</span>
                   </div>
                   <textarea
                     {...register('medicalNotes')}
-                    placeholder='اكتب التشخيص والملاحظات الطبية هنا...'
+                    placeholder={placeholder}
                     className='min-h-[120px] w-full resize-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
                     required
                   />
@@ -193,7 +195,7 @@ export default function CancelAppointmentDialog({
                     })}
                     className='flex h-[46px] w-full items-center justify-center gap-3 rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)] disabled:opacity-60'
                   >
-                    <span>حفظ وإنهاء</span>
+                    <span>{confirmLabel}</span>
                     <Check className='h-5 w-5' />
                   </button>
                 </div>
