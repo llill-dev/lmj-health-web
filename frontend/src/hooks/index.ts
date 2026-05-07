@@ -8,6 +8,15 @@ export {
   useCompleteAppointment,
 } from './useAppointments';
 export {
+  useDoctorAppointmentsApi,
+  useDoctorAppointmentDetailsApi,
+  useBookDoctorAppointmentApi,
+  useCancelDoctorAppointmentApi,
+  useRescheduleDoctorAppointmentApi,
+  useCompleteDoctorAppointmentApi,
+  useNoShowDoctorAppointmentApi,
+} from './useDoctorAppointmentsApi';
+export {
   usePatients,
   usePatient,
   useCreatePatient,
