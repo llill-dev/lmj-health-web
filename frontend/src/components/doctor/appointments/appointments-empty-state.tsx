@@ -2,12 +2,19 @@
 
 type Props = {
   onBookClick: () => void;
+  /** اختياري — قائمة انتظار أو أي سياق عرض مختلف */
+  title?: string;
+  subtitle?: string;
 };
 
 /**
  * حالة فارغة لصفحة المواعيد — ترتيب: صورة ثم عنوان ثم جملة دعوة ثم زر الحجز (وسط، RTL).
  */
-export default function AppointmentsEmptyState({ onBookClick }: Props) {
+export default function AppointmentsEmptyState({
+  onBookClick,
+  title,
+  subtitle,
+}: Props) {
   return (
     <div className='flex flex-col items-center px-6 py-14 text-center'>
       <div className='mb-8 flex w-full max-w-[280px] justify-center sm:max-w-[320px]'>
@@ -23,11 +30,11 @@ export default function AppointmentsEmptyState({ onBookClick }: Props) {
       </div>
 
       <h3 className='font-cairo text-[17px] font-bold leading-[28px] text-[#101828] sm:text-[18px]'>
-        لا يوجد مواعيد محجوزة بعد .
+        {title ?? 'لا يوجد مواعيد محجوزة بعد .'}
       </h3>
 
       <p className='mt-3 font-cairo text-[14px] font-semibold leading-[22px] text-[#667085]'>
-        قم بحجز موعد الآن
+        {subtitle ?? 'قم بحجز موعد الآن'}
       </p>
 
       <button

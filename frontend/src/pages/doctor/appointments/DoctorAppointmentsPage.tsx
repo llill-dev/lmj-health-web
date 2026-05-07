@@ -14,7 +14,7 @@ import {
   useCancelAppointment,
   useCompleteAppointment,
 } from '@/hooks';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useToast } from '@/components/ui/ToastProvider';
 import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
@@ -23,6 +23,68 @@ import DoctorAppointmentExpandableCard from '@/components/doctor/appointments/do
 import AppointmentsEmptyState from '@/components/doctor/appointments/appointments-empty-state';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
 import CancelAppointmentDialog from '@/components/doctor/appointments/cancel-appointment-dialog';
+import type { Appointment } from '@/lib/api/api';
+
+type MainView = 'schedule' | 'waiting';
+type PeriodFilter = 'all' | 'today' | 'week' | 'month';
+
+function formatIsoLocal(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** بداية الأسبوع بمعيار الاثنين (شائع في التنسيق الطبي المحلي). */
+function isoWeekMonday(d: Date): Date {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const mon = new Date(d);
+  mon.setDate(d.getDate() + diff);
+  mon.setHours(12, 0, 0, 0);
+  return mon;
+}
+
+function filterAppointmentsByPeriod(
+  list: Appointment[],
+  period: PeriodFilter,
+  anchor: Date,
+): Appointment[] {
+  if (period === 'all') return list;
+  const isoToday = formatIsoLocal(anchor);
+  if (period === 'today') {
+    return list.filter((a) => a.date === isoToday);
+  }
+  if (period === 'week') {
+    const start = isoWeekMonday(anchor);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const s = formatIsoLocal(start);
+    const e = formatIsoLocal(end);
+    return list.filter((a) => a.date >= s && a.date <= e);
+  }
+  const y = anchor.getFullYear();
+  const m = anchor.getMonth();
+  const first = new Date(y, m, 1);
+  const last = new Date(y, m + 1, 0);
+  const s = formatIsoLocal(first);
+  const e = formatIsoLocal(last);
+  return list.filter((a) => a.date >= s && a.date <= e);
+}
+
+function sortByDateTimeAsc(a: Appointment, b: Appointment): number {
+  const d = a.date.localeCompare(b.date);
+  if (d !== 0) return d;
+  return a.time.localeCompare(b.time);
+}
+
+function countAppointmentsForPeriod(
+  list: Appointment[],
+  period: PeriodFilter,
+  anchor: Date,
+): number {
+  return filterAppointmentsByPeriod(list, period, anchor).length;
+}
 
 export default function DoctorAppointmentsPage() {
   const { toast } = useToast();
@@ -47,6 +109,8 @@ export default function DoctorAppointmentsPage() {
   const [statusTab, setStatusTab] = useState<
     'scheduled' | 'completed' | 'cancelled' | 'absent'
   >('scheduled');
+  const [mainView, setMainView] = useState<MainView>('schedule');
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
 
   const {
     stats,
@@ -54,16 +118,16 @@ export default function DoctorAppointmentsPage() {
     error: statsError,
   } = useDashboardStats();
   const {
-    appointments,
+    appointments: rawAppointments,
     isLoading: appointmentsLoading,
     error: appointmentsError,
     refetch,
-  } = useAppointments(1, 50, selectedDate, undefined, searchTerm);
+  } = useAppointments(1, 100, undefined, undefined, searchTerm);
   const { cancelAppointment, isLoading: cancelling } = useCancelAppointment();
   const { completeAppointment, isLoading: completing } =
     useCompleteAppointment();
 
-  const todayAppointments = appointments.filter(
+  const todayAppointments = rawAppointments.filter(
     (apt) => apt.date === selectedDate,
   );
 
@@ -78,10 +142,45 @@ export default function DoctorAppointmentsPage() {
   ).length;
   const absentCount = 0;
 
-  const visibleTodayAppointments = todayAppointments.filter((apt) => {
-    if (statusTab === 'absent') return false;
-    return apt.status === statusTab;
-  });
+  const periodScoped = useMemo(() => {
+    const anchor = new Date();
+    return filterAppointmentsByPeriod(rawAppointments, periodFilter, anchor);
+  }, [rawAppointments, periodFilter]);
+
+  const periodCounts = useMemo(() => {
+    const anchor = new Date();
+    return {
+      all: countAppointmentsForPeriod(rawAppointments, 'all', anchor),
+      today: countAppointmentsForPeriod(rawAppointments, 'today', anchor),
+      week: countAppointmentsForPeriod(rawAppointments, 'week', anchor),
+      month: countAppointmentsForPeriod(rawAppointments, 'month', anchor),
+    };
+  }, [rawAppointments]);
+
+  const waitingListAppointments = useMemo(
+    () =>
+      [...periodScoped]
+        .filter((a) => a.status === 'scheduled')
+        .sort(sortByDateTimeAsc),
+    [periodScoped],
+  );
+
+  const scheduleViewAppointments = useMemo(() => {
+    return periodScoped.filter((apt) => {
+      if (statusTab === 'absent') return false;
+      return apt.status === statusTab;
+    });
+  }, [periodScoped, statusTab]);
+
+  const visibleAppointments =
+    mainView === 'waiting' ? waitingListAppointments : scheduleViewAppointments;
+
+  const periodPills: { key: PeriodFilter; label: string }[] = [
+    { key: 'all', label: 'الكل' },
+    { key: 'today', label: 'اليوم' },
+    { key: 'week', label: 'الأسبوع' },
+    { key: 'month', label: 'الشهر' },
+  ];
 
   const handleCancelAppointment = async (id: string) => {
     await cancelAppointment(id);
@@ -219,7 +318,7 @@ export default function DoctorAppointmentsPage() {
           }}
         />
 
-        <section className='mb-6 flex items-center justify-between rounded-[6px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
+        <section className='mb-5 flex items-center justify-between rounded-[6px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='flex flex-1 gap-4 items-center'>
             <div className='relative flex-1'>
               <Search className='absolute right-3 top-1/2 w-5 h-5 text-gray-400 -translate-y-1/2' />
@@ -234,127 +333,199 @@ export default function DoctorAppointmentsPage() {
           </div>
         </section>
 
+        {/* مُبدّل رئيسي: الجدول المجدول | قائمة الانتظار — مطابقاً لتصميم لوحة الطبيب */}
+        <section className='mb-4'>
+          <div className='flex gap-3 sm:gap-4'>
+            <button
+              type='button'
+              onClick={() => setMainView('schedule')}
+              className={
+                mainView === 'schedule'
+                  ? 'min-h-[56px] flex-1 rounded-[8px] bg-primary px-4 py-3 font-cairo text-[15px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.35)] transition-all sm:min-h-[60px] sm:text-[16px]'
+                  : 'min-h-[56px] flex-1 rounded-[8px] border-2 border-primary/35 bg-white px-4 py-3 font-cairo text-[15px] font-extrabold text-primary shadow-[inset_0_1px_0_rgba(255,255,255,1)] transition-all hover:border-primary/55 hover:bg-[#F0FDFC] sm:min-h-[60px] sm:text-[16px]'
+              }
+            >
+              المواعيد المجدولة
+            </button>
+            <button
+              type='button'
+              onClick={() => setMainView('waiting')}
+              className={
+                mainView === 'waiting'
+                  ? 'min-h-[56px] flex-1 rounded-[8px] bg-primary px-4 py-3 font-cairo text-[15px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.35)] transition-all sm:min-h-[60px] sm:text-[16px]'
+                  : 'min-h-[56px] flex-1 rounded-[8px] border-2 border-primary/35 bg-white px-4 py-3 font-cairo text-[15px] font-extrabold text-primary shadow-[inset_0_1px_0_rgba(255,255,255,1)] transition-all hover:border-primary/55 hover:bg-[#F0FDFC] sm:min-h-[60px] sm:text-[16px]'
+              }
+            >
+              قائمة الانتظار
+            </button>
+          </div>
+        </section>
+
+        <section className='mb-4 flex flex-wrap gap-2'>
+          {periodPills.map(({ key, label }) => {
+            const count = periodCounts[key];
+            const active = periodFilter === key;
+            return (
+              <button
+                key={key}
+                type='button'
+                onClick={() => setPeriodFilter(key)}
+                className={
+                  active
+                    ? 'inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white shadow-[0_8px_18px_rgba(15,143,139,0.25)]'
+                    : 'inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054] transition-colors hover:border-primary/40 hover:text-primary'
+                }
+              >
+                <span>{label}</span>
+                <span
+                  className={
+                    active
+                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[11px] font-extrabold text-white'
+                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[11px] font-extrabold text-[#344054]'
+                  }
+                >
+                  {appointmentsLoading ? (
+                    <Loader2 className='h-3 w-3 animate-spin' />
+                  ) : (
+                    count
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </section>
+
         <section className='mb-6'>
           <div className='rounded-[6px] border border-[#E5E7EB] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-            <div className='flex gap-2 items-center px-6 py-4'>
-              <button
-                type='button'
-                onClick={() => setStatusTab('scheduled')}
-                className={
-                  statusTab === 'scheduled'
-                    ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
-                }
-              >
-                <span className='whitespace-nowrap'>المجدولة</span>
-                <span
+            {mainView === 'schedule' ? (
+              <div className='flex flex-wrap gap-2 items-center px-6 py-4 border-b border-[#F2F4F7]'>
+                <button
+                  type='button'
+                  onClick={() => setStatusTab('scheduled')}
                   className={
                     statusTab === 'scheduled'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                      ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                      : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
                   }
                 >
-                  {appointmentsLoading ? (
-                    <Loader2 className='w-3 h-3 animate-spin' />
-                  ) : (
-                    scheduledCount
-                  )}
-                </span>
-              </button>
+                  <span className='whitespace-nowrap'>المجدولة</span>
+                  <span
+                    className={
+                      statusTab === 'scheduled'
+                        ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                        : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                    }
+                  >
+                    {appointmentsLoading ? (
+                      <Loader2 className='w-3 h-3 animate-spin' />
+                    ) : (
+                      periodScoped.filter((a) => a.status === 'scheduled').length
+                    )}
+                  </span>
+                </button>
 
-              <button
-                type='button'
-                onClick={() => setStatusTab('completed')}
-                className={
-                  statusTab === 'completed'
-                    ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
-                }
-              >
-                <span className='whitespace-nowrap'>المكتملة</span>
-                <span
+                <button
+                  type='button'
+                  onClick={() => setStatusTab('completed')}
                   className={
                     statusTab === 'completed'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                      ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                      : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
                   }
                 >
-                  {appointmentsLoading ? (
-                    <Loader2 className='w-3 h-3 animate-spin' />
-                  ) : (
-                    completedCount
-                  )}
-                </span>
-              </button>
+                  <span className='whitespace-nowrap'>المكتملة</span>
+                  <span
+                    className={
+                      statusTab === 'completed'
+                        ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                        : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                    }
+                  >
+                    {appointmentsLoading ? (
+                      <Loader2 className='w-3 h-3 animate-spin' />
+                    ) : (
+                      periodScoped.filter((a) => a.status === 'completed').length
+                    )}
+                  </span>
+                </button>
 
-              <button
-                type='button'
-                onClick={() => setStatusTab('cancelled')}
-                className={
-                  statusTab === 'cancelled'
-                    ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
-                }
-              >
-                <span className='whitespace-nowrap'>الملغية</span>
-                <span
+                <button
+                  type='button'
+                  onClick={() => setStatusTab('cancelled')}
                   className={
                     statusTab === 'cancelled'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                      ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                      : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
                   }
                 >
-                  {appointmentsLoading ? (
-                    <Loader2 className='w-3 h-3 animate-spin' />
-                  ) : (
-                    cancelledCount
-                  )}
-                </span>
-              </button>
+                  <span className='whitespace-nowrap'>الملغية</span>
+                  <span
+                    className={
+                      statusTab === 'cancelled'
+                        ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                        : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                    }
+                  >
+                    {appointmentsLoading ? (
+                      <Loader2 className='w-3 h-3 animate-spin' />
+                    ) : (
+                      periodScoped.filter((a) => a.status === 'cancelled').length
+                    )}
+                  </span>
+                </button>
 
-              <button
-                type='button'
-                onClick={() => setStatusTab('absent')}
-                className={
-                  statusTab === 'absent'
-                    ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
-                    : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
-                }
-              >
-                <span className='whitespace-nowrap'>الغياب</span>
-                <span
+                <button
+                  type='button'
+                  onClick={() => setStatusTab('absent')}
                   className={
                     statusTab === 'absent'
-                      ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
-                      : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                      ? 'flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white'
+                      : 'flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#344054]'
                   }
                 >
-                  {appointmentsLoading ? (
-                    <Loader2 className='w-3 h-3 animate-spin' />
-                  ) : (
-                    absentCount
-                  )}
-                </span>
-              </button>
-            </div>
+                  <span className='whitespace-nowrap'>الغياب</span>
+                  <span
+                    className={
+                      statusTab === 'absent'
+                        ? 'flex h-6 min-w-6 items-center justify-center rounded-full bg-white/20 px-2 font-cairo text-[12px] font-extrabold text-white'
+                        : 'flex h-6 min-w-6 items-center justify-center rounded-full bg-[#F2F4F7] px-2 font-cairo text-[12px] font-extrabold text-[#344054]'
+                    }
+                  >
+                    {appointmentsLoading ? (
+                      <Loader2 className='w-3 h-3 animate-spin' />
+                    ) : (
+                      absentCount
+                    )}
+                  </span>
+                </button>
+              </div>
+            ) : (
+              <div className='px-6 py-3 border-b border-[#F2F4F7]'>
+                <p className='font-cairo text-[13px] font-semibold text-[#667085]'>
+                  مواعيد بانتظار الدور (مجدولة فقط) — مرتبة حسب التاريخ والوقت ضمن النطاق المحدد.
+                </p>
+              </div>
+            )}
 
             <div className='px-6 py-4'>
               {appointmentsLoading ? (
                 <div className='flex justify-center items-center py-8'>
                   <Loader2 className='w-8 h-8 animate-spin text-primary' />
                 </div>
-              ) : todayAppointments.length === 0 ? (
+              ) : periodScoped.length === 0 ? (
                 <AppointmentsEmptyState onBookClick={() => setBookOpen(true)} />
-              ) : visibleTodayAppointments.length === 0 ? (
+              ) : visibleAppointments.length === 0 ? (
                 <div className='py-12 text-center'>
                   <Calendar className='mx-auto h-12 w-12 text-gray-300' />
                   <p className='mt-3 font-cairo text-[14px] font-semibold text-[#667085]'>
-                    لا توجد مواعيد ضمن هذا التبويب للتاريخ المحدد
+                    {mainView === 'waiting'
+                      ? 'لا توجد مواعيد مجدولة في قائمة الانتظار ضمن هذا النطاق'
+                      : 'لا توجد مواعيد ضمن هذا التبويب والنطاق الزمني'}
                   </p>
                 </div>
               ) : (
                 <div className='space-y-3'>
-                  {visibleTodayAppointments.map((appointment) => (
+                  {visibleAppointments.map((appointment) => (
                     <DoctorAppointmentExpandableCard
                       key={appointment.id}
                       appointment={appointment}
