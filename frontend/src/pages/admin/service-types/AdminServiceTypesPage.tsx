@@ -5,8 +5,8 @@ import {
   useServiceTypesList,
   useMutateServiceType,
 } from '@/hooks/useAdminServices';
-import type { ServiceType } from '@/lib/admin/services/types';
-import { resolveLabel } from '@/lib/admin/services/types';
+import type { ServiceType } from '@/lib/admin/types';
+import { resolveLabel } from '@/lib/admin/types';
 import {
   UpsertServiceTypeDialog,
   ServiceTypeStatusConfirmDialog,

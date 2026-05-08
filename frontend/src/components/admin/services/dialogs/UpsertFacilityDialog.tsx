@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateFacility, useUpdateFacility } from '@/hooks/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
-import type { FacilitySummary, FacilityType, FacilityStatus } from '@/lib/admin/services/types';
+import type { FacilitySummary, FacilityType, FacilityStatus } from '@/lib/admin/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants

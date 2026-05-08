@@ -57,7 +57,7 @@ export default function DoctorDashboardOverview({
     variant === 'appointments'
       ? 'grid-cols-4'
       : variant === 'patients'
-        ? 'grid-cols-2'
+        ? 'grid-cols-3'
         : 'grid-cols-3';
 
   const mintStack =

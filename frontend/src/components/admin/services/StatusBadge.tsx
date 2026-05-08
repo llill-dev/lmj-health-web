@@ -1,4 +1,4 @@
-import type { FacilityStatus } from '@/lib/admin/services/types';
+import type { FacilityStatus } from '@/lib/admin/types';
 
 const MAP: Record<FacilityStatus, { label: string; cls: string }> = {
   ACTIVE: { label: 'نشط', cls: 'bg-emerald-50 text-emerald-700' },

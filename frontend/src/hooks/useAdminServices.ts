@@ -5,7 +5,7 @@ import {
   keepPreviousData,
 } from '@tanstack/react-query';
 import { get, post, put, patch, del } from '@/lib/base';
-import { servicesEndpoints } from '@/lib/admin/services/endpoints';
+import { adminEndpoints } from '@/lib/admin/endpoints';
 import type {
   FacilitiesListParams,
   FacilitiesListResponse,
@@ -19,7 +19,7 @@ import type {
   ServiceProvidersListResponse,
   CreateProviderBody,
   UpdateProviderBody,
-} from '@/lib/admin/services/types';
+} from '@/lib/admin/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Query keys
@@ -57,7 +57,7 @@ export function useFacilitiesList(params: FacilitiesListParams = {}) {
     queryKey: SERVICES_KEYS.facilities(params),
     queryFn: () =>
       get<FacilitiesListResponse>(
-        `${servicesEndpoints.facilities.list}${qs ? `?${qs}` : ''}`,
+        `${adminEndpoints.facilities.list}${qs ? `?${qs}` : ''}`,
         { locale: 'ar' },
       ),
     placeholderData: keepPreviousData,
@@ -68,7 +68,7 @@ export function useFacilityById(id: string, enabled = true) {
   return useQuery({
     queryKey: SERVICES_KEYS.facilityById(id),
     queryFn: () =>
-      get<FacilityResponse>(servicesEndpoints.facilities.getById(id), {
+      get<FacilityResponse>(adminEndpoints.facilities.getById(id), {
         locale: 'ar',
       }),
     enabled: !!id && enabled,
@@ -79,7 +79,7 @@ export function useCreateFacility() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateFacilityBody) =>
-      post<FacilityResponse>(servicesEndpoints.facilities.create, body, {
+      post<FacilityResponse>(adminEndpoints.facilities.create, body, {
         locale: 'ar',
       }),
     onSuccess: () => {
@@ -92,7 +92,7 @@ export function useUpdateFacility(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: UpdateFacilityBody) =>
-      put<FacilityResponse>(servicesEndpoints.facilities.update(id), body, {
+      put<FacilityResponse>(adminEndpoints.facilities.update(id), body, {
         locale: 'ar',
       }),
     onSuccess: () => {
@@ -107,7 +107,7 @@ export function useUpdateFacilityStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       patch<FacilityResponse>(
-        servicesEndpoints.facilities.updateStatus(id),
+        adminEndpoints.facilities.updateStatus(id),
         { status },
         { locale: 'ar' },
       ),
@@ -121,7 +121,7 @@ export function useDeleteFacility() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
-      del<FacilityResponse>(servicesEndpoints.facilities.delete(id), {
+      del<FacilityResponse>(adminEndpoints.facilities.delete(id), {
         locale: 'ar',
       }),
     onSuccess: () => {
@@ -140,7 +140,7 @@ export function useServiceTypesList(active?: boolean) {
     queryKey: [...SERVICES_KEYS.serviceTypes(), active],
     queryFn: () =>
       get<ServiceTypesListResponse>(
-        `${servicesEndpoints.serviceTypes.list}${qs}`,
+        `${adminEndpoints.serviceTypes.list}${qs}`,
         { locale: 'ar' },
       ),
     staleTime: 5 * 60 * 1000,
@@ -151,7 +151,7 @@ export function useCreateServiceType() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateServiceTypeBody) =>
-      post<ServiceTypeResponse>(servicesEndpoints.serviceTypes.create, body, {
+      post<ServiceTypeResponse>(adminEndpoints.serviceTypes.create, body, {
         locale: 'ar',
       }),
     onSuccess: () => {
@@ -165,7 +165,7 @@ export function useUpdateServiceType(id: string) {
   return useMutation({
     mutationFn: (body: UpdateServiceTypeBody) =>
       put<ServiceTypeResponse>(
-        servicesEndpoints.serviceTypes.update(id),
+        adminEndpoints.serviceTypes.update(id),
         body,
         { locale: 'ar' },
       ),
@@ -187,7 +187,7 @@ export function useMutateServiceType() {
       body: UpdateServiceTypeBody;
     }) =>
       put<ServiceTypeResponse>(
-        servicesEndpoints.serviceTypes.update(id),
+        adminEndpoints.serviceTypes.update(id),
         body,
         { locale: 'ar' },
       ),
@@ -210,7 +210,7 @@ export function useServiceProvidersList(typeSlug?: string, cursor?: string) {
     queryKey: SERVICES_KEYS.serviceProviders(typeSlug, cursor),
     queryFn: () =>
       get<ServiceProvidersListResponse>(
-        `${servicesEndpoints.serviceProviders.list}?${qs.toString()}`,
+        `${adminEndpoints.serviceProviders.list}?${qs.toString()}`,
         { locale: 'ar' },
       ),
     enabled: !!typeSlug,
@@ -221,7 +221,7 @@ export function useCreateProvider() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateProviderBody) =>
-      post(servicesEndpoints.serviceProviders.create, body, { locale: 'ar' }),
+      post(adminEndpoints.serviceProviders.create, body, { locale: 'ar' }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'service-providers'] });
     },
@@ -232,7 +232,7 @@ export function useUpdateProvider(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: UpdateProviderBody) =>
-      put(servicesEndpoints.serviceProviders.update(id), body, {
+      put(adminEndpoints.serviceProviders.update(id), body, {
         locale: 'ar',
       }),
     onSuccess: () => {
@@ -246,7 +246,7 @@ export function useUpdateProviderStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       patch(
-        servicesEndpoints.serviceProviders.updateStatus(id),
+        adminEndpoints.serviceProviders.updateStatus(id),
         { status },
         { locale: 'ar' },
       ),

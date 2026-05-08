@@ -35,10 +35,6 @@ type StatusTab = 'scheduled' | 'completed' | 'cancelled' | 'no-show';
 
 const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
 
-function todayIso(): string {
-  return new Date().toISOString().split('T')[0];
-}
-
 function filterLocalSearch<
   T extends {
     patientName?: string;
@@ -60,7 +56,7 @@ function filterLocalSearch<
 export default function DoctorAppointmentsPage() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState(todayIso());
+  const [dateFilter, setDateFilter] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [bookOpen, setBookOpen] = useState(false);
@@ -102,29 +98,26 @@ export default function DoctorAppointmentsPage() {
   });
   const detailsQuery = useDoctorAppointmentDetailsApi(expandedAppointmentId ?? '');
 
-  const scheduledToday = useDoctorAppointmentsApi({
+  // KPI counts should come from backend totals per status (not just "today").
+  const scheduledTotal = useDoctorAppointmentsApi({
     page: 1,
     limit: 1,
     status: 'scheduled',
-    date: todayIso(),
   });
-  const completedToday = useDoctorAppointmentsApi({
+  const completedTotal = useDoctorAppointmentsApi({
     page: 1,
     limit: 1,
     status: 'completed',
-    date: todayIso(),
   });
-  const cancelledToday = useDoctorAppointmentsApi({
+  const cancelledTotal = useDoctorAppointmentsApi({
     page: 1,
     limit: 1,
     status: 'cancelled',
-    date: todayIso(),
   });
-  const noShowToday = useDoctorAppointmentsApi({
+  const noShowTotal = useDoctorAppointmentsApi({
     page: 1,
     limit: 1,
     status: 'no-show',
-    date: todayIso(),
   });
 
   const cancelMutation = useCancelDoctorAppointmentApi();
@@ -198,34 +191,39 @@ export default function DoctorAppointmentsPage() {
         <DoctorDashboardOverview
           variant='appointments'
           surface='mint'
-          title='إدارة المواعيد'
-          subtitle='قائمة المواعيد مربوطة بعقدة الـ API الفعلية للعرض والتحديث'
+          title='إجمالي المواعيد'
+          subtitle={
+            <span>
+              <span className='font-extrabold text-primary'>{listQuery.total}</span>
+              <span className='text-primary/90'> — إجمالي المواعيد حسب الحالة</span>
+            </span>
+          }
           onActionClick={handleBookingAction}
           actionLabel='حجز موعد جديد'
           kpis={[
             {
               key: 'scheduled',
               icon: <Clock className='h-5 w-5 shrink-0' />,
-              value: scheduledToday.isLoading ? '—' : scheduledToday.total,
-              label: 'مجدولة اليوم',
+              value: scheduledTotal.isLoading ? '—' : scheduledTotal.total,
+              label: 'مجدولة',
             },
             {
               key: 'completed',
               icon: <CheckCircle className='h-5 w-5 shrink-0' />,
-              value: completedToday.isLoading ? '—' : completedToday.total,
-              label: 'مكتملة اليوم',
+              value: completedTotal.isLoading ? '—' : completedTotal.total,
+              label: 'مكتملة',
             },
             {
               key: 'cancelled',
               icon: <XCircle className='h-5 w-5 shrink-0' />,
-              value: cancelledToday.isLoading ? '—' : cancelledToday.total,
-              label: 'ملغية اليوم',
+              value: cancelledTotal.isLoading ? '—' : cancelledTotal.total,
+              label: 'ملغية',
             },
             {
               key: 'no-show',
               icon: <UserX className='h-5 w-5 shrink-0' />,
-              value: noShowToday.isLoading ? '—' : noShowToday.total,
-              label: 'عدم حضور اليوم',
+              value: noShowTotal.isLoading ? '—' : noShowTotal.total,
+              label: 'عدم حضور',
             },
           ]}
         />

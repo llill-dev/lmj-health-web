@@ -1,117 +1,60 @@
-import { get, patch, post } from '@/lib/base';
+import { get, patch, post, apiRequestResult } from '@/lib/base';
 import { api, type Appointment as MockAppointment, type Appointment as UiAppointment } from '@/lib/api/api';
+import { doctorEndpoints } from './endpoints';
+import type {
+  CreateTemporaryPatientBody,
+  CreateTemporaryPatientResponse,
+  DoctorAppointmentDetailsResponse,
+  DoctorAppointmentFile,
+  DoctorAppointmentListParams,
+  DoctorAppointmentMutationResponse,
+  DoctorAppointmentStatus,
+  DoctorAppointmentSummary,
+  DoctorAppointmentsListResponse,
+  DoctorBookAppointmentBody,
+  DoctorCancelAppointmentBody,
+  DoctorCompleteAppointmentBody,
+  DoctorNoShowAppointmentBody,
+  DoctorPatientAccessRequestBody,
+  DoctorPatientAccessRequestResponse,
+  DoctorPatientFullProfileResponse,
+  DoctorPatientPublicProfileResponse,
+  DoctorPatientsListParams,
+  DoctorPatientsListResponse,
+  DoctorRescheduleAppointmentBody,
+} from './types';
 
-export type DoctorAppointmentStatus =
-  | 'scheduled'
-  | 'rescheduled'
-  | 'completed'
-  | 'cancelled'
-  | 'no-show';
+function buildPatientsListQuery(params: DoctorPatientsListParams): string {
+  const qs = new URLSearchParams();
+  if (params.name?.trim()) qs.set('name', params.name.trim());
+  if (params.search?.trim()) qs.set('search', params.search.trim());
+  if (params.diagnosis?.trim()) qs.set('diagnosis', params.diagnosis.trim());
+  if (params.from) qs.set('from', params.from);
+  if (params.to) qs.set('to', params.to);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  if (params.account_status && params.account_status !== 'all') {
+    qs.set('account_status', params.account_status);
+  }
+  return qs.toString();
+}
 
-export type DoctorAppointmentListParams = {
-  page?: number;
-  limit?: number;
-  status?: DoctorAppointmentStatus;
-  date?: string;
+export const doctorPatientsQueryKeys = {
+  all: ['doctor', 'patients'] as const,
+  lists: () => [...doctorPatientsQueryKeys.all, 'list'] as const,
+  list: (params: DoctorPatientsListParams) =>
+    [...doctorPatientsQueryKeys.lists(), params] as const,
+  publicProfile: (patientId: string) =>
+    [...doctorPatientsQueryKeys.all, 'public', patientId] as const,
+  fullProfile: (doctorId: string, patientId: string) =>
+    [...doctorPatientsQueryKeys.all, 'profile', doctorId, patientId] as const,
 };
 
-export type DoctorAppointmentSummary = {
-  _id: string;
-  doctor?: {
-    _id: string;
-    specialization?: string;
-    userId?: { _id?: string; fullName?: string };
-  };
-  patient?: {
-    _id: string;
-    publicId?: string;
-    userId?: { _id?: string; fullName?: string };
-  };
-  status: DoctorAppointmentStatus;
-  date?: string;
-  startTime?: string;
-  startDateTime?: string;
-  endTime?: string;
-  notes?: string;
-  appointmentType?: string | null;
-  appointmentTypeNameSnapshot?: string | null;
-  priceSnapshot?: number | null;
-  priceVisibleToPatientSnapshot?: boolean;
-  cancelledAt?: string;
-  cancelledBy?: string;
-  cancelReason?: string;
-  rescheduledAt?: string;
-  rescheduledBy?: string;
-  rescheduleReason?: string;
-  completedAt?: string;
-  noShowAt?: string;
-};
+// NOTE: Exported via doctorApi.patients below (admin-like shape)
 
-export type DoctorAppointmentFile = {
-  _id: string;
-  id?: string;
-  appointmentLinkId?: string;
-  appointmentId?: string;
-  patientId?: string;
-  originalName?: string;
-  mimeType?: string;
-  sizeBytes?: number;
-  linkedAt?: string;
-  linkedByRole?: string;
-  linkedByUserId?: string;
-  isArchived?: boolean;
-};
-
-export type DoctorAppointmentDetailsResponse = {
-  messageKey?: string;
-  message?: string;
-  appointment: DoctorAppointmentSummary;
-  files?: DoctorAppointmentFile[];
-};
-
-export type DoctorAppointmentsListResponse = {
-  messageKey?: string;
-  message?: string;
-  page: number;
-  limit: number;
-  total: number;
-  results: number;
-  appointments: DoctorAppointmentSummary[];
-};
-
-export type DoctorBookAppointmentBody = {
-  doctorId: string;
-  patientId?: string;
-  date: string;
-  startTime: string;
-  appointmentTypeId?: string;
-  notes?: string;
-};
-
-export type DoctorAppointmentMutationResponse = {
-  messageKey?: string;
-  message?: string;
-  appointment: DoctorAppointmentSummary;
-};
-
-export type DoctorCancelAppointmentBody = {
-  reason: string;
-};
-
-export type DoctorRescheduleAppointmentBody = {
-  date: string;
-  startTime: string;
-  appointmentTypeId?: string;
-  reason?: string;
-};
-
-export type DoctorCompleteAppointmentBody = {
-  notes: string;
-};
-
-export type DoctorNoShowAppointmentBody = {
-  reason: string;
-};
+// ─────────────────────────────────────────────────────────────────────────────
+// Doctor — Appointments
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const doctorAppointmentsQueryKeys = {
   all: ['doctor', 'appointments'] as const,
@@ -125,7 +68,7 @@ export const doctorAppointmentsQueryKeys = {
 
 const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
 
-function buildAppointmentsQuery(params: DoctorAppointmentListParams): string {
+function buildAppointmentsListQuery(params: DoctorAppointmentListParams): string {
   const qs = new URLSearchParams();
 
   if (params.page) qs.set('page', String(params.page));
@@ -134,15 +77,11 @@ function buildAppointmentsQuery(params: DoctorAppointmentListParams): string {
   if (params.date) qs.set('date', params.date);
 
   const query = qs.toString();
-  return query ? `/api/appointments?${query}` : '/api/appointments';
+  return query ? `${doctorEndpoints.appointments.list}?${query}` : doctorEndpoints.appointments.list;
 }
 
 function pickPatientName(summary: DoctorAppointmentSummary): string {
-  return (
-    summary.patient?.userId?.fullName ??
-    summary.patient?.publicId ??
-    '—'
-  );
+  return summary.patient?.userId?.fullName ?? summary.patient?.publicId ?? '—';
 }
 
 function pickPatientInitial(summary: DoctorAppointmentSummary): string {
@@ -162,9 +101,7 @@ function deriveTime(summary: DoctorAppointmentSummary): string {
   return '';
 }
 
-function normalizeStatus(
-  status: DoctorAppointmentStatus,
-): UiAppointment['status'] {
+function normalizeStatus(status: DoctorAppointmentStatus): UiAppointment['status'] {
   switch (status) {
     case 'rescheduled':
       return 'scheduled';
@@ -175,19 +112,11 @@ function normalizeStatus(
   }
 }
 
-function summarizeMockAppointment(
-  appointment: MockAppointment,
-): DoctorAppointmentSummary {
+function summarizeMockAppointment(appointment: MockAppointment): DoctorAppointmentSummary {
   return {
     _id: appointment.id,
-    doctor: {
-      _id: 'mock-doctor',
-      userId: { fullName: 'Doctor' },
-    },
-    patient: {
-      _id: appointment.patientId,
-      userId: { fullName: appointment.patientName },
-    },
+    doctor: { _id: 'mock-doctor', userId: { fullName: 'Doctor' } },
+    patient: { _id: appointment.patientId, userId: { fullName: appointment.patientName } },
     status:
       appointment.status === 'scheduled' ||
       appointment.status === 'completed' ||
@@ -256,10 +185,10 @@ export const doctorAppointmentsApi = {
         total: response.total,
         results: response.data.length,
         appointments: response.data.map(summarizeMockAppointment),
-      };
+      } satisfies DoctorAppointmentsListResponse;
     }
 
-    return get<DoctorAppointmentsListResponse>(buildAppointmentsQuery(params), {
+    return get<DoctorAppointmentsListResponse>(buildAppointmentsListQuery(params), {
       locale: 'ar',
     });
   },
@@ -278,12 +207,13 @@ export const doctorAppointmentsApi = {
           linkedAt: file.date,
           isArchived: false,
         })),
-      };
+      } satisfies DoctorAppointmentDetailsResponse;
     }
 
-    return get<DoctorAppointmentDetailsResponse>(`/api/appointments/${appointmentId}`, {
-      locale: 'ar',
-    });
+    return get<DoctorAppointmentDetailsResponse>(
+      doctorEndpoints.appointments.details(appointmentId),
+      { locale: 'ar' },
+    );
   },
   book: async (body: DoctorBookAppointmentBody) => {
     if (UI_ONLY) {
@@ -301,10 +231,10 @@ export const doctorAppointmentsApi = {
       return {
         message: 'Appointment booked successfully.',
         appointment: summarizeMockAppointment(created.data),
-      };
+      } satisfies DoctorAppointmentMutationResponse;
     }
 
-    return post<DoctorAppointmentMutationResponse>('/api/appointments/book', body, {
+    return post<DoctorAppointmentMutationResponse>(doctorEndpoints.appointments.book, body, {
       locale: 'ar',
     });
   },
@@ -313,24 +243,26 @@ export const doctorAppointmentsApi = {
       await api.cancelAppointment(appointmentId);
       const appointment = await api.getAppointmentById(appointmentId);
       return {
-        message: body.reason ? 'Appointment cancelled successfully.' : 'Appointment cancelled successfully.',
+        message: body.reason
+          ? 'Appointment cancelled successfully.'
+          : 'Appointment cancelled successfully.',
         appointment: {
           ...summarizeMockAppointment(appointment.data),
           status: 'cancelled',
           cancelReason: body.reason,
         },
-      };
+      } satisfies DoctorAppointmentMutationResponse;
     }
 
     return patch<DoctorAppointmentMutationResponse>(
-      `/api/appointments/${appointmentId}/cancel`,
+      doctorEndpoints.appointments.cancel(appointmentId),
       body,
       { locale: 'ar' },
     );
   },
   reschedule: (appointmentId: string, body: DoctorRescheduleAppointmentBody) =>
     patch<DoctorAppointmentMutationResponse>(
-      `/api/appointments/${appointmentId}/reschedule`,
+      doctorEndpoints.appointments.reschedule(appointmentId),
       body,
       { locale: 'ar' },
     ),
@@ -345,19 +277,59 @@ export const doctorAppointmentsApi = {
           status: 'completed',
           notes: body.notes,
         },
-      };
+      } satisfies DoctorAppointmentMutationResponse;
     }
 
     return patch<DoctorAppointmentMutationResponse>(
-      `/api/appointments/${appointmentId}/complete`,
+      doctorEndpoints.appointments.complete(appointmentId),
       body,
       { locale: 'ar' },
     );
   },
   markNoShow: (appointmentId: string, body: DoctorNoShowAppointmentBody) =>
     patch<DoctorAppointmentMutationResponse>(
-      `/api/appointments/${appointmentId}/no-show`,
+      doctorEndpoints.appointments.noShow(appointmentId),
       body,
       { locale: 'ar' },
     ),
 };
+
+export const doctorApi = {
+  patients: {
+    list: (params: DoctorPatientsListParams = {}) => {
+      const query = buildPatientsListQuery(params);
+      const base = doctorEndpoints.patients.list;
+      const endpoint = query ? `${base}?${query}` : base;
+      return get<DoctorPatientsListResponse>(endpoint, { locale: 'ar' });
+    },
+    createTemporary: (body: CreateTemporaryPatientBody) =>
+      post<CreateTemporaryPatientResponse>(doctorEndpoints.patients.temp, body, {
+        locale: 'ar',
+      }),
+    getPublicProfile: (patientId: string) =>
+      get<DoctorPatientPublicProfileResponse>(
+        doctorEndpoints.patients.publicProfile(patientId),
+        { locale: 'ar' },
+      ),
+    getFullProfileResult: (doctorId: string, patientId: string) =>
+      apiRequestResult<DoctorPatientFullProfileResponse>(
+        doctorEndpoints.patients.fullProfile(doctorId, patientId),
+        {
+          method: 'GET',
+          locale: 'ar',
+          expectedStatuses: [403, 404],
+        },
+      ),
+    requestAccess: (
+      doctorId: string,
+      patientId: string,
+      body: DoctorPatientAccessRequestBody,
+    ) =>
+      post<DoctorPatientAccessRequestResponse>(
+        doctorEndpoints.patients.accessRequests(doctorId, patientId),
+        body,
+        { locale: 'ar' },
+      ),
+  },
+  appointments: doctorAppointmentsApi,
+} as const;

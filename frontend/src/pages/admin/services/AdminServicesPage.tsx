@@ -17,7 +17,7 @@ import {
   useUpdateFacilityStatus,
   useServiceTypesList,
 } from '@/hooks/useAdminServices';
-import type { FacilitySummary, FacilityStatus } from '@/lib/admin/services/types';
+import type { FacilitySummary, FacilityStatus } from '@/lib/admin/types';
 
 export default function AdminServicesPage() {
   const [activeTabIdx, setActiveTabIdx] = useState(0);

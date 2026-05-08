@@ -1,7 +1,6 @@
 /**
- * Professional Mock API Layer
- * Simulates REST endpoints with realistic delays, errors, and response handling
- * Designed for React Query integration with TypeScript types
+ * Mock API layer for UI/dev when back-end routes are unavailable.
+ * Keeps only paths used by hooks and doctor UI_ONLY appointment bridge.
  */
 
 // ============================================================================
@@ -23,15 +22,8 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-export interface ApiError {
-  message: string;
-  code: string;
-  status: number;
-  details?: Record<string, any>;
-}
-
 // ============================================================================
-// Domain Types
+// Domain Types (actively imported by the app)
 // ============================================================================
 
 export interface Patient {
@@ -76,71 +68,6 @@ export interface Appointment {
   appointmentFiles?: Array<{ name: string; date: string; url?: string }>;
 }
 
-export interface MedicalRecord {
-  id: string;
-  patientId: string;
-  patientName: string;
-  date: string;
-  diagnosis: string;
-  treatment: string;
-  medications: Array<{
-    name: string;
-    dosage: string;
-    frequency: string;
-  }>;
-  followUpDate?: string;
-  doctor: string;
-  attachments: Array<{
-    name: string;
-    url: string;
-    type: 'pdf' | 'image' | 'video';
-  }>;
-}
-
-export interface Doctor {
-  id: string;
-  name: string;
-  specialty: string;
-  rating: number;
-  experience: number; // years
-  clinic: string;
-  availability: {
-    days: string[];
-    hours: {
-      start: string;
-      end: string;
-    };
-  };
-  avatar?: string;
-  bio?: string;
-  education: Array<{
-    degree: string;
-    university: string;
-    year: string;
-  }>;
-  languages: string[];
-}
-
-export interface Clinic {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  workingHours: {
-    [key: string]: {
-      open: string;
-      close: string;
-    };
-  };
-  services: string[];
-  doctors: string[]; // doctor IDs
-}
-
 export interface DashboardStats {
   totalPatients: number;
   activePatients: number;
@@ -148,6 +75,7 @@ export interface DashboardStats {
   todayAppointments: number;
   completedAppointments: number;
   pendingAppointments: number;
+  /** غير مستخدم بعد ربط السجلات بـ API؛ محفوظ لتوافق واجهة الإحصائيات */
   totalMedicalRecords: number;
 }
 
@@ -191,9 +119,6 @@ class MockDataStore {
   private data: {
     patients: Patient[];
     appointments: Appointment[];
-    medicalRecords: MedicalRecord[];
-    doctors: Doctor[];
-    clinics: Clinic[];
     workSchedule: WorkSchedule;
   };
 
@@ -201,11 +126,15 @@ class MockDataStore {
     this.data = {
       patients: this.generateMockPatients(),
       appointments: this.generateMockAppointments(),
-      medicalRecords: this.generateMockMedicalRecords(),
-      doctors: this.generateMockDoctors(),
-      clinics: this.generateMockClinics(),
       workSchedule: this.generateMockWorkSchedule(),
     };
+  }
+
+  public static getInstance(): MockDataStore {
+    if (!MockDataStore.instance) {
+      MockDataStore.instance = new MockDataStore();
+    }
+    return MockDataStore.instance;
   }
 
   private generateMockWorkSchedule(): WorkSchedule {
@@ -234,10 +163,6 @@ class MockDataStore {
     };
   }
 
-  // ============================================================================
-  // Work Schedule API
-  // ============================================================================
-
   async getWorkSchedule(): Promise<ApiResponse<WorkSchedule>> {
     await this.delay();
     return this.createResponse(this.data.workSchedule);
@@ -247,25 +172,12 @@ class MockDataStore {
     payload: WorkSchedule,
   ): Promise<ApiResponse<WorkSchedule>> {
     await this.delay(900);
-
     this.data.workSchedule = payload;
-
     return this.createResponse(
       this.data.workSchedule,
       'Work schedule updated successfully',
     );
   }
-
-  public static getInstance(): MockDataStore {
-    if (!MockDataStore.instance) {
-      MockDataStore.instance = new MockDataStore();
-    }
-    return MockDataStore.instance;
-  }
-
-  // ============================================================================
-  // Data Generators
-  // ============================================================================
 
   private generateMockPatients(): Patient[] {
     return [
@@ -391,152 +303,6 @@ class MockDataStore {
     ];
   }
 
-  private generateMockMedicalRecords(): MedicalRecord[] {
-    return [
-      {
-        id: '1',
-        patientId: '1',
-        patientName: 'أحمد محمد العلي',
-        date: '2024-12-10',
-        diagnosis: 'ارتفاع ضغط الدم',
-        treatment: 'تغيير نمط الحياة + أدوية',
-        medications: [
-          {
-            name: 'لوسارتان',
-            dosage: '50mg',
-            frequency: 'مرة واحدة يومياً',
-          },
-          {
-            name: 'إنالابريل',
-            dosage: '10mg',
-            frequency: 'مرة واحدة يومياً',
-          },
-        ],
-        followUpDate: '2024-12-24',
-        doctor: 'د. خالد عبدالله',
-        attachments: [
-          {
-            name: 'تحاليل الدم.pdf',
-            url: '/mock-files/blood-test.pdf',
-            type: 'pdf',
-          },
-          {
-            name: 'صورة الأشعة السينية',
-            url: '/mock-files/x-ray.jpg',
-            type: 'image',
-          },
-        ],
-      },
-      {
-        id: '2',
-        patientId: '2',
-        patientName: 'فاطمة أحمد السالم',
-        date: '2024-11-15',
-        diagnosis: 'التهاب الحلق',
-        treatment: 'مضادات حيوية + راحة',
-        medications: [
-          {
-            name: 'أموكسيسيلين',
-            dosage: '500mg',
-            frequency: 'كل 8 ساعات',
-          },
-        ],
-        followUpDate: '2024-11-22',
-        doctor: 'د. خالد عبدالله',
-        attachments: [
-          {
-            name: 'فحص الحلق.jpg',
-            url: '/mock-files/throat-exam.jpg',
-            type: 'image',
-          },
-        ],
-      },
-    ];
-  }
-
-  private generateMockDoctors(): Doctor[] {
-    return [
-      {
-        id: '1',
-        name: 'د. خالد عبدالله',
-        specialty: 'طب عام',
-        rating: 4.9,
-        experience: 15,
-        clinic: 'عيادة الأطباء المتخصصين',
-        availability: {
-          days: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
-          hours: {
-            start: '09:00',
-            end: '17:00',
-          },
-        },
-        bio: 'طبيب عام بخبرة 15 عاماً في تشخيص وعلاج الأمراض الشائعة',
-        education: [
-          {
-            degree: 'بكالوريوس الطب والجراحة',
-            university: 'جامعة الملك سعود',
-            year: '2009',
-          },
-        ],
-        languages: ['العربية', 'الإنجليزية'],
-      },
-      {
-        id: '2',
-        name: 'د. سارة أحمد',
-        specialty: 'طب أطفال',
-        rating: 4.8,
-        experience: 12,
-        clinic: 'عيادة الأطباء المتخصصين',
-        availability: {
-          days: ['السبت', 'الأحد', 'الثلاثاء'],
-          hours: {
-            start: '10:00',
-            end: '16:00',
-          },
-        },
-        bio: 'طبيبة أطفال متخصصة في الرعاية الصحية للأطفال والرضع',
-        education: [
-          {
-            degree: 'مجلس في طب الأطفال',
-            university: 'جامعة القاهرة',
-            year: '2012',
-          },
-        ],
-        languages: ['العربية', 'الإنجليزية'],
-      },
-    ];
-  }
-
-  private generateMockClinics(): Clinic[] {
-    return [
-      {
-        id: '1',
-        name: 'عيادة الأطباء المتخصصين',
-        address: 'الرياض، حي النخيل، شارع الملك فهد',
-        phone: '+966112233445',
-        email: 'info@specialists-clinic.sa',
-        coordinates: {
-          lat: 24.7136,
-          lng: 46.6753,
-        },
-        workingHours: {
-          الأحد: { open: '09:00', close: '17:00' },
-          الإثنين: { open: '09:00', close: '17:00' },
-          الثلاثاء: { open: '09:00', close: '17:00' },
-          الأربعاء: { open: '09:00', close: '17:00' },
-          الخميس: { open: '09:00', close: '17:00' },
-          السبت: { open: '09:00', close: '15:00' },
-        },
-        services: ['طب عام', 'طب أطفال', 'طب نساء', 'جلدية'],
-        doctors: ['1', '2'],
-      },
-    ];
-  }
-
-  // ============================================================================
-  // Public API Methods
-  // ============================================================================
-
   private async delay(ms: number = 800): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
@@ -550,21 +316,7 @@ class MockDataStore {
     };
   }
 
-  private createErrorResponse(
-    message: string,
-    code = 'OPERATION_FAILED',
-    status = 400,
-  ): ApiError {
-    return {
-      message,
-      code,
-      status,
-    };
-  }
-
-  // ============================================================================
-  // Patients API
-  // ============================================================================
+  // ── Patients ────────────────────────────────────────────────────────────
 
   async getPatients(
     page = 1,
@@ -680,9 +432,7 @@ class MockDataStore {
     return this.updatePatient(id, { status });
   }
 
-  // ============================================================================
-  // Appointments API
-  // ============================================================================
+  // ── Appointments ─────────────────────────────────────────────────────────
 
   async getAppointments(
     page = 1,
@@ -768,9 +518,7 @@ class MockDataStore {
   ): Promise<ApiResponse<Appointment>> {
     await this.delay();
 
-    const appointmentIndex = this.data.appointments.findIndex(
-      (a) => a.id === id,
-    );
+    const appointmentIndex = this.data.appointments.findIndex((a) => a.id === id);
 
     if (appointmentIndex === -1) {
       throw new Error(`Appointment with id ${id} not found`);
@@ -790,9 +538,7 @@ class MockDataStore {
   async cancelAppointment(id: string): Promise<ApiResponse<null>> {
     await this.delay();
 
-    const appointmentIndex = this.data.appointments.findIndex(
-      (a) => a.id === id,
-    );
+    const appointmentIndex = this.data.appointments.findIndex((a) => a.id === id);
 
     if (appointmentIndex === -1) {
       throw new Error(`Appointment with id ${id} not found`);
@@ -809,9 +555,7 @@ class MockDataStore {
   async completeAppointment(id: string): Promise<ApiResponse<null>> {
     await this.delay();
 
-    const appointmentIndex = this.data.appointments.findIndex(
-      (a) => a.id === id,
-    );
+    const appointmentIndex = this.data.appointments.findIndex((a) => a.id === id);
 
     if (appointmentIndex === -1) {
       throw new Error(`Appointment with id ${id} not found`);
@@ -825,141 +569,7 @@ class MockDataStore {
     return this.createResponse(null, 'Appointment completed successfully');
   }
 
-  // ============================================================================
-  // Medical Records API
-  // ============================================================================
-
-  async getMedicalRecords(
-    page = 1,
-    limit = 10,
-    patientId?: string,
-  ): Promise<PaginatedResponse<MedicalRecord>> {
-    await this.delay();
-
-    let filteredRecords = this.data.medicalRecords;
-
-    if (patientId) {
-      filteredRecords = filteredRecords.filter(
-        (record) => record.patientId === patientId,
-      );
-    }
-
-    const startIndex = (page - 1) * limit;
-    const paginatedRecords = filteredRecords.slice(
-      startIndex,
-      startIndex + limit,
-    );
-
-    return {
-      data: paginatedRecords,
-      total: filteredRecords.length,
-      page,
-      limit,
-      totalPages: Math.ceil(filteredRecords.length / limit),
-    };
-  }
-
-  async getMedicalRecordById(id: string): Promise<ApiResponse<MedicalRecord>> {
-    await this.delay();
-
-    const record = this.data.medicalRecords.find((r) => r.id === id);
-
-    if (!record) {
-      throw new Error(`Medical record with id ${id} not found`);
-    }
-
-    return this.createResponse(record);
-  }
-
-  async createMedicalRecord(
-    recordData: Omit<MedicalRecord, 'id'>,
-  ): Promise<ApiResponse<MedicalRecord>> {
-    await this.delay(1200);
-
-    const newRecord: MedicalRecord = {
-      ...recordData,
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
-    };
-
-    this.data.medicalRecords.push(newRecord);
-
-    return this.createResponse(
-      newRecord,
-      'Medical record created successfully',
-    );
-  }
-
-  // ============================================================================
-  // Doctors API
-  // ============================================================================
-
-  async getDoctors(
-    page = 1,
-    limit = 10,
-    specialty?: string,
-  ): Promise<PaginatedResponse<Doctor>> {
-    await this.delay();
-
-    let filteredDoctors = this.data.doctors;
-
-    if (specialty) {
-      filteredDoctors = filteredDoctors.filter((doctor) =>
-        doctor.specialty.toLowerCase().includes(specialty.toLowerCase()),
-      );
-    }
-
-    const startIndex = (page - 1) * limit;
-    const paginatedDoctors = filteredDoctors.slice(
-      startIndex,
-      startIndex + limit,
-    );
-
-    return {
-      data: paginatedDoctors,
-      total: filteredDoctors.length,
-      page,
-      limit,
-      totalPages: Math.ceil(filteredDoctors.length / limit),
-    };
-  }
-
-  async getDoctorById(id: string): Promise<ApiResponse<Doctor>> {
-    await this.delay();
-
-    const doctor = this.data.doctors.find((d) => d.id === id);
-
-    if (!doctor) {
-      throw new Error(`Doctor with id ${id} not found`);
-    }
-
-    return this.createResponse(doctor);
-  }
-
-  // ============================================================================
-  // Clinics API
-  // ============================================================================
-
-  async getClinics(): Promise<ApiResponse<Clinic[]>> {
-    await this.delay();
-    return this.createResponse(this.data.clinics);
-  }
-
-  async getClinicById(id: string): Promise<ApiResponse<Clinic>> {
-    await this.delay();
-
-    const clinic = this.data.clinics.find((c) => c.id === id);
-
-    if (!clinic) {
-      throw new Error(`Clinic with id ${id} not found`);
-    }
-
-    return this.createResponse(clinic);
-  }
-
-  // ============================================================================
-  // Statistics API
-  // ============================================================================
+  // ── Dashboard (mock KPIs aligned with appointments + patients only) ────
 
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     await this.delay();
@@ -967,6 +577,11 @@ class MockDataStore {
     const today = new Date().toISOString().split('T')[0];
     const todayAppointments = this.data.appointments.filter(
       (apt) => apt.date === today,
+    );
+
+    const recordsBackedByPatients = this.data.patients.reduce(
+      (acc, p) => acc + (p.recordsCount ?? 0),
+      0,
     );
 
     return this.createResponse({
@@ -981,13 +596,9 @@ class MockDataStore {
       pendingAppointments: this.data.appointments.filter(
         (apt) => apt.status === 'scheduled',
       ).length,
-      totalMedicalRecords: this.data.medicalRecords.length,
+      totalMedicalRecords: recordsBackedByPatients,
     });
   }
 }
-
-// ============================================================================
-// Export singleton instance
-// ============================================================================
 
 export const api = MockDataStore.getInstance();

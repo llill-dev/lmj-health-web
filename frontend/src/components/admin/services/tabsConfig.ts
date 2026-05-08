@@ -6,7 +6,7 @@ import {
   Stethoscope,
 } from 'lucide-react';
 import type { ElementType } from 'react';
-import type { FacilityType } from '@/lib/admin/services/types';
+import type { FacilityType } from '@/lib/admin/types';
 
 export type Tab =
   | { kind: 'facility'; type: FacilityType; label: string; icon: ElementType }

@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useDeleteFacility } from '@/hooks/useAdminServices';
 import { useToast } from '@/components/ui/ToastProvider';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
-import type { FacilitySummary } from '@/lib/admin/services/types';
+import type { FacilitySummary } from '@/lib/admin/types';
 
 interface Props {
   open: boolean;

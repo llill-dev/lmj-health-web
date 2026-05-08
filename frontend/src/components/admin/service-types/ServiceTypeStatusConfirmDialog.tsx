@@ -3,8 +3,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import { X, Power } from 'lucide-react';
 import { useEffect } from 'react';
-import type { ServiceType } from '@/lib/admin/services/types';
-import { resolveLabel } from '@/lib/admin/services/types';
+import type { ServiceType } from '@/lib/admin/types';
+import { resolveLabel } from '@/lib/admin/types';
 
 type Action = 'deactivate' | 'activate';
 

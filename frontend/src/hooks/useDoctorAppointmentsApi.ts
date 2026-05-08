@@ -5,13 +5,15 @@ import {
   doctorAppointmentsApi,
   doctorAppointmentsQueryKeys,
   normalizeDoctorAppointmentToUi,
-  type DoctorAppointmentListParams,
-  type DoctorBookAppointmentBody,
-  type DoctorCancelAppointmentBody,
-  type DoctorCompleteAppointmentBody,
-  type DoctorNoShowAppointmentBody,
-  type DoctorRescheduleAppointmentBody,
-} from '@/lib/doctor/appointments';
+} from '@/lib/doctor/client';
+import type {
+  DoctorAppointmentListParams,
+  DoctorBookAppointmentBody,
+  DoctorCancelAppointmentBody,
+  DoctorCompleteAppointmentBody,
+  DoctorNoShowAppointmentBody,
+  DoctorRescheduleAppointmentBody,
+} from '@/lib/doctor/types';
 
 export function useDoctorAppointmentsApi(params: DoctorAppointmentListParams) {
   const query = useQuery({

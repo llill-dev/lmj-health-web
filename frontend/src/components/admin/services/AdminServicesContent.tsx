@@ -5,7 +5,7 @@ import { FacilityCard } from '@/components/admin/services/FacilityCard';
 import { Pagination } from '@/components/admin/services/Pagination';
 import { ServiceTypeCard } from '@/components/admin/services/ServiceTypeCard';
 import { ADMIN_SERVICES_PAGE_SIZE } from '@/components/admin/services/tabsConfig';
-import type { FacilitySummary, ServiceType } from '@/lib/admin/services/types';
+import type { FacilitySummary, ServiceType } from '@/lib/admin/types';
 
 export function AdminServicesContent({
   isLoading,

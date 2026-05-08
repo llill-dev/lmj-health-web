@@ -17,6 +17,13 @@ export {
   useNoShowDoctorAppointmentApi,
 } from './useDoctorAppointmentsApi';
 export {
+  useDoctorPatients,
+  useDoctorPatientPublicProfile,
+  useDoctorPatientFullProfile,
+  useCreateTemporaryDoctorPatient,
+  useRequestDoctorPatientAccess,
+} from './useDoctorPatients';
+export {
   usePatients,
   usePatient,
   useCreatePatient,

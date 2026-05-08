@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import type { ElementType } from 'react';
 import { StatusBadge } from '@/components/admin/services/StatusBadge';
-import type { FacilitySummary } from '@/lib/admin/services/types';
+import type { FacilitySummary } from '@/lib/admin/types';
 
 export function FacilityCard({
   facility,

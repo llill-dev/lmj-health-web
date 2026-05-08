@@ -12,7 +12,7 @@ import {
 } from '@/hooks/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
-import type { ServiceType, ServiceTypeField } from '@/lib/admin/services/types';
+import type { ServiceType, ServiceTypeField } from '@/lib/admin/types';
 
 /**
  * Script checks for bilingual service-type fields (API-3 accepts any string per locale object;
