@@ -2,7 +2,10 @@
 
 import type { ReactNode } from 'react';
 
-export type OverviewKpiCardVariant = 'appointments' | 'medical-records';
+export type OverviewKpiCardVariant =
+  | 'appointments'
+  | 'patients'
+  | 'medical-records';
 
 export default function OverviewKpiCard({
   variant: _variant,

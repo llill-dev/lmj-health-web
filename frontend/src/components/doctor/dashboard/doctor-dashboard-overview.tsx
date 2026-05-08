@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Calendar, FileText, Plus } from 'lucide-react';
+import { Calendar, FileText, Plus, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import DashboardOverviewSection from '@/components/doctor/dashboard/dashboard-overview-section';
 import OverviewKpiCard, {
@@ -15,7 +15,10 @@ type OverviewKpiItem = {
   label: ReactNode;
 };
 
-export type DoctorDashboardOverviewVariant = 'appointments' | 'medical-records';
+export type DoctorDashboardOverviewVariant =
+  | 'appointments'
+  | 'patients'
+  | 'medical-records';
 
 export type DoctorDashboardSurface = 'teal' | 'mint';
 
@@ -46,8 +49,16 @@ export default function DoctorDashboardOverview({
   /** `mint`: خلفية فاتحة + صورة للصفحات مثل المواعيد */
   surface?: DoctorDashboardSurface;
 }) {
-  const kpiVariant: OverviewKpiCardVariant = variant;
+  const kpiVariant: OverviewKpiCardVariant =
+    variant as OverviewKpiCardVariant;
   const kpiTone = surface === 'mint' ? 'onLight' : 'onDark';
+
+  const kpiGridColsClass =
+    variant === 'appointments'
+      ? 'grid-cols-4'
+      : variant === 'patients'
+        ? 'grid-cols-2'
+        : 'grid-cols-3';
 
   const mintStack =
     surface === 'mint' ? (
@@ -95,16 +106,14 @@ export default function DoctorDashboardOverview({
       headerLeft={
         <div className='flex gap-[16px]'>
           <div className={iconTileClass}>
-            {headerIcon ?? (
-              <>
-                {' '}
-                {variant === 'appointments' ? (
-                  <Calendar className='h-8 w-8 text-white' />
-                ) : (
-                  <FileText className='h-8 w-8 text-white' />
-                )}
-              </>
-            )}
+            {headerIcon ??
+              (variant === 'appointments' ? (
+                <Calendar className='h-8 w-8 text-white' />
+              ) : variant === 'patients' ? (
+                <Users className='h-8 w-8 text-white' />
+              ) : (
+                <FileText className='h-8 w-8 text-white' />
+              ))}
           </div>
           <div className='flex flex-col gap-1'>
             <h1 className={titleClass}>{title}</h1>
@@ -126,22 +135,19 @@ export default function DoctorDashboardOverview({
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.12, ease: 'easeOut' }}
           >
-            {actionIcon ?? (
-              <>
-                {variant === 'appointments' ? (
-                  <Calendar className='h-4 w-4' />
-                ) : (
-                  <Plus className='h-4 w-4' />
-                )}
-              </>
-            )}
+            {actionIcon ??
+              (variant === 'appointments' ? (
+                <Calendar className='h-4 w-4' />
+              ) : (
+                <Plus className='h-4 w-4' />
+              ))}
             <span className='font-cairo text-[14px] font-bold leading-[20px]'>
               {actionLabel}
             </span>
           </motion.button>
         ) : undefined
       }
-      kpiGridClassName={`grid gap-4 ${variant === 'appointments' ? 'grid-cols-4' : 'grid-cols-3 '}`}
+      kpiGridClassName={`grid gap-4 ${kpiGridColsClass}`}
       cards={kpis.map((kpi) => (
         <OverviewKpiCard
           key={kpi.key}

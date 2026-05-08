@@ -1,272 +1,235 @@
-import {
-  CalendarDays,
-  ChevronDown,
-  Clock,
-  FileText,
-  Heart,
-  PhoneCall,
-  Search,
-  Users,
-} from 'lucide-react';
+import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
+import DoctorPatientExpandableCard, {
+  type DoctorPatientExpandableCardData,
+} from '@/components/doctor/patients/doctor-patient-expandable-card';
+import { useMemo, useState } from 'react';
+import { Search, UserCheck, UserX } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { useToast } from '@/components/ui/ToastProvider';
+
+type PatientFilter = 'all' | 'today' | 'upcoming' | 'active';
 
 type PatientStatus = 'active' | 'inactive';
 
-type Patient = {
-  id: string;
-  name: string;
-  initials: string;
+type PatientRow = DoctorPatientExpandableCardData & {
   status: PatientStatus;
-  statusLabel: string;
-  ageLabel: string;
-  bloodType: string;
-  visits: number;
-  records: number;
-  phone: string;
-  lastVisit: string;
+  hasUpcomingAppointment: boolean;
 };
 
-const patients: Patient[] = [
+const patientsSeed: PatientRow[] = [
   {
     id: '1',
-    name: 'أحمد محمد العلي',
-    initials: 'أ',
-    status: 'inactive',
-    statusLabel: 'غير نشط',
-    ageLabel: '30 سنة',
-    bloodType: 'A+',
-    visits: 1,
-    records: 1,
-    phone: '+966501234567',
-    lastVisit: '2024-12-10',
+    fileNo: '12345',
+    name: 'محمد أحمد السالم',
+    status: 'active',
+    ageLabel: '45 سنة',
+    genderLabel: 'ذكر',
+    phone: '0501234567',
+    lastVisit: '2026-02-10',
+    lastVisitIso: '2026-02-10',
+    hasUpcomingAppointment: true,
+    weightKg: '80 كجم',
+    heightCm: '175 سم',
+    bloodPressure: '120/80',
+    allergySummary: 'حساسية دوائية',
+    sensitivities: ['البنسلين'],
+    chronicConditions: ['السكري', 'الضغط'],
   },
   {
     id: '2',
+    fileNo: '12346',
     name: 'فاطمة أحمد السالم',
-    initials: 'ف',
     status: 'inactive',
-    statusLabel: 'غير نشط',
     ageLabel: '30 سنة',
-    bloodType: 'A+',
-    visits: 0,
-    records: 1,
-    phone: '+966502345678',
+    genderLabel: 'أنثى',
+    phone: '0509876543',
     lastVisit: 'لا توجد زيارات',
+    lastVisitIso: '',
+    hasUpcomingAppointment: false,
+    weightKg: '62 كجم',
+    heightCm: '162 سم',
+    bloodPressure: '110/70',
+    allergySummary: 'لا يوجد',
+    sensitivities: [],
+    chronicConditions: [],
   },
 ];
 
+function todayIso(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
 export default function DoctorPatientsPage() {
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<PatientFilter>('all');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const total = patientsSeed.length;
+  const activeCount = patientsSeed.filter((p) => p.status === 'active').length;
+  const inactiveCount = patientsSeed.filter((p) => p.status === 'inactive').length;
+
+  const visiblePatients = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    let list = patientsSeed;
+
+    if (filter === 'today') {
+      const t = todayIso();
+      list = list.filter((p) => p.lastVisitIso === t);
+    } else if (filter === 'upcoming') {
+      list = list.filter((p) => p.hasUpcomingAppointment);
+    } else if (filter === 'active') {
+      list = list.filter((p) => p.status === 'active');
+    }
+
+    if (!q) return list;
+    return list.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.fileNo.includes(q) ||
+        p.phone.replace(/\s/g, '').includes(q),
+    );
+  }, [searchTerm, filter]);
+
+  const handleAddPatient = () => {
+    toast('سيتم ربط «إضافة مريض جديد» بواجهة الخادم عند جاهزية المسار.', {
+      title: 'قريباً',
+      variant: 'info',
+      durationMs: 4200,
+    });
+  };
+
+  const tabClass = (key: PatientFilter) =>
+    filter === key
+      ? 'h-[34px] flex-1 rounded-[6px] bg-primary font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(15,143,139,0.25)]'
+      : 'h-[34px] flex-1 rounded-[6px] bg-[#F2F4F7] font-cairo text-[12px] font-extrabold text-[#667085]';
+
   return (
     <>
       <Helmet>
         <title>Patients • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
-        <section className='rounded-[16px] bg-primary px-6 py-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]'>
-          <div className='flex items-start justify-between'>
-            <div className='flex items-center gap-3'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-[6px] bg-white/15'>
-                <Users className='h-[18px] w-[18px] text-white' />
-              </div>
-              <div className='text-right'>
-                <div className='font-cairo text-[13px] font-bold leading-[18px] text-white/90'>
-                  إجمالي المرضى
-                </div>
-                <div className='mt-1 font-cairo text-[28px] font-extrabold leading-[28px] text-white'>
-                  2
-                </div>
-              </div>
-            </div>
+      <div dir='rtl' lang='ar'>
+        <DoctorDashboardOverview
+          variant='patients'
+          surface='mint'
+          title='إجمالي المرضى'
+          subtitle={
+            <span>
+              <span className='font-extrabold text-primary'>{total}</span>
+              <span className='text-primary/90'> — متابعة ملفات المرضى والزيارات</span>
+            </span>
+          }
+          onActionClick={handleAddPatient}
+          actionLabel='إضافة مريض جديد'
+          kpis={[
+            {
+              key: 'active',
+              icon: <UserCheck className='h-5 w-5 shrink-0' />,
+              value: activeCount,
+              label: 'نشط',
+            },
+            {
+              key: 'inactive',
+              icon: <UserX className='h-5 w-5 shrink-0' />,
+              value: inactiveCount,
+              label: 'غير نشط',
+            },
+          ]}
+        />
 
-            <div className='grid w-[520px] grid-cols-2 gap-4'>
-              <div className='rounded-[6px] bg-white/15 px-5 py-4'>
-                <div className='flex items-center justify-between'>
-                  <div className='font-cairo text-[12px] font-bold text-white/90'>
-                    غير نشط
-                  </div>
-                  <div className='font-cairo text-[14px] font-extrabold text-white'>
-                    0
-                  </div>
-                </div>
-              </div>
-              <div className='rounded-[6px] bg-white/15 px-5 py-4'>
-                <div className='flex items-center justify-between'>
-                  <div className='font-cairo text-[12px] font-bold text-white/90'>
-                    نشط
-                  </div>
-                  <div className='font-cairo text-[14px] font-extrabold text-white'>
-                    0
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className='mt-6 rounded-[16px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
+        <section className='mb-5 rounded-[6px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='relative'>
+            <Search className='absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400' />
             <input
               type='text'
               placeholder='ابحث عن مريض...'
-              className='h-[40px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-11 pe-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3]'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='w-full rounded-[6px] border border-[#E5E7EB] bg-white py-3 pl-4 pr-10 font-cairo text-[14px] font-semibold text-[#111827] placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-[#0F8F8B]/20'
             />
-            <div className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-              <Search className='h-[18px] w-[18px]' />
-            </div>
           </div>
 
-          <div className='mt-3 grid grid-cols-3 gap-3'>
+          <div className='mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4'>
             <button
               type='button'
-              className='h-[34px] rounded-[6px] bg-primary font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)]'
+              onClick={() => setFilter('all')}
+              className={tabClass('all')}
             >
               الكل
             </button>
             <button
               type='button'
-              className='h-[34px] rounded-[6px] bg-[#F2F4F7] font-cairo text-[12px] font-extrabold text-[#667085]'
+              onClick={() => setFilter('today')}
+              className={tabClass('today')}
             >
-              نشط
+              اليوم
             </button>
             <button
               type='button'
-              className='h-[34px] rounded-[6px] bg-[#F2F4F7] font-cairo text-[12px] font-extrabold text-[#667085]'
+              onClick={() => setFilter('upcoming')}
+              className={tabClass('upcoming')}
             >
-              غير نشط
+              مواعيد قادمة
+            </button>
+            <button
+              type='button'
+              onClick={() => setFilter('active')}
+              className={tabClass('active')}
+            >
+              نشط
             </button>
           </div>
         </section>
 
-        <section className='mt-6 space-y-5'>
-          {patients.map((patient) => {
-            const statusPillClass =
-              patient.status === 'active'
-                ? 'bg-[#ECFDF3] text-[#16A34A]'
-                : 'bg-[#F2F4F7] text-[#667085]';
-
+        <section className='space-y-3'>
+          {visiblePatients.map((patient) => {
+            const {
+              status: _s,
+              hasUpcomingAppointment: _h,
+              ...cardPatient
+            } = patient;
             return (
-              <div
+              <DoctorPatientExpandableCard
                 key={patient.id}
-                className='rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_20px_45px_rgba(0,0,0,0.10)]'
-              >
-                <div className='flex items-start justify-between px-6 pb-4 pt-5'>
-                  <div className='flex items-start gap-3'>
-                    <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15, 143, 139,0.35)]'>
-                      <span className='font-cairo text-[18px] font-extrabold leading-none'>
-                        {patient.initials}
-                      </span>
-                    </div>
-                    <div className='text-right'>
-                      <div className='font-cairo text-[16px] font-extrabold leading-[20px] text-[#111827]'>
-                        {patient.name}
-                      </div>
-                      <div className='mt-2 flex items-center gap-2'>
-                        <span
-                          className={`inline-flex h-[24px] items-center justify-center rounded-full px-3 font-cairo text-[11px] font-extrabold ${statusPillClass}`}
-                        >
-                          {patient.statusLabel}
-                        </span>
-                        <span className='text-[#6A7282] text-[12px] leading-[16px]'>
-                          {patient.ageLabel}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-3'>
-                    <button
-                      type='button'
-                      className='flex h-9 w-9  text-[#667085]'
-                      aria-label='فتح'
-                    >
-                      <ChevronDown className='h-5 w-5' />
-                    </button>
-                  </div>
-                </div>
-
-                <div className='px-6 pb-4'>
-                  <div className='grid grid-cols-3 gap-3'>
-                    <div className='rounded-[6px] bg-[#EFFFFE] px-4 py-3 text-center'>
-                      <Heart className='mx-auto h-[18px] w-[18px] text-primary' />
-                      <div className='mt-1 font-cairo text-[14px] font-extrabold text-primary'>
-                        {patient.bloodType}
-                      </div>
-                      <div className='mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]'>
-                        الفصيلة
-                      </div>
-                    </div>
-
-                    <div className='rounded-[6px] bg-[#F0FDF4] px-4 py-3 text-center'>
-                      <CalendarDays className='mx-auto h-[18px] w-[18px] text-[#16A34A]' />
-                      <div className='mt-1 font-cairo text-[14px] font-extrabold text-[#16A34A]'>
-                        {patient.visits}
-                      </div>
-                      <div className='mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]'>
-                        زيارة
-                      </div>
-                    </div>
-
-                    <div className='rounded-[6px] bg-[#EFF6FF] px-4 py-3 text-center'>
-                      <FileText className='mx-auto h-[18px] w-[18px] text-[#2563EB]' />
-                      <div className='mt-1 font-cairo text-[14px] font-extrabold text-[#2563EB]'>
-                        {patient.records}
-                      </div>
-                      <div className='mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]'>
-                        سجل
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className='mt-4 rounded-[6px] bg-[#F9FAFB] px-4 py-3'>
-                    <div className='flex flex-col gap-1 items-start justify-start'>
-                      <div className='flex items-center gap-2 text-[#667085]'>
-                        <PhoneCall className='h-4 w-4' />
-                        <div
-                          dir='ltr'
-                          className='font-cairo text-[12px] font-bold'
-                        >
-                          {patient.phone}
-                        </div>
-                      </div>
-
-                      <div className='flex items-center gap-2 text-[#667085]'>
-                        <Clock className='h-4 w-4' />
-                        <div>
-                          {' '}
-                          <div className='font-cairo text-[12px] font-bold'>
-                            آخر زيارة
-                          </div>
-                          <div className='font-cairo text-[12px] font-bold text-[#111827]'>
-                            {patient.lastVisit}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className='mt-4 grid grid-cols-2 gap-4'>
-                    <button
-                      type='button'
-                      className='flex h-[42px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-white font-cairo text-[13px] font-extrabold text-primary'
-                    >
-                      <CalendarDays className='h-4 w-4' />
-                      موعد جديد
-                    </button>
-                    <button
-                      type='button'
-                      className='flex h-[42px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.28)]'
-                    >
-                      <FileText className='h-4 w-4' />
-                      السجلات
-                    </button>
-                  </div>
-                </div>
-              </div>
+                patient={cardPatient}
+                expanded={expandedId === patient.id}
+                onToggle={() =>
+                  setExpandedId((cur) =>
+                    cur === patient.id ? null : patient.id,
+                  )
+                }
+                onStartConsultation={() =>
+                  toast('سيتم ربط «بدء استشارة» بالخادم.', {
+                    title: 'قريباً',
+                    variant: 'info',
+                    durationMs: 3800,
+                  })
+                }
+                onStartVisit={() =>
+                  toast('سيتم ربط «بدء زيارة» بالخادم.', {
+                    title: 'قريباً',
+                    variant: 'info',
+                    durationMs: 3800,
+                  })
+                }
+                onRequestAccess={() =>
+                  toast('سيتم ربط «طلب وصول» للملف الطبي بالخادم.', {
+                    title: 'قريباً',
+                    variant: 'info',
+                    durationMs: 3800,
+                  })
+                }
+              />
             );
           })}
+
+          {visiblePatients.length === 0 ? (
+            <div className='rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#667085]'>
+              لا توجد مرضى مطابقون لهذا الفلتر أو البحث.
+            </div>
+          ) : null}
         </section>
       </div>
     </>
