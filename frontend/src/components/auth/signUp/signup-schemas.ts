@@ -144,7 +144,7 @@ const phoneLocalPartSchema = z
   .string()
   .regex(/^\d*$/, 'أرقام فقط، بدون مسافات أو رمز الدولة');
 
-const signupE164PhoneSchema = z
+export const signupE164PhoneSchema = z
   .string()
   .regex(
     /^\+[1-9]\d{7,14}$/,
@@ -195,6 +195,37 @@ export function signupLocalLengthErrorMessage(
   return `رقم الهاتف المحلي غير مكتمل أو غير مطابق للصيغة المتوقعة لهذا المفتاح (${dial}).`;
 }
 
+export function normalizePhoneLocalDigits(value: string): string {
+  return value.replace(/^0+/, '').replace(/\D/g, '');
+}
+
+export function validatePhoneByDialCode(
+  dial: SignupPhoneDialCode,
+  phoneLocal: string,
+): string | null {
+  const local = normalizePhoneLocalDigits(phoneLocal);
+  if (!local.length) {
+    return 'أدخل رقم الهاتف بدون رمز الدولة';
+  }
+
+  const rule = SIGNUP_LOCAL_DIGIT_RULES[dial];
+  if (rule) {
+    if ('exact' in rule && local.length !== rule.exact) {
+      return signupLocalLengthErrorMessage(dial, local.length);
+    }
+    if ('min' in rule && (local.length < rule.min || local.length > rule.max)) {
+      return signupLocalLengthErrorMessage(dial, local.length);
+    }
+  }
+
+  const full = `${dial}${local}`;
+  if (!signupE164PhoneSchema.safeParse(full).success) {
+    return 'رقم الهاتف لا يطابق صيغة دولية صالحة (E.164). تحقق من عدد الأرقام.';
+  }
+
+  return null;
+}
+
 export const step1AccountSchema = z
   .object({
     fullName: signupStringTrim.pipe(
@@ -217,8 +248,8 @@ export const step1AccountSchema = z
     phoneLocal: phoneLocalPartSchema,
     channel: verificationChannelSchema,
   })
-  .superRefine((data, ctx) => {
-    const local = data.phoneLocal.replace(/^0+/, '').replace(/\D/g, '');
+.superRefine((data, ctx) => {
+    const local = normalizePhoneLocalDigits(data.phoneLocal);
     if (!local.length) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -228,44 +259,18 @@ export const step1AccountSchema = z
       return;
     }
 
-    const rule = SIGNUP_LOCAL_DIGIT_RULES[data.phoneDialCode];
-    if (rule) {
-      if ('exact' in rule && local.length !== rule.exact) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: signupLocalLengthErrorMessage(
-            data.phoneDialCode,
-            local.length,
-          ),
-          path: ['phoneLocal'],
-        });
-        return;
-      }
-      if ('min' in rule && (local.length < rule.min || local.length > rule.max)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: signupLocalLengthErrorMessage(
-            data.phoneDialCode,
-            local.length,
-          ),
-          path: ['phoneLocal'],
-        });
-        return;
-      }
-    }
-
-    const full = `${data.phoneDialCode}${local}`;
-    if (!signupE164PhoneSchema.safeParse(full).success) {
+    const phoneError = validatePhoneByDialCode(data.phoneDialCode, data.phoneLocal);
+    if (phoneError && phoneError !== 'أدخل رقم الهاتف بدون رمز الدولة') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message:
-          'رقم الهاتف لا يطابق صيغة دولية صالحة (E.164). تحقق من عدد الأرقام.',
+        message: phoneError,
         path: ['phoneLocal'],
       });
+      return;
     }
   })
   .transform((d) => {
-    const local = d.phoneLocal.replace(/^0+/, '').replace(/\D/g, '');
+    const local = normalizePhoneLocalDigits(d.phoneLocal);
     const phone = `${d.phoneDialCode}${local}`;
     return {
       fullName: d.fullName.trim(),
