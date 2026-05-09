@@ -16,7 +16,7 @@ import {
   DEFAULT_ADMIN_LOCAL_SETTINGS,
   loadAdminLocalSettings,
   persistAdminLocalSettings,
-} from '@/lib/adminLocalSettings';
+} from '@/lib/admin/adminLocalSettings';
 
 type Ctx = {
   settings: AdminLocalSettings;

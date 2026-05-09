@@ -1,12 +1,12 @@
-'use client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type Patient } from '@/lib/api/api';
+"use client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, type Patient } from "@/lib/api_mock";
 
 export function usePatients(
   page = 1,
   limit = 10,
-  search = '',
-  status?: Patient['status'],
+  search = "",
+  status?: Patient["status"],
 ) {
   const {
     data: response,
@@ -14,7 +14,7 @@ export function usePatients(
     error,
     refetch,
   } = useQuery({
-    queryKey: ['patients', page, limit, search, status],
+    queryKey: ["patients", page, limit, search, status],
     queryFn: () => api.getPatients(page, limit, search, status),
     staleTime: 1000 * 60, // 1 minute
   });
@@ -37,7 +37,7 @@ export function usePatient(id: string) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['patient', id],
+    queryKey: ["patient", id],
     queryFn: () => api.getPatientById(id),
     enabled: !!id,
     staleTime: 1000 * 60, // 1 minute
@@ -54,14 +54,14 @@ export function useCreatePatient() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (patientData: Omit<Patient, 'id'>) =>
+    mutationFn: (patientData: Omit<Patient, "id">) =>
       api.createPatient(patientData),
     onSuccess: (response) => {
       // Invalidate patients list to refresh
-      queryClient.invalidateQueries({ queryKey: ['patients'] });
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
     },
     onError: (error) => {
-      console.error('Failed to create patient:', error);
+      console.error("Failed to create patient:", error);
     },
   });
 
@@ -81,11 +81,11 @@ export function useUpdatePatient() {
       api.updatePatient(id, updates),
     onSuccess: (response, variables) => {
       // Invalidate specific patient and list
-      queryClient.invalidateQueries({ queryKey: ['patient', variables.id] });
-      queryClient.invalidateQueries({ queryKey: ['patients'] });
+      queryClient.invalidateQueries({ queryKey: ["patient", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
     },
     onError: (error) => {
-      console.error('Failed to update patient:', error);
+      console.error("Failed to update patient:", error);
     },
   });
 
@@ -104,10 +104,10 @@ export function useDeletePatient() {
     mutationFn: (id: string) => api.deletePatient(id),
     onSuccess: () => {
       // Invalidate patients list
-      queryClient.invalidateQueries({ queryKey: ['patients'] });
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
     },
     onError: (error) => {
-      console.error('Failed to delete patient:', error);
+      console.error("Failed to delete patient:", error);
     },
   });
 
@@ -123,7 +123,7 @@ export function useUpdatePatientStatus() {
   const { updatePatient } = useUpdatePatient();
 
   return {
-    updateStatus: (id: string, status: Patient['status']) =>
+    updateStatus: (id: string, status: Patient["status"]) =>
       updatePatient({ id, updates: { status } }),
   };
 }

@@ -1,16 +1,16 @@
-import { get } from '@/lib/base';
-import { resolveLookupText } from '@/lib/admin/lookupUtils';
-import type { AdminLocalizedLookupText } from '@/lib/admin/types';
-import { authEndpoints } from '@/lib/auth/endpoints';
-import type { DoctorSignupSpecialtyOption } from '@/lib/auth/types';
+import { get } from "@/lib/api";
+import { resolveLookupText } from "@/lib/admin/lookupUtils";
+import type { AdminLocalizedLookupText } from "@/lib/admin/types";
+import { authEndpoints } from "@/lib/auth/endpoints";
+import type { DoctorSignupSpecialtyOption } from "@/lib/auth/types";
 
 /** PDF: GET /meta/doctor-specializations مع `includeAllLangs=true` تعيد حقول `{ ar, en }` للنص. */
 function doctorSpecializationsRequestUrl(): string {
   const override =
-    import.meta.env.VITE_PUBLIC_DOCTOR_SPECIALTIES_PATH?.trim() ?? '';
+    import.meta.env.VITE_PUBLIC_DOCTOR_SPECIALTIES_PATH?.trim() ?? "";
   const base =
     override.length > 0 ? override : authEndpoints.doctorSpecialties();
-  const sep = base.includes('?') ? '&' : '?';
+  const sep = base.includes("?") ? "&" : "?";
   return `${base}${sep}includeAllLangs=true`;
 }
 
@@ -18,13 +18,11 @@ function mapLookupLikeRow(
   row: Record<string, unknown>,
 ): DoctorSignupSpecialtyOption | null {
   const rawText = row.text as AdminLocalizedLookupText | undefined;
-  const fallbackLabel = String(
-    row.label ?? row.name ?? row.title ?? '',
-  ).trim();
-  const labelAr = resolveLookupText(rawText ?? fallbackLabel, 'ar').trim();
-  const labelEn = resolveLookupText(rawText ?? fallbackLabel, 'en').trim();
-  const key = String(row.key ?? '').trim();
-  const id = String(row.id ?? row._id ?? '').trim();
+  const fallbackLabel = String(row.label ?? row.name ?? row.title ?? "").trim();
+  const labelAr = resolveLookupText(rawText ?? fallbackLabel, "ar").trim();
+  const labelEn = resolveLookupText(rawText ?? fallbackLabel, "en").trim();
+  const key = String(row.key ?? "").trim();
+  const id = String(row.id ?? row._id ?? "").trim();
   const label = labelAr || labelEn || fallbackLabel || key || id;
   const value = key || id || label;
   if (!value || !label) return null;
@@ -37,29 +35,29 @@ function mapLookupLikeRow(
 }
 
 const ARRAY_PAYLOAD_KEYS_OUTER = [
-  'doctorSpecializations',
-  'specialties',
-  'lookups',
-  'options',
-  'items',
-  'results',
-  'data',
-  'payload',
-  'response',
-  'content',
-  'result',
+  "doctorSpecializations",
+  "specialties",
+  "lookups",
+  "options",
+  "items",
+  "results",
+  "data",
+  "payload",
+  "response",
+  "content",
+  "result",
 ] as const;
 
 const ARRAY_PAYLOAD_KEYS_INNER = [
-  'doctorSpecializations',
-  'items',
-  'results',
-  'specialties',
-  'lookups',
-  'options',
-  'data',
-  'records',
-  'result',
+  "doctorSpecializations",
+  "items",
+  "results",
+  "specialties",
+  "lookups",
+  "options",
+  "data",
+  "records",
+  "result",
 ] as const;
 
 function extractRows(raw: Record<string, unknown>): Record<string, unknown>[] {
@@ -76,7 +74,7 @@ function extractRows(raw: Record<string, unknown>): Record<string, unknown>[] {
   for (const k of ARRAY_PAYLOAD_KEYS_OUTER) {
     const v = raw[k];
     if (Array.isArray(v)) return v as Record<string, unknown>[];
-    if (v && typeof v === 'object' && !Array.isArray(v)) {
+    if (v && typeof v === "object" && !Array.isArray(v)) {
       const inner = tryNest(v as Record<string, unknown>);
       if (inner?.length ?? 0) return inner!;
     }
@@ -95,7 +93,7 @@ export async function fetchDoctorSignupSpecialties(): Promise<
   const url = doctorSpecializationsRequestUrl();
   const raw =
     ((await get<Record<string, unknown>>(url, {
-      locale: 'ar',
+      locale: "ar",
       omitAuth: true,
     })) as Record<string, unknown> | undefined) ?? {};
 

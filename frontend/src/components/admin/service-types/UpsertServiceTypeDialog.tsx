@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   useCreateServiceType,
   useMutateServiceType,
-} from '@/hooks/useAdminServices';
+} from '@/hooks/admin/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
 import type { ServiceType, ServiceTypeField } from '@/lib/admin/types';

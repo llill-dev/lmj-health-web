@@ -4,8 +4,10 @@ import {
   AlertCircle,
   CalendarClock,
   Download,
+  Eye,
   FileText,
   HeartPulse,
+  Loader2,
   Mail,
   Phone,
   ShieldCheck,
@@ -14,14 +16,16 @@ import {
   Calendar,
   Info,
 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAdminPatient } from '@/hooks/useAdminPatient';
-import { useAdminAppointments } from '@/hooks/useAdminAppointments';
-import { useAdminAuditLogs } from '@/hooks/useAdminAuditLogs';
-import { useAdminPatientFiles } from '@/hooks/useAdminPatientFiles';
+import { useAdminPatient } from '@/hooks/admin/useAdminPatient';
+import { useAdminAppointments } from '@/hooks/admin/useAdminAppointments';
+import { useAdminAuditLogs } from '@/hooks/admin/useAdminAuditLogs';
+import { useAdminPatientFiles } from '@/hooks/admin/useAdminPatientFiles';
 import { AppointmentStatusChip } from '@/components/admin/patients/AppointmentStatusChip';
+import { useToast } from '@/components/ui/ToastProvider';
 import { adminApi } from '@/lib/admin/client';
+import { triggerBrowserFileDownload } from '@/lib/files/triggerBrowserFileDownload';
 import type {
   AdminPatientFileItem,
   AdminPatientSummary,
@@ -74,7 +78,23 @@ function formatBytes(bytes?: number) {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
 
+function safeDownloadBasename(file: AdminPatientFileItem): string {
+  const raw = file.originalName?.trim().replace(/\s+/g, '_') || 'file';
+  const hasExt = /\.\w{1,12}$/i.test(raw);
+  if (hasExt) return raw.slice(0, 220);
+  const mime = file.mimeType?.toLowerCase() ?? '';
+  let ext = '';
+  if (mime === 'application/pdf') ext = '.pdf';
+  else if (mime.startsWith('image/jpeg')) ext = '.jpg';
+  else if (mime.startsWith('image/png')) ext = '.png';
+  else if (mime.startsWith('image/webp')) ext = '.webp';
+  else if (mime.startsWith('image/'))
+    ext = '.' + mime.split('/')[1]?.replace(/[^\w]/g, '') || '';
+  return `${raw.slice(0, 180)}${ext}`;
+}
+
 export default function AdminPatientDetailsPage() {
+  const { toast } = useToast();
   const { patientId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -130,6 +150,8 @@ export default function AdminPatientDetailsPage() {
     [patientAppointments],
   );
 
+  const [fileActionKey, setFileActionKey] = useState<string | null>(null);
+
   const patientAuditLogs = useMemo(
     () =>
       (auditQuery.data?.auditLogs ?? []).filter((l) => {
@@ -139,18 +161,54 @@ export default function AdminPatientDetailsPage() {
     [auditQuery.data?.auditLogs, patient?.publicId, patientId],
   );
 
-  const handleFileDownload = async (file: AdminPatientFileItem) => {
+  async function openPatientFile(
+    file: AdminPatientFileItem,
+    mode: 'view' | 'download',
+  ) {
     const resolvedPatientId = patient?._id ?? patientId;
-    const fileId = file._id || file.id;
+    const fileIdRaw = file._id ?? file.id;
+    const fileId = fileIdRaw != null ? String(fileIdRaw) : '';
     if (!resolvedPatientId || !fileId) return;
+    const actionKey = `${fileId}:${mode}`;
+    setFileActionKey(actionKey);
     try {
-      const res = await adminApi.patients.files.getDownloadUrl(resolvedPatientId, fileId);
+      const res = await adminApi.patients.files.getDownloadUrl(
+        resolvedPatientId,
+        fileId,
+      );
       const url = res.downloadUrl || res.url;
-      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      if (!url) {
+        toast('لم يُرجع الخادم رابطاً لهذا الملف.', {
+          title: 'تعذّر الفتح',
+          variant: 'error',
+          durationMs: 4500,
+        });
+        return;
+      }
+      if (mode === 'view') {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        const name = safeDownloadBasename(file);
+        try {
+          await triggerBrowserFileDownload(url, name);
+        } catch {
+          toast('تعذّر تنزيل الملف. جرّب «معاينة» أو تحقّق من سياسة CORS على رابط التخزين.', {
+            title: 'تعذّر التنزيل',
+            variant: 'error',
+            durationMs: 5500,
+          });
+        }
+      }
     } catch {
-      // Keep UX quiet here; list remains interactive.
+      toast('تعذّر الحصول على رابط الملف. تحقّق من الصلاحيات والشبكة.', {
+        title: 'خطأ',
+        variant: 'error',
+        durationMs: 5000,
+      });
+    } finally {
+      setFileActionKey(null);
     }
-  };
+  }
 
   return (
     <>
@@ -377,34 +435,63 @@ export default function AdminPatientDetailsPage() {
                     لا توجد ملفات مرفوعة لهذا المريض.
                   </div>
                 ) : (
-                  filesQuery.files.map((f) => (
+                  filesQuery.files.map((f) => {
+                    const fid = String(f._id || f.id || '');
+                    const busyThisFile =
+                      fileActionKey !== null && fileActionKey.startsWith(`${fid}:`);
+                    return (
                     <div
-                      key={f._id || f.id}
+                      key={fid}
                       className='rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3'
                     >
-                      <div className='flex items-center justify-between gap-3'>
-                        <div className='text-right'>
+                      <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                        <div className='min-w-0 flex-1 text-right'>
                           <div className='font-cairo text-[12px] font-black text-[#111827]'>
                             {f.originalName || 'ملف بدون اسم'}
                           </div>
                           <div className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
-                            {f.mimeType || 'غير معروف'} • {formatBytes(f.sizeBytes)} •{' '}
-                            {formatDateTime(f.createdAt)}
+                            {f.mimeType || 'غير معروف'} • {formatBytes(f.sizeBytes)}{' '}
+                            • {formatDateTime(f.createdAt)}
                           </div>
                         </div>
-                        <button
-                          type='button'
-                          onClick={() => {
-                            void handleFileDownload(f);
-                          }}
-                          className='inline-flex h-[30px] items-center gap-1.5 rounded-[8px] border border-[#D1E9FF] bg-[#EFF8FF] px-3 font-cairo text-[11px] font-extrabold text-[#175CD3] hover:bg-[#D1E9FF]'
-                        >
-                          <Download className='h-3.5 w-3.5' />
-                          تنزيل
-                        </button>
+                        <div className='flex shrink-0 flex-wrap items-center justify-end gap-2'>
+                          <button
+                            type='button'
+                            disabled={busyThisFile || !fid}
+                            onClick={() => {
+                              void openPatientFile(f, 'view');
+                            }}
+                            className='inline-flex h-[32px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-[#ECFDF3] px-3 font-cairo text-[11px] font-extrabold text-[#15803D] transition-colors hover:bg-[#DCFCE7] disabled:opacity-55'
+                            aria-label='معاينة الملف في تبويب جديد'
+                          >
+                            {fileActionKey === `${fid}:view` ? (
+                              <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                            ) : (
+                              <Eye className='h-3.5 w-3.5' aria-hidden />
+                            )}
+                            معاينة
+                          </button>
+                          <button
+                            type='button'
+                            disabled={busyThisFile || !fid}
+                            onClick={() => {
+                              void openPatientFile(f, 'download');
+                            }}
+                            className='inline-flex h-[32px] items-center gap-1.5 rounded-[8px] border border-[#D1E9FF] bg-[#EFF8FF] px-3 font-cairo text-[11px] font-extrabold text-[#175CD3] hover:bg-[#D1E9FF] disabled:opacity-55'
+                            aria-label='تنزيل الملف'
+                          >
+                            {fileActionKey === `${fid}:download` ? (
+                              <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                            ) : (
+                              <Download className='h-3.5 w-3.5' aria-hidden />
+                            )}
+                            تنزيل
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </section>

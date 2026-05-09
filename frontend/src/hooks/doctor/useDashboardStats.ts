@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { api, type DashboardStats } from '@/lib/api/api';
+import { useQuery } from "@tanstack/react-query";
+import { api, type DashboardStats } from "@/lib/api_mock";
 
 export function useDashboardStats() {
   const {
@@ -10,7 +10,7 @@ export function useDashboardStats() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ["dashboard-stats"],
     queryFn: () => api.getDashboardStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateFacility, useUpdateFacility } from '@/hooks/useAdminServices';
+import { useCreateFacility, useUpdateFacility } from '@/hooks/admin/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
 import type { FacilitySummary, FacilityType, FacilityStatus } from '@/lib/admin/types';

@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from 'react';
-import { get, post } from '@/lib/base';
-import { authApi } from '@/lib/auth/client';
+import { useSyncExternalStore } from "react";
+import { get, post } from "@/lib/api";
+import { authApi } from "@/lib/auth/client";
 import {
   readAuthToken,
   writeAuthToken,
@@ -8,8 +8,8 @@ import {
   readAuthUser,
   writeAuthUser,
   clearAllAuthCookies,
-} from '@/lib/cookies';
-import type { LoginRequest, AuthError } from '@/lib/auth/types';
+} from "@/lib/cookies";
+import type { LoginRequest, AuthError } from "@/lib/auth/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -19,20 +19,20 @@ export interface User {
   id: string;
   email: string;
   phone: string;
-  role: 'patient' | 'secretary' | 'data-entry' | 'doctor' | 'admin';
+  role: "patient" | "secretary" | "data-entry" | "doctor" | "admin";
   name?: string;
   verified: boolean;
 }
 
 interface PendingVerification {
   userId: string;
-  role: User['role'];
+  role: User["role"];
   email: string;
   phone: string;
-  channel: 'email' | 'whatsapp';
+  channel: "email" | "whatsapp";
 }
 
-const PENDING_VERIFICATION_KEY = 'pendingSignupVerification';
+const PENDING_VERIFICATION_KEY = "pendingSignupVerification";
 
 interface AuthState {
   user: User | null;
@@ -44,7 +44,7 @@ interface AuthState {
   primaryEmail: string;
   phone: string;
   region: string;
-  lang: 'ar' | 'en';
+  lang: "ar" | "en";
   // Actions
   loadGeneralSettings: () => Promise<void>;
   saveGeneralSettings: (payload: {
@@ -52,17 +52,17 @@ interface AuthState {
     primaryEmail: string;
     phone: string;
     region: string;
-    lang?: 'ar' | 'en';
+    lang?: "ar" | "en";
   }) => Promise<void>;
   login: (
     identifier: string,
     password: string,
-    clientType?: 'web' | 'patient_mobile' | 'doctor_mobile',
+    clientType?: "web" | "patient_mobile" | "doctor_mobile",
   ) => Promise<void>;
   register: (
     email: string,
     password: string,
-    role: 'jobseeker' | 'company' | 'doctor',
+    role: "jobseeker" | "company" | "doctor",
   ) => Promise<void>;
   setPendingVerification: (payload: PendingVerification | null) => void;
   logout: (options?: { skipRemoteRevoke?: boolean }) => Promise<void>;
@@ -76,7 +76,7 @@ export class AuthFlowError extends Error {
 
   constructor(authError: AuthError) {
     super(authError.message);
-    this.name = 'AuthFlowError';
+    this.name = "AuthFlowError";
     this.code = authError.code;
     this.authError = authError;
   }
@@ -102,16 +102,16 @@ function readPersistedGeneralSettings(): Partial<AuthState> | null {
       primaryEmail?: string;
       phone?: string;
       region?: string;
-      lang?: 'ar' | 'en';
-    }>(localStorage.getItem('generalSettings'));
+      lang?: "ar" | "en";
+    }>(localStorage.getItem("generalSettings"));
 
     if (!saved) return null;
     return {
-      platformName: saved.platformName ?? 'LMJ Health',
-      primaryEmail: saved.primaryEmail ?? '',
-      phone: saved.phone ?? '',
-      region: saved.region ?? '',
-      lang: saved.lang ?? 'ar',
+      platformName: saved.platformName ?? "LMJ Health",
+      primaryEmail: saved.primaryEmail ?? "",
+      phone: saved.phone ?? "",
+      region: saved.region ?? "",
+      lang: saved.lang ?? "ar",
     } as Partial<AuthState>;
   } catch {
     return null;
@@ -123,15 +123,15 @@ function writePersistedGeneralSettings(payload: {
   primaryEmail: string;
   phone: string;
   region: string;
-  lang?: 'ar' | 'en';
+  lang?: "ar" | "en";
 }) {
   try {
-    localStorage.setItem('generalSettings', JSON.stringify(payload));
+    localStorage.setItem("generalSettings", JSON.stringify(payload));
   } catch {}
 }
 
 function readPendingVerification(): PendingVerification | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   let parsed: PendingVerification | null = null;
   try {
     parsed = safeJsonParse<PendingVerification>(
@@ -146,7 +146,7 @@ function readPendingVerification(): PendingVerification | null {
     !parsed.role ||
     !parsed.email ||
     !parsed.phone ||
-    !['email', 'whatsapp'].includes(parsed.channel)
+    !["email", "whatsapp"].includes(parsed.channel)
   ) {
     return null;
   }
@@ -155,7 +155,7 @@ function readPendingVerification(): PendingVerification | null {
 }
 
 function writePendingVerification(payload: PendingVerification | null): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     if (!payload) {
       sessionStorage.removeItem(PENDING_VERIFICATION_KEY);
@@ -174,9 +174,11 @@ function buildUserFromCookie(): User | null {
   if (!data) return null;
   return {
     id: data.userId,
-    email: data.email ?? '',
-    phone: data.phone ?? '',
-    role: (data.role === 'data_entry' ? 'data-entry' : data.role) as User['role'],
+    email: data.email ?? "",
+    phone: data.phone ?? "",
+    role: (data.role === "data_entry"
+      ? "data-entry"
+      : data.role) as User["role"],
     name: data.fullName,
     verified: true,
   };
@@ -191,11 +193,11 @@ let state: AuthState = {
   token: null,
   isAuthenticated: false,
   pendingVerification: null,
-  platformName: 'LMJ Health',
-  primaryEmail: '',
-  phone: '',
-  region: '',
-  lang: 'ar',
+  platformName: "LMJ Health",
+  primaryEmail: "",
+  phone: "",
+  region: "",
+  lang: "ar",
 
   loadGeneralSettings: async () => {
     const persisted = readPersistedGeneralSettings();
@@ -209,15 +211,15 @@ let state: AuthState = {
       primaryEmail: string;
       phone: string;
       region: string;
-      lang?: 'ar' | 'en';
-    }>('/api/admin/settings/general', { locale: 'ar' });
+      lang?: "ar" | "en";
+    }>("/api/admin/settings/general", { locale: "ar" });
 
     setState({
-      platformName: data.platformName || 'LMJ Health',
-      primaryEmail: data.primaryEmail || '',
-      phone: data.phone || '',
-      region: data.region || '',
-      lang: (data.lang as 'ar' | 'en' | undefined) || 'ar',
+      platformName: data.platformName || "LMJ Health",
+      primaryEmail: data.primaryEmail || "",
+      phone: data.phone || "",
+      region: data.region || "",
+      lang: (data.lang as "ar" | "en" | undefined) || "ar",
     });
   },
 
@@ -230,9 +232,9 @@ let state: AuthState = {
           primaryEmail: string;
           phone: string;
           region: string;
-          lang?: 'ar' | 'en';
+          lang?: "ar" | "en";
         };
-      }>('/api/admin/settings/general', payload, { locale: 'ar' });
+      }>("/api/admin/settings/general", payload, { locale: "ar" });
 
       const s = (data as { settings?: typeof payload })?.settings ?? payload;
       setState({
@@ -240,7 +242,7 @@ let state: AuthState = {
         primaryEmail: s.primaryEmail,
         phone: s.phone,
         region: s.region,
-        lang: s.lang || 'ar',
+        lang: s.lang || "ar",
       });
 
       writePersistedGeneralSettings(s);
@@ -252,18 +254,18 @@ let state: AuthState = {
   login: async (
     identifier: string,
     password: string,
-    clientType: 'web' | 'patient_mobile' | 'doctor_mobile' = 'web',
+    clientType: "web" | "patient_mobile" | "doctor_mobile" = "web",
   ) => {
     const loginRequest: LoginRequest = {
-      email: identifier.includes('@') ? identifier : undefined,
-      phone: identifier.includes('@') ? undefined : identifier,
+      email: identifier.includes("@") ? identifier : undefined,
+      phone: identifier.includes("@") ? undefined : identifier,
       password,
       clientType,
     };
 
     const result = await authApi.login(loginRequest);
 
-    if ('error' in result) {
+    if ("error" in result) {
       throw new AuthFlowError(result.error);
     }
 
@@ -271,10 +273,12 @@ let state: AuthState = {
 
     const mappedUser: User = {
       id: data.userId,
-      email: data.email ?? '',
-      phone: data.phone ?? '',
-      role: (data.role === 'data_entry' ? 'data-entry' : data.role) as User['role'],
-      verified: data.accountStatus === 'active',
+      email: data.email ?? "",
+      phone: data.phone ?? "",
+      role: (data.role === "data_entry"
+        ? "data-entry"
+        : data.role) as User["role"],
+      verified: data.accountStatus === "active",
       name: data.fullName,
     };
 
@@ -292,17 +296,17 @@ let state: AuthState = {
       userId: data.userId,
       role: data.role,
       fullName: data.fullName,
-      email: data.email ?? '',
-      phone: data.phone ?? '',
+      email: data.email ?? "",
+      phone: data.phone ?? "",
       actorIds: data.actorIds as Record<string, string | undefined>,
       patientPublicId: data.patientPublicId,
     });
 
     // Legacy localStorage keys removed — cookies are the single source of truth.
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('userRole');
+      localStorage.removeItem("token");
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userRole");
     } catch {}
   },
 
@@ -320,7 +324,7 @@ let state: AuthState = {
       try {
         await authApi.logoutAll(token);
       } catch (err) {
-        console.warn('Logout API failed — continuing local logout:', err);
+        console.warn("Logout API failed — continuing local logout:", err);
       }
     }
 
@@ -336,9 +340,9 @@ let state: AuthState = {
 
     // Also clear any legacy localStorage keys that may still exist.
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('userRole');
+      localStorage.removeItem("token");
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userRole");
       sessionStorage.removeItem(PENDING_VERIFICATION_KEY);
     } catch {}
   },
@@ -360,7 +364,7 @@ function setState(patch: Partial<AuthState>) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function initFromCookies() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const token = readAuthToken();
   const user = buildUserFromCookie();

@@ -4,7 +4,7 @@ import { Settings, Plus, Edit, Check, Loader2 } from 'lucide-react';
 import {
   useServiceTypesList,
   useMutateServiceType,
-} from '@/hooks/useAdminServices';
+} from '@/hooks/admin/useAdminServices';
 import type { ServiceType } from '@/lib/admin/types';
 import { resolveLabel } from '@/lib/admin/types';
 import {

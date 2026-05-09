@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type WorkSchedule } from '@/lib/api/api';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, type WorkSchedule } from "@/lib/api_mock";
 
 export function useWorkSchedule() {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['work-schedule'],
+    queryKey: ["work-schedule"],
     queryFn: () => api.getWorkSchedule(),
     staleTime: 1000 * 60 * 5,
   });
@@ -24,7 +24,7 @@ export function useUpdateWorkSchedule() {
   const mutation = useMutation({
     mutationFn: (payload: WorkSchedule) => api.updateWorkSchedule(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['work-schedule'] });
+      queryClient.invalidateQueries({ queryKey: ["work-schedule"] });
     },
   });
 

@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { ExternalLink, Loader2, Tag, X } from 'lucide-react';
-import { useAdminContentById } from '@/hooks/useAdminContent';
+import { useAdminContentById } from '@/hooks/admin/useAdminContent';
 import type {
   AdminContentBlock,
   AdminContentDetailsItem,

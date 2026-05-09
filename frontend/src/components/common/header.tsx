@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 interface PageHeaderProps {
   title: string;
@@ -8,7 +8,12 @@ interface PageHeaderProps {
   className?: string;
 }
 
-export function Header({ title, description, actions, className }: PageHeaderProps) {
+export function Header({
+  title,
+  description,
+  actions,
+  className,
+}: PageHeaderProps) {
   return (
     <div className={cn("flex items-start justify-between gap-4", className)}>
       <div>
@@ -17,7 +22,9 @@ export function Header({ title, description, actions, className }: PageHeaderPro
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex items-center gap-2">{actions}</div>
+      ) : null}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ban, CheckCircle2, MapPin } from 'lucide-react';
-import { useAdminDoctor } from '@/hooks/useAdminDoctor';
+import { useAdminDoctor } from '@/hooks/admin/useAdminDoctor';
 import { adminApi, verificationRequestsFromListEnvelope } from '@/lib/admin/client';
 import {
   mergeDoctorProfileIntoSummaryStats,

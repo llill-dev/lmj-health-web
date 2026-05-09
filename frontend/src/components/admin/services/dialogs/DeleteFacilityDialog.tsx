@@ -3,7 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import { useEffect } from 'react';
-import { useDeleteFacility } from '@/hooks/useAdminServices';
+import { useDeleteFacility } from '@/hooks/admin/useAdminServices';
 import { useToast } from '@/components/ui/ToastProvider';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { FacilitySummary } from '@/lib/admin/types';

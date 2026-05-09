@@ -16,7 +16,7 @@ import {
   useFacilitiesList,
   useUpdateFacilityStatus,
   useServiceTypesList,
-} from '@/hooks/useAdminServices';
+} from '@/hooks/admin/useAdminServices';
 import type { FacilitySummary, FacilityStatus } from '@/lib/admin/types';
 
 export default function AdminServicesPage() {

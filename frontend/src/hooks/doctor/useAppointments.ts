@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type Appointment } from '@/lib/api/api';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, type Appointment } from "@/lib/api_mock";
 
 export function useAppointments(
   page = 1,
   limit = 10,
   date?: string,
-  status?: Appointment['status'],
+  status?: Appointment["status"],
   search?: string,
 ) {
   const {
@@ -16,7 +16,7 @@ export function useAppointments(
     error,
     refetch,
   } = useQuery({
-    queryKey: ['appointments', page, limit, date, status, search],
+    queryKey: ["appointments", page, limit, date, status, search],
     queryFn: () => api.getAppointments(page, limit, date, status, search),
     staleTime: 1000 * 60, // 1 minute
   });
@@ -39,7 +39,7 @@ export function useAppointment(id: string) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['appointment', id],
+    queryKey: ["appointment", id],
     queryFn: () => api.getAppointmentById(id),
     enabled: !!id,
     staleTime: 1000 * 60, // 1 minute
@@ -56,14 +56,14 @@ export function useCreateAppointment() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (appointmentData: Omit<Appointment, 'id'>) =>
+    mutationFn: (appointmentData: Omit<Appointment, "id">) =>
       api.createAppointment(appointmentData),
     onSuccess: (response) => {
       // Invalidate appointments list to refresh
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
     onError: (error) => {
-      console.error('Failed to create appointment:', error);
+      console.error("Failed to create appointment:", error);
     },
   });
 
@@ -84,17 +84,17 @@ export function useUpdateAppointmentStatus() {
       status,
     }: {
       id: string;
-      status: Appointment['status'];
+      status: Appointment["status"];
     }) => api.updateAppointmentStatus(id, status),
     onSuccess: (response, variables) => {
       // Invalidate specific appointment and list
       queryClient.invalidateQueries({
-        queryKey: ['appointment', variables.id],
+        queryKey: ["appointment", variables.id],
       });
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
     onError: (error) => {
-      console.error('Failed to update appointment status:', error);
+      console.error("Failed to update appointment status:", error);
     },
   });
 
@@ -113,11 +113,11 @@ export function useCancelAppointment() {
     mutationFn: (id: string) => api.cancelAppointment(id),
     onSuccess: () => {
       // Invalidate appointments list
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
     },
     onError: (error) => {
-      console.error('Failed to cancel appointment:', error);
+      console.error("Failed to cancel appointment:", error);
     },
   });
 
@@ -136,11 +136,11 @@ export function useCompleteAppointment() {
     mutationFn: (id: string) => api.completeAppointment(id),
     onSuccess: () => {
       // Invalidate appointments list
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
     },
     onError: (error) => {
-      console.error('Failed to complete appointment:', error);
+      console.error("Failed to complete appointment:", error);
     },
   });
 

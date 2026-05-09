@@ -1,4 +1,4 @@
-import { ApiError } from "@/lib/base";
+import { ApiError } from "@/lib/api";
 
 /** تعارض بريد/هاتف مُعرَّف بوضوح من الاستجابة (يُعرَض تحت الحقلة لا في الشريط العام إن أمكن). */
 export type SignupFieldConflictMessages = {
@@ -31,40 +31,40 @@ function normalizeIssueKey(key: string | null | undefined): string | null {
   const trimmed = key.trim();
   if (!trimmed) return null;
   return trimmed
-    .replace(/^body[.[/]/i, '')
-    .replace(/^\/+/, '')
-    .replace(/\]$/g, '')
-    .replace(/\[/g, '.')
-    .replace(/^"+|"+$/g, '');
+    .replace(/^body[.[/]/i, "")
+    .replace(/^\/+/, "")
+    .replace(/\]$/g, "")
+    .replace(/\[/g, ".")
+    .replace(/^"+|"+$/g, "");
 }
 
 function validationFieldLabel(key: string): string {
   const normalized = normalizeIssueKey(key) ?? key;
-  const leaf = normalized.split('.').filter(Boolean).at(-1) ?? normalized;
+  const leaf = normalized.split(".").filter(Boolean).at(-1) ?? normalized;
   const labels: Record<string, string> = {
-    fullName: 'الاسم الكامل',
-    email: 'البريد الإلكتروني',
-    phone: 'رقم الهاتف',
-    channel: 'قناة التحقق',
-    password: 'كلمة المرور',
-    role: 'نوع الحساب',
-    gender: 'الجنس',
-    dateOfBirth: 'تاريخ الميلاد',
-    address: 'العنوان',
-    specializationKey: 'التخصص',
-    customSpecializationText: 'التخصص المخصص',
-    specialization: 'التخصص',
-    medicalLicenseNumber: 'رقم مزاولة المهنة',
-    bio: 'النبذة التعريفية',
-    education: 'المؤهل العلمي',
-    clinicAddress: 'عنوان العيادة',
-    locationCity: 'المدينة',
-    locationCountry: 'الدولة',
-    consultationTypes: 'أنماط الاستشارة',
-    clinicLat: 'خط العرض',
-    clinicLng: 'خط الطول',
-    otp: 'رمز التحقق',
-    clientType: 'نوع العميل',
+    fullName: "الاسم الكامل",
+    email: "البريد الإلكتروني",
+    phone: "رقم الهاتف",
+    channel: "قناة التحقق",
+    password: "كلمة المرور",
+    role: "نوع الحساب",
+    gender: "الجنس",
+    dateOfBirth: "تاريخ الميلاد",
+    address: "العنوان",
+    specializationKey: "التخصص",
+    customSpecializationText: "التخصص المخصص",
+    specialization: "التخصص",
+    medicalLicenseNumber: "رقم مزاولة المهنة",
+    bio: "النبذة التعريفية",
+    education: "المؤهل العلمي",
+    clinicAddress: "عنوان العيادة",
+    locationCity: "المدينة",
+    locationCountry: "الدولة",
+    consultationTypes: "أنماط الاستشارة",
+    clinicLat: "خط العرض",
+    clinicLng: "خط الطول",
+    otp: "رمز التحقق",
+    clientType: "نوع العميل",
   };
   return labels[leaf] ?? normalized;
 }
@@ -82,7 +82,10 @@ function dedupeMessages(messages: string[]): string[] {
 }
 
 /** هل ظهر هذا النص (أو بصيغة مع أقواس) ضمن رسالة موجودة بالفعل؟ يمنع ازدواج «نص أساسي + (نفس النص)». */
-function serverDetailAlreadyContainedIn(messages: string[], detail: string): boolean {
+function serverDetailAlreadyContainedIn(
+  messages: string[],
+  detail: string,
+): boolean {
   const d = detail.trim();
   if (!d) return true;
   for (const raw of messages) {
@@ -104,11 +107,11 @@ function formatValidationDetails(body: Record<string, unknown>): string | null {
     .map((issue) => {
       const messages = dedupeMessages(issue.messages);
       if (!messages.length) return null;
-      if (!issue.key) return `• ${messages.join('، ')}`;
-      return `• ${validationFieldLabel(issue.key)}: ${messages.join('، ')}`;
+      if (!issue.key) return `• ${messages.join("، ")}`;
+      return `• ${validationFieldLabel(issue.key)}: ${messages.join("، ")}`;
     })
     .filter((s): s is string => Boolean(s))
-    .join('\n');
+    .join("\n");
 }
 
 function collectMessagesFromIssueValue(val: unknown): string[] {
@@ -130,9 +133,9 @@ function collectMessagesFromIssueValue(val: unknown): string[] {
 }
 
 function issueKeyFromObject(o: Record<string, unknown>): string | null {
-  for (const key of ['path', 'param', 'field', 'key', 'property', 'name']) {
+  for (const key of ["path", "param", "field", "key", "property", "name"]) {
     const val = o[key];
-    if (typeof val === 'string' && val.trim()) {
+    if (typeof val === "string" && val.trim()) {
       return normalizeIssueKey(val);
     }
   }
@@ -163,18 +166,18 @@ function collectValidationIssues(
     grouped.set(mapKey, { key: cleanKey, messages: cleanMessages });
   }
 
-  if (typeof errs === 'string') {
+  if (typeof errs === "string") {
     add(null, [errs]);
     return [...grouped.values()];
   }
 
   if (Array.isArray(errs)) {
     for (const item of errs) {
-      if (typeof item === 'string') {
+      if (typeof item === "string") {
         add(null, [item]);
         continue;
       }
-      if (item && typeof item === 'object') {
+      if (item && typeof item === "object") {
         const obj = item as Record<string, unknown>;
         add(issueKeyFromObject(obj), collectMessagesFromIssueValue(obj));
         continue;
@@ -184,7 +187,7 @@ function collectValidationIssues(
     return [...grouped.values()];
   }
 
-  if (typeof errs === 'object') {
+  if (typeof errs === "object") {
     for (const [rawKey, rawVal] of Object.entries(
       errs as Record<string, unknown>,
     )) {
@@ -200,7 +203,7 @@ export function issueMessagesIndicateMedicalLicenseConflict(
   messages: string[],
 ): boolean {
   if (!messages.length) return false;
-  const joinedAr = messages.join(' ');
+  const joinedAr = messages.join(" ");
   const joined = `${joinedAr} ${joinedAr.toLowerCase()}`;
   return (
     /مزاولة|مزاول|مزاولة المهنة|ترخيص|رقم.{0,8}مزاول|طبيب\s*مزاول|مزاول\s+مهنة|طبيب\s*مسجل|وزارة\s*الصحة|رخصة\s*مزاول|مزاولة\s*\(/i.test(
@@ -214,15 +217,15 @@ export function issueMessagesIndicateMedicalLicenseConflict(
 
 /** هل يصف النص بوضوح تعارض بريد/هاتف (وليس رسالة بدون اسم حقل)؟ */
 function issueMessagesExplicitlyDescribeContactField(
-  field: 'email' | 'phone',
+  field: "email" | "phone",
   messages: string[],
 ): boolean {
   if (!messages.length) return false;
-  const t = messages.join(' ');
+  const t = messages.join(" ");
   if (/مزاولة|ترخيص|مزاول|medical\s*license|\blicen[cs]e\b/i.test(t)) {
     return false;
   }
-  if (field === 'email') {
+  if (field === "email") {
     return /بريد|إيميل|ايميل|e-?mail|correo/i.test(t);
   }
   return /هاتف|جوال|واتس|phone|mobile|msisdn|رقم\s*الواتس|رقم\s*الجوال|rقم\s+الهاتف/i.test(
@@ -236,8 +239,7 @@ function responseBodyLooksLikeMedicalLicenseViolation(
   try {
     const haystack = JSON.stringify(body ?? {}).toLowerCase();
     const arHaystack =
-      haystack.replace(/\\/g, '') +
-      `${body ? JSON.stringify(body) : ''}`;
+      haystack.replace(/\\/g, "") + `${body ? JSON.stringify(body) : ""}`;
     /** أسماء أشهر من الخلفيات لرمز ترخيص المزاولة في JSON */
     const licenseKeysOk =
       /medicallicense|medical_license|medicallicensenumber|license_number|"license"|licensenumber|practiceid|professionalid|مزاولة|ترخيص|مزاول/.test(
@@ -267,32 +269,32 @@ function mapIssueKeyToConflictField(
 
   const k = normalizedLeaf
     .toLowerCase()
-    .replace(/[\s._[\]'"]/g, '')
-    .replace(/^\/+/, '');
+    .replace(/[\s._[\]'"]/g, "")
+    .replace(/^\/+/, "");
 
   /** قناة إرسال رمز OTP (واتساب/بريد) — ليست حقلاً لمقارنة «رقم الجوال مسجَّل». */
   if (
-    k === 'channel' ||
-    k === 'whatsapp' ||
-    k === 'verificationchannel' ||
-    k.includes('verificationchannel') ||
-    k.includes('otpchannel') ||
-    k.includes('signchannel')
+    k === "channel" ||
+    k === "whatsapp" ||
+    k === "verificationchannel" ||
+    k.includes("verificationchannel") ||
+    k.includes("otpchannel") ||
+    k.includes("signchannel")
   ) {
     return null;
   }
 
-  if (k.includes('email') || k === 'mail') return 'email';
+  if (k.includes("email") || k === "mail") return "email";
 
   /** لا نعتبر كلمة whatsapp وحده مؤشراً على حقول الهاتف (كثيرة الخوادم تُستخدمها لحقل القناة). */
   if (
-    k.includes('phone') ||
-    k.includes('mobile') ||
-    k.includes('phonenumber') ||
-    k.includes('msisdn') ||
-    k === 'tel'
+    k.includes("phone") ||
+    k.includes("mobile") ||
+    k.includes("phonenumber") ||
+    k.includes("msisdn") ||
+    k === "tel"
   ) {
-    return 'phone';
+    return "phone";
   }
 
   return null;
@@ -309,13 +311,13 @@ export function issueKeyIndicatesMedicalLicense(
     key;
   const k = leaf
     .toLowerCase()
-    .replace(/[\s._[\]'"]/g, '')
-    .replace(/^\/+/, '');
+    .replace(/[\s._[\]'"]/g, "")
+    .replace(/^\/+/, "");
   return (
-    k.includes('medicallicensenumber') ||
-    k.includes('medicallicense') ||
-    k.includes('licensenumber') ||
-    k === 'license' ||
+    k.includes("medicallicensenumber") ||
+    k.includes("medicallicense") ||
+    k.includes("licensenumber") ||
+    k === "license" ||
     /^license.+number/.test(k) ||
     /^medical.+license/.test(k)
   );
@@ -334,7 +336,7 @@ export function extractSignupMedicalLicenseConflictMessage(
 
   /** توحيد أسلوب رسالة واحدة مهنية عند يُعاد تصنيفها من حقول الهاتف/البريد */
   const LICENSE_FALLBACK_ALREADY_AR =
-    'رقم مزاولة المهنة مسجل مسبقاً أو مستخدم؛ جرّب رقم الترخيص الصادر عن الجهة المختصة.';
+    "رقم مزاولة المهنة مسجل مسبقاً أو مستخدم؛ جرّب رقم الترخيص الصادر عن الجهة المختصة.";
   const bodyLicenseContext = responseBodyLooksLikeMedicalLicenseViolation(
     error.body,
   );
@@ -363,7 +365,11 @@ export function extractSignupMedicalLicenseConflictMessage(
     }
     /** أحياناً الخادم يرسل key خاطئ (مثل قناة) لكن الرسالة تصف الترخيص */
     for (const m of issue.messages) {
-      if (/مزاولة|ترخيص|رقم.{0,6}مزاولة|medical\s*license|license\s*number/i.test(m))
+      if (
+        /مزاولة|ترخيص|رقم.{0,6}مزاولة|medical\s*license|license\s*number/i.test(
+          m,
+        )
+      )
         msgs.push(m);
     }
   }
@@ -402,7 +408,7 @@ export function extractSignupMedicalLicenseConflictMessage(
 
   const unified = dedupeMessages(msgs);
   if (!unified.length) return undefined;
-  return unified.join(' — ');
+  return unified.join(" — ");
 }
 
 function mergeFieldConflict(
@@ -464,12 +470,13 @@ export function extractSignupConflictFields(
   }
 
   const primary = error.message.trim();
-  const mkRaw = error.messageKey ?? '';
+  const mkRaw = error.messageKey ?? "";
   const mk = mkRaw.toLowerCase();
 
   /** لا نربط messageKey ببريد/هاتف إذا كان جسم الرد يشير لحقول ترخيص (تعارض شائع مع مفاتيح مثل PHONE_TAKEN). */
-  const bodyLicenseHintGlobal =
-    responseBodyLooksLikeMedicalLicenseViolation(error.body);
+  const bodyLicenseHintGlobal = responseBodyLooksLikeMedicalLicenseViolation(
+    error.body,
+  );
 
   /** لا نربط رسالة عامة بالبريد/الهاتف إن أوضح الخادم أنها عن الترخيص */
   const messageKeyIndicatesLicense =
@@ -562,8 +569,7 @@ export function signupErrorHasOnlyContactFieldIssues(error: unknown): boolean {
       const onlyContactKeyed = issues.every((issue) => {
         const f = issue.key ? mapIssueKeyToConflictField(issue.key) : null;
         return (
-          !!f &&
-          issueMessagesExplicitlyDescribeContactField(f, issue.messages)
+          !!f && issueMessagesExplicitlyDescribeContactField(f, issue.messages)
         );
       });
       if (!onlyContactKeyed) return false;

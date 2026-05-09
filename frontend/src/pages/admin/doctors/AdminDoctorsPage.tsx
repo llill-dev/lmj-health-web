@@ -10,7 +10,7 @@ import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 import DoctorListCard from '@/components/admin/doctors/DoctorListCard';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { useAdminDoctors } from '@/hooks/useAdminDoctors';
+import { useAdminDoctors } from '@/hooks/admin/useAdminDoctors';
 import type { AdminDoctorApprovalStatus } from '@/lib/admin/types';
 
 const TEAL = '#108B8B';

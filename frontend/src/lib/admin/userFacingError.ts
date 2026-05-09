@@ -1,4 +1,4 @@
-import { ApiError } from '@/lib/base';
+import { ApiError } from "@/lib/api";
 
 /** بادئات قديمة أو من مصادر أخرى لا نريد إظهارها للمشرف */
 const RE_AR_STATUS = /^خطأ\s*\d+\s*:\s*/u;
@@ -12,10 +12,10 @@ const RE_EN_UPLOAD = /^Upload error:\s*\d+/i;
 export function stripHttpStatusFromMessage(s: string): string {
   let t = s.trim();
   if (!t) return t;
-  t = t.replace(RE_AR_STATUS, '');
-  t = t.replace(RE_EN_STATUS, '');
-  t = t.replace(RE_AR_UPLOAD, 'تعذّر رفع الملف');
-  t = t.replace(RE_EN_UPLOAD, 'Upload failed');
+  t = t.replace(RE_AR_STATUS, "");
+  t = t.replace(RE_EN_STATUS, "");
+  t = t.replace(RE_AR_UPLOAD, "تعذّر رفع الملف");
+  t = t.replace(RE_EN_UPLOAD, "Upload failed");
   return t.trim();
 }
 
@@ -24,10 +24,10 @@ export function stripHttpStatusFromMessage(s: string): string {
  */
 export function userFacingErrorMessage(
   err: unknown,
-  fallback = 'تعذّر إكمال العملية.',
+  fallback = "تعذّر إكمال العملية.",
 ): string {
   if (err == null) return fallback;
-  if (typeof err === 'string') {
+  if (typeof err === "string") {
     const u = stripHttpStatusFromMessage(err);
     return u || fallback;
   }

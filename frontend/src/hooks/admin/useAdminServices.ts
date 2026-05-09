@@ -3,9 +3,9 @@ import {
   useMutation,
   useQueryClient,
   keepPreviousData,
-} from '@tanstack/react-query';
-import { get, post, put, patch, del } from '@/lib/base';
-import { adminEndpoints } from '@/lib/admin/endpoints';
+} from "@tanstack/react-query";
+import { get, post, put, patch, del } from "@/lib/api";
+import { adminEndpoints } from "@/lib/admin/endpoints";
 import type {
   FacilitiesListParams,
   FacilitiesListResponse,
@@ -19,20 +19,20 @@ import type {
   ServiceProvidersListResponse,
   CreateProviderBody,
   UpdateProviderBody,
-} from '@/lib/admin/types';
+} from "@/lib/admin/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Query keys
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const SERVICES_KEYS = {
-  allFacilities: ['admin', 'facilities'] as const,
+  allFacilities: ["admin", "facilities"] as const,
   facilities: (params: FacilitiesListParams) =>
-    ['admin', 'facilities', params] as const,
-  facilityById: (id: string) => ['admin', 'facility', id] as const,
-  serviceTypes: () => ['admin', 'service-types'] as const,
+    ["admin", "facilities", params] as const,
+  facilityById: (id: string) => ["admin", "facility", id] as const,
+  serviceTypes: () => ["admin", "service-types"] as const,
   serviceProviders: (typeSlug?: string, cursor?: string) =>
-    ['admin', 'service-providers', typeSlug, cursor] as const,
+    ["admin", "service-providers", typeSlug, cursor] as const,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ export const SERVICES_KEYS = {
 function buildQs(params: Record<string, unknown>): string {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+    if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
   });
   return qs.toString();
 }
@@ -57,8 +57,8 @@ export function useFacilitiesList(params: FacilitiesListParams = {}) {
     queryKey: SERVICES_KEYS.facilities(params),
     queryFn: () =>
       get<FacilitiesListResponse>(
-        `${adminEndpoints.facilities.list}${qs ? `?${qs}` : ''}`,
-        { locale: 'ar' },
+        `${adminEndpoints.facilities.list}${qs ? `?${qs}` : ""}`,
+        { locale: "ar" },
       ),
     placeholderData: keepPreviousData,
   });
@@ -69,7 +69,7 @@ export function useFacilityById(id: string, enabled = true) {
     queryKey: SERVICES_KEYS.facilityById(id),
     queryFn: () =>
       get<FacilityResponse>(adminEndpoints.facilities.getById(id), {
-        locale: 'ar',
+        locale: "ar",
       }),
     enabled: !!id && enabled,
   });
@@ -80,7 +80,7 @@ export function useCreateFacility() {
   return useMutation({
     mutationFn: (body: CreateFacilityBody) =>
       post<FacilityResponse>(adminEndpoints.facilities.create, body, {
-        locale: 'ar',
+        locale: "ar",
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
@@ -93,7 +93,7 @@ export function useUpdateFacility(id: string) {
   return useMutation({
     mutationFn: (body: UpdateFacilityBody) =>
       put<FacilityResponse>(adminEndpoints.facilities.update(id), body, {
-        locale: 'ar',
+        locale: "ar",
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
@@ -109,7 +109,7 @@ export function useUpdateFacilityStatus() {
       patch<FacilityResponse>(
         adminEndpoints.facilities.updateStatus(id),
         { status },
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
@@ -122,7 +122,7 @@ export function useDeleteFacility() {
   return useMutation({
     mutationFn: (id: string) =>
       del<FacilityResponse>(adminEndpoints.facilities.delete(id), {
-        locale: 'ar',
+        locale: "ar",
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
@@ -135,13 +135,13 @@ export function useDeleteFacility() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useServiceTypesList(active?: boolean) {
-  const qs = active !== undefined ? `?active=${active}` : '';
+  const qs = active !== undefined ? `?active=${active}` : "";
   return useQuery({
     queryKey: [...SERVICES_KEYS.serviceTypes(), active],
     queryFn: () =>
       get<ServiceTypesListResponse>(
         `${adminEndpoints.serviceTypes.list}${qs}`,
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
     staleTime: 5 * 60 * 1000,
   });
@@ -152,7 +152,7 @@ export function useCreateServiceType() {
   return useMutation({
     mutationFn: (body: CreateServiceTypeBody) =>
       post<ServiceTypeResponse>(adminEndpoints.serviceTypes.create, body, {
-        locale: 'ar',
+        locale: "ar",
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceTypes() });
@@ -164,11 +164,9 @@ export function useUpdateServiceType(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: UpdateServiceTypeBody) =>
-      put<ServiceTypeResponse>(
-        adminEndpoints.serviceTypes.update(id),
-        body,
-        { locale: 'ar' },
-      ),
+      put<ServiceTypeResponse>(adminEndpoints.serviceTypes.update(id), body, {
+        locale: "ar",
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceTypes() });
     },
@@ -179,18 +177,10 @@ export function useUpdateServiceType(id: string) {
 export function useMutateServiceType() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string;
-      body: UpdateServiceTypeBody;
-    }) =>
-      put<ServiceTypeResponse>(
-        adminEndpoints.serviceTypes.update(id),
-        body,
-        { locale: 'ar' },
-      ),
+    mutationFn: ({ id, body }: { id: string; body: UpdateServiceTypeBody }) =>
+      put<ServiceTypeResponse>(adminEndpoints.serviceTypes.update(id), body, {
+        locale: "ar",
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceTypes() });
     },
@@ -202,16 +192,16 @@ export function useMutateServiceType() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useServiceProvidersList(typeSlug?: string, cursor?: string) {
-  const qs = new URLSearchParams({ limit: '20' });
-  if (typeSlug) qs.set('type', typeSlug);
-  if (cursor) qs.set('cursor', cursor);
+  const qs = new URLSearchParams({ limit: "20" });
+  if (typeSlug) qs.set("type", typeSlug);
+  if (cursor) qs.set("cursor", cursor);
 
   return useQuery({
     queryKey: SERVICES_KEYS.serviceProviders(typeSlug, cursor),
     queryFn: () =>
       get<ServiceProvidersListResponse>(
         `${adminEndpoints.serviceProviders.list}?${qs.toString()}`,
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
     enabled: !!typeSlug,
   });
@@ -221,9 +211,9 @@ export function useCreateProvider() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateProviderBody) =>
-      post(adminEndpoints.serviceProviders.create, body, { locale: 'ar' }),
+      post(adminEndpoints.serviceProviders.create, body, { locale: "ar" }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'service-providers'] });
+      qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
     },
   });
 }
@@ -233,10 +223,10 @@ export function useUpdateProvider(id: string) {
   return useMutation({
     mutationFn: (body: UpdateProviderBody) =>
       put(adminEndpoints.serviceProviders.update(id), body, {
-        locale: 'ar',
+        locale: "ar",
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'service-providers'] });
+      qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
     },
   });
 }
@@ -248,10 +238,11 @@ export function useUpdateProviderStatus() {
       patch(
         adminEndpoints.serviceProviders.updateStatus(id),
         { status },
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'service-providers'] });
+      qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
     },
   });
 }
+

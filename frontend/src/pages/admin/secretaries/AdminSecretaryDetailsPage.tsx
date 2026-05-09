@@ -12,7 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useAdminSecretariesList } from '@/hooks/useAdminSecretaries';
+import { useAdminSecretariesList } from '@/hooks/admin/useAdminSecretaries';
 import OffboardDialog from '@/components/admin/secretaries/dialogs/OffboardDialog';
 import {
   PERM_GROUPS,

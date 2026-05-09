@@ -16,7 +16,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { useDoctorSignupSpecialties } from '@/hooks/useDoctorSignupSpecialties';
+import { useDoctorSignupSpecialties } from '@/hooks/shared';
 
 import {
   step3ProfessionalSchema,

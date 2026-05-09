@@ -6,7 +6,7 @@ import AdminNotificationsList from '@/components/admin/notifications/AdminNotifi
 import AdminNotificationsToolbar from '@/components/admin/notifications/AdminNotificationsToolbar';
 import type { NotificationFilterTab } from '@/components/admin/notifications/AdminNotificationsToolbar';
 import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
-import { useAdminNotificationsPage } from '@/hooks/useAdminNotifications';
+import { useAdminNotificationsPage } from '@/hooks/admin/useAdminNotifications';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import { useToast } from '@/components/ui/ToastProvider';
 

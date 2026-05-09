@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ApiError } from "@/lib/base";
+import { ApiError } from "@/lib/api";
 import { authApi } from "@/lib/auth/client";
 import type { DoctorSignupBody } from "@/lib/auth/types";
 import { useAuthStore } from "@/store/authStore";
@@ -230,7 +230,9 @@ export default function SignUpForm({
         const general = contactOnly
           ? formatSignupGeneralBannerError(e, conflicts)
           : formatSignupApiError(e);
-        setSubmitError(general ?? (contactOnly ? null : formatSignupApiError(e)));
+        setSubmitError(
+          general ?? (contactOnly ? null : formatSignupApiError(e)),
+        );
         setProfessionalLicenseConflict(licenseConflict ?? null);
 
         if (licenseConflict) {
@@ -401,4 +403,3 @@ export default function SignUpForm({
     </section>
   );
 }
-

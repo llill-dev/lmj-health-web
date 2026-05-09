@@ -22,7 +22,7 @@ import {
 } from '@/components/admin/appointments/appointmentListUtils';
 import { adminApi } from '@/lib/admin/client';
 
-import { useAdminAppointments } from '@/hooks/useAdminAppointments';
+import { useAdminAppointments } from '@/hooks/admin/useAdminAppointments';
 import type { AppointmentStatus } from '@/lib/admin/types';
 
 export default function AdminAppointmentsPage() {

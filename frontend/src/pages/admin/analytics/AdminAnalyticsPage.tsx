@@ -15,7 +15,7 @@ import {
   useAdminPlatformStats,
   useRecentAppointments,
   useTopApprovedDoctors,
-} from '@/hooks/useAdminAnalytics';
+} from '@/hooks/admin/useAdminAnalytics';
 import StatCard from '@/components/admin/analytics/StatCard';
 import {
   StatCardSkeleton,

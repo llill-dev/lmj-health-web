@@ -1,12 +1,7 @@
-import { Helmet } from 'react-helmet-async';
-import {
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from "react-helmet-async";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
   FileSpreadsheet,
@@ -18,27 +13,27 @@ import {
   Stethoscope,
   Tags,
   Trash2,
-} from 'lucide-react';
-import ConfirmActionDialog from '@/components/admin/dialogs/ConfirmActionDialog';
-import UpsertDoctorLookupDialog from '@/components/admin/doctor-specializations/UpsertDoctorLookupDialog';
-import { useAdminLookups } from '@/hooks/useAdminLookups';
-import { useRemoveLookup } from '@/hooks/useAdminLookupMutations';
+} from "lucide-react";
+import ConfirmActionDialog from "@/components/admin/dialogs/ConfirmActionDialog";
+import UpsertDoctorLookupDialog from "@/components/admin/doctor-specializations/UpsertDoctorLookupDialog";
+import { useAdminLookups } from "@/hooks/admin/useAdminLookups";
+import { useRemoveLookup } from "@/hooks/admin/useAdminLookupMutations";
 import {
   resolveLookupSecondaryText,
   resolveLookupText,
-} from '@/lib/admin/lookupUtils';
-import { resolveDoctorSpecialtyLookupCategory } from '@/lib/admin/doctorSpecialtyLookupCategory';
-import type { AdminLookupRecord } from '@/lib/admin/types';
-import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
-import { staggerContainer, staggerItem } from '@/motion';
-import { ApiError } from '@/lib/base';
-import { downloadUtf8Csv } from '@/lib/export/downloadUtf8Csv';
+} from "@/lib/admin/lookupUtils";
+import { resolveDoctorSpecialtyLookupCategory } from "@/lib/admin/doctorSpecialtyLookupCategory";
+import type { AdminLookupRecord } from "@/lib/admin/types";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
+import { staggerContainer, staggerItem } from "@/motion";
+import { ApiError } from "@/lib/api";
+import { downloadUtf8Csv } from "@/lib/export/downloadUtf8Csv";
 
-const TEAL = '#108B8B';
+const TEAL = "#108B8B";
 const PAGE_SIZE = 9;
 
 export default function AdminDoctorSpecializationsPage() {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim());
   const [page, setPage] = useState(1);
   const [includeInactive, setIncludeInactive] = useState(false);
@@ -71,13 +66,13 @@ export default function AdminDoctorSpecializationsPage() {
     const rows = [...lookups];
     rows.sort(
       (a, b) =>
-        (a.order ?? 0) - (b.order ?? 0) || a.key.localeCompare(b.key, 'en'),
+        (a.order ?? 0) - (b.order ?? 0) || a.key.localeCompare(b.key, "en"),
     );
     if (!q) return rows;
     return rows.filter((row) => {
-      const ar = resolveLookupText(row.text, 'ar');
-      const en = resolveLookupText(row.text, 'en');
-      const alt = resolveLookupSecondaryText(row.text, 'ar');
+      const ar = resolveLookupText(row.text, "ar");
+      const en = resolveLookupText(row.text, "en");
+      const alt = resolveLookupSecondaryText(row.text, "ar");
       const hay = `${row.key} ${ar} ${en} ${alt}`.toLowerCase();
       return hay.includes(q);
     });
@@ -116,22 +111,22 @@ export default function AdminDoctorSpecializationsPage() {
   function exportFilteredTableToExcel() {
     if (filtered.length === 0) return;
     const headers = [
-      'المفتاح',
-      'الترتيب',
-      'الحالة',
-      'الاسم بالعربية',
-      'الاسم بالإنجليزية',
-      'المعرف',
+      "المفتاح",
+      "الترتيب",
+      "الحالة",
+      "الاسم بالعربية",
+      "الاسم بالإنجليزية",
+      "المعرف",
     ];
     const rows = filtered.map((row) => {
-      const titleAr = resolveLookupText(row.text, 'ar');
-      const titleEn = resolveLookupText(row.text, 'en');
+      const titleAr = resolveLookupText(row.text, "ar");
+      const titleEn = resolveLookupText(row.text, "en");
       return [
         row.key,
         String(row.order ?? 0),
-        row.isActive ? 'نشط' : 'غير نشط',
+        row.isActive ? "نشط" : "غير نشط",
         titleAr || titleEn || row.key,
-        titleEn || '',
+        titleEn || "",
         row._id,
       ];
     });
@@ -143,7 +138,7 @@ export default function AdminDoctorSpecializationsPage() {
     error != null
       ? error instanceof ApiError
         ? userFacingErrorMessage(error)
-        : 'تعذّر تحميل الكتالوج.'
+        : "تعذّر تحميل الكتالوج."
       : null;
 
   return (
@@ -153,147 +148,126 @@ export default function AdminDoctorSpecializationsPage() {
       </Helmet>
 
       <div
-        dir='rtl'
-        lang='ar'
-        className='mx-auto w-full max-w-[1600px] px-3 pb-10 sm:px-4 md:px-6'
+        dir="rtl"
+        lang="ar"
+        className="mx-auto w-full max-w-[1600px] px-3 pb-10 sm:px-4 md:px-6"
       >
-        <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
-          <div className='min-w-0 text-right'>
-            <div className='inline-flex gap-3 items-center'>
-              <div className='flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#ECFEFF] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]'>
-                <Tags
-                  className='w-5 h-5 text-primary'
-                  aria-hidden
-                />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 text-right">
+            <div className="inline-flex gap-3 items-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#ECFEFF] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+                <Tags className="w-5 h-5 text-primary" aria-hidden />
               </div>
               <div>
-                <h1 className='font-cairo text-[20px] font-black leading-tight text-[#111827] sm:text-[22px]'>
+                <h1 className="font-cairo text-[20px] font-black leading-tight text-[#111827] sm:text-[22px]">
                   تخصصات الأطباء
                 </h1>
-                <p className='mt-1 max-w-[560px] font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]'>
+                <p className="mt-1 max-w-[560px] font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
                   إدارة كتالوج التخصصات الطبية في الإدارة وكتالوج التسجيل
                 </p>
               </div>
             </div>
           </div>
 
-          <div className='flex flex-wrap gap-2 items-center lg:justify-end'>
+          <div className="flex flex-wrap gap-2 items-center lg:justify-end">
             <button
-              type='button'
+              type="button"
               onClick={exportFilteredTableToExcel}
               disabled={busy || filtered.length === 0}
-              className='inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50'
-              title='ملف CSV يفتح كجدول في Microsoft Excel'
+              className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
+              title="ملف CSV يفتح كجدول في Microsoft Excel"
             >
-              <FileSpreadsheet
-                className='h-4 w-4 text-[#16A34A]'
-                aria-hidden
-              />
+              <FileSpreadsheet className="h-4 w-4 text-[#16A34A]" aria-hidden />
               جدول Excel
             </button>
             <button
-              type='button'
+              type="button"
               onClick={() => refetch()}
               disabled={busy}
-              className='inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50'
+              className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
             >
               <RefreshCw
-                className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`}
+                className={`h-4 w-4 ${busy ? "animate-spin" : ""}`}
                 aria-hidden
               />
               تحديث
             </button>
             <button
-              type='button'
+              type="button"
               onClick={openCreate}
-              className='inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_16px_34px_rgba(15,143,139,0.28)] transition hover:brightness-105'
+              className="inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_16px_34px_rgba(15,143,139,0.28)] transition hover:brightness-105"
             >
-              <Plus
-                className='w-4 h-4'
-                aria-hidden
-              />
+              <Plus className="w-4 h-4" aria-hidden />
               إضافة تخصص
             </button>
             <Link
-              to='/admin/doctors'
-              className='inline-flex h-[40px] items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 hover:text-primary'
+              to="/admin/doctors"
+              className="inline-flex h-[40px] items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 hover:text-primary"
             >
               قائمة الأطباء
-              <ChevronLeft
-                className='w-4 h-4'
-                aria-hidden
-              />
+              <ChevronLeft className="w-4 h-4" aria-hidden />
             </Link>
           </div>
         </div>
 
-        <section className='grid grid-cols-1 gap-3 mt-6 sm:grid-cols-3'>
-          <div className='rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]'>
-            <div className='flex gap-2 justify-between items-center'>
-              <span className='font-cairo text-[11px] font-bold text-[#667085]'>
+        <section className="grid grid-cols-1 gap-3 mt-6 sm:grid-cols-3">
+          <div className="rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
+            <div className="flex gap-2 justify-between items-center">
+              <span className="font-cairo text-[11px] font-bold text-[#667085]">
                 عناصر الكتالوج
               </span>
-              <Tags
-                className='w-4 h-4 text-primary'
-                aria-hidden
-              />
+              <Tags className="w-4 h-4 text-primary" aria-hidden />
             </div>
             <div
-              className='mt-2 font-cairo text-[28px] font-black tabular-nums leading-none'
+              className="mt-2 font-cairo text-[28px] font-black tabular-nums leading-none"
               style={{ color: TEAL }}
             >
-              {busy ? '…' : lookups.length}
+              {busy ? "…" : lookups.length}
             </div>
           </div>
-          <div className='rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]'>
-            <div className='flex gap-2 justify-between items-center'>
-              <span className='font-cairo text-[11px] font-bold text-[#667085]'>
+          <div className="rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
+            <div className="flex gap-2 justify-between items-center">
+              <span className="font-cairo text-[11px] font-bold text-[#667085]">
                 نشطة
               </span>
-              <Stethoscope
-                className='h-4 w-4 text-[#16A34A]'
-                aria-hidden
-              />
+              <Stethoscope className="h-4 w-4 text-[#16A34A]" aria-hidden />
             </div>
-            <div className='mt-2 font-cairo text-[28px] font-black tabular-nums leading-none text-[#16A34A]'>
-              {busy ? '…' : activeCount}
+            <div className="mt-2 font-cairo text-[28px] font-black tabular-nums leading-none text-[#16A34A]">
+              {busy ? "…" : activeCount}
             </div>
           </div>
-          <div className='rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]'>
-            <div className='flex gap-2 justify-between items-center'>
-              <span className='font-cairo text-[11px] font-bold text-[#667085]'>
+          <div className="rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
+            <div className="flex gap-2 justify-between items-center">
+              <span className="font-cairo text-[11px] font-bold text-[#667085]">
                 غير نشطة
               </span>
-              <Tags
-                className='h-4 w-4 text-[#98A2B3]'
-                aria-hidden
-              />
+              <Tags className="h-4 w-4 text-[#98A2B3]" aria-hidden />
             </div>
-            <div className='mt-2 font-cairo text-[28px] font-black tabular-nums leading-none text-[#64748B]'>
-              {busy ? '…' : inactiveCount}
+            <div className="mt-2 font-cairo text-[28px] font-black tabular-nums leading-none text-[#64748B]">
+              {busy ? "…" : inactiveCount}
             </div>
           </div>
         </section>
 
-        <div className='mt-6 flex flex-col gap-3 rounded-[14px] border border-[#E8ECEF] bg-white p-4 shadow-[0_14px_34px_rgba(15,23,42,0.06)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between'>
-          <label className='relative flex min-w-[200px] flex-1 items-center'>
+        <div className="mt-6 flex flex-col gap-3 rounded-[14px] border border-[#E8ECEF] bg-white p-4 shadow-[0_14px_34px_rgba(15,23,42,0.06)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <label className="relative flex min-w-[200px] flex-1 items-center">
             <Search
-              className='pointer-events-none absolute right-3 h-4 w-4 text-[#98A2B3]'
+              className="pointer-events-none absolute right-3 h-4 w-4 text-[#98A2B3]"
               aria-hidden
             />
             <input
-              type='search'
+              type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder='ابحث بالمفتاح أو الاسم العربي أو الإنجليزي…'
-              className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] py-2 pe-10 ps-4 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/0 transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/12'
+              placeholder="ابحث بالمفتاح أو الاسم العربي أو الإنجليزي…"
+              className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] py-2 pe-10 ps-4 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/0 transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/12"
             />
           </label>
 
-          <label className='flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054]'>
+          <label className="flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054]">
             <input
-              type='checkbox'
-              className='h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40'
+              type="checkbox"
+              className="h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40"
               checked={includeInactive}
               onChange={(e) => setIncludeInactive(e.target.checked)}
             />
@@ -302,115 +276,115 @@ export default function AdminDoctorSpecializationsPage() {
         </div>
 
         {isLoading ? (
-          <div className='mt-8 flex flex-col items-center justify-center gap-3 rounded-[14px] border border-[#EEF2F6] bg-white py-20'>
-            <Loader2 className='w-8 h-8 animate-spin text-primary' />
-            <p className='font-cairo text-[13px] font-semibold text-[#667085]'>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-[14px] border border-[#EEF2F6] bg-white py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="font-cairo text-[13px] font-semibold text-[#667085]">
               جاري تحميل كتالوج التخصصات…
             </p>
           </div>
         ) : apiErrMsg ? (
-          <div className='mt-8 rounded-[14px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-12 text-center'>
-            <p className='font-cairo text-[13px] font-bold text-[#B42318]'>
+          <div className="mt-8 rounded-[14px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-12 text-center">
+            <p className="font-cairo text-[13px] font-bold text-[#B42318]">
               {apiErrMsg}
             </p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className='mt-8 rounded-[14px] border border-dashed border-[#E5E7EB] bg-[#FAFBFC] px-6 py-16 text-center'>
-            <p className='font-cairo text-[14px] font-bold text-[#475467]'>
+          <div className="mt-8 rounded-[14px] border border-dashed border-[#E5E7EB] bg-[#FAFBFC] px-6 py-16 text-center">
+            <p className="font-cairo text-[14px] font-bold text-[#475467]">
               لا توجد عناصر مطابقة للبحث أو الكتالوج فارغ.
             </p>
             <button
-              type='button'
+              type="button"
               onClick={openCreate}
-              className='mt-4 inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white'
+              className="mt-4 inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white"
             >
-              <Plus className='w-4 h-4' />
+              <Plus className="w-4 h-4" />
               إضافة أول تخصص
             </button>
           </div>
         ) : (
           <>
-            <AnimatePresence mode='wait'>
+            <AnimatePresence mode="wait">
               <motion.ul
                 key={safePage}
-                role='list'
-                className='grid grid-cols-1 gap-4 mt-8 md:grid-cols-2 xl:grid-cols-3'
+                role="list"
+                className="grid grid-cols-1 gap-4 mt-8 md:grid-cols-2 xl:grid-cols-3"
                 variants={staggerContainer(0.055, 0.03)}
-                initial='hidden'
-                animate='show'
+                initial="hidden"
+                animate="show"
                 exit={{ opacity: 0.65 }}
               >
                 {pageRows.map((row) => {
-                  const titleAr = resolveLookupText(row.text, 'ar');
-                  const titleEn = resolveLookupText(row.text, 'en');
+                  const titleAr = resolveLookupText(row.text, "ar");
+                  const titleEn = resolveLookupText(row.text, "en");
                   const filterLink = `/admin/doctors?specialization=${encodeURIComponent(titleAr || titleEn || row.key)}`;
                   return (
                     <motion.li
                       key={row._id}
                       variants={staggerItem}
                       layout
-                      className='h-full group'
+                      className="h-full group"
                     >
-                      <div className='relative flex h-full min-h-[168px] flex-col overflow-hidden rounded-[14px] border border-[#E8ECEF] bg-white shadow-[0_18px_38px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_26px_52px_rgba(15,143,139,0.14)]'>
-                        <div className='pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-l from-primary/90 via-[#2DD4BF]/90 to-transparent opacity-90' />
+                      <div className="relative flex h-full min-h-[168px] flex-col overflow-hidden rounded-[14px] border border-[#E8ECEF] bg-white shadow-[0_18px_38px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_26px_52px_rgba(15,143,139,0.14)]">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-l from-primary/90 via-[#2DD4BF]/90 to-transparent opacity-90" />
 
-                        <div className='flex flex-col flex-1 gap-3 p-4'>
-                          <div className='flex flex-wrap gap-2 justify-between items-start'>
+                        <div className="flex flex-col flex-1 gap-3 p-4">
+                          <div className="flex flex-wrap gap-2 justify-between items-start">
                             <span
                               className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-cairo text-[10px] font-extrabold ${
                                 row.isActive
-                                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
-                                  : 'bg-[#F3F4F6] text-[#64748B] ring-1 ring-[#E5E7EB]'
+                                  ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
+                                  : "bg-[#F3F4F6] text-[#64748B] ring-1 ring-[#E5E7EB]"
                               }`}
                             >
-                              {row.isActive ? 'نشط' : 'غير نشط'}
+                              {row.isActive ? "نشط" : "غير نشط"}
                             </span>
-                            <span className='rounded-full bg-[#F0FDFA] px-2.5 py-0.5 font-mono text-[10px] font-bold text-primary ring-1 ring-[#CCFBF1]'>
+                            <span className="rounded-full bg-[#F0FDFA] px-2.5 py-0.5 font-mono text-[10px] font-bold text-primary ring-1 ring-[#CCFBF1]">
                               #{row.order ?? 0}
                             </span>
                           </div>
 
-                          <div className='min-w-0 text-right'>
-                            <h2 className='font-cairo text-[15px] font-extrabold leading-snug text-[#111827]'>
+                          <div className="min-w-0 text-right">
+                            <h2 className="font-cairo text-[15px] font-extrabold leading-snug text-[#111827]">
                               {titleAr || titleEn || row.key}
                             </h2>
                             <p
-                              dir='ltr'
-                              className='mt-1 font-cairo text-[12px] font-semibold leading-snug text-[#64748B]'
+                              dir="ltr"
+                              className="mt-1 font-cairo text-[12px] font-semibold leading-snug text-[#64748B]"
                             >
-                              {titleEn || '—'}
+                              {titleEn || "—"}
                             </p>
                             <p
-                              dir='ltr'
-                              className='mt-2 truncate font-mono text-[11px] font-semibold text-[#98A2B3] text-left'
+                              dir="ltr"
+                              className="mt-2 truncate font-mono text-[11px] font-semibold text-[#98A2B3] text-left"
                             >
                               key: {row.key}
                             </p>
                           </div>
 
-                          <div className='mt-auto flex flex-wrap items-center gap-2 border-t border-[#F2F4F7] pt-3'>
+                          <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-[#F2F4F7] pt-3">
                             <Link
                               to={filterLink}
-                              className='inline-flex flex-1 min-w-[120px] items-center justify-center gap-1 rounded-[10px] bg-[#ECFEFF] px-3 py-2 font-cairo text-[11px] font-extrabold text-primary ring-1 ring-[#CFFAFE] transition hover:bg-[#DCFDFD]'
+                              className="inline-flex flex-1 min-w-[120px] items-center justify-center gap-1 rounded-[10px] bg-[#ECFEFF] px-3 py-2 font-cairo text-[11px] font-extrabold text-primary ring-1 ring-[#CFFAFE] transition hover:bg-[#DCFDFD]"
                             >
                               أطباء مطابقون
-                              <ChevronLeft className='h-3.5 w-3.5' />
+                              <ChevronLeft className="h-3.5 w-3.5" />
                             </Link>
                             <button
-                              type='button'
+                              type="button"
                               onClick={() => openEdit(row)}
-                              className='inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#475467] shadow-sm transition hover:border-primary/35 hover:text-primary'
-                              aria-label='تعديل'
+                              className="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#475467] shadow-sm transition hover:border-primary/35 hover:text-primary"
+                              aria-label="تعديل"
                             >
-                              <Pencil className='w-4 h-4' />
+                              <Pencil className="w-4 h-4" />
                             </button>
                             <button
-                              type='button'
+                              type="button"
                               onClick={() => setDeleteTarget(row)}
-                              className='inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#FEE2E2] bg-[#FFF7F7] text-[#DC2626] transition hover:bg-[#FEF2F2]'
-                              aria-label='تعطيل'
+                              className="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[10px] border border-[#FEE2E2] bg-[#FFF7F7] text-[#DC2626] transition hover:bg-[#FEF2F2]"
+                              aria-label="تعطيل"
                             >
-                              <Trash2 className='w-4 h-4' />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
@@ -421,40 +395,37 @@ export default function AdminDoctorSpecializationsPage() {
               </motion.ul>
             </AnimatePresence>
 
-            <div className='mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#F2F4F7] pt-6 sm:flex-row'>
-              <p className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                عرض{' '}
-                <span className='tabular-nums font-bold text-[#111827]'>
-                  {filtered.length === 0
-                    ? 0
-                    : (safePage - 1) * PAGE_SIZE + 1}
-                  –
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#F2F4F7] pt-6 sm:flex-row">
+              <p className="font-cairo text-[12px] font-semibold text-[#667085]">
+                عرض{" "}
+                <span className="tabular-nums font-bold text-[#111827]">
+                  {filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}–
                   {(safePage - 1) * PAGE_SIZE + pageRows.length}
-                </span>{' '}
-                من{' '}
-                <span className='font-bold text-[#111827]'>{filtered.length}</span>{' '}
+                </span>{" "}
+                من{" "}
+                <span className="font-bold text-[#111827]">
+                  {filtered.length}
+                </span>{" "}
                 عنصراً مطابقاً
               </p>
 
-              <div className='flex flex-wrap gap-2 justify-center items-center'>
+              <div className="flex flex-wrap gap-2 justify-center items-center">
                 <button
-                  type='button'
+                  type="button"
                   disabled={safePage <= 1 || busy}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className='h-[38px] min-w-[96px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-sm disabled:opacity-40'
+                  className="h-[38px] min-w-[96px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-sm disabled:opacity-40"
                 >
                   السابق
                 </button>
-                <span className='font-cairo text-[12px] font-bold text-[#475467]'>
+                <span className="font-cairo text-[12px] font-bold text-[#475467]">
                   صفحة {safePage} / {totalPages}
                 </span>
                 <button
-                  type='button'
+                  type="button"
                   disabled={safePage >= totalPages || busy}
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  className='h-[38px] min-w-[96px] rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_12px_26px_rgba(15,143,139,0.28)] disabled:opacity-40'
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="h-[38px] min-w-[96px] rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_12px_26px_rgba(15,143,139,0.28)] disabled:opacity-40"
                 >
                   التالي
                 </button>
@@ -474,21 +445,23 @@ export default function AdminDoctorSpecializationsPage() {
       <ConfirmActionDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        variant='destructive'
-        title='تعطيل عنصر التخصص'
-        icon={<Trash2 className='w-6 h-6' strokeWidth={2} aria-hidden />}
+        variant="destructive"
+        title="تعطيل عنصر التخصص"
+        icon={<Trash2 className="w-6 h-6" strokeWidth={2} aria-hidden />}
         description={
           deleteTarget ? (
             <>
-              سيتم استدعاء{' '}
-              <span className='font-mono text-[11px]'>DELETE /api/admin/lookups/:id</span>{' '}
-              (تعطيل ناعم). العنصر:{' '}
-              <strong>{resolveLookupText(deleteTarget.text, 'ar')}</strong>
+              سيتم استدعاء{" "}
+              <span className="font-mono text-[11px]">
+                DELETE /api/admin/lookups/:id
+              </span>{" "}
+              (تعطيل ناعم). العنصر:{" "}
+              <strong>{resolveLookupText(deleteTarget.text, "ar")}</strong>
             </>
           ) : null
         }
-        cancelLabel='إلغاء'
-        confirmLabel={removeMut.isPending ? 'جاري التعطيل…' : 'تأكيد التعطيل'}
+        cancelLabel="إلغاء"
+        confirmLabel={removeMut.isPending ? "جاري التعطيل…" : "تأكيد التعطيل"}
         confirmDisabled={removeMut.isPending}
         onConfirm={async () => {
           if (!deleteTarget) return;
@@ -496,9 +469,9 @@ export default function AdminDoctorSpecializationsPage() {
           setDeleteTarget(null);
         }}
         successToast={{
-          title: 'تم',
-          message: 'عُطّل عنصر الكتالوج.',
-          variant: 'success',
+          title: "تم",
+          message: "عُطّل عنصر الكتالوج.",
+          variant: "success",
         }}
       />
     </>

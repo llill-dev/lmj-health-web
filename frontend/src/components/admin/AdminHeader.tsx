@@ -13,7 +13,7 @@ import {
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { getAdminPageMeta } from '@/constant/adminPageMeta';
-import { useAdminUnreadNotificationCount } from '@/hooks/useAdminNotifications';
+import { useAdminUnreadNotificationCount } from '@/hooks/admin/useAdminNotifications';
 
 type Props = {
   /** يتجاوز العنوان المستنتج من المسار */

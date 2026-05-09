@@ -20,7 +20,7 @@ import {
   Archive,
 } from 'lucide-react';
 import { adminApi } from '@/lib/admin/client';
-import { useAdminContentList, useArchiveContent } from '@/hooks/useAdminContent';
+import { useAdminContentList, useArchiveContent } from '@/hooks/admin/useAdminContent';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import type {
   AdminComplaintListItem,

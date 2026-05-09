@@ -17,7 +17,7 @@ import {
   patientStatusTone,
 } from '@/components/admin/patients/patientListUtils';
 
-import { useAdminPatients } from '@/hooks/useAdminPatients';
+import { useAdminPatients } from '@/hooks/admin/useAdminPatients';
 import type {
   AdminPatientsAccountStatusFilter,
   AdminPatientSummary,

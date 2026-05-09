@@ -8,7 +8,7 @@ import { AdminAuditLogStatsCards } from '@/components/admin/system-logs/AdminAud
 import { AdminAuditLogTable } from '@/components/admin/system-logs/AdminAuditLogTable';
 import { AdminSystemLogsHeader } from '@/components/admin/system-logs/AdminSystemLogsHeader';
 import { PAGE_SIZE } from '@/components/admin/system-logs/auditLogConstants';
-import { useAdminAuditLogs } from '@/hooks/useAdminAuditLogs';
+import { useAdminAuditLogs } from '@/hooks/admin/useAdminAuditLogs';
 import type { AuditLogCategory, AuditLogOutcome } from '@/lib/admin/types';
 
 export default function AdminSystemLogsPage() {

@@ -1,5 +1,5 @@
-import { get, patch } from '@/lib/base';
-import type { ApiSuccessEnvelope } from '@/lib/admin/types';
+import { get, patch } from "@/lib/api";
+import type { ApiSuccessEnvelope } from "@/lib/admin/types";
 
 /**
  * عقد REST للإشعارات (المرجع في المشروع: API-3.pdf):
@@ -38,7 +38,7 @@ export type NotificationItem = {
 
 export function notificationItemId(item: NotificationItem): string | undefined {
   const raw = item._id ?? item.id;
-  if (raw == null || String(raw) === '') return undefined;
+  if (raw == null || String(raw) === "") return undefined;
   return String(raw);
 }
 
@@ -57,22 +57,22 @@ export type NotificationsReadAllResponse = ApiSuccessEnvelope & {
 export const notificationsApi = {
   list: (params: NotificationsListParams = {}) => {
     const qs = new URLSearchParams();
-    if (params.page != null) qs.set('page', String(params.page));
-    if (params.limit != null) qs.set('limit', String(params.limit));
-    if (params.unread_only === true) qs.set('unread_only', 'true');
+    if (params.page != null) qs.set("page", String(params.page));
+    if (params.limit != null) qs.set("limit", String(params.limit));
+    if (params.unread_only === true) qs.set("unread_only", "true");
     const suffix = qs.toString();
     return get<NotificationsListResponse>(
-      suffix ? `/api/notifications?${suffix}` : '/api/notifications',
-      { locale: 'ar' },
+      suffix ? `/api/notifications?${suffix}` : "/api/notifications",
+      { locale: "ar" },
     );
   },
 
   /** PATCH /notifications/read-all — API-3.pdf */
   readAll: () =>
     patch<NotificationsReadAllResponse>(
-      '/api/notifications/read-all',
+      "/api/notifications/read-all",
       {},
-      { locale: 'ar' },
+      { locale: "ar" },
     ),
 
   /** PATCH /notifications/:id/read — API-3.pdf */
@@ -80,6 +80,6 @@ export const notificationsApi = {
     patch<NotificationsReadAllResponse>(
       `/api/notifications/${id}/read`,
       {},
-      { locale: 'ar' },
+      { locale: "ar" },
     ),
 };

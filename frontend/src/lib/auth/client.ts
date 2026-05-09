@@ -1,6 +1,6 @@
-import { post, postResult } from '@/lib/base';
-import { ApiError } from '@/lib/base';
-import { authEndpoints } from '@/lib/auth/endpoints';
+import { post, postResult } from "@/lib/api";
+import { ApiError } from "@/lib/api";
+import { authEndpoints } from "@/lib/auth/endpoints";
 import type {
   DoctorSignupBody,
   ResendSignupOtpBody,
@@ -11,13 +11,13 @@ import type {
   LoginResponse,
   LogoutResponse,
   AuthError,
-} from '@/lib/auth/types';
-import { AUTH_ERROR_MESSAGES } from '@/lib/auth/types';
-import type { SignupFieldConflictMessages } from '@/lib/auth/signupMessaging';
+} from "@/lib/auth/types";
+import { AUTH_ERROR_MESSAGES } from "@/lib/auth/types";
+import type { SignupFieldConflictMessages } from "@/lib/auth/signupMessaging";
 import {
   extractSignupConflictFields,
   signupErrorHasOnlyContactFieldIssues,
-} from '@/lib/auth/signupMessaging';
+} from "@/lib/auth/signupMessaging";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Error normaliser
@@ -33,44 +33,44 @@ const handleAuthError = (error: unknown): AuthError => {
       (body.error as string | undefined) ||
       error.message;
 
-    let code: AuthError['code'] = 'UNKNOWN';
+    let code: AuthError["code"] = "UNKNOWN";
 
     switch (status) {
       case 401:
-        code = 'INVALID_CREDENTIALS';
+        code = "INVALID_CREDENTIALS";
         break;
       case 410:
-        code = 'DELETED';
+        code = "DELETED";
         break;
       case 403: {
         // Refine 403 using messageKey first (most reliable), then fall back
         // to scanning the message text for known phrases.
-        const key = messageKey ?? '';
+        const key = messageKey ?? "";
         const msg = backendMessage.toLowerCase();
 
-        if (key.includes('notVerified') || msg.includes('not verified')) {
-          code = 'NOT_VERIFIED';
-        } else if (key.includes('inactive') || msg.includes('inactive')) {
-          code = 'INACTIVE';
+        if (key.includes("notVerified") || msg.includes("not verified")) {
+          code = "NOT_VERIFIED";
+        } else if (key.includes("inactive") || msg.includes("inactive")) {
+          code = "INACTIVE";
         } else if (
-          key.includes('pendingApproval') ||
-          key.includes('pending') ||
-          msg.includes('pending')
+          key.includes("pendingApproval") ||
+          key.includes("pending") ||
+          msg.includes("pending")
         ) {
-          code = 'PENDING_APPROVAL';
-        } else if (key.includes('notAllowed') || msg.includes('not allowed')) {
-          code = 'NOT_ALLOWED';
-        } else if (key.includes('activate') || msg.includes('activate')) {
-          code = 'TEMPORARY';
-        } else if (key.includes('locked') || msg.includes('locked')) {
-          code = 'LOCKED';
+          code = "PENDING_APPROVAL";
+        } else if (key.includes("notAllowed") || msg.includes("not allowed")) {
+          code = "NOT_ALLOWED";
+        } else if (key.includes("activate") || msg.includes("activate")) {
+          code = "TEMPORARY";
+        } else if (key.includes("locked") || msg.includes("locked")) {
+          code = "LOCKED";
         } else {
-          code = 'NOT_VERIFIED';
+          code = "NOT_VERIFIED";
         }
         break;
       }
       default:
-        code = 'UNKNOWN';
+        code = "UNKNOWN";
     }
 
     return {
@@ -82,17 +82,17 @@ const handleAuthError = (error: unknown): AuthError => {
 
   // ── Network / unknown error ─────────────────────────────────────────────
   if (error instanceof Error && error.message) {
-    return { code: 'NETWORK_ERROR', message: error.message };
+    return { code: "NETWORK_ERROR", message: error.message };
   }
 
   return {
-    code: 'UNKNOWN',
-    message: AUTH_ERROR_MESSAGES['UNKNOWN'].ar,
+    code: "UNKNOWN",
+    message: AUTH_ERROR_MESSAGES["UNKNOWN"].ar,
   };
 };
 
 const signupContactPrecheckEnabled =
-  import.meta.env.VITE_ENABLE_SIGNUP_CONTACT_PRECHECK === 'true';
+  import.meta.env.VITE_ENABLE_SIGNUP_CONTACT_PRECHECK === "true";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Auth API client
@@ -100,7 +100,7 @@ const signupContactPrecheckEnabled =
 export const authApi = {
   signupDoctor: (body: DoctorSignupBody) =>
     post<SignupResponse>(authEndpoints.signup(), body, {
-      locale: 'ar',
+      locale: "ar",
       omitAuth: true,
     }),
 
@@ -114,10 +114,9 @@ export const authApi = {
    * عند تفعيل الاستدعاء: غياب المسار (404/405) يُكمَّل بتخطّي المحلّي دون احتجاز التدفّق.
    */
   signupDoctorContactPrecheck: async (
-    body: Pick<DoctorSignupBody, 'email' | 'phone'>,
+    body: Pick<DoctorSignupBody, "email" | "phone">,
   ): Promise<
-    | { ok: true; skipped?: boolean }
-    | { conflict: SignupFieldConflictMessages }
+    { ok: true; skipped?: boolean } | { conflict: SignupFieldConflictMessages }
   > => {
     if (!signupContactPrecheckEnabled) {
       return { ok: true, skipped: true };
@@ -130,11 +129,14 @@ export const authApi = {
           email: body.email.trim().toLowerCase(),
           phone: body.phone,
         },
-        { locale: 'ar', omitAuth: true },
+        { locale: "ar", omitAuth: true },
       );
       return { ok: true };
     } catch (error) {
-      if (error instanceof ApiError && (error.status === 404 || error.status === 405)) {
+      if (
+        error instanceof ApiError &&
+        (error.status === 404 || error.status === 405)
+      ) {
         return { ok: true, skipped: true };
       }
       const conflict = extractSignupConflictFields(error);
@@ -150,13 +152,13 @@ export const authApi = {
 
   resendSignupOtp: (body: ResendSignupOtpBody) =>
     post<SignupResponse>(authEndpoints.resendSignupOtp(), body, {
-      locale: 'ar',
+      locale: "ar",
       omitAuth: true,
     }),
 
   verifySignupOtp: (body: VerifySignupOtpBody) =>
     post<VerifySignupOtpResponse>(authEndpoints.verifySignupOtp(), body, {
-      locale: 'ar',
+      locale: "ar",
       omitAuth: true,
     }),
 
@@ -168,13 +170,13 @@ export const authApi = {
         authEndpoints.login(),
         body,
         {
-          locale: 'ar',
+          locale: "ar",
           omitAuth: true,
           expectedStatuses: [400, 401, 403, 410],
         },
       );
 
-      if ('error' in response) {
+      if ("error" in response) {
         return { error: handleAuthError(response.error) };
       }
 
@@ -191,7 +193,7 @@ export const authApi = {
       const response = await post<LogoutResponse>(
         authEndpoints.logoutAll(),
         {},
-        { locale: 'ar', token },
+        { locale: "ar", token },
       );
       return { data: response };
     } catch (error) {
@@ -199,3 +201,4 @@ export const authApi = {
     }
   },
 };
+

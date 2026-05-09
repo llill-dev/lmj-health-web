@@ -1,18 +1,18 @@
-import type { ChangeEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useQuery } from '@tanstack/react-query';
-import { CloudUpload, Settings } from 'lucide-react';
-import { get } from '@/lib/base';
-import { adminApi } from '@/lib/admin/client';
-import { notificationsApi } from '@/lib/notifications/client';
-import { useAdminAppSettings } from '@/contexts/AdminAppSettingsContext';
-import { ConfirmActionDialog } from '@/components/admin/dialogs';
-import SettingsField from '@/components/admin/settings/SettingsField';
-import SettingsSectionCard from '@/components/admin/settings/SettingsSectionCard';
+import type { ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
+import { CloudUpload, Settings } from "lucide-react";
+import { get } from "@/lib/api";
+import { adminApi } from "@/lib/admin/client";
+import { notificationsApi } from "@/lib/notifications/client";
+import { useAdminAppSettings } from "@/contexts/AdminAppSettingsContext";
+import { ConfirmActionDialog } from "@/components/admin/dialogs";
+import SettingsField from "@/components/admin/settings/SettingsField";
+import SettingsSectionCard from "@/components/admin/settings/SettingsSectionCard";
 
-type SectionState = 'idle' | 'saved';
-type SaveStates = Record<'general' | 'logo', SectionState>;
+type SectionState = "idle" | "saved";
+type SaveStates = Record<"general" | "logo", SectionState>;
 
 type HealthResponse = {
   ok?: boolean;
@@ -27,8 +27,8 @@ export default function AdminSettingsPage() {
   const [logoConfirmOpen, setLogoConfirmOpen] = useState(false);
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [saveStates, setSaveStates] = useState<SaveStates>({
-    general: 'idle',
-    logo: 'idle',
+    general: "idle",
+    logo: "idle",
   });
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -44,14 +44,14 @@ export default function AdminSettingsPage() {
   }, []);
 
   const healthQuery = useQuery({
-    queryKey: ['admin', 'settings', 'health'],
-    queryFn: () => get<HealthResponse>('/api/health', { locale: 'ar' }),
+    queryKey: ["admin", "settings", "health"],
+    queryFn: () => get<HealthResponse>("/api/health", { locale: "ar" }),
     staleTime: 60_000,
     retry: 1,
   });
 
   const unreadNotificationsQuery = useQuery({
-    queryKey: ['admin', 'settings', 'notifications-unread'],
+    queryKey: ["admin", "settings", "notifications-unread"],
     queryFn: () =>
       notificationsApi.list({
         unread_only: true,
@@ -64,9 +64,9 @@ export default function AdminSettingsPage() {
 
   const auditSummaryQuery = useQuery({
     queryKey: [
-      'admin',
-      'settings',
-      'audit-summary',
+      "admin",
+      "settings",
+      "audit-summary",
       weekRange.from,
       weekRange.to,
     ],
@@ -90,9 +90,9 @@ export default function AdminSettingsPage() {
   const weeklyAuditCount = auditSummaryQuery.data?.total ?? 0;
 
   function markSaved(section: keyof SaveStates) {
-    setSaveStates((prev) => ({ ...prev, [section]: 'saved' }));
+    setSaveStates((prev) => ({ ...prev, [section]: "saved" }));
     window.setTimeout(() => {
-      setSaveStates((prev) => ({ ...prev, [section]: 'idle' }));
+      setSaveStates((prev) => ({ ...prev, [section]: "idle" }));
     }, 2200);
   }
 
@@ -101,15 +101,15 @@ export default function AdminSettingsPage() {
       appName: draftGeneral.appName,
       appDescription: draftGeneral.appDescription,
     });
-    markSaved('general');
+    markSaved("general");
   }
 
   function handleLogoPick(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    e.target.value = '';
+    e.target.value = "";
     if (!file) return;
 
-    if (file.type !== 'image/png') {
+    if (file.type !== "image/png") {
       return;
     }
 
@@ -125,17 +125,17 @@ export default function AdminSettingsPage() {
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result;
-        if (typeof result === 'string') {
+        if (typeof result === "string") {
           setSettings((prev) => ({
             ...prev,
             logo: { ...prev.logo, dataUrl: result },
           }));
-          markSaved('logo');
+          markSaved("logo");
         }
         setPendingLogoFile(null);
         resolve();
       };
-      reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+      reader.onerror = () => reject(new Error("فشل قراءة الملف"));
       reader.readAsDataURL(file);
     });
   }
@@ -150,81 +150,77 @@ export default function AdminSettingsPage() {
         <title>الإعدادات • {settings.general.appName}</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-        className='min-h-[520px] bg-[#FCFDFE]'
-      >
-        <div className='mx-auto w-full max-w-[1320px] px-4 pb-10 pt-2 sm:px-6 lg:px-10'>
-          <section className='grid grid-cols-1 gap-3 mb-6 md:grid-cols-3'>
-            <div className='rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]'>
-              <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+      <div dir="rtl" lang="ar" className="min-h-[520px] bg-[#FCFDFE]">
+        <div className="mx-auto w-full max-w-[1320px] px-4 pb-10 pt-2 sm:px-6 lg:px-10">
+          <section className="grid grid-cols-1 gap-3 mb-6 md:grid-cols-3">
+            <div className="rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
+              <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                 حالة النظام (API/Storage)
               </div>
-              <div className='mt-2 font-cairo text-[14px] font-black text-[#111827]'>
+              <div className="mt-2 font-cairo text-[14px] font-black text-[#111827]">
                 {healthQuery.isLoading
-                  ? 'جارِ الفحص...'
+                  ? "جارِ الفحص..."
                   : healthQuery.isError
-                    ? 'غير متاح'
-                    : `${healthQuery.data?.status ?? '—'} / ${healthQuery.data?.storage ?? '—'}`}
+                    ? "غير متاح"
+                    : `${healthQuery.data?.status ?? "—"} / ${healthQuery.data?.storage ?? "—"}`}
               </div>
             </div>
 
-            <div className='rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]'>
-              <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+            <div className="rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
+              <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                 إشعارات غير مقروءة (GET /notifications)
               </div>
-              <div className='mt-2 font-cairo text-[14px] font-black text-[#111827]'>
+              <div className="mt-2 font-cairo text-[14px] font-black text-[#111827]">
                 {unreadNotificationsQuery.isLoading
-                  ? 'جارِ التحميل...'
+                  ? "جارِ التحميل..."
                   : unreadCount}
               </div>
             </div>
 
-            <div className='rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]'>
-              <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+            <div className="rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
+              <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                 سجلات التدقيق (آخر 7 أيام)
               </div>
-              <div className='mt-2 font-cairo text-[14px] font-black text-[#111827]'>
+              <div className="mt-2 font-cairo text-[14px] font-black text-[#111827]">
                 {auditSummaryQuery.isLoading
-                  ? 'جارِ التحميل...'
+                  ? "جارِ التحميل..."
                   : weeklyAuditCount}
               </div>
             </div>
           </section>
 
-          <div className='grid grid-cols-1 gap-6 xl:grid-cols-12'>
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <SettingsSectionCard
-              title='الإعدادات العامة'
+              title="الإعدادات العامة"
               icon={Settings}
-              className='xl:col-span-7'
+              className="xl:col-span-7"
             >
-              <div className='space-y-4'>
+              <div className="space-y-4">
                 <SettingsField
-                  label='اسم التطبيق'
+                  label="اسم التطبيق"
                   value={draftGeneral.appName}
                   onChange={(v) =>
                     setDraftGeneral((d) => ({ ...d, appName: v }))
                   }
                 />
                 <SettingsField
-                  label='وصف التطبيق'
+                  label="وصف التطبيق"
                   value={draftGeneral.appDescription}
                   onChange={(v) =>
                     setDraftGeneral((d) => ({ ...d, appDescription: v }))
                   }
                 />
-                <div className='flex justify-start pt-1'>
+                <div className="flex justify-start pt-1">
                   <button
-                    type='button'
+                    type="button"
                     onClick={() => setConfirmGeneralOpen(true)}
-                    className='inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)]'
+                    className="inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)]"
                   >
                     حفظ التغييرات
                   </button>
                 </div>
-                {saveStates.general === 'saved' ? (
-                  <div className='text-right font-cairo text-[11px] font-semibold text-[#16A34A]'>
+                {saveStates.general === "saved" ? (
+                  <div className="text-right font-cairo text-[11px] font-semibold text-[#16A34A]">
                     تم الحفظ محلياً في المتصفح
                   </div>
                 ) : null}
@@ -232,44 +228,44 @@ export default function AdminSettingsPage() {
             </SettingsSectionCard>
 
             <SettingsSectionCard
-              title='شعار التطبيق'
+              title="شعار التطبيق"
               icon={CloudUpload}
-              className='xl:col-span-5'
+              className="xl:col-span-5"
             >
-              <div className='flex flex-col gap-5 items-start sm:flex-row sm:items-center'>
-                <div className='flex min-h-[96px] min-w-[96px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_14px_30px_rgba(15,143,139,0.25)]'>
+              <div className="flex flex-col gap-5 items-start sm:flex-row sm:items-center">
+                <div className="flex min-h-[96px] min-w-[96px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_14px_30px_rgba(15,143,139,0.25)]">
                   {settings.logo.dataUrl ? (
                     <img
                       src={settings.logo.dataUrl}
-                      alt='App Logo'
-                      className='h-[96px] w-[96px] rounded-[6px] object-cover'
+                      alt="App Logo"
+                      className="h-[96px] w-[96px] rounded-[6px] object-cover"
                     />
                   ) : (
-                    <div className='px-8 font-cairo text-[25px] font-black leading-[36px]'>
+                    <div className="px-8 font-cairo text-[25px] font-black leading-[36px]">
                       {settings.logo.initials}
                     </div>
                   )}
                 </div>
-                <div className='w-full sm:w-auto'>
+                <div className="w-full sm:w-auto">
                   <button
-                    type='button'
+                    type="button"
                     onClick={triggerLogoUpload}
-                    className='inline-flex h-[36px] items-center gap-2 rounded-[8px] border border-primary bg-white px-2 font-cairo text-[12px] font-extrabold text-primary'
+                    className="inline-flex h-[36px] items-center gap-2 rounded-[8px] border border-primary bg-white px-2 font-cairo text-[12px] font-extrabold text-primary"
                   >
                     تحميل شعار جديد
                   </button>
                   <input
                     ref={logoInputRef}
-                    type='file'
-                    accept='image/png'
+                    type="file"
+                    accept="image/png"
                     onChange={handleLogoPick}
-                    className='hidden'
+                    className="hidden"
                   />
-                  <div className='mt-2 text-right font-cairo text-[11px] font-medium text-[#98A2B3]'>
+                  <div className="mt-2 text-right font-cairo text-[11px] font-medium text-[#98A2B3]">
                     الحجم المفضل 512×512 • صيغة (PNG)
                   </div>
-                  {saveStates.logo === 'saved' ? (
-                    <div className='mt-1 text-right font-cairo text-[11px] font-semibold text-[#16A34A]'>
+                  {saveStates.logo === "saved" ? (
+                    <div className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#16A34A]">
                       تم حفظ الشعار محلياً
                     </div>
                   ) : null}
@@ -283,29 +279,29 @@ export default function AdminSettingsPage() {
       <ConfirmActionDialog
         open={confirmGeneralOpen}
         onOpenChange={setConfirmGeneralOpen}
-        variant='primary'
-        title='تأكيد حفظ الإعدادات العامة'
-        icon={<Settings className='h-6 w-6' strokeWidth={2} aria-hidden />}
+        variant="primary"
+        title="تأكيد حفظ الإعدادات العامة"
+        icon={<Settings className="h-6 w-6" strokeWidth={2} aria-hidden />}
         description={
           <>
-            سيتُحدَّث الشريط الجانبي مباشرة بقيم:{' '}
-            <span className='font-extrabold text-[#344054]'>اسم التطبيق</span> و
-            <span className='font-extrabold text-[#344054]'>الوصف</span>، وتُحفظان محلياً
-            عبر
+            سيتُحدَّث الشريط الجانبي مباشرة بقيم:{" "}
+            <span className="font-extrabold text-[#344054]">اسم التطبيق</span> و
+            <span className="font-extrabold text-[#344054]">الوصف</span>،
+            وتُحفظان محلياً عبر
             {` `}
-            <span className='font-extrabold'>localStorage</span> ليبقيا بعد إعادة تحميل
-            الصفحة.
+            <span className="font-extrabold">localStorage</span> ليبقيا بعد
+            إعادة تحميل الصفحة.
           </>
         }
-        cancelLabel='ليس الآن'
-        confirmLabel='نعم، احفظ'
+        cancelLabel="ليس الآن"
+        confirmLabel="نعم، احفظ"
         onConfirm={async () => {
           commitGeneralFromDraft();
         }}
         successToast={{
-          title: 'تم حفظ الإعدادات',
-          message: 'تم تطبيق اسم التطبيق والوصف في الشريط الجانبي.',
-          variant: 'success',
+          title: "تم حفظ الإعدادات",
+          message: "تم تطبيق اسم التطبيق والوصف في الشريط الجانبي.",
+          variant: "success",
         }}
       />
 
@@ -315,20 +311,21 @@ export default function AdminSettingsPage() {
           setLogoConfirmOpen(o);
           if (!o) setPendingLogoFile(null);
         }}
-        variant='primary'
-        title='تأكيد تغيير شعار التطبيق؟'
-        icon={<CloudUpload className='h-6 w-6' strokeWidth={2} aria-hidden />}
-        description='سيُستبدل الشعار الحالي بالصورة التي اخترتها (PNG) ويُحفظ محلياً ليظهر في الشريط والهوية داخل اللوحة.'
-        cancelLabel='إلغاء'
-        confirmLabel='نعم، استخدم هذا الشعار'
+        variant="primary"
+        title="تأكيد تغيير شعار التطبيق؟"
+        icon={<CloudUpload className="h-6 w-6" strokeWidth={2} aria-hidden />}
+        description="سيُستبدل الشعار الحالي بالصورة التي اخترتها (PNG) ويُحفظ محلياً ليظهر في الشريط والهوية داخل اللوحة."
+        cancelLabel="إلغاء"
+        confirmLabel="نعم، استخدم هذا الشعار"
         onConfirm={() => applyPendingLogo()}
         successToast={{
-          title: 'تم تحديث الشعار',
+          title: "تم تحديث الشعار",
           message:
-            'يظهر شعارك الجديد فوراً في واجهة الإعدادات. احفظ نسخة احتياطية من الملف عند الحاجة.',
-          variant: 'success',
+            "يظهر شعارك الجديد فوراً في واجهة الإعدادات. احفظ نسخة احتياطية من الملف عند الحاجة.",
+          variant: "success",
         }}
       />
     </>
   );
 }
+

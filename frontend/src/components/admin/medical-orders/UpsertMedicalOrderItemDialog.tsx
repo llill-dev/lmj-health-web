@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import {
   useCreateMedicalOrderCatalogItem,
   useUpdateMedicalOrderCatalogItem,
-} from '@/hooks/useAdminMedicalOrderCatalog';
+} from '@/hooks/admin/useAdminMedicalOrderCatalog';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
 import type {
