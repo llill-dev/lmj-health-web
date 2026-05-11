@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import {
+  PHONE_DIAL_CODES,
+  PHONE_DIAL_CODE_OPTIONS,
+  type PhoneDialCode,
+} from '@/lib/phone/dialCodes';
 
 /**
  * رسائل التحقق من البريد في التسجيل (تظهر عند الخروج من الحقل أو عند المتابعة).
@@ -17,55 +22,20 @@ export const SIGNUP_EMAIL_INVALID_MESSAGE_AR =
  */
 
 /** Dial codes for signup phone UI; merged into one `phone` string for POST /auth/signup (API-3). */
-export const SIGNUP_PHONE_DIAL_CODES = [
-  '+963',
-  '+966',
-  '+971',
-  '+962',
-  '+961',
-  '+965',
-  '+968',
-  '+964',
-  '+972',
-  '+973',
-  '+974',
-  '+20',
-  '+212',
-  '+249',
-  '+90',
-  '+44',
-  '+1',
-] as const;
+export const SIGNUP_PHONE_DIAL_CODES = PHONE_DIAL_CODES;
 
-export type SignupPhoneDialCode = (typeof SIGNUP_PHONE_DIAL_CODES)[number];
+export type SignupPhoneDialCode = PhoneDialCode;
 
 export const signupPhoneDialCodeSchema = z.enum(SIGNUP_PHONE_DIAL_CODES, {
   message: 'رمز النداء غير مدعوم أو غير مختار.',
 });
 
 /** Labels for `<select>` (UI only); API still receives one combined `phone` string. */
-export const SIGNUP_PHONE_DIAL_OPTIONS: ReadonlyArray<{
-  value: SignupPhoneDialCode;
-  label: string;
-}> = [
-  { value: '+966', label: 'السعودية (+966)' },
-  { value: '+963', label: 'سوريا (+963)' },
-  { value: '+971', label: 'الإمارات (+971)' },
-  { value: '+962', label: 'الأردن (+962)' },
-  { value: '+961', label: 'لبنان (+961)' },
-  { value: '+965', label: 'الكويت (+965)' },
-  { value: '+968', label: 'عُمان (+968)' },
-  { value: '+964', label: 'العراق (+964)' },
-  { value: '+972', label: 'فلسطين (+972)' },
-  { value: '+973', label: 'البحرين (+973)' },
-  { value: '+974', label: 'قطر (+974)' },
-  { value: '+20', label: 'مصر (+20)' },
-  { value: '+212', label: 'المغرب (+212)' },
-  { value: '+249', label: 'السودان (+249)' },
-  { value: '+90', label: 'تركيا (+90)' },
-  { value: '+44', label: 'المملكة المتحدة (+44)' },
-  { value: '+1', label: 'أمريكا / كندا (+1)' },
-];
+export const SIGNUP_PHONE_DIAL_OPTIONS =
+  PHONE_DIAL_CODE_OPTIONS satisfies ReadonlyArray<{
+    value: SignupPhoneDialCode;
+    label: string;
+  }>;
 
 /** Split a stored E.164-style phone from draft into dial + local (best-effort). */
 export function splitSignupPhone(phone?: string): {
@@ -109,6 +79,18 @@ export const genderSchema = z.enum(['male', 'female'], {
 export const doctorCatalogSpecializationKeyRegex = /^[a-zA-Z0-9_.-]+$/;
 
 const signupStringTrim = z.string().trim();
+
+const SIGNUP_PASSWORD_COMPLEXITY_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+
+export const signupPasswordSchema = z
+  .string()
+  .min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.')
+  .max(256, 'كلمة المرور طويلة جداً.')
+  .regex(
+    SIGNUP_PASSWORD_COMPLEXITY_REGEX,
+    'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم واحد على الأقل.',
+  );
 
 /** Matches POST /auth/signup `dateOfBirth`: ISO date only, no time (API-3). */
 const isoDateOnlySchema = z
@@ -239,16 +221,21 @@ export const step1AccountSchema = z
       .trim()
       .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
       .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
-    /** API-3: minimum length 6 */
-    password: z
-      .string()
-      .min(6, 'كلمة المرور 6 أحرف على الأقل مطلوبة')
-      .max(256, 'كلمة المرور طويلة جداً'),
+    password: signupPasswordSchema,
+    confirmPassword: z.string().min(1, 'يرجى تأكيد كلمة المرور.'),
     phoneDialCode: signupPhoneDialCodeSchema,
     phoneLocal: phoneLocalPartSchema,
     channel: verificationChannelSchema,
   })
 .superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'كلمتا المرور غير متطابقتين.',
+        path: ['confirmPassword'],
+      });
+    }
+
     const local = normalizePhoneLocalDigits(data.phoneLocal);
     if (!local.length) {
       ctx.addIssue({
@@ -371,10 +358,7 @@ export const signUpSchema = z
       .trim()
       .min(1, SIGNUP_EMAIL_REQUIRED_MESSAGE_AR)
       .email(SIGNUP_EMAIL_INVALID_MESSAGE_AR),
-    password: z
-      .string()
-      .min(6, 'كلمة المرور 6 أحرف على الأقل (متطلب الخادم).')
-      .max(256, 'كلمة المرور طويلة جداً'),
+    password: signupPasswordSchema,
     phone: signupE164PhoneSchema,
     channel: verificationChannelSchema,
     gender: genderSchema,

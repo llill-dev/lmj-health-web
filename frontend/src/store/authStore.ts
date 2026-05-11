@@ -64,7 +64,7 @@ interface AuthState {
     password: string,
     role: "jobseeker" | "company" | "doctor",
   ) => Promise<void>;
-  setPendingVerification: (payload: PendingVerification | null) => void;
+  setPendingVerification: (df: PendingVerification | null) => void;
   logout: (options?: { skipRemoteRevoke?: boolean }) => Promise<void>;
 }
 

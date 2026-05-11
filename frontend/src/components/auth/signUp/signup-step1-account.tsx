@@ -44,6 +44,7 @@ export default function SignUpStep1Account({
   onDismissContactConflict?: (field: 'email' | 'phone') => void;
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const phoneDefaults = useMemo(
     () => splitSignupPhone(defaultValues?.phone),
@@ -62,6 +63,7 @@ export default function SignUpStep1Account({
       fullName: defaultValues?.fullName ?? '',
       email: defaultValues?.email ?? '',
       password: defaultValues?.password ?? '',
+      confirmPassword: '',
       phoneDialCode: phoneDefaults.phoneDialCode,
       phoneLocal: phoneDefaults.phoneLocal,
       channel: defaultValues?.channel ?? 'whatsapp',
@@ -74,6 +76,8 @@ export default function SignUpStep1Account({
   const channel = watch('channel');
 
   const emailField = register('email');
+  const passwordField = register('password');
+  const confirmPasswordField = register('confirmPassword');
   const phoneLocalField = register('phoneLocal');
   const phoneDialField = register('phoneDialCode');
 
@@ -102,6 +106,7 @@ export default function SignUpStep1Account({
               setValue('fullName', 'د. محمد أحمد', { shouldDirty: true });
               setValue('email', `doctor+${demoStamp}@example.com`, { shouldDirty: true });
               setValue('password', 'Password123', { shouldDirty: true });
+              setValue('confirmPassword', 'Password123', { shouldDirty: true });
               setValue('phoneDialCode', '+963', { shouldDirty: true });
               setValue('phoneLocal', `9${demoStamp.slice(-8)}`, { shouldDirty: true });
               setValue('channel', 'whatsapp', { shouldDirty: true });
@@ -197,7 +202,7 @@ export default function SignUpStep1Account({
                 type={showPassword ? 'text' : 'password'}
                 placeholder='••••••••'
                 autoComplete='new-password'
-                {...register('password')}
+                {...passwordField}
                 className='h-full min-w-0 px-12 flex-1 bg-transparent font-cairo text-[14px] font-semibold text-[#6B7280] outline-none placeholder:font-cairo placeholder:font-medium'
               />
               <button
@@ -224,8 +229,52 @@ export default function SignUpStep1Account({
               {errors.password?.message ?? 'x'}
             </div>
             <p className='mt-0.5 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-              الحد الأدنى 6 أحرف مطلوبة
+              8+ أحرف وتتضمن حرفاً كبيراً وحرفاً صغيراً ورقماً واحداً على الأقل
             </p>
+          </div>
+
+          <div>
+            <div className='flex gap-2 justify-start items-center text-right'>
+              <LockKeyhole className='w-4 h-4 text-primary' />
+              <span className='font-cairo text-[14px] font-bold text-[#374151]'>
+                تأكيد كلمة المرور
+              </span>
+              <span className='font-cairo text-[14px] font-bold text-[#374151]'>
+                *
+              </span>
+            </div>
+            <div className='mt-2 flex h-[48px] w-full items-center gap-2 rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-3 shadow-[0_10px_25px_rgba(0,0,0,0.05)] focus-within:border-primary'>
+              <input
+                dir='rlt'
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder='********'
+                autoComplete='new-password'
+                {...confirmPasswordField}
+                className='h-full min-w-0 px-12 flex-1 bg-transparent font-cairo text-[14px] font-semibold text-[#6B7280] outline-none placeholder:font-cairo placeholder:font-medium'
+              />
+              <button
+                type='button'
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                className='justify-start shrink-0 items-center text-[#6B7280] transition-colors hover:text-primary focus:outline-none'
+                aria-label={
+                  showConfirmPassword ? 'إخفاء تأكيد كلمة المرور' : 'إظهار تأكيد كلمة المرور'
+                }
+                title={showConfirmPassword ? 'إخفاء تأكيد كلمة المرور' : 'إظهار تأكيد كلمة المرور'}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className='w-5 h-5' />
+                ) : (
+                  <Eye className='w-5 h-5' />
+                )}
+              </button>
+            </div>
+            <div
+              className={`mt-1 min-h-[18px] font-cairo text-[12px] font-semibold ${
+                errors.confirmPassword?.message ? 'text-red-500' : 'text-transparent'
+              }`}
+            >
+              {errors.confirmPassword?.message ?? 'x'}
+            </div>
           </div>
 
           <div>

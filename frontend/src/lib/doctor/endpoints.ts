@@ -24,4 +24,23 @@ export const doctorEndpoints = {
       `/api/appointments/${appointmentId}/complete`,
     noShow: (appointmentId: string) => `/api/appointments/${appointmentId}/no-show`,
   },
+  schedule: {
+    get: (doctorId: string) => `/api/doctors/${doctorId}/schedule`,
+    update: (doctorId: string) => `/api/doctors/${doctorId}/schedule`,
+    updateSettings: (doctorId: string) => `/api/doctors/${doctorId}/schedule/settings`,
+    addDay: (doctorId: string) => `/api/doctors/${doctorId}/schedule/day`,
+    updateDay: (doctorId: string, day: string) => `/api/doctors/${doctorId}/schedule/day/${day}`,
+    deleteDay: (doctorId: string, day: string) => `/api/doctors/${doctorId}/schedule/day/${day}`,
+    addException: (doctorId: string) => `/api/doctors/${doctorId}/schedule/exception`,
+    updateExceptions: (doctorId: string) => `/api/doctors/${doctorId}/schedule/exceptions`,
+    deleteException: (doctorId: string, exceptionId: string) => `/api/doctors/${doctorId}/schedule/exception/${exceptionId}`,
+    slots: (doctorId: string) => `/api/doctors/${doctorId}/slots`,
+  },
+  appointmentTypes: {
+    available: (doctorId: string) => `/api/doctors/${doctorId}/appointment-types/available`,
+    list: (doctorId: string) => `/api/doctors/${doctorId}/appointment-types`,
+    create: (doctorId: string) => `/api/doctors/${doctorId}/appointment-types`,
+    update: (doctorId: string, typeId: string) => `/api/doctors/${doctorId}/appointment-types/${typeId}`,
+    delete: (doctorId: string, typeId: string) => `/api/doctors/${doctorId}/appointment-types/${typeId}`,
+  },
 } as const;

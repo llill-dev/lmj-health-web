@@ -6,12 +6,14 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAvailableAppointmentTypes } from '@/hooks/doctor';
 
 export type BookAppointmentValues = {
   patientId: string;
   date: string;
   time: string;
   consultationType: 'clinic' | 'video';
+  appointmentTypeId?: string;
   notes?: string;
 };
 
@@ -26,6 +28,7 @@ const bookAppointmentSchema = z.object({
     .min(1, 'يرجى اختيار الوقت')
     .regex(/^\d{2}:\d{2}/, 'صيغة الوقت غير صحيحة'),
   consultationType: z.enum(['clinic', 'video']),
+  appointmentTypeId: z.string().optional(),
   notes: z.string().max(500, 'الحد الأقصى للملاحظات 500 حرف').optional(),
 });
 
@@ -36,11 +39,13 @@ export default function BookAppointmentDialog({
   onOpenChange,
   patients,
   onSubmit,
+  doctorId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patients: { id: string; name: string }[];
   onSubmit: (values: BookAppointmentValues) => void;
+  doctorId?: string;
 }) {
   const {
     register,
@@ -54,9 +59,14 @@ export default function BookAppointmentDialog({
       date: '',
       time: '',
       consultationType: 'clinic',
+      appointmentTypeId: '',
       notes: '',
     },
   });
+
+  // Fetch available appointment types for this doctor
+  const { appointmentTypes, isLoading: isLoadingTypes } =
+    useAvailableAppointmentTypes(doctorId);
 
   useEffect(() => {
     if (!open) return;
@@ -88,6 +98,7 @@ export default function BookAppointmentDialog({
             date: '',
             time: '',
             consultationType: 'clinic',
+            appointmentTypeId: '',
             notes: '',
           });
       }}
@@ -189,6 +200,7 @@ export default function BookAppointmentDialog({
                     date: values.date,
                     time: values.time,
                     consultationType: values.consultationType,
+                    appointmentTypeId: values.appointmentTypeId?.trim() || undefined,
                     notes: values.notes?.trim()
                       ? values.notes.trim()
                       : undefined,
@@ -199,6 +211,7 @@ export default function BookAppointmentDialog({
                     date: '',
                     time: '',
                     consultationType: 'clinic',
+                    appointmentTypeId: '',
                     notes: '',
                   });
                 })}
@@ -295,6 +308,42 @@ export default function BookAppointmentDialog({
                       </div>
                     ) : null}
                   </div>
+
+                  {appointmentTypes.length > 0 && (
+                    <div>
+                      <div className='mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]'>
+                        نوع الموعد (اختياري)
+                      </div>
+                      <div className='relative'>
+                        <select
+                          {...register('appointmentTypeId')}
+                          disabled={isLoadingTypes}
+                          className={`h-[46px] w-full appearance-none rounded-[12px] border-[1.82px] ${errors.appointmentTypeId ? 'border-[#F04438]' : 'border-primary'} bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          <option value=''>بدون تحديد نوع</option>
+                          {appointmentTypes.map((type) => (
+                            <option
+                              key={type._id}
+                              value={type._id}
+                            >
+                              {type.name}
+                              {type.priceVisibleToPatient && type.price
+                                ? ` - ${type.price} ريال`
+                                : ''}
+                            </option>
+                          ))}
+                        </select>
+                        <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#667085]'>
+                          <ChevronDown className='h-4 w-4' />
+                        </div>
+                      </div>
+                      {errors.appointmentTypeId ? (
+                        <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                          {errors.appointmentTypeId.message}
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
 
                   <div>
                     <div className='mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]'>

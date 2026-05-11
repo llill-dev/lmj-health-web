@@ -12,13 +12,34 @@ import {
   useRequestDoctorPatientAccess,
 } from "@/hooks";
 import { Helmet } from "react-helmet-async";
-import { Search, UserCheck, UserMinus, UserRoundPlus } from "lucide-react";
+import {
+  Search,
+  UserCheck,
+  UserMinus,
+  UserRoundPlus,
+  Link2,
+  Clock,
+  Hourglass,
+  CheckCircle2,
+  Stethoscope,
+  ShieldAlert,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { readAuthUser } from "@/lib/cookies";
 import { ApiError } from "@/lib/api";
+import {
+  determinePatientState,
+  getPatientStateInfo,
+  type PatientRelationshipState
+} from "@/lib/doctor/patient-states";
 
 type FilterStatus = "all" | "active" | "temporary" | "suspended";
+type RelationshipFilter = "all" | PatientRelationshipState;
+type PendingAccessState = Record<
+  string,
+  { pendingRequestId?: string | null; message?: string }
+>;
 
 function getPatientsListErrorMessage(error: unknown): string {
   if (!(error instanceof ApiError)) {
@@ -73,6 +94,9 @@ function toCardData(patient: {
     fileNo: patient.publicId,
     name: patient.user.fullName,
     accountStatusLabel,
+    accountStatusKey: patient.user.accountStatus ?? "active",
+    isTemporary:
+      patient.isTemporary ?? patient.user.accountStatus === "temporary",
     phone: patient.user.phone ?? "—",
     lastVisit: formatIsoDate(patient.lastVisitAt),
     allergies: patient.allergies ?? [],
@@ -94,11 +118,14 @@ export default function DoctorPatientsPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
+  const [relationshipFilter, setRelationshipFilter] = useState<RelationshipFilter>("all");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<PatientCardTab>("basic");
   const [tempPatientOpen, setTempPatientOpen] = useState(false);
+  const [pendingAccessByPatient, setPendingAccessByPatient] =
+    useState<PendingAccessState>({});
 
   const listQuery = useDoctorPatients({
     search: search || undefined,
@@ -144,38 +171,54 @@ export default function DoctorPatientsPage() {
     1,
     Math.ceil(listQuery.total / Math.max(limit, 1)),
   );
-  const cardPatients = useMemo(
-    () =>
-      listQuery.patients.map((patient) => {
-        const base = toCardData(patient);
-        if (
-          expandedId &&
-          patient._id === expandedId &&
-          publicProfileQuery.patient
-        ) {
-          return {
-            ...base,
-            allergies: publicProfileQuery.patient.allergies ?? base.allergies,
-            medicalConditions:
-              publicProfileQuery.patient.medicalConditions ??
-              base.medicalConditions,
-            bloodType: publicProfileQuery.patient.bloodType ?? base.bloodType,
-            heightLabel: publicProfileQuery.patient.heightCm
-              ? `${publicProfileQuery.patient.heightCm} سم`
-              : "—",
-            weightLabel: publicProfileQuery.patient.weightKg
-              ? `${publicProfileQuery.patient.weightKg} كغ`
-              : "—",
-            measurementUnitLabel:
-              publicProfileQuery.patient.measurementUnit === "metric"
-                ? "متري"
-                : (publicProfileQuery.patient.measurementUnit ?? "—"),
-          };
-        }
-        return base;
-      }),
-    [expandedId, listQuery.patients, publicProfileQuery.patient],
-  );
+  const cardPatients = useMemo(() => {
+    const enhancedPatients = listQuery.patients.map((patient) => {
+      const base = toCardData(patient);
+
+      // Determine relationship state for each patient
+      const relationshipState = determinePatientState({
+        isTemporary: base.isTemporary ?? false,
+        accessRequired: false, // Will be determined when expanded
+        accessPending: Boolean(pendingAccessByPatient[patient._id]),
+        hasActiveEncounter: false, // TODO: Add encounter check
+        accountStatus: base.accountStatusKey,
+      });
+
+      if (
+        expandedId &&
+        patient._id === expandedId &&
+        publicProfileQuery.patient
+      ) {
+        return {
+          ...base,
+          relationshipState,
+          allergies: publicProfileQuery.patient.allergies ?? base.allergies,
+          medicalConditions:
+            publicProfileQuery.patient.medicalConditions ??
+            base.medicalConditions,
+          bloodType: publicProfileQuery.patient.bloodType ?? base.bloodType,
+          heightLabel: publicProfileQuery.patient.heightCm
+            ? `${publicProfileQuery.patient.heightCm} سم`
+            : "—",
+          weightLabel: publicProfileQuery.patient.weightKg
+            ? `${publicProfileQuery.patient.weightKg} كغ`
+            : "—",
+          measurementUnitLabel:
+            publicProfileQuery.patient.measurementUnit === "metric"
+              ? "متري"
+              : (publicProfileQuery.patient.measurementUnit ?? "—"),
+        };
+      }
+      return { ...base, relationshipState };
+    });
+
+    // Apply relationship filter
+    if (relationshipFilter !== "all") {
+      return enhancedPatients.filter(p => p.relationshipState === relationshipFilter);
+    }
+
+    return enhancedPatients;
+  }, [expandedId, listQuery.patients, publicProfileQuery.patient, pendingAccessByPatient, relationshipFilter]);
 
   const statusCounts = {
     active: activeCountQuery.total,
@@ -228,8 +271,21 @@ export default function DoctorPatientsPage() {
     accessError?.messageKey === "errors.accessRequest.approvalRequired" ||
     accessError?.body?.accessRequired === true;
 
+  const pendingRequestIdFromQuery =
+    typeof accessError?.body?.pendingRequestId === "string"
+      ? accessError.body.pendingRequestId
+      : null;
+
+  const effectivePendingAccess =
+    (expandedId ? pendingAccessByPatient[expandedId] : undefined) ?? null;
+
+  const accessPending = Boolean(
+    pendingRequestIdFromQuery || effectivePendingAccess?.pendingRequestId,
+  );
+
   const accessMessage =
-    typeof accessError?.message === "string" ? accessError.message : undefined;
+    effectivePendingAccess?.message ??
+    (typeof accessError?.message === "string" ? accessError.message : undefined);
 
   return (
     <>
@@ -258,24 +314,70 @@ export default function DoctorPatientsPage() {
           kpis={[
             {
               key: "active",
-              icon: <UserCheck className="h-5 w-5 shrink-0" />,
+              icon: <UserCheck className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.active,
               label: "نشط",
             },
             {
               key: "temporary",
-              icon: <UserRoundPlus className="h-5 w-5 shrink-0" />,
+              icon: <UserRoundPlus className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.temporary,
               label: "مؤقت",
             },
             {
               key: "suspended",
-              icon: <UserMinus className="h-5 w-5 shrink-0" />,
+              icon: <UserMinus className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.suspended,
               label: "معلّق",
             },
           ]}
         />
+
+        <section className="mb-5 rounded-[12px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+          <h3 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
+            تصفية حسب حالة العلاقة
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {(['all', 'full-access', 'linked-only', 'temporary', 'access-pending', 'active-encounter', 'restricted'] as const).map((state) => {
+              const isActive = relationshipFilter === state;
+              const stateInfo = state !== 'all' ? getPatientStateInfo(state) : null;
+              const StateIcon = state === 'all' ? UserCheck
+                : state === 'full-access' ? CheckCircle2
+                : state === 'linked-only' ? Link2
+                : state === 'temporary' ? Clock
+                : state === 'access-pending' ? Hourglass
+                : state === 'active-encounter' ? Stethoscope
+                : ShieldAlert;
+
+              return (
+                <button
+                  key={state}
+                  type="button"
+                  onClick={() => {
+                    setRelationshipFilter(state);
+                    setPage(1);
+                  }}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-cairo text-[12px] font-bold transition-all ${
+                    isActive
+                      ? stateInfo
+                        ? `${stateInfo.color.bg} ${stateInfo.color.text} ring-2 ${stateInfo.color.ring} ring-inset`
+                        : 'bg-primary text-white ring-2 ring-primary ring-inset'
+                      : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
+                  }`}
+                >
+                  <StateIcon className="h-3.5 w-3.5 shrink-0" />
+                  {state === 'all' ? 'الكل'
+                    : state === 'full-access' ? 'وصول كامل'
+                    : state === 'linked-only' ? 'مرتبط فقط'
+                    : state === 'temporary' ? 'مؤقت'
+                    : state === 'access-pending' ? 'قيد الانتظار'
+                    : state === 'active-encounter' ? 'زيارة جارية'
+                    : 'محجوب'}
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
         <CreateTemporaryPatientDialog
           open={tempPatientOpen}
@@ -300,7 +402,7 @@ export default function DoctorPatientsPage() {
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr),180px,180px]">
             <div className="relative">
-              <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute right-3 top-1/2 w-5 h-5 text-gray-400 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="بحث من الباكند بالاسم أو البريد أو الهاتف أو الرقم العام"
@@ -339,7 +441,7 @@ export default function DoctorPatientsPage() {
             </select>
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-3">
             <input
               type="date"
               value={from}
@@ -419,8 +521,18 @@ export default function DoctorPatientsPage() {
                 accessRequired={
                   expandedId === patient.id ? accessRequired : false
                 }
+                accessPending={
+                  expandedId === patient.id ? accessPending : false
+                }
                 accessMessage={
                   expandedId === patient.id ? accessMessage : undefined
+                }
+                pendingRequestId={
+                  expandedId === patient.id
+                    ? pendingRequestIdFromQuery ??
+                      effectivePendingAccess?.pendingRequestId ??
+                      null
+                    : null
                 }
                 onStartConsultation={() =>
                   toast(
@@ -444,12 +556,25 @@ export default function DoctorPatientsPage() {
                     const response = await requestAccessMutation.mutateAsync({
                       patientId: patient.id,
                       body: {
-                        reason: "Need to review your profile before follow-up",
+                        reason: "طلب وصول للملف الطبي الكامل لمتابعة الحالة الصحية",
                       },
                     });
-                    toast(response.message ?? "تم إنشاء طلب الوصول.", {
+
+                    // Update local state to reflect pending access
+                    if (response.request?._id) {
+                      setPendingAccessByPatient(prev => ({
+                        ...prev,
+                        [patient.id]: {
+                          pendingRequestId: response.request._id,
+                          message: response.message,
+                        },
+                      }));
+                    }
+
+                    toast(response.message ?? "تم إرسال طلب الوصول بنجاح.", {
                       title: "نجاح",
                       variant: "success",
+                      durationMs: 4000,
                     });
                   } catch (error) {
                     toast(
@@ -473,7 +598,7 @@ export default function DoctorPatientsPage() {
             الصفحة {page} من {totalPages} • إجمالي {listQuery.total}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex gap-3 items-center">
             <button
               type="button"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}

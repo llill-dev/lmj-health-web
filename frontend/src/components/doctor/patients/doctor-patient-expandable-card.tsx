@@ -2,15 +2,25 @@ import { cn } from "@/lib/utils/utils";
 import {
   AlertTriangle,
   Calendar,
+  CheckCircle2,
   ChevronDown,
+  Clock,
   FileText,
   Heart,
+  Hourglass,
   Link2,
   Phone,
   ShieldAlert,
   Stethoscope,
   UserRound,
 } from "lucide-react";
+import {
+  determinePatientState,
+  getPatientStateInfo,
+  getStateMessage,
+  getStateActions,
+  type PatientRelationshipState,
+} from "@/lib/doctor/patient-states";
 
 export type PatientCardTab =
   | "basic"
@@ -25,6 +35,8 @@ export type DoctorPatientExpandableCardData = {
   fileNo: string;
   name: string;
   accountStatusLabel: string;
+  accountStatusKey?: "active" | "temporary" | "suspended";
+  isTemporary?: boolean;
   phone: string;
   lastVisit: string;
   allergies: string[];
@@ -102,6 +114,9 @@ export type DoctorPatientExpandableCardProps = {
   detailsLoading?: boolean;
   accessRequired?: boolean;
   accessMessage?: string;
+  accessPending?: boolean;
+  pendingRequestId?: string | null;
+  hasActiveEncounter?: boolean;
 };
 
 export default function DoctorPatientExpandableCard({
@@ -116,6 +131,9 @@ export default function DoctorPatientExpandableCard({
   detailsLoading,
   accessRequired,
   accessMessage,
+  accessPending,
+  pendingRequestId,
+  hasActiveEncounter,
 }: DoctorPatientExpandableCardProps) {
   const digits = patient.phone.replace(/\D/g, "");
   const phoneDisplay =
@@ -127,29 +145,73 @@ export default function DoctorPatientExpandableCard({
           ? `+966${digits.slice(1)}`
           : patient.phone;
 
-  const renderRestrictedPanel = () => (
-    <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-5">
-      <div className="flex items-start gap-3">
-        <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-[#B42318]" />
-        <div className="text-right">
-          <div className="font-cairo text-[14px] font-extrabold text-[#B42318]">
-            يلزم طلب وصول
+  // Determine patient relationship state
+  const relationshipState = determinePatientState({
+    isTemporary: patient.isTemporary ?? false,
+    accessRequired: accessRequired ?? false,
+    accessPending: accessPending ?? false,
+    hasActiveEncounter: hasActiveEncounter ?? false,
+    accountStatus: patient.accountStatusKey,
+  });
+
+  const stateInfo = getPatientStateInfo(relationshipState);
+  const stateMessage = getStateMessage(relationshipState, pendingRequestId);
+  const stateActions = getStateActions(relationshipState);
+
+  const statusTone =
+    patient.accountStatusKey === "temporary"
+      ? "bg-[#FFF4ED] text-[#C4320A] ring-[#FED7AA]"
+      : patient.accountStatusKey === "suspended"
+        ? "bg-[#FEF2F2] text-[#B42318] ring-[#FECACA]"
+        : "bg-[#ECFDF3] text-[#027A48] ring-[#ABEFC6]";
+
+  const StateIcon = stateInfo.icon === 'link' ? Link2
+    : stateInfo.icon === 'clock' ? Clock
+    : stateInfo.icon === 'hourglass' ? Hourglass
+    : stateInfo.icon === 'check' ? CheckCircle2
+    : stateInfo.icon === 'stethoscope' ? Stethoscope
+    : ShieldAlert;
+
+  const renderRestrictedPanel = () => {
+    const messageTypeColor = stateMessage.type === 'error' 
+      ? 'border-[#FECACA] bg-[#FEF2F2] text-[#B42318]'
+      : stateMessage.type === 'warning'
+      ? 'border-[#FEDF89] bg-[#FFFAEB] text-[#B54708]'
+      : stateMessage.type === 'success'
+      ? 'border-[#ABEFC6] bg-[#ECFDF3] text-[#027A48]'
+      : 'border-[#B2DDFF] bg-[#EFF8FF] text-[#175CD3]';
+
+    return (
+      <div className={cn('rounded-[12px] border px-4 py-5', messageTypeColor)}>
+        <div className="flex items-start gap-3">
+          <StateIcon className="mt-0.5 h-5 w-5 shrink-0" />
+          <div className="flex-1 text-right">
+            <div className="font-cairo text-[14px] font-extrabold">
+              {stateMessage.title}
+            </div>
+            <p className="mt-1 font-cairo text-[13px] font-semibold leading-6">
+              {stateMessage.body}
+            </p>
+            {pendingRequestId ? (
+              <div className="mt-3 font-cairo text-[12px] font-bold opacity-80">
+                رقم الطلب: {pendingRequestId}
+              </div>
+            ) : null}
+            {stateInfo.canRequestAccess && onRequestAccess ? (
+              <button
+                type="button"
+                onClick={onRequestAccess}
+                className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-current bg-white px-4 font-cairo text-[13px] font-extrabold hover:opacity-90 transition-opacity"
+              >
+                <Link2 className="h-4 w-4" />
+                إرسال طلب وصول
+              </button>
+            ) : null}
           </div>
-          <p className="mt-1 font-cairo text-[13px] font-semibold leading-6 text-[#7A271A]">
-            {accessMessage ?? "هذا القسم يحتاج موافقة المريض أو طلب وصول فعال."}
-          </p>
-          <button
-            type="button"
-            onClick={onRequestAccess}
-            className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-[#F04438] bg-white px-4 font-cairo text-[13px] font-extrabold text-[#B42318]"
-          >
-            <Link2 className="h-4 w-4" />
-            طلب وصول
-          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderFullTab = () => {
     if (detailsLoading) {
@@ -287,8 +349,26 @@ export default function DoctorPatientExpandableCard({
               <div className="font-cairo text-[17px] font-extrabold leading-tight text-primary">
                 {patient.name}
               </div>
-              <div className="font-cairo text-[13px] font-semibold text-[#667085]">
-                {patient.accountStatusLabel}
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={cn(
+                    "inline-flex rounded-full px-2.5 py-1 font-cairo text-[12px] font-extrabold ring-1 ring-inset",
+                    statusTone,
+                  )}
+                >
+                  {patient.accountStatusLabel}
+                </span>
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-cairo text-[12px] font-extrabold ring-1 ring-inset",
+                    stateInfo.color.bg,
+                    stateInfo.color.text,
+                    stateInfo.color.ring,
+                  )}
+                >
+                  <StateIcon className="h-3.5 w-3.5" />
+                  {stateInfo.label}
+                </span>
               </div>
               <p className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
                 ملف #{patient.fileNo}
@@ -362,6 +442,42 @@ export default function DoctorPatientExpandableCard({
               </div>
 
               <div className="mt-4">
+                <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
+                  <div className="rounded-[12px] border border-[#E4E7EC] bg-[#F8FAFC] px-4 py-3 text-right">
+                    <div className="font-cairo text-[12px] font-bold text-[#667085]">
+                      ???? ?????
+                    </div>
+                    <div className="mt-1 font-cairo text-[14px] font-extrabold text-[#101828]">
+                      ?????? ????? ???????
+                    </div>
+                  </div>
+                  <div className="rounded-[12px] border border-[#E4E7EC] bg-[#F8FAFC] px-4 py-3 text-right">
+                    <div className="font-cairo text-[12px] font-bold text-[#667085]">
+                      حالة الوصول
+                    </div>
+                    <div className={cn(
+                      "mt-1 font-cairo text-[14px] font-extrabold",
+                      stateInfo.color.text
+                    )}>
+                      {stateInfo.label}
+                    </div>
+                  </div>
+                  <div className="rounded-[12px] border border-[#E4E7EC] bg-[#F8FAFC] px-4 py-3 text-right">
+                    <div className="font-cairo text-[12px] font-bold text-[#667085]">
+                      الإجراءات المتاحة
+                    </div>
+                    <div className="mt-1 font-cairo text-[14px] font-extrabold text-[#101828]">
+                      {stateInfo.canStartEncounter
+                        ? "يمكن بدء زيارة طبية"
+                        : stateInfo.canRequestAccess
+                        ? "يحتاج طلب وصول"
+                        : stateInfo.canViewFullProfile
+                        ? "عرض متاح"
+                        : "وصول محدود"}
+                    </div>
+                  </div>
+                </div>
+
                 {activeTab === "basic" ? (
                   <div className="space-y-3">
                     <div className="space-y-2.5">
@@ -434,22 +550,42 @@ export default function DoctorPatientExpandableCard({
               </div>
 
               <div className="mt-5 grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:gap-4">
-                <button
-                  type="button"
-                  onClick={onStartConsultation}
-                  className="inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-[8px] bg-primary px-2 font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition-colors hover:bg-[#0d7a77]"
-                >
-                  <Stethoscope className="h-4 w-4 shrink-0" aria-hidden />
-                  <span className="truncate">بدء استشارة</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={onRequestAccess}
-                  className="inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-[8px] border-2 border-primary bg-[#F0F9F9] px-2 font-cairo text-[13px] font-extrabold text-primary transition-colors hover:bg-[#E6F4F4]"
-                >
-                  <Link2 className="h-4 w-4 shrink-0" aria-hidden />
-                  <span className="truncate">طلب وصول</span>
-                </button>
+                {stateActions.primary && (
+                  <button
+                    type="button"
+                    onClick={
+                      stateActions.primary.action === 'start-encounter'
+                        ? onStartConsultation
+                        : stateActions.primary.action === 'request-access'
+                        ? onRequestAccess
+                        : undefined
+                    }
+                    disabled={!stateInfo.canStartEncounter && !stateInfo.canRequestAccess}
+                    className={cn(
+                      "inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-[8px] px-2 font-cairo text-[13px] font-extrabold transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                      stateActions.primary.variant === 'primary'
+                        ? "bg-primary text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] hover:bg-[#0d7a77]"
+                        : "border-2 border-primary bg-[#F0F9F9] text-primary hover:bg-[#E6F4F4]"
+                    )}
+                  >
+                    {stateActions.primary.action === 'start-encounter' ? (
+                      <Stethoscope className="h-4 w-4 shrink-0" aria-hidden />
+                    ) : (
+                      <Link2 className="h-4 w-4 shrink-0" aria-hidden />
+                    )}
+                    <span className="truncate">{stateActions.primary.label}</span>
+                  </button>
+                )}
+                {stateActions.secondary && (
+                  <button
+                    type="button"
+                    onClick={onToggle}
+                    className="inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-[8px] border-2 border-[#E5E7EB] bg-white px-2 font-cairo text-[13px] font-extrabold text-[#344054] transition-colors hover:bg-[#F9FAFB]"
+                  >
+                    <FileText className="h-4 w-4 shrink-0" aria-hidden />
+                    <span className="truncate">{stateActions.secondary.label}</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

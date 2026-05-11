@@ -69,7 +69,11 @@ function DetailRow({
 }
 
 export type DoctorAppointmentExpandableCardProps = {
-  appointment: Appointment;
+  appointment: Appointment & {
+    appointmentTypeNameSnapshot?: string | null;
+    priceSnapshot?: number | null;
+    priceVisibleToPatientSnapshot?: boolean;
+  };
   expanded: boolean;
   onToggle: () => void;
   cancelling: boolean;
@@ -194,6 +198,20 @@ export default function DoctorAppointmentExpandableCard({
                   label="الحالة"
                   value={statusLabelAr(appointment.status)}
                 />
+                {appointment.appointmentTypeNameSnapshot && (
+                  <DetailRow
+                    icon={Hospital}
+                    label="نوع الموعد"
+                    value={appointment.appointmentTypeNameSnapshot}
+                  />
+                )}
+                {appointment.priceSnapshot && appointment.priceVisibleToPatientSnapshot && (
+                  <DetailRow
+                    icon={AlertTriangle}
+                    label="السعر"
+                    value={`${appointment.priceSnapshot} ريال`}
+                  />
+                )}
                 <DetailRow icon={MapPin} label="الموقع" value={location} />
                 <DetailRow icon={Hospital} label="سبب الزيارة" value={reason} />
               </div>

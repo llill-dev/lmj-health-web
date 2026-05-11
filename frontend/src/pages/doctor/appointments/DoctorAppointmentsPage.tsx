@@ -5,6 +5,7 @@ import {
   Clock,
   Loader2,
   Search,
+  Settings,
   UserX,
   XCircle,
 } from "lucide-react";
@@ -27,8 +28,10 @@ import {
   useNoShowDoctorAppointmentApi,
   useRescheduleDoctorAppointmentApi,
   usePatients,
+  useDoctorPatients,
 } from "@/hooks";
 import { readAuthUser } from "@/lib/cookies";
+import { useNavigate } from "react-router-dom";
 
 type MainView = "schedule" | "waiting";
 type StatusTab = "scheduled" | "completed" | "cancelled" | "no-show";
@@ -55,6 +58,7 @@ function filterLocalSearch<
 
 export default function DoctorAppointmentsPage() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [page, setPage] = useState(1);
@@ -128,7 +132,20 @@ export default function DoctorAppointmentsPage() {
   const noShowMutation = useNoShowDoctorAppointmentApi();
   const bookMutation = useBookDoctorAppointmentApi();
 
+  // Use real doctor patients API when connected to backend
   const { patients: uiOnlyPatients } = usePatients(1, 100);
+  const doctorPatientsQuery = useDoctorPatients({
+    page: 1,
+    limit: 100, // Get enough patients for the dropdown
+  });
+  
+  // Choose correct patient source based on mode
+  const availablePatients = UI_ONLY 
+    ? uiOnlyPatients.map((p) => ({ id: p.id, name: p.name }))
+    : doctorPatientsQuery.patients.map((p) => ({
+        id: p._id,
+        name: p.user.fullName,
+      }));
 
   const mergedAppointments = useMemo(() => {
     return listQuery.appointments.map((appointment) => {
@@ -158,14 +175,25 @@ export default function DoctorAppointmentsPage() {
   const appointmentLoadError = listQuery.error;
 
   const handleBookingAction = () => {
-    if (!UI_ONLY) {
-      toast("ربط حجز الموعد يحتاج مصدر مرضى فعلي للطبيب قبل التفعيل الكامل.", {
-        title: "قيد الاستكمال",
+    // Check if we have patients available (only when connected to backend)
+    if (!UI_ONLY && doctorPatientsQuery.isLoading) {
+      toast("جارٍ تحميل قائمة المرضى...", {
+        title: "انتظر قليلاً",
         variant: "info",
-        durationMs: 4500,
+        durationMs: 2000,
       });
       return;
     }
+
+    if (!UI_ONLY && doctorPatientsQuery.patients.length === 0) {
+      toast("لا توجد مرضى مرتبطين بحسابك حالياً. يرجى إضافة مرضى أولاً من صفحة المرضى.", {
+        title: "لا توجد مرضى",
+        variant: "warning",
+        durationMs: 5000,
+      });
+      return;
+    }
+
     setBookOpen(true);
   };
 
@@ -173,11 +201,11 @@ export default function DoctorAppointmentsPage() {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+          <AlertCircle className="mx-auto w-12 h-12 text-red-500" />
           <p className="mt-2 text-red-600">تعذّر تحميل المواعيد</p>
           <button
             onClick={() => listQuery.refetch()}
-            className="mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            className="px-4 py-2 mt-2 text-white bg-blue-500 rounded hover:bg-blue-600"
           >
             إعادة المحاولة
           </button>
@@ -209,42 +237,74 @@ export default function DoctorAppointmentsPage() {
             </span>
           }
           onActionClick={handleBookingAction}
-          actionLabel="حجز موعد جديد"
+          actionLabel="حجز موعد لمريض"
           kpis={[
             {
               key: "scheduled",
-              icon: <Clock className="h-5 w-5 shrink-0" />,
+              icon: <Clock className="w-5 h-5 shrink-0" />,
               value: scheduledTotal.isLoading ? "—" : scheduledTotal.total,
               label: "مجدولة",
             },
             {
               key: "completed",
-              icon: <CheckCircle className="h-5 w-5 shrink-0" />,
+              icon: <CheckCircle className="w-5 h-5 shrink-0" />,
               value: completedTotal.isLoading ? "—" : completedTotal.total,
               label: "مكتملة",
             },
             {
               key: "cancelled",
-              icon: <XCircle className="h-5 w-5 shrink-0" />,
+              icon: <XCircle className="w-5 h-5 shrink-0" />,
               value: cancelledTotal.isLoading ? "—" : cancelledTotal.total,
               label: "ملغية",
             },
             {
               key: "no-show",
-              icon: <UserX className="h-5 w-5 shrink-0" />,
+              icon: <UserX className="w-5 h-5 shrink-0" />,
               value: noShowTotal.isLoading ? "—" : noShowTotal.total,
               label: "عدم حضور",
             },
           ]}
         />
 
+        {/* رسالة توضيحية للتفريق بين إدارة الجدول وحجز المواعيد */}
+        <section className="mb-5 rounded-[12px] border border-[#D1E9E8] bg-[#F3FBFA] p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <Settings className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-cairo text-[14px] font-extrabold text-primary mb-2">
+                الفرق بين إدارة الجدول وحجز المواعيد
+              </h3>
+              <ul className="space-y-2 font-cairo text-[13px] font-semibold text-[#155E75]">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>
+                    <strong>إدارة الجدول:</strong> حدد أوقات عملك الأسبوعية والاستثناءات حتى يتمكن المرضى من الحجز عبر التطبيق
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>
+                    <strong>حجز موعد لمريض:</strong> احجز موعداً محدداً لمريض موجود (مثل: اتصال هاتفي، زيارة عيادة)
+                  </span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => navigate('/doctor/work-schedule')}
+                className="mt-3 inline-flex items-center gap-2 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white shadow-md hover:bg-[#0d7a77] transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                إدارة جدول العمل
+              </button>
+            </div>
+          </div>
+        </section>
+
         <BookAppointmentDialog
           open={bookOpen}
           onOpenChange={setBookOpen}
-          patients={uiOnlyPatients.map((patient) => ({
-            id: patient.id,
-            name: patient.name,
-          }))}
+          patients={availablePatients}
+          doctorId={readAuthUser()?.actorIds?.doctorId}
           onSubmit={async (values) => {
             const doctorId = readAuthUser()?.actorIds?.doctorId;
             if (!doctorId) {
@@ -259,6 +319,7 @@ export default function DoctorAppointmentsPage() {
               patientId: values.patientId,
               date: values.date,
               startTime: values.time,
+              appointmentTypeId: values.appointmentTypeId,
               notes: values.notes,
             });
           }}
@@ -333,7 +394,7 @@ export default function DoctorAppointmentsPage() {
             if (!open) setNoShowTarget(null);
           }}
           patientName={noShowTarget?.patientName ?? ""}
-          confirmDisabled={noShowMutation.isPending || UI_ONLY}
+          confirmDisabled={noShowMutation.isPending}
           title="تسجيل عدم حضور"
           fieldLabel="سبب عدم الحضور"
           placeholder="اكتب سبب تسجيل الموعد كعدم حضور..."
@@ -370,7 +431,7 @@ export default function DoctorAppointmentsPage() {
           patientName={rescheduleTarget?.patientName ?? ""}
           initialDate={rescheduleTarget?.date}
           initialTime={rescheduleTarget?.time}
-          confirmDisabled={rescheduleMutation.isPending || UI_ONLY}
+          confirmDisabled={rescheduleMutation.isPending}
           onConfirm={async (values) => {
             if (!rescheduleTarget) return;
             try {
@@ -395,9 +456,9 @@ export default function DoctorAppointmentsPage() {
         />
 
         <section className="mb-5 rounded-[6px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap gap-3 items-center">
             <div className="relative min-w-[260px] flex-1">
-              <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute right-3 top-1/2 w-5 h-5 text-gray-400 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="بحث محلي داخل الصفحة الحالية فقط"
@@ -512,14 +573,14 @@ export default function DoctorAppointmentsPage() {
 
             <div className="px-6 py-4">
               {listQuery.isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : listQuery.total === 0 ? (
                 <AppointmentsEmptyState onBookClick={handleBookingAction} />
               ) : visibleAppointments.length === 0 ? (
                 <div className="py-12 text-center">
-                  <Calendar className="mx-auto h-12 w-12 text-gray-300" />
+                  <Calendar className="mx-auto w-12 h-12 text-gray-300" />
                   <p className="mt-3 font-cairo text-[14px] font-semibold text-[#667085]">
                     لا توجد نتائج مطابقة للبحث المحلي ضمن هذه الصفحة.
                   </p>
@@ -542,8 +603,8 @@ export default function DoctorAppointmentsPage() {
                       }}
                       cancelling={cancelMutation.isPending}
                       completing={completeMutation.isPending}
-                      rescheduling={rescheduleMutation.isPending || UI_ONLY}
-                      noShowing={noShowMutation.isPending || UI_ONLY}
+                      rescheduling={rescheduleMutation.isPending}
+                      noShowing={noShowMutation.isPending}
                       onCancel={() => {
                         setCancelTarget({
                           id: appointment.id,
@@ -559,16 +620,6 @@ export default function DoctorAppointmentsPage() {
                         setCompleteOpen(true);
                       }}
                       onEdit={() => {
-                        if (UI_ONLY) {
-                          toast(
-                            "إعادة الجدولة الفعلية متاحة فقط مع الباكند الحقيقي.",
-                            {
-                              title: "محدود في وضع الواجهة",
-                              variant: "info",
-                            },
-                          );
-                          return;
-                        }
                         setRescheduleTarget({
                           id: appointment.id,
                           patientName: appointment.patientName,
@@ -578,16 +629,6 @@ export default function DoctorAppointmentsPage() {
                         setRescheduleOpen(true);
                       }}
                       onNoShow={() => {
-                        if (UI_ONLY) {
-                          toast(
-                            "عدم الحضور الفعلي متاح فقط مع الباكند الحقيقي.",
-                            {
-                              title: "محدود في وضع الواجهة",
-                              variant: "info",
-                            },
-                          );
-                          return;
-                        }
                         setNoShowTarget({
                           id: appointment.id,
                           patientName: appointment.patientName,
@@ -608,7 +649,7 @@ export default function DoctorAppointmentsPage() {
             من {totalPages}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex gap-3 items-center">
             <button
               type="button"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}

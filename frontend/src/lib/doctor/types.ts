@@ -192,6 +192,13 @@ export type CreateTemporaryPatientResponse = {
   isTemporary?: boolean;
 };
 
+export type LinkExistingDoctorPatientResponse = {
+  messageKey?: string;
+  message?: string;
+  doctorId: string;
+  patientId: string;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Doctor — Appointments
 // ─────────────────────────────────────────────────────────────────────────────
@@ -307,3 +314,188 @@ export type DoctorCompleteAppointmentBody = {
 export type DoctorNoShowAppointmentBody = {
   reason: string;
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Doctor — Appointment Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type AppointmentType = {
+  _id: string;
+  name: string;
+  description?: string;
+  duration: number;
+  price?: number;
+  priceVisibleToPatient?: boolean;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type DoctorAppointmentTypesResponse = {
+  messageKey?: string;
+  message?: string;
+  appointmentTypes: AppointmentType[];
+};
+
+export type CreateAppointmentTypeBody = {
+  name: string;
+  description?: string;
+  duration: number;
+  price?: number;
+  priceVisibleToPatient?: boolean;
+};
+
+export type UpdateAppointmentTypeBody = {
+  name?: string;
+  description?: string;
+  duration?: number;
+  price?: number;
+  priceVisibleToPatient?: boolean;
+  isActive?: boolean;
+};
+
+export type AppointmentTypeMutationResponse = {
+  messageKey?: string;
+  message?: string;
+  appointmentType: AppointmentType;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Doctor — Schedule (based on actual API)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Day names used by API
+export type ScheduleDayKey =
+  | 'Monday'
+  | 'Tuesday'
+  | 'Wednesday'
+  | 'Thursday'
+  | 'Friday'
+  | 'Saturday'
+  | 'Sunday';
+
+// Time slot for a day
+export interface ScheduleTimeSlot {
+  startTime: string; // e.g., "09:00"
+  endTime: string;   // e.g., "12:00"
+}
+
+// Available times for one day (e.g., Monday)
+export interface ScheduleDayTemplate {
+  day: ScheduleDayKey;
+  slots: ScheduleTimeSlot[];
+}
+
+// Exception for a specific date
+export interface ScheduleException {
+  _id?: string;
+  date: string; // YYYY-MM-DD
+  slots: ScheduleTimeSlot[];
+  note?: string;
+}
+
+// Slot settings (doctor-level)
+export interface ScheduleSlotSettings {
+  duration: number; // minutes (e.g., 30)
+  gap: number;      // minutes (e.g., 5)
+}
+
+// Full schedule response from GET /doctors/:doctorId/schedule
+export interface DoctorScheduleResponse {
+  messageKey?: string;
+  message?: string;
+  availableTimes: ScheduleDayTemplate[];
+  exceptions: ScheduleException[];
+  slotSettings: ScheduleSlotSettings;
+}
+
+// Body for PUT /doctors/:doctorId/schedule (full replacement)
+export interface DoctorUpdateScheduleBody {
+  availableTimes: ScheduleDayTemplate[];
+  exceptions: ScheduleException[];
+}
+
+// Body for PATCH /doctors/:doctorId/schedule/settings
+export interface DoctorUpdateScheduleSettingsBody {
+  duration?: number;
+  gap?: number;
+}
+
+// Body for POST /doctors/:doctorId/schedule/day
+export interface DoctorAddDayBody {
+  day: ScheduleDayKey;
+  slots: ScheduleTimeSlot[];
+}
+
+// Body for PATCH /doctors/:doctorId/schedule/day/:day
+export interface DoctorUpdateDayBody {
+  slots: ScheduleTimeSlot[];
+}
+
+// Body for POST /doctors/:doctorId/schedule/exception
+export interface DoctorAddExceptionBody {
+  date: string; // YYYY-MM-DD
+  slots: ScheduleTimeSlot[];
+  note?: string;
+}
+
+// Body for PATCH /doctors/:doctorId/schedule/exceptions (replace all)
+export interface DoctorUpdateExceptionsBody {
+  exceptions: ScheduleException[];
+}
+
+// Free slots response from GET /doctors/:doctorId/slots?type=free
+export interface DoctorFreeSlotsResponse {
+  messageKey?: string;
+  message?: string;
+  date: string;
+  doctorId: string;
+  duration: number;
+  gap: number;
+  freeSlots: ScheduleTimeSlot[];
+  totalFreeSlots: number;
+}
+
+// Booked slots response from GET /doctors/:doctorId/slots?type=booked
+export interface DoctorBookedSlotsResponse {
+  messageKey?: string;
+  message?: string;
+  date: string;
+  doctorId: string;
+  bookedSlots: Array<{
+    startTime: string;
+    endTime: string;
+    appointmentId: string;
+    patientName?: string;
+    status?: string;
+  }>;
+  totalBookedSlots: number;
+}
+
+// All slots response from GET /doctors/:doctorId/slots?type=all
+export interface DoctorAllSlotsResponse {
+  messageKey?: string;
+  message?: string;
+  date: string;
+  doctorId: string;
+  duration: number;
+  gap: number;
+  freeSlots: ScheduleTimeSlot[];
+  bookedSlots: Array<{
+    startTime: string;
+    endTime: string;
+    appointmentId: string;
+    patientName?: string;
+    status?: string;
+  }>;
+  totalFreeSlots: number;
+  totalBookedSlots: number;
+}
+
+// Query params for GET /doctors/:doctorId/slots
+export interface DoctorSlotsQueryParams {
+  date: string; // YYYY-MM-DD (required)
+  type?: 'free' | 'booked' | 'all'; // default: 'free'
+  page?: number;
+  limit?: number;
+}
