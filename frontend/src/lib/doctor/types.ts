@@ -457,39 +457,46 @@ export interface DoctorFreeSlotsResponse {
 }
 
 // Booked slots response from GET /doctors/:doctorId/slots?type=booked
+// NOTE: API returns "appointments" array with "totalBooked", not "bookedSlots"
 export interface DoctorBookedSlotsResponse {
   messageKey?: string;
   message?: string;
   date: string;
   doctorId: string;
-  bookedSlots: Array<{
+  appointments: Array<{
+    _id: string;
+    patient: string;
     startTime: string;
     endTime: string;
-    appointmentId: string;
     patientName?: string;
     status?: string;
   }>;
-  totalBookedSlots: number;
+  totalBooked: number;
 }
 
 // All slots response from GET /doctors/:doctorId/slots?type=all
+// NOTE: The exact structure for type=all is not fully documented in API-4.pdf
+// We assume it returns both free and booked data - adjust if API returns different structure
 export interface DoctorAllSlotsResponse {
   messageKey?: string;
   message?: string;
   date: string;
   doctorId: string;
-  duration: number;
-  gap: number;
-  freeSlots: ScheduleTimeSlot[];
-  bookedSlots: Array<{
+  duration?: number;
+  gap?: number;
+  // Support both free slots data
+  freeSlots?: ScheduleTimeSlot[];
+  totalFreeSlots?: number;
+  // And booked appointments data (using API naming conventions)
+  appointments?: Array<{
+    _id: string;
+    patient: string;
     startTime: string;
     endTime: string;
-    appointmentId: string;
     patientName?: string;
     status?: string;
   }>;
-  totalFreeSlots: number;
-  totalBookedSlots: number;
+  totalBooked?: number;
 }
 
 // Query params for GET /doctors/:doctorId/slots

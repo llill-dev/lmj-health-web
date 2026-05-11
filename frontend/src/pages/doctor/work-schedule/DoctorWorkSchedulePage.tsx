@@ -650,41 +650,74 @@ export default function DoctorWorkSchedulePage() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
                         transition={{ delay: index * 0.05 }}
-                        className='group flex items-center justify-between rounded-[14px] border border-[#E5E7EB] bg-gradient-to-r from-white to-[#FAFBFC] p-4 transition-all hover:border-[#FEE4E2] hover:shadow-md'
+                        className='group rounded-[14px] border border-[#E5E7EB] bg-gradient-to-r from-white to-[#FAFBFC] p-4 transition-all hover:border-[#FEE4E2] hover:shadow-md'
                       >
-                        <div className='flex gap-4 items-center'>
-                          <div className='rounded-[10px] bg-[#FEF3F2] p-2'>
-                            <Calendar className='h-4 w-4 text-[#F04438]' />
-                          </div>
-                          <div>
-                            <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                              {exception.note || 'استثناء'}
+                        <div className='flex items-start justify-between'>
+                          <div className='flex gap-4 items-start flex-1'>
+                            <div className='rounded-[10px] bg-[#FEF3F2] p-2'>
+                              <Calendar className='h-4 w-4 text-[#F04438]' />
                             </div>
-                            <div className='mt-1 font-cairo text-[12px] font-bold text-[#667085]'>
-                              {new Date(exception.date).toLocaleDateString(
-                                'ar-SA',
-                                {
-                                  weekday: 'long',
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                },
+                            <div className='flex-1'>
+                              <div className='flex items-center gap-2 flex-wrap'>
+                                <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
+                                  {exception.note || 'استثناء'}
+                                </div>
+                                {/* Exception Type Badge */}
+                                <span
+                                  className={`rounded-[6px] px-2 py-1 font-cairo text-[11px] font-bold ${
+                                    !exception.slots || exception.slots.length === 0
+                                      ? 'bg-[#FEE4E2] text-[#D92D20]'
+                                      : 'bg-[#D1FAE5] text-[#10B981]'
+                                  }`}
+                                >
+                                  {!exception.slots || exception.slots.length === 0
+                                    ? 'يوم مغلق'
+                                    : 'ساعات مخصصة'}
+                                </span>
+                              </div>
+                              <div className='mt-1 font-cairo text-[12px] font-bold text-[#667085]'>
+                                {new Date(exception.date).toLocaleDateString(
+                                  'ar-SA',
+                                  {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  },
+                                )}
+                              </div>
+                              
+                              {/* Custom Hours Display */}
+                              {exception.slots && exception.slots.length > 0 && (
+                                <div className='mt-3 flex flex-wrap gap-2'>
+                                  {exception.slots.map((slot, slotIdx) => (
+                                    <div
+                                      key={slotIdx}
+                                      className='flex items-center gap-2 rounded-[8px] border border-[#D1FAE5] bg-[#F0FDF4] px-3 py-1.5'
+                                    >
+                                      <Clock className='h-3 w-3 text-[#10B981]' />
+                                      <span className='font-cairo text-[12px] font-bold text-[#10B981]'>
+                                        {slot.startTime} - {slot.endTime}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
                               )}
                             </div>
                           </div>
-                        </div>
 
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          type='button'
-                          onClick={() => handleDeleteException(exception._id!)}
-                          disabled={isDeletingException}
-                          className='flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#FEF3F2] text-[#F04438] transition-colors hover:bg-[#F04438] hover:text-white'
-                          aria-label='حذف'
-                        >
-                          <Trash2 className='w-4 h-4' />
-                        </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            type='button'
+                            onClick={() => handleDeleteException(exception._id!)}
+                            disabled={isDeletingException}
+                            className='flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#FEF3F2] text-[#F04438] transition-colors hover:bg-[#F04438] hover:text-white flex-shrink-0'
+                            aria-label='حذف'
+                          >
+                            <Trash2 className='w-4 h-4' />
+                          </motion.button>
+                        </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>

@@ -1,5 +1,6 @@
 'use client';
 import { Calendar, Clock, Loader2, User } from 'lucide-react';
+import { useState } from 'react';
 import { useSlots } from '@/hooks/doctor';
 import { cn } from '@/lib/utils/utils';
 
@@ -9,11 +10,15 @@ interface SlotsPreviewProps {
   className?: string;
 }
 
+type SlotFilterType = 'all' | 'free' | 'booked';
+
 export default function SlotsPreview({
   date,
   doctorId,
   className,
 }: SlotsPreviewProps) {
+  const [filterType, setFilterType] = useState<SlotFilterType>('all');
+  
   const {
     freeSlots,
     bookedSlots,
@@ -23,7 +28,7 @@ export default function SlotsPreview({
     gap,
     isLoading,
     error,
-  } = useSlots(date, 'all', doctorId);
+  } = useSlots(date, filterType, doctorId);
 
   if (isLoading) {
     return (
@@ -86,6 +91,43 @@ export default function SlotsPreview({
 
   return (
     <div className={cn('space-y-4', className)}>
+      {/* Filter Tabs */}
+      <div className='flex gap-2 rounded-[12px] border border-[#E5E7EB] bg-white p-1'>
+        <button
+          onClick={() => setFilterType('all')}
+          className={cn(
+            'flex-1 rounded-[8px] px-4 py-2.5 font-cairo text-[13px] font-bold transition-all',
+            filterType === 'all'
+              ? 'bg-primary text-white shadow-sm'
+              : 'text-[#667085] hover:bg-[#F9FAFB]',
+          )}
+        >
+          الكل
+        </button>
+        <button
+          onClick={() => setFilterType('free')}
+          className={cn(
+            'flex-1 rounded-[8px] px-4 py-2.5 font-cairo text-[13px] font-bold transition-all',
+            filterType === 'free'
+              ? 'bg-primary text-white shadow-sm'
+              : 'text-[#667085] hover:bg-[#F9FAFB]',
+          )}
+        >
+          المتاحة
+        </button>
+        <button
+          onClick={() => setFilterType('booked')}
+          className={cn(
+            'flex-1 rounded-[8px] px-4 py-2.5 font-cairo text-[13px] font-bold transition-all',
+            filterType === 'booked'
+              ? 'bg-primary text-white shadow-sm'
+              : 'text-[#667085] hover:bg-[#F9FAFB]',
+          )}
+        >
+          المحجوزة
+        </button>
+      </div>
+
       {/* Header Stats */}
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
         <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3'>
@@ -138,9 +180,15 @@ export default function SlotsPreview({
       </div>
 
       {/* Slots Grid */}
-      <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+      <div
+        className={cn(
+          'grid grid-cols-1 gap-4',
+          filterType === 'all' ? 'lg:grid-cols-2' : '',
+        )}
+      >
         {/* Free Slots */}
-        <div className='rounded-[16px] border border-[#D1FAE5] bg-[#F0FDF4] p-4'>
+        {(filterType === 'all' || filterType === 'free') && (
+          <div className='rounded-[16px] border border-[#D1FAE5] bg-[#F0FDF4] p-4'>
           <div className='mb-3 flex items-center gap-2'>
             <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#10B981]'>
               <Clock className='h-4 w-4 text-white' />
@@ -174,9 +222,11 @@ export default function SlotsPreview({
             )}
           </div>
         </div>
+        )}
 
         {/* Booked Slots */}
-        <div className='rounded-[16px] border border-[#FEE2E2] bg-[#FEF2F2] p-4'>
+        {(filterType === 'all' || filterType === 'booked') && (
+          <div className='rounded-[16px] border border-[#FEE2E2] bg-[#FEF2F2] p-4'>
           <div className='mb-3 flex items-center gap-2'>
             <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#EF4444]'>
               <User className='h-4 w-4 text-white' />
@@ -217,6 +267,7 @@ export default function SlotsPreview({
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

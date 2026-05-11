@@ -44,6 +44,8 @@ import type {
   AppointmentTypeMutationResponse,
   DoctorSlotsQueryParams,
   DoctorAllSlotsResponse,
+  DoctorFreeSlotsResponse,
+  DoctorBookedSlotsResponse,
 } from "./types";
 
 function buildPatientsListQuery(params: DoctorPatientsListParams): string {
@@ -343,19 +345,21 @@ export const doctorAppointmentsApi = {
 
 export const doctorScheduleQueryKeys = {
   all: ["doctor", "schedule"] as const,
-  detail: (doctorId: string) => [...doctorScheduleQueryKeys.all, doctorId] as const,
-  slots: (doctorId: string, date: string) => [...doctorScheduleQueryKeys.all, "slots", doctorId, date] as const,
+  detail: (doctorId: string) =>
+    [...doctorScheduleQueryKeys.all, doctorId] as const,
+  slots: (doctorId: string, date: string) =>
+    [...doctorScheduleQueryKeys.all, "slots", doctorId, date] as const,
 };
 
 // Helper to get doctorId from auth
 function getDoctorIdFromAuth(): string {
   const authUser = readAuthUser();
   const doctorId = authUser?.actorIds?.doctorId;
-  
+
   if (!doctorId) {
     throw new Error("Doctor ID not found in auth. Please login as a doctor.");
   }
-  
+
   return doctorId;
 }
 
@@ -366,22 +370,25 @@ const doctorScheduleApi = {
       // Convert mock data to API format
       const mockResponse = await api.getWorkSchedule();
       const mockData = mockResponse.data;
-      
+
       // Convert mock format to real API format
-      const availableTimes: ScheduleDayTemplate[] = Object.entries(mockData.weekly)
+      const availableTimes: ScheduleDayTemplate[] = Object.entries(
+        mockData.weekly,
+      )
         .filter(([_, day]) => day.enabled)
         .map(([dayKey, day]) => ({
-          day: dayKey.charAt(0).toUpperCase() + dayKey.slice(1) as ScheduleDayKey,
+          day: (dayKey.charAt(0).toUpperCase() +
+            dayKey.slice(1)) as ScheduleDayKey,
           slots: [{ startTime: day.from, endTime: day.to }],
         }));
-      
+
       const exceptions: ScheduleException[] = mockData.exceptions.map((ex) => ({
         _id: ex.id,
         date: ex.date,
         slots: [],
         note: ex.title,
       }));
-      
+
       return {
         message: "Schedule retrieved successfully.",
         availableTimes,
@@ -394,14 +401,15 @@ const doctorScheduleApi = {
     }
 
     const doctorId = getDoctorIdFromAuth();
-    return get<DoctorScheduleResponse>(
-      doctorEndpoints.schedule.get(doctorId),
-      { locale: "ar" },
-    );
+    return get<DoctorScheduleResponse>(doctorEndpoints.schedule.get(doctorId), {
+      locale: "ar",
+    });
   },
-  
+
   // PUT /doctors/:doctorId/schedule (full replacement)
-  update: async (body: DoctorUpdateScheduleBody): Promise<DoctorScheduleResponse> => {
+  update: async (
+    body: DoctorUpdateScheduleBody,
+  ): Promise<DoctorScheduleResponse> => {
     if (UI_ONLY) {
       // Convert API format to mock format for storage
       const mockBody: MockWorkSchedule = {
@@ -421,10 +429,11 @@ const doctorScheduleApi = {
         },
         exceptions: [],
       };
-      
+
       // Convert availableTimes to weekly
       body.availableTimes.forEach((dayTemplate) => {
-        const dayKey = dayTemplate.day.toLowerCase() as keyof typeof mockBody.weekly;
+        const dayKey =
+          dayTemplate.day.toLowerCase() as keyof typeof mockBody.weekly;
         if (dayTemplate.slots.length > 0) {
           mockBody.weekly[dayKey] = {
             enabled: true,
@@ -433,7 +442,7 @@ const doctorScheduleApi = {
           };
         }
       });
-      
+
       await api.updateWorkSchedule(mockBody);
       return {
         message: "Schedule updated successfully.",
@@ -450,9 +459,11 @@ const doctorScheduleApi = {
       { locale: "ar" },
     );
   },
-  
+
   // PATCH /doctors/:doctorId/schedule/settings
-  updateSettings: async (body: DoctorUpdateScheduleSettingsBody): Promise<{ message?: string }> => {
+  updateSettings: async (
+    body: DoctorUpdateScheduleSettingsBody,
+  ): Promise<{ message?: string }> => {
     const doctorId = getDoctorIdFromAuth();
     return patch<{ message?: string }>(
       doctorEndpoints.schedule.updateSettings(doctorId),
@@ -460,7 +471,7 @@ const doctorScheduleApi = {
       { locale: "ar" },
     );
   },
-  
+
   // POST /doctors/:doctorId/schedule/day
   addDay: async (body: DoctorAddDayBody): Promise<{ message?: string }> => {
     const doctorId = getDoctorIdFromAuth();
@@ -470,9 +481,12 @@ const doctorScheduleApi = {
       { locale: "ar" },
     );
   },
-  
+
   // PATCH /doctors/:doctorId/schedule/day/:day
-  updateDay: async (day: ScheduleDayKey, body: DoctorUpdateDayBody): Promise<{ message?: string }> => {
+  updateDay: async (
+    day: ScheduleDayKey,
+    body: DoctorUpdateDayBody,
+  ): Promise<{ message?: string }> => {
     const doctorId = getDoctorIdFromAuth();
     return patch<{ message?: string }>(
       doctorEndpoints.schedule.updateDay(doctorId, day),
@@ -480,7 +494,7 @@ const doctorScheduleApi = {
       { locale: "ar" },
     );
   },
-  
+
   // DELETE /doctors/:doctorId/schedule/day/:day
   deleteDay: async (day: ScheduleDayKey): Promise<{ message?: string }> => {
     const doctorId = getDoctorIdFromAuth();
@@ -489,9 +503,11 @@ const doctorScheduleApi = {
       { locale: "ar" },
     );
   },
-  
+
   // POST /doctors/:doctorId/schedule/exception
-  addException: async (body: DoctorAddExceptionBody): Promise<{ message?: string }> => {
+  addException: async (
+    body: DoctorAddExceptionBody,
+  ): Promise<{ message?: string }> => {
     const doctorId = getDoctorIdFromAuth();
     return post<{ message?: string }>(
       doctorEndpoints.schedule.addException(doctorId),
@@ -499,9 +515,11 @@ const doctorScheduleApi = {
       { locale: "ar" },
     );
   },
-  
+
   // PATCH /doctors/:doctorId/schedule/exceptions
-  updateExceptions: async (body: DoctorUpdateExceptionsBody): Promise<{ message?: string }> => {
+  updateExceptions: async (
+    body: DoctorUpdateExceptionsBody,
+  ): Promise<{ message?: string }> => {
     const doctorId = getDoctorIdFromAuth();
     return patch<{ message?: string }>(
       doctorEndpoints.schedule.updateExceptions(doctorId),
@@ -509,9 +527,11 @@ const doctorScheduleApi = {
       { locale: "ar" },
     );
   },
-  
+
   // DELETE /doctors/:doctorId/schedule/exception/:exceptionId
-  deleteException: async (exceptionId: string): Promise<{ message?: string }> => {
+  deleteException: async (
+    exceptionId: string,
+  ): Promise<{ message?: string }> => {
     const doctorId = getDoctorIdFromAuth();
     return del<{ message?: string }>(
       doctorEndpoints.schedule.deleteException(doctorId, exceptionId),
@@ -525,37 +545,45 @@ const doctorScheduleApi = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const doctorAppointmentTypesQueryKeys = {
-  all: ['doctor', 'appointmentTypes'] as const,
-  available: (doctorId: string) => [...doctorAppointmentTypesQueryKeys.all, 'available', doctorId] as const,
-  list: (doctorId: string) => [...doctorAppointmentTypesQueryKeys.all, 'list', doctorId] as const,
+  all: ["doctor", "appointmentTypes"] as const,
+  available: (doctorId: string) =>
+    [...doctorAppointmentTypesQueryKeys.all, "available", doctorId] as const,
+  list: (doctorId: string) =>
+    [...doctorAppointmentTypesQueryKeys.all, "list", doctorId] as const,
 };
 
 const doctorAppointmentTypesApi = {
   // GET /doctors/:doctorId/appointment-types/available
-  getAvailableTypes: async (doctorId?: string): Promise<DoctorAppointmentTypesResponse> => {
+  getAvailableTypes: async (
+    doctorId?: string,
+  ): Promise<DoctorAppointmentTypesResponse> => {
     const actualDoctorId = doctorId || getDoctorIdFromAuth();
     return get<DoctorAppointmentTypesResponse>(
       doctorEndpoints.appointmentTypes.available(actualDoctorId),
-      { locale: 'ar' },
+      { locale: "ar" },
     );
   },
 
   // GET /doctors/:doctorId/appointment-types
-  listTypes: async (doctorId?: string): Promise<DoctorAppointmentTypesResponse> => {
+  listTypes: async (
+    doctorId?: string,
+  ): Promise<DoctorAppointmentTypesResponse> => {
     const actualDoctorId = doctorId || getDoctorIdFromAuth();
     return get<DoctorAppointmentTypesResponse>(
       doctorEndpoints.appointmentTypes.list(actualDoctorId),
-      { locale: 'ar' },
+      { locale: "ar" },
     );
   },
 
   // POST /doctors/:doctorId/appointment-types
-  createType: async (body: CreateAppointmentTypeBody): Promise<AppointmentTypeMutationResponse> => {
+  createType: async (
+    body: CreateAppointmentTypeBody,
+  ): Promise<AppointmentTypeMutationResponse> => {
     const doctorId = getDoctorIdFromAuth();
     return post<AppointmentTypeMutationResponse>(
       doctorEndpoints.appointmentTypes.create(doctorId),
       body,
-      { locale: 'ar' },
+      { locale: "ar" },
     );
   },
 
@@ -568,7 +596,7 @@ const doctorAppointmentTypesApi = {
     return patch<AppointmentTypeMutationResponse>(
       doctorEndpoints.appointmentTypes.update(doctorId, typeId),
       body,
-      { locale: 'ar' },
+      { locale: "ar" },
     );
   },
 
@@ -577,7 +605,7 @@ const doctorAppointmentTypesApi = {
     const doctorId = getDoctorIdFromAuth();
     return del<{ message?: string }>(
       doctorEndpoints.appointmentTypes.delete(doctorId, typeId),
-      { locale: 'ar' },
+      { locale: "ar" },
     );
   },
 };
@@ -587,25 +615,31 @@ const doctorAppointmentTypesApi = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const doctorSlotsQueryKeys = {
-  all: ['doctor', 'slots'] as const,
-  byDate: (doctorId: string, date: string, type?: 'free' | 'booked' | 'all') =>
-    [...doctorSlotsQueryKeys.all, doctorId, date, type || 'free'] as const,
+  all: ["doctor", "slots"] as const,
+  byDate: (doctorId: string, date: string, type?: "free" | "booked" | "all") =>
+    [...doctorSlotsQueryKeys.all, doctorId, date, type || "free"] as const,
 };
 
 const doctorSlotsApi = {
-  // GET /doctors/:doctorId/slots?date=...&type=free
+  // GET /doctors/:doctorId/slots?date=...&type=free|booked|all
+  // Returns different response shapes based on type parameter
   getSlots: async (
     params: DoctorSlotsQueryParams & { doctorId?: string },
-  ): Promise<DoctorAllSlotsResponse> => {
+  ): Promise<
+    DoctorFreeSlotsResponse | DoctorBookedSlotsResponse | DoctorAllSlotsResponse
+  > => {
     const actualDoctorId = params.doctorId || getDoctorIdFromAuth();
     const qs = new URLSearchParams();
-    qs.set('date', params.date);
-    if (params.type) qs.set('type', params.type);
-    if (params.page) qs.set('page', String(params.page));
-    if (params.limit) qs.set('limit', String(params.limit));
+    qs.set("date", params.date);
+    if (params.type) qs.set("type", params.type);
+    if (params.page) qs.set("page", String(params.page));
+    if (params.limit) qs.set("limit", String(params.limit));
 
     const endpoint = `${doctorEndpoints.schedule.slots(actualDoctorId)}?${qs.toString()}`;
-    return get<DoctorAllSlotsResponse>(endpoint, { locale: 'ar' });
+
+    // Cast to DoctorAllSlotsResponse as it's the most comprehensive type
+    // that includes optional fields from all response types
+    return get<DoctorAllSlotsResponse>(endpoint, { locale: "ar" });
   },
 };
 
@@ -655,3 +689,4 @@ export const doctorApi = {
   slots: doctorSlotsApi,
   appointmentTypes: doctorAppointmentTypesApi,
 } as const;
+
