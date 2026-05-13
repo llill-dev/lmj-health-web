@@ -22,11 +22,18 @@ import type {
   DoctorCompleteAppointmentBody,
   DoctorNoShowAppointmentBody,
   DoctorPatientAccessRequestBody,
+  DoctorAccessRequestDetailsResponse,
+  DoctorAccessRequestListParams,
+  DoctorAccessRequestsListResponse,
   DoctorPatientAccessRequestResponse,
+  DoctorCreateMedicalRecordBody,
   DoctorPatientFullProfileResponse,
+  DoctorMedicalRecordDetailsResponse,
+  DoctorMedicalRecordsListResponse,
   DoctorPatientPublicProfileResponse,
   DoctorPatientsListParams,
   DoctorPatientsListResponse,
+  DoctorUpdateMedicalRecordBody,
   DoctorRescheduleAppointmentBody,
   DoctorScheduleResponse,
   DoctorUpdateScheduleBody,
@@ -63,6 +70,19 @@ function buildPatientsListQuery(params: DoctorPatientsListParams): string {
   return qs.toString();
 }
 
+function buildAccessRequestsListQuery(
+  params: DoctorAccessRequestListParams = {},
+): string {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set("status", params.status);
+  if (params.patientId) qs.set("patientId", params.patientId);
+  if (params.from) qs.set("from", params.from);
+  if (params.to) qs.set("to", params.to);
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+  return qs.toString();
+}
+
 export const doctorPatientsQueryKeys = {
   all: ["doctor", "patients"] as const,
   lists: () => [...doctorPatientsQueryKeys.all, "list"] as const,
@@ -72,6 +92,20 @@ export const doctorPatientsQueryKeys = {
     [...doctorPatientsQueryKeys.all, "public", patientId] as const,
   fullProfile: (doctorId: string, patientId: string) =>
     [...doctorPatientsQueryKeys.all, "profile", doctorId, patientId] as const,
+  medicalRecords: (doctorId: string, patientId: string) =>
+    [...doctorPatientsQueryKeys.all, "medical-records", doctorId, patientId] as const,
+  medicalRecord: (doctorId: string, patientId: string, recordId: string) =>
+    [...doctorPatientsQueryKeys.medicalRecords(doctorId, patientId), recordId] as const,
+};
+
+export const doctorAccessRequestsQueryKeys = {
+  all: ["doctor", "access-requests"] as const,
+  list: (params: DoctorAccessRequestListParams = {}) =>
+    [...doctorAccessRequestsQueryKeys.all, "list", params] as const,
+  detail: (requestId: string) =>
+    [...doctorAccessRequestsQueryKeys.all, "detail", requestId] as const,
+  approvedPayload: (doctorId: string, patientId: string, requestId: string) =>
+    [...doctorAccessRequestsQueryKeys.all, "approved-payload", doctorId, patientId, requestId] as const,
 };
 
 // NOTE: Exported via doctorApi.patients below (admin-like shape)
@@ -683,10 +717,76 @@ export const doctorApi = {
         body,
         { locale: "ar" },
       ),
+    listMedicalRecords: (doctorId: string, patientId: string) =>
+      get<DoctorMedicalRecordsListResponse>(
+        doctorEndpoints.patients.medicalRecords(doctorId, patientId),
+        { locale: "ar" },
+      ),
+    getMedicalRecord: (
+      doctorId: string,
+      patientId: string,
+      recordId: string,
+    ) =>
+      get<DoctorMedicalRecordDetailsResponse>(
+        doctorEndpoints.patients.medicalRecordById(doctorId, patientId, recordId),
+        { locale: "ar" },
+      ),
+    createMedicalRecord: (
+      doctorId: string,
+      patientId: string,
+      body: DoctorCreateMedicalRecordBody,
+    ) =>
+      post<DoctorMedicalRecordDetailsResponse>(
+        doctorEndpoints.patients.medicalRecords(doctorId, patientId),
+        body,
+        { locale: "ar" },
+      ),
+    updateMedicalRecord: (
+      doctorId: string,
+      patientId: string,
+      recordId: string,
+      body: DoctorUpdateMedicalRecordBody,
+    ) =>
+      patch<DoctorMedicalRecordDetailsResponse>(
+        doctorEndpoints.patients.medicalRecordById(doctorId, patientId, recordId),
+        body,
+        { locale: "ar" },
+      ),
+    getAccessRequestApprovedPayload: (
+      doctorId: string,
+      patientId: string,
+      requestId: string,
+    ) =>
+      apiRequestResult<DoctorPatientFullProfileResponse>(
+        doctorEndpoints.patients.accessRequestDetails(
+          doctorId,
+          patientId,
+          requestId,
+        ),
+        {
+          method: "GET",
+          locale: "ar",
+          expectedStatuses: [403, 404],
+        },
+      ),
+  },
+  accessRequests: {
+    list: (params: DoctorAccessRequestListParams = {}) => {
+      const query = buildAccessRequestsListQuery(params);
+      const base = doctorEndpoints.accessRequests.list;
+      const endpoint = query ? `${base}?${query}` : base;
+      return get<DoctorAccessRequestsListResponse>(endpoint, {
+        locale: "ar",
+      });
+    },
+    getById: (requestId: string) =>
+      get<DoctorAccessRequestDetailsResponse>(
+        doctorEndpoints.accessRequests.details(requestId),
+        { locale: "ar" },
+      ),
   },
   appointments: doctorAppointmentsApi,
   schedule: doctorScheduleApi,
   slots: doctorSlotsApi,
   appointmentTypes: doctorAppointmentTypesApi,
 } as const;
-

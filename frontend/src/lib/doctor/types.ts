@@ -177,6 +177,83 @@ export type DoctorPatientAccessRequestResponse = {
   } | null;
 };
 
+export type DoctorAccessRequestStatus =
+  | 'pending'
+  | 'approved'
+  | 'denied'
+  | 'rejected'
+  | 'expired';
+
+export type DoctorAccessRequestListParams = {
+  status?: DoctorAccessRequestStatus;
+  patientId?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type DoctorAccessRequestListItem = {
+  _id: string;
+  scope?: string;
+  status: DoctorAccessRequestStatus | string;
+  reason?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  reviewedAt?: string | null;
+  decidedAt?: string | null;
+  expiresAt?: string | null;
+  requestedItems?: Array<{
+    type?: string;
+    refId?: string;
+    description?: string;
+  }>;
+  requester?: {
+    _id?: string;
+    specialization?: string;
+    userId?: {
+      _id?: string;
+      fullName?: string;
+      photoUrl?: string | null;
+    };
+    user?: {
+      _id?: string;
+      fullName?: string;
+      photoUrl?: string | null;
+    };
+  };
+  patient?: {
+    _id?: string;
+    publicId?: string;
+    userId?: {
+      _id?: string;
+      fullName?: string;
+      photoUrl?: string | null;
+    };
+    user?: {
+      _id?: string;
+      fullName?: string;
+      photoUrl?: string | null;
+    };
+  };
+};
+
+export type DoctorAccessRequestsListResponse = {
+  messageKey?: string;
+  message?: string;
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  requests: DoctorAccessRequestListItem[];
+};
+
+export type DoctorAccessRequestDetailsResponse = {
+  messageKey?: string;
+  message?: string;
+  request: DoctorAccessRequestListItem;
+};
+
 export type CreateTemporaryPatientBody = {
   fullName: string;
   email: string;
@@ -198,6 +275,28 @@ export type LinkExistingDoctorPatientResponse = {
   doctorId: string;
   patientId: string;
 };
+
+export type DoctorMedicalRecordsListResponse = {
+  messageKey?: string;
+  message?: string;
+  records: DoctorPatientMedicalRecord[];
+};
+
+export type DoctorMedicalRecordDetailsResponse = {
+  messageKey?: string;
+  message?: string;
+  record: DoctorPatientMedicalRecord;
+};
+
+export type DoctorCreateMedicalRecordBody = {
+  title: string;
+  diagnosis: string;
+  prescriptions?: string[];
+  attachments?: string[];
+  followUpRequired?: boolean;
+};
+
+export type DoctorUpdateMedicalRecordBody = Partial<DoctorCreateMedicalRecordBody>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Doctor — Appointments

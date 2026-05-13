@@ -12,6 +12,24 @@ export const doctorEndpoints = {
       `/api/doctors/${doctorId}/patients/${patientId}`,
     accessRequests: (doctorId: string, patientId: string) =>
       `/api/doctors/${doctorId}/patients/${patientId}/access-requests`,
+    accessRequestDetails: (
+      doctorId: string,
+      patientId: string,
+      requestId: string,
+    ) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/access-requests/${requestId}/details`,
+    medicalRecords: (doctorId: string, patientId: string) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/medical-records`,
+    medicalRecordById: (
+      doctorId: string,
+      patientId: string,
+      recordId: string,
+    ) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/medical-records/${recordId}`,
+  },
+  accessRequests: {
+    list: '/api/access-requests',
+    details: (requestId: string) => `/api/access-requests/${requestId}`,
   },
   appointments: {
     list: '/api/appointments',

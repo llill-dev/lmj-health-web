@@ -227,7 +227,7 @@ export default function AddAccessRequestForm({
           </div>
 
           <div>
-            <div className={labelBase}>حدد ما تريد الوصول له</div>
+            <div className={labelBase}>حدد سياق الطلب</div>
             <div className='grid grid-cols-1 gap-3'>
               {(
                 [
@@ -284,6 +284,9 @@ export default function AddAccessRequestForm({
                 {errors.scope.message}
               </div>
             ) : null}
+            <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+              هذه الخيارات توضح سبب الطلب داخل الواجهة، بينما طلب الوصول في الباك هو طلب وصول للملف الطبي الكامل.
+            </div>
           </div>
 
           <div>

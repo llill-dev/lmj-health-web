@@ -48,23 +48,37 @@ export function useSlots(
 
   // Map API response to consistent format
   // API returns "appointments" for booked data, not "bookedSlots"
-  const bookedSlots =
-    response?.appointments?.map((apt) => ({
-      startTime: apt.startTime,
-      endTime: apt.endTime,
-      appointmentId: apt._id,
-      patientName: apt.patientName,
-      status: apt.status,
-    })) || [];
+  const appointments =
+    response && 'appointments' in response && Array.isArray(response.appointments)
+      ? response.appointments
+      : [];
+  const bookedSlots = appointments.map((apt) => ({
+    startTime: apt.startTime,
+    endTime: apt.endTime,
+    appointmentId: apt._id,
+    patientName: apt.patientName,
+    status: apt.status,
+  }));
+  const duration =
+    response && 'duration' in response ? response.duration : undefined;
+  const gap = response && 'gap' in response ? response.gap : undefined;
+  const freeSlots =
+    response && 'freeSlots' in response && Array.isArray(response.freeSlots)
+      ? response.freeSlots
+      : [];
+  const totalFreeSlots =
+    response && 'totalFreeSlots' in response ? response.totalFreeSlots ?? 0 : 0;
+  const totalBookedSlots =
+    response && 'totalBooked' in response ? response.totalBooked ?? 0 : 0;
 
   return {
     date: response?.date,
-    duration: response?.duration,
-    gap: response?.gap,
-    freeSlots: response?.freeSlots || [],
+    duration,
+    gap,
+    freeSlots,
     bookedSlots,
-    totalFreeSlots: response?.totalFreeSlots || 0,
-    totalBookedSlots: response?.totalBooked || 0,
+    totalFreeSlots,
+    totalBookedSlots,
     isLoading,
     error,
     refetch,

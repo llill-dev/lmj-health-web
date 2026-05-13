@@ -2,6 +2,8 @@ export * from './useAppointments';
 export * from './useAppointmentTypes';
 export * from './useDashboardStats';
 export * from './useDoctorAppointmentsApi';
+export * from './useDoctorAccessRequests';
+export * from './useDoctorMedicalRecords';
 export * from './useDoctorPatients';
 export * from './usePatients';
 export * from './useSlots';

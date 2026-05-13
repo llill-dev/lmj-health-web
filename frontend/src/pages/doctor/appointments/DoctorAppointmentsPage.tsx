@@ -324,16 +324,30 @@ export default function DoctorAppointmentsPage() {
                 title: "خطأ",
                 variant: "error",
               });
-              return;
+              throw new Error("تعذر تحديد هوية الطبيب الحالي لهذا الحجز.");
             }
-            await bookMutation.mutateAsync({
-              doctorId,
-              patientId: values.patientId,
-              date: values.date,
-              startTime: values.time,
-              appointmentTypeId: values.appointmentTypeId,
-              notes: values.notes,
-            });
+            try {
+              await bookMutation.mutateAsync({
+                doctorId,
+                patientId: values.patientId,
+                date: values.date,
+                startTime: values.time,
+                appointmentTypeId: values.appointmentTypeId,
+                notes: values.notes,
+              });
+              toast("تم حجز الموعد بنجاح.", {
+                title: "تم الحجز",
+                variant: "success",
+                durationMs: 4200,
+              });
+            } catch (error) {
+              toast(getUserFacingRequestErrorMessage(error), {
+                title: "فشل حجز الموعد",
+                variant: "error",
+                durationMs: 5200,
+              });
+              throw error;
+            }
           }}
         />
 

@@ -1,14 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  FileText,
-  Search,
   Activity,
-  ClipboardList,
-  Files,
-  Building2,
-  ChevronRight,
-  X,
   Calendar,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Files,
+  Search,
+  UserRound,
+  X,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -17,148 +17,105 @@ import CreateMedicalRecordForm from '@/components/doctor/medical-records/create-
 import MedicalRecordDetailsDialog, {
   type MedicalRecordDetails,
 } from '@/components/doctor/medical-records/medical-record-details-dialog';
+import {
+  useCreateDoctorMedicalRecord,
+  useDoctorMedicalRecord,
+  useDoctorMedicalRecords,
+  useDoctorPatients,
+} from '@/hooks';
+import { readAuthUser } from '@/lib/cookies';
+import { useToast } from '@/components/ui/ToastProvider';
+import { getUserFacingRequestErrorMessage } from '@/lib/api';
 
-type MedicalRecordItem = {
-  id: string;
-  systemId: string;
-  patientName: string;
-  patientInitial: string;
-  patientPhone: string;
-  date: string;
-  statusLabel: string;
-  facility: string;
-  diagnosisTitle: string;
-  diagnosisSubtitle: string;
-  symptoms: string[];
-  medicinesCount: number;
-  vitals: {
-    label: string;
-    value: string;
-  }[];
-  followUpDate: string;
-};
+function formatArabicDate(value?: string | null) {
+  if (!value) return 'غير محدد';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('ar-SA');
+}
 
-const mockRecords: MedicalRecordItem[] = [
-  {
-    id: 'mr-1',
-    systemId: 'MR-SY-2024-00001234',
-    patientName: 'أحمد محمد',
-    patientInitial: 'أ',
-    patientPhone: '+966501234567',
-    date: '2024-02-08',
-    statusLabel: 'يحتاج متابعة',
-    facility: 'عيادة القلب',
-    diagnosisTitle: 'التشخيص',
-    diagnosisSubtitle: 'التهاب الحلق',
-    symptoms: ['ألم في الحلق', 'سعال', 'التهاب شديد في الحلق'],
-    medicinesCount: 2,
-    vitals: [
-      { label: 'ضغط الدم', value: '120/80' },
-      { label: 'النبض', value: '75' },
-      { label: 'الحرارة', value: '37.5' },
-      { label: 'الوزن', value: '75' },
-    ],
-    followUpDate: '15-02-2024',
-  },
-  {
-    id: 'mr-2',
-    systemId: 'MR-SY-2024-00001789',
-    patientName: 'فاطمة أحمد',
-    patientInitial: 'ف',
-    patientPhone: '+966502345678',
-    date: '2024-12-01',
-    statusLabel: 'طارئة',
-    facility: 'قسم الطوارئ - مشفى دمشق',
-    diagnosisTitle: 'التشخيص',
-    diagnosisSubtitle: 'ألم حاد في الصدر - اشتباه ذبحة صدرية',
-    symptoms: ['ألم صدر', 'ضيق تنفس'],
-    medicinesCount: 1,
-    vitals: [
-      { label: 'ضغط الدم', value: '140/90' },
-      { label: 'النبض', value: '92' },
-      { label: 'الحرارة', value: '37.0' },
-      { label: 'الوزن', value: '68' },
-    ],
-    followUpDate: '02-12-2024',
-  },
-  {
-    id: 'mr-3',
-    systemId: 'MR-SY-2024-00001456',
-    patientName: 'أحمد محمد',
-    patientInitial: 'أ',
-    patientPhone: '+966501234567',
-    date: '2024-11-20',
-    statusLabel: 'نشط',
-    facility: 'مشفى دمشق',
-    diagnosisTitle: 'التشخيص',
-    diagnosisSubtitle: 'الحالة الصحية جيدة بشكل عام',
-    symptoms: ['تعب بسيط'],
-    medicinesCount: 0,
-    vitals: [
-      { label: 'ضغط الدم', value: '120/80' },
-      { label: 'النبض', value: '70' },
-      { label: 'الحرارة', value: '36.8' },
-      { label: 'الوزن', value: '74' },
-    ],
-    followUpDate: '01-12-2024',
-  },
-  {
-    id: 'mr-4',
-    systemId: 'MR-SY-2024-00001567',
-    patientName: 'فاطمة أحمد',
-    patientInitial: 'ف',
-    patientPhone: '+966502345678',
-    date: '2024-11-10',
-    statusLabel: 'مغلق',
-    facility: 'عيادة القلب',
-    diagnosisTitle: 'التشخيص',
-    diagnosisSubtitle:
-      'المريضة أُحيلت للفحص القلبي بسبب تاريخ عائلي. الفحوصات طبيعية ولا توجد مشاكل قلبية حالياً.',
-    symptoms: ['ألم خفيف'],
-    medicinesCount: 1,
-    vitals: [
-      { label: 'ضغط الدم', value: '118/78' },
-      { label: 'النبض', value: '72' },
-      { label: 'الحرارة', value: '36.9' },
-      { label: 'الوزن', value: '66' },
-    ],
-    followUpDate: '17-11-2024',
-  },
-  {
-    id: 'mr-5',
-    systemId: 'MR-SY-2023-00008912',
-    patientName: 'أحمد محمد',
-    patientInitial: 'أ',
-    patientPhone: '+966501234567',
-    date: '2023-06-15',
-    statusLabel: 'متأرشفة',
-    facility: 'عيادة القلب',
-    diagnosisTitle: 'التشخيص',
-    diagnosisSubtitle: 'التهاب اللوزتين الحاد',
-    symptoms: ['حرارة', 'ألم حلق'],
-    medicinesCount: 1,
-    vitals: [
-      { label: 'ضغط الدم', value: '110/70' },
-      { label: 'النبض', value: '68' },
-      { label: 'الحرارة', value: '38.2' },
-      { label: 'الوزن', value: '73' },
-    ],
-    followUpDate: '22-06-2023',
-  },
-];
+function mapRecordToDetails(
+  record: NonNullable<ReturnType<typeof useDoctorMedicalRecord>['record']>,
+  patientName: string,
+): MedicalRecordDetails {
+  return {
+    id: record._id,
+    patientName,
+    date: formatArabicDate(record.date || record.createdAt),
+    diagnosisSubtitle: record.diagnosis || record.title || 'بدون تشخيص',
+    symptoms: record.title ? [record.title] : ['لا توجد أعراض موثقة'],
+    vitals: [],
+    medicinesCount: record.prescriptions?.length ?? 0,
+    prescriptions: (record.prescriptions ?? []).map((item) => ({
+      name: item,
+      dosage: '—',
+      duration: '—',
+      frequency: '—',
+      notes: '',
+    })),
+    followUpDate: record.followUpRequired ? 'تحتاج متابعة' : 'لا توجد متابعة',
+    additionalNotes:
+      record.attachments && record.attachments.length > 0
+        ? `المرفقات: ${record.attachments.join('، ')}`
+        : 'لا توجد ملاحظات إضافية.',
+  };
+}
 
 export default function DoctorMedicalRecordsPage() {
+  const { toast } = useToast();
+  const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const [searchTerm, setSearchTerm] = useState('');
   const [mode, setMode] = useState<'list' | 'create'>('list');
+  const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [selectedRecordId, setSelectedRecordId] = useState('');
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [detailsRecord, setDetailsRecord] =
-    useState<MedicalRecordDetails | null>(null);
+  const [detailsRecord, setDetailsRecord] = useState<MedicalRecordDetails | null>(
+    null,
+  );
 
-  const filtered = useMemo(() => {
-    if (!searchTerm.trim()) return mockRecords;
-    const q = searchTerm.toLowerCase();
-    return mockRecords.filter((r) => r.patientName.toLowerCase().includes(q));
-  }, [searchTerm]);
+  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
+  const recordsQuery = useDoctorMedicalRecords(
+    doctorId,
+    selectedPatientId,
+    Boolean(selectedPatientId),
+  );
+  const recordDetailsQuery = useDoctorMedicalRecord(
+    doctorId,
+    selectedPatientId,
+    selectedRecordId,
+    Boolean(selectedPatientId && selectedRecordId),
+  );
+  const createMutation = useCreateDoctorMedicalRecord(doctorId);
+
+  const selectedPatient = patientsQuery.patients.find(
+    (patient) => patient._id === selectedPatientId,
+  );
+
+  const filteredRecords = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return recordsQuery.records.filter((record) => {
+      if (!q) return true;
+      return (
+        (record.title ?? '').toLowerCase().includes(q) ||
+        (record.diagnosis ?? '').toLowerCase().includes(q)
+      );
+    });
+  }, [recordsQuery.records, searchTerm]);
+
+  const needsFollowUpCount = recordsQuery.records.filter(
+    (record) => record.followUpRequired,
+  ).length;
+
+  useEffect(() => {
+    if (!recordDetailsQuery.record || !selectedPatient) return;
+    setDetailsRecord(
+      mapRecordToDetails(
+        recordDetailsQuery.record,
+        selectedPatient.user.fullName,
+      ),
+    );
+    setDetailsOpen(true);
+  }, [recordDetailsQuery.record, selectedPatient]);
 
   return (
     <>
@@ -166,15 +123,15 @@ export default function DoctorMedicalRecordsPage() {
         <title>Medical Records • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
+      <div dir='rtl' lang='ar'>
         <MedicalRecordDetailsDialog
           open={detailsOpen}
           onOpenChange={(open) => {
             setDetailsOpen(open);
-            if (!open) setDetailsRecord(null);
+            if (!open) {
+              setSelectedRecordId('');
+              setDetailsRecord(null);
+            }
           }}
           record={detailsRecord}
         />
@@ -182,7 +139,7 @@ export default function DoctorMedicalRecordsPage() {
         <DoctorDashboardOverview
           variant='medical-records'
           title='السجلات الطبية'
-          subtitle='تتبع الحالات والوصفات'
+          subtitle='اختر مريضاً لعرض سجلاته الطبية وإنشاء سجل جديد.'
           mode={mode}
           actionLabel='إضافة سجل جديد'
           onActionClick={() => setMode('create')}
@@ -193,11 +150,6 @@ export default function DoctorMedicalRecordsPage() {
                 onClick={() => setMode('list')}
                 className='absolute left-[24px] top-[24px] flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)]'
                 aria-label='إغلاق'
-                initial={{ opacity: 0, scale: 0.96, y: -4 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -4 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                whileTap={{ scale: 0.98 }}
               >
                 <X className='h-5 w-5 text-[#0F8F8B]' />
               </motion.button>
@@ -207,45 +159,112 @@ export default function DoctorMedicalRecordsPage() {
             {
               key: 'totalRecords',
               icon: <Files />,
-              value: 1,
+              value: selectedPatientId ? recordsQuery.records.length : '—',
               label: 'إجمالي السجلات',
             },
             {
               key: 'activePrescriptions',
-              icon: <ClipboardList />,
-              value: 2,
-              label: 'الوصفات النشطة',
+              icon: <FileText />,
+              value: selectedPatientId
+                ? recordsQuery.records.reduce(
+                    (sum, record) => sum + (record.prescriptions?.length ?? 0),
+                    0,
+                  )
+                : '—',
+              label: 'الوصفات المسجلة',
             },
             {
               key: 'needsFollowUp',
               icon: <Activity />,
-              value: 1,
-              label: 'يحتاج متابعة',
+              value: selectedPatientId ? needsFollowUpCount : '—',
+              label: 'تحتاج متابعة',
             },
           ]}
         />
 
-        <AnimatePresence
-          mode='wait'
-          initial={false}
-        >
+        <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
+          <div className='grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]'>
+            <div>
+              <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]'>
+                اختر المريض
+              </div>
+              <div className='relative'>
+                <select
+                  value={selectedPatientId}
+                  onChange={(e) => setSelectedPatientId(e.target.value)}
+                  className='h-[44px] w-full appearance-none rounded-[12px] border border-[#E5E7EB] bg-white px-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
+                >
+                  <option value=''>اختر المريض...</option>
+                  {patientsQuery.patients.map((patient) => (
+                    <option key={patient._id} value={patient._id}>
+                      {patient.user.fullName}
+                    </option>
+                  ))}
+                </select>
+                <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
+                  <ChevronDown className='h-4 w-4' />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]'>
+                ابحث داخل سجلات المريض
+              </div>
+              <div className='relative'>
+                <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
+                  <Search className='h-4 w-4' />
+                </div>
+                <input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder='ابحث عن تشخيص أو عنوان السجل...'
+                  className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <AnimatePresence mode='wait' initial={false}>
           {mode === 'create' ? (
             <motion.div
               key='create'
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
             >
               <CreateMedicalRecordForm
-                patients={[
-                  { id: 'p-1', name: 'أحمد محمد' },
-                  { id: 'p-2', name: 'سارة عبدالله' },
-                  { id: 'p-3', name: 'محمد علي' },
-                ]}
+                patients={patientsQuery.patients.map((patient) => ({
+                  id: patient._id,
+                  name: patient.user.fullName,
+                }))}
                 onCancel={() => setMode('list')}
-                onSave={() => {
-                  setMode('list');
+                onSave={async (payload) => {
+                  try {
+                    await createMutation.mutateAsync({
+                      patientId: payload.patientId,
+                      body: {
+                        title: payload.address,
+                        diagnosis: payload.diagnosis,
+                        prescriptions: payload.treatment
+                          ? [payload.treatment]
+                          : undefined,
+                        followUpRequired: Boolean(payload.followUpDate),
+                      },
+                    });
+                    toast('تم إنشاء السجل الطبي بنجاح', {
+                      title: 'تم الحفظ',
+                      variant: 'success',
+                    });
+                    setSelectedPatientId(payload.patientId);
+                    setMode('list');
+                  } catch (error) {
+                    toast(getUserFacingRequestErrorMessage(error), {
+                      title: 'فشلت العملية',
+                      variant: 'error',
+                    });
+                  }
                 }}
               />
             </motion.div>
@@ -255,231 +274,89 @@ export default function DoctorMedicalRecordsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              <section className='mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
-                <div className='relative'>
-                  <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                    <Search className='h-4 w-4' />
+              {!selectedPatientId ? (
+                <section className='mt-5 rounded-[18px] border border-dashed border-[#D0D5DD] bg-white px-6 py-12 text-center'>
+                  <UserRound className='mx-auto h-10 w-10 text-[#98A2B3]' />
+                  <div className='mt-4 font-cairo text-[15px] font-extrabold text-[#111827]'>
+                    اختر مريضاً أولاً
                   </div>
-                  <input
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder='بحث عن مريض أو تشخيص...'
-                    className='h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
-                  />
-                </div>
-              </section>
-
-              <section className='mt-5 mb-8 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)] overflow-hidden'>
-                <div className='overflow-x-auto'>
-                  <table className='w-full min-w-[800px] border-collapse'>
-                    <thead>
-                      <tr className='border-b border-[#EEF2F6] bg-[#F9FAFB]'>
-                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[100px]'>
-                          System ID
-                        </th>
-                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[150px]'>
-                          اسم المريض
-                        </th>
-                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[200px]'>
-                          التشخيص
-                        </th>
-                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[120px]'>
-                          المنشأة
-                        </th>
-                        <th className='px-4 py-3 text-right font-cairo text-[13px] font-extrabold text-[#111827] w-[100px]'>
-                          التاريخ
-                        </th>
-                        <th className='px-4 py-3 text-center font-cairo text-[13px] font-extrabold text-[#111827] w-[100px]'>
-                          الحالة
-                        </th>
-                        <th className='px-4 py-3 text-center font-cairo text-[13px] font-extrabold text-[#111827] w-[120px]'>
-                          الإجراءات
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((r) => {
-                        const statusStyle =
-                          r.statusLabel === 'نشط'
-                            ? 'bg-primary text-white'
-                            : r.statusLabel === 'طارئة'
-                              ? 'bg-[#F04438] text-white'
-                              : r.statusLabel === 'يحتاج متابعة'
-                                ? 'bg-[#F79009] text-white'
-                                : r.statusLabel === 'متأرشفة'
-                                  ? 'bg-[#E5E7EB] text-[#344054]'
-                                  : 'bg-[#667085] text-white';
-
-                        return (
-                          <tr
-                            key={r.id}
-                            className='border-b border-[#EEF2F6] hover:bg-[#F9FAFB] transition-colors'
-                          >
-                            <td className='px-4 py-3'>
-                              <div className='flex items-center gap-3'>
-                                <div className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.28)]'>
-                                  <FileText className='h-5 w-5' />
-                                </div>
-                                <div className='min-w-0'>
-                                  <div className='break-words font-cairo text-[13px] font-extrabold text-[#0F8F8B]'>
-                                    {r.systemId}
-                                  </div>
-                                  <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#0F8F8B]'>
-                                    {r.id.replace('mr-', '').padStart(4, '0')}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className='px-4 py-3'>
-                              <div className='flex items-center gap-3'>
-                                <div className='flex h-[34px] w-[34px] items-center justify-center rounded-full bg-primary text-white'>
-                                  <span className='font-cairo text-[14px] font-extrabold'>
-                                    {r.patientInitial}
-                                  </span>
-                                </div>
-                                <div className='text-right'>
-                                  <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                                    {r.patientName}
-                                  </div>
-                                  <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                                    {r.patientPhone}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className='px-4 py-3'>
-                              <div className='w-full max-w-full rounded-[12px] border border-[#B8D3FF] bg-[#EEF5FF] px-4 py-3 text-right'>
-                                <div className='whitespace-normal break-words font-cairo text-[13px] font-extrabold leading-[18px] text-[#111827]'>
-                                  {r.diagnosisSubtitle}
-                                </div>
-                              </div>
-                            </td>
-                            <td className='px-4 py-3'>
-                              <div className='flex items-center gap-2'>
-                                <Building2 className='h-4 w-4 text-[#F79009]' />
-                                <div className='min-w-0'>
-                                  <div className='whitespace-normal break-words font-cairo text-[13px] font-extrabold text-[#667085]'>
-                                    {r.facility}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className='px-4 py-3'>
-                              <div className='flex items-center gap-2'>
-                                <Calendar className='h-4 w-4 text-[#98A2B3]' />
-                                <span className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                                  {r.date}
-                                </span>
-                              </div>
-                            </td>
-                            <td className='px-4 py-3 text-center'>
-                              <div
-                                className={`inline-flex h-[30px] items-center justify-center rounded-[8px] px-4 font-cairo text-[12px] font-extrabold ${statusStyle}`}
-                              >
-                                {r.statusLabel}
-                              </div>
-                            </td>
-                            <td className='px-4 py-3 text-center'>
-                              <div className='flex items-center justify-center gap-2'>
-                                <button
-                                  type='button'
-                                  onClick={() => {
-                                    const mapped: MedicalRecordDetails = {
-                                      id: r.id,
-                                      patientName: r.patientName,
-                                      date: r.date,
-                                      diagnosisSubtitle: r.diagnosisSubtitle,
-                                      symptoms: r.symptoms,
-                                      vitals: r.vitals,
-                                      medicinesCount: r.medicinesCount,
-                                      prescriptions: [
-                                        {
-                                          name: 'أموكسيسيلين 500mg',
-                                          dosage: 'حبّة واحدة',
-                                          duration: '7 أيام',
-                                          frequency: '3 مرات يومياً',
-                                          notes: 'بعد الأكل',
-                                        },
-                                        {
-                                          name: 'باراسيتامول 500mg',
-                                          dosage: 'حبّة واحدة',
-                                          duration: '5 أيام',
-                                          frequency: 'عند الحاجة',
-                                          notes: 'للحمى فقط',
-                                        },
-                                      ].slice(0, r.medicinesCount),
-                                      followUpDate: r.followUpDate,
-                                      additionalNotes:
-                                        'المريض يعاني من التهاب بكتيري في الحلق، تم وصف المضاد الحيوي، متابعة بعد أسبوع.',
-                                    };
-                                    setDetailsRecord(mapped);
-                                    setDetailsOpen(true);
-                                  }}
-                                  className='flex items-center gap-2 font-cairo text-[13px] font-extrabold text-primary'
-                                >
-                                  <span>عرض التفاصيل</span>
-                                </button>
-
-                                <button
-                                  type='button'
-                                  onClick={() => {
-                                    const mapped: MedicalRecordDetails = {
-                                      id: r.id,
-                                      patientName: r.patientName,
-                                      date: r.date,
-                                      diagnosisSubtitle: r.diagnosisSubtitle,
-                                      symptoms: r.symptoms,
-                                      vitals: r.vitals,
-                                      medicinesCount: r.medicinesCount,
-                                      prescriptions: [
-                                        {
-                                          name: 'أموكسيسيلين 500mg',
-                                          dosage: 'حبّة واحدة',
-                                          duration: '7 أيام',
-                                          frequency: '3 مرات يومياً',
-                                          notes: 'بعد الأكل',
-                                        },
-                                        {
-                                          name: 'باراسيتامول 500mg',
-                                          dosage: 'حبّة واحدة',
-                                          duration: '5 أيام',
-                                          frequency: 'عند الحاجة',
-                                          notes: 'للحمى فقط',
-                                        },
-                                      ].slice(0, r.medicinesCount),
-                                      followUpDate: r.followUpDate,
-                                      additionalNotes:
-                                        'المريض يعاني من التهاب بكتيري في الحلق، تم وصف المضاد الحيوي، متابعة بعد أسبوع.',
-                                    };
-                                    setDetailsRecord(mapped);
-                                    setDetailsOpen(true);
-                                  }}
-                                  className='flex h-[40px] w-[40px] items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_10px_18px_rgba(15, 143, 139,0.28)]'
-                                  aria-label='تفاصيل'
-                                >
-                                  <ChevronRight className='h-5 w-5' />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className='flex items-center justify-between gap-4 bg-white px-6 py-4'>
-                  <div className='font-cairo text-[13px] font-semibold text-[#98A2B3]'>
-                    عرض {filtered.length} من {mockRecords.length} سجل
+                  <div className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                    الـ API يعرض السجلات الطبية لكل مريض على حدة.
                   </div>
-                  <div className='inline-flex h-[36px] items-center justify-center rounded-[999px] bg-primary px-4 font-cairo text-[13px] font-extrabold text-white'>
-                    إجمالي {mockRecords.length} سجل طبي
+                </section>
+              ) : recordsQuery.isLoading ? (
+                <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]'>
+                  جارٍ تحميل السجلات الطبية...
+                </section>
+              ) : recordsQuery.error ? (
+                <section className='mt-5 rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#B42318]'>
+                  {getUserFacingRequestErrorMessage(recordsQuery.error)}
+                </section>
+              ) : filteredRecords.length === 0 ? (
+                <section className='mt-5 rounded-[18px] border border-dashed border-[#D0D5DD] bg-white px-6 py-12 text-center'>
+                  <FileText className='mx-auto h-10 w-10 text-[#98A2B3]' />
+                  <div className='mt-4 font-cairo text-[15px] font-extrabold text-[#111827]'>
+                    لا توجد سجلات طبية لهذا المريض
                   </div>
-                </div>
-              </section>
-              <div className='h-8' />
+                  <div className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                    يمكنك إنشاء أول سجل من زر "إضافة سجل جديد".
+                  </div>
+                </section>
+              ) : (
+                <section className='mt-5 mb-8 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)] overflow-hidden'>
+                  <div className='border-b border-[#EEF2F6] bg-[#F9FAFB] px-6 py-4 text-right'>
+                    <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
+                      سجلات {selectedPatient?.user.fullName}
+                    </div>
+                    <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+                      {filteredRecords.length} سجل
+                    </div>
+                  </div>
+
+                  <div className='divide-y divide-[#EEF2F6]'>
+                    {filteredRecords.map((record) => (
+                      <div
+                        key={record._id}
+                        className='flex items-center justify-between gap-4 px-6 py-5 hover:bg-[#F9FAFB]'
+                      >
+                        <div className='min-w-0 flex-1 text-right'>
+                          <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
+                            {record.title || 'بدون عنوان'}
+                          </div>
+                          <div className='mt-1 font-cairo text-[13px] font-semibold text-[#667085]'>
+                            {record.diagnosis || 'بدون تشخيص'}
+                          </div>
+                          <div className='mt-2 flex flex-wrap justify-end gap-2 text-[11px]'>
+                            <span className='rounded-full bg-[#EEF6FF] px-3 py-1 font-cairo font-extrabold text-[#2563EB]'>
+                              {formatArabicDate(record.date || record.createdAt)}
+                            </span>
+                            <span className='rounded-full bg-[#F9FAFB] px-3 py-1 font-cairo font-extrabold text-[#667085]'>
+                              {record.prescriptions?.length ?? 0} وصفة
+                            </span>
+                            {record.followUpRequired ? (
+                              <span className='rounded-full bg-[#FEF6EE] px-3 py-1 font-cairo font-extrabold text-[#F79009]'>
+                                تحتاج متابعة
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <button
+                          type='button'
+                          onClick={() => {
+                            setSelectedRecordId(record._id);
+                          }}
+                          className='flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_10px_18px_rgba(15,143,139,0.28)]'
+                          aria-label='عرض التفاصيل'
+                        >
+                          <ChevronRight className='h-5 w-5' />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
