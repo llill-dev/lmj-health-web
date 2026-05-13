@@ -469,14 +469,14 @@ export default function DoctorAppointmentsPage() {
 
         {/* شريط تصفية احترافي — مطابق لصفحة المرضى، البحث ~50% على الشاشات الواسعة */}
         <section
-          className="mt-5 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
+          className="my-6 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
           aria-label="تصفية قائمة المواعيد"
         >
           <div className="border-b border-[#EEF2F6] bg-gradient-to-l from-primary/[0.07] via-[#F8FAFC] to-white px-5 py-4 sm:px-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-3 sm:items-center">
+              <div className="flex gap-3 items-start sm:items-center">
                 <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-gradient-to-br from-primary/15 to-primary/5 text-primary shadow-sm"
+                  className="flex justify-center items-center w-11 h-11 bg-gradient-to-br rounded-xl border shadow-sm shrink-0 border-primary/25 from-primary/15 to-primary/5 text-primary"
                   aria-hidden
                 >
                   <Filter className="h-[18px] w-[18px]" strokeWidth={2.25} />
@@ -492,7 +492,7 @@ export default function DoctorAppointmentsPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex flex-wrap gap-2 justify-end items-center">
                 <button
                   type="button"
                   disabled={!hasActiveFilters}
@@ -516,14 +516,14 @@ export default function DoctorAppointmentsPage() {
               </div>
             </div>
           </div>
-
-          <div className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+{/* filter container */}
+          <div className="px-5 py-5 space-y-5 sm:px-6 sm:py-6">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:gap-6">
               {/* بحث محلي رئيسي: نصف عرض الحاوية على xl */}
               <div className="w-full flex-[0_0_auto] xl:w-1/2 xl:max-w-[50%]">
                 <label
                   htmlFor="doctor-appointments-search"
-                  className="mb-2 flex items-center justify-between gap-2"
+                  className="flex gap-2 justify-between items-center mb-2"
                 >
                   <span className="inline-flex items-center gap-1.5 font-cairo text-[12px] font-extrabold text-[#111827]">
                     <CalendarDays
@@ -536,7 +536,7 @@ export default function DoctorAppointmentsPage() {
                     المريض · المعرّف · الملاحظات
                   </span>
                 </label>
-                <div className="group relative">
+                <div className="relative group">
                   <input
                     id="doctor-appointments-search"
                     type="search"
@@ -558,7 +558,7 @@ export default function DoctorAppointmentsPage() {
                 </div>
               </div>
 
-              <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid flex-1 grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                 <div className="relative min-w-0">
                   <label
                     htmlFor="doctor-appointments-view"
@@ -635,15 +635,12 @@ export default function DoctorAppointmentsPage() {
 
               </div>
             </div>
-
+            {/* date filter */}
             <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFBFC]/90 px-4 py-4 sm:px-5">
-              <div className="mb-3 flex flex-wrap items-center gap-2 text-right">
-                <Calendar className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+              <div className="flex flex-wrap gap-2 items-center mb-3 text-right">
+                <Calendar className="w-4 h-4 shrink-0 text-primary" aria-hidden />
                 <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
-                  تاريخ المواعيد (فلتر الخادم)
-                </span>
-                <span className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  (يُرسل مع الحالة ونوع العرض؛ اتركه فارغاً لعرض النطاق الافتراضي)
+                  تاريخ المواعيد
                 </span>
               </div>
               <div className="max-w-xs">
@@ -756,7 +753,7 @@ export default function DoctorAppointmentsPage() {
             الصفحة {filters.page} من {totalPages}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex gap-3 items-center">
             <div className="relative">
               <select
                 value={filters.limit}
@@ -775,7 +772,7 @@ export default function DoctorAppointmentsPage() {
                   </option>
                 ))}
               </select>
-              <ChevronLeft className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-primary" />
+              <ChevronLeft className="absolute left-3 top-1/2 w-4 h-4 rotate-90 -translate-y-1/2 pointer-events-none text-primary" />
             </div>
 
             <button

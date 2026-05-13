@@ -108,11 +108,11 @@ export default function DoctorDashboardOverview({
           <div className={iconTileClass}>
             {headerIcon ??
               (variant === 'appointments' ? (
-                <Calendar className='h-8 w-8 text-white' />
+                <Calendar className='w-8 h-8 text-white' />
               ) : variant === 'patients' ? (
-                <Users className='h-8 w-8 text-white' />
+                <Users className='w-8 h-8 text-white' />
               ) : (
-                <FileText className='h-8 w-8 text-white' />
+                <FileText className='w-8 h-8 text-white' />
               ))}
           </div>
           <div className='flex flex-col gap-1'>
@@ -128,8 +128,8 @@ export default function DoctorDashboardOverview({
             onClick={onActionClick}
             className={
               surface === 'mint'
-                ? 'flex h-[48px] min-w-[146px] items-center justify-between rounded-[6px] border-[1.5px] border-primary bg-white px-4 py-3 font-cairo text-[14px] font-bold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.2)]'
-                : 'flex h-[48px] min-w-[146px] items-center justify-between rounded-[6px] bg-[#FFFFFF] px-4 py-3 font-cairo text-[14px] font-bold text-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
+                ? 'flex gap-2 h-[48px] min-w-[146px] items-center justify-between rounded-[6px] border-[1.5px] border-primary bg-white px-4 py-3 font-cairo text-[14px] font-bold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.2)]'
+                : 'flex gap-2 h-[48px] min-w-[146px] items-center justify-between rounded-[6px] bg-[#FFFFFF] px-4 py-3 font-cairo text-[14px] font-bold text-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
             }
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.98 }}
@@ -137,9 +137,9 @@ export default function DoctorDashboardOverview({
           >
             {actionIcon ??
               (variant === 'appointments' ? (
-                <Calendar className='h-4 w-4' />
+                <Calendar className='w-4 h-4' />
               ) : (
-                <Plus className='h-4 w-4' />
+                <Plus className='w-4 h-4' />
               ))}
             <span className='font-cairo text-[14px] font-bold leading-[20px]'>
               {actionLabel}
