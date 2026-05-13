@@ -499,10 +499,6 @@ export default function DoctorAppointmentsPage() {
                   <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
                     تصفية المواعيد
                   </h2>
-                  <p className="mt-1 max-w-xl font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
-                    ضبط العرض والحالة والتاريخ على الخادم، مع بحث سريع داخل نتائج
-                    الصفحة الحالية (اسم المريض، المعرّف، الملاحظات).
-                  </p>
                 </div>
               </div>
 

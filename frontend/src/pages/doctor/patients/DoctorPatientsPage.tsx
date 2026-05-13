@@ -414,10 +414,6 @@ export default function DoctorPatientsPage() {
                   <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
                     تصفية قائمة المرضى
                   </h2>
-                  <p className="mt-1 max-w-xl font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
-                    بحث سريع بالهوية أو ضبط الفلاتر التفصيلية حسب حالة الحساب والعلاقة
-                    وتواريخ آخر زيارة.
-                  </p>
                 </div>
               </div>
 
@@ -493,7 +489,7 @@ export default function DoctorPatientsPage() {
                     className="mb-2 flex items-center gap-1.5 font-cairo text-[11px] font-extrabold text-[#667085]"
                   >
                     <Stethoscope className="h-3.5 w-3.5 text-primary/80 shrink-0" aria-hidden />
-                    التشخيص / الملاحظات السريعة
+                    التشخيص / الملاحظات
                   </label>
                   <input
                     id="doctor-patients-diagnosis"
