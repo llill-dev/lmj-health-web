@@ -1,0 +1,8 @@
+# Local text dumps / extracts — do not commit or push
+/*.txt
+
+# Root-level Markdown reports — keep docs out of the remote repo
+/*.md
+
+# Internal report (exclude from Git; frontend README stays tracked)
+frontend/PROJECT_MIGRATION_REPORT.md
