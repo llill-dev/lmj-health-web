@@ -11,9 +11,9 @@ import {
   ShieldCheck,
   Check,
   Link,
-  ChevronDown,
 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import StyledSelect from '@/components/ui/styled-select';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
@@ -85,6 +85,7 @@ export default function AddAccessRequestForm({
 }) {
   const {
     register,
+    control,
     handleSubmit,
     watch,
     setValue,
@@ -145,30 +146,23 @@ export default function AddAccessRequestForm({
         <div className='grid grid-cols-1 gap-5'>
           <div>
             <div className={labelBase}>اختر المريض</div>
-            <div className='relative'>
-              <select
-                {...register('patientId')}
-                className={`${inputBase} appearance-none pl-10`}
-              >
-                <option
-                  value=''
-                  disabled
-                >
-                  اختر المريض...
-                </option>
-                {patients.map((p) => (
-                  <option
-                    key={p.id}
-                    value={p.id}
-                  >
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <ChevronDown />
-              </div>
-            </div>
+            <Controller
+              name='patientId'
+              control={control}
+              render={({ field }) => (
+                <StyledSelect
+                  options={patients.map((p) => ({ value: p.id, label: p.name }))}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  placeholder='اختر المريض...'
+                  error={Boolean(errors.patientId)}
+                  emptyTriggerLabel='لا يوجد مرضى في القائمة'
+                  emptyState='لا يوجد مرضى متاحين للاختيار.'
+                  listboxAriaLabel='اختيار المريض'
+                />
+              )}
+            />
             {errors.patientId?.message ? (
               <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
                 {errors.patientId.message}

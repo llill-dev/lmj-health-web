@@ -36,6 +36,7 @@ import ScheduleConflictDialog, {
   type ScheduleConflictData,
 } from '@/components/doctor/work-schedule/schedule-conflict-dialog';
 import SlotsPreview from '@/components/doctor/work-schedule/slots-preview';
+import StyledSelect from '@/components/ui/styled-select';
 import type { ScheduleDayKey, ScheduleTimeSlot } from '@/lib/doctor/types';
 
 const DAY_LABELS: Record<ScheduleDayKey, string> = {
@@ -379,12 +380,12 @@ export default function DoctorWorkSchedulePage() {
             </div>
           </motion.section>
 
-          {/* Slot Settings */}
+          {/* Slot Settings: overflow-visible + z-[25] so StyledSelect dropdowns aren’t clipped or covered */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className='mt-6 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
+            className='relative z-[25] mt-6 overflow-visible rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
           >
             <div className='border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-6 py-4'>
               <div className='flex gap-2 items-center'>
@@ -405,16 +406,17 @@ export default function DoctorWorkSchedulePage() {
                     <Clock className='w-4 h-4 text-primary' />
                     مدة الموعد (دقيقة)
                   </label>
-                  <select
-                    value={duration}
-                    onChange={(e) => setDuration(Number(e.target.value))}
-                    className='h-[44px] w-full rounded-[8px] border-[2px] border-primary bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20'
-                  >
-                    <option value={15}>15 دقيقة</option>
-                    <option value={30}>30 دقيقة</option>
-                    <option value={45}>45 دقيقة</option>
-                    <option value={60}>60 دقيقة</option>
-                  </select>
+                  <StyledSelect
+                    value={String(duration)}
+                    onChange={(v) => setDuration(Number(v))}
+                    options={[
+                      { value: '15', label: '15 دقيقة' },
+                      { value: '30', label: '30 دقيقة' },
+                      { value: '45', label: '45 دقيقة' },
+                      { value: '60', label: '60 دقيقة' },
+                    ]}
+                    listboxAriaLabel='مدة الموعد بالدقيقة'
+                  />
                 </div>
 
                 <div>
@@ -422,16 +424,17 @@ export default function DoctorWorkSchedulePage() {
                     <Clock className='w-4 h-4 text-primary' />
                     الفجوة بين المواعيد (دقيقة)
                   </label>
-                  <select
-                    value={gap}
-                    onChange={(e) => setGap(Number(e.target.value))}
-                    className='h-[44px] w-full rounded-[8px] border-[2px] border-primary bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20'
-                  >
-                    <option value={0}>بدون فجوة</option>
-                    <option value={5}>5 دقائق</option>
-                    <option value={10}>10 دقائق</option>
-                    <option value={15}>15 دقيقة</option>
-                  </select>
+                  <StyledSelect
+                    value={String(gap)}
+                    onChange={(v) => setGap(Number(v))}
+                    options={[
+                      { value: '0', label: 'بدون فجوة' },
+                      { value: '5', label: '5 دقائق' },
+                      { value: '10', label: '10 دقائق' },
+                      { value: '15', label: '15 دقيقة' },
+                    ]}
+                    listboxAriaLabel='الفجوة بين المواعيد بالدقيقة'
+                  />
                 </div>
               </div>
 
@@ -456,7 +459,7 @@ export default function DoctorWorkSchedulePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className='mt-6 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
+            className='relative z-10 mt-6 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
           >
             <div className='flex items-center justify-between border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-6 py-4'>
               <div>
@@ -596,7 +599,7 @@ export default function DoctorWorkSchedulePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className='mt-6 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
+            className='relative z-10 mt-6 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
           >
             <div className='flex items-center justify-between border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-6 py-4'>
               <div>
@@ -732,7 +735,7 @@ export default function DoctorWorkSchedulePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              className='mt-6 overflow-hidden rounded-[18px] border-[2px] border-primary/20 bg-white shadow-[0_8px_20px_rgba(15,143,139,0.08)]'
+              className='relative z-10 mt-6 overflow-hidden rounded-[18px] border-[2px] border-primary/20 bg-white shadow-[0_8px_20px_rgba(15,143,139,0.08)]'
             >
               <div className='border-b border-[#EEF2F6] bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4'>
                 <div className='flex justify-between items-center'>
@@ -780,7 +783,7 @@ export default function DoctorWorkSchedulePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className='mt-6 overflow-hidden rounded-[18px] border-[2px] border-[#BFEDEC] bg-gradient-to-br from-[#F2FFFE] to-[#E6F9F8] shadow-[0_8px_20px_rgba(15,143,139,0.1)]'
+              className='relative z-10 mt-6 overflow-hidden rounded-[18px] border-[2px] border-[#BFEDEC] bg-gradient-to-br from-[#F2FFFE] to-[#E6F9F8] shadow-[0_8px_20px_rgba(15,143,139,0.1)]'
             >
               <div className='p-6'>
                 <div className='flex gap-4 items-start'>

@@ -14,6 +14,7 @@ import {
 import { Helmet } from "react-helmet-async";
 import {
   Search,
+  Filter,
   UserCheck,
   UserMinus,
   UserRoundPlus,
@@ -23,13 +24,12 @@ import {
   CheckCircle2,
   Stethoscope,
   ShieldAlert,
-  Filter,
-  ChevronLeft,
   Users,
   Calendar,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
+import StyledSelect from "@/components/ui/styled-select";
 import { readAuthUser } from "@/lib/cookies";
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 import {
@@ -518,30 +518,26 @@ export default function DoctorPatientsPage() {
                   >
                     حالة الحساب
                   </label>
-                  <div className="relative">
-                    <select
-                      id="doctor-patients-account-status"
-                      value={filters.account_status}
-                      onChange={(e) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          account_status:
-                            (e.target.value as FilterStatus) || "all",
-                          page: 1,
-                        }))
-                      }
-                      className="h-[42px] w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3.5 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
-                    >
-                      <option value="all">جميع الحالات</option>
-                      <option value="active">نشط</option>
-                      <option value="temporary">مؤقت</option>
-                      <option value="suspended">معلق</option>
-                    </select>
-                    <ChevronLeft
-                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-[-90deg] text-[#98A2B3]"
-                      aria-hidden
-                    />
-                  </div>
+                  <StyledSelect
+                    id="doctor-patients-account-status"
+                    size="sm"
+                    tone="muted"
+                    value={filters.account_status}
+                    onChange={(v) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        account_status: (v as FilterStatus) || "all",
+                        page: 1,
+                      }))
+                    }
+                    options={[
+                      { value: "all", label: "جميع الحالات" },
+                      { value: "active", label: "نشط" },
+                      { value: "temporary", label: "مؤقت" },
+                      { value: "suspended", label: "معلق" },
+                    ]}
+                    listboxAriaLabel="حالة الحساب"
+                  />
                 </div>
 
                 <div className="relative min-w-0 sm:col-span-2 lg:col-span-1">
@@ -551,33 +547,30 @@ export default function DoctorPatientsPage() {
                   >
                     علاقة الوصول
                   </label>
-                  <div className="relative">
-                    <select
-                      id="doctor-patients-relationship"
-                      value={filters.relationship}
-                      onChange={(e) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          relationship:
-                            (e.target.value as RelationshipFilter) || "all",
-                          page: 1,
-                        }))
-                      }
-                      className="h-[42px] w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3.5 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12 lg:min-w-0"
-                    >
-                      <option value="all">كل العلاقات</option>
-                      <option value="full-access">وصول كامل</option>
-                      <option value="linked-only">مرتبط فقط</option>
-                      <option value="temporary">مؤقت</option>
-                      <option value="access-pending">قيد الانتظار</option>
-                      <option value="active-encounter">زيارة جارية</option>
-                      <option value="restricted">محجوب</option>
-                    </select>
-                    <ChevronLeft
-                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-[-90deg] text-[#98A2B3]"
-                      aria-hidden
-                    />
-                  </div>
+                  <StyledSelect
+                    id="doctor-patients-relationship"
+                    size="sm"
+                    tone="muted"
+                    value={filters.relationship}
+                    onChange={(v) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        relationship: (v as RelationshipFilter) || "all",
+                        page: 1,
+                      }))
+                    }
+                    className="lg:min-w-0"
+                    options={[
+                      { value: "all", label: "كل العلاقات" },
+                      { value: "full-access", label: "وصول كامل" },
+                      { value: "linked-only", label: "مرتبط فقط" },
+                      { value: "temporary", label: "مؤقت" },
+                      { value: "access-pending", label: "قيد الانتظار" },
+                      { value: "active-encounter", label: "زيارة جارية" },
+                      { value: "restricted", label: "محجوب" },
+                    ]}
+                    listboxAriaLabel="علاقة الوصول"
+                  />
                 </div>
               </div>
             </div>
@@ -760,25 +753,24 @@ export default function DoctorPatientsPage() {
           </div>
 
           <div className="flex gap-3 items-center">
-            <div className="relative">
-              <select
-                value={filters.limit}
-                onChange={(e) =>
+            <div className="w-[118px] shrink-0">
+              <StyledSelect
+                size="xs"
+                tone="emphasis"
+                value={String(filters.limit)}
+                onChange={(v) =>
                   setFilters((prev) => ({
                     ...prev,
-                    limit: Number(e.target.value),
+                    limit: Number(v),
                     page: 1,
                   }))
                 }
-                className="h-[36px] w-[110px] appearance-none rounded-[10px] border border-primary/25 bg-primary/10 px-4 text-right font-cairo text-[12px] font-extrabold text-primary outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
-              >
-                {[20, 50, 100].map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-              <ChevronLeft className="absolute left-3 top-1/2 w-4 h-4 rotate-90 -translate-y-1/2 pointer-events-none text-primary" />
+                options={[20, 50, 100].map((v) => ({
+                  value: String(v),
+                  label: String(v),
+                }))}
+                listboxAriaLabel="عدد العناصر في الصفحة"
+              />
             </div>
 
             <button

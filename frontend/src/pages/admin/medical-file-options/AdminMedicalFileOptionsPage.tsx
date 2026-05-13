@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { MedicalFileOptionCard } from '@/components/admin/medical-file-options/MedicalFileOptionCard';
+import StyledSelect from '@/components/ui/styled-select';
 
 export default function AdminMedicalFileOptionsPage() {
   const chronicDiseases = useMemo(
@@ -129,22 +130,23 @@ export default function AdminMedicalFileOptionsPage() {
                 <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
                   اختر الفئة
                 </div>
-                <select
+                <StyledSelect
                   value={selectedCategory}
-                  onChange={(e) =>
+                  onChange={(v) =>
                     setSelectedCategory(
-                      e.target.value as
+                      v as
                         | 'الأمراض المزمنة'
                         | 'أنواع الحساسية'
                         | 'فصائل الدم',
                     )
                   }
-                  className='h-[44px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827]'
-                >
-                  <option value='الأمراض المزمنة'>الأمراض المزمنة</option>
-                  <option value='أنواع الحساسية'>أنواع الحساسية</option>
-                  <option value='فصائل الدم'>فصائل الدم</option>
-                </select>
+                  options={[
+                    { value: 'الأمراض المزمنة', label: 'الأمراض المزمنة' },
+                    { value: 'أنواع الحساسية', label: 'أنواع الحساسية' },
+                    { value: 'فصائل الدم', label: 'فصائل الدم' },
+                  ]}
+                  listboxAriaLabel='فئة الخيار'
+                />
               </div>
             </div>
           </div>

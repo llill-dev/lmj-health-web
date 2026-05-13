@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateAdminContent } from '@/hooks/admin/useAdminContent';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
+import StyledSelect from '@/components/ui/styled-select';
 import type { AdminContentBlock, AdminContentType } from '@/lib/admin/types';
 
 /** جسم مبدئي تتوافق مع الـ API ويتجنّب أعطال التحقق عندما يتوقع الخادم مصفوفة بلوكات. */
@@ -211,16 +212,18 @@ export default function CreateAdminContentDialog({
                     name='type'
                     control={control}
                     render={({ field }) => (
-                      <select
-                        {...field}
-                        className='mt-1.5 w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2.5 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20'
-                      >
-                        {typeOptions.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
+                      <StyledSelect
+                        className='mt-1.5'
+                        options={typeOptions.map((o) => ({
+                          value: o.value,
+                          label: o.label,
+                        }))}
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        listboxAriaLabel='نوع المحتوى'
+                      />
                     )}
                   />
                 </div>
@@ -258,15 +261,20 @@ export default function CreateAdminContentDialog({
                     <Controller
                       name='language'
                       control={control}
-                      render={({ field }) => (
-                        <select
-                          {...field}
-                          className='mt-1.5 w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2.5 text-right font-cairo text-[13px] font-semibold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20'
-                        >
-                          <option value='ar'>العربية</option>
-                          <option value='en'>English</option>
-                        </select>
-                      )}
+                    render={({ field }) => (
+                      <StyledSelect
+                        className='mt-1.5'
+                        options={[
+                          { value: 'ar', label: 'العربية' },
+                          { value: 'en', label: 'English' },
+                        ]}
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        listboxAriaLabel='لغة المحتوى'
+                      />
+                    )}
                     />
                   </div>
                   <div>

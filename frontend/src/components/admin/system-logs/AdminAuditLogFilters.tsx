@@ -1,4 +1,5 @@
 import { Filter, Search } from 'lucide-react';
+import StyledSelect from '@/components/ui/styled-select';
 import {
   FILTER_CATEGORIES,
   FILTER_OUTCOMES,
@@ -67,37 +68,47 @@ export function AdminAuditLogFilters({
           <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
         </div>
 
-        <select
+        <StyledSelect
+          size="sm"
+          tone="muted"
+          className="min-w-0"
+          triggerClassName="!h-[40px] !rounded-[10px] border-0 !shadow-none"
           value={category}
-          onChange={(e) => onCategoryChange(e.target.value as AuditLogCategory | '')}
-          className={SELECT_CLASS}
-        >
-          {FILTER_CATEGORIES.map((c) => (
-            <option key={c.value || 'all-cat'} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => onCategoryChange(v as AuditLogCategory | '')}
+          options={FILTER_CATEGORIES.map((c) => ({
+            value: c.value,
+            label: c.label,
+          }))}
+          listboxAriaLabel="تصنيف السجل"
+        />
 
-        <select
+        <StyledSelect
+          size="sm"
+          tone="muted"
+          className="min-w-0"
+          triggerClassName="!h-[40px] !rounded-[10px] border-0 !shadow-none"
           value={outcome}
-          onChange={(e) => onOutcomeChange(e.target.value as AuditLogOutcome | '')}
-          className={SELECT_CLASS}
-        >
-          {FILTER_OUTCOMES.map((o) => (
-            <option key={o.value || 'all-out'} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => onOutcomeChange(v as AuditLogOutcome | '')}
+          options={FILTER_OUTCOMES.map((o) => ({
+            value: o.value,
+            label: o.label,
+          }))}
+          listboxAriaLabel="نتيجة العملية"
+        />
 
-        <select value={actorRole} onChange={(e) => onActorRoleChange(e.target.value)} className={SELECT_CLASS}>
-          {FILTER_ROLES.map((r) => (
-            <option key={r.value || 'all-role'} value={r.value}>
-              {r.label}
-            </option>
-          ))}
-        </select>
+        <StyledSelect
+          size="sm"
+          tone="muted"
+          className="min-w-0"
+          triggerClassName="!h-[40px] !rounded-[10px] border-0 !shadow-none"
+          value={actorRole}
+          onChange={onActorRoleChange}
+          options={FILTER_ROLES.map((r) => ({
+            value: r.value,
+            label: r.label,
+          }))}
+          listboxAriaLabel="دور المستخدم"
+        />
 
         <div className='flex min-w-0 items-center gap-2 sm:col-span-2 lg:col-span-4 xl:col-span-3'>
           <input

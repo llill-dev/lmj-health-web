@@ -25,6 +25,7 @@ import {
   resolveUserId,
 } from "@/components/admin/secretaries/secretaryListUtils";
 import { cn } from "@/lib/utils/utils";
+import StyledSelect from "@/components/ui/styled-select";
 import type { AdminSecretarySummary } from "@/lib/admin/types";
 
 /* ─── permission label map ──────────────────────────────────── */
@@ -131,24 +132,27 @@ export default function AdminSecretariesPage() {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
           </div>
 
-          <select
-            id="admin-secretary-doctor-filter"
+          <StyledSelect
+            id='admin-secretary-doctor-filter'
+            className='w-36 shrink-0'
+            size='sm'
+            tone='muted'
             value={doctorIdFilter}
             disabled={doctorsListLoading}
-            onChange={(e) => {
-              setDoctorIdFilter(e.target.value);
+            onChange={(v) => {
+              setDoctorIdFilter(v);
               setPage(1);
             }}
-            className="h-[42px] w-36 cursor-pointer rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary disabled:cursor-wait disabled:opacity-60"
-          >
-            <option value="">كل الأطباء</option>
-            {doctorOptions.map((d) => (
-              <option key={d._id} value={d._id}>
-                {d.user?.fullName ?? d._id}
-                {d.specialization ? ` — ${d.specialization}` : ""}
-              </option>
-            ))}
-          </select>
+            placeholder='كل الأطباء'
+            options={[
+              { value: '', label: 'كل الأطباء' },
+              ...doctorOptions.map((d) => ({
+                value: d._id,
+                label: `${d.user?.fullName ?? d._id}${d.specialization ? ` — ${d.specialization}` : ''}`,
+              })),
+            ]}
+            listboxAriaLabel='تصفية حسب الطبيب'
+          />
           {doctorOptions.length >= 200 ? (
             <p className="mt-1.5 text-right font-cairo text-[10px] font-semibold text-[#98A2B3]">
               عُرضت أول 200 طبيب معتمد. استخدم البحث أعلاه لتضييق السكرتيرين.

@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
 import { adminApi } from '@/lib/admin/client';
+import StyledSelect from '@/components/ui/styled-select';
 
 export default function AdminVerificationRequestsPage() {
   const navigate = useNavigate();
@@ -175,24 +176,21 @@ export default function AdminVerificationRequestsPage() {
                   </button>
                 );
               })}
-              <select
-                value={limit}
-                onChange={(e) => {
-                  setLimit(Number(e.target.value));
+              <StyledSelect
+                className='min-w-[4.5rem]'
+                size='xs'
+                tone='muted'
+                value={String(limit)}
+                onChange={(v) => {
+                  setLimit(Number(v));
                   setPage(1);
                 }}
-                className='h-[32px] rounded-[8px] border border-[#EAECF0] bg-white px-2.5 font-cairo text-[12px] font-bold text-[#475467] outline-none'
-                aria-label='عدد العناصر في الصفحة'
-              >
-                {[10, 20, 50, 100].map((v) => (
-                  <option
-                    key={v}
-                    value={v}
-                  >
-                    {v} / صفحة
-                  </option>
-                ))}
-              </select>
+                options={[10, 20, 50, 100].map((v) => ({
+                  value: String(v),
+                  label: `${v} / صفحة`,
+                }))}
+                listboxAriaLabel='عدد العناصر في الصفحة'
+              />
             </div>
           </div>
         </section>

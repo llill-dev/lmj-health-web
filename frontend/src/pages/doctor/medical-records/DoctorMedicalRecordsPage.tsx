@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Calendar,
-  ChevronDown,
   ChevronRight,
   FileText,
   Files,
@@ -26,6 +25,7 @@ import {
 import { readAuthUser } from '@/lib/cookies';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import StyledSelect from '@/components/ui/styled-select';
 
 function formatArabicDate(value?: string | null) {
   if (!value) return 'غير محدد';
@@ -188,23 +188,19 @@ export default function DoctorMedicalRecordsPage() {
               <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]'>
                 اختر المريض
               </div>
-              <div className='relative'>
-                <select
-                  value={selectedPatientId}
-                  onChange={(e) => setSelectedPatientId(e.target.value)}
-                  className='h-[44px] w-full appearance-none rounded-[12px] border border-[#E5E7EB] bg-white px-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none'
-                >
-                  <option value=''>اختر المريض...</option>
-                  {patientsQuery.patients.map((patient) => (
-                    <option key={patient._id} value={patient._id}>
-                      {patient.user.fullName}
-                    </option>
-                  ))}
-                </select>
-                <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                  <ChevronDown className='h-4 w-4' />
-                </div>
-              </div>
+              <StyledSelect
+                size='sm'
+                tone='muted'
+                value={selectedPatientId}
+                onChange={setSelectedPatientId}
+                placeholder='اختر المريض...'
+                options={patientsQuery.patients.map((patient) => ({
+                  value: patient._id,
+                  label: patient.user.fullName,
+                }))}
+                emptyTriggerLabel='لا يوجد مرضى'
+                listboxAriaLabel='اختيار المريض'
+              />
             </div>
 
             <div>

@@ -1,6 +1,5 @@
 import { Helmet } from 'react-helmet-async';
 import {
-  ChevronLeft,
   Eye,
   Ban,
   Users,
@@ -18,6 +17,7 @@ import {
 } from '@/components/admin/patients/patientListUtils';
 
 import { useAdminPatients } from '@/hooks/admin/useAdminPatients';
+import StyledSelect from '@/components/ui/styled-select';
 import type {
   AdminPatientsAccountStatusFilter,
   AdminPatientSummary,
@@ -115,27 +115,28 @@ export default function AdminPatientsPage() {
                 <Filter className='w-4 h-4' />
               </div>
 
-              <div className='relative'>
-                <select
+              <div className='min-w-0 lg:w-[180px]'>
+                <StyledSelect
+                  size='sm'
+                  tone='muted'
                   value={filters.account_status}
-                  onChange={(e) =>
+                  onChange={(v) =>
                     setFilters((prev) => ({
                       ...prev,
                       account_status:
-                        (e.target.value as AdminPatientsAccountStatusFilter) ||
-                        'all',
+                        (v as AdminPatientsAccountStatusFilter) || 'all',
                       page: 1,
                     }))
                   }
-                  className='h-[42px] w-full appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/15 lg:w-[180px]'
-                >
-                  <option value='all'>جميع الحالات</option>
-                  <option value='active'>نشط</option>
-                  <option value='temporary'>مؤقت</option>
-                  <option value='suspended'>معلق</option>
-                  <option value='locked'>موقوف</option>
-                </select>
-                <ChevronLeft className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-[-90deg] text-[#98A2B3]' />
+                  options={[
+                    { value: 'all', label: 'جميع الحالات' },
+                    { value: 'active', label: 'نشط' },
+                    { value: 'temporary', label: 'مؤقت' },
+                    { value: 'suspended', label: 'معلق' },
+                    { value: 'locked', label: 'موقوف' },
+                  ]}
+                  listboxAriaLabel='حالة الحساب'
+                />
               </div>
 
               <label className='flex h-[42px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'>
@@ -302,28 +303,24 @@ export default function AdminPatientsPage() {
           </div>
 
           <div className='flex gap-3 items-center'>
-            <div className='relative'>
-              <select
-                value={filters.limit}
-                onChange={(e) =>
+            <div className='w-[118px] shrink-0'>
+              <StyledSelect
+                size='xs'
+                tone='emphasis'
+                value={String(filters.limit)}
+                onChange={(v) =>
                   setFilters((prev) => ({
                     ...prev,
-                    limit: Number(e.target.value),
+                    limit: Number(v),
                     page: 1,
                   }))
                 }
-                className='h-[36px] w-[110px] appearance-none rounded-[10px] border border-primary/25 bg-primary/10 px-4 text-right font-cairo text-[12px] font-extrabold text-primary outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/15'
-              >
-                {[20, 50, 100].map((v) => (
-                  <option
-                    key={v}
-                    value={v}
-                  >
-                    {v}
-                  </option>
-                ))}
-              </select>
-              <ChevronLeft className='absolute left-3 top-1/2 w-4 h-4 rotate-90 -translate-y-1/2 pointer-events-none text-primary' />
+                options={[20, 50, 100].map((v) => ({
+                  value: String(v),
+                  label: String(v),
+                }))}
+                listboxAriaLabel='عدد العناصر في الصفحة'
+              />
             </div>
 
             <button

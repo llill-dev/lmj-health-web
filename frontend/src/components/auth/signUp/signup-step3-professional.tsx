@@ -14,9 +14,11 @@ import {
 } from 'lucide-react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useDoctorSignupSpecialties } from '@/hooks/shared';
+
+import StyledSelect from '@/components/ui/styled-select';
 
 import {
   step3ProfessionalSchema,
@@ -49,6 +51,7 @@ export default function SignUpStep3Professional({
 
   const {
     register,
+    control,
     setValue,
     handleSubmit,
     formState: { errors },
@@ -170,29 +173,36 @@ export default function SignUpStep3Professional({
             )}
             {specialtiesLoading ? (
               <div className='relative mt-2'>
-                <select
+                <StyledSelect
                   disabled
-                  className='h-[48px] w-full appearance-none rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#F9FAFB] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#9CA3AF] shadow-[0_10px_25px_rgba(0,0,0,0.05)]'
-                  aria-busy='true'
-                >
-                  <option>جاري تحميل التخصصات…</option>
-                </select>
-                <Loader2 className='pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-primary' />
+                  value=''
+                  onChange={() => {}}
+                  options={[]}
+                  placeholder='جاري تحميل التخصصات…'
+                  emptyTriggerLabel='جاري تحميل التخصصات…'
+                  listboxAriaLabel='التخصص'
+                />
+                <Loader2 className='pointer-events-none absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 animate-spin text-primary' />
               </div>
             ) : hasSpecialtyCatalog ? (
-              <select
-                {...register('specialty')}
-                className='mt-2 h-[48px] w-full appearance-none rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#374151] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
-              >
-                <option value='' disabled hidden>
-                  اختر التخصص
-                </option>
-                {specialties.map((opt) => (
-                  <option key={opt.key} value={opt.value}>
-                    {opt.labelAr}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name='specialty'
+                control={control}
+                render={({ field }) => (
+                  <StyledSelect
+                    className='mt-2'
+                    options={specialties.map((opt) => ({
+                      value: opt.value,
+                      label: opt.labelAr,
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder='اختر التخصص'
+                    listboxAriaLabel='اختيار التخصص'
+                  />
+                )}
+              />
             ) : (
               <>
                 {!specialtiesError && (

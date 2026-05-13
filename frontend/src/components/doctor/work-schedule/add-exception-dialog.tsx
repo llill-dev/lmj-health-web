@@ -1,7 +1,8 @@
 "use client";
 import * as Dialog from "@radix-ui/react-dialog";
 import { motion } from "framer-motion";
-import { X, ChevronDown, AlertCircle, Clock } from "lucide-react";
+import { X, AlertCircle, Clock } from "lucide-react";
+import StyledSelect from "@/components/ui/styled-select";
 import { useEffect, useMemo, useState } from "react";
 import type { ScheduleDayKey } from "@/lib/doctor/types";
 
@@ -394,30 +395,30 @@ export default function AddExceptionDialog({
                     <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
                       نوع الاستثناء
                     </div>
-                    <div className="relative">
-                      <select
-                        value={exceptionType}
-                        onChange={(e) => {
-                          const newType = e.target
-                            .value as ExceptionFormValues["exceptionType"];
-                          setExceptionType(newType);
-                          if (newType === "closed") {
-                            setSlots([]);
-                          } else if (slots.length === 0) {
-                            setSlots([{ startTime: "", endTime: "" }]);
-                          }
-                        }}
-                        className="h-[44px] w-full appearance-none rounded-[6px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none"
-                      >
-                        <option value="closed">
-                          يوم مغلق (لا توجد فترات متاحة)
-                        </option>
-                        <option value="custom_hours">ساعات عمل مخصصة</option>
-                      </select>
-                      <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#667085]">
-                        <ChevronDown className="h-4 w-4" />
-                      </div>
-                    </div>
+                    <StyledSelect
+                      value={exceptionType}
+                      onChange={(v) => {
+                        const newType =
+                          v as ExceptionFormValues["exceptionType"];
+                        setExceptionType(newType);
+                        if (newType === "closed") {
+                          setSlots([]);
+                        } else if (slots.length === 0) {
+                          setSlots([{ startTime: "", endTime: "" }]);
+                        }
+                      }}
+                      options={[
+                        {
+                          value: "closed",
+                          label: "يوم مغلق (لا توجد فترات متاحة)",
+                        },
+                        {
+                          value: "custom_hours",
+                          label: "ساعات عمل مخصصة",
+                        },
+                      ]}
+                      listboxAriaLabel="نوع الاستثناء"
+                    />
                     <p className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#667085]">
                       {exceptionType === "closed"
                         ? "سيتم إغلاق هذا اليوم بالكامل ولن يكون متاحاً للحجز"

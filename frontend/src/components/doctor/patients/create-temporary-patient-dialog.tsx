@@ -5,8 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
+import StyledSelect from '@/components/ui/styled-select';
 import {
   SIGNUP_PHONE_DIAL_OPTIONS,
   normalizePhoneLocalDigits,
@@ -87,6 +88,7 @@ export default function CreateTemporaryPatientDialog({
 }) {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -205,16 +207,24 @@ export default function CreateTemporaryPatientDialog({
                         رقم الهاتف
                       </label>
                       <div className='grid grid-cols-[145px,minmax(0,1fr)] gap-2'>
-                        <select
-                          {...register('phoneDialCode')}
-                          className='h-[46px] rounded-[12px] border border-[#D0D5DD] bg-white px-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none'
-                        >
-                          {SIGNUP_PHONE_DIAL_OPTIONS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
+                      <Controller
+                        name='phoneDialCode'
+                        control={control}
+                        render={({ field }) => (
+                          <StyledSelect
+                            options={SIGNUP_PHONE_DIAL_OPTIONS.map((option) => ({
+                              value: option.value,
+                              label: option.label,
+                            }))}
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            size='sm'
+                            listboxAriaLabel='رمز الاتصال'
+                          />
+                        )}
+                      />
                         <input
                           {...register('phoneLocal')}
                           inputMode='numeric'

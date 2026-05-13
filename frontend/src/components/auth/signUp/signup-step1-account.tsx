@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import {
   step1AccountSchema,
@@ -27,6 +27,7 @@ import {
 } from './signup-schemas';
 
 import type { SignupFieldConflictMessages } from '@/lib/auth/signupMessaging';
+import StyledSelect from '@/components/ui/styled-select';
 
 export default function SignUpStep1Account({
   onBack,
@@ -53,6 +54,7 @@ export default function SignUpStep1Account({
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
     watch,
@@ -79,7 +81,6 @@ export default function SignUpStep1Account({
   const passwordField = register('password');
   const confirmPasswordField = register('confirmPassword');
   const phoneLocalField = register('phoneLocal');
-  const phoneDialField = register('phoneDialCode');
 
   const emailRemote = contactFieldErrors?.email?.trim();
   const phoneRemote = contactFieldErrors?.phone?.trim();
@@ -302,24 +303,31 @@ export default function SignUpStep1Account({
                 }}
                 className='h-[48px] min-w-0 flex-1 rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] font-cairo text-[14px] font-semibold tabular-nums text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
               />
-              <select
-                {...phoneDialField}
-                onBlur={(ev) => {
-                  void phoneDialField.onBlur(ev);
-                  if (dirtyFields.phoneLocal || dirtyFields.phoneDialCode)
-                    onDismissContactConflict?.('phone');
-                }}
-                className='h-[48px] w-[11rem] shrink-0 rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-2 font-cairo text-[12px] font-bold text-[#374151] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
-              >
-                {SIGNUP_PHONE_DIAL_OPTIONS.map((o) => (
-                  <option
-                    key={o.value}
-                    value={o.value}
-                  >
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name='phoneDialCode'
+                control={control}
+                render={({ field }) => (
+                  <StyledSelect
+                    className='w-[11rem] shrink-0'
+                    triggerClassName='h-[48px] rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-2 font-cairo text-[12px] font-bold text-[#374151] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+                    size='md'
+                    tone='brand'
+                    options={SIGNUP_PHONE_DIAL_OPTIONS.map((o) => ({
+                      value: o.value,
+                      label: o.label,
+                    }))}
+                    value={field.value}
+                    onChange={(v) => field.onChange(v)}
+                    onBlur={() => {
+                      field.onBlur();
+                      if (dirtyFields.phoneLocal || dirtyFields.phoneDialCode)
+                        onDismissContactConflict?.('phone');
+                    }}
+                    name={field.name}
+                    listboxAriaLabel='رمز الاتصال'
+                  />
+                )}
+              />
             </div>
             <p className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
               اختر مفتاح الدولة ثم أدخل الرقم المحلي فقط (بدون الصفر الأول)

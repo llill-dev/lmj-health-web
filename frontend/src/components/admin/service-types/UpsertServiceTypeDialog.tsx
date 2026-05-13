@@ -12,6 +12,7 @@ import {
 } from '@/hooks/admin/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
+import StyledSelect from '@/components/ui/styled-select';
 import type { ServiceType, ServiceTypeField } from '@/lib/admin/types';
 
 /**
@@ -515,16 +516,18 @@ export default function UpsertServiceTypeDialog({
                               control={control}
                               name={`fields.${index}.type`}
                               render={({ field }) => (
-                                <select
-                                  {...field}
-                                  className={inputClass}
-                                >
-                                  {fieldTypes.map((o) => (
-                                    <option key={o.value} value={o.value}>
-                                      {o.label}
-                                    </option>
-                                  ))}
-                                </select>
+                                <StyledSelect
+                                  options={fieldTypes.map((o) => ({
+                                    value: o.value,
+                                    label: o.label,
+                                  }))}
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  onBlur={field.onBlur}
+                                  name={field.name}
+                                  triggerClassName={inputClass}
+                                  listboxAriaLabel={`نوع حقل ${index + 1}`}
+                                />
                               )}
                             />
                           </div>

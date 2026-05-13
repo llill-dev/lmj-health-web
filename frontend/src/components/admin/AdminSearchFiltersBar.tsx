@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import StyledSelect from '@/components/ui/styled-select';
 
 export type AdminSearchFiltersValues = {
   query?: string;
@@ -114,52 +114,42 @@ export default function AdminSearchFiltersBar({
           <div className='flex w-full min-w-0 flex-wrap items-stretch gap-2 sm:gap-3 xl:w-auto xl:flex-nowrap'>
             {filtersLeading}
             {hasSpecialty ? (
-              <div className='relative min-w-0 flex-1 sm:flex-none sm:min-w-[140px]'>
-                <select
+              <div className='min-w-0 flex-1 sm:flex-none sm:min-w-[140px] sm:w-[160px]'>
+                <StyledSelect
+                  size='sm'
+                  tone='muted'
                   value={values.specialty ?? ''}
-                  onChange={(e) =>
-                    setValues((v) => ({ ...v, specialty: e.target.value }))
-                  }
-                  className='h-[42px] w-full min-w-[120px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] sm:w-[160px]'
-                >
-                  <option value=''>{specialtyPlaceholder ?? 'الاختصاص'}</option>
-                  {specialtyOptions?.map((opt) => (
-                    <option
-                      key={opt.value}
-                      value={opt.value}
-                    >
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                  <ChevronLeft className='h-4 w-4 rotate-[-90deg]' />
-                </div>
+                  onChange={(v) => setValues((prev) => ({ ...prev, specialty: v }))}
+                  options={[
+                    { value: '', label: specialtyPlaceholder ?? 'الاختصاص' },
+                    ...(specialtyOptions?.map((opt) => ({
+                      value: opt.value,
+                      label: opt.label,
+                    })) ?? []),
+                  ]}
+                  placeholder={specialtyPlaceholder ?? 'الاختصاص'}
+                  listboxAriaLabel={specialtyPlaceholder ?? 'الاختصاص'}
+                />
               </div>
             ) : null}
 
             {hasStatus ? (
-              <div className='relative min-w-0 flex-1 sm:flex-none sm:min-w-[120px]'>
-                <select
+              <div className='min-w-0 flex-1 sm:flex-none sm:min-w-[120px] sm:w-[140px]'>
+                <StyledSelect
+                  size='sm'
+                  tone='muted'
                   value={values.status ?? ''}
-                  onChange={(e) =>
-                    setValues((v) => ({ ...v, status: e.target.value }))
-                  }
-                  className='h-[42px] w-full min-w-[110px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] sm:w-[140px]'
-                >
-                  <option value=''>{statusPlaceholder ?? 'الحالة'}</option>
-                  {statusOptions?.map((opt) => (
-                    <option
-                      key={opt.value}
-                      value={opt.value}
-                    >
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                  <ChevronLeft className='h-4 w-4 rotate-[-90deg]' />
-                </div>
+                  onChange={(v) => setValues((prev) => ({ ...prev, status: v }))}
+                  options={[
+                    { value: '', label: statusPlaceholder ?? 'الحالة' },
+                    ...(statusOptions?.map((opt) => ({
+                      value: opt.value,
+                      label: opt.label,
+                    })) ?? []),
+                  ]}
+                  placeholder={statusPlaceholder ?? 'الحالة'}
+                  listboxAriaLabel={statusPlaceholder ?? 'الحالة'}
+                />
               </div>
             ) : null}
             {filtersTrailing}

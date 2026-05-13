@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { staggerContainer, staggerItem } from '@/motion';
 import { adminApi } from '@/lib/admin/client';
+import StyledSelect from '@/components/ui/styled-select';
 import type { ComplaintLifecycleStatus, ComplaintType } from '@/lib/admin/types';
 import ComplaintsSummaryStatCard from '@/components/admin/complaints/ComplaintsSummaryStatCard';
 import {
@@ -230,37 +231,41 @@ export default function AdminComplaintsPage() {
                 تصفية
               </span>
             </span>
-            <select
+            <StyledSelect
+              className='h-10 min-w-[160px]'
+              size='sm'
+              tone='muted'
               value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as typeof statusFilter)
+              onChange={(v) =>
+                setStatusFilter(v as 'all' | ComplaintLifecycleStatus)
               }
-              className='h-10 min-w-[160px] cursor-pointer rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#334155] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15'
-            >
-              <option value='all'>الحالة — الكل</option>
-              <option value='submitted'>مقدّمة</option>
-              <option value='under_review'>قيد المراجعة</option>
-              <option value='in_progress'>قيد المعالجة</option>
-              <option value='resolved'>تم الحل</option>
-              <option value='closed'>مغلقة</option>
-            </select>
-            <select
+              options={[
+                { value: 'all', label: 'الحالة — الكل' },
+                { value: 'submitted', label: 'مقدّمة' },
+                { value: 'under_review', label: 'قيد المراجعة' },
+                { value: 'in_progress', label: 'قيد المعالجة' },
+                { value: 'resolved', label: 'تم الحل' },
+                { value: 'closed', label: 'مغلقة' },
+              ]}
+              listboxAriaLabel='تصفية حالة الشكوى'
+            />
+            <StyledSelect
+              className='h-10 min-w-[180px]'
+              size='sm'
+              tone='muted'
               value={typeFilter}
-              onChange={(e) =>
-                setTypeFilter(e.target.value as typeof typeFilter)
+              onChange={(v) =>
+                setTypeFilter(v as 'all' | ComplaintType)
               }
-              className='h-10 min-w-[180px] cursor-pointer rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#334155] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15'
-            >
-              <option value='all'>نوع الشكوى — الكل</option>
-              {COMPLAINT_TYPES.map((t) => (
-                <option
-                  key={t}
-                  value={t}
-                >
-                  {complaintTypeAr(t)}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: 'all', label: 'نوع الشكوى — الكل' },
+                ...COMPLAINT_TYPES.map((t) => ({
+                  value: t,
+                  label: complaintTypeAr(t),
+                })),
+              ]}
+              listboxAriaLabel='تصفية نوع الشكوى'
+            />
           </div>
         </motion.div>
 

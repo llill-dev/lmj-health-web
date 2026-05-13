@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateFacility, useUpdateFacility } from '@/hooks/admin/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
+import StyledSelect from '@/components/ui/styled-select';
 import type { FacilitySummary, FacilityType, FacilityStatus } from '@/lib/admin/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -312,13 +313,18 @@ export default function UpsertFacilityDialog({
                       name='facilityType'
                       control={control}
                       render={({ field }) => (
-                        <select {...field} className={`${inputClass} cursor-pointer`}>
-                          {FACILITY_TYPE_OPTIONS.map((o) => (
-                            <option key={o.value} value={o.value}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </select>
+                        <StyledSelect
+                          options={FACILITY_TYPE_OPTIONS.map((o) => ({
+                            value: o.value,
+                            label: o.label,
+                          }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          triggerClassName={inputClass}
+                          listboxAriaLabel='نوع المنشأة'
+                        />
                       )}
                     />
                   </Field>
@@ -329,13 +335,18 @@ export default function UpsertFacilityDialog({
                       name='status'
                       control={control}
                       render={({ field }) => (
-                        <select {...field} className={`${inputClass} cursor-pointer`}>
-                          {STATUS_OPTIONS.map((o) => (
-                            <option key={o.value} value={o.value}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </select>
+                        <StyledSelect
+                          options={STATUS_OPTIONS.map((o) => ({
+                            value: o.value,
+                            label: o.label,
+                          }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          triggerClassName={inputClass}
+                          listboxAriaLabel='حالة المنشأة'
+                        />
                       )}
                     />
                   </Field>

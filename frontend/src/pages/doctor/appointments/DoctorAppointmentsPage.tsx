@@ -9,11 +9,11 @@ import {
   UserX,
   XCircle,
   Filter,
-  ChevronLeft,
   CalendarDays,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
 import BookAppointmentDialog from "@/components/doctor/appointments/book-appointment-dialog";
@@ -580,27 +580,24 @@ export default function DoctorAppointmentsPage() {
                   >
                     نوع العرض
                   </label>
-                  <div className="relative">
-                    <select
-                      id="doctor-appointments-view"
-                      value={filters.view}
-                      onChange={(e) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          view: (e.target.value as MainView) || "schedule",
-                          page: 1,
-                        }))
-                      }
-                      className="h-[42px] w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3.5 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
-                    >
-                      <option value="schedule">جدول المواعيد</option>
-                      <option value="waiting">قائمة الانتظار</option>
-                    </select>
-                    <ChevronLeft
-                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-[-90deg] text-[#98A2B3]"
-                      aria-hidden
-                    />
-                  </div>
+                  <StyledSelect
+                    id="doctor-appointments-view"
+                    size="sm"
+                    tone="muted"
+                    value={filters.view}
+                    onChange={(v) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        view: (v as MainView) || "schedule",
+                        page: 1,
+                      }))
+                    }
+                    options={[
+                      { value: "schedule", label: "جدول المواعيد" },
+                      { value: "waiting", label: "قائمة الانتظار" },
+                    ]}
+                    listboxAriaLabel="نوع العرض"
+                  />
                 </div>
 
                 {filters.view === "schedule" ? (
@@ -611,29 +608,26 @@ export default function DoctorAppointmentsPage() {
                     >
                       حالة الموعد
                     </label>
-                    <div className="relative">
-                      <select
-                        id="doctor-appointments-status"
-                        value={filters.status}
-                        onChange={(e) =>
-                          setFilters((prev) => ({
-                            ...prev,
-                            status: (e.target.value as StatusTab) || "scheduled",
-                            page: 1,
-                          }))
-                        }
-                        className="h-[42px] w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3.5 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
-                      >
-                        <option value="scheduled">المجدولة</option>
-                        <option value="completed">المكتملة</option>
-                        <option value="cancelled">الملغية</option>
-                        <option value="no-show">عدم الحضور</option>
-                      </select>
-                      <ChevronLeft
-                        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-[-90deg] text-[#98A2B3]"
-                        aria-hidden
-                      />
-                    </div>
+                    <StyledSelect
+                      id="doctor-appointments-status"
+                      size="sm"
+                      tone="muted"
+                      value={filters.status}
+                      onChange={(v) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          status: (v as StatusTab) || "scheduled",
+                          page: 1,
+                        }))
+                      }
+                      options={[
+                        { value: "scheduled", label: "المجدولة" },
+                        { value: "completed", label: "المكتملة" },
+                        { value: "cancelled", label: "الملغية" },
+                        { value: "no-show", label: "عدم الحضور" },
+                      ]}
+                      listboxAriaLabel="حالة الموعد"
+                    />
                   </div>
                 ) : (
                   <div className="flex min-h-[42px] min-w-0 flex-col justify-end rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2">
@@ -768,25 +762,24 @@ export default function DoctorAppointmentsPage() {
           </div>
 
           <div className="flex gap-3 items-center">
-            <div className="relative">
-              <select
-                value={filters.limit}
-                onChange={(e) =>
+            <div className="w-[118px] shrink-0">
+              <StyledSelect
+                size="xs"
+                tone="emphasis"
+                value={String(filters.limit)}
+                onChange={(v) =>
                   setFilters((prev) => ({
                     ...prev,
-                    limit: Number(e.target.value),
+                    limit: Number(v),
                     page: 1,
                   }))
                 }
-                className="h-[36px] w-[110px] appearance-none rounded-xl border border-primary/25 bg-primary/10 px-4 text-right font-cairo text-[12px] font-extrabold text-primary outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
-              >
-                {[20, 50, 100].map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-              <ChevronLeft className="absolute left-3 top-1/2 w-4 h-4 rotate-90 -translate-y-1/2 pointer-events-none text-primary" />
+                options={[20, 50, 100].map((v) => ({
+                  value: String(v),
+                  label: String(v),
+                }))}
+                listboxAriaLabel="عدد العناصر في الصفحة"
+              />
             </div>
 
             <button

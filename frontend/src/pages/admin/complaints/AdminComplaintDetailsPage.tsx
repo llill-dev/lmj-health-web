@@ -21,6 +21,7 @@ import {
   statusLabelAr,
 } from '@/components/admin/complaints/complaintDetailsUtils';
 import { adminApi } from '@/lib/admin/client';
+import StyledSelect from '@/components/ui/styled-select';
 import type {
   ComplaintAttachmentRef,
   ComplaintLifecycleStatus,
@@ -322,23 +323,18 @@ export default function AdminComplaintDetailsPage() {
                   <span className='mb-1 block font-cairo text-[12px] font-bold text-[#475467]'>
                     الحالة الجديدة
                   </span>
-                  <select
+                  <StyledSelect
                     value={nextStatus}
-                    onChange={(e) =>
-                      setNextStatus(e.target.value as ComplaintLifecycleStatus)
+                    onChange={(v) =>
+                      setNextStatus(v as ComplaintLifecycleStatus | '')
                     }
-                    className='h-11 w-full rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[13px] font-semibold'
-                  >
-                    <option value=''>— اختر —</option>
-                    {STATUS_OPTIONS.map((s) => (
-                      <option
-                        key={s}
-                        value={s}
-                      >
-                        {statusLabelAr(s)}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder='— اختر —'
+                    options={STATUS_OPTIONS.map((s) => ({
+                      value: s,
+                      label: statusLabelAr(s),
+                    }))}
+                    listboxAriaLabel='الحالة الجديدة للشكوى'
+                  />
                 </label>
                 <label className='block'>
                   <span className='mb-1 block font-cairo text-[12px] font-bold text-[#475467]'>

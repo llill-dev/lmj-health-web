@@ -1,7 +1,8 @@
 'use client';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
-import { X, Plus, Trash2, ChevronDown } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
+import StyledSelect from '@/components/ui/styled-select';
 import { useEffect, useState } from 'react';
 import type { ScheduleDayKey, ScheduleTimeSlot } from '@/lib/doctor/types';
 
@@ -192,26 +193,17 @@ export default function AddDayDialog({
                         <div className='mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
                           اليوم
                         </div>
-                        <div className='relative'>
-                          <select
-                            value={day}
-                            onChange={(e) => setDay(e.target.value as ScheduleDayKey)}
-                            className='h-[44px] w-full appearance-none rounded-[6px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[13px] font-extrabold text-[#111827] outline-none'
-                            required
-                          >
-                            {availableDays.map((d) => (
-                              <option
-                                key={d.value}
-                                value={d.value}
-                              >
-                                {d.label}
-                              </option>
-                            ))}
-                          </select>
-                          <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#667085]'>
-                            <ChevronDown className='h-4 w-4' />
-                          </div>
-                        </div>
+                        <StyledSelect
+                          value={day}
+                          onChange={(v) => setDay(v as ScheduleDayKey)}
+                          options={availableDays.map((d) => ({
+                            value: d.value,
+                            label: d.label,
+                          }))}
+                          placeholder='اختر اليوم'
+                          emptyState='لا توجد أيام متاحة للإضافة.'
+                          listboxAriaLabel='اختيار يوم العمل'
+                        />
                       </div>
 
                       <div>

@@ -8,10 +8,10 @@ import {
   User,
   Eye,
   AlertCircle,
-  ChevronLeft,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import StyledSelect from '@/components/ui/styled-select';
 import CancelAppointmentDialog from '@/components/admin/appointments/dialogs/CancelAppointmentDialog';
 import AdminAppointmentDetailsDialog from '@/components/admin/appointments/dialogs/AdminAppointmentDetailsDialog';
 import {
@@ -232,24 +232,29 @@ export default function AdminAppointmentsPage() {
             </div>
 
             <div className='flex items-center gap-3'>
-              <select
-                value={filters.status}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    status: (e.target.value as AppointmentStatus | '') || '',
-                    page: 1,
-                  }))
-                }
-                className='h-[42px] w-[160px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827]'
-              >
-                <option value=''>كل الحالات</option>
-                <option value='scheduled'>مجدولة</option>
-                <option value='rescheduled'>معاد جدولتها</option>
-                <option value='completed'>مكتملة</option>
-                <option value='cancelled'>ملغية</option>
-                <option value='no-show'>عدم حضور</option>
-              </select>
+              <div className='w-[168px] shrink-0'>
+                <StyledSelect
+                  size='sm'
+                  tone='muted'
+                  value={filters.status}
+                  onChange={(v) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      status: (v as AppointmentStatus | '') || '',
+                      page: 1,
+                    }))
+                  }
+                  options={[
+                    { value: '', label: 'كل الحالات' },
+                    { value: 'scheduled', label: 'مجدولة' },
+                    { value: 'rescheduled', label: 'معاد جدولتها' },
+                    { value: 'completed', label: 'مكتملة' },
+                    { value: 'cancelled', label: 'ملغية' },
+                    { value: 'no-show', label: 'عدم حضور' },
+                  ]}
+                  listboxAriaLabel='حالة الموعد'
+                />
+              </div>
 
               <input
                 type='date'
@@ -394,28 +399,24 @@ export default function AdminAppointmentsPage() {
           </div>
 
           <div className='flex items-center gap-3'>
-            <div className='relative'>
-              <select
-                value={filters.limit}
-                onChange={(e) =>
+            <div className='w-[128px] shrink-0'>
+              <StyledSelect
+                size='xs'
+                tone='emphasis'
+                value={String(filters.limit)}
+                onChange={(v) =>
                   setFilters((prev) => ({
                     ...prev,
-                    limit: Number(e.target.value),
+                    limit: Number(v),
                     page: 1,
                   }))
                 }
-                className='h-[36px] w-[110px] appearance-none rounded-[10px] border border-primary/25 bg-primary/10 px-4 text-right font-cairo text-[12px] font-extrabold text-primary outline-none'
-              >
-                {[10, 20, 50, 100].map((v) => (
-                  <option
-                    key={v}
-                    value={v}
-                  >
-                    {v}
-                  </option>
-                ))}
-              </select>
-              <ChevronLeft className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-90 text-primary' />
+                options={[10, 20, 50, 100].map((v) => ({
+                  value: String(v),
+                  label: String(v),
+                }))}
+                listboxAriaLabel='عدد العناصر في الصفحة'
+              />
             </div>
 
             <button

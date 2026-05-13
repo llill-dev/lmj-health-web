@@ -4,10 +4,10 @@ import {
   CheckCircle2,
   Clock,
   Stethoscope,
-  ChevronLeft,
 } from 'lucide-react';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 import DoctorListCard from '@/components/admin/doctors/DoctorListCard';
+import StyledSelect from '@/components/ui/styled-select';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useAdminDoctors } from '@/hooks/admin/useAdminDoctors';
@@ -305,27 +305,26 @@ export default function AdminDoctorsPage() {
           </div>
 
           <div className='flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-3'>
-            <div className='relative'>
-              <select
-                value={filters.limit}
-                onChange={(e) => {
-                  const nextLimit = Number(e.target.value) || 20;
-                  setFilters((prev) => ({
-                    ...prev,
-                    limit: nextLimit,
-                    page: 1,
-                  }));
-                }}
-                className='h-[38px] w-full min-w-[110px] appearance-none rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#111827] sm:w-[120px] sm:px-4'
-              >
-                <option value={20}>20 / صفحة</option>
-                <option value={50}>50 / صفحة</option>
-                <option value={100}>100 / صفحة</option>
-              </select>
-              <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <ChevronLeft className='h-4 w-4 rotate-[-90deg]' />
-              </div>
-            </div>
+            <StyledSelect
+              className='w-full min-w-[110px] sm:w-[120px]'
+              size='sm'
+              tone='muted'
+              value={String(filters.limit)}
+              onChange={(v) => {
+                const nextLimit = Number(v) || 20;
+                setFilters((prev) => ({
+                  ...prev,
+                  limit: nextLimit,
+                  page: 1,
+                }));
+              }}
+              options={[
+                { value: '20', label: '20 / صفحة' },
+                { value: '50', label: '50 / صفحة' },
+                { value: '100', label: '100 / صفحة' },
+              ]}
+              listboxAriaLabel='عدد النتائج في الصفحة'
+            />
 
             <button
               type='button'
