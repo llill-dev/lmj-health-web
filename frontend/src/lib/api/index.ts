@@ -105,14 +105,14 @@ function userFacingHttpErrorMessage(
       case 429:
         return 'تم إرسال طلبات كثيرة في وقت قصير. انتظر قليلاً ثم حاول مرّة أخرى.';
       case 502:
-        return 'الخادم تلقّى استجابة غير صالحة من خدمة أخرى؛ حاول لاحقاً.';
+        return 'تعذّر إتمام الطلب عبر شبكة الوصول (غالبًا وسيطًا أو VPN). تحقَّق من الاتصال أو جرّب لاحقًا أو بدون VPN.';
       case 503:
-        return 'الخدمة غير متاحة مؤقتاً بسبب صيانة أو ضغط. حاول بعد دقائق.';
+        return 'الخدمة غير متاحة مؤقتاً (صيانة، ضغط، أو قطع شبكة نحو الخادم). أعد المحاولة بعد قليل.';
       case 504:
-        return 'انتهى وقت الاتصال بين الخوادم. تحقّق من الشبكة ثم أعد المحاولة.';
+        return 'انتهى وقت الاتصال نحو الخادم؛ غالبًا بسبب الشبكة أو VPN أو بطء الوصول. أعد المحاولة لاحقاً.';
       default:
         if (status >= 500)
-          return 'حدث عطل داخلي على خادم الخدمة ولم يُكمل طلبك. أعد المحاولة لاحقاً؛ إذا استمرّ الخطأ فأبلغ الدعم.';
+          return 'لم نتمكن من إتمام الطلب مع الخادم. غالبًا يكون ذلك بسبب انقطاع مؤقت في الشبكة، أو تأثّر المسار بـ VPN أو جدار الحماية، أو توقيت خاطئ على الجهاز. تحقَّق من الإنترنت ثم أعد المحاولة لاحقًا. إذا كان الاتصال سليمًا واستمر ذلك، يمكن أن يكون هناك عطلًا بالخدمة — أبلغ الدعم عند الحاجة.';
         if (status >= 400)
           return 'تعذّر تنفيذ الطلب. راجع البيانات أو حاول لاحقاً.';
         return 'تعذّر إكمال الطلب.';
@@ -127,12 +127,15 @@ function userFacingHttpErrorMessage(
     return 'The data does not match server validation rules. Review the fields and try again.';
   if (status === 429) return 'Too many requests. Please wait and try again.';
   if (status >= 500)
-    return 'The server could not complete the request. Please try again later.';
+    return 'We could not complete the request. Check your internet, VPN/firewall settings, try again shortly, or report if it persists.';
   return statusText || 'Request failed';
 }
 
-/** أعطال fetch / TLS / إلغاء الطلب — رسالة عربية واحدة لكل حالة تقريباً. */
-function transportFailureUserMessage(error: unknown, locale: 'ar' | 'en'): string {
+/** أعطال fetch / TLS / إلغاء الطلب — رسائل جاهزة للعرض على الواجهة. */
+export function transportFailureUserMessage(
+  error: unknown,
+  locale: 'ar' | 'en' = 'ar',
+): string {
   if (locale === 'en') {
     if (error instanceof DOMException && error.name === 'AbortError')
       return 'The request was cancelled.';
@@ -160,7 +163,7 @@ function transportFailureUserMessage(error: unknown, locale: 'ar' | 'en'): strin
     lower.includes('network request failed') ||
     lower.includes('load failed')
   ) {
-    return 'تعذّر الوصول إلى الخادم. تحقّق من اتصال الإنترنت؛ إن كان يعمل فربما الخدمة غير متاحة مؤقتاً—أعد المحاولة بعد قليل.';
+    return 'تعذّر الوصول إلى الخادم عبر المتصفّح — غالبًا بسبب الشبكة أو VPN أو قطع مسار الوصول لحظياً. تحقَّق من الإنترنت، أو جرّب لاحقاً أو بدون VPN ثم أعد المحاولة.';
   }
 
   if (
@@ -179,6 +182,15 @@ function transportFailureUserMessage(error: unknown, locale: 'ar' | 'en'): strin
   }
 
   return 'تعذّر إتمام الطلب بسبب مشكلة اتصال. تحقّق من الإنترنت ثم أعد المحاولة.';
+}
+
+/** رسالة موحّدة لواجهة المستخدم بعد فشل طلب: ApiError أو فشل نقل الشبكة. */
+export function getUserFacingRequestErrorMessage(
+  error: unknown,
+  locale: 'ar' | 'en' = 'ar',
+): string {
+  if (error instanceof ApiError) return error.message;
+  return transportFailureUserMessage(error, locale);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

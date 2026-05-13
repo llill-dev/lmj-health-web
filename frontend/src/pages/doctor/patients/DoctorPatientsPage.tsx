@@ -23,15 +23,19 @@ import {
   CheckCircle2,
   Stethoscope,
   ShieldAlert,
+  Filter,
+  ChevronLeft,
+  Users,
+  Calendar,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { readAuthUser } from "@/lib/cookies";
-import { ApiError } from "@/lib/api";
+import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 import {
   determinePatientState,
   getPatientStateInfo,
-  type PatientRelationshipState
+  type PatientRelationshipState,
 } from "@/lib/doctor/patient-states";
 
 type FilterStatus = "all" | "active" | "temporary" | "suspended";
@@ -43,7 +47,7 @@ type PendingAccessState = Record<
 
 function getPatientsListErrorMessage(error: unknown): string {
   if (!(error instanceof ApiError)) {
-    return "تعذر تحميل قائمة المرضى من الخادم حالياً. حاول مجددًا بعد قليل.";
+    return getUserFacingRequestErrorMessage(error);
   }
 
   if (error.messageKey === "errors.doctor.notApproved") {
@@ -58,7 +62,9 @@ function getPatientsListErrorMessage(error: unknown): string {
     return error.message || "لا تملك صلاحية عرض مرضى الطبيب بهذا الحساب.";
   }
 
-  return error.message || "تعذر تحميل قائمة المرضى من الخادم.";
+  return (
+    error.message || getUserFacingRequestErrorMessage(error)
+  );
 }
 
 function formatIsoDate(value?: string | null): string {
@@ -108,19 +114,39 @@ function toCardData(patient: {
   };
 }
 
+type DoctorPatientsFiltersState = {
+  account_status: FilterStatus;
+  relationship: RelationshipFilter;
+  search: string;
+  diagnosis: string;
+  from: string;
+  to: string;
+  page: number;
+  limit: number;
+};
+
 export default function DoctorPatientsPage() {
   const { toast } = useToast();
   const authUser = readAuthUser();
   const doctorId = authUser?.actorIds?.doctorId ?? "";
 
-  const [search, setSearch] = useState("");
-  const [diagnosis, setDiagnosis] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
-  const [relationshipFilter, setRelationshipFilter] = useState<RelationshipFilter>("all");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const defaultFilters = useMemo<DoctorPatientsFiltersState>(() => {
+    return {
+      account_status: "all",
+      relationship: "all",
+      search: "",
+      diagnosis: "",
+      from: "",
+      to: "",
+      page: 1,
+      limit: 20,
+    };
+  }, []);
+
+  const [filters, setFilters] = useState<DoctorPatientsFiltersState>({
+    ...defaultFilters,
+  });
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<PatientCardTab>("basic");
   const [tempPatientOpen, setTempPatientOpen] = useState(false);
@@ -128,13 +154,13 @@ export default function DoctorPatientsPage() {
     useState<PendingAccessState>({});
 
   const listQuery = useDoctorPatients({
-    search: search || undefined,
-    diagnosis: diagnosis || undefined,
-    from: from || undefined,
-    to: to || undefined,
-    page,
-    limit,
-    account_status: statusFilter,
+    search: filters.search || undefined,
+    diagnosis: filters.diagnosis || undefined,
+    from: filters.from || undefined,
+    to: filters.to || undefined,
+    page: filters.page,
+    limit: filters.limit,
+    account_status: filters.account_status,
   });
 
   // KPI counts should come from backend totals, not the current page slice.
@@ -167,10 +193,24 @@ export default function DoctorPatientsPage() {
   const createTempMutation = useCreateTemporaryDoctorPatient();
   const requestAccessMutation = useRequestDoctorPatientAccess(doctorId);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(listQuery.total / Math.max(limit, 1)),
-  );
+  const totalPages = useMemo(() => {
+    const safeLimit = Math.max(1, filters.limit);
+    const pages = Math.ceil((listQuery.total || 0) / safeLimit);
+    return pages || 1;
+  }, [filters.limit, listQuery.total]);
+
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filters.account_status !== defaultFilters.account_status ||
+      filters.relationship !== defaultFilters.relationship ||
+      Boolean(filters.search.trim()) ||
+      Boolean(filters.diagnosis.trim()) ||
+      Boolean(filters.from.trim()) ||
+      Boolean(filters.to.trim()) ||
+      filters.page !== defaultFilters.page ||
+      filters.limit !== defaultFilters.limit
+    );
+  }, [defaultFilters, filters]);
   const cardPatients = useMemo(() => {
     const enhancedPatients = listQuery.patients.map((patient) => {
       const base = toCardData(patient);
@@ -213,12 +253,20 @@ export default function DoctorPatientsPage() {
     });
 
     // Apply relationship filter
-    if (relationshipFilter !== "all") {
-      return enhancedPatients.filter(p => p.relationshipState === relationshipFilter);
+    if (filters.relationship !== "all") {
+      return enhancedPatients.filter(
+        (p) => p.relationshipState === filters.relationship,
+      );
     }
 
     return enhancedPatients;
-  }, [expandedId, listQuery.patients, publicProfileQuery.patient, pendingAccessByPatient, relationshipFilter]);
+  }, [
+    expandedId,
+    listQuery.patients,
+    publicProfileQuery.patient,
+    pendingAccessByPatient,
+    filters.relationship,
+  ]);
 
   const statusCounts = {
     active: activeCountQuery.total,
@@ -285,15 +333,18 @@ export default function DoctorPatientsPage() {
 
   const accessMessage =
     effectivePendingAccess?.message ??
-    (typeof accessError?.message === "string" ? accessError.message : undefined);
+    (typeof accessError?.message === "string"
+      ? accessError.message
+      : undefined);
 
   return (
     <>
       <Helmet>
         <title>Patients • LMJ Health</title>
       </Helmet>
-
+      {/* Overview section */}
       <div dir="rtl" lang="ar">
+        {/* Overview section */}
         <DoctorDashboardOverview
           variant="patients"
           surface="mint"
@@ -332,53 +383,7 @@ export default function DoctorPatientsPage() {
             },
           ]}
         />
-
-        <section className="mb-5 rounded-[12px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <h3 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
-            تصفية حسب حالة العلاقة
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {(['all', 'full-access', 'linked-only', 'temporary', 'access-pending', 'active-encounter', 'restricted'] as const).map((state) => {
-              const isActive = relationshipFilter === state;
-              const stateInfo = state !== 'all' ? getPatientStateInfo(state) : null;
-              const StateIcon = state === 'all' ? UserCheck
-                : state === 'full-access' ? CheckCircle2
-                : state === 'linked-only' ? Link2
-                : state === 'temporary' ? Clock
-                : state === 'access-pending' ? Hourglass
-                : state === 'active-encounter' ? Stethoscope
-                : ShieldAlert;
-
-              return (
-                <button
-                  key={state}
-                  type="button"
-                  onClick={() => {
-                    setRelationshipFilter(state);
-                    setPage(1);
-                  }}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-cairo text-[12px] font-bold transition-all ${
-                    isActive
-                      ? stateInfo
-                        ? `${stateInfo.color.bg} ${stateInfo.color.text} ring-2 ${stateInfo.color.ring} ring-inset`
-                        : 'bg-primary text-white ring-2 ring-primary ring-inset'
-                      : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
-                  }`}
-                >
-                  <StateIcon className="h-3.5 w-3.5 shrink-0" />
-                  {state === 'all' ? 'الكل'
-                    : state === 'full-access' ? 'وصول كامل'
-                    : state === 'linked-only' ? 'مرتبط فقط'
-                    : state === 'temporary' ? 'مؤقت'
-                    : state === 'access-pending' ? 'قيد الانتظار'
-                    : state === 'active-encounter' ? 'زيارة جارية'
-                    : 'محجوب'}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
+        {/* Create temporary patient dialog */}
         <CreateTemporaryPatientDialog
           open={tempPatientOpen}
           onOpenChange={setTempPatientOpen}
@@ -391,92 +396,247 @@ export default function DoctorPatientsPage() {
             });
           }}
         />
+        {/* شريط تصفية احترافي — البحث الرئيسي ~50% على الشاشات الواسعة */}
+        <section
+          className="my-5 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
+          aria-label="تصفية قائمة المرضى"
+        >
+          <div className="border-b border-[#EEF2F6] bg-gradient-to-l from-primary/[0.07] via-[#F8FAFC] to-white px-5 py-4 sm:px-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex gap-3 items-start sm:items-center">
+                <div
+                  className="flex justify-center items-center w-11 h-11 bg-gradient-to-br rounded-xl border shadow-sm shrink-0 border-primary/25 from-primary/15 to-primary/5 text-primary"
+                  aria-hidden
+                >
+                  <Filter className="h-[18px] w-[18px]" strokeWidth={2.25} />
+                </div>
+                <div className="min-w-0 text-right">
+                  <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
+                    تصفية قائمة المرضى
+                  </h2>
+                  <p className="mt-1 max-w-xl font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
+                    بحث سريع بالهوية أو ضبط الفلاتر التفصيلية حسب حالة الحساب والعلاقة
+                    وتواريخ آخر زيارة.
+                  </p>
+                </div>
+              </div>
 
-        <section className="mb-5 rounded-[6px] border border-[#E5E7EB] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="mb-3 rounded-[10px] border border-[#D1E9E8] bg-[#F3FBFA] px-4 py-3 text-right font-cairo text-[13px] font-semibold leading-6 text-[#155E75]">
-            هذه الصفحة تعتمد على <code dir="ltr">GET /api/doctors/patients</code>
-            ، وهذا المسار يعرض المرضى المرتبطين بهذا الطبيب فقط. إنشاء مريض من
-            لوحة الإدارة وحده لا يربطه بالطبيب تلقائياً، لذلك قد لا يظهر هنا حتى
-            يتم عمل link له مع الطبيب.
+              <div className="flex flex-wrap gap-2 justify-end items-center">
+                <button
+                  type="button"
+                  disabled={!hasActiveFilters}
+                  onClick={() => setFilters({ ...defaultFilters })}
+                  className={
+                    !hasActiveFilters
+                      ? "inline-flex h-[40px] min-w-[132px] cursor-not-allowed items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3]"
+                      : "inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-xl border border-primary/30 bg-white px-4 font-cairo text-[12px] font-extrabold text-primary shadow-[0_1px_2px_rgba(15,143,139,0.12)] transition-all hover:bg-primary/[0.06] hover:shadow-[0_4px_14px_rgba(15,143,139,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  }
+                >
+                  مسح الفلاتر
+                </button>
+
+                <output
+                  className="inline-flex h-[40px] min-w-[100px] items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-black text-[#344054] shadow-sm tabular-nums"
+                  aria-live="polite"
+                >
+                  <span className="text-primary">{listQuery.total || 0}</span>
+                  <span className="font-extrabold text-[#667085]">نتيجة</span>
+                </output>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr),180px,180px]">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 w-5 h-5 text-gray-400 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="بحث من الباكند بالاسم أو البريد أو الهاتف أو الرقم العام"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full rounded-[6px] border border-[#E5E7EB] bg-white py-3 pl-4 pr-10 font-cairo text-[14px] font-semibold text-[#111827] placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-[#0F8F8B]/20"
-              />
+          <div className="px-5 py-5 space-y-5 sm:px-6 sm:py-6">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:gap-6">
+              {/* بحث رئيسي: نصف عرض الحاوية على xl */}
+              <div className="w-full flex-[0_0_auto] xl:w-1/2 xl:max-w-[50%]">
+                <label
+                  htmlFor="doctor-patients-search"
+                  className="flex gap-2 justify-between items-center mb-2"
+                >
+                  <span className="inline-flex items-center gap-1.5 font-cairo text-[12px] font-extrabold text-[#111827]">
+                    <Users className="h-3.5 w-3.5 text-primary" aria-hidden />
+                    البحث عن المريض
+                  </span>
+                  <span className="hidden font-cairo text-[10px] font-bold uppercase tracking-wider text-[#98A2B3] sm:inline">
+                    الاسم · البريد · الهاتف · الرقم العام
+                  </span>
+                </label>
+                <div className="relative group">
+                  <input
+                    id="doctor-patients-search"
+                    type="search"
+                    enterKeyHint="search"
+                    autoComplete="off"
+                    placeholder="ابدأ بالكتابة: الاسم، البريد، الهاتف، أو الرقم العام..."
+                    className="h-[48px] w-full rounded-xl border-2 border-[#E8ECF3] bg-gradient-to-b from-[#FBFCFD] to-white pe-12 ps-4 font-cairo text-[13px] font-bold text-[#111827] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] outline-none transition-[border-color,box-shadow,background] placeholder:text-[#98A2B3] hover:border-[#D0D8E6] focus:border-primary focus:bg-white focus:shadow-[0_0_0_4px_rgba(15,143,139,0.12),inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                    value={filters.search}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        search: e.target.value,
+                        page: 1,
+                      }))
+                    }
+                  />
+                  <div className="pointer-events-none absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-focus-within:bg-primary/[0.14]">
+                    <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
+                  </div>
+                </div>
+              </div>
+
+              {/* فلاتر ثانوية في شبكة مدمجة */}
+              <div className="grid flex-1 grid-cols-1 gap-3 min-w-0 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="min-w-0 sm:col-span-2 lg:col-span-1">
+                  <label
+                    htmlFor="doctor-patients-diagnosis"
+                    className="mb-2 flex items-center gap-1.5 font-cairo text-[11px] font-extrabold text-[#667085]"
+                  >
+                    <Stethoscope className="h-3.5 w-3.5 text-primary/80 shrink-0" aria-hidden />
+                    التشخيص / الملاحظات السريعة
+                  </label>
+                  <input
+                    id="doctor-patients-diagnosis"
+                    type="text"
+                    placeholder="كلمة في التشخيص..."
+                    value={filters.diagnosis}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        diagnosis: e.target.value,
+                        page: 1,
+                      }))
+                    }
+                    className="h-[42px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3.5 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all placeholder:text-[#98A2B3] hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                  />
+                </div>
+
+                <div className="relative min-w-0">
+                  <label
+                    htmlFor="doctor-patients-account-status"
+                    className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
+                  >
+                    حالة الحساب
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="doctor-patients-account-status"
+                      value={filters.account_status}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          account_status:
+                            (e.target.value as FilterStatus) || "all",
+                          page: 1,
+                        }))
+                      }
+                      className="h-[42px] w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3.5 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                    >
+                      <option value="all">جميع الحالات</option>
+                      <option value="active">نشط</option>
+                      <option value="temporary">مؤقت</option>
+                      <option value="suspended">معلق</option>
+                    </select>
+                    <ChevronLeft
+                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-[-90deg] text-[#98A2B3]"
+                      aria-hidden
+                    />
+                  </div>
+                </div>
+
+                <div className="relative min-w-0 sm:col-span-2 lg:col-span-1">
+                  <label
+                    htmlFor="doctor-patients-relationship"
+                    className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
+                  >
+                    علاقة الوصول
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="doctor-patients-relationship"
+                      value={filters.relationship}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          relationship:
+                            (e.target.value as RelationshipFilter) || "all",
+                          page: 1,
+                        }))
+                      }
+                      className="h-[42px] w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-3.5 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12 lg:min-w-0"
+                    >
+                      <option value="all">كل العلاقات</option>
+                      <option value="full-access">وصول كامل</option>
+                      <option value="linked-only">مرتبط فقط</option>
+                      <option value="temporary">مؤقت</option>
+                      <option value="access-pending">قيد الانتظار</option>
+                      <option value="active-encounter">زيارة جارية</option>
+                      <option value="restricted">محجوب</option>
+                    </select>
+                    <ChevronLeft
+                      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 rotate-[-90deg] text-[#98A2B3]"
+                      aria-hidden
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <input
-              type="text"
-              placeholder="بحث بالتشخيص"
-              value={diagnosis}
-              onChange={(e) => {
-                setDiagnosis(e.target.value);
-                setPage(1);
-              }}
-              className="rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[14px] font-semibold text-[#111827] placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-[#0F8F8B]/20"
-            />
-
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value as FilterStatus);
-                setPage(1);
-              }}
-              className="rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[14px] font-semibold text-[#111827] focus:border-primary focus:outline-none focus:ring-2 focus:ring-[#0F8F8B]/20"
-            >
-              <option value="all">كل الحالات</option>
-              <option value="active">نشط</option>
-              <option value="temporary">مؤقت</option>
-              <option value="suspended">معلّق</option>
-            </select>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 mt-3 sm:grid-cols-3">
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => {
-                setFrom(e.target.value);
-                setPage(1);
-              }}
-              className="rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[14px] font-semibold text-[#111827]"
-            />
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => {
-                setTo(e.target.value);
-                setPage(1);
-              }}
-              className="rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[14px] font-semibold text-[#111827]"
-            />
-            <select
-              value={limit}
-              onChange={(e) => {
-                setLimit(Number(e.target.value));
-                setPage(1);
-              }}
-              className="rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[14px] font-semibold text-[#111827]"
-            >
-              {[10, 20, 50].map((value) => (
-                <option key={value} value={value}>
-                  {value} / صفحة
-                </option>
-              ))}
-            </select>
+            {/* فترة آخر زيارة — شريط زمني متماسك */}
+            <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFBFC]/90 px-4 py-4 sm:px-5">
+              <div className="flex flex-wrap gap-2 items-center mb-3 text-right">
+                <Calendar className="w-4 h-4 text-primary shrink-0" aria-hidden />
+                <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
+                  نطاق تاريخ آخر زيارة
+                </span>
+              </div>
+              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-5">
+                <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
+                  <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
+                    من تاريخ
+                  </span>
+                  <input
+                    type="date"
+                    value={filters.from}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        from: e.target.value,
+                        page: 1,
+                      }))
+                    }
+                    className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                  />
+                </div>
+                <span
+                  className="hidden shrink-0 pb-2 font-cairo text-[11px] font-bold text-[#D0D5DD] sm:inline sm:self-end"
+                  aria-hidden
+                >
+                  ···
+                </span>
+                <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
+                  <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
+                    إلى تاريخ
+                  </span>
+                  <input
+                    type="date"
+                    value={filters.to}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        to: e.target.value,
+                        page: 1,
+                      }))
+                    }
+                    className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
+        {/* Patients list section */}
         <section className="space-y-3">
           {listQuery.isLoading ? (
             <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
@@ -529,9 +689,9 @@ export default function DoctorPatientsPage() {
                 }
                 pendingRequestId={
                   expandedId === patient.id
-                    ? pendingRequestIdFromQuery ??
+                    ? (pendingRequestIdFromQuery ??
                       effectivePendingAccess?.pendingRequestId ??
-                      null
+                      null)
                     : null
                 }
                 onStartConsultation={() =>
@@ -556,13 +716,14 @@ export default function DoctorPatientsPage() {
                     const response = await requestAccessMutation.mutateAsync({
                       patientId: patient.id,
                       body: {
-                        reason: "طلب وصول للملف الطبي الكامل لمتابعة الحالة الصحية",
+                        reason:
+                          "طلب وصول للملف الطبي الكامل لمتابعة الحالة الصحية",
                       },
                     });
 
                     // Update local state to reflect pending access
                     if (response.request?._id) {
-                      setPendingAccessByPatient(prev => ({
+                      setPendingAccessByPatient((prev) => ({
                         ...prev,
                         [patient.id]: {
                           pendingRequestId: response.request._id,
@@ -592,26 +753,58 @@ export default function DoctorPatientsPage() {
             ))
           )}
         </section>
-
+        {/* Modern pagination section - Admin style */}
         <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="font-cairo text-[12px] font-bold text-[#667085]">
-            الصفحة {page} من {totalPages} • إجمالي {listQuery.total}
+            الصفحة {filters.page} من {totalPages}
           </div>
 
           <div className="flex gap-3 items-center">
+            <div className="relative">
+              <select
+                value={filters.limit}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    limit: Number(e.target.value),
+                    page: 1,
+                  }))
+                }
+                className="h-[36px] w-[110px] appearance-none rounded-[10px] border border-primary/25 bg-primary/10 px-4 text-right font-cairo text-[12px] font-extrabold text-primary outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+              >
+                {[20, 50, 100].map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+              <ChevronLeft className="absolute left-3 top-1/2 w-4 h-4 rotate-90 -translate-y-1/2 pointer-events-none text-primary" />
+            </div>
+
             <button
               type="button"
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-              disabled={page <= 1 || listQuery.isFetching}
-              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:opacity-60"
+              onClick={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  page: Math.max(1, prev.page - 1),
+                }))
+              }
+              disabled={filters.page <= 1}
+              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               السابق
             </button>
+
             <button
               type="button"
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={page >= totalPages || listQuery.isFetching}
-              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:opacity-60"
+              onClick={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  page: Math.min(totalPages, prev.page + 1),
+                }))
+              }
+              disabled={filters.page >= totalPages}
+              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               التالي
             </button>

@@ -41,10 +41,10 @@ function KpiStatCard({
 }: KpiCard) {
   return (
     <article
-      className='min-h-[180px] max-w-[245px] rounded-[16px] border border-[#E7EDF5] bg-white px-4 py-4 shadow-[0_10px_20px_rgba(15,23,42,0.04)]'
+      className='min-h-[180px] max-w-[500px] rounded-[16px] border border-[#E7EDF5] bg-white px-4 py-4 shadow-[0_10px_20px_rgba(15,23,42,0.04)]'
       style={{ borderBottomWidth: '4px', borderBottomColor: accent }}
     >
-      <div className='flex items-start justify-between gap-5'>
+      <div className='flex gap-5 justify-between items-start'>
         <div className='space-y-4 text-right'>
           <div className='font-cairo font-bold text-[16px] leading-[20px] text-[#243044]'>
             {label}
@@ -57,7 +57,7 @@ function KpiStatCard({
           className='flex h-[56px] w-[56px] items-center justify-center rounded-[6px]'
           style={{ backgroundColor: soft, color: iconColor }}
         >
-          <Icon className='h-8 w-8' />
+          <Icon className='w-8 h-8' />
         </div>
       </div>
 
@@ -112,11 +112,11 @@ export default function HomeDoctor() {
     return (
       <div className='flex h-[400px] items-center justify-center'>
         <div className='text-center'>
-          <AlertCircle className='mx-auto h-12 w-12 text-red-500' />
+          <AlertCircle className='mx-auto w-12 h-12 text-red-500' />
           <p className='mt-2 text-red-600'>فشل تحميل البيانات</p>
           <button
             onClick={() => refetch()}
-            className='mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+            className='px-4 py-2 mt-2 text-white bg-blue-500 rounded hover:bg-blue-600'
           >
             إعادة المحاولة
           </button>
@@ -176,8 +176,8 @@ export default function HomeDoctor() {
   }));
 
   return (
-    <div dir='rtl' lang='ar' className='space-y-7 pb-8'>
-      <section className='grid gap-12 md:grid-cols-2 2xl:grid-cols-4'>
+    <div dir='rtl' lang='ar' className='pb-8 space-y-7'>
+      <section className='grid gap-12 md:grid-cols-2 lg:grid-cols-4'>
         {kpis.map((card) => (
           <KpiStatCard key={card.key} {...card} />
         ))}
@@ -185,21 +185,21 @@ export default function HomeDoctor() {
 
       <QuickActionsSection />
 
-      <section className='grid items-start gap-6 xl:grid-cols-2'>
+      <section className='grid gap-6 items-start xl:grid-cols-2'>
         <ActiveConsultationsSection />
         <ConsultationsWaitingSection />
       </section>
 
       <section className='grid gap-6 xl:grid-cols-2'>
         <SurfaceSection title='مواعيد اليوم'>
-          <div className='space-y-4 px-5 py-6'>
+          <div className='px-5 py-6 space-y-4'>
             {todayRows.length > 0 ? (
               todayRows.map((row) => (
                 <article
                   key={`${row.time}-${row.name}`}
                   className='flex items-center justify-between rounded-[16px] bg-[#F8FAFC] px-4 py-4'
                 >
-                  <div className='flex items-center gap-4'>
+                  <div className='flex gap-4 items-center'>
                                         <div className='flex h-[45px] w-[45px] items-center justify-center rounded-[10px] bg-primary text-white'>
                       <span className='font-cairo text-[20px] font-black'>
                         {row.initial}
@@ -239,7 +239,7 @@ export default function HomeDoctor() {
                 className='h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3]'
               />
               <div className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <Search className='h-5 w-5' />
+                <Search className='w-5 h-5' />
               </div>
             </div>
 
@@ -249,7 +249,7 @@ export default function HomeDoctor() {
               </div>
 
               <div>
-                <div className='mt-8 flex items-end justify-between gap-3'>
+                <div className='flex gap-3 justify-between items-end mt-8'>
                   {[
                     { day: 'الثلاثاء', h: 24 },
                     { day: 'الأربعاء', h: 24 },
@@ -259,7 +259,7 @@ export default function HomeDoctor() {
                     { day: 'الأحد', h: 24 },
                     { day: 'الاثنين', h: 24 },
                   ].map((item) => (
-                    <div key={item.day} className='flex flex-1 flex-col items-center gap-3'>
+                    <div key={item.day} className='flex flex-col flex-1 gap-3 items-center'>
                       <div
                         className='w-full max-w-[52px] rounded-t-[16px] bg-primary'
                         style={{ height: `${item.h}px` }}
@@ -286,7 +286,7 @@ export default function HomeDoctor() {
             المرضى
           </h2>
 
-          <div className='flex flex-wrap items-center gap-2'>
+          <div className='flex flex-wrap gap-2 items-center'>
             {['الكل', 'اليوم', 'نشط', 'القادم'].reverse().map((status) => (
               <button
                 key={status}
@@ -319,7 +319,7 @@ export default function HomeDoctor() {
             key={idx}
             className='grid grid-cols-12 items-center gap-4 border-b border-[#EEF2F6] px-8 py-5 last:border-b-0'
           >
-            <div className='col-span-4 flex items-center gap-4'>
+            <div className='flex col-span-4 gap-4 items-center'>
               <div className='flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]'>
                 <span className='font-cairo text-[20px] font-black'>
                   {idx === 0 ? 'أ' : 'ف'}
@@ -352,13 +352,13 @@ export default function HomeDoctor() {
                 className='inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]'
               >
                 عرض التفاصيل
-                <ChevronRight className='h-4 w-4' />
+                <ChevronRight className='w-4 h-4' />
               </button>
             </div>
           </div>
         ))}
       </section>
-              <div className="grid gap-8  md:grid-cols-3">
+              <div className="grid gap-8 md:grid-cols-3">
           {[
             {
               key: 'rating',
@@ -385,7 +385,7 @@ export default function HomeDoctor() {
             const Icon = card.icon;
             return (
               <div key={card.key} className='bg-white px-8 py-8 rounded-[10px] bg-[#FFFFFF]  shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.10),0px_1px_3px_0px_rgba(0,0,0,0.10)]'>
-                <div className='flex items-center justify-between'>
+                <div className='flex justify-between items-center'>
                   <div className='text-right'>
                     <div className='font-cairo text-[22px] font-black text-[#243044]'>
                       {card.value}
@@ -395,7 +395,7 @@ export default function HomeDoctor() {
                     </div>
                   </div>
                                <div className={`flex h-16 w-16 items-center justify-center rounded-[16px] ${card.iconClass}`}>
-                    <Icon className='h-8 w-8' />
+                    <Icon className='w-8 h-8' />
                   </div>
                 </div>
               </div>
