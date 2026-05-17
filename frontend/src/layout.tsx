@@ -29,13 +29,13 @@ export default function ProtectedLayout({
     )?.path ?? 'dashboard';
 
   return (
-    <div className='h-screen bg-white scrollbar-hide overflow-hidden'>
+    <div className='h-screen scrollbar-hide overflow-hidden bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]'>
       <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
         <main className='flex h-screen flex-1 flex-col'>
           <div className='sticky top-0 z-40'>
             <DashboardHeader />
           </div>
-          <div className='flex-1 overflow-y-auto py-8 bg-white scrollbar-hide'>
+          <div className='flex-1 overflow-y-auto bg-transparent py-8 scrollbar-hide'>
             <MotionProvider>
               <AnimatePresence mode='wait'>
                 <PageTransition key={pathname}>

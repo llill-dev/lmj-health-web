@@ -1,6 +1,6 @@
 "use client";
 import * as Dialog from "@radix-ui/react-dialog";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   AlertCircle,
   CalendarDays,
@@ -8,7 +8,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,6 +70,7 @@ export default function BookAppointmentDialog({
   onSubmit: (values: BookAppointmentValues) => Promise<void>;
   doctorId?: string;
 }) {
+  const bookSelectOutletRef = useRef<HTMLDivElement>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     register,
@@ -172,71 +173,53 @@ export default function BookAppointmentDialog({
       }}
     >
       <Dialog.Portal>
-        <AnimatePresence>
-          {open ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999]"
-            >
-              <Dialog.Overlay asChild forceMount>
-                <motion.div
-                  initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-                  animate={{ opacity: 1, backdropFilter: "blur(6px)" }}
-                  exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-                  transition={{ duration: 0.28, ease: "easeOut" }}
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_top,#0f8f8b24,transparent_35%),rgba(15,23,42,0.5)]"
-                />
-              </Dialog.Overlay>
+        <Dialog.Overlay asChild forceMount>
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{
+              opacity: open ? 1 : 0,
+              backdropFilter: open ? "blur(6px)" : "blur(0px)",
+            }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className="fixed inset-0 z-[9999] bg-[radial-gradient(circle_at_top,#0f8f8b24,transparent_35%),rgba(15,23,42,0.5)]"
+          />
+        </Dialog.Overlay>
 
-              <Dialog.Content asChild forceMount>
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                    x: "-50%",
-                    y: "calc(-50% + 42px)",
-                    scale: 0.94,
-                    rotateX: -6,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    x: "-50%",
-                    y: "-50%",
-                    scale: 1,
-                    rotateX: 0,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    x: "-50%",
-                    y: "calc(-50% + 24px)",
-                    scale: 0.97,
-                    rotateX: -3,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 340,
-                    damping: 28,
-                    mass: 0.9,
-                  }}
-                  className="fixed left-1/2 top-1/2 z-[10000] flex w-[720px] max-h-[calc(100vh-56px)] max-w-[calc(100vw-28px)] flex-col overflow-hidden rounded-[28px] border border-white/60 bg-white shadow-[0_30px_90px_rgba(2,6,23,0.28)] outline-none"
-                  dir="rtl"
-                  lang="ar"
-                  style={{ transformOrigin: "center top" }}
-                >
+        <div className="pointer-events-none fixed inset-0 z-[10000] box-border grid place-items-center">
+          <Dialog.Content asChild forceMount>
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 42,
+                scale: 0.94,
+                rotateX: -6,
+              }}
+              animate={{
+                opacity: open ? 1 : 0,
+                y: open ? 0 : 42,
+                scale: open ? 1 : 0.94,
+                rotateX: open ? 0 : -6,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 340,
+                damping: 28,
+                mass: 0.9,
+              }}
+              className="pointer-events-auto flex w-[720px] max-h-[calc(100vh-56px)] max-w-[calc(100vw-28px)] flex-col overflow-visible rounded-[28px] border border-white/60 bg-white shadow-[0_30px_90px_rgba(2,6,23,0.28)] outline-none"
+              dir="rtl"
+              lang="ar"
+              style={{ transformOrigin: "center top" }}
+            >
+                  <div
+                    ref={bookSelectOutletRef}
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-[99999] isolate overflow-visible"
+                  />
+
                   <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f8f8b_0%,#14b8a6_62%,#dff8f6_100%)] px-8 pb-7 pt-7 text-white">
                     <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full blur-2xl bg-white/15" />
                     <div className="absolute -bottom-14 right-8 h-28 w-28 rounded-full bg-[#083344]/20 blur-2xl" />
-
-                    <Dialog.Close asChild>
-                      <button
-                        type="button"
-                        className="flex absolute top-5 right-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105"
-                        aria-label="إغلاق"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </Dialog.Close>
 
                     <div className="relative max-w-[520px] pr-12 text-right lg:max-w-none lg:pr-0">
                       <Dialog.Title className="font-cairo text-[24px] font-black leading-[30px]">
@@ -247,6 +230,17 @@ export default function BookAppointmentDialog({
                         الموعد مباشرة في جدول الطبيب.
                       </p>
                     </div>
+
+                    <Dialog.Close asChild>
+                      <button
+                        type="button"
+                        className="flex absolute top-5 left-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105"
+                        aria-label="إغلاق"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </Dialog.Close>
+
                   </div>
 
                   <form
@@ -300,6 +294,7 @@ export default function BookAppointmentDialog({
                           control={control}
                           render={({ field }) => (
                             <StyledSelect
+                              listboxPortalRef={bookSelectOutletRef}
                               options={patients.map((p) => ({
                                 value: p.id,
                                 label: p.name,
@@ -413,6 +408,7 @@ export default function BookAppointmentDialog({
                               control={control}
                               render={({ field }) => (
                                 <StyledSelect
+                                  listboxPortalRef={bookSelectOutletRef}
                                   listboxId="book-appointment-time-options"
                                   options={availableTimes.map((t) => ({
                                     value: t,
@@ -461,6 +457,7 @@ export default function BookAppointmentDialog({
                           control={control}
                           render={({ field }) => (
                             <StyledSelect
+                              listboxPortalRef={bookSelectOutletRef}
                               options={[
                                 { value: "clinic", label: "حضوري" },
                                 { value: "video", label: "أونلاين" },
@@ -485,6 +482,7 @@ export default function BookAppointmentDialog({
                             control={control}
                             render={({ field }) => (
                               <StyledSelect
+                                listboxPortalRef={bookSelectOutletRef}
                                 options={[
                                   { value: "", label: "بدون تحديد نوع" },
                                   ...appointmentTypes.map((type) => ({
@@ -604,10 +602,8 @@ export default function BookAppointmentDialog({
                   </form>
                 </motion.div>
               </Dialog.Content>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </Dialog.Portal>
+            </div>
+          </Dialog.Portal>
     </Dialog.Root>
   );
 }

@@ -1,4 +1,4 @@
-import { get, patch, post, put, del, apiRequestResult } from "@/lib/api";
+import { get, patch, post, put, del, apiRequestResult, apiMultipart } from "@/lib/api";
 import {
   api,
   type Appointment as MockAppointment,
@@ -31,6 +31,12 @@ import type {
   DoctorMedicalRecordDetailsResponse,
   DoctorMedicalRecordsListResponse,
   DoctorPatientPublicProfileResponse,
+  DoctorPatientFilesListResponse,
+  DoctorPatientFileDetailsResponse,
+  DoctorFileDownloadUrlResponse,
+  DoctorPatientFileDeleteResponse,
+  DoctorPatientEncountersListParams,
+  DoctorPatientEncountersListResponse,
   DoctorPatientsListParams,
   DoctorPatientsListResponse,
   DoctorUpdateMedicalRecordBody,
@@ -46,6 +52,10 @@ import type {
   ScheduleDayTemplate,
   ScheduleException,
   DoctorAppointmentTypesResponse,
+  DoctorAppointmentFilesListResponse,
+  DoctorAppointmentFileDetailsResponse,
+  DoctorAppointmentFileUploadResponse,
+  DoctorAppointmentFileDeleteResponse,
   CreateAppointmentTypeBody,
   UpdateAppointmentTypeBody,
   AppointmentTypeMutationResponse,
@@ -83,6 +93,20 @@ function buildAccessRequestsListQuery(
   return qs.toString();
 }
 
+function buildPatientEncountersListQuery(
+  params: DoctorPatientEncountersListParams = {},
+): string {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set("status", params.status);
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
+  if (params.sortBy) qs.set("sortBy", params.sortBy);
+  if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+  return qs.toString();
+}
+
 export const doctorPatientsQueryKeys = {
   all: ["doctor", "patients"] as const,
   lists: () => [...doctorPatientsQueryKeys.all, "list"] as const,
@@ -96,6 +120,15 @@ export const doctorPatientsQueryKeys = {
     [...doctorPatientsQueryKeys.all, "medical-records", doctorId, patientId] as const,
   medicalRecord: (doctorId: string, patientId: string, recordId: string) =>
     [...doctorPatientsQueryKeys.medicalRecords(doctorId, patientId), recordId] as const,
+  encounters: (
+    doctorId: string,
+    patientId: string,
+    params: DoctorPatientEncountersListParams = {},
+  ) => [...doctorPatientsQueryKeys.all, "encounters", doctorId, patientId, params] as const,
+  files: (patientId: string) =>
+    [...doctorPatientsQueryKeys.all, "files", patientId] as const,
+  file: (patientId: string, fileId: string) =>
+    [...doctorPatientsQueryKeys.files(patientId), fileId] as const,
 };
 
 export const doctorAccessRequestsQueryKeys = {
@@ -122,6 +155,10 @@ export const doctorAppointmentsQueryKeys = {
   details: () => [...doctorAppointmentsQueryKeys.all, "detail"] as const,
   detail: (appointmentId: string) =>
     [...doctorAppointmentsQueryKeys.details(), appointmentId] as const,
+  files: (appointmentId: string) =>
+    [...doctorAppointmentsQueryKeys.all, "files", appointmentId] as const,
+  file: (appointmentId: string, fileId: string) =>
+    [...doctorAppointmentsQueryKeys.files(appointmentId), fileId] as const,
 };
 
 const UI_ONLY = import.meta.env.VITE_UI_ONLY === "true";
@@ -369,6 +406,37 @@ export const doctorAppointmentsApi = {
     patch<DoctorAppointmentMutationResponse>(
       doctorEndpoints.appointments.noShow(appointmentId),
       body,
+      { locale: "ar" },
+    ),
+  listFiles: (appointmentId: string) =>
+    get<DoctorAppointmentFilesListResponse>(
+      doctorEndpoints.appointments.files.list(appointmentId),
+      { locale: "ar" },
+    ),
+  getFile: (appointmentId: string, fileId: string) =>
+    get<DoctorAppointmentFileDetailsResponse>(
+      doctorEndpoints.appointments.files.detail(appointmentId, fileId),
+      { locale: "ar" },
+    ),
+  getFileDownloadUrl: (appointmentId: string, fileId: string) =>
+    get<DoctorFileDownloadUrlResponse>(
+      `${doctorEndpoints.appointments.files.download(appointmentId, fileId)}?mode=url`,
+      { locale: "ar" },
+    ),
+  uploadFile: (appointmentId: string, file: File, note?: string, tags?: string[]) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (note?.trim()) formData.append("note", note.trim());
+    if (tags && tags.length > 0) formData.append("tags", JSON.stringify(tags));
+    return apiMultipart<DoctorAppointmentFileUploadResponse>(
+      doctorEndpoints.appointments.files.upload(appointmentId),
+      formData,
+      { locale: "ar" },
+    );
+  },
+  unlinkFile: (appointmentId: string, fileId: string) =>
+    del<DoctorAppointmentFileDeleteResponse>(
+      doctorEndpoints.appointments.files.unlink(appointmentId, fileId),
       { locale: "ar" },
     ),
 };
@@ -750,6 +818,47 @@ export const doctorApi = {
       patch<DoctorMedicalRecordDetailsResponse>(
         doctorEndpoints.patients.medicalRecordById(doctorId, patientId, recordId),
         body,
+        { locale: "ar" },
+      ),
+    listEncounters: (
+      doctorId: string,
+      patientId: string,
+      params: DoctorPatientEncountersListParams = {},
+    ) => {
+      const query = buildPatientEncountersListQuery(params);
+      const base = doctorEndpoints.patients.encounters(doctorId, patientId);
+      const endpoint = query ? `${base}?${query}` : base;
+      return get<DoctorPatientEncountersListResponse>(endpoint, { locale: "ar" });
+    },
+    listFiles: (patientId: string) =>
+      get<DoctorPatientFilesListResponse>(
+        doctorEndpoints.patients.files.list(patientId),
+        { locale: "ar" },
+      ),
+    getFile: (patientId: string, fileId: string) =>
+      get<DoctorPatientFileDetailsResponse>(
+        doctorEndpoints.patients.files.detail(patientId, fileId),
+        { locale: "ar" },
+      ),
+    getFileDownloadUrl: (doctorId: string, patientId: string, fileId: string) =>
+      get<DoctorFileDownloadUrlResponse>(
+        doctorEndpoints.patients.files.doctorDownloadUrl(doctorId, patientId, fileId),
+        { locale: "ar" },
+      ),
+    uploadFile: (patientId: string, file: File, note?: string, tags?: string[]) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (note?.trim()) formData.append("note", note.trim());
+      if (tags && tags.length > 0) formData.append("tags", JSON.stringify(tags));
+      return apiMultipart<DoctorPatientFileDetailsResponse>(
+        doctorEndpoints.patients.files.upload(patientId),
+        formData,
+        { locale: "ar" },
+      );
+    },
+    deleteFile: (patientId: string, fileId: string) =>
+      del<DoctorPatientFileDeleteResponse>(
+        doctorEndpoints.patients.files.remove(patientId, fileId),
         { locale: "ar" },
       ),
     getAccessRequestApprovedPayload: (

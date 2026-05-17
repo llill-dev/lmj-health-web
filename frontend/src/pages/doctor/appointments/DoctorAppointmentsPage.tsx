@@ -1,17 +1,18 @@
 import {
-  AlertCircle,
   Calendar,
+  CalendarDays,
   CheckCircle,
+  ChevronDown,
   Clock,
+  Filter,
   Loader2,
   Search,
   Settings,
   UserX,
+  WifiOff,
   XCircle,
-  Filter,
-  CalendarDays,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { Helmet } from "react-helmet-async";
 import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -19,6 +20,8 @@ import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashbo
 import BookAppointmentDialog from "@/components/doctor/appointments/book-appointment-dialog";
 import DoctorAppointmentExpandableCard from "@/components/doctor/appointments/doctor-appointment-expandable-card";
 import AppointmentsEmptyState from "@/components/doctor/appointments/appointments-empty-state";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import CancelAppointmentDialog from "@/components/admin/appointments/dialogs/CancelAppointmentDialog";
 import CompleteOrReasonDialog from "@/components/doctor/appointments/cancel-appointment-dialog";
 import RescheduleAppointmentDialog from "@/components/doctor/appointments/reschedule-appointment-dialog";
@@ -27,15 +30,47 @@ import {
   useCancelDoctorAppointmentApi,
   useCompleteDoctorAppointmentApi,
   useDoctorAppointmentDetailsApi,
+  useDoctorAppointmentFilesApi,
   useDoctorAppointmentsApi,
   useNoShowDoctorAppointmentApi,
   useRescheduleDoctorAppointmentApi,
+  useUnlinkDoctorAppointmentFileApi,
+  useUploadDoctorAppointmentFileApi,
   usePatients,
   useDoctorPatients,
 } from "@/hooks";
 import { readAuthUser } from "@/lib/cookies";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { doctorAppointmentsApi } from "@/lib/doctor/client";
+import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import { useNavigate } from "react-router-dom";
+
+/** نص قصير للواجهة + إبقاء الشرح الطويل داخل تفاصيل قابلة للطي. */
+function summarizeAppointmentsListError(error: unknown): {
+  title: string;
+  brief: string;
+  detail: string;
+  showTechnicalDetail: boolean;
+} {
+  const detail = error
+    ? getUserFacingRequestErrorMessage(error)
+    : "حدث خطأ غير متوقع أثناء الاتصال بالخادم.";
+  const verbose =
+    detail.length > 160 ||
+    detail.includes("لم نتمكن من إتمام الطلب") ||
+    detail.includes("VPN") ||
+    detail.includes("جدار الحماية") ||
+    detail.includes("توقيت خاطئ");
+  const brief = verbose
+    ? "لم نتمكن من جلب المواعيد في هذه المحاولة. تحقّق من اتصالك بالإنترنت ثم أعد المحاولة، أو انتظر قليلاً إن كانت الخدمة مشغولة."
+    : detail;
+  return {
+    title: "تعذّر تحميل المواعيد",
+    brief,
+    detail,
+    showTechnicalDetail: verbose,
+  };
+}
 
 type MainView = "schedule" | "waiting";
 type StatusTab = "scheduled" | "completed" | "cancelled" | "no-show";
@@ -114,8 +149,17 @@ export default function DoctorAppointmentsPage() {
   const [expandedAppointmentId, setExpandedAppointmentId] = useState<
     string | null
   >(null);
+  const [appointmentFileActionKey, setAppointmentFileActionKey] = useState<
+    string | null
+  >(null);
+  const [unlinkFileConfirmOpen, setUnlinkFileConfirmOpen] = useState(false);
+  const [unlinkFileTarget, setUnlinkFileTarget] = useState<{
+    fileId: string;
+    fileName: string;
+  } | null>(null);
 
-  const selectedStatus = filters.view === "waiting" ? "scheduled" : filters.status;
+  const selectedStatus =
+    filters.view === "waiting" ? "scheduled" : filters.status;
 
   const listQuery = useDoctorAppointmentsApi({
     page: filters.page,
@@ -125,6 +169,10 @@ export default function DoctorAppointmentsPage() {
   });
   const detailsQuery = useDoctorAppointmentDetailsApi(
     expandedAppointmentId ?? "",
+  );
+  const appointmentFilesQuery = useDoctorAppointmentFilesApi(
+    expandedAppointmentId ?? "",
+    Boolean(expandedAppointmentId),
   );
 
   // KPI counts should come from backend totals per status (not just "today").
@@ -154,6 +202,12 @@ export default function DoctorAppointmentsPage() {
   const rescheduleMutation = useRescheduleDoctorAppointmentApi();
   const noShowMutation = useNoShowDoctorAppointmentApi();
   const bookMutation = useBookDoctorAppointmentApi();
+  const uploadAppointmentFileMutation = useUploadDoctorAppointmentFileApi(
+    expandedAppointmentId ?? "",
+  );
+  const unlinkAppointmentFileMutation = useUnlinkDoctorAppointmentFileApi(
+    expandedAppointmentId ?? "",
+  );
 
   // Use real doctor patients API when connected to backend
   const { patients: uiOnlyPatients } = usePatients(1, 100);
@@ -177,11 +231,29 @@ export default function DoctorAppointmentsPage() {
         expandedAppointmentId === appointment.id &&
         detailsQuery.appointment
       ) {
-        return detailsQuery.appointment;
+        const filesSource =
+          appointmentFilesQuery.files.length > 0
+            ? appointmentFilesQuery.files
+            : detailsQuery.files;
+        return {
+          ...detailsQuery.appointment,
+          appointmentFiles: filesSource.map((file) => ({
+            id: file._id,
+            name: file.originalName ?? "ملف",
+            date: (file.linkedAt ?? "").slice(0, 10),
+            url: undefined,
+          })),
+        };
       }
       return appointment;
     });
-  }, [detailsQuery.appointment, expandedAppointmentId, listQuery.appointments]);
+  }, [
+    appointmentFilesQuery.files,
+    detailsQuery.appointment,
+    detailsQuery.files,
+    expandedAppointmentId,
+    listQuery.appointments,
+  ]);
 
   const visibleAppointments = useMemo(
     () => filterLocalSearch(mergedAppointments, filters.search),
@@ -205,7 +277,132 @@ export default function DoctorAppointmentsPage() {
     );
   }, [defaultFilters, filters]);
 
-  const appointmentLoadError = listQuery.error;
+  const appointmentsListFailed = listQuery.isError;
+  const appointmentsListPending =
+    listQuery.isPending && !appointmentsListFailed;
+  const appointmentsListReady = !appointmentsListFailed && !appointmentsListPending;
+  const appointmentsRefreshing =
+    listQuery.isFetching &&
+    listQuery.fetchStatus === "fetching" &&
+    appointmentsListReady;
+
+  const appointmentsLoadErrorPresentation = useMemo(
+    () => summarizeAppointmentsListError(listQuery.error),
+    [listQuery.error],
+  );
+
+  const handleAppointmentFileOpen = async (
+    appointmentId: string,
+    fileId: string,
+  ) => {
+    setAppointmentFileActionKey(fileId);
+    try {
+      const response = await doctorAppointmentsApi.getFileDownloadUrl(
+        appointmentId,
+        fileId,
+      );
+      if (response.url) {
+        window.open(response.url, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذر فتح الملف",
+        variant: "error",
+      });
+    } finally {
+      setAppointmentFileActionKey(null);
+    }
+  };
+
+  const handleAppointmentFileDownload = async (
+    appointmentId: string,
+    fileId: string,
+  ) => {
+    setAppointmentFileActionKey(fileId);
+    try {
+      const [downloadResponse, fileResponse] = await Promise.all([
+        doctorAppointmentsApi.getFileDownloadUrl(appointmentId, fileId),
+        doctorAppointmentsApi.getFile(appointmentId, fileId),
+      ]);
+      if (downloadResponse.url) {
+        triggerBrowserFileDownload(
+          downloadResponse.url,
+          fileResponse.file?.originalName ?? "appointment-file",
+        );
+      }
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذر تحميل الملف",
+        variant: "error",
+      });
+    } finally {
+      setAppointmentFileActionKey(null);
+    }
+  };
+
+  const handleRequestUnlinkAppointmentFile = (
+    fileId: string,
+    fileName?: string,
+  ) => {
+    setUnlinkFileTarget({
+      fileId,
+      fileName: fileName?.trim() || "ملف مرفق",
+    });
+    setUnlinkFileConfirmOpen(true);
+  };
+
+  /** تنفيذ فك الربط بعد التأكيد — يعرض نظام التوست داخلياً */
+  const handleAppointmentFileUnlinkConfirmed = async (fileId: string) => {
+    setAppointmentFileActionKey(fileId);
+    try {
+      const response = await unlinkAppointmentFileMutation.mutateAsync(fileId);
+      toast(response.message ?? "تم فك ربط الملف من الموعد بنجاح.", {
+        title: "تم فك الربط",
+        variant: "success",
+        durationMs: 4200,
+      });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذّر فك ربط الملف",
+        variant: "error",
+        durationMs: 4800,
+      });
+      throw error;
+    } finally {
+      setAppointmentFileActionKey(null);
+    }
+  };
+
+  const resetUnlinkDialog = (open: boolean) => {
+    setUnlinkFileConfirmOpen(open);
+    if (!open) setUnlinkFileTarget(null);
+  };
+
+  const handleAppointmentFileUpload = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !expandedAppointmentId) return;
+    setAppointmentFileActionKey("upload");
+    try {
+      const response = await uploadAppointmentFileMutation.mutateAsync({
+        file,
+      });
+      toast(response.message ?? "تم رفع الملف وربطه بالموعد بنجاح.", {
+        title: "تم الرفع",
+        variant: "success",
+        durationMs: 4200,
+      });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذر رفع الملف",
+        variant: "error",
+      });
+    } finally {
+      event.target.value = "";
+      setAppointmentFileActionKey(null);
+    }
+  };
 
   const handleBookingAction = () => {
     // Check if we have patients available (only when connected to backend)
@@ -219,47 +416,28 @@ export default function DoctorAppointmentsPage() {
     }
 
     if (!UI_ONLY && doctorPatientsQuery.patients.length === 0) {
-      toast("لا توجد مرضى مرتبطين بحسابك حالياً. يرجى إضافة مرضى أولاً من صفحة المرضى.", {
-        title: "لا توجد مرضى",
-        variant: "warning",
-        durationMs: 5000,
-      });
+      toast(
+        "لا توجد مرضى مرتبطين بحسابك حالياً. يرجى إضافة مرضى أولاً من صفحة المرضى.",
+        {
+          title: "لا توجد مرضى",
+          variant: "warning",
+          durationMs: 5000,
+        },
+      );
       return;
     }
 
     setBookOpen(true);
   };
 
-  if (appointmentLoadError) {
-    const loadDetail = getUserFacingRequestErrorMessage(appointmentLoadError);
-    return (
-      <div
-        dir="rtl"
-        lang="ar"
-        className="flex min-h-[400px] items-center justify-center px-4 pb-16"
-      >
-        <div className="mx-auto max-w-md rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center shadow-sm">
-          <AlertCircle className="mx-auto h-12 w-12 text-[#B42318]" aria-hidden />
-          <p className="mt-3 font-cairo text-[15px] font-extrabold text-[#B42318]">
-            تعذّر تحميل المواعيد
-          </p>
-          <p className="mt-2 font-cairo text-[13px] font-semibold leading-relaxed text-[#7A271A]">
-            {loadDetail}
-          </p>
-          <button
-            type="button"
-            onClick={() => listQuery.refetch()}
-            className="mt-5 inline-flex h-[40px] min-w-[160px] items-center justify-center rounded-xl bg-primary px-5 font-cairo text-[13px] font-extrabold text-white shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-          >
-            إعادة المحاولة
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
+      <input
+        id="doctor-appointment-file-upload"
+        type="file"
+        className="hidden"
+        onChange={handleAppointmentFileUpload}
+      />
       <Helmet>
         <title>Appointments • LMJ Health</title>
       </Helmet>
@@ -272,7 +450,7 @@ export default function DoctorAppointmentsPage() {
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
-                {listQuery.total}
+                {appointmentsListFailed ? "—" : listQuery.total}
               </span>
               <span className="text-primary/90">
                 {" "}
@@ -309,8 +487,6 @@ export default function DoctorAppointmentsPage() {
             },
           ]}
         />
-
-
 
         <BookAppointmentDialog
           open={bookOpen}
@@ -351,6 +527,36 @@ export default function DoctorAppointmentsPage() {
           }}
         />
 
+        <ConfirmActionDialog
+          open={unlinkFileConfirmOpen}
+          onOpenChange={resetUnlinkDialog}
+          title="فك ربط الملف من الموعد"
+          confirmLabel="نعم، فك الربط"
+          confirmDisabled={
+            unlinkAppointmentFileMutation.isPending ||
+            Boolean(unlinkFileTarget && appointmentFileActionKey === unlinkFileTarget.fileId)
+          }
+          description={
+            <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
+              هل أنت متأكد من فك ربط الملف
+              {unlinkFileTarget?.fileName ? (
+                <>
+                  {" "}
+                  <span className="font-black text-[#101828]">
+                    «{unlinkFileTarget.fileName}»
+                  </span>
+                </>
+              ) : null}{" "}
+              عن هذا الموعد؟ لا يُحذف الملف من النظام بالكامل، لكن لن يعد ظاهراً ضمن هذا
+              الموعد.
+            </span>
+          }
+          onConfirm={async () => {
+            if (!unlinkFileTarget) return;
+            await handleAppointmentFileUnlinkConfirmed(unlinkFileTarget.fileId);
+          }}
+        />
+
         <CancelAppointmentDialog
           open={cancelOpen}
           onOpenChange={(open) => {
@@ -359,6 +565,11 @@ export default function DoctorAppointmentsPage() {
           }}
           targetName={cancelTarget?.patientName ?? ""}
           confirmDisabled={cancelMutation.isPending}
+          successToast={{
+            title: "تم إلغاء الموعد",
+            message: "تم إلغاء الموعد وحفظ السبب بنجاح.",
+            variant: "success",
+          }}
           onConfirm={async (reason) => {
             if (!cancelTarget) return;
             try {
@@ -399,6 +610,11 @@ export default function DoctorAppointmentsPage() {
                 id: completeTarget.id,
                 body: { notes: medicalNotes },
               });
+              toast("تم إنهاء الموعد وتسجيل الملاحظات بنجاح.", {
+                title: "تم الإنهاء",
+                variant: "success",
+                durationMs: 4200,
+              });
             } catch (error) {
               toast(
                 error instanceof Error ? error.message : "تعذّر إنهاء الموعد.",
@@ -432,6 +648,11 @@ export default function DoctorAppointmentsPage() {
                 id: noShowTarget.id,
                 body: { reason },
               });
+              toast("تم تسجيل عدم حضور المريض لهذا الموعد.", {
+                title: "تم التسجيل",
+                variant: "success",
+                durationMs: 4200,
+              });
             } catch (error) {
               toast(
                 error instanceof Error
@@ -457,6 +678,13 @@ export default function DoctorAppointmentsPage() {
           patientName={rescheduleTarget?.patientName ?? ""}
           initialDate={rescheduleTarget?.date}
           initialTime={rescheduleTarget?.time}
+          initialAppointmentTypeId={
+            expandedAppointmentId === rescheduleTarget?.id &&
+            detailsQuery.rawAppointment?.appointmentType
+              ? detailsQuery.rawAppointment.appointmentType
+              : undefined
+          }
+          doctorId={readAuthUser()?.actorIds?.doctorId}
           confirmDisabled={rescheduleMutation.isPending}
           onConfirm={async (values) => {
             if (!rescheduleTarget) return;
@@ -464,6 +692,11 @@ export default function DoctorAppointmentsPage() {
               await rescheduleMutation.mutateAsync({
                 id: rescheduleTarget.id,
                 body: values,
+              });
+              toast("تم تحديث تاريخ ووقت الموعد بنجاح.", {
+                title: "تم إعادة الجدولة",
+                variant: "success",
+                durationMs: 4200,
               });
             } catch (error) {
               toast(
@@ -520,13 +753,15 @@ export default function DoctorAppointmentsPage() {
                   className="inline-flex h-[40px] min-w-[100px] items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-black text-[#344054] shadow-sm tabular-nums"
                   aria-live="polite"
                 >
-                  <span className="text-primary">{listQuery.total || 0}</span>
+                  <span className="text-primary">
+                    {appointmentsListFailed ? "—" : listQuery.total || 0}
+                  </span>
                   <span className="font-extrabold text-[#667085]">نتيجة</span>
                 </output>
               </div>
             </div>
           </div>
-{/* filter container */}
+          {/* filter container */}
           <div className="px-5 py-5 space-y-5 sm:px-6 sm:py-6">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:gap-6">
               {/* بحث محلي رئيسي: نصف عرض الحاوية على xl */}
@@ -636,13 +871,15 @@ export default function DoctorAppointmentsPage() {
                     </p>
                   </div>
                 )}
-
               </div>
             </div>
             {/* date filter */}
             <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFBFC]/90 px-4 py-4 sm:px-5">
               <div className="flex flex-wrap gap-2 items-center mb-3 text-right">
-                <Calendar className="w-4 h-4 shrink-0 text-primary" aria-hidden />
+                <Calendar
+                  className="w-4 h-4 shrink-0 text-primary"
+                  aria-hidden
+                />
                 <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
                   تاريخ المواعيد
                 </span>
@@ -668,21 +905,114 @@ export default function DoctorAppointmentsPage() {
           </div>
         </section>
 
-
         <section className="mb-6">
           <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.06),0_2px_8px_rgba(0,0,0,0.03)]">
             {filters.view === "waiting" && (
               <div className="border-b border-[#F2F4F7] px-6 py-3">
                 <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-                  قائمة الانتظار تعرض المواعيد المجدولة ضمن نفس فلاتر الباكند الحالية.
+                  قائمة الانتظار تعرض المواعيد المجدولة ضمن نفس فلاتر الباكند
+                  الحالية.
                 </p>
               </div>
             )}
 
             <div className="px-6 py-4">
-              {listQuery.isLoading ? (
-                <div className="flex justify-center items-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              {appointmentsRefreshing &&
+              appointmentsListReady &&
+              listQuery.total > 0 &&
+              visibleAppointments.length > 0 ? (
+                <p
+                  className="mb-3 flex justify-center gap-2 rounded-xl border border-primary/15 bg-primary/[0.04] py-2 text-center font-cairo text-[12px] font-bold text-primary"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <Loader2
+                    className="h-4 w-4 shrink-0 animate-spin"
+                    aria-hidden
+                  />
+                  جارٍ تحديث القائمة...
+                </p>
+              ) : null}
+              {appointmentsListFailed ? (
+                <DoctorListErrorState
+                  title={appointmentsLoadErrorPresentation.title}
+                  brief={appointmentsLoadErrorPresentation.brief}
+                  detail={appointmentsLoadErrorPresentation.detail}
+                  showTechnicalDetail={
+                    appointmentsLoadErrorPresentation.showTechnicalDetail
+                  }
+                  retrying={
+                    listQuery.isFetching &&
+                    listQuery.fetchStatus === "fetching"
+                  }
+                  onRetry={() => listQuery.refetch()}
+                />
+              ) : false ? (
+                <div
+                  dir="rtl"
+                  lang="ar"
+                  role="alert"
+                  className="flex min-h-[360px] items-center justify-center px-3 py-10 sm:px-4"
+                >
+                  <div className="relative mx-auto w-full max-w-[440px] overflow-hidden rounded-[22px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFFFE] via-white to-[#F8FAFC] px-6 pb-10 pt-9 text-center shadow-[0_24px_64px_-20px_rgba(15,23,42,0.14)]">
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-l from-[#0F766E]/90 via-primary to-[#5EEAD4]"
+                    />
+                    <div className="mx-auto flex h-[52px] w-[52px] items-center justify-center rounded-2xl border border-[#E6F7F6] bg-white shadow-[0_14px_32px_rgba(15,143,139,0.14)]">
+                      <WifiOff
+                        className="h-[26px] w-[26px] text-primary"
+                        strokeWidth={2}
+                        aria-hidden
+                      />
+                    </div>
+                    <h2 className="mt-5 font-cairo text-[clamp(1.05rem,2.8vw,1.2rem)] font-black tracking-tight text-[#101828]">
+                      {appointmentsLoadErrorPresentation.title}
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-[34ch] font-cairo text-[13px] font-semibold leading-[1.7] text-[#475467]">
+                      {appointmentsLoadErrorPresentation.brief}
+                    </p>
+                    {appointmentsLoadErrorPresentation.showTechnicalDetail ? (
+                      <details className="group mt-5 rounded-2xl border border-[#EAECF0] bg-white/75 px-4 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[2px]">
+                        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-cairo text-[12px] font-extrabold text-[#344054] transition-colors hover:text-[#101828] [&::-webkit-details-marker]:hidden">
+                          <span>تفاصيل إضافية</span>
+                          <ChevronDown
+                            className="h-4 w-4 shrink-0 text-[#98A2B3] transition-transform duration-200 group-open:rotate-180"
+                            aria-hidden
+                          />
+                        </summary>
+                        <p className="mt-3 border-t border-[#F2F4F7] pt-3 text-right font-cairo text-[12px] font-medium leading-[1.75] text-[#667085]">
+                          {appointmentsLoadErrorPresentation.detail}
+                        </p>
+                      </details>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => listQuery.refetch()}
+                      disabled={listQuery.isFetching && listQuery.fetchStatus === "fetching"}
+                      className="mt-7 inline-flex h-[44px] min-w-[180px] items-center justify-center gap-2 rounded-[14px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.22)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#0d7d76] hover:shadow-[0_14px_32px_rgba(15,143,139,0.26)] active:translate-y-[0.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 disabled:pointer-events-none disabled:opacity-60"
+                    >
+                      {listQuery.isFetching && appointmentsListFailed ? (
+                        <Loader2
+                          className="h-4 w-4 animate-spin"
+                          aria-hidden
+                        />
+                      ) : null}
+                      إعادة المحاولة
+                    </button>
+                  </div>
+                </div>
+              ) : appointmentsListPending ? (
+                <div
+                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 py-12"
+                  role="status"
+                  aria-busy="true"
+                  aria-live="polite"
+                >
+                  <Loader2 className="h-9 w-9 animate-spin text-primary" />
+                  <p className="font-cairo text-[14px] font-semibold text-[#667085]">
+                    جارٍ تحميل المواعيد...
+                  </p>
                 </div>
               ) : listQuery.total === 0 ? (
                 <AppointmentsEmptyState onBookClick={handleBookingAction} />
@@ -702,7 +1032,8 @@ export default function DoctorAppointmentsPage() {
                       expanded={expandedAppointmentId === appointment.id}
                       detailsLoading={
                         expandedAppointmentId === appointment.id &&
-                        detailsQuery.isLoading
+                        (detailsQuery.isLoading ||
+                          appointmentFilesQuery.isLoading)
                       }
                       onToggle={() => {
                         setExpandedAppointmentId((current) =>
@@ -743,6 +1074,19 @@ export default function DoctorAppointmentsPage() {
                         });
                         setNoShowOpen(true);
                       }}
+                      onUploadFile={() =>
+                        document
+                          .getElementById("doctor-appointment-file-upload")
+                          ?.click()
+                      }
+                      onOpenFile={(fileId) =>
+                        handleAppointmentFileOpen(appointment.id, fileId)
+                      }
+                      onDownloadFile={(fileId) =>
+                        handleAppointmentFileDownload(appointment.id, fileId)
+                      }
+                      onUnlinkFile={handleRequestUnlinkAppointmentFile}
+                      fileActionKey={appointmentFileActionKey}
                     />
                   ))}
                 </div>
@@ -762,6 +1106,7 @@ export default function DoctorAppointmentsPage() {
               <StyledSelect
                 size="xs"
                 tone="emphasis"
+                disabled={!appointmentsListReady}
                 value={String(filters.limit)}
                 onChange={(v) =>
                   setFilters((prev) => ({
@@ -786,7 +1131,7 @@ export default function DoctorAppointmentsPage() {
                   page: Math.max(1, prev.page - 1),
                 }))
               }
-              disabled={filters.page <= 1}
+              disabled={filters.page <= 1 || !appointmentsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               السابق
@@ -800,7 +1145,7 @@ export default function DoctorAppointmentsPage() {
                   page: Math.min(totalPages, prev.page + 1),
                 }))
               }
-              disabled={filters.page >= totalPages}
+              disabled={filters.page >= totalPages || !appointmentsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               التالي
@@ -811,4 +1156,3 @@ export default function DoctorAppointmentsPage() {
     </>
   );
 }
-

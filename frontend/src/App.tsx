@@ -24,6 +24,7 @@ import DoctorLayout from '@/layout';
 import DoctorDashboardPage from '@/pages/doctor/dashboard/DoctorDashboardPage';
 import DoctorAppointmentsPage from '@/pages/doctor/appointments/DoctorAppointmentsPage';
 import DoctorPatientsPage from '@/pages/doctor/patients/DoctorPatientsPage';
+import DoctorPatientDetailsPage from '@/pages/doctor/patients/DoctorPatientDetailsPage';
 import DoctorOnlineConsultationsPage from '@/pages/doctor/online-consultations/DoctorOnlineConsultationsPage';
 import DoctorWorkSchedulePage from '@/pages/doctor/work-schedule/DoctorWorkSchedulePage';
 import DoctorMedicalRecordsPage from '@/pages/doctor/medical-records/DoctorMedicalRecordsPage';
@@ -125,6 +126,7 @@ export default function App() {
             <Route path='dashboard'            element={<DoctorDashboardPage />} />
             <Route path='appointments'         element={<DoctorAppointmentsPage />} />
             <Route path='patients'             element={<DoctorPatientsPage />} />
+            <Route path='patients/:patientId'  element={<DoctorPatientDetailsPage />} />
             <Route path='online-consultations' element={<DoctorOnlineConsultationsPage />} />
             <Route path='work-schedule'        element={<DoctorWorkSchedulePage />} />
             <Route path='medical-records'      element={<DoctorMedicalRecordsPage />} />

@@ -4,12 +4,16 @@ import DoctorPatientExpandableCard, {
   type PatientCardTab,
 } from "@/components/doctor/patients/doctor-patient-expandable-card";
 import CreateTemporaryPatientDialog from "@/components/doctor/patients/create-temporary-patient-dialog";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import {
   useCreateTemporaryDoctorPatient,
   useDoctorPatientFullProfile,
+  useDoctorPatientFiles,
   useDoctorPatientPublicProfile,
   useDoctorPatients,
+  useDeleteDoctorPatientFile,
   useRequestDoctorPatientAccess,
+  useUploadDoctorPatientFile,
 } from "@/hooks";
 import { Helmet } from "react-helmet-async";
 import {
@@ -23,20 +27,23 @@ import {
   Hourglass,
   CheckCircle2,
   Stethoscope,
-  ShieldAlert,
   Users,
   Calendar,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { readAuthUser } from "@/lib/cookies";
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
+import { doctorApi } from "@/lib/doctor/client";
 import {
   determinePatientState,
-  getPatientStateInfo,
   type PatientRelationshipState,
 } from "@/lib/doctor/patient-states";
+import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
+import { useNavigate } from "react-router-dom";
 
 type FilterStatus = "all" | "active" | "temporary" | "suspended";
 type RelationshipFilter = "all" | PatientRelationshipState;
@@ -67,6 +74,31 @@ function getPatientsListErrorMessage(error: unknown): string {
   );
 }
 
+function summarizePatientsListError(error: unknown): {
+  title: string;
+  brief: string;
+  detail: string;
+  showTechnicalDetail: boolean;
+} {
+  const detail = getPatientsListErrorMessage(error);
+  const verbose =
+    detail.length > 160 ||
+    detail.includes("لم نتمكن من إتمام الطلب") ||
+    detail.includes("VPN") ||
+    detail.includes("جدار الحماية") ||
+    detail.includes("توقيت خاطئ");
+  const brief = verbose
+    ? "لم نتمكن من جلب قائمة المرضى في هذه المحاولة. تحقق من اتصالك بالإنترنت ثم أعد المحاولة، أو انتظر قليلًا إن كانت الخدمة مشغولة."
+    : detail;
+
+  return {
+    title: "تعذّر تحميل مرضى الطبيب",
+    brief,
+    detail,
+    showTechnicalDetail: verbose,
+  };
+}
+
 function formatIsoDate(value?: string | null): string {
   if (!value) return "لا توجد زيارات";
   const date = new Date(value);
@@ -87,7 +119,7 @@ function toCardData(patient: {
   bloodType: string | null;
   lastVisitAt: string | null;
   isTemporary?: boolean;
-}): DoctorPatientExpandableCardData {
+}): Omit<DoctorPatientExpandableCardData, "relationshipState"> {
   const accountStatusLabel =
     patient.user.accountStatus === "temporary"
       ? "مؤقت"
@@ -127,6 +159,7 @@ type DoctorPatientsFiltersState = {
 
 export default function DoctorPatientsPage() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const authUser = readAuthUser();
   const doctorId = authUser?.actorIds?.doctorId ?? "";
 
@@ -152,6 +185,17 @@ export default function DoctorPatientsPage() {
   const [tempPatientOpen, setTempPatientOpen] = useState(false);
   const [pendingAccessByPatient, setPendingAccessByPatient] =
     useState<PendingAccessState>({});
+  const [accessResolutionByPatientId, setAccessResolutionByPatientId] = useState<
+    Record<
+      string,
+      {
+        accessRequired: boolean;
+        accessPending: boolean;
+        pendingRequestId: string | null;
+      }
+    >
+  >({});
+  const [patientFileActionKey, setPatientFileActionKey] = useState<string | null>(null);
 
   const listQuery = useDoctorPatients({
     search: filters.search || undefined,
@@ -179,6 +223,14 @@ export default function DoctorPatientsPage() {
     limit: 1,
     account_status: "suspended",
   });
+  const expandedListPatient = useMemo(
+    () => listQuery.patients.find((patient) => patient._id === expandedId),
+    [expandedId, listQuery.patients],
+  );
+  const expandedPatientIsTemporary = Boolean(
+    expandedListPatient?.isTemporary ||
+      expandedListPatient?.user.accountStatus === "temporary",
+  );
 
   const publicProfileQuery = useDoctorPatientPublicProfile(
     expandedId ?? "",
@@ -187,17 +239,40 @@ export default function DoctorPatientsPage() {
   const fullProfileQuery = useDoctorPatientFullProfile(
     doctorId,
     expandedId ?? "",
-    Boolean(expandedId && doctorId),
+    Boolean(expandedId && doctorId && !expandedPatientIsTemporary),
+  );
+  const canFetchFiles =
+    Boolean(expandedId) &&
+    !expandedPatientIsTemporary &&
+    fullProfileQuery.isSuccess &&
+    fullProfileQuery.data?.ok === true;
+  const patientFilesQuery = useDoctorPatientFiles(
+    expandedId ?? "",
+    canFetchFiles,
   );
 
   const createTempMutation = useCreateTemporaryDoctorPatient();
   const requestAccessMutation = useRequestDoctorPatientAccess(doctorId);
+  const uploadPatientFileMutation = useUploadDoctorPatientFile(expandedId ?? "");
+  const deletePatientFileMutation = useDeleteDoctorPatientFile(expandedId ?? "");
 
   const totalPages = useMemo(() => {
     const safeLimit = Math.max(1, filters.limit);
     const pages = Math.ceil((listQuery.total || 0) / safeLimit);
     return pages || 1;
   }, [filters.limit, listQuery.total]);
+
+  const patientsListFailed = listQuery.isError;
+  const patientsListPending = listQuery.isPending && !patientsListFailed;
+  const patientsListReady = !patientsListFailed && !patientsListPending;
+  const patientsRefreshing =
+    listQuery.isFetching &&
+    listQuery.fetchStatus === "fetching" &&
+    patientsListReady;
+  const patientsLoadErrorPresentation = useMemo(
+    () => summarizePatientsListError(listQuery.error),
+    [listQuery.error],
+  );
 
   const hasActiveFilters = useMemo(() => {
     return (
@@ -211,62 +286,6 @@ export default function DoctorPatientsPage() {
       filters.limit !== defaultFilters.limit
     );
   }, [defaultFilters, filters]);
-  const cardPatients = useMemo(() => {
-    const enhancedPatients = listQuery.patients.map((patient) => {
-      const base = toCardData(patient);
-
-      // Determine relationship state for each patient
-      const relationshipState = determinePatientState({
-        isTemporary: base.isTemporary ?? false,
-        accessRequired: false, // Will be determined when expanded
-        accessPending: Boolean(pendingAccessByPatient[patient._id]),
-        hasActiveEncounter: false, // TODO: Add encounter check
-        accountStatus: base.accountStatusKey,
-      });
-
-      if (
-        expandedId &&
-        patient._id === expandedId &&
-        publicProfileQuery.patient
-      ) {
-        return {
-          ...base,
-          relationshipState,
-          allergies: publicProfileQuery.patient.allergies ?? base.allergies,
-          medicalConditions:
-            publicProfileQuery.patient.medicalConditions ??
-            base.medicalConditions,
-          bloodType: publicProfileQuery.patient.bloodType ?? base.bloodType,
-          heightLabel: publicProfileQuery.patient.heightCm
-            ? `${publicProfileQuery.patient.heightCm} سم`
-            : "—",
-          weightLabel: publicProfileQuery.patient.weightKg
-            ? `${publicProfileQuery.patient.weightKg} كغ`
-            : "—",
-          measurementUnitLabel:
-            publicProfileQuery.patient.measurementUnit === "metric"
-              ? "متري"
-              : (publicProfileQuery.patient.measurementUnit ?? "—"),
-        };
-      }
-      return { ...base, relationshipState };
-    });
-
-    // Apply relationship filter
-    if (filters.relationship !== "all") {
-      return enhancedPatients.filter(
-        (p) => p.relationshipState === filters.relationship,
-      );
-    }
-
-    return enhancedPatients;
-  }, [
-    expandedId,
-    listQuery.patients,
-    publicProfileQuery.patient,
-    pendingAccessByPatient,
-    filters.relationship,
-  ]);
 
   const statusCounts = {
     active: activeCountQuery.total,
@@ -278,7 +297,14 @@ export default function DoctorPatientsPage() {
       suspendedCountQuery.isLoading,
   };
 
-  const fullProfileData = fullProfileQuery.patient
+  const fullProfileData = expandedPatientIsTemporary
+    ? {
+        medicalHistory: [],
+        medications: [],
+        files: [],
+        orders: [],
+      }
+    : fullProfileQuery.patient
     ? {
         medicalHistory: (fullProfileQuery.patient.medicalHistory ?? []).map(
           (record) => ({
@@ -296,7 +322,11 @@ export default function DoctorPatientsPage() {
             frequency: medication.frequency ?? "—",
           }),
         ),
-        files: (fullProfileQuery.patient.files ?? []).map((file) => ({
+        files: (
+          patientFilesQuery.files.length
+            ? patientFilesQuery.files
+            : (fullProfileQuery.patient.files ?? [])
+        ).map((file) => ({
           id: file._id,
           name: file.originalName ?? "ملف",
           createdAt: formatIsoDate(file.createdAt),
@@ -337,8 +367,245 @@ export default function DoctorPatientsPage() {
       ? accessError.message
       : undefined);
 
+  useEffect(() => {
+    if (!expandedId) return;
+    if (fullProfileQuery.isPending) return;
+
+    const pid = expandedId;
+    const pendId =
+      pendingRequestIdFromQuery ??
+      pendingAccessByPatient[pid]?.pendingRequestId ??
+      null;
+
+    if (expandedPatientIsTemporary) {
+      setAccessResolutionByPatientId((prev) => ({
+        ...prev,
+        [pid]: {
+          accessRequired: false,
+          accessPending: false,
+          pendingRequestId: null,
+        },
+      }));
+      return;
+    }
+
+    if (fullProfileQuery.patient) {
+      setAccessResolutionByPatientId((prev) => ({
+        ...prev,
+        [pid]: {
+          accessRequired: false,
+          accessPending: Boolean(pendId),
+          pendingRequestId: pendId,
+        },
+      }));
+      return;
+    }
+
+    if (
+      fullProfileQuery.deniedError ||
+      accessRequired ||
+      accessPending
+    ) {
+      setAccessResolutionByPatientId((prev) => ({
+        ...prev,
+        [pid]: {
+          accessRequired: Boolean(accessRequired),
+          accessPending: Boolean(accessPending),
+          pendingRequestId: pendId,
+        },
+      }));
+    }
+  }, [
+    expandedId,
+    expandedPatientIsTemporary,
+    fullProfileQuery.isPending,
+    fullProfileQuery.patient,
+    fullProfileQuery.deniedError,
+    accessRequired,
+    accessPending,
+    pendingRequestIdFromQuery,
+    pendingAccessByPatient,
+  ]);
+
+  const cardPatients = useMemo(() => {
+    const buildRelationshipState = (
+      base: ReturnType<typeof toCardData>,
+      patientApiId: string,
+    ): PatientRelationshipState => {
+      const resolved = accessResolutionByPatientId[patientApiId];
+      const optimisticPendingId =
+        pendingAccessByPatient[patientApiId]?.pendingRequestId ?? null;
+
+      const relationshipKnown =
+        Boolean(resolved) ||
+        Boolean(optimisticPendingId) ||
+        Boolean(base.isTemporary) ||
+        base.accountStatusKey === "temporary" ||
+        base.accountStatusKey === "suspended";
+
+      const accessRequiredForState = resolved ? resolved.accessRequired : false;
+      const accessPendingForState = resolved
+        ? resolved.accessPending
+        : Boolean(optimisticPendingId);
+
+      return determinePatientState({
+        isTemporary: base.isTemporary ?? false,
+        accessRequired: accessRequiredForState,
+        accessPending: accessPendingForState,
+        hasActiveEncounter: false,
+        accountStatus: base.accountStatusKey,
+        relationshipKnown,
+      });
+    };
+
+    const enhancedPatients = listQuery.patients.map((patient) => {
+      const base = toCardData(patient);
+      const relationshipState = buildRelationshipState(base, patient._id);
+
+      if (
+        expandedId &&
+        patient._id === expandedId &&
+        publicProfileQuery.patient
+      ) {
+        return {
+          ...base,
+          relationshipState,
+          allergies: publicProfileQuery.patient.allergies ?? base.allergies,
+          medicalConditions:
+            publicProfileQuery.patient.medicalConditions ??
+            base.medicalConditions,
+          bloodType: publicProfileQuery.patient.bloodType ?? base.bloodType,
+          heightLabel: publicProfileQuery.patient.heightCm
+            ? `${publicProfileQuery.patient.heightCm} سم`
+            : "—",
+          weightLabel: publicProfileQuery.patient.weightKg
+            ? `${publicProfileQuery.patient.weightKg} كغ`
+            : "—",
+          measurementUnitLabel:
+            publicProfileQuery.patient.measurementUnit === "metric"
+              ? "متري"
+              : (publicProfileQuery.patient.measurementUnit ?? "—"),
+        };
+      }
+      return { ...base, relationshipState };
+    });
+
+    if (filters.relationship !== "all") {
+      return enhancedPatients.filter(
+        (p) => p.relationshipState === filters.relationship,
+      );
+    }
+
+    return enhancedPatients;
+  }, [
+    accessResolutionByPatientId,
+    expandedId,
+    listQuery.patients,
+    pendingAccessByPatient,
+    publicProfileQuery.patient,
+    filters.relationship,
+  ]);
+
+  const patientFilesLoading =
+    expandedId !== null &&
+    activeTab === "files" &&
+    !expandedPatientIsTemporary &&
+    patientFilesQuery.isLoading;
+
+  const handlePatientFileOpen = async (patientId: string, fileId: string) => {
+    if (!doctorId) return;
+    setPatientFileActionKey(fileId);
+    try {
+      const response = await doctorApi.patients.getFileDownloadUrl(
+        doctorId,
+        patientId,
+        fileId,
+      );
+      if (response.url) {
+        window.open(response.url, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذر فتح الملف",
+        variant: "error",
+      });
+    } finally {
+      setPatientFileActionKey(null);
+    }
+  };
+
+  const handlePatientFileDownload = async (patientId: string, fileId: string) => {
+    if (!doctorId) return;
+    setPatientFileActionKey(fileId);
+    try {
+      const [downloadResponse, fileResponse] = await Promise.all([
+        doctorApi.patients.getFileDownloadUrl(doctorId, patientId, fileId),
+        doctorApi.patients.getFile(patientId, fileId),
+      ]);
+      if (downloadResponse.url) {
+        triggerBrowserFileDownload(
+          downloadResponse.url,
+          fileResponse.file?.originalName ?? "patient-file",
+        );
+      }
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذر تحميل الملف",
+        variant: "error",
+      });
+    } finally {
+      setPatientFileActionKey(null);
+    }
+  };
+
+  const handlePatientFileDelete = async (fileId: string) => {
+    if (!expandedId) return;
+    setPatientFileActionKey(fileId);
+    try {
+      const response = await deletePatientFileMutation.mutateAsync(fileId);
+      toast(response.message ?? "تم حذف الملف بنجاح.", {
+        title: "نجاح",
+        variant: "success",
+      });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذر حذف الملف",
+        variant: "error",
+      });
+    } finally {
+      setPatientFileActionKey(null);
+    }
+  };
+
+  const handlePatientFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !expandedId) return;
+    setPatientFileActionKey("upload");
+    try {
+      const response = await uploadPatientFileMutation.mutateAsync({ file });
+      toast(response.message ?? "تم رفع الملف بنجاح.", {
+        title: "نجاح",
+        variant: "success",
+      });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "تعذر رفع الملف",
+        variant: "error",
+      });
+    } finally {
+      event.target.value = "";
+      setPatientFileActionKey(null);
+    }
+  };
+
   return (
     <>
+      <input
+        id="doctor-patient-file-upload"
+        type="file"
+        className="hidden"
+        onChange={handlePatientFileUpload}
+      />
       <Helmet>
         <title>Patients • LMJ Health</title>
       </Helmet>
@@ -352,7 +619,7 @@ export default function DoctorPatientsPage() {
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
-                {listQuery.total}
+                {patientsListFailed ? "—" : listQuery.total}
               </span>
               <span className="text-primary/90">
                 {" "}
@@ -435,7 +702,9 @@ export default function DoctorPatientsPage() {
                   className="inline-flex h-[40px] min-w-[100px] items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-black text-[#344054] shadow-sm tabular-nums"
                   aria-live="polite"
                 >
-                  <span className="text-primary">{listQuery.total || 0}</span>
+                  <span className="text-primary">
+                    {patientsListFailed ? "—" : listQuery.total || 0}
+                  </span>
                   <span className="font-extrabold text-[#667085]">نتيجة</span>
                 </output>
               </div>
@@ -564,6 +833,10 @@ export default function DoctorPatientsPage() {
                       { value: "access-pending", label: "قيد الانتظار" },
                       { value: "active-encounter", label: "زيارة جارية" },
                       { value: "restricted", label: "محجوب" },
+                      {
+                        value: "relationship-indeterminate",
+                        label: "لم تُعرَف بعد (وسِّع البطاقة)",
+                      },
                     ]}
                     listboxAriaLabel="علاقة الوصول"
                   />
@@ -627,23 +900,88 @@ export default function DoctorPatientsPage() {
 
         {/* Patients list section */}
         <section className="space-y-3">
-          {listQuery.isLoading ? (
-            <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-              جارِ تحميل المرضى...
-            </div>
-          ) : listQuery.isError ? (
-            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-right font-cairo">
-              <div className="text-[15px] font-extrabold text-[#B42318]">
-                تعذر تحميل مرضى الطبيب
+          {patientsRefreshing &&
+          patientsListReady &&
+          cardPatients.length > 0 ? (
+            <p
+              className="flex justify-center gap-2 rounded-2xl border border-primary/15 bg-primary/[0.04] px-4 py-2.5 text-center font-cairo text-[12px] font-bold text-primary"
+              role="status"
+              aria-live="polite"
+            >
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+              جارٍ تحديث قائمة المرضى...
+            </p>
+          ) : null}
+          {patientsListFailed ? (
+            <DoctorListErrorState
+              title={patientsLoadErrorPresentation.title}
+              brief={patientsLoadErrorPresentation.brief}
+              detail={patientsLoadErrorPresentation.detail}
+              showTechnicalDetail={
+                patientsLoadErrorPresentation.showTechnicalDetail
+              }
+              retrying={
+                listQuery.isFetching && listQuery.fetchStatus === "fetching"
+              }
+              onRetry={() => listQuery.refetch()}
+            />
+          ) : false ? (
+            <div
+              className="flex flex-col justify-center items-center  rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-sm"
+              role="alert"
+            >
+              <AlertCircle
+                className="mb-4 text-center h-11 w-11 text-[#B42318]"
+                aria-hidden
+              />
+              <div className="font-cairo text-[15px] font-extrabold text-[#B42318]">
+                تعذّر تحميل مرضى الطبيب
               </div>
-              <p className="mt-2 text-[13px] font-semibold leading-6 text-[#7A271A]">
+              <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#7A271A]">
                 {getPatientsListErrorMessage(listQuery.error)}
+              </p>
+              <button
+                type="button"
+                onClick={() => listQuery.refetch()}
+                className="mt-6 inline-flex h-[40px] min-w-[160px] items-center justify-center rounded-xl bg-primary px-5 font-cairo text-[13px] font-extrabold text-white shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          ) : patientsListPending ? (
+            <div
+              className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-2xl border border-[#E5E7EB] bg-white px-6 py-12 shadow-[0_20px_50px_rgba(15,143,139,0.06)]"
+              role="status"
+              aria-busy="true"
+              aria-live="polite"
+            >
+              <Loader2 className="h-9 w-9 animate-spin text-primary" />
+              <p className="font-cairo text-[14px] font-semibold text-[#667085]">
+                جارٍ تحميل قائمة المرضى...
               </p>
             </div>
           ) : listQuery.patients.length === 0 ? (
-            <div className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-              لا توجد نتائج حالياً. إذا أنشأت المريض من admin فقط، فالغالب أنه
-              غير مرتبط بهذا الطبيب بعد، لذلك لن يظهر في هذه القائمة.
+            listQuery.total === 0 ? (
+              <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#667085]">
+                لا توجد نتائج حالياً. إذا أنشأت المريض من admin فقط، فالغالب أنه
+                غير مرتبط بهذا الطبيب بعد، لذلك لن يظهر في هذه القائمة.
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-[#E8ECF3] bg-white px-6 py-12 text-center shadow-sm">
+                <Users className="mx-auto h-12 w-12 text-[#D0D5DD]" aria-hidden />
+                <p className="mt-4 font-cairo text-[14px] font-semibold leading-relaxed text-[#667085]">
+                  لا توجد مرضى في هذه الصفحة وفقًا لعدد النتائج الإجمالي. جرّب
+                  العودة إلى صفحة سابقة أو تعديل عدد النتائج بالصفحة.
+                </p>
+              </div>
+            )
+          ) : cardPatients.length === 0 ? (
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-12 text-center shadow-sm">
+              <Users className="mx-auto h-12 w-12 text-[#D0D5DD]" aria-hidden />
+              <p className="mt-4 font-cairo text-[14px] font-semibold text-[#667085]">
+                لا يوجد مرضى يطابقون فلتر «علاقة الوصول» الحالي ضمن الصفحة
+                المعروضة. جرّب اختيار «كل العلاقات» أو غيّر الفلاتر الأخرى.
+              </p>
             </div>
           ) : (
             cardPatients.map((patient) => (
@@ -664,7 +1002,9 @@ export default function DoctorPatientsPage() {
                 }}
                 detailsLoading={
                   expandedId === patient.id &&
-                  (publicProfileQuery.isLoading || fullProfileQuery.isLoading)
+                  (publicProfileQuery.isLoading ||
+                    fullProfileQuery.isLoading ||
+                    patientFilesLoading)
                 }
                 fullProfile={expandedId === patient.id ? fullProfileData : null}
                 accessRequired={
@@ -683,6 +1023,20 @@ export default function DoctorPatientsPage() {
                       null)
                     : null
                 }
+                onUploadFile={() =>
+                  document.getElementById("doctor-patient-file-upload")?.click()
+                }
+                onOpenFile={(fileId) => handlePatientFileOpen(patient.id, fileId)}
+                onDownloadFile={(fileId) =>
+                  handlePatientFileDownload(patient.id, fileId)
+                }
+                onDeleteFile={handlePatientFileDelete}
+                fileActionKey={patientFileActionKey}
+                onOpenDetails={() => {
+                  navigate(`/doctor/patients/${patient.id}`, {
+                    state: { patient },
+                  });
+                }}
                 onStartConsultation={() =>
                   toast(
                     "تدفق بدء الاستشارة يرتبط بوحدة encounters/consultations التالية.",
@@ -753,6 +1107,7 @@ export default function DoctorPatientsPage() {
               <StyledSelect
                 size="xs"
                 tone="emphasis"
+                disabled={!patientsListReady}
                 value={String(filters.limit)}
                 onChange={(v) =>
                   setFilters((prev) => ({
@@ -777,7 +1132,7 @@ export default function DoctorPatientsPage() {
                   page: Math.max(1, prev.page - 1),
                 }))
               }
-              disabled={filters.page <= 1}
+              disabled={filters.page <= 1 || !patientsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               السابق
@@ -791,7 +1146,7 @@ export default function DoctorPatientsPage() {
                   page: Math.min(totalPages, prev.page + 1),
                 }))
               }
-              disabled={filters.page >= totalPages}
+              disabled={filters.page >= totalPages || !patientsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               التالي

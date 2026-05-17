@@ -179,7 +179,16 @@ export default function HomeDoctor() {
     <div dir='rtl' lang='ar' className='pb-8 space-y-7'>
       <section className='grid gap-12 md:grid-cols-2 lg:grid-cols-4'>
         {kpis.map((card) => (
-          <KpiStatCard key={card.key} {...card} />
+          <KpiStatCard
+            key={card.key}
+            label={card.label}
+            value={card.value}
+            delta={card.delta}
+            icon={card.icon}
+            accent={card.accent}
+            soft={card.soft}
+            iconColor={card.iconColor}
+          />
         ))}
       </section>
 

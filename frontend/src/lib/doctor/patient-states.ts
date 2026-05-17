@@ -12,7 +12,8 @@ export type PatientRelationshipState =
   | 'access-pending'       // طلب وصول قيد الانتظار - access request sent, awaiting approval
   | 'full-access'          // وصول كامل - doctor has full profile access
   | 'active-encounter'     // زيارة جارية - currently in an active encounter
-  | 'restricted';          // محجوب - access explicitly denied or restricted
+  | 'restricted'           // محجوب - access explicitly denied or restricted
+  | 'relationship-indeterminate'; // لم نُقيِّم بعد — البطاقة مطوية ولم يُحمَّل ملف الوصول بعد
 
 export type PatientStateInfo = {
   state: PatientRelationshipState;
@@ -41,17 +42,29 @@ export function determinePatientState(params: {
   accessPending: boolean;
   hasActiveEncounter?: boolean;
   accountStatus?: 'active' | 'temporary' | 'suspended';
+  /**
+   * When false we must not infer full-access from missing data (e.g. collapsed list row).
+   * Still handles temporary/pending/active-encounter/restricted when those are known from the list.
+   */
+  relationshipKnown?: boolean;
 }): PatientRelationshipState {
-  const { isTemporary, accessRequired, accessPending, hasActiveEncounter, accountStatus } = params;
+  const {
+    isTemporary,
+    accessRequired,
+    accessPending,
+    hasActiveEncounter,
+    accountStatus,
+    relationshipKnown = true,
+  } = params;
 
   // Priority order matters here
   if (hasActiveEncounter) return 'active-encounter';
   if (isTemporary || accountStatus === 'temporary') return 'temporary';
   if (accessPending) return 'access-pending';
-  if (accessRequired) return 'linked-only';
   if (accountStatus === 'suspended') return 'restricted';
-  
-  // If none of the above, patient is fully accessible
+  if (!relationshipKnown) return 'relationship-indeterminate';
+  if (accessRequired) return 'linked-only';
+
   return 'full-access';
 }
 
@@ -162,6 +175,24 @@ export function getPatientStateInfo(state: PatientRelationshipState): PatientSta
       showAccessButton: false,
       priority: 0,
     },
+    'relationship-indeterminate': {
+      state: 'relationship-indeterminate',
+      label: 'وسِّع البطاقة لعرض حالة الوصول',
+      description:
+        'لم تُحمَّل بعد صلاحية الملف الكامل لهذا المريض. افتح البطاقة لمعرفة ما إذا كان الوصول مكتملاً أو يحتاج موافقة.',
+      color: {
+        bg: 'bg-[#F2F4F7]',
+        text: 'text-[#475467]',
+        ring: 'ring-[#EAECF0]',
+        border: 'border-[#E4E7EC]',
+      },
+      icon: 'link',
+      canViewFullProfile: false,
+      canStartEncounter: false,
+      canRequestAccess: false,
+      showAccessButton: false,
+      priority: 2,
+    },
   };
 
   return stateMap[state];
@@ -225,6 +256,11 @@ export function getStateMessage(state: PatientRelationshipState, pendingRequestI
       title: 'وصول محجوب',
       body: 'الوصول إلى ملف هذا المريض محجوب حالياً. قد يكون الحساب معلقاً أو تم رفض طلب الوصول.',
       type: 'error',
+    },
+    'relationship-indeterminate': {
+      title: 'لم تُقيَّم صلاحية الوصول بعد',
+      body: 'البطاقة مطوّية ولم يُحمَّل تقييم الوصول بعد. وسِّع البطاقة لعرض ما إذا كان لديك وصولاً كاملاً إلى الملف أو تحتاج موافقة.',
+      type: 'info',
     },
   };
 

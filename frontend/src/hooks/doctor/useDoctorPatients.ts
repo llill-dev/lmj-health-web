@@ -8,6 +8,7 @@ import {
 import type {
   CreateTemporaryPatientBody,
   DoctorPatientAccessRequestBody,
+  DoctorPatientEncountersListParams,
   DoctorPatientsListParams,
 } from '@/lib/doctor/types';
 
@@ -64,6 +65,29 @@ export function useDoctorPatientFullProfile(
   };
 }
 
+export function useDoctorPatientEncounters(
+  doctorId: string,
+  patientId: string,
+  params: DoctorPatientEncountersListParams = {},
+  enabled = true,
+) {
+  const query = useQuery({
+    queryKey: doctorPatientsQueryKeys.encounters(doctorId, patientId, params),
+    queryFn: () => doctorApi.patients.listEncounters(doctorId, patientId, params),
+    enabled: enabled && Boolean(doctorId) && Boolean(patientId),
+    staleTime: 1000 * 30,
+  });
+
+  return {
+    ...query,
+    encounters: query.data?.encounters ?? [],
+    page: query.data?.page ?? params.page ?? 1,
+    limit: query.data?.limit ?? params.limit ?? 20,
+    total: query.data?.total ?? 0,
+    results: query.data?.results ?? 0,
+  };
+}
+
 export function useCreateTemporaryDoctorPatient() {
   const queryClient = useQueryClient();
 
@@ -92,6 +116,66 @@ export function useRequestDoctorPatientAccess(doctorId: string) {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: doctorPatientsQueryKeys.fullProfile(doctorId, variables.patientId),
+      });
+    },
+  });
+}
+
+export function useDoctorPatientFiles(patientId: string, enabled = true) {
+  const query = useQuery({
+    queryKey: doctorPatientsQueryKeys.files(patientId),
+    queryFn: () => doctorApi.patients.listFiles(patientId),
+    enabled: enabled && Boolean(patientId),
+    staleTime: 1000 * 30,
+  });
+
+  const items = query.data?.items ?? query.data?.files ?? [];
+  const pageInfo = query.data?.pageInfo;
+
+  return {
+    ...query,
+    files: items,
+    page: query.data?.page ?? pageInfo?.page ?? 1,
+    limit: query.data?.limit ?? pageInfo?.limit ?? items.length,
+    total: query.data?.total ?? pageInfo?.total ?? items.length,
+  };
+}
+
+export function useUploadDoctorPatientFile(patientId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      file,
+      note,
+      tags,
+    }: {
+      file: File;
+      note?: string;
+      tags?: string[];
+    }) => doctorApi.patients.uploadFile(patientId, file, note, tags),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.files(patientId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useDeleteDoctorPatientFile(patientId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (fileId: string) => doctorApi.patients.deleteFile(patientId, fileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.files(patientId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.all,
       });
     },
   });

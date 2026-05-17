@@ -101,6 +101,49 @@ export type DoctorPatientFile = {
   tags?: string[];
 };
 
+export type DoctorPatientFilesListResponse = {
+  messageKey?: string;
+  message?: string;
+  items?: DoctorPatientFile[];
+  files?: DoctorPatientFile[];
+  page?: number;
+  limit?: number;
+  total?: number;
+  results?: number;
+  pageInfo?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+    results?: number;
+    hasNextPage?: boolean;
+    hasPrevPage?: boolean;
+  };
+};
+
+export type DoctorPatientFileDetailsResponse = {
+  messageKey?: string;
+  message?: string;
+  file: DoctorPatientFile;
+};
+
+export type DoctorFileDownloadUrlResponse = {
+  messageKey?: string;
+  message?: string;
+  fileId?: string;
+  fileName?: string;
+  mimeType?: string | null;
+  extension?: string | null;
+  url?: string;
+  downloadUrl?: string;
+  expiresIn?: number;
+};
+
+export type DoctorPatientFileDeleteResponse = {
+  messageKey?: string;
+  message?: string;
+  success?: boolean;
+};
+
 export type DoctorPatientOrder = {
   _id?: string;
   orderType?: string;
@@ -298,6 +341,53 @@ export type DoctorCreateMedicalRecordBody = {
 
 export type DoctorUpdateMedicalRecordBody = Partial<DoctorCreateMedicalRecordBody>;
 
+export type DoctorEncounterStatus = 'open' | 'closed';
+
+export type DoctorEncounterOrigin =
+  | 'appointment'
+  | 'walk_in'
+  | 'manual'
+  | 'follow_up'
+  | string;
+
+export type DoctorPatientEncountersListParams = {
+  status?: DoctorEncounterStatus;
+  dateFrom?: string;
+  dateTo?: string;
+  sortBy?: 'startedAt' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+};
+
+export type DoctorEncounterSummary = {
+  _id: string;
+  status?: DoctorEncounterStatus | string;
+  origin?: DoctorEncounterOrigin;
+  notes?: string;
+  startedAt?: string;
+  createdAt?: string;
+  closedAt?: string | null;
+  appointment?: {
+    _id?: string;
+    date?: string;
+    startTime?: string;
+    status?: string;
+    appointmentType?: string | null;
+    appointmentTypeNameSnapshot?: string | null;
+  } | null;
+};
+
+export type DoctorPatientEncountersListResponse = {
+  messageKey?: string;
+  message?: string;
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  encounters: DoctorEncounterSummary[];
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Doctor — Appointments
 // ─────────────────────────────────────────────────────────────────────────────
@@ -368,6 +458,30 @@ export type DoctorAppointmentDetailsResponse = {
   message?: string;
   appointment: DoctorAppointmentSummary;
   files?: DoctorAppointmentFile[];
+};
+
+export type DoctorAppointmentFilesListResponse = {
+  messageKey?: string;
+  message?: string;
+  items: DoctorAppointmentFile[];
+};
+
+export type DoctorAppointmentFileDetailsResponse = {
+  messageKey?: string;
+  message?: string;
+  file: DoctorAppointmentFile;
+};
+
+export type DoctorAppointmentFileUploadResponse = {
+  messageKey?: string;
+  message?: string;
+  file: DoctorAppointmentFile;
+};
+
+export type DoctorAppointmentFileDeleteResponse = {
+  messageKey?: string;
+  message?: string;
+  success?: boolean;
 };
 
 export type DoctorAppointmentsListResponse = {

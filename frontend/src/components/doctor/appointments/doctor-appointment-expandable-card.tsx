@@ -13,6 +13,8 @@ import {
   MapPin,
   Pencil,
   Phone,
+  Trash2,
+  Upload,
   Video,
   X,
 } from "lucide-react";
@@ -85,6 +87,11 @@ export type DoctorAppointmentExpandableCardProps = {
   onEdit: () => void;
   onNoShow: () => void;
   detailsLoading?: boolean;
+  onUploadFile?: () => void;
+  onOpenFile?: (fileId: string) => void;
+  onDownloadFile?: (fileId: string) => void;
+  onUnlinkFile?: (fileId: string, fileName?: string) => void;
+  fileActionKey?: string | null;
 };
 
 export default function DoctorAppointmentExpandableCard({
@@ -100,10 +107,20 @@ export default function DoctorAppointmentExpandableCard({
   onEdit,
   onNoShow,
   detailsLoading,
+  onUploadFile,
+  onOpenFile,
+  onDownloadFile,
+  onUnlinkFile,
+  fileActionKey,
 }: DoctorAppointmentExpandableCardProps) {
   const phone = appointment.patientPhone ?? "—";
   const modeLine = appointment.type === "video" ? "أونلاين" : "عيادة";
-  const files = appointment.appointmentFiles ?? [];
+  const files = (appointment.appointmentFiles ?? []) as Array<{
+    id?: string;
+    name: string;
+    date: string;
+    url?: string;
+  }>;
   const detailDate = formatDashDate(appointment.date);
   const location =
     appointment.location ??
@@ -188,11 +205,7 @@ export default function DoctorAppointmentExpandableCard({
             <div className="mt-4 border-t border-[#EEF2F6] pt-4">
               <div className="rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-3">
                 <DetailRow icon={Calendar} label="التاريخ" value={detailDate} />
-                <DetailRow
-                  icon={Clock}
-                  label="الوقت"
-                  value={appointment.time}
-                />
+                <DetailRow icon={Clock} label="الوقت" value={appointment.time} />
                 <DetailRow
                   icon={Check}
                   label="الحالة"
@@ -205,24 +218,36 @@ export default function DoctorAppointmentExpandableCard({
                     value={appointment.appointmentTypeNameSnapshot}
                   />
                 )}
-                {appointment.priceSnapshot && appointment.priceVisibleToPatientSnapshot && (
-                  <DetailRow
-                    icon={AlertTriangle}
-                    label="السعر"
-                    value={`${appointment.priceSnapshot} ريال`}
-                  />
-                )}
+                {appointment.priceSnapshot &&
+                  appointment.priceVisibleToPatientSnapshot && (
+                    <DetailRow
+                      icon={AlertTriangle}
+                      label="السعر"
+                      value={`${appointment.priceSnapshot} ريال`}
+                    />
+                  )}
                 <DetailRow icon={MapPin} label="الموقع" value={location} />
                 <DetailRow icon={Hospital} label="سبب الزيارة" value={reason} />
               </div>
 
               <div className="mt-4">
-                <div className="mb-2 font-cairo text-[13px] font-extrabold text-[#101828]">
-                  ملفات الموعد:
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
+                    ملفات الموعد:
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onUploadFile}
+                    disabled={!onUploadFile}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 font-cairo text-[12px] font-bold text-white transition-colors hover:bg-[#0d7a77] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Upload className="h-3.5 w-3.5" />
+                    رفع ملف
+                  </button>
                 </div>
                 {detailsLoading ? (
                   <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                    جارِ تحميل تفاصيل الموعد...
+                    جارٍ تحميل تفاصيل الموعد...
                   </p>
                 ) : files.length === 0 ? (
                   <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
@@ -230,39 +255,54 @@ export default function DoctorAppointmentExpandableCard({
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {files.map((f, idx) => (
-                      <div
-                        key={`${f.name}-${idx}`}
-                        className="flex flex-col gap-3 rounded-lg border border-[#D6F5F3] bg-[#F0FDFC] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <div className="min-w-0 text-right">
-                          <div className="font-cairo text-[14px] font-bold text-[#101828]">
-                            {f.name}
+                    {files.map((file, idx) => {
+                      const fileId = file.id ?? `${file.name}-${idx}`;
+                      const isBusy = fileActionKey === fileId;
+                      return (
+                        <div
+                          key={fileId}
+                          className="flex flex-col gap-3 rounded-lg border border-[#D6F5F3] bg-[#F0FDFC] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div className="min-w-0 text-right">
+                            <div className="font-cairo text-[14px] font-bold text-[#101828]">
+                              {file.name}
+                            </div>
+                            <div className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
+                              {formatDashDate(file.date)}
+                            </div>
                           </div>
-                          <div className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
-                            {formatDashDate(f.date)}
+                          <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => onOpenFile?.(fileId)}
+                              disabled={!onOpenFile || isBusy}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              عرض
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onDownloadFile?.(fileId)}
+                              disabled={!onDownloadFile || isBusy}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              تحميل
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onUnlinkFile?.(fileId, file.name)}
+                              disabled={!onUnlinkFile || isBusy}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#F04438] bg-white px-3 font-cairo text-[12px] font-bold text-[#D92D20] transition-colors hover:bg-[#FEF3F2] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              فك الربط
+                            </button>
                           </div>
                         </div>
-                        <div className="flex flex-wrap justify-end gap-2 shrink-0">
-                          <button
-                            type="button"
-                            disabled
-                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary opacity-60"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            عرض
-                          </button>
-                          <button
-                            type="button"
-                            disabled
-                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary opacity-60"
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                            تحميل
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

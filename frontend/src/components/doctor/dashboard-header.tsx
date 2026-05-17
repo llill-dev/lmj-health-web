@@ -1,60 +1,154 @@
 'use client';
 
-import { Bell, MessageCircle, Search } from 'lucide-react';
+import { Bell, MessageCircle } from 'lucide-react';
+import { useMemo } from 'react';
+import { useAuthStore } from '@/store/authStore';
+
+function greetingWord(): string {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'صباح الخير';
+  if (h >= 12 && h < 17) return 'طاب يومك';
+  if (h >= 17 && h < 23) return 'مساء الخير';
+  return 'أهلاً بك';
+}
+
+function initialsFromName(name: string): string {
+  const t = name.trim();
+  if (!t) return 'ط';
+  const parts = t.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    const a = parts[0]?.[0] ?? '';
+    const b = parts[1]?.[0] ?? '';
+    return `${a}${b}`.toUpperCase();
+  }
+  return t.slice(0, 2).toUpperCase();
+}
 
 export default function DashboardHeader({
-  title = 'لوحة التحكم',
-  subtitle = 'مرحباً، د. خالد عبدالله (وضع العرض)',
-  searchPlaceholder = 'بحث...',
+  title = 'لوحة الطبيب',
+  subtitle: subtitleProp,
 }: {
   title?: string;
+  /** إن وُجد يُستخدم بدلاً من الاسم القادم من الحساب */
   subtitle?: string;
-  searchPlaceholder?: string;
 }) {
+  const user = useAuthStore((s) => s.user);
+
+  const displayName = useMemo(() => {
+    if (subtitleProp?.trim()) return subtitleProp.trim();
+    const n = user?.name?.trim();
+    if (n) return n;
+    return 'ضيفاً كريماً';
+  }, [subtitleProp, user?.name]);
+
+  const titledDisplay = useMemo(() => {
+    if (subtitleProp?.trim()) return displayName;
+    if (displayName === 'ضيفاً كريماً') return displayName;
+    if (user?.role === 'doctor' && !/^د\.?\s/u.test(displayName)) {
+      return `د. ${displayName}`;
+    }
+    return displayName;
+  }, [displayName, subtitleProp, user?.role]);
+
+  const initials = useMemo(
+    () =>
+      initialsFromName(
+        subtitleProp?.trim()
+          ? subtitleProp.trim()
+          : user?.name?.trim() ?? '',
+      ),
+    [subtitleProp, user?.name],
+  );
+
+  const greeting = greetingWord();
+
   return (
     <header
       dir='rtl'
       lang='ar'
-      className='flex h-[90px] pt-[16px] px-[32px] pb-[1.82px] w-full border-b-[1.82px] border-[#E5E7EB] items-center justify-between bg-[#FFFFFF]'
+      className='px-6 pt-3 pb-3 w-full sm:px-10 lg:px-12'
     >
-      <div className='text-right'>
-        <div className='font-cairo text-[22px] font-extrabold leading-[26px] text-[#111827]'>
-          {title}
-        </div>
-        <div className='mt-1 font-cairo text-[12px] font-semibold leading-[14px] text-[#98A2B3]'>
-          {subtitle}
-        </div>
-      </div>
-
-      <div className='flex flex-1 items-center justify-center'>
-        <div className='relative w-full max-w-[360px]'>
-          <input
-            type='text'
-            placeholder={searchPlaceholder}
-            className='h-[40px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] ps-11 pe-4 font-cairo text-[13px] font-semibold text-[#111827] shadow-[0_10px_25px_rgba(0,0,0,0.06)] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3]'
+      <div className='mx-auto max-w-[1420px]'>
+        <div className='relative overflow-hidden rounded-[18px] border border-white/70 bg-gradient-to-br from-[#e8faf8] via-white to-[#f0fdf9] shadow-[0_14px_36px_-14px_rgba(15,143,139,0.2),inset_0_1px_0_rgba(255,255,255,0.9)]'>
+          <div
+            className='pointer-events-none absolute inset-0 opacity-[0.45]'
+            aria-hidden
+            style={{
+              backgroundImage:
+                'radial-gradient(circle at 14% 40%, rgba(15,143,139,0.12), transparent 38%), radial-gradient(circle at 88% 30%, rgba(20,184,166,0.1), transparent 36%)',
+            }}
           />
-          <div className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-            <Search className='h-[18px] w-[18px]' />
-          </div>
-        </div>
-      </div>
+          <div
+            className='pointer-events-none absolute -left-16 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-[#14b8a6]/18 blur-3xl'
+            aria-hidden
+          />
+          <div
+            className='pointer-events-none absolute -right-12 top-0 h-28 w-28 rounded-full bg-[#0f766e]/12 blur-2xl'
+            aria-hidden
+          />
 
-      <div className='flex items-center gap-4'>
-        <button
-          type='button'
-          className='flex h-10 w-10 items-center justify-center rounded-[12px] bg-white shadow-[0_10px_25px_rgba(0,0,0,0.06)]'
-          aria-label='الإشعارات'
-        >
-          <Bell className='h-[18px] w-[18px] text-primary' />
-        </button>
-        <div className='h-9 w-px bg-[#E5E7EB]' />
-        <button
-          type='button'
-          className='flex h-10 w-10 items-center justify-center rounded-[12px] bg-white shadow-[0_10px_25px_rgba(0,0,0,0.06)]'
-          aria-label='الرسائل'
-        >
-          <MessageCircle className='h-[18px] w-[18px] text-primary' />
-        </button>
+          {/* ارتفاع البطاقة ~80–96px مع مرونة صعوداً إلى ~100px على الشاشات الضيقة جداً */}
+          <div className='relative flex min-h-[80px] max-h-[100px] items-center gap-3 px-4 py-2.5 sm:min-h-[84px] sm:gap-5 sm:px-6 sm:py-3'>
+            <div className='flex flex-1 gap-3 items-center min-w-0 min-h-0 sm:gap-4'>
+              <div className='relative shrink-0'>
+                <div className='flex h-[52px] w-[52px] items-center justify-center rounded-[16px] bg-gradient-to-br from-[#0f766e] via-[#0f8f8b] to-[#14b8a6] font-cairo text-[15px] font-black tracking-wide text-white shadow-[0_12px_28px_rgba(15,143,139,0.32)] ring-2 ring-white/95 sm:h-[56px] sm:w-[56px] sm:rounded-[18px] sm:text-[16px]'>
+                  {initials}
+                </div>
+                <span
+                  className='absolute -bottom-px -left-px w-3 h-3 bg-emerald-400 rounded-full border-2 border-white shadow-sm'
+                  aria-hidden
+                  title='متصل'
+                />
+              </div>
+
+              <div className='flex flex-col flex-1 gap-1 justify-center min-w-0 min-h-0 text-right'>
+                <div className='flex min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-0.5'>
+                  <h1 className='max-w-full truncate font-cairo text-[16px] font-black leading-tight text-[#0f172a] sm:text-[17px]'>
+                    {titledDisplay}
+                  </h1>
+                  <span className='inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/18 bg-white/80 px-2.5 py-0.5 font-cairo text-[10px] font-bold text-primary shadow-sm backdrop-blur-sm sm:text-[11px]'>
+                    <span
+                      className='h-1.5 w-1.5 shrink-0 rounded-full bg-primary'
+                      aria-hidden
+                    />
+                    {title}
+                  </span>
+                </div>
+                <p className='line-clamp-1 font-cairo text-[11px] font-semibold leading-snug text-[#64748b] sm:text-[12px]'>
+                  <span>{greeting}</span>
+                  <span className='mx-1.5 text-[#cbd5e1]' aria-hidden>
+                    ·
+                  </span>
+                  <span className='text-[#94a3b8]'>
+                    نظرة عامة على نشاط عيادتك
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className='flex shrink-0 items-center gap-2 border-r border-[#e2e8f0]/80 pr-3 sm:gap-2.5 sm:pr-4'>
+              <button
+                type='button'
+                className='flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]'
+                aria-label='الإشعارات'
+              >
+                <Bell className='h-[17px] w-[17px]' strokeWidth={2.25} />
+              </button>
+              <button
+                type='button'
+                className='flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]'
+                aria-label='الرسائل'
+              >
+                <MessageCircle className='h-[17px] w-[17px]' strokeWidth={2.25} />
+              </button>
+            </div>
+          </div>
+
+          <div
+            className='absolute inset-x-0 bottom-0 h-px bg-gradient-to-l from-transparent to-transparent pointer-events-none via-primary/25'
+            aria-hidden
+          />
+        </div>
       </div>
     </header>
   );

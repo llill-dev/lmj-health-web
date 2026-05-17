@@ -26,6 +26,20 @@ export const doctorEndpoints = {
       recordId: string,
     ) =>
       `/api/doctors/${doctorId}/patients/${patientId}/medical-records/${recordId}`,
+    encounters: (doctorId: string, patientId: string) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/encounters`,
+    files: {
+      list: (patientId: string) => `/api/patients/${patientId}/files`,
+      upload: (patientId: string) => `/api/patients/${patientId}/files/upload`,
+      detail: (patientId: string, fileId: string) =>
+        `/api/patients/${patientId}/files/${fileId}`,
+      download: (patientId: string, fileId: string) =>
+        `/api/patients/${patientId}/files/${fileId}/download`,
+      doctorDownloadUrl: (doctorId: string, patientId: string, fileId: string) =>
+        `/api/doctors/${doctorId}/patients/${patientId}/files/${fileId}/download-url`,
+      remove: (patientId: string, fileId: string) =>
+        `/api/patients/${patientId}/files/${fileId}`,
+    },
   },
   accessRequests: {
     list: '/api/access-requests',
@@ -41,6 +55,16 @@ export const doctorEndpoints = {
     complete: (appointmentId: string) =>
       `/api/appointments/${appointmentId}/complete`,
     noShow: (appointmentId: string) => `/api/appointments/${appointmentId}/no-show`,
+    files: {
+      list: (appointmentId: string) => `/api/appointments/${appointmentId}/files`,
+      upload: (appointmentId: string) => `/api/appointments/${appointmentId}/files`,
+      detail: (appointmentId: string, fileId: string) =>
+        `/api/appointments/${appointmentId}/files/${fileId}`,
+      download: (appointmentId: string, fileId: string) =>
+        `/api/appointments/${appointmentId}/files/${fileId}/download`,
+      unlink: (appointmentId: string, fileId: string) =>
+        `/api/appointments/${appointmentId}/files/${fileId}`,
+    },
   },
   schedule: {
     get: (doctorId: string) => `/api/doctors/${doctorId}/schedule`,

@@ -166,3 +166,61 @@ export function useNoShowDoctorAppointmentApi(appointmentId?: string) {
     },
   });
 }
+
+export function useDoctorAppointmentFilesApi(
+  appointmentId: string,
+  enabled = true,
+) {
+  const query = useQuery({
+    queryKey: doctorAppointmentsQueryKeys.files(appointmentId),
+    queryFn: () => doctorAppointmentsApi.listFiles(appointmentId),
+    enabled: enabled && Boolean(appointmentId),
+    staleTime: 1000 * 30,
+  });
+
+  return {
+    ...query,
+    files: query.data?.items ?? [],
+  };
+}
+
+export function useUploadDoctorAppointmentFileApi(appointmentId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      file,
+      note,
+      tags,
+    }: {
+      file: File;
+      note?: string;
+      tags?: string[];
+    }) => doctorAppointmentsApi.uploadFile(appointmentId, file, note, tags),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: doctorAppointmentsQueryKeys.files(appointmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorAppointmentsQueryKeys.detail(appointmentId),
+      });
+    },
+  });
+}
+
+export function useUnlinkDoctorAppointmentFileApi(appointmentId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (fileId: string) =>
+      doctorAppointmentsApi.unlinkFile(appointmentId, fileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: doctorAppointmentsQueryKeys.files(appointmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorAppointmentsQueryKeys.detail(appointmentId),
+      });
+    },
+  });
+}
