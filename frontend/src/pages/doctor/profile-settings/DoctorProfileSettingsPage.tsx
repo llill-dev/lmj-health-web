@@ -14,6 +14,8 @@ import {
   ShieldClose,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import DoctorProfileSecurityPanel from '@/components/doctor/profile-settings/doctor-profile-security-panel';
+import { readAuthUser } from '@/lib/cookies';
 
 type ProfileStatus = 'active' | 'inactive';
 
@@ -30,7 +32,10 @@ type InfoRow = {
 };
 
 export default function DoctorProfileSettingsPage() {
+  const authUser = readAuthUser();
   const [status, setStatus] = useState<ProfileStatus>('active');
+  const displayName = authUser?.fullName?.trim() || 'الطبيب';
+  const displayInitial = displayName.charAt(0) || 'د';
 
   const statusLabel = useMemo(() => {
     return status === 'active' ? 'نشط' : 'غير نشط';
@@ -45,12 +50,12 @@ export default function DoctorProfileSettingsPage() {
   const contact: InfoRow[] = [
     {
       label: 'رقم الهاتف',
-      value: '+966503456789',
+      value: authUser?.phone?.trim() || '—',
       icon: <Phone className='h-4 w-4 text-white' />,
     },
     {
       label: 'البريد الإلكتروني',
-      value: 'doctor1@example.com',
+      value: authUser?.email?.trim() || '—',
       icon: <Mail className='h-4 w-4 text-white' />,
     },
     {
@@ -114,12 +119,12 @@ export default function DoctorProfileSettingsPage() {
           <div className='flex flex-col items-center text-center'>
             <div className='flex h-[64px] w-[64px] items-center justify-center rounded-full border-2 border-white/50 bg-white/15'>
               <span className='font-cairo text-[20px] font-extrabold text-white'>
-                د
+                {displayInitial}
               </span>
             </div>
 
             <div className='mt-3 font-cairo text-[18px] font-extrabold text-white'>
-              د. خالد عبدالله
+              {/^د\.?\s/u.test(displayName) ? displayName : `د. ${displayName}`}
             </div>
             <div className='mt-1 font-cairo text-[13px] font-semibold text-white/80'>
               طب القلب
@@ -320,6 +325,8 @@ export default function DoctorProfileSettingsPage() {
             </button>
           </div>
         </section>
+
+        <DoctorProfileSecurityPanel />
 
         <div className='h-10' />
       </div>
