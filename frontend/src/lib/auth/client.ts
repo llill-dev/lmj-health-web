@@ -9,7 +9,20 @@ import type {
   SignupResponse,
   LoginRequest,
   LoginResponse,
+  LogoutAllResponse,
   LogoutResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  ResetPasswordRequestBody,
+  ResetPasswordRequestResponse,
+  VerifyResetOtpBody,
+  VerifyResetOtpResponse,
+  NewPasswordBody,
+  NewPasswordResponse,
+  ClaimAccountRequestBody,
+  ClaimAccountRequestResponse,
+  ClaimAccountVerifyBody,
+  ClaimAccountVerifyResponse,
   AuthError,
 } from "@/lib/auth/types";
 import { AUTH_ERROR_MESSAGES } from "@/lib/auth/types";
@@ -186,19 +199,76 @@ export const authApi = {
     }
   },
 
-  logoutAll: async (
-    token: string,
+  refresh: (body: RefreshTokenRequest) =>
+    post<RefreshTokenResponse>(authEndpoints.refresh(), body, {
+      locale: "ar",
+      omitAuth: true,
+    }),
+
+  logout: async (
+    accessToken: string,
   ): Promise<{ data: LogoutResponse } | { error: AuthError }> => {
     try {
       const response = await post<LogoutResponse>(
-        authEndpoints.logoutAll(),
+        authEndpoints.logout(),
         {},
-        { locale: "ar", token },
+        { locale: "ar", token: accessToken },
       );
       return { data: response };
     } catch (error) {
       return { error: handleAuthError(error) };
     }
   },
-};
 
+  logoutAll: async (
+    accessToken: string,
+  ): Promise<{ data: LogoutAllResponse } | { error: AuthError }> => {
+    try {
+      const response = await post<LogoutAllResponse>(
+        authEndpoints.logoutAll(),
+        {},
+        { locale: "ar", token: accessToken },
+      );
+      return { data: response };
+    } catch (error) {
+      return { error: handleAuthError(error) };
+    }
+  },
+
+  requestPasswordReset: (body: ResetPasswordRequestBody) =>
+    post<ResetPasswordRequestResponse>(authEndpoints.resetPassword(), body, {
+      locale: "ar",
+      omitAuth: true,
+    }),
+
+  resendResetOtp: (body: ResetPasswordRequestBody) =>
+    post<ResetPasswordRequestResponse>(authEndpoints.resendResetOtp(), body, {
+      locale: "ar",
+      omitAuth: true,
+    }),
+
+  verifyResetOtp: (body: VerifyResetOtpBody) =>
+    post<VerifyResetOtpResponse>(authEndpoints.verifyResetOtp(), body, {
+      locale: "ar",
+      omitAuth: true,
+    }),
+
+  setNewPassword: (body: NewPasswordBody) =>
+    post<NewPasswordResponse>(authEndpoints.newPassword(), body, {
+      locale: "ar",
+      omitAuth: true,
+    }),
+
+  requestClaimAccount: (body: ClaimAccountRequestBody) =>
+    post<ClaimAccountRequestResponse>(
+      authEndpoints.claimAccountRequest(),
+      body,
+      { locale: "ar", omitAuth: true },
+    ),
+
+  verifyClaimAccount: (body: ClaimAccountVerifyBody) =>
+    post<ClaimAccountVerifyResponse>(authEndpoints.claimAccountVerify(), body, {
+      locale: "ar",
+      omitAuth: true,
+    }),
+};

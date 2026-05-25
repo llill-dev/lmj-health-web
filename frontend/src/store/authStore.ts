@@ -2,13 +2,12 @@ import { useSyncExternalStore } from "react";
 import { get, post } from "@/lib/api";
 import { authApi } from "@/lib/auth/client";
 import {
-  readAuthToken,
-  writeAuthToken,
-  clearAuthToken,
-  readAuthUser,
-  writeAuthUser,
-  clearAllAuthCookies,
-} from "@/lib/cookies";
+  clearAuthSession,
+  persistAuthSession,
+  readStoredAuthSession,
+  type AuthSessionUser,
+  type AuthTokenPair,
+} from "@/lib/auth/session";
 import type { LoginRequest, AuthError } from "@/lib/auth/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -36,7 +35,9 @@ const PENDING_VERIFICATION_KEY = "pendingSignupVerification";
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  refreshExpiresAt: string | null;
   isAuthenticated: boolean;
   pendingVerification: PendingVerification | null;
   // Platform / general settings
@@ -59,13 +60,17 @@ interface AuthState {
     password: string,
     clientType?: "web" | "patient_mobile" | "doctor_mobile",
   ) => Promise<void>;
+  applySession: (pair: AuthTokenPair, user: AuthSessionUser) => void;
   register: (
     email: string,
     password: string,
     role: "jobseeker" | "company" | "doctor",
   ) => Promise<void>;
   setPendingVerification: (df: PendingVerification | null) => void;
-  logout: (options?: { skipRemoteRevoke?: boolean }) => Promise<void>;
+  logout: (options?: {
+    skipRemoteRevoke?: boolean;
+    scope?: 'current' | 'all';
+  }) => Promise<void>;
 }
 
 type Listener = () => void;
@@ -165,23 +170,33 @@ function writePendingVerification(payload: PendingVerification | null): void {
   } catch {}
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Build User from the persisted cookie data
-// ─────────────────────────────────────────────────────────────────────────────
+function mapRole(role: string): User["role"] {
+  return (role === "data_entry" ? "data-entry" : role) as User["role"];
+}
+
+function buildUserFromSession(user: AuthSessionUser, verified = true): User {
+  return {
+    id: user.userId,
+    email: user.email ?? "",
+    phone: user.phone ?? "",
+    role: mapRole(user.role),
+    name: user.fullName,
+    verified,
+  };
+}
 
 function buildUserFromCookie(): User | null {
-  const data = readAuthUser();
-  if (!data) return null;
-  return {
-    id: data.userId,
-    email: data.email ?? "",
-    phone: data.phone ?? "",
-    role: (data.role === "data_entry"
-      ? "data-entry"
-      : data.role) as User["role"],
-    name: data.fullName,
-    verified: true,
-  };
+  const { user } = readStoredAuthSession();
+  if (!user) return null;
+  return buildUserFromSession({
+    userId: user.userId,
+    role: user.role,
+    fullName: user.fullName,
+    email: user.email,
+    phone: user.phone,
+    actorIds: user.actorIds,
+    patientPublicId: user.patientPublicId,
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -190,7 +205,9 @@ function buildUserFromCookie(): User | null {
 
 let state: AuthState = {
   user: null,
-  token: null,
+  accessToken: null,
+  refreshToken: null,
+  refreshExpiresAt: null,
   isAuthenticated: false,
   pendingVerification: null,
   platformName: "LMJ Health",
@@ -251,6 +268,31 @@ let state: AuthState = {
     }
   },
 
+  applySession: (pair, sessionUser) => {
+    const mappedUser = buildUserFromSession(
+      sessionUser,
+      sessionUser.accountStatus === "active" || !sessionUser.accountStatus,
+    );
+
+    persistAuthSession(pair, sessionUser);
+
+    setState({
+      user: mappedUser,
+      accessToken: pair.accessToken,
+      refreshToken: pair.refreshToken,
+      refreshExpiresAt: pair.refreshExpiresAt ?? null,
+      isAuthenticated: true,
+      pendingVerification: null,
+    });
+    writePendingVerification(null);
+
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userRole");
+    } catch {}
+  },
+
   login: async (
     identifier: string,
     password: string,
@@ -271,43 +313,23 @@ let state: AuthState = {
 
     const { data } = result;
 
-    const mappedUser: User = {
-      id: data.userId,
-      email: data.email ?? "",
-      phone: data.phone ?? "",
-      role: (data.role === "data_entry"
-        ? "data-entry"
-        : data.role) as User["role"],
-      verified: data.accountStatus === "active",
-      name: data.fullName,
-    };
-
-    setState({
-      user: mappedUser,
-      token: data.token,
-      isAuthenticated: true,
-      pendingVerification: null,
-    });
-    writePendingVerification(null);
-
-    // ── Persist to cookies (replaces localStorage for sensitive auth data) ──
-    writeAuthToken(data.token);
-    writeAuthUser({
-      userId: data.userId,
-      role: data.role,
-      fullName: data.fullName,
-      email: data.email ?? "",
-      phone: data.phone ?? "",
-      actorIds: data.actorIds as Record<string, string | undefined>,
-      patientPublicId: data.patientPublicId,
-    });
-
-    // Legacy localStorage keys removed — cookies are the single source of truth.
-    try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("userData");
-      localStorage.removeItem("userRole");
-    } catch {}
+    state.applySession(
+      {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        refreshExpiresAt: data.refreshExpiresAt,
+      },
+      {
+        userId: data.userId,
+        role: data.role,
+        fullName: data.fullName,
+        email: data.email ?? "",
+        phone: data.phone ?? "",
+        actorIds: data.actorIds,
+        patientPublicId: data.patientPublicId,
+        accountStatus: data.accountStatus,
+      },
+    );
   },
 
   register: async () => {},
@@ -317,12 +339,20 @@ let state: AuthState = {
     setState({ pendingVerification: payload });
   },
 
-  logout: async (options?: { skipRemoteRevoke?: boolean }) => {
-    const token = state.token;
+  logout: async (options?: {
+    skipRemoteRevoke?: boolean;
+    scope?: 'current' | 'all';
+  }) => {
+    const accessToken = state.accessToken;
+    const scope = options?.scope ?? 'all';
 
-    if (token && !options?.skipRemoteRevoke) {
+    if (accessToken && !options?.skipRemoteRevoke) {
       try {
-        await authApi.logoutAll(token);
+        if (scope === 'current') {
+          await authApi.logout(accessToken);
+        } else {
+          await authApi.logoutAll(accessToken);
+        }
       } catch (err) {
         console.warn("Logout API failed — continuing local logout:", err);
       }
@@ -330,15 +360,15 @@ let state: AuthState = {
 
     setState({
       user: null,
-      token: null,
+      accessToken: null,
+      refreshToken: null,
+      refreshExpiresAt: null,
       isAuthenticated: false,
       pendingVerification: null,
     });
 
-    // Clear all auth cookies (token + user).
-    clearAllAuthCookies();
+    clearAuthSession();
 
-    // Also clear any legacy localStorage keys that may still exist.
     try {
       localStorage.removeItem("token");
       localStorage.removeItem("userData");
@@ -359,25 +389,21 @@ function setState(patch: Partial<AuthState>) {
   listeners.forEach((l) => l());
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Initialise from cookies on app start (replaces initFromStorage)
-// ─────────────────────────────────────────────────────────────────────────────
-
 function initFromCookies() {
   if (typeof window === "undefined") return;
 
-  const token = readAuthToken();
+  const stored = readStoredAuthSession();
   const user = buildUserFromCookie();
   const settings = readPersistedGeneralSettings();
   const pendingVerification = readPendingVerification();
 
-  if (token) {
+  if (stored.accessToken) {
     state = {
       ...state,
-      token,
+      accessToken: stored.accessToken,
+      refreshToken: stored.refreshToken,
+      refreshExpiresAt: stored.refreshExpiresAt,
       isAuthenticated: true,
-      // Restore full User object so ProtectedRoute can read role immediately
-      // after a page refresh — no /me round-trip needed.
       ...(user ? { user } : {}),
     };
   }
@@ -386,7 +412,7 @@ function initFromCookies() {
     state = { ...state, ...settings };
   }
 
-  if (pendingVerification && !token) {
+  if (pendingVerification && !stored.accessToken) {
     state = { ...state, pendingVerification };
   }
 }
@@ -424,3 +450,8 @@ useAuthStore.subscribe = (listener) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
 };
+
+/** Backward-compatible alias for Bearer token reads. */
+export function getAccessToken(): string | null {
+  return useAuthStore.getState().accessToken;
+}

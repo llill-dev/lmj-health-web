@@ -14,7 +14,10 @@
 
 /** Cookie names used across the app — change in one place if needed. */
 export const COOKIE_NAMES = {
+  /** Short-lived JWT used as Bearer accessToken. */
   TOKEN: 'auth_token',
+  REFRESH_TOKEN: 'auth_refresh_token',
+  REFRESH_EXPIRES_AT: 'auth_refresh_expires_at',
   USER: 'auth_user',
 } as const;
 
@@ -81,6 +84,36 @@ export function clearAuthToken(): void {
   deleteCookie(COOKIE_NAMES.TOKEN);
 }
 
+export function readAuthRefreshToken(): string | null {
+  return getCookie(COOKIE_NAMES.REFRESH_TOKEN);
+}
+
+export function writeAuthRefreshToken(
+  token: string,
+  maxAge = DEFAULT_MAX_AGE,
+): void {
+  setCookie(COOKIE_NAMES.REFRESH_TOKEN, token, maxAge);
+}
+
+export function clearAuthRefreshToken(): void {
+  deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
+}
+
+export function readAuthRefreshExpiresAt(): string | null {
+  return getCookie(COOKIE_NAMES.REFRESH_EXPIRES_AT);
+}
+
+export function writeAuthRefreshExpiresAt(
+  value: string,
+  maxAge = DEFAULT_MAX_AGE,
+): void {
+  setCookie(COOKIE_NAMES.REFRESH_EXPIRES_AT, value, maxAge);
+}
+
+export function clearAuthRefreshExpiresAt(): void {
+  deleteCookie(COOKIE_NAMES.REFRESH_EXPIRES_AT);
+}
+
 // ── User data (non-sensitive profile fields for role-based routing) ──────────
 
 export type PersistedUser = {
@@ -119,5 +152,7 @@ export function clearAuthUser(): void {
 /** Clear all auth cookies at once (logout). */
 export function clearAllAuthCookies(): void {
   clearAuthToken();
+  clearAuthRefreshToken();
+  clearAuthRefreshExpiresAt();
   clearAuthUser();
 }

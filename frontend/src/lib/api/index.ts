@@ -4,6 +4,10 @@ import {
   isAccessTokenExpired,
   isSessionExpiry401Exempt,
 } from '@/lib/session/sessionExpiryGuards';
+import {
+  ensureFreshAccessToken,
+  refreshAccessToken,
+} from '@/lib/auth/sessionRefresh';
 
 function normalizeApiOrigin(value: string | undefined): string {
   const trimmed = value?.trim() ?? '';
@@ -213,8 +217,11 @@ export type ApiResult<T, E = Error> =
 // ─────────────────────────────────────────────────────────────────────────────
 // Core request function
 // ─────────────────────────────────────────────────────────────────────────────
-function scheduleSessionExpiryHandling(locale: 'ar' | 'en'): void {
-  runSessionExpiredFlow(locale);
+function scheduleSessionExpiryHandling(
+  locale: 'ar' | 'en',
+  reason: 'expired' | 'invalidated' = 'expired',
+): void {
+  runSessionExpiredFlow(locale, reason);
 }
 
 /** استجابة 401 مع طلب كان يحمل توكن مصادقة → انتهاء الجلسة (مع استثناء مسارات /api/auth العامة). */
@@ -228,16 +235,22 @@ function maybeHandleUnauthorizedSession(
   scheduleSessionExpiryHandling(locale);
 }
 
-/** فحص JWT محلياً؛ إن انتهت الصلاحية يُفعَّل تسجيل الخروج ثم يُرمى خطأ لإيقاف الطلب */
-function ensureAccessTokenLive(
+/** فحص JWT محلياً؛ يحاول refresh قبل إيقاف الطلب */
+async function ensureAccessTokenLive(
   endpoint: string,
   locale: 'ar' | 'en',
   token: string,
   omitAuth: boolean,
-): void {
-  if (omitAuth || !token) return;
-  if (isSessionExpiry401Exempt(endpoint)) return;
-  if (!isAccessTokenExpired(token)) return;
+): Promise<string> {
+  if (omitAuth || !token) return token;
+  if (isSessionExpiry401Exempt(endpoint)) return token;
+  if (!isAccessTokenExpired(token)) return token;
+
+  const refreshed = await ensureFreshAccessToken();
+  if (refreshed) {
+    return useAuthStore.getState().accessToken || token;
+  }
+
   scheduleSessionExpiryHandling(locale);
   throw new ApiError(
     401,
@@ -247,6 +260,20 @@ function ensureAccessTokenLive(
       ? 'انتهت صلاحية جلسة الدخول.'
       : 'Session expired.',
   );
+}
+
+async function tryRecoverUnauthorizedSession(
+  endpoint: string,
+  locale: 'ar' | 'en',
+  hadBearerToken: boolean,
+): Promise<boolean> {
+  if (!hadBearerToken) return false;
+  if (isSessionExpiry401Exempt(endpoint)) return false;
+  const refreshed = await refreshAccessToken();
+  if (!refreshed) {
+    scheduleSessionExpiryHandling(locale, 'invalidated');
+  }
+  return refreshed;
 }
 
 export async function apiRequest<T = unknown>(
@@ -266,14 +293,15 @@ export async function apiRequest<T = unknown>(
   } = options;
 
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
-  const token =
+
+  let token =
     omitAuth === true
       ? ''
       : providedToken !== undefined
         ? providedToken
-        : useAuthStore.getState().token || '';
+        : useAuthStore.getState().accessToken || '';
 
-  ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
+  token = await ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
 
   const isFormData = rest.body instanceof FormData;
 
@@ -298,10 +326,9 @@ export async function apiRequest<T = unknown>(
     ...rest,
   };
 
-  try {
+  const execute = async (retryAfterRefresh: boolean): Promise<T> => {
     const res = await fetch(url, config);
 
-    // ── Parse body (JSON preferred, fall back to text) ──
     const contentType = res.headers.get('content-type') ?? '';
     let body: Record<string, unknown> = {};
     let rawText = '';
@@ -317,11 +344,31 @@ export async function apiRequest<T = unknown>(
     }
 
     if (!res.ok) {
+      if (res.status === 401 && !retryAfterRefresh) {
+        const recovered = await tryRecoverUnauthorizedSession(
+          endpoint,
+          locale,
+          hadBearerToken,
+        );
+        if (recovered) {
+          const nextToken =
+            providedToken !== undefined && omitAuth !== true
+              ? providedToken
+              : useAuthStore.getState().accessToken || '';
+          if (nextToken) {
+            config.headers = {
+              ...(config.headers as Record<string, string>),
+              Authorization: `Bearer ${nextToken}`,
+            };
+            return execute(true);
+          }
+        }
+      }
+
       if (res.status === 401) {
         maybeHandleUnauthorizedSession(endpoint, locale, hadBearerToken);
       }
 
-      // Prefer messageKey-keyed message, then body.message/error, then statusText
       const backendMsg =
         (body.message as string | undefined) ||
         (body.detail as string | undefined) ||
@@ -345,6 +392,10 @@ export async function apiRequest<T = unknown>(
     }
 
     return (Object.keys(body).length ? body : undefined) as unknown as T;
+  };
+
+  try {
+    return await execute(false);
   } catch (e) {
     if (e instanceof ApiError) throw e;
 
@@ -400,7 +451,7 @@ export async function apiMultipart<T = unknown>(
       ? ''
       : providedToken !== undefined
         ? providedToken
-        : useAuthStore.getState().token || '';
+        : useAuthStore.getState().accessToken || '';
 
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 

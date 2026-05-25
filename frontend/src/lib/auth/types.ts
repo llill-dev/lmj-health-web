@@ -78,10 +78,15 @@ export type AuthActorIds = {
   assignedDoctorId?: string | null;
 };
 
+export type AuthTokenResponseFields = {
+  accessToken: string;
+  refreshToken: string;
+  refreshExpiresAt: string;
+};
+
 export type VerifySignupOtpResponse =
-  | {
+  | ({
       message: string;
-      token: string;
       userId: string;
       role: 'patient' | 'doctor' | 'secretary' | 'admin' | 'data_entry';
       fullName: string;
@@ -89,7 +94,7 @@ export type VerifySignupOtpResponse =
       phone?: string;
       patientPublicId?: string | null;
       actorIds: AuthActorIds;
-    }
+    } & AuthTokenResponseFields)
   | {
       message: string;
       userId: string;
@@ -109,9 +114,8 @@ export interface LoginRequest {
   clientType?: ClientType;
 }
 
-export interface LoginResponse {
+export interface LoginResponse extends AuthTokenResponseFields {
   message: string;
-  token: string;
   userId: string;
   role: 'patient' | 'doctor' | 'secretary' | 'admin' | 'data_entry';
   accountStatus: 'active' | 'inactive' | 'pending' | 'suspended';
@@ -125,13 +129,100 @@ export interface LoginResponse {
   recoverUntil?: string;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse extends AuthTokenResponseFields {
+  messageKey?: string;
+  message: string;
+}
+
 export interface LogoutResponse {
+  messageKey?: string;
+  message: string;
+}
+
+export interface LogoutAllResponse {
   message: string;
   fullName: string;
   email?: string;
   phone?: string;
   patientPublicId?: string;
 }
+
+export type ResetPasswordChannel = 'email' | 'whatsapp';
+
+export type ResetPasswordRequestBody =
+  | { channel: 'email'; email: string }
+  | { channel: 'whatsapp'; phone: string };
+
+export type ResetPasswordRequestResponse = {
+  message: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  patientPublicId?: string | null;
+};
+
+export type VerifyResetOtpBody =
+  | { email: string; otp: string; phone?: never }
+  | { phone: string; otp: string; email?: never };
+
+export type VerifyResetOtpResponse = {
+  message: string;
+  resetToken: string;
+  expiresInMinutes: number;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  patientPublicId?: string | null;
+};
+
+export type NewPasswordBody = {
+  /** Session token from verify-reset-otp (API field name is `token`). */
+  token: string;
+  password: string;
+};
+
+export type NewPasswordResponse = {
+  message: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  patientPublicId?: string | null;
+};
+
+export type ClaimAccountRequestBody = ResetPasswordRequestBody;
+
+export type ClaimAccountRequestResponse = ResetPasswordRequestResponse;
+
+export type ClaimAccountVerifyBody =
+  | {
+      channel: 'email';
+      email: string;
+      otp: string;
+      password: string;
+      clientType?: ClientType;
+    }
+  | {
+      channel: 'whatsapp';
+      phone: string;
+      otp: string;
+      password: string;
+      clientType?: ClientType;
+    };
+
+export type ClaimAccountVerifyResponse = AuthTokenResponseFields & {
+  message: string;
+  userId: string;
+  role: 'patient';
+  fullName: string;
+  email?: string;
+  phone?: string;
+  patientPublicId?: string | null;
+  actorIds: AuthActorIds;
+};
 
 export interface AuthError {
   code:

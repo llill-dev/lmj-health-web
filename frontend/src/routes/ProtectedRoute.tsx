@@ -49,11 +49,11 @@ export default function ProtectedRoute({
   allowedRoles: AppRole[];
 }) {
   const location = useLocation();
-  const token = useAuthStore((s) => s.token);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const user  = useAuthStore((s) => s.user);
   const role  = user?.role as AppRole | undefined;
 
-  if (!token || !role) {
+  if (!accessToken || !role) {
     const next = encodeURIComponent(`${location.pathname}${location.search}`);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
@@ -79,10 +79,10 @@ export default function ProtectedRoute({
  * use as a layout route inside <Routes>.
  */
 export function GuestRoute({ children }: { children?: ReactNode }) {
-  const token = useAuthStore((s) => s.token);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const user  = useAuthStore((s) => s.user);
 
-  if (token && user?.role) {
+  if (accessToken && user?.role) {
     return <Navigate to={getRoleRoot(user.role as AppRole)} replace />;
   }
 
@@ -100,10 +100,10 @@ export function GuestRoute({ children }: { children?: ReactNode }) {
  * • Anonymous visitor  → /welcome
  */
 export function RootRedirect() {
-  const token = useAuthStore((s) => s.token);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const user  = useAuthStore((s) => s.user);
 
-  if (token && user?.role) {
+  if (accessToken && user?.role) {
     return <Navigate to={getRoleRoot(user.role as AppRole)} replace />;
   }
 
