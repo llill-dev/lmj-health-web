@@ -15,12 +15,17 @@ import type {
   DoctorEncounterOrigin,
   DoctorPatientListItem,
 } from "@/lib/doctor/types";
+import {
+  CreateEncounterSubmitError,
+  isValidAppointmentObjectId,
+} from "@/lib/doctor/createEncounterFormErrors";
 import { cn } from "@/lib/utils/utils";
 
 type CreateEncounterDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patients: DoctorPatientListItem[];
+  defaultPatientId?: string;
   submitting?: boolean;
   onSubmit: (payload: {
     patientId: string;
@@ -70,8 +75,8 @@ function validateField(
       if (values.origin === "appointment" && !trimmed) {
         return "رقم الموعد مطلوب عند اختيار زيارة مرتبطة بموعد.";
       }
-      if (trimmed && !/^[a-zA-Z0-9_-]{3,80}$/.test(trimmed)) {
-        return "رقم الموعد يجب أن يحتوي على 3 أحرف أو أرقام على الأقل وبدون مسافات.";
+      if (trimmed && !isValidAppointmentObjectId(trimmed)) {
+        return "رقم الموعد غير صالح. أدخل معرّف الموعد كاملاً (24 حرفاً hex) من نظام المواعيد.";
       }
       return "";
     }
@@ -110,11 +115,13 @@ export function CreateEncounterDialog({
   open,
   onOpenChange,
   patients,
+  defaultPatientId,
   submitting = false,
   onSubmit,
 }: CreateEncounterDialogProps) {
   const { toast } = useToast();
   const selectListboxOutletRef = useRef<HTMLDivElement>(null);
+  const valuesRef = useRef<EncounterFormValues>(INITIAL_VALUES);
 
   const [values, setValues] = useState<EncounterFormValues>(INITIAL_VALUES);
   const [errors, setErrors] = useState<EncounterFormErrors>({});
@@ -158,10 +165,27 @@ export function CreateEncounterDialog({
   useEffect(() => {
     if (!open) {
       setValues(INITIAL_VALUES);
+      valuesRef.current = INITIAL_VALUES;
       setErrors({});
       setTouched({});
+      return;
     }
-  }, [open]);
+
+    const prefillPatientId =
+      defaultPatientId &&
+      patients.some((patient) => patient._id === defaultPatientId)
+        ? defaultPatientId
+        : "";
+
+    const next = {
+      ...INITIAL_VALUES,
+      patientId: prefillPatientId,
+    };
+    setValues(next);
+    valuesRef.current = next;
+    setErrors({});
+    setTouched({});
+  }, [open, defaultPatientId, patients]);
 
   const setFieldValue = <K extends keyof EncounterFormValues>(
     field: K,
@@ -170,35 +194,23 @@ export function CreateEncounterDialog({
     setValues((prev) => {
       const next = { ...prev, [field]: value };
 
-      if (field === "origin" && value !== "appointment" && prev.appointmentId) {
+      if (field === "origin" && value !== "appointment") {
         next.appointmentId = "";
       }
 
+      valuesRef.current = next;
+
+      setErrors((prevErrors) => {
+        const updated: EncounterFormErrors = { ...prevErrors };
+        updated[field] = validateField(field, next) || undefined;
+        if (field === "origin") {
+          updated.appointmentId =
+            validateField("appointmentId", next) || undefined;
+        }
+        return updated;
+      });
+
       return next;
-    });
-
-    setErrors((prev) => {
-      const nextValues = {
-        ...values,
-        [field]: value,
-        ...(field === "origin" && value !== "appointment"
-          ? { appointmentId: "" }
-          : {}),
-      } as EncounterFormValues;
-
-      return {
-        ...prev,
-        [field]: touched[field]
-          ? validateField(field, nextValues) || undefined
-          : prev[field],
-        ...(field === "origin"
-          ? {
-              appointmentId: touched.appointmentId
-                ? validateField("appointmentId", nextValues) || undefined
-                : prev.appointmentId,
-            }
-          : {}),
-      };
     });
   };
 
@@ -206,7 +218,8 @@ export function CreateEncounterDialog({
     setTouched((prev) => ({ ...prev, [field]: true }));
     setErrors((prev) => ({
       ...prev,
-      [field]: validateField(field, values) || undefined,
+      [field]:
+        validateField(field, valuesRef.current) || undefined,
     }));
   };
 
@@ -230,12 +243,34 @@ export function CreateEncounterDialog({
       return;
     }
 
-    await onSubmit({
-      patientId: values.patientId,
-      origin: values.origin as DoctorEncounterOrigin,
-      appointmentId: values.appointmentId.trim(),
-      notes: values.notes.trim(),
-    });
+    try {
+      await onSubmit({
+        patientId: values.patientId,
+        origin: values.origin as DoctorEncounterOrigin,
+        appointmentId: values.appointmentId.trim(),
+        notes: values.notes.trim(),
+      });
+    } catch (error) {
+      if (error instanceof CreateEncounterSubmitError) {
+        setTouched({
+          patientId: true,
+          origin: true,
+          appointmentId: true,
+          notes: true,
+        });
+        setErrors((prev) => ({
+          ...prev,
+          ...error.fields,
+        }));
+        toast(error.message, {
+          title: "تعذّر إنشاء الزيارة",
+          variant: "error",
+          durationMs: 5200,
+        });
+        return;
+      }
+      throw error;
+    }
   };
 
   const fieldShell = (hasError: boolean) =>
@@ -360,8 +395,8 @@ export function CreateEncounterDialog({
                       onBlur={() => markTouched("appointmentId")}
                       placeholder={
                         values.origin === "appointment"
-                          ? "أدخل رقم الموعد المراد ربطه بالزيارة"
-                          : "اختياري، يمكن تركه فارغًا"
+                          ? "أدخل معرّف الموعد (24 حرفاً) من نظام المواعيد"
+                          : "اختياري — اتركه فارغاً إن لم تربط بموعد"
                       }
                       className="h-12 w-full border-0 bg-transparent px-0 text-right font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
                       aria-invalid={Boolean(errors.appointmentId)}
@@ -374,7 +409,9 @@ export function CreateEncounterDialog({
                   </div>
                 ) : (
                   <div className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#667085]">
-                    عند اختيار زيارة مرتبطة بموعد يصبح هذا الحقل مطلوبًا.
+                    {values.origin === "appointment"
+                      ? "عند اختيار «مرتبطة بموعد» يصبح معرّف الموعد مطلوباً."
+                      : "إذا أدخلت معرّف موعد، يجب أن يكون صالحاً بالكامل."}
                   </div>
                 )}
               </div>

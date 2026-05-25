@@ -28,6 +28,11 @@ import {
   useDoctorPatients,
 } from "@/hooks/doctor";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import {
+  CreateEncounterSubmitError,
+  isValidAppointmentObjectId,
+  resolveCreateEncounterServerFeedback,
+} from "@/lib/doctor/createEncounterFormErrors";
 import { readAuthUser } from "@/lib/cookies";
 import { useToast } from "@/components/ui/ToastProvider";
 
@@ -73,6 +78,9 @@ export default function DoctorEncountersPage() {
   const [filters, setFilters] = useState<EncountersFiltersState>(DEFAULT_FILTERS);
   const [expandedVisitId, setExpandedVisitId] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createDialogPatientId, setCreateDialogPatientId] = useState<
+    string | null
+  >(null);
   const [closeTarget, setCloseTarget] = useState<MedicalVisitCardData | null>(null);
 
   const { visits, stats, isLoading, isError, error, refetch, isFetching } =
@@ -117,6 +125,16 @@ export default function DoctorEncountersPage() {
     [filters.status],
   );
 
+  const openCreateEncounterDialog = (patientId?: string) => {
+    setCreateDialogPatientId(patientId ?? null);
+    setCreateDialogOpen(true);
+  };
+
+  const handleCreateDialogOpenChange = (open: boolean) => {
+    setCreateDialogOpen(open);
+    if (!open) setCreateDialogPatientId(null);
+  };
+
   const isRefreshing = isFetching && !isLoading;
 
   const handleStatusTab = (status: MedicalVisitStatusFilter) => {
@@ -135,17 +153,23 @@ export default function DoctorEncountersPage() {
     notes: string;
     appointmentId: string;
   }) => {
+    const trimmedAppointmentId = appointmentId.trim();
+    const validAppointmentId = isValidAppointmentObjectId(trimmedAppointmentId)
+      ? trimmedAppointmentId
+      : undefined;
+
     try {
       const response = await createEncounterMutation.mutateAsync({
         patientId,
         body: {
           origin,
           notes: notes.trim() || undefined,
-          appointmentId: appointmentId.trim() || undefined,
+          ...(validAppointmentId ? { appointmentId: validAppointmentId } : {}),
         },
       });
 
       setCreateDialogOpen(false);
+      setCreateDialogPatientId(null);
       setExpandedVisitId(response.encounter._id);
       setFilters((prev) => ({ ...prev, status: "all" }));
       toast(response.message ?? "تم إنشاء الزيارة الطبية بنجاح.", {
@@ -154,10 +178,8 @@ export default function DoctorEncountersPage() {
       });
       void refetch();
     } catch (requestError) {
-      toast(getUserFacingRequestErrorMessage(requestError), {
-        title: "تعذر إنشاء الزيارة",
-        variant: "error",
-      });
+      const feedback = resolveCreateEncounterServerFeedback(requestError);
+      throw new CreateEncounterSubmitError(feedback.fields, feedback.toastMessage);
     }
   };
 
@@ -200,7 +222,7 @@ export default function DoctorEncountersPage() {
           headerIcon={<ClipboardList className="h-8 w-8 text-white" aria-hidden />}
           actionLabel="زيارة جديدة"
           actionIcon={<Plus className="h-4 w-4" aria-hidden />}
-          onActionClick={() => setCreateDialogOpen(true)}
+          onActionClick={() => openCreateEncounterDialog()}
           kpis={[
             {
               key: "all",
@@ -265,7 +287,7 @@ export default function DoctorEncountersPage() {
                 title={emptyCopy.title}
                 subtitle={emptyCopy.subtitle}
                 actionLabel="إضافة زيارة جديدة"
-                onAction={() => setCreateDialogOpen(true)}
+                onAction={() => openCreateEncounterDialog()}
                 actionIcon={<Plus className="h-4 w-4" />}
               />
             ) : (
@@ -319,9 +341,9 @@ export default function DoctorEncountersPage() {
                               state: { openEncounters: true },
                             });
                           }}
-                          onStartNewVisit={() => {
-                            navigate(`/doctor/patients/${visit.patientId}`);
-                          }}
+                          onStartNewVisit={() =>
+                            openCreateEncounterDialog(visit.patientId)
+                          }
                           onCloseVisit={() => setCloseTarget(displayVisit)}
                         />
                       </motion.div>
@@ -336,7 +358,8 @@ export default function DoctorEncountersPage() {
 
       <CreateEncounterDialog
         open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
+        onOpenChange={handleCreateDialogOpenChange}
+        defaultPatientId={createDialogPatientId ?? undefined}
         patients={patientsQuery.patients}
         submitting={createEncounterMutation.isPending}
         onSubmit={handleCreateEncounter}
