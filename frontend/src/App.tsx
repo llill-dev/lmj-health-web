@@ -13,6 +13,8 @@ import LoginPage from '@/pages/auth/login/LoginPage';
 import SignupPage from '@/pages/auth/signup/SignupPage';
 import ForgotPasswordPage from '@/pages/auth/password/forgot-password/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/auth/password/reset-password/ResetPasswordPage';
+import ResetPasswordVerifyPage from '@/pages/auth/password/reset-password-verify/ResetPasswordVerifyPage';
+import ClaimAccountPage from '@/pages/auth/claim-account/ClaimAccountPage';
 import VerifyOtpPage from '@/pages/auth/verify-otp/VerifyOtpPage';
 import SignupSuccessPage from '@/pages/auth/signup-success/SignupSuccessPage';
 import OnboardingPage from '@/pages/onboarding/OnboardingPage';
@@ -28,6 +30,7 @@ import DoctorPatientDetailsPage from '@/pages/doctor/patients/DoctorPatientDetai
 import DoctorOnlineConsultationsPage from '@/pages/doctor/online-consultations/DoctorOnlineConsultationsPage';
 import DoctorWorkSchedulePage from '@/pages/doctor/work-schedule/DoctorWorkSchedulePage';
 import DoctorMedicalRecordsPage from '@/pages/doctor/medical-records/DoctorMedicalRecordsPage';
+import DoctorEncountersPage from '@/pages/doctor/encounters/DoctorEncountersPage';
 import DoctorAccessRequestsPage from '@/pages/doctor/access-requests/DoctorAccessRequestsPage';
 import DoctorDoctorsDirectoryPage from '@/pages/doctor/doctors-directory/DoctorDoctorsDirectoryPage';
 import DoctorClinicLocationPage from '@/pages/doctor/clinic-location/DoctorClinicLocationPage';
@@ -102,7 +105,9 @@ export default function App() {
             <Route path='/login'           element={<LoginPage />} />
             <Route path='/signup'          element={<SignupPage />} />
             <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+            <Route path='/reset-password/verify' element={<ResetPasswordVerifyPage />} />
             <Route path='/reset-password'  element={<ResetPasswordPage />} />
+            <Route path='/claim-account'   element={<ClaimAccountPage />} />
           </Route>
         </Route>
 
@@ -129,6 +134,7 @@ export default function App() {
             <Route path='patients/:patientId'  element={<DoctorPatientDetailsPage />} />
             <Route path='online-consultations' element={<DoctorOnlineConsultationsPage />} />
             <Route path='work-schedule'        element={<DoctorWorkSchedulePage />} />
+            <Route path='encounters'          element={<DoctorEncountersPage />} />
             <Route path='medical-records'      element={<DoctorMedicalRecordsPage />} />
             <Route path='access-requests'      element={<DoctorAccessRequestsPage />} />
             <Route path='doctors-directory'    element={<DoctorDoctorsDirectoryPage />} />

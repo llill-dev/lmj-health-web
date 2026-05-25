@@ -7,6 +7,9 @@ import {
 } from '@/lib/doctor/client';
 import type {
   CreateTemporaryPatientBody,
+  DoctorCloseEncounterResponse,
+  DoctorCreateEncounterBody,
+  DoctorEncounterDetailsResponse,
   DoctorPatientAccessRequestBody,
   DoctorPatientEncountersListParams,
   DoctorPatientsListParams,
@@ -86,6 +89,84 @@ export function useDoctorPatientEncounters(
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
   };
+}
+
+export function useDoctorPatientEncounterDetail(
+  doctorId: string,
+  patientId: string,
+  encounterId: string,
+  enabled = true,
+) {
+  const query = useQuery({
+    queryKey: doctorPatientsQueryKeys.encounterDetail(
+      doctorId,
+      patientId,
+      encounterId,
+    ),
+    queryFn: () => doctorApi.patients.getEncounter(doctorId, patientId, encounterId),
+    enabled:
+      enabled &&
+      Boolean(doctorId) &&
+      Boolean(patientId) &&
+      Boolean(encounterId),
+    staleTime: 1000 * 30,
+  });
+
+  return {
+    ...query,
+    encounter: query.data?.encounter,
+  };
+}
+
+export function useCreateDoctorPatientEncounter(doctorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      patientId,
+      body,
+    }: {
+      patientId: string;
+      body: DoctorCreateEncounterBody;
+    }) => doctorApi.patients.createEncounter(doctorId, patientId, body),
+    onSuccess: (_response: DoctorEncounterDetailsResponse, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.encounters(doctorId, variables.patientId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useCloseDoctorPatientEncounter(doctorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      patientId,
+      encounterId,
+    }: {
+      patientId: string;
+      encounterId: string;
+    }) => doctorApi.patients.closeEncounter(doctorId, patientId, encounterId),
+    onSuccess: (_response: DoctorCloseEncounterResponse, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.encounters(doctorId, variables.patientId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.encounterDetail(
+          doctorId,
+          variables.patientId,
+          variables.encounterId,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.all,
+      });
+    },
+  });
 }
 
 export function useCreateTemporaryDoctorPatient() {

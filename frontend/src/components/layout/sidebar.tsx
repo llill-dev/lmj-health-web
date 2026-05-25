@@ -17,12 +17,16 @@ export default function Sidebar({
   collapsed = false,
   onToggleCollapse,
   onLogout,
+  profileName,
+  profileEmail,
 }: {
   active?: SidebarItemId | AdminSidebarItemId;
   role?: 'doctor' | 'admin';
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   onLogout?: () => void;
+  profileName?: string;
+  profileEmail?: string;
 }) {
   const navItems = useMemo(() => {
     return role === 'admin' ? adminSidebarItems : sidebarItems;
@@ -37,6 +41,9 @@ export default function Sidebar({
       : 'بوابة الطبيب';
 
   const basePath = role === 'admin' ? '/admin' : '/doctor';
+  const doctorDisplayName = profileName?.trim() || 'الطبيب';
+  const doctorEmail = profileEmail?.trim() || '—';
+  const doctorInitial = doctorDisplayName.charAt(0).toUpperCase() || 'د';
 
   const resolvedActive =
     (active as (SidebarItemId | AdminSidebarItemId) | undefined) ??
@@ -122,18 +129,18 @@ export default function Sidebar({
                     <span className='font-cairo text-[18px] font-extrabold leading-none'>
                       {role === 'admin'
                         ? (adminBranding.appName.trim().charAt(0) || 'م')
-                        : 'د'}
+                        : doctorInitial}
                     </span>
                   )}
                 </div>
                 <div className='flex-1'>
                   <div className='text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]'>
-                    {role === 'admin' ? 'المدير' : 'د. خالد عبدالله'}
+                    {role === 'admin' ? '??????' : doctorDisplayName}
                   </div>
                   <div className='mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]'>
                     {role === 'admin'
                       ? 'admin@lmjhealth.com'
-                      : 'doctor1@example.com'}
+                      : doctorEmail}
                   </div>
                 </div>
               </div>

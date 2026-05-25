@@ -1,0 +1,239 @@
+import { motion } from "framer-motion";
+import {
+  Calendar,
+  CalendarDays,
+  Check,
+  Clock,
+  Hospital,
+  Phone,
+  Plus,
+  Video,
+} from "lucide-react";
+
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
+
+import { PatientDetailsTabSkeleton } from "../skeletons";
+import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
+
+function patientInitialsFromName(name?: string): string {
+  const value = name?.trim() ?? "";
+  if (!value) return "م";
+  const parts = value.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
+  }
+  return value.slice(0, 2).toUpperCase();
+}
+
+function formatDashDate(iso?: string | null) {
+  if (!iso) return "—";
+  const [y, m, d] = iso.split("-");
+  if (!y || !m || !d) return iso;
+  return `${d}-${m}-${y}`;
+}
+
+interface AppointmentsTabProps {
+  appointments: any[];
+  isLoading: boolean;
+  isError: boolean;
+  isFetching: boolean;
+  onRetry: () => void;
+  onOpenAppointments: () => void;
+  formatIsoDate: (value?: string | null) => string;
+}
+
+export function AppointmentsTab({
+  appointments,
+  isLoading,
+  isError,
+  isFetching,
+  onRetry,
+  onOpenAppointments,
+  formatIsoDate,
+}: AppointmentsTabProps) {
+  if (isLoading) return <PatientDetailsTabSkeleton rows={3} />;
+
+  if (isError) {
+    return (
+      <DoctorListErrorState
+        title="تعذّر تحميل المواعيد"
+        brief="حدث خطأ أثناء تحميل مواعيد المريض"
+        detail="حدث خطأ أثناء تحميل مواعيد المريض"
+        retrying={isFetching}
+        onRetry={onRetry}
+      />
+    );
+  }
+
+  if (!appointments.length) {
+    return (
+      <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="w-full">
+        <motion.div variants={TAB_STAGGER_ITEM} className="w-full">
+          <PatientTabEmptyIllustration
+            variant="teal"
+            imageSrc="/images/photo-not-meduical-file.png"
+            imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.12)]"
+            title="لا توجد مواعيد مسجّلة"
+            subtitle="لا توجد مواعيد محجوزة لهذا المريض حتى الآن"
+            actionLabel="حجز موعد جديد"
+            onAction={onOpenAppointments}
+            actionIcon={<CalendarDays className="h-4 w-4" />}
+          />
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  const statusMap: Record<string, { label: string; tone: string }> = {
+    scheduled: { label: "مؤكد", tone: "bg-primary text-white" },
+    completed: { label: "مكتمل", tone: "bg-[#ECFDF3] text-[#027A48] ring-1 ring-inset ring-[#ABEFC6]" },
+    cancelled: { label: "ملغي", tone: "bg-[#FEE2E2] text-[#991B1B] ring-1 ring-inset ring-[#FCA5A5]" },
+    no_show: { label: "لم يحضر", tone: "bg-[#F3F4F6] text-[#475467] ring-1 ring-inset ring-[#E5E7EB]" },
+    rescheduled: { label: "أعيدت جدولته", tone: "bg-[#FFF7ED] text-[#C2410C] ring-1 ring-inset ring-[#FDBA74]" },
+  };
+
+  return (
+    <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="space-y-4">
+      <motion.div variants={TAB_STAGGER_ITEM} className="flex justify-start">
+        <button
+          type="button"
+          onClick={onOpenAppointments}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.18)] transition-colors hover:bg-[#0d7a77]"
+        >
+          <Plus className="h-4 w-4" />
+          حجز موعد جديد
+        </button>
+      </motion.div>
+
+      {appointments.map((appointment, index) => {
+        const status = statusMap[appointment.status] ?? {
+          label: appointment.status ?? "غير معروف",
+          tone: "bg-[#F3F4F6] text-[#475467] ring-1 ring-inset ring-[#E5E7EB]",
+        };
+        const patientName =
+          appointment.patientName ??
+          appointment.patient?.userId?.fullName ??
+          appointment.patient?.fullName ??
+          "المريض";
+        const patientPhone =
+          appointment.patientPhone ??
+          appointment.patient?.userId?.phone ??
+          appointment.patient?.phone ??
+          "—";
+        const type =
+          appointment.type ??
+          (appointment.mode === "video" ? "video" : "clinic");
+        const modeLine = type === "video" ? "أونلاين" : "عيادة";
+        const kindLabel =
+          type === "video"
+            ? "استشارة"
+            : type === "home"
+              ? "زيارة منزلية"
+              : "مراجعة";
+
+        return (
+          <motion.article
+            key={appointment._id ?? index}
+            variants={TAB_STAGGER_ITEM}
+            className="overflow-hidden rounded-[10px] border border-[#E5E7EB] bg-white shadow-[0px_4px_12px_rgba(0,0,0,0.06)]"
+          >
+            <div className="px-4 py-4 sm:px-5 sm:py-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary font-cairo text-[18px] font-extrabold text-white shadow-[0_8px_18px_rgba(15,143,139,0.22)]">
+                    {patientInitialsFromName(patientName)}
+                  </div>
+
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="font-cairo text-[17px] font-extrabold leading-tight text-[#101828]">
+                      {patientName}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-cairo text-[13px] font-semibold text-[#667085]">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Phone className="h-4 w-4 text-primary" />
+                        {patientPhone}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 text-primary">
+                        {type === "video" ? (
+                          <Video className="h-4 w-4" />
+                        ) : (
+                          <Hospital className="h-4 w-4" />
+                        )}
+                        {modeLine}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-flex h-9 items-center gap-1.5 rounded-[6px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary">
+                        <Clock className="h-3.5 w-3.5" />
+                        {appointment.startTime ?? appointment.time ?? "—"}
+                      </span>
+                      <span className="inline-flex h-9 items-center gap-1.5 rounded-[6px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {appointment.date ?? "—"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-center gap-2 sm:flex-row sm:items-start">
+                  <span className="rounded-lg bg-primary px-2.5 py-1 font-cairo text-[11px] font-bold text-white">
+                    {kindLabel}
+                  </span>
+                  <span
+                    className={`rounded-lg px-2.5 py-1 font-cairo text-[11px] font-bold ${status.tone}`}
+                  >
+                    {status.label}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 border-t border-[#EEF2F6] pt-4">
+                <div className="rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-3">
+                  <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
+                    <Calendar className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
+                    <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                      <div className="font-cairo text-[16px] font-bold text-primary">التاريخ</div>
+                      <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
+                        {formatDashDate(appointment.date)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
+                    <Clock className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
+                    <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                      <div className="font-cairo text-[16px] font-bold text-primary">الوقت</div>
+                      <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
+                        {appointment.startTime ?? appointment.time ?? "—"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
+                    <Check className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
+                    <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                      <div className="font-cairo text-[16px] font-bold text-primary">الحالة</div>
+                      <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
+                        {status.label}
+                      </div>
+                    </div>
+                  </div>
+                  {(appointment.appointmentTypeNameSnapshot ?? appointment.appointmentType?.name) ? (
+                    <div className="flex items-start gap-3 py-3">
+                      <Hospital className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
+                      <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                        <div className="font-cairo text-[16px] font-bold text-primary">نوع الموعد</div>
+                        <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
+                          {appointment.appointmentTypeNameSnapshot ?? appointment.appointmentType?.name}
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </motion.article>
+        );
+      })}
+    </motion.div>
+  );
+}

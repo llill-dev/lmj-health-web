@@ -35,8 +35,12 @@ import type {
   DoctorPatientFileDetailsResponse,
   DoctorFileDownloadUrlResponse,
   DoctorPatientFileDeleteResponse,
+  DoctorCreateEncounterBody,
+  DoctorUpdateEncounterBody,
   DoctorPatientEncountersListParams,
   DoctorPatientEncountersListResponse,
+  DoctorEncounterDetailsResponse,
+  DoctorCloseEncounterResponse,
   DoctorPatientsListParams,
   DoctorPatientsListResponse,
   DoctorUpdateMedicalRecordBody,
@@ -125,6 +129,12 @@ export const doctorPatientsQueryKeys = {
     patientId: string,
     params: DoctorPatientEncountersListParams = {},
   ) => [...doctorPatientsQueryKeys.all, "encounters", doctorId, patientId, params] as const,
+  encounterDetail: (
+    doctorId: string,
+    patientId: string,
+    encounterId: string,
+  ) =>
+    [...doctorPatientsQueryKeys.all, "encounter-detail", doctorId, patientId, encounterId] as const,
   files: (patientId: string) =>
     [...doctorPatientsQueryKeys.all, "files", patientId] as const,
   file: (patientId: string, fileId: string) =>
@@ -830,6 +840,46 @@ export const doctorApi = {
       const endpoint = query ? `${base}?${query}` : base;
       return get<DoctorPatientEncountersListResponse>(endpoint, { locale: "ar" });
     },
+    createEncounter: (
+      doctorId: string,
+      patientId: string,
+      body: DoctorCreateEncounterBody,
+    ) =>
+      post<DoctorEncounterDetailsResponse>(
+        doctorEndpoints.patients.encounters(doctorId, patientId),
+        body,
+        { locale: "ar" },
+      ),
+    getEncounter: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+    ) =>
+      get<DoctorEncounterDetailsResponse>(
+        doctorEndpoints.patients.encounterById(doctorId, patientId, encounterId),
+        { locale: "ar" },
+      ),
+    updateEncounter: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      body: DoctorUpdateEncounterBody,
+    ) =>
+      patch<DoctorEncounterDetailsResponse>(
+        doctorEndpoints.patients.encounterById(doctorId, patientId, encounterId),
+        body,
+        { locale: "ar" },
+      ),
+    closeEncounter: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+    ) =>
+      post<DoctorCloseEncounterResponse>(
+        doctorEndpoints.patients.closeEncounter(doctorId, patientId, encounterId),
+        {},
+        { locale: "ar" },
+      ),
     listFiles: (patientId: string) =>
       get<DoctorPatientFilesListResponse>(
         doctorEndpoints.patients.files.list(patientId),

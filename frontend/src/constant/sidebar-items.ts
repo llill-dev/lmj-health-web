@@ -24,6 +24,7 @@ export type SidebarItemId =
   | 'dashboard'
   | 'appointments'
   | 'patients'
+  | 'encounters'
   | 'online-consultations'
   | 'work-schedule'
   | 'medical-records'
@@ -80,6 +81,12 @@ export const sidebarItems: Array<{
     badge: 5,
   },
   { id: 'patients', path: 'patients', label: 'المرضى', icon: Users },
+  {
+    id: 'encounters',
+    path: 'encounters',
+    label: 'الزيارات الطبية',
+    icon: Stethoscope,
+  },
   {
     id: 'work-schedule',
     path: 'work-schedule',

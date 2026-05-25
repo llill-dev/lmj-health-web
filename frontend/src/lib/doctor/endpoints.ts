@@ -28,6 +28,18 @@ export const doctorEndpoints = {
       `/api/doctors/${doctorId}/patients/${patientId}/medical-records/${recordId}`,
     encounters: (doctorId: string, patientId: string) =>
       `/api/doctors/${doctorId}/patients/${patientId}/encounters`,
+    encounterById: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+    ) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/encounters/${encounterId}`,
+    closeEncounter: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+    ) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/encounters/${encounterId}/close`,
     files: {
       list: (patientId: string) => `/api/patients/${patientId}/files`,
       upload: (patientId: string) => `/api/patients/${patientId}/files/upload`,

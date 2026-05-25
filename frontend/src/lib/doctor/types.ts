@@ -378,6 +378,14 @@ export type DoctorEncounterSummary = {
   } | null;
 };
 
+export type DoctorCreateEncounterBody = {
+  appointmentId?: string;
+  origin?: DoctorEncounterOrigin;
+  notes?: string;
+};
+
+export type DoctorUpdateEncounterBody = Partial<DoctorCreateEncounterBody>;
+
 export type DoctorPatientEncountersListResponse = {
   messageKey?: string;
   message?: string;
@@ -386,6 +394,20 @@ export type DoctorPatientEncountersListResponse = {
   total: number;
   results: number;
   encounters: DoctorEncounterSummary[];
+};
+
+export type DoctorEncounterDetailsResponse = {
+  messageKey?: string;
+  message?: string;
+  encounter: DoctorEncounterSummary;
+};
+
+export type DoctorCloseEncounterResponse = {
+  messageKey?: string;
+  message?: string;
+  encounterId: string;
+  status: DoctorEncounterStatus | string;
+  closedAt?: string | null;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
