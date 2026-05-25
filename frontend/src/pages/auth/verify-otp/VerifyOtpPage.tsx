@@ -6,13 +6,19 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { useAuthStore } from "@/store/authStore";
 import { authApi } from "@/lib/auth/client";
 import AuthBackground from "@/components/auth/AuthBackground";
-import { writeAuthToken, writeAuthUser } from "@/lib/cookies";
+import { normalizeTokenPair } from "@/lib/auth/session";
 import { getRoleRoot, type AppRole } from "@/routes/ProtectedRoute";
 import {
   persistSignupSuccessNavState,
   type SignupSuccessLocationState,
 } from "@/lib/auth/signupSuccessNavState";
 import type { VerifySignupOtpResponse } from "@/lib/auth/types";
+
+function hasTokenPair(
+  value: VerifySignupOtpResponse,
+): value is Extract<VerifySignupOtpResponse, { accessToken: string }> {
+  return "accessToken" in value && Boolean(value.accessToken);
+}
 
 /** يدعم الاستجابة المسطّحة أو تحت data، وأشكال أسماء JWT الشائعة. */
 function coerceVerifySignupOtpPayload(
@@ -23,21 +29,19 @@ function coerceVerifySignupOtpPayload(
     base = raw.data as Record<string, unknown>;
   }
 
-  const pickToken =
-    (typeof base.token === "string" && base.token) ||
-    (typeof base.accessToken === "string" && base.accessToken) ||
-    (typeof base.access_token === "string" && base.access_token) ||
-    undefined;
+  const pair = normalizeTokenPair(base);
 
-  if (pickToken && base.userId != null) {
+  if (pair && base.userId != null) {
     return {
       message: typeof base.message === "string" ? base.message : "",
-      token: pickToken,
+      accessToken: pair.accessToken,
+      refreshToken: pair.refreshToken,
+      refreshExpiresAt: pair.refreshExpiresAt ?? "",
       userId:
         typeof base.userId === "string" ? base.userId : String(base.userId),
       role: base.role as Extract<
         VerifySignupOtpResponse,
-        { token: string }
+        { accessToken: string }
       >["role"],
       fullName: typeof base.fullName === "string" ? base.fullName : "",
       email: typeof base.email === "string" ? base.email : undefined,
@@ -50,7 +54,7 @@ function coerceVerifySignupOtpPayload(
         typeof base.actorIds === "object" && base.actorIds !== null
           ? (base.actorIds as Extract<
               VerifySignupOtpResponse,
-              { token: string }
+              { accessToken: string }
             >["actorIds"])
           : {},
     };
@@ -81,43 +85,25 @@ function coerceVerifySignupOtpPayload(
 }
 
 function persistVerifiedSession(
-  response: Extract<VerifySignupOtpResponse, { token: string }>,
+  response: Extract<VerifySignupOtpResponse, { accessToken: string }>,
 ) {
-  const role = (
-    response.role === "data_entry" ? "data-entry" : response.role
-  ) as AppRole;
-
-  useAuthStore.setState({
-    user: {
-      id: response.userId,
+  useAuthStore.getState().applySession(
+    {
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+      refreshExpiresAt: response.refreshExpiresAt,
+    },
+    {
+      userId: response.userId,
+      role: response.role,
+      fullName: response.fullName,
       email: response.email ?? "",
       phone: response.phone ?? "",
-      role,
-      verified: true,
-      name: response.fullName,
+      actorIds: response.actorIds,
+      patientPublicId: response.patientPublicId,
+      accountStatus: "active",
     },
-    token: response.token,
-    isAuthenticated: true,
-    pendingVerification: null,
-  });
-
-  useAuthStore.getState().setPendingVerification(null);
-
-  writeAuthToken(response.token);
-  writeAuthUser({
-    userId: response.userId,
-    role: response.role,
-    fullName: response.fullName,
-    email: response.email ?? "",
-    phone: response.phone ?? "",
-    actorIds: Object.fromEntries(
-      Object.entries(response.actorIds ?? {}).map(([key, value]) => [
-        key,
-        value ?? undefined,
-      ]),
-    ) as Record<string, string | undefined>,
-    patientPublicId: response.patientPublicId,
-  });
+  );
 }
 
 function VerifyOtpContent() {
@@ -126,12 +112,12 @@ function VerifyOtpContent() {
   /** عند النجاح نوقف بوابة التوجيه لتجنّب الإرسال إلى /signup قبل navigate(). */
   const allowGuardRedirectsRef = useRef(true);
   const pending = useAuthStore((s) => s.pendingVerification);
-  const token = useAuthStore((s) => s.token);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
 
   if (!pending) {
     if (allowGuardRedirectsRef.current) {
-      if (token && user?.role) {
+      if (accessToken && user?.role) {
         return <Navigate to={getRoleRoot(user.role as AppRole)} replace />;
       }
       return <Navigate to="/signup" replace />;
@@ -185,11 +171,7 @@ function VerifyOtpContent() {
 
         allowGuardRedirectsRef.current = false;
 
-        if (
-          "token" in response &&
-          typeof response.token === "string" &&
-          response.token
-        ) {
+        if (hasTokenPair(response)) {
           persistVerifiedSession(response);
           const role = (
             response.role === "data_entry" ? "data-entry" : response.role

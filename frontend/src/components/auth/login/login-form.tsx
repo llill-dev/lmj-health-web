@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AuthFlowError, useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
 import { SIGNUP_EMAIL_INVALID_MESSAGE_AR } from '@/components/auth/signUp/signup-schemas';
+import { persistClaimAccountPending } from '@/lib/auth/claimAccountNavState';
 
 type LoginMethod = 'phone' | 'email';
 
@@ -101,7 +102,7 @@ export default function LoginForm({
     INACTIVE: 'الحساب غير نشط، تواصل مع الدعم',
     PENDING_APPROVAL: 'حساب الطبيب في انتظار موافقة الإدارة',
     NOT_ALLOWED: 'هذا الحساب غير مسموح له باستخدام هذا التطبيق',
-    TEMPORARY: 'يرجى تفعيل حسابك قبل تسجيل الدخول',
+    TEMPORARY: 'حسابك غير مفعّل بعد. سيتم توجيهك لصفحة التفعيل.',
     LOCKED: 'الحساب مقفول مؤقتاً، حاول لاحقاً',
     DELETED: 'تم حذف هذا الحساب',
     NETWORK_ERROR: 'تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة؛ إن استمر الأمر قد يكون سببه الخدمة وليس شبكتك.',
@@ -183,6 +184,23 @@ export default function LoginForm({
         variant: 'error',
         durationMs: 5600,
       });
+
+      if (code === 'TEMPORARY') {
+        const identifier =
+          values.method === 'email'
+            ? values.identifier.trim()
+            : values.identifier.replace(/[\s-]/g, '');
+
+        persistClaimAccountPending({
+          channel: values.method === 'email' ? 'email' : 'whatsapp',
+          email: values.method === 'email' ? identifier : undefined,
+          phone: values.method === 'phone' ? identifier : undefined,
+          destination: identifier,
+        });
+
+        navigate('/claim-account', { replace: true });
+        return;
+      }
 
       if (!(error instanceof AuthFlowError)) {
         console.error('Unexpected login failure:', error);
