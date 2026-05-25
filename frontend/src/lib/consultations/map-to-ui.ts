@@ -69,7 +69,7 @@ export function mapConsultationTicketToUi(
     patientInitial: patientName.charAt(0) || 'م',
     patientEmail: '',
     patientPhone: '',
-    description: ticket.subject?.trim() || '',
+    description: ticket.description?.trim() || ticket.subject?.trim() || '',
     symptoms: [],
     historyNote: '',
     messages: [],

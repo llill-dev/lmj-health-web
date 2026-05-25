@@ -1,4 +1,4 @@
-import { get, post } from '@/lib/api';
+import { get, patch, post } from '@/lib/api';
 
 export type ConsultationTicketStatus =
   | 'pending'
@@ -9,6 +9,7 @@ export type ConsultationTicketStatus =
 export type ConsultationTicketSummary = {
   _id?: string;
   subject?: string;
+  description?: string;
   status?: ConsultationTicketStatus;
   closedReason?: string | null;
   cancellationReason?: string | null;
@@ -77,6 +78,23 @@ export const consultationsApi = {
     post<{ message?: string }>(
       `/api/consultations/${ticketId}/messages`,
       { content },
+      { locale: 'ar' },
+    ),
+
+  updateStatus: (
+    ticketId: string,
+    body: { status: 'closed' | 'dismissed'; reason?: string },
+  ) =>
+    patch<{ ticket?: ConsultationTicketSummary; message?: string }>(
+      `/api/consultations/${ticketId}/status`,
+      body,
+      { locale: 'ar' },
+    ),
+
+  markRead: (ticketId: string) =>
+    post<{ ticket?: ConsultationTicketSummary; message?: string }>(
+      `/api/consultations/${ticketId}/mark-read`,
+      {},
       { locale: 'ar' },
     ),
 };

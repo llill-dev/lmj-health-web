@@ -39,3 +39,40 @@ export function useSendConsultationMessage(ticketId: string) {
     },
   });
 }
+
+export function useUpdateConsultationStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      ticketId,
+      status,
+      reason,
+    }: {
+      ticketId: string;
+      status: 'closed' | 'dismissed';
+      reason?: string;
+    }) => consultationsApi.updateStatus(ticketId, { status, reason }),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['consultations', 'detail', variables.ticketId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ['consultations', 'list'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['doctor', 'home', 'snapshot'],
+      });
+    },
+  });
+}
+
+export function useMarkConsultationRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ticketId: string) => consultationsApi.markRead(ticketId),
+    onSuccess: (_data, ticketId) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['consultations', 'detail', ticketId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ['consultations', 'list'] });
+    },
+  });
+}
