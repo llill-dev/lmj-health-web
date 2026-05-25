@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Calendar, FileText, Plus, Users } from 'lucide-react';
+import { Calendar, ClipboardList, FileText, Plus, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import DashboardOverviewSection from '@/components/doctor/dashboard/dashboard-overview-section';
 import OverviewKpiCard, {
@@ -18,7 +18,8 @@ type OverviewKpiItem = {
 export type DoctorDashboardOverviewVariant =
   | 'appointments'
   | 'patients'
-  | 'medical-records';
+  | 'medical-records'
+  | 'encounters';
 
 export type DoctorDashboardSurface = 'teal' | 'mint';
 
@@ -55,9 +56,9 @@ export default function DoctorDashboardOverview({
 
   const kpiGridColsClass =
     variant === 'appointments'
-      ? 'grid-cols-4'
-      : variant === 'patients'
-        ? 'grid-cols-3'
+      ? 'grid-cols-2 sm:grid-cols-4'
+      : variant === 'patients' || variant === 'encounters' || variant === 'medical-records'
+        ? 'grid-cols-1 sm:grid-cols-3'
         : 'grid-cols-3';
 
   const mintStack =
@@ -111,6 +112,8 @@ export default function DoctorDashboardOverview({
                 <Calendar className='w-8 h-8 text-white' />
               ) : variant === 'patients' ? (
                 <Users className='w-8 h-8 text-white' />
+              ) : variant === 'encounters' ? (
+                <ClipboardList className='w-8 h-8 text-white' />
               ) : (
                 <FileText className='w-8 h-8 text-white' />
               ))}

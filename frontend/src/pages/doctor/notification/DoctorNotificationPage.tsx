@@ -4,91 +4,18 @@ import {
   CalendarDays,
   Clock,
   FileText,
+  Loader2,
   MessageSquare,
-  Trash2,
   UserPlus,
   Check,
   XCircleIcon,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
+import type { AdminNotificationKind } from '@/components/admin/notifications/types';
+import { useDoctorNotificationsPage } from '@/hooks';
 
-type NotificationType =
-  | 'appointment'
-  | 'message'
-  | 'access-request'
-  | 'reminder'
-  | 'cancel'
-  | 'record';
-
-type NotificationItem = {
-  id: string;
-  type: NotificationType;
-  title: string;
-  description: string;
-  timeLabel: string;
-  isUnread: boolean;
-  isNew: boolean;
-};
-
-const mockNotifications: NotificationItem[] = [
-  {
-    id: 'n1',
-    type: 'appointment',
-    title: 'موعد جديد',
-    description:
-      'قام المريض محمد أحمد السعيد بحجز موعد جديد ليوم الأحد الساعة 09:00',
-    timeLabel: 'منذ 10 دقيقة',
-    isUnread: true,
-    isNew: true,
-  },
-  {
-    id: 'n2',
-    type: 'message',
-    title: 'رسالة جديدة',
-    description: 'أرسلت المريضة فاطمة خالد رسالة جديدة في نظام الاستشارات',
-    timeLabel: 'منذ 30 دقيقة',
-    isUnread: true,
-    isNew: true,
-  },
-  {
-    id: 'n3',
-    type: 'access-request',
-    title: 'طلب وصول جديد',
-    description:
-      'يطلب الدكتور أحمد بن علي الوصول إلى السجل الطبي للمريض عبدالله سعد',
-    timeLabel: 'منذ 2 ساعة',
-    isUnread: true,
-    isNew: true,
-  },
-  {
-    id: 'n4',
-    type: 'reminder',
-    title: 'تذكير بموعد',
-    description: 'لديك موعد مع المريض خالد محمد بعد ساعة واحدة',
-    timeLabel: 'منذ 3 ساعة',
-    isUnread: false,
-    isNew: false,
-  },
-  {
-    id: 'n5',
-    type: 'cancel',
-    title: 'إلغاء موعد',
-    description:
-      'قامت المريضة نورة عبد الله بإلغاء موعدها المجدول ليوم الإثنين',
-    timeLabel: 'منذ 5 ساعة',
-    isUnread: false,
-    isNew: false,
-  },
-  {
-    id: 'n6',
-    type: 'record',
-    title: 'تحديث سجل طبي',
-    description: 'تم تحديث السجل الطبي للمريض سعد عبد الرحمن',
-    timeLabel: 'أمس',
-    isUnread: false,
-    isNew: false,
-  },
-];
+type NotificationType = AdminNotificationKind;
 
 function getTypeIcon(type: NotificationType) {
   switch (type) {
@@ -110,8 +37,16 @@ function getTypeIcon(type: NotificationType) {
 }
 
 export default function DoctorNotificationPage() {
-  const [items, setItems] = useState<NotificationItem[]>(mockNotifications);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const unreadOnly = filter === 'unread';
+
+  const { listQuery, markOneReadMutation, markAllReadMutation } =
+    useDoctorNotificationsPage(unreadOnly);
+
+  const items = useMemo(
+    () => mapNotificationsToRows(listQuery.data?.notifications),
+    [listQuery.data?.notifications],
+  );
 
   const unreadCount = useMemo(
     () => items.filter((n) => n.isUnread).length,
@@ -120,28 +55,22 @@ export default function DoctorNotificationPage() {
 
   const newCount = useMemo(() => items.filter((n) => n.isNew).length, [items]);
 
-  const visibleItems = useMemo(() => {
-    if (filter === 'unread') return items.filter((n) => n.isUnread);
-    return items;
-  }, [items, filter]);
-
   const markAllRead = () => {
-    setItems((prev) =>
-      prev.map((n) => ({ ...n, isUnread: false, isNew: false })),
-    );
+    if (!items.some((n) => n.isUnread)) return;
+    markAllReadMutation.mutate();
   };
 
   const markRead = (id: string) => {
-    setItems((prev) =>
-      prev.map((n) =>
-        n.id === id ? { ...n, isUnread: false, isNew: false } : n,
-      ),
-    );
+    const row = items.find((n) => n.id === id);
+    if (!row?.isUnread) return;
+    markOneReadMutation.mutate(id);
   };
 
-  const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((n) => n.id !== id));
-  };
+  const pendingMarkId =
+    markOneReadMutation.isPending &&
+    typeof markOneReadMutation.variables === 'string'
+      ? markOneReadMutation.variables
+      : null;
 
   return (
     <>
@@ -173,7 +102,11 @@ export default function DoctorNotificationPage() {
                 <button
                   type='button'
                   onClick={markAllRead}
-                  className='flex h-[34px] items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]'
+                  disabled={
+                    markAllReadMutation.isPending ||
+                    !items.some((n) => n.isUnread)
+                  }
+                  className='flex h-[34px] items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB] disabled:opacity-60'
                 >
                   <Check className='h-4 w-4 text-primary' />
                   تحديد الكل كمقروء
@@ -195,73 +128,88 @@ export default function DoctorNotificationPage() {
         </section>
 
         <section className='mt-5 space-y-4'>
-          {visibleItems.map((n) => {
-            const isAccent = n.isUnread;
+          {listQuery.isLoading ? (
+            <div className='flex items-center justify-center gap-2 rounded-[14px] border border-[#E5E7EB] bg-white py-16 font-cairo text-[13px] font-semibold text-[#667085]'>
+              <Loader2 className='h-5 w-5 animate-spin text-primary' />
+              جاري تحميل الإشعارات…
+            </div>
+          ) : listQuery.isError ? (
+            <div className='rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>
+              تعذّر تحميل الإشعارات. حاول تحديث الصفحة.
+            </div>
+          ) : items.length === 0 ? (
+            <div className='rounded-[14px] border border-[#E5E7EB] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
+              {filter === 'unread'
+                ? 'لا توجد إشعارات غير مقروءة.'
+                : 'لا توجد إشعارات حالياً.'}
+            </div>
+          ) : (
+            items.map((n) => {
+              const isAccent = n.isUnread;
+              const marking = pendingMarkId === n.id;
 
-            return (
-              <div
-                key={n.id}
-                className={
-                  isAccent
-                    ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#0F8F8B]'
-                    : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]'
-                }
-              >
-                <div className='flex h-[151px] items-stretch justify-between gap-4 px-5 py-4'>
-                  <div className='flex flex-1 items-start justify-between gap-4'>
-                    <div className='flex items-center justify-center  bg-[#FFFFFF] w-12 h-12 rounded-[6px] shadow-[0px_4px_6px_-1px_#0000001A]'>
-                      {getTypeIcon(n.type)}
-                    </div>
-                    <div className='flex flex-1 flex-col text-right'>
-                      <div className='font-cairo text-[16px] font-extrabold leading-[22px] text-[#111827]'>
-                        {n.title}
+              return (
+                <div
+                  key={n.id}
+                  className={
+                    isAccent
+                      ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#0F8F8B]'
+                      : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]'
+                  }
+                >
+                  <div className='flex h-[151px] items-stretch justify-between gap-4 px-5 py-4'>
+                    <div className='flex flex-1 items-start justify-between gap-4'>
+                      <div className='flex items-center justify-center  bg-[#FFFFFF] w-12 h-12 rounded-[6px] shadow-[0px_4px_6px_-1px_#0000001A]'>
+                        {getTypeIcon(n.kind)}
                       </div>
-                      <div className='mt-1 font-cairo text-[12px] font-semibold leading-[18px] text-[#667085]'>
-                        {n.description}
-                      </div>
-
-                      <div className='mt-2 flex items-center gap-2 text-[#98A2B3]'>
-                        <Clock className='h-3.5 w-3.5' />
-                        <span className='font-cairo text-[11px] font-semibold'>
-                          {n.timeLabel}
-                        </span>
-                      </div>
-                    </div>
-                    <div className='flex items-start gap-3'>
-                      {n.isNew ? (
-                        <div className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-primary px-2 font-cairo text-[12px] font-semibold text-white'>
-                          جديد
+                      <div className='flex flex-1 flex-col text-right'>
+                        <div className='font-cairo text-[16px] font-extrabold leading-[22px] text-[#111827]'>
+                          {n.title}
                         </div>
-                      ) : (
-                        <div className='h-[26px] w-[52px]' />
-                      )}
+                        <div className='mt-1 font-cairo text-[12px] font-semibold leading-[18px] text-[#667085]'>
+                          {n.description}
+                        </div>
 
-                      {n.isUnread ? (
-                        <button
-                          type='button'
-                          onClick={() => markRead(n.id)}
-                          className='flex h-[34px] w-[34px] items-center justify-center rounded-[6px] border border-[#D1FAE5] bg-white text-[#16A34A] hover:bg-[#ECFDF3]'
-                          aria-label='تحديد كمقروء'
-                        >
-                          <Check className='h-4 w-4' />
-                        </button>
-                      ) : (
-                        <div className='h-[34px] w-[34px]' />
-                      )}
-                      <button
-                        type='button'
-                        onClick={() => removeItem(n.id)}
-                        className='flex h-[34px] w-[34px] items-center justify-center rounded-[6px] border border-[#FEE2E2] bg-white text-[#F43F5E] hover:bg-[#FFF1F2]'
-                        aria-label='حذف'
-                      >
-                        <Trash2 className='h-4 w-4' />
-                      </button>
+                        <div className='mt-2 flex items-center gap-2 text-[#98A2B3]'>
+                          <Clock className='h-3.5 w-3.5' />
+                          <span className='font-cairo text-[11px] font-semibold'>
+                            {n.timeLabel}
+                          </span>
+                        </div>
+                      </div>
+                      <div className='flex items-start gap-3'>
+                        {n.isNew ? (
+                          <div className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-primary px-2 font-cairo text-[12px] font-semibold text-white'>
+                            جديد
+                          </div>
+                        ) : (
+                          <div className='h-[26px] w-[52px]' />
+                        )}
+
+                        {n.isUnread ? (
+                          <button
+                            type='button'
+                            onClick={() => markRead(n.id)}
+                            disabled={marking}
+                            className='flex h-[34px] w-[34px] items-center justify-center rounded-[6px] border border-[#D1FAE5] bg-white text-[#16A34A] hover:bg-[#ECFDF3] disabled:opacity-60'
+                            aria-label='تحديد كمقروء'
+                          >
+                            {marking ? (
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                            ) : (
+                              <Check className='h-4 w-4' />
+                            )}
+                          </button>
+                        ) : (
+                          <div className='h-[34px] w-[34px]' />
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </section>
       </div>
     </>

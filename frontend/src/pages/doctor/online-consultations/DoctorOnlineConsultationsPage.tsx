@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CheckCircle2,
   Clock,
   Filter,
+  Loader2,
   MessageCircle,
   Paperclip,
   Search,
@@ -13,6 +14,8 @@ import {
   Ticket,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { useConsultationsList, useConsultationDetails, useSendConsultationMessage } from '@/hooks';
+import { mapConsultationTicketToUi } from '@/lib/consultations/map-to-ui';
 
 type ConsultationStatus = 'closed' | 'in_progress' | 'waiting';
 
@@ -44,44 +47,7 @@ type Consultation = {
   messages: ConsultationMessage[];
 };
 
-const mockConsultations: Consultation[] = [
-  {
-    id: 'c1',
-    status: 'in_progress',
-    statusLabel: 'قيد المعالجة',
-    priorityLabel: 'عالية',
-    title: 'ألم في الصدر',
-    createdAtLabel: '2024-01-17',
-    lastUpdateLabel: '2024-01-17',
-    repliesCount: 2,
-    patientName: 'أحمد محمد العلي',
-    patientInitial: 'أ',
-    patientEmail: 'patient1@example.com',
-    patientPhone: '+966501234567',
-    description:
-      'أشعر بألم في الصدر عند الجلوس وفي بعض الأحيان يزداد أثناء النوم.',
-    symptoms: ['ألم في الصدر', 'خفقان'],
-    historyNote:
-      'مرحبًا، يرجى تحديد نوع الألم ومتى يبدأ وهل يزداد مع بذل المجهود؟',
-    messages: [
-      {
-        id: 'm1',
-        author: 'doctor',
-        authorName: 'د. أحمد محمد العلي',
-        text: 'مرحبًا، يرجى تحديد نوع الألم ومتى يبدأ وهل يزداد مع بذل المجهود؟',
-        timeLabel: 'قبل 4 ساعات',
-      },
-      {
-        id: 'm2',
-        author: 'patient',
-        authorName: 'أحمد محمد العلي',
-        text: 'الألم يأتي فجأة ويستمر لمدة 5 دقائق، وأحيانًا يزيد عند الحركة.',
-        timeLabel: 'قبل 10 دقائق',
-        isNew: true,
-      },
-    ],
-  },
-];
+const mockConsultations: Consultation[] = [];
 
 function statusTabLabel(tab: 'all' | ConsultationStatus) {
   if (tab === 'all') return 'الكل';
@@ -103,32 +69,47 @@ function statusChipStyle(status: ConsultationStatus) {
 export default function DoctorOnlineConsultationsPage() {
   const [tab, setTab] = useState<'all' | ConsultationStatus>('all');
   const [query, setQuery] = useState('');
-  const [expandedId, setExpandedId] = useState<string>('c1');
+  const [expandedId, setExpandedId] = useState<string>('');
   const [draft, setDraft] = useState('');
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
     null,
   );
 
+  const listQuery = useConsultationsList();
+  const consultations = useMemo(() => {
+    const mapped = (listQuery.data?.tickets ?? [])
+      .map(mapConsultationTicketToUi)
+      .filter((c) => c.id);
+    return mapped.length ? mapped : mockConsultations;
+  }, [listQuery.data?.tickets]);
+
+  const detailsQuery = useConsultationDetails(expandedId || null);
+  const sendMessage = useSendConsultationMessage(expandedId);
+
   const stats = useMemo(() => {
-    const total = mockConsultations.length;
-    const waiting = mockConsultations.filter(
-      (c) => c.status === 'waiting',
-    ).length;
-    const inProgress = mockConsultations.filter(
+    const counts = listQuery.data?.counts;
+    if (counts) {
+      return {
+        total: counts.total ?? consultations.length,
+        waiting: counts.pending ?? 0,
+        inProgress: counts.active ?? 0,
+        closed: counts.closed ?? 0,
+      };
+    }
+    const total = consultations.length;
+    const waiting = consultations.filter((c) => c.status === 'waiting').length;
+    const inProgress = consultations.filter(
       (c) => c.status === 'in_progress',
     ).length;
-    const closed = mockConsultations.filter(
-      (c) => c.status === 'closed',
-    ).length;
-
+    const closed = consultations.filter((c) => c.status === 'closed').length;
     return { total, waiting, inProgress, closed };
-  }, []);
+  }, [consultations, listQuery.data?.counts]);
 
   const visibleConsultations = useMemo(() => {
     const base =
       tab === 'all'
-        ? mockConsultations
-        : mockConsultations.filter((c) => c.status === tab);
+        ? consultations
+        : consultations.filter((c) => c.status === tab);
 
     if (!query.trim()) return base;
 
@@ -140,11 +121,37 @@ export default function DoctorOnlineConsultationsPage() {
         c.patientEmail.includes(q) ||
         c.patientPhone.includes(q),
     );
-  }, [tab, query]);
+  }, [tab, query, consultations]);
 
   const active =
     visibleConsultations.find((c) => c.id === expandedId) ??
     visibleConsultations[0];
+
+  const activeMessages = useMemo(() => {
+    const apiMessages = detailsQuery.data?.messages ?? [];
+    if (!apiMessages.length) return active?.messages ?? [];
+    return apiMessages.map((m, idx) => ({
+      id: m._id ?? String(idx),
+      author: (m.senderRole === 'doctor' ? 'doctor' : 'patient') as
+        | 'doctor'
+        | 'patient',
+      authorName:
+        m.senderRole === 'doctor'
+          ? 'الطبيب'
+          : active?.patientName ?? 'المريض',
+      text: m.content ?? '',
+      timeLabel: m.createdAt
+        ? new Date(m.createdAt).toLocaleString('ar-SY')
+        : '—',
+      isNew: false,
+    }));
+  }, [active?.messages, active?.patientName, detailsQuery.data?.messages]);
+
+  useEffect(() => {
+    if (!expandedId && consultations[0]?.id) {
+      setExpandedId(consultations[0].id);
+    }
+  }, [consultations, expandedId]);
 
   return (
     <>
@@ -291,7 +298,18 @@ export default function DoctorOnlineConsultationsPage() {
           </div>
         </section>
 
-        {active ? (
+        {listQuery.isLoading ? (
+          <div className='mt-6 flex items-center justify-center gap-2 rounded-[14px] border border-[#E5E7EB] bg-white py-16 font-cairo text-[13px] font-semibold text-[#667085]'>
+            <Loader2 className='h-5 w-5 animate-spin text-primary' />
+            جاري تحميل الاستشارات…
+          </div>
+        ) : listQuery.isError ? (
+          <div className='mt-6 rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>
+            تعذّر تحميل الاستشارات. حاول تحديث الصفحة.
+          </div>
+        ) : null}
+
+        {!listQuery.isLoading && !listQuery.isError && active ? (
           <section className='mt-5 rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='flex items-center justify-between border-b border-[#EEF2F6] px-5 py-4'>
               <div className='flex items-center gap-3'>
@@ -424,12 +442,18 @@ export default function DoctorOnlineConsultationsPage() {
               <section className='mt-4 px-4'>
                 <div className='flex items-center justify-between'>
                   <h2 className='font-cairo text-[12px] font-extrabold text-[#111827]'>
-                    سجل المحادثة ( {active.repliesCount} رد) :
+                    سجل المحادثة ( {activeMessages.length} رد) :
                   </h2>
                 </div>
 
                 <div className='mt-3 space-y-3'>
-                  {active.messages.map((m) => {
+                  {detailsQuery.isLoading && expandedId ? (
+                    <div className='flex items-center justify-center gap-2 py-8 font-cairo text-[12px] font-semibold text-[#667085]'>
+                      <Loader2 className='h-4 w-4 animate-spin text-primary' />
+                      جاري تحميل الرسائل…
+                    </div>
+                  ) : null}
+                  {activeMessages.map((m) => {
                     const isSelected = selectedMessageId === m.id;
                     return (
                       <button
@@ -489,9 +513,25 @@ export default function DoctorOnlineConsultationsPage() {
 
                   <button
                     type='button'
-                    className='flex h-[40px] flex-1 items-center justify-center gap-2 rounded-[6px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.30)]'
+                    disabled={
+                      !draft.trim() ||
+                      sendMessage.isPending ||
+                      !expandedId
+                    }
+                    onClick={() => {
+                      const text = draft.trim();
+                      if (!text || !expandedId) return;
+                      sendMessage.mutate(text, {
+                        onSuccess: () => setDraft(''),
+                      });
+                    }}
+                    className='flex h-[40px] flex-1 items-center justify-center gap-2 rounded-[6px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.30)] disabled:opacity-60'
                   >
-                    <Send className='h-4 w-4' />
+                    {sendMessage.isPending ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : (
+                      <Send className='h-4 w-4' />
+                    )}
                     إرسال الرد
                   </button>
                 </div>
@@ -506,13 +546,13 @@ export default function DoctorOnlineConsultationsPage() {
               </div>
             </div>
           </section>
-        ) : (
+        ) : !listQuery.isLoading && !listQuery.isError && !active ? (
           <div className='mt-6 rounded-[14px] border border-[#E5E7EB] bg-white p-6 text-center shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
               لا توجد استشارات
             </div>
           </div>
-        )}
+        ) : null}
 
         <div className='h-10' />
       </div>

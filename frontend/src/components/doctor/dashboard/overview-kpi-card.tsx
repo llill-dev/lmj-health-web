@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 export type OverviewKpiCardVariant =
   | 'appointments'
   | 'patients'
-  | 'medical-records';
+  | 'medical-records'
+  | 'encounters';
 
 export default function OverviewKpiCard({
   variant: _variant,

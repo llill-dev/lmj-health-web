@@ -1,0 +1,41 @@
+'use client';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  consultationsApi,
+  type ConsultationTicketStatus,
+} from '@/lib/consultations/client';
+
+export function useConsultationsList(status?: ConsultationTicketStatus) {
+  return useQuery({
+    queryKey: ['consultations', 'list', status ?? 'all'],
+    queryFn: () => consultationsApi.list(status ? { status } : undefined),
+    staleTime: 1000 * 30,
+  });
+}
+
+export function useConsultationDetails(ticketId: string | null) {
+  return useQuery({
+    queryKey: ['consultations', 'detail', ticketId],
+    queryFn: () => consultationsApi.getById(ticketId!),
+    enabled: Boolean(ticketId),
+    staleTime: 1000 * 15,
+  });
+}
+
+export function useSendConsultationMessage(ticketId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (content: string) =>
+      consultationsApi.sendMessage(ticketId, content),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['consultations', 'detail', ticketId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ['consultations', 'list'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['doctor', 'home', 'snapshot'],
+      });
+    },
+  });
+}

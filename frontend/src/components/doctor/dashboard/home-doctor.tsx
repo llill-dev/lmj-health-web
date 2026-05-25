@@ -14,7 +14,7 @@ import {
   Users,
 } from 'lucide-react';
 
-import { useAppointments, useDashboardStats } from '@/hooks';
+import { useAppointments, useDashboardStats, useDoctorAppointmentsApi, useDoctorHomeSnapshot } from '@/hooks';
 import ActiveConsultationsSection from '@/components/doctor/dashboard/active-consultations-section';
 import ConsultationsWaitingSection from '@/components/doctor/dashboard/consultations-waiting-section';
 import QuickActionsSection from '@/components/doctor/dashboard/quick-actions-section';
@@ -103,12 +103,35 @@ export default function HomeDoctor() {
     error: statsError,
   } = useDashboardStats();
   const {
-    appointments,
-    error: appointmentsError,
-    refetch,
+    data: snapshotData,
+    isLoading: snapshotLoading,
+    error: snapshotError,
+  } = useDoctorHomeSnapshot();
+  const {
+    appointments: apiAppointments,
+    error: apiAppointmentsError,
+    refetch: refetchApiAppointments,
+  } = useDoctorAppointmentsApi({
+    page: 1,
+    limit: 50,
+    from: selectedDate,
+    to: selectedDate,
+  });
+  const {
+    appointments: mockAppointments,
+    error: mockAppointmentsError,
+    refetch: refetchMockAppointments,
   } = useAppointments(1, 50, selectedDate, undefined, searchTerm);
 
-  if (statsError || appointmentsError) {
+  const snapshot = snapshotData?.snapshot;
+  const appointments = apiAppointments.length ? apiAppointments : mockAppointments;
+  const appointmentsError = apiAppointmentsError ?? mockAppointmentsError;
+  const refetch = () => {
+    void refetchApiAppointments();
+    void refetchMockAppointments();
+  };
+
+  if (statsError || appointmentsError || snapshotError) {
     return (
       <div className='flex h-[400px] items-center justify-center'>
         <div className='text-center'>
@@ -129,38 +152,38 @@ export default function HomeDoctor() {
     {
       key: 'today',
       label: 'مواعيد اليوم',
-      value: stats?.todayAppointments ?? 2,
-      delta: '↑ +12%',
+      value: snapshot?.counts?.appointments ?? stats?.todayAppointments ?? 0,
+      delta: `${snapshot?.counts?.appointments ?? 0} مجدول`,
       icon: Calendar,
       accent: '#129A98',
       soft: '#E9F7F6',
       iconColor: '#129A98',
     },
     {
-      key: 'patients',
-      label: 'إجمالي المرضى',
-      value: stats?.totalPatients ?? 2,
-      delta: '↑ +8%',
+      key: 'consultations',
+      label: 'استشارات تحتاج متابعة',
+      value: snapshot?.counts?.consultations ?? 0,
+      delta: `${snapshot?.counts?.consultations ?? 0} نشطة`,
       icon: Users,
       accent: '#2D74F5',
       soft: '#EAF1FF',
       iconColor: '#2D74F5',
     },
     {
-      key: 'completed',
-      label: 'مواعيد مكتملة',
-      value: stats?.completedAppointments ?? 0,
-      delta: '↑ +15%',
+      key: 'waitlist',
+      label: 'قائمة الانتظار',
+      value: snapshot?.counts?.waitlist ?? 0,
+      delta: `${snapshot?.counts?.waitlist ?? 0} طلب`,
       icon: Check,
       accent: '#22C55E',
       soft: '#EAFBF0',
       iconColor: '#22C55E',
     },
     {
-      key: 'pending',
-      label: 'مواعيد معلقة',
-      value: stats?.pendingAppointments ?? 2,
-      delta: '↑ +12%',
+      key: 'access',
+      label: 'طلبات وصول معلّقة',
+      value: snapshot?.pendingAccessRequestAlert?.count ?? 0,
+      delta: `${snapshot?.pendingAccessRequestAlert?.count ?? 0} جديد`,
       icon: Clock,
       accent: '#FF6A00',
       soft: '#FFF2E8',
@@ -195,8 +218,23 @@ export default function HomeDoctor() {
       <QuickActionsSection />
 
       <section className='grid gap-6 items-start xl:grid-cols-2'>
-        <ActiveConsultationsSection />
-        <ConsultationsWaitingSection />
+        <ActiveConsultationsSection
+          subject={
+            typeof snapshot?.activeConsultation?.subject === 'string'
+              ? snapshot.activeConsultation.subject
+              : undefined
+          }
+          patientName={
+            typeof snapshot?.activeConsultation?.patientSummary === 'object' &&
+            snapshot.activeConsultation.patientSummary &&
+            typeof (snapshot.activeConsultation.patientSummary as { userId?: { fullName?: string } }).userId?.fullName === 'string'
+              ? (snapshot.activeConsultation.patientSummary as { userId: { fullName: string } }).userId.fullName
+              : undefined
+          }
+        />
+        <ConsultationsWaitingSection
+          patientName={snapshot?.nearestWaitlistRequest?.patientName as string | undefined}
+        />
       </section>
 
       <section className='grid gap-6 xl:grid-cols-2'>
