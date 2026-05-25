@@ -4,6 +4,7 @@ import DoctorPatientExpandableCard, {
   type PatientCardTab,
 } from "@/components/doctor/patients/doctor-patient-expandable-card";
 import CreateTemporaryPatientDialog from "@/components/doctor/patients/create-temporary-patient-dialog";
+import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import {
   useCreateTemporaryDoctorPatient,
@@ -908,7 +909,7 @@ export default function DoctorPatientsPage() {
               role="status"
               aria-live="polite"
             >
-              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" aria-hidden />
               جارٍ تحديث قائمة المرضى...
             </p>
           ) : null}
@@ -955,17 +956,23 @@ export default function DoctorPatientsPage() {
               aria-busy="true"
               aria-live="polite"
             >
-              <Loader2 className="h-9 w-9 animate-spin text-primary" />
+              <Loader2 className="w-9 h-9 animate-spin text-primary" />
               <p className="font-cairo text-[14px] font-semibold text-[#667085]">
                 جارٍ تحميل قائمة المرضى...
               </p>
             </div>
           ) : listQuery.patients.length === 0 ? (
             listQuery.total === 0 ? (
-              <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-                لا توجد نتائج حالياً. إذا أنشأت المريض من admin فقط، فالغالب أنه
-                غير مرتبط بهذا الطبيب بعد، لذلك لن يظهر في هذه القائمة.
-              </div>
+              <PatientTabEmptyIllustration
+                variant="teal"
+                imageSrc="/images/photo-not-found-patient.png"
+                imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
+                title="لا يوجد مرضى مضافة بعد"
+                subtitle="قم بإضافة مريض جديد الآن"
+                actionLabel="إضافة مريض"
+                onAction={() => setTempPatientOpen(true)}
+                actionIcon={<UserRoundPlus className="w-4 h-4" />}
+              />
             ) : (
               <div className="rounded-2xl border border-[#E8ECF3] bg-white px-6 py-12 text-center shadow-sm">
                 <Users className="mx-auto h-12 w-12 text-[#D0D5DD]" aria-hidden />

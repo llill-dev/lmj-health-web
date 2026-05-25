@@ -1,4 +1,4 @@
-@import '@fontsource/cairo';
+@import "@fontsource/cairo";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,7 +7,7 @@
   /* Brand primary: one token — Tailwind `text-primary` and `bg-primary` both resolve
      to `hsl(var(--primary))` (see tailwind.config.js). Change only --primary / --ring here. */
   :root {
-    --font-cairo: 'Cairo', system-ui, sans-serif;
+    --font-cairo: "Cairo", system-ui, sans-serif;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -56,7 +56,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased overflow-x-hidden font-cairo;
+    @apply overflow-x-hidden antialiased bg-background text-foreground font-cairo;
   }
 }
 
@@ -104,7 +104,7 @@ html {
     background-color: hsl(var(--primary));
   }
   .font-cairo {
-    font-family: 'Cairo', system-ui, sans-serif;
+    font-family: "Cairo", system-ui, sans-serif;
   }
   .scrollbar-hide {
     -ms-overflow-style: none;

@@ -159,7 +159,7 @@ export default function CreateTemporaryPatientDialog({
                 y: open ? 0 : 16,
                 scale: open ? 1 : 0.98,
               }}
-              className='pointer-events-auto relative box-border max-h-[min(calc(100dvh-2rem),900px)] w-full max-w-[480px] shrink-0 origin-center overflow-visible overscroll-contain rounded-[22px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFFFE] via-white to-[#F8FAFC] shadow-[0_24px_64px_-12px_rgba(15,23,42,0.22),0_0_1px_rgba(15,143,139,0.08)] outline-none sm:max-w-[520px]'
+              className='pointer-events-auto relative box-border w-full max-w-[min(96vw,920px)] shrink-0 origin-center overflow-visible rounded-[22px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFFFE] via-white to-[#F8FAFC] shadow-[0_24px_64px_-12px_rgba(15,23,42,0.22),0_0_1px_rgba(15,143,139,0.08)] outline-none'
               dir='rtl'
               lang='ar'
             >
@@ -168,13 +168,13 @@ export default function CreateTemporaryPatientDialog({
                 className='pointer-events-none absolute inset-0 z-[120] isolate overflow-visible'
                 style={{ contain: 'layout' }}
               />
-              <div className='relative flex max-h-[min(calc(100dvh-2rem),900px)] flex-col'>
+              <div className='relative flex flex-col'>
                 <div
                   aria-hidden
                   className='h-[4px] w-full shrink-0 bg-gradient-to-l from-[#0F766E] via-primary to-[#5EEAD4]'
                 />
 
-                <div className='relative shrink-0 border-b border-[#EEF2F6] px-7 pb-6 pt-6 sm:px-8 sm:pb-7 sm:pt-7'>
+                <div className='relative shrink-0 border-b border-[#EEF2F6] px-6 pb-4 pt-5 sm:px-8 sm:pb-5 sm:pt-6'>
                   <Dialog.Close asChild>
                     <button
                       type='button'
@@ -204,18 +204,18 @@ export default function CreateTemporaryPatientDialog({
                   </div>
                 </div>
 
-                <div className='overflow-y-auto overscroll-contain flex-1 px-7 py-6 min-h-0 sm:px-8'>
+                <div className='relative overflow-visible px-6 py-5 sm:px-8 sm:py-5'>
                   {errors.root?.message ? (
                     <div
                       role='alert'
-                      className='mb-6 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3.5 text-right font-cairo text-[13px] font-semibold leading-relaxed text-[#B42318] shadow-sm'
+                      className='mb-4 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3.5 text-right font-cairo text-[13px] font-semibold leading-relaxed text-[#B42318] shadow-sm'
                     >
                       {errors.root.message}
                     </div>
                   ) : null}
 
                   <form
-                    className='flex flex-col gap-6'
+                    className='flex flex-col gap-5'
                     onSubmit={handleSubmit(async (values) => {
                       clearErrors();
                       try {
@@ -256,8 +256,9 @@ export default function CreateTemporaryPatientDialog({
                       }
                     })}
                 >
-                  <section className='rounded-[18px] border border-[#E6F7F6] bg-white/95 p-5 shadow-[0_10px_32px_rgba(15,143,139,0.07)]'>
-                    <p className='mb-4 text-right font-cairo text-[12px] font-black tracking-wide text-primary'>
+                  <div className='grid grid-cols-1 items-start gap-5 md:grid-cols-2 md:gap-6'>
+                  <section className='rounded-[18px] border border-[#E6F7F6] bg-white/95 p-4 shadow-[0_10px_32px_rgba(15,143,139,0.07)]'>
+                    <p className='mb-3 text-right font-cairo text-[12px] font-black tracking-wide text-primary'>
                       خطوة ١ — الهوية
                     </p>
                     <label
@@ -290,12 +291,12 @@ export default function CreateTemporaryPatientDialog({
                     ) : null}
                   </section>
 
-                  <section className='rounded-[18px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFBFC] to-white p-5 shadow-[0_8px_28px_rgba(15,23,42,0.05)]'>
-                    <p className='mb-4 text-right font-cairo text-[12px] font-black tracking-wide text-[#475467]'>
+                  <section className='rounded-[18px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFBFC] to-white p-4 shadow-[0_8px_28px_rgba(15,23,42,0.05)]'>
+                    <p className='mb-3 text-right font-cairo text-[12px] font-black tracking-wide text-[#475467]'>
                       خطوة ٢ — التواصل
                     </p>
 
-                    <div className='space-y-5'>
+                    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4'>
                       <div>
                         <label
                           htmlFor='temp-patient-email'
@@ -393,7 +394,7 @@ export default function CreateTemporaryPatientDialog({
                           </div>
                         </div>
 
-                        <p className='mt-2 flex flex-wrap items-center justify-start gap-x-2 text-right font-cairo text-[11px] font-semibold leading-relaxed text-[#667085]'>
+                        <p className='mt-1.5 flex flex-wrap items-center justify-start gap-x-2 text-right font-cairo text-[10.5px] font-semibold leading-snug text-[#667085]'>
                           <span className='inline-flex items-center rounded-lg bg-[#EFF8FF] px-2 py-0.5 text-[10px] font-extrabold text-[#175CD3]'>
                             بدون الصفر الأول
                           </span>
@@ -416,8 +417,9 @@ export default function CreateTemporaryPatientDialog({
                       </div>
                     </div>
                   </section>
+                  </div>
 
-                  <div className='flex flex-col-reverse gap-3 pt-2 sm:flex-row-reverse'>
+                  <div className='flex flex-col-reverse gap-3 pt-1 sm:flex-row-reverse'>
                     <button
                       type='submit'
                       disabled={busy || isSubmitting}
