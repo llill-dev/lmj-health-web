@@ -18,6 +18,7 @@ export type SecurityFormFieldConfig<T extends FieldValues> = {
   label: string;
   placeholder: string;
   type?: 'password' | 'email' | 'tel' | 'text';
+  multiline?: boolean;
   hint?: string;
   autoComplete?: string;
 };
@@ -223,6 +224,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                     | string
                     | undefined;
                   const isPassword = field.type === 'password';
+                  const isMultiline = Boolean(field.multiline);
                   const fieldKey = String(field.name);
                   const visible = visibleFields[fieldKey] ?? false;
 
@@ -234,24 +236,37 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                       hint={!error ? field.hint : undefined}
                     >
                       <div className="relative">
-                        <input
-                          type={
-                            isPassword
-                              ? visible
-                                ? 'text'
-                                : 'password'
-                              : (field.type ?? 'text')
-                          }
-                          placeholder={field.placeholder}
-                          autoComplete={field.autoComplete}
-                          aria-invalid={Boolean(error)}
-                          {...register(field.name)}
-                          className={cn(
-                            inputBaseClass,
-                            isPassword ? 'pe-12' : undefined,
-                            error ? inputInvalidBorder : inputNormalBorder,
-                          )}
-                        />
+                        {isMultiline ? (
+                          <textarea
+                            placeholder={field.placeholder}
+                            aria-invalid={Boolean(error)}
+                            rows={4}
+                            {...register(field.name)}
+                            className={cn(
+                              'min-h-[110px] w-full resize-none rounded-[12px] border bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#101828] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow,background] placeholder:font-semibold placeholder:text-[#98A2B3]',
+                              error ? inputInvalidBorder : inputNormalBorder,
+                            )}
+                          />
+                        ) : (
+                          <input
+                            type={
+                              isPassword
+                                ? visible
+                                  ? 'text'
+                                  : 'password'
+                                : (field.type ?? 'text')
+                            }
+                            placeholder={field.placeholder}
+                            autoComplete={field.autoComplete}
+                            aria-invalid={Boolean(error)}
+                            {...register(field.name)}
+                            className={cn(
+                              inputBaseClass,
+                              isPassword ? 'pe-12' : undefined,
+                              error ? inputInvalidBorder : inputNormalBorder,
+                            )}
+                          />
+                        )}
                         {isPassword ? (
                           <button
                             type="button"

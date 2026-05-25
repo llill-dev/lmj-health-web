@@ -11,4 +11,5 @@ export * from './useSlots';
 export * from './useDoctorHomeSnapshot';
 export * from './useDoctorNotifications';
 export * from './useConsultations';
+export * from './useDoctorProfile';
 export * from './useWorkSchedule';
