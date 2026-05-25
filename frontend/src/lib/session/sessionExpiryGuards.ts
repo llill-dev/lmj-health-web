@@ -4,6 +4,8 @@ const SESSION_EXEMPT_401_PREFIXES = [
   '/api/auth/signup',
   '/api/auth/resend-signup-otp',
   '/api/auth/verify-otp',
+  '/api/auth/refresh',
+  '/api/auth/logout',
   '/api/auth/reset-password',
   '/api/auth/resend-reset-otp',
   '/api/auth/verify-reset-otp',

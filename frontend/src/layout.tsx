@@ -1,13 +1,20 @@
 'use client';
+
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+
 import Sidebar from '@/components/layout/sidebar';
 import DashboardHeader from '@/components/doctor/dashboard-header';
+import LogoutConfirmDialog, {
+  type LogoutScope,
+} from '@/components/auth/logout-confirm-dialog';
+import { useToast } from '@/components/ui/ToastProvider';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
-import { useAuthStore } from '@/store/authStore';
-import { AnimatePresence } from 'framer-motion';
+import { readAuthUser } from '@/lib/cookies';
 import { MotionProvider, PageTransition } from '@/motion';
+import { useAuthStore } from '@/store/authStore';
 
 export default function ProtectedLayout({
   children,
@@ -16,8 +23,42 @@ export default function ProtectedLayout({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const authUser = readAuthUser();
+  const doctorName = useMemo(() => {
+    const fullName = authUser?.fullName?.trim();
+    if (!fullName) return 'الطبيب';
+    return /^د\.?\s/u.test(fullName) ? fullName : `د. ${fullName}`;
+  }, [authUser?.fullName]);
+  const doctorEmail = authUser?.email?.trim() || '';
+
+  const performLogout = useCallback(
+    async (scope: LogoutScope) => {
+      setLoggingOut(true);
+      try {
+        await useAuthStore.getState().logout({ scope });
+        toast('نراك في زيارة قادمة.', {
+          title: 'تم تسجيل الخروج',
+          variant: 'success',
+        });
+        navigate('/login', { replace: true });
+      } catch {
+        toast('تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.', {
+          title: 'فشل تسجيل الخروج',
+          variant: 'error',
+        });
+        throw new Error('logout_failed');
+      } finally {
+        setLoggingOut(false);
+      }
+    },
+    [navigate, toast],
+  );
 
   const pathname = location.pathname;
 
@@ -29,7 +70,7 @@ export default function ProtectedLayout({
     )?.path ?? 'dashboard';
 
   return (
-    <div className='h-screen scrollbar-hide overflow-hidden bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]'>
+    <div className='h-screen overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]'>
       <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
         <main className='flex h-screen flex-1 flex-col'>
           <div className='sticky top-0 z-40'>
@@ -47,16 +88,23 @@ export default function ProtectedLayout({
             </MotionProvider>
           </div>
         </main>
+
         <Sidebar
           active={active}
           collapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed((v) => !v)}
-          onLogout={() => {
-            useAuthStore.getState().logout();
-            navigate('/login');
-          }}
+          onToggleCollapse={() => setIsSidebarCollapsed((value) => !value)}
+          onLogout={() => setLogoutConfirmOpen(true)}
+          profileName={doctorName}
+          profileEmail={doctorEmail}
         />
       </div>
+
+      <LogoutConfirmDialog
+        open={logoutConfirmOpen}
+        onOpenChange={setLogoutConfirmOpen}
+        confirmDisabled={loggingOut}
+        onConfirm={performLogout}
+      />
     </div>
   );
 }

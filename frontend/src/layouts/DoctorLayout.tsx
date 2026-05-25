@@ -1,12 +1,49 @@
+import { useCallback, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+
 import Sidebar from '@/components/layout/sidebar';
 import DashboardHeader from '@/components/doctor/dashboard-header';
+import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import { useToast } from '@/components/ui/ToastProvider';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
+import { readAuthUser } from '@/lib/cookies';
 import { useAuthStore } from '@/store/authStore';
 
 export default function DoctorLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const authUser = readAuthUser();
+  const doctorName = useMemo(() => {
+    const fullName = authUser?.fullName?.trim();
+    if (!fullName) return 'الطبيب';
+    return /^د\.?\s/u.test(fullName) ? fullName : `د. ${fullName}`;
+  }, [authUser?.fullName]);
+  const doctorEmail = authUser?.email?.trim() || '';
+
+  const performLogout = useCallback(async () => {
+    setLoggingOut(true);
+    try {
+      await useAuthStore.getState().logout();
+      toast('نراك في زيارة قادمة.', {
+        title: 'تم تسجيل الخروج',
+        variant: 'success',
+      });
+      navigate('/login', { replace: true });
+    } catch {
+      toast('تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.', {
+        title: 'فشل تسجيل الخروج',
+        variant: 'error',
+      });
+      throw new Error('logout_failed');
+    } finally {
+      setLoggingOut(false);
+    }
+  }, [navigate, toast]);
 
   const pathname = location.pathname;
 
@@ -18,14 +55,13 @@ export default function DoctorLayout() {
     )?.path ?? 'dashboard';
 
   return (
-    <div className='h-screen bg-white scrollbar-hide overflow-hidden'>
+    <div className='h-screen overflow-hidden bg-white scrollbar-hide'>
       <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
         <Sidebar
           active={active}
-          onLogout={() => {
-            useAuthStore.getState().logout();
-            navigate('/');
-          }}
+          onLogout={() => setLogoutConfirmOpen(true)}
+          profileName={doctorName}
+          profileEmail={doctorEmail}
         />
 
         <main className='flex h-screen flex-1 flex-col pr-[290px]'>
@@ -33,11 +69,21 @@ export default function DoctorLayout() {
             <DashboardHeader />
           </div>
 
-          <div className='flex-1 overflow-y-auto py-8 bg-white scrollbar-hide'>
+          <div className='flex-1 overflow-y-auto bg-white py-8 scrollbar-hide'>
             <Outlet />
           </div>
         </main>
       </div>
+
+      <ConfirmActionDialog
+        open={logoutConfirmOpen}
+        onOpenChange={setLogoutConfirmOpen}
+        title='تأكيد تسجيل الخروج'
+        description='سيتم إنهاء جلستك الحالية وإعادتك إلى صفحة تسجيل الدخول. إذا كنت لا تزال بحاجة إلى العمل، اختر إلغاء.'
+        confirmLabel={loggingOut ? 'جاري تسجيل الخروج…' : 'تسجيل الخروج'}
+        confirmDisabled={loggingOut}
+        onConfirm={performLogout}
+      />
     </div>
   );
 }

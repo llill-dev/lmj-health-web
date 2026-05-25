@@ -15,11 +15,31 @@ type ToastSink = (
 
 let toastSink: ToastSink | null = null;
 
+export type SessionEndReason = 'expired' | 'invalidated';
+
 export function registerSessionExpiryToastSink(sink: ToastSink | null): void {
   toastSink = sink;
 }
 
-function sessionExpiryCopy(locale: 'ar' | 'en'): { title: string; message: string } {
+function sessionEndCopy(
+  locale: 'ar' | 'en',
+  reason: SessionEndReason,
+): { title: string; message: string } {
+  if (reason === 'invalidated') {
+    if (locale === 'en') {
+      return {
+        title: 'Session ended',
+        message:
+          'Your session was ended for security reasons (expired token or sign-in elsewhere). Please sign in again.',
+      };
+    }
+    return {
+      title: 'انتهت الجلسة',
+      message:
+        'تم إنهاء جلسة الدخول لأسباب أمنية (انتهاء صلاحية الرمز أو تسجيل دخول من جهاز آخر). يرجى تسجيل الدخول مجدداً.',
+    };
+  }
+
   if (locale === 'en') {
     return {
       title: 'Session expired',
@@ -35,15 +55,17 @@ function sessionExpiryCopy(locale: 'ar' | 'en'): { title: string; message: strin
 }
 
 /**
- * تسجيل خروج محلي فوري مع توست واحد (منع التكرار أثناء طلبات متزامنة).
- * يُستدعى عند 401 مع Bearer أو عند انتهاء claim.exp قبل الطلب.
+ * Local logout with a single toast (deduped during parallel requests).
  */
-export function runSessionExpiredFlow(locale: 'ar' | 'en' = 'ar'): void {
+export function runSessionExpiredFlow(
+  locale: 'ar' | 'en' = 'ar',
+  reason: SessionEndReason = 'expired',
+): void {
   const now = Date.now();
   if (now - lastExpiryHandledAt < DEDUP_MS) return;
   lastExpiryHandledAt = now;
 
-  const { title, message } = sessionExpiryCopy(locale);
+  const { title, message } = sessionEndCopy(locale, reason);
 
   toastSink?.(message, {
     title,

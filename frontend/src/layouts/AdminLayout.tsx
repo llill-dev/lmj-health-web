@@ -1,37 +1,53 @@
 import type { ReactNode } from 'react';
 import { useState, useCallback } from 'react';
-import { LogOut } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/layout/sidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
-import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import AdminInboxToastBridge from '@/components/admin/AdminInboxToastBridge';
+import LogoutConfirmDialog, {
+  type LogoutScope,
+} from '@/components/auth/logout-confirm-dialog';
 import { AdminAppSettingsProvider } from '@/contexts/AdminAppSettingsContext';
 import {
   adminSidebarItems,
   type AdminSidebarItemId,
 } from '@/constant/sidebar-items';
 import { useAuthStore } from '@/store/authStore';
+import { useToast } from '@/components/ui/ToastProvider';
 import { AnimatePresence } from 'framer-motion';
 import { MotionProvider, PageTransition } from '@/motion';
 
 export default function AdminLayout({ children }: { children?: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const performLogout = useCallback(async () => {
-    setLoggingOut(true);
-    try {
-      await useAuthStore.getState().logout();
-      navigate('/login', { replace: true });
-    } finally {
-      setLoggingOut(false);
-    }
-  }, [navigate]);
+  const performLogout = useCallback(
+    async (scope: LogoutScope) => {
+      setLoggingOut(true);
+      try {
+        await useAuthStore.getState().logout({ scope });
+        toast('نراك في زيارة قادمة.', {
+          title: 'تم تسجيل الخروج',
+          variant: 'success',
+        });
+        navigate('/login', { replace: true });
+      } catch {
+        toast('تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.', {
+          title: 'فشل تسجيل الخروج',
+          variant: 'error',
+        });
+        throw new Error('logout_failed');
+      } finally {
+        setLoggingOut(false);
+      }
+    },
+    [navigate, toast],
+  );
 
   const pathname = location.pathname;
 
@@ -76,27 +92,11 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
         />
       </div>
 
-      <ConfirmActionDialog
+      <LogoutConfirmDialog
         open={logoutConfirmOpen}
         onOpenChange={setLogoutConfirmOpen}
-        variant='primary'
-        title='تأكيد تسجيل الخروج'
-        icon={<LogOut className='h-6 w-6' strokeWidth={2} aria-hidden />}
-        description={
-          <>
-            سيتم إنهاء جلستك الحالية وإزالة بيانات الدخول من هذا المتصفح. إذا
-            ضغطت بالخطأ اختر «إلغاء» للبقاء داخل النظام.
-          </>
-        }
-        cancelLabel='إلغاء'
-        confirmLabel={loggingOut ? 'جاري تسجيل الخروج…' : 'تسجيل الخروج'}
         confirmDisabled={loggingOut}
         onConfirm={performLogout}
-        successToast={{
-          title: 'تم تسجيل الخروج',
-          message: 'نراك في زيارة قادمة.',
-          variant: 'success',
-        }}
       />
     </div>
     </AdminAppSettingsProvider>
