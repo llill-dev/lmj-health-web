@@ -1,4 +1,10 @@
 import { get, patch, post } from '@/lib/api';
+import type {
+  ConsultationAttachmentFile,
+  ConsultationReview,
+} from '@/lib/consultations/types';
+
+export type { ConsultationAttachmentFile, ConsultationReview };
 
 export type ConsultationTicketStatus =
   | 'pending'
@@ -52,11 +58,22 @@ export type ConsultationMessage = {
   senderRole?: string;
   createdAt?: string;
   attachments?: string[];
+  attachmentFiles?: ConsultationAttachmentFile[];
+};
+
+export type ConsultationTicketDetails = ConsultationTicketSummary & {
+  review?: ConsultationReview | null;
+  attachmentFiles?: ConsultationAttachmentFile[];
 };
 
 export type ConsultationTicketDetailsResponse = {
-  ticket?: ConsultationTicketSummary & Record<string, unknown>;
+  ticket?: ConsultationTicketDetails;
   messages?: ConsultationMessage[];
+};
+
+export type ConsultationSendMessageInput = {
+  content: string;
+  attachments?: string[];
 };
 
 export const consultationsApi = {
@@ -74,10 +91,10 @@ export const consultationsApi = {
       locale: 'ar',
     }),
 
-  sendMessage: (ticketId: string, content: string) =>
-    post<{ message?: string }>(
+  sendMessage: (ticketId: string, body: ConsultationSendMessageInput) =>
+    post<{ message?: ConsultationMessage; ticket?: ConsultationTicketDetails }>(
       `/api/consultations/${ticketId}/messages`,
-      { content },
+      body,
       { locale: 'ar' },
     ),
 

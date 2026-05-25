@@ -1,6 +1,6 @@
 import type { ConsultationTicketSummary } from '@/lib/consultations/client';
 
-export type UiConsultationStatus = 'closed' | 'in_progress' | 'waiting';
+export type UiConsultationStatus = 'closed' | 'dismissed' | 'in_progress' | 'waiting';
 
 export type UiConsultationListItem = {
   id: string;
@@ -33,12 +33,14 @@ function mapStatus(
 ): UiConsultationStatus {
   if (status === 'active') return 'in_progress';
   if (status === 'pending') return 'waiting';
+  if (status === 'dismissed') return 'dismissed';
   return 'closed';
 }
 
 function statusLabelAr(status: UiConsultationStatus) {
   if (status === 'in_progress') return 'قيد المعالجة';
   if (status === 'waiting') return 'بالانتظار';
+  if (status === 'dismissed') return 'مرفوضة';
   return 'مغلقة';
 }
 

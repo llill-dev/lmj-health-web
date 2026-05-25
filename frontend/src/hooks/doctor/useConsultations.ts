@@ -26,8 +26,8 @@ export function useConsultationDetails(ticketId: string | null) {
 export function useSendConsultationMessage(ticketId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (content: string) =>
-      consultationsApi.sendMessage(ticketId, content),
+    mutationFn: (input: { content: string; attachments?: string[] }) =>
+      consultationsApi.sendMessage(ticketId, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ['consultations', 'detail', ticketId],
