@@ -57,6 +57,39 @@ function DraftBadge({ icon, label }: { icon: ReactNode; label: string }) {
   );
 }
 
+function LinkedAppointmentSection({
+  date,
+  time,
+}: {
+  date: string;
+  time: string;
+}) {
+  return (
+    <motion.section
+      variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
+      className="rounded-[12px] border border-[#B2DDFF] bg-[#EFF8FF] px-4 py-4"
+    >
+      <h4 className="text-right font-cairo text-[13px] font-extrabold text-[#101828]">
+        الموعد المرتبط
+      </h4>
+      <div className="mt-3 space-y-3">
+        <div className="flex h-11 items-center justify-start gap-3 rounded-[10px] border border-[#E2E8F0] bg-white px-3">
+          <Calendar className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+          <span className="font-cairo text-[13px] font-semibold text-[#101828]">
+            {date}
+          </span>
+        </div>
+        <div className="flex h-11 items-center justify-start gap-3 rounded-[10px] border border-[#E2E8F0] bg-white px-3">
+          <Clock className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+          <span className="font-cairo text-[13px] font-semibold text-[#101828]">
+            {time}
+          </span>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
 export function MedicalVisitExpandableCard({
   visit,
   expanded,
@@ -175,13 +208,38 @@ export function MedicalVisitExpandableCard({
 
               <motion.div
                 variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+                className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+              >
+                <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+                  <div className="font-cairo text-[11px] font-bold text-[#667085]">
+                    بدأت
+                  </div>
+                  <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#101828]">
+                    {visit.startedAtLabel}
+                  </div>
+                </div>
+                <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+                  <div className="font-cairo text-[11px] font-bold text-[#667085]">
+                    موعد
+                  </div>
+                  <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#101828]">
+                    {visit.listTimeLabel !== "—"
+                      ? `${visit.listTimeLabel}${visit.listTimePeriodLabel ? ` ${visit.listTimePeriodLabel}` : ""}`
+                      : "—"}
+                  </div>
+                </div>
+              </motion.div>
+
+              <LinkedAppointmentSection
+                date={visit.linkedAppointment?.date ?? "—"}
+                time={visit.linkedAppointment?.time ?? "—"}
+              />
+
+              <motion.div
+                variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
+                className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
               >
                 <InfoCell label="نوع الزيارة" value={visit.visitTypeLabel} />
-                <InfoCell
-                  label="الموعد المرتبط"
-                  value={visit.appointmentAtLabel || "—"}
-                />
                 <InfoCell
                   label="نوع الموعد"
                   value={visit.appointmentTypeName || "—"}
@@ -231,47 +289,13 @@ export function MedicalVisitExpandableCard({
                 </motion.section>
               ) : null}
 
-              {visit.linkedAppointment ? (
-                <motion.section
-                  variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                  className="overflow-hidden rounded-[12px] border border-[#B2DDFF] bg-white"
-                >
-                  <header className="flex items-center gap-2 border-b border-[#B2DDFF] bg-[#EFF8FF] px-4 py-3">
-                    <Calendar className="h-4 w-4 text-[#175CD3]" aria-hidden />
-                    <h4 className="font-cairo text-[13px] font-extrabold text-[#175CD3]">
-                      الموعد المرتبط
-                    </h4>
-                  </header>
-                  <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
-                    <div className="flex h-11 items-center justify-start gap-3 rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] px-3">
-                      <Calendar
-                        className="w-4 h-4 shrink-0 text-primary"
-                        aria-hidden
-                      />
-                      <span className="font-cairo text-[13px] font-semibold text-[#101828]">
-                        {visit.linkedAppointment.date}
-                      </span>
-                    </div>
-                    <div className="flex h-11 items-center justify-start gap-3 rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] px-3">
-                      <Clock
-                        className="w-4 h-4 shrink-0 text-primary"
-                        aria-hidden
-                      />
-                      <span className="font-cairo text-[13px] font-semibold text-[#101828]">
-                        {visit.linkedAppointment.time}
-                      </span>
-                    </div>
-                  </div>
-                </motion.section>
-              ) : null}
-
               {visit.drafts.length > 0 ? (
                 <motion.section
                   variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
                   className="rounded-[12px] border border-[#9EE8E0] bg-gradient-to-br from-[#F0FDFA] to-white p-4"
                 >
                   <h4 className="mb-3 text-right font-cairo text-[13px] font-extrabold text-[#0F766E]">
-                    مسودات الزيارة
+                    مسودات الزيارات
                   </h4>
                   <div className="space-y-3">
                     {visit.drafts.map((draft) => (

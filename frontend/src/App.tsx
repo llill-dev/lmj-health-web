@@ -31,6 +31,7 @@ import DoctorOnlineConsultationsPage from '@/pages/doctor/online-consultations/D
 import DoctorWorkSchedulePage from '@/pages/doctor/work-schedule/DoctorWorkSchedulePage';
 import DoctorMedicalRecordsPage from '@/pages/doctor/medical-records/DoctorMedicalRecordsPage';
 import DoctorEncountersPage from '@/pages/doctor/encounters/DoctorEncountersPage';
+import DoctorEncounterWorkspacePage from '@/pages/doctor/encounters/DoctorEncounterWorkspacePage';
 import DoctorAccessRequestsPage from '@/pages/doctor/access-requests/DoctorAccessRequestsPage';
 import DoctorDoctorsDirectoryPage from '@/pages/doctor/doctors-directory/DoctorDoctorsDirectoryPage';
 import DoctorClinicLocationPage from '@/pages/doctor/clinic-location/DoctorClinicLocationPage';
@@ -135,6 +136,7 @@ export default function App() {
             <Route path='online-consultations' element={<DoctorOnlineConsultationsPage />} />
             <Route path='work-schedule'        element={<DoctorWorkSchedulePage />} />
             <Route path='encounters'          element={<DoctorEncountersPage />} />
+            <Route path='encounters/:patientId/:encounterId' element={<DoctorEncounterWorkspacePage />} />
             <Route path='medical-records'      element={<DoctorMedicalRecordsPage />} />
             <Route path='access-requests'      element={<DoctorAccessRequestsPage />} />
             <Route path='doctors-directory'    element={<DoctorDoctorsDirectoryPage />} />

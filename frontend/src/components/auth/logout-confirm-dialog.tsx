@@ -39,13 +39,17 @@ export default function LogoutConfirmDialog({
         <Dialog.Overlay forceMount asChild>
           <motion.div
             initial={false}
-            animate={open ? 'open' : 'closed'}
+            animate={open ? "open" : "closed"}
             variants={{
-              open: { opacity: 1, visibility: 'visible', pointerEvents: 'auto' },
+              open: {
+                opacity: 1,
+                visibility: "visible",
+                pointerEvents: "auto",
+              },
               closed: {
                 opacity: 0,
-                pointerEvents: 'none',
-                transitionEnd: { visibility: 'hidden' },
+                pointerEvents: "none",
+                transitionEnd: { visibility: "hidden" },
               },
             }}
             className="fixed inset-0 z-[9999] bg-black/45 backdrop-blur-[2px]"
@@ -55,27 +59,31 @@ export default function LogoutConfirmDialog({
         <Dialog.Content forceMount asChild>
           <motion.div
             initial={false}
-            animate={open ? 'open' : 'closed'}
+            animate={open ? "open" : "closed"}
             variants={{
-              open: { opacity: 1, visibility: 'visible', pointerEvents: 'auto' },
+              open: {
+                opacity: 1,
+                visibility: "visible",
+                pointerEvents: "auto",
+              },
               closed: {
                 opacity: 0,
-                pointerEvents: 'none',
-                transitionEnd: { visibility: 'hidden' },
+                pointerEvents: "none",
+                transitionEnd: { visibility: "hidden" },
               },
             }}
             className="fixed left-1/2 top-1/2 z-[10000] w-[480px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
             dir="rtl"
             lang="ar"
           >
-            <div className="relative px-7 pb-6 pt-5">
+            <div className="relative px-7 pt-5 pb-6">
               <Dialog.Close asChild>
                 <button
                   type="button"
                   className="absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                   aria-label="إغلاق"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="w-5 h-5" />
                 </button>
               </Dialog.Close>
 
@@ -89,30 +97,30 @@ export default function LogoutConfirmDialog({
 
               <div className="mt-5 space-y-3">
                 <label className="flex cursor-pointer items-center justify-between rounded-[12px] border border-[#E4E7EC] px-4 py-3">
-                  <input
-                    type="radio"
-                    name="logout-scope"
-                    checked={scope === 'current'}
-                    onChange={() => setScope('current')}
-                  />
                   <span className="text-right font-cairo text-[13px] font-bold text-[#101828]">
                     هذا الجهاز فقط
                   </span>
-                </label>
-                <label className="flex cursor-pointer items-center justify-between rounded-[12px] border border-[#E4E7EC] px-4 py-3">
                   <input
                     type="radio"
                     name="logout-scope"
-                    checked={scope === 'all'}
-                    onChange={() => setScope('all')}
+                    checked={scope === "current"}
+                    onChange={() => setScope("current")}
                   />
+                </label>
+                <label className="flex cursor-pointer items-center justify-between rounded-[12px] border border-[#E4E7EC] px-4 py-3">
                   <span className="text-right font-cairo text-[13px] font-bold text-[#101828]">
                     جميع الأجهزة
                   </span>
+                  <input
+                    type="radio"
+                    name="logout-scope"
+                    checked={scope === "all"}
+                    onChange={() => setScope("all")}
+                  />
                 </label>
               </div>
 
-              <div className="mt-6 flex items-center justify-end gap-3">
+              <div className="flex gap-3 justify-end items-center mt-6">
                 <Dialog.Close asChild>
                   <button
                     type="button"
@@ -135,7 +143,7 @@ export default function LogoutConfirmDialog({
                   }}
                   className="h-[40px] rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] px-8 font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
-                  {confirmDisabled ? 'جاري تسجيل الخروج…' : 'تسجيل الخروج'}
+                  {confirmDisabled ? "جاري تسجيل الخروج…" : "تسجيل الخروج"}
                 </button>
               </div>
             </div>

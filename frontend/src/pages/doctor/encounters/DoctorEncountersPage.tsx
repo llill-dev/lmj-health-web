@@ -337,9 +337,9 @@ export default function DoctorEncountersPage() {
                             )
                           }
                           onContinueDraft={() => {
-                            navigate(`/doctor/patients/${visit.patientId}`, {
-                              state: { openEncounters: true },
-                            });
+                            navigate(
+                              `/doctor/encounters/${visit.patientId}/${visit.id}`,
+                            );
                           }}
                           onStartNewVisit={() =>
                             openCreateEncounterDialog(visit.patientId)
