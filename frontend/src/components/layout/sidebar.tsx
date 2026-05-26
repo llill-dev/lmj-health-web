@@ -19,6 +19,7 @@ export default function Sidebar({
   onLogout,
   profileName,
   profileEmail,
+  profilePhotoUrl,
 }: {
   active?: SidebarItemId | AdminSidebarItemId;
   role?: 'doctor' | 'admin';
@@ -27,6 +28,7 @@ export default function Sidebar({
   onLogout?: () => void;
   profileName?: string;
   profileEmail?: string;
+  profilePhotoUrl?: string | null;
 }) {
   const navItems = useMemo(() => {
     return role === 'admin' ? adminSidebarItems : sidebarItems;
@@ -59,7 +61,7 @@ export default function Sidebar({
           : 'relative z-50 h-screen w-[320px] shrink-0 border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] transition-[width] duration-300'
       }
     >
-      <div className='flex h-full flex-col'>
+      <div className='flex flex-col h-full'>
         <div
           className={
             collapsed
@@ -67,8 +69,8 @@ export default function Sidebar({
               : 'px-[24px] pt-[24px] pb-[24px] border-b-[1.82px] border-b-[#E5E7EB]'
           }
         >
-          <div className='flex items-start justify-between'>
-            <div className='flex items-center gap-2'>
+          <div className='flex justify-between items-start'>
+            <div className='flex gap-2 items-center'>
               {!collapsed ? (
                 <>
                   <div className='mt-0.5 flex h-[44px] w-[44px] shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
@@ -76,13 +78,13 @@ export default function Sidebar({
                       <img
                         src={adminBranding.logo.dataUrl}
                         alt=''
-                        className='h-full w-full object-cover'
+                        className='object-cover w-full h-full'
                       />
                     ) : (
-                      <Stethoscope className='h-6 w-6 text-white' aria-hidden />
+                      <Stethoscope className='w-6 h-6 text-white' aria-hidden />
                     )}
                   </div>
-                  <div className='flex min-w-0 flex-col items-center text-center'>
+                  <div className='flex flex-col items-center min-w-0 text-center'>
                     <div className='max-w-[200px] truncate font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
                       {brandTitle}
                     </div>
@@ -97,7 +99,7 @@ export default function Sidebar({
               ) : null}
             </div>
 
-            <div className='flex items-center gap-2'>
+            <div className='flex gap-2 items-center'>
               <button
                 type='button'
                 onClick={onToggleCollapse}
@@ -109,7 +111,7 @@ export default function Sidebar({
                 aria-label={collapsed ? 'فتح القائمة' : 'طي القائمة'}
               >
                 <ChevronsRight
-                  className={collapsed ? 'h-5 w-5 rotate-180' : 'h-5 w-5'}
+                  className={collapsed ? 'w-5 h-5 rotate-180' : 'w-5 h-5'}
                 />
               </button>
             </div>
@@ -117,12 +119,18 @@ export default function Sidebar({
 
           {!collapsed ? (
             <div className='mt-6 rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
-              <div className='flex items-center gap-3'>
+              <div className='flex gap-3 items-center'>
                 <div className='flex h-[46px] w-[46px] items-center justify-center overflow-hidden rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15,143,139,0.30)]'>
                   {role === 'admin' && adminBranding.logo.dataUrl ? (
                     <img
                       src={adminBranding.logo.dataUrl}
                       alt=''
+                      className='object-cover w-full h-full'
+                    />
+                  ) : role === 'doctor' && profilePhotoUrl ? (
+                    <img
+                      src={profilePhotoUrl}
+                      alt={doctorDisplayName}
                       className='h-full w-full object-cover'
                     />
                   ) : (
@@ -178,7 +186,7 @@ export default function Sidebar({
                     className={
                       collapsed
                         ? 'flex items-center'
-                        : 'flex items-center gap-3'
+                        : 'flex gap-3 items-center'
                     }
                   >
                     <Icon
@@ -212,7 +220,7 @@ export default function Sidebar({
                       {item.badge}
                     </div>
                   ) : !collapsed ? (
-                    <span className='ms-auto w-6' />
+                    <span className='w-6 ms-auto' />
                   ) : null}
                 </Link>
               );
@@ -236,7 +244,7 @@ export default function Sidebar({
                 : 'flex w-full items-center justify-start gap-2 font-cairo text-[14px] font-extrabold text-[#E11D48] hover:text-[#BE123C]'
             }
           >
-            <LogOut className='h-4 w-4' />
+            <LogOut className='w-4 h-4' />
             {!collapsed ? 'تسجيل الخروج' : null}
           </button>
         </div>

@@ -44,7 +44,7 @@ export function EncounterWorkspacePatientCard({
         {patient.statusLabel}
       </span>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <div className="flex gap-3 justify-start items-center">
           <div className="flex justify-center items-center h-10 text-primary">
             <UserRound className="w-5 h-5 text-primary" aria-hidden />
@@ -53,13 +53,13 @@ export function EncounterWorkspacePatientCard({
             معلومات المريض
           </h2>
         </div>
-
-        <div className="space-y-2 text-right">
+      </div>
+      <div className="flex gap-2 justify-between">
+        <div className="space-y-1 text-right ms-6">
           <DetailLine label="الاسم" value={patient.name} />
           <DetailLine label="العمر" value={patient.ageLabel} />
           <DetailLine label="رقم الملف" value={patient.fileNumber} />
         </div>
-
         <div className="flex flex-wrap gap-3 justify-start items-center">
           <TimeBox label="بدأت" value={patient.startedLabel} />
           <TimeBox label="موعد" value={patient.appointmentTimeLabel} />

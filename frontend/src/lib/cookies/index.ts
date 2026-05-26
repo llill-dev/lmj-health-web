@@ -122,6 +122,7 @@ export type PersistedUser = {
   fullName?: string;
   email?: string;
   phone?: string;
+  photoUrl?: string | null;
   actorIds?: Record<string, string | undefined>;
   patientPublicId?: string | null;
 };

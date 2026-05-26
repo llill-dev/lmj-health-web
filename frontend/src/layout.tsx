@@ -13,6 +13,7 @@ import LogoutConfirmDialog, {
 import { useToast } from '@/components/ui/ToastProvider';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
 import { readAuthUser } from '@/lib/cookies';
+import { useDoctorProfile } from '@/hooks';
 import { MotionProvider, PageTransition } from '@/motion';
 import { useAuthStore } from '@/store/authStore';
 
@@ -30,12 +31,19 @@ export default function ProtectedLayout({
   const [loggingOut, setLoggingOut] = useState(false);
 
   const authUser = readAuthUser();
+  const profileQuery = useDoctorProfile();
+  const profileUser = profileQuery.data?.doctor?.user;
+
   const doctorName = useMemo(() => {
-    const fullName = authUser?.fullName?.trim();
+    const fullName =
+      profileUser?.fullName?.trim() || authUser?.fullName?.trim();
     if (!fullName) return 'الطبيب';
     return /^د\.?\s/u.test(fullName) ? fullName : `د. ${fullName}`;
-  }, [authUser?.fullName]);
-  const doctorEmail = authUser?.email?.trim() || '';
+  }, [authUser?.fullName, profileUser?.fullName]);
+  const doctorEmail =
+    profileUser?.email?.trim() || authUser?.email?.trim() || '';
+  const doctorPhotoUrl =
+    profileUser?.photoUrl ?? authUser?.photoUrl ?? null;
 
   const performLogout = useCallback(
     async (scope: LogoutScope) => {
@@ -96,6 +104,7 @@ export default function ProtectedLayout({
           onLogout={() => setLogoutConfirmOpen(true)}
           profileName={doctorName}
           profileEmail={doctorEmail}
+          profilePhotoUrl={doctorPhotoUrl}
         />
       </div>
 

@@ -37,6 +37,9 @@ import DoctorDoctorsDirectoryPage from '@/pages/doctor/doctors-directory/DoctorD
 import DoctorClinicLocationPage from '@/pages/doctor/clinic-location/DoctorClinicLocationPage';
 import DoctorNotificationPage from '@/pages/doctor/notification/DoctorNotificationPage';
 import DoctorProfileSettingsPage from '@/pages/doctor/profile-settings/DoctorProfileSettingsPage';
+import DoctorProfilePersonalEditPage from '@/pages/doctor/profile-settings/DoctorProfilePersonalEditPage';
+import DoctorProfileProfessionalEditPage from '@/pages/doctor/profile-settings/DoctorProfileProfessionalEditPage';
+import DoctorProfileSuccessPage from '@/pages/doctor/profile-settings/DoctorProfileSuccessPage';
 
 // ─── Admin pages ──────────────────────────────────────────────────────────────
 import AdminLayout from '@/layouts/AdminLayout';
@@ -127,6 +130,10 @@ export default function App() {
             Wrong role → redirected to their own role root.
             No token   → /login?next=<intended-path>                   */}
         <Route element={<ProtectedRoute allowedRoles={['doctor']} />}>
+          <Route
+            path='/doctor/profile-update-success'
+            element={<DoctorProfileSuccessPage />}
+          />
           <Route path='/doctor' element={<DoctorLayout />}>
             <Route index                       element={<Navigate to='dashboard'            replace />} />
             <Route path='dashboard'            element={<DoctorDashboardPage />} />
@@ -143,6 +150,8 @@ export default function App() {
             <Route path='clinic-location'      element={<DoctorClinicLocationPage />} />
             <Route path='notification'         element={<DoctorNotificationPage />} />
             <Route path='profile-settings'     element={<DoctorProfileSettingsPage />} />
+            <Route path='profile-settings/personal/edit' element={<DoctorProfilePersonalEditPage />} />
+            <Route path='profile-settings/professional/edit' element={<DoctorProfileProfessionalEditPage />} />
           </Route>
         </Route>
 

@@ -12,6 +12,11 @@ import type {
 } from 'react-hook-form';
 import { cn } from '@/lib/utils/utils';
 import { useToast } from '@/components/ui/ToastProvider';
+import {
+  profileFieldClass,
+  profileInputClass,
+  profileTextareaClass,
+} from '@/components/doctor/profile-settings/doctor-profile-form-field';
 
 export type SecurityFormFieldConfig<T extends FieldValues> = {
   name: Path<T>;
@@ -22,13 +27,6 @@ export type SecurityFormFieldConfig<T extends FieldValues> = {
   hint?: string;
   autoComplete?: string;
 };
-
-const inputBaseClass =
-  'h-[48px] w-full rounded-[12px] border bg-white px-4 font-cairo text-[13px] font-bold text-[#101828] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow,background] placeholder:font-semibold placeholder:text-[#98A2B3]';
-const inputNormalBorder =
-  'border-[#E4E7EC] hover:border-primary/35 focus-visible:border-primary focus-visible:bg-[#FAFFFE] focus-visible:shadow-[0_0_0_4px_rgba(15,143,139,0.11),inset_0_1px_2px_rgba(0,0,0,0.03)]';
-const inputInvalidBorder =
-  'border-[#F04438] bg-[#FFFBFB] shadow-[inset_0_1px_2px_rgba(240,68,56,0.06)] ring-2 ring-[#FECDCA]/70 focus-visible:border-[#F04438] focus-visible:shadow-[0_0_0_4px_rgba(240,68,56,0.12)]';
 
 function SecurityFormField<T extends FieldValues>({
   label,
@@ -242,9 +240,9 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                             aria-invalid={Boolean(error)}
                             rows={4}
                             {...register(field.name)}
-                            className={cn(
-                              'min-h-[110px] w-full resize-none rounded-[12px] border bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#101828] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow,background] placeholder:font-semibold placeholder:text-[#98A2B3]',
-                              error ? inputInvalidBorder : inputNormalBorder,
+                            className={profileFieldClass(
+                              profileTextareaClass,
+                              Boolean(error),
                             )}
                           />
                         ) : (
@@ -260,10 +258,9 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                             autoComplete={field.autoComplete}
                             aria-invalid={Boolean(error)}
                             {...register(field.name)}
-                            className={cn(
-                              inputBaseClass,
-                              isPassword ? 'pe-12' : undefined,
-                              error ? inputInvalidBorder : inputNormalBorder,
+                            className={profileFieldClass(
+                              cn(profileInputClass, isPassword && 'pe-12'),
+                              Boolean(error),
                             )}
                           />
                         )}

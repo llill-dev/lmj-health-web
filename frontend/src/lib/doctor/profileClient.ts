@@ -21,6 +21,10 @@ export type DoctorProfileRecord = {
   medicalLicenseNumber?: string;
   education?: string;
   clinicAddress?: string;
+  locationCity?: string;
+  locationCountry?: string;
+  clinicLat?: number | null;
+  clinicLng?: number | null;
   bio?: string;
   consultationFee?: number | null;
   consultationTypes?: DoctorConsultationType[] | string[];
@@ -53,6 +57,26 @@ function appendIfPresent(form: FormData, key: string, value: string | undefined)
   if (trimmed) form.append(key, trimmed);
 }
 
+/** API expects calendar date; normalize date input / ISO strings. */
+export function normalizeProfileDateOfBirth(value?: string | null): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const date = new Date(trimmed);
+  if (Number.isNaN(date.getTime())) return trimmed;
+  return date.toISOString().slice(0, 10);
+}
+
+function appendConsultationTypes(
+  form: FormData,
+  types?: DoctorConsultationType[],
+) {
+  if (!types?.length) return;
+  for (const type of types) {
+    form.append('consultationTypes', type);
+  }
+}
+
 export const doctorProfileApi = {
   getProfile: () =>
     get<DoctorProfileResponse>('/api/doctors/me/profile', { locale: 'ar' }),
@@ -62,14 +86,16 @@ export const doctorProfileApi = {
     appendIfPresent(form, 'fullName', input.fullName);
     appendIfPresent(form, 'phone', input.phone);
     appendIfPresent(form, 'address', input.address);
-    appendIfPresent(form, 'dateOfBirth', input.dateOfBirth);
+    appendIfPresent(
+      form,
+      'dateOfBirth',
+      normalizeProfileDateOfBirth(input.dateOfBirth),
+    );
     appendIfPresent(form, 'bio', input.bio);
     if (input.consultationFee != null && !Number.isNaN(input.consultationFee)) {
-      form.append('consultationFee', String(input.consultationFee));
+      form.append('consultationFee', String(Math.trunc(input.consultationFee)));
     }
-    if (input.consultationTypes?.length) {
-      form.append('consultationTypes', JSON.stringify(input.consultationTypes));
-    }
+    appendConsultationTypes(form, input.consultationTypes);
     if (input.photo) {
       form.append('photo', input.photo);
     }
