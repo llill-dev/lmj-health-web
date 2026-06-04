@@ -1,0 +1,54 @@
+'use client';
+
+import { Download } from 'lucide-react';
+import type { MedicalRequestDetailVm } from './map-doctor-medical-requests';
+import { MedicalRequestInfoCard } from './medical-request-info-card';
+import { MedicalRequestModalShell } from './medical-request-modal-shell';
+import { useMedicalRequestDocument } from './use-medical-request-document';
+
+export function LabResultDialog({
+  open,
+  onClose,
+  vm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  vm: MedicalRequestDetailVm | null;
+}) {
+  const { openResultUrl, documentBusy } = useMedicalRequestDocument();
+
+  if (!vm) return null;
+
+  return (
+    <MedicalRequestModalShell
+      open={open}
+      onClose={onClose}
+      title="نتيجة تحاليل"
+      maxWidthClass="max-w-[640px]"
+    >
+      <div className="space-y-5">
+        <MedicalRequestInfoCard
+          vm={vm}
+          subtitle={
+            <>
+              <span className="font-extrabold text-[#344054]">النوع:</span>{' '}
+              {vm.typeDetail}
+            </>
+          }
+        />
+
+        <div className="min-h-[280px] rounded-[8px] border border-dashed border-[#E2E8F0] bg-[#FAFAFA]" />
+
+        <button
+          type="button"
+          disabled={documentBusy}
+          onClick={() => void openResultUrl(vm, 'download')}
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:opacity-60"
+        >
+          <Download className="h-4 w-4" aria-hidden />
+          {documentBusy ? 'جارٍ التحميل...' : 'تحميل'}
+        </button>
+      </div>
+    </MedicalRequestModalShell>
+  );
+}
