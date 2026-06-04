@@ -163,6 +163,13 @@ export function useCloseDoctorPatientEncounter(doctorId: string) {
         ),
       });
       queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.encounterSummary(
+          doctorId,
+          variables.patientId,
+          variables.encounterId,
+        ),
+      });
+      queryClient.invalidateQueries({
         queryKey: doctorPatientsQueryKeys.all,
       });
     },
