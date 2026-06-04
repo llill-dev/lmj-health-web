@@ -1,3 +1,4 @@
+import { localizeOrderStatusesInMessage } from '@/lib/doctor/orderStatusLabels';
 import { useAuthStore } from '@/store/authStore';
 import { runSessionExpiredFlow } from '@/lib/session/sessionExpiryFlow';
 import {
@@ -193,7 +194,10 @@ export function getUserFacingRequestErrorMessage(
   error: unknown,
   locale: 'ar' | 'en' = 'ar',
 ): string {
-  if (error instanceof ApiError) return error.message;
+  if (error instanceof ApiError) {
+    const msg = error.message;
+    return locale === 'ar' ? localizeOrderStatusesInMessage(msg) : msg;
+  }
   return transportFailureUserMessage(error, locale);
 }
 

@@ -1,4 +1,12 @@
-import { get, patch, post, put, del, apiRequestResult, apiMultipart } from "@/lib/api";
+import {
+  get,
+  patch,
+  post,
+  put,
+  del,
+  apiRequestResult,
+  apiMultipart,
+} from "@/lib/api";
 import {
   api,
   type Appointment as MockAppointment,
@@ -6,6 +14,44 @@ import {
   type WorkSchedule as MockWorkSchedule,
 } from "@/lib/api_mock";
 import { doctorEndpoints } from "./endpoints";
+import type {
+  EncounterClinicalListParams,
+  EncounterOrdersListResponse,
+} from "./encounterClinicalTypes";
+import type {
+  CreateEncounterPrescriptionBody,
+  EncounterPrescriptionFinalizeResponse,
+  EncounterPrescriptionItemMutationResponse,
+  EncounterPrescriptionPreviewResponse,
+  EncounterPrescriptionResponse,
+  EncounterPrescriptionsListResponse,
+  PrescriptionItemBody,
+  UpdateEncounterPrescriptionBody,
+} from "./prescriptionTypes";
+import type {
+  CancelDoctorOrderBody,
+  DoctorOrderDetailsResponse,
+  DoctorOrderMutationResponse,
+  DoctorOrdersListParams,
+  DoctorOrdersListResponse,
+  UpdateDoctorOrderStatusBody,
+} from "./doctorOrderTypes";
+import {
+  normalizeDoctorOrderFromApi,
+  normalizeDoctorOrdersListResponse,
+} from "./map-doctor-orders-api";
+import type {
+  CreateEncounterOrderBody,
+  CreateImagingOrderBody,
+  EncounterOrderFinalizeResponse,
+  EncounterOrderItemMutationResponse,
+  EncounterOrderPreviewResponse,
+  EncounterOrderResponse,
+  ImagingOrderItemBody,
+  OrderCatalogListResponse,
+  UpdateEncounterOrderBody,
+  UpdateImagingOrderBody,
+} from "./encounterOrderTypes";
 import { readAuthUser } from "@/lib/cookies";
 import type {
   CreateTemporaryPatientBody,
@@ -97,6 +143,17 @@ function buildAccessRequestsListQuery(
   return qs.toString();
 }
 
+function buildEncounterClinicalListQuery(
+  params: EncounterClinicalListParams = {},
+): string {
+  const search = new URLSearchParams();
+  if (params.page != null) search.set("page", String(params.page));
+  if (params.limit != null) search.set("limit", String(params.limit));
+  if (params.status?.trim()) search.set("status", params.status.trim());
+  const query = search.toString();
+  return query ? `?${query}` : "";
+}
+
 function buildPatientEncountersListQuery(
   params: DoctorPatientEncountersListParams = {},
 ): string {
@@ -121,24 +178,157 @@ export const doctorPatientsQueryKeys = {
   fullProfile: (doctorId: string, patientId: string) =>
     [...doctorPatientsQueryKeys.all, "profile", doctorId, patientId] as const,
   medicalRecords: (doctorId: string, patientId: string) =>
-    [...doctorPatientsQueryKeys.all, "medical-records", doctorId, patientId] as const,
+    [
+      ...doctorPatientsQueryKeys.all,
+      "medical-records",
+      doctorId,
+      patientId,
+    ] as const,
   medicalRecord: (doctorId: string, patientId: string, recordId: string) =>
-    [...doctorPatientsQueryKeys.medicalRecords(doctorId, patientId), recordId] as const,
+    [
+      ...doctorPatientsQueryKeys.medicalRecords(doctorId, patientId),
+      recordId,
+    ] as const,
   encounters: (
     doctorId: string,
     patientId: string,
     params: DoctorPatientEncountersListParams = {},
-  ) => [...doctorPatientsQueryKeys.all, "encounters", doctorId, patientId, params] as const,
-  encounterDetail: (
+  ) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounters",
+      doctorId,
+      patientId,
+      params,
+    ] as const,
+  encounterDetail: (doctorId: string, patientId: string, encounterId: string) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-detail",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  encounterSummary: (
     doctorId: string,
     patientId: string,
     encounterId: string,
   ) =>
-    [...doctorPatientsQueryKeys.all, "encounter-detail", doctorId, patientId, encounterId] as const,
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-summary",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  encounterPrescription: (
+    doctorId: string,
+    patientId: string,
+    encounterId: string,
+  ) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-prescription",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  encounterRadiologyOrder: (
+    doctorId: string,
+    patientId: string,
+    encounterId: string,
+  ) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-radiology-order",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  encounterLabOrder: (
+    doctorId: string,
+    patientId: string,
+    encounterId: string,
+  ) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-lab-order",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  encounterProcedureOrder: (
+    doctorId: string,
+    patientId: string,
+    encounterId: string,
+  ) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-procedure-order",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  encounterReferralOrder: (
+    doctorId: string,
+    patientId: string,
+    encounterId: string,
+  ) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-referral-order",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  encounterWorkspace: (
+    doctorId: string,
+    patientId: string,
+    encounterId: string,
+  ) =>
+    [
+      ...doctorPatientsQueryKeys.all,
+      "encounter-workspace",
+      doctorId,
+      patientId,
+      encounterId,
+    ] as const,
+  imagingCatalog: (search?: string) =>
+    [...doctorPatientsQueryKeys.all, "imaging-catalog", search ?? ""] as const,
+  labCatalog: (search?: string) =>
+    [...doctorPatientsQueryKeys.all, "lab-catalog", search ?? ""] as const,
+  procedureCatalog: (search?: string) =>
+    [...doctorPatientsQueryKeys.all, "procedure-catalog", search ?? ""] as const,
   files: (patientId: string) =>
     [...doctorPatientsQueryKeys.all, "files", patientId] as const,
   file: (patientId: string, fileId: string) =>
     [...doctorPatientsQueryKeys.files(patientId), fileId] as const,
+};
+
+function buildDoctorOrdersListQuery(params: DoctorOrdersListParams = {}) {
+  const qs = new URLSearchParams();
+  if (params.patientId) qs.set("patientId", params.patientId);
+  if (params.orderType) qs.set("orderType", params.orderType);
+  if (params.category) qs.set("category", params.category);
+  if (params.type) qs.set("type", params.type);
+  if (params.status) qs.set("status", params.status);
+  if (params.statusCode) qs.set("statusCode", params.statusCode);
+  if (params.q?.trim()) qs.set("q", params.q.trim());
+  if (params.search?.trim()) qs.set("search", params.search.trim());
+  if (params.from) qs.set("from", params.from);
+  if (params.to) qs.set("to", params.to);
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+  if (params.sort) qs.set("sort", params.sort);
+  return qs.toString();
+}
+
+export const doctorOrdersQueryKeys = {
+  all: ["doctor", "orders"] as const,
+  list: (params: DoctorOrdersListParams = {}) =>
+    [...doctorOrdersQueryKeys.all, "list", params] as const,
+  detail: (orderId: string) =>
+    [...doctorOrdersQueryKeys.all, "detail", orderId] as const,
 };
 
 export const doctorAccessRequestsQueryKeys = {
@@ -148,7 +338,13 @@ export const doctorAccessRequestsQueryKeys = {
   detail: (requestId: string) =>
     [...doctorAccessRequestsQueryKeys.all, "detail", requestId] as const,
   approvedPayload: (doctorId: string, patientId: string, requestId: string) =>
-    [...doctorAccessRequestsQueryKeys.all, "approved-payload", doctorId, patientId, requestId] as const,
+    [
+      ...doctorAccessRequestsQueryKeys.all,
+      "approved-payload",
+      doctorId,
+      patientId,
+      requestId,
+    ] as const,
 };
 
 // NOTE: Exported via doctorApi.patients below (admin-like shape)
@@ -433,7 +629,12 @@ export const doctorAppointmentsApi = {
       `${doctorEndpoints.appointments.files.download(appointmentId, fileId)}?mode=url`,
       { locale: "ar" },
     ),
-  uploadFile: (appointmentId: string, file: File, note?: string, tags?: string[]) => {
+  uploadFile: (
+    appointmentId: string,
+    file: File,
+    note?: string,
+    tags?: string[],
+  ) => {
     const formData = new FormData();
     formData.append("file", file);
     if (note?.trim()) formData.append("note", note.trim());
@@ -800,13 +1001,13 @@ export const doctorApi = {
         doctorEndpoints.patients.medicalRecords(doctorId, patientId),
         { locale: "ar" },
       ),
-    getMedicalRecord: (
-      doctorId: string,
-      patientId: string,
-      recordId: string,
-    ) =>
+    getMedicalRecord: (doctorId: string, patientId: string, recordId: string) =>
       get<DoctorMedicalRecordDetailsResponse>(
-        doctorEndpoints.patients.medicalRecordById(doctorId, patientId, recordId),
+        doctorEndpoints.patients.medicalRecordById(
+          doctorId,
+          patientId,
+          recordId,
+        ),
         { locale: "ar" },
       ),
     createMedicalRecord: (
@@ -826,7 +1027,11 @@ export const doctorApi = {
       body: DoctorUpdateMedicalRecordBody,
     ) =>
       patch<DoctorMedicalRecordDetailsResponse>(
-        doctorEndpoints.patients.medicalRecordById(doctorId, patientId, recordId),
+        doctorEndpoints.patients.medicalRecordById(
+          doctorId,
+          patientId,
+          recordId,
+        ),
         body,
         { locale: "ar" },
       ),
@@ -838,7 +1043,9 @@ export const doctorApi = {
       const query = buildPatientEncountersListQuery(params);
       const base = doctorEndpoints.patients.encounters(doctorId, patientId);
       const endpoint = query ? `${base}?${query}` : base;
-      return get<DoctorPatientEncountersListResponse>(endpoint, { locale: "ar" });
+      return get<DoctorPatientEncountersListResponse>(endpoint, {
+        locale: "ar",
+      });
     },
     createEncounter: (
       doctorId: string,
@@ -850,13 +1057,13 @@ export const doctorApi = {
         body,
         { locale: "ar" },
       ),
-    getEncounter: (
-      doctorId: string,
-      patientId: string,
-      encounterId: string,
-    ) =>
+    getEncounter: (doctorId: string, patientId: string, encounterId: string) =>
       get<DoctorEncounterDetailsResponse>(
-        doctorEndpoints.patients.encounterById(doctorId, patientId, encounterId),
+        doctorEndpoints.patients.encounterById(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
         { locale: "ar" },
       ),
     updateEncounter: (
@@ -866,7 +1073,11 @@ export const doctorApi = {
       body: DoctorUpdateEncounterBody,
     ) =>
       patch<DoctorEncounterDetailsResponse>(
-        doctorEndpoints.patients.encounterById(doctorId, patientId, encounterId),
+        doctorEndpoints.patients.encounterById(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
         body,
         { locale: "ar" },
       ),
@@ -876,8 +1087,401 @@ export const doctorApi = {
       encounterId: string,
     ) =>
       post<DoctorCloseEncounterResponse>(
-        doctorEndpoints.patients.closeEncounter(doctorId, patientId, encounterId),
+        doctorEndpoints.patients.closeEncounter(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
         {},
+        { locale: "ar" },
+      ),
+    listEncounterPrescriptions: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      params: EncounterClinicalListParams = {},
+    ) => {
+      const query = buildEncounterClinicalListQuery(params);
+      const base = doctorEndpoints.patients.encounterPrescriptions(
+        doctorId,
+        patientId,
+        encounterId,
+      );
+      return get<EncounterPrescriptionsListResponse>(`${base}${query}`, {
+        locale: "ar",
+      });
+    },
+    listEncounterOrders: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      params: EncounterClinicalListParams = {},
+    ) => {
+      const query = buildEncounterClinicalListQuery(params);
+      const base = doctorEndpoints.patients.encounterOrders(
+        doctorId,
+        patientId,
+        encounterId,
+      );
+      return get<EncounterOrdersListResponse>(`${base}${query}`, {
+        locale: "ar",
+      });
+    },
+    createEncounterImagingOrder: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      body: CreateEncounterOrderBody = {},
+    ) =>
+      post<EncounterOrderResponse>(
+        doctorEndpoints.patients.encounterOrdersImaging(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    createEncounterLabOrder: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      body: CreateEncounterOrderBody = {},
+    ) =>
+      post<EncounterOrderResponse>(
+        doctorEndpoints.patients.encounterOrdersLab(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    createEncounterProcedureOrder: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      body: CreateEncounterOrderBody = {},
+    ) =>
+      post<EncounterOrderResponse>(
+        doctorEndpoints.patients.encounterOrdersProcedures(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    createEncounterReferralOrder: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      body: {
+        specialty?: string;
+        reason?: string;
+        referralType?: string;
+        referredDoctorName?: string;
+        institution?: string;
+        clinicalSummary?: string;
+        questionsToColleague?: string;
+        notes?: string;
+        urgency?: string;
+        priority?: string;
+      },
+    ) =>
+      post<EncounterOrderResponse>(
+        doctorEndpoints.patients.encounterOrdersReferrals(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    getEncounterOrder: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      orderId: string,
+    ) =>
+      get<EncounterOrderResponse>(
+        doctorEndpoints.patients.encounterOrderById(
+          doctorId,
+          patientId,
+          encounterId,
+          orderId,
+        ),
+        { locale: "ar" },
+      ),
+    updateEncounterOrder: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      orderId: string,
+      body: UpdateEncounterOrderBody,
+    ) =>
+      patch<EncounterOrderResponse>(
+        doctorEndpoints.patients.encounterOrderById(
+          doctorId,
+          patientId,
+          encounterId,
+          orderId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    addEncounterOrderItem: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      orderId: string,
+      body: ImagingOrderItemBody,
+    ) =>
+      post<EncounterOrderItemMutationResponse>(
+        doctorEndpoints.patients.encounterOrderItems(
+          doctorId,
+          patientId,
+          encounterId,
+          orderId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    updateEncounterOrderItem: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      orderId: string,
+      itemId: string,
+      body: ImagingOrderItemBody,
+    ) =>
+      patch<EncounterOrderItemMutationResponse>(
+        doctorEndpoints.patients.encounterOrderItemById(
+          doctorId,
+          patientId,
+          encounterId,
+          orderId,
+          itemId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    deleteEncounterOrderItem: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      orderId: string,
+      itemId: string,
+    ) =>
+      del<EncounterOrderItemMutationResponse>(
+        doctorEndpoints.patients.encounterOrderItemById(
+          doctorId,
+          patientId,
+          encounterId,
+          orderId,
+          itemId,
+        ),
+        { locale: "ar" },
+      ),
+    finalizeEncounterOrder: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      orderId: string,
+      body: { note?: string } = {},
+    ) =>
+      post<EncounterOrderFinalizeResponse>(
+        doctorEndpoints.patients.encounterOrderFinalize(
+          doctorId,
+          patientId,
+          encounterId,
+          orderId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    getEncounterOrderPreview: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      orderId: string,
+    ) =>
+      get<EncounterOrderPreviewResponse>(
+        doctorEndpoints.patients.encounterOrderPreview(
+          doctorId,
+          patientId,
+          encounterId,
+          orderId,
+        ),
+        { locale: "ar" },
+      ),
+    listImagingCatalog: (params: { q?: string; page?: number; limit?: number } = {}) => {
+      const search = new URLSearchParams();
+      if (params.q?.trim()) search.set("q", params.q.trim());
+      if (params.page) search.set("page", String(params.page));
+      if (params.limit) search.set("limit", String(params.limit));
+      const query = search.toString();
+      const base = doctorEndpoints.orderCatalogImaging;
+      return get<OrderCatalogListResponse>(
+        query ? `${base}?${query}` : base,
+        { locale: "ar" },
+      );
+    },
+    listLabCatalog: (params: { q?: string; page?: number; limit?: number } = {}) => {
+      const search = new URLSearchParams();
+      if (params.q?.trim()) search.set("q", params.q.trim());
+      if (params.page) search.set("page", String(params.page));
+      if (params.limit) search.set("limit", String(params.limit));
+      const query = search.toString();
+      const base = doctorEndpoints.patients.orderCatalogLab;
+      return get<OrderCatalogListResponse>(
+        query ? `${base}?${query}` : base,
+        { locale: "ar" },
+      );
+    },
+    listProcedureCatalog: (
+      params: { q?: string; page?: number; limit?: number } = {},
+    ) => {
+      const search = new URLSearchParams();
+      if (params.q?.trim()) search.set("q", params.q.trim());
+      if (params.page) search.set("page", String(params.page));
+      if (params.limit) search.set("limit", String(params.limit));
+      const query = search.toString();
+      const base = doctorEndpoints.patients.orderCatalogProcedures;
+      return get<OrderCatalogListResponse>(
+        query ? `${base}?${query}` : base,
+        { locale: "ar" },
+      );
+    },
+    createEncounterPrescription: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      body: CreateEncounterPrescriptionBody = {},
+    ) =>
+      post<EncounterPrescriptionResponse>(
+        doctorEndpoints.patients.encounterPrescriptions(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    getEncounterPrescription: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+    ) =>
+      get<EncounterPrescriptionResponse>(
+        doctorEndpoints.patients.encounterPrescriptionById(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+        ),
+        { locale: "ar" },
+      ),
+    updateEncounterPrescription: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+      body: UpdateEncounterPrescriptionBody,
+    ) =>
+      patch<EncounterPrescriptionResponse>(
+        doctorEndpoints.patients.encounterPrescriptionById(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    addEncounterPrescriptionItem: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+      body: PrescriptionItemBody,
+    ) =>
+      post<EncounterPrescriptionItemMutationResponse>(
+        doctorEndpoints.patients.encounterPrescriptionItems(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    updateEncounterPrescriptionItem: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+      itemId: string,
+      body: PrescriptionItemBody,
+    ) =>
+      patch<EncounterPrescriptionItemMutationResponse>(
+        doctorEndpoints.patients.encounterPrescriptionItemById(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+          itemId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    deleteEncounterPrescriptionItem: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+      itemId: string,
+    ) =>
+      del<EncounterPrescriptionItemMutationResponse>(
+        doctorEndpoints.patients.encounterPrescriptionItemById(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+          itemId,
+        ),
+        { locale: "ar" },
+      ),
+    finalizeEncounterPrescription: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+    ) =>
+      post<EncounterPrescriptionFinalizeResponse>(
+        doctorEndpoints.patients.encounterPrescriptionFinalize(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+        ),
+        {},
+        { locale: "ar" },
+      ),
+    getEncounterPrescriptionPreview: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+    ) =>
+      get<EncounterPrescriptionPreviewResponse>(
+        doctorEndpoints.patients.encounterPrescriptionPreview(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+        ),
         { locale: "ar" },
       ),
     listFiles: (patientId: string) =>
@@ -892,14 +1496,24 @@ export const doctorApi = {
       ),
     getFileDownloadUrl: (doctorId: string, patientId: string, fileId: string) =>
       get<DoctorFileDownloadUrlResponse>(
-        doctorEndpoints.patients.files.doctorDownloadUrl(doctorId, patientId, fileId),
+        doctorEndpoints.patients.files.doctorDownloadUrl(
+          doctorId,
+          patientId,
+          fileId,
+        ),
         { locale: "ar" },
       ),
-    uploadFile: (patientId: string, file: File, note?: string, tags?: string[]) => {
+    uploadFile: (
+      patientId: string,
+      file: File,
+      note?: string,
+      tags?: string[],
+    ) => {
       const formData = new FormData();
       formData.append("file", file);
       if (note?.trim()) formData.append("note", note.trim());
-      if (tags && tags.length > 0) formData.append("tags", JSON.stringify(tags));
+      if (tags && tags.length > 0)
+        formData.append("tags", JSON.stringify(tags));
       return apiMultipart<DoctorPatientFileDetailsResponse>(
         doctorEndpoints.patients.files.upload(patientId),
         formData,
@@ -948,4 +1562,61 @@ export const doctorApi = {
   schedule: doctorScheduleApi,
   slots: doctorSlotsApi,
   appointmentTypes: doctorAppointmentTypesApi,
+  orders: {
+    list: async (params: DoctorOrdersListParams = {}) => {
+      const query = buildDoctorOrdersListQuery(params);
+      const base = doctorEndpoints.orders.list;
+      const endpoint = query ? `${base}?${query}` : base;
+      const response = await get<DoctorOrdersListResponse>(endpoint, {
+        locale: "ar",
+      });
+      return {
+        ...response,
+        orders: normalizeDoctorOrdersListResponse(response),
+      };
+    },
+    getById: async (orderId: string) => {
+      const response = await get<DoctorOrderDetailsResponse>(
+        doctorEndpoints.orders.byId(orderId),
+        { locale: "ar" },
+      );
+      const order = normalizeDoctorOrderFromApi(response.order);
+      if (!order) {
+        throw new Error("errors.orders.notFound");
+      }
+      return { ...response, order };
+    },
+    updateStatus: (orderId: string, body: UpdateDoctorOrderStatusBody) =>
+      patch<DoctorOrderMutationResponse>(
+        doctorEndpoints.orders.status(orderId),
+        body,
+        { locale: "ar" },
+      ),
+    cancel: (orderId: string, body: CancelDoctorOrderBody = {}) =>
+      patch<DoctorOrderMutationResponse>(
+        doctorEndpoints.orders.cancel(orderId),
+        body,
+        { locale: "ar" },
+      ),
+    createLab: (body: CreateEncounterOrderBody) =>
+      post<EncounterOrderResponse>(doctorEndpoints.orders.createLab, body, {
+        locale: "ar",
+      }),
+    createImaging: (body: CreateEncounterOrderBody) =>
+      post<EncounterOrderResponse>(
+        doctorEndpoints.orders.createImaging,
+        body,
+        { locale: "ar" },
+      ),
+    createProcedure: (body: CreateEncounterOrderBody) =>
+      post<EncounterOrderResponse>(
+        doctorEndpoints.orders.createProcedures,
+        body,
+        { locale: "ar" },
+      ),
+    createCompat: (body: CreateEncounterOrderBody) =>
+      post<EncounterOrderResponse>(doctorEndpoints.orders.create, body, {
+        locale: "ar",
+      }),
+  },
 } as const;

@@ -360,6 +360,18 @@ export type DoctorPatientEncountersListParams = {
   limit?: number;
 };
 
+export type DoctorEncounterPatientSummary = {
+  _id?: string;
+  publicId?: string;
+  dateOfBirth?: string;
+  age?: number;
+  user?: {
+    _id?: string;
+    fullName?: string;
+    dateOfBirth?: string;
+  };
+};
+
 export type DoctorEncounterSummary = {
   _id: string;
   status?: DoctorEncounterStatus | string;
@@ -368,6 +380,11 @@ export type DoctorEncounterSummary = {
   startedAt?: string;
   createdAt?: string;
   closedAt?: string | null;
+  patient?: DoctorEncounterPatientSummary;
+  doctor?: {
+    _id?: string;
+    user?: { fullName?: string };
+  };
   appointment?: {
     _id?: string;
     date?: string;
