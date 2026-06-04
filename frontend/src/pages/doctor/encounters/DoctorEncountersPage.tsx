@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { ClipboardList, Loader2, Plus, Stethoscope } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
 import {
@@ -26,6 +27,7 @@ import {
   useDoctorMedicalEncountersPage,
   useDoctorPatientEncounterDetail,
   useDoctorPatients,
+  prefetchEncounterWorkspace,
 } from "@/hooks/doctor";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import {
@@ -72,6 +74,7 @@ function getEmptyStateCopy(status: MedicalVisitStatusFilter): {
 
 export default function DoctorEncountersPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
 
@@ -196,8 +199,13 @@ export default function DoctorEncountersPage() {
         title: "إغلاق زيارة",
         variant: "success",
       });
+      const closedPatientId = closeTarget.patientId;
+      const closedEncounterId = closeTarget.id;
       setCloseTarget(null);
-      void refetch();
+      navigate(
+        `/doctor/encounters/${closedPatientId}/${closedEncounterId}/summary`,
+        { replace: true },
+      );
     } catch (requestError) {
       toast(getUserFacingRequestErrorMessage(requestError), {
         title: "تعذر إغلاق الزيارة",
@@ -337,10 +345,24 @@ export default function DoctorEncountersPage() {
                             )
                           }
                           onContinueDraft={() => {
+                            prefetchEncounterWorkspace(
+                              queryClient,
+                              doctorId,
+                              visit.patientId,
+                              visit.id,
+                            );
                             navigate(
                               `/doctor/encounters/${visit.patientId}/${visit.id}`,
                             );
                           }}
+                          onWarmWorkspace={() =>
+                            prefetchEncounterWorkspace(
+                              queryClient,
+                              doctorId,
+                              visit.patientId,
+                              visit.id,
+                            )
+                          }
                           onStartNewVisit={() =>
                             openCreateEncounterDialog(visit.patientId)
                           }

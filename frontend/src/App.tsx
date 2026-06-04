@@ -1,76 +1,85 @@
-import {
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-  useLocation,
-} from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 
 // ─── Public / Auth pages ──────────────────────────────────────────────────────
-import WelcomePage from '@/pages/welcome/WelcomePage';
-import LoginPage from '@/pages/auth/login/LoginPage';
-import SignupPage from '@/pages/auth/signup/SignupPage';
-import ForgotPasswordPage from '@/pages/auth/password/forgot-password/ForgotPasswordPage';
-import ResetPasswordPage from '@/pages/auth/password/reset-password/ResetPasswordPage';
-import ResetPasswordVerifyPage from '@/pages/auth/password/reset-password-verify/ResetPasswordVerifyPage';
-import ClaimAccountPage from '@/pages/auth/claim-account/ClaimAccountPage';
-import VerifyOtpPage from '@/pages/auth/verify-otp/VerifyOtpPage';
-import SignupSuccessPage from '@/pages/auth/signup-success/SignupSuccessPage';
-import OnboardingPage from '@/pages/onboarding/OnboardingPage';
-import ConnectionTestPage from '@/pages/connection-test/ConnectionTestPage';
-import NotFoundPage from '@/pages/not-found/NotFoundPage';
+import WelcomePage from "@/pages/welcome/WelcomePage";
+import LoginPage from "@/pages/auth/login/LoginPage";
+import SignupPage from "@/pages/auth/signup/SignupPage";
+import ForgotPasswordPage from "@/pages/auth/password/forgot-password/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/auth/password/reset-password/ResetPasswordPage";
+import ResetPasswordVerifyPage from "@/pages/auth/password/reset-password-verify/ResetPasswordVerifyPage";
+import ClaimAccountPage from "@/pages/auth/claim-account/ClaimAccountPage";
+import VerifyOtpPage from "@/pages/auth/verify-otp/VerifyOtpPage";
+import SignupSuccessPage from "@/pages/auth/signup-success/SignupSuccessPage";
+import OnboardingPage from "@/pages/onboarding/OnboardingPage";
+import ConnectionTestPage from "@/pages/connection-test/ConnectionTestPage";
+import NotFoundPage from "@/pages/not-found/NotFoundPage";
 
 // ─── Doctor pages ─────────────────────────────────────────────────────────────
-import DoctorLayout from '@/layout';
-import DoctorDashboardPage from '@/pages/doctor/dashboard/DoctorDashboardPage';
-import DoctorAppointmentsPage from '@/pages/doctor/appointments/DoctorAppointmentsPage';
-import DoctorPatientsPage from '@/pages/doctor/patients/DoctorPatientsPage';
-import DoctorPatientDetailsPage from '@/pages/doctor/patients/DoctorPatientDetailsPage';
-import DoctorOnlineConsultationsPage from '@/pages/doctor/online-consultations/DoctorOnlineConsultationsPage';
-import DoctorWorkSchedulePage from '@/pages/doctor/work-schedule/DoctorWorkSchedulePage';
-import DoctorMedicalRecordsPage from '@/pages/doctor/medical-records/DoctorMedicalRecordsPage';
-import DoctorEncountersPage from '@/pages/doctor/encounters/DoctorEncountersPage';
-import DoctorEncounterWorkspacePage from '@/pages/doctor/encounters/DoctorEncounterWorkspacePage';
-import DoctorAccessRequestsPage from '@/pages/doctor/access-requests/DoctorAccessRequestsPage';
-import DoctorDoctorsDirectoryPage from '@/pages/doctor/doctors-directory/DoctorDoctorsDirectoryPage';
-import DoctorClinicLocationPage from '@/pages/doctor/clinic-location/DoctorClinicLocationPage';
-import DoctorNotificationPage from '@/pages/doctor/notification/DoctorNotificationPage';
-import DoctorProfileSettingsPage from '@/pages/doctor/profile-settings/DoctorProfileSettingsPage';
-import DoctorProfilePersonalEditPage from '@/pages/doctor/profile-settings/DoctorProfilePersonalEditPage';
-import DoctorProfileProfessionalEditPage from '@/pages/doctor/profile-settings/DoctorProfileProfessionalEditPage';
-import DoctorProfileSuccessPage from '@/pages/doctor/profile-settings/DoctorProfileSuccessPage';
+import DoctorLayout from "@/layout";
+import DoctorDashboardPage from "@/pages/doctor/dashboard/DoctorDashboardPage";
+import DoctorAppointmentsPage from "@/pages/doctor/appointments/DoctorAppointmentsPage";
+import DoctorPatientsPage from "@/pages/doctor/patients/DoctorPatientsPage";
+import DoctorPatientDetailsPage from "@/pages/doctor/patients/DoctorPatientDetailsPage";
+import DoctorOnlineConsultationsPage from "@/pages/doctor/online-consultations/DoctorOnlineConsultationsPage";
+import DoctorWorkSchedulePage from "@/pages/doctor/work-schedule/DoctorWorkSchedulePage";
+import DoctorMedicalRecordsPage from "@/pages/doctor/medical-records/DoctorMedicalRecordsPage";
+import DoctorPrescriptionPage from "@/pages/doctor/prescription/DoctorPrescriptionPage";
+import DoctorPrescriptionPreviewPage from "@/pages/doctor/prescription/DoctorPrescriptionPreviewPage";
+import DoctorRadiologyWorkspacePage from "@/pages/doctor/radiology/DoctorRadiologyWorkspacePage";
+import DoctorRadiologyManualPage from "@/pages/doctor/radiology/DoctorRadiologyManualPage";
+import DoctorRadiologyPreviewPage from "@/pages/doctor/radiology/DoctorRadiologyPreviewPage";
+import DoctorMedicalRequestsPage from "@/pages/doctor/medical-requests/DoctorMedicalRequestsPage";
+import DoctorEncountersPage from "@/pages/doctor/encounters/DoctorEncountersPage";
+import DoctorEncounterWorkspacePage from "@/pages/doctor/encounters/DoctorEncounterWorkspacePage";
+import DoctorEncounterLabWorkspacePage from "@/pages/doctor/encounters/DoctorEncounterLabWorkspacePage";
+import DoctorEncounterProcedureWorkspacePage from "@/pages/doctor/encounters/DoctorEncounterProcedureWorkspacePage";
+import DoctorEncounterReferralWorkspacePage from "@/pages/doctor/encounters/DoctorEncounterReferralWorkspacePage";
+import DoctorEncounterOrderManualPage from "@/pages/doctor/encounters/DoctorEncounterOrderManualPage";
+import DoctorEncounterOrderPreviewPage from "@/pages/doctor/encounters/DoctorEncounterOrderPreviewPage";
+import DoctorEncounterSummaryPage from "@/pages/doctor/encounters/DoctorEncounterSummaryPage";
+import DoctorAccessRequestsPage from "@/pages/doctor/access-requests/DoctorAccessRequestsPage";
+import DoctorDoctorsDirectoryPage from "@/pages/doctor/doctors-directory/DoctorDoctorsDirectoryPage";
+import DoctorClinicLocationPage from "@/pages/doctor/clinic-location/DoctorClinicLocationPage";
+import DoctorNotificationPage from "@/pages/doctor/notification/DoctorNotificationPage";
+import DoctorProfileSettingsPage from "@/pages/doctor/profile-settings/DoctorProfileSettingsPage";
+import DoctorProfilePersonalEditPage from "@/pages/doctor/profile-settings/DoctorProfilePersonalEditPage";
+import DoctorProfileProfessionalEditPage from "@/pages/doctor/profile-settings/DoctorProfileProfessionalEditPage";
+import DoctorProfileSuccessPage from "@/pages/doctor/profile-settings/DoctorProfileSuccessPage";
 
 // ─── Admin pages ──────────────────────────────────────────────────────────────
-import AdminLayout from '@/layouts/AdminLayout';
-import AdminDashboardPage from '@/pages/admin/dashboard/AdminDashboardPage';
-import AdminDoctorsPage from '@/pages/admin/doctors/AdminDoctorsPage';
-import AdminDoctorDetailsPage from '@/pages/admin/doctors/AdminDoctorDetailsPage';
-import AdminPatientsPage from '@/pages/admin/patients/AdminPatientsPage';
-import AdminPatientDetailsPage from '@/pages/admin/patients/AdminPatientDetailsPage';
-import AdminSecretariesPage from '@/pages/admin/secretaries/AdminSecretariesPage';
-import AdminSecretaryDetailsPage from '@/pages/admin/secretaries/AdminSecretaryDetailsPage';
-import AdminSecretaryAppointmentsPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsPage';
-import AdminSecretaryAppointmentsManagementPage from '@/pages/admin/secretaries/AdminSecretaryAppointmentsManagementPage';
-import AdminMedicalContentPage from '@/pages/admin/medical-content/AdminMedicalContentPage';
-import AdminServiceTypesPage from '@/pages/admin/service-types/AdminServiceTypesPage';
-import AdminAppointmentsPage from '@/pages/admin/appointments/AdminAppointmentsPage';
-import AdminMedicalFileOptionsPage from '@/pages/admin/medical-file-options/AdminMedicalFileOptionsPage';
-import AdminMedicalOrdersPage from '@/pages/admin/medical-orders/AdminMedicalOrdersPage';
-import AdminVerificationRequestsPage from '@/pages/admin/verification-requests/AdminVerificationRequestsPage';
-import AdminVerificationRequestDetailsPage from '@/pages/admin/verification-requests/AdminVerificationRequestDetailsPage';
-import AdminSystemLogsPage from '@/pages/admin/system-logs/AdminSystemLogsPage';
-import AdminSettingsPage from '@/pages/admin/settings/AdminSettingsPage';
-import AdminNotificationsPage from '@/pages/admin/notifications/AdminNotificationsPage';
-import AdminServicesPage from '@/pages/admin/services/AdminServicesPage';
-import AdminAnalyticsPage from '@/pages/admin/analytics/AdminAnalyticsPage';
-import AdminComplaintsPage from '@/pages/admin/complaints/AdminComplaintsPage';
-import AdminComplaintDetailsPage from '@/pages/admin/complaints/AdminComplaintDetailsPage';
-import AdminDoctorSpecializationsPage from '@/pages/admin/doctor-specializations/AdminDoctorSpecializationsPage';
+import AdminLayout from "@/layouts/AdminLayout";
+import AdminDashboardPage from "@/pages/admin/dashboard/AdminDashboardPage";
+import AdminDoctorsPage from "@/pages/admin/doctors/AdminDoctorsPage";
+import AdminDoctorDetailsPage from "@/pages/admin/doctors/AdminDoctorDetailsPage";
+import AdminPatientsPage from "@/pages/admin/patients/AdminPatientsPage";
+import AdminPatientDetailsPage from "@/pages/admin/patients/AdminPatientDetailsPage";
+import AdminSecretariesPage from "@/pages/admin/secretaries/AdminSecretariesPage";
+import AdminSecretaryDetailsPage from "@/pages/admin/secretaries/AdminSecretaryDetailsPage";
+import AdminSecretaryAppointmentsPage from "@/pages/admin/secretaries/AdminSecretaryAppointmentsPage";
+import AdminSecretaryAppointmentsManagementPage from "@/pages/admin/secretaries/AdminSecretaryAppointmentsManagementPage";
+import AdminMedicalContentPage from "@/pages/admin/medical-content/AdminMedicalContentPage";
+import AdminServiceTypesPage from "@/pages/admin/service-types/AdminServiceTypesPage";
+import AdminAppointmentsPage from "@/pages/admin/appointments/AdminAppointmentsPage";
+import AdminMedicalFileOptionsPage from "@/pages/admin/medical-file-options/AdminMedicalFileOptionsPage";
+import AdminMedicalOrdersPage from "@/pages/admin/medical-orders/AdminMedicalOrdersPage";
+import AdminVerificationRequestsPage from "@/pages/admin/verification-requests/AdminVerificationRequestsPage";
+import AdminVerificationRequestDetailsPage from "@/pages/admin/verification-requests/AdminVerificationRequestDetailsPage";
+import AdminSystemLogsPage from "@/pages/admin/system-logs/AdminSystemLogsPage";
+import AdminSettingsPage from "@/pages/admin/settings/AdminSettingsPage";
+import AdminNotificationsPage from "@/pages/admin/notifications/AdminNotificationsPage";
+import AdminServicesPage from "@/pages/admin/services/AdminServicesPage";
+import AdminAnalyticsPage from "@/pages/admin/analytics/AdminAnalyticsPage";
+import AdminComplaintsPage from "@/pages/admin/complaints/AdminComplaintsPage";
+import AdminComplaintDetailsPage from "@/pages/admin/complaints/AdminComplaintDetailsPage";
+import AdminDoctorSpecializationsPage from "@/pages/admin/doctor-specializations/AdminDoctorSpecializationsPage";
 
 // ─── Routing guards ───────────────────────────────────────────────────────────
-import ProtectedRoute, { GuestRoute, RootRedirect } from '@/routes/ProtectedRoute';
-import { PageTransition } from '@/motion';
+import ProtectedRoute, {
+  GuestRoute,
+  RootRedirect,
+} from "@/routes/ProtectedRoute";
+import { PageTransition } from "@/motion";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PublicPagesLayout
@@ -81,7 +90,7 @@ import { PageTransition } from '@/motion';
 function PublicPagesLayout() {
   const location = useLocation();
   return (
-    <AnimatePresence mode='wait'>
+    <AnimatePresence mode="wait">
       <PageTransition key={location.pathname}>
         <Outlet />
       </PageTransition>
@@ -94,24 +103,26 @@ function PublicPagesLayout() {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
-    <div className='font-cairo'>
+    <div className="font-cairo">
       <Routes>
-
         {/* ── "/" → smart redirect (role dashboard | /welcome) ───────── */}
-        <Route path='/' element={<RootRedirect />} />
+        <Route path="/" element={<RootRedirect />} />
 
         {/* ── Guest-only pages ────────────────────────────────────────
             Already-authenticated users are immediately redirected to
             their role dashboard so they never see auth pages again.    */}
         <Route element={<GuestRoute />}>
           <Route element={<PublicPagesLayout />}>
-            <Route path='/welcome'         element={<WelcomePage />} />
-            <Route path='/login'           element={<LoginPage />} />
-            <Route path='/signup'          element={<SignupPage />} />
-            <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-            <Route path='/reset-password/verify' element={<ResetPasswordVerifyPage />} />
-            <Route path='/reset-password'  element={<ResetPasswordPage />} />
-            <Route path='/claim-account'   element={<ClaimAccountPage />} />
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route
+              path="/reset-password/verify"
+              element={<ResetPasswordVerifyPage />}
+            />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/claim-account" element={<ClaimAccountPage />} />
           </Route>
         </Route>
 
@@ -119,100 +130,209 @@ export default function App() {
             Not blocked for authenticated users: a doctor might need
             to re-verify OTP or complete onboarding after first login. */}
         <Route element={<PublicPagesLayout />}>
-          <Route path='/verify-otp'     element={<VerifyOtpPage />} />
-          <Route path='/signup-success' element={<SignupSuccessPage />} />
-          <Route path='/onboarding'     element={<OnboardingPage />} />
-          <Route path='/connection-test' element={<ConnectionTestPage />} />
+          <Route path="/verify-otp" element={<VerifyOtpPage />} />
+          <Route path="/signup-success" element={<SignupSuccessPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/connection-test" element={<ConnectionTestPage />} />
         </Route>
 
         {/* ── Doctor protected routes ──────────────────────────────────
             Requires: authenticated + role === 'doctor'
             Wrong role → redirected to their own role root.
             No token   → /login?next=<intended-path>                   */}
-        <Route element={<ProtectedRoute allowedRoles={['doctor']} />}>
+        <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
           <Route
-            path='/doctor/profile-update-success'
+            path="/doctor/profile-update-success"
             element={<DoctorProfileSuccessPage />}
           />
-          <Route path='/doctor' element={<DoctorLayout />}>
-            <Route index                       element={<Navigate to='dashboard'            replace />} />
-            <Route path='dashboard'            element={<DoctorDashboardPage />} />
-            <Route path='appointments'         element={<DoctorAppointmentsPage />} />
-            <Route path='patients'             element={<DoctorPatientsPage />} />
-            <Route path='patients/:patientId'  element={<DoctorPatientDetailsPage />} />
-            <Route path='online-consultations' element={<DoctorOnlineConsultationsPage />} />
-            <Route path='work-schedule'        element={<DoctorWorkSchedulePage />} />
-            <Route path='encounters'          element={<DoctorEncountersPage />} />
-            <Route path='encounters/:patientId/:encounterId' element={<DoctorEncounterWorkspacePage />} />
-            <Route path='medical-records'      element={<DoctorMedicalRecordsPage />} />
-            <Route path='access-requests'      element={<DoctorAccessRequestsPage />} />
-            <Route path='doctors-directory'    element={<DoctorDoctorsDirectoryPage />} />
-            <Route path='clinic-location'      element={<DoctorClinicLocationPage />} />
-            <Route path='notification'         element={<DoctorNotificationPage />} />
-            <Route path='profile-settings'     element={<DoctorProfileSettingsPage />} />
-            <Route path='profile-settings/personal/edit' element={<DoctorProfilePersonalEditPage />} />
-            <Route path='profile-settings/professional/edit' element={<DoctorProfileProfessionalEditPage />} />
+          <Route path="/doctor" element={<DoctorLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<DoctorDashboardPage />} />
+            <Route path="appointments" element={<DoctorAppointmentsPage />} />
+            <Route path="patients" element={<DoctorPatientsPage />} />
+            <Route
+              path="patients/:patientId"
+              element={<DoctorPatientDetailsPage />}
+            />
+            <Route
+              path="online-consultations"
+              element={<DoctorOnlineConsultationsPage />}
+            />
+            <Route path="work-schedule" element={<DoctorWorkSchedulePage />} />
+            <Route path="encounters" element={<DoctorEncountersPage />} />
+            <Route
+              path="encounters/:patientId/:encounterId/summary"
+              element={<DoctorEncounterSummaryPage />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/prescription"
+              element={<DoctorPrescriptionPage />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/radiology/preview"
+              element={<DoctorEncounterOrderPreviewPage category="radiology" />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/radiology/manual"
+              element={<DoctorRadiologyManualPage />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/radiology"
+              element={<DoctorRadiologyWorkspacePage />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/lab/preview"
+              element={<DoctorEncounterOrderPreviewPage category="lab" />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/lab/manual"
+              element={<DoctorEncounterOrderManualPage category="lab" />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/lab"
+              element={<DoctorEncounterLabWorkspacePage />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/procedure/preview"
+              element={<DoctorEncounterOrderPreviewPage category="procedure" />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/procedure"
+              element={<DoctorEncounterProcedureWorkspacePage />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId/referral"
+              element={<DoctorEncounterReferralWorkspacePage />}
+            />
+            <Route
+              path="encounters/:patientId/:encounterId"
+              element={<DoctorEncounterWorkspacePage />}
+            />
+            <Route
+              path="medical-records"
+              element={<DoctorMedicalRecordsPage />}
+            />
+            <Route
+              path="prescription"
+              element={<DoctorPrescriptionPreviewPage />}
+            />
+            <Route path="radiology" element={<DoctorRadiologyPreviewPage />} />
+            <Route
+              path="medical-requests"
+              element={<DoctorMedicalRequestsPage />}
+            />
+            <Route
+              path="access-requests"
+              element={<DoctorAccessRequestsPage />}
+            />
+            <Route
+              path="doctors-directory"
+              element={<DoctorDoctorsDirectoryPage />}
+            />
+            <Route
+              path="clinic-location"
+              element={<DoctorClinicLocationPage />}
+            />
+            <Route path="notification" element={<DoctorNotificationPage />} />
+            <Route
+              path="profile-settings"
+              element={<DoctorProfileSettingsPage />}
+            />
+            <Route
+              path="profile-settings/personal/edit"
+              element={<DoctorProfilePersonalEditPage />}
+            />
+            <Route
+              path="profile-settings/professional/edit"
+              element={<DoctorProfileProfessionalEditPage />}
+            />
           </Route>
         </Route>
 
         {/* ── Admin protected routes ───────────────────────────────────
             Requires: authenticated + role === 'admin'                 */}
-        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-          <Route path='/admin' element={<AdminLayout />}>
-            <Route index                         element={<Navigate to='overview' replace />} />
-            <Route path='overview'               element={<AdminDashboardPage />} />
-            <Route path='notifications'         element={<AdminNotificationsPage />} />
-            <Route path='doctors'                element={<AdminDoctorsPage />} />
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route path="overview" element={<AdminDashboardPage />} />
+            <Route path="notifications" element={<AdminNotificationsPage />} />
+            <Route path="doctors" element={<AdminDoctorsPage />} />
             <Route
-              path='doctor-specializations'
+              path="doctor-specializations"
               element={<AdminDoctorSpecializationsPage />}
             />
-            <Route path='doctors/:doctorId'      element={<AdminDoctorDetailsPage />} />
-            <Route path='patients'               element={<AdminPatientsPage />} />
-            <Route path='patients/:patientId'    element={<AdminPatientDetailsPage />} />
-            <Route path='secretaries'                                  element={<AdminSecretariesPage />} />
-            <Route path='secretaries/:secretaryId'                     element={<AdminSecretaryDetailsPage />} />
-            <Route path='secretaries/:secretaryId/appointments'        element={<AdminSecretaryAppointmentsPage />} />
-            <Route path='secretaries/:secretaryId/appointments/manage' element={<AdminSecretaryAppointmentsManagementPage />} />
-            <Route path='medical-content'       element={<AdminMedicalContentPage />} />
             <Route
-              path='content-review'
+              path="doctors/:doctorId"
+              element={<AdminDoctorDetailsPage />}
+            />
+            <Route path="patients" element={<AdminPatientsPage />} />
+            <Route
+              path="patients/:patientId"
+              element={<AdminPatientDetailsPage />}
+            />
+            <Route path="secretaries" element={<AdminSecretariesPage />} />
+            <Route
+              path="secretaries/:secretaryId"
+              element={<AdminSecretaryDetailsPage />}
+            />
+            <Route
+              path="secretaries/:secretaryId/appointments"
+              element={<AdminSecretaryAppointmentsPage />}
+            />
+            <Route
+              path="secretaries/:secretaryId/appointments/manage"
+              element={<AdminSecretaryAppointmentsManagementPage />}
+            />
+            <Route
+              path="medical-content"
+              element={<AdminMedicalContentPage />}
+            />
+            <Route
+              path="content-review"
               element={
-                <Navigate
-                  to='/admin/medical-content?queue=review'
-                  replace
-                />
+                <Navigate to="/admin/medical-content?queue=review" replace />
               }
             />
             <Route
-              path='medical-news'
+              path="medical-news"
               element={
-                <Navigate
-                  to='/admin/medical-content?type=NEWS'
-                  replace
-                />
+                <Navigate to="/admin/medical-content?type=NEWS" replace />
               }
             />
-            <Route path='service-types'         element={<AdminServiceTypesPage />} />
-            <Route path='appointments'          element={<AdminAppointmentsPage />} />
-            <Route path='medical-file-options'  element={<AdminMedicalFileOptionsPage />} />
-            <Route path='medical-orders'        element={<AdminMedicalOrdersPage />} />
-            <Route path='verification-requests' element={<AdminVerificationRequestsPage />} />
-            <Route path='verification-requests/:requestId' element={<AdminVerificationRequestDetailsPage />} />
-            <Route path='complaints' element={<AdminComplaintsPage />} />
-            <Route path='complaints/:complaintId' element={<AdminComplaintDetailsPage />} />
-            <Route path='system-logs'           element={<AdminSystemLogsPage />} />
-            <Route path='settings'              element={<AdminSettingsPage />} />
-            <Route path='services'              element={<AdminServicesPage />} />
-            <Route path='analytics'             element={<AdminAnalyticsPage />} />
+            <Route path="service-types" element={<AdminServiceTypesPage />} />
+            <Route path="appointments" element={<AdminAppointmentsPage />} />
+            <Route
+              path="medical-file-options"
+              element={<AdminMedicalFileOptionsPage />}
+            />
+            <Route path="medical-orders" element={<AdminMedicalOrdersPage />} />
+            <Route
+              path="verification-requests"
+              element={<AdminVerificationRequestsPage />}
+            />
+            <Route
+              path="verification-requests/:requestId"
+              element={<AdminVerificationRequestDetailsPage />}
+            />
+            <Route path="complaints" element={<AdminComplaintsPage />} />
+            <Route
+              path="complaints/:complaintId"
+              element={<AdminComplaintDetailsPage />}
+            />
+            <Route path="system-logs" element={<AdminSystemLogsPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
+            <Route path="services" element={<AdminServicesPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
             {/* legacy /admin/dashboard → canonical path */}
-            <Route path='dashboard'             element={<Navigate to='/admin/overview' replace />} />
+            <Route
+              path="dashboard"
+              element={<Navigate to="/admin/overview" replace />}
+            />
           </Route>
         </Route>
 
         {/* ── Catch-all 404 ───────────────────────────────────────── */}
-        <Route path='*' element={<NotFoundPage />} />
-
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );
