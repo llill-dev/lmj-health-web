@@ -28,8 +28,11 @@ function TimeBox({ label, value }: { label: string; value: string }) {
 
 export function EncounterWorkspacePatientCard({
   patient,
+  isEnriching = false,
 }: {
   patient: EncounterWorkspacePatientViewModel;
+  /** تحميل خلفي لملف المريض (الاسم/العمر قد يتحدّثان) */
+  isEnriching?: boolean;
 }) {
   return (
     <article className="relative overflow-hidden rounded-[14px] border border-[#0F8F8B] bg-[#E6F4F3] px-5 py-5 shadow-[0_12px_32px_-14px_rgba(15,23,42,0.1)]">
@@ -59,6 +62,11 @@ export function EncounterWorkspacePatientCard({
           <DetailLine label="الاسم" value={patient.name} />
           <DetailLine label="العمر" value={patient.ageLabel} />
           <DetailLine label="رقم الملف" value={patient.fileNumber} />
+          {isEnriching ? (
+            <p className="font-cairo text-[11px] font-semibold text-primary/75">
+              جارٍ تحميل بيانات الملف…
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-3 justify-start items-center">
           <TimeBox label="بدأت" value={patient.startedLabel} />

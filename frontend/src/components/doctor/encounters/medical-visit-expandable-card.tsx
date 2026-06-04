@@ -30,6 +30,8 @@ type MedicalVisitExpandableCardProps = {
   onContinueDraft?: (draftId: string) => void;
   onStartNewVisit?: () => void;
   onCloseVisit?: () => void;
+  /** تحميل مسبق لمساحة الزيارة عند التمرير (زيارة نشطة) */
+  onWarmWorkspace?: () => void;
 };
 
 function InfoCell({ label, value }: { label: string; value: string }) {
@@ -100,6 +102,7 @@ export function MedicalVisitExpandableCard({
   onContinueDraft,
   onStartNewVisit,
   onCloseVisit,
+  onWarmWorkspace,
 }: MedicalVisitExpandableCardProps) {
   const isOpen = visit.status === "open";
   const ageLabel = visit.patientAge != null ? `${visit.patientAge} سنة` : "—";
@@ -108,6 +111,9 @@ export function MedicalVisitExpandableCard({
     <motion.article
       layout
       transition={ENCOUNTERS_EXPAND_TRANSITION}
+      onMouseEnter={() => {
+        if (expanded && isOpen) onWarmWorkspace?.();
+      }}
       className={cn(
         "overflow-hidden rounded-[16px] border bg-white transition-shadow duration-300",
         expanded
@@ -327,6 +333,7 @@ export function MedicalVisitExpandableCard({
                         </div>
                         <button
                           type="button"
+                          onMouseEnter={() => onWarmWorkspace?.()}
                           onClick={() => onContinueDraft?.(draft.id)}
                           className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#0F766E] font-cairo text-[13px] font-extrabold text-white transition-opacity hover:opacity-95"
                         >

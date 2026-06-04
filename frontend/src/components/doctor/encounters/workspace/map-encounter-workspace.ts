@@ -1,9 +1,20 @@
+import type { EncounterOrder, EncounterOrderItem } from '@/lib/doctor/encounterClinicalTypes';
+import {
+  filterEncounterOrdersByCategory,
+  isFinalizedEncounterOrder,
+  normalizeEncounterOrderCategory,
+  type EncounterOrderCategoryKey,
+  resolveEncounterOrderStatusLabel,
+  resolveEncounterOrderTitle,
+} from '@/lib/doctor/encounterOrderCategories';
+import {
+  formatRadiologyItemBrief,
+  resolveImagingOrderItemFields,
+} from '@/components/doctor/radiology/map-radiology-ui';
+import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptionTypes';
+import type { DoctorEncounterSummary, DoctorPatientFullProfile } from '@/lib/doctor/types';
 import type {
-  DoctorEncounterSummary,
-  DoctorPatientFullProfile,
-  DoctorPatientOrder,
-} from '@/lib/doctor/types';
-import type {
+  EncounterWorkspaceLineItem,
   EncounterWorkspacePatientViewModel,
   EncounterWorkspaceSectionStatus,
   EncounterWorkspaceSectionViewModel,
@@ -42,39 +53,35 @@ function formatStartedLabel(encounter: DoctorEncounterSummary): string {
   return `${shortDate} ${time}`;
 }
 
-function normalizeOrderCategory(order: DoctorPatientOrder): string {
-  const raw = `${order.orderType ?? ''} ${order.type ?? ''} ${order.category ?? ''} ${order.orderTitle ?? ''}`.toLowerCase();
-  if (raw.includes('refer')) return 'referral';
-  if (raw.includes('lab') || raw.includes('تحل')) return 'lab';
-  if (raw.includes('radio') || raw.includes('image') || raw.includes('scan') || raw.includes('أشعة')) {
-    return 'radiology';
-  }
-  if (raw.includes('procedure') || raw.includes('إجر')) return 'procedure';
-  return 'other';
+function isFinalizedPrescription(rx: EncounterPrescriptionRecord) {
+  const status = (rx.status ?? '').toLowerCase();
+  return status.includes('final') || Boolean(rx.finalizedAt);
+}
+
+function resolvePrescriptionStatusLabel(rx: EncounterPrescriptionRecord): string {
+  if (isFinalizedPrescription(rx)) return 'معتمدة';
+  const status = (rx.status ?? '').toUpperCase();
+  const map: Record<string, string> = {
+    DRAFT: 'مسودة',
+    PENDING: 'قيد الانتظار',
+    FINALIZED: 'معتمدة',
+  };
+  return map[status] ?? rx.status ?? 'مسودة';
 }
 
 function resolveSectionStatus(
   count: number,
-  statuses: string[],
+  finalizedCount: number,
 ): { status: EncounterWorkspaceSectionStatus; label: string; hint: string } {
   if (count === 0) {
     return {
       status: 'empty',
       label: 'فارغة',
-      hint: 'بحاجة للإسناد',
+      hint: 'ابدأ بإضافة محتوى من القسم',
     };
   }
 
-  const normalized = statuses.map((s) => s.toLowerCase());
-  const allApproved = normalized.every(
-    (s) =>
-      s.includes('approved') ||
-      s.includes('complete') ||
-      s.includes('final') ||
-      s.includes('معتمد'),
-  );
-
-  if (allApproved) {
+  if (finalizedCount === count) {
     return {
       status: 'approved',
       label: 'معتمدة',
@@ -89,62 +96,171 @@ function resolveSectionStatus(
   };
 }
 
+function mapPrescriptionItems(
+  prescriptions: EncounterPrescriptionRecord[],
+): EncounterWorkspaceLineItem[] {
+  return prescriptions.flatMap((rx, rxIndex) => {
+    const items = rx.items ?? [];
+    if (items.length === 0) {
+      return [
+        {
+          id: rx._id ?? `rx-${rxIndex}`,
+          title: 'وصفة طبية',
+          subtitle: resolvePrescriptionStatusLabel(rx),
+          statusLabel: resolvePrescriptionStatusLabel(rx),
+        },
+      ];
+    }
+    return items
+      .filter((item) => item.name?.trim())
+      .map((item, itemIndex) => ({
+        id: item._id ?? `${rx._id}-item-${itemIndex}`,
+        title: item.name!.trim(),
+        subtitle: [item.dosage, item.frequency].filter(Boolean).join(' • ') || undefined,
+        statusLabel: resolvePrescriptionStatusLabel(rx),
+      }));
+  });
+}
+
+function resolveOrderItemCount(order: EncounterOrder): number {
+  const items = order.items ?? [];
+  if (items.length > 0) return items.length;
+  const count = order.itemCount;
+  if (typeof count === 'number' && count > 0) return count;
+  return 1;
+}
+
+function sumOrderItemCounts(orders: EncounterOrder[]): number {
+  if (orders.length === 0) return 0;
+  return orders.reduce((sum, order) => sum + resolveOrderItemCount(order), 0);
+}
+
+function resolveOrderItemLine(
+  order: EncounterOrder,
+  item: EncounterOrderItem,
+  category: EncounterOrderCategoryKey,
+): { title: string; subtitle?: string } {
+  if (category === 'radiology') {
+    const fields = resolveImagingOrderItemFields(item);
+    const brief = formatRadiologyItemBrief(fields);
+    return {
+      title: fields.name,
+      subtitle: brief || undefined,
+    };
+  }
+
+  const title =
+    item.title?.trim() ??
+    item.name?.trim() ??
+    item.testName?.trim() ??
+    item.procedureName?.trim() ??
+    resolveEncounterOrderTitle(order);
+
+  const subtitle =
+    category === 'lab'
+      ? [item.testName, item.name].filter((v) => v?.trim() && v !== title).join(' • ') ||
+        undefined
+      : undefined;
+
+  return { title, subtitle: subtitle?.trim() || undefined };
+}
+
+function mapOrderLineItems(orders: EncounterOrder[]): EncounterWorkspaceLineItem[] {
+  return orders.flatMap((order, orderIndex) => {
+    const statusLabel = resolveEncounterOrderStatusLabel(order);
+    const orderItems = order.items ?? [];
+    const category = normalizeEncounterOrderCategory(order);
+
+    if (orderItems.length > 0) {
+      return orderItems.map((item, itemIndex) => {
+        const { title, subtitle } = resolveOrderItemLine(order, item, category);
+        return {
+          id: item._id ?? `${order._id}-item-${itemIndex}`,
+          title,
+          subtitle,
+          statusLabel,
+          urgency:
+            `${order.urgency ?? ''} ${order.priority ?? ''}`.toLowerCase().includes('urgent')
+              ? ('urgent' as const)
+              : undefined,
+        };
+      });
+    }
+
+    return [
+      {
+        id: order._id ?? `order-${orderIndex}`,
+        title: resolveEncounterOrderTitle(order),
+        subtitle: order.clinicalReason?.trim() ?? order.reason?.trim(),
+        statusLabel,
+        urgency:
+          `${order.urgency ?? ''} ${order.priority ?? ''}`.toLowerCase().includes('urgent')
+            ? ('urgent' as const)
+            : undefined,
+      },
+    ];
+  });
+}
+
 function mapPrescriptionSection(
-  prescriptions: Array<{ status?: string }>,
+  prescriptions: EncounterPrescriptionRecord[],
 ): EncounterWorkspaceSectionViewModel {
-  const count = prescriptions.length;
+  const items = mapPrescriptionItems(prescriptions);
+  const finalizedCount = prescriptions.filter(isFinalizedPrescription).length;
   const { status, label, hint } = resolveSectionStatus(
-    count,
-    prescriptions.map((item) => item.status ?? 'draft'),
+    prescriptions.length,
+    finalizedCount,
   );
 
   return {
     key: 'prescription',
-    count,
+    count: items.length || prescriptions.length,
     status,
     statusLabel: label,
     footerHint: hint,
-    defaultExpanded: count > 0,
+    defaultExpanded: prescriptions.length > 0,
+    items,
   };
 }
 
 function mapOrdersSection(
   key: 'lab' | 'radiology' | 'procedure' | 'referral',
-  orders: DoctorPatientOrder[],
+  orders: EncounterOrder[],
 ): EncounterWorkspaceSectionViewModel {
-  const filtered = orders.filter((order) => normalizeOrderCategory(order) === key);
-  const count = filtered.length;
+  const filtered = filterEncounterOrdersByCategory(orders, key);
+  const items = mapOrderLineItems(filtered);
+  const finalizedCount = filtered.filter(isFinalizedEncounterOrder).length;
   const { status, label, hint } = resolveSectionStatus(
-    count,
-    filtered.map((order) => order.status ?? order.statusCode ?? 'draft'),
+    filtered.length,
+    finalizedCount,
   );
 
   const referrals =
     key === 'referral'
       ? filtered.map((order, index) => ({
           id: order._id ?? `referral-${index}`,
-          code: order.orderTitle ?? order.orderName ?? `REF-${index + 1}`,
-          doctorName: 'طبيب مختص',
-          specialty: order.orderType ?? order.type ?? 'تحويل طبي',
+          code: order._id?.slice(-6).toUpperCase() ?? `REF-${index + 1}`,
+          doctorName: order.referredDoctorName?.trim() || 'طبيب مختص',
+          specialty: order.specialty?.trim() || order.reason?.trim() || 'تحويل طبي',
           urgency:
-            (order.status ?? '').toLowerCase().includes('urgent') ||
-            (order.statusCode ?? '').toLowerCase().includes('urgent')
+            `${order.urgency ?? ''} ${order.priority ?? ''}`.toLowerCase().includes('urgent')
               ? ('urgent' as const)
               : undefined,
-          statusLabel:
-            order.status === 'active' || order.statusCode === 'active'
-              ? 'نشط'
-              : (order.status ?? order.statusCode ?? '—'),
+          statusLabel: resolveEncounterOrderStatusLabel(order),
         }))
       : undefined;
 
+  const itemCount =
+    key === 'referral' ? filtered.length : sumOrderItemCounts(filtered);
+
   return {
     key,
-    count,
+    count: itemCount,
     status,
     statusLabel: label,
     footerHint: hint,
-    defaultExpanded: key === 'referral' ? Boolean(referrals?.length) : count > 0,
+    defaultExpanded: filtered.length > 0,
+    items,
     referrals,
   };
 }
@@ -157,11 +273,26 @@ export function mapEncounterWorkspacePatient(
   const isActive = encounter.status !== 'closed';
   const apptDate = encounter.appointment?.date;
   const apptTime = encounter.appointment?.startTime;
+  const embedded = encounter.patient;
+  const resolvedPublicId =
+    publicId?.trim() ||
+    embedded?.publicId?.trim() ||
+    patient?.patientId?.trim();
+  const resolvedAge = patient?.age ?? embedded?.age;
 
   return {
-    name: patient?.user?.fullName ?? 'مريض',
-    ageLabel: patient?.age != null ? `${patient.age} سنة` : '—',
-    fileNumber: publicId ? `#${publicId}` : patient?._id ? `#${patient._id.slice(-6)}` : '—',
+    name:
+      patient?.user?.fullName?.trim() ||
+      embedded?.user?.fullName?.trim() ||
+      'مريض',
+    ageLabel: resolvedAge != null ? `${resolvedAge} سنة` : '—',
+    fileNumber: resolvedPublicId
+      ? `#${resolvedPublicId}`
+      : patient?._id
+        ? `#${patient._id.slice(-6)}`
+        : embedded?._id
+          ? `#${embedded._id.slice(-6)}`
+          : '—',
     statusLabel: isActive ? 'نشطة' : 'مغلقة',
     isActive,
     startedLabel: formatStartedLabel(encounter),
@@ -171,72 +302,19 @@ export function mapEncounterWorkspacePatient(
   };
 }
 
-export function mapEncounterWorkspaceSections(
-  patient?: DoctorPatientFullProfile,
-): EncounterWorkspaceSectionViewModel[] {
-  const prescriptions = ((patient as { prescriptions?: Array<{ status?: string }> } | undefined)
-    ?.prescriptions ?? []) as Array<{ status?: string }>;
-  const orders = patient?.orders ?? [];
+export function mapEncounterWorkspaceSections(input: {
+  prescriptions: EncounterPrescriptionRecord[];
+  orders: EncounterOrder[];
+}): EncounterWorkspaceSectionViewModel[] {
+  const encounterOrders = input.orders.filter(
+    (order) => normalizeEncounterOrderCategory(order) !== 'other',
+  );
 
   return [
-    mapPrescriptionSection(prescriptions),
-    mapOrdersSection('lab', orders),
-    mapOrdersSection('radiology', orders),
-    mapOrdersSection('procedure', orders),
-    mapOrdersSection('referral', orders),
-  ];
-}
-
-export function buildEncounterWorkspaceDemoSections(): EncounterWorkspaceSectionViewModel[] {
-  return [
-    {
-      key: 'prescription',
-      count: 5,
-      status: 'draft',
-      statusLabel: 'مسودة',
-      footerHint: 'بحاجة للاعتماد',
-      defaultExpanded: true,
-    },
-    {
-      key: 'lab',
-      count: 3,
-      status: 'approved',
-      statusLabel: 'معتمدة',
-      footerHint: 'معتمدة ونهائية',
-      defaultExpanded: true,
-    },
-    {
-      key: 'radiology',
-      count: 2,
-      status: 'draft',
-      statusLabel: 'مسودة',
-      footerHint: 'بحاجة للاعتماد',
-      defaultExpanded: true,
-    },
-    {
-      key: 'procedure',
-      count: 0,
-      status: 'empty',
-      statusLabel: 'فارغة',
-      footerHint: 'بحاجة للإسناد',
-    },
-    {
-      key: 'referral',
-      count: 1,
-      status: 'draft',
-      statusLabel: 'مسودة',
-      footerHint: 'بحاجة للاعتماد',
-      defaultExpanded: true,
-      referrals: [
-        {
-          id: 'ref-demo-1',
-          code: 'REF-1023',
-          doctorName: 'د. خالد الشهري',
-          specialty: 'قلب — نشط',
-          urgency: 'urgent',
-          statusLabel: 'نشط',
-        },
-      ],
-    },
+    mapPrescriptionSection(input.prescriptions),
+    mapOrdersSection('lab', encounterOrders),
+    mapOrdersSection('radiology', encounterOrders),
+    mapOrdersSection('procedure', encounterOrders),
+    mapOrdersSection('referral', encounterOrders),
   ];
 }

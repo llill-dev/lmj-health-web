@@ -27,6 +27,14 @@ export type EncounterWorkspaceSectionTheme = {
   statusEmptyClass: string;
 };
 
+export type EncounterWorkspaceLineItem = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  statusLabel: string;
+  urgency?: 'urgent' | 'normal';
+};
+
 export type EncounterWorkspaceSectionViewModel = {
   key: EncounterWorkspaceSectionKey;
   count: number;
@@ -34,6 +42,8 @@ export type EncounterWorkspaceSectionViewModel = {
   footerHint: string;
   statusLabel: string;
   defaultExpanded?: boolean;
+  items: EncounterWorkspaceLineItem[];
+  /** للتحويلات: نفس البيانات مع حقول إضافية للعرض */
   referrals?: Array<{
     id: string;
     code: string;
@@ -54,4 +64,20 @@ export type EncounterWorkspacePatientViewModel = {
   appointmentTimeLabel: string;
   linkedAppointmentDate: string;
   linkedAppointmentTime: string;
+};
+
+export const ENCOUNTER_WORKSPACE_SECTION_PATHS: Record<
+  EncounterWorkspaceSectionKey,
+  (patientId: string, encounterId: string) => string
+> = {
+  prescription: (patientId, encounterId) =>
+    `/doctor/encounters/${patientId}/${encounterId}/prescription`,
+  lab: (patientId, encounterId) =>
+    `/doctor/encounters/${patientId}/${encounterId}/lab`,
+  radiology: (patientId, encounterId) =>
+    `/doctor/encounters/${patientId}/${encounterId}/radiology`,
+  procedure: (patientId, encounterId) =>
+    `/doctor/encounters/${patientId}/${encounterId}/procedure`,
+  referral: (patientId, encounterId) =>
+    `/doctor/encounters/${patientId}/${encounterId}/referral`,
 };

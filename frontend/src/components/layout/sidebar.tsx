@@ -131,7 +131,7 @@ export default function Sidebar({
                     <img
                       src={profilePhotoUrl}
                       alt={doctorDisplayName}
-                      className='h-full w-full object-cover'
+                      className='object-cover w-full h-full'
                     />
                   ) : (
                     <span className='font-cairo text-[18px] font-extrabold leading-none'>

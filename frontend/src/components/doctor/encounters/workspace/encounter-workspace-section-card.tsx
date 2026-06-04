@@ -23,11 +23,13 @@ export function EncounterWorkspaceSectionCard({
   section,
   expanded,
   onToggle,
+  onOpenSection,
   onAddReferral,
 }: {
   section: EncounterWorkspaceSectionViewModel;
   expanded: boolean;
   onToggle: () => void;
+  onOpenSection?: () => void;
   onAddReferral?: () => void;
 }) {
   const theme = ENCOUNTER_WORKSPACE_SECTION_THEMES[section.key];
@@ -35,17 +37,18 @@ export function EncounterWorkspaceSectionCard({
   const AddIcon = ENCOUNTER_WORKSPACE_ADD_ICON;
   const showReferrals =
     section.key === 'referral' && (section.referrals?.length ?? 0) > 0;
+  const hasItems = (section.items?.length ?? 0) > 0;
 
   return (
     <article
       className={cn(
-        "overflow-hidden rounded-[14px] border bg-white shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)]",
+        'overflow-hidden rounded-[14px] border bg-white shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)]',
         theme.borderClass,
       )}
     >
       <div
         className={cn(
-          "border-b px-4 py-3 sm:px-5",
+          'border-b px-4 py-3 sm:px-5',
           theme.headerClass,
           theme.borderClass,
         )}
@@ -57,14 +60,17 @@ export function EncounterWorkspaceSectionCard({
             onClick={onToggle}
             className="flex flex-1 gap-3 justify-between items-center min-w-0 text-right"
           >
-            <div className="flex gap-3 items-center">
+            <div
+              dir="rtl"
+              className="flex items-center justify-start gap-3 text-start"
+            >
               <div
                 className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px]",
+                  'flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px]',
                   theme.iconWrapClass,
                 )}
               >
-                <Icon className={cn("h-5 w-5", theme.iconClass)} aria-hidden />
+                <Icon className={cn('h-5 w-5', theme.iconClass)} aria-hidden />
               </div>
               <span className="font-cairo text-[14px] font-extrabold text-[#101828]">
                 {theme.title}
@@ -74,7 +80,7 @@ export function EncounterWorkspaceSectionCard({
             <div className="flex flex-wrap gap-2 justify-end items-center">
               <span
                 className={cn(
-                  "inline-flex h-7 min-w-[28px] items-center justify-center rounded-full border bg-white px-2 font-cairo text-[12px] font-extrabold",
+                  'inline-flex h-7 min-w-[28px] items-center justify-center rounded-full border bg-white px-2 font-cairo text-[12px] font-extrabold',
                   theme.countClass,
                 )}
               >
@@ -82,7 +88,7 @@ export function EncounterWorkspaceSectionCard({
               </span>
               <span
                 className={cn(
-                  "inline-flex rounded-full px-2.5 py-1 font-cairo text-[11px] font-extrabold",
+                  'inline-flex rounded-full px-2.5 py-1 font-cairo text-[11px] font-extrabold',
                   statusClass(section.status, theme),
                 )}
               >
@@ -100,10 +106,10 @@ export function EncounterWorkspaceSectionCard({
             </motion.div>
           </button>
 
-          {section.key === "referral" ? (
+          {section.key === 'referral' ? (
             <button
               type="button"
-              onClick={onAddReferral}
+              onClick={onAddReferral ?? onOpenSection}
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.25)] transition hover:opacity-95"
               aria-label="إضافة تحويل"
             >
@@ -117,14 +123,12 @@ export function EncounterWorkspaceSectionCard({
         {expanded ? (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={ENCOUNTERS_EXPAND_TRANSITION}
             className="overflow-hidden"
           >
-            <div
-              className={cn("space-y-3 px-4 py-4 sm:px-5", theme.panelClass)}
-            >
+            <div className={cn('space-y-3 px-4 py-4 sm:px-5', theme.panelClass)}>
               {showReferrals ? (
                 section.referrals?.map((referral) => (
                   <div
@@ -133,7 +137,7 @@ export function EncounterWorkspaceSectionCard({
                   >
                     <div className="flex flex-wrap gap-2 justify-between items-center">
                       <div className="flex flex-wrap gap-2 items-center">
-                        {referral.urgency === "urgent" ? (
+                        {referral.urgency === 'urgent' ? (
                           <span className="inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#B45309]">
                             عاجل
                           </span>
@@ -158,17 +162,53 @@ export function EncounterWorkspaceSectionCard({
                 <div className="rounded-[10px] border border-dashed border-[#D0D5DD] bg-white/80 px-4 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
                   لا توجد عناصر في هذا القسم بعد
                 </div>
+              ) : hasItems ? (
+                section.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-[12px] border border-[#E2E8F0] bg-white px-4 py-3 text-right shadow-sm"
+                  >
+                    <div className="flex flex-wrap gap-2 justify-between items-start">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
+                          {item.title}
+                        </div>
+                        {item.subtitle ? (
+                          <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                            {item.subtitle}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="flex flex-wrap gap-2 items-center shrink-0">
+                        {item.urgency === 'urgent' ? (
+                          <span className="inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#B45309]">
+                            عاجل
+                          </span>
+                        ) : null}
+                        <span className="font-cairo text-[11px] font-semibold text-[#667085]">
+                          {item.statusLabel}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
               ) : (
                 <div className="rounded-[10px] border border-[#E2E8F0] bg-white px-4 py-4 text-right">
                   <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
-                    {section.count} عنصر/عناصر مسجّلة
+                    {section.count} طلب/طلبات مسجّلة
                   </div>
-                  <p className="mt-2 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
-                    افتح ملف المريض أو أكمل التوثيق من الأقسام المرتبطة لإضافة
-                    التفاصيل.
-                  </p>
                 </div>
               )}
+
+              {onOpenSection ? (
+                <button
+                  type="button"
+                  onClick={onOpenSection}
+                  className="flex h-10 w-full items-center justify-center rounded-[10px] border-2 border-primary bg-white font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FAF9]"
+                >
+                  فتح {theme.title}
+                </button>
+              ) : null}
             </div>
           </motion.div>
         ) : null}
@@ -176,22 +216,25 @@ export function EncounterWorkspaceSectionCard({
 
       <div
         className={cn(
-          "border-t px-4 py-3 sm:px-5",
+          'border-t px-4 py-3 sm:px-5',
           theme.borderClass,
           theme.headerClass,
         )}
       >
-        <div className="flex gap-2 justify-end items-center text-right">
-          <span className="font-cairo text-[12px] font-semibold text-[#667085]">
-            {section.footerHint}
-          </span>
+        <div
+          dir="rtl"
+          className="flex w-full items-center justify-start gap-2 text-start"
+        >
           <span
             className={cn(
-              "h-2 w-2 shrink-0 rounded-full",
+              'h-2 w-2 shrink-0 rounded-full',
               theme.footerDotClass,
             )}
             aria-hidden
           />
+          <span className="font-cairo text-[12px] font-semibold text-[#667085]">
+            {section.footerHint}
+          </span>
         </div>
       </div>
     </article>
