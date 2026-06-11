@@ -137,6 +137,7 @@ export function EncounterOrderWorkspaceShell({
         centerInstructionsLabel={config.centerInstructionsLabel}
         fieldErrors={workspace.clinicalFieldErrors}
         showFastingCheckbox={category === 'lab'}
+        urgencyAsSelect={config.urgencyAsSelect}
       />
 
       <section

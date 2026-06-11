@@ -3,6 +3,7 @@ import type { EncounterOrder, EncounterOrdersListResponse } from './encounterCli
 export type ImagingOrderItemBody = {
   title?: string;
   name?: string;
+  displayName?: string;
   testName?: string;
   procedureName?: string;
   notes?: string;
@@ -21,6 +22,7 @@ export type EncounterOrderCatalogItemRef = {
   _id?: string;
   title?: string;
   name?: string;
+  displayName?: string;
   notes?: string;
   testName?: string;
   procedureName?: string;

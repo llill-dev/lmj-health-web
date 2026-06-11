@@ -1,6 +1,7 @@
 import type { EncounterOrder } from '@/lib/doctor/encounterClinicalTypes';
 import type { EncounterOrderItem } from '@/lib/doctor/encounterClinicalTypes';
 import { resolveOrderStatusLabelAr } from '@/lib/doctor/orderStatusLabels';
+import { mapClinicalUrgencyFromApi } from '@/lib/doctor/referralPriority';
 import type { ImagingOrderItemBody } from '@/lib/doctor/encounterOrderTypes';
 import type {
   RadiologyClinicalForm,
@@ -206,7 +207,7 @@ export function mapOrderToClinicalForm(
 
   if (category === 'procedure') {
     return {
-      urgency: o?.urgency?.trim() ?? '',
+      urgency: mapClinicalUrgencyFromApi(o?.urgency),
       clinicalReason: '',
       instructionsToPatient:
         o?.instructionsToPatient?.trim() ?? o?.notes?.trim() ?? '',
@@ -215,7 +216,7 @@ export function mapOrderToClinicalForm(
   }
 
   return {
-    urgency: o?.urgency?.trim() ?? '',
+    urgency: mapClinicalUrgencyFromApi(o?.urgency),
     clinicalReason: o?.clinicalReason?.trim() ?? '',
     instructionsToPatient: o?.instructionsToPatient?.trim() ?? '',
     imagingCenterInstructions: labCenter,

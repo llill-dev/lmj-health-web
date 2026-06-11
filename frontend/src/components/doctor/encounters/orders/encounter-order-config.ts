@@ -30,6 +30,8 @@ export type EncounterOrderCategoryConfig = {
   errorTitle: string;
   clinicalVariant: EncounterOrderClinicalVariant;
   centerInstructionsLabel: string;
+  /** قائمة اختيار لدرجة الاستعجال (اختياري) */
+  urgencyAsSelect?: boolean;
   manualPathSuffix: string;
   supportsManual: boolean;
   pdfSourceType: 'order' | 'imaging_order';
@@ -112,6 +114,7 @@ export const ENCOUNTER_ORDER_CONFIG: Record<
     errorTitle: 'تعذّر تحميل طلب التحاليل',
     clinicalVariant: 'full',
     centerInstructionsLabel: 'تعليمات للمختبر',
+    urgencyAsSelect: true,
     manualPathSuffix: 'lab/manual',
     supportsManual: true,
     pdfSourceType: 'order',

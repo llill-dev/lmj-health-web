@@ -25,7 +25,37 @@ export function mapReferralPriorityToApiUrgency(
   return UI_TO_API[priority];
 }
 
-/** يحوّل نص الاستعجال في نماذج التحاليل/الأشعة إلى low | medium | high للـ PATCH. */
+/** قيم الواجهة لدرجة الاستعجال في طلبات التحاليل/الأشعة (اختياري). */
+export const CLINICAL_URGENCY_UI_VALUES = ['عادي', 'عاجل', 'طارئ'] as const;
+export type ClinicalUrgencyUiValue = (typeof CLINICAL_URGENCY_UI_VALUES)[number];
+
+export const CLINICAL_URGENCY_SELECT_OPTIONS: Array<{
+  value: '' | ClinicalUrgencyUiValue;
+  label: string;
+}> = [
+  { value: '', label: '— بدون —' },
+  { value: 'عادي', label: 'عادي (منخفض)' },
+  { value: 'عاجل', label: 'عاجل (متوسط)' },
+  { value: 'طارئ', label: 'طارئ (عالي)' },
+];
+
+/** يحوّل urgency من الـ API (low|medium|high) إلى قيمة القائمة العربية. */
+export function mapClinicalUrgencyFromApi(raw?: string | null): string {
+  const value = (raw ?? '').trim().toLowerCase();
+  if (!value) return '';
+  if (value === 'low') return 'عادي';
+  if (value === 'medium') return 'عاجل';
+  if (value === 'high') return 'طارئ';
+  if (value === 'عادي' || value === 'عاجل' || value === 'طارئ') {
+    return value;
+  }
+  const mapped = mapReferralPriorityFromApi(raw);
+  if (mapped === 'normal') return 'عادي';
+  if (mapped === 'urgent') return 'عاجل';
+  if (mapped === 'emergency') return 'طارئ';
+  return '';
+}
+
 export function mapClinicalUrgencyTextToApi(
   raw?: string | null,
 ): ReferralApiUrgency | undefined {

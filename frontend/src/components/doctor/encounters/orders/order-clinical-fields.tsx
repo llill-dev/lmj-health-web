@@ -4,8 +4,10 @@ import {
   profileInputClass,
   profileTextareaClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
+import StyledSelect from '@/components/ui/styled-select';
 import type { RadiologyClinicalForm } from '@/components/doctor/radiology/radiology-types';
 import type { OrderClinicalFieldMessages } from '@/lib/doctor/orderClinicalFormSchema';
+import { CLINICAL_URGENCY_SELECT_OPTIONS } from '@/lib/doctor/referralPriority';
 import type { EncounterOrderClinicalVariant } from './encounter-order-config';
 
 export function OrderClinicalFields({
@@ -16,6 +18,7 @@ export function OrderClinicalFields({
   centerInstructionsLabel = 'تعليمات للمختبر / مركز الأشعة',
   fieldErrors = {},
   showFastingCheckbox = false,
+  urgencyAsSelect = false,
 }: {
   value: RadiologyClinicalForm;
   onChange: (value: RadiologyClinicalForm) => void;
@@ -24,25 +27,49 @@ export function OrderClinicalFields({
   centerInstructionsLabel?: string;
   fieldErrors?: OrderClinicalFieldMessages;
   showFastingCheckbox?: boolean;
+  urgencyAsSelect?: boolean;
 }) {
   const set = (patch: Partial<RadiologyClinicalForm>) =>
     onChange({ ...value, ...patch });
 
+  const urgencyField = urgencyAsSelect ? (
+    <StyledSelect
+      size="md"
+      tone="muted"
+      disabled={disabled}
+      value={value.urgency}
+      onChange={(next) => set({ urgency: next })}
+      error={Boolean(fieldErrors.urgency)}
+      placeholder="— بدون —"
+      options={CLINICAL_URGENCY_SELECT_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      }))}
+      listboxAriaLabel="درجة الاستعجال"
+      triggerClassName={profileFieldClass(
+        'w-full',
+        Boolean(fieldErrors.urgency),
+      )}
+    />
+  ) : (
+    <input
+      dir="rtl"
+      lang="ar"
+      value={value.urgency}
+      onChange={(e) => set({ urgency: e.target.value })}
+      disabled={disabled}
+      placeholder="مثال: عادي / عاجل / طارئ"
+      className={profileFieldClass(
+        profileInputClass,
+        Boolean(fieldErrors.urgency),
+      )}
+    />
+  );
+
   return (
     <section className="mb-6 space-y-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-5 sm:px-5">
       <DoctorProfileFormField label="درجة الاستعجال" error={fieldErrors.urgency}>
-        <input
-          dir="rtl"
-          lang="ar"
-          value={value.urgency}
-          onChange={(e) => set({ urgency: e.target.value })}
-          disabled={disabled}
-          placeholder="مثال: عادي / عاجل / طارئ"
-          className={profileFieldClass(
-            profileInputClass,
-            Boolean(fieldErrors.urgency),
-          )}
-        />
+        {urgencyField}
       </DoctorProfileFormField>
 
       {showFastingCheckbox ? (

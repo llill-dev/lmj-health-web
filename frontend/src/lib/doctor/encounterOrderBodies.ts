@@ -24,78 +24,58 @@ export function resolveEncounterOrderIdFromCreateResponse(
   return id;
 }
 
-function legacyTypeForCategory(
-  category: EncounterOrderCategoryKey,
-): string | undefined {
-  switch (category) {
-    case 'lab':
-      return 'lab';
-    case 'radiology':
-      return 'imaging';
-    case 'procedure':
-      return 'procedure';
-    default:
-      return undefined;
-  }
-}
-
 function catalogItemsBody(
   patientId: string,
   catalogItemId: string,
-  encounterId?: string,
 ): CreateEncounterOrderBody {
   const id = catalogItemId.trim();
-  const body: CreateEncounterOrderBody = {
+  return {
     patientId,
-    catalogItems: [{ catalogItemId: id, _id: id }],
+    catalogItems: [{ catalogItemId: id }],
   };
-  if (encounterId?.trim()) body.encounterId = encounterId.trim();
-  return body;
+}
+
+function draftPlaceholderItem(
+  category: EncounterOrderCategoryKey,
+): ImagingOrderItemBody {
+  switch (category) {
+    case 'lab':
+      return {
+        title: 'مسودة تحليل',
+        name: 'مسودة تحليل',
+        displayName: 'مسودة تحليل',
+        testName: 'مسودة تحليل',
+      };
+    case 'radiology':
+      return {
+        title: 'مسودة أشعة',
+        name: 'مسودة أشعة',
+        displayName: 'مسودة أشعة',
+      };
+    case 'procedure':
+      return {
+        title: 'مسودة إجراء',
+        name: 'مسودة إجراء',
+        displayName: 'مسودة إجراء',
+        procedureName: 'مسودة إجراء',
+      };
+    default:
+      return { title: 'مسودة', name: 'مسودة' };
+  }
 }
 
 /** بند يدوي بسيط لإنشاء مسودة عندما لا يتوفر عنصر كتالوج صالح */
 export function draftManualPlaceholderBody(
   category: EncounterOrderCategoryKey,
   patientId: string,
-  encounterId?: string,
 ): CreateEncounterOrderBody {
   const pid = patientId.trim();
-  const body: CreateEncounterOrderBody = { patientId: pid };
-  const eid = encounterId?.trim();
-  if (eid) body.encounterId = eid;
-
-  switch (category) {
-    case 'lab':
-      body.manualItems = [
-        {
-          title: 'مسودة تحليل',
-          name: 'مسودة تحليل',
-          testName: 'مسودة تحليل',
-        },
-      ];
-      break;
-    case 'radiology':
-      body.manualItems = [
-        {
-          title: 'مسودة أشعة',
-          name: 'مسودة أشعة',
-        },
-      ];
-      break;
-    case 'procedure':
-      body.manualItems = [
-        {
-          title: 'مسودة إجراء',
-          name: 'مسودة إجراء',
-          procedureName: 'مسودة إجراء',
-        },
-      ];
-      break;
-    default:
-      break;
-  }
-
-  return body;
+  const item = draftPlaceholderItem(category);
+  return {
+    patientId: pid,
+    manualItems: [item],
+    items: [item],
+  };
 }
 
 /**
@@ -124,16 +104,19 @@ export function buildStandaloneOrderCreateCandidates(
   }
 
   push(draftManualPlaceholderBody(category, pid));
-  push({ patientId: pid });
+
+  const item = draftPlaceholderItem(category);
+  push({ patientId: pid, items: [item] });
+  push({ patientId: pid, manualItems: [item] });
 
   return candidates;
 }
 
 /**
- * مرشحات إنشاء طلب الزيارة — متوافقة مع API-4:
+ * مرشحات إنشاء طلب الزيارة — متوافقة مع API-3:
  * - patientId مطلوب في الجسم (حتى مع وجوده في المسار)
- * - لا نرسل orderType على مسارات .../orders/lab|imaging (النوع من الـ URL)
- * - encounterId في الجسم اختياري ويُجرَّب لاحقاً
+ * - يلزم بند واحد على الأقل (catalogItems | manualItems | items)
+ * - لا نرسل type/category/orderType/encounterId على مسارات .../orders/lab|imaging
  */
 export function buildEncounterOrderCreateCandidates(
   category: EncounterOrderCategoryKey,
@@ -145,8 +128,8 @@ export function buildEncounterOrderCreateCandidates(
   if (!pid) return [{}];
 
   const eid = encounterId?.trim();
-  const legacyType = legacyTypeForCategory(category);
   const seen = new Set<string>();
+  const candidates: CreateEncounterOrderBody[] = [];
   const push = (body: CreateEncounterOrderBody) => {
     const key = JSON.stringify(body);
     if (seen.has(key)) return;
@@ -154,33 +137,15 @@ export function buildEncounterOrderCreateCandidates(
     candidates.push(body);
   };
 
-  const candidates: CreateEncounterOrderBody[] = [];
-
-  push({ patientId: pid });
-  push(draftManualPlaceholderBody(category, pid));
-  if (eid) {
-    push(draftManualPlaceholderBody(category, pid, eid));
-  }
-
-  if (legacyType) {
-    push({ patientId: pid, type: legacyType });
-    push({ patientId: pid, category: legacyType });
-  }
-
   if (catalogItemId?.trim()) {
-    push(catalogItemsBody(pid, catalogItemId.trim(), eid));
     push(catalogItemsBody(pid, catalogItemId.trim()));
   }
 
-  if (eid) {
-    push({ patientId: pid, encounterId: eid });
-    if (legacyType) {
-      push({ patientId: pid, encounterId: eid, type: legacyType });
-    }
-    if (catalogItemId?.trim()) {
-      push(catalogItemsBody(pid, catalogItemId.trim(), eid));
-    }
-  }
+  push(draftManualPlaceholderBody(category, pid));
+
+  const item = draftPlaceholderItem(category);
+  push({ patientId: pid, items: [item] });
+  push({ patientId: pid, manualItems: [item] });
 
   if (category === 'referral') {
     return [
@@ -213,7 +178,7 @@ export function buildEncounterOrderCreateBody(
       patientId,
       encounterId,
       catalogItemId,
-    )[0] ?? { patientId }
+    )[0] ?? draftManualPlaceholderBody(category, patientId)
   );
 }
 
@@ -284,9 +249,7 @@ export function mapClinicalFormToOrderPatch(
   category: EncounterOrderCategoryKey,
   clinical: RadiologyClinicalForm,
 ): UpdateEncounterOrderBody {
-  const urgency =
-    mapClinicalUrgencyTextToApi(clinical.urgency) ??
-    (clinical.urgency.trim() || undefined);
+  const urgency = mapClinicalUrgencyTextToApi(clinical.urgency);
 
   if (category === 'lab') {
     const labParts = [
