@@ -17,7 +17,9 @@ import {
   type DoctorPhoneChangeRequestForm,
 } from '@/components/doctor/profile-settings/doctor-profile-security-schemas';
 import { useToast } from '@/components/ui/ToastProvider';
+import { resolveDeleteAccountPath } from '@/lib/auth/accountDeletionSession';
 import { doctorSettingsApi } from '@/lib/doctor/settingsClient';
+import { readAuthUser } from '@/lib/cookies';
 import { useAuthStore } from '@/store/authStore';
 import { ApiError } from '@/lib/api';
 
@@ -47,6 +49,7 @@ export default function DoctorProfileSecurityPanel() {
     useState<PendingSecurityAction | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmBusy, setConfirmBusy] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const passwordForm = useForm<DoctorPasswordChangeForm>({
     resolver: zodResolver(doctorPasswordChangeSchema),
@@ -301,6 +304,50 @@ export default function DoctorProfileSecurityPanel() {
           ))}
         </div>
       </section>
+
+      <section
+        dir="rtl"
+        lang="ar"
+        className="mt-5 overflow-hidden rounded-[6px] border border-[#FECACA] bg-[#FFFBFB] shadow-[0_18px_30px_rgba(0,0,0,0.06)]"
+      >
+        <div className="border-b border-[#FECACA] px-6 py-4">
+          <div className="font-cairo text-[14px] font-extrabold text-[#B91C1C]">
+            منطقة الخطر
+          </div>
+          <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+            حذف الحساب يضع حسابك في حالة «بانتظار الحذف» لمدة 7 أيام مع إمكانية
+            الاسترجاع.
+          </p>
+        </div>
+        <div className="px-6 py-4">
+          <button
+            type="button"
+            onClick={() => setDeleteConfirmOpen(true)}
+            className="flex h-[44px] w-full items-center justify-center rounded-[8px] border border-[#FCA5A5] bg-white font-cairo text-[13px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
+          >
+            حذف الحساب
+          </button>
+        </div>
+      </section>
+
+      <ConfirmActionDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="تأكيد بدء حذف الحساب"
+        description={
+          <>
+            أنت على وشك بدء عملية حذف الحساب. سيتم إرشادك عبر خطوات التحقق (كلمة
+            المرور، السبب، رمز OTP). يمكنك استعادة حسابك خلال{' '}
+            <span className="font-extrabold text-[#101828]">7 أيام</span> قبل
+            الحذف النهائي.
+          </>
+        }
+        confirmLabel="متابعة إلى حذف الحساب"
+        onConfirm={() => {
+          setDeleteConfirmOpen(false);
+          navigate(resolveDeleteAccountPath(readAuthUser()?.role));
+        }}
+      />
 
       <DoctorSecurityFormDialog
         open={passwordOpen}

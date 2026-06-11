@@ -125,6 +125,9 @@ export type PersistedUser = {
   photoUrl?: string | null;
   actorIds?: Record<string, string | undefined>;
   patientPublicId?: string | null;
+  accountDeletionStatus?: 'none' | 'pending' | 'requested' | 'deleted';
+  deletionRequestedAt?: string | null;
+  deletionRecoverUntil?: string | null;
 };
 
 export function readAuthUser(): PersistedUser | null {

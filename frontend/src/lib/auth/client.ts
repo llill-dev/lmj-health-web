@@ -77,6 +77,17 @@ const handleAuthError = (error: unknown): AuthError => {
           code = "TEMPORARY";
         } else if (key.includes("locked") || msg.includes("locked")) {
           code = "LOCKED";
+        } else if (
+          key.includes("doctorRestoreRequestAvailable") ||
+          body.lifecycleAction === "restore_request"
+        ) {
+          code = "DELETION_RECOVERY";
+        } else if (
+          key.includes("doctorSelfRecoveryAvailable") ||
+          key.includes("accountDeletion") ||
+          body.lifecycleAction === "self_recovery"
+        ) {
+          code = "DELETION_RECOVERY";
         } else {
           code = "NOT_VERIFIED";
         }

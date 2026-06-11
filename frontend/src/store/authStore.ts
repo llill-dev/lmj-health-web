@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { get, post } from "@/lib/api";
 import { authApi } from "@/lib/auth/client";
+import { buildDeletionSessionFromLogin } from "@/lib/auth/accountDeletionSession";
 import {
   clearAuthSession,
   persistAuthSession,
@@ -8,7 +9,7 @@ import {
   type AuthSessionUser,
   type AuthTokenPair,
 } from "@/lib/auth/session";
-import type { LoginRequest, AuthError } from "@/lib/auth/types";
+import type { LoginRequest, AuthError, LoginResponse } from "@/lib/auth/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -59,7 +60,7 @@ interface AuthState {
     identifier: string,
     password: string,
     clientType?: "web" | "patient_mobile" | "doctor_mobile",
-  ) => Promise<void>;
+  ) => Promise<LoginResponse>;
   applySession: (pair: AuthTokenPair, user: AuthSessionUser) => void;
   register: (
     email: string,
@@ -313,6 +314,12 @@ let state: AuthState = {
 
     const { data } = result;
 
+    const deletionSession = buildDeletionSessionFromLogin({
+      accountDeletionStatus: data.accountDeletionStatus,
+      requestedAt: data.requestedAt ?? null,
+      recoverUntil: data.recoverUntil ?? null,
+    });
+
     state.applySession(
       {
         accessToken: data.accessToken,
@@ -328,8 +335,13 @@ let state: AuthState = {
         actorIds: data.actorIds,
         patientPublicId: data.patientPublicId,
         accountStatus: data.accountStatus,
+        accountDeletionStatus: deletionSession.accountDeletionStatus,
+        deletionRequestedAt: deletionSession.deletionRequestedAt,
+        deletionRecoverUntil: deletionSession.deletionRecoverUntil,
       },
     );
+
+    return data;
   },
 
   register: async () => {},

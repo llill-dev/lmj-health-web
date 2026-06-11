@@ -27,6 +27,9 @@ export type AuthSessionUser = {
   actorIds?: AuthActorIds;
   patientPublicId?: string | null;
   accountStatus?: string;
+  accountDeletionStatus?: 'none' | 'pending' | 'requested' | 'deleted';
+  deletionRequestedAt?: string | null;
+  deletionRecoverUntil?: string | null;
 };
 
 const DEFAULT_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -80,6 +83,9 @@ export function toPersistedUser(user: AuthSessionUser): PersistedUser {
       ]),
     ) as Record<string, string | undefined>,
     patientPublicId: user.patientPublicId,
+    accountDeletionStatus: user.accountDeletionStatus,
+    deletionRequestedAt: user.deletionRequestedAt,
+    deletionRecoverUntil: user.deletionRecoverUntil,
   };
 }
 

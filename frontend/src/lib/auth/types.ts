@@ -234,6 +234,7 @@ export interface AuthError {
     | 'TEMPORARY'
     | 'LOCKED'
     | 'DELETED'
+    | 'DELETION_RECOVERY'
     | 'NETWORK_ERROR'
     | 'UNKNOWN';
   message: string;
@@ -307,6 +308,10 @@ export const AUTH_ERROR_MESSAGES: Record<
   DELETED: {
     ar: 'تم حذف الحساب',
     en: 'Account has been deleted',
+  },
+  DELETION_RECOVERY: {
+    ar: 'حسابك في فترة استرجاع. يمكنك إلغاء طلب الحذف خلال 7 أيام.',
+    en: 'Your account is in the recovery window. You can cancel deletion within 7 days.',
   },
   NETWORK_ERROR: {
     ar: 'تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة؛ إن استمر الأمر قد يكون الخادم مشغولاً وليس جهازك.',

@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import {
+  isAccountDeletionPending,
+  resolveRestorePath,
+} from '@/lib/auth/accountDeletionSession';
+import { readAuthUser } from '@/lib/cookies';
 import { useAuthStore } from '@/store/authStore';
 
 export type AppRole =
@@ -62,6 +67,24 @@ export default function ProtectedRoute({
     return <Navigate to={getRoleRoot(role)} replace />;
   }
 
+  const authUser = readAuthUser();
+  const restorePath = resolveRestorePath(role);
+  const isDeletionRoute =
+    location.pathname.startsWith('/doctor/delete-account') ||
+    location.pathname.startsWith('/doctor/restore-account') ||
+    location.pathname.startsWith('/patient/delete-account') ||
+    location.pathname.startsWith('/patient/restore-account');
+
+  if (
+    !isDeletionRoute &&
+    isAccountDeletionPending({
+      accountDeletionStatus: authUser?.accountDeletionStatus,
+      recoverUntil: authUser?.deletionRecoverUntil ?? null,
+    })
+  ) {
+    return <Navigate to={restorePath} replace />;
+  }
+
   return <Outlet />;
 }
 
@@ -81,8 +104,17 @@ export default function ProtectedRoute({
 export function GuestRoute({ children }: { children?: ReactNode }) {
   const accessToken = useAuthStore((s) => s.accessToken);
   const user  = useAuthStore((s) => s.user);
+  const authUser = readAuthUser();
 
   if (accessToken && user?.role) {
+    if (
+      isAccountDeletionPending({
+        accountDeletionStatus: authUser?.accountDeletionStatus,
+        recoverUntil: authUser?.deletionRecoverUntil ?? null,
+      })
+    ) {
+      return <Navigate to={resolveRestorePath(user.role)} replace />;
+    }
     return <Navigate to={getRoleRoot(user.role as AppRole)} replace />;
   }
 
@@ -102,8 +134,17 @@ export function GuestRoute({ children }: { children?: ReactNode }) {
 export function RootRedirect() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const user  = useAuthStore((s) => s.user);
+  const authUser = readAuthUser();
 
   if (accessToken && user?.role) {
+    if (
+      isAccountDeletionPending({
+        accountDeletionStatus: authUser?.accountDeletionStatus,
+        recoverUntil: authUser?.deletionRecoverUntil ?? null,
+      })
+    ) {
+      return <Navigate to={resolveRestorePath(user.role)} replace />;
+    }
     return <Navigate to={getRoleRoot(user.role as AppRole)} replace />;
   }
 

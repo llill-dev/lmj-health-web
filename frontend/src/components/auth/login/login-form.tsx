@@ -12,6 +12,13 @@ import { AuthFlowError, useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
 import { SIGNUP_EMAIL_INVALID_MESSAGE_AR } from '@/components/auth/signUp/signup-schemas';
 import { persistClaimAccountPending } from '@/lib/auth/claimAccountNavState';
+import {
+  clearPendingDoctorRecoveryLogin,
+  persistPendingDoctorRecoveryLogin,
+  resolveRestorePath,
+  sanitizePostLoginNextPath,
+  shouldRedirectToRestore,
+} from '@/lib/auth/accountDeletionSession';
 
 type LoginMethod = 'phone' | 'email';
 
@@ -103,8 +110,12 @@ export default function LoginForm({
     PENDING_APPROVAL: 'حساب الطبيب في انتظار موافقة الإدارة',
     NOT_ALLOWED: 'هذا الحساب غير مسموح له باستخدام هذا التطبيق',
     TEMPORARY: 'حسابك غير مفعّل بعد. سيتم توجيهك لصفحة التفعيل.',
-    LOCKED: 'الحساب مقفول مؤقتاً، حاول لاحقاً',
-    DELETED: 'تم حذف هذا الحساب',
+    LOCKED:
+      'الحساب مقفول. إذا طلبت حذف الحساب مؤخراً فقد لا يزال بإمكانك تسجيل الدخول خلال فترة الاسترجاع (7 أيام) حسب نوع الحساب.',
+    DELETED:
+      'تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.',
+    DELETION_RECOVERY:
+      'حسابك في فترة استرجاع (7 أيام). سيتم توجيهك لصفحة استعادة الحساب.',
     NETWORK_ERROR: 'تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة؛ إن استمر الأمر قد يكون سببه الخدمة وليس شبكتك.',
     UNKNOWN: 'حدث خطأ غير متوقع، حاول مجدداً',
   };
@@ -121,7 +132,7 @@ export default function LoginForm({
     setLoginError(null);
 
     try {
-      await useAuthStore
+      const loginData = await useAuthStore
         .getState()
         .login(
           values.method === 'email'
@@ -132,6 +143,23 @@ export default function LoginForm({
         );
 
       const userRole = useAuthStore.getState().user?.role ?? '';
+
+      if (
+        shouldRedirectToRestore({
+          accountDeletionStatus: loginData.accountDeletionStatus,
+          recoverUntil: loginData.recoverUntil ?? null,
+        })
+      ) {
+        toast('حسابك في فترة استرجاع. يمكنك إلغاء طلب الحذف الآن.', {
+          title: 'طلب حذف نشط',
+          variant: 'info',
+          durationMs: 5200,
+        });
+        navigate(resolveRestorePath(loginData.role), { replace: true });
+        return;
+      }
+
+      clearPendingDoctorRecoveryLogin();
 
       const LOGIN_SUCCESS_AR: Record<string, string> = {
         admin: 'تم تسجيل الدخول بنجاح. مرحباً بك في لوحة إدارة LMJ Health.',
@@ -155,19 +183,13 @@ export default function LoginForm({
         });
       }
 
-      // Honour the ?next= redirect set by ProtectedRoute (safe-guard: only
-      // accept relative paths to prevent open-redirect attacks).
-      const next = searchParams.get('next');
-      if (next) {
-        try {
-          const decoded = decodeURIComponent(next);
-          if (decoded.startsWith('/')) {
-            navigate(decoded, { replace: true });
-            return;
-          }
-        } catch {
-          // malformed next param — fall through to role-based redirect
-        }
+      const safeNext = sanitizePostLoginNextPath(searchParams.get('next'), {
+        accountDeletionStatus: loginData.accountDeletionStatus,
+        recoverUntil: loginData.recoverUntil ?? null,
+      });
+      if (safeNext) {
+        navigate(safeNext, { replace: true });
+        return;
       }
 
       navigate(roleRoot[userRole] ?? '/welcome', { replace: true });
@@ -184,6 +206,50 @@ export default function LoginForm({
         variant: 'error',
         durationMs: 5600,
       });
+
+      if (code === 'DELETION_RECOVERY') {
+        const details =
+          error instanceof AuthFlowError ? error.authError?.details : null;
+        const recoverUntil =
+          typeof details?.recoveryExpiresAt === 'string'
+            ? details.recoveryExpiresAt
+            : typeof details?.recoverUntil === 'string'
+              ? details.recoverUntil
+              : null;
+
+        const lifecycleAction =
+          typeof details?.lifecycleAction === 'string'
+            ? details.lifecycleAction
+            : 'self_recovery';
+        const isRestoreRequest = lifecycleAction === 'restore_request';
+
+        persistPendingDoctorRecoveryLogin({
+          role: 'doctor',
+          email:
+            values.method === 'email'
+              ? values.identifier.trim()
+              : undefined,
+          phone:
+            values.method === 'phone'
+              ? values.identifier.replace(/[\s-]/g, '')
+              : undefined,
+          recoverUntil,
+          lifecycleAction,
+        });
+
+        toast(
+          isRestoreRequest
+            ? 'انتهت فترة الاسترجاع التلقائي. يمكنك تقديم طلب استعادة للمراجعة.'
+            : 'حسابك في فترة استرجاع. يمكنك إلغاء طلب الحذف الآن.',
+          {
+            title: isRestoreRequest ? 'طلب استعادة' : 'استعادة الحساب',
+            variant: 'info',
+            durationMs: 5200,
+          },
+        );
+        navigate(resolveRestorePath('doctor'), { replace: true });
+        return;
+      }
 
       if (code === 'TEMPORARY') {
         const identifier =
