@@ -15,6 +15,10 @@ import {
 } from "@/lib/api_mock";
 import { doctorEndpoints } from "./endpoints";
 import type {
+  InternalDirectoryListParams,
+  InternalDirectoryListResponse,
+} from "./doctorDirectoryTypes";
+import type {
   EncounterClinicalListParams,
   EncounterOrdersListResponse,
 } from "./encounterClinicalTypes";
@@ -72,6 +76,7 @@ import type {
   DoctorAccessRequestListParams,
   DoctorAccessRequestsListResponse,
   DoctorPatientAccessRequestResponse,
+  DoctorPatientLinkResponse,
   DoctorCreateMedicalRecordBody,
   DoctorPatientFullProfileResponse,
   DoctorMedicalRecordDetailsResponse,
@@ -996,6 +1001,12 @@ export const doctorApi = {
         body,
         { locale: "ar" },
       ),
+    linkPatient: (doctorId: string, patientId: string) =>
+      post<DoctorPatientLinkResponse>(
+        doctorEndpoints.patients.link(doctorId, patientId),
+        {},
+        { locale: "ar" },
+      ),
     listMedicalRecords: (doctorId: string, patientId: string) =>
       get<DoctorMedicalRecordsListResponse>(
         doctorEndpoints.patients.medicalRecords(doctorId, patientId),
@@ -1618,5 +1629,34 @@ export const doctorApi = {
       post<EncounterOrderResponse>(doctorEndpoints.orders.create, body, {
         locale: "ar",
       }),
+  },
+  internalDirectory: {
+    list: (params: InternalDirectoryListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.search?.trim()) qs.set('search', params.search.trim());
+      if (params.specialization?.trim()) {
+        qs.set('specialization', params.specialization.trim());
+      }
+      if (params.city?.trim()) qs.set('city', params.city.trim());
+      if (params.country?.trim()) qs.set('country', params.country.trim());
+      if (params.consultationType) {
+        qs.set('consultationType', params.consultationType);
+      }
+      if (params.minRating != null) {
+        qs.set('minRating', String(params.minRating));
+      }
+      if (params.page != null) qs.set('page', String(params.page));
+      if (params.limit != null) qs.set('limit', String(params.limit));
+      if (params.lat != null) qs.set('lat', String(params.lat));
+      if (params.lng != null) qs.set('lng', String(params.lng));
+      if (params.radiusKm != null) qs.set('radiusKm', String(params.radiusKm));
+
+      const query = qs.toString();
+      const path = query
+        ? `${doctorEndpoints.internalDirectory}?${query}`
+        : doctorEndpoints.internalDirectory;
+
+      return get<InternalDirectoryListResponse>(path, { locale: 'ar' });
+    },
   },
 } as const;

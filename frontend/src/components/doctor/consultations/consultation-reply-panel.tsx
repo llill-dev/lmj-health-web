@@ -15,33 +15,38 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import type { ConsultationClinicalAction } from '@/lib/consultations/consultationEncounter';
 import type { PendingConsultationAttachment } from '@/lib/consultations/types';
 import { doctorApi } from '@/lib/doctor/client';
 import { useDoctorPatientFiles } from '@/hooks/doctor/useDoctorPatients';
 
-const CLINICAL_ACTIONS = [
+const CLINICAL_ACTIONS: Array<{
+  key: ConsultationClinicalAction;
+  label: string;
+  icon: typeof FlaskConical;
+}> = [
   {
     key: 'lab',
     label: 'طلب تحاليل',
     icon: FlaskConical,
-    hint: 'يتطلب ربط POST /api/doctors/orders/lab بالاستشارة',
   },
   {
     key: 'imaging',
     label: 'طلب أشعة',
     icon: ScanLine,
-    hint: 'يتطلب ربط POST /api/doctors/orders/imaging بالاستشارة',
   },
   {
     key: 'prescription',
     label: 'الوصفة الطبية',
     icon: Pill,
-    hint: 'يتطلب ربط الوصفات الطبية بالاستشارة',
   },
-] as const;
+];
 
 export default function ConsultationReplyPanel({
   patientId,
+  clinicalActionsEnabled = true,
+  busyClinicalAction = null,
+  onClinicalAction,
   disabled,
   draft,
   onDraftChange,
@@ -54,6 +59,9 @@ export default function ConsultationReplyPanel({
   closing,
 }: {
   patientId: string;
+  clinicalActionsEnabled?: boolean;
+  busyClinicalAction?: ConsultationClinicalAction | null;
+  onClinicalAction?: (action: ConsultationClinicalAction) => void | Promise<void>;
   disabled?: boolean;
   draft: string;
   onDraftChange: (value: string) => void;
@@ -75,6 +83,13 @@ export default function ConsultationReplyPanel({
     !disabled &&
     !sending &&
     (draft.trim().length > 0 || pendingAttachments.length > 0);
+
+  const clinicalDisabled =
+    disabled ||
+    !clinicalActionsEnabled ||
+    !patientId ||
+    !onClinicalAction ||
+    busyClinicalAction !== null;
 
   const addAttachment = (attachment: PendingConsultationAttachment) => {
     if (pendingAttachments.some((item) => item.ref === attachment.ref)) return;
@@ -107,13 +122,6 @@ export default function ConsultationReplyPanel({
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
-  };
-
-  const notifyComingSoon = (label: string) => {
-    toast(`${label} غير مفعّل بعد. سيتم تفعيله عند ربطه بالباك إند.`, {
-      title: 'قريباً',
-      variant: 'info',
-    });
   };
 
   return (
@@ -258,26 +266,33 @@ export default function ConsultationReplyPanel({
       <div dir="rtl" className="mt-4 grid grid-cols-3 gap-2">
         {CLINICAL_ACTIONS.map((action) => {
           const Icon = action.icon;
+          const isBusy = busyClinicalAction === action.key;
           return (
             <button
               key={action.key}
               type="button"
-              disabled
-              title={action.hint}
-              onClick={() => notifyComingSoon(action.label)}
-              className="flex h-[42px] items-center justify-center gap-2 rounded-[8px] border border-[#D0D5DD] bg-[#F9FAFB] px-2 font-cairo text-[11px] font-extrabold text-[#98A2B3] opacity-70"
+              disabled={clinicalDisabled}
+              onClick={() => void onClinicalAction?.(action.key)}
+              className="flex h-[42px] items-center justify-center gap-2 rounded-[8px] border border-[#D0D5DD] bg-white px-2 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:border-primary/30 hover:bg-[#F0FAFA] hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              {isBusy ? (
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+              ) : (
+                <Icon className="h-4 w-4 shrink-0" />
+              )}
               <span className="truncate">{action.label}</span>
             </button>
           );
         })}
       </div>
 
-      <p dir="rtl" className="mt-2 font-cairo text-[10px] font-semibold text-[#98A2B3]">
-        أزرار التحاليل والأشعة والوصفة معطّلة مؤقتاً حتى ربطها بمسارات الطلبات في
-        الباك إند.
-      </p>
+      {!disabled ? (
+        <p dir="rtl" className="mt-2 font-cairo text-[10px] font-semibold text-[#98A2B3]">
+          عند فتح طلب تحاليل أو أشعة أو وصفة، يُربَط المريض تلقائياً بقائمتك ثم تُفتح
+          زيارة سريرية مرتبطة بهذه الاستشارة. لن يُبلَغ المريض حتى تُنهي الطلب أو
+          الوصفة.
+        </p>
+      ) : null}
 
       {!disabled ? (
         <div dir="rtl" className="mt-4 grid grid-cols-2 gap-3">

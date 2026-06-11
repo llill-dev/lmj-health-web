@@ -10,6 +10,8 @@ export const doctorEndpoints = {
       `/api/doctors/patients/${patientId}/public`,
     fullProfile: (doctorId: string, patientId: string) =>
       `/api/doctors/${doctorId}/patients/${patientId}`,
+    link: (doctorId: string, patientId: string) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/link`,
     accessRequests: (doctorId: string, patientId: string) =>
       `/api/doctors/${doctorId}/patients/${patientId}/access-requests`,
     accessRequestDetails: (
@@ -243,4 +245,6 @@ export const doctorEndpoints = {
   documents: {
     generate: '/api/documents/generate',
   },
+  /** GET — internal staff directory (doctor / secretary). API-3 */
+  internalDirectory: '/api/doctors/internal/directory',
 } as const;

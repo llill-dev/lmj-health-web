@@ -209,6 +209,26 @@ export function useRequestDoctorPatientAccess(doctorId: string) {
   });
 }
 
+export function useLinkDoctorPatient(doctorId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (patientId: string) =>
+      doctorApi.patients.linkPatient(doctorId, patientId),
+    onSuccess: (_response, patientId) => {
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.all,
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.fullProfile(doctorId, patientId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.public(patientId),
+      });
+    },
+  });
+}
+
 export function useDoctorPatientFiles(patientId: string, enabled = true) {
   const query = useQuery({
     queryKey: doctorPatientsQueryKeys.files(patientId),
