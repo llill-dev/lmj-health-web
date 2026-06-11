@@ -46,6 +46,17 @@ import DoctorProfileSettingsPage from "@/pages/doctor/profile-settings/DoctorPro
 import DoctorProfilePersonalEditPage from "@/pages/doctor/profile-settings/DoctorProfilePersonalEditPage";
 import DoctorProfileProfessionalEditPage from "@/pages/doctor/profile-settings/DoctorProfileProfessionalEditPage";
 import DoctorProfileSuccessPage from "@/pages/doctor/profile-settings/DoctorProfileSuccessPage";
+import DeleteAccountPage from "@/pages/account-deletion/DeleteAccountPage";
+import RestoreAccountPage from "@/pages/account-deletion/RestoreAccountPage";
+import DoctorClinicAccountsPage from "@/pages/doctor/clinic-accounts/DoctorClinicAccountsPage";
+import DoctorClinicInvoicesPage from "@/pages/doctor/clinic-accounts/DoctorClinicInvoicesPage";
+import DoctorClinicCreateInvoicePage from "@/pages/doctor/clinic-accounts/DoctorClinicCreateInvoicePage";
+import DoctorClinicExpensesPage from "@/pages/doctor/clinic-accounts/DoctorClinicExpensesPage";
+import DoctorClinicAddPaymentPage from "@/pages/doctor/clinic-accounts/DoctorClinicAddPaymentPage";
+import DoctorClinicFinancialReportsPage from "@/pages/doctor/clinic-accounts/DoctorClinicFinancialReportsPage";
+import DoctorFacilitiesPage from "@/pages/doctor/facilities/DoctorFacilitiesPage";
+import DoctorActivityLogPage from "@/pages/doctor/activity-log/DoctorActivityLogPage";
+import DoctorSupportPage from "@/pages/doctor/support/DoctorSupportPage";
 
 // ─── Admin pages ──────────────────────────────────────────────────────────────
 import AdminLayout from "@/layouts/AdminLayout";
@@ -130,6 +141,14 @@ export default function App() {
             Not blocked for authenticated users: a doctor might need
             to re-verify OTP or complete onboarding after first login. */}
         <Route element={<PublicPagesLayout />}>
+          <Route
+            path="/doctor/restore-account"
+            element={<RestoreAccountPage />}
+          />
+          <Route
+            path="/patient/restore-account"
+            element={<RestoreAccountPage />}
+          />
           <Route path="/verify-otp" element={<VerifyOtpPage />} />
           <Route path="/signup-success" element={<SignupSuccessPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
@@ -144,6 +163,10 @@ export default function App() {
           <Route
             path="/doctor/profile-update-success"
             element={<DoctorProfileSuccessPage />}
+          />
+          <Route
+            path="/doctor/delete-account"
+            element={<DeleteAccountPage />}
           />
           <Route path="/doctor" element={<DoctorLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -233,6 +256,30 @@ export default function App() {
               path="clinic-location"
               element={<DoctorClinicLocationPage />}
             />
+            <Route path="accounts" element={<DoctorClinicAccountsPage />} />
+            <Route
+              path="accounts/invoices"
+              element={<DoctorClinicInvoicesPage />}
+            />
+            <Route
+              path="accounts/invoices/new"
+              element={<DoctorClinicCreateInvoicePage />}
+            />
+            <Route
+              path="accounts/expenses"
+              element={<DoctorClinicExpensesPage />}
+            />
+            <Route
+              path="accounts/payments/new"
+              element={<DoctorClinicAddPaymentPage />}
+            />
+            <Route
+              path="accounts/reports"
+              element={<DoctorClinicFinancialReportsPage />}
+            />
+            <Route path="facilities" element={<DoctorFacilitiesPage />} />
+            <Route path="activity-log" element={<DoctorActivityLogPage />} />
+            <Route path="support" element={<DoctorSupportPage />} />
             <Route path="notification" element={<DoctorNotificationPage />} />
             <Route
               path="profile-settings"

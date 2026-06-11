@@ -19,6 +19,9 @@ import {
   BarChart3,
   MessageSquareWarning,
   Tags,
+  Wallet,
+  Building2,
+  LifeBuoy,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -36,6 +39,10 @@ export type SidebarItemId =
   | "access-requests"
   | "doctors-directory"
   | "clinic-location"
+  | "accounts"
+  | "facilities"
+  | "activity-log"
+  | "support"
   | "notification"
   | "profile-settings";
 
@@ -139,6 +146,30 @@ export const sidebarItems: Array<{
     path: "clinic-location",
     label: "موقع العيادة",
     icon: MapPin,
+  },
+  {
+    id: "accounts",
+    path: "accounts",
+    label: "الحسابات",
+    icon: Wallet,
+  },
+  {
+    id: "facilities",
+    path: "facilities",
+    label: "المنشآت",
+    icon: Building2,
+  },
+  {
+    id: "activity-log",
+    path: "activity-log",
+    label: "سجل النشاطات",
+    icon: ScrollText,
+  },
+  {
+    id: "support",
+    path: "support",
+    label: "الدعم والمساعدة",
+    icon: LifeBuoy,
   },
   {
     id: "notification",
