@@ -1,0 +1,53 @@
+'use client';
+
+import { Search } from 'lucide-react';
+import type { ReactNode } from 'react';
+
+export function ClinicAccountsSearchRow({
+  value,
+  onChange,
+  placeholder,
+  trailing,
+  onValueChangeExtra,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  trailing?: ReactNode;
+  onValueChangeExtra?: () => void;
+}) {
+  return (
+    <div
+      dir="rtl"
+      className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center"
+    >
+      <div className="relative min-w-0 flex-1">
+        <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+        <input
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            onValueChangeExtra?.();
+          }}
+          placeholder={placeholder}
+          className="h-[46px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary"
+        />
+      </div>
+      {trailing ? <div className="shrink-0">{trailing}</div> : null}
+    </div>
+  );
+}
+
+export function ClinicAccountsSearchCount({
+  count,
+  label,
+}: {
+  count: number;
+  label: string;
+}) {
+  return (
+    <p className="whitespace-nowrap font-cairo text-[12px] font-bold text-[#667085]">
+      {count} {label}
+    </p>
+  );
+}
