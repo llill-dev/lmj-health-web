@@ -1,0 +1,4 @@
+export { FacilityStatusBadge } from '@/components/doctor/facilities/facility-status-badge';
+export { FacilityEmptyState } from '@/components/doctor/facilities/facility-empty-state';
+export { FacilitiesTable } from '@/components/doctor/facilities/facilities-table';
+export { FacilityFormDialog } from '@/components/doctor/facilities/facility-form-dialog';

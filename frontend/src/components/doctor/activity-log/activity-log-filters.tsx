@@ -1,0 +1,56 @@
+'use client';
+
+import { Search } from 'lucide-react';
+import type { ActivityLogPeriod } from '@/lib/doctor/activityLog/types';
+import { cn } from '@/lib/utils/utils';
+
+const PERIOD_OPTIONS: Array<{ id: ActivityLogPeriod; label: string }> = [
+  { id: 'all', label: 'الكل' },
+  { id: 'today', label: 'اليوم' },
+  { id: 'week', label: 'هذا الأسبوع' },
+  { id: 'month', label: 'هذا الشهر' },
+];
+
+export function ActivityLogFilters({
+  search,
+  onSearchChange,
+  period,
+  onPeriodChange,
+}: {
+  search: string;
+  onSearchChange: (value: string) => void;
+  period: ActivityLogPeriod;
+  onPeriodChange: (value: ActivityLogPeriod) => void;
+}) {
+  return (
+    <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-wrap justify-end gap-2">
+        {PERIOD_OPTIONS.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            onClick={() => onPeriodChange(option.id)}
+            className={cn(
+              'rounded-[10px] px-4 py-2.5 font-cairo text-[12px] font-extrabold transition',
+              period === option.id
+                ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.22)]'
+                : 'border border-[#EEF2F6] bg-white text-[#667085] hover:border-primary/30 hover:text-primary',
+            )}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="relative w-full max-w-md">
+        <Search className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+        <input
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="بحث في النشاطات..."
+          className="h-[46px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-11 pl-4 font-cairo text-[13px] font-semibold outline-none transition focus:border-primary"
+        />
+      </div>
+    </div>
+  );
+}
