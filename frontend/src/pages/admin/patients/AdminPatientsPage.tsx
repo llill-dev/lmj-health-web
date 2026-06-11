@@ -10,6 +10,7 @@ import {
 import { Filter, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import SuspendAccountDialog from '@/components/admin/patients/dialogs/SuspendAccountDialog';
 import {
   patientStatusLabel,
@@ -97,16 +98,33 @@ export default function AdminPatientsPage() {
         dir='rtl'
         lang='ar'
       >
-        <div className='flex justify-between items-start'>
-          <div>
-            <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
-              إدارة المرضى
-            </div>
-            <div className='mt-1 font-cairo text-[12px] font-semibold leading-[14px] text-[#98A2B3]'>
-              إدارة ومراقبة حسابات المرضى
-            </div>
-          </div>
-        </div>
+        <AdminDashboardOverview
+          variant='patients'
+          surface='mint'
+          title='إدارة المرضى'
+          subtitle='إدارة ومراقبة حسابات المرضى'
+          headerIcon={<Users className='h-8 w-8 text-white' />}
+          kpis={[
+            {
+              key: 'total',
+              icon: <Users className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : total,
+              label: 'إجمالي المرضى',
+            },
+            {
+              key: 'page',
+              icon: <Activity className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : results,
+              label: 'في هذه الصفحة',
+            },
+            {
+              key: 'pages',
+              icon: <Mail className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : totalPages,
+              label: 'عدد الصفحات',
+            },
+          ]}
+        />
 
         <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>

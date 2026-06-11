@@ -1,7 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  AddOrderTypeButton,
   MedicalOrderCatalogCard,
   MedicalOrderCatalogToolbar,
   MedicalOrderCategoryTabs,
@@ -17,7 +16,8 @@ import type {
 } from '@/lib/admin/types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
-import { Trash2 } from 'lucide-react';
+import { ClipboardList, Trash2 } from 'lucide-react';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 
 export default function AdminMedicalOrdersPage() {
   const [kind, setKind] = useState<MedicalOrderCatalogKind>('lab');
@@ -67,21 +67,24 @@ export default function AdminMedicalOrdersPage() {
       </Helmet>
 
       <div dir='rtl' lang='ar' className='space-y-5'>
-        <header className='flex flex-col gap-4 justify-between items-stretch sm:flex-row sm:items-center'>
-          <div className='min-w-0 text-right'>
-            <h1 className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
-              كتالوج الطلبات الطبية
-            </h1>
-            <p className='mt-1 font-cairo text-[13px] font-semibold leading-[18px] text-[#667085]'>
-              إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض
-            </p>
-          </div>
-          <AddOrderTypeButton
-            onClick={openAdd}
-            disabled={isLoading}
-            className='self-start shrink-0 sm:self-center'
-          />
-        </header>
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='كتالوج الطلبات الطبية'
+          subtitle='إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض'
+          headerIcon={<ClipboardList className='h-8 w-8 text-white' />}
+          actionLabel='إضافة نوع جديد'
+          actionDisabled={isLoading}
+          onActionClick={openAdd}
+          kpis={[
+            {
+              key: 'items',
+              icon: <ClipboardList className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : filteredItems.length,
+              label: 'عناصر معروضة',
+            },
+          ]}
+        />
 
         <div className='flex flex-col gap-3 items-stretch md:flex-row md:items-center md:justify-between'>
           <div className='order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center'>

@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
 import { adminApi } from '@/lib/admin/client';
 import StyledSelect from '@/components/ui/styled-select';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 
 export default function AdminVerificationRequestsPage() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function AdminVerificationRequestsPage() {
     doctor: string;
     lat: string;
     lng: string;
+    doctorProfile: Record<string, unknown> | null;
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'pending' | 'approved' | 'rejected'
@@ -93,6 +95,7 @@ export default function AdminVerificationRequestsPage() {
               : 'مرفوض',
         lat,
         lng,
+        doctorProfile: (request.doctor ?? null) as Record<string, unknown> | null,
       };
     });
   }, [verificationQuery.data?.requests]);
@@ -114,31 +117,33 @@ export default function AdminVerificationRequestsPage() {
         dir='rtl'
         lang='ar'
       >
-        <div className='text-right'>
-          <div className='font-cairo text-[20px] font-black leading-[26px] text-[#1F2937]'>
-            إدارة الطلبات
-          </div>
-        </div>
-
-        <section className='mt-6 rounded-[12px] border border-[#F7D7B6] bg-[#FFF7ED] px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
-              <div className='flex h-[44px] w-[44px] items-center justify-center rounded-[10px] bg-[#F97316]'>
-                <AlertCircle className='h-6 w-6 text-white' />
-              </div>
-              <div className='text-right'>
-                <div className='font-cairo text-[14px] font-black text-[#9A3412]'>
-                  يوجد طلبات تحتاج لمراجعة:
-                </div>
-                <div className='mt-2 inline-flex h-[24px] items-center rounded-[8px] bg-[#F97316] px-3 font-cairo text-[12px] font-extrabold text-white'>
-                  {verificationQuery.isLoading
-                    ? 'جارِ تحميل الطلبات...'
-                    : `${total} طلب تحقق`}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='طلبات التحقق'
+          subtitle='مراجعة طلبات التحقق من موقع العيادة وتخصص الأطباء'
+          headerIcon={<Stethoscope className='h-8 w-8 text-white' />}
+          kpis={[
+            {
+              key: 'pending',
+              icon: <AlertCircle className='h-5 w-5 shrink-0' />,
+              value: verificationQuery.isLoading ? '—' : total,
+              label: 'طلبات في القائمة',
+            },
+            {
+              key: 'page',
+              icon: <Clock className='h-5 w-5 shrink-0' />,
+              value: verificationQuery.isLoading ? '—' : locationRequests.length,
+              label: 'معروضة الآن',
+            },
+            {
+              key: 'pages',
+              icon: <Filter className='h-5 w-5 shrink-0' />,
+              value: verificationQuery.isLoading ? '—' : totalPages,
+              label: 'عدد الصفحات',
+            },
+          ]}
+        />
 
         <section className='mt-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]'>
           <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
@@ -314,6 +319,7 @@ export default function AdminVerificationRequestsPage() {
           }}
           requestId={selected?.id ?? null}
           doctorName={selected?.doctor ?? ''}
+          doctorProfile={selected?.doctorProfile}
           lat={selected?.lat}
           lng={selected?.lng}
           mode={dialogMode}

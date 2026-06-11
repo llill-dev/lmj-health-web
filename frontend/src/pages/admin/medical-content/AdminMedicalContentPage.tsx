@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import MedicalContentViewDialog from "@/components/admin/medical-content/dialogs/MedicalContentViewDialog";
 import {
   CreateAdminContentDialog,
@@ -287,120 +288,52 @@ export default function AdminMedicalContentPage() {
       </Helmet>
 
       <div dir="rtl" lang="ar">
-        <div className="flex flex-col gap-3 justify-between sm:flex-row sm:items-start">
-          <div>
-            <div className="font-cairo text-[20px] font-black leading-[26px] text-[#111827]">
-              إدارة المحتوى الطبي
-            </div>
-            <div className="mt-1 font-cairo text-[12px] font-semibold leading-[14px] text-[#98A2B3]">
-              {activeType === "NEWS"
-                ? "عرض وإدارة أخبار المنصة (نفس باقي الأنواع: مسودة → مراجعة → نشر)"
-                : "قائمة، فلاتر، ومراجعة لدورة حياة المحتوى (مسودة → مراجعة → نشر)"}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="inline-flex h-[40px] items-center gap-2 self-start rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.2)] transition hover:brightness-105"
-          >
-            <Plus className="w-4 h-4" />
-            إضافة محتوى جديد
-          </button>
-        </div>
-
-        <section className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 xl:grid-cols-5">
-          {[
+        <AdminDashboardOverview
+          variant="admin"
+          surface="mint"
+          title="إدارة المحتوى الطبي"
+          subtitle={
+            activeType === "NEWS"
+              ? "عرض وإدارة أخبار المنصة (مسودة → مراجعة → نشر)"
+              : "قائمة، فلاتر، ومراجعة لدورة حياة المحتوى"
+          }
+          headerIcon={<BookOpen className="h-8 w-8 text-white" />}
+          actionLabel="إضافة محتوى جديد"
+          onActionClick={() => setCreateOpen(true)}
+          kpiColumns={5}
+          kpis={[
             {
-              title: "مشاهدات (هذه الصفحة)",
+              key: "views",
+              icon: <Eye className="h-5 w-5 shrink-0" />,
               value: pageViews.toLocaleString("ar-SA"),
-              icon: Eye,
-              valueColor: "text-[#0F8F8B]",
-              tone: {
-                border: "border-[#0F8F8B]",
-                bg: "bg-[#16C5C00D]",
-                iconBg: "bg-[#0F8F8B]",
-              },
-              sub: "مجموع المشاهدات للعناصر المعروضة في الصفحة الحالية",
+              label: "مشاهدات الصفحة",
             },
             {
-              title: "مسودات (النظام)",
-              value: statusCounts.isLoading ? "…" : String(statusCounts.draft),
-              icon: FileText,
-              valueColor: "text-[#00C950]",
-              tone: {
-                border: "border-[#B9F8CF]",
-                bg: "bg-gradient-to-br from-[#F0FDF4] to-white",
-                iconBg: "bg-[#00C950]",
-              },
+              key: "draft",
+              icon: <FileText className="h-5 w-5 shrink-0" />,
+              value: statusCounts.isLoading ? "…" : statusCounts.draft,
+              label: "مسودات",
             },
             {
-              title: "قيد المراجعة",
-              value: statusCounts.isLoading
-                ? "…"
-                : String(statusCounts.inReview),
-              icon: Clock,
-              valueColor: "text-[#F0B100]",
-              tone: {
-                border: "border-[#FFF085]",
-                bg: "bg-gradient-to-br from-[#FEFCE8] to-white",
-                iconBg: "bg-[#F0B100]",
-              },
+              key: "review",
+              icon: <Clock className="h-5 w-5 shrink-0" />,
+              value: statusCounts.isLoading ? "…" : statusCounts.inReview,
+              label: "قيد المراجعة",
             },
             {
-              title: "منشور",
-              value: statusCounts.isLoading
-                ? "…"
-                : String(statusCounts.published),
-              icon: CheckCircle2,
-              valueColor: "text-[#4A5565]",
-              tone: {
-                border: "border-[#E5E7EB]",
-                bg: "bg-gradient-to-br from-[#F9FAFB] to-white",
-                iconBg: "bg-[#4A5565]",
-              },
+              key: "published",
+              icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
+              value: statusCounts.isLoading ? "…" : statusCounts.published,
+              label: "منشور",
             },
             {
-              title: "إجمالي في النظام",
-              value: statusCounts.isLoading ? "…" : String(statusCounts.all),
-              icon: BookOpen,
-              valueColor: "text-[#8200DB]",
-              tone: {
-                border: "border-[#E9D4FF]",
-                bg: "bg-gradient-to-br from-[#FAF5FF] to-white",
-                iconBg: "bg-[#8200DB]",
-              },
+              key: "all",
+              icon: <BookOpen className="h-5 w-5 shrink-0" />,
+              value: statusCounts.isLoading ? "…" : statusCounts.all,
+              label: "إجمالي النظام",
             },
-          ].map((c) => {
-            const Icon = c.icon;
-            return (
-              <div
-                key={c.title}
-                title={"sub" in c ? c.sub : undefined}
-                className={`h-[92px] rounded-[10px] border-[1.82px] px-[16px] py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${c.tone.border} ${c.tone.bg}`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                      {c.title}
-                    </div>
-                    <div
-                      className={`mt-2 font-cairo text-[20px] font-black leading-[20px] ${c.valueColor}`}
-                    >
-                      {c.value}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`flex h-[40px] w-[40px] items-center justify-center rounded-[6px] ${c.tone.iconBg}`}
-                  >
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </section>
+          ]}
+        />
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="flex flex-col gap-3 w-full min-w-0 lg:flex-row lg:items-center lg:justify-between">

@@ -5,6 +5,7 @@ import {
   Clock,
   Stethoscope,
 } from 'lucide-react';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
 import DoctorListCard from '@/components/admin/doctors/DoctorListCard';
 import StyledSelect from '@/components/ui/styled-select';
@@ -142,45 +143,23 @@ export default function AdminDoctorsPage() {
         lang='ar'
         className='mx-auto w-full max-w-[1600px] px-3 pb-6 sm:px-4 md:px-6'
       >
-        <div className='flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between'>
-          <div className='min-w-0 text-right'>
-            <div className='font-cairo text-lg font-black leading-snug text-[#111827] sm:text-[20px] sm:leading-[26px]'>
-              إدارة الأطباء
-            </div>
-            <div className='mt-1 font-cairo text-[11px] font-semibold leading-snug text-[#98A2B3] sm:text-[12px] sm:leading-[14px]'>
-              إدارة ومتابعة بيانات الأطباء
-            </div>
-          </div>
-        </div>
-
-        <section className='mt-4 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4'>
-          {stats.map((c) => {
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='إدارة الأطباء'
+          subtitle='إدارة ومتابعة بيانات الأطباء'
+          headerIcon={<Stethoscope className='h-8 w-8 text-white' />}
+          kpiColumns={4}
+          kpis={stats.map((c) => {
             const Icon = c.icon;
-            return (
-              <div
-                key={c.title}
-                className={`flex items-center justify-between gap-3 rounded-[12px] border px-3 py-3 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-5 sm:py-4 ${c.tone.border} ${c.tone.bg}`}
-              >
-                <div className='min-w-0 text-right'>
-                  <div className='font-cairo text-[11px] font-bold text-[#667085] sm:text-[12px]'>
-                    {c.title}
-                  </div>
-                  <div
-                    className={`mt-1 font-cairo text-lg font-black leading-none sm:mt-2 sm:text-[22px] sm:leading-[22px] ${c.tone.valueColor}`}
-                  >
-                    {c.value}
-                  </div>
-                </div>
-
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] sm:h-[44px] sm:w-[44px] ${c.tone.iconBg}`}
-                >
-                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${c.tone.iconColor}`} />
-                </div>
-              </div>
-            );
+            return {
+              key: c.title,
+              icon: <Icon className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : c.value,
+              label: c.title,
+            };
           })}
-        </section>
+        />
 
         <AdminSearchFiltersBar
           queryPlaceholder='ابحث عن طبيب...'

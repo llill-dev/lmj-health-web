@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
 import { Settings, Plus, Edit, Check, Loader2 } from 'lucide-react';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import {
   useServiceTypesList,
   useMutateServiceType,
@@ -86,25 +87,23 @@ export default function AdminServiceTypesPage() {
       </Helmet>
 
       <div dir='rtl' lang='ar'>
-        <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
-          <div className='text-right'>
-            <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
-              أنواع الخدمات
-            </div>
-            <div className='mt-1 font-cairo text-[12px] font-semibold leading-[14px] text-[#98A2B3]'>
-              إدارة أنواع الخدمات والـ schema الديناميكي (مربوط بالـ API)
-            </div>
-          </div>
-
-          <button
-            type='button'
-            onClick={openCreate}
-            className='inline-flex h-[40px] items-center justify-center gap-2 self-start rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.2)] transition hover:brightness-105'
-          >
-            <Plus className='h-4 w-4' />
-            إضافة نوع خدمة
-          </button>
-        </div>
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='أنواع الخدمات'
+          subtitle='إدارة أنواع الخدمات والـ schema الديناميكي'
+          headerIcon={<Settings className='h-8 w-8 text-white' />}
+          actionLabel='إضافة نوع خدمة'
+          onActionClick={openCreate}
+          kpis={[
+            {
+              key: 'total',
+              icon: <Settings className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : serviceTypes.length,
+              label: 'أنواع مسجّلة',
+            },
+          ]}
+        />
 
         {isLoading && (
           <div className='mt-8 flex items-center justify-center gap-2 rounded-[12px] border border-[#EEF2F6] bg-white py-16 font-cairo text-[14px] font-semibold text-[#667085]'>

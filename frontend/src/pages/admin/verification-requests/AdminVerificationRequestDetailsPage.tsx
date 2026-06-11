@@ -11,7 +11,9 @@ import {
   MapPinned,
   Stethoscope,
 } from 'lucide-react';
+import { DoctorSpecializationReviewBanner } from '@/components/admin/verification-requests/DoctorSpecializationReviewBanner';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
+import { resolveDoctorSpecializationReviewState } from '@/lib/admin/doctorSpecializationReview';
 import {
   buildChangeRows,
   extractRequestFromDetails,
@@ -105,6 +107,11 @@ export default function AdminVerificationRequestDetailsPage() {
     };
   }, [requestId, requestQuery.data]);
 
+  const specializationState = useMemo(
+    () => resolveDoctorSpecializationReviewState(requestQuery.data?.doctor),
+    [requestQuery.data?.doctor],
+  );
+
   return (
     <>
       <Helmet>
@@ -181,6 +188,8 @@ export default function AdminVerificationRequestDetailsPage() {
               </div>
             </div>
 
+            <DoctorSpecializationReviewBanner state={specializationState} />
+
             <div className='mt-3 border-t border-[#B9D8D6] pt-2' />
 
             <div className='my-6 text-right font-cairo text-[20px] font-semibold leading-[20px] text-[#000000]'>
@@ -231,6 +240,13 @@ export default function AdminVerificationRequestDetailsPage() {
               </table>
             </div>
 
+            {specializationState.needsAdminResolve ? (
+              <p className='mt-4 text-center font-cairo text-[12px] font-semibold text-[#92400E]'>
+                عند «قبول التعديلات» يجب اختيار تخصص مُدار من القائمة أو إنشاء
+                تخصص جديد في نافذة التأكيد.
+              </p>
+            ) : null}
+
             <div className='mt-6 flex flex-wrap items-center justify-center gap-3'>
               <button
                 type='button'
@@ -280,6 +296,9 @@ export default function AdminVerificationRequestDetailsPage() {
         }}
         requestId={cardData.id}
         doctorName={cardData.doctor}
+        doctorProfile={
+          (requestQuery.data?.doctor ?? null) as Record<string, unknown> | null
+        }
         lat={cardData.lat}
         lng={cardData.lng}
         mode={dialogMode}

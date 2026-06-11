@@ -13,7 +13,9 @@ import {
 import type { AdminDoctorDetailsDoctor, AdminDoctorAnalyticsRange } from '@/lib/admin/types';
 import { AdminDoctorAnalyticsPanels } from '@/components/admin/doctor/AdminDoctorAnalyticsPanels';
 import { FieldBlock, SectionTitle } from '@/components/admin/doctors/DoctorDetailsPrimitives';
+import { DoctorSpecializationReviewBanner } from '@/components/admin/verification-requests/DoctorSpecializationReviewBanner';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
+import { resolveDoctorSpecializationReviewState } from '@/lib/admin/doctorSpecializationReview';
 
 
 function requestStillOpen(status: string | undefined): boolean {
@@ -129,6 +131,11 @@ export default function AdminDoctorDetailsPage() {
 
   const clinicCoords = useMemo(
     () => (doctor ? coordsToLatLng(doctor) : { lat: undefined, lng: undefined }),
+    [doctor],
+  );
+
+  const specializationState = useMemo(
+    () => resolveDoctorSpecializationReviewState(doctor),
     [doctor],
   );
 
@@ -259,12 +266,29 @@ export default function AdminDoctorDetailsPage() {
               <section>
                 <SectionTitle>المعلومات المهنية</SectionTitle>
                 <div className='rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]'>
-                  <div className='grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 md:gap-10'>
+                  <DoctorSpecializationReviewBanner state={specializationState} />
+                  <div className='mt-4 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 md:gap-10'>
                     <div className='flex flex-col gap-4'>
                       <FieldBlock
-                        label='التخصص'
-                        value={doctor.specialization ?? '—'}
+                        label='التخصص المعروض'
+                        value={specializationState.displayLabel}
                       />
+                      <FieldBlock
+                        label='حالة التخصص'
+                        value={specializationState.statusLabel}
+                      />
+                      {specializationState.specializationKey ? (
+                        <FieldBlock
+                          label='رمز التخصص'
+                          value={specializationState.specializationKey}
+                        />
+                      ) : null}
+                      {specializationState.customSpecializationText ? (
+                        <FieldBlock
+                          label='التخصص المُدخل يدوياً'
+                          value={specializationState.customSpecializationText}
+                        />
+                      ) : null}
                       <FieldBlock
                         label='رقم الترخيص'
                         value={doctor.medicalLicenseNumber ?? '—'}
@@ -305,6 +329,13 @@ export default function AdminDoctorDetailsPage() {
 
               {doctor.approvalStatus === 'pending' ? (
                 <div className='flex flex-col items-center gap-3 pb-6 pt-2'>
+                  {specializationState.needsAdminResolve ? (
+                    <p className='max-w-lg text-center font-cairo text-[12px] font-semibold text-[#92400E]'>
+                      هذا الطبيب لديه تخصص مخصص معلّق. عند «قبول» يجب اختيار
+                      تخصصاً مُداراً من القائمة أو إنشاء تخصص جديد في نافذة
+                      التأكيد.
+                    </p>
+                  ) : null}
                   {verificationRequestId ? (
                     <div className='flex w-full max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4'>
                       <button
@@ -401,6 +432,7 @@ export default function AdminDoctorDetailsPage() {
                   onOpenChange={setActionDialogOpen}
                   requestId={verificationRequestId}
                   doctorName={doctor.user?.fullName ?? '—'}
+                  doctorProfile={doctor}
                   lat={clinicCoords.lat}
                   lng={clinicCoords.lng}
                   mode={actionDialogMode}

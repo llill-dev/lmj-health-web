@@ -16,11 +16,8 @@ import {
   useRecentAppointments,
   useTopApprovedDoctors,
 } from '@/hooks/admin/useAdminAnalytics';
-import StatCard from '@/components/admin/analytics/StatCard';
-import {
-  StatCardSkeleton,
-  TableRowSkeleton,
-} from '@/components/admin/analytics/AnalyticsSkeletons';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
+import { TableRowSkeleton } from '@/components/admin/analytics/AnalyticsSkeletons';
 import {
   formatDateTime,
   localizeSpec,
@@ -44,78 +41,43 @@ export default function AdminAnalyticsPage() {
         dir='rtl'
         lang='ar'
       >
-        {/* header */}
-        <div className='flex items-center justify-between'>
-          <div className='text-right'>
-            <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
-              التحليلات والإحصائيات
-            </div>
-            <div className='mt-1 font-cairo text-[12px] font-semibold leading-[16px] text-[#98A2B3]'>
-              إحصائيات حقيقية من قاعدة البيانات
-            </div>
-          </div>
-
-          <button
-            onClick={refetch}
-            className='inline-flex items-center gap-2 rounded-[10px] border border-[#EEF2F6] bg-white px-4 py-2.5 font-cairo text-[12px] font-extrabold text-[#667085] shadow-sm transition-all hover:border-primary hover:text-primary active:scale-95'
-          >
-            <RefreshCw className='h-4 w-4' />
-            تحديث
-          </button>
-        </div>
-
-        {/* ── stat cards ── */}
-        <section className='mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4'>
-          {statsLoading ? (
-            <>
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-            </>
-          ) : (
-            <>
-              <StatCard
-                title='إجمالي المرضى'
-                value={stats.totalPatients}
-                icon={Users}
-                border='border-[#86EFAC]'
-                bg='bg-gradient-to-br from-[#F0FDF4] to-white'
-                iconColor='text-[#16A34A]'
-                sub={`${stats.totalPatients} مريض مسجل`}
-                subColor='text-[#16A34A]'
-              />
-              <StatCard
-                title='الأطباء المعتمدون'
-                value={stats.approvedDoctors}
-                icon={UserCheck}
-                border='border-[#67E8F9]'
-                bg='bg-gradient-to-br from-[#ECFEFF] to-white'
-                iconColor='text-primary'
-                sub={`${stats.pendingDoctors} طلب قيد المراجعة`}
-                subColor={stats.pendingDoctors > 0 ? 'text-[#D97706]' : 'text-[#667085]'}
-              />
-              <StatCard
-                title='إجمالي المواعيد'
-                value={stats.totalAppointments}
-                icon={CalendarDays}
-                border='border-[#86EFAC]'
-                bg='bg-gradient-to-br from-[#F0FDF4] to-white'
-                iconColor='text-[#16A34A]'
-                sub='جميع الحالات'
-              />
-              <StatCard
-                title='إجمالي الأطباء'
-                value={stats.totalDoctors}
-                icon={Stethoscope}
-                border='border-[#67E8F9]'
-                bg='bg-gradient-to-br from-[#ECFEFF] to-white'
-                iconColor='text-primary'
-                sub={`${stats.totalSecretaries} سكرتير/ة`}
-              />
-            </>
-          )}
-        </section>
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='التحليلات والإحصائيات'
+          subtitle='إحصائيات حقيقية من قاعدة البيانات'
+          headerIcon={<BarChart3 className='h-8 w-8 text-white' />}
+          actionLabel='تحديث'
+          actionIcon={<RefreshCw className='h-4 w-4' />}
+          onActionClick={() => void refetch()}
+          kpiColumns={4}
+          kpis={[
+            {
+              key: 'patients',
+              icon: <Users className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : stats.totalPatients,
+              label: 'إجمالي المرضى',
+            },
+            {
+              key: 'approved',
+              icon: <UserCheck className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : stats.approvedDoctors,
+              label: 'أطباء معتمدون',
+            },
+            {
+              key: 'appointments',
+              icon: <CalendarDays className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : stats.totalAppointments,
+              label: 'إجمالي المواعيد',
+            },
+            {
+              key: 'doctors',
+              icon: <Stethoscope className='h-5 w-5 shrink-0' />,
+              value: statsLoading ? '—' : stats.totalDoctors,
+              label: 'إجمالي الأطباء',
+            },
+          ]}
+        />
 
         {/* ── secondary metrics ── */}
         <section className='mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3'>

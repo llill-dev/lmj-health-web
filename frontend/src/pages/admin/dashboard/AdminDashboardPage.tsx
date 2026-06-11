@@ -26,6 +26,7 @@ import type {
   AdminComplaintListItem,
   AdminContentItem,
 } from '@/lib/admin/types';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import {
   activityDescription,
   activityHeadline,
@@ -83,70 +84,40 @@ export default function AdminDashboardPage() {
         lang='ar'
         className='min-h-full text-[#111827]'
       >
-        <div className='flex flex-col gap-4 justify-between sm:flex-row sm:items-start'>
-          <div>
-            <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
-              لوحة التحكم الرئيسية
-            </div>
-            <div className='mt-1 font-cairo text-[12px] font-semibold leading-[14px] text-[#98A2B3]'>
-              نظرة عامة شاملة على النظام وإدارة النشاط
-            </div>
-          </div>
-        </div>
-
-        <section className='grid grid-cols-1 gap-5 mt-6 sm:grid-cols-2 lg:grid-cols-4'>
-          {[
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='لوحة التحكم الرئيسية'
+          subtitle='نظرة عامة شاملة على النظام وإدارة النشاط'
+          headerIcon={<ClipboardList className='h-8 w-8 text-white' />}
+          kpiColumns={4}
+          kpis={[
             {
-              title: 'طلبات الوصول المعلّقة',
+              key: 'access',
+              icon: <UserCheck className='h-5 w-5 shrink-0' />,
               value: '1',
-              icon: UserCheck,
-              badge: 'معلّق',
+              label: 'طلبات الوصول المعلّقة',
             },
             {
-              title: 'عدد المواعيد (الشهر)',
+              key: 'appointments',
+              icon: <CalendarDays className='h-5 w-5 shrink-0' />,
               value: '2',
-              icon: CalendarDays,
-              badge: '+18%',
+              label: 'مواعيد الشهر',
             },
             {
-              title: 'إجمالي عدد الأطباء',
+              key: 'doctors',
+              icon: <Stethoscope className='h-5 w-5 shrink-0' />,
               value: '5',
-              icon: Stethoscope,
-              badge: '+12%',
+              label: 'إجمالي الأطباء',
             },
             {
-              title: 'إجمالي عدد المرضى',
+              key: 'patients',
+              icon: <Users className='h-5 w-5 shrink-0' />,
               value: '2',
-              icon: Users,
-              badge: '+24%',
+              label: 'إجمالي المرضى',
             },
-          ].map((c, idx) => {
-            const Icon = c.icon;
-            return (
-              <div
-                key={idx}
-                className='relative overflow-hidden rounded-[12px] bg-primary px-5 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]'
-                style={{ backgroundColor: TEAL }}
-              >
-                <div className='flex justify-between items-start'>
-                  <div className='flex h-[34px] w-[34px] items-center justify-center rounded-[6px] bg-[#FFFFFF33]'>
-                    <Icon className='h-[18px] w-[18px] text-white' />
-                  </div>
-                  <div className='inline-flex h-[26px] items-center justify-center rounded-full bg-white/15 px-3 font-cairo text-[11px] font-extrabold text-white'>
-                    {c.badge}
-                  </div>
-                </div>
-
-                <div className='mt-6 font-cairo text-[34px] font-extrabold leading-[34px] text-white'>
-                  {c.value}
-                </div>
-                <div className='mt-2 font-cairo text-[12px] font-semibold text-white/85'>
-                  {c.title}
-                </div>
-              </div>
-            );
-          })}
-        </section>
+          ]}
+        />
 
         <section className='grid grid-cols-1 gap-5 mt-5 md:grid-cols-3'>
           {[

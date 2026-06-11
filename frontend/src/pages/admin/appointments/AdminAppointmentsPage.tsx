@@ -10,6 +10,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import StyledSelect from '@/components/ui/styled-select';
 import CancelAppointmentDialog from '@/components/admin/appointments/dialogs/CancelAppointmentDialog';
@@ -174,42 +175,23 @@ export default function AdminAppointmentsPage() {
         dir='rtl'
         lang='ar'
       >
-        <div className='text-right'>
-          <div className='font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
-            إدارة المواعيد
-          </div>
-        </div>
-
-        <section className='mt-6 grid grid-cols-4 gap-4'>
-          {stats.map((s) => {
+        <AdminDashboardOverview
+          variant='appointments'
+          surface='mint'
+          title='إدارة المواعيد'
+          subtitle='متابعة وجدولة مواعيد المرضى مع الأطباء'
+          headerIcon={<CalendarDays className='h-8 w-8 text-white' />}
+          kpiColumns={4}
+          kpis={stats.map((s) => {
             const Icon = s.icon;
-            return (
-              <div
-                key={s.title}
-                className={`h-[92px] rounded-[12px] border px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${s.tone.border} ${s.tone.bg}`}
-              >
-                <div className='flex items-start justify-between'>
-                  <div className='text-right'>
-                    <div className='font-cairo text-[12px] font-bold text-[#667085]'>
-                      {s.title}
-                    </div>
-                    <div
-                      className={`mt-2 font-cairo text-[20px] font-black leading-[20px] ${s.tone.valueFg}`}
-                    >
-                      {s.value}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`flex h-[44px] w-[44px] items-center justify-center rounded-[12px] ${s.tone.iconBg}`}
-                  >
-                    <Icon className={`h-5 w-5 ${s.tone.iconFg}`} />
-                  </div>
-                </div>
-              </div>
-            );
+            return {
+              key: s.title,
+              icon: <Icon className='h-5 w-5 shrink-0' />,
+              value: s.value,
+              label: s.title,
+            };
           })}
-        </section>
+        />
 
         <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
           <div className='flex items-center justify-between gap-4'>

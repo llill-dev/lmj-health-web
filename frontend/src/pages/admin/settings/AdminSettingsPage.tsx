@@ -8,6 +8,7 @@ import { adminApi } from "@/lib/admin/client";
 import { notificationsApi } from "@/lib/notifications/client";
 import { useAdminAppSettings } from "@/contexts/AdminAppSettingsContext";
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import SettingsField from "@/components/admin/settings/SettingsField";
 import SettingsSectionCard from "@/components/admin/settings/SettingsSectionCard";
 
@@ -152,42 +153,38 @@ export default function AdminSettingsPage() {
 
       <div dir="rtl" lang="ar" className="min-h-[520px] bg-[#FCFDFE]">
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-10 pt-2 sm:px-6 lg:px-10">
-          <section className="grid grid-cols-1 gap-3 mb-6 md:grid-cols-3">
-            <div className="rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
-              <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                حالة النظام (API/Storage)
-              </div>
-              <div className="mt-2 font-cairo text-[14px] font-black text-[#111827]">
-                {healthQuery.isLoading
-                  ? "جارِ الفحص..."
+          <AdminDashboardOverview
+            variant="admin"
+            surface="mint"
+            title="الإعدادات"
+            subtitle="إدارة إعدادات التطبيق والشعار وحالة النظام"
+            headerIcon={<Settings className="h-8 w-8 text-white" />}
+            kpiColumns={3}
+            kpis={[
+              {
+                key: "health",
+                icon: <Settings className="h-5 w-5 shrink-0" />,
+                value: healthQuery.isLoading
+                  ? "…"
                   : healthQuery.isError
                     ? "غير متاح"
-                    : `${healthQuery.data?.status ?? "—"} / ${healthQuery.data?.storage ?? "—"}`}
-              </div>
-            </div>
-
-            <div className="rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
-              <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                إشعارات غير مقروءة (GET /notifications)
-              </div>
-              <div className="mt-2 font-cairo text-[14px] font-black text-[#111827]">
-                {unreadNotificationsQuery.isLoading
-                  ? "جارِ التحميل..."
-                  : unreadCount}
-              </div>
-            </div>
-
-            <div className="rounded-[12px] border border-[#E8EDF2] bg-white px-5 py-4 text-right shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
-              <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                سجلات التدقيق (آخر 7 أيام)
-              </div>
-              <div className="mt-2 font-cairo text-[14px] font-black text-[#111827]">
-                {auditSummaryQuery.isLoading
-                  ? "جارِ التحميل..."
-                  : weeklyAuditCount}
-              </div>
-            </div>
-          </section>
+                    : `${healthQuery.data?.status ?? "—"}`,
+                label: "حالة النظام",
+              },
+              {
+                key: "notifications",
+                icon: <CloudUpload className="h-5 w-5 shrink-0" />,
+                value: unreadNotificationsQuery.isLoading ? "…" : unreadCount,
+                label: "إشعارات غير مقروءة",
+              },
+              {
+                key: "audit",
+                icon: <Settings className="h-5 w-5 shrink-0" />,
+                value: auditSummaryQuery.isLoading ? "…" : weeklyAuditCount,
+                label: "سجلات (7 أيام)",
+              },
+            ]}
+          />
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <SettingsSectionCard

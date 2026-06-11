@@ -20,7 +20,7 @@ import { staggerContainer, staggerItem } from '@/motion';
 import { adminApi } from '@/lib/admin/client';
 import StyledSelect from '@/components/ui/styled-select';
 import type { ComplaintLifecycleStatus, ComplaintType } from '@/lib/admin/types';
-import ComplaintsSummaryStatCard from '@/components/admin/complaints/ComplaintsSummaryStatCard';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import {
   COMPLAINT_TYPES,
   complaintTypeAr,
@@ -157,18 +157,34 @@ export default function AdminComplaintsPage() {
         lang='ar'
         className='text-right'
       >
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-        >
-          <h1 className='font-cairo text-[22px] font-black leading-7 text-[#111827] md:text-[24px]'>
-            الشكاوي
-          </h1>
-          <p className='mt-1 font-cairo text-[13px] font-semibold text-[#64748B]'>
-            متابعة شكاوى المرضى عبر GET /api/complaints (إداري)
-          </p>
-        </motion.div>
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='الشكاوي'
+          subtitle='متابعة شكاوى المرضى ومعالجة طلبات الدعم'
+          headerIcon={<MessageSquare className='h-8 w-8 text-white' />}
+          kpiColumns={3}
+          kpis={[
+            {
+              key: 'total',
+              icon: <MessageSquare className='h-5 w-5 shrink-0' />,
+              value: countsLoading ? '—' : stats.total,
+              label: 'إجمالي الشكاوي',
+            },
+            {
+              key: 'review',
+              icon: <SlidersHorizontal className='h-5 w-5 shrink-0' />,
+              value: countsLoading ? '—' : stats.review,
+              label: 'قيد المراجعة',
+            },
+            {
+              key: 'closed',
+              icon: <Stethoscope className='h-5 w-5 shrink-0' />,
+              value: countsLoading ? '—' : stats.closed,
+              label: 'مغلقة',
+            },
+          ]}
+        />
 
         {showNewBanner && bannerName ? (
           <motion.section
@@ -189,24 +205,6 @@ export default function AdminComplaintsPage() {
             </p>
           </motion.section>
         ) : null}
-
-        <div className='mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3'>
-          <ComplaintsSummaryStatCard
-            variant='total'
-            value={countsLoading ? 0 : stats.total}
-            delay={0.08}
-          />
-          <ComplaintsSummaryStatCard
-            variant='closed'
-            value={countsLoading ? 0 : stats.closed}
-            delay={0.14}
-          />
-          <ComplaintsSummaryStatCard
-            variant='review'
-            value={countsLoading ? 0 : stats.review}
-            delay={0.2}
-          />
-        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 8 }}

@@ -7,6 +7,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { MedicalFileOptionCard } from '@/components/admin/medical-file-options/MedicalFileOptionCard';
 import StyledSelect from '@/components/ui/styled-select';
 
@@ -39,17 +40,37 @@ export default function AdminMedicalFileOptionsPage() {
         dir='rtl'
         lang='ar'
       >
-        <div>
-          <div className='text-right'>
-            <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
-              خيارات الملف الطبي
-            </div>
-            <div className='mt-1 font-cairo text-[12px] font-semibold leading-[16px] text-[#667085]'>
-              إضافة وإدارة الخيارات ضمن الملف الطبي للمريض
-            </div>
-          </div>
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='خيارات الملف الطبي'
+          subtitle='إضافة وإدارة الخيارات ضمن الملف الطبي للمريض'
+          headerIcon={<FileCog className='h-8 w-8 text-white' />}
+          kpiColumns={3}
+          kpis={[
+            {
+              key: 'chronic',
+              icon: <Heart className='h-5 w-5 shrink-0' />,
+              value: chronicDiseases.length,
+              label: 'أمراض مزمنة',
+            },
+            {
+              key: 'allergies',
+              icon: <AlertTriangle className='h-5 w-5 shrink-0' />,
+              value: allergies.length,
+              label: 'أنواع حساسية',
+            },
+            {
+              key: 'blood',
+              icon: <Droplets className='h-5 w-5 shrink-0' />,
+              value: bloodTypes.length,
+              label: 'فصائل دم',
+            },
+          ]}
+        />
 
-          <div className='mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3'>
+        <div>
+          <div className='mt-2 grid grid-cols-1 gap-6 lg:grid-cols-3'>
             <MedicalFileOptionCard
               title='الأمراض المزمنة'
               items={chronicDiseases}

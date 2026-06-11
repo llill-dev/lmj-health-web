@@ -14,6 +14,7 @@ import {
   Tags,
   Trash2,
 } from "lucide-react";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import ConfirmActionDialog from "@/components/admin/dialogs/ConfirmActionDialog";
 import UpsertDoctorLookupDialog from "@/components/admin/doctor-specializations/UpsertDoctorLookupDialog";
 import { useAdminLookups } from "@/hooks/admin/useAdminLookups";
@@ -29,7 +30,6 @@ import { staggerContainer, staggerItem } from "@/motion";
 import { ApiError } from "@/lib/api";
 import { downloadUtf8Csv } from "@/lib/export/downloadUtf8Csv";
 
-const TEAL = "#108B8B";
 const PAGE_SIZE = 9;
 
 export default function AdminDoctorSpecializationsPage() {
@@ -152,102 +152,68 @@ export default function AdminDoctorSpecializationsPage() {
         lang="ar"
         className="mx-auto w-full max-w-[1600px] px-3 pb-10 sm:px-4 md:px-6"
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 text-right">
-            <div className="inline-flex gap-3 items-center">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#ECFEFF] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
-                <Tags className="w-5 h-5 text-primary" aria-hidden />
-              </div>
-              <div>
-                <h1 className="font-cairo text-[20px] font-black leading-tight text-[#111827] sm:text-[22px]">
-                  تخصصات الأطباء
-                </h1>
-                <p className="mt-1 max-w-[560px] font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
-                  إدارة كتالوج التخصصات الطبية في الإدارة وكتالوج التسجيل
-                </p>
-              </div>
-            </div>
-          </div>
+        <AdminDashboardOverview
+          variant="admin"
+          surface="mint"
+          title="تخصصات الأطباء"
+          subtitle="إدارة كتالوج التخصصات الطبية في الإدارة وكتالوج التسجيل"
+          headerIcon={<Tags className="h-8 w-8 text-white" />}
+          actionLabel="إضافة تخصص"
+          onActionClick={openCreate}
+          kpiColumns={3}
+          kpis={[
+            {
+              key: "total",
+              icon: <Tags className="h-5 w-5 shrink-0" />,
+              value: busy ? "…" : lookups.length,
+              label: "عناصر الكتالوج",
+            },
+            {
+              key: "active",
+              icon: <Stethoscope className="h-5 w-5 shrink-0" />,
+              value: busy ? "…" : activeCount,
+              label: "نشطة",
+            },
+            {
+              key: "inactive",
+              icon: <Tags className="h-5 w-5 shrink-0" />,
+              value: busy ? "…" : inactiveCount,
+              label: "غير نشطة",
+            },
+          ]}
+        />
 
-          <div className="flex flex-wrap gap-2 items-center lg:justify-end">
-            <button
-              type="button"
-              onClick={exportFilteredTableToExcel}
-              disabled={busy || filtered.length === 0}
-              className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
-              title="ملف CSV يفتح كجدول في Microsoft Excel"
-            >
-              <FileSpreadsheet className="h-4 w-4 text-[#16A34A]" aria-hidden />
-              جدول Excel
-            </button>
-            <button
-              type="button"
-              onClick={() => refetch()}
-              disabled={busy}
-              className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${busy ? "animate-spin" : ""}`}
-                aria-hidden
-              />
-              تحديث
-            </button>
-            <button
-              type="button"
-              onClick={openCreate}
-              className="inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_16px_34px_rgba(15,143,139,0.28)] transition hover:brightness-105"
-            >
-              <Plus className="w-4 h-4" aria-hidden />
-              إضافة تخصص
-            </button>
-            <Link
-              to="/admin/doctors"
-              className="inline-flex h-[40px] items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 hover:text-primary"
-            >
-              قائمة الأطباء
-              <ChevronLeft className="w-4 h-4" aria-hidden />
-            </Link>
-          </div>
+        <div className="mt-2 flex flex-wrap gap-2 items-center justify-end">
+          <button
+            type="button"
+            onClick={exportFilteredTableToExcel}
+            disabled={busy || filtered.length === 0}
+            className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
+            title="ملف CSV يفتح كجدول في Microsoft Excel"
+          >
+            <FileSpreadsheet className="h-4 w-4 text-[#16A34A]" aria-hidden />
+            جدول Excel
+          </button>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={busy}
+            className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${busy ? "animate-spin" : ""}`}
+              aria-hidden
+            />
+            تحديث
+          </button>
+          <Link
+            to="/admin/doctors"
+            className="inline-flex h-[40px] items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 hover:text-primary"
+          >
+            قائمة الأطباء
+            <ChevronLeft className="w-4 h-4" aria-hidden />
+          </Link>
         </div>
-
-        <section className="grid grid-cols-1 gap-3 mt-6 sm:grid-cols-3">
-          <div className="rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
-            <div className="flex gap-2 justify-between items-center">
-              <span className="font-cairo text-[11px] font-bold text-[#667085]">
-                عناصر الكتالوج
-              </span>
-              <Tags className="w-4 h-4 text-primary" aria-hidden />
-            </div>
-            <div
-              className="mt-2 font-cairo text-[28px] font-black tabular-nums leading-none"
-              style={{ color: TEAL }}
-            >
-              {busy ? "…" : lookups.length}
-            </div>
-          </div>
-          <div className="rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
-            <div className="flex gap-2 justify-between items-center">
-              <span className="font-cairo text-[11px] font-bold text-[#667085]">
-                نشطة
-              </span>
-              <Stethoscope className="h-4 w-4 text-[#16A34A]" aria-hidden />
-            </div>
-            <div className="mt-2 font-cairo text-[28px] font-black tabular-nums leading-none text-[#16A34A]">
-              {busy ? "…" : activeCount}
-            </div>
-          </div>
-          <div className="rounded-[14px] border border-[#E8ECEF] bg-white px-4 py-4 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
-            <div className="flex gap-2 justify-between items-center">
-              <span className="font-cairo text-[11px] font-bold text-[#667085]">
-                غير نشطة
-              </span>
-              <Tags className="h-4 w-4 text-[#98A2B3]" aria-hidden />
-            </div>
-            <div className="mt-2 font-cairo text-[28px] font-black tabular-nums leading-none text-[#64748B]">
-              {busy ? "…" : inactiveCount}
-            </div>
-          </div>
-        </section>
 
         <div className="mt-6 flex flex-col gap-3 rounded-[14px] border border-[#E8ECEF] bg-white p-4 shadow-[0_14px_34px_rgba(15,23,42,0.06)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <label className="relative flex min-w-[200px] flex-1 items-center">

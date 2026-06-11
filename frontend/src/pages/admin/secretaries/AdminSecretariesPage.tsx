@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils/utils";
 import StyledSelect from "@/components/ui/styled-select";
 import type { AdminSecretarySummary } from "@/lib/admin/types";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 
 /* ─── permission label map ──────────────────────────────────── */
 /* ─── helpers ──────────────────────────────────────────────── */
@@ -97,28 +98,33 @@ export default function AdminSecretariesPage() {
       </Helmet>
 
       <div dir="rtl" lang="ar">
-        {/* ── header ── */}
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="font-cairo text-[26px] font-black leading-[34px] text-[#111827]">
-              إدارة السكرتارية
-            </div>
-            <div className="mt-1 font-cairo text-[12px] font-semibold leading-[16px] text-[#98A2B3]">
-              مراقبة وإدارة حسابات السكرتيرين المرتبطين بالأطباء
-            </div>
-          </div>
-
-          {data && (
-            <div className="flex h-10 items-center rounded-[10px] border border-[#EEF2F6] bg-white px-4 shadow-sm">
-              <span className="font-cairo text-[12px] font-extrabold text-[#667085]">
-                الإجمالي:&nbsp;
-              </span>
-              <span className="font-cairo text-[14px] font-black text-primary">
-                {data.total.toLocaleString("ar-EG")}
-              </span>
-            </div>
-          )}
-        </div>
+        <AdminDashboardOverview
+          variant="admin"
+          surface="mint"
+          title="إدارة السكرتارية"
+          subtitle="مراقبة وإدارة حسابات السكرتيرين المرتبطين بالأطباء"
+          headerIcon={<Users className="h-8 w-8 text-white" />}
+          kpis={[
+            {
+              key: "total",
+              icon: <Users className="h-5 w-5 shrink-0" />,
+              value: isLoading ? "—" : (data?.total ?? 0).toLocaleString("ar-EG"),
+              label: "إجمالي السكرتارية",
+            },
+            {
+              key: "doctors",
+              icon: <Stethoscope className="h-5 w-5 shrink-0" />,
+              value: doctorsListLoading ? "—" : doctorOptions.length,
+              label: "أطباء مرتبطون",
+            },
+            {
+              key: "page",
+              icon: <Mail className="h-5 w-5 shrink-0" />,
+              value: isLoading ? "—" : (data?.results ?? 0),
+              label: "في هذه الصفحة",
+            },
+          ]}
+        />
 
         {/* ── فلاتر: بحث + طبيب (مطابقة GET /api/admin/secretaries) ── */}
         <div className="flex justify-between gap-16  items-center mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">

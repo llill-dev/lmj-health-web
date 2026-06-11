@@ -4,9 +4,9 @@ import { useDebounce } from 'use-debounce';
 import { AdminAuditLogFilters } from '@/components/admin/system-logs/AdminAuditLogFilters';
 import { AdminAuditLogPagination } from '@/components/admin/system-logs/AdminAuditLogPagination';
 import { AdminAuditLogPrivacyNote } from '@/components/admin/system-logs/AdminAuditLogPrivacyNote';
-import { AdminAuditLogStatsCards } from '@/components/admin/system-logs/AdminAuditLogStatsCards';
 import { AdminAuditLogTable } from '@/components/admin/system-logs/AdminAuditLogTable';
-import { AdminSystemLogsHeader } from '@/components/admin/system-logs/AdminSystemLogsHeader';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
+import { Activity, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { PAGE_SIZE } from '@/components/admin/system-logs/auditLogConstants';
 import { useAdminAuditLogs } from '@/hooks/admin/useAdminAuditLogs';
 import type { AuditLogCategory, AuditLogOutcome } from '@/lib/admin/types';
@@ -67,14 +67,39 @@ export default function AdminSystemLogsPage() {
       </Helmet>
 
       <div dir='rtl' lang='ar'>
-        <AdminSystemLogsHeader />
-
-        <AdminAuditLogStatsCards
-          isLoading={isLoading}
-          total={total}
-          failCount={failCount}
-          denyCount={denyCount}
-          phiCount={phiCount}
+        <AdminDashboardOverview
+          variant='admin'
+          surface='mint'
+          title='سجلات النظام'
+          subtitle='مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي'
+          headerIcon={<Activity className='h-8 w-8 text-white' />}
+          kpiColumns={4}
+          kpis={[
+            {
+              key: 'total',
+              icon: <Activity className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : total.toLocaleString('ar-SA'),
+              label: 'إجمالي السجلات',
+            },
+            {
+              key: 'fail',
+              icon: <ShieldAlert className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : failCount,
+              label: 'إجراءات فاشلة',
+            },
+            {
+              key: 'deny',
+              icon: <Shield className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : denyCount,
+              label: 'محاولات مرفوضة',
+            },
+            {
+              key: 'phi',
+              icon: <ShieldCheck className='h-5 w-5 shrink-0' />,
+              value: isLoading ? '—' : phiCount,
+              label: 'وصول للبيانات الطبية',
+            },
+          ]}
         />
 
         <AdminAuditLogFilters
