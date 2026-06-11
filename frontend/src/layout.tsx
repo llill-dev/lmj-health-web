@@ -7,6 +7,10 @@ import { AnimatePresence } from 'framer-motion';
 
 import Sidebar from '@/components/layout/sidebar';
 import DashboardHeader from '@/components/doctor/dashboard-header';
+import {
+  PlatformFooter,
+  PlatformSupportProvider,
+} from '@/components/platform';
 import LogoutConfirmDialog, {
   type LogoutScope,
 } from '@/components/auth/logout-confirm-dialog';
@@ -78,42 +82,47 @@ export default function ProtectedLayout({
     )?.path ?? 'dashboard';
 
   return (
-    <div className='h-screen overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]'>
-      <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
-        <main className='flex h-screen flex-1 flex-col'>
-          <div className='sticky top-0 z-40'>
-            <DashboardHeader />
-          </div>
-          <div className='flex-1 overflow-y-auto bg-transparent py-8 scrollbar-hide'>
-            <MotionProvider>
-              <AnimatePresence mode='wait'>
-                <PageTransition key={pathname}>
-                  <div className='mx-auto w-full max-w-[1420px] px-12'>
-                    {children ?? <Outlet />}
-                  </div>
-                </PageTransition>
-              </AnimatePresence>
-            </MotionProvider>
-          </div>
-        </main>
+    <PlatformSupportProvider>
+      <div className='h-screen overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]'>
+        <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
+          <main className='flex h-screen flex-1 flex-col'>
+            <div className='sticky top-0 z-40'>
+              <DashboardHeader />
+            </div>
+            <div className='flex-1 overflow-y-auto bg-transparent py-8 scrollbar-hide'>
+              <MotionProvider>
+                <AnimatePresence mode='wait'>
+                  <PageTransition key={pathname}>
+                    <div className='mx-auto w-full max-w-[1420px] px-12'>
+                      {children ?? <Outlet />}
+                      {!pathname.startsWith('/doctor/support') ? (
+                        <PlatformFooter />
+                      ) : null}
+                    </div>
+                  </PageTransition>
+                </AnimatePresence>
+              </MotionProvider>
+            </div>
+          </main>
 
-        <Sidebar
-          active={active}
-          collapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed((value) => !value)}
-          onLogout={() => setLogoutConfirmOpen(true)}
-          profileName={doctorName}
-          profileEmail={doctorEmail}
-          profilePhotoUrl={doctorPhotoUrl}
+          <Sidebar
+            active={active}
+            collapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed((value) => !value)}
+            onLogout={() => setLogoutConfirmOpen(true)}
+            profileName={doctorName}
+            profileEmail={doctorEmail}
+            profilePhotoUrl={doctorPhotoUrl}
+          />
+        </div>
+
+        <LogoutConfirmDialog
+          open={logoutConfirmOpen}
+          onOpenChange={setLogoutConfirmOpen}
+          confirmDisabled={loggingOut}
+          onConfirm={performLogout}
         />
       </div>
-
-      <LogoutConfirmDialog
-        open={logoutConfirmOpen}
-        onOpenChange={setLogoutConfirmOpen}
-        confirmDisabled={loggingOut}
-        onConfirm={performLogout}
-      />
-    </div>
+    </PlatformSupportProvider>
   );
 }
