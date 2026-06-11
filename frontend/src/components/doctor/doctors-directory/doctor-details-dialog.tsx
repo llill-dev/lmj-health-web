@@ -22,8 +22,14 @@ export type DoctorCardItem = {
   rating: number;
   reviews: number;
   tags: string[];
-  price: number;
+  price: number | null;
   city: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string | null;
+  bio?: string;
+  clinicAddress?: string;
+  consultationTypes?: string[];
 };
 
 export default function DoctorDetailsDialog({
@@ -52,25 +58,28 @@ export default function DoctorDetailsDialog({
     };
   }, [open, onClose]);
 
+  const hasOnline = doctor?.tags.includes('أونلاين');
+  const hasOffline = doctor?.tags.includes('حضوري');
+
   return (
     <AnimatePresence>
       {open && doctor ? (
         <motion.div
-          key='overlay'
-          className='fixed inset-0 z-50 max-h-[752px] flex items-center justify-center bg-black/40 px-4'
+          key="overlay"
+          className="fixed inset-0 z-50 flex max-h-[752px] items-center justify-center bg-black/40 px-4"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
-          role='dialog'
-          aria-modal='true'
+          role="dialog"
+          aria-modal="true"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
         >
           <motion.div
-            key='panel'
-            className='relative w-full max-w-[512px] overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]'
+            key="panel"
+            className="relative max-h-[90vh] w-full max-w-[512px] overflow-y-auto rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
             initial={{ opacity: 0, y: 14, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 14, scale: 0.98 }}
@@ -78,139 +87,190 @@ export default function DoctorDetailsDialog({
             onMouseDown={(e) => e.stopPropagation()}
           >
             <button
-              type='button'
+              type="button"
               onClick={onClose}
-              className='absolute left-4 top-4 text-[#667085]'
-              aria-label='إغلاق'
+              className="absolute left-4 top-4 text-[#667085]"
+              aria-label="إغلاق"
             >
-              <X className='h-4 w-4' />
+              <X className="h-4 w-4" />
             </button>
 
-            <div className='px-7 pb-6 pt-6'>
-              <div className='text-right font-cairo text-[24px] font-bold text-[#101828]'>
+            <div className="px-7 pb-6 pt-6">
+              <div className="text-right font-cairo text-[24px] font-bold text-[#101828]">
                 تفاصيل الطبيب
               </div>
 
-              <div className='flex gap-[24px] mt-6'>
-                <div className='h-[128px] w-[128px] rounded-full border-[3.65px] border-[#C7F3F1] bg-[#F8FAFC]' />
-                <div className='flex gap-4 flex-1 flex-col items-start'>
-                  <div className='flex items-center gap-16'>
-                    <div className='font-cairo text-[20px] font-extrabold text-[#111827]'>
+              <div className="mt-6 flex gap-[24px]">
+                <div className="flex h-[128px] w-[128px] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3.65px] border-[#C7F3F1] bg-[#F8FAFC]">
+                  {doctor.photoUrl ? (
+                    <img
+                      src={doctor.photoUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="font-cairo text-[28px] font-extrabold text-[#98A2B3]">
+                      {doctor.name.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-1 flex-col items-start gap-4">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="font-cairo text-[20px] font-extrabold text-[#111827]">
                       {doctor.name}
                     </div>
-                    <span className='inline-flex h-[24px] items-center justify-center gap-2 rounded-full bg-[#00C950] px-4 font-cairo text-[11px] text-[#fff]'>
+                    <span className="inline-flex h-[24px] items-center justify-center gap-2 rounded-full bg-[#00C950] px-4 font-cairo text-[11px] text-[#fff]">
                       معتمد
-                      <CircleCheck className='h-4 w-4' />
+                      <CircleCheck className="h-4 w-4" />
                     </span>
                   </div>
-                  <div className='flex items-center justify-center gap-2 font-cairo text-[18px] font-semibold text-primary'>
-                    <Stethoscope className='h-5 w-5 text-primary' />
+                  <div className="flex items-center justify-center gap-2 font-cairo text-[18px] font-semibold text-primary">
+                    <Stethoscope className="h-5 w-5 text-primary" />
                     {doctor.specialty}
                   </div>
-                  <div className=' flex items-center justify-center gap-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                    <span className='flex items-center gap-2'>
+                  <div className="flex items-center justify-center gap-3 font-cairo text-[13px] font-extrabold text-[#111827]">
+                    <span className="flex items-center gap-2">
                       <Star
-                        className='h-5 w-5 text-[#FACC15]'
-                        fill='#FACC15'
+                        className="h-5 w-5 text-[#FACC15]"
+                        fill="#FACC15"
                       />
                       {doctor.rating.toFixed(1)}
                     </span>
-                    <span className='text-[#98A2B3] font-semibold'>
+                    <span className="font-semibold text-[#98A2B3]">
                       ({doctor.reviews} تقييم)
                     </span>
                   </div>
-                  <div className=' flex items-center justify-center gap-2'>
-                    <span className='flex h-[24px] w-[124px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-[#FFFFFF] px-2 font-cairo text-[12px] font-semibold text-primary'>
-                      <Video className='h-[12px] w-[12px]' />
-                      استشارة أونلاين
-                    </span>
-                    <span className='flex h-[24px] w-[124px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-primary px-2 font-cairo text-[12px] font-semibold text-[#E9FFFE]'>
-                      <Building className='h-[12px] w-[12px]' />
-                      استشارة حضورية
-                    </span>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {hasOnline ? (
+                      <span className="flex h-[24px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-[#FFFFFF] px-2 font-cairo text-[12px] font-semibold text-primary">
+                        <Video className="h-[12px] w-[12px]" />
+                        استشارة أونلاين
+                      </span>
+                    ) : null}
+                    {hasOffline ? (
+                      <span className="flex h-[24px] items-center justify-center gap-2 rounded-full border-[1.82px] border-primary bg-primary px-2 font-cairo text-[12px] font-semibold text-[#E9FFFE]">
+                        <Building className="h-[12px] w-[12px]" />
+                        استشارة حضورية
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               </div>
+
+              {doctor.bio ? (
+                <p className="mt-5 text-right font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
+                  {doctor.bio}
+                </p>
+              ) : null}
             </div>
 
-            <div className='h-px w-full bg-[#EEF2F6]' />
+            <div className="h-px w-full bg-[#EEF2F6]" />
 
-            <div className='px-7 py-6'>
-              <div className='grid grid-cols-2 gap-6'>
-                <div className='text-right'>
-                  <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+            <div className="px-7 py-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="text-right">
+                  <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                     البريد الإلكتروني
                   </div>
-                  <div className='mt-2 font-cairo text-[12px] font-bold text-[#111827]'>
-                    mona.abdullah@hospital.sa
+                  <div
+                    className="mt-2 font-cairo text-[12px] font-bold text-[#111827]"
+                    dir="ltr"
+                  >
+                    {doctor.email ?? '—'}
                   </div>
                 </div>
-                <div className='text-right'>
-                  <div className='flex gap-2 items-center'>
-                    <Phone className='h-4 w-4 text-primary' />
+                <div className="text-right">
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-primary" />
                     <div>
-                      <p className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+                      <p className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                         رقم الهاتف
                       </p>
-                      <p className='mt-1 flex items-center justify-end gap-2 font-cairo text-[12px] font-bold text-[#111827]'>
-                        +966507890123
+                      <p
+                        className="mt-1 font-cairo text-[12px] font-bold text-[#111827]"
+                        dir="ltr"
+                      >
+                        {doctor.phone ?? '—'}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className='flex mt-8 gap-2 items-center'>
-                <DollarSign className='h-5 w-5 text-[#16A34A]' />
-                <div>
-                  <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                    سعر الكشف
+              {doctor.price != null ? (
+                <div className="mt-8 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-[#16A34A]" />
+                  <div>
+                    <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
+                      سعر الكشف
+                    </div>
+                    <span className="font-cairo text-[16px] font-extrabold text-[#16A34A]">
+                      {doctor.price}
+                    </span>
                   </div>
-                  <span className='font-cairo text-[16px] font-extrabold text-[#16A34A]'>
-                    {doctor.price}
-                  </span>
                 </div>
-              </div>
+              ) : null}
             </div>
 
-            <div className='h-px w-full bg-[#EEF2F6]' />
+            <div className="h-px w-full bg-[#EEF2F6]" />
 
-            <div className='px-7 py-6'>
-              <div className='flex items-start justify-start gap-2'>
-                <MapPin className='h-5 w-5 text-primary' />
-                <div className='space-y-6'>
-                  <div className='font-cairo text-[16px] font-extrabold text-[#111827]'>
+            <div className="px-7 py-6">
+              <div className="flex items-start justify-start gap-2">
+                <MapPin className="h-5 w-5 shrink-0 text-primary" />
+                <div className="space-y-2">
+                  <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
                     موقع العيادة
                   </div>
-                  <div>
-                    <div className='text-right font-cairo text-[13px] font-semibold text-[#667085]'>
-                      شارع بغداد
+                  {doctor.clinicAddress ? (
+                    <div className="text-right font-cairo text-[13px] font-semibold text-[#667085]">
+                      {doctor.clinicAddress}
                     </div>
-                    <div className='text-right font-cairo text-[13px] font-semibold text-[#667085]'>
-                      دمشق، سوريا
-                    </div>
+                  ) : null}
+                  <div className="text-right font-cairo text-[13px] font-semibold text-[#667085]">
+                    {doctor.city}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className='grid grid-cols-2 gap-4 px-7 pb-6'>
-              <button
-                type='button'
-                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-white font-cairo text-[13px] font-extrabold text-primary'
-              >
-                <Mail className='h-4 w-4' />
-                إرسال رسالة
-              </button>
+            <div className="grid grid-cols-2 gap-4 px-7 pb-6">
+              {doctor.email ? (
+                <a
+                  href={`mailto:${doctor.email}`}
+                  className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-primary bg-white font-cairo text-[13px] font-extrabold text-primary"
+                >
+                  <Mail className="h-4 w-4" />
+                  إرسال رسالة
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[13px] font-extrabold text-[#98A2B3]"
+                >
+                  <Mail className="h-4 w-4" />
+                  إرسال رسالة
+                </button>
+              )}
 
-              <button
-                type='button'
-                className='flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[13px] font-extrabold text-white'
-              >
-                <Phone className='h-4 w-4' />
-                اتصال
-              </button>
-              
+              {doctor.phone ? (
+                <a
+                  href={`tel:${doctor.phone}`}
+                  className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[13px] font-extrabold text-white"
+                >
+                  <Phone className="h-4 w-4" />
+                  اتصال
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="flex h-[46px] items-center justify-center gap-2 rounded-[6px] bg-[#E5E7EB] font-cairo text-[13px] font-extrabold text-[#98A2B3]"
+                >
+                  <Phone className="h-4 w-4" />
+                  اتصال
+                </button>
+              )}
             </div>
           </motion.div>
         </motion.div>

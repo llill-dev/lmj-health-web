@@ -18,6 +18,7 @@ import { useAppointments, useDashboardStats, useDoctorAppointmentsApi, useDoctor
 import ActiveConsultationsSection from '@/components/doctor/dashboard/active-consultations-section';
 import ConsultationsWaitingSection from '@/components/doctor/dashboard/consultations-waiting-section';
 import QuickActionsSection from '@/components/doctor/dashboard/quick-actions-section';
+import { DoctorDashboardSkeleton } from '@/components/doctor/shared/skeletons';
 
 type KpiCard = {
   key: string;
@@ -130,6 +131,12 @@ export default function HomeDoctor() {
     void refetchApiAppointments();
     void refetchMockAppointments();
   };
+
+  const isInitialLoading = statsLoading || snapshotLoading;
+
+  if (isInitialLoading) {
+    return <DoctorDashboardSkeleton />;
+  }
 
   if (statsError || appointmentsError || snapshotError) {
     return (
