@@ -6,7 +6,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { DoctorSpecializationReviewBanner } from '@/components/admin/verification-requests/DoctorSpecializationReviewBanner';
+import { useAdminLookups } from '@/hooks/admin/useAdminLookups';
 import { adminApi } from '@/lib/admin/client';
+import { resolveDoctorSpecialtyLookupCategory } from '@/lib/admin/doctorSpecialtyLookupCategory';
+import {
+  buildDoctorSpecializationLookupOptions,
+  findDoctorSpecializationLookupId,
+  resolveDoctorSpecializationReviewState,
+} from '@/lib/admin/doctorSpecializationReview';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
 
@@ -37,6 +45,7 @@ export default function ReviewVerificationRequestDialog({
   onReviewed,
   requestId,
   doctorName,
+  doctorProfile,
   lat,
   lng,
   mode,
@@ -46,6 +55,7 @@ export default function ReviewVerificationRequestDialog({
   onReviewed?: () => void | Promise<void>;
   requestId: string | null;
   doctorName: string;
+  doctorProfile?: Record<string, unknown> | null;
   lat?: string;
   lng?: string;
   mode: Mode;
@@ -53,6 +63,28 @@ export default function ReviewVerificationRequestDialog({
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [specializationLookupId, setSpecializationLookupId] = useState('');
+  const [createNewSpecialization, setCreateNewSpecialization] = useState(false);
+  const [newSpecializationKey, setNewSpecializationKey] = useState('');
+  const [newSpecializationTextAr, setNewSpecializationTextAr] = useState('');
+  const [newSpecializationTextEn, setNewSpecializationTextEn] = useState('');
+
+  const specializationState = useMemo(
+    () => resolveDoctorSpecializationReviewState(doctorProfile),
+    [doctorProfile],
+  );
+
+  const lookupCategory = resolveDoctorSpecialtyLookupCategory();
+  const lookupsQuery = useAdminLookups({
+    category: lookupCategory,
+    includeInactive: false,
+  });
+
+  const lookupOptions = useMemo(
+    () =>
+      buildDoctorSpecializationLookupOptions(lookupsQuery.data?.lookups ?? []),
+    [lookupsQuery.data?.lookups],
+  );
 
   const schema = useMemo(() => {
     if (mode === 'reject') return rejectSchema;
@@ -81,9 +113,31 @@ export default function ReviewVerificationRequestDialog({
   });
 
   useEffect(() => {
+    if (!open || mode !== 'approve') return;
+    const autoId = findDoctorSpecializationLookupId(
+      lookupsQuery.data?.lookups ?? [],
+      specializationState.specializationKey,
+    );
+    if (autoId) {
+      setSpecializationLookupId(autoId);
+    } else if (specializationState.customSpecializationText) {
+      setNewSpecializationTextAr(specializationState.customSpecializationText);
+    }
+  }, [
+    open,
+    mode,
+    lookupsQuery.data?.lookups,
+    specializationState.specializationKey,
+    specializationState.customSpecializationText,
+  ]);
+
+  useEffect(() => {
     if (!open) return;
     setError(null);
     setDone(null);
+    setCreateNewSpecialization(false);
+    setNewSpecializationKey('');
+    setNewSpecializationTextEn('');
 
     const prevOverflow = document.body.style.overflow;
     const prevPaddingRight = document.body.style.paddingRight;
@@ -101,6 +155,16 @@ export default function ReviewVerificationRequestDialog({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (open) return;
+    reset();
+    setSpecializationLookupId('');
+    setCreateNewSpecialization(false);
+    setNewSpecializationKey('');
+    setNewSpecializationTextAr('');
+    setNewSpecializationTextEn('');
+  }, [open, reset]);
+
   const title =
     mode === 'approve'
       ? 'قبول طلب التحقق'
@@ -111,19 +175,88 @@ export default function ReviewVerificationRequestDialog({
   const Icon =
     mode === 'approve' ? CheckCheck : mode === 'reject' ? X : MapPin;
 
+  const approveBlocked =
+    mode === 'approve' &&
+    specializationState.needsAdminResolve &&
+    !createNewSpecialization &&
+    !specializationLookupId;
+
+  const submitApprove = async (values: {
+    adminNote: string;
+    clinicLat?: number;
+    clinicLng?: number;
+    verifyLocation?: boolean;
+  }) => {
+    if (!requestId) return;
+
+    let specializationPayload:
+      | { specializationLookupId: string }
+      | {
+          newSpecialization: {
+            key: string;
+            text: { ar: string; en?: string };
+          };
+        }
+      | null = null;
+
+    if (createNewSpecialization) {
+      const key = newSpecializationKey.trim();
+      const textAr = newSpecializationTextAr.trim();
+      if (!key || !textAr) {
+        setError('أدخل مفتاح التخصص (إنجليزي) والاسم العربي لإنشاء تخصص جديد.');
+        return;
+      }
+      specializationPayload = {
+        newSpecialization: {
+          key,
+          text: {
+            ar: textAr,
+            en: newSpecializationTextEn.trim() || undefined,
+          },
+        },
+      };
+    } else if (specializationLookupId) {
+      specializationPayload = { specializationLookupId };
+    } else if (specializationState.needsAdminResolve) {
+      setError(
+        'يجب اختيار تخصص مُدار من القائمة أو إنشاء تخصص جديد قبل الموافقة.',
+      );
+      return;
+    }
+
+    await adminApi.verificationRequests.review(requestId, {
+      decision: 'approved',
+      adminNote: values.adminNote,
+      clinicLat: values.clinicLat,
+      clinicLng: values.clinicLng,
+      verifyLocation:
+        typeof values.verifyLocation === 'boolean'
+          ? values.verifyLocation
+          : true,
+      ...(specializationPayload ?? {}),
+    });
+
+    setDone('تم قبول الطلب بنجاح');
+    toast(
+      `تم قبول طلب التحقق للطبيب «${doctorName}». يمكنه الآن استكمال المسار وفق سياسات المنصة.`,
+      {
+        title: 'تم قبول الطبيب',
+        variant: 'success',
+        durationMs: 4200,
+      },
+    );
+    await onReviewed?.();
+  };
+
   return (
     <Dialog.Root
       open={open}
       onOpenChange={(next) => {
         onOpenChange(next);
-        if (!next) reset();
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay
-          forceMount
-          asChild
-        >
+        <Dialog.Overlay forceMount asChild>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
@@ -146,10 +279,7 @@ export default function ReviewVerificationRequestDialog({
           />
         </Dialog.Overlay>
 
-        <Dialog.Content
-          forceMount
-          asChild
-        >
+        <Dialog.Content forceMount asChild>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
@@ -167,7 +297,7 @@ export default function ReviewVerificationRequestDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed left-1/2 top-1/2 z-[10000] max-h-[90vh] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             dir='rtl'
             lang='ar'
           >
@@ -198,6 +328,12 @@ export default function ReviewVerificationRequestDialog({
                 </div>
               </div>
 
+              {mode === 'approve' ? (
+                <div className='mt-4'>
+                  <DoctorSpecializationReviewBanner state={specializationState} />
+                </div>
+              ) : null}
+
               {mode === 'map' ? (
                 <div className='mt-5 rounded-[12px] border border-[#D1E9FF] bg-[#EFF6FF] px-5 py-5'>
                   <div className='font-cairo text-[12px] font-bold text-[#1D4ED8]'>
@@ -216,47 +352,132 @@ export default function ReviewVerificationRequestDialog({
                     if (!requestId) return;
                     try {
                       if (mode === 'approve') {
-                        await adminApi.verificationRequests.review(requestId, {
-                          decision: 'approved',
-                          adminNote: values.adminNote,
-                          clinicLat: values.clinicLat,
-                          clinicLng: values.clinicLng,
-                          verifyLocation:
-                            typeof values.verifyLocation === 'boolean'
-                              ? values.verifyLocation
-                              : true,
-                        });
-                        setDone('تم قبول الطلب بنجاح');
-                        toast(
-                          `تم قبول طلب التحقق للطبيب «${doctorName}». يمكنه الآن استكمال المسار وفق سياسات المنصة.`,
-                          {
-                            title: 'تم قبول الطبيب',
-                            variant: 'success',
-                            durationMs: 4200,
-                          },
-                        );
-                        await onReviewed?.();
-                      } else {
-                        await adminApi.verificationRequests.review(requestId, {
-                          decision: 'rejected',
-                          adminNote: values.adminNote,
-                        });
-                        setDone('تم رفض الطلب');
-                        toast(
-                          `تم رفض طلب التحقق للطبيب «${doctorName}». أُبلغ الفريق أو الطبيب وفق آلية الإشعارات.`,
-                          {
-                            title: 'تم الرفض',
-                            variant: 'info',
-                            durationMs: 4200,
-                          },
-                        );
-                        await onReviewed?.();
+                        await submitApprove(values);
+                        return;
                       }
+
+                      await adminApi.verificationRequests.review(requestId, {
+                        decision: 'rejected',
+                        adminNote: values.adminNote,
+                      });
+                      setDone('تم رفض الطلب');
+                      toast(
+                        `تم رفض طلب التحقق للطبيب «${doctorName}». أُبلغ الفريق أو الطبيب وفق آلية الإشعارات.`,
+                        {
+                          title: 'تم الرفض',
+                          variant: 'info',
+                          durationMs: 4200,
+                        },
+                      );
+                      await onReviewed?.();
                     } catch (e: unknown) {
                       setError(userFacingErrorMessage(e, 'فشل تنفيذ العملية'));
                     }
                   })}
                 >
+                  {mode === 'approve' ? (
+                    <div className='space-y-4 rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-4'>
+                      <div className='text-right font-cairo text-[13px] font-extrabold text-[#101828]'>
+                        ربط التخصص قبل الموافقة
+                      </div>
+
+                      <label className='flex items-center justify-start gap-2'>
+                        <input
+                          type='checkbox'
+                          checked={createNewSpecialization}
+                          onChange={(event) => {
+                            setCreateNewSpecialization(event.target.checked);
+                            setError(null);
+                          }}
+                        />
+                        <span className='font-cairo text-[12px] font-bold text-[#344054]'>
+                          إنشاء تخصص جديد بدلاً من اختيار موجود
+                        </span>
+                      </label>
+
+                      {createNewSpecialization ? (
+                        <div className='space-y-3'>
+                          <div>
+                            <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]'>
+                              مفتاح التخصص (إنجليزي)
+                              <span className='ms-1 text-[#F04438]'>*</span>
+                            </div>
+                            <input
+                              value={newSpecializationKey}
+                              onChange={(event) =>
+                                setNewSpecializationKey(event.target.value)
+                              }
+                              placeholder='dentistry'
+                              className='h-[42px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3]'
+                            />
+                          </div>
+                          <div>
+                            <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]'>
+                              الاسم بالعربية
+                              <span className='ms-1 text-[#F04438]'>*</span>
+                            </div>
+                            <input
+                              value={newSpecializationTextAr}
+                              onChange={(event) =>
+                                setNewSpecializationTextAr(event.target.value)
+                              }
+                              placeholder='طب الأسنان'
+                              className='h-[42px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3]'
+                            />
+                          </div>
+                          <div>
+                            <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]'>
+                              الاسم بالإنجليزية (اختياري)
+                            </div>
+                            <input
+                              value={newSpecializationTextEn}
+                              onChange={(event) =>
+                                setNewSpecializationTextEn(event.target.value)
+                              }
+                              placeholder='Dentistry'
+                              className='h-[42px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3]'
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]'>
+                            اختر تخصصاً من القائمة
+                            {specializationState.needsAdminResolve ? (
+                              <span className='ms-1 text-[#F04438]'>*</span>
+                            ) : null}
+                          </div>
+                          <select
+                            value={specializationLookupId}
+                            onChange={(event) => {
+                              setSpecializationLookupId(event.target.value);
+                              setError(null);
+                            }}
+                            disabled={lookupsQuery.isLoading}
+                            className='h-[42px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-semibold text-[#101828] outline-none disabled:opacity-60'
+                          >
+                            <option value=''>
+                              {lookupsQuery.isLoading
+                                ? 'جارٍ تحميل التخصصات…'
+                                : '— اختر التخصص —'}
+                            </option>
+                            {lookupOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          {lookupsQuery.isError ? (
+                            <p className='mt-2 font-cairo text-[11px] font-semibold text-[#B45309]'>
+                              تعذّر تحميل قائمة التخصصات. يمكنك إنشاء تخصص
+                              جديد أو إعادة فتح النافذة.
+                            </p>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+
                   <div>
                     <div className='mb-2 text-right font-cairo text-[13px] font-extrabold text-[#101828]'>
                       ملاحظة الإدارة:
@@ -334,7 +555,9 @@ export default function ReviewVerificationRequestDialog({
                     </Dialog.Close>
                     <button
                       type='submit'
-                      disabled={isSubmitting || !requestId}
+                      disabled={
+                        isSubmitting || !requestId || approveBlocked
+                      }
                       className={
                         mode === 'approve'
                           ? 'inline-flex h-[40px] items-center gap-2 rounded-[10px] bg-[#00C950] px-7 font-cairo text-[12px] font-extrabold text-white disabled:opacity-60'
@@ -358,4 +581,3 @@ export default function ReviewVerificationRequestDialog({
     </Dialog.Root>
   );
 }
-

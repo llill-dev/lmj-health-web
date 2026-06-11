@@ -150,12 +150,24 @@ export type AdminPatientAccountActionResponse = ApiSuccessEnvelope & {
 
 export type VerificationRequestReviewDecision = 'approved' | 'rejected';
 
+export type VerificationRequestNewSpecializationBody = {
+  key: string;
+  text: {
+    en?: string;
+    ar?: string;
+  };
+};
+
 export type VerificationRequestReviewBody = {
   decision: VerificationRequestReviewDecision;
   adminNote?: string | null;
   clinicLat?: number;
   clinicLng?: number;
   verifyLocation?: boolean;
+  /** ربط تخصص مخصص معلّق بتخصص مُدار (API-3). */
+  specializationLookupId?: string;
+  /** إنشاء تخصص lookup جديد وربطه فوراً (API-3). */
+  newSpecialization?: VerificationRequestNewSpecializationBody;
 };
 
 export type AuditLogCategory =
@@ -281,6 +293,10 @@ export type VerificationRequestSummary = {
   doctor?: {
     _id: string;
     specialization?: string;
+    specializationKey?: string | null;
+    customSpecializationText?: string | null;
+    customSpecializationPending?: boolean;
+    customSpecializationStatus?: string | null;
     medicalLicenseNumber?: string;
     clinicAddress?: string;
     locationCity?: string;
@@ -475,6 +491,10 @@ export type AdminSecretariesListResponse = ApiSuccessEnvelope & {
 export type AdminDoctorDetailsDoctor = {
   _id: string;
   specialization?: string;
+  specializationKey?: string | null;
+  customSpecializationText?: string | null;
+  customSpecializationPending?: boolean;
+  customSpecializationStatus?: string | null;
   medicalLicenseNumber?: string;
   education?: string;
   bio?: string;
