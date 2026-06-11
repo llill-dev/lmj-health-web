@@ -16,12 +16,23 @@ import {
   buildProfileFieldRows,
   parseExperienceYears,
 } from '@/components/doctor/profile-settings/doctor-profile-utils';
-import { useDoctorHomeSnapshot, useDoctorProfile } from '@/hooks';
+import {
+  useDoctorHomeSnapshot,
+  useDoctorProfile,
+  useDoctorSelfRating,
+} from '@/hooks';
 
 export default function DoctorProfileSettingsPage() {
   const navigate = useNavigate();
   const profileQuery = useDoctorProfile();
   const snapshotQuery = useDoctorHomeSnapshot();
+  const ratingQuery = useDoctorSelfRating({
+    doctorId: profileQuery.data?.doctor?._id,
+    searchHint:
+      profileQuery.data?.doctor?.user?.email ??
+      profileQuery.data?.doctor?.user?.phone ??
+      null,
+  });
   const {
     confirmKind,
     confirmOpen,
@@ -44,6 +55,10 @@ export default function DoctorProfileSettingsPage() {
   const consultationsCount =
     snapshotQuery.data?.snapshot?.counts?.consultations ?? 0;
   const experienceYears = parseExperienceYears(doctor.bio);
+  const ratingValue =
+    ratingQuery.data?.averageRating != null
+      ? ratingQuery.data.averageRating.toFixed(1)
+      : '—';
 
   return (
     <>
@@ -73,7 +88,7 @@ export default function DoctorProfileSettingsPage() {
             },
             {
               key: 'rating',
-              value: '—',
+              value: ratingValue,
               label: 'التقييم',
             },
           ]}

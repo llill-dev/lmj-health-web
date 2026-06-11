@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { ClipboardList, Loader2, Plus, Stethoscope } from "lucide-react";
+import { ClipboardList, Plus, Stethoscope } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
@@ -19,6 +19,7 @@ import {
   type MedicalVisitStatusFilter,
 } from "@/components/doctor/encounters";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorExpandableCardSkeleton } from "@/components/doctor/shared/skeletons";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import {
   useCloseDoctorPatientEncounter,
@@ -265,15 +266,8 @@ export default function DoctorEncountersPage() {
         />
 
         {isLoading ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex min-h-[280px] items-center justify-center rounded-[16px] border border-dashed border-[#E2E8F0] bg-white"
-          >
-            <Loader2
-              className="h-8 w-8 animate-spin text-primary"
-              aria-label="جارٍ التحميل"
-            />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <DoctorExpandableCardSkeleton count={5} />
           </motion.div>
         ) : isError ? (
           <DoctorListErrorState

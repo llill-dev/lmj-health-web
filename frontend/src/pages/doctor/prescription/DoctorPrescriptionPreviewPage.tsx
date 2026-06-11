@@ -9,6 +9,7 @@ import {
 } from '@/components/doctor/prescription/preview';
 import DoctorPrescriptionHubPage from '@/pages/doctor/prescription/DoctorPrescriptionHubPage';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { DoctorDocumentPreviewSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   useEncounterPrescriptionWorkspace,
@@ -90,9 +91,7 @@ export default function DoctorPrescriptionPreviewPage() {
         />
 
         {preview.isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-[16px] border border-dashed border-[#E2E8F0] bg-white font-cairo text-[14px] font-semibold text-[#667085]">
-            جارٍ تحميل معاينة الوصفة...
-          </div>
+          <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
             title="تعذّر تحميل معاينة الوصفة"

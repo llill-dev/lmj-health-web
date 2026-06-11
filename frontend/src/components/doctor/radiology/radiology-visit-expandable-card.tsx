@@ -7,6 +7,7 @@ import {
   ScanLine,
   UserRound,
 } from 'lucide-react';
+import { DoctorInlineDetailsSkeleton } from '@/components/doctor/shared/skeletons';
 import { cn } from '@/lib/utils/utils';
 import {
   ENCOUNTERS_EXPAND_CONTENT_ITEM,
@@ -153,12 +154,9 @@ export function RadiologyVisitExpandableCard({
               className="space-y-4 border-t border-[#E2E8F0]/80 px-4 py-5 sm:px-5"
             >
               {detailsLoading ? (
-                <motion.p
-                  variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                  className="font-cairo text-[13px] font-bold text-primary"
-                >
-                  جارٍ تحميل تفاصيل الطلب...
-                </motion.p>
+                <motion.div variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}>
+                  <DoctorInlineDetailsSkeleton rows={3} />
+                </motion.div>
               ) : null}
               {detailsError ? (
                 <motion.p

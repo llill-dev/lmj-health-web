@@ -14,6 +14,7 @@ import {
   ENCOUNTERS_LIST_STAGGER,
 } from '@/components/doctor/encounters/encounters-motion';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { DoctorExpandableCardSkeleton } from '@/components/doctor/shared/skeletons';
 import {
   useDoctorMedicalEncountersPage,
   useEncounterRadiologyWorkspace,
@@ -96,11 +97,7 @@ export default function DoctorRadiologyHubPage() {
   let listContent: ReactNode;
 
   if (isLoading) {
-    listContent = (
-      <div className="rounded-[12px] border border-dashed border-[#E2E8F0] bg-white py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        جارٍ تحميل الزيارات...
-      </div>
-    );
+    listContent = <DoctorExpandableCardSkeleton count={4} />;
   } else if (isError) {
     listContent = (
       <DoctorListErrorState

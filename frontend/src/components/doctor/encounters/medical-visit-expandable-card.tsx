@@ -12,6 +12,7 @@ import {
   Stethoscope,
   UserRound,
 } from "lucide-react";
+import { DoctorInlineDetailsSkeleton } from "@/components/doctor/shared/skeletons";
 import { cn } from "@/lib/utils/utils";
 import {
   ENCOUNTERS_EXPAND_CONTENT_ITEM,
@@ -261,11 +262,8 @@ export function MedicalVisitExpandableCard({
               </motion.div>
 
               {detailsLoading ? (
-                <motion.div
-                  variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                  className="rounded-[12px] border border-dashed border-primary/30 bg-[#F8FFFE] px-4 py-3 text-right font-cairo text-[13px] font-bold text-primary"
-                >
-                  جارٍ تحميل تفاصيل الزيارة...
+                <motion.div variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}>
+                  <DoctorInlineDetailsSkeleton rows={4} />
                 </motion.div>
               ) : null}
 

@@ -11,6 +11,7 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { DoctorNotificationListSkeleton } from '@/components/doctor/shared/skeletons';
 import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
 import type { AdminNotificationKind } from '@/components/admin/notifications/types';
 import { useDoctorNotificationsPage } from '@/hooks';
@@ -129,10 +130,7 @@ export default function DoctorNotificationPage() {
 
         <section className='mt-5 space-y-4'>
           {listQuery.isLoading ? (
-            <div className='flex items-center justify-center gap-2 rounded-[14px] border border-[#E5E7EB] bg-white py-16 font-cairo text-[13px] font-semibold text-[#667085]'>
-              <Loader2 className='h-5 w-5 animate-spin text-primary' />
-              جاري تحميل الإشعارات…
-            </div>
+            <DoctorNotificationListSkeleton rows={6} />
           ) : listQuery.isError ? (
             <div className='rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>
               تعذّر تحميل الإشعارات. حاول تحديث الصفحة.

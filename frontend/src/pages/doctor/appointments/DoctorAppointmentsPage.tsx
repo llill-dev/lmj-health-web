@@ -21,6 +21,7 @@ import BookAppointmentDialog from "@/components/doctor/appointments/book-appoint
 import DoctorAppointmentExpandableCard from "@/components/doctor/appointments/doctor-appointment-expandable-card";
 import AppointmentsEmptyState from "@/components/doctor/appointments/appointments-empty-state";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorExpandableCardSkeleton } from "@/components/doctor/shared/skeletons";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import CancelAppointmentDialog from "@/components/admin/appointments/dialogs/CancelAppointmentDialog";
 import CompleteOrReasonDialog from "@/components/doctor/appointments/cancel-appointment-dialog";
@@ -1003,17 +1004,7 @@ export default function DoctorAppointmentsPage() {
                   </div>
                 </div>
               ) : appointmentsListPending ? (
-                <div
-                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 py-12"
-                  role="status"
-                  aria-busy="true"
-                  aria-live="polite"
-                >
-                  <Loader2 className="h-9 w-9 animate-spin text-primary" />
-                  <p className="font-cairo text-[14px] font-semibold text-[#667085]">
-                    جارٍ تحميل المواعيد...
-                  </p>
-                </div>
+                <DoctorExpandableCardSkeleton count={5} />
               ) : listQuery.total === 0 ? (
                 <AppointmentsEmptyState onBookClick={handleBookingAction} />
               ) : visibleAppointments.length === 0 ? (

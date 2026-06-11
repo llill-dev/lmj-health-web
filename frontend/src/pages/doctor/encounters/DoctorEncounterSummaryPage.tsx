@@ -8,6 +8,7 @@ import {
   EncounterSummaryHeader,
 } from '@/components/doctor/encounters/summary';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { DoctorSummaryPageSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useDoctorEncounterSummary } from '@/hooks/doctor';
 import { readAuthUser } from '@/lib/cookies';
@@ -97,9 +98,7 @@ export default function DoctorEncounterSummaryPage() {
         <EncounterSummaryHeader />
 
         {isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-[16px] border border-dashed border-[#E2E8F0] bg-white font-cairo text-[14px] font-semibold text-[#667085]">
-            جارٍ تحميل ملخص الزيارة من السيرفر...
-          </div>
+          <DoctorSummaryPageSkeleton />
         ) : isError || !summary || !encounter ? (
           <DoctorListErrorState
             title="تعذّر تحميل ملخص الزيارة"

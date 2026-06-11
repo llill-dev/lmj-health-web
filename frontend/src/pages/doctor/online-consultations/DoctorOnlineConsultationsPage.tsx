@@ -12,9 +12,14 @@ import {
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import {
+  DoctorExpandableCardSkeleton,
+  DoctorInlineDetailsSkeleton,
+} from '@/components/doctor/shared/skeletons';
 import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
+  useConsultationClinicalNavigation,
   useConsultationsList,
   useConsultationDetails,
   useMarkConsultationRead,
@@ -248,6 +253,20 @@ export default function DoctorOnlineConsultationsPage() {
     Boolean(expandedId) &&
     !sendMessage.isPending;
 
+  const clinicalNavigation = useConsultationClinicalNavigation({
+    doctorId,
+    patientId: activePatientId,
+    consultationId: expandedId ?? '',
+    consultationSubject: active?.title ?? detailsQuery.data?.ticket?.subject,
+    returnTo: '/doctor/online-consultations',
+    onError: (message) => {
+      toast(message, {
+        title: 'تعذّر فتح الأداة السريرية',
+        variant: 'error',
+      });
+    },
+  });
+
   useEffect(() => {
     if (!expandedId) return;
     if (!visibleConsultations.some((c) => c.id === expandedId)) {
@@ -395,9 +414,8 @@ export default function DoctorOnlineConsultationsPage() {
         </section>
 
         {listQuery.isLoading ? (
-          <div className="mt-6 flex items-center justify-center gap-2 rounded-[14px] border border-[#E5E7EB] bg-white py-16 font-cairo text-[13px] font-semibold text-[#667085]">
-            <Loader2 className="w-5 h-5 animate-spin text-primary" />
-            جاري تحميل الاستشارات…
+          <div className="mt-6">
+            <DoctorExpandableCardSkeleton count={4} expanded />
           </div>
         ) : listQuery.isError ? (
           <div className="mt-6 rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
@@ -543,10 +561,7 @@ export default function DoctorOnlineConsultationsPage() {
 
                                 <div className="mt-3 space-y-3">
                                   {detailsQuery.isLoading ? (
-                                    <div className="flex items-center justify-center gap-2 py-8 font-cairo text-[12px] font-semibold text-[#667085]">
-                                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                                      جاري تحميل الرسائل…
-                                    </div>
+                                    <DoctorInlineDetailsSkeleton rows={5} />
                                   ) : null}
                                   {activeMessages.map((m) => {
                                     const isSelected = selectedMessageId === m.id;
@@ -603,6 +618,14 @@ export default function DoctorOnlineConsultationsPage() {
                               <motion.div variants={CONSULTATIONS_EXPAND_CONTENT_ITEM}>
                                 <ConsultationReplyPanel
                                   patientId={activePatientId}
+                                  clinicalActionsEnabled={
+                                    canReply &&
+                                    Boolean(doctorId) &&
+                                    Boolean(activePatientId) &&
+                                    Boolean(expandedId)
+                                  }
+                                  busyClinicalAction={clinicalNavigation.busyAction}
+                                  onClinicalAction={clinicalNavigation.openClinicalAction}
                                   disabled={!canReply}
                                   draft={draft}
                                   onDraftChange={setDraft}

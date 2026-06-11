@@ -9,6 +9,7 @@ import {
 } from '@/components/doctor/radiology/preview';
 import DoctorRadiologyHubPage from '@/pages/doctor/radiology/DoctorRadiologyHubPage';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { DoctorDocumentPreviewSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   useEncounterRadiologyWorkspace,
@@ -87,9 +88,7 @@ export default function DoctorRadiologyPreviewPage() {
         />
 
         {preview.isLoading ? (
-          <div className="flex min-h-[280px] items-center justify-center rounded-[16px] border border-dashed border-[#E2E8F0] bg-white font-cairo text-[14px] font-semibold text-[#667085]">
-            جارٍ تحميل المعاينة...
-          </div>
+          <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
             title="تعذّر تحميل المعاينة"

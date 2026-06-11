@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   ArrowLeft,
@@ -49,6 +49,10 @@ export default function SignUpStep3Professional({
   const hasSpecialtyCatalog =
     !specialtiesError && !specialtiesLoading && specialties.length > 0;
 
+  const [specialtyInputMode, setSpecialtyInputMode] = useState<'catalog' | 'manual'>(
+    () => (defaultValues?.specialtySource === 'manual' ? 'manual' : 'catalog'),
+  );
+
   const {
     register,
     control,
@@ -69,18 +73,21 @@ export default function SignUpStep3Professional({
   });
 
   useEffect(() => {
-    const fromCatalog =
-      !specialtiesError && !specialtiesLoading && specialties.length > 0;
-    setValue('specialtySource', fromCatalog ? 'catalog' : 'manual', {
+    if (specialtyInputMode === 'manual' || !hasSpecialtyCatalog) {
+      setValue('specialtySource', 'manual', {
+        shouldValidate: false,
+        shouldDirty: false,
+      });
+      return;
+    }
+    setValue('specialtySource', 'catalog', {
       shouldValidate: false,
       shouldDirty: false,
     });
-  }, [
-    specialtiesError,
-    specialtiesLoading,
-    specialties.length,
-    setValue,
-  ]);
+  }, [hasSpecialtyCatalog, specialtyInputMode, setValue]);
+
+  const useCatalogSpecialty =
+    hasSpecialtyCatalog && specialtyInputMode === 'catalog';
 
   return (
     <>
@@ -95,10 +102,8 @@ export default function SignUpStep3Professional({
           <button
             type='button'
             onClick={() => {
-              const fromCatalog =
-                !specialtiesError &&
-                !specialtiesLoading &&
-                specialties.length > 0;
+              const fromCatalog = hasSpecialtyCatalog;
+              setSpecialtyInputMode(fromCatalog ? 'catalog' : 'manual');
               setValue('specialtySource', fromCatalog ? 'catalog' : 'manual', {
                 shouldDirty: true,
               });
@@ -184,38 +189,97 @@ export default function SignUpStep3Professional({
                 />
                 <Loader2 className='pointer-events-none absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 animate-spin text-primary' />
               </div>
-            ) : hasSpecialtyCatalog ? (
-              <Controller
-                name='specialty'
-                control={control}
-                render={({ field }) => (
-                  <StyledSelect
-                    className='mt-2'
-                    options={specialties.map((opt) => ({
-                      value: opt.value,
-                      label: opt.labelAr,
-                    }))}
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    placeholder='اختر التخصص'
-                    listboxAriaLabel='اختيار التخصص'
-                  />
-                )}
-              />
+            ) : useCatalogSpecialty ? (
+              <>
+                <Controller
+                  name='specialty'
+                  control={control}
+                  render={({ field }) => (
+                    <StyledSelect
+                      className='mt-2'
+                      options={specialties.map((opt) => ({
+                        value: opt.value,
+                        label: opt.labelAr,
+                      }))}
+                      value={field.value}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        setValue('specialtySource', 'catalog', {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                      onBlur={field.onBlur}
+                      placeholder='اختر التخصص'
+                      listboxAriaLabel='اختيار التخصص'
+                    />
+                  )}
+                />
+                <button
+                  type='button'
+                  onClick={() => {
+                    setSpecialtyInputMode('manual');
+                    setValue('specialty', '', { shouldDirty: true });
+                    setValue('specialtySource', 'manual', {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
+                  }}
+                  className='mt-2 font-cairo text-[12px] font-bold text-primary underline-offset-2 hover:underline'
+                >
+                  تخصصي غير موجود؟ أدخله يدوياً
+                </button>
+                <p className='mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+                  وفق API: الاختيار من القائمة يُرسل{' '}
+                  <span className='font-bold'>specializationKey</span> ويُقبل
+                  مباشرة بعد موافقة الإدارة.
+                </p>
+              </>
             ) : (
               <>
-                {!specialtiesError && (
+                {!specialtiesError && !hasSpecialtyCatalog && (
                   <p className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                    الخادم أعاد قائمة فارغة (لا توجد تخصصات نشطة ضمن تصنيف DOCTOR_SPECIALIZATION)، فزِر الإدارة → إعدادات lookups لإضافتها. يمكنك المتابعة بإدخال يدوي؛ يُرسَل كنصّ مخصَّص وفق وثيقة الـ API.
+                    الخادم أعاد قائمة فارغة (لا توجد تخصصات نشطة ضمن تصنيف
+                    DOCTOR_SPECIALIZATION)، فزِر الإدارة → إعدادات lookups
+                    لإضافتها. يمكنك المتابعة بإدخال يدوي؛ يُرسَل كنصّ مخصَّص
+                    وفق وثيقة الـ API.
                   </p>
                 )}
                 <input
                   type='text'
                   placeholder='مثال: طب الأسنان، تقويم الأسنان، جراحة الفم'
-                  {...register('specialty')}
+                  {...register('specialty', {
+                    onChange: (event) => {
+                      void register('specialty').onChange(event);
+                      setValue('specialtySource', 'manual', {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    },
+                  })}
                   className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
                 />
+                {hasSpecialtyCatalog ? (
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setSpecialtyInputMode('catalog');
+                      setValue('specialty', '', { shouldDirty: true });
+                      setValue('specialtySource', 'catalog', {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }}
+                    className='mt-2 font-cairo text-[12px] font-bold text-primary underline-offset-2 hover:underline'
+                  >
+                    العودة لاختيار التخصص من القائمة
+                  </button>
+                ) : null}
+                <p className='mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+                  الإدخال اليدوي يُرسل{' '}
+                  <span className='font-bold'>customSpecializationText</span>
+                  ويبقى معلّقاً حتى يربطه الأدمين بتخصص مُدار عند الموافقة.
+                </p>
               </>
             )}
             {errors.specialty?.message && (
@@ -334,7 +398,8 @@ export default function SignUpStep3Professional({
             </button>
             <button
               type='submit'
-              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
+              disabled={specialtiesLoading}
+              className='flex h-[54px] items-center justify-center gap-2 rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:cursor-not-allowed disabled:opacity-60'
             >
               التالي
               <ArrowLeft className='h-4 w-4' />

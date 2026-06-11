@@ -9,6 +9,7 @@ import {
   Pencil,
   UserRound,
 } from 'lucide-react';
+import { DoctorInlineDetailsSkeleton } from '@/components/doctor/shared/skeletons';
 import { cn } from '@/lib/utils/utils';
 import {
   ENCOUNTERS_EXPAND_CONTENT_ITEM,
@@ -154,11 +155,8 @@ export function PrescriptionVisitExpandableCard({
               className="space-y-4 border-t border-[#E2E8F0]/80 bg-white px-4 py-5 sm:px-5"
             >
               {detailsLoading ? (
-                <motion.div
-                  variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                  className="rounded-[12px] border border-dashed border-primary/30 bg-[#F8FFFE] px-4 py-3 text-right font-cairo text-[13px] font-bold text-primary"
-                >
-                  جارٍ تحميل تفاصيل الوصفة...
+                <motion.div variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}>
+                  <DoctorInlineDetailsSkeleton rows={3} />
                 </motion.div>
               ) : null}
 

@@ -23,6 +23,7 @@ import {
 import { readAuthUser } from '@/lib/cookies';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { DoctorExpandableCardSkeleton } from '@/components/doctor/shared/skeletons';
 
 type AccessRequestStatus = 'pending' | 'approved' | 'rejected' | 'expired';
 
@@ -272,9 +273,7 @@ export default function DoctorAccessRequestsPage() {
               </section>
 
               {listQuery.isLoading ? (
-                <div className='rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]'>
-                  جارٍ تحميل الطلبات...
-                </div>
+                <DoctorExpandableCardSkeleton count={4} />
               ) : listQuery.error ? (
                 <div className='rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#B42318]'>
                   {getUserFacingRequestErrorMessage(listQuery.error)}

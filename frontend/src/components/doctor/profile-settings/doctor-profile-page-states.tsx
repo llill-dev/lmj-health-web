@@ -1,14 +1,9 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { DoctorProfileFormSkeleton } from '@/components/doctor/shared/skeletons';
 
 export function DoctorProfilePageLoading() {
-  return (
-    <div className="flex min-h-[320px] items-center justify-center font-cairo text-[13px] font-semibold text-[#667085]">
-      <Loader2 className="me-2 h-5 w-5 animate-spin text-primary" />
-      جاري تحميل الملف الشخصي…
-    </div>
-  );
+  return <DoctorProfileFormSkeleton fields={8} />;
 }
 
 export function DoctorProfilePageError() {

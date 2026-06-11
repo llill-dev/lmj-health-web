@@ -6,6 +6,7 @@ import DoctorPatientExpandableCard, {
 import CreateTemporaryPatientDialog from "@/components/doctor/patients/create-temporary-patient-dialog";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorTableSkeleton } from "@/components/doctor/shared/skeletons";
 import {
   useCreateTemporaryDoctorPatient,
   useDoctorPatientFullProfile,
@@ -950,17 +951,7 @@ export default function DoctorPatientsPage() {
               </button>
             </div>
           ) : patientsListPending ? (
-            <div
-              className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-2xl border border-[#E5E7EB] bg-white px-6 py-12 shadow-[0_20px_50px_rgba(15,143,139,0.06)]"
-              role="status"
-              aria-busy="true"
-              aria-live="polite"
-            >
-              <Loader2 className="w-9 h-9 animate-spin text-primary" />
-              <p className="font-cairo text-[14px] font-semibold text-[#667085]">
-                جارٍ تحميل قائمة المرضى...
-              </p>
-            </div>
+            <DoctorTableSkeleton rows={8} columns={5} />
           ) : listQuery.patients.length === 0 ? (
             listQuery.total === 0 ? (
               <PatientTabEmptyIllustration

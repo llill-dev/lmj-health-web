@@ -220,6 +220,13 @@ export type DoctorPatientAccessRequestResponse = {
   } | null;
 };
 
+export type DoctorPatientLinkResponse = {
+  messageKey?: string;
+  message?: string;
+  doctorId?: string;
+  patientId?: string;
+};
+
 export type DoctorAccessRequestStatus =
   | 'pending'
   | 'approved'

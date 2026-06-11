@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   LabResultDialog,
@@ -17,6 +16,10 @@ import {
   type MedicalRequestRowVm,
 } from '@/components/doctor/medical-requests';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import {
+  DoctorTableSkeleton,
+  DoctorToolbarSkeleton,
+} from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   useDoctorMedicalRequestDetails,
@@ -144,11 +147,9 @@ export default function DoctorMedicalRequestsPage() {
 
           <div className="mt-6">
             {list.isLoading && !list.rows.length ? (
-              <div className="flex min-h-[280px] items-center justify-center rounded-[12px] border border-dashed border-[#E2E8F0] bg-[#F8FAFC]">
-                <Loader2
-                  className="h-8 w-8 animate-spin text-primary"
-                  aria-hidden
-                />
+              <div className="space-y-4">
+                <DoctorToolbarSkeleton tabs={3} />
+                <DoctorTableSkeleton rows={8} columns={6} />
               </div>
             ) : list.isError ? (
               <DoctorListErrorState

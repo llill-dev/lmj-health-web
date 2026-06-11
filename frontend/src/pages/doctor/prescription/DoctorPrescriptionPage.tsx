@@ -17,6 +17,7 @@ import {
   resolvePrescriptionStatusLabel,
 } from '@/components/doctor/prescription/map-prescription-ui';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { DoctorWorkspaceFormSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterPrescriptionWorkspace } from '@/hooks/doctor';
 import { resolvePrescriptionSaveFeedback } from '@/lib/doctor/prescriptionFormErrors';
@@ -130,9 +131,7 @@ export default function DoctorPrescriptionPage() {
 
       <div dir="rtl" lang="ar" className="w-full pb-10">
         {workspace.isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-[16px] border border-dashed border-[#E2E8F0] bg-white font-cairo text-[14px] font-semibold text-[#667085]">
-            جارٍ تحميل الوصفة من السيرفر...
-          </div>
+          <DoctorWorkspaceFormSkeleton medicationCards={3} />
         ) : workspace.isError ? (
           <DoctorListErrorState
             title="تعذّر تحميل الوصفة الطبية"

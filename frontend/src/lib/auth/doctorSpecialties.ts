@@ -22,15 +22,14 @@ function mapLookupLikeRow(
   const labelAr = resolveLookupText(rawText ?? fallbackLabel, "ar").trim();
   const labelEn = resolveLookupText(rawText ?? fallbackLabel, "en").trim();
   const key = String(row.key ?? "").trim();
-  const id = String(row.id ?? row._id ?? "").trim();
-  const label = labelAr || labelEn || fallbackLabel || key || id;
-  const value = key || id || label;
-  if (!value || !label) return null;
+  if (!key) return null;
+  const label = labelAr || labelEn || fallbackLabel || key;
+  if (!label) return null;
   return {
-    key: value,
+    key,
     labelAr: label,
     ...(labelEn ? { labelEn } : {}),
-    value,
+    value: key,
   };
 }
 

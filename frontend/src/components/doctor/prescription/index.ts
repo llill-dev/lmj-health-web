@@ -1,5 +1,6 @@
 export { PrescriptionPageHeader } from './prescription-page-header';
 export { PrescriptionVisitExpandableCard } from './prescription-visit-expandable-card';
+export * from './hub';
 export { PrescriptionAddMedicationButton } from './prescription-add-medication-button';
 export { PrescriptionSelectedMedications } from './prescription-selected-medications';
 export { PrescriptionGeneralInstructions } from './prescription-general-instructions';

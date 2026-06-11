@@ -12,6 +12,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
+import { DoctorTableSkeleton } from "@/components/doctor/shared/skeletons";
 import CreateMedicalRecordForm from "@/components/doctor/medical-records/create-medical-record-form";
 import MedicalRecordDetailsDialog, {
   type MedicalRecordDetails,
@@ -338,8 +339,8 @@ export default function DoctorMedicalRecordsPage() {
                   </div>
                 </section>
               ) : recordsQuery.isLoading ? (
-                <section className="mt-5 rounded-[18px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-                  جارٍ تحميل السجلات الطبية...
+                <section className="mt-5">
+                  <DoctorTableSkeleton rows={5} columns={5} />
                 </section>
               ) : recordsQuery.error ? (
                 <section className="mt-5 rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#B42318]">
