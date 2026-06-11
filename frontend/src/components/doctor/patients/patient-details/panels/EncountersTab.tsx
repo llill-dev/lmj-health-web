@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { Calendar, ClipboardList, FileText, Stethoscope, UserCheck } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import type { DoctorEncounterSummary } from "@/lib/doctor/types";
 
+import { EncounterCard } from "../cards";
 import { PatientDetailsTabSkeleton } from "../skeletons";
 import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
 
@@ -63,73 +64,43 @@ export function EncountersTab({
     );
   }
 
+  const openCount = encounters.filter((e) => e.status === "open").length;
+
   return (
     <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="space-y-4">
-      {encounters.map((encounter, index) => {
-        const statusLabel = encounter.status === "closed" ? "مغلقة" : "مفتوحة";
-        const statusTone =
-          encounter.status === "closed"
-            ? "bg-[#F3F4F6] text-[#475467] ring-[#E5E7EB]"
-            : "bg-[#ECFDF3] text-[#027A48] ring-[#ABEFC6]";
-        const originLabel =
-          encounter.origin === "appointment"
-            ? "من موعد"
-            : encounter.origin === "walk_in"
-              ? "زيارة مباشرة"
-              : encounter.origin === "follow_up"
-                ? "متابعة"
-                : encounter.origin === "manual"
-                  ? "إدخال يدوي"
-                  : "غير محدد";
-        const OriginIcon =
-          encounter.origin === "appointment"
-            ? Calendar
-            : encounter.origin === "walk_in"
-              ? UserCheck
-              : encounter.origin === "follow_up"
-                ? ClipboardList
-                : FileText;
+      <motion.div
+        variants={TAB_STAGGER_ITEM}
+        className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#E2E8F0]/90 bg-[linear-gradient(145deg,#fafefd_0%,#ffffff_60%,#f8fafc_100%)] px-4 py-3"
+      >
+        <div className="text-right">
+          <p className="font-cairo text-[13px] font-extrabold text-[#0F172A]">
+            {encounters.length} زيارة مسجّلة
+          </p>
+          <p className="mt-0.5 font-cairo text-[12px] font-semibold text-[#64748B]">
+            {openCount > 0
+              ? `${openCount} زيارة مفتوحة حالياً`
+              : "جميع الزيارات مغلقة"}
+          </p>
+        </div>
+        {openCount > 0 ? (
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#ECFDF3] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-[#027A48] ring-1 ring-inset ring-[#ABEFC6]">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#10B981] opacity-70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#10B981]" />
+            </span>
+            زيارة نشطة
+          </span>
+        ) : null}
+      </motion.div>
 
-        return (
-          <motion.article
-            key={encounter._id}
-            variants={TAB_STAGGER_ITEM}
-            className="rounded-[22px] border border-[#E2E8F0]/95 bg-gradient-to-br from-white to-[#F8FAFC]/50 p-5 shadow-[0_16px_42px_-14px_rgba(15,143,139,0.12),0_6px_18px_rgba(15,23,42,0.05)]"
-          >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="text-right">
-                <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="font-cairo text-[14px] font-black text-[#0F172A]">
-                    زيارة طبية #{index + 1}
-                  </span>
-                  <span className={`inline-flex rounded-full px-2.5 py-1 font-cairo text-[11px] font-extrabold ring-1 ring-inset ${statusTone}`}>
-                    {statusLabel}
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[11px] font-bold text-[#475467] ring-1 ring-inset ring-[#E2E8F0]">
-                    <OriginIcon className="h-3.5 w-3.5" />
-                    {originLabel}
-                  </span>
-                </div>
-                <p className="font-cairo text-[13px] font-semibold leading-6 text-[#475467]">
-                  {encounter.notes || "لا توجد ملاحظات مسجلة لهذه الزيارة."}
-                </p>
-              </div>
-              <div className="min-w-[160px] rounded-2xl bg-[#F8FAFC] px-4 py-3 text-right">
-                <div className="font-cairo text-[11px] font-bold text-[#64748B]">تاريخ البدء</div>
-                <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#0F172A]">
-                  {formatIsoDate(encounter.startedAt ?? encounter.createdAt)}
-                </div>
-                <div className="mt-3 font-cairo text-[11px] font-bold text-[#64748B]">الموعد المرتبط</div>
-                <div className="mt-1 font-cairo text-[12px] font-semibold text-[#475467]">
-                  {encounter.appointment?.date
-                    ? `${formatIsoDate(encounter.appointment.date)} ${encounter.appointment.startTime ?? ""}`.trim()
-                    : "لا يوجد"}
-                </div>
-              </div>
-            </div>
-          </motion.article>
-        );
-      })}
+      {encounters.map((encounter, index) => (
+        <EncounterCard
+          key={encounter._id}
+          encounter={encounter}
+          index={index + 1}
+          formatIsoDate={formatIsoDate}
+        />
+      ))}
     </motion.div>
   );
 }

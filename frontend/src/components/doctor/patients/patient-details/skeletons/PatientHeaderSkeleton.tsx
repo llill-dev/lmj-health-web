@@ -24,21 +24,32 @@ export function PatientHeaderSkeleton() {
         aria-live="polite"
       >
         <span className="sr-only">جارٍ تحميل تفاصيل المريض…</span>
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-          <div className="flex flex-1 gap-5 items-start min-w-0 sm:gap-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-5">
             <div className="h-[76px] w-[76px] animate-pulse rounded-[22px] bg-gradient-to-br from-[#E5E7EB] to-[#F3F4F6]" />
-            <div className="flex-1 space-y-3 min-w-0">
+            <div className="min-w-0 flex-1 space-y-3">
               <div className="h-3 w-24 animate-pulse rounded-md bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
               <div className="h-7 w-48 animate-pulse rounded-lg bg-gradient-to-r from-[#D1D5DB] to-[#E5E7EB]" />
-              <div className="flex flex-wrap gap-2">
-                <div className="h-8 w-28 animate-pulse rounded-xl bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
-                <div className="h-8 w-20 animate-pulse rounded-full bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
+              <div className="flex flex-wrap justify-start gap-2">
+                <div className="h-7 w-20 animate-pulse rounded-full bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
+                <div className="h-7 w-24 animate-pulse rounded-full bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
               </div>
+              <div className="h-4 w-32 animate-pulse rounded-md bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 lg:w-auto lg:grid-cols-2">
-            <div className="h-[110px] animate-pulse rounded-2xl bg-gradient-to-br from-[#F9FAFB] to-[#F3F4F6]" />
-            <div className="h-[110px] animate-pulse rounded-2xl bg-gradient-to-br from-[#F9FAFB] to-[#F3F4F6]" />
+          <div className="flex w-full flex-col items-start gap-3 lg:w-auto lg:min-w-[360px]">
+            <div className="flex w-full flex-wrap justify-start gap-3">
+              <div className="h-5 w-28 animate-pulse rounded-md bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
+              <div className="h-5 w-36 animate-pulse rounded-md bg-gradient-to-r from-[#E5E7EB] to-[#F3F4F6]" />
+            </div>
+            <div className="grid w-full grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-[72px] animate-pulse rounded-xl bg-gradient-to-br from-[#F9FAFB] to-[#F3F4F6]"
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

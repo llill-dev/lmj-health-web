@@ -171,10 +171,10 @@ export default function DoctorPatientExpandableCard({
       )}
     >
       <div className="px-4 py-4 sm:px-5 sm:py-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-1 items-start gap-3">
+        <div className="flex gap-3 justify-between items-start">
+          <div className="flex flex-1 gap-3 items-start min-w-0">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-[0_8px_18px_rgba(15,143,139,0.22)]">
-              <UserRound className="h-7 w-7" aria-hidden strokeWidth={1.75} />
+              <UserRound className="w-7 h-7" aria-hidden strokeWidth={1.75} />
             </div>
 
             <div className="min-w-0 flex-1 space-y-1.5 text-right">
@@ -182,7 +182,7 @@ export default function DoctorPatientExpandableCard({
                 {patient.name}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap gap-2 items-center">
                 <span
                   className={cn(
                     "inline-flex rounded-full px-2.5 py-1 font-cairo text-[12px] font-extrabold ring-1 ring-inset",
@@ -210,13 +210,13 @@ export default function DoctorPatientExpandableCard({
 
               <div className="mt-4 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 font-cairo text-[13px] font-semibold text-[#667085]">
                 <span className="inline-flex items-center gap-1.5">
-                  <Phone className="h-4 w-4 shrink-0 text-primary" />
+                  <Phone className="w-4 h-4 shrink-0 text-primary" />
                   <span dir="ltr" className="text-left font-semibold text-[#344054]">
                     {phoneDisplay}
                   </span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 text-primary" />
+                  <Calendar className="w-4 h-4 text-primary" />
                   <span>
                     آخر زيارة: <span className="text-[#1F2937]">{patient.lastVisit}</span>
                   </span>
@@ -243,11 +243,11 @@ export default function DoctorPatientExpandableCard({
 
         <div
           className={cn(
-            "grid transition-[grid-template-rows] duration-300 ease-out",
+            "grid duration-300 ease-out transition-[grid-template-rows]",
             expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
           )}
         >
-          <div className="min-h-0 overflow-hidden">
+          <div className="overflow-hidden min-h-0">
             <div className="mt-4 border-t border-[#EEF2F6] pt-4">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <QuickInfo label="فصيلة الدم" value={patient.bloodType} />
@@ -271,7 +271,7 @@ export default function DoctorPatientExpandableCard({
                         : "border-[#B2DDFF] bg-[#EFF8FF] text-[#175CD3]",
                 )}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex gap-3 items-start">
                   <StateIcon className="mt-0.5 h-5 w-5 shrink-0" />
                   <div className="flex-1 text-right">
                     <div className="font-cairo text-[14px] font-extrabold">
@@ -289,14 +289,14 @@ export default function DoctorPatientExpandableCard({
                 </div>
               </div>
 
-              <div className="mt-5 grid  gap-2 grid-cols-1 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 mt-5 md:grid-cols-3">
                 {onOpenDetails ? (
                   <button
                     type="button"
                     onClick={onOpenDetails}
                     className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[8px] border-2 border-primary/20 bg-[#F8FFFE] px-2 font-cairo text-[13px] font-extrabold text-primary transition-colors hover:bg-[#F0F9F9]"
                   >
-                    <FileText className="h-4 w-4 shrink-0" aria-hidden />
+                    <FileText className="w-4 h-4 shrink-0" aria-hidden />
                     <span className="truncate">فتح ملف المريض</span>
                   </button>
                 ) : null}
@@ -320,9 +320,9 @@ export default function DoctorPatientExpandableCard({
                     )}
                   >
                     {stateActions.primary.action === "start-encounter" ? (
-                      <Stethoscope className="h-4 w-4 shrink-0" aria-hidden />
+                      <Stethoscope className="w-4 h-4 shrink-0" aria-hidden />
                     ) : (
-                      <Link2 className="h-4 w-4 shrink-0" aria-hidden />
+                      <Link2 className="w-4 h-4 shrink-0" aria-hidden />
                     )}
                     <span className="truncate">{stateActions.primary.label}</span>
                   </button>
@@ -333,7 +333,7 @@ export default function DoctorPatientExpandableCard({
                   onClick={onToggle}
                   className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[8px] border-2 border-[#E5E7EB] bg-white px-2 font-cairo text-[13px] font-extrabold text-[#344054] transition-colors hover:bg-[#F9FAFB]"
                 >
-                  <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
+                  <ChevronDown className="w-4 h-4 shrink-0" aria-hidden />
                   <span className="truncate">
                     {expanded ? "إخفاء المعاينة" : "إظهار المعاينة"}
                   </span>

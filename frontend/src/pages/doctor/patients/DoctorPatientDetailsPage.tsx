@@ -2,9 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -12,10 +10,8 @@ import {
   Eye,
   FileText,
   FlaskConical,
-  Heart,
   Link2,
   Loader2,
-  Phone,
   Pill,
   Plus,
   Printer,
@@ -25,7 +21,6 @@ import {
   Syringe,
   Upload,
   UserCheck,
-  UserRound,
   Users,
   type LucideIcon,
   Calendar,
@@ -60,8 +55,8 @@ import {
   TAB_PANEL_TRANSITION,
   PatientDetailsTabSkeleton,
   PatientHeaderSkeleton,
-  InfoCard,
   EmptyPanel,
+  PatientProfileHeader,
   OverviewTab,
   TimelineTab,
   HistoryTab,
@@ -137,17 +132,6 @@ function getPatientAccessErrorMessage(error: unknown): string {
     return error.message || "لا تملك صلاحية عرض هذا المريض بهذا الحساب.";
   }
   return error.message || getUserFacingRequestErrorMessage(error);
-}
-
-function patientNameInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    const a = parts[0]?.[0] ?? "";
-    const b = parts[1]?.[0] ?? "";
-    return `${a}${b}`.toUpperCase();
-  }
-  const t = name.trim();
-  return (t.slice(0, 2) || "؟").toUpperCase();
 }
 
 export default function DoctorPatientDetailsPage() {
@@ -238,21 +222,21 @@ export default function DoctorPatientDetailsPage() {
     Boolean(patientId && !isTemporary && fullProfileQuery.data?.ok === true),
   );
 
-  // جلب مواعيد المريض
+  // جلب مواعيد المريض — API لا يدعم فلتر patientId، نجلب آخر 100 موعد ونفلتر محلياً
   const patientAppointmentsQuery = useQuery({
     queryKey: ['doctor-patient-appointments', doctorId, patientId],
     queryFn: async () => {
       if (!doctorId || !patientId) return { appointments: [] };
       try {
-        // جلب جميع المواعيد وفلترتها للمريض المحدد
-        const response = await doctorApi.appointments.list({});
-        const patientAppointments = response.appointments?.filter(
-          (apt: any) => apt.patient?._id === patientId || apt.patient === patientId
-        ) ?? [];
-        console.log('🗓️ Patient Appointments:', patientAppointments);
+        const response = await doctorApi.appointments.list({ limit: 100 });
+        const patientAppointments = (response.appointments ?? []).filter(
+          (apt: any) =>
+            apt.patient?._id === patientId ||
+            apt.patient?.publicId === patientId ||
+            apt.patient === patientId,
+        );
         return { appointments: patientAppointments };
-      } catch (error) {
-        console.error('Error fetching patient appointments:', error);
+      } catch {
         return { appointments: [] };
       }
     },
@@ -372,25 +356,21 @@ export default function DoctorPatientDetailsPage() {
             name: file.originalName ?? "ملف",
             createdAt: formatIsoDate(file.createdAt),
           })),
-          orders: (() => {
-            // Debug: تحقق من البيانات
-            console.log('🔍 Full Profile Patient Data:', fullProfileQuery.patient);
-            console.log('🔍 Orders from API:', fullProfileQuery.patient.orders);
-            console.log('🔍 Medical Orders:', (fullProfileQuery.patient as any)?.medicalOrders);
-
-            // جرب أكثر من مصدر محتمل للطلبات
-            const ordersSource = fullProfileQuery.patient.orders ??
-                                (fullProfileQuery.patient as any)?.medicalOrders ??
-                                [];
-
-            console.log('🔍 Orders Source:', ordersSource);
-
-            return ordersSource.map((order: any, index: number) => ({
-              id: order._id ?? order.id ?? `order-${index}`,
-              title: order.orderTitle ?? order.title ?? order.orderName ?? order.orderType ?? order.type ?? "طلب طبي",
-              status: order.status ?? order.statusCode ?? "pending",
-            }));
-          })(),
+          orders: (
+            fullProfileQuery.patient.orders ??
+            (fullProfileQuery.patient as any)?.medicalOrders ??
+            []
+          ).map((order: any, index: number) => ({
+            id: order._id ?? order.id ?? `order-${index}`,
+            title:
+              order.orderTitle ??
+              order.title ??
+              order.orderName ??
+              order.orderType ??
+              order.type ??
+              "طلب طبي",
+            status: order.status ?? order.statusCode ?? "pending",
+          })),
         }
       : null;
 
@@ -409,6 +389,17 @@ export default function DoctorPatientDetailsPage() {
         pendingRequestIdFromQuery ?? pendingAccess?.pendingRequestId ?? null,
       )
     : null;
+
+  const relationshipIcon =
+    stateInfo?.icon === "link"
+      ? Link2
+      : stateInfo?.icon === "clock"
+        ? Clock
+        : stateInfo?.icon === "check"
+          ? CheckCircle2
+          : stateInfo?.icon === "stethoscope"
+            ? Stethoscope
+            : ShieldAlert;
 
   async function handleRequestAccess() {
     if (!doctorId || !patientId) return;
@@ -670,7 +661,12 @@ export default function DoctorPatientDetailsPage() {
     }
 
     if (activeTab === "history") {
-      return <HistoryTab fullProfileData={fullProfileData} />;
+      return (
+        <HistoryTab
+          fullProfileData={fullProfileData}
+          onAddRecord={() => navigate('/doctor/medical-records/new')}
+        />
+      );
     }
 
     if (activeTab === "medications") {
@@ -715,7 +711,14 @@ export default function DoctorPatientDetailsPage() {
     }
 
     if (activeTab === "documents") {
-      return <DocumentsTab onOpenFiles={() => setActiveTab('files')} />;
+      return (
+        <DocumentsTab
+          fullProfileData={fullProfileData}
+          encounters={encounters}
+          onOpenFiles={() => setActiveTab('files')}
+          onOpenEncountersPage={() => navigate('/doctor/encounters')}
+        />
+      );
     }
 
     if (activeTab === "appointments") {
@@ -984,88 +987,13 @@ export default function DoctorPatientDetailsPage() {
               />
 
               <div className="relative px-5 py-7 sm:px-8 sm:py-8">
-                <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-                  <div className="flex flex-1 gap-5 items-start min-w-0 sm:gap-6">
-                    <div className="relative shrink-0">
-                      <div className="flex h-[76px] w-[76px] items-center justify-center rounded-[22px] bg-gradient-to-br from-[#0f766e] via-[#0f8f8b] to-[#14b8a6] font-cairo text-[22px] font-black tracking-wide text-white shadow-[0_18px_38px_rgba(15,143,139,0.35)] ring-[3px] ring-white/90">
-                        {patientNameInitials(patient.name)}
-                      </div>
-                      <span
-                        className="absolute -bottom-0.5 -left-0.5 flex h-[22px] w-[22px] items-center justify-center rounded-full border-[3px] border-white bg-[#ecfdf5] text-primary shadow-sm"
-                        aria-hidden
-                      >
-                        <UserRound className="w-3 h-3" strokeWidth={2.5} />
-                      </span>
-                    </div>
-
-                    <div className="flex-1 min-w-0 text-right">
-                      <p className="font-cairo text-[11px] font-extrabold uppercase tracking-[0.06em] text-primary">
-                        ملف المريض الطبي
-                      </p>
-                      <h1 className="mt-1.5 font-cairo text-[clamp(1.35rem,3.2vw,1.75rem)] font-black leading-[1.2] text-[#0f172a]">
-                        {patient.name}
-                      </h1>
-                      <div className="flex flex-wrap gap-2 justify-start items-center mt-3">
-                        <span className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0]/90 bg-white/85 px-3 py-1.5 font-cairo text-[12px] font-bold text-[#475569] shadow-[0_4px_14px_rgba(15,23,42,0.04)] backdrop-blur-sm">
-                          <span className="text-[#94a3b8]">رقم الملف</span>
-                          <span className="font-cairo tabular-nums text-[#0f172a]">
-                            {patient.fileNo}
-                          </span>
-                        </span>
-                        <span className="inline-flex items-center rounded-full bg-gradient-to-l from-[#ecfdf5] to-[#d1fae5] px-3.5 py-1 font-cairo text-[12px] font-extrabold text-[#047857] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ring-1 ring-[#6ee7b7]/55">
-                          {patient.accountStatusLabel}
-                        </span>
-                        {stateInfo ? (
-                          <span
-                            className={cn(
-                              "inline-flex items-center rounded-full px-3.5 py-1 font-cairo text-[12px] font-extrabold ring-1 ring-inset shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]",
-                              stateInfo.color.bg,
-                              stateInfo.color.text,
-                              stateInfo.color.ring,
-                            )}
-                          >
-                            {stateInfo.label}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      {/* Badges للتنبيهات المهمة */}
-                      {(patient.allergies.length > 0 || patient.medicalConditions.length > 0) && (
-                        <div className="flex flex-wrap gap-2 items-center mt-3">
-                          {patient.allergies.length > 0 && (
-                            <div className="inline-flex items-center gap-1.5 rounded-lg border border-[#FEE2E2] bg-[#FEF2F2] px-2.5 py-1 shadow-sm">
-                              <AlertTriangle className="h-3.5 w-3.5 text-[#DC2626]" />
-                              <span className="font-cairo text-[11px] font-bold text-[#B91C1C]">
-                                {patient.allergies.length} حساسية
-                              </span>
-                            </div>
-                          )}
-                          {patient.medicalConditions.length > 0 && (
-                            <div className="inline-flex items-center gap-1.5 rounded-lg border border-[#FED7AA] bg-[#FFF7ED] px-2.5 py-1 shadow-sm">
-                              <Heart className="h-3.5 w-3.5 text-[#EA580C]" />
-                              <span className="font-cairo text-[11px] font-bold text-[#C2410C]">
-                                {patient.medicalConditions.length} مرض مزمن
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:w-auto lg:min-w-[340px] xl:min-w-[380px]">
-                    <InfoCard
-                      label="الهاتف"
-                      value={patient.phone}
-                      icon={Phone}
-                    />
-                    <InfoCard
-                      label="آخر زيارة"
-                      value={patient.lastVisit}
-                      icon={CalendarDays}
-                    />
-                  </div>
-                </div>
+                <PatientProfileHeader
+                  variant="page"
+                  patient={patient}
+                  relationshipLabel={stateInfo?.label}
+                  relationshipTone={stateInfo?.color}
+                  relationshipIcon={relationshipIcon}
+                />
               </div>
             </section>
 
