@@ -193,6 +193,15 @@ export type CreateBillingPaymentBody = {
   note?: string;
 };
 
+export type UpdateBillingInvoiceBody = CreateBillingInvoiceBody;
+
+export type CreateBillingRefundBody = {
+  paymentId: string;
+  amount: number;
+  reason?: string;
+  refundedAt?: string;
+};
+
 export type CreateBillingExpenseBody = {
   category: string;
   amount: number;

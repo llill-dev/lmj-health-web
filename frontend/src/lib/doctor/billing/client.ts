@@ -9,12 +9,15 @@ import type {
   ApiBillingExpense,
   ApiBillingInvoice,
   ApiBillingPayment,
+  ApiBillingRefund,
   ApiBillingReport,
   ApiBillingSettings,
   ApiSupportedCurrency,
   CreateBillingExpenseBody,
   CreateBillingInvoiceBody,
   CreateBillingPaymentBody,
+  CreateBillingRefundBody,
+  UpdateBillingInvoiceBody,
 } from '@/lib/doctor/billing/apiTypes';
 
 export type BillingInvoicesListParams = {
@@ -81,6 +84,22 @@ export const billingApi = {
         billingEndpoints.invoiceIssue(invoiceId),
         body ?? {},
       ),
+
+    update: (invoiceId: string, body: UpdateBillingInvoiceBody) =>
+      put<{ invoice?: ApiBillingInvoice; message?: string }>(
+        billingEndpoints.invoiceById(invoiceId),
+        body,
+      ),
+  },
+
+  refunds: {
+    create: (body: CreateBillingRefundBody) =>
+      post<{
+        refund?: ApiBillingRefund;
+        payment?: ApiBillingPayment;
+        invoice?: ApiBillingInvoice;
+        message?: string;
+      }>(billingEndpoints.refunds, body),
   },
 
   payments: {

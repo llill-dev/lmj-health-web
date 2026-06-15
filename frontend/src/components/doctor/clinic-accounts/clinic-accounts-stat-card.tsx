@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { formatBillingNumber } from '@/lib/doctor/billing/format';
 import { cn } from '@/lib/utils/utils';
 
 export function ClinicAccountsStatCard({
@@ -19,11 +20,11 @@ export function ClinicAccountsStatCard({
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-start gap-3 text-right">
         <Icon className="h-5 w-5 shrink-0 opacity-90" aria-hidden />
-        <div className="min-w-0 text-right">
+        <div className="min-w-0">
           <p className="font-cairo text-[12px] font-bold opacity-90">{label}</p>
-          <p className="mt-2 font-cairo text-[24px] font-black leading-none">
+          <p className="mt-2 font-cairo text-[24px] font-black leading-none tabular-nums">
             {value}
           </p>
         </div>
@@ -57,7 +58,9 @@ export function ClinicAccountsMiniStatCard({
         )}
         aria-hidden
       />
-      <p className="font-cairo text-[22px] font-black text-primary">{value}</p>
+      <p className="font-cairo text-[22px] font-black text-primary tabular-nums">
+        {typeof value === 'number' ? formatBillingNumber(value, { maximumFractionDigits: 0 }) : value}
+      </p>
       <p className="mt-1 font-cairo text-[12px] font-bold text-[#667085]">
         {label}
       </p>

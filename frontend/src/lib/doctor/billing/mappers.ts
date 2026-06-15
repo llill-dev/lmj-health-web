@@ -6,7 +6,10 @@ import type {
   ApiBillingReport,
   ApiBillingSummary,
 } from '@/lib/doctor/billing/apiTypes';
-import { formatBillingAmount } from '@/lib/doctor/billing/format';
+import {
+  formatBillingAmount,
+  formatBillingDate,
+} from '@/lib/doctor/billing/format';
 import type {
   AccountsSummary,
   ClinicExpense,
@@ -30,10 +33,7 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 };
 
 function formatIsoDate(value?: string | null): string {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-SY');
+  return formatBillingDate(value);
 }
 
 function formatRelativeTime(value?: string): string {
@@ -121,15 +121,28 @@ export function mapApiInvoiceToClinicInvoice(
     currency: invoice.currency,
     rawId: invoice.id,
     remaining: invoice.remaining,
-  } as ClinicInvoice & { currency?: string; rawId?: string; remaining?: number };
+    apiStatus: invoice.status,
+    patientId: invoice.patient?.id,
+    notes: invoice.notes,
+    dueAtIso: invoice.dueAt,
+  };
 }
 
 export function mapApiPaymentToClinicPayment(
   payment: ApiBillingPayment,
 ): ClinicPayment {
+  const amount = payment.amount ?? 0;
+  const refundedAmount = payment.refundedAmount ?? 0;
+  const refundableAmount =
+    payment.refundableAmount ??
+    Math.max(0, amount - refundedAmount);
+
   return {
     id: payment.number ?? payment.id,
-    amount: payment.amount ?? 0,
+    rawId: payment.id,
+    amount,
+    refundedAmount,
+    refundableAmount,
     method: PAYMENT_METHOD_LABELS[payment.method ?? ''] ?? payment.method ?? '—',
     date: formatIsoDate(payment.paidAt),
   };

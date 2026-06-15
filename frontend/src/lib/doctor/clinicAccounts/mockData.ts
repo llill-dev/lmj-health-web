@@ -175,7 +175,7 @@ export const INVOICE_STATUS_LABELS: Record<
   overdue: 'متأخرة',
 };
 
-export { formatUsd, formatBillingAmount } from '@/lib/doctor/billing/format';
+export { formatUsd, formatBillingAmount, formatBillingNumber } from '@/lib/doctor/billing/format';
 
 export function calcInvoiceTotals(invoice: ClinicInvoice) {
   const subtotal = invoice.items.reduce(

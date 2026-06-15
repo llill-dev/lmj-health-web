@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import { BarChart3, FileSpreadsheet, FileText, TrendingDown, TrendingUp } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import {
+  BarChart3,
+  FileSpreadsheet,
+  FileText,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import {
   ClinicAccountsBanner,
   ClinicAccountsStatCard,
@@ -11,47 +17,52 @@ import {
   ExpensePieLegend,
   FinancialBarChart,
   FinancialLineChart,
-} from '@/components/doctor/clinic-accounts';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorStatCardsSkeleton } from '@/components/doctor/shared/skeletons';
+} from "@/components/doctor/clinic-accounts";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorStatCardsSkeleton } from "@/components/doctor/shared/skeletons";
 import {
   useBillingReports,
   useBillingSettings,
   useExportBillingReportPdf,
-} from '@/hooks/doctor/billing';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { formatBillingAmount } from '@/lib/doctor/billing/format';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/hooks/doctor/billing";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { formatBillingAmount } from "@/lib/doctor/billing/format";
+import { triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
+import { useToast } from "@/components/ui/ToastProvider";
 
 const MONTHS = [
-  { value: 'all', label: 'السنة كاملة' },
-  { value: '1', label: 'يناير' },
-  { value: '2', label: 'فبراير' },
-  { value: '3', label: 'مارس' },
-  { value: '4', label: 'أبريل' },
-  { value: '5', label: 'مايو' },
-  { value: '6', label: 'يونيو' },
-  { value: '7', label: 'يوليو' },
-  { value: '8', label: 'أغسطس' },
-  { value: '9', label: 'سبتمبر' },
-  { value: '10', label: 'أكتوبر' },
-  { value: '11', label: 'نوفمبر' },
-  { value: '12', label: 'ديسمبر' },
+  { value: "all", label: "السنة كاملة" },
+  { value: "1", label: "يناير" },
+  { value: "2", label: "فبراير" },
+  { value: "3", label: "مارس" },
+  { value: "4", label: "أبريل" },
+  { value: "5", label: "مايو" },
+  { value: "6", label: "يونيو" },
+  { value: "7", label: "يوليو" },
+  { value: "8", label: "أغسطس" },
+  { value: "9", label: "سبتمبر" },
+  { value: "10", label: "أكتوبر" },
+  { value: "11", label: "نوفمبر" },
+  { value: "12", label: "ديسمبر" },
 ];
 
 export default function DoctorClinicFinancialReportsPage() {
   const { toast } = useToast();
   const settingsQuery = useBillingSettings();
   const [year, setYear] = useState(new Date().getFullYear());
-  const [month, setMonth] = useState<string>('all');
+  const [month, setMonth] = useState<string>("all");
 
-  const reportMonth = month === 'all' ? 'all' : Number(month);
+  const reportMonth = month === "all" ? "all" : Number(month);
   const reportsQuery = useBillingReports({
     year,
     month: reportMonth,
     currency: settingsQuery.currency,
   });
   const exportPdf = useExportBillingReportPdf();
+  const { retry: retryReports, retrying: retryingReports } = useRetryAction(() =>
+    reportsQuery.refetch(),
+  );
 
   const currency = reportsQuery.currency ?? settingsQuery.currency;
   const formatMoney = (value: number) => formatBillingAmount(value, currency);
@@ -78,17 +89,20 @@ export default function DoctorClinicFinancialReportsPage() {
       const result = await exportPdf.mutateAsync(reportsQuery.params);
       const url = result.downloadUrl ?? result.url;
       if (!url) {
-        throw new Error('missing_download_url');
+        throw new Error("missing_download_url");
       }
-      window.open(url, '_blank', 'noopener,noreferrer');
-      toast('تم تجهيز ملف PDF للتقرير.', {
-        title: 'تصدير PDF',
-        variant: 'success',
+      const fileName =
+        result.fileName?.trim() ||
+        `billing-report-${year}${month === "all" ? "" : `-${month}`}.pdf`;
+      await triggerBrowserFileDownloadAndOpen(url, fileName);
+      toast("تم تنزيل التقرير وفتحه في تبويب جديد.", {
+        title: "تصدير PDF",
+        variant: "success",
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر التصدير',
-        variant: 'error',
+        title: "تعذّر التصدير",
+        variant: "error",
       });
     }
   };
@@ -137,21 +151,29 @@ export default function DoctorClinicFinancialReportsPage() {
           <DoctorListErrorState
             title="تعذّر تحميل التقرير المالي"
             brief={getUserFacingRequestErrorMessage(reportsQuery.error)}
-            retrying={reportsQuery.isFetching}
-            onRetry={() => void reportsQuery.refetch()}
+            retrying={retryingReports}
+            onRetry={() => void retryReports()}
           />
-        ) : reportsQuery.isLoading ? (
+        ) : reportsQuery.isAwaitingData ? (
           <DoctorStatCardsSkeleton count={3} columns={3} />
         ) : (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <ClinicAccountsStatCard label="الدخل" value={formatMoney(totals.income)} icon={TrendingUp} />
+            <ClinicAccountsStatCard
+              label="الدخل"
+              value={formatMoney(totals.income)}
+              icon={TrendingUp}
+            />
             <ClinicAccountsStatCard
               label="المصاريف"
               value={formatMoney(totals.expenses)}
               icon={TrendingDown}
               className="bg-[#EF4444]"
             />
-            <ClinicAccountsStatCard label="الربح" value={formatMoney(totals.profit)} icon={BarChart3} />
+            <ClinicAccountsStatCard
+              label="الربح"
+              value={formatMoney(totals.profit)}
+              icon={BarChart3}
+            />
           </section>
         )}
 
@@ -192,7 +214,7 @@ export default function DoctorClinicFinancialReportsPage() {
               className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
             >
               <FileText className="h-4 w-4" aria-hidden />
-              {exportPdf.isPending ? 'جاري التصدير...' : 'PDF'}
+              {exportPdf.isPending ? "جاري التصدير..." : "PDF"}
             </button>
             <button
               type="button"

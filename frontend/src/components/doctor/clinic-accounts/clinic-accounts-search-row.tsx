@@ -2,6 +2,7 @@
 
 import { Search } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { formatBillingNumber } from '@/lib/doctor/billing/format';
 
 export function ClinicAccountsSearchRow({
   value,
@@ -46,8 +47,8 @@ export function ClinicAccountsSearchCount({
   label: string;
 }) {
   return (
-    <p className="whitespace-nowrap font-cairo text-[12px] font-bold text-[#667085]">
-      {count} {label}
+    <p className="whitespace-nowrap font-cairo text-[12px] font-bold text-[#667085] tabular-nums">
+      {formatBillingNumber(count, { maximumFractionDigits: 0 })} {label}
     </p>
   );
 }

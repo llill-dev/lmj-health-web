@@ -24,9 +24,11 @@ export function ClinicAccountsBanner({
         aria-hidden
       />
 
-      <div className="relative flex items-start justify-between gap-4">
-        {action ? <div className="shrink-0">{action}</div> : <div />}
-        <div className="flex min-w-0 flex-1 items-start justify-end gap-4 text-right">
+      <div className="relative flex w-full items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-4 text-right">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[6px] bg-primary shadow-[0px_4px_14px_rgba(15,143,139,0.35)] sm:h-16 sm:w-16">
+            {icon}
+          </div>
           <div className="min-w-0">
             <h1 className="font-cairo text-[26px] font-black leading-[32px] text-primary sm:text-[30px] sm:leading-[36px]">
               {title}
@@ -37,10 +39,8 @@ export function ClinicAccountsBanner({
               </p>
             ) : null}
           </div>
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[6px] bg-primary shadow-[0px_4px_14px_rgba(15,143,139,0.35)] sm:h-16 sm:w-16">
-            {icon}
-          </div>
         </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
     </section>
   );

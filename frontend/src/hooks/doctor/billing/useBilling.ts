@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   billingApi,
   billingQueryKeys,
   type BillingExpensesListParams,
   type BillingInvoicesListParams,
   type BillingPaymentsListParams,
-} from '@/lib/doctor/billing/client';
+} from "@/lib/doctor/billing/client";
 import {
   mapApiExpenseToClinicExpense,
   mapApiInvoiceToClinicInvoice,
@@ -17,19 +17,23 @@ import {
   mapRecentActivitiesFromReport,
   mapReportTrendsToMonthlyFinance,
   mapUiInvoiceStatusToApi,
-} from '@/lib/doctor/billing/mappers';
+} from "@/lib/doctor/billing/mappers";
 import {
   resolveBillingDashboardPeriodParams,
   resolveBillingReportPeriodParams,
   type BillingQueryParams,
-} from '@/lib/doctor/billing/periodParams';
-import type { AccountsPeriod } from '@/lib/doctor/clinicAccounts/types';
+} from "@/lib/doctor/billing/periodParams";
+import type { AccountsPeriod } from "@/lib/doctor/clinicAccounts/types";
 import type {
   CreateBillingExpenseBody,
   CreateBillingInvoiceBody,
   CreateBillingPaymentBody,
-} from '@/lib/doctor/billing/apiTypes';
-import type { InvoiceStatus } from '@/lib/doctor/clinicAccounts/types';
+  CreateBillingRefundBody,
+  UpdateBillingInvoiceBody,
+  ApiBillingSettings,
+} from "@/lib/doctor/billing/apiTypes";
+import type { InvoiceStatus } from "@/lib/doctor/clinicAccounts/types";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 const STALE_MS = 1000 * 30;
 
@@ -44,14 +48,13 @@ export function useBillingSettings() {
     ...query,
     settings: query.data?.settings ?? null,
     supportedCurrencies: query.data?.supportedCurrencies ?? [],
-    currency: query.data?.settings?.currency ?? query.data?.defaultCurrency ?? 'USD',
+    currency:
+      query.data?.settings?.currency ?? query.data?.defaultCurrency ?? "USD",
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
-export function useBillingDashboard(
-  period: AccountsPeriod,
-  currency?: string,
-) {
+export function useBillingDashboard(period: AccountsPeriod, currency?: string) {
   const params = {
     ...resolveBillingDashboardPeriodParams(period),
     ...(currency ? { currency } : {}),
@@ -77,12 +80,13 @@ export function useBillingDashboard(
       : [],
     overdueCount: dashboard?.overdueSummary?.count ?? 0,
     outstandingCount: dashboard?.outstandingSummary?.count ?? 0,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
 export function useBillingInvoices(
   params: BillingInvoicesListParams & {
-    uiStatus?: InvoiceStatus | 'all';
+    uiStatus?: InvoiceStatus | "all";
   } = {},
 ) {
   const apiParams: BillingInvoicesListParams = {
@@ -94,7 +98,7 @@ export function useBillingInvoices(
     dateTo: params.dateTo,
     status:
       params.status ??
-      (params.uiStatus && params.uiStatus !== 'all'
+      (params.uiStatus && params.uiStatus !== "all"
         ? mapUiInvoiceStatusToApi(params.uiStatus)
         : undefined),
   };
@@ -105,7 +109,9 @@ export function useBillingInvoices(
     staleTime: STALE_MS,
   });
 
-  const invoices = (query.data?.invoices ?? []).map(mapApiInvoiceToClinicInvoice);
+  const invoices = (query.data?.invoices ?? []).map(
+    mapApiInvoiceToClinicInvoice,
+  );
 
   return {
     ...query,
@@ -113,6 +119,7 @@ export function useBillingInvoices(
     total: query.data?.total ?? invoices.length,
     page: query.data?.page ?? apiParams.page ?? 1,
     limit: query.data?.limit ?? apiParams.limit ?? 50,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -130,6 +137,89 @@ export function useBillingInvoice(invoiceId: string, enabled = true) {
     ...query,
     invoice,
     rawInvoice: query.data,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
+}
+
+/** Resolve invoice by Mongo id or display number (INV-…). */
+export function useResolvedBillingInvoice(invoiceRef: string) {
+  const trimmed = invoiceRef.trim();
+  const looksLikeDisplayNumber = /^INV-/i.test(trimmed);
+
+  const byIdQuery = useQuery({
+    queryKey: [...billingQueryKeys.invoice(trimmed), "resolve", "id"] as const,
+    queryFn: () => billingApi.invoices.get(trimmed),
+    enabled: Boolean(trimmed) && !looksLikeDisplayNumber,
+    staleTime: STALE_MS,
+    retry: false,
+  });
+
+  const shouldSearch =
+    Boolean(trimmed) &&
+    (looksLikeDisplayNumber ||
+      (byIdQuery.isError &&
+        !isAwaitingInitialQueryData(byIdQuery.data, byIdQuery.isError)));
+
+  const searchParams: BillingInvoicesListParams = {
+    search: trimmed,
+    limit: 10,
+  };
+
+  const bySearchQuery = useQuery({
+    queryKey: [
+      ...billingQueryKeys.invoices(searchParams),
+      "resolve",
+      "search",
+    ] as const,
+    queryFn: () => billingApi.invoices.list(searchParams),
+    enabled: shouldSearch,
+    staleTime: STALE_MS,
+    retry: false,
+  });
+
+  const matchedFromSearch =
+    bySearchQuery.data?.invoices?.find(
+      (item) => item.id === trimmed || item.number === trimmed,
+    ) ?? bySearchQuery.data?.invoices?.[0];
+
+  const rawInvoice = byIdQuery.data ?? matchedFromSearch ?? null;
+  const invoice = rawInvoice ? mapApiInvoiceToClinicInvoice(rawInvoice) : null;
+
+  const isAwaitingById =
+    !looksLikeDisplayNumber &&
+    isAwaitingInitialQueryData(byIdQuery.data, byIdQuery.isError);
+  const isAwaitingBySearch =
+    shouldSearch &&
+    isAwaitingInitialQueryData(bySearchQuery.data, bySearchQuery.isError);
+
+  const isAwaitingData =
+    Boolean(trimmed) && !rawInvoice && (isAwaitingById || isAwaitingBySearch);
+
+  const isError =
+    Boolean(trimmed) &&
+    !isAwaitingData &&
+    !rawInvoice &&
+    ((looksLikeDisplayNumber && bySearchQuery.isError) ||
+      (!looksLikeDisplayNumber && byIdQuery.isError && bySearchQuery.isError));
+
+  const error = byIdQuery.error ?? bySearchQuery.error ?? null;
+
+  const refetch = async () => {
+    await Promise.all([
+      looksLikeDisplayNumber ? Promise.resolve() : byIdQuery.refetch(),
+      shouldSearch || looksLikeDisplayNumber
+        ? bySearchQuery.refetch()
+        : Promise.resolve(),
+    ]);
+  };
+
+  return {
+    invoice,
+    rawInvoice,
+    isAwaitingData,
+    isError,
+    error,
+    refetch,
   };
 }
 
@@ -149,12 +239,17 @@ export function useBillingExpenses(params: BillingExpensesListParams = {}) {
     staleTime: STALE_MS,
   });
 
-  const expenses = (query.data?.expenses ?? []).map(mapApiExpenseToClinicExpense);
+  const expenses = (query.data?.expenses ?? []).map(
+    mapApiExpenseToClinicExpense,
+  );
 
   return {
     ...query,
     expenses,
     total: query.data?.total ?? expenses.length,
+    page: query.data?.page ?? apiParams.page ?? 1,
+    limit: query.data?.limit ?? apiParams.limit ?? 50,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -169,12 +264,15 @@ export function useBillingPayments(params: BillingPaymentsListParams = {}) {
     ...query,
     payments: query.data?.payments ?? [],
     total: query.data?.total ?? 0,
+    page: query.data?.page ?? params.page ?? 1,
+    limit: query.data?.limit ?? params.limit ?? 50,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
 export function useBillingReports(input: {
   year: number;
-  month?: number | 'all';
+  month?: number | "all";
   currency?: string;
 }) {
   const params: BillingQueryParams = {
@@ -198,9 +296,13 @@ export function useBillingReports(input: {
     monthlyFinance: report ? mapReportTrendsToMonthlyFinance(report) : [],
     expenseBreakdown: report ? mapExpensesByCategory(report) : [],
     recentActivities: report
-      ? mapRecentActivitiesFromReport(report, report.currency ?? input.currency ?? 'USD')
+      ? mapRecentActivitiesFromReport(
+          report,
+          report.currency ?? input.currency ?? "USD",
+        )
       : [],
     summary: report?.summary ?? null,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -226,6 +328,26 @@ export function useCreateBillingPayment() {
   });
 }
 
+export function useUpdateBillingInvoice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      invoiceId: string;
+      body: UpdateBillingInvoiceBody;
+    }) => billingApi.invoices.update(input.invoiceId, input.body),
+    onSuccess: () => invalidateBilling(queryClient),
+  });
+}
+
+export function useCreateBillingRefund() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateBillingRefundBody) =>
+      billingApi.refunds.create(body),
+    onSuccess: () => invalidateBilling(queryClient),
+  });
+}
+
 export function useCreateBillingExpense() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -239,5 +361,14 @@ export function useExportBillingReportPdf() {
   return useMutation({
     mutationFn: (params: BillingQueryParams) =>
       billingApi.reports.exportPdf(params),
+  });
+}
+
+export function useUpdateBillingSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Partial<ApiBillingSettings>) =>
+      billingApi.settings.update(body),
+    onSuccess: () => invalidateBilling(queryClient),
   });
 }

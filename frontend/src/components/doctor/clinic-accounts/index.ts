@@ -19,6 +19,9 @@ export {
   InvoiceDetailsDialog,
   RecentActivityList,
 } from '@/components/doctor/clinic-accounts/invoice-details-dialog';
+export { InvoiceEditDialog } from '@/components/doctor/clinic-accounts/invoice-edit-dialog';
+export { InvoiceSummaryCard } from '@/components/doctor/clinic-accounts/invoice-summary-card';
+export { InvoiceRefundDialog } from '@/components/doctor/clinic-accounts/invoice-refund-dialog';
 export {
   ClinicAccountsPeriodFilter,
   ClinicAccountsFilterTabs,

@@ -1,56 +1,91 @@
-'use client';
+"use client";
 
-import { BookOpen, Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { BookOpen, CheckCircle, Clock, FileText, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
 import {
-  ClinicAccountsBanner,
   ClinicAccountsFilterTabs,
-  ClinicAccountsMiniStatCard,
   ClinicAccountsSearchCount,
   ClinicAccountsSearchRow,
   ClinicAccountsSubNav,
   InvoiceDetailsDialog,
   InvoiceListItem,
-} from '@/components/doctor/clinic-accounts';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
-import { useBillingInvoice, useBillingInvoices } from '@/hooks/doctor/billing';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import type { ClinicInvoice, InvoiceStatus } from '@/lib/doctor/clinicAccounts/types';
+} from "@/components/doctor/clinic-accounts";
+import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
+import { DoctorTableSkeleton } from "@/components/doctor/shared/skeletons";
+import {
+  useBillingDashboard,
+  useBillingInvoice,
+  useBillingInvoices,
+  useBillingSettings,
+} from "@/hooks/doctor/billing";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import type {
+  ClinicInvoice,
+  InvoiceStatus,
+} from "@/lib/doctor/clinicAccounts/types";
 
-type InvoiceFilter = 'all' | InvoiceStatus;
+type InvoiceFilter = "all" | InvoiceStatus;
 
 const FILTER_OPTIONS: Array<{ id: InvoiceFilter; label: string }> = [
-  { id: 'all', label: 'الكل' },
-  { id: 'paid', label: 'مدفوعة' },
-  { id: 'unpaid', label: 'غير مدفوعة' },
-  { id: 'overdue', label: 'متأخرة' },
+  { id: "all", label: "الكل" },
+  { id: "paid", label: "مدفوعة" },
+  { id: "unpaid", label: "غير مدفوعة" },
+  { id: "overdue", label: "متأخرة" },
 ];
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
+function pickStatusCount(
+  rows: Array<{ label?: string; count?: number; amount?: number }> | undefined,
+  status: string,
+) {
+  return rows?.find((row) => row.label === status)?.count ?? 0;
+}
+
 export default function DoctorClinicInvoicesPage() {
-  const [filter, setFilter] = useState<InvoiceFilter>('all');
-  const [search, setSearch] = useState('');
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState<InvoiceFilter>("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
+  const settingsQuery = useBillingSettings();
+  const dashboardQuery = useBillingDashboard("month", settingsQuery.currency);
   const listQuery = useBillingInvoices({
     uiStatus: filter,
     search,
-    limit: 100,
+    page,
+    limit,
   });
-  const allQuery = useBillingInvoices({ limit: 200 });
-  const detailQuery = useBillingInvoice(selectedInvoiceId ?? '', Boolean(selectedInvoiceId));
+  const { retry: retryList, retrying: retryingList } = useRetryAction(() =>
+    listQuery.refetch(),
+  );
+  const detailQuery = useBillingInvoice(
+    selectedInvoiceId ?? "",
+    Boolean(selectedInvoiceId),
+  );
+
+  const invoiceStatusRows = dashboardQuery.dashboard?.charts?.invoiceTotalsByStatus;
 
   const stats = useMemo(
     () => ({
-      paid: allQuery.invoices.filter((i) => i.status === 'paid').length,
-      unpaid: allQuery.invoices.filter((i) => i.status === 'unpaid').length,
-      overdue: allQuery.invoices.filter((i) => i.status === 'overdue').length,
+      paid: pickStatusCount(invoiceStatusRows, "paid"),
+      unpaid:
+        pickStatusCount(invoiceStatusRows, "issued") +
+        pickStatusCount(invoiceStatusRows, "draft"),
+      overdue: pickStatusCount(invoiceStatusRows, "overdue"),
     }),
-    [allQuery.invoices],
+    [invoiceStatusRows],
   );
+
+  const totalPages = Math.max(1, Math.ceil(listQuery.total / listQuery.limit));
 
   const openDetails = (invoice: ClinicInvoice) => {
     setSelectedInvoiceId(invoice.rawId ?? invoice.id);
@@ -66,52 +101,74 @@ export default function DoctorClinicInvoicesPage() {
       </Helmet>
 
       <div dir="rtl" lang="ar">
-        <ClinicAccountsBanner
+        <DoctorDashboardOverview
+          variant="appointments"
+          surface="mint"
+          kpiColumns={3}
+          headerIcon={<BookOpen className="h-8 w-8 text-white" />}
           title="الفواتير"
-          subtitle="جميع الفواتير لديك"
-          icon={<BookOpen className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
-          action={
-            <Link
-              to="/doctor/accounts/invoices/new"
-              className="inline-flex h-[44px] min-w-[120px] shrink-0 items-center justify-between gap-3 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/30"
-            >
-              <Plus className="h-4 w-4 shrink-0" aria-hidden />
-              <span>جديد</span>
-            </Link>
+          subtitle={
+            <span>
+              <span className="font-extrabold text-primary">
+                {listQuery.isAwaitingData ? "—" : listQuery.total}
+              </span>
+              <span className="text-primary/90"> — إجمالي الفواتير</span>
+            </span>
           }
+          actionLabel="فاتورة جديدة"
+          actionIcon={<Plus className="h-4 w-4" />}
+          onActionClick={() => navigate("/doctor/accounts/invoices/new")}
+          kpis={[
+            {
+              key: "paid",
+              icon: <CheckCircle className="w-5 h-5 shrink-0" />,
+              value: dashboardQuery.isAwaitingData ? "—" : stats.paid,
+              label: "مدفوعة",
+            },
+            {
+              key: "unpaid",
+              icon: <FileText className="w-5 h-5 shrink-0" />,
+              value: dashboardQuery.isAwaitingData ? "—" : stats.unpaid,
+              label: "غير مدفوعة",
+            },
+            {
+              key: "overdue",
+              icon: <Clock className="w-5 h-5 shrink-0" />,
+              value: dashboardQuery.isAwaitingData ? "—" : stats.overdue,
+              label: "متأخرة",
+            },
+          ]}
         />
 
         <ClinicAccountsSubNav />
 
-        <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <ClinicAccountsMiniStatCard label="مدفوعة" value={stats.paid} icon={BookOpen} active />
-          <ClinicAccountsMiniStatCard label="غير مدفوعة" value={stats.unpaid} icon={BookOpen} />
-          <ClinicAccountsMiniStatCard label="متأخرة" value={stats.overdue} icon={BookOpen} />
-        </section>
-
         <ClinicAccountsFilterTabs<InvoiceFilter>
           value={filter}
-          onChange={setFilter}
+          onChange={(nextFilter) => {
+            setFilter(nextFilter);
+            setPage(1);
+          }}
           options={FILTER_OPTIONS}
         />
 
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
+          onValueChangeExtra={() => setPage(1)}
           placeholder="بحث بالاسم أو رقم الفاتورة..."
           trailing={
-            <ClinicAccountsSearchCount count={listQuery.invoices.length} label="فاتورة" />
+            <ClinicAccountsSearchCount count={listQuery.total} label="فاتورة" />
           }
         />
 
-        {listQuery.isLoading ? (
+        {listQuery.isAwaitingData ? (
           <DoctorTableSkeleton rows={6} columns={1} />
         ) : listQuery.isError ? (
           <DoctorListErrorState
             title="تعذّر تحميل الفواتير"
             brief={getUserFacingRequestErrorMessage(listQuery.error)}
-            retrying={listQuery.isFetching}
-            onRetry={() => void listQuery.refetch()}
+            retrying={retryingList}
+            onRetry={() => void retryList()}
           />
         ) : listQuery.invoices.length === 0 ? (
           <p className="py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
@@ -130,12 +187,33 @@ export default function DoctorClinicInvoicesPage() {
           </div>
         )}
 
+        {!listQuery.isError ? (
+          <DoctorTablePagination
+            className="mt-6"
+            page={listQuery.page}
+            totalPages={totalPages}
+            pageSize={listQuery.limit}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            disabled={listQuery.isAwaitingData}
+            onPageChange={setPage}
+            onPageSizeChange={(nextLimit) => {
+              setLimit(nextLimit);
+              setPage(1);
+            }}
+          />
+        ) : null}
+
         <InvoiceDetailsDialog
           open={detailsOpen}
           invoice={selectedInvoice}
           onClose={() => {
             setDetailsOpen(false);
             setSelectedInvoiceId(null);
+          }}
+          onInvoiceUpdated={() => {
+            void detailQuery.refetch();
+            void listQuery.refetch();
+            void dashboardQuery.refetch();
           }}
         />
       </div>

@@ -20,7 +20,13 @@ import type {
   MonthlyFinancePoint,
   WeeklyOverviewPoint,
 } from '@/lib/doctor/clinicAccounts/types';
-import { formatUsd } from '@/lib/doctor/clinicAccounts/mockData';
+import {
+  formatBillingNumber,
+  formatUsd,
+} from '@/lib/doctor/clinicAccounts/mockData';
+
+const formatAxisTick = (value: number) =>
+  formatBillingNumber(value, { maximumFractionDigits: 0 });
 
 const TOOLTIP_STYLE = {
   borderRadius: 10,
@@ -49,6 +55,7 @@ export function AccountsOverviewChart({
             tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
             axisLine={false}
             tickLine={false}
+            tickFormatter={formatAxisTick}
           />
           <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
           <Legend
@@ -82,6 +89,7 @@ export function FinancialBarChart({ data }: { data: MonthlyFinancePoint[] }) {
             tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
             axisLine={false}
             tickLine={false}
+            tickFormatter={formatAxisTick}
           />
           <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
           <Legend wrapperStyle={{ fontFamily: 'Cairo', fontSize: 12 }} />
@@ -109,6 +117,7 @@ export function FinancialLineChart({ data }: { data: MonthlyFinancePoint[] }) {
             tick={{ fill: '#667085', fontSize: 12, fontFamily: 'Cairo' }}
             axisLine={false}
             tickLine={false}
+            tickFormatter={formatAxisTick}
           />
           <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
           <Line

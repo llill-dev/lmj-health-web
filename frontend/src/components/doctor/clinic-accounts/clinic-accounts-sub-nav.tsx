@@ -8,12 +8,13 @@ const LINKS = [
   { to: '/doctor/accounts/invoices', label: 'الفواتير', end: false },
   { to: '/doctor/accounts/expenses', label: 'المصاريف', end: false },
   { to: '/doctor/accounts/reports', label: 'التقارير', end: false },
+  { to: '/doctor/accounts/settings', label: 'الإعدادات', end: false },
 ] as const;
 
 export function ClinicAccountsSubNav() {
   return (
     <nav
-      className="mb-6 grid grid-cols-2 gap-2 rounded-[12px] border border-[#EEF2F6] bg-white p-2 shadow-sm sm:grid-cols-4"
+      className="mb-6 grid grid-cols-2 gap-2 rounded-[12px] border border-[#EEF2F6] bg-white p-2 shadow-sm sm:grid-cols-3 lg:grid-cols-5"
       aria-label="تنقل الحسابات"
     >
       {LINKS.map((link) => (

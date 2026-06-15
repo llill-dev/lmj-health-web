@@ -8,6 +8,14 @@ export type ExpenseCategory = 'rent' | 'salaries' | 'services' | 'materials';
 
 export type AccountsPeriod = 'day' | 'week' | 'month' | 'custom';
 
+export type ClinicInvoiceApiStatus =
+  | 'draft'
+  | 'issued'
+  | 'partial'
+  | 'paid'
+  | 'overdue'
+  | 'cancelled';
+
 export type ClinicInvoice = {
   id: string;
   patientName: string;
@@ -24,6 +32,11 @@ export type ClinicInvoice = {
   rawId?: string;
   currency?: string;
   remaining?: number;
+  /** Raw API status (edit/refund rules) */
+  apiStatus?: ClinicInvoiceApiStatus;
+  patientId?: string;
+  notes?: string | null;
+  dueAtIso?: string | null;
 };
 
 export type ClinicInvoiceItem = {
@@ -38,6 +51,10 @@ export type ClinicPayment = {
   amount: number;
   method: string;
   date: string;
+  /** Mongo id for refund API */
+  rawId?: string;
+  refundableAmount?: number;
+  refundedAmount?: number;
 };
 
 export type ClinicExpense = {

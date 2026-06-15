@@ -23,15 +23,12 @@ export function InvoiceListItem({
       onClick={() => onOpen(invoice)}
       className="flex w-full items-center justify-between gap-4 rounded-[12px] border border-[#D1FAE5] bg-white px-5 py-4 text-right shadow-sm transition hover:border-primary/40 hover:shadow-md"
     >
-      <span className="font-cairo text-[22px] font-black text-primary">
-        {formatUsd(invoice.total)}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="mb-2 flex flex-wrap items-center justify-end gap-2">
-          <InvoiceStatusBadge status={invoice.status} />
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap gap-2 justify-start items-center mb-2">
           <span className="font-cairo text-[14px] font-extrabold text-[#111827]">
             {invoice.id}
           </span>
+          <InvoiceStatusBadge status={invoice.status} />
         </div>
         <p className="font-cairo text-[13px] font-bold text-[#111827]">
           {invoice.patientName}
@@ -40,6 +37,9 @@ export function InvoiceListItem({
           {invoice.issueDate}
         </p>
       </div>
+      <span className="font-cairo text-[22px] font-black text-primary">
+        {formatUsd(invoice.total)}
+      </span>
     </motion.button>
   );
 }
