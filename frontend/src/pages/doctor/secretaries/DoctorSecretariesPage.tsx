@@ -1,0 +1,321 @@
+'use client';
+
+import { Plus, UserCog, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
+import {
+  ClinicAccountsSearchRow,
+  ClinicAccountsSearchCount,
+} from '@/components/doctor/clinic-accounts';
+import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { DoctorExpandableCardSkeleton } from '@/components/doctor/shared/skeletons';
+import {
+  DoctorSecretaryCard,
+  DoctorSecretaryCreateDialog,
+  DoctorSecretaryEditDialog,
+} from '@/components/doctor/secretaries';
+import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import { useToast } from '@/components/ui/ToastProvider';
+import {
+  useCreateDoctorSecretary,
+  useDoctorSecretaries,
+  useUnassignDoctorSecretary,
+  useUpdateDoctorSecretary,
+} from '@/hooks/doctor/useDoctorSecretaries';
+import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { isSecretaryActive } from '@/lib/doctor/secretaries/permissionsUi';
+import type {
+  DoctorSecretary,
+  SecretaryStatusFilter,
+} from '@/lib/doctor/secretaries/types';
+import { useRetryAction } from '@/lib/query/useRetryAction';
+import { cn } from '@/lib/utils/utils';
+
+const STATUS_TABS: Array<{ id: SecretaryStatusFilter; label: string }> = [
+  { id: 'all', label: 'الكل' },
+  { id: 'active', label: 'المفعلة' },
+  { id: 'disabled', label: 'المعطلة' },
+];
+
+const MAX_SECRETARIES = 3;
+
+export default function DoctorSecretariesPage() {
+  const { toast } = useToast();
+  const listQuery = useDoctorSecretaries();
+  const createSecretary = useCreateDoctorSecretary();
+  const updateSecretary = useUpdateDoctorSecretary();
+  const unassignSecretary = useUnassignDoctorSecretary();
+  const { retry: retryList, retrying: retryingList } = useRetryAction(() =>
+    listQuery.refetch(),
+  );
+
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<SecretaryStatusFilter>('all');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<DoctorSecretary | null>(null);
+  const [unassignTarget, setUnassignTarget] = useState<DoctorSecretary | null>(
+    null,
+  );
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return listQuery.secretaries.filter((secretary) => {
+      const active = isSecretaryActive(secretary.user);
+      if (statusFilter === 'active' && !active) return false;
+      if (statusFilter === 'disabled' && active) return false;
+      if (!q) return true;
+      const haystacks = [
+        secretary.user?.fullName,
+        secretary.user?.email,
+        secretary.user?.phone,
+      ]
+        .filter(Boolean)
+        .map((value) => String(value).toLowerCase());
+      return haystacks.some((value) => value.includes(q));
+    });
+  }, [listQuery.secretaries, search, statusFilter]);
+
+  const activeCount = useMemo(
+    () =>
+      listQuery.secretaries.filter((secretary) =>
+        isSecretaryActive(secretary.user),
+      ).length,
+    [listQuery.secretaries],
+  );
+
+  const handleCreate = async (input: {
+    fullName: string;
+    email: string;
+    password: string;
+    phone: string;
+    gender: 'Male' | 'Female';
+    permissions: string[];
+  }) => {
+    if (listQuery.secretaries.length >= MAX_SECRETARIES) {
+      toast(`الحد الأقصى ${MAX_SECRETARIES} سكرتيرين لكل طبيب.`, {
+        title: 'لا يمكن الإضافة',
+        variant: 'error',
+      });
+      return;
+    }
+
+    try {
+      await createSecretary.mutateAsync({
+        fullName: input.fullName,
+        email: input.email,
+        password: input.password,
+        phone: input.phone || undefined,
+        gender: input.gender,
+        permissions: input.permissions,
+      });
+      toast('تم إنشاء السكرتير وربطه بحسابك.', {
+        title: 'تمت الإضافة',
+        variant: 'success',
+      });
+      setCreateOpen(false);
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: 'تعذّر إنشاء السكرتير',
+        variant: 'error',
+      });
+    }
+  };
+
+  const handleEditSave = async (input: {
+    fullName: string;
+    phone: string;
+    permissions: string[];
+  }) => {
+    if (!editTarget?._id) return;
+    try {
+      await updateSecretary.mutateAsync({
+        secretaryId: editTarget._id,
+        body: {
+          fullName: input.fullName,
+          phone: input.phone || undefined,
+          permissions: input.permissions,
+        },
+      });
+      toast('تم تحديث بيانات السكرتير.', {
+        title: 'تم الحفظ',
+        variant: 'success',
+      });
+      setEditTarget(null);
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: 'تعذّر الحفظ',
+        variant: 'error',
+      });
+    }
+  };
+
+  const handleUnassign = async () => {
+    if (!unassignTarget?._id) return;
+    try {
+      await unassignSecretary.mutateAsync(unassignTarget._id);
+      toast('تم إلغاء ربط السكرتير من حسابك.', {
+        title: 'تم الإلغاء',
+        variant: 'success',
+      });
+      setUnassignTarget(null);
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: 'تعذّر الإلغاء',
+        variant: 'error',
+      });
+      throw error;
+    }
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>إدارة السكرتارية • LMJ Health</title>
+      </Helmet>
+
+      <div dir="rtl" lang="ar">
+        <DoctorDashboardOverview
+          variant="patients"
+          surface="mint"
+          headerIcon={<UserCog className="h-8 w-8 text-white" />}
+          title="إدارة السكرتارية"
+          subtitle="تحكم كامل بصلاحيات وإعدادات السكرتارية"
+          actionLabel="إضافة سكرتير"
+          actionIcon={<Plus className="h-4 w-4" />}
+          onActionClick={() => setCreateOpen(true)}
+          actionDisabled={listQuery.secretaries.length >= MAX_SECRETARIES}
+          kpis={[
+            {
+              key: 'total',
+              icon: <Users className="h-5 w-5 shrink-0" />,
+              value: listQuery.isAwaitingData ? '—' : listQuery.total,
+              label: 'إجمالي السكرتير',
+            },
+            {
+              key: 'active',
+              icon: <UserCog className="h-5 w-5 shrink-0" />,
+              value: listQuery.isAwaitingData ? '—' : activeCount,
+              label: 'مفعل',
+            },
+            {
+              key: 'limit',
+              icon: <Users className="h-5 w-5 shrink-0" />,
+              value: MAX_SECRETARIES,
+              label: 'الحد الأقصى',
+            },
+          ]}
+        />
+
+        <section className="mb-5 rounded-[16px] border border-[#EEF2F6] bg-white p-5 shadow-sm">
+          <ClinicAccountsSearchRow
+            value={search}
+            onChange={setSearch}
+            placeholder="بحث..."
+            trailing={
+              <ClinicAccountsSearchCount
+                count={filtered.length}
+                label="سكرتير"
+              />
+            }
+          />
+
+          <div className="mt-4 flex flex-wrap justify-start gap-2">
+            {STATUS_TABS.map((tab) => {
+              const active = statusFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setStatusFilter(tab.id)}
+                  className={cn(
+                    'rounded-[10px] px-4 py-2 font-cairo text-[12px] font-extrabold transition',
+                    active
+                      ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.25)]'
+                      : 'border border-[#EEF2F6] bg-[#F9FAFB] text-[#667085] hover:bg-[#F0FDFA] hover:text-primary',
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {listQuery.isError ? (
+          <DoctorListErrorState
+            title="تعذّر تحميل السكرتير"
+            brief={getUserFacingRequestErrorMessage(listQuery.error)}
+            retrying={retryingList}
+            onRetry={() => void retryList()}
+          />
+        ) : listQuery.isAwaitingData ? (
+          <div className="space-y-4">
+            <DoctorExpandableCardSkeleton />
+            <DoctorExpandableCardSkeleton />
+          </div>
+        ) : filtered.length === 0 ? (
+          <section className="rounded-[16px] border border-dashed border-[#D1FAE5] bg-[#F0FDFA] px-6 py-12 text-center">
+            <p className="font-cairo text-[16px] font-extrabold text-primary">
+              {listQuery.secretaries.length === 0
+                ? 'لا يوجد سكرتير مرتبط بحسابك'
+                : 'لا توجد نتائج مطابقة'}
+            </p>
+            <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
+              {listQuery.secretaries.length === 0
+                ? 'يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم.'
+                : 'جرّب تغيير البحث أو الفلتر.'}
+            </p>
+          </section>
+        ) : (
+          <div className="space-y-4">
+            {filtered.map((secretary) => (
+              <DoctorSecretaryCard
+                key={secretary._id}
+                secretary={secretary}
+                onEdit={setEditTarget}
+                onUnassign={setUnassignTarget}
+              />
+            ))}
+          </div>
+        )}
+
+        <DoctorSecretaryCreateDialog
+          open={createOpen}
+          saving={createSecretary.isPending}
+          onClose={() => setCreateOpen(false)}
+          onSave={handleCreate}
+        />
+
+        <DoctorSecretaryEditDialog
+          open={Boolean(editTarget)}
+          secretary={editTarget}
+          saving={updateSecretary.isPending}
+          onClose={() => setEditTarget(null)}
+          onSave={handleEditSave}
+        />
+
+        <ConfirmActionDialog
+          open={Boolean(unassignTarget)}
+          onOpenChange={(open) => {
+            if (!open) setUnassignTarget(null);
+          }}
+          title="إلغاء ربط السكرتير"
+          confirmLabel="نعم، إلغاء الربط"
+          confirmDisabled={unassignSecretary.isPending}
+          description={
+            <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
+              هل تريد إلغاء ربط{' '}
+              <span className="font-black text-[#101828]">
+                {unassignTarget?.user?.fullName ?? 'هذا السكرتير'}
+              </span>{' '}
+              من عيادتك؟ لن يُحذف حساب المستخدم من النظام، لكنه لن يعود مرتبطاً
+              بك.
+            </span>
+          }
+          onConfirm={handleUnassign}
+        />
+      </div>
+    </>
+  );
+}
