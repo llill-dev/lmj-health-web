@@ -19,6 +19,11 @@ import {
   sanitizePostLoginNextPath,
   shouldRedirectToRestore,
 } from '@/lib/auth/accountDeletionSession';
+import {
+  isValidAuthPhoneIdentifier,
+  normalizeAuthPhoneIdentifier,
+} from '@/lib/phone/normalizeAuthPhone';
+import { resolveLoginErrorMessageAr } from '@/lib/auth/loginErrorMessages';
 
 type LoginMethod = 'phone' | 'email';
 
@@ -41,13 +46,12 @@ const loginSchema = z
     }
 
     if (val.method === 'phone') {
-      const phone = val.identifier.replace(/[\s-]/g, '');
-      const ok = /^\+?[0-9]{7,15}$/.test(phone);
-      if (!ok) {
+      if (!isValidAuthPhoneIdentifier(val.identifier)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['identifier'],
-          message: 'أدخل رقم هاتف صحيح',
+          message:
+            'أدخل رقم هاتف صحيح بصيغة دولية مثل +963912345678 أو 009639912345678',
         });
       }
     }
@@ -96,29 +100,12 @@ export default function LoginForm({
   }, [method]);
 
   const methodPlaceholder = useMemo(() => {
-    return method === 'phone' ? '+963 9XX XXX XXX' : 'example@email.com';
+    return method === 'phone'
+      ? '+963912345678'
+      : 'example@email.com';
   }, [method]);
 
   const MethodIcon = method === 'phone' ? Phone : Mail;
-
-  // Map AuthError codes to user-friendly Arabic messages
-  const AUTH_ERROR_MESSAGES_AR: Record<string, string> = {
-    INVALID_CREDENTIALS:
-      'البريد الإلكتروني/رقم الهاتف أو كلمة المرور غير صحيحة',
-    NOT_VERIFIED: 'الحساب غير موثق، يرجى التحقق من بريدك الإلكتروني',
-    INACTIVE: 'الحساب غير نشط، تواصل مع الدعم',
-    PENDING_APPROVAL: 'حساب الطبيب في انتظار موافقة الإدارة',
-    NOT_ALLOWED: 'هذا الحساب غير مسموح له باستخدام هذا التطبيق',
-    TEMPORARY: 'حسابك غير مفعّل بعد. سيتم توجيهك لصفحة التفعيل.',
-    LOCKED:
-      'الحساب مقفول. إذا طلبت حذف الحساب مؤخراً فقد لا يزال بإمكانك تسجيل الدخول خلال فترة الاسترجاع (7 أيام) حسب نوع الحساب.',
-    DELETED:
-      'تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.',
-    DELETION_RECOVERY:
-      'حسابك في فترة استرجاع (7 أيام). سيتم توجيهك لصفحة استعادة الحساب.',
-    NETWORK_ERROR: 'تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة؛ إن استمر الأمر قد يكون سببه الخدمة وليس شبكتك.',
-    UNKNOWN: 'حدث خطأ غير متوقع، حاول مجدداً',
-  };
 
   const roleRoot: Record<string, string> = {
     doctor: '/doctor/dashboard',
@@ -132,15 +119,14 @@ export default function LoginForm({
     setLoginError(null);
 
     try {
+      const loginIdentifier =
+        values.method === 'email'
+          ? values.identifier.trim()
+          : normalizeAuthPhoneIdentifier(values.identifier);
+
       const loginData = await useAuthStore
         .getState()
-        .login(
-          values.method === 'email'
-            ? values.identifier
-            : values.identifier.replace(/[\s-]/g, ''),
-          values.password,
-          'web',
-        );
+        .login(loginIdentifier, values.password, 'web');
 
       const userRole = useAuthStore.getState().user?.role ?? '';
 
@@ -196,10 +182,7 @@ export default function LoginForm({
     } catch (error: unknown) {
       const code =
         error instanceof AuthFlowError ? error.code : 'UNKNOWN';
-      const message =
-        AUTH_ERROR_MESSAGES_AR[code] ??
-        (error instanceof Error ? error.message : undefined) ??
-        AUTH_ERROR_MESSAGES_AR['UNKNOWN'];
+      const message = resolveLoginErrorMessageAr(code, values.method);
       setLoginError(message);
       toast(message, {
         title: 'تعذّر تسجيل الدخول',
@@ -231,7 +214,7 @@ export default function LoginForm({
               : undefined,
           phone:
             values.method === 'phone'
-              ? values.identifier.replace(/[\s-]/g, '')
+              ? normalizeAuthPhoneIdentifier(values.identifier)
               : undefined,
           recoverUntil,
           lifecycleAction,
@@ -255,7 +238,7 @@ export default function LoginForm({
         const identifier =
           values.method === 'email'
             ? values.identifier.trim()
-            : values.identifier.replace(/[\s-]/g, '');
+            : normalizeAuthPhoneIdentifier(values.identifier);
 
         persistClaimAccountPending({
           channel: values.method === 'email' ? 'email' : 'whatsapp',

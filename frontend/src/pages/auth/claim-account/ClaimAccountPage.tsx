@@ -16,6 +16,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
 import { ApiError } from '@/lib/api';
 import { getRoleRoot, type AppRole } from '@/routes/ProtectedRoute';
+import { normalizeAuthPhoneIdentifier } from '@/lib/phone/normalizeAuthPhone';
 
 type ClaimStep = 'request' | 'verify';
 
@@ -32,7 +33,7 @@ export default function ClaimAccountPage() {
   }) => {
     const identifier =
       values.method === 'phone'
-        ? values.identifier.replace(/[\s-]/g, '')
+        ? normalizeAuthPhoneIdentifier(values.identifier)
         : values.identifier.trim();
 
     const body =
@@ -77,6 +78,7 @@ export default function ClaimAccountPage() {
       <AuthBackground>
         {step === 'request' || !pending ? (
           <ForgotPasswordRequest
+            variant='plain'
             title="تفعيل حسابك"
             subtitle="حسابك موجود لكنه غير مفعّل بعد. أدخل بياناتك لاستلام رمز التفعيل وتعيين كلمة مرور."
             submitLabel="إرسال رمز التفعيل"

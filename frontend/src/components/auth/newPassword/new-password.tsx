@@ -1,18 +1,20 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, CheckCircle2, Circle, Eye, EyeOff, LockKeyhole } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import PasswordResetShell from '@/components/auth/password/PasswordResetShell';
 
 const newPasswordSchema = z
   .object({
-    password: z.string().min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'),
-    confirmPassword: z
+    password: z
       .string()
-      .min(1, 'يرجى تأكيد كلمة المرور')
-      .min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'),
+      .min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل')
+      .regex(/[A-Z]/, 'يجب أن تحتوي على حرف كبير')
+      .regex(/\d/, 'يجب أن تحتوي على رقم'),
+    confirmPassword: z.string().min(1, 'يرجى تأكيد كلمة المرور'),
   })
   .refine((values) => values.password === values.confirmPassword, {
     message: 'كلمتا المرور غير متطابقتين',
@@ -21,156 +23,214 @@ const newPasswordSchema = z
 
 type NewPasswordValues = z.infer<typeof newPasswordSchema>;
 
+function RequirementRow({
+  met,
+  label,
+}: {
+  met: boolean;
+  label: string;
+}) {
+  const Icon = met ? CheckCircle2 : Circle;
+  return (
+    <li className='flex items-center gap-2'>
+      <Icon
+        className={`h-4 w-4 shrink-0 ${met ? 'text-primary' : 'text-[#CBD5E1]'}`}
+        aria-hidden
+      />
+      <span
+        className={`font-cairo text-[12px] font-semibold ${met ? 'text-[#0F766E]' : 'text-[#64748B]'}`}
+      >
+        {label}
+      </span>
+    </li>
+  );
+}
+
 export default function NewPassword({
-  onBack,
   onSubmit,
 }: {
-  onBack: () => void;
-  onSubmit: (values: NewPasswordValues) => void;
+  onBack?: () => void;
+  onSubmit: (values: NewPasswordValues) => void | Promise<void>;
 }) {
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<NewPasswordValues>({
     resolver: zodResolver(newPasswordSchema),
     defaultValues: {
       password: '',
       confirmPassword: '',
     },
-    mode: 'onSubmit',
+    mode: 'onChange',
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [flowError, setFlowError] = useState<string | null>(null);
 
-  const passwordValue = watch('password');
-  const confirmPasswordValue = watch('confirmPassword');
+  const passwordValue = watch('password') ?? '';
+  const confirmPasswordValue = watch('confirmPassword') ?? '';
+
+  const requirements = useMemo(
+    () => ({
+      minLength: passwordValue.length >= 8,
+      uppercase: /[A-Z]/.test(passwordValue),
+      number: /\d/.test(passwordValue),
+      match:
+        passwordValue.length > 0 &&
+        confirmPasswordValue.length > 0 &&
+        passwordValue === confirmPasswordValue,
+    }),
+    [confirmPasswordValue, passwordValue],
+  );
+
+  const submit = handleSubmit(async (values) => {
+    setFlowError(null);
+    try {
+      await onSubmit(values);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'لا يوجد أي تطابق مع البيانات المدخلة. يرجى التحقق من المعلومات وإعادة المحاولة.';
+      setFlowError(message);
+    }
+  });
+
+  const fieldError =
+    errors.password?.message ??
+    errors.confirmPassword?.message ??
+    flowError;
 
   return (
-    <section className='mx-auto flex flex-col items-center'>
-      <div className='my-[50px]'>
-        <img
-          src='/images/syr-health-logo.png'
-          alt='LMJ Health'
-          width={300}
-          height={200}
-          className='max-h-[200px]'
-          loading='eager'
-        />
+    <PasswordResetShell step={3}>
+      <div className='text-center'>
+        <h2 className='font-cairo text-[15px] font-extrabold text-[#1F2937]'>
+          إنشاء كلمة مرور جديدة
+        </h2>
+        <p className='mt-1 font-cairo text-[13px] font-semibold text-[#667085]'>
+          اختر كلمة مرور قوية لحماية حسابك
+        </p>
       </div>
 
-      <div
-        dir='rtl'
-        lang='ar'
-        className='relative'
+      <form
+        onSubmit={submit}
+        className='mt-5 space-y-4'
+        noValidate
       >
-        <div className='relative w-fit'>
-          <div className='pointer-events-none absolute -right-[100px] -top-[70px] z-10'>
-            <div className='relative h-44 w-44'>
-              <div className='absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
-              <div className='absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-500/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
-            </div>
-          </div>
-          <div className='text-center'>
-            <h1 className='text-[#1F2937] font-cairo text-[22px] font-bold leading-[24px] py-10'>
-              تعيين كلمة مرور جديدة
-            </h1>
+        <div>
+          <label className='mb-2 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
+            كلمة المرور الجديدة
+          </label>
+          <div className='flex h-[40px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F3F3F5] px-3 shadow-[0_10px_24px_rgba(0,0,0,0.06)]'>
+            <LockKeyhole
+              className='h-4 w-4 shrink-0 text-[#98A2B3]'
+              aria-hidden
+            />
+            <input
+              dir='ltr'
+              type={showPassword ? 'text' : 'password'}
+              autoComplete='new-password'
+              placeholder='password123'
+              {...register('password')}
+              className='h-full w-full bg-transparent px-3 text-right font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
+            />
             <button
               type='button'
-              onClick={onBack}
-              className='-mt-6 font-cairo text-[14px] font-bold text-primary transition-colors hover:text-[#14B3AE]'
+              onClick={() => setShowPassword((value) => !value)}
+              className='shrink-0 text-[#98A2B3] transition-colors hover:text-[#667085]'
+              aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
             >
-              العودة لتسجيل الدخول
+              {showPassword ? (
+                <EyeOff className='h-4 w-4' />
+              ) : (
+                <Eye className='h-4 w-4' />
+              )}
             </button>
           </div>
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className='w-[557px] h-[300px] rounded-[6px] border-[1.9px] border-[#E5E7EB] bg-[#FFFFFF] px-[108px] py-[18px] mt-8 shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.1),0px_10px_15px_-3px_rgba(0,0,0,0.1)]'
-          >
-            <div className='mt-6'>
-              <div>
-                <label className='block text-right font-cairo text-[14px] font-bold leading-[24px] text-[#1F2937]'>
-                  عين كلمة مرور جديدة
-                </label>
-                <div className='flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] py-[4px] px-[12px] shadow-[0_10px_25px_rgba(0,0,0,0.06)]'>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder='password123'
-                    {...register('password')}
-                    className='h-full w-full bg-transparent px-3 font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
-                  />
-
-                  {passwordValue?.length ? (
-                    <button
-                      type='button'
-                      onClick={() => setShowPassword((v) => !v)}
-                      className='shrink-0 ps-1 text-[#98A2B3] hover:text-[#667085]'
-                      aria-label={
-                        showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'
-                      }
-                    >
-                      {showPassword ? (
-                        <EyeOff className='h-5 w-5' />
-                      ) : (
-                        <Eye className='h-5 w-5' />
-                      )}
-                    </button>
-                  ) : null}
-                </div>
-                <div className='mt-2 min-h-[18px] text-right font-cairo text-[12px] font-semibold text-red-500'>
-                  {errors.password?.message ?? ''}
-                </div>
-              </div>
-
-              <div>
-                <label className='block text-right font-cairo text-[14px] font-bold leading-[24px] text-[#1F2937]'>
-                  تأكيد كلمة المرور
-                </label>
-                <div className='flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] py-[4px] px-[12px] shadow-[0_10px_25px_rgba(0,0,0,0.06)]'>
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder='password123'
-                    {...register('confirmPassword')}
-                    className='h-full w-full bg-transparent px-3 font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
-                  />
-
-                  {confirmPasswordValue?.length ? (
-                    <button
-                      type='button'
-                      onClick={() => setShowConfirmPassword((v) => !v)}
-                      className='shrink-0 ps-1 text-[#98A2B3] hover:text-[#667085]'
-                      aria-label={
-                        showConfirmPassword
-                          ? 'إخفاء كلمة المرور'
-                          : 'إظهار كلمة المرور'
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className='h-5 w-5' />
-                      ) : (
-                        <Eye className='h-5 w-5' />
-                      )}
-                    </button>
-                  ) : null}
-                </div>
-                <div className='mt-2 min-h-[18px] text-right font-cairo text-[12px] font-semibold text-red-500'>
-                  {errors.confirmPassword?.message ?? ''}
-                </div>
-              </div>
-
-              <button
-                type='submit'
-                className='mt-2 w-[329.15px] flex h-[44px]  items-center justify-center rounded-[10px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15, 143, 139,0.35)] transition-colors hover:bg-[#14B3AE]'
-              >
-                تعيين كلمة المرور
-              </button>
-            </div>
-          </form>
         </div>
-      </div>
-    </section>
+
+        <div>
+          <label className='mb-2 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
+            تأكيد كلمة المرور
+          </label>
+          <div className='flex h-[40px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F3F3F5] px-3 shadow-[0_10px_24px_rgba(0,0,0,0.06)]'>
+            <LockKeyhole
+              className='h-4 w-4 shrink-0 text-[#98A2B3]'
+              aria-hidden
+            />
+            <input
+              dir='ltr'
+              type={showConfirmPassword ? 'text' : 'password'}
+              autoComplete='new-password'
+              placeholder='password123'
+              {...register('confirmPassword')}
+              className='h-full w-full bg-transparent px-3 text-right font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
+            />
+            <button
+              type='button'
+              onClick={() => setShowConfirmPassword((value) => !value)}
+              className='shrink-0 text-[#98A2B3] transition-colors hover:text-[#667085]'
+              aria-label={
+                showConfirmPassword
+                  ? 'إخفاء كلمة المرور'
+                  : 'إظهار كلمة المرور'
+              }
+            >
+              {showConfirmPassword ? (
+                <EyeOff className='h-4 w-4' />
+              ) : (
+                <Eye className='h-4 w-4' />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className='rounded-[10px] border border-[#D9EEF0] bg-[#F0FAFA] px-4 py-3'>
+          <p className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#0F766E]'>
+            متطلبات كلمة المرور:
+          </p>
+          <ul className='space-y-2'>
+            <RequirementRow
+              met={requirements.minLength}
+              label='لا تقل عن 8 أحرف'
+            />
+            <RequirementRow
+              met={requirements.uppercase}
+              label='تحتوي على حرف كبير'
+            />
+            <RequirementRow
+              met={requirements.number}
+              label='تحتوي على رقم'
+            />
+            <RequirementRow
+              met={requirements.match}
+              label='كلمتا المرور متطابقتان'
+            />
+          </ul>
+        </div>
+
+        <div
+          className={`min-h-[20px] text-right font-cairo text-[12px] font-semibold leading-snug ${fieldError ? 'text-[#D92D20]' : 'text-transparent'}`}
+          aria-live='polite'
+        >
+          {fieldError ?? '\u00A0'}
+        </div>
+
+        <button
+          type='submit'
+          disabled={isSubmitting}
+          className='flex h-[42px] w-full items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15,143,139,0.32)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60'
+        >
+          <span>{isSubmitting ? 'جارٍ الحفظ…' : 'تعيين كلمة المرور'}</span>
+          <ArrowLeft
+            className='h-4 w-4 shrink-0'
+            aria-hidden
+          />
+        </button>
+      </form>
+    </PasswordResetShell>
   );
 }

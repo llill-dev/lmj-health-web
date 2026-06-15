@@ -33,6 +33,7 @@ import type {
   DoctorRestoreRequestOtpVerifyBody,
 } from '@/lib/auth/accountDeletionTypes';
 import { readAuthUser } from '@/lib/cookies';
+import { resolveLoginIdentifier } from '@/lib/phone/normalizeAuthPhone';
 
 function basePath(scope: AccountDeletionScope): string {
   return scope === 'patient' ? '/api/patient/me' : '/api/doctors/me';
@@ -88,8 +89,7 @@ async function verifyPasswordViaLogin(currentPassword: string): Promise<void> {
   }
 
   const result = await authApi.login({
-    email: identifier.includes('@') ? identifier : undefined,
-    phone: identifier.includes('@') ? undefined : identifier,
+    ...resolveLoginIdentifier(identifier),
     password: currentPassword,
     clientType: 'web',
   });

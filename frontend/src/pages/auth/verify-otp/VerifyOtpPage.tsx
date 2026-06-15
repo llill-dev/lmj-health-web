@@ -1,4 +1,4 @@
-import { Suspense, useRef } from "react";
+import { useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, useNavigate } from "react-router-dom";
 import VerifyAccount from "@/components/auth/verify/verify-account";
@@ -228,9 +228,7 @@ export default function VerifyOtpPage() {
         <title>Verify OTP • LMJ Health</title>
       </Helmet>
       <AuthBackground>
-        <Suspense fallback={null}>
-          <VerifyOtpContent />
-        </Suspense>
+        <VerifyOtpContent />
       </AuthBackground>
     </>
   );

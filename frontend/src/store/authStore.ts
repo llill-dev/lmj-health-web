@@ -10,6 +10,7 @@ import {
   type AuthTokenPair,
 } from "@/lib/auth/session";
 import type { LoginRequest, AuthError, LoginResponse } from "@/lib/auth/types";
+import { resolveLoginIdentifier } from "@/lib/phone/normalizeAuthPhone";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -300,8 +301,7 @@ let state: AuthState = {
     clientType: "web" | "patient_mobile" | "doctor_mobile" = "web",
   ) => {
     const loginRequest: LoginRequest = {
-      email: identifier.includes("@") ? identifier : undefined,
-      phone: identifier.includes("@") ? undefined : identifier,
+      ...resolveLoginIdentifier(identifier),
       password,
       clientType,
     };

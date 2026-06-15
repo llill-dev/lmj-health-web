@@ -1,7 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useNavigate } from 'react-router-dom';
-import VerifyAccount from '@/components/auth/verify/verify-account';
-import AuthBackground from '@/components/auth/AuthBackground';
+import ResetPasswordVerifyForm from '@/components/auth/password/ResetPasswordVerifyForm';
 import { authApi } from '@/lib/auth/client';
 import {
   peekPasswordResetPending,
@@ -15,7 +14,7 @@ export default function ResetPasswordVerifyPage() {
   const pending = peekPasswordResetPending();
 
   if (!pending) {
-    return <Navigate to="/forgot-password" replace />;
+    return <Navigate to='/forgot-password' replace />;
   }
 
   return (
@@ -24,47 +23,45 @@ export default function ResetPasswordVerifyPage() {
         <title>Verify Reset OTP • LMJ Health</title>
       </Helmet>
 
-      <AuthBackground>
-        <VerifyAccount
-          destination={pending.destination}
-          onBack={() => navigate('/forgot-password')}
-          onResend={async () => {
-            const body =
-              pending.channel === 'email'
-                ? ({ channel: 'email' as const, email: pending.email! })
-                : ({
-                    channel: 'whatsapp' as const,
-                    phone: pending.phone!,
-                  });
+      <ResetPasswordVerifyForm
+        destination={pending.destination}
+        onBack={() => navigate('/forgot-password')}
+        onResend={async () => {
+          const body =
+            pending.channel === 'email'
+              ? ({ channel: 'email' as const, email: pending.email! })
+              : ({
+                  channel: 'whatsapp' as const,
+                  phone: pending.phone!,
+                });
 
-            await authApi.resendResetOtp(body);
-          }}
-          onVerify={async (otp) => {
-            const body =
-              pending.channel === 'email'
-                ? { email: pending.email!, otp }
-                : { phone: pending.phone!, otp };
+          await authApi.resendResetOtp(body);
+        }}
+        onVerify={async (otp) => {
+          const body =
+            pending.channel === 'email'
+              ? { email: pending.email!, otp }
+              : { phone: pending.phone!, otp };
 
-            const response = await authApi.verifyResetOtp(body);
+          const response = await authApi.verifyResetOtp(body);
 
-            persistPasswordResetToken({
-              resetToken: response.resetToken,
-              expiresInMinutes: response.expiresInMinutes,
-              fullName: response.fullName ?? pending.fullName,
-              email: response.email ?? pending.email,
-              phone: response.phone ?? pending.phone,
-            });
+          persistPasswordResetToken({
+            resetToken: response.resetToken,
+            expiresInMinutes: response.expiresInMinutes,
+            fullName: response.fullName ?? pending.fullName,
+            email: response.email ?? pending.email,
+            phone: response.phone ?? pending.phone,
+          });
 
-            toast('تم التحقق من الرمز. يمكنك الآن تعيين كلمة مرور جديدة.', {
-              title: 'تم التحقق',
-              variant: 'success',
-              durationMs: 3600,
-            });
+          toast('تم التحقق من الرمز. يمكنك الآن تعيين كلمة مرور جديدة.', {
+            title: 'تم التحقق',
+            variant: 'success',
+            durationMs: 3600,
+          });
 
-            navigate('/reset-password', { replace: true });
-          }}
-        />
-      </AuthBackground>
+          navigate('/reset-password', { replace: true });
+        }}
+      />
     </>
   );
 }
