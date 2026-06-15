@@ -23,15 +23,28 @@ export function ActivityLogFilters({
   onPeriodChange: (value: ActivityLogPeriod) => void;
 }) {
   return (
-    <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex flex-wrap justify-end gap-2">
+    <div
+      dir="rtl"
+      className="mb-5 flex w-full flex-col gap-3 lg:flex-row lg:items-stretch"
+    >
+      <div className="relative min-w-0 flex-[1.35] lg:min-w-[240px]">
+        <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+        <input
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="بحث في النشاطات..."
+          className="h-[46px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary"
+        />
+      </div>
+
+      <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
         {PERIOD_OPTIONS.map((option) => (
           <button
             key={option.id}
             type="button"
             onClick={() => onPeriodChange(option.id)}
             className={cn(
-              'rounded-[10px] px-4 py-2.5 font-cairo text-[12px] font-extrabold transition',
+              'min-h-[46px] rounded-[10px] px-3 py-2.5 font-cairo text-[12px] font-extrabold transition',
               period === option.id
                 ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.22)]'
                 : 'border border-[#EEF2F6] bg-white text-[#667085] hover:border-primary/30 hover:text-primary',
@@ -40,16 +53,6 @@ export function ActivityLogFilters({
             {option.label}
           </button>
         ))}
-      </div>
-
-      <div className="relative w-full max-w-md">
-        <Search className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
-        <input
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="بحث في النشاطات..."
-          className="h-[46px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-11 pl-4 font-cairo text-[13px] font-semibold outline-none transition focus:border-primary"
-        />
       </div>
     </div>
   );

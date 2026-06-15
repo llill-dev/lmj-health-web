@@ -5,7 +5,12 @@ export type ActivityLogActionType =
   | 'upload_file'
   | 'login'
   | 'update_profile'
-  | 'access_request';
+  | 'access_request'
+  | 'appointment'
+  | 'consultation'
+  | 'order'
+  | 'security'
+  | 'other';
 
 export type DoctorActivityLogItem = {
   id: string;
@@ -16,6 +21,8 @@ export type DoctorActivityLogItem = {
   timeLabel: string;
   patientName?: string;
   operationTypeLabel: string;
+  actorRoleLabel?: string;
+  actorDisplayName?: string;
   ip?: string;
   device?: string;
 };

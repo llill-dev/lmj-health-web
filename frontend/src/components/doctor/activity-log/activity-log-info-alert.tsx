@@ -1,5 +1,5 @@
 import { Info } from 'lucide-react';
-import { ACTIVITY_LOG_INFO_TEXT } from '@/lib/doctor/activityLog/mockData';
+import { ACTIVITY_LOG_INFO_TEXT } from '@/lib/doctor/activityLog/constants';
 
 export function ActivityLogInfoAlert() {
   return (
