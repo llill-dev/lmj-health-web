@@ -28,11 +28,9 @@ type ActionsMenuState = {
 export function FacilitiesTable({
   rows,
   onEdit,
-  onToggleStatus,
 }: {
   rows: DoctorFacility[];
   onEdit: (facility: DoctorFacility) => void;
-  onToggleStatus: (facility: DoctorFacility) => void;
 }) {
   const [menu, setMenu] = useState<ActionsMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -161,17 +159,6 @@ export function FacilitiesTable({
                 }}
               >
                 تعديل المنشأة
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] hover:bg-[#F0FDFA]"
-                onClick={() => {
-                  setMenu(null);
-                  onToggleStatus(activeRow);
-                }}
-              >
-                {activeRow.status === 'active' ? 'إغلاق المنشأة' : 'تفعيل المنشأة'}
               </button>
             </motion.div>,
             document.body,

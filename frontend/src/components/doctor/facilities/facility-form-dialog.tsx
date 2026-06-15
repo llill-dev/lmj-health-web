@@ -1,94 +1,73 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Save, X } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
-import type {
-  DoctorFacility,
-  DoctorFacilityFormValues,
-} from '@/lib/doctor/facilities/types';
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#111827]">
-        {label}
-        {required ? <span className="ms-1 text-[#DC2626]">*</span> : null}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-const inputClass =
-  'h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-white px-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary';
-
-const textareaClass =
-  'w-full rounded-[12px] border border-[#E5E7EB] px-4 py-3 text-start font-cairo text-[13px] font-semibold outline-none focus:border-primary';
-
-const EMPTY_FORM: DoctorFacilityFormValues = {
-  name: '',
-  description: '',
-  city: '',
-  address: '',
-  phone: '',
-  email: '',
-  workHoursFrom: '',
-  workHoursTo: '',
-  active: true,
-};
-
-function facilityToForm(facility: DoctorFacility): DoctorFacilityFormValues {
-  return {
-    name: facility.name,
-    description: facility.description ?? '',
-    city: facility.city,
-    address: facility.address,
-    phone: facility.phone,
-    email: facility.email ?? '',
-    workHoursFrom: facility.workHoursFrom,
-    workHoursTo: facility.workHoursTo,
-    active: facility.status === 'active',
-  };
-}
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  DoctorProfileFormField,
+  profileFieldClass,
+  profileInputClass,
+  profileTextareaClass,
+} from '@/components/doctor/profile-settings/doctor-profile-form-field';
+import StyledSelect from '@/components/ui/styled-select';
+import {
+  doctorFacilityToFormValues,
+} from '@/lib/doctor/facilities/mappers';
+import {
+  doctorFacilityFormSchema,
+  EMPTY_DOCTOR_FACILITY_FORM,
+  type DoctorFacilityFormSchemaValues,
+} from '@/lib/doctor/facilities/schema';
+import type { DoctorFacility } from '@/lib/doctor/facilities/types';
+import { DEFAULT_FACILITY_TYPE_OPTIONS } from '@/lib/doctor/facilities/types';
+import { FacilityStatusBadge } from '@/components/doctor/facilities/facility-status-badge';
+import { cn } from '@/lib/utils/utils';
 
 export function FacilityFormDialog({
   open,
   mode,
   initialFacility,
+  typeOptions = DEFAULT_FACILITY_TYPE_OPTIONS,
+  submitting = false,
   onClose,
   onSubmit,
 }: {
   open: boolean;
   mode: 'create' | 'edit';
   initialFacility?: DoctorFacility | null;
+  typeOptions?: Array<{ value: DoctorFacility['facilityType']; label: string }>;
+  submitting?: boolean;
   onClose: () => void;
-  onSubmit: (values: DoctorFacilityFormValues) => void;
+  onSubmit: (values: DoctorFacilityFormSchemaValues) => void | Promise<void>;
 }) {
-  const [form, setForm] = useState<DoctorFacilityFormValues>(EMPTY_FORM);
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<DoctorFacilityFormSchemaValues>({
+    resolver: zodResolver(doctorFacilityFormSchema),
+    defaultValues: EMPTY_DOCTOR_FACILITY_FORM,
+    mode: 'onSubmit',
+  });
 
   useEffect(() => {
     if (!open) return;
-    setForm(
+    reset(
       mode === 'edit' && initialFacility
-        ? facilityToForm(initialFacility)
-        : EMPTY_FORM,
+        ? doctorFacilityToFormValues(initialFacility)
+        : EMPTY_DOCTOR_FACILITY_FORM,
     );
-  }, [open, mode, initialFacility]);
+  }, [open, mode, initialFacility, reset]);
 
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !submitting) onClose();
     };
 
     const prevOverflow = document.body.style.overflow;
@@ -99,10 +78,9 @@ export function FacilityFormDialog({
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, submitting]);
 
   const title = mode === 'edit' ? 'تعديل منشأة' : 'إضافة منشأة';
-  const subtitle = 'توثيق المنشآت';
 
   return (
     <AnimatePresence>
@@ -116,7 +94,7 @@ export function FacilityFormDialog({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) onClose();
+            if (e.target === e.currentTarget && !submitting) onClose();
           }}
         >
           <motion.div
@@ -139,7 +117,8 @@ export function FacilityFormDialog({
               <button
                 type="button"
                 onClick={onClose}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
+                disabled={submitting}
+                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label="إغلاق"
               >
                 <X className="h-5 w-5" aria-hidden />
@@ -148,70 +127,99 @@ export function FacilityFormDialog({
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {title}
                 </h2>
-                <p className="mt-1 font-cairo text-[13px] font-bold text-primary/80">
-                  {subtitle}
-                </p>
               </div>
             </div>
 
-            <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
-              <div className="space-y-5">
-                <Field label="اسم المنشأة" required>
+            <form dir="rtl" onSubmit={handleSubmit(onSubmit)}>
+              <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
+                <div className="space-y-5">
+                <DoctorProfileFormField
+                  label="اسم المنشأة"
+                  required
+                  error={errors.name?.message}
+                >
                   <input
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, name: e.target.value }))
-                    }
+                    {...register('name')}
                     placeholder="أدخل اسم المنشأة"
-                    className={inputClass}
+                    className={profileFieldClass(
+                      cn(profileInputClass, 'text-start placeholder:text-start'),
+                      Boolean(errors.name),
+                    )}
                   />
-                </Field>
+                </DoctorProfileFormField>
 
-                <Field label="الوصف">
+                <DoctorProfileFormField
+                  label="نوع المنشأة"
+                  required
+                  error={errors.facilityType?.message}
+                >
+                  <Controller
+                    control={control}
+                    name="facilityType"
+                    render={({ field }) => (
+                      <StyledSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={typeOptions.map((option) => ({
+                          value: option.value,
+                          label: option.label,
+                        }))}
+                        placeholder="اختر نوع المنشأة"
+                        error={Boolean(errors.facilityType)}
+                      />
+                    )}
+                  />
+                </DoctorProfileFormField>
+
+                <DoctorProfileFormField
+                  label="الوصف"
+                  error={errors.description?.message}
+                >
                   <textarea
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
+                    {...register('description')}
                     rows={3}
                     placeholder="أدخل وصف المنشأة"
-                    className={textareaClass}
+                    className={profileFieldClass(
+                      cn(profileTextareaClass, 'text-start placeholder:text-start'),
+                      Boolean(errors.description),
+                    )}
                   />
-                </Field>
+                </DoctorProfileFormField>
 
                 <div>
                   <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
                     الموقع
                   </h3>
                   <div className="space-y-4">
-                    <Field label="المدينة" required>
+                    <DoctorProfileFormField
+                      label="المدينة"
+                      required
+                      error={errors.city?.message}
+                    >
                       <input
-                        value={form.city}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, city: e.target.value }))
-                        }
-                        className={inputClass}
+                        {...register('city')}
+                        placeholder="أدخل المدينة"
+                        className={profileFieldClass(
+                          cn(profileInputClass, 'text-start placeholder:text-start'),
+                          Boolean(errors.city),
+                        )}
                       />
-                    </Field>
-                    <Field label="العنوان" required>
+                    </DoctorProfileFormField>
+
+                    <DoctorProfileFormField
+                      label="العنوان"
+                      required
+                      error={errors.address?.message}
+                    >
                       <input
-                        value={form.address}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            address: e.target.value,
-                          }))
-                        }
+                        {...register('address')}
                         placeholder="أدخل العنوان التفصيلي"
-                        className={inputClass}
+                        className={profileFieldClass(
+                          cn(profileInputClass, 'text-start placeholder:text-start'),
+                          Boolean(errors.address),
+                        )}
                       />
-                    </Field>
-                    <div className="flex h-[180px] items-center justify-center rounded-[12px] border border-dashed border-[#D1FAE5] bg-[#FAFAFA] font-cairo text-[13px] font-semibold text-[#98A2B3]">
-                      [ Map Picker ]
-                    </div>
+                    </DoctorProfileFormField>
                   </div>
                 </div>
 
@@ -220,28 +228,36 @@ export function FacilityFormDialog({
                     التواصل
                   </h3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Field label="الهاتف" required>
+                    <DoctorProfileFormField
+                      label="الهاتف"
+                      required
+                      error={errors.phone?.message}
+                    >
                       <input
-                        value={form.phone}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, phone: e.target.value }))
-                        }
+                        {...register('phone')}
                         placeholder="09xxxxxxxx"
-                        className={inputClass}
                         dir="ltr"
+                        className={profileFieldClass(
+                          cn(profileInputClass, 'text-start placeholder:text-start'),
+                          Boolean(errors.phone),
+                        )}
                       />
-                    </Field>
-                    <Field label="البريد الإلكتروني">
+                    </DoctorProfileFormField>
+
+                    <DoctorProfileFormField
+                      label="البريد الإلكتروني"
+                      error={errors.email?.message}
+                    >
                       <input
-                        value={form.email}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, email: e.target.value }))
-                        }
+                        {...register('email')}
                         placeholder="email@example.com"
-                        className={inputClass}
                         dir="ltr"
+                        className={profileFieldClass(
+                          cn(profileInputClass, 'text-start placeholder:text-start'),
+                          Boolean(errors.email),
+                        )}
                       />
-                    </Field>
+                    </DoctorProfileFormField>
                   </div>
                 </div>
 
@@ -250,81 +266,72 @@ export function FacilityFormDialog({
                     ساعات العمل
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <Field label="من" required>
+                    <DoctorProfileFormField
+                      label="من"
+                      required
+                      error={errors.workHoursFrom?.message}
+                    >
                       <input
                         type="time"
-                        value={form.workHoursFrom}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            workHoursFrom: e.target.value,
-                          }))
-                        }
-                        className={inputClass}
+                        {...register('workHoursFrom')}
+                        className={profileFieldClass(
+                          cn(profileInputClass, 'text-start'),
+                          Boolean(errors.workHoursFrom),
+                        )}
                       />
-                    </Field>
-                    <Field label="إلى" required>
+                    </DoctorProfileFormField>
+
+                    <DoctorProfileFormField
+                      label="إلى"
+                      required
+                      error={errors.workHoursTo?.message}
+                    >
                       <input
                         type="time"
-                        value={form.workHoursTo}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            workHoursTo: e.target.value,
-                          }))
-                        }
-                        className={inputClass}
+                        {...register('workHoursTo')}
+                        className={profileFieldClass(
+                          cn(profileInputClass, 'text-start'),
+                          Boolean(errors.workHoursTo),
+                        )}
                       />
-                    </Field>
+                    </DoctorProfileFormField>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4">
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={form.active}
-                    onClick={() =>
-                      setForm((prev) => ({ ...prev, active: !prev.active }))
-                    }
-                    className={
-                      form.active
-                        ? 'relative h-7 w-12 rounded-full bg-primary transition'
-                        : 'relative h-7 w-12 rounded-full bg-[#D0D5DD] transition'
-                    }
-                  >
-                    <span
-                      className={
-                        form.active
-                          ? 'absolute end-1 top-1 h-5 w-5 rounded-full bg-white shadow transition'
-                          : 'absolute start-1 top-1 h-5 w-5 rounded-full bg-white shadow transition'
-                      }
-                    />
-                  </button>
-                  <span className="font-cairo text-[13px] font-extrabold text-[#667085]">
-                    {form.active ? 'نشط' : 'غير نشط'}
-                  </span>
+                {mode === 'edit' && initialFacility ? (
+                  <div className="flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4">
+                    <FacilityStatusBadge status={initialFacility.status} />
+                    <span className="font-cairo text-[13px] font-extrabold text-[#667085]">
+                      حالة المنشأة
+                    </span>
+                  </div>
+                ) : (
+                  <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+                    بعد الإنشاء تُفعَّل المنشأة تلقائياً وتظهر حالتها في الجدول.
+                  </p>
+                )}
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5">
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary"
-              >
-                إلغاء
-              </button>
-              <button
-                type="button"
-                onClick={() => onSubmit(form)}
-                className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
-              >
-                <Save className="h-4 w-4" aria-hidden />
-                حفظ
-              </button>
-            </div>
+              <div className="grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={submitting}
+                  className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
+                >
+                  <Save className="h-4 w-4" aria-hidden />
+                  {submitting ? 'جارٍ الحفظ…' : 'حفظ'}
+                </button>
+              </div>
+            </form>
           </motion.div>
         </motion.div>
       ) : null}
