@@ -6,3 +6,4 @@ export { MedicalOrderCard } from "./MedicalOrderCard";
 export { EncounterCard } from "./EncounterCard";
 export { MedicationRecordCard } from "./MedicationRecordCard";
 export { PrescriptionCard } from "./PrescriptionCard";
+export { PatientAppointmentsSummaryCards } from "./PatientAppointmentsSummaryCards";
