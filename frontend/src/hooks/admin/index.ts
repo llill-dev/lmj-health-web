@@ -1,3 +1,4 @@
+export * from './useAdminOffboardUser';
 export * from './useAdminAnalytics';
 export * from './useAdminAppointments';
 export * from './useAdminAuditLogs';

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAdminOffboardUser } from '@/hooks/admin/useAdminSecretaries';
+import { useAdminOffboardUser } from '@/hooks/admin/useAdminOffboardUser';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 const schema = z.object({
@@ -18,15 +18,30 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   targetUserId: string | null;
+  targetDoctorId?: string | null;
   targetLabel: string;
+  accountRole?: 'secretary' | 'doctor' | 'staff';
   onSuccess?: () => void;
+};
+
+const OFFBOARD_DESCRIPTION: Record<
+  NonNullable<Props['accountRole']>,
+  string
+> = {
+  secretary:
+    'وإلغاء ارتباطه بالطبيب وإلغاء جميع مواعيده النشطة.',
+  doctor:
+    'وإخفاؤه من البحث وإلغاء مواعيده المستقبلية وإغلاق الاستشارات النشطة.',
+  staff: 'وتعطيل وصوله إلى المنصة.',
 };
 
 export default function OffboardDialog({
   open,
   onOpenChange,
   targetUserId,
+  targetDoctorId = null,
   targetLabel,
+  accountRole = 'secretary',
   onSuccess,
 }: Props) {
   const [done, setDone] = useState(false);
@@ -60,7 +75,11 @@ export default function OffboardDialog({
   async function onSubmit(values: Values) {
     if (!targetUserId) return;
     try {
-      await offboard.mutateAsync({ userId: targetUserId, reason: values.reason });
+      await offboard.mutateAsync({
+        userId: targetUserId,
+        reason: values.reason,
+        doctorId: targetDoctorId ?? undefined,
+      });
       setDone(true);
       onSuccess?.();
       setTimeout(() => onOpenChange(false), 1400);
@@ -130,7 +149,7 @@ export default function OffboardDialog({
                 <Dialog.Description className='font-cairo text-[13px] font-semibold text-[#667085]'>
                   سيتم إيقاف حساب{' '}
                   <span className='font-extrabold text-[#111827]'>{targetLabel}</span>{' '}
-                  وإلغاء ارتباطه بالطبيب وإلغاء جميع مواعيده النشطة.
+                  {OFFBOARD_DESCRIPTION[accountRole]}
                   <br />
                   <span className='text-[#DC2626]'>هذا الإجراء لا يمكن التراجع عنه.</span>
                 </Dialog.Description>

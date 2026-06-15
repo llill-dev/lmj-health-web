@@ -2,9 +2,12 @@ import { Helmet } from 'react-helmet-async';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban, CheckCircle2, MapPin } from 'lucide-react';
+import { Ban, CheckCircle2, MapPin, UserX } from 'lucide-react';
 import { useAdminDoctor } from '@/hooks/admin/useAdminDoctor';
 import { adminApi, verificationRequestsFromListEnvelope } from '@/lib/admin/client';
+import { resolveAdminDoctorUserId } from '@/lib/admin/resolveAdminDoctorUserId';
+import { isAdminDoctorOffboarded } from '@/lib/admin/isAdminDoctorOffboarded';
+import { formatPhoneForDisplay } from '@/lib/phone/formatPhoneForDisplay';
 import {
   mergeDoctorProfileIntoSummaryStats,
   parseDiagnosisAnalytics,
@@ -15,7 +18,9 @@ import { AdminDoctorAnalyticsPanels } from '@/components/admin/doctor/AdminDocto
 import { FieldBlock, SectionTitle } from '@/components/admin/doctors/DoctorDetailsPrimitives';
 import { DoctorSpecializationReviewBanner } from '@/components/admin/verification-requests/DoctorSpecializationReviewBanner';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
+import OffboardDialog from '@/components/admin/secretaries/dialogs/OffboardDialog';
 import { resolveDoctorSpecializationReviewState } from '@/lib/admin/doctorSpecializationReview';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 
 function requestStillOpen(status: string | undefined): boolean {
@@ -83,7 +88,7 @@ export default function AdminDoctorDetailsPage() {
     doctor,
     verificationRequest: verificationFromDetails,
     pendingVerificationRequestId: pendingRequestIdFromApi,
-    isLoading,
+    isAwaitingData,
     error,
     refetch: refetchDoctor,
   } = useAdminDoctor(doctorId);
@@ -92,6 +97,17 @@ export default function AdminDoctorDetailsPage() {
   const [actionDialogMode, setActionDialogMode] = useState<
     'approve' | 'reject' | 'map'
   >('approve');
+  const [offboardOpen, setOffboardOpen] = useState(false);
+
+  const offboardUserId = useMemo(
+    () => resolveAdminDoctorUserId(doctor),
+    [doctor],
+  );
+  const isOffboarded = isAdminDoctorOffboarded(doctor);
+  const phoneDisplay = useMemo(
+    () => formatPhoneForDisplay(doctor?.user?.phone),
+    [doctor?.user?.phone],
+  );
 
   const { data: vrListData } = useQuery({
     queryKey: ['admin-verification-requests', 'by-doctor', doctorId],
@@ -150,11 +166,7 @@ export default function AdminDoctorDetailsPage() {
   };
 
   const analyticsRange: AdminDoctorAnalyticsRange = 'month';
-  const {
-    data: diagnosisRaw,
-    isLoading: diagnosisLoading,
-    isError: diagnosisError,
-  } = useQuery({
+  const diagnosisQuery = useQuery({
     queryKey: ['admin', 'doctor', doctorId, 'analytics', 'diagnosis', analyticsRange],
     queryFn: () =>
       adminApi.doctors.analyticsDiagnosis(String(doctorId), {
@@ -163,11 +175,7 @@ export default function AdminDoctorDetailsPage() {
     enabled: Boolean(doctorId) && Boolean(doctor),
     staleTime: 60_000,
   });
-  const {
-    data: summaryRaw,
-    isLoading: summaryLoading,
-    isError: summaryError,
-  } = useQuery({
+  const summaryQuery = useQuery({
     queryKey: ['admin', 'doctor', doctorId, 'analytics', 'summary', analyticsRange],
     queryFn: () =>
       adminApi.doctors.analyticsSummary(String(doctorId), {
@@ -176,6 +184,18 @@ export default function AdminDoctorDetailsPage() {
     enabled: Boolean(doctorId) && Boolean(doctor),
     staleTime: 60_000,
   });
+  const diagnosisRaw = diagnosisQuery.data;
+  const summaryRaw = summaryQuery.data;
+  const diagnosisAwaiting = isAwaitingInitialQueryData(
+    diagnosisQuery.data,
+    diagnosisQuery.isError,
+  );
+  const diagnosisError = diagnosisQuery.isError;
+  const summaryAwaiting = isAwaitingInitialQueryData(
+    summaryQuery.data,
+    summaryQuery.isError,
+  );
+  const summaryError = summaryQuery.isError;
 
   const diagnosisItems = useMemo(
     () => parseDiagnosisAnalytics(diagnosisRaw, analyticsRange),
@@ -202,7 +222,7 @@ export default function AdminDoctorDetailsPage() {
         className='-mx-3 -mt-6 mb-0 min-h-[calc(100vh-5.5rem)] px-3 py-6 font-cairo sm:-mx-6 sm:-mt-8 sm:px-6 sm:py-8 md:px-8 lg:px-12'
       >
         <div className='mx-auto flex w-full max-w-[1100px] flex-col gap-6 sm:gap-8'>
-          {isLoading ? (
+          {isAwaitingData ? (
             <div className='rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-10 text-center font-cairo text-sm font-semibold text-[#667085] shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
               جاري تحميل بيانات الطبيب...
             </div>
@@ -237,7 +257,8 @@ export default function AdminDoctorDetailsPage() {
                         />
                         <FieldBlock
                           label='رقم الهاتف'
-                          value={doctor.user?.phone ?? '—'}
+                          value={phoneDisplay}
+                          valueDir='ltr'
                         />
                         <FieldBlock
                           label='الايميل'
@@ -321,13 +342,13 @@ export default function AdminDoctorDetailsPage() {
               <AdminDoctorAnalyticsPanels
                 diagnosisItems={diagnosisItems}
                 summary={summaryStats}
-                isDiagnosisLoading={diagnosisLoading}
-                isSummaryLoading={summaryLoading}
+                isDiagnosisLoading={diagnosisAwaiting}
+                isSummaryLoading={summaryAwaiting}
                 hasDiagnosisError={diagnosisError}
                 hasSummaryError={summaryError}
               />
 
-              {doctor.approvalStatus === 'pending' ? (
+              {doctor.approvalStatus === 'pending' && !isOffboarded ? (
                 <div className='flex flex-col items-center gap-3 pb-6 pt-2'>
                   {specializationState.needsAdminResolve ? (
                     <p className='max-w-lg text-center font-cairo text-[12px] font-semibold text-[#92400E]'>
@@ -425,6 +446,43 @@ export default function AdminDoctorDetailsPage() {
                 </div>
               ) : null}
 
+              {isOffboarded ? (
+                <section className='rounded-[10px] border border-[#FECACA] bg-[#FFF5F5] px-4 py-5 sm:px-6'>
+                  <SectionTitle>إدارة الحساب</SectionTitle>
+                  <div className='flex items-start gap-3 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4'>
+                    <UserX
+                      className='mt-0.5 h-5 w-5 shrink-0 text-[#991B1B]'
+                      aria-hidden
+                    />
+                    <div>
+                      <p className='font-cairo text-[14px] font-extrabold text-[#991B1B]'>
+                        الحساب موقوف
+                      </p>
+                      <p className='mt-1 font-cairo text-[13px] font-semibold leading-relaxed text-[#7F1D1D]'>
+                        تم إيقاف وصول هذا الطبيب إلى المنصة. لا يظهر في البحث
+                        للمرضى ولا يمكن إعادة إيقافه.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              ) : offboardUserId ? (
+                <section className='rounded-[10px] border border-[#FECACA] bg-[#FFF5F5] px-4 py-5 sm:px-6'>
+                  <SectionTitle>إدارة الحساب</SectionTitle>
+                  <p className='mb-4 font-cairo text-[13px] font-semibold leading-relaxed text-[#7F1D1D]'>
+                    إيقاف الحساب يُستخدم للحسابات المكرّرة أو التجريبية. يُخفى
+                    الطبيب من البحث وتُلغى مواعيده المستقبلية.
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => setOffboardOpen(true)}
+                    className='inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#DC2626] px-6 font-cairo text-[14px] font-extrabold text-white transition hover:bg-[#B91C1C]'
+                  >
+                    <UserX className='h-5 w-5 shrink-0' aria-hidden />
+                    إيقاف حساب الطبيب
+                  </button>
+                </section>
+              ) : null}
+
               {doctor && verificationRequestId ? (
                 <ReviewVerificationRequestDialog
                   key={`${verificationRequestId}-${actionDialogMode}`}
@@ -448,6 +506,19 @@ export default function AdminDoctorDetailsPage() {
           )}
         </div>
       </div>
+
+      <OffboardDialog
+        open={offboardOpen}
+        onOpenChange={setOffboardOpen}
+        targetUserId={offboardUserId}
+        targetDoctorId={doctorId ?? null}
+        targetLabel={doctor?.user?.fullName?.trim() || phoneDisplay}
+        accountRole='doctor'
+        onSuccess={() => {
+          void refetchDoctor();
+          void queryClient.invalidateQueries({ queryKey: ['admin-doctors'] });
+        }}
+      />
     </>
   );
 }

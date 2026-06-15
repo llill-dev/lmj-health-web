@@ -6,11 +6,15 @@ import {
   Eye,
   Mail,
   Phone,
+  UserX,
 } from 'lucide-react';
 import type {
   AdminDoctorApprovalStatus,
   AdminDoctorSummary,
 } from '@/lib/admin/types';
+import { isAdminDoctorOffboarded } from '@/lib/admin/isAdminDoctorOffboarded';
+import { resolveAdminDoctorUserId } from '@/lib/admin/resolveAdminDoctorUserId';
+import { formatPhoneForDisplay } from '@/lib/phone/formatPhoneForDisplay';
 
 const TEAL = '#108B8B';
 const STAT_BG = '#E6F4F4';
@@ -21,7 +25,21 @@ function doctorInitial(fullName?: string) {
   return n.charAt(0);
 }
 
-function StatusBadge({ status }: { status?: AdminDoctorApprovalStatus }) {
+function StatusBadge({
+  status,
+  offboarded,
+}: {
+  status?: AdminDoctorApprovalStatus;
+  offboarded?: boolean;
+}) {
+  if (offboarded) {
+    return (
+      <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#7F1D1D] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
+        <UserX className='h-3.5 w-3.5 shrink-0' />
+        موقوف
+      </span>
+    );
+  }
   if (status === 'approved') {
     return (
       <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#28A745] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
@@ -49,15 +67,26 @@ function StatusBadge({ status }: { status?: AdminDoctorApprovalStatus }) {
 export default function DoctorListCard({
   doctor: d,
   onDetails,
+  onOffboard,
+  isDuplicatePhone = false,
 }: {
   doctor: AdminDoctorSummary;
   onDetails: () => void;
+  onOffboard?: (target: {
+    doctorId: string;
+    userId?: string | null;
+    label: string;
+  }) => void;
+  isDuplicatePhone?: boolean;
 }) {
   const appt = d.appointmentsCount;
   const done = d.completedAppointmentsCount;
   const pts = d.linkedPatientsCount;
   const fmt = (n: number | undefined) =>
     typeof n === 'number' && !Number.isNaN(n) ? String(n) : '—';
+  const userId = resolveAdminDoctorUserId(d);
+  const phoneDisplay = formatPhoneForDisplay(d.user?.phone);
+  const offboarded = isAdminDoctorOffboarded(d);
 
   return (
     <div className='rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
@@ -130,7 +159,7 @@ export default function DoctorListCard({
               {d.user?.email ?? '—'}
             </span>
           </div>
-          <div className='flex items-center gap-2'>
+          <div className='flex flex-wrap items-center gap-2'>
             <Phone
               className='h-4 w-4 shrink-0'
               style={{ color: TEAL }}
@@ -140,14 +169,19 @@ export default function DoctorListCard({
               className='font-cairo text-[12px] font-semibold text-[#6B7280]'
               dir='ltr'
             >
-              {d.user?.phone ?? '—'}
+              {phoneDisplay}
             </span>
+            {isDuplicatePhone ? (
+              <span className='rounded-[6px] bg-[#FEF3C7] px-2 py-0.5 font-cairo text-[10px] font-extrabold text-[#92400E]'>
+                رقم مكرّر
+              </span>
+            ) : null}
           </div>
         </div>
 
         <div className='flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:border-t-0 sm:pt-0 lg:w-auto lg:items-end lg:justify-self-end'>
           <div className='flex justify-end'>
-            <StatusBadge status={d.approvalStatus} />
+            <StatusBadge status={d.approvalStatus} offboarded={offboarded} />
           </div>
           <button
             type='button'
@@ -158,6 +192,22 @@ export default function DoctorListCard({
             <span>التفاصيل</span>
             <Eye className='h-4 w-4 shrink-0' />
           </button>
+          {onOffboard && !offboarded ? (
+            <button
+              type='button'
+              onClick={() =>
+                onOffboard({
+                  doctorId: d._id,
+                  userId,
+                  label: d.user?.fullName?.trim() || phoneDisplay,
+                })
+              }
+              className='inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-4 font-cairo text-[12px] font-extrabold text-[#B91C1C] transition hover:bg-[#FEE2E2] lg:w-auto lg:min-w-[8.5rem]'
+            >
+              <UserX className='h-4 w-4 shrink-0' />
+              <span>إيقاف الحساب</span>
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

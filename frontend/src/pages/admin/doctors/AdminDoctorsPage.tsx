@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Clock,
   Stethoscope,
+  UserX,
 } from 'lucide-react';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import AdminSearchFiltersBar from '@/components/admin/AdminSearchFiltersBar';
@@ -13,11 +14,19 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useAdminDoctors } from '@/hooks/admin/useAdminDoctors';
 import type { AdminDoctorApprovalStatus } from '@/lib/admin/types';
+import OffboardDialog from '@/components/admin/secretaries/dialogs/OffboardDialog';
+import { phoneComparisonKey } from '@/lib/phone/formatPhoneForDisplay';
+import { adminApi } from '@/lib/admin/client';
+import { normalizeAdminDoctorDetailsResponse } from '@/lib/admin/normalizeAdminDoctorDetailsResponse';
+import { resolveAdminDoctorUserId } from '@/lib/admin/resolveAdminDoctorUserId';
+import { isAdminDoctorOffboarded } from '@/lib/admin/isAdminDoctorOffboarded';
+import { useToast } from '@/components/ui/ToastProvider';
 
 const TEAL = '#108B8B';
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const specializationParam = searchParams.get('specialization') ?? '';
 
@@ -51,7 +60,7 @@ export default function AdminDoctorsPage() {
     );
   }, [specializationParam]);
 
-  const { doctors, total, results, isLoading, error } = useAdminDoctors({
+  const { doctors, total, results, isAwaitingData, error, refetch } = useAdminDoctors({
     search: filters.search || undefined,
     specialization: filters.specialization || undefined,
     status: filters.status || undefined,
@@ -63,6 +72,27 @@ export default function AdminDoctorsPage() {
     limit: filters.limit,
   });
 
+  const [offboardOpen, setOffboardOpen] = useState(false);
+  const [offboardTarget, setOffboardTarget] = useState<{
+    userId: string;
+    doctorId: string;
+    label: string;
+  } | null>(null);
+
+  const duplicatePhoneKeys = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const doctor of doctors) {
+      const key = phoneComparisonKey(doctor.user?.phone);
+      if (!key) continue;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return new Set(
+      [...counts.entries()]
+        .filter(([, count]) => count > 1)
+        .map(([key]) => key),
+    );
+  }, [doctors]);
+
   const totalPages = useMemo(() => {
     const safeLimit = Math.max(1, filters.limit);
     const pages = Math.ceil((total || 0) / safeLimit);
@@ -71,16 +101,33 @@ export default function AdminDoctorsPage() {
 
   const stats = useMemo(() => {
     const approvedCount = doctors.filter(
-      (d) => d.approvalStatus === 'approved',
+      (d) => d.approvalStatus === 'approved' && !isAdminDoctorOffboarded(d),
     ).length;
     const pendingCount = doctors.filter(
-      (d) => d.approvalStatus === 'pending',
+      (d) => d.approvalStatus === 'pending' && !isAdminDoctorOffboarded(d),
     ).length;
     const rejectedCount = doctors.filter(
-      (d) => d.approvalStatus === 'rejected',
+      (d) => d.approvalStatus === 'rejected' && !isAdminDoctorOffboarded(d),
     ).length;
+    const offboardedCount = doctors.filter(isAdminDoctorOffboarded).length;
 
     return [
+      ...(offboardedCount > 0
+        ? [
+            {
+              title: 'موقوف' as const,
+              value: offboardedCount,
+              icon: UserX,
+              tone: {
+                border: 'border-[#FCA5A5]',
+                bg: 'bg-[#FEF2F2]',
+                iconBg: 'bg-[#FEE2E2]',
+                iconColor: 'text-[#991B1B]',
+                valueColor: 'text-[#991B1B]',
+              },
+            },
+          ]
+        : []),
       {
         title: 'مرفوض' as const,
         value: rejectedCount,
@@ -155,7 +202,7 @@ export default function AdminDoctorsPage() {
             return {
               key: c.title,
               icon: <Icon className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : c.value,
+              value: isAwaitingData ? '—' : c.value,
               label: c.title,
             };
           })}
@@ -252,7 +299,7 @@ export default function AdminDoctorsPage() {
           </div>
 
           <div className='space-y-3 p-3 sm:space-y-4 sm:p-5'>
-            {isLoading ? (
+            {isAwaitingData ? (
               <div className='rounded-[10px] border border-[#E8ECEF] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
                 جاري تحميل قائمة الأطباء...
               </div>
@@ -265,15 +312,57 @@ export default function AdminDoctorsPage() {
                 لا يوجد أطباء مطابقون لخيارات البحث.
               </div>
             ) : (
-              doctors.map((d) => (
-                <DoctorListCard
-                  key={d._id}
-                  doctor={d}
-                  onDetails={() =>
-                    navigate(`/admin/doctors/${encodeURIComponent(d._id)}`)
-                  }
-                />
-              ))
+              doctors.map((d) => {
+                const phoneKey = phoneComparisonKey(d.user?.phone);
+                return (
+                  <DoctorListCard
+                    key={d._id}
+                    doctor={d}
+                    isDuplicatePhone={
+                      phoneKey != null && duplicatePhoneKeys.has(phoneKey)
+                    }
+                    onDetails={() =>
+                      navigate(`/admin/doctors/${encodeURIComponent(d._id)}`)
+                    }
+                    onOffboard={async (target) => {
+                      let userId = target.userId ?? null;
+                      if (!userId) {
+                        try {
+                          const details = normalizeAdminDoctorDetailsResponse(
+                            await adminApi.doctors.getById(target.doctorId),
+                          );
+                          userId = resolveAdminDoctorUserId(details.doctor);
+                        } catch {
+                          toast(
+                            'تعذّر تحميل معرف المستخدم لإيقاف الحساب. افتح التفاصيل وحاول مجدداً.',
+                            {
+                              title: 'تعذّر الإيقاف',
+                              variant: 'error',
+                            },
+                          );
+                          return;
+                        }
+                      }
+                      if (!userId) {
+                        toast(
+                          'لم يُعثَر على معرف المستخدم المرتبط بهذا الطبيب.',
+                          {
+                            title: 'تعذّر الإيقاف',
+                            variant: 'error',
+                          },
+                        );
+                        return;
+                      }
+                      setOffboardTarget({
+                        userId,
+                        doctorId: target.doctorId,
+                        label: target.label,
+                      });
+                      setOffboardOpen(true);
+                    }}
+                  />
+                );
+              })
             )}
           </div>
         </section>
@@ -307,7 +396,7 @@ export default function AdminDoctorsPage() {
 
             <button
               type='button'
-              disabled={isLoading || filters.page <= 1}
+              disabled={isAwaitingData || filters.page <= 1}
               onClick={() =>
                 setFilters((prev) => ({
                   ...prev,
@@ -315,7 +404,7 @@ export default function AdminDoctorsPage() {
                 }))
               }
               className={
-                isLoading || filters.page <= 1
+                isAwaitingData || filters.page <= 1
                   ? 'h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none'
                   : 'h-[38px] flex-1 rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] sm:flex-none'
               }
@@ -324,7 +413,7 @@ export default function AdminDoctorsPage() {
             </button>
             <button
               type='button'
-              disabled={isLoading || filters.page >= totalPages}
+              disabled={isAwaitingData || filters.page >= totalPages}
               onClick={() =>
                 setFilters((prev) => ({
                   ...prev,
@@ -332,7 +421,7 @@ export default function AdminDoctorsPage() {
                 }))
               }
               className={
-                isLoading || filters.page >= totalPages
+                isAwaitingData || filters.page >= totalPages
                   ? 'h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none'
                   : 'h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15, 143, 139,0.25)] sm:flex-none'
               }
@@ -344,6 +433,18 @@ export default function AdminDoctorsPage() {
 
         <div className='h-4 sm:h-8' />
       </div>
+
+      <OffboardDialog
+        open={offboardOpen}
+        onOpenChange={setOffboardOpen}
+        targetUserId={offboardTarget?.userId ?? null}
+        targetDoctorId={offboardTarget?.doctorId ?? null}
+        targetLabel={offboardTarget?.label ?? ''}
+        accountRole='doctor'
+        onSuccess={() => {
+          void refetch();
+        }}
+      />
     </>
   );
 }

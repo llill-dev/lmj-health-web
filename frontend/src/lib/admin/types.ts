@@ -258,6 +258,16 @@ export type AdminDoctorSummary = {
     gender?: string;
     photoUrl?: string;
   };
+  userId?:
+    | string
+    | {
+        _id?: string;
+        fullName?: string;
+        email?: string;
+        phone?: string;
+        accountDeletionStatus?: string;
+        accountDeletion?: { status?: string | null } | null;
+      };
 };
 
 export type AdminDoctorsListParams = {
@@ -531,7 +541,11 @@ export type AdminDoctorDetailsDoctor = {
         gender?: string;
         photoUrl?: string;
         dateOfBirth?: string;
+        accountDeletionStatus?: string;
+        accountDeletion?: { status?: string | null } | null;
       };
+  accountDeletionStatus?: string;
+  accountDeletion?: { status?: string | null } | null;
   /**
    * بعض الردود تعيد بيانات الحساب في جذر المستند بدل `user` — ندمجها للعرض في `user`.
    */
