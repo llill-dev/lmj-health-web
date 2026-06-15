@@ -1,5 +1,6 @@
 import {
   Activity,
+  BookMarked,
   BookOpen,
   Bell,
   CalendarDays,
@@ -38,13 +39,15 @@ export type SidebarItemId =
   | "medical-requests"
   | "access-requests"
   | "doctors-directory"
+  | "medical-services-directory"
   | "clinic-location"
   | "accounts"
   | "facilities"
   | "activity-log"
   | "support"
   | "notification"
-  | "profile-settings";
+  | "profile-settings"
+  | "secretaries";
 
 export type AdminSidebarItemId =
   | "overview"
@@ -142,6 +145,12 @@ export const sidebarItems: Array<{
     icon: BookOpen,
   },
   {
+    id: "medical-services-directory",
+    path: "medical-services-directory",
+    label: "دليل الخدمات الطبية",
+    icon: BookMarked,
+  },
+  {
     id: "clinic-location",
     path: "clinic-location",
     label: "موقع العيادة",
@@ -182,6 +191,12 @@ export const sidebarItems: Array<{
     path: "profile-settings",
     label: "الملف الشخصي",
     icon: Settings,
+  },
+  {
+    id: "secretaries",
+    path: "secretaries",
+    label: "إدارة السكرتارية",
+    icon: UserCog,
   },
 ];
 

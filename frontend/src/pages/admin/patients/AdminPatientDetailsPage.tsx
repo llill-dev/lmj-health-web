@@ -100,7 +100,7 @@ export default function AdminPatientDetailsPage() {
   const navigate = useNavigate();
   const initialPatient = (location.state as { patient?: AdminPatientSummary } | null)
     ?.patient;
-  const { patient, isLoading, error } = useAdminPatient(patientId, initialPatient ?? null);
+  const { patient, isAwaitingData, error } = useAdminPatient(patientId, initialPatient ?? null);
 
   // Fetch more appointments to improve per-patient accuracy.
   // NOTE: API admin/appointments does not support ?patientId filter,
@@ -238,7 +238,7 @@ export default function AdminPatientDetailsPage() {
           </button>
         </div>
 
-        {isLoading ? (
+        {isAwaitingData ? (
           <div className='mt-6 rounded-[14px] border border-[#EEF2F6] bg-white px-6 py-10 text-center shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='font-cairo text-[13px] font-semibold text-[#667085]'>
               جارِ تحميل تفاصيل المريض...
@@ -333,25 +333,25 @@ export default function AdminPatientDetailsPage() {
               <div className='rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
                 <div className='font-cairo text-[11px] font-bold text-[#667085]'>مواعيد قادمة</div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-[#16A34A]'>
-                  {appointmentsQuery.isLoading ? '...' : upcomingCount}
+                  {appointmentsQuery.isAwaitingData ? '...' : upcomingCount}
                 </div>
               </div>
               <div className='rounded-[12px] border border-[#67E8F9] bg-[#ECFEFF] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
                 <div className='font-cairo text-[11px] font-bold text-[#667085]'>مواعيد مكتملة</div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-primary'>
-                  {appointmentsQuery.isLoading ? '...' : completedCount}
+                  {appointmentsQuery.isAwaitingData ? '...' : completedCount}
                 </div>
               </div>
               <div className='rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
                 <div className='font-cairo text-[11px] font-bold text-[#667085]'>مواعيد ملغاة</div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-[#B42318]'>
-                  {appointmentsQuery.isLoading ? '...' : cancelledCount}
+                  {appointmentsQuery.isAwaitingData ? '...' : cancelledCount}
                 </div>
               </div>
               <div className='rounded-[12px] border border-[#E9D4FF] bg-[#FAF5FF] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
                 <div className='font-cairo text-[11px] font-bold text-[#667085]'>لم يحضر (No-show)</div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-[#7C3AED]'>
-                  {appointmentsQuery.isLoading ? '...' : noShowCount}
+                  {appointmentsQuery.isAwaitingData ? '...' : noShowCount}
                 </div>
               </div>
             </section>
@@ -364,7 +364,7 @@ export default function AdminPatientDetailsPage() {
                 </div>
                 <div className='flex items-center gap-2'>
                   <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                    {appointmentsQuery.isLoading ? 'جارِ التحميل...' : `${patientAppointments.length} عنصر`}
+                    {appointmentsQuery.isAwaitingData ? 'جارِ التحميل...' : `${patientAppointments.length} عنصر`}
                   </div>
                   <div
                     title='الأرقام محسوبة من أحدث 500 موعد. الـ API لا يدعم فلترة بـ patientId مباشرة.'
@@ -375,7 +375,7 @@ export default function AdminPatientDetailsPage() {
                 </div>
               </div>
               <div className='space-y-3 px-6 py-4'>
-                {appointmentsQuery.isLoading ? (
+                {appointmentsQuery.isAwaitingData ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
                     جارِ تحميل المواعيد...
                   </div>
@@ -418,11 +418,11 @@ export default function AdminPatientDetailsPage() {
                   ملفات المريض
                 </div>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  {filesQuery.isLoading ? 'جارِ التحميل...' : `${filesQuery.files.length} ملف`}
+                  {filesQuery.isAwaitingData ? 'جارِ التحميل...' : `${filesQuery.files.length} ملف`}
                 </div>
               </div>
               <div className='space-y-3 px-6 py-4'>
-                {filesQuery.isLoading ? (
+                {filesQuery.isAwaitingData ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
                     جارِ تحميل ملفات المريض...
                   </div>
@@ -503,11 +503,11 @@ export default function AdminPatientDetailsPage() {
                   سجل النشاط المرتبط بالمريض (Audit)
                 </div>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  {auditQuery.isLoading ? 'جارِ التحميل...' : `${patientAuditLogs.length} حدث`}
+                  {auditQuery.isAwaitingData ? 'جارِ التحميل...' : `${patientAuditLogs.length} حدث`}
                 </div>
               </div>
               <div className='space-y-3 px-6 py-4'>
-                {auditQuery.isLoading ? (
+                {auditQuery.isAwaitingData ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
                     جارِ تحميل السجلات...
                   </div>

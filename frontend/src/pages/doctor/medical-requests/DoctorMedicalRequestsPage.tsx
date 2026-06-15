@@ -28,6 +28,7 @@ import {
   useDoctorOrderMutations,
 } from '@/hooks/doctor';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import type { DoctorOrderCategory } from '@/lib/doctor/doctorOrderTypes';
 
 export default function DoctorMedicalRequestsPage() {
@@ -49,6 +50,9 @@ export default function DoctorMedicalRequestsPage() {
   const list = useDoctorMedicalRequests({ tab, search, page, limit });
   const stats = useDoctorMedicalRequestStats(search);
   const orderMutations = useDoctorOrderMutations();
+  const { retry: retryList, retrying: retryingList } = useRetryAction(() =>
+    list.refetch(),
+  );
 
   const detailsQuery = useDoctorMedicalRequestDetails(
     selectedRow?.id ?? null,
@@ -146,7 +150,7 @@ export default function DoctorMedicalRequestsPage() {
           />
 
           <div className="mt-6">
-            {list.isLoading && !list.rows.length ? (
+            {list.isAwaitingData && !list.rows.length ? (
               <div className="space-y-4">
                 <DoctorToolbarSkeleton tabs={3} />
                 <DoctorTableSkeleton rows={8} columns={6} />
@@ -155,8 +159,8 @@ export default function DoctorMedicalRequestsPage() {
               <DoctorListErrorState
                 title="تعذّر تحميل الطلبات الطبية"
                 brief={getUserFacingRequestErrorMessage(list.error)}
-                retrying={list.isFetching}
-                onRetry={() => void list.refetch()}
+                retrying={retryingList}
+                onRetry={() => void retryList()}
               />
             ) : (
               <MedicalRequestsTable
@@ -169,7 +173,7 @@ export default function DoctorMedicalRequestsPage() {
           </div>
         </section>
 
-        {!list.isLoading && !list.isError ? (
+        {!list.isAwaitingData && !list.isError ? (
           <div className="mt-5">
             <MedicalRequestsPagination
               page={list.page}
@@ -178,7 +182,7 @@ export default function DoctorMedicalRequestsPage() {
               showingTo={list.showingTo}
               total={list.total}
               pageSize={limit}
-              disabled={list.isFetching}
+              disabled={false}
               onPageChange={setPage}
               onPageSizeChange={(size) => {
                 setLimit(size);
@@ -227,7 +231,7 @@ export default function DoctorMedicalRequestsPage() {
         />
 
         {(detailsOpen || labOpen || radiologyOpen || statusOpen) &&
-        detailsQuery.isLoading ? (
+        detailsQuery.isAwaitingData ? (
           <div className="pointer-events-none fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#111827] px-4 py-2 font-cairo text-[12px] font-bold text-white shadow-lg">
             جارٍ تحميل التفاصيل...
           </div>

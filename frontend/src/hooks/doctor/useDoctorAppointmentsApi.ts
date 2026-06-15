@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import {
   doctorAppointmentsApi,
   doctorAppointmentsQueryKeys,
@@ -32,6 +33,7 @@ export function useDoctorAppointmentsApi(params: DoctorAppointmentListParams) {
     limit: query.data?.limit ?? params.limit ?? 10,
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -53,6 +55,9 @@ export function useDoctorAppointmentDetailsApi(appointmentId: string) {
       : undefined,
     rawAppointment: query.data?.appointment,
     files: query.data?.files ?? [],
+    isAwaitingData:
+      Boolean(appointmentId) &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -181,6 +186,10 @@ export function useDoctorAppointmentFilesApi(
   return {
     ...query,
     files: query.data?.items ?? [],
+    isAwaitingData:
+      enabled &&
+      Boolean(appointmentId) &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 

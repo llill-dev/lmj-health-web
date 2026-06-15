@@ -18,7 +18,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 
 export default function AdminServiceTypesPage() {
   const { toast } = useToast();
-  const { data, isLoading, isError, error, refetch } = useServiceTypesList();
+  const { data, isAwaitingData, isError, error, refetch } = useServiceTypesList();
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ServiceType | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -99,13 +99,13 @@ export default function AdminServiceTypesPage() {
             {
               key: 'total',
               icon: <Settings className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : serviceTypes.length,
+              value: isAwaitingData ? '—' : serviceTypes.length,
               label: 'أنواع مسجّلة',
             },
           ]}
         />
 
-        {isLoading && (
+        {isAwaitingData && (
           <div className='mt-8 flex items-center justify-center gap-2 rounded-[12px] border border-[#EEF2F6] bg-white py-16 font-cairo text-[14px] font-semibold text-[#667085]'>
             <Loader2 className='h-5 w-5 shrink-0 animate-spin text-primary' />
             جاري التحميل…
@@ -130,7 +130,7 @@ export default function AdminServiceTypesPage() {
           </div>
         )}
 
-        {!isLoading && !isError && (
+        {!isAwaitingData && !isError && (
           <section className='mt-6 overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             {serviceTypes.length === 0 ? (
               <p className='px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]'>

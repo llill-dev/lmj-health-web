@@ -449,7 +449,12 @@ export type DoctorAppointmentListParams = {
   page?: number;
   limit?: number;
   status?: DoctorAppointmentStatus;
+  /** Single local day (YYYY-MM-DD). Mutually exclusive with dateFrom/dateTo. */
   date?: string;
+  /** Inclusive range start (YYYY-MM-DD). API: dateFrom */
+  dateFrom?: string;
+  /** Inclusive range end (YYYY-MM-DD). API: dateTo */
+  dateTo?: string;
 };
 
 export type DoctorAppointmentSummary = {

@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type { AdminPatientFilesListParams } from '@/lib/admin/types';
 
 export function useAdminPatientFiles(
@@ -18,7 +19,7 @@ export function useAdminPatientFiles(
   return {
     files: query.data?.items ?? [],
     pageInfo: query.data?.pageInfo,
-    isLoading: query.isLoading,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
     error: query.error,
     refetch: query.refetch,
   };

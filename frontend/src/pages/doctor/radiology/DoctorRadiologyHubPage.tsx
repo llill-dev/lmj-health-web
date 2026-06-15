@@ -20,6 +20,7 @@ import {
   useEncounterRadiologyWorkspace,
 } from '@/hooks/doctor';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
 
 const DEFAULT_FILTERS = {
@@ -63,7 +64,7 @@ function RadiologyVisitCardRow({
       visit={visit}
       expanded={expanded}
       onToggle={onToggle}
-      detailsLoading={expanded && workspace.isLoading}
+      detailsLoading={expanded && workspace.isAwaitingData}
       detailsError={
         expanded && workspace.isError
           ? getUserFacingRequestErrorMessage(workspace.error)
@@ -86,8 +87,11 @@ export default function DoctorRadiologyHubPage() {
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const [expandedVisitId, setExpandedVisitId] = useState<string | null>(null);
 
-  const { visits, isLoading, isError, error, refetch } =
+  const { visits, isAwaitingData, isError, error, refetch } =
     useDoctorMedicalEncountersPage(doctorId, DEFAULT_FILTERS);
+  const { retry: retryVisits, retrying: retryingVisits } = useRetryAction(() =>
+    Promise.resolve(refetch()),
+  );
 
   const openVisits = useMemo(
     () => visits.filter((v) => v.status === 'open'),
@@ -96,14 +100,15 @@ export default function DoctorRadiologyHubPage() {
 
   let listContent: ReactNode;
 
-  if (isLoading) {
+  if (isAwaitingData) {
     listContent = <DoctorExpandableCardSkeleton count={4} />;
   } else if (isError) {
     listContent = (
       <DoctorListErrorState
         title="تعذّر تحميل الزيارات"
         brief={getUserFacingRequestErrorMessage(error)}
-        onRetry={refetch}
+        retrying={retryingVisits}
+        onRetry={() => void retryVisits()}
       />
     );
   } else if (openVisits.length === 0) {

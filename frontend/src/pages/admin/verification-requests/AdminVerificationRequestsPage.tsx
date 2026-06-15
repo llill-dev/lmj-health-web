@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryDataWithPlaceholder } from '@/lib/query/queryUi';
 import StyledSelect from '@/components/ui/styled-select';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 
@@ -47,6 +48,12 @@ export default function AdminVerificationRequestsPage() {
     staleTime: 15_000,
     placeholderData: (prev) => prev,
   });
+
+  const verificationAwaiting = isAwaitingInitialQueryDataWithPlaceholder(
+    verificationQuery.data,
+    verificationQuery.isError,
+    undefined,
+  );
 
   function formatRequestedAt(value?: string) {
     if (!value) return '—';
@@ -127,19 +134,19 @@ export default function AdminVerificationRequestsPage() {
             {
               key: 'pending',
               icon: <AlertCircle className='h-5 w-5 shrink-0' />,
-              value: verificationQuery.isLoading ? '—' : total,
+              value: verificationAwaiting ? '—' : total,
               label: 'طلبات في القائمة',
             },
             {
               key: 'page',
               icon: <Clock className='h-5 w-5 shrink-0' />,
-              value: verificationQuery.isLoading ? '—' : locationRequests.length,
+              value: verificationAwaiting ? '—' : locationRequests.length,
               label: 'معروضة الآن',
             },
             {
               key: 'pages',
               icon: <Filter className='h-5 w-5 shrink-0' />,
-              value: verificationQuery.isLoading ? '—' : totalPages,
+              value: verificationAwaiting ? '—' : totalPages,
               label: 'عدد الصفحات',
             },
           ]}
@@ -202,7 +209,7 @@ export default function AdminVerificationRequestsPage() {
 
 
         <section className='mt-6'>
-          {verificationQuery.isLoading ? (
+          {verificationAwaiting ? (
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
               جارِ تحميل طلبات التحقق...
             </div>
@@ -274,7 +281,7 @@ export default function AdminVerificationRequestsPage() {
           )}
         </section>
 
-        {!verificationQuery.isLoading && total > 0 ? (
+        {!verificationAwaiting && total > 0 ? (
           <section className='mt-4'>
             <div className='flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between'>
               <div className='text-right font-cairo text-[12px] font-semibold text-[#667085]'>

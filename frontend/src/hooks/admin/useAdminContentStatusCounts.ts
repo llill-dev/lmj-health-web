@@ -1,5 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import type { AdminContentListResponse, AdminContentStatus } from '@/lib/admin/types';
 
 const STAGES: ('all' | AdminContentStatus)[] = [
@@ -40,7 +41,9 @@ export function useAdminContentStatusCounts() {
 
   return {
     ...byKey,
-    isLoading: results.some((r) => r.isLoading),
+    isAwaitingData: isAwaitingAnyInitialQueryData(
+      results.map((r) => ({ data: r.data, isError: r.isError })),
+    ),
     isError: results.some((r) => r.isError),
   };
 }

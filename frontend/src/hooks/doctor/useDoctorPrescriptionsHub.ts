@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import {
+  isAwaitingAnyQueryResults,
+  isAwaitingInitialQueryData,
+} from '@/lib/query/queryUi';
+import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
+import {
   buildEncounterRef,
   mapEncounterDraftToHubRow,
   mapPrescriptionToHubRow,
@@ -149,12 +154,12 @@ export function useDoctorPrescriptionsHub(
   const firstPrescriptionError =
     prescriptionQueries.find((query) => query.isError)?.error ?? null;
 
-  const isLoading =
-    patientsQuery.isLoading ||
-    profileQuery.isLoading ||
-    encounterQueries.some((query) => query.isLoading) ||
+  const isAwaitingData =
+    patientsQuery.isAwaitingData ||
+    isAwaitingInitialQueryData(profileQuery.data, profileQuery.isError) ||
+    isAwaitingAnyQueryResults(encounterQueries) ||
     (encounterRefs.length > 0 &&
-      prescriptionQueries.some((query) => query.isLoading));
+      isAwaitingAnyQueryResults(prescriptionQueries));
 
   const isError =
     patientsQuery.isError ||
@@ -171,14 +176,9 @@ export function useDoctorPrescriptionsHub(
     totalPages,
     showingFrom,
     showingTo,
-    isLoading,
+    isAwaitingData,
     isError,
     error,
-    isFetching:
-      patientsQuery.isFetching ||
-      profileQuery.isFetching ||
-      encounterQueries.some((query) => query.isFetching) ||
-      prescriptionQueries.some((query) => query.isFetching),
     refetch: () => {
       void patientsQuery.refetch();
       void profileQuery.refetch();

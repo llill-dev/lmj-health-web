@@ -7,6 +7,7 @@ import type {
   UpdateAppointmentTypeBody,
 } from '@/lib/doctor/types';
 import { readAuthUser } from '@/lib/cookies';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 function getDoctorIdFromAuth(): string {
   const user = readAuthUser();
@@ -20,12 +21,7 @@ function getDoctorIdFromAuth(): string {
 export function useAvailableAppointmentTypes(doctorId?: string) {
   const actualDoctorId = doctorId || getDoctorIdFromAuth();
 
-  const {
-    data: response,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const query = useQuery({
     queryKey: doctorAppointmentTypesQueryKeys.available(actualDoctorId),
     queryFn: () => doctorApi.appointmentTypes.getAvailableTypes(actualDoctorId),
     enabled: !!actualDoctorId,
@@ -33,10 +29,10 @@ export function useAvailableAppointmentTypes(doctorId?: string) {
   });
 
   return {
-    appointmentTypes: response?.appointmentTypes || [],
-    isLoading,
-    error,
-    refetch,
+    appointmentTypes: query.data?.appointmentTypes || [],
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    error: query.error,
+    refetch: query.refetch,
   };
 }
 
@@ -47,12 +43,7 @@ export function useAvailableAppointmentTypes(doctorId?: string) {
 export function useAppointmentTypes(doctorId?: string) {
   const actualDoctorId = doctorId || getDoctorIdFromAuth();
 
-  const {
-    data: response,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const query = useQuery({
     queryKey: doctorAppointmentTypesQueryKeys.list(actualDoctorId),
     queryFn: () => doctorApi.appointmentTypes.listTypes(actualDoctorId),
     enabled: !!actualDoctorId,
@@ -60,10 +51,10 @@ export function useAppointmentTypes(doctorId?: string) {
   });
 
   return {
-    appointmentTypes: response?.appointmentTypes || [],
-    isLoading,
-    error,
-    refetch,
+    appointmentTypes: query.data?.appointmentTypes || [],
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    error: query.error,
+    refetch: query.refetch,
   };
 }
 

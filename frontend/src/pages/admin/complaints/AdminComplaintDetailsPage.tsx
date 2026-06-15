@@ -21,6 +21,7 @@ import {
   statusLabelAr,
 } from '@/components/admin/complaints/complaintDetailsUtils';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import StyledSelect from '@/components/ui/styled-select';
 import type {
   ComplaintAttachmentRef,
@@ -43,6 +44,10 @@ export default function AdminComplaintDetailsPage() {
     queryFn: () => adminApi.complaints.getById(complaintId!),
     enabled: Boolean(complaintId),
   });
+  const detailAwaiting = isAwaitingInitialQueryData(
+    detailQuery.data,
+    detailQuery.isError,
+  );
 
   const c = detailQuery.data?.complaint;
 
@@ -124,7 +129,7 @@ export default function AdminComplaintDetailsPage() {
           العودة إلى الشكاوي
         </button>
 
-        {detailQuery.isLoading ? (
+        {detailAwaiting ? (
           <div className='flex justify-center py-16'>
             <Loader2 className='w-8 h-8 animate-spin text-primary' />
           </div>

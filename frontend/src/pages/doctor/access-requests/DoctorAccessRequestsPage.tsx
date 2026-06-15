@@ -272,7 +272,7 @@ export default function DoctorAccessRequestsPage() {
                 </div>
               </section>
 
-              {listQuery.isLoading ? (
+              {listQuery.isAwaitingData ? (
                 <DoctorExpandableCardSkeleton count={4} />
               ) : listQuery.error ? (
                 <div className='rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#B42318]'>

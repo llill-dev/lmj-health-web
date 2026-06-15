@@ -2,6 +2,9 @@
 
 import { useQueries } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import {
+  isAwaitingAnyInitialQueryData,
+} from '@/lib/query/queryUi';
 import { mapEncounterSummaryFromApi } from '@/components/doctor/encounters/summary/map-encounter-summary-api';
 import type { EncounterSummaryViewModel } from '@/components/doctor/encounters/summary/encounter-summary-types';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
@@ -142,12 +145,13 @@ export function useDoctorEncounterSummary(
     [prescriptionsQuery.data?.prescriptions, encounterOrders],
   );
 
-  const isLoading =
-    encounterQuery.isLoading ||
-    prescriptionsQuery.isLoading ||
-    ordersQuery.isLoading ||
-    publicProfileQuery.isLoading ||
-    recordsQuery.isLoading;
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: encounterQuery.data, isError: encounterQuery.isError },
+    { data: prescriptionsQuery.data, isError: prescriptionsQuery.isError },
+    { data: ordersQuery.data, isError: ordersQuery.isError },
+    { data: publicProfileQuery.data, isError: publicProfileQuery.isError },
+    { data: recordsQuery.data, isError: recordsQuery.isError },
+  ]);
 
   const isError = encounterQuery.isError;
   const error = encounterQuery.error;
@@ -156,7 +160,7 @@ export function useDoctorEncounterSummary(
     summary,
     encounter: encounterQuery.data?.encounter,
     exportPdfSource,
-    isLoading,
+    isAwaitingData,
     isError,
     error,
     profileDenied:
@@ -169,9 +173,5 @@ export function useDoctorEncounterSummary(
       void publicProfileQuery.refetch();
       void recordsQuery.refetch();
     },
-    isFetching:
-      encounterQuery.isFetching ||
-      prescriptionsQuery.isFetching ||
-      ordersQuery.isFetching,
   };
 }

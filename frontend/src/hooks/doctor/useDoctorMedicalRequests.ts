@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import {
+  isAwaitingInitialQueryData,
+  isAwaitingInitialQueryDataWithPlaceholder,
+} from '@/lib/query/queryUi';
+import {
   filterOrdersByCategory,
   mapDoctorOrderToDetail,
   mapDoctorOrderToRow,
@@ -70,7 +74,21 @@ export function useDoctorMedicalRequestStats(search: string) {
       lab: queries[1]?.data?.total ?? 0,
       radiology: queries[2]?.data?.total ?? 0,
       procedure: queries[3]?.data?.total ?? 0,
-      isLoading: queries.some((query) => query.isLoading),
+      isAwaitingData: queries.some((query) =>
+        isAwaitingInitialQueryDataWithPlaceholder(
+          query.data,
+          query.isError,
+          undefined,
+        ),
+      ),
+      /** @deprecated use isAwaitingData */
+      isLoading: queries.some((query) =>
+        isAwaitingInitialQueryDataWithPlaceholder(
+          query.data,
+          query.isError,
+          undefined,
+        ),
+      ),
     }),
     [queries],
   );
@@ -134,6 +152,12 @@ export function useDoctorMedicalRequests(filters: MedicalRequestsFilters) {
   const showingTo =
     rows.length === 0 ? 0 : Math.min(total, showingFrom + rows.length - 1);
 
+  const isAwaitingList = isAwaitingInitialQueryDataWithPlaceholder(
+    listQuery.data,
+    listQuery.isError,
+    undefined,
+  );
+
   return {
     rows,
     total,
@@ -141,11 +165,12 @@ export function useDoctorMedicalRequests(filters: MedicalRequestsFilters) {
     page,
     showingFrom,
     showingTo,
-    isLoading: listQuery.isLoading,
+    isAwaitingData: isAwaitingList,
+    /** @deprecated use isAwaitingData */
+    isLoading: isAwaitingList,
     isError: listQuery.isError,
     error: listQuery.error,
     refetch: listQuery.refetch,
-    isFetching: listQuery.isFetching,
     isDemo,
   };
 }
@@ -172,9 +197,15 @@ export function useDoctorMedicalRequestDetails(
     return null;
   }, [detailQuery.data?.order, fallback]);
 
+  const isAwaitingDetail =
+    Boolean(orderId) &&
+    isAwaitingInitialQueryData(detailQuery.data, detailQuery.isError);
+
   return {
     vm,
-    isLoading: detailQuery.isLoading && Boolean(orderId),
+    isAwaitingData: isAwaitingDetail,
+    /** @deprecated use isAwaitingData */
+    isLoading: isAwaitingDetail,
     isError: detailQuery.isError,
     error: detailQuery.error,
     refetch: detailQuery.refetch,

@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import {
+  isAwaitingAnyInitialQueryData,
+  isAwaitingInitialQueryData,
+} from '@/lib/query/queryUi';
 
 const STALE = 5 * 60 * 1000;
 
@@ -51,8 +55,11 @@ export function useAdminPlatformStats() {
     staleTime: STALE,
   });
 
-  const isLoading =
-    patients.isLoading || allDoctors.isLoading || appointments.isLoading;
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: patients.data, isError: patients.isError },
+    { data: allDoctors.data, isError: allDoctors.isError },
+    { data: appointments.data, isError: appointments.isError },
+  ]);
   const isError =
     patients.isError || allDoctors.isError || appointments.isError;
 
@@ -66,7 +73,7 @@ export function useAdminPlatformStats() {
       totalSecretaries: secretaries.data?.total ?? 0,
       pendingVerifications: pendingVerifications.data?.total ?? 0,
     },
-    isLoading,
+    isAwaitingData,
     isError,
     refetch: () => {
       patients.refetch();
@@ -81,17 +88,27 @@ export function useAdminPlatformStats() {
 }
 
 export function useTopApprovedDoctors(limit = 8) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['admin', 'analytics', 'top-doctors', limit],
     queryFn: () => adminApi.doctors.list({ status: 'approved', limit }),
     staleTime: STALE,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }
 
 export function useRecentAppointments(limit = 6) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['admin', 'analytics', 'recent-appointments', limit],
     queryFn: () => adminApi.appointments.list({ limit }),
     staleTime: STALE,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }

@@ -1,20 +1,21 @@
 'use client';
 
 import { Send } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  DoctorProfileFormField,
+  profileFieldClass,
+  profileInputClass,
+  profileTextareaClass,
+} from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import { useToast } from '@/components/ui/ToastProvider';
+import StyledSelect from '@/components/ui/styled-select';
 import { submitDoctorSupportRequest } from '@/lib/doctor/support/submitDoctorSupportRequest';
 import type {
   DoctorSupportContactForm,
   DoctorSupportIdentity,
   DoctorSupportRequestType,
 } from '@/lib/doctor/support/types';
-
-const INPUT_CLASS =
-  'h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[13px] font-semibold text-[#111827] text-right outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white';
-
-const TEXTAREA_CLASS =
-  'w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] text-right outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white';
 
 const REQUEST_TYPES: Array<{ value: DoctorSupportRequestType; label: string }> = [
   { value: 'technical', label: 'مشكلة تقنية' },
@@ -45,6 +46,15 @@ export function DoctorSupportContactForm({
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<DoctorSupportContactForm>(EMPTY_FORM);
+
+  const requestTypeOptions = useMemo(
+    () =>
+      REQUEST_TYPES.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    [],
+  );
 
   useEffect(() => {
     setForm((prev) => ({
@@ -104,48 +114,39 @@ export function DoctorSupportContactForm({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
-            نوع الطلب
-          </label>
-          <select
+        <DoctorProfileFormField label="نوع الطلب">
+          <StyledSelect
+            size="md"
+            tone="muted"
+            disabled={submitting || loadingIdentity}
             value={form.requestType}
-            onChange={(event) =>
+            onChange={(next) =>
               setForm((prev) => ({
                 ...prev,
-                requestType: event.target.value as DoctorSupportRequestType,
+                requestType: next as DoctorSupportRequestType,
               }))
             }
-            className={INPUT_CLASS}
-          >
-            {REQUEST_TYPES.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+            options={requestTypeOptions}
+            placeholder="اختر نوع الطلب"
+            listboxAriaLabel="نوع الطلب"
+            triggerClassName={profileFieldClass('w-full', false)}
+          />
+        </DoctorProfileFormField>
 
-        <div>
-          <label className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
-            الموضوع
-          </label>
+        <DoctorProfileFormField label="الموضوع">
           <input
             value={form.subject}
             onChange={(event) =>
               setForm((prev) => ({ ...prev, subject: event.target.value }))
             }
             placeholder="موضوع الرسالة"
-            className={INPUT_CLASS}
+            className={profileFieldClass(profileInputClass, false)}
           />
-        </div>
+        </DoctorProfileFormField>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div>
-          <label className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
-            الاسم الكامل
-          </label>
+        <DoctorProfileFormField label="الاسم الكامل">
           <input
             value={form.fullName}
             disabled={loadingIdentity}
@@ -153,13 +154,10 @@ export function DoctorSupportContactForm({
               setForm((prev) => ({ ...prev, fullName: event.target.value }))
             }
             placeholder="اسم الطبيب"
-            className={INPUT_CLASS}
+            className={profileFieldClass(profileInputClass, false)}
           />
-        </div>
-        <div>
-          <label className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
-            البريد الإلكتروني
-          </label>
+        </DoctorProfileFormField>
+        <DoctorProfileFormField label="البريد الإلكتروني">
           <input
             type="email"
             value={form.email}
@@ -168,13 +166,10 @@ export function DoctorSupportContactForm({
               setForm((prev) => ({ ...prev, email: event.target.value }))
             }
             placeholder="example@email.com"
-            className={INPUT_CLASS}
+            className={profileFieldClass(profileInputClass, false)}
           />
-        </div>
-        <div>
-          <label className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
-            رقم الهاتف
-          </label>
+        </DoctorProfileFormField>
+        <DoctorProfileFormField label="رقم الهاتف">
           <input
             type="tel"
             value={form.phone}
@@ -183,15 +178,12 @@ export function DoctorSupportContactForm({
               setForm((prev) => ({ ...prev, phone: event.target.value }))
             }
             placeholder="+963 9XX XXX XXX"
-            className={INPUT_CLASS}
+            className={profileFieldClass(profileInputClass, false)}
           />
-        </div>
+        </DoctorProfileFormField>
       </div>
 
-      <div>
-        <label className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
-          الرسالة <span className="text-[#DC2626]">*</span>
-        </label>
+      <DoctorProfileFormField label="الرسالة" required>
         <textarea
           value={form.message}
           onChange={(event) =>
@@ -199,9 +191,9 @@ export function DoctorSupportContactForm({
           }
           rows={5}
           placeholder="اشرح مشكلتك أو استفسارك بالتفصيل..."
-          className={TEXTAREA_CLASS}
+          className={profileFieldClass(profileTextareaClass, false)}
         />
-      </div>
+      </DoctorProfileFormField>
 
       <button
         type="submit"

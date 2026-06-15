@@ -7,14 +7,12 @@ import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { AuditLogItem } from '@/lib/admin/types';
 
 export function AdminAuditLogTable({
-  isLoading,
-  isFetching,
+  isAwaitingData,
   isError,
   error,
   logs,
 }: {
-  isLoading: boolean;
-  isFetching: boolean;
+  isAwaitingData: boolean;
   isError: boolean;
   error: unknown;
   logs: AuditLogItem[];
@@ -43,7 +41,7 @@ export function AdminAuditLogTable({
         </div>
       </div>
 
-      {(isLoading || (isFetching && logs.length === 0)) && (
+      {isAwaitingData && (
         <div className='divide-y divide-[#EEF2F6]'>
           {Array.from({ length: 6 }).map((_, i) => (
             <AuditLogSkeletonRow key={i} />
@@ -51,7 +49,7 @@ export function AdminAuditLogTable({
         </div>
       )}
 
-      {isError && !isLoading && (
+      {isError && !isAwaitingData && (
         <div className='px-6 py-16 text-center'>
           <ShieldAlert className='mx-auto mb-3 h-10 w-10 text-[#FCA5A5]' />
           <div className='font-cairo text-[14px] font-black text-[#991B1B]'>تعذّر تحميل السجلات</div>
@@ -61,7 +59,7 @@ export function AdminAuditLogTable({
         </div>
       )}
 
-      {!isLoading && !isError && logs.length === 0 && (
+      {!isAwaitingData && !isError && logs.length === 0 && (
         <div className='px-6 py-16 text-center'>
           <Activity className='mx-auto mb-3 h-10 w-10 text-[#E5E7EB]' />
           <div className='font-cairo text-[14px] font-black text-[#667085]'>لا توجد سجلات مطابقة</div>
@@ -71,8 +69,8 @@ export function AdminAuditLogTable({
         </div>
       )}
 
-      {!isLoading && !isError && logs.length > 0 && (
-        <div className={`divide-y divide-[#EEF2F6] ${isFetching ? 'opacity-60 transition-opacity' : ''}`}>
+      {!isAwaitingData && !isError && logs.length > 0 && (
+        <div className='divide-y divide-[#EEF2F6]'>
           {logs.map((log) => (
             <AuditLogRow
               key={log._id}

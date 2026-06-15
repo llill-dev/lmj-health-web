@@ -18,6 +18,7 @@ import {
   openPdfBlobInNewTab,
 } from '@/lib/doctor/doctorOrderDocuments';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
 
 export default function DoctorEncounterOrderPreviewPage({
@@ -35,6 +36,9 @@ export default function DoctorEncounterOrderPreviewPage({
     doctorId,
     patientId,
     encounterId,
+  );
+  const { retry: retryPreview, retrying: retryingPreview } = useRetryAction(
+    () => Promise.resolve(preview.refetch()),
   );
   const workspace = useEncounterOrderWorkspace(
     category,
@@ -94,16 +98,17 @@ export default function DoctorEncounterOrderPreviewPage({
         <RadiologyPreviewBanner
           patientName={preview.previewVm?.patientName}
           statusLabel={preview.previewVm?.statusLabel}
-          loading={preview.isLoading}
+          loading={preview.isAwaitingData}
         />
 
-        {preview.isLoading ? (
+        {preview.isAwaitingData ? (
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
             title="تعذّر تحميل المعاينة"
             brief={getUserFacingRequestErrorMessage(preview.error)}
-            onRetry={preview.refetch}
+            retrying={retryingPreview}
+            onRetry={() => void retryPreview()}
           />
         ) : (
           <>

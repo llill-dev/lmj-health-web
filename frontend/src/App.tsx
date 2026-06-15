@@ -8,6 +8,7 @@ import SignupPage from "@/pages/auth/signup/SignupPage";
 import ForgotPasswordPage from "@/pages/auth/password/forgot-password/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/auth/password/reset-password/ResetPasswordPage";
 import ResetPasswordVerifyPage from "@/pages/auth/password/reset-password-verify/ResetPasswordVerifyPage";
+import ResetPasswordSuccessPage from "@/pages/auth/password/reset-password-success/ResetPasswordSuccessPage";
 import ClaimAccountPage from "@/pages/auth/claim-account/ClaimAccountPage";
 import VerifyOtpPage from "@/pages/auth/verify-otp/VerifyOtpPage";
 import SignupSuccessPage from "@/pages/auth/signup-success/SignupSuccessPage";
@@ -40,6 +41,7 @@ import DoctorEncounterOrderPreviewPage from "@/pages/doctor/encounters/DoctorEnc
 import DoctorEncounterSummaryPage from "@/pages/doctor/encounters/DoctorEncounterSummaryPage";
 import DoctorAccessRequestsPage from "@/pages/doctor/access-requests/DoctorAccessRequestsPage";
 import DoctorDoctorsDirectoryPage from "@/pages/doctor/doctors-directory/DoctorDoctorsDirectoryPage";
+import DoctorMedicalServicesDirectoryPage from "@/pages/doctor/medical-services-directory/DoctorMedicalServicesDirectoryPage";
 import DoctorClinicLocationPage from "@/pages/doctor/clinic-location/DoctorClinicLocationPage";
 import DoctorNotificationPage from "@/pages/doctor/notification/DoctorNotificationPage";
 import DoctorProfileSettingsPage from "@/pages/doctor/profile-settings/DoctorProfileSettingsPage";
@@ -54,9 +56,11 @@ import DoctorClinicCreateInvoicePage from "@/pages/doctor/clinic-accounts/Doctor
 import DoctorClinicExpensesPage from "@/pages/doctor/clinic-accounts/DoctorClinicExpensesPage";
 import DoctorClinicAddPaymentPage from "@/pages/doctor/clinic-accounts/DoctorClinicAddPaymentPage";
 import DoctorClinicFinancialReportsPage from "@/pages/doctor/clinic-accounts/DoctorClinicFinancialReportsPage";
+import DoctorClinicFinancialSettingsPage from "@/pages/doctor/clinic-accounts/DoctorClinicFinancialSettingsPage";
 import DoctorFacilitiesPage from "@/pages/doctor/facilities/DoctorFacilitiesPage";
 import DoctorActivityLogPage from "@/pages/doctor/activity-log/DoctorActivityLogPage";
 import DoctorSupportPage from "@/pages/doctor/support/DoctorSupportPage";
+import DoctorSecretariesPage from "@/pages/doctor/secretaries/DoctorSecretariesPage";
 
 // ─── Admin pages ──────────────────────────────────────────────────────────────
 import AdminLayout from "@/layouts/AdminLayout";
@@ -133,6 +137,10 @@ export default function App() {
               element={<ResetPasswordVerifyPage />}
             />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/reset-password/success"
+              element={<ResetPasswordSuccessPage />}
+            />
             <Route path="/claim-account" element={<ClaimAccountPage />} />
           </Route>
         </Route>
@@ -253,6 +261,10 @@ export default function App() {
               element={<DoctorDoctorsDirectoryPage />}
             />
             <Route
+              path="medical-services-directory"
+              element={<DoctorMedicalServicesDirectoryPage />}
+            />
+            <Route
               path="clinic-location"
               element={<DoctorClinicLocationPage />}
             />
@@ -277,9 +289,14 @@ export default function App() {
               path="accounts/reports"
               element={<DoctorClinicFinancialReportsPage />}
             />
+            <Route
+              path="accounts/settings"
+              element={<DoctorClinicFinancialSettingsPage />}
+            />
             <Route path="facilities" element={<DoctorFacilitiesPage />} />
             <Route path="activity-log" element={<DoctorActivityLogPage />} />
             <Route path="support" element={<DoctorSupportPage />} />
+            <Route path="secretaries" element={<DoctorSecretariesPage />} />
             <Route path="notification" element={<DoctorNotificationPage />} />
             <Route
               path="profile-settings"

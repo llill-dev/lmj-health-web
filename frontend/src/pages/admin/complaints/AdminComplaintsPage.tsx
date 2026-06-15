@@ -5,6 +5,10 @@ import {
   useQueries,
   useQuery,
 } from '@tanstack/react-query';
+import {
+  isAwaitingAnyInitialQueryData,
+  isAwaitingInitialQueryDataWithPlaceholder,
+} from '@/lib/query/queryUi';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -134,7 +138,14 @@ export default function AdminComplaintsPage() {
     return { total, review, closed };
   }, [countQueries]);
 
-  const countsLoading = countQueries.some((q) => q.isLoading);
+  const countsAwaiting = isAwaitingAnyInitialQueryData(
+    countQueries.map((q) => ({ data: q.data, isError: q.isError })),
+  );
+  const listAwaiting = isAwaitingInitialQueryDataWithPlaceholder(
+    listQuery.data,
+    listQuery.isError,
+    undefined,
+  );
 
   const complaints = listQuery.data?.complaints ?? [];
   const totalList = listQuery.data?.total ?? 0;
@@ -168,19 +179,19 @@ export default function AdminComplaintsPage() {
             {
               key: 'total',
               icon: <MessageSquare className='h-5 w-5 shrink-0' />,
-              value: countsLoading ? '—' : stats.total,
+              value: countsAwaiting ? '—' : stats.total,
               label: 'إجمالي الشكاوي',
             },
             {
               key: 'review',
               icon: <SlidersHorizontal className='h-5 w-5 shrink-0' />,
-              value: countsLoading ? '—' : stats.review,
+              value: countsAwaiting ? '—' : stats.review,
               label: 'قيد المراجعة',
             },
             {
               key: 'closed',
               icon: <Stethoscope className='h-5 w-5 shrink-0' />,
-              value: countsLoading ? '—' : stats.closed,
+              value: countsAwaiting ? '—' : stats.closed,
               label: 'مغلقة',
             },
           ]}
@@ -271,7 +282,7 @@ export default function AdminComplaintsPage() {
           <p className='mt-8 text-center font-cairo text-sm font-semibold text-red-600'>
             فشل تحميل قائمة الشكاوي. تحقق من الصلاحيات والاتصال بالخادم.
           </p>
-        ) : listQuery.isLoading && !listQuery.data ? (
+        ) : listAwaiting ? (
           <p className='mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]'>
             جاري تحميل الشكاوي...
           </p>

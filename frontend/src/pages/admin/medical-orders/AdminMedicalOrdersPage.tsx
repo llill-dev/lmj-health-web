@@ -30,7 +30,7 @@ export default function AdminMedicalOrdersPage() {
     null,
   );
 
-  const { data, isLoading, isError, error, refetch } =
+  const { data, isAwaitingData, isError, error, refetch } =
     useAdminMedicalOrderCatalog(kind);
   const deleteMut = useDeleteMedicalOrderCatalogItem(kind);
 
@@ -74,13 +74,13 @@ export default function AdminMedicalOrdersPage() {
           subtitle='إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض'
           headerIcon={<ClipboardList className='h-8 w-8 text-white' />}
           actionLabel='إضافة نوع جديد'
-          actionDisabled={isLoading}
+          actionDisabled={isAwaitingData}
           onActionClick={openAdd}
           kpis={[
             {
               key: 'items',
               icon: <ClipboardList className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : filteredItems.length,
+              value: isAwaitingData ? '—' : filteredItems.length,
               label: 'عناصر معروضة',
             },
           ]}
@@ -119,7 +119,7 @@ export default function AdminMedicalOrdersPage() {
           </div>
         )}
 
-        {isLoading ? (
+        {isAwaitingData ? (
           <div className='rounded-[10px] border border-[#E5E7EB] bg-white p-10 text-center font-cairo text-[14px] font-semibold text-[#667085]'>
             جاري التحميل…
           </div>

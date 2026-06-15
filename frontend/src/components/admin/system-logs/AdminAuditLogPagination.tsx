@@ -5,14 +5,12 @@ export function AdminAuditLogPagination({
   totalPages,
   total,
   pageSize,
-  isFetching,
   onPageChange,
 }: {
   page: number;
   totalPages: number;
   total: number;
   pageSize: number;
-  isFetching: boolean;
   onPageChange: (page: number) => void;
 }) {
   if (total <= pageSize) return null;
@@ -27,7 +25,7 @@ export function AdminAuditLogPagination({
         <button
           type='button'
           onClick={() => onPageChange(Math.max(1, page - 1))}
-          disabled={page === 1 || isFetching}
+          disabled={page === 1}
           className='flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[#EEF2F6] bg-white text-[#344054] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-40'
         >
           <ChevronRight className='h-4 w-4' />
@@ -58,7 +56,7 @@ export function AdminAuditLogPagination({
         <button
           type='button'
           onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-          disabled={page === totalPages || isFetching}
+          disabled={page === totalPages}
           className='flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[#EEF2F6] bg-white text-[#344054] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-40'
         >
           <ChevronLeft className='h-4 w-4' />

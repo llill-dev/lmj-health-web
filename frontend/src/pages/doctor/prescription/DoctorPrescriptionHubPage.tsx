@@ -12,6 +12,7 @@ import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-s
 import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
 import { useDoctorPrescriptionsHub } from '@/hooks/doctor/useDoctorPrescriptionsHub';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
 
 export default function DoctorPrescriptionHubPage() {
@@ -22,6 +23,9 @@ export default function DoctorPrescriptionHubPage() {
   const [limit, setLimit] = useState(8);
 
   const list = useDoctorPrescriptionsHub(doctorId, { search, page, limit });
+  const { retry: retryList, retrying: retryingList } = useRetryAction(() =>
+    Promise.resolve(list.refetch()),
+  );
 
   useEffect(() => {
     setPage(1);
@@ -52,14 +56,14 @@ export default function DoctorPrescriptionHubPage() {
           <PrescriptionsHubSearchBar search={search} onSearchChange={setSearch} />
 
           <div className="mt-6">
-            {list.isLoading && !list.rows.length ? (
+            {list.isAwaitingData && !list.rows.length ? (
               <DoctorTableSkeleton rows={8} columns={5} />
             ) : list.isError ? (
               <DoctorListErrorState
                 title="تعذّر تحميل الوصفات الطبية"
                 brief={getUserFacingRequestErrorMessage(list.error)}
-                retrying={list.isFetching}
-                onRetry={() => void list.refetch()}
+                retrying={retryingList}
+                onRetry={() => void retryList()}
               />
             ) : (
               <PrescriptionsHubTable
@@ -70,7 +74,7 @@ export default function DoctorPrescriptionHubPage() {
           </div>
         </section>
 
-        {!list.isLoading && !list.isError ? (
+        {!list.isAwaitingData && !list.isError ? (
           <div className="mt-5">
             <PrescriptionsHubPagination
               page={list.page}
@@ -79,7 +83,7 @@ export default function DoctorPrescriptionHubPage() {
               showingTo={list.showingTo}
               total={list.total}
               pageSize={limit}
-              disabled={list.isFetching}
+              disabled={false}
               onPageChange={setPage}
               onPageSizeChange={(size) => {
                 setLimit(size);

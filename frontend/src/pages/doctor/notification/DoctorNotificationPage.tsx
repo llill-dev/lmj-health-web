@@ -15,6 +15,7 @@ import { DoctorNotificationListSkeleton } from '@/components/doctor/shared/skele
 import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
 import type { AdminNotificationKind } from '@/components/admin/notifications/types';
 import { useDoctorNotificationsPage } from '@/hooks';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 type NotificationType = AdminNotificationKind;
 
@@ -129,7 +130,7 @@ export default function DoctorNotificationPage() {
         </section>
 
         <section className='mt-5 space-y-4'>
-          {listQuery.isLoading ? (
+          {isAwaitingInitialQueryData(listQuery.data, listQuery.isError) ? (
             <DoctorNotificationListSkeleton rows={6} />
           ) : listQuery.isError ? (
             <div className='rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>

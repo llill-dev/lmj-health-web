@@ -27,6 +27,7 @@ import {
   useUpdateConsultationStatus,
 } from '@/hooks';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { readAuthUser } from '@/lib/cookies';
 import ConsultationAttachmentList, {
   type ConsultationAttachmentItem,
@@ -107,8 +108,14 @@ export default function DoctorOnlineConsultationsPage() {
       .filter((c) => c.id);
   }, [listQuery.data?.tickets]);
 
-  const isRefreshing =
-    listQuery.isFetching && !listQuery.isLoading && consultations.length > 0;
+  const listAwaitingData = isAwaitingInitialQueryData(
+    listQuery.data,
+    listQuery.isError,
+  );
+  const overviewAwaitingData = isAwaitingInitialQueryData(
+    overviewQuery.data,
+    overviewQuery.isError,
+  );
 
   const unreadById = useMemo(() => {
     const map = new Map<string, number>();
@@ -121,6 +128,9 @@ export default function DoctorOnlineConsultationsPage() {
   }, [listQuery.data?.tickets]);
 
   const detailsQuery = useConsultationDetails(expandedId);
+  const detailsAwaitingData =
+    Boolean(expandedId) &&
+    isAwaitingInitialQueryData(detailsQuery.data, detailsQuery.isError);
   const sendMessage = useSendConsultationMessage(expandedId ?? '');
 
   const overviewStats = useMemo(() => {
@@ -131,16 +141,16 @@ export default function DoctorOnlineConsultationsPage() {
         new: counts.pending ?? 0,
         active: counts.active ?? 0,
         closed: counts.closed ?? 0,
-        loading: overviewQuery.isLoading,
+        loading: overviewAwaitingData,
       };
     }
     return {
       new: tickets.filter((t) => t.status === 'pending').length,
       active: tickets.filter((t) => t.status === 'active').length,
       closed: tickets.filter((t) => t.status === 'closed').length,
-      loading: overviewQuery.isLoading,
+      loading: overviewAwaitingData,
     };
-  }, [overviewQuery.data?.counts, overviewQuery.data?.tickets, overviewQuery.isLoading]);
+  }, [overviewQuery.data?.counts, overviewQuery.data?.tickets, overviewAwaitingData]);
 
   const visibleConsultations = useMemo(() => {
     if (!query.trim()) return consultations;
@@ -408,12 +418,12 @@ export default function DoctorOnlineConsultationsPage() {
               value={tab}
               onChange={handleTabChange}
               counts={tabCounts}
-              disabled={listQuery.isLoading}
+              disabled={listAwaitingData}
             />
           </div>
         </section>
 
-        {listQuery.isLoading ? (
+        {listAwaitingData ? (
           <div className="mt-6">
             <DoctorExpandableCardSkeleton count={4} expanded />
           </div>
@@ -424,7 +434,7 @@ export default function DoctorOnlineConsultationsPage() {
         ) : (
           <ConsultationsListPanel
             panelKey={tab}
-            isRefreshing={isRefreshing}
+            isRefreshing={false}
           >
             <div className="mt-5 space-y-4">
               {visibleConsultations.length === 0 ? (
@@ -560,7 +570,7 @@ export default function DoctorOnlineConsultationsPage() {
                                 </h2>
 
                                 <div className="mt-3 space-y-3">
-                                  {detailsQuery.isLoading ? (
+                                  {detailsAwaitingData ? (
                                     <DoctorInlineDetailsSkeleton rows={5} />
                                   ) : null}
                                   {activeMessages.map((m) => {

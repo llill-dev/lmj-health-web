@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import {
   mapPrescriptionItemsToUi,
   mapUiItemToApiBody,
@@ -252,8 +253,6 @@ export function useEncounterPrescriptionWorkspace(
   });
 
   const isBusy =
-    prescriptionQuery.isLoading ||
-    prescriptionQuery.isFetching ||
     saveDraftMutation.isPending ||
     addItemMutation.isPending ||
     updateItemMutation.isPending ||
@@ -261,10 +260,10 @@ export function useEncounterPrescriptionWorkspace(
     finalizeMutation.isPending ||
     previewMutation.isPending;
 
-  const loadError =
-    encounterQuery.error ??
-    prescriptionQuery.error ??
-    null;
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: encounterQuery.data, isError: encounterQuery.isError },
+    { data: prescriptionQuery.data, isError: prescriptionQuery.isError },
+  ]);
 
   return {
     encounter: encounterQuery.data?.encounter,
@@ -272,9 +271,9 @@ export function useEncounterPrescriptionWorkspace(
     medications,
     generalInstructions,
     setGeneralInstructions,
-    isLoading: encounterQuery.isLoading || prescriptionQuery.isLoading,
+    isAwaitingData,
     isError: encounterQuery.isError || prescriptionQuery.isError,
-    error: loadError,
+    error: encounterQuery.error ?? prescriptionQuery.error ?? null,
     isBusy,
     isEditable:
       Boolean(prescriptionQuery.data) &&

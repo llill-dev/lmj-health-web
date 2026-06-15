@@ -95,9 +95,10 @@ export default function AdminServicesPage() {
     setUpsertOpen(true);
   };
 
-  const isLoading = isFacilityTab ? facilitiesQuery.isLoading : serviceTypesQuery.isLoading;
+  const isAwaitingData = isFacilityTab
+    ? facilitiesQuery.isAwaitingData
+    : serviceTypesQuery.isAwaitingData;
   const isError = isFacilityTab ? facilitiesQuery.isError : serviceTypesQuery.isError;
-  const isFetching = isFacilityTab ? facilitiesQuery.isFetching : false;
 
   const facilityTabIcon = activeTab.kind === 'facility' ? activeTab.icon : Hospital;
 
@@ -172,14 +173,13 @@ export default function AdminServicesPage() {
           searchInput={searchInput}
           onSearchChange={handleSearch}
           searchDisabled={!isFacilityTab}
-          isFetching={isFetching}
           activeTabIdx={activeTabIdx}
           onTabChange={handleTabChange}
           serviceTypesCount={serviceTypesCount}
         />
 
         <AdminServicesContent
-          isLoading={isLoading}
+          isAwaitingData={isAwaitingData}
           isError={isError}
           isFacilityTab={isFacilityTab}
           facilityTabIcon={facilityTabIcon}

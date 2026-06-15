@@ -100,13 +100,13 @@ export default function BookAppointmentDialog({
     [patients, selectedPatientId],
   );
 
-  const { appointmentTypes, isLoading: isLoadingTypes } =
+  const { appointmentTypes, isAwaitingData: isAwaitingTypes } =
     useAvailableAppointmentTypes(doctorId);
   const today = useMemo(() => formatLocalDate(new Date()), []);
   const {
     freeSlots,
     totalFreeSlots,
-    isLoading: isLoadingSlots,
+    isAwaitingData: isAwaitingSlots,
     error: slotsError,
   } = useSlots(selectedDate, "free", doctorId);
   const availableTimes = useMemo(() => {
@@ -345,7 +345,7 @@ export default function BookAppointmentDialog({
                             </div>
                             {selectedDate ? (
                               <div className="font-cairo text-[11px] font-bold text-[#667085]">
-                                {isLoadingSlots
+                                {isAwaitingSlots
                                   ? "جارٍ تحميل الفترات..."
                                   : `${totalFreeSlots} فترات متاحة`}
                               </div>
@@ -365,7 +365,7 @@ export default function BookAppointmentDialog({
                                 فقط.
                               </div>
                             </div>
-                          ) : isLoadingSlots ? (
+                          ) : isAwaitingSlots ? (
                             <div
                               className={`rounded-[16px] border-[1.82px] ${
                                 errors.time || !isSelectedTimeAvailable
@@ -497,7 +497,7 @@ export default function BookAppointmentDialog({
                                 value={field.value ?? ""}
                                 onChange={field.onChange}
                                 onBlur={field.onBlur}
-                                disabled={isLoadingTypes}
+                                disabled={isAwaitingTypes}
                                 placeholder="بدون تحديد نوع"
                                 listboxAriaLabel="نوع الموعد"
                               />

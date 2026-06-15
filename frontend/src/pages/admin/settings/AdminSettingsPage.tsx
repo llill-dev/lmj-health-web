@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CloudUpload, Settings } from "lucide-react";
 import { get } from "@/lib/api";
 import { adminApi } from "@/lib/admin/client";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import { notificationsApi } from "@/lib/notifications/client";
 import { useAdminAppSettings } from "@/contexts/AdminAppSettingsContext";
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
@@ -89,6 +90,18 @@ export default function AdminSettingsPage() {
       .length ??
     0;
   const weeklyAuditCount = auditSummaryQuery.data?.total ?? 0;
+  const healthAwaiting = isAwaitingInitialQueryData(
+    healthQuery.data,
+    healthQuery.isError,
+  );
+  const unreadAwaiting = isAwaitingInitialQueryData(
+    unreadNotificationsQuery.data,
+    unreadNotificationsQuery.isError,
+  );
+  const auditSummaryAwaiting = isAwaitingInitialQueryData(
+    auditSummaryQuery.data,
+    auditSummaryQuery.isError,
+  );
 
   function markSaved(section: keyof SaveStates) {
     setSaveStates((prev) => ({ ...prev, [section]: "saved" }));
@@ -164,7 +177,7 @@ export default function AdminSettingsPage() {
               {
                 key: "health",
                 icon: <Settings className="h-5 w-5 shrink-0" />,
-                value: healthQuery.isLoading
+                value: healthAwaiting
                   ? "…"
                   : healthQuery.isError
                     ? "غير متاح"
@@ -174,13 +187,13 @@ export default function AdminSettingsPage() {
               {
                 key: "notifications",
                 icon: <CloudUpload className="h-5 w-5 shrink-0" />,
-                value: unreadNotificationsQuery.isLoading ? "…" : unreadCount,
+                value: unreadAwaiting ? "…" : unreadCount,
                 label: "إشعارات غير مقروءة",
               },
               {
                 key: "audit",
                 icon: <Settings className="h-5 w-5 shrink-0" />,
-                value: auditSummaryQuery.isLoading ? "…" : weeklyAuditCount,
+                value: auditSummaryAwaiting ? "…" : weeklyAuditCount,
                 label: "سجلات (7 أيام)",
               },
             ]}

@@ -39,6 +39,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { readAuthUser } from "@/lib/cookies";
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 import { doctorApi } from "@/lib/doctor/client";
 import {
   determinePatientState,
@@ -265,12 +266,10 @@ export default function DoctorPatientsPage() {
   }, [filters.limit, listQuery.total]);
 
   const patientsListFailed = listQuery.isError;
-  const patientsListPending = listQuery.isPending && !patientsListFailed;
+  const patientsListPending = listQuery.isAwaitingData && !patientsListFailed;
   const patientsListReady = !patientsListFailed && !patientsListPending;
-  const patientsRefreshing =
-    listQuery.isFetching &&
-    listQuery.fetchStatus === "fetching" &&
-    patientsListReady;
+  const { retry: retryPatientsList, retrying: retryingPatientsList } =
+    useRetryAction(() => listQuery.refetch());
   const patientsLoadErrorPresentation = useMemo(
     () => summarizePatientsListError(listQuery.error),
     [listQuery.error],
@@ -294,9 +293,9 @@ export default function DoctorPatientsPage() {
     temporary: temporaryCountQuery.total,
     suspended: suspendedCountQuery.total,
     loading:
-      activeCountQuery.isLoading ||
-      temporaryCountQuery.isLoading ||
-      suspendedCountQuery.isLoading,
+      activeCountQuery.isAwaitingData ||
+      temporaryCountQuery.isAwaitingData ||
+      suspendedCountQuery.isAwaitingData,
   };
 
   const fullProfileData = expandedPatientIsTemporary
@@ -371,7 +370,7 @@ export default function DoctorPatientsPage() {
 
   useEffect(() => {
     if (!expandedId) return;
-    if (fullProfileQuery.isPending) return;
+    if (fullProfileQuery.isAwaitingData) return;
 
     const pid = expandedId;
     const pendId =
@@ -420,7 +419,7 @@ export default function DoctorPatientsPage() {
   }, [
     expandedId,
     expandedPatientIsTemporary,
-    fullProfileQuery.isPending,
+    fullProfileQuery.isAwaitingData,
     fullProfileQuery.patient,
     fullProfileQuery.deniedError,
     accessRequired,
@@ -512,7 +511,7 @@ export default function DoctorPatientsPage() {
     expandedId !== null &&
     activeTab === "files" &&
     !expandedPatientIsTemporary &&
-    patientFilesQuery.isLoading;
+    patientFilesQuery.isAwaitingData;
 
   const handlePatientFileOpen = async (patientId: string, fileId: string) => {
     if (!doctorId) return;
@@ -902,18 +901,6 @@ export default function DoctorPatientsPage() {
 
         {/* Patients list section */}
         <section className="space-y-3">
-          {patientsRefreshing &&
-          patientsListReady &&
-          cardPatients.length > 0 ? (
-            <p
-              className="flex justify-center gap-2 rounded-2xl border border-primary/15 bg-primary/[0.04] px-4 py-2.5 text-center font-cairo text-[12px] font-bold text-primary"
-              role="status"
-              aria-live="polite"
-            >
-              <Loader2 className="w-4 h-4 animate-spin shrink-0" aria-hidden />
-              جارٍ تحديث قائمة المرضى...
-            </p>
-          ) : null}
           {patientsListFailed ? (
             <DoctorListErrorState
               title={patientsLoadErrorPresentation.title}
@@ -922,10 +909,8 @@ export default function DoctorPatientsPage() {
               showTechnicalDetail={
                 patientsLoadErrorPresentation.showTechnicalDetail
               }
-              retrying={
-                listQuery.isFetching && listQuery.fetchStatus === "fetching"
-              }
-              onRetry={() => listQuery.refetch()}
+              retrying={retryingPatientsList}
+              onRetry={() => void retryPatientsList()}
             />
           ) : false ? (
             <div
@@ -1000,8 +985,8 @@ export default function DoctorPatientsPage() {
                 }}
                 detailsLoading={
                   expandedId === patient.id &&
-                  (publicProfileQuery.isLoading ||
-                    fullProfileQuery.isLoading ||
+                  (publicProfileQuery.isAwaitingData ||
+                    fullProfileQuery.isAwaitingData ||
                     patientFilesLoading)
                 }
                 fullProfile={expandedId === patient.id ? fullProfileData : null}

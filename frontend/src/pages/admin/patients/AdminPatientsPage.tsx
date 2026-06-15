@@ -18,6 +18,7 @@ import {
 } from '@/components/admin/patients/patientListUtils';
 
 import { useAdminPatients } from '@/hooks/admin/useAdminPatients';
+import { AppCheckbox } from '@/components/ui';
 import StyledSelect from '@/components/ui/styled-select';
 import type {
   AdminPatientsAccountStatusFilter,
@@ -54,7 +55,7 @@ export default function AdminPatientsPage() {
     ...defaultFilters,
   });
 
-  const { patients, results, total, isLoading, error } = useAdminPatients({
+  const { patients, results, total, isAwaitingData, error } = useAdminPatients({
     account_status: filters.account_status,
     search: filters.search || undefined,
     includeDeleted: filters.includeDeleted,
@@ -108,19 +109,19 @@ export default function AdminPatientsPage() {
             {
               key: 'total',
               icon: <Users className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : total,
+              value: isAwaitingData ? '—' : total,
               label: 'إجمالي المرضى',
             },
             {
               key: 'page',
               icon: <Activity className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : results,
+              value: isAwaitingData ? '—' : results,
               label: 'في هذه الصفحة',
             },
             {
               key: 'pages',
               icon: <Mail className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : totalPages,
+              value: isAwaitingData ? '—' : totalPages,
               label: 'عدد الصفحات',
             },
           ]}
@@ -158,8 +159,8 @@ export default function AdminPatientsPage() {
               </div>
 
               <label className='flex h-[42px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'>
-                <input
-                  type='checkbox'
+                <AppCheckbox
+                  size='sm'
                   checked={filters.includeDeleted}
                   onChange={(e) =>
                     setFilters((prev) => ({
@@ -168,7 +169,6 @@ export default function AdminPatientsPage() {
                       page: 1,
                     }))
                   }
-                  className='w-4 h-4 accent-primary'
                 />
                 إظهار المحذوفين
               </label>
@@ -214,7 +214,7 @@ export default function AdminPatientsPage() {
         </section>
 
         <section className='mt-5 space-y-5'>
-          {isLoading ? (
+          {isAwaitingData ? (
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
               جارِ تحميل قائمة المرضى...
             </div>

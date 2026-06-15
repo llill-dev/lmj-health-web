@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
+  CalendarDays,
   ClipboardList,
   Clock,
   FileText,
@@ -47,6 +48,8 @@ interface OverviewTabProps {
   patient: OverviewPatient | null;
   fullProfileData: FullProfileData | null;
   encountersCount: number;
+  appointmentsCount: number;
+  appointmentsLoading?: boolean;
   hasOpenEncounter: boolean;
   accessRequired: boolean;
   stateInfo: OverviewStateInfo | null;
@@ -65,7 +68,7 @@ function OverviewStatCard({
   onClick,
 }: {
   icon: ReactNode;
-  value: number;
+  value: number | string;
   label: string;
   active?: boolean;
   tone: string;
@@ -122,6 +125,8 @@ export function OverviewTab({
   patient,
   fullProfileData,
   encountersCount,
+  appointmentsCount,
+  appointmentsLoading = false,
   hasOpenEncounter,
   accessRequired,
   stateInfo,
@@ -149,7 +154,14 @@ export function OverviewTab({
         <h3 className="mb-3 font-cairo text-[15px] font-black text-[#101828]">
           المؤشرات السريعة
         </h3>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+          <OverviewStatCard
+            icon={<CalendarDays className="h-5 w-5 text-primary" />}
+            value={appointmentsLoading ? "…" : appointmentsCount}
+            label="إجمالي المواعيد"
+            tone="bg-gradient-to-br from-[#f0fdfa] to-white hover:border-primary"
+            onClick={() => onSelectTab("appointments")}
+          />
           <OverviewStatCard
             icon={<Stethoscope className="h-5 w-5 text-[#0EA5E9]" />}
             value={encountersCount}

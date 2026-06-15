@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { DoctorScheduleSkeleton } from '@/components/doctor/shared/skeletons';
+import { ClinicAccountsBanner } from '@/components/doctor/clinic-accounts';
 import {
   useSchedule,
   useAddScheduleDay,
@@ -53,7 +54,7 @@ const DAY_LABELS: Record<ScheduleDayKey, string> = {
 export default function DoctorWorkSchedulePage() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { workSchedule, isLoading, error, refetch } = useSchedule();
+  const { workSchedule, isAwaitingData, error, refetch } = useSchedule();
   const { addDayAsync, isLoading: isAddingDay } = useAddScheduleDay();
   const { updateDayAsync, isLoading: isUpdatingDay } =
     useUpdateScheduleDay();
@@ -297,7 +298,7 @@ export default function DoctorWorkSchedulePage() {
   return (
     <>
       <Helmet>
-        <title>إدارة جدول العمل • LMJ Health</title>
+        <title>جدول العمل • LMJ Health</title>
       </Helmet>
 
       <div
@@ -331,11 +332,16 @@ export default function DoctorWorkSchedulePage() {
         }
       />
 
+        <ClinicAccountsBanner
+          title='جدول العمل'
+          icon={<Calendar className='h-7 w-7 text-white sm:h-8 sm:w-8' />}
+        />
+
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className='container px-4 pt-8 mx-auto max-w-5xl'
+          className='container px-4 mx-auto max-w-5xl'
         >
           {error && (
             <motion.div
@@ -358,28 +364,6 @@ export default function DoctorWorkSchedulePage() {
               </button>
             </motion.div>
           )}
-
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className='rounded-[18px] border-[2px] border-[#BFEDEC] bg-gradient-to-br from-[#F2FFFE] to-[#E6F9F8] px-6 py-6 shadow-[0_8px_20px_rgba(15,143,139,0.1)]'
-          >
-            <div className='flex gap-4 items-start'>
-              <div className='p-2 rounded-full bg-primary/10'>
-                <Info className='w-5 h-5 text-primary' />
-              </div>
-              <div className='flex-1'>
-                <h1 className='font-cairo text-[18px] font-extrabold leading-[24px] text-primary'>
-                  إدارة جدول المواعيد
-                </h1>
-                <p className='mt-2 font-cairo text-[14px] font-semibold leading-[20px] text-[#155E75]'>
-                  حدد أيام وأوقات عملك الأسبوعية حتى يتمكن المرضى من الحجز عبر
-                  التطبيق. يمكنك إضافة استثناءات وإجازات خاصة.
-                </p>
-              </div>
-            </div>
-          </motion.section>
 
           {/* Slot Settings: overflow-visible + z-[25] so StyledSelect dropdowns aren’t clipped or covered */}
           <motion.section
@@ -490,7 +474,7 @@ export default function DoctorWorkSchedulePage() {
             </div>
 
             <div className='p-6'>
-              {isLoading ? (
+              {isAwaitingData ? (
                 <DoctorScheduleSkeleton days={5} />
               ) : availableTimes.length === 0 ? (
                 <motion.div

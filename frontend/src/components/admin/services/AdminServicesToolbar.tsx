@@ -1,4 +1,4 @@
-import { Loader2, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import type { Tab } from '@/components/admin/services/tabsConfig';
 
 export function AdminServicesToolbar({
@@ -6,7 +6,6 @@ export function AdminServicesToolbar({
   searchInput,
   onSearchChange,
   searchDisabled,
-  isFetching,
   activeTabIdx,
   onTabChange,
   serviceTypesCount,
@@ -15,7 +14,6 @@ export function AdminServicesToolbar({
   searchInput: string;
   onSearchChange: (value: string) => void;
   searchDisabled: boolean;
-  isFetching: boolean;
   activeTabIdx: number;
   onTabChange: (idx: number) => void;
   serviceTypesCount: number;
@@ -32,11 +30,7 @@ export function AdminServicesToolbar({
             className='h-[40px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none placeholder:text-[#98A2B3] focus:border-primary disabled:opacity-50'
           />
           <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-            {isFetching ? (
-              <Loader2 className='h-4 w-4 animate-spin text-primary' />
-            ) : (
-              <Search className='h-4 w-4' />
-            )}
+            <Search className='h-4 w-4' />
           </div>
         </div>
 

@@ -26,6 +26,7 @@ import {
 import { resolveDoctorSpecialtyLookupCategory } from "@/lib/admin/doctorSpecialtyLookupCategory";
 import type { AdminLookupRecord } from "@/lib/admin/types";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 import { staggerContainer, staggerItem } from "@/motion";
 import { ApiError } from "@/lib/api";
 import { downloadUtf8Csv } from "@/lib/export/downloadUtf8Csv";
@@ -55,8 +56,11 @@ export default function AdminDoctorSpecializationsPage() {
     [lookupCategory, includeInactive],
   );
 
-  const { data, isLoading, error, refetch, isFetching } =
+  const { data, isAwaitingData, error, refetch } =
     useAdminLookups(listParams);
+  const { retry: retryLookups, retrying: retryingLookups } = useRetryAction(
+    () => refetch(),
+  );
   const removeMut = useRemoveLookup();
 
   const lookups = data?.lookups ?? [];
@@ -96,7 +100,7 @@ export default function AdminDoctorSpecializationsPage() {
   const activeCount = lookups.filter((x) => x.isActive).length;
   const inactiveCount = lookups.filter((x) => !x.isActive).length;
 
-  const busy = isLoading || isFetching;
+  const busy = isAwaitingData;
 
   function openCreate() {
     setEditTarget(null);
@@ -196,12 +200,12 @@ export default function AdminDoctorSpecializationsPage() {
           </button>
           <button
             type="button"
-            onClick={() => refetch()}
-            disabled={busy}
+            onClick={() => void retryLookups()}
+            disabled={retryingLookups}
             className="inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] transition hover:border-primary/40 disabled:opacity-50"
           >
             <RefreshCw
-              className={`h-4 w-4 ${busy ? "animate-spin" : ""}`}
+              className={`h-4 w-4 ${retryingLookups ? "animate-spin" : ""}`}
               aria-hidden
             />
             تحديث
@@ -241,7 +245,7 @@ export default function AdminDoctorSpecializationsPage() {
           </label>
         </div>
 
-        {isLoading ? (
+        {isAwaitingData ? (
           <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-[14px] border border-[#EEF2F6] bg-white py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
             <p className="font-cairo text-[13px] font-semibold text-[#667085]">

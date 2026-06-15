@@ -13,6 +13,7 @@ import {
   useDoctorProfile,
   useSubmitDoctorProfileChangeRequest,
 } from '@/hooks';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 export default function DoctorProfileProfessionalEditPage() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function DoctorProfileProfessionalEditPage() {
     }
   };
 
-  if (profileQuery.isLoading) {
+  if (isAwaitingInitialQueryData(profileQuery.data, profileQuery.isError)) {
     return <DoctorProfilePageLoading />;
   }
 

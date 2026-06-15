@@ -6,14 +6,14 @@ export default function AdminNotificationsList({
   items,
   onMarkRead,
   pendingMarkId,
-  isLoading,
+  isAwaitingData,
 }: {
   items: AdminNotificationRow[];
   onMarkRead: (id: string) => void;
   pendingMarkId?: string | null;
-  isLoading?: boolean;
+  isAwaitingData?: boolean;
 }) {
-  if (isLoading) {
+  if (isAwaitingData) {
     return (
       <div
         dir='rtl'

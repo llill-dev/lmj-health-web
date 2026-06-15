@@ -6,6 +6,10 @@ import {
 } from "@tanstack/react-query";
 import { get, post, put, patch, del } from "@/lib/api";
 import { adminEndpoints } from "@/lib/admin/endpoints";
+import {
+  isAwaitingInitialQueryData,
+  isAwaitingInitialQueryDataWithPlaceholder,
+} from "@/lib/query/queryUi";
 import type {
   FacilitiesListParams,
   FacilitiesListResponse,
@@ -53,7 +57,7 @@ function buildQs(params: Record<string, unknown>): string {
 
 export function useFacilitiesList(params: FacilitiesListParams = {}) {
   const qs = buildQs(params as Record<string, unknown>);
-  return useQuery({
+  const query = useQuery({
     queryKey: SERVICES_KEYS.facilities(params),
     queryFn: () =>
       get<FacilitiesListResponse>(
@@ -62,6 +66,15 @@ export function useFacilitiesList(params: FacilitiesListParams = {}) {
       ),
     placeholderData: keepPreviousData,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryDataWithPlaceholder(
+      query.data,
+      query.isError,
+      undefined,
+    ),
+  };
 }
 
 export function useFacilityById(id: string, enabled = true) {
@@ -136,7 +149,7 @@ export function useDeleteFacility() {
 
 export function useServiceTypesList(active?: boolean) {
   const qs = active !== undefined ? `?active=${active}` : "";
-  return useQuery({
+  const query = useQuery({
     queryKey: [...SERVICES_KEYS.serviceTypes(), active],
     queryFn: () =>
       get<ServiceTypesListResponse>(
@@ -145,6 +158,11 @@ export function useServiceTypesList(active?: boolean) {
       ),
     staleTime: 5 * 60 * 1000,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }
 
 export function useCreateServiceType() {

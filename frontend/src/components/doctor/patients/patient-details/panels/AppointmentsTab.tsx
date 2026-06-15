@@ -13,8 +13,13 @@ import {
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 
+import { PatientAppointmentsSummaryCards } from "../cards";
 import { PatientDetailsTabSkeleton } from "../skeletons";
 import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
+import {
+  countPatientAppointments,
+  type PatientAppointmentCounts,
+} from "@/lib/doctor/countPatientAppointments";
 
 function patientInitialsFromName(name?: string): string {
   const value = name?.trim() ?? "";
@@ -35,9 +40,9 @@ function formatDashDate(iso?: string | null) {
 
 interface AppointmentsTabProps {
   appointments: any[];
-  isLoading: boolean;
+  isAwaitingData: boolean;
   isError: boolean;
-  isFetching: boolean;
+  retrying?: boolean;
   onRetry: () => void;
   onOpenAppointments: () => void;
   formatIsoDate: (value?: string | null) => string;
@@ -45,14 +50,14 @@ interface AppointmentsTabProps {
 
 export function AppointmentsTab({
   appointments,
-  isLoading,
+  isAwaitingData,
   isError,
-  isFetching,
+  retrying,
   onRetry,
   onOpenAppointments,
   formatIsoDate,
 }: AppointmentsTabProps) {
-  if (isLoading) return <PatientDetailsTabSkeleton rows={3} />;
+  if (isAwaitingData) return <PatientDetailsTabSkeleton rows={3} />;
 
   if (isError) {
     return (
@@ -60,15 +65,21 @@ export function AppointmentsTab({
         title="تعذّر تحميل المواعيد"
         brief="حدث خطأ أثناء تحميل مواعيد المريض"
         detail="حدث خطأ أثناء تحميل مواعيد المريض"
-        retrying={isFetching}
+        retrying={retrying}
         onRetry={onRetry}
       />
     );
   }
 
+  const appointmentCounts: PatientAppointmentCounts =
+    countPatientAppointments(appointments);
+
   if (!appointments.length) {
     return (
-      <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="w-full">
+      <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="w-full space-y-4">
+        <motion.div variants={TAB_STAGGER_ITEM}>
+          <PatientAppointmentsSummaryCards counts={appointmentCounts} />
+        </motion.div>
         <motion.div variants={TAB_STAGGER_ITEM} className="w-full">
           <PatientTabEmptyIllustration
             variant="teal"
@@ -95,6 +106,9 @@ export function AppointmentsTab({
 
   return (
     <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="space-y-4">
+      <motion.div variants={TAB_STAGGER_ITEM}>
+        <PatientAppointmentsSummaryCards counts={appointmentCounts} />
+      </motion.div>
       <motion.div variants={TAB_STAGGER_ITEM} className="flex justify-start">
         <button
           type="button"

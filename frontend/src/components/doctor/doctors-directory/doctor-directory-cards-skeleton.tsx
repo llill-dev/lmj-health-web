@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
 import {
   DoctorLoadingShell,
   DoctorPaginationSkeleton,
   SkeletonBlock,
-} from '@/components/doctor/shared/skeletons';
+} from "@/components/doctor/shared/skeletons";
 
 function DoctorDirectoryCardSkeleton() {
   return (
-    <div className="relative overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white px-6 pb-5 pt-6 text-center shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
+    <div className="relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white px-6 pb-5 pt-6 text-center shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
       <SkeletonBlock className="mx-auto h-[78px] w-[78px] rounded-full" />
       <SkeletonBlock className="mx-auto mt-4 h-[16px] w-[140px]" />
       <SkeletonBlock className="mx-auto mt-2 h-[14px] w-[100px]" />
@@ -22,7 +22,9 @@ function DoctorDirectoryCardSkeleton() {
       </div>
       <SkeletonBlock className="mx-auto mt-4 h-[18px] w-[56px]" />
       <SkeletonBlock className="mx-auto mt-2 h-[14px] w-[90px]" />
-      <SkeletonBlock className="mx-auto mt-5 h-[36px] w-full max-w-[290px] rounded-[16px]" />
+      <div className="mt-auto w-full pt-5">
+        <SkeletonBlock className="mx-auto h-[36px] w-full max-w-[290px] rounded-[16px]" />
+      </div>
     </div>
   );
 }
@@ -51,7 +53,7 @@ export function DoctorDirectoryCardsSkeleton({
           </div>
         </section>
 
-        <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch">
           {Array.from({ length: cardCount }).map((_, index) => (
             <DoctorDirectoryCardSkeleton key={index} />
           ))}

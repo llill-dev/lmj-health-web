@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import {
   ENCOUNTER_ORDER_CONFIG,
   type CatalogOrderCategory,
@@ -81,14 +82,17 @@ export function useEncounterOrderPreviewPage(
     publicProfileQuery.data?.patient,
   ]);
 
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: encounterQuery.data, isError: encounterQuery.isError },
+    { data: orderQuery.data, isError: orderQuery.isError },
+    { data: publicProfileQuery.data, isError: publicProfileQuery.isError },
+  ]);
+
   return {
     config: ENCOUNTER_ORDER_CONFIG[category],
     previewVm,
     order: orderQuery.data,
-    isLoading:
-      encounterQuery.isLoading ||
-      orderQuery.isLoading ||
-      publicProfileQuery.isLoading,
+    isAwaitingData,
     isError: orderQuery.isError || !orderQuery.data,
     error: orderQuery.error,
     refetch: () => {

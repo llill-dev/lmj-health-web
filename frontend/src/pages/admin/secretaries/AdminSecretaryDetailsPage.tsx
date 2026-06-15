@@ -28,7 +28,7 @@ export default function AdminSecretaryDetailsPage() {
 
   /* Try state first, then fallback to fetching list */
   const locationSecretary = (location.state as { secretary?: AdminSecretarySummary })?.secretary;
-  const { data: listData, isLoading } = useAdminSecretariesList({ limit: 100 });
+  const { data: listData, isAwaitingData } = useAdminSecretariesList({ limit: 100 });
   const secretary: AdminSecretarySummary | undefined =
     locationSecretary ??
     listData?.secretaries.find((s) => s._id === secretaryId);
@@ -69,7 +69,7 @@ export default function AdminSecretaryDetailsPage() {
               <Users className='h-8 w-8' />
             </div>
             <div>
-              {isLoading && !secretary ? (
+              {isAwaitingData && !secretary ? (
                 <>
                   <div className='h-6 w-48 animate-pulse rounded bg-[#EEF2F6]' />
                   <div className='mt-2 h-4 w-32 animate-pulse rounded bg-[#EEF2F6]' />
@@ -167,7 +167,7 @@ export default function AdminSecretaryDetailsPage() {
                     </span>
                   </div>
                 )}
-                {!secretary?.user?.email && !secretary?.user?.phone && !isLoading && (
+                {!secretary?.user?.email && !secretary?.user?.phone && !isAwaitingData && (
                   <div className='font-cairo text-[12px] text-[#98A2B3]'>
                     لا توجد بيانات تواصل
                   </div>

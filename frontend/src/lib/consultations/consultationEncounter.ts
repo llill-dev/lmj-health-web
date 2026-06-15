@@ -28,6 +28,16 @@ export function buildConsultationEncounterNotes(input: {
   return `${subject}\n${marker}`;
 }
 
+/** يعرض ملاحظات الزيارة للطبيب بدون العلامة الداخلية [consultation:...]. */
+export function formatEncounterNotesForDisplay(notes?: string | null): string {
+  const raw = notes?.trim();
+  if (!raw) return '';
+  return raw
+    .replace(/\[consultation:[^\]]+\]/gi, '')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
+}
+
 export function buildConsultationClinicalPath(
   patientId: string,
   encounterId: string,

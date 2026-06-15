@@ -42,6 +42,7 @@ import {
 } from "@/hooks";
 import { readAuthUser } from "@/lib/cookies";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 import { doctorAppointmentsApi } from "@/lib/doctor/client";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import { useNavigate } from "react-router-dom";
@@ -280,12 +281,10 @@ export default function DoctorAppointmentsPage() {
 
   const appointmentsListFailed = listQuery.isError;
   const appointmentsListPending =
-    listQuery.isPending && !appointmentsListFailed;
+    listQuery.isAwaitingData && !appointmentsListFailed;
   const appointmentsListReady = !appointmentsListFailed && !appointmentsListPending;
-  const appointmentsRefreshing =
-    listQuery.isFetching &&
-    listQuery.fetchStatus === "fetching" &&
-    appointmentsListReady;
+  const { retry: retryAppointmentsList, retrying: retryingAppointmentsList } =
+    useRetryAction(() => listQuery.refetch());
 
   const appointmentsLoadErrorPresentation = useMemo(
     () => summarizeAppointmentsListError(listQuery.error),
@@ -407,7 +406,7 @@ export default function DoctorAppointmentsPage() {
 
   const handleBookingAction = () => {
     // Check if we have patients available (only when connected to backend)
-    if (!UI_ONLY && doctorPatientsQuery.isLoading) {
+    if (!UI_ONLY && doctorPatientsQuery.isAwaitingData) {
       toast("جارٍ تحميل قائمة المرضى...", {
         title: "انتظر قليلاً",
         variant: "info",
@@ -465,25 +464,25 @@ export default function DoctorAppointmentsPage() {
             {
               key: "scheduled",
               icon: <Clock className="w-5 h-5 shrink-0" />,
-              value: scheduledTotal.isLoading ? "—" : scheduledTotal.total,
+              value: scheduledTotal.isAwaitingData ? "—" : scheduledTotal.total,
               label: "مجدولة",
             },
             {
               key: "completed",
               icon: <CheckCircle className="w-5 h-5 shrink-0" />,
-              value: completedTotal.isLoading ? "—" : completedTotal.total,
+              value: completedTotal.isAwaitingData ? "—" : completedTotal.total,
               label: "مكتملة",
             },
             {
               key: "cancelled",
               icon: <XCircle className="w-5 h-5 shrink-0" />,
-              value: cancelledTotal.isLoading ? "—" : cancelledTotal.total,
+              value: cancelledTotal.isAwaitingData ? "—" : cancelledTotal.total,
               label: "ملغية",
             },
             {
               key: "no-show",
               icon: <UserX className="w-5 h-5 shrink-0" />,
-              value: noShowTotal.isLoading ? "—" : noShowTotal.total,
+              value: noShowTotal.isAwaitingData ? "—" : noShowTotal.total,
               label: "عدم حضور",
             },
           ]}
@@ -918,22 +917,6 @@ export default function DoctorAppointmentsPage() {
             )}
 
             <div className="px-6 py-4">
-              {appointmentsRefreshing &&
-              appointmentsListReady &&
-              listQuery.total > 0 &&
-              visibleAppointments.length > 0 ? (
-                <p
-                  className="mb-3 flex justify-center gap-2 rounded-xl border border-primary/15 bg-primary/[0.04] py-2 text-center font-cairo text-[12px] font-bold text-primary"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <Loader2
-                    className="h-4 w-4 shrink-0 animate-spin"
-                    aria-hidden
-                  />
-                  جارٍ تحديث القائمة...
-                </p>
-              ) : null}
               {appointmentsListFailed ? (
                 <DoctorListErrorState
                   title={appointmentsLoadErrorPresentation.title}
@@ -942,11 +925,8 @@ export default function DoctorAppointmentsPage() {
                   showTechnicalDetail={
                     appointmentsLoadErrorPresentation.showTechnicalDetail
                   }
-                  retrying={
-                    listQuery.isFetching &&
-                    listQuery.fetchStatus === "fetching"
-                  }
-                  onRetry={() => listQuery.refetch()}
+                  retrying={retryingAppointmentsList}
+                  onRetry={() => void retryAppointmentsList()}
                 />
               ) : false ? (
                 <div
@@ -989,11 +969,11 @@ export default function DoctorAppointmentsPage() {
                     ) : null}
                     <button
                       type="button"
-                      onClick={() => listQuery.refetch()}
-                      disabled={listQuery.isFetching && listQuery.fetchStatus === "fetching"}
+                      onClick={() => void retryAppointmentsList()}
+                      disabled={retryingAppointmentsList}
                       className="mt-7 inline-flex h-[44px] min-w-[180px] items-center justify-center gap-2 rounded-[14px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.22)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#0d7d76] hover:shadow-[0_14px_32px_rgba(15,143,139,0.26)] active:translate-y-[0.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 disabled:pointer-events-none disabled:opacity-60"
                     >
-                      {listQuery.isFetching && appointmentsListFailed ? (
+                      {retryingAppointmentsList ? (
                         <Loader2
                           className="h-4 w-4 animate-spin"
                           aria-hidden
@@ -1023,8 +1003,8 @@ export default function DoctorAppointmentsPage() {
                       expanded={expandedAppointmentId === appointment.id}
                       detailsLoading={
                         expandedAppointmentId === appointment.id &&
-                        (detailsQuery.isLoading ||
-                          appointmentFilesQuery.isLoading)
+                        (detailsQuery.isAwaitingData ||
+                          appointmentFilesQuery.isAwaitingData)
                       }
                       onToggle={() => {
                         setExpandedAppointmentId((current) =>

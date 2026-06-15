@@ -20,6 +20,7 @@ import {
   formatRequestedAt,
 } from '@/components/admin/verification-requests/verificationRequestDetailsUtils';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 export default function AdminVerificationRequestDetailsPage() {
   const navigate = useNavigate();
@@ -50,6 +51,10 @@ export default function AdminVerificationRequestDetailsPage() {
     enabled: Boolean(requestId),
     staleTime: 15_000,
   });
+  const requestAwaiting = isAwaitingInitialQueryData(
+    requestQuery.data,
+    requestQuery.isError,
+  );
 
   const cardData = useMemo(() => {
     const request = requestQuery.data;
@@ -138,7 +143,7 @@ export default function AdminVerificationRequestDetailsPage() {
           </button>
         </div>
 
-        {requestQuery.isLoading ? (
+        {requestAwaiting ? (
           <div className='rounded-[10px] border border-[#D1E9E6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
             جارِ تحميل تفاصيل الطلب...
           </div>

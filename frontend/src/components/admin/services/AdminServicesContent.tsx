@@ -8,7 +8,7 @@ import { ADMIN_SERVICES_PAGE_SIZE } from '@/components/admin/services/tabsConfig
 import type { FacilitySummary, ServiceType } from '@/lib/admin/types';
 
 export function AdminServicesContent({
-  isLoading,
+  isAwaitingData,
   isError,
   isFacilityTab,
   facilityTabIcon,
@@ -24,7 +24,7 @@ export function AdminServicesContent({
   onDeleteFacility,
   onToggleFacilityStatus,
 }: {
-  isLoading: boolean;
+  isAwaitingData: boolean;
   isError: boolean;
   isFacilityTab: boolean;
   facilityTabIcon: ElementType;
@@ -42,13 +42,13 @@ export function AdminServicesContent({
 }) {
   return (
     <section className='mt-6 space-y-4'>
-      {isLoading && (
+      {isAwaitingData && (
         <div className='flex items-center justify-center py-16'>
           <Loader2 className='h-8 w-8 animate-spin text-primary' />
         </div>
       )}
 
-      {isError && !isLoading && (
+      {isError && !isAwaitingData && (
         <div className='flex flex-col items-center gap-3 rounded-[12px] border border-[#FEE2E2] bg-white py-12 text-center'>
           <AlertCircle className='h-8 w-8 text-[#F04438]' />
           <p className='font-cairo text-[14px] font-bold text-[#F04438]'>حدث خطأ أثناء تحميل البيانات</p>
@@ -63,7 +63,7 @@ export function AdminServicesContent({
         </div>
       )}
 
-      {!isLoading && !isError && isFacilityTab && (
+      {!isAwaitingData && !isError && isFacilityTab && (
         <>
           {facilities.length === 0 ? (
             <EmptyState message='لا توجد منشآت لهذا النوع. أضف منشأة جديدة من الزر أعلاه.' />
@@ -93,7 +93,7 @@ export function AdminServicesContent({
         </>
       )}
 
-      {!isLoading && !isError && !isFacilityTab && (
+      {!isAwaitingData && !isError && !isFacilityTab && (
         <>
           {serviceTypes.length === 0 ? (
             <EmptyState message='لا توجد أنواع خدمات مُعرَّفة بعد.' />

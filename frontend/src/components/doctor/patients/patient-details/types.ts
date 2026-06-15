@@ -40,5 +40,10 @@ export type FullProfileData = {
     notes?: string;
   }>;
   files: Array<{ id: string; name: string; createdAt: string }>;
-  orders: Array<{ id: string; title: string; status: string }>;
+  orders: Array<{
+    id: string;
+    title: string;
+    status: string;
+    category: "lab" | "radiology" | "procedure" | "referral" | "other";
+  }>;
 };

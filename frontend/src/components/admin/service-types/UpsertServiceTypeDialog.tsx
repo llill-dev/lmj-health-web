@@ -11,6 +11,7 @@ import {
   useMutateServiceType,
 } from '@/hooks/admin/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { AppCheckbox } from '@/components/ui';
 import { useToast } from '@/components/ui/ToastProvider';
 import StyledSelect from '@/components/ui/styled-select';
 import type { ServiceType, ServiceTypeField } from '@/lib/admin/types';
@@ -563,12 +564,11 @@ export default function UpsertServiceTypeDialog({
                               control={control}
                               name={`fields.${index}.required`}
                               render={({ field: { value, onChange, ref } }) => (
-                                <input
+                                <AppCheckbox
                                   ref={ref}
-                                  type='checkbox'
+                                  size='sm'
                                   checked={value}
                                   onChange={(e) => onChange(e.target.checked)}
-                                  className='h-4 w-4 rounded border-[#D0D5DD] text-primary'
                                 />
                               )}
                             />
@@ -579,12 +579,11 @@ export default function UpsertServiceTypeDialog({
                               control={control}
                               name={`fields.${index}.isPublic`}
                               render={({ field: { value, onChange, ref } }) => (
-                                <input
+                                <AppCheckbox
                                   ref={ref}
-                                  type='checkbox'
+                                  size='sm'
                                   checked={value}
                                   onChange={(e) => onChange(e.target.checked)}
-                                  className='h-4 w-4 rounded border-[#D0D5DD] text-primary'
                                 />
                               )}
                             />

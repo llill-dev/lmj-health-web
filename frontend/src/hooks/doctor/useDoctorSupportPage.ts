@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { isAwaitingAnyInitialQueryData, isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import {
   usePlatformContactContent,
   usePlatformFaqContent,
@@ -35,12 +36,28 @@ export function useDoctorSupportPage(language: 'ar' | 'en' = 'ar') {
     [contactQuery.channels],
   );
 
-  const isLoading =
-    profileQuery.isLoading ||
-    faqQuery.isLoading ||
-    contactQuery.isLoading ||
-    termsQuery.isLoading ||
-    privacyQuery.isLoading;
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: profileQuery.data, isError: profileQuery.isError },
+    { data: faqQuery.data, isError: false },
+    { data: contactQuery.data, isError: false },
+    { data: termsQuery.data, isError: false },
+    { data: privacyQuery.data, isError: false },
+  ]);
+
+  const isAwaitingProfileData = isAwaitingInitialQueryData(
+    profileQuery.data,
+    profileQuery.isError,
+  );
+
+  const isAwaitingFaqData = isAwaitingInitialQueryData(
+    faqQuery.data,
+    false,
+  );
+
+  const isAwaitingContactData = isAwaitingInitialQueryData(
+    contactQuery.data,
+    false,
+  );
 
   const hasCmsContact = contactQuery.channels.length > 0;
 
@@ -51,10 +68,10 @@ export function useDoctorSupportPage(language: 'ar' | 'en' = 'ar') {
     contactChannels: contactQuery.channels,
     termsDocument: termsQuery.document,
     privacyDocument: privacyQuery.document,
-    isLoading,
-    isProfileLoading: profileQuery.isLoading,
-    isFaqLoading: faqQuery.isLoading,
-    isContactLoading: contactQuery.isLoading,
+    isAwaitingData,
+    isAwaitingProfileData,
+    isAwaitingFaqData,
+    isAwaitingContactData,
     hasCmsContact,
     profileError: profileQuery.isError,
   };

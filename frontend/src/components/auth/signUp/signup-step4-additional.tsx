@@ -10,6 +10,7 @@ import {
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { AppCheckbox } from '@/components/ui';
 
 import {
   step4AdditionalSchema,
@@ -111,17 +112,15 @@ export default function SignUpStep4Additional({
             <div className='flex flex-col gap-3 mt-3 sm:flex-row sm:flex-wrap sm:justify-end'>
               <label className='flex cursor-pointer items-center justify-end gap-2 font-cairo text-[13px] font-semibold text-[#374151]'>
                 <span>استشارة عبر الإنترنت (online)</span>
-                <input
-                  type='checkbox'
-                  className='h-4 w-4 rounded border-[#9EE8E0] text-primary focus:ring-primary'
+                <AppCheckbox
+                  size='sm'
                   {...register('consultationOnline')}
                 />
               </label>
               <label className='flex cursor-pointer items-center justify-end gap-2 font-cairo text-[13px] font-semibold text-[#374151]'>
                 <span>في العيادة (offline)</span>
-                <input
-                  type='checkbox'
-                  className='h-4 w-4 rounded border-[#9EE8E0] text-primary focus:ring-primary'
+                <AppCheckbox
+                  size='sm'
                   {...register('consultationOffline')}
                 />
               </label>

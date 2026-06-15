@@ -5,6 +5,7 @@ import {
   doctorAccessRequestsQueryKeys,
   doctorApi,
 } from '@/lib/doctor/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type { DoctorAccessRequestListParams } from '@/lib/doctor/types';
 
 export function useDoctorAccessRequests(
@@ -23,6 +24,7 @@ export function useDoctorAccessRequests(
     limit: query.data?.limit ?? params.limit ?? 20,
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 

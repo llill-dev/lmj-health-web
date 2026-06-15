@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import { doctorApi, doctorScheduleQueryKeys } from "@/lib/doctor/client";
 import type {
   DoctorUpdateScheduleBody,
@@ -24,7 +25,7 @@ function getDoctorId(): string {
 export function useSchedule() {
   const doctorId = getDoctorId();
   
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isError, error, refetch } = useQuery({
     queryKey: doctorScheduleQueryKeys.detail(doctorId),
     queryFn: async () => {
       const response = await doctorApi.schedule.get();
@@ -37,7 +38,9 @@ export function useSchedule() {
 
   return {
     workSchedule: data,
-    isLoading,
+    isAwaitingData: isAwaitingInitialQueryData(data, isError),
+    /** @deprecated use isAwaitingData */
+    isLoading: isAwaitingInitialQueryData(data, isError),
     error,
     refetch,
   };

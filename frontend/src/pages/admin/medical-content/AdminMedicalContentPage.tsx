@@ -232,7 +232,7 @@ export default function AdminMedicalContentPage() {
   );
 
   const showPaginationBar =
-    !contentQuery.isLoading && !contentQuery.isError && serverTotal > 0;
+    !contentQuery.isAwaitingData && !contentQuery.isError && serverTotal > 0;
 
   useEffect(() => {
     setPage(1);
@@ -311,25 +311,25 @@ export default function AdminMedicalContentPage() {
             {
               key: "draft",
               icon: <FileText className="h-5 w-5 shrink-0" />,
-              value: statusCounts.isLoading ? "…" : statusCounts.draft,
+              value: statusCounts.isAwaitingData ? "…" : statusCounts.draft,
               label: "مسودات",
             },
             {
               key: "review",
               icon: <Clock className="h-5 w-5 shrink-0" />,
-              value: statusCounts.isLoading ? "…" : statusCounts.inReview,
+              value: statusCounts.isAwaitingData ? "…" : statusCounts.inReview,
               label: "قيد المراجعة",
             },
             {
               key: "published",
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
-              value: statusCounts.isLoading ? "…" : statusCounts.published,
+              value: statusCounts.isAwaitingData ? "…" : statusCounts.published,
               label: "منشور",
             },
             {
               key: "all",
               icon: <BookOpen className="h-5 w-5 shrink-0" />,
-              value: statusCounts.isLoading ? "…" : statusCounts.all,
+              value: statusCounts.isAwaitingData ? "…" : statusCounts.all,
               label: "إجمالي النظام",
             },
           ]}
@@ -498,7 +498,7 @@ export default function AdminMedicalContentPage() {
           </div>
 
           <div className="divide-y divide-[#EEF2F6]">
-            {contentQuery.isLoading ? (
+            {contentQuery.isAwaitingData ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
                 جارِ تحميل المحتوى...
               </div>

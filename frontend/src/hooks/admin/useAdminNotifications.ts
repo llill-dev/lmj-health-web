@@ -8,6 +8,7 @@ import type { NotificationItem, NotificationsListResponse } from '@/lib/notifica
 import { notificationItemId, notificationsApi } from '@/lib/notifications/client';
 import { ADMIN_NOTIFICATIONS_MOCK } from '@/components/admin/notifications/admin-notifications-mock';
 import { normalizeNotificationRead } from '@/components/admin/notifications/map-api-to-rows';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 const PAGE_SIZE = 20;
 
@@ -136,12 +137,17 @@ function applyReadAllToCache(queryClient: QueryClient) {
 
 /** شارة الهيدر: إجمالي غير المقروء — نفس مفاتيح صفحة الإشعارات (GET /api/notifications، API-3). */
 export function useAdminUnreadNotificationCount() {
-  return useQuery({
+  const query = useQuery({
     queryKey: adminNotificationsQueryKeys.unreadTotal,
     queryFn: fetchUnreadTotal,
     staleTime: 15_000,
     refetchOnWindowFocus: true,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }
 
 export function useAdminNotificationsPage(filterUnread: boolean, page: number) {
@@ -198,6 +204,7 @@ export function useAdminNotificationsPage(filterUnread: boolean, page: number) {
 
   return {
     listQuery,
+    isAwaitingData: isAwaitingInitialQueryData(listQuery.data, listQuery.isError),
     unreadTotal: unreadTotalQuery.data ?? 0,
     allTotal: allTotalQuery.data ?? 0,
     total,

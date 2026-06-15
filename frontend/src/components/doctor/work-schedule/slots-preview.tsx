@@ -26,11 +26,11 @@ export default function SlotsPreview({
     totalBookedSlots,
     duration,
     gap,
-    isLoading,
+    isAwaitingData,
     error,
   } = useSlots(date, filterType, doctorId);
 
-  if (isLoading) {
+  if (isAwaitingData) {
     return (
       <div
         className={cn(

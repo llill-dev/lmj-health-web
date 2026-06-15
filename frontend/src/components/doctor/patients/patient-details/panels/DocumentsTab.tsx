@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -54,7 +55,7 @@ export function DocumentsTab({
   onOpenFiles,
   onOpenEncountersPage,
 }: DocumentsTabProps) {
-  const [filter, setFilter] = React.useState<"all" | ClinicalDoc["kind"]>("all");
+  const [filter, setFilter] = useState<"all" | ClinicalDoc["kind"]>("all");
 
   const docs: ClinicalDoc[] = [
     ...encounters.map((enc): ClinicalDoc => ({
@@ -244,6 +245,3 @@ export function DocumentsTab({
     </motion.div>
   );
 }
-
-// lazy import to avoid circular
-import React from "react";

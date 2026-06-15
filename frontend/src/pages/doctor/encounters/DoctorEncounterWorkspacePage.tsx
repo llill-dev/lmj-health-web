@@ -19,6 +19,7 @@ import {
   useEncounterWorkspace,
 } from '@/hooks/doctor';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import { doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { readAuthUser } from '@/lib/cookies';
 
@@ -50,6 +51,9 @@ export default function DoctorEncounterWorkspacePage() {
 
   const queryClient = useQueryClient();
   const workspace = useEncounterWorkspace(doctorId, patientId, encounterId);
+  const { retry: retryWorkspace, retrying: retryingWorkspace } = useRetryAction(
+    () => Promise.resolve(workspace.refetch()),
+  );
   const closeEncounterMutation = useCloseDoctorPatientEncounter(doctorId);
 
   const sections = workspace.sections;
@@ -66,11 +70,11 @@ export default function DoctorEncounterWorkspacePage() {
   };
 
   const handleSaveProgress = () => {
+    void retryWorkspace();
     toast('تم تحديث عرض الزيارة من الخادم.', {
       title: 'حفظ التقدم',
       variant: 'success',
     });
-    workspace.refetch();
   };
 
   const handleCloseEncounter = async () => {
@@ -113,21 +117,21 @@ export default function DoctorEncounterWorkspacePage() {
       <div dir="rtl" lang="ar" className="w-full">
         <EncounterWorkspaceHeader doctorName={doctorName} />
 
-        {workspace.isEncounterLoading ? (
+        {workspace.isAwaitingEncounterData ? (
           <EncounterWorkspacePageSkeleton />
         ) : workspace.isError || !workspace.encounter || !workspace.patientVm ? (
           <DoctorListErrorState
             title="تعذّر تحميل مساحة الزيارة الطبية"
             brief={getUserFacingRequestErrorMessage(workspace.error)}
             detail={getUserFacingRequestErrorMessage(workspace.error)}
-            retrying={workspace.isFetching}
-            onRetry={workspace.refetch}
+            retrying={retryingWorkspace}
+            onRetry={() => void retryWorkspace()}
           />
         ) : (
           <div className="space-y-4">
             <EncounterWorkspacePatientCard
               patient={workspace.patientVm}
-              isEnriching={workspace.isPatientEnriching}
+              isEnriching={workspace.isAwaitingPatientEnrichment}
             />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -171,7 +175,7 @@ export default function DoctorEncounterWorkspacePage() {
               </button>
             </div>
 
-            {workspace.isSectionsLoading ? (
+            {workspace.isAwaitingSectionsData ? (
               <EncounterWorkspaceSectionsSkeleton />
             ) : (
               <div className="space-y-4">
@@ -209,10 +213,10 @@ export default function DoctorEncounterWorkspacePage() {
               <button
                 type="button"
                 onClick={handleSaveProgress}
-                disabled={workspace.isFetching}
+                disabled={retryingWorkspace}
                 className="inline-flex h-12 items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:opacity-60"
               >
-                {workspace.isFetching ? 'جارٍ التحديث...' : 'تحديث من الخادم'}
+                {retryingWorkspace ? 'جارٍ التحديث...' : 'تحديث من الخادم'}
               </button>
             </div>
 

@@ -80,11 +80,11 @@ export default function RescheduleAppointmentDialog({
   const today = useMemo(() => formatLocalDate(new Date()), []);
   const rescheduleSelectOutletRef = useRef<HTMLDivElement>(null);
 
-  const { appointmentTypes, isLoading: isLoadingTypes } =
+  const { appointmentTypes, isAwaitingData: isAwaitingTypes } =
     useAvailableAppointmentTypes(doctorId);
   const {
     freeSlots,
-    isLoading: isLoadingSlots,
+    isAwaitingData: isAwaitingSlots,
     error: slotsError,
   } = useSlots(selectedDate, 'free', doctorId);
 
@@ -279,11 +279,11 @@ export default function RescheduleAppointmentDialog({
                             onChange={field.onChange}
                             onBlur={field.onBlur}
                             name={field.name}
-                            disabled={!selectedDate || isLoadingSlots}
+                            disabled={!selectedDate || isAwaitingSlots}
                             placeholder={
                               !selectedDate
                                 ? 'اختر التاريخ أولًا'
-                                : isLoadingSlots
+                                : isAwaitingSlots
                                   ? 'جارٍ تحميل الأوقات...'
                                   : availableTimes.length === 0
                                     ? 'لا توجد أوقات متاحة'
@@ -321,7 +321,7 @@ export default function RescheduleAppointmentDialog({
                           onChange={field.onChange}
                           onBlur={field.onBlur}
                           name={field.name}
-                          disabled={isLoadingTypes}
+                          disabled={isAwaitingTypes}
                           placeholder='الإبقاء على النوع الحالي أو اختيار نوع متاح'
                           options={[
                             { value: '', label: 'الإبقاء على النوع الحالي' },
@@ -349,7 +349,7 @@ export default function RescheduleAppointmentDialog({
                     </div>
                   ) : null}
 
-                  {selectedDate && isLoadingSlots ? (
+                  {selectedDate && isAwaitingSlots ? (
                     <div className='rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#667085]'>
                       <span className='inline-flex items-center gap-2'>
                         <Loader2 className='h-4 w-4 animate-spin text-primary' />

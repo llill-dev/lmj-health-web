@@ -70,19 +70,19 @@ export function PlatformSupportProvider({ children }: { children: ReactNode }) {
         open={activeModal === 'terms'}
         onClose={closeModal}
         document={termsQuery.document}
-        loading={termsQuery.isLoading}
+        loading={termsQuery.isAwaitingData}
       />
       <LegalDocumentDialog
         open={activeModal === 'privacy'}
         onClose={closeModal}
         document={privacyQuery.document}
-        loading={privacyQuery.isLoading}
+        loading={privacyQuery.isAwaitingData}
       />
       <LegalDocumentDialog
         open={activeModal === 'usage'}
         onClose={closeModal}
         document={usageQuery.document}
-        loading={usageQuery.isLoading}
+        loading={usageQuery.isAwaitingData}
       />
     </PlatformSupportContext.Provider>
   );

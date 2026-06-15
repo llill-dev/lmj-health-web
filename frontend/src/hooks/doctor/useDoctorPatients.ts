@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import {
   doctorApi,
   doctorPatientsQueryKeys,
@@ -29,6 +30,7 @@ export function useDoctorPatients(params: DoctorPatientsListParams) {
     limit: query.data?.limit ?? params.limit ?? 20,
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -43,6 +45,9 @@ export function useDoctorPatientPublicProfile(patientId: string, enabled = true)
   return {
     ...query,
     patient: query.data?.patient,
+    isAwaitingData:
+      enabled &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -65,6 +70,11 @@ export function useDoctorPatientFullProfile(
     patient: query.data?.ok ? query.data.data.patient : undefined,
     deniedError:
       query.data && query.data.ok === false ? query.data.error : null,
+    isAwaitingData:
+      enabled &&
+      Boolean(doctorId) &&
+      Boolean(patientId) &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -88,6 +98,11 @@ export function useDoctorPatientEncounters(
     limit: query.data?.limit ?? params.limit ?? 20,
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
+    isAwaitingData:
+      enabled &&
+      Boolean(doctorId) &&
+      Boolean(patientId) &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -115,6 +130,12 @@ export function useDoctorPatientEncounterDetail(
   return {
     ...query,
     encounter: query.data?.encounter,
+    isAwaitingData:
+      enabled &&
+      Boolean(doctorId) &&
+      Boolean(patientId) &&
+      Boolean(encounterId) &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -246,6 +267,10 @@ export function useDoctorPatientFiles(patientId: string, enabled = true) {
     page: query.data?.page ?? pageInfo?.page ?? 1,
     limit: query.data?.limit ?? pageInfo?.limit ?? items.length,
     total: query.data?.total ?? pageInfo?.total ?? items.length,
+    isAwaitingData:
+      enabled &&
+      Boolean(patientId) &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 

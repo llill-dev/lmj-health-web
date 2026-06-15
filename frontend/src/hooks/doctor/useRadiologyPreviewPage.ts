@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import { mapRadiologyPreviewVm } from '@/components/doctor/radiology/preview/map-radiology-preview';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { loadEncounterImagingOrderForPreview } from '@/lib/doctor/encounterImagingLoad';
@@ -59,12 +60,15 @@ export function useRadiologyPreviewPage(
     publicProfileQuery.data?.patient,
   ]);
 
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: encounterQuery.data, isError: encounterQuery.isError },
+    { data: orderQuery.data, isError: orderQuery.isError },
+    { data: publicProfileQuery.data, isError: publicProfileQuery.isError },
+  ]);
+
   return {
     previewVm,
-    isLoading:
-      encounterQuery.isLoading ||
-      orderQuery.isLoading ||
-      publicProfileQuery.isLoading,
+    isAwaitingData,
     isError: orderQuery.isError || !orderQuery.data,
     error: orderQuery.error,
     refetch: () => {

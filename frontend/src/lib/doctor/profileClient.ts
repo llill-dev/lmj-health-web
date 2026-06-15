@@ -25,6 +25,13 @@ export type DoctorProfileRecord = {
   locationCountry?: string;
   clinicLat?: number | null;
   clinicLng?: number | null;
+  clinicLocation?: {
+    type?: 'Point';
+    coordinates?: [number, number];
+  } | null;
+  geoStatus?: 'missing' | 'pending' | 'verified' | string | null;
+  geoSource?: string | null;
+  geoUpdatedAt?: string | null;
   bio?: string;
   consultationFee?: number | null;
   consultationTypes?: DoctorConsultationType[] | string[];

@@ -51,6 +51,24 @@ export function normalizeEncounterOrderCategory(
   return 'other';
 }
 
+/** يصنّف طلباً من ملف المريض الكامل (orders[]) حسب orderType أو الحقول المرآتية. */
+export function resolvePatientOrderCategory(order: {
+  orderType?: string | null;
+  type?: string | null;
+  category?: string | null;
+  orderTitle?: string | null;
+  title?: string | null;
+  orderName?: string | null;
+}): EncounterOrderCategoryKey | 'other' {
+  return normalizeEncounterOrderCategory({
+    orderType: order.orderType ?? undefined,
+    type: order.type ?? undefined,
+    category: order.category ?? undefined,
+    orderTitle: order.orderTitle ?? order.title ?? order.orderName ?? undefined,
+    orderName: order.orderName ?? undefined,
+  });
+}
+
 export function isDraftEncounterOrder(order: EncounterOrder) {
   const status = `${order.status ?? ''} ${order.statusCode ?? ''}`.toLowerCase();
   return (

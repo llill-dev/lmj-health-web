@@ -3,6 +3,10 @@
 import { useQueries, type QueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import {
+  isAwaitingAnyInitialQueryData,
+  isAwaitingInitialQueryData,
+} from '@/lib/query/queryUi';
+import {
   mapEncounterWorkspacePatient,
   mapEncounterWorkspaceSections,
 } from '@/components/doctor/encounters/workspace/map-encounter-workspace';
@@ -185,17 +189,25 @@ export function useEncounterWorkspace(
   }, [encounterQuery.data?.encounter, profile, publicId]);
 
   /** يمنع عرض الصفحة — فقط تفاصيل الزيارة (الأساس) */
-  const isEncounterLoading =
-    encounterQuery.isPending && !encounterQuery.data?.encounter;
+  const isAwaitingEncounterData = isAwaitingInitialQueryData(
+    encounterQuery.data,
+    encounterQuery.isError,
+  );
 
   /** أقسام الوصفة والطلبات — تُعرض بـ skeleton بعد ظهور الهيكل */
-  const isSectionsLoading =
-    (prescriptionsQuery.isPending && !prescriptionsQuery.data) ||
-    (ordersQuery.isPending && !ordersQuery.data);
+  const isAwaitingSectionsData = isAwaitingAnyInitialQueryData([
+    { data: prescriptionsQuery.data, isError: prescriptionsQuery.isError },
+    { data: ordersQuery.data, isError: ordersQuery.isError },
+  ]);
 
-  const isPatientEnriching =
-    (profileQuery.isFetching && !profile) ||
-    (publicProfileQuery.isFetching && !publicId);
+  const isAwaitingPatientEnrichment =
+    (isAwaitingInitialQueryData(profileResult, profileQuery.isError) &&
+      !profile) ||
+    (isAwaitingInitialQueryData(
+      publicProfileQuery.data,
+      publicProfileQuery.isError,
+    ) &&
+      !publicId);
 
   return {
     encounter: encounterQuery.data?.encounter,
@@ -203,11 +215,9 @@ export function useEncounterWorkspace(
     patientVm,
     profileDenied:
       profileResult && 'ok' in profileResult && profileResult.ok === false,
-    isEncounterLoading,
-    isSectionsLoading,
-    isPatientEnriching,
-    /** @deprecated استخدم isEncounterLoading */
-    isLoading: isEncounterLoading,
+    isAwaitingEncounterData,
+    isAwaitingSectionsData,
+    isAwaitingPatientEnrichment,
     isError: encounterQuery.isError,
     error: encounterQuery.error,
     refetch: () => {
@@ -217,9 +227,5 @@ export function useEncounterWorkspace(
       void profileQuery.refetch();
       void publicProfileQuery.refetch();
     },
-    isFetching:
-      encounterQuery.isFetching ||
-      prescriptionsQuery.isFetching ||
-      ordersQuery.isFetching,
   };
 }

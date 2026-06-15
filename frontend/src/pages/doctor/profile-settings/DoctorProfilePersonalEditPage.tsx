@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { persistDoctorProfileSuccessNavState } from '@/lib/doctor/doctorProfileSuccessNavState';
 import { useDoctorProfile, useUpdateDoctorProfile } from '@/hooks';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 export default function DoctorProfilePersonalEditPage() {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ export default function DoctorProfilePersonalEditPage() {
     }
   };
 
-  if (profileQuery.isLoading) {
+  if (isAwaitingInitialQueryData(profileQuery.data, profileQuery.isError)) {
     return <DoctorProfilePageLoading />;
   }
 

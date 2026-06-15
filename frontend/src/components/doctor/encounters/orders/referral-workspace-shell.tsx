@@ -84,7 +84,7 @@ export function ReferralWorkspaceShell({
     );
   }
 
-  if (workspace.isLoading) {
+  if (workspace.isAwaitingData) {
     return (
       <div className="flex min-h-[320px] items-center justify-center rounded-[16px] border border-dashed border-[#E2E8F0] bg-white font-cairo text-[14px] font-semibold text-[#667085]">
         {config.loadingLabel}

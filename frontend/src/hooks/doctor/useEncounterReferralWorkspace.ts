@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
+import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import {
   resolveEncounterOrderStatusLabel,
@@ -184,9 +185,16 @@ export function useEncounterReferralWorkspace(
   });
 
   const isBusy =
-    orderQuery.isFetching ||
     saveMutation.isPending ||
     finalizeMutation.isPending;
+
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: encounterQuery.data, isError: encounterQuery.isError },
+    {
+      data: orderQuery.data,
+      isError: orderQuery.isError,
+    },
+  ]);
 
   return {
     encounter: encounterQuery.data?.encounter,
@@ -194,7 +202,7 @@ export function useEncounterReferralWorkspace(
     form,
     setForm,
     statusLabel: resolveEncounterOrderStatusLabel(orderQuery.data ?? {}),
-    isLoading: encounterQuery.isLoading || orderQuery.isLoading,
+    isAwaitingData,
     isError: encounterQuery.isError || orderQuery.isError,
     error: encounterQuery.error ?? orderQuery.error,
     isBusy,

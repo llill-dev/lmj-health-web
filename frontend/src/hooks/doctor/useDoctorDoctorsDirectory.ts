@@ -1,3 +1,4 @@
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { doctorApi } from '@/lib/doctor/client';
@@ -85,6 +86,7 @@ export function useDoctorDoctorsDirectory(params: InternalDirectoryListParams) {
     limit: query.data?.limit ?? params.limit ?? 8,
     total: query.data?.total ?? 0,
     results: query.data?.results ?? query.data?.total ?? 0,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 

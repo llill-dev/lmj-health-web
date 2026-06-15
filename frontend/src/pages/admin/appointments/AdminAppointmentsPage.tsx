@@ -49,7 +49,7 @@ export default function AdminAppointmentsPage() {
     search: '',
   });
 
-  const { appointments, results, total, isLoading, error } =
+  const { appointments, results, total, isAwaitingData, error } =
     useAdminAppointments({
       page: filters.page,
       limit: filters.limit,
@@ -268,7 +268,7 @@ export default function AdminAppointmentsPage() {
         </section>
 
         <section className='mt-5 space-y-4'>
-          {isLoading ? (
+          {isAwaitingData ? (
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
               جارِ تحميل المواعيد...
             </div>

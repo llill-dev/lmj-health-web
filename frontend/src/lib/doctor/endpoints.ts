@@ -245,6 +245,16 @@ export const doctorEndpoints = {
   documents: {
     generate: '/api/documents/generate',
   },
+  facilities: {
+    suggest: '/api/facilities/suggest',
+    types: '/api/facilities/types',
+    /** Legacy create flow — fallback when POST /doctors/me/facility fails (API-3). */
+    requests: '/api/facilities/requests',
+  },
   /** GET — internal staff directory (doctor / secretary). API-3 */
   internalDirectory: '/api/doctors/internal/directory',
+  me: {
+    activityLog: '/api/doctors/me/activity-log',
+    facility: '/api/doctors/me/facility',
+  },
 } as const;

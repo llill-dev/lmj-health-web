@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { formatEncounterNotesForDisplay } from "@/lib/consultations/consultationEncounter";
 import { cn } from "@/lib/utils/utils";
 import type { DoctorEncounterSummary } from "@/lib/doctor/types";
 
@@ -190,7 +191,8 @@ export function EncounterCard({
                 ملاحظات الزيارة
               </div>
               <p className="font-cairo text-[13px] font-semibold leading-[1.65] text-[#334155]">
-                {encounter.notes?.trim() || "لا توجد ملاحظات مسجّلة لهذه الزيارة."}
+                {formatEncounterNotesForDisplay(encounter.notes) ||
+                  "لا توجد ملاحظات مسجّلة لهذه الزيارة."}
               </p>
             </div>
 

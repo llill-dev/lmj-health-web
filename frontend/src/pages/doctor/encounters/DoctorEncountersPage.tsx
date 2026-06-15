@@ -31,6 +31,7 @@ import {
   prefetchEncounterWorkspace,
 } from "@/hooks/doctor";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 import {
   CreateEncounterSubmitError,
   isValidAppointmentObjectId,
@@ -87,8 +88,10 @@ export default function DoctorEncountersPage() {
   >(null);
   const [closeTarget, setCloseTarget] = useState<MedicalVisitCardData | null>(null);
 
-  const { visits, stats, isLoading, isError, error, refetch, isFetching } =
+  const { visits, stats, isAwaitingData, isError, error, refetch } =
     useDoctorMedicalEncountersPage(doctorId, filters);
+  const { retry: retryEncounters, retrying: retryingEncounters } =
+    useRetryAction(() => Promise.resolve(refetch()));
 
   const patientsQuery = useDoctorPatients({
     page: 1,
@@ -139,7 +142,7 @@ export default function DoctorEncountersPage() {
     if (!open) setCreateDialogPatientId(null);
   };
 
-  const isRefreshing = isFetching && !isLoading;
+  const isRefreshing = false;
 
   const handleStatusTab = (status: MedicalVisitStatusFilter) => {
     setFilters((prev) => ({ ...prev, status }));
@@ -262,10 +265,10 @@ export default function DoctorEncountersPage() {
         <EncountersStatusTabs
           value={filters.status}
           onChange={handleStatusTab}
-          disabled={isRefreshing}
+          disabled={false}
         />
 
-        {isLoading ? (
+        {isAwaitingData ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <DoctorExpandableCardSkeleton count={5} />
           </motion.div>
@@ -274,13 +277,13 @@ export default function DoctorEncountersPage() {
             title="تعذّر تحميل الزيارات الطبية"
             brief={getUserFacingRequestErrorMessage(error)}
             detail={getUserFacingRequestErrorMessage(error)}
-            retrying={isFetching}
-            onRetry={refetch}
+            retrying={retryingEncounters}
+            onRetry={() => void retryEncounters()}
           />
         ) : (
           <EncountersListPanel
             panelKey={filters.status}
-            isRefreshing={isRefreshing && visits.length > 0}
+            isRefreshing={false}
           >
             {visits.length === 0 ? (
               <PatientTabEmptyIllustration
@@ -320,7 +323,7 @@ export default function DoctorEncountersPage() {
                           visit={displayVisit}
                           expanded={isExpanded}
                           detailsLoading={
-                            isExpanded && encounterDetailQuery.isLoading
+                            isExpanded && encounterDetailQuery.isAwaitingData
                           }
                           detailsError={
                             isExpanded && encounterDetailQuery.isError

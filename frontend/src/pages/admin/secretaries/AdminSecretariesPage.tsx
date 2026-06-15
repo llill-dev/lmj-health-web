@@ -48,14 +48,14 @@ export default function AdminSecretariesPage() {
     label: string;
   } | null>(null);
 
-  const { doctors: doctorOptions, isLoading: doctorsListLoading } =
+  const { doctors: doctorOptions, isAwaitingData: doctorsListAwaiting } =
     useAdminDoctors({
       page: 1,
       limit: 200,
       status: "approved",
     });
 
-  const { data, isLoading, isError, refetch } = useAdminSecretariesList({
+  const { data, isAwaitingData, isError, refetch } = useAdminSecretariesList({
     search: debouncedSearch || undefined,
     doctorId: doctorIdFilter || undefined,
     page,
@@ -77,7 +77,7 @@ export default function AdminSecretariesPage() {
     [page, totalPages],
   );
 
-  const showPaginationBar = !isLoading && !isError && data && data.total > 0;
+  const showPaginationBar = !isAwaitingData && !isError && data && data.total > 0;
 
   const openOffboard = useCallback((s: AdminSecretarySummary) => {
     const userId = resolveUserId(s);
@@ -108,19 +108,19 @@ export default function AdminSecretariesPage() {
             {
               key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
-              value: isLoading ? "—" : (data?.total ?? 0).toLocaleString("ar-EG"),
+              value: isAwaitingData ? "—" : (data?.total ?? 0).toLocaleString("ar-EG"),
               label: "إجمالي السكرتارية",
             },
             {
               key: "doctors",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
-              value: doctorsListLoading ? "—" : doctorOptions.length,
+              value: doctorsListAwaiting ? "—" : doctorOptions.length,
               label: "أطباء مرتبطون",
             },
             {
               key: "page",
               icon: <Mail className="h-5 w-5 shrink-0" />,
-              value: isLoading ? "—" : (data?.results ?? 0),
+              value: isAwaitingData ? "—" : (data?.results ?? 0),
               label: "في هذه الصفحة",
             },
           ]}
@@ -144,7 +144,7 @@ export default function AdminSecretariesPage() {
             size='sm'
             tone='muted'
             value={doctorIdFilter}
-            disabled={doctorsListLoading}
+            disabled={doctorsListAwaiting}
             onChange={(v) => {
               setDoctorIdFilter(v);
               setPage(1);
@@ -168,7 +168,7 @@ export default function AdminSecretariesPage() {
 
         {/* ── list ── */}
         <section className="mt-5 space-y-4">
-          {isLoading ? (
+          {isAwaitingData ? (
             <>
               <SecretaryCardSkeleton />
               <SecretaryCardSkeleton />

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type {
   AdminContentListParams,
   CreateAdminContentBody,
@@ -10,20 +11,30 @@ const CONTENT_LIST_KEY = ['admin', 'content'];
 const STALE = 30 * 1000;
 
 export function useAdminContentList(params: AdminContentListParams = {}) {
-  return useQuery({
+  const query = useQuery({
     queryKey: [...CONTENT_LIST_KEY, params],
     queryFn: () => adminApi.content.list(params),
     staleTime: STALE,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }
 
 export function useAdminContentById(id?: string | null) {
-  return useQuery({
+  const query = useQuery({
     queryKey: [...CONTENT_LIST_KEY, 'details', id],
     queryFn: () => adminApi.content.getById(id as string),
     enabled: Boolean(id),
     staleTime: STALE,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }
 
 function invalidateContentQueries(qc: ReturnType<typeof useQueryClient>) {

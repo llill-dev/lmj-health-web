@@ -383,6 +383,8 @@ function buildAppointmentsListQuery(
   if (params.limit) qs.set("limit", String(params.limit));
   if (params.status) qs.set("status", params.status);
   if (params.date) qs.set("date", params.date);
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
 
   const query = qs.toString();
   return query

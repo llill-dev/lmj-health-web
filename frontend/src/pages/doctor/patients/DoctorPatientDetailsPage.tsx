@@ -41,6 +41,8 @@ import {
   useUploadDoctorPatientFile,
 } from "@/hooks";
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 import { readAuthUser } from "@/lib/cookies";
 import { doctorApi } from "@/lib/doctor/client";
 import {
@@ -69,6 +71,8 @@ import {
   AppointmentsTab,
 } from "@/components/doctor/patients/patient-details";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
+import { countPatientAppointments } from "@/lib/doctor/countPatientAppointments";
+import { resolvePatientOrderCategory } from "@/lib/doctor/encounterOrderCategories";
 import { cn } from "@/lib/utils/utils";
 
 function formatIsoDate(value?: string | null): string {
@@ -244,6 +248,27 @@ export default function DoctorPatientDetailsPage() {
     staleTime: 1000 * 30,
   });
 
+  const patientAppointments = patientAppointmentsQuery.data?.appointments ?? [];
+  const patientAppointmentsAwaitingData = isAwaitingInitialQueryData(
+    patientAppointmentsQuery.data,
+    patientAppointmentsQuery.isError,
+  );
+  const { retry: retryPatientProfile, retrying: retryingPatientProfile } =
+    useRetryAction(async () => {
+      await Promise.all([
+        publicProfileQuery.refetch(),
+        fullProfileQuery.refetch(),
+      ]);
+    });
+  const { retry: retryEncounters, retrying: retryingEncounters } =
+    useRetryAction(() => encountersQuery.refetch());
+  const { retry: retryAppointments, retrying: retryingAppointments } =
+    useRetryAction(() => patientAppointmentsQuery.refetch());
+  const patientAppointmentsCount = useMemo(
+    () => countPatientAppointments(patientAppointments).total,
+    [patientAppointments],
+  );
+
   const requestAccessMutation = useRequestDoctorPatientAccess(doctorId);
   const uploadPatientFileMutation = useUploadDoctorPatientFile(patientId ?? "");
   const deletePatientFileMutation = useDeleteDoctorPatientFile(patientId ?? "");
@@ -370,6 +395,7 @@ export default function DoctorPatientDetailsPage() {
               order.type ??
               "طلب طبي",
             status: order.status ?? order.statusCode ?? "pending",
+            category: resolvePatientOrderCategory(order),
           })),
         }
       : null;
@@ -574,6 +600,8 @@ export default function DoctorPatientDetailsPage() {
           patient={patient}
           fullProfileData={fullProfileData}
           encountersCount={encountersCount}
+          appointmentsCount={patientAppointmentsCount}
+          appointmentsLoading={patientAppointmentsAwaitingData}
           hasOpenEncounter={hasOpenEncounter}
           accessRequired={accessRequired}
           stateInfo={stateInfo}
@@ -585,10 +613,7 @@ export default function DoctorPatientDetailsPage() {
       );
     }
 
-    const awaitingFullProfile =
-      !isTemporary &&
-      (fullProfileQuery.isLoading ||
-        (!fullProfileQuery.patient && fullProfileQuery.isFetching));
+    const awaitingFullProfile = !isTemporary && fullProfileQuery.isAwaitingData;
 
     if (awaitingFullProfile) {
       return <PatientDetailsTabSkeleton rows={activeTab === "files" ? 3 : 4} />;
@@ -613,13 +638,11 @@ export default function DoctorPatientDetailsPage() {
           message="حدث خطأ أثناء جلب جزء ملف المريض المرتبط بهذا القسم، أو لم تُرسَل البيانات من الخادم بشكل مكتمل. راجع الوصف أسفله ثم يمكن إعادة المحاولة إن أمكن."
           detail={detailMsg}
           actionLabel={canRetry ? "إعادة المحاولة" : undefined}
-          actionPending={
-            fullProfileQuery.isFetching || fullProfileQuery.isPending
-          }
+          actionPending={retryingPatientProfile}
           onAction={
             canRetry
               ? () => {
-                  void fullProfileQuery.refetch();
+                  void retryPatientProfile();
                 }
               : undefined
           }
@@ -635,7 +658,7 @@ export default function DoctorPatientDetailsPage() {
           medicalConditions={patient?.medicalConditions ?? []}
           timelineFilter={timelineFilter}
           onTimelineFilterChange={setTimelineFilter}
-          onCreateMedicalRecord={() => navigate('/doctor/medical-records/new')}
+          onCreateMedicalRecord={() => navigate('/doctor/medical-records')}
           onOpenEncountersTab={() => setActiveTab("encounters")}
           onOpenPrescriptionsTab={() => setActiveTab("prescriptions")}
           onOpenOrdersTab={() => setActiveTab("tests")}
@@ -647,12 +670,12 @@ export default function DoctorPatientDetailsPage() {
       return (
         <EncountersTab
           encounters={encounters}
-          isLoading={encountersQuery.isLoading}
+          isAwaitingData={encountersQuery.isAwaitingData}
           isError={encountersQuery.isError}
           error={encountersQuery.error}
-          isFetching={encountersQuery.isFetching}
+          retrying={retryingEncounters}
           onRetry={() => {
-            void encountersQuery.refetch();
+            void retryEncounters();
           }}
           onOpenEncountersPage={() => navigate('/doctor/encounters')}
           formatIsoDate={formatIsoDate}
@@ -664,7 +687,7 @@ export default function DoctorPatientDetailsPage() {
       return (
         <HistoryTab
           fullProfileData={fullProfileData}
-          onAddRecord={() => navigate('/doctor/medical-records/new')}
+          onAddRecord={() => navigate('/doctor/medical-records')}
         />
       );
     }
@@ -682,7 +705,13 @@ export default function DoctorPatientDetailsPage() {
       return (
         <PrescriptionsTab
           fullProfileData={fullProfileData}
-          onCreatePrescription={() => navigate('/doctor/prescriptions/new')}
+          onCreatePrescription={() =>
+            navigate(
+              patientId
+                ? `/doctor/prescription?patientId=${encodeURIComponent(patientId)}`
+                : '/doctor/prescription',
+            )
+          }
         />
       );
     }
@@ -724,12 +753,12 @@ export default function DoctorPatientDetailsPage() {
     if (activeTab === "appointments") {
       return (
         <AppointmentsTab
-          appointments={patientAppointmentsQuery.data?.appointments ?? []}
-          isLoading={patientAppointmentsQuery.isLoading}
+          appointments={patientAppointments}
+          isAwaitingData={patientAppointmentsAwaitingData}
           isError={patientAppointmentsQuery.isError}
-          isFetching={patientAppointmentsQuery.isFetching}
+          retrying={retryingAppointments}
           onRetry={() => {
-            void patientAppointmentsQuery.refetch();
+            void retryAppointments();
           }}
           onOpenAppointments={() => navigate('/doctor/appointments')}
           formatIsoDate={formatIsoDate}
@@ -819,7 +848,7 @@ export default function DoctorPatientDetailsPage() {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/doctor/medical-records/new")}
+              onClick={() => navigate("/doctor/medical-records")}
               className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#475467] transition-all hover:bg-[#F8FAFC] hover:border-[#CBD5E1]"
             >
               <ClipboardList className="h-3.5 w-3.5" />
@@ -827,7 +856,13 @@ export default function DoctorPatientDetailsPage() {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/doctor/prescriptions/new")}
+              onClick={() =>
+                navigate(
+                  patientId
+                    ? `/doctor/prescription?patientId=${encodeURIComponent(patientId)}`
+                    : "/doctor/prescription",
+                )
+              }
               className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[#E9D5FF] bg-[#FAF5FF] px-4 font-cairo text-[12px] font-extrabold text-[#7C3AED] transition-all hover:bg-[#F3E8FF] hover:border-[#DDD6FE]"
             >
               <FileText className="h-3.5 w-3.5" />
@@ -937,13 +972,8 @@ export default function DoctorPatientDetailsPage() {
             title="تعذّر تحميل ملف المريض"
             brief={getPatientAccessErrorMessage(patientError)}
             detail={getPatientAccessErrorMessage(patientError)}
-            retrying={
-              publicProfileQuery.isFetching || fullProfileQuery.isFetching
-            }
-            onRetry={() => {
-              void publicProfileQuery.refetch();
-              void fullProfileQuery.refetch();
-            }}
+            retrying={retryingPatientProfile}
+            onRetry={() => void retryPatientProfile()}
           />
         ) : !patient ? (
           <>

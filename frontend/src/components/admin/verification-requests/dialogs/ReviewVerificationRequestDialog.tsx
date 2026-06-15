@@ -16,6 +16,7 @@ import {
   resolveDoctorSpecializationReviewState,
 } from '@/lib/admin/doctorSpecializationReview';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { AppCheckbox } from '@/components/ui';
 import { useToast } from '@/components/ui/ToastProvider';
 
 const approveSchema = z.object({
@@ -382,8 +383,8 @@ export default function ReviewVerificationRequestDialog({
                       </div>
 
                       <label className='flex items-center justify-start gap-2'>
-                        <input
-                          type='checkbox'
+                        <AppCheckbox
+                          size='sm'
                           checked={createNewSpecialization}
                           onChange={(event) => {
                             setCreateNewSpecialization(event.target.checked);
@@ -453,11 +454,11 @@ export default function ReviewVerificationRequestDialog({
                               setSpecializationLookupId(event.target.value);
                               setError(null);
                             }}
-                            disabled={lookupsQuery.isLoading}
+                            disabled={lookupsQuery.isAwaitingData}
                             className='h-[42px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-semibold text-[#101828] outline-none disabled:opacity-60'
                           >
                             <option value=''>
-                              {lookupsQuery.isLoading
+                              {lookupsQuery.isAwaitingData
                                 ? 'جارٍ تحميل التخصصات…'
                                 : '— اختر التخصص —'}
                             </option>
@@ -520,8 +521,8 @@ export default function ReviewVerificationRequestDialog({
                         />
                       </div>
                       <label className='col-span-2 flex items-center justify-end gap-2 rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-3'>
-                        <input
-                          type='checkbox'
+                        <AppCheckbox
+                          size='sm'
                           defaultChecked
                           {...register('verifyLocation')}
                         />

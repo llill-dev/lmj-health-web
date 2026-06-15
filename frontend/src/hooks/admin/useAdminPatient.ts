@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type { AdminPatientSummary } from '@/lib/admin/types';
 
 export function useAdminPatient(
@@ -40,7 +41,9 @@ export function useAdminPatient(
 
   return {
     patient,
-    isLoading: fallbackQuery.isLoading,
+    isAwaitingData: initialPatient
+      ? false
+      : isAwaitingInitialQueryData(fallbackQuery.data, fallbackQuery.isError),
     error: fallbackQuery.error,
     refetch: async () => {
       await fallbackQuery.refetch();

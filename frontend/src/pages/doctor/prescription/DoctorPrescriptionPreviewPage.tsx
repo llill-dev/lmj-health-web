@@ -17,6 +17,7 @@ import {
 } from '@/hooks/doctor';
 import { readAuthUser } from '@/lib/cookies';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import {
   generateDoctorDocumentPdf,
   openPdfBlobInNewTab,
@@ -32,6 +33,9 @@ export default function DoctorPrescriptionPreviewPage() {
   const encounterId = searchParams.get('encounterId') ?? '';
 
   const preview = usePrescriptionPreviewPage(doctorId, patientId, encounterId);
+  const { retry: retryPreview, retrying: retryingPreview } = useRetryAction(
+    () => Promise.resolve(preview.refetch()),
+  );
   const workspace = useEncounterPrescriptionWorkspace(
     doctorId,
     patientId,
@@ -86,17 +90,18 @@ export default function DoctorPrescriptionPreviewPage() {
         <PrescriptionPreviewBanner
           patientName={preview.previewVm?.patientName}
           statusLabel={preview.previewVm?.statusLabel}
-          loading={preview.isLoading}
+          loading={preview.isAwaitingData}
           backTo="/doctor/prescription"
         />
 
-        {preview.isLoading ? (
+        {preview.isAwaitingData ? (
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
             title="تعذّر تحميل معاينة الوصفة"
             brief={getUserFacingRequestErrorMessage(preview.error)}
-            onRetry={preview.refetch}
+            retrying={retryingPreview}
+            onRetry={() => void retryPreview()}
           />
         ) : (
           <>

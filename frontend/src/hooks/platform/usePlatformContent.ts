@@ -9,6 +9,7 @@ import {
 import { platformApi } from '@/lib/platform/client';
 import type { PlatformSettingsSlug } from '@/lib/platform/endpoints';
 import { resolvePublishedSettingsSlug } from '@/lib/platform/resolveSettingsSlug';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type {
   PlatformContentLanguage,
   PlatformLegalDocument,
@@ -56,12 +57,19 @@ function usePlatformContentBySettingsKey(
     retry: false,
   });
 
+  const catalogAwaiting = isAwaitingInitialQueryData(
+    catalogQuery.data,
+    catalogQuery.isError,
+  );
+  const contentAwaiting = publishedSlug
+    ? isAwaitingInitialQueryData(contentQuery.data, contentQuery.isError)
+    : false;
+
   return {
     catalogQuery,
     contentQuery,
     data: contentQuery.data ?? null,
-    isLoading: catalogQuery.isLoading || contentQuery.isLoading,
-    isFetching: catalogQuery.isFetching || contentQuery.isFetching,
+    isAwaitingData: catalogAwaiting || contentAwaiting,
   };
 }
 
@@ -96,7 +104,7 @@ export function usePlatformContentBySlug(
 }
 
 export function usePlatformFaqContent(language: PlatformContentLanguage = 'ar') {
-  const { data, isLoading, isFetching } = usePlatformContentBySettingsKey(
+  const { data, isAwaitingData } = usePlatformContentBySettingsKey(
     'faq',
     language,
   );
@@ -107,7 +115,7 @@ export function usePlatformFaqContent(language: PlatformContentLanguage = 'ar') 
     return fromApi.length ? fromApi : PLATFORM_FAQ_ITEMS;
   }, [data]);
 
-  return { data, isLoading, isFetching, items };
+  return { data, isAwaitingData, items };
 }
 
 export function usePlatformLegalContent(
@@ -115,7 +123,7 @@ export function usePlatformLegalContent(
   fallback: PlatformLegalDocument,
   language: PlatformContentLanguage = 'ar',
 ) {
-  const { data, isLoading, isFetching } = usePlatformContentBySettingsKey(
+  const { data, isAwaitingData } = usePlatformContentBySettingsKey(
     key,
     language,
   );
@@ -125,7 +133,7 @@ export function usePlatformLegalContent(
     return mapContentToLegalDocument(data);
   }, [data, fallback]);
 
-  return { data, isLoading, isFetching, document };
+  return { data, isAwaitingData, document };
 }
 
 export function usePlatformTermsContent(language: PlatformContentLanguage = 'ar') {
@@ -177,7 +185,7 @@ export function usePlatformUsageContent(language: PlatformContentLanguage = 'ar'
 }
 
 export function usePlatformAboutContent(language: PlatformContentLanguage = 'ar') {
-  const { data, isLoading, isFetching } = usePlatformContentBySettingsKey(
+  const { data, isAwaitingData } = usePlatformContentBySettingsKey(
     'about',
     language,
   );
@@ -189,11 +197,11 @@ export function usePlatformAboutContent(language: PlatformContentLanguage = 'ar'
     return extractAboutSummary(data);
   }, [data]);
 
-  return { data, isLoading, isFetching, summary };
+  return { data, isAwaitingData, summary };
 }
 
 export function usePlatformContactContent(language: PlatformContentLanguage = 'ar') {
-  const { data, isLoading, isFetching } = usePlatformContentBySettingsKey(
+  const { data, isAwaitingData } = usePlatformContentBySettingsKey(
     'contact',
     language,
   );
@@ -203,7 +211,7 @@ export function usePlatformContactContent(language: PlatformContentLanguage = 'a
     return extractContactChannelsFromBlocks(data.contentBlocks);
   }, [data]);
 
-  return { data, isLoading, isFetching, channels };
+  return { data, isAwaitingData, channels };
 }
 
 export function usePlatformServiceTypes(language: PlatformContentLanguage = 'ar') {

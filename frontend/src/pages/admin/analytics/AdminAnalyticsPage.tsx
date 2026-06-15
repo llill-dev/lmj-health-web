@@ -27,7 +27,7 @@ import {
 
 /* ─── page ──────────────────────────────────────────────────── */
 export default function AdminAnalyticsPage() {
-  const { stats, isLoading: statsLoading, refetch } = useAdminPlatformStats();
+  const { stats, isAwaitingData: statsAwaiting, refetch } = useAdminPlatformStats();
   const doctorsQuery = useTopApprovedDoctors(8);
   const appointmentsQuery = useRecentAppointments(6);
 
@@ -55,25 +55,25 @@ export default function AdminAnalyticsPage() {
             {
               key: 'patients',
               icon: <Users className='h-5 w-5 shrink-0' />,
-              value: statsLoading ? '—' : stats.totalPatients,
+              value: statsAwaiting ? '—' : stats.totalPatients,
               label: 'إجمالي المرضى',
             },
             {
               key: 'approved',
               icon: <UserCheck className='h-5 w-5 shrink-0' />,
-              value: statsLoading ? '—' : stats.approvedDoctors,
+              value: statsAwaiting ? '—' : stats.approvedDoctors,
               label: 'أطباء معتمدون',
             },
             {
               key: 'appointments',
               icon: <CalendarDays className='h-5 w-5 shrink-0' />,
-              value: statsLoading ? '—' : stats.totalAppointments,
+              value: statsAwaiting ? '—' : stats.totalAppointments,
               label: 'إجمالي المواعيد',
             },
             {
               key: 'doctors',
               icon: <Stethoscope className='h-5 w-5 shrink-0' />,
-              value: statsLoading ? '—' : stats.totalDoctors,
+              value: statsAwaiting ? '—' : stats.totalDoctors,
               label: 'إجمالي الأطباء',
             },
           ]}
@@ -87,7 +87,7 @@ export default function AdminAnalyticsPage() {
             </div>
             <div>
               <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>طلبات التحقق المعلقة</div>
-              {statsLoading ? (
+              {statsAwaiting ? (
                 <div className='mt-1 h-5 w-12 animate-pulse rounded bg-[#EEF2F6]' />
               ) : (
                 <div className='mt-0.5 font-cairo text-[20px] font-black text-[#111827]'>
@@ -103,7 +103,7 @@ export default function AdminAnalyticsPage() {
             </div>
             <div>
               <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>نسبة الاعتماد</div>
-              {statsLoading ? (
+              {statsAwaiting ? (
                 <div className='mt-1 h-5 w-12 animate-pulse rounded bg-[#EEF2F6]' />
               ) : (
                 <div className='mt-0.5 font-cairo text-[20px] font-black text-[#16A34A]'>
@@ -121,7 +121,7 @@ export default function AdminAnalyticsPage() {
             </div>
             <div>
               <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>السكرتارية الكلي</div>
-              {statsLoading ? (
+              {statsAwaiting ? (
                 <div className='mt-1 h-5 w-12 animate-pulse rounded bg-[#EEF2F6]' />
               ) : (
                 <div className='mt-0.5 font-cairo text-[20px] font-black text-[#111827]'>
@@ -166,7 +166,7 @@ export default function AdminAnalyticsPage() {
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-[#EEF2F6]'>
-                  {doctorsQuery.isLoading
+                  {doctorsQuery.isAwaitingData
                     ? Array.from({ length: 5 }).map((_, i) => (
                         <TableRowSkeleton
                           key={i}
@@ -297,11 +297,11 @@ export default function AdminAnalyticsPage() {
                           {label}
                         </div>
                         <div className={`font-cairo text-[11px] font-extrabold ${text}`}>
-                          {statsLoading ? '—' : `${value.toLocaleString('ar-EG')} (${pct}٪)`}
+                          {statsAwaiting ? '—' : `${value.toLocaleString('ar-EG')} (${pct}٪)`}
                         </div>
                       </div>
                       <div className='mt-1.5 h-[8px] w-full rounded-full bg-[#EEF2F6]'>
-                        {!statsLoading && (
+                        {!statsAwaiting && (
                           <div
                             className={`h-[8px] rounded-full transition-all duration-700 ${bar}`}
                             style={{ width: `${pct}%` }}
@@ -349,7 +349,7 @@ export default function AdminAnalyticsPage() {
                     <div className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                       {label}
                     </div>
-                    {statsLoading ? (
+                    {statsAwaiting ? (
                       <div className='h-4 w-10 animate-pulse rounded bg-[#EEF2F6]' />
                     ) : (
                       <div className={`font-cairo text-[14px] font-black ${text}`}>
@@ -392,7 +392,7 @@ export default function AdminAnalyticsPage() {
                 </tr>
               </thead>
               <tbody className='divide-y divide-[#EEF2F6]'>
-                {appointmentsQuery.isLoading
+                {appointmentsQuery.isAwaitingData
                   ? Array.from({ length: 4 }).map((_, i) => (
                       <TableRowSkeleton
                         key={i}

@@ -1,26 +1,27 @@
-import { Helmet } from 'react-helmet-async';
-import { Briefcase, UserRound } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import DoctorProfileConfirmDialog from '@/components/doctor/profile-settings/doctor-profile-confirm-dialog';
-import DoctorProfileHeroCard from '@/components/doctor/profile-settings/doctor-profile-hero-card';
-import DoctorProfileInfoBanner from '@/components/doctor/profile-settings/doctor-profile-info-banner';
-import DoctorProfileSectionCard from '@/components/doctor/profile-settings/doctor-profile-section-card';
-import DoctorProfileStatsRow from '@/components/doctor/profile-settings/doctor-profile-stats-row';
-import DoctorProfileSecurityPanel from '@/components/doctor/profile-settings/doctor-profile-security-panel';
+import { Helmet } from "react-helmet-async";
+import { Briefcase, UserRound } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import DoctorProfileConfirmDialog from "@/components/doctor/profile-settings/doctor-profile-confirm-dialog";
+import DoctorProfileHeroCard from "@/components/doctor/profile-settings/doctor-profile-hero-card";
+import DoctorProfileInfoBanner from "@/components/doctor/profile-settings/doctor-profile-info-banner";
+import DoctorProfileSectionCard from "@/components/doctor/profile-settings/doctor-profile-section-card";
+import DoctorProfileStatsRow from "@/components/doctor/profile-settings/doctor-profile-stats-row";
+import DoctorProfileSecurityPanel from "@/components/doctor/profile-settings/doctor-profile-security-panel";
 import {
   DoctorProfilePageError,
   DoctorProfilePageLoading,
-} from '@/components/doctor/profile-settings/doctor-profile-page-states';
-import { useDoctorProfileConfirm } from '@/components/doctor/profile-settings/use-doctor-profile-confirm';
+} from "@/components/doctor/profile-settings/doctor-profile-page-states";
+import { useDoctorProfileConfirm } from "@/components/doctor/profile-settings/use-doctor-profile-confirm";
 import {
   buildProfileFieldRows,
   parseExperienceYears,
-} from '@/components/doctor/profile-settings/doctor-profile-utils';
+} from "@/components/doctor/profile-settings/doctor-profile-utils";
 import {
   useDoctorHomeSnapshot,
   useDoctorProfile,
   useDoctorSelfRating,
-} from '@/hooks';
+} from "@/hooks";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 export default function DoctorProfileSettingsPage() {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ export default function DoctorProfileSettingsPage() {
     handleConfirm,
   } = useDoctorProfileConfirm();
 
-  if (profileQuery.isLoading) {
+  if (isAwaitingInitialQueryData(profileQuery.data, profileQuery.isError)) {
     return <DoctorProfilePageLoading />;
   }
 
@@ -58,7 +59,7 @@ export default function DoctorProfileSettingsPage() {
   const ratingValue =
     ratingQuery.data?.averageRating != null
       ? ratingQuery.data.averageRating.toFixed(1)
-      : '—';
+      : "—";
 
   return (
     <>
@@ -77,19 +78,19 @@ export default function DoctorProfileSettingsPage() {
         <DoctorProfileStatsRow
           items={[
             {
-              key: 'consultations',
+              key: "consultations",
               value: consultationsCount,
-              label: 'استشارة',
+              label: "استشارة",
             },
             {
-              key: 'experience',
-              value: experienceYears ?? '—',
-              label: 'سنة خبرة',
+              key: "experience",
+              value: experienceYears ?? "—",
+              label: "سنة خبرة",
             },
             {
-              key: 'rating',
+              key: "rating",
               value: ratingValue,
-              label: 'التقييم',
+              label: "التقييم",
             },
           ]}
         />
@@ -115,8 +116,8 @@ export default function DoctorProfileSettingsPage() {
           <button
             type="button"
             onClick={() =>
-              requestConfirm('navigate-personal-edit', () => {
-                navigate('/doctor/profile-settings/personal/edit');
+              requestConfirm("navigate-personal-edit", () => {
+                navigate("/doctor/profile-settings/personal/edit");
               })
             }
             className="flex h-[48px] w-full items-center justify-center rounded-[8px] border-[1.5px] border-primary bg-white font-cairo text-[14px] font-extrabold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.2)] transition hover:bg-[#F0FAFA]"
@@ -126,8 +127,8 @@ export default function DoctorProfileSettingsPage() {
           <button
             type="button"
             onClick={() =>
-              requestConfirm('navigate-professional-edit', () => {
-                navigate('/doctor/profile-settings/professional/edit');
+              requestConfirm("navigate-professional-edit", () => {
+                navigate("/doctor/profile-settings/professional/edit");
               })
             }
             className="flex h-[48px] w-full items-center justify-center rounded-[8px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.25)] transition hover:bg-[#0A7A77]"

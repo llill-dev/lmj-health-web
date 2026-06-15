@@ -21,6 +21,7 @@ import { DoctorWorkspaceFormSkeleton } from '@/components/doctor/shared/skeleton
 import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterPrescriptionWorkspace } from '@/hooks/doctor';
 import { resolvePrescriptionSaveFeedback } from '@/lib/doctor/prescriptionFormErrors';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
 
 export default function DoctorPrescriptionPage() {
@@ -33,6 +34,9 @@ export default function DoctorPrescriptionPage() {
     doctorId,
     patientId,
     encounterId,
+  );
+  const { retry: retryWorkspace, retrying: retryingWorkspace } = useRetryAction(
+    () => Promise.resolve(workspace.refetch()),
   );
 
   const [medicationDialogOpen, setMedicationDialogOpen] = useState(false);
@@ -130,13 +134,14 @@ export default function DoctorPrescriptionPage() {
       </Helmet>
 
       <div dir="rtl" lang="ar" className="w-full pb-10">
-        {workspace.isLoading ? (
+        {workspace.isAwaitingData ? (
           <DoctorWorkspaceFormSkeleton medicationCards={3} />
         ) : workspace.isError ? (
           <DoctorListErrorState
             title="تعذّر تحميل الوصفة الطبية"
             brief={workspace.getErrorMessage(workspace.error)}
-            onRetry={workspace.refetch}
+            retrying={retryingWorkspace}
+            onRetry={() => void retryWorkspace()}
           />
         ) : (
           <>

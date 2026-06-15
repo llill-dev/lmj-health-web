@@ -36,7 +36,7 @@ export default function AdminHeader({
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
 
-  const { data: unreadTotal, isFetching: unreadLoading } =
+  const { data: unreadTotal, isAwaitingData: unreadAwaiting } =
     useAdminUnreadNotificationCount();
 
   const { title, subtitle } = useMemo(() => {
@@ -95,7 +95,7 @@ export default function AdminHeader({
           title='الإشعارات'
         >
           <Bell className='w-5 h-5 text-gray-600' aria-hidden />
-          {unreadLoading ? (
+          {unreadAwaiting ? (
             <span className='flex absolute -top-1 justify-center items-center w-5 h-5 bg-gray-100 rounded-full -end-1'>
               <Loader2 className='w-3 h-3 text-gray-500 animate-spin' aria-hidden />
             </span>

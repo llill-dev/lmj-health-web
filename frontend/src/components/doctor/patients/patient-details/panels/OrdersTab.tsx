@@ -58,13 +58,9 @@ export function OrdersTab({
   const filteredOrders =
     orderTypeFilter === "all"
       ? fullProfileData.orders
-      : fullProfileData.orders.filter((order) => {
-          const title = order.title.toLowerCase();
-          if (orderTypeFilter === "lab") return title.includes("lab") || title.includes("تحليل") || title.includes("فحص");
-          if (orderTypeFilter === "radiology") return title.includes("radiology") || title.includes("أشعة") || title.includes("تصوير");
-          if (orderTypeFilter === "procedure") return title.includes("procedure") || title.includes("إجراء") || title.includes("عملية");
-          return title.includes("referral") || title.includes("تحويل") || title.includes("إحالة");
-        });
+      : fullProfileData.orders.filter(
+          (order) => order.category === orderTypeFilter,
+        );
 
   const filters = FILTER_OPTIONS;
 

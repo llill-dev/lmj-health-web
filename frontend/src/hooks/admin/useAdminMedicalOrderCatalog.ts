@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type {
   AdminMedicalOrderCatalogUpsertBody,
   MedicalOrderCatalogKind,
@@ -16,11 +17,16 @@ export const MEDICAL_ORDER_CATALOG_KEYS = {
 };
 
 export function useAdminMedicalOrderCatalog(kind: MedicalOrderCatalogKind) {
-  return useQuery({
+  const query = useQuery({
     queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
     queryFn: () => adminApi.medicalOrderCatalog.list({ type: kind }),
     staleTime: 30_000,
   });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }
 
 export function useCreateMedicalOrderCatalogItem() {

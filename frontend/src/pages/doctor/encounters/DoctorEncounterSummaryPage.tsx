@@ -17,6 +17,7 @@ import {
   generateDoctorDocumentPdf,
   openPdfBlobInNewTab,
 } from '@/lib/doctor/doctorOrderDocuments';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 
 export default function DoctorEncounterSummaryPage() {
   const navigate = useNavigate();
@@ -31,13 +32,15 @@ export default function DoctorEncounterSummaryPage() {
     summary,
     encounter,
     exportPdfSource,
-    isLoading,
+    isAwaitingData,
     isError,
     error,
     profileDenied,
     refetch,
-    isFetching,
   } = useDoctorEncounterSummary(doctorId, patientId, encounterId);
+  const { retry: retrySummary, retrying: retryingSummary } = useRetryAction(
+    () => Promise.resolve(refetch()),
+  );
 
   const handleExportPdf = async () => {
     if (!exportPdfSource) {
@@ -97,14 +100,14 @@ export default function DoctorEncounterSummaryPage() {
       <div dir="rtl" lang="ar" className="w-full pb-10">
         <EncounterSummaryHeader />
 
-        {isLoading ? (
+        {isAwaitingData ? (
           <DoctorSummaryPageSkeleton />
         ) : isError || !summary || !encounter ? (
           <DoctorListErrorState
             title="تعذّر تحميل ملخص الزيارة"
             brief={getUserFacingRequestErrorMessage(error)}
-            retrying={isFetching}
-            onRetry={refetch}
+            retrying={retryingSummary}
+            onRetry={() => void retrySummary()}
           />
         ) : (
           <>

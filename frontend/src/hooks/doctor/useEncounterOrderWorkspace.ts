@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { isAwaitingAnyInitialQueryData, isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import {
   ENCOUNTER_ORDER_CONFIG,
   type CatalogOrderCategory,
@@ -343,13 +344,21 @@ export function useEncounterOrderWorkspace(
   }, [items.length]);
 
   const isBusy =
-    orderQuery.isLoading ||
-    orderQuery.isFetching ||
     saveDraftMutation.isPending ||
     addItemMutation.isPending ||
     deleteItemMutation.isPending ||
     finalizeMutation.isPending ||
     previewMutation.isPending;
+
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: encounterQuery.data, isError: encounterQuery.isError },
+    { data: orderQuery.data, isError: orderQuery.isError },
+  ]);
+
+  const isAwaitingCatalogData = isAwaitingInitialQueryData(
+    catalogQuery.data,
+    catalogQuery.isError,
+  );
 
   return {
     category,
@@ -364,9 +373,9 @@ export function useEncounterOrderWorkspace(
     itemsSectionError,
     setItemsSectionError,
     catalogItems: normalizeCatalogItems(catalogQuery.data, category),
-    catalogLoading: catalogQuery.isLoading,
+    isAwaitingCatalogData,
     statusLabel: resolveRadiologyStatusLabel(orderQuery.data),
-    isLoading: encounterQuery.isLoading || orderQuery.isLoading,
+    isAwaitingData,
     isError: encounterQuery.isError || orderQuery.isError,
     error: encounterQuery.error ?? orderQuery.error,
     isBusy,

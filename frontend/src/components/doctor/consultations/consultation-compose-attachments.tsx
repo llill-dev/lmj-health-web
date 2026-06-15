@@ -24,6 +24,7 @@ export default function ConsultationComposeAttachments({
   const [uploading, setUploading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const patientFilesQuery = useDoctorPatientFiles(patientId, Boolean(patientId));
+  const patientFilesAwaitingData = patientFilesQuery.isAwaitingData;
 
   const addAttachment = (attachment: PendingConsultationAttachment) => {
     if (pendingAttachments.some((item) => item.ref === attachment.ref)) return;
@@ -92,7 +93,7 @@ export default function ConsultationComposeAttachments({
 
         <button
           type="button"
-          disabled={disabled || !patientId || patientFilesQuery.isLoading}
+          disabled={disabled || !patientId || patientFilesAwaitingData}
           onClick={() => setPickerOpen((open) => !open)}
           className="flex h-[40px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#667085] hover:bg-[#F9FAFB] disabled:opacity-50"
         >
@@ -102,7 +103,7 @@ export default function ConsultationComposeAttachments({
 
       {pickerOpen ? (
         <div className="mt-2 max-h-[160px] overflow-y-auto rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] p-2">
-          {patientFilesQuery.isLoading ? (
+          {patientFilesAwaitingData ? (
             <div className="flex items-center justify-center gap-2 py-4 font-cairo text-[12px] font-semibold text-[#667085]">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               جاري تحميل الملفات…

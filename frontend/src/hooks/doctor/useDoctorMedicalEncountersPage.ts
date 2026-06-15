@@ -1,5 +1,8 @@
 import { useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
+import {
+  isAwaitingAnyQueryResults,
+} from "@/lib/query/queryUi";
 import type {
   EncountersFiltersState,
   MedicalVisitCardData,
@@ -244,23 +247,22 @@ export function useDoctorMedicalEncountersPage(
 
   const firstEncounterError =
     encounterQueries.find((query) => query.isError)?.error ?? null;
-  const isLoading =
-    patientsQuery.isLoading || encounterQueries.some((q) => q.isLoading);
+  const isAwaitingData =
+    patientsQuery.isAwaitingData ||
+    isAwaitingAnyQueryResults(encounterQueries);
   const isError = patientsQuery.isError || Boolean(firstEncounterError);
   const error = patientsQuery.error ?? firstEncounterError;
 
   return {
     visits,
     stats,
-    isLoading,
+    isAwaitingData,
     isError,
     error,
     refetch: () => {
       void patientsQuery.refetch();
       encounterQueries.forEach((q) => void q.refetch());
     },
-    isFetching:
-      patientsQuery.isFetching || encounterQueries.some((q) => q.isFetching),
   };
 }
 

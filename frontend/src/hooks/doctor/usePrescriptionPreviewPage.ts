@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import { mapPrescriptionPreviewVm } from '@/components/doctor/prescription/preview/map-prescription-preview';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { loadEncounterPrescriptionForPreview } from '@/lib/doctor/encounterPrescriptionLoad';
@@ -73,14 +74,17 @@ export function usePrescriptionPreviewPage(
     doctorName,
   ]);
 
+  const isAwaitingData = isAwaitingAnyInitialQueryData([
+    { data: encounterQuery.data, isError: encounterQuery.isError },
+    { data: prescriptionQuery.data, isError: prescriptionQuery.isError },
+    { data: publicProfileQuery.data, isError: publicProfileQuery.isError },
+  ]);
+
   return {
     previewVm,
     prescription: prescriptionQuery.data,
     encounter: encounterQuery.data?.encounter,
-    isLoading:
-      encounterQuery.isLoading ||
-      prescriptionQuery.isLoading ||
-      publicProfileQuery.isLoading,
+    isAwaitingData,
     isError:
       encounterQuery.isError ||
       prescriptionQuery.isError ||
@@ -91,7 +95,5 @@ export function usePrescriptionPreviewPage(
       void prescriptionQuery.refetch();
       void publicProfileQuery.refetch();
     },
-    isFetching:
-      encounterQuery.isFetching || prescriptionQuery.isFetching,
   };
 }

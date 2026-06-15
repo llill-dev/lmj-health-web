@@ -2,8 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { doctorApi, doctorSlotsQueryKeys } from '@/lib/doctor/client';
-import type { DoctorSlotsQueryParams } from '@/lib/doctor/types';
 import { readAuthUser } from '@/lib/cookies';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 function getDoctorIdFromAuth(): string {
   const user = readAuthUser();
@@ -27,12 +27,7 @@ export function useSlots(
 ) {
   const actualDoctorId = doctorId || getDoctorIdFromAuth();
 
-  const {
-    data: response,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const query = useQuery({
     queryKey: doctorSlotsQueryKeys.byDate(actualDoctorId, date, type),
     queryFn: () =>
       doctorApi.slots.getSlots({
@@ -45,6 +40,7 @@ export function useSlots(
     enabled: !!actualDoctorId && !!date && /^\d{4}-\d{2}-\d{2}$/.test(date),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
+  const response = query.data;
 
   // Map API response to consistent format
   // API returns "appointments" for booked data, not "bookedSlots"
@@ -79,8 +75,8 @@ export function useSlots(
     bookedSlots,
     totalFreeSlots,
     totalBookedSlots,
-    isLoading,
-    error,
-    refetch,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    error: query.error,
+    refetch: query.refetch,
   };
 }

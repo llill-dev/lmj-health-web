@@ -318,7 +318,7 @@ export default function MedicalContentViewDialog({
           </div>
 
           <div className='max-h-[75vh] overflow-y-auto px-6 py-5'>
-            {detailsQuery.isLoading ? (
+            {detailsQuery.isAwaitingData ? (
               <div className='flex items-center justify-center gap-2 py-16 font-cairo text-[13px] font-bold text-[#667085]'>
                 <Loader2 className='h-4 w-4 animate-spin' />
                 جارِ تحميل تفاصيل المحتوى...

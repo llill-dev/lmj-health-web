@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, type Appointment } from "@/lib/api_mock";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 export function useAppointments(
   page = 1,
@@ -10,35 +11,27 @@ export function useAppointments(
   status?: Appointment["status"],
   search?: string,
 ) {
-  const {
-    data: response,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const query = useQuery({
     queryKey: ["appointments", page, limit, date, status, search],
     queryFn: () => api.getAppointments(page, limit, date, status, search),
     staleTime: 1000 * 60, // 1 minute
   });
+  const response = query.data;
 
   return {
     appointments: response?.data || [],
     total: response?.total || 0,
     currentPage: response?.page || page,
     totalPages: response?.totalPages || 0,
-    isLoading,
-    error,
-    refetch,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    error: query.error,
+    refetch: query.refetch,
     hasMore: response ? response.page < response.totalPages : false,
   };
 }
 
 export function useAppointment(id: string) {
-  const {
-    data: response,
-    isLoading,
-    error,
-  } = useQuery({
+  const query = useQuery({
     queryKey: ["appointment", id],
     queryFn: () => api.getAppointmentById(id),
     enabled: !!id,
@@ -46,9 +39,9 @@ export function useAppointment(id: string) {
   });
 
   return {
-    appointment: response?.data,
-    isLoading,
-    error,
+    appointment: query.data?.data,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    error: query.error,
   };
 }
 

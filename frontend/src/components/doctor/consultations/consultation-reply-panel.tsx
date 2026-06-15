@@ -78,6 +78,7 @@ export default function ConsultationReplyPanel({
   const [uploading, setUploading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const patientFilesQuery = useDoctorPatientFiles(patientId, Boolean(patientId));
+  const patientFilesAwaitingData = patientFilesQuery.isAwaitingData;
 
   const canSend =
     !disabled &&
@@ -215,7 +216,7 @@ export default function ConsultationReplyPanel({
       <div dir="rtl" className="mt-2">
         <button
           type="button"
-          disabled={disabled || !patientId || patientFilesQuery.isLoading}
+          disabled={disabled || !patientId || patientFilesAwaitingData}
           onClick={() => setPickerOpen((open) => !open)}
           className="font-cairo text-[11px] font-semibold text-primary hover:underline disabled:opacity-50"
         >
@@ -225,7 +226,7 @@ export default function ConsultationReplyPanel({
 
       {pickerOpen ? (
         <div dir="rtl" className="mt-2 max-h-[140px] overflow-y-auto rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] p-2">
-          {patientFilesQuery.isLoading ? (
+          {patientFilesAwaitingData ? (
             <div className="flex items-center justify-center gap-2 py-4 font-cairo text-[12px] font-semibold text-[#667085]">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               جاري تحميل الملفات…

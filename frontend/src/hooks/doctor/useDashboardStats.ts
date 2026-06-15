@@ -1,24 +1,20 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { api, type DashboardStats } from "@/lib/api_mock";
+import { api } from "@/lib/api_mock";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 export function useDashboardStats() {
-  const {
-    data: response,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const query = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: () => api.getDashboardStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   return {
-    stats: response?.data,
-    isLoading,
-    error,
-    refetch,
+    stats: query.data?.data,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    error: query.error,
+    refetch: query.refetch,
   };
 }

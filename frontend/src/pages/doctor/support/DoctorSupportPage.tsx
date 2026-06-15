@@ -102,7 +102,7 @@ export default function DoctorSupportPage() {
           </div>
           <DoctorSupportChannels
             channels={support.contactChannels}
-            loading={support.isContactLoading}
+            loading={support.isAwaitingContactData}
           />
         </section>
 
@@ -113,7 +113,7 @@ export default function DoctorSupportPage() {
           <DoctorSupportContactForm
             identity={support.identity}
             supportEmail={support.supportEmail}
-            loadingIdentity={support.isProfileLoading}
+            loadingIdentity={support.isAwaitingProfileData}
           />
         </section>
 
@@ -121,7 +121,7 @@ export default function DoctorSupportPage() {
           <h2 className="mb-5 text-right font-cairo text-[18px] font-extrabold text-primary">
             الأسئلة الشائعة
           </h2>
-          {support.isFaqLoading ? (
+          {support.isAwaitingFaqData ? (
             <div className="flex items-center justify-center py-10">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>

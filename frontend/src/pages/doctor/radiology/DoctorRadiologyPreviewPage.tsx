@@ -16,6 +16,7 @@ import {
   useRadiologyPreviewPage,
 } from '@/hooks/doctor';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
 import {
   generateDoctorOrderDocumentPdf,
@@ -32,6 +33,9 @@ export default function DoctorRadiologyPreviewPage() {
   const encounterId = searchParams.get('encounterId') ?? '';
 
   const preview = useRadiologyPreviewPage(doctorId, patientId, encounterId);
+  const { retry: retryPreview, retrying: retryingPreview } = useRetryAction(
+    () => Promise.resolve(preview.refetch()),
+  );
   const workspace = useEncounterRadiologyWorkspace(
     doctorId,
     patientId,
@@ -84,16 +88,17 @@ export default function DoctorRadiologyPreviewPage() {
         <RadiologyPreviewBanner
           patientName={preview.previewVm?.patientName}
           statusLabel={preview.previewVm?.statusLabel}
-          loading={preview.isLoading}
+          loading={preview.isAwaitingData}
         />
 
-        {preview.isLoading ? (
+        {preview.isAwaitingData ? (
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
             title="تعذّر تحميل المعاينة"
             brief={getUserFacingRequestErrorMessage(preview.error)}
-            onRetry={preview.refetch}
+            retrying={retryingPreview}
+            onRetry={() => void retryPreview()}
           />
         ) : (
           <>

@@ -36,7 +36,7 @@ export default function AdminSystemLogsPage() {
     [page, debouncedSearch, category, outcome, actorRole, from, to],
   );
 
-  const { data, isFetching, isLoading, isError, error } = useAdminAuditLogs(params);
+  const { data, isAwaitingData, isError, error } = useAdminAuditLogs(params);
 
   const logs = data?.auditLogs ?? [];
   const total = data?.total ?? 0;
@@ -78,25 +78,25 @@ export default function AdminSystemLogsPage() {
             {
               key: 'total',
               icon: <Activity className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : total.toLocaleString('ar-SA'),
+              value: isAwaitingData ? '—' : total.toLocaleString('ar-SA'),
               label: 'إجمالي السجلات',
             },
             {
               key: 'fail',
               icon: <ShieldAlert className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : failCount,
+              value: isAwaitingData ? '—' : failCount,
               label: 'إجراءات فاشلة',
             },
             {
               key: 'deny',
               icon: <Shield className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : denyCount,
+              value: isAwaitingData ? '—' : denyCount,
               label: 'محاولات مرفوضة',
             },
             {
               key: 'phi',
               icon: <ShieldCheck className='h-5 w-5 shrink-0' />,
-              value: isLoading ? '—' : phiCount,
+              value: isAwaitingData ? '—' : phiCount,
               label: 'وصول للبيانات الطبية',
             },
           ]}
@@ -138,20 +138,18 @@ export default function AdminSystemLogsPage() {
         />
 
         <AdminAuditLogTable
-          isLoading={isLoading}
-          isFetching={isFetching}
+          isAwaitingData={isAwaitingData}
           isError={isError}
           error={error}
           logs={logs}
         />
 
-        {!isLoading && !isError && (
+        {!isAwaitingData && !isError && (
           <AdminAuditLogPagination
             page={page}
             totalPages={totalPages}
             total={total}
             pageSize={PAGE_SIZE}
-            isFetching={isFetching}
             onPageChange={setPage}
           />
         )}

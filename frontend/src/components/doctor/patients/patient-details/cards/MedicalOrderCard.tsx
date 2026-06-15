@@ -171,7 +171,18 @@ function detectOrderKind(title: string): OrderKindMeta {
 }
 
 export function MedicalOrderCard({ order, index }: MedicalOrderCardProps) {
-  const kindMeta = detectOrderKind(order.title);
+  const kindMeta =
+    order.category !== "other"
+      ? detectOrderKind(
+          order.category === "lab"
+            ? "lab_order"
+            : order.category === "radiology"
+              ? "imaging_order"
+              : order.category === "procedure"
+                ? "procedure_order"
+                : "referral_order",
+        )
+      : detectOrderKind(order.title);
   const Icon = kindMeta.icon;
   const normalizedStatus = order.status?.toLowerCase().replace(/[\s-]+/g, "_");
   const currentStatus =

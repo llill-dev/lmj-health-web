@@ -23,6 +23,7 @@ export default function AdminNotificationsPage() {
 
   const {
     listQuery,
+    isAwaitingData,
     unreadTotal,
     allTotal,
     total,
@@ -113,7 +114,7 @@ export default function AdminNotificationsPage() {
               items={rows}
               onMarkRead={handleMarkRead}
               pendingMarkId={pendingMarkId}
-              isLoading={listQuery.isLoading}
+              isAwaitingData={isAwaitingData}
             />
 
             <ConfirmActionDialog
@@ -135,11 +136,11 @@ export default function AdminNotificationsPage() {
               }}
             />
 
-            {totalPages > 1 && !listQuery.isLoading ? (
+            {totalPages > 1 && !isAwaitingData ? (
               <div className='flex flex-wrap items-center justify-center gap-2'>
                 <button
                   type='button'
-                  disabled={!canPrev || listQuery.isFetching}
+                  disabled={!canPrev || isAwaitingData}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   className='inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:cursor-not-allowed disabled:opacity-40'
                 >
@@ -151,7 +152,7 @@ export default function AdminNotificationsPage() {
                 </span>
                 <button
                   type='button'
-                  disabled={!canNext || listQuery.isFetching}
+                  disabled={!canNext || isAwaitingData}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   className='inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:cursor-not-allowed disabled:opacity-40'
                 >

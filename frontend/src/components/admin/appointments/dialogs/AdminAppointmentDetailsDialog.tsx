@@ -5,6 +5,7 @@ import { X, CalendarDays, Clock, User, Stethoscope, Ban } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import CancelAppointmentDialog from './CancelAppointmentDialog';
 import { useState } from 'react';
@@ -50,6 +51,10 @@ export default function AdminAppointmentDetailsDialog({
   }, [open]);
 
   const appointment = detailsQuery.data?.appointment;
+  const detailsAwaiting = isAwaitingInitialQueryData(
+    detailsQuery.data,
+    detailsQuery.isError,
+  );
 
   return (
     <>
@@ -127,7 +132,7 @@ export default function AdminAppointmentDetailsDialog({
                   تفاصيل الموعد
                 </Dialog.Title>
 
-                {detailsQuery.isLoading ? (
+                {detailsAwaiting ? (
                   <div className='mt-6 font-cairo text-[13px] font-semibold text-[#667085]'>
                     جارِ التحميل...
                   </div>

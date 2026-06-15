@@ -12,10 +12,10 @@ import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
 
 interface EncountersTabProps {
   encounters: DoctorEncounterSummary[];
-  isLoading: boolean;
+  isAwaitingData: boolean;
   isError: boolean;
   error: unknown;
-  isFetching: boolean;
+  retrying?: boolean;
   onRetry: () => void;
   onOpenEncountersPage: () => void;
   formatIsoDate: (value?: string | null) => string;
@@ -23,15 +23,15 @@ interface EncountersTabProps {
 
 export function EncountersTab({
   encounters,
-  isLoading,
+  isAwaitingData,
   isError,
   error,
-  isFetching,
+  retrying,
   onRetry,
   onOpenEncountersPage,
   formatIsoDate,
 }: EncountersTabProps) {
-  if (isLoading) return <PatientDetailsTabSkeleton rows={4} />;
+  if (isAwaitingData) return <PatientDetailsTabSkeleton rows={4} />;
 
   if (isError) {
     return (
@@ -39,7 +39,7 @@ export function EncountersTab({
         title="تعذّر تحميل الزيارات الطبية"
         brief={getUserFacingRequestErrorMessage(error)}
         detail={getUserFacingRequestErrorMessage(error)}
-        retrying={isFetching}
+        retrying={retrying}
         onRetry={onRetry}
       />
     );
