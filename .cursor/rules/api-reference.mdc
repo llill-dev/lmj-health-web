@@ -1,0 +1,26 @@
+---
+description: Canonical LMJ Health Backend API text reference for frontend↔backend integration
+alwaysApply: true
+---
+
+# LMJ Health API — canonical reference
+
+When wiring frontend to backend, verifying endpoints, or reviewing API contracts:
+
+1. **Primary source:** `api3_extracted.txt` or `api_latest_extracted.txt` (same content; from API (1)-3.pdf, v2026.05.10).
+2. **Quick path lookup:** `api3_endpoint_index.txt` (~330 METHOD path patterns).
+3. **Manifest / versions:** `api_extracted_manifest.json`.
+4. **API-2 vs API-3 diff:** `api3_vs_api2_delta.txt` — use only `api2_extracted.txt` for comparing the older PDF.
+
+**Do not use** `api4_extracted.txt` (2026.05.08) for new integration work — superseded by API-3.
+
+## Integration workflow
+
+- Grep the canonical extract for the exact `GET|POST|PATCH|DELETE` path, auth role, query/body, and `messageKey` errors before implementing clients/hooks.
+- Prefer `/api/...` prefixes as documented; note legacy aliases in the extract.
+- API-3 adds **doctor account lifecycle** (self-deletion, OTP recovery, restore requests) — required for auth/account-deletion flows.
+- **Complaints:** `POST /api/complaints` is patient-only; doctors use CMS `contact-us` channels or documented alternatives.
+- **CMS / footer / legal:** `GET /api/content?type=SETTINGS_PAGE` and `GET /api/content/:slug`.
+- **Doctor directory (staff):** `GET /api/doctors/internal/directory` (doctor/secretary), not admin doctors list.
+
+Match existing frontend patterns: `lib/*/endpoints.ts`, `lib/*/client.ts`, React Query hooks under `hooks/`.

@@ -1,0 +1,59 @@
+{
+  "description": "Canonical LMJ Health Backend API text extracts for frontend integration and backend verification.",
+  "canonical": "api3_extracted.txt",
+  "canonicalAlias": "api_latest_extracted.txt",
+  "version": "2026.05.10",
+  "lastUpdated": "2026-05-10",
+  "sources": [
+    {
+      "file": "api2_extracted.txt",
+      "origin": "API (1)-2.pdf",
+      "pages": 255,
+      "version": "2026.05.10",
+      "role": "secondary",
+      "notes": "Same release date as API-3 but missing doctor account lifecycle changelog and related endpoint docs."
+    },
+    {
+      "file": "api3_extracted.txt",
+      "origin": "API (1)-3.pdf",
+      "pages": 255,
+      "version": "2026.05.10",
+      "role": "primary",
+      "notes": "Latest upload. Includes doctor account lifecycle (self-deletion, OTP recovery, restore requests, admin reboarding). Prefer this for all new integration work."
+    },
+    {
+      "file": "api_latest_extracted.txt",
+      "origin": "API (1)-3.pdf",
+      "pages": 255,
+      "version": "2026.05.10",
+      "role": "alias",
+      "notes": "Byte-identical copy of api3_extracted.txt for stable grep paths."
+    },
+    {
+      "file": "api4_extracted.txt",
+      "origin": "older PDF export",
+      "pages": null,
+      "version": "2026.05.08",
+      "role": "deprecated",
+      "notes": "Superseded by api3_extracted.txt. Do not use for new work."
+    }
+  ],
+  "indexes": [
+    {
+      "file": "api3_endpoint_index.txt",
+      "description": "Auto-generated flat list of ~330 METHOD path patterns from api3_extracted.txt"
+    },
+    {
+      "file": "api3_vs_api2_delta.txt",
+      "description": "Human-readable summary of material differences between API-2 and API-3 extracts"
+    }
+  ],
+  "usage": {
+    "frontendBackendIntegration": "Read api3_extracted.txt (or api_latest_extracted.txt) first. Cross-check paths in api3_endpoint_index.txt. Use api2_extracted.txt only when comparing regressions against the older PDF.",
+    "searchTips": [
+      "Grep endpoint paths like: GET /api/doctors/internal/directory",
+      "Grep module headings: Complaints, Content / Medical Library, Internal Doctor Directory",
+      "Grep messageKey patterns for error handling"
+    ]
+  }
+}
