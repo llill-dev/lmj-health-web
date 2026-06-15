@@ -5,6 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
+import { AppCheckbox } from '@/components/ui';
 import StyledSelect from '@/components/ui/styled-select';
 
 type PatientOption = {
@@ -125,11 +126,11 @@ export default function CreateMedicalRecordForm({
           className='absolute left-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[6px] border border-[#EEF2F6] bg-white text-[#667085]'
           aria-label='إغلاق'
         >
-          <X className='h-4 w-4' />
+          <X className='w-4 h-4' />
         </button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className='px-8 pb-8 pt-6'>
+      <form onSubmit={handleSubmit(onSubmit)} className='px-8 pt-6 pb-8'>
         <div className='grid grid-cols-1 gap-5'>
           <div>
             <div className={labelBase}>اختر المريض</div>
@@ -198,9 +199,6 @@ export default function CreateMedicalRecordForm({
               className={textAreaBase}
               placeholder='أدخل كل وصفة في سطر مستقل، مثال:&#10;Paracetamol 500mg&#10;Vitamin D 1000 IU'
             />
-            <p className='mt-2 text-right font-cairo text-[11px] font-semibold leading-6 text-[#667085]'>
-              سيتم إرسال كل سطر غير فارغ كوصفة مستقلة داخل حقل <span dir='ltr'>prescriptions[]</span>.
-            </p>
           </div>
 
           <label className='flex items-center justify-between rounded-[10px] border border-[#D6F5F3] bg-[#F0FDFC] px-4 py-4'>
@@ -208,23 +206,14 @@ export default function CreateMedicalRecordForm({
               <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                 يحتاج متابعة
               </div>
-              <div className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
-                يرسل هذا الخيار القيمة <span dir='ltr'>followUpRequired=true</span> إلى الـ API.
-              </div>
             </div>
-            <input
-              type='checkbox'
+            <AppCheckbox
+              size='md'
               {...register('followUpRequired')}
-              className='h-5 w-5 rounded border-[#98A2B3] text-primary focus:ring-primary'
             />
           </label>
 
-          <div className='rounded-[12px] border border-dashed border-[#D0D5DD] bg-[#FAFBFC] px-4 py-4 text-right font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
-            الحقول المدعومة حاليًا في هذا التدفق هي: العنوان، التشخيص، الوصفات النصية، وحالة المتابعة.
-            بيانات العلامات الحيوية والملاحظات التفصيلية والمرفقات تحتاج تكامل API إضافي قبل عرضها كنموذج تحرير كامل.
-          </div>
-
-          <div className='mt-2 flex items-center justify-end gap-4'>
+          <div className='flex gap-4 justify-end items-center mt-2'>
             <motion.button
               type='button'
               onClick={onCancel}
@@ -244,7 +233,7 @@ export default function CreateMedicalRecordForm({
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
             >
-              <Save className='h-4 w-4' />
+              <Save className='w-4 h-4' />
               {submitLabel}
             </motion.button>
           </div>

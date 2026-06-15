@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { doctorApi, doctorPatientsQueryKeys } from "@/lib/doctor/client";
 import type {
   DoctorCreateMedicalRecordBody,
   DoctorUpdateMedicalRecordBody,
-} from '@/lib/doctor/types';
+} from "@/lib/doctor/types";
 
 export function useDoctorMedicalRecords(
   doctorId: string,
@@ -22,6 +23,11 @@ export function useDoctorMedicalRecords(
   return {
     ...query,
     records: query.data?.records ?? [],
+    isAwaitingData:
+      enabled &&
+      Boolean(doctorId) &&
+      Boolean(patientId) &&
+      isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -32,7 +38,11 @@ export function useDoctorMedicalRecord(
   enabled = true,
 ) {
   const query = useQuery({
-    queryKey: doctorPatientsQueryKeys.medicalRecord(doctorId, patientId, recordId),
+    queryKey: doctorPatientsQueryKeys.medicalRecord(
+      doctorId,
+      patientId,
+      recordId,
+    ),
     queryFn: () =>
       doctorApi.patients.getMedicalRecord(doctorId, patientId, recordId),
     enabled:
@@ -77,7 +87,12 @@ export function useUpdateDoctorMedicalRecord(
 
   return useMutation({
     mutationFn: (body: DoctorUpdateMedicalRecordBody) =>
-      doctorApi.patients.updateMedicalRecord(doctorId, patientId, recordId, body),
+      doctorApi.patients.updateMedicalRecord(
+        doctorId,
+        patientId,
+        recordId,
+        body,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: doctorPatientsQueryKeys.medicalRecords(doctorId, patientId),

@@ -1,33 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Activity,
-  Calendar,
-  ChevronRight,
-  FileText,
-  Files,
-  Search,
-  UserRound,
-  X,
-} from "lucide-react";
+import { Activity, CheckCircle, FileText, Files, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
-import { DoctorTableSkeleton } from "@/components/doctor/shared/skeletons";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import {
+  DoctorTableSkeleton,
+  DoctorToolbarSkeleton,
+} from "@/components/doctor/shared/skeletons";
 import CreateMedicalRecordForm from "@/components/doctor/medical-records/create-medical-record-form";
+import {
+  MedicalRecordsPagination,
+  MedicalRecordsTable,
+  MedicalRecordsToolbar,
+  type MedicalRecordRowVm,
+} from "@/components/doctor/medical-records";
 import MedicalRecordDetailsDialog, {
   type MedicalRecordDetails,
 } from "@/components/doctor/medical-records/medical-record-details-dialog";
 import {
   useCreateDoctorMedicalRecord,
   useDoctorMedicalRecord,
-  useDoctorMedicalRecords,
-  useDoctorPatients,
+  useDoctorMedicalRecordsHub,
   useUpdateDoctorMedicalRecord,
 } from "@/hooks";
 import { readAuthUser } from "@/lib/cookies";
 import { useToast } from "@/components/ui/ToastProvider";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
-import StyledSelect from "@/components/ui/styled-select";
+import { useRetryAction } from "@/lib/query/useRetryAction";
 
 function formatArabicDate(value?: string | null) {
   if (!value) return "غير محدد";
@@ -55,9 +55,7 @@ function mapRecordToDetails(
       frequency: "—",
       notes: "",
     })),
-    followUpDate: record.followUpRequired
-      ? "تحتاج متابعة"
-      : "لا توجد متابعة",
+    followUpDate: record.followUpRequired ? "تحتاج متابعة" : "لا توجد متابعة",
     additionalNotes:
       record.attachments && record.attachments.length > 0
         ? `المرفقات: ${record.attachments.join("، ")}`
@@ -68,7 +66,9 @@ function mapRecordToDetails(
 export default function DoctorMedicalRecordsPage() {
   const { toast } = useToast();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
   const [mode, setMode] = useState<"list" | "create" | "edit">("list");
   const [selectedPatientId, setSelectedPatientId] = useState("");
   const [selectedRecordId, setSelectedRecordId] = useState("");
@@ -76,17 +76,16 @@ export default function DoctorMedicalRecordsPage() {
   const [detailsRecord, setDetailsRecord] =
     useState<MedicalRecordDetails | null>(null);
 
-  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
-  const recordsQuery = useDoctorMedicalRecords(
-    doctorId,
-    selectedPatientId,
-    Boolean(selectedPatientId),
+  const list = useDoctorMedicalRecordsHub(doctorId, { search, page, limit });
+  const { retry: retryList, retrying: retryingList } = useRetryAction(() =>
+    list.refetch(),
   );
+
   const recordDetailsQuery = useDoctorMedicalRecord(
     doctorId,
     selectedPatientId,
     selectedRecordId,
-    Boolean(selectedPatientId && selectedRecordId),
+    Boolean(selectedPatientId && selectedRecordId && detailsOpen),
   );
   const createMutation = useCreateDoctorMedicalRecord(doctorId);
   const updateMutation = useUpdateDoctorMedicalRecord(
@@ -95,24 +94,28 @@ export default function DoctorMedicalRecordsPage() {
     selectedRecordId,
   );
 
-  const selectedPatient = patientsQuery.patients.find(
+  const selectedPatient = list.patients.find(
     (patient) => patient._id === selectedPatientId,
   );
 
-  const filteredRecords = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
-    return recordsQuery.records.filter((record) => {
-      if (!q) return true;
-      return (
-        (record.title ?? "").toLowerCase().includes(q) ||
-        (record.diagnosis ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [recordsQuery.records, searchTerm]);
+  const editingRecord = useMemo(() => {
+    if (!selectedRecordId || !selectedPatientId) return null;
+    const row = list.rows.find(
+      (item) =>
+        item.id === selectedRecordId && item.patientId === selectedPatientId,
+    );
+    return row?.raw ?? null;
+  }, [list.rows, selectedPatientId, selectedRecordId]);
 
-  const needsFollowUpCount = recordsQuery.records.filter(
-    (record) => record.followUpRequired,
-  ).length;
+  useEffect(() => {
+    setPage(1);
+  }, [search, limit]);
+
+  useEffect(() => {
+    if (page > list.totalPages) {
+      setPage(list.totalPages);
+    }
+  }, [list.totalPages, page]);
 
   useEffect(() => {
     if (!recordDetailsQuery.record || !selectedPatient) return;
@@ -122,23 +125,22 @@ export default function DoctorMedicalRecordsPage() {
         selectedPatient.user.fullName,
       ),
     );
-    setDetailsOpen(true);
   }, [recordDetailsQuery.record, selectedPatient]);
 
-  const editingRecord = useMemo(
-    () =>
-      recordsQuery.records.find((record) => record._id === selectedRecordId) ??
-      null,
-    [recordsQuery.records, selectedRecordId],
-  );
+  const openDetails = (row: MedicalRecordRowVm) => {
+    setDetailsRecord(null);
+    setSelectedPatientId(row.patientId);
+    setSelectedRecordId(row.id);
+    setDetailsOpen(true);
+  };
 
   return (
     <>
       <Helmet>
-        <title>Medical Records • LMJ Health</title>
+        <title>السجلات الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir="rtl" lang="ar" className="pb-10 w-full">
         <MedicalRecordDetailsDialog
           open={detailsOpen}
           onOpenChange={(open) => {
@@ -153,11 +155,46 @@ export default function DoctorMedicalRecordsPage() {
 
         <DoctorDashboardOverview
           variant="medical-records"
+          surface="mint"
+          kpiColumns={4}
           title="السجلات الطبية"
-          subtitle="اختر مريضًا لعرض سجلاته الطبية وإنشاء أو تعديل السجلات المدعومة."
+          subtitle={
+            <span>
+              <span className="font-extrabold text-primary">
+                {list.isAwaitingData ? "—" : list.stats.totalRecords}
+              </span>
+              <span className="text-primary/90"> — إجمالي السجلات</span>
+            </span>
+          }
           mode={mode === "edit" ? "create" : mode}
           actionLabel="إضافة سجل جديد"
           onActionClick={() => setMode("create")}
+          kpis={[
+            {
+              key: "totalRecords",
+              icon: <Files className="h-5 w-5 shrink-0" />,
+              value: list.isAwaitingData ? "—" : list.stats.totalRecords,
+              label: "إجمالي السجلات",
+            },
+            {
+              key: "prescriptions",
+              icon: <FileText className="h-5 w-5 shrink-0" />,
+              value: list.isAwaitingData ? "—" : list.stats.prescriptions,
+              label: "الوصفات المسجلة",
+            },
+            {
+              key: "needsFollowUp",
+              icon: <Activity className="h-5 w-5 shrink-0" />,
+              value: list.isAwaitingData ? "—" : list.stats.needsFollowUp,
+              label: "تحتاج متابعة",
+            },
+            {
+              key: "active",
+              icon: <CheckCircle className="h-5 w-5 shrink-0" />,
+              value: list.isAwaitingData ? "—" : list.stats.active,
+              label: "سجلات نشطة",
+            },
+          ]}
           overlay={
             mode !== "list" ? (
               <motion.button
@@ -170,71 +207,7 @@ export default function DoctorMedicalRecordsPage() {
               </motion.button>
             ) : null
           }
-          kpis={[
-            {
-              key: "totalRecords",
-              icon: <Files />,
-              value: selectedPatientId ? recordsQuery.records.length : "—",
-              label: "إجمالي السجلات",
-            },
-            {
-              key: "activePrescriptions",
-              icon: <FileText />,
-              value: selectedPatientId
-                ? recordsQuery.records.reduce(
-                    (sum, record) => sum + (record.prescriptions?.length ?? 0),
-                    0,
-                  )
-                : "—",
-              label: "الوصفات المسجلة",
-            },
-            {
-              key: "needsFollowUp",
-              icon: <Activity />,
-              value: selectedPatientId ? needsFollowUpCount : "—",
-              label: "تحتاج متابعة",
-            },
-          ]}
         />
-
-        <section className="mt-5 rounded-[18px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="col-span-3">
-              <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
-                ابحث داخل سجلات المريض
-              </div>
-              <div className="relative">
-                <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                  <Search className="w-4 h-4" />
-                </div>
-                <input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="ابحث عن تشخيص أو عنوان السجل..."
-                  className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none"
-                />
-              </div>
-            </div>
-            <div className="col-span-1">
-              <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
-                اختر المريض
-              </div>
-              <StyledSelect
-                size="sm"
-                tone="muted"
-                value={selectedPatientId}
-                onChange={setSelectedPatientId}
-                placeholder="اختر المريض..."
-                options={patientsQuery.patients.map((patient) => ({
-                  value: patient._id,
-                  label: patient.user.fullName,
-                }))}
-                emptyTriggerLabel="لا يوجد مرضى"
-                listboxAriaLabel="اختيار المريض"
-              />
-            </div>
-          </div>
-        </section>
 
         <AnimatePresence mode="wait" initial={false}>
           {mode === "create" || mode === "edit" ? (
@@ -245,7 +218,7 @@ export default function DoctorMedicalRecordsPage() {
               exit={{ opacity: 0, y: 10 }}
             >
               <CreateMedicalRecordForm
-                patients={patientsQuery.patients.map((patient) => ({
+                patients={list.patients.map((patient) => ({
                   id: patient._id,
                   name: patient.user.fullName,
                 }))}
@@ -312,6 +285,7 @@ export default function DoctorMedicalRecordsPage() {
                     setSelectedPatientId(payload.patientId);
                     setSelectedRecordId("");
                     setMode("list");
+                    void list.refetch();
                   } catch (error) {
                     toast(getUserFacingRequestErrorMessage(error), {
                       title: "فشلت العملية",
@@ -328,100 +302,52 @@ export default function DoctorMedicalRecordsPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
             >
-              {!selectedPatientId ? (
-                <section className="mt-5 rounded-[18px] border border-dashed border-[#D0D5DD] bg-white px-6 py-12 text-center">
-                  <UserRound className="mx-auto h-10 w-10 text-[#98A2B3]" />
-                  <div className="mt-4 font-cairo text-[15px] font-extrabold text-[#111827]">
-                    اختر مريضًا أولًا
-                  </div>
-                  <div className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                    الـ API يعرض السجلات الطبية لكل مريض على حدة.
-                  </div>
-                </section>
-              ) : recordsQuery.isLoading ? (
-                <section className="mt-5">
-                  <DoctorTableSkeleton rows={5} columns={5} />
-                </section>
-              ) : recordsQuery.error ? (
-                <section className="mt-5 rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[14px] font-semibold text-[#B42318]">
-                  {getUserFacingRequestErrorMessage(recordsQuery.error)}
-                </section>
-              ) : filteredRecords.length === 0 ? (
-                <section className="mt-5 rounded-[18px] border border-dashed border-[#D0D5DD] bg-white px-6 py-12 text-center">
-                  <FileText className="mx-auto h-10 w-10 text-[#98A2B3]" />
-                  <div className="mt-4 font-cairo text-[15px] font-extrabold text-[#111827]">
-                    لا توجد سجلات طبية لهذا المريض
-                  </div>
-                  <div className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                    يمكنك إنشاء أول سجل من زر "إضافة سجل جديد".
-                  </div>
-                </section>
-              ) : (
-                <section className="mt-5 mb-8 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
-                  <div className="border-b border-[#EEF2F6] bg-[#F9FAFB] px-6 py-4 text-right">
-                    <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                      سجلات {selectedPatient?.user.fullName}
-                    </div>
-                    <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                      {filteredRecords.length} سجل
-                    </div>
-                  </div>
+              <section className="rounded-[12px] border border-[#EEF2F6] bg-white p-5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6">
+                <MedicalRecordsToolbar
+                  search={search}
+                  onSearchChange={setSearch}
+                />
 
-                  <div className="divide-y divide-[#EEF2F6]">
-                    {filteredRecords.map((record) => (
-                      <div
-                        key={record._id}
-                        className="flex items-center justify-between gap-4 px-6 py-5 hover:bg-[#F9FAFB]"
-                      >
-                        <div className="flex-1 min-w-0 text-right">
-                          <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                            {record.title || "بدون عنوان"}
-                          </div>
-                          <div className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
-                            {record.diagnosis || "بدون تشخيص"}
-                          </div>
-                          <div className="mt-2 flex flex-wrap justify-end gap-2 text-[11px]">
-                            <span className="rounded-full bg-[#EEF6FF] px-3 py-1 font-cairo font-extrabold text-[#2563EB]">
-                              {formatArabicDate(record.date || record.createdAt)}
-                            </span>
-                            <span className="rounded-full bg-[#F9FAFB] px-3 py-1 font-cairo font-extrabold text-[#667085]">
-                              {record.prescriptions?.length ?? 0} وصفة
-                            </span>
-                            {record.followUpRequired ? (
-                              <span className="rounded-full bg-[#FEF6EE] px-3 py-1 font-cairo font-extrabold text-[#F79009]">
-                                تحتاج متابعة
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
+                <div className="mt-6">
+                  {list.isAwaitingData && !list.rows.length ? (
+                    <div className="space-y-4">
+                      <DoctorToolbarSkeleton tabs={0} />
+                      <DoctorTableSkeleton rows={8} columns={7} />
+                    </div>
+                  ) : list.isError ? (
+                    <DoctorListErrorState
+                      title="تعذّر تحميل السجلات الطبية"
+                      brief={getUserFacingRequestErrorMessage(list.error)}
+                      retrying={retryingList}
+                      onRetry={() => void retryList()}
+                    />
+                  ) : (
+                    <MedicalRecordsTable
+                      rows={list.rows}
+                      onOpenDetails={openDetails}
+                    />
+                  )}
+                </div>
+              </section>
 
-                        <div className="flex shrink-0 items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedRecordId(record._id);
-                              setMode("edit");
-                            }}
-                            className="flex h-[40px] items-center justify-center rounded-[10px] border border-primary/20 bg-white px-4 font-cairo text-[12px] font-extrabold text-primary"
-                          >
-                            تعديل
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedRecordId(record._id);
-                            }}
-                            className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_10px_18px_rgba(15,143,139,0.28)]"
-                            aria-label="عرض التفاصيل"
-                          >
-                            <ChevronRight className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+              {!list.isAwaitingData && !list.isError ? (
+                <div className="mt-5">
+                  <MedicalRecordsPagination
+                    page={list.page}
+                    totalPages={list.totalPages}
+                    showingFrom={list.showingFrom}
+                    showingTo={list.showingTo}
+                    total={list.total}
+                    pageSize={limit}
+                    disabled={false}
+                    onPageChange={setPage}
+                    onPageSizeChange={(size) => {
+                      setLimit(size);
+                      setPage(1);
+                    }}
+                  />
+                </div>
+              ) : null}
             </motion.div>
           )}
         </AnimatePresence>
