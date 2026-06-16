@@ -3,6 +3,7 @@ import {
   buildDoctorOrderStatusUpdateOptions,
   isDoctorOrderEligibleForResultSection,
   isTerminalDoctorOrderStatus,
+  canAppendDoctorOrderResults,
   resolveDoctorOrderStatusUiMeta,
 } from '@/lib/doctor/orderStatusLabels';
 
@@ -44,6 +45,7 @@ export type MedicalRequestDetailVm = MedicalRequestRowVm & {
   patientId?: string;
   encounterId?: string;
   canUpdateStatus: boolean;
+  canUploadResults: boolean;
   pdfSourceType: 'order' | 'imaging_order';
 };
 
@@ -213,6 +215,9 @@ function normalizeCategory(order: DoctorOrderRecord): DoctorOrderCategory {
   if (raw.includes('lab') || raw.includes('تحليل') || raw.includes('مختبر')) {
     return 'lab';
   }
+  if (raw.includes('referral') || raw.includes('refer') || raw.includes('إحالة')) {
+    return 'referral';
+  }
   return 'lab';
 }
 
@@ -221,6 +226,7 @@ export function resolveMedicalRequestTypeLabel(
 ): string {
   if (category === 'radiology') return 'أشعة';
   if (category === 'procedure') return 'إجراءات';
+  if (category === 'referral') return 'إحالة';
   return 'تحاليل';
 }
 
@@ -452,6 +458,7 @@ export function mapDoctorOrderToDetail(
     patientId: order.patientId ?? order.patient?._id,
     encounterId: order.encounterId,
     canUpdateStatus: !isTerminalDoctorOrderStatus(status.code),
+    canUploadResults: canAppendDoctorOrderResults(status.code),
     pdfSourceType:
       category === 'radiology' ? 'imaging_order' : 'order',
     patientInitial: row.patientName.trim().charAt(0) || 'م',
@@ -495,6 +502,7 @@ export function countOrdersByCategory(orders: DoctorOrderRecord[]) {
     lab: rows.filter((r) => r.category === 'lab').length,
     radiology: rows.filter((r) => r.category === 'radiology').length,
     procedure: rows.filter((r) => r.category === 'procedure').length,
+    referral: rows.filter((r) => r.category === 'referral').length,
   };
 }
 
@@ -524,5 +532,6 @@ export function orderTypeQueryForTab(
   if (tab === 'lab') return 'LAB_ORDER';
   if (tab === 'radiology') return 'IMAGING_ORDER';
   if (tab === 'procedure') return 'PROCEDURE_ORDER';
+  if (tab === 'referral') return 'REFERRAL_ORDER';
   return undefined;
 }

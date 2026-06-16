@@ -1,4 +1,9 @@
-export type DoctorOrderCategory = 'lab' | 'radiology' | 'procedure' | 'all';
+export type DoctorOrderCategory =
+  | 'lab'
+  | 'radiology'
+  | 'procedure'
+  | 'referral'
+  | 'all';
 
 export type DoctorOrdersListParams = {
   patientId?: string;
@@ -75,6 +80,19 @@ export type DoctorOrderRecord = {
 export type UpdateDoctorOrderStatusBody = {
   statusCode?: string;
   status?: string;
+};
+
+export type AppendDoctorOrderResultsBody = {
+  reportText?: string;
+  summary?: string;
+  attachments?: string[];
+  isFinal?: boolean;
+};
+
+export type AppendDoctorOrderResultsResponse = {
+  messageKey?: string;
+  message?: string;
+  order?: DoctorOrderRecord;
 };
 
 export type CancelDoctorOrderBody = {

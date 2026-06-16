@@ -3,6 +3,10 @@
  * Patient listing uses `/api/doctors/patients` per backend contract.
  */
 export const doctorEndpoints = {
+  analytics: {
+    summary: '/api/doctors/analytics/summary',
+    diagnosis: '/api/doctors/analytics/diagnosis',
+  },
   patients: {
     list: "/api/doctors/patients",
     temp: "/api/doctors/patients/temp",
@@ -156,6 +160,25 @@ export const doctorEndpoints = {
       orderId: string,
     ) =>
       `/api/doctors/${doctorId}/patients/${patientId}/encounters/${encounterId}/orders/${orderId}/preview`,
+    encounterDocuments: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+    ) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/encounters/${encounterId}/documents`,
+    encounterDocumentLink: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+    ) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/encounters/${encounterId}/documents/link`,
+    encounterDocumentShare: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      documentId: string,
+    ) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/encounters/${encounterId}/documents/${documentId}/share`,
     files: {
       list: (patientId: string) => `/api/patients/${patientId}/files`,
       upload: (patientId: string) => `/api/patients/${patientId}/files/upload`,
@@ -241,6 +264,7 @@ export const doctorEndpoints = {
     byId: (orderId: string) => `/api/doctors/orders/${orderId}`,
     cancel: (orderId: string) => `/api/doctors/orders/${orderId}/cancel`,
     status: (orderId: string) => `/api/doctors/orders/${orderId}/status`,
+    results: (orderId: string) => `/api/doctors/orders/${orderId}/results`,
   },
   documents: {
     generate: '/api/documents/generate',

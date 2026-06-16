@@ -65,6 +65,12 @@ export function useDoctorMedicalRequestStats(search: string) {
           doctorApi.orders.list({ ...shared, orderType: 'PROCEDURE_ORDER' }),
         staleTime: 30_000,
       },
+      {
+        queryKey: [...doctorOrdersQueryKeys.all, 'stats', 'referral', q] as const,
+        queryFn: () =>
+          doctorApi.orders.list({ ...shared, orderType: 'REFERRAL_ORDER' }),
+        staleTime: 30_000,
+      },
     ],
   });
 
@@ -74,6 +80,7 @@ export function useDoctorMedicalRequestStats(search: string) {
       lab: queries[1]?.data?.total ?? 0,
       radiology: queries[2]?.data?.total ?? 0,
       procedure: queries[3]?.data?.total ?? 0,
+      referral: queries[4]?.data?.total ?? 0,
       isAwaitingData: queries.some((query) =>
         isAwaitingInitialQueryDataWithPlaceholder(
           query.data,

@@ -6,6 +6,7 @@ import AdminLayout from "@/layouts/AdminLayout";
 import { PageTransition } from "@/motion";
 import ProtectedRoute, {
   GuestRoute,
+  LegacySecretariesRedirect,
   RootRedirect,
 } from "@/routes/ProtectedRoute";
 import {
@@ -119,6 +120,10 @@ export default function App() {
               path="appointments"
               element={<DoctorPages.DoctorAppointmentsPage />}
             />
+            <Route
+              path="waitlist"
+              element={<DoctorPages.DoctorWaitlistPage />}
+            />
             <Route path="patients" element={<DoctorPages.DoctorPatientsPage />} />
             <Route
               path="patients/:patientId"
@@ -139,6 +144,10 @@ export default function App() {
                   <DoctorPages.DoctorWorkSchedulePage />
                 </Suspense>
               }
+            />
+            <Route
+              path="appointment-types"
+              element={<DoctorPages.DoctorAppointmentTypesPage />}
             />
             <Route path="encounters" element={<DoctorPages.DoctorEncountersPage />} />
             <Route
@@ -280,6 +289,10 @@ export default function App() {
             <Route
               path="accounts/invoices/new"
               element={<DoctorPages.DoctorClinicCreateInvoicePage />}
+            />
+            <Route
+              path="accounts/services"
+              element={<DoctorPages.DoctorClinicServicesPage />}
             />
             <Route
               path="accounts/expenses"
@@ -447,6 +460,8 @@ export default function App() {
             />
           </Route>
         </Route>
+
+        <Route path="/secretaries" element={<LegacySecretariesRedirect />} />
 
         <Route path="*" element={<MiscPages.NotFoundPage />} />
       </Routes>

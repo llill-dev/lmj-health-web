@@ -1,5 +1,6 @@
 import { del, get, post, put } from '@/lib/api';
 import { doctorSecretaryEndpoints } from '@/lib/doctor/secretaries/endpoints';
+import { normalizeDoctorSecretary } from '@/lib/doctor/secretaries/formUtils';
 import type {
   CreateDoctorSecretaryBody,
   DoctorSecretariesListResponse,
@@ -7,14 +8,37 @@ import type {
   UpdateDoctorSecretaryBody,
 } from '@/lib/doctor/secretaries/types';
 
-export const doctorSecretariesApi = {
-  list: () =>
-    get<DoctorSecretariesListResponse>(doctorSecretaryEndpoints.list),
+function unwrapSecretaryPayload(payload: unknown): DoctorSecretary | null {
+  if (!payload || typeof payload !== 'object') return null;
 
-  get: (secretaryId: string) =>
-    get<{ secretary?: DoctorSecretary }>(
-      doctorSecretaryEndpoints.byId(secretaryId),
-    ).then((res) => res.secretary ?? null),
+  const record = payload as Record<string, unknown>;
+  if (record.secretary) {
+    return normalizeDoctorSecretary(record.secretary);
+  }
+
+  return normalizeDoctorSecretary(record);
+}
+
+export const doctorSecretariesApi = {
+  list: async () => {
+    const response = await get<DoctorSecretariesListResponse>(
+      doctorSecretaryEndpoints.list,
+    );
+    const secretaries = (response.secretaries ?? [])
+      .map((item) => normalizeDoctorSecretary(item))
+      .filter((item): item is DoctorSecretary => item != null);
+
+    return {
+      ...response,
+      secretaries,
+      total: response.total ?? secretaries.length,
+    } satisfies DoctorSecretariesListResponse;
+  },
+
+  get: async (secretaryId: string) => {
+    const response = await get<unknown>(doctorSecretaryEndpoints.byId(secretaryId));
+    return unwrapSecretaryPayload(response);
+  },
 
   create: (body: CreateDoctorSecretaryBody) =>
     post<{ secretary?: DoctorSecretary; message?: string }>(

@@ -131,6 +131,22 @@ export function GuestRoute({ children }: { children?: ReactNode }) {
  * • Authenticated user → their role's home dashboard (no login flash)
  * • Anonymous visitor  → /welcome
  */
+/** Legacy/bookmarked URLs without the /doctor or /admin prefix. */
+export function LegacySecretariesRedirect() {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const role = useAuthStore((s) => s.user?.role) as AppRole | undefined;
+
+  if (accessToken && role === 'admin') {
+    return <Navigate to='/admin/secretaries' replace />;
+  }
+
+  if (accessToken && role === 'doctor') {
+    return <Navigate to='/doctor/secretaries' replace />;
+  }
+
+  return <Navigate to='/login?next=%2Fdoctor%2Fsecretaries' replace />;
+}
+
 export function RootRedirect() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const user  = useAuthStore((s) => s.user);

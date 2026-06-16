@@ -1,0 +1,244 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import {
+  ClinicAccountsSearchRow,
+  ClinicAccountsSubNav,
+  ClinicAccountsModalShell,
+} from '@/components/doctor/clinic-accounts';
+import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
+import { useToast } from '@/components/ui/ToastProvider';
+import {
+  useBillingServices,
+  useCreateBillingService,
+  useDeleteBillingService,
+  useUpdateBillingService,
+} from '@/hooks/doctor/billing';
+import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { formatBillingAmount } from '@/lib/doctor/billing/format';
+import type { ApiBillingService } from '@/lib/doctor/billing/apiTypes';
+import { useRetryAction } from '@/lib/query/useRetryAction';
+
+export default function DoctorClinicServicesPage() {
+  const { toast } = useToast();
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<ApiBillingService | null>(null);
+  const [name, setName] = useState('');
+  const [defaultPrice, setDefaultPrice] = useState('');
+  const [durationMinutes, setDurationMinutes] = useState('30');
+  const [description, setDescription] = useState('');
+
+  const list = useBillingServices({ search, page, limit: 10, includeInactive: true });
+  const createService = useCreateBillingService();
+  const updateService = useUpdateBillingService();
+  const deleteService = useDeleteBillingService();
+  const { retry, retrying } = useRetryAction(() => list.refetch());
+
+  useEffect(() => {
+    if (!dialogOpen) return;
+    setName(editTarget?.name ?? '');
+    setDefaultPrice(
+      editTarget?.defaultPrice != null ? String(editTarget.defaultPrice) : '',
+    );
+    setDurationMinutes(
+      editTarget?.durationMinutes != null
+        ? String(editTarget.durationMinutes)
+        : '30',
+    );
+    setDescription(editTarget?.description ?? '');
+  }, [dialogOpen, editTarget]);
+
+  const openCreate = () => {
+    setEditTarget(null);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (service: ApiBillingService) => {
+    setEditTarget(service);
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    const body = {
+      name: name.trim(),
+      defaultPrice: defaultPrice.trim() ? Number(defaultPrice) : undefined,
+      durationMinutes: durationMinutes.trim()
+        ? Number(durationMinutes)
+        : undefined,
+      description: description.trim() || undefined,
+      isActive: true,
+    };
+    try {
+      if (editTarget?.id) {
+        await updateService.mutateAsync({ serviceId: editTarget.id, body });
+        toast('تم تحديث الخدمة.', { variant: 'success' });
+      } else {
+        await createService.mutateAsync(body);
+        toast('تم إنشاء الخدمة.', { variant: 'success' });
+      }
+      setDialogOpen(false);
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+    }
+  };
+
+  const handleDelete = async (service: ApiBillingService) => {
+    if (!window.confirm(`حذف الخدمة "${service.name ?? ''}"؟`)) return;
+    try {
+      await deleteService.mutateAsync(service.id);
+      toast('تم حذف الخدمة.', { variant: 'success' });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+    }
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>خدمات الفوترة • LMJ Health</title>
+      </Helmet>
+
+      <div dir="rtl" lang="ar" className="w-full pb-10">
+        <ClinicAccountsSubNav />
+
+        <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="text-right">
+            <h1 className="font-cairo text-[28px] font-black text-[#111827]">
+              كتالوج الخدمات
+            </h1>
+            <p className="mt-2 font-cairo text-[14px] font-semibold text-[#667085]">
+              إدارة خدمات الفوترة المرتبطة بأنواع المواعيد.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={openCreate}
+            className="h-11 rounded-[10px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white"
+          >
+            خدمة جديدة
+          </button>
+        </header>
+
+        <ClinicAccountsSearchRow search={search} onSearchChange={setSearch} />
+
+        <section className="mt-6 rounded-[12px] border border-[#EEF2F6] bg-white p-5">
+          {list.isAwaitingData && !list.services.length ? (
+            <DoctorTableSkeleton rows={5} columns={4} />
+          ) : list.services.length === 0 ? (
+            <p className="py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
+              لا توجد خدمات.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-right">
+                <thead>
+                  <tr className="border-b border-[#EEF2F6] font-cairo text-[12px] font-extrabold text-[#667085]">
+                    <th className="px-3 py-3">الخدمة</th>
+                    <th className="px-3 py-3">السعر</th>
+                    <th className="px-3 py-3">المدة</th>
+                    <th className="px-3 py-3">الحالة</th>
+                    <th className="px-3 py-3">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.services.map((service) => (
+                    <tr key={service.id} className="border-b border-[#F2F4F7]">
+                      <td className="px-3 py-4 font-cairo text-[13px] font-extrabold text-[#111827]">
+                        {service.name}
+                      </td>
+                      <td className="px-3 py-4 font-cairo text-[13px] font-semibold">
+                        {service.defaultPrice != null
+                          ? formatBillingAmount(service.defaultPrice, 'USD')
+                          : '—'}
+                      </td>
+                      <td className="px-3 py-4 font-cairo text-[13px] font-semibold">
+                        {service.durationMinutes ?? '—'} د
+                      </td>
+                      <td className="px-3 py-4">
+                        {service.isActive !== false ? 'نشط' : 'غير نشط'}
+                      </td>
+                      <td className="px-3 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openEdit(service)}
+                            className="rounded-[6px] border border-primary px-3 py-1 text-[11px] font-extrabold text-primary"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(service)}
+                            className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+
+      <ClinicAccountsModalShell
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        title={editTarget ? 'تعديل خدمة' : 'خدمة جديدة'}
+        maxWidthClass="max-w-[520px]"
+      >
+        <div dir="rtl" className="space-y-4 text-right">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="اسم الخدمة"
+            className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
+          />
+          <input
+            type="number"
+            min={0}
+            value={defaultPrice}
+            onChange={(e) => setDefaultPrice(e.target.value)}
+            placeholder="السعر الافتراضي"
+            className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
+          />
+          <input
+            type="number"
+            min={1}
+            value={durationMinutes}
+            onChange={(e) => setDurationMinutes(e.target.value)}
+            placeholder="المدة بالدقائق"
+            className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
+          />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="الوصف"
+            rows={3}
+            className="w-full rounded-[8px] border border-[#E5E7EB] px-3 py-2 font-cairo text-[13px]"
+          />
+          <button
+            type="button"
+            disabled={
+              createService.isPending ||
+              updateService.isPending ||
+              !name.trim()
+            }
+            onClick={() => void handleSave()}
+            className="h-11 w-full rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white disabled:opacity-60"
+          >
+            حفظ
+          </button>
+        </div>
+      </ClinicAccountsModalShell>
+    </>
+  );
+}

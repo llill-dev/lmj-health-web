@@ -14,6 +14,7 @@ export function MedicalRequestDetailsDialog({
   onViewRadiology,
   onReorder,
   onUpdateStatus,
+  onUploadResult,
 }: {
   open: boolean;
   onClose: () => void;
@@ -22,6 +23,7 @@ export function MedicalRequestDetailsDialog({
   onViewRadiology: () => void;
   onReorder: () => void;
   onUpdateStatus: () => void;
+  onUploadResult: () => void;
 }) {
   const { openResultUrl, documentBusy } = useMedicalRequestDocument();
 
@@ -94,6 +96,14 @@ export function MedicalRequestDetailsDialog({
         <div className="grid grid-cols-2 gap-3 pt-1">
           <button
             type="button"
+            onClick={onUploadResult}
+            disabled={!vm.canUploadResults}
+            className="inline-flex h-11 items-center justify-center rounded-[8px] border-2 border-primary bg-white font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FDFA] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            إضافة نتيجة
+          </button>
+          <button
+            type="button"
             onClick={onUpdateStatus}
             disabled={!vm.canUpdateStatus}
             className="inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
@@ -103,7 +113,7 @@ export function MedicalRequestDetailsDialog({
           <button
             type="button"
             onClick={onReorder}
-            className="inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] transition hover:opacity-95"
+            className="col-span-2 inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] transition hover:opacity-95"
           >
             إعادة الطلب
           </button>

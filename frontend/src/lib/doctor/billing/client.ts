@@ -1,4 +1,4 @@
-import { get, post, put } from '@/lib/api';
+import { del, get, post, put } from '@/lib/api';
 import { billingEndpoints } from '@/lib/doctor/billing/endpoints';
 import {
   buildBillingQueryString,
@@ -8,6 +8,8 @@ import type {
   ApiBillingDashboard,
   ApiBillingExpense,
   ApiBillingInvoice,
+  ApiBillingInvoicePrefill,
+  ApiBillingService,
   ApiBillingPayment,
   ApiBillingRefund,
   ApiBillingReport,
@@ -17,7 +19,9 @@ import type {
   CreateBillingInvoiceBody,
   CreateBillingPaymentBody,
   CreateBillingRefundBody,
+  CreateBillingServiceBody,
   UpdateBillingInvoiceBody,
+  UpdateBillingServiceBody,
 } from '@/lib/doctor/billing/apiTypes';
 
 export type BillingInvoicesListParams = {
@@ -89,6 +93,17 @@ export const billingApi = {
       put<{ invoice?: ApiBillingInvoice; message?: string }>(
         billingEndpoints.invoiceById(invoiceId),
         body,
+      ),
+
+    prefillVisit: (appointmentId: string) =>
+      get<{ prefill?: ApiBillingInvoicePrefill; message?: string }>(
+        billingEndpoints.invoicePrefillVisit(appointmentId),
+      ).then((res) => res.prefill ?? null),
+
+    cancel: (invoiceId: string, body?: { reason?: string }) =>
+      post<{ invoice?: ApiBillingInvoice; message?: string }>(
+        billingEndpoints.invoiceCancel(invoiceId),
+        body ?? {},
       ),
   },
 
@@ -163,6 +178,53 @@ export const billingApi = {
         body,
       ),
   },
+
+  services: {
+    list: (params: {
+      includeInactive?: boolean;
+      search?: string;
+      page?: number;
+      limit?: number;
+    } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.includeInactive) qs.set('includeInactive', 'true');
+      if (params.search?.trim()) qs.set('search', params.search.trim());
+      if (params.page != null) qs.set('page', String(params.page));
+      if (params.limit != null) qs.set('limit', String(params.limit));
+      const query = qs.toString();
+      const path = query
+        ? `${billingEndpoints.services}?${query}`
+        : billingEndpoints.services;
+      return get<{
+        services?: ApiBillingService[];
+        total?: number;
+        page?: number;
+        limit?: number;
+      }>(path);
+    },
+
+    get: (serviceId: string) =>
+      get<{ service?: ApiBillingService }>(
+        billingEndpoints.serviceById(serviceId),
+      ).then((res) => res.service ?? null),
+
+    create: (body: CreateBillingServiceBody) =>
+      post<{ service?: ApiBillingService; message?: string }>(
+        billingEndpoints.services,
+        body,
+      ),
+
+    update: (serviceId: string, body: UpdateBillingServiceBody) =>
+      put<{ service?: ApiBillingService; message?: string }>(
+        billingEndpoints.serviceById(serviceId),
+        body,
+      ),
+
+    delete: (serviceId: string) =>
+      del<{ service?: ApiBillingService; message?: string }>(
+        billingEndpoints.serviceById(serviceId),
+      ),
+  },
 } as const;
 
 export const billingQueryKeys = {
@@ -173,6 +235,8 @@ export const billingQueryKeys = {
     [...billingQueryKeys.all, 'invoices', params] as const,
   invoice: (invoiceId: string) =>
     [...billingQueryKeys.all, 'invoice', invoiceId] as const,
+  prefillVisit: (appointmentId: string) =>
+    [...billingQueryKeys.all, 'prefill', appointmentId] as const,
   payments: (params: BillingPaymentsListParams) =>
     [...billingQueryKeys.all, 'payments', params] as const,
   expenses: (params: BillingExpensesListParams) =>
@@ -180,4 +244,6 @@ export const billingQueryKeys = {
   reports: (params: BillingQueryParams) =>
     [...billingQueryKeys.all, 'reports', params] as const,
   settings: () => [...billingQueryKeys.all, 'settings'] as const,
+  services: (params: Record<string, unknown>) =>
+    [...billingQueryKeys.all, 'services', params] as const,
 };

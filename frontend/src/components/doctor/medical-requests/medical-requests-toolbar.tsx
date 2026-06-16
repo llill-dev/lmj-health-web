@@ -9,6 +9,7 @@ const TABS: Array<{
   { id: 'lab', label: 'تحاليل' },
   { id: 'radiology', label: 'أشعة' },
   { id: 'procedure', label: 'إجراءات' },
+  { id: 'referral', label: 'إحالات' },
 ];
 
 export function MedicalRequestsToolbar({
@@ -39,7 +40,7 @@ export function MedicalRequestsToolbar({
         />
       </label>
 
-      <div className="grid grid-cols-3 gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#F8FAFC] p-1.5">
+      <div className="grid grid-cols-2 gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#F8FAFC] p-1.5 sm:grid-cols-4">
         {TABS.map((item) => (
           <button
             key={item.id}

@@ -5,6 +5,7 @@ import {
   LabResultDialog,
   MedicalRequestDetailsDialog,
   MedicalRequestUpdateStatusDialog,
+  MedicalRequestUploadResultDialog,
   MedicalRequestsPageHeader,
   MedicalRequestsPagination,
   MedicalRequestsStatCards,
@@ -46,6 +47,7 @@ export default function DoctorMedicalRequestsPage() {
   const [labOpen, setLabOpen] = useState(false);
   const [radiologyOpen, setRadiologyOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [uploadResultOpen, setUploadResultOpen] = useState(false);
 
   const list = useDoctorMedicalRequests({ tab, search, page, limit });
   const stats = useDoctorMedicalRequestStats(search);
@@ -56,7 +58,7 @@ export default function DoctorMedicalRequestsPage() {
 
   const detailsQuery = useDoctorMedicalRequestDetails(
     selectedRow?.id ?? null,
-    detailsOpen || labOpen || radiologyOpen || statusOpen,
+    detailsOpen || labOpen || radiologyOpen || statusOpen || uploadResultOpen,
     selectedRow,
   );
 
@@ -115,6 +117,28 @@ export default function DoctorMedicalRequestsPage() {
     }
   };
 
+  const handleUploadResult = async (input: {
+    reportText: string;
+    isFinal: boolean;
+  }) => {
+    if (!activeVm?.id) return;
+    try {
+      await orderMutations.appendResults({
+        orderId: activeVm.id,
+        body: {
+          reportText: input.reportText,
+          summary: input.reportText,
+          isFinal: input.isFinal,
+        },
+      });
+      toast('تمت إضافة النتيجة.', { variant: 'success' });
+      setUploadResultOpen(false);
+      await detailsQuery.refetch();
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -131,6 +155,7 @@ export default function DoctorMedicalRequestsPage() {
               lab: stats.lab,
               radiology: stats.radiology,
               procedure: stats.procedure,
+              referral: stats.referral,
             }}
           />
         </div>
@@ -206,6 +231,15 @@ export default function DoctorMedicalRequestsPage() {
           }}
           onReorder={handleReorder}
           onUpdateStatus={() => setStatusOpen(true)}
+          onUploadResult={() => setUploadResultOpen(true)}
+        />
+
+        <MedicalRequestUploadResultDialog
+          open={uploadResultOpen}
+          onClose={() => setUploadResultOpen(false)}
+          patientName={activeVm?.patientName ?? '—'}
+          busy={orderMutations.isAppendingResults}
+          onConfirm={handleUploadResult}
         />
 
         <MedicalRequestUpdateStatusDialog
@@ -230,7 +264,7 @@ export default function DoctorMedicalRequestsPage() {
           vm={activeVm}
         />
 
-        {(detailsOpen || labOpen || radiologyOpen || statusOpen) &&
+        {(detailsOpen || labOpen || radiologyOpen || statusOpen || uploadResultOpen) &&
         detailsQuery.isAwaitingData ? (
           <div className="pointer-events-none fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#111827] px-4 py-2 font-cairo text-[12px] font-bold text-white shadow-lg">
             جارٍ تحميل التفاصيل...

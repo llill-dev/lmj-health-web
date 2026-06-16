@@ -1,4 +1,4 @@
-import { FlaskConical, ScanLine, Stethoscope, LayoutGrid } from 'lucide-react';
+import { FlaskConical, ScanLine, Stethoscope, LayoutGrid, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
 
 const CARDS = [
@@ -30,15 +30,22 @@ const CARDS = [
     activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
     idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
   },
+  {
+    key: 'referral' as const,
+    label: 'إحالات',
+    icon: Share2,
+    activeClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+    idleClass: 'border-[#E2E8F0] bg-[#F8FAFC] text-[#475467]',
+  },
 ];
 
 export function MedicalRequestsStatCards({
   stats,
 }: {
-  stats: { all: number; lab: number; radiology: number; procedure: number };
+  stats: { all: number; lab: number; radiology: number; procedure: number; referral: number };
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 sm:gap-4">
       {CARDS.map((card) => {
         const Icon = card.icon;
         const count = stats[card.key];

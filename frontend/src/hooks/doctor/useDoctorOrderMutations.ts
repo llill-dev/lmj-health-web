@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { doctorApi, doctorOrdersQueryKeys } from '@/lib/doctor/client';
+import type { AppendDoctorOrderResultsBody } from '@/lib/doctor/doctorOrderTypes';
 
 export function useDoctorOrderMutations() {
   const queryClient = useQueryClient();
@@ -32,9 +33,27 @@ export function useDoctorOrderMutations() {
     },
   });
 
+  const appendResultsMutation = useMutation({
+    mutationFn: async ({
+      orderId,
+      body,
+    }: {
+      orderId: string;
+      body: AppendDoctorOrderResultsBody;
+    }) => doctorApi.orders.appendResults(orderId, body),
+    onSuccess: async (_data, variables) => {
+      await invalidateOrders();
+      await queryClient.invalidateQueries({
+        queryKey: doctorOrdersQueryKeys.detail(variables.orderId),
+      });
+    },
+  });
+
   return {
     updateStatus: updateStatusMutation.mutateAsync,
+    appendResults: appendResultsMutation.mutateAsync,
     isUpdatingStatus: updateStatusMutation.isPending,
+    isAppendingResults: appendResultsMutation.isPending,
     invalidateOrders,
   };
 }

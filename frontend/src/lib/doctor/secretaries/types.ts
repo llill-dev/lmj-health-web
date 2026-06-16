@@ -15,6 +15,11 @@ export type DoctorSecretary = {
   permissions?: string[];
   assignedDoctor?: string;
   user?: DoctorSecretaryUser;
+  /** Flat fields returned by some API responses (POST/GET). */
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  gender?: string;
 };
 
 export type DoctorSecretariesListResponse = {

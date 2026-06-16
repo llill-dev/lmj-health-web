@@ -11,6 +11,10 @@ import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { normalizeEncounterOrdersList } from '@/lib/doctor/encounterOrderLoad';
 import { loadEncounterPrescriptionsForSummary } from '@/lib/doctor/encounterPrescriptionLoad';
 import { resolveEncounterSummaryPdfSource } from '@/lib/doctor/encounterSummaryPdf';
+import type { EncounterDocumentLinkBody } from '@/lib/doctor/encounterDocumentsTypes';
+import {
+  normalizeEncounterOrderCategory,
+} from '@/lib/doctor/encounterOrderCategories';
 
 export function useDoctorEncounterSummary(
   doctorId: string,
@@ -145,6 +149,46 @@ export function useDoctorEncounterSummary(
     [prescriptionsQuery.data?.prescriptions, encounterOrders],
   );
 
+  const documentLinkCandidates = useMemo(() => {
+    const candidates: Array<{
+      label: string;
+      body: EncounterDocumentLinkBody;
+    }> = [];
+
+    for (const prescription of prescriptionsQuery.data?.prescriptions ?? []) {
+      if (!prescription._id) continue;
+      candidates.push({
+        label: 'وصفة',
+        body: { sourceType: 'prescription', sourceId: prescription._id },
+      });
+    }
+
+    for (const order of encounterOrders) {
+      if (!order._id) continue;
+      const category = normalizeEncounterOrderCategory(order);
+      if (category === 'radiology') {
+        candidates.push({
+          label: 'طلب أشعة',
+          body: { sourceType: 'imaging_order', sourceId: order._id },
+        });
+      } else if (category === 'lab' || category === 'procedure') {
+        candidates.push({
+          label: category === 'lab' ? 'طلب مختبر' : 'طلب إجراء',
+          body: { sourceType: 'order', sourceId: order._id },
+        });
+      }
+    }
+
+    return candidates.filter(
+      (candidate, index, array) =>
+        array.findIndex(
+          (item) =>
+            item.body.sourceType === candidate.body.sourceType &&
+            item.body.sourceId === candidate.body.sourceId,
+        ) === index,
+    );
+  }, [encounterOrders, prescriptionsQuery.data?.prescriptions]);
+
   const isAwaitingData = isAwaitingAnyInitialQueryData([
     { data: encounterQuery.data, isError: encounterQuery.isError },
     { data: prescriptionsQuery.data, isError: prescriptionsQuery.isError },
@@ -160,6 +204,7 @@ export function useDoctorEncounterSummary(
     summary,
     encounter: encounterQuery.data?.encounter,
     exportPdfSource,
+    documentLinkCandidates,
     isAwaitingData,
     isError,
     error,

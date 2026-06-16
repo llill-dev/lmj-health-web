@@ -53,6 +53,41 @@ export type ApiBillingRefund = {
   refundedAt?: string;
 };
 
+export type ApiBillingInvoicePrefill = {
+  sourceType?: 'visit' | 'manual' | string;
+  appointmentId?: string;
+  patient?: ApiBillingInvoicePatient;
+  currency?: string;
+  suggestedDueAt?: string;
+  items?: ApiBillingInvoiceItem[];
+};
+
+export type ApiBillingService = {
+  id: string;
+  name?: string;
+  defaultPrice?: number;
+  durationMinutes?: number;
+  description?: string | null;
+  isActive?: boolean;
+  appointmentType?: {
+    id?: string;
+    name?: string;
+    price?: number;
+  } | null;
+  deletedAt?: string | null;
+};
+
+export type CreateBillingServiceBody = {
+  name: string;
+  defaultPrice?: number;
+  durationMinutes?: number;
+  description?: string;
+  appointmentTypeId?: string;
+  isActive?: boolean;
+};
+
+export type UpdateBillingServiceBody = Partial<CreateBillingServiceBody>;
+
 export type ApiBillingInvoice = {
   id: string;
   number?: string;

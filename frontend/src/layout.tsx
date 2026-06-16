@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
@@ -19,6 +19,7 @@ import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
 import { readAuthUser } from '@/lib/cookies';
 import { useDoctorProfile } from '@/hooks';
 import { MotionProvider, PageTransition } from '@/motion';
+import { DoctorRouteFallback } from '@/routes/RouteFallbacks';
 import { useAuthStore } from '@/store/authStore';
 
 export default function ProtectedLayout({
@@ -94,7 +95,9 @@ export default function ProtectedLayout({
                 <AnimatePresence mode='wait'>
                   <PageTransition key={pathname}>
                     <div className='mx-auto w-full max-w-[1420px] px-12'>
-                      {children ?? <Outlet />}
+                      <Suspense fallback={<DoctorRouteFallback />}>
+                        {children ?? <Outlet />}
+                      </Suspense>
                       {!pathname.startsWith('/doctor/support') ? (
                         <PlatformFooter />
                       ) : null}

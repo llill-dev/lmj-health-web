@@ -17,7 +17,7 @@ export default function ConsultationsWaitingSection({
       <DashboardSectionHeading
         title='قائمة الانتظار'
         actionLabel='عرض الكل'
-        onActionClick={() => navigate('/doctor/appointments')}
+        onActionClick={() => navigate('/doctor/waitlist')}
         className='mb-[22px]'
       />
 
@@ -37,7 +37,7 @@ export default function ConsultationsWaitingSection({
             </div>
             <button
               type='button'
-              onClick={() => navigate('/doctor/appointments')}
+              onClick={() => navigate('/doctor/waitlist')}
               className='rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-black text-white'
             >
               التفاصيل

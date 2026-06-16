@@ -7,5 +7,6 @@ export { MedicalRequestDetailsDialog } from './medical-request-details-dialog';
 export { LabResultDialog } from './lab-result-dialog';
 export { RadiologyViewerDialog } from './radiology-viewer-dialog';
 export { MedicalRequestUpdateStatusDialog } from './medical-request-update-status-dialog';
+export { MedicalRequestUploadResultDialog } from './medical-request-upload-result-dialog';
 export { useMedicalRequestDocument } from './use-medical-request-document';
 export * from './map-doctor-medical-requests';

@@ -6,6 +6,9 @@ export const DoctorDashboardPage = lazy(
 export const DoctorAppointmentsPage = lazy(
   () => import("@/pages/doctor/appointments/DoctorAppointmentsPage"),
 );
+export const DoctorWaitlistPage = lazy(
+  () => import("@/pages/doctor/waitlist/DoctorWaitlistPage"),
+);
 export const DoctorPatientsPage = lazy(
   () => import("@/pages/doctor/patients/DoctorPatientsPage"),
 );
@@ -17,6 +20,9 @@ export const DoctorOnlineConsultationsPage = lazy(
 );
 export const DoctorWorkSchedulePage = lazy(
   () => import("@/pages/doctor/work-schedule/DoctorWorkSchedulePage"),
+);
+export const DoctorAppointmentTypesPage = lazy(
+  () => import("@/pages/doctor/appointment-types/DoctorAppointmentTypesPage"),
 );
 export const DoctorMedicalRecordsPage = lazy(
   () => import("@/pages/doctor/medical-records/DoctorMedicalRecordsPage"),
@@ -120,6 +126,9 @@ export const DoctorClinicFinancialReportsPage = lazy(
 export const DoctorClinicFinancialSettingsPage = lazy(
   () =>
     import("@/pages/doctor/clinic-accounts/DoctorClinicFinancialSettingsPage"),
+);
+export const DoctorClinicServicesPage = lazy(
+  () => import("@/pages/doctor/clinic-accounts/DoctorClinicServicesPage"),
 );
 export const DoctorFacilitiesPage = lazy(
   () => import("@/pages/doctor/facilities/DoctorFacilitiesPage"),

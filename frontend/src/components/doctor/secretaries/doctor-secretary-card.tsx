@@ -33,7 +33,9 @@ export function DoctorSecretaryCard({
   const permissions = secretary.permissions ?? [];
   const { granted, total } = countGrantedCardPermissions(permissions);
   const active = isSecretaryActive(secretary.user);
-  const name = secretary.user?.fullName ?? '—';
+  const name = secretary.user?.fullName ?? secretary.fullName ?? '—';
+  const email = secretary.user?.email ?? secretary.email;
+  const phone = secretary.user?.phone ?? secretary.phone;
 
   return (
     <article className="overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
@@ -60,16 +62,16 @@ export function DoctorSecretaryCard({
                 </span>
               </div>
               <div className="mt-2 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:gap-4">
-                {secretary.user?.email ? (
+                {email ? (
                   <span className="inline-flex items-center gap-1.5 font-cairo text-[12px] font-semibold text-[#667085]">
                     <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    {secretary.user.email}
+                    {email}
                   </span>
                 ) : null}
-                {secretary.user?.phone ? (
+                {phone ? (
                   <span className="inline-flex items-center gap-1.5 font-cairo text-[12px] font-semibold text-[#667085]">
                     <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    {secretary.user.phone}
+                    {phone}
                   </span>
                 ) : null}
               </div>

@@ -7,6 +7,7 @@ import {
   EncounterSummaryFinishDialog,
   EncounterSummaryHeader,
 } from '@/components/doctor/encounters/summary';
+import { EncounterDocumentsPanel } from '@/components/doctor/encounters/summary/encounter-documents-panel';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { DoctorSummaryPageSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -32,6 +33,7 @@ export default function DoctorEncounterSummaryPage() {
     summary,
     encounter,
     exportPdfSource,
+    documentLinkCandidates,
     isAwaitingData,
     isError,
     error,
@@ -130,6 +132,14 @@ export default function DoctorEncounterSummaryPage() {
             ) : null}
 
             <EncounterSummaryBody summary={summary} />
+            <div className="my-6">
+              <EncounterDocumentsPanel
+                doctorId={doctorId}
+                patientId={patientId}
+                encounterId={encounterId}
+                linkCandidates={documentLinkCandidates}
+              />
+            </div>
             <EncounterSummaryActions
               onExportPdf={() => void handleExportPdf()}
               onFinish={() => setFinishConfirmOpen(true)}

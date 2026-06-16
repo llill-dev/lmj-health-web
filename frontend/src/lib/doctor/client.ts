@@ -13,7 +13,15 @@ import {
   type Appointment as UiAppointment,
   type WorkSchedule as MockWorkSchedule,
 } from "@/lib/api_mock";
+import type {
+  EncounterDocumentLinkBody,
+  EncounterDocumentLinkResponse,
+  EncounterDocumentShareBody,
+  EncounterDocumentShareResponse,
+  EncounterDocumentsListResponse,
+} from "./encounterDocumentsTypes";
 import { doctorEndpoints } from "./endpoints";
+import { toAppointmentTypeApiBody } from "./appointmentTypeApiBodies";
 import type {
   InternalDirectoryListParams,
   InternalDirectoryListResponse,
@@ -33,6 +41,8 @@ import type {
   UpdateEncounterPrescriptionBody,
 } from "./prescriptionTypes";
 import type {
+  AppendDoctorOrderResultsBody,
+  AppendDoctorOrderResultsResponse,
   CancelDoctorOrderBody,
   DoctorOrderDetailsResponse,
   DoctorOrderMutationResponse,
@@ -902,7 +912,7 @@ const doctorAppointmentTypesApi = {
     const doctorId = getDoctorIdFromAuth();
     return post<AppointmentTypeMutationResponse>(
       doctorEndpoints.appointmentTypes.create(doctorId),
-      body,
+      toAppointmentTypeApiBody(body),
       { locale: "ar" },
     );
   },
@@ -915,7 +925,7 @@ const doctorAppointmentTypesApi = {
     const doctorId = getDoctorIdFromAuth();
     return patch<AppointmentTypeMutationResponse>(
       doctorEndpoints.appointmentTypes.update(doctorId, typeId),
-      body,
+      toAppointmentTypeApiBody(body),
       { locale: "ar" },
     );
   },
@@ -1497,6 +1507,51 @@ export const doctorApi = {
         ),
         { locale: "ar" },
       ),
+    listEncounterDocuments: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+    ) =>
+      get<EncounterDocumentsListResponse>(
+        doctorEndpoints.patients.encounterDocuments(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
+        { locale: "ar" },
+      ),
+    linkEncounterDocument: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      body: EncounterDocumentLinkBody,
+    ) =>
+      post<EncounterDocumentLinkResponse>(
+        doctorEndpoints.patients.encounterDocumentLink(
+          doctorId,
+          patientId,
+          encounterId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
+    shareEncounterDocument: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      documentId: string,
+      body: EncounterDocumentShareBody = {},
+    ) =>
+      post<EncounterDocumentShareResponse>(
+        doctorEndpoints.patients.encounterDocumentShare(
+          doctorId,
+          patientId,
+          encounterId,
+          documentId,
+        ),
+        body,
+        { locale: "ar" },
+      ),
     listFiles: (patientId: string) =>
       get<DoctorPatientFilesListResponse>(
         doctorEndpoints.patients.files.list(patientId),
@@ -1629,6 +1684,16 @@ export const doctorApi = {
       ),
     createCompat: (body: CreateEncounterOrderBody) =>
       post<EncounterOrderResponse>(doctorEndpoints.orders.create, body, {
+        locale: "ar",
+      }),
+    appendResults: (orderId: string, body: AppendDoctorOrderResultsBody) =>
+      post<AppendDoctorOrderResultsResponse>(
+        doctorEndpoints.orders.results(orderId),
+        body,
+        { locale: "ar" },
+      ),
+    createReferral: (body: Record<string, unknown>) =>
+      post<EncounterOrderResponse>(doctorEndpoints.orders.createReferrals, body, {
         locale: "ar",
       }),
   },

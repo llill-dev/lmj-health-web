@@ -17,4 +17,6 @@ export const billingEndpoints = {
   reportsExportPdf: '/api/billing/reports/export.pdf',
   settings: '/api/billing/settings',
   services: '/api/billing/services',
+  serviceById: (serviceId: string) =>
+    `/api/billing/services/${encodeURIComponent(serviceId)}`,
 } as const;

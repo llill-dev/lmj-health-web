@@ -24,11 +24,17 @@ import {
   useUpdateDoctorSecretary,
 } from '@/hooks/doctor/useDoctorSecretaries';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { getSecretaryId } from '@/lib/doctor/secretaries/formUtils';
 import { isSecretaryActive } from '@/lib/doctor/secretaries/permissionsUi';
+import type {
+  DoctorSecretaryCreateFormValues,
+  DoctorSecretaryEditFormValues,
+} from '@/lib/doctor/secretaries/schema';
 import type {
   DoctorSecretary,
   SecretaryStatusFilter,
 } from '@/lib/doctor/secretaries/types';
+import { normalizeAuthPhoneIdentifier } from '@/lib/phone/normalizeAuthPhone';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { cn } from '@/lib/utils/utils';
 
@@ -84,14 +90,7 @@ export default function DoctorSecretariesPage() {
     [listQuery.secretaries],
   );
 
-  const handleCreate = async (input: {
-    fullName: string;
-    email: string;
-    password: string;
-    phone: string;
-    gender: 'Male' | 'Female';
-    permissions: string[];
-  }) => {
+  const handleCreate = async (input: DoctorSecretaryCreateFormValues) => {
     if (listQuery.secretaries.length >= MAX_SECRETARIES) {
       toast(`الحد الأقصى ${MAX_SECRETARIES} سكرتيرين لكل طبيب.`, {
         title: 'لا يمكن الإضافة',
@@ -100,12 +99,16 @@ export default function DoctorSecretariesPage() {
       return;
     }
 
+    const phone = input.phone.trim()
+      ? normalizeAuthPhoneIdentifier(input.phone.trim())
+      : undefined;
+
     try {
       await createSecretary.mutateAsync({
-        fullName: input.fullName,
-        email: input.email,
+        fullName: input.fullName.trim(),
+        email: input.email.trim(),
         password: input.password,
-        phone: input.phone || undefined,
+        phone,
         gender: input.gender,
         permissions: input.permissions,
       });
@@ -122,18 +125,21 @@ export default function DoctorSecretariesPage() {
     }
   };
 
-  const handleEditSave = async (input: {
-    fullName: string;
-    phone: string;
-    permissions: string[];
-  }) => {
-    if (!editTarget?._id) return;
+  const handleEditSave = async (input: DoctorSecretaryEditFormValues) => {
+    const secretaryId = getSecretaryId(editTarget);
+    if (!secretaryId) return;
+
+    const phone = input.phone.trim()
+      ? normalizeAuthPhoneIdentifier(input.phone.trim())
+      : undefined;
+
     try {
       await updateSecretary.mutateAsync({
-        secretaryId: editTarget._id,
+        secretaryId,
         body: {
-          fullName: input.fullName,
-          phone: input.phone || undefined,
+          fullName: input.fullName.trim(),
+          phone,
+          gender: input.gender,
           permissions: input.permissions,
         },
       });
@@ -151,9 +157,10 @@ export default function DoctorSecretariesPage() {
   };
 
   const handleUnassign = async () => {
-    if (!unassignTarget?._id) return;
+    const secretaryId = getSecretaryId(unassignTarget);
+    if (!secretaryId) return;
     try {
-      await unassignSecretary.mutateAsync(unassignTarget._id);
+      await unassignSecretary.mutateAsync(secretaryId);
       toast('تم إلغاء ربط السكرتير من حسابك.', {
         title: 'تم الإلغاء',
         variant: 'success',
@@ -271,7 +278,7 @@ export default function DoctorSecretariesPage() {
           <div className="space-y-4">
             {filtered.map((secretary) => (
               <DoctorSecretaryCard
-                key={secretary._id}
+                key={getSecretaryId(secretary) ?? secretary._id}
                 secretary={secretary}
                 onEdit={setEditTarget}
                 onUnassign={setUnassignTarget}

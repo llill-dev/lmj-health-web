@@ -283,6 +283,12 @@ export function isTerminalDoctorOrderStatus(code?: string | null): boolean {
   );
 }
 
+/** POST /doctors/orders/:orderId/results — API-3 working states only. */
+export function canAppendDoctorOrderResults(code?: string | null): boolean {
+  const normalized = normalizeDoctorOrderStatusCode(code);
+  return normalized === 'ACCEPTED' || normalized === 'IN_PROGRESS';
+}
+
 /**
  * خيارات PATCH /api/doctors/orders/:orderId/status حسب سياسة الانتقال في API-4.
  * الحالات النهائية: COMPLETED، CANCELLED، REJECTED، EXPIRED (+ FINALIZED للطلبات المعتمدة).

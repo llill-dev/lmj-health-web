@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Pencil, Plus, Receipt } from "lucide-react";
+import { FileText, Pencil, Plus, Receipt, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { ClinicInvoice } from "@/lib/doctor/clinicAccounts/types";
@@ -14,6 +14,8 @@ import { InvoiceEditDialog } from "@/components/doctor/clinic-accounts/invoice-e
 import { InvoiceRefundDialog } from "@/components/doctor/clinic-accounts/invoice-refund-dialog";
 import { InvoiceStatusBadge } from "@/components/doctor/clinic-accounts/invoice-status-badge";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useCancelBillingInvoice } from "@/hooks/doctor/billing";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils/utils";
 
 function hasRefundablePayments(invoice: ClinicInvoice): boolean {
@@ -37,10 +39,16 @@ export function InvoiceDetailsDialog({
   onInvoiceUpdated?: () => void;
 }) {
   const { toast } = useToast();
+  const cancelInvoice = useCancelBillingInvoice();
   const [editOpen, setEditOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
 
   const canEdit = invoice?.apiStatus === "draft";
+  const canCancel =
+    invoice?.rawId &&
+    invoice.apiStatus !== "cancelled" &&
+    invoice.apiStatus !== "paid";
   const canRefund = useMemo(
     () => (invoice ? hasRefundablePayments(invoice) : false),
     [invoice],
@@ -75,6 +83,35 @@ export function InvoiceDetailsDialog({
 
   const refreshInvoice = () => {
     onInvoiceUpdated?.();
+  };
+
+  const handleCancelClick = async () => {
+    if (!invoice?.rawId) return;
+    if (!canCancel) {
+      toast("لا يمكن إلغاء هذه الفاتورة في حالتها الحالية.", {
+        title: "لا يمكن الإلغاء",
+        variant: "error",
+      });
+      return;
+    }
+    const reason = window.prompt("سبب الإلغاء (اختياري):") ?? undefined;
+    setCancelBusy(true);
+    try {
+      await cancelInvoice.mutateAsync({
+        invoiceId: invoice.rawId,
+        reason: reason?.trim() || undefined,
+      });
+      toast("تم إلغاء الفاتورة.", { variant: "success" });
+      refreshInvoice();
+      onClose();
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: 'تعذّر إلغاء الفاتورة',
+        variant: 'error',
+      });
+    } finally {
+      setCancelBusy(false);
+    }
   };
 
   return (
@@ -274,6 +311,17 @@ export function InvoiceDetailsDialog({
             >
               <Receipt className="w-4 h-4" aria-hidden />
               استرجاع
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleCancelClick()}
+              disabled={cancelBusy || !canCancel}
+              className={cn(
+                "col-span-2 inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] font-cairo text-[14px] font-extrabold text-[#B42318] transition hover:bg-[#FEE4E2] disabled:opacity-60",
+              )}
+            >
+              <XCircle className="h-4 w-4" aria-hidden />
+              {cancelBusy ? "جارٍ الإلغاء..." : "إلغاء الفاتورة"}
             </button>
           </div>
           {!canEdit ? (

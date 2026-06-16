@@ -1,9 +1,9 @@
 'use client';
 
 import { BookOpen, Plus, Save } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/ToastProvider';
 import StyledSelect from '@/components/ui/styled-select';
@@ -14,6 +14,7 @@ import {
 } from '@/components/doctor/clinic-accounts';
 import {
   useBillingSettings,
+  useBillingInvoicePrefill,
   useCreateBillingInvoice,
 } from '@/hooks/doctor/billing';
 import { useDoctorPatients } from '@/hooks/doctor';
@@ -30,8 +31,11 @@ type LineItem = {
 
 export default function DoctorClinicCreateInvoicePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const appointmentId = searchParams.get('appointmentId');
   const { toast } = useToast();
   const settingsQuery = useBillingSettings();
+  const prefillQuery = useBillingInvoicePrefill(appointmentId);
   const createInvoice = useCreateBillingInvoice();
   const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
 
@@ -42,6 +46,30 @@ export default function DoctorClinicCreateInvoicePage() {
   const [items, setItems] = useState<LineItem[]>([
     { id: '1', service: '', quantity: 1, price: 0 },
   ]);
+  const [prefillApplied, setPrefillApplied] = useState(false);
+
+  useEffect(() => {
+    const prefill = prefillQuery.prefill;
+    if (!prefill || prefillApplied) return;
+
+    if (prefill.patient?.id) {
+      setPatientId(prefill.patient.id);
+    }
+    if (prefill.suggestedDueAt) {
+      setDueDate(prefill.suggestedDueAt.slice(0, 10));
+    }
+    if (prefill.items?.length) {
+      setItems(
+        prefill.items.map((item, index) => ({
+          id: String(index + 1),
+          service: item.serviceNameSnapshot?.trim() || item.description?.trim() || '',
+          quantity: item.quantity ?? 1,
+          price: item.unitPrice ?? 0,
+        })),
+      );
+    }
+    setPrefillApplied(true);
+  }, [prefillApplied, prefillQuery.prefill]);
 
   const currency = settingsQuery.currency;
   const taxPercent = settingsQuery.settings?.defaultTaxPercent ?? 0;
@@ -115,7 +143,8 @@ export default function DoctorClinicCreateInvoicePage() {
     try {
       await createInvoice.mutateAsync({
         patientId,
-        sourceType: 'manual',
+        sourceType: appointmentId ? 'visit' : 'manual',
+        appointmentId: appointmentId ?? undefined,
         status,
         discountPercent,
         items: validItems.map((item) => ({

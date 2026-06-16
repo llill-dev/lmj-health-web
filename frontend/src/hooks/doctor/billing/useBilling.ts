@@ -339,6 +339,34 @@ export function useUpdateBillingInvoice() {
   });
 }
 
+export function useBillingInvoicePrefill(appointmentId: string | null) {
+  const trimmed = appointmentId?.trim() ?? '';
+  const query = useQuery({
+    queryKey: billingQueryKeys.prefillVisit(trimmed),
+    queryFn: () => billingApi.invoices.prefillVisit(trimmed),
+    enabled: Boolean(trimmed),
+    staleTime: 60_000,
+  });
+
+  return {
+    prefill: query.data,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    error: query.error,
+    refetch: query.refetch,
+  };
+}
+
+export function useCancelBillingInvoice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { invoiceId: string; reason?: string }) =>
+      billingApi.invoices.cancel(input.invoiceId, {
+        reason: input.reason,
+      }),
+    onSuccess: () => invalidateBilling(queryClient),
+  });
+}
+
 export function useCreateBillingRefund() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -369,6 +397,59 @@ export function useUpdateBillingSettings() {
   return useMutation({
     mutationFn: (body: Partial<ApiBillingSettings>) =>
       billingApi.settings.update(body),
+    onSuccess: () => invalidateBilling(queryClient),
+  });
+}
+
+export function useBillingServices(params: {
+  search?: string;
+  page?: number;
+  limit?: number;
+  includeInactive?: boolean;
+} = {}) {
+  const query = useQuery({
+    queryKey: billingQueryKeys.services(params),
+    queryFn: () => billingApi.services.list(params),
+    staleTime: 30_000,
+  });
+
+  const services = query.data?.services ?? [];
+  const total = query.data?.total ?? services.length;
+  const limit = params.limit ?? 20;
+
+  return {
+    services,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    refetch: query.refetch,
+  };
+}
+
+export function useCreateBillingService() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: import('@/lib/doctor/billing/apiTypes').CreateBillingServiceBody) =>
+      billingApi.services.create(body),
+    onSuccess: () => invalidateBilling(queryClient),
+  });
+}
+
+export function useUpdateBillingService() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      serviceId: string;
+      body: import('@/lib/doctor/billing/apiTypes').UpdateBillingServiceBody;
+    }) => billingApi.services.update(input.serviceId, input.body),
+    onSuccess: () => invalidateBilling(queryClient),
+  });
+}
+
+export function useDeleteBillingService() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (serviceId: string) => billingApi.services.delete(serviceId),
     onSuccess: () => invalidateBilling(queryClient),
   });
 }

@@ -20,19 +20,23 @@ import {
   BarChart3,
   MessageSquareWarning,
   Tags,
+  Tags,
   Wallet,
   Building2,
   LifeBuoy,
+  Hourglass,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
 export type SidebarItemId =
   | "dashboard"
   | "appointments"
+  | "waitlist"
   | "patients"
   | "encounters"
   | "online-consultations"
   | "work-schedule"
+  | "appointment-types"
   | "medical-records"
   | "prescription"
   | "radiology"
@@ -89,6 +93,12 @@ export const sidebarItems: Array<{
     badge: 3,
   },
   {
+    id: "waitlist",
+    path: "waitlist",
+    label: "قائمة الانتظار",
+    icon: Hourglass,
+  },
+  {
     id: "online-consultations",
     path: "online-consultations",
     label: "الاستشارات",
@@ -107,6 +117,12 @@ export const sidebarItems: Array<{
     path: "work-schedule",
     label: "جدول العمل",
     icon: Activity,
+  },
+  {
+    id: "appointment-types",
+    path: "appointment-types",
+    label: "أنواع المواعيد",
+    icon: Tags,
   },
   {
     id: "medical-records",
