@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import Sidebar from '@/components/layout/sidebar';
@@ -7,6 +7,7 @@ import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
 import { useToast } from '@/components/ui/ToastProvider';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
 import { readAuthUser } from '@/lib/cookies';
+import { DoctorRouteFallback } from '@/routes/RouteFallbacks';
 import { useAuthStore } from '@/store/authStore';
 
 export default function DoctorLayout() {
@@ -70,7 +71,9 @@ export default function DoctorLayout() {
           </div>
 
           <div className='flex-1 overflow-y-auto bg-white py-8 scrollbar-hide'>
-            <Outlet />
+            <Suspense fallback={<DoctorRouteFallback />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

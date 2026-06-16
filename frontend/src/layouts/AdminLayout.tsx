@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useState, useCallback } from 'react';
+import { Suspense, useState, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/layout/sidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
@@ -16,6 +16,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
 import { AnimatePresence } from 'framer-motion';
 import { MotionProvider, PageTransition } from '@/motion';
+import { AdminRouteFallback } from '@/routes/RouteFallbacks';
 
 export default function AdminLayout({ children }: { children?: ReactNode }) {
   const location = useLocation();
@@ -75,7 +76,9 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
               <AnimatePresence mode='wait'>
                 <PageTransition key={pathname}>
                   <div className='mx-auto min-h-full w-full max-w-[1420px] px-6 pb-6 sm:px-10 lg:px-12'>
-                    {children ?? <Outlet />}
+                    <Suspense fallback={<AdminRouteFallback />}>
+                      {children ?? <Outlet />}
+                    </Suspense>
                   </div>
                 </PageTransition>
               </AnimatePresence>
