@@ -180,6 +180,20 @@ export function useEncounterPrescriptionWorkspace(
     onSuccess: invalidate,
   });
 
+  const duplicateItemMutation = useMutation({
+    mutationFn: async (itemId: string) => {
+      const prescriptionId = await resolvePrescriptionId();
+      return doctorApi.patients.duplicateEncounterPrescriptionItem(
+        doctorId,
+        patientId,
+        encounterId,
+        prescriptionId,
+        itemId,
+      );
+    },
+    onSuccess: invalidate,
+  });
+
   const finalizeMutation = useMutation({
     mutationFn: async () => {
       const fresh = await queryClient.fetchQuery({
@@ -257,6 +271,7 @@ export function useEncounterPrescriptionWorkspace(
     addItemMutation.isPending ||
     updateItemMutation.isPending ||
     deleteItemMutation.isPending ||
+    duplicateItemMutation.isPending ||
     finalizeMutation.isPending ||
     previewMutation.isPending;
 
@@ -287,6 +302,7 @@ export function useEncounterPrescriptionWorkspace(
     addItem: addItemMutation.mutateAsync,
     updateItem: updateItemMutation.mutateAsync,
     deleteItem: deleteItemMutation.mutateAsync,
+    duplicateItem: duplicateItemMutation.mutateAsync,
     finalize: finalizeMutation.mutateAsync,
     preview: previewMutation.mutateAsync,
     getErrorMessage: (error: unknown) => {

@@ -127,6 +127,16 @@ export function EncounterOrderWorkspaceShell({
             toast(workspace.getErrorMessage(error), { variant: 'error' });
           }
         }}
+        onToggleFavorite={async (item) => {
+          try {
+            await workspace.toggleCatalogFavorite({
+              catalogItemId: item._id,
+              isFavorited: item.isFavorited === true,
+            });
+          } catch (error) {
+            toast(workspace.getErrorMessage(error), { variant: 'error' });
+          }
+        }}
       />
 
       <OrderClinicalFields

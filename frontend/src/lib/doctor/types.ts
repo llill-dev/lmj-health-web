@@ -86,6 +86,24 @@ export type DoctorPatientMedication = {
   notes?: string;
   sourceType?: string;
   remindersEnabled?: boolean;
+  times?: string[];
+};
+
+export type AddDoctorPatientMedicationBody = {
+  name: string;
+  dosage?: string;
+  frequency?: string;
+  startDate?: string;
+  endDate?: string;
+  times?: string[];
+  remindersEnabled?: boolean;
+  notes?: string;
+};
+
+export type AddDoctorPatientMedicationResponse = {
+  message?: string;
+  messageKey?: string;
+  medication?: DoctorPatientMedication & { _id?: string };
 };
 
 export type DoctorPatientFile = {

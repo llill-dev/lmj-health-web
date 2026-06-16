@@ -128,7 +128,24 @@ import type {
   DoctorAllSlotsResponse,
   DoctorFreeSlotsResponse,
   DoctorBookedSlotsResponse,
+  AddDoctorPatientMedicationBody,
+  AddDoctorPatientMedicationResponse,
 } from "./types";
+import type {
+  CreateDoctorLibraryItemBody,
+  DoctorLibraryListResponse,
+  DoctorLibraryRecentResponse,
+  UpdateDoctorLibraryItemBody,
+} from "./libraryTypes";
+import type {
+  CreateDoctorTemplateBody,
+  DoctorTemplatesListResponse,
+  UpdateDoctorTemplateBody,
+} from "./templateTypes";
+import type {
+  CreateOrderFavoriteBody,
+  OrderFavoritesListResponse,
+} from "./orderFavoritesTypes";
 
 function buildPatientsListQuery(params: DoctorPatientsListParams): string {
   const qs = new URLSearchParams();
@@ -318,6 +335,18 @@ export const doctorPatientsQueryKeys = {
     [...doctorPatientsQueryKeys.all, "files", patientId] as const,
   file: (patientId: string, fileId: string) =>
     [...doctorPatientsQueryKeys.files(patientId), fileId] as const,
+};
+
+export const doctorClinicalQueryKeys = {
+  all: ['doctor', 'clinical'] as const,
+  orderFavorites: (section?: string) =>
+    [...doctorClinicalQueryKeys.all, 'order-favorites', section ?? 'all'] as const,
+  libraryItems: (params: Record<string, unknown>) =>
+    [...doctorClinicalQueryKeys.all, 'library-items', params] as const,
+  libraryRecent: () =>
+    [...doctorClinicalQueryKeys.all, 'library-recent'] as const,
+  templates: (params: Record<string, unknown>) =>
+    [...doctorClinicalQueryKeys.all, 'templates', params] as const,
 };
 
 function buildDoctorOrdersListQuery(params: DoctorOrdersListParams = {}) {
@@ -1058,6 +1087,16 @@ export const doctorApi = {
         body,
         { locale: "ar" },
       ),
+    addPatientMedication: (
+      doctorId: string,
+      patientId: string,
+      body: AddDoctorPatientMedicationBody,
+    ) =>
+      post<AddDoctorPatientMedicationResponse>(
+        doctorEndpoints.patients.medications(doctorId, patientId),
+        body,
+        { locale: "ar" },
+      ),
     listEncounters: (
       doctorId: string,
       patientId: string,
@@ -1476,6 +1515,24 @@ export const doctorApi = {
         ),
         { locale: "ar" },
       ),
+    duplicateEncounterPrescriptionItem: (
+      doctorId: string,
+      patientId: string,
+      encounterId: string,
+      prescriptionId: string,
+      itemId: string,
+    ) =>
+      post<EncounterPrescriptionItemMutationResponse>(
+        doctorEndpoints.patients.encounterPrescriptionItemDuplicate(
+          doctorId,
+          patientId,
+          encounterId,
+          prescriptionId,
+          itemId,
+        ),
+        {},
+        { locale: "ar" },
+      ),
     finalizeEncounterPrescription: (
       doctorId: string,
       patientId: string,
@@ -1696,6 +1753,118 @@ export const doctorApi = {
       post<EncounterOrderResponse>(doctorEndpoints.orders.createReferrals, body, {
         locale: "ar",
       }),
+  },
+  orderFavorites: {
+    list: (params: { catalogSection?: string; page?: number; limit?: number } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.catalogSection) qs.set('catalogSection', params.catalogSection);
+      if (params.page != null) qs.set('page', String(params.page));
+      if (params.limit != null) qs.set('limit', String(params.limit));
+      const query = qs.toString();
+      const path = query
+        ? `${doctorEndpoints.orderFavorites.list}?${query}`
+        : doctorEndpoints.orderFavorites.list;
+      return get<OrderFavoritesListResponse>(path, { locale: 'ar' });
+    },
+    create: (body: CreateOrderFavoriteBody) =>
+      post<{ favorite?: { _id?: string }; message?: string }>(
+        doctorEndpoints.orderFavorites.create,
+        body,
+        { locale: 'ar' },
+      ),
+    remove: (favoriteId: string) =>
+      del<{ message?: string }>(doctorEndpoints.orderFavorites.delete(favoriteId), {
+        locale: 'ar',
+      }),
+  },
+  library: {
+    recent: (limit = 10) =>
+      get<DoctorLibraryRecentResponse>(
+        `${doctorEndpoints.library.recent}?limit=${limit}`,
+        { locale: 'ar' },
+      ),
+    list: (params: {
+      page?: number;
+      limit?: number;
+      type?: string;
+      favorite?: boolean;
+      includeArchived?: boolean;
+      search?: string;
+    } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page != null) qs.set('page', String(params.page));
+      if (params.limit != null) qs.set('limit', String(params.limit));
+      if (params.type) qs.set('type', params.type);
+      if (params.favorite) qs.set('favorite', 'true');
+      if (params.includeArchived) qs.set('includeArchived', 'true');
+      if (params.search?.trim()) qs.set('search', params.search.trim());
+      const query = qs.toString();
+      const path = query
+        ? `${doctorEndpoints.library.items}?${query}`
+        : doctorEndpoints.library.items;
+      return get<DoctorLibraryListResponse>(path, { locale: 'ar' });
+    },
+    create: (body: CreateDoctorLibraryItemBody) =>
+      post<{ item?: DoctorLibraryListResponse['items'] extends (infer T)[] | undefined ? T : never; message?: string }>(
+        doctorEndpoints.library.items,
+        body,
+        { locale: 'ar' },
+      ),
+    update: (itemId: string, body: UpdateDoctorLibraryItemBody) =>
+      patch<{ item?: DoctorLibraryListResponse['items'] extends (infer T)[] | undefined ? T : never; message?: string }>(
+        doctorEndpoints.library.itemById(itemId),
+        body,
+        { locale: 'ar' },
+      ),
+    delete: (itemId: string) =>
+      del<{ itemId?: string; message?: string }>(
+        doctorEndpoints.library.itemById(itemId),
+        { locale: 'ar' },
+      ),
+    setFavorite: (itemId: string, isFavorite: boolean) =>
+      patch<{ itemId?: string; isFavorite?: boolean; message?: string }>(
+        doctorEndpoints.library.itemFavorite(itemId),
+        { isFavorite },
+        { locale: 'ar' },
+      ),
+  },
+  templates: {
+    list: (params: {
+      page?: number;
+      limit?: number;
+      type?: string;
+      includeArchived?: boolean;
+      search?: string;
+    } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page != null) qs.set('page', String(params.page));
+      if (params.limit != null) qs.set('limit', String(params.limit));
+      if (params.type) qs.set('type', params.type);
+      if (params.includeArchived) qs.set('includeArchived', 'true');
+      if (params.search?.trim()) qs.set('search', params.search.trim());
+      const query = qs.toString();
+      const path = query
+        ? `${doctorEndpoints.templates.list}?${query}`
+        : doctorEndpoints.templates.list;
+      return get<DoctorTemplatesListResponse>(path, { locale: 'ar' });
+    },
+    create: (body: CreateDoctorTemplateBody) =>
+      post<{ template?: DoctorTemplatesListResponse['templates'] extends (infer T)[] | undefined ? T : never; message?: string }>(
+        doctorEndpoints.templates.list,
+        body,
+        { locale: 'ar' },
+      ),
+    update: (templateId: string, body: UpdateDoctorTemplateBody) =>
+      patch<{ template?: DoctorTemplatesListResponse['templates'] extends (infer T)[] | undefined ? T : never; message?: string }>(
+        doctorEndpoints.templates.byId(templateId),
+        body,
+        { locale: 'ar' },
+      ),
+    delete: (templateId: string) =>
+      del<{ templateId?: string; message?: string }>(
+        doctorEndpoints.templates.byId(templateId),
+        { locale: 'ar' },
+      ),
   },
   internalDirectory: {
     list: (params: InternalDirectoryListParams = {}) => {

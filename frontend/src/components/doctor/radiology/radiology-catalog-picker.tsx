@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, Plus, Search } from 'lucide-react';
+import { ChevronDown, Plus, Search, Star } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
 import type { OrderCatalogItem } from '@/lib/doctor/encounterOrderTypes';
 import type { RadiologyCatalogTab } from './radiology-types';
@@ -24,6 +24,7 @@ export function RadiologyCatalogPicker({
   loading,
   onAddCatalogItem,
   onOpenManual,
+  onToggleFavorite,
   disabled,
   catalogSectionLabel = 'إضافة فحص',
   searchPlaceholder = 'بحث...',
@@ -33,6 +34,7 @@ export function RadiologyCatalogPicker({
   loading?: boolean;
   onAddCatalogItem: (item: OrderCatalogItem) => void;
   onOpenManual: () => void;
+  onToggleFavorite?: (item: OrderCatalogItem) => void | Promise<void>;
   disabled?: boolean;
   catalogSectionLabel?: string;
   searchPlaceholder?: string;
@@ -145,24 +147,47 @@ export function RadiologyCatalogPicker({
                   item.title ?? item.name ?? item.label ?? '—';
                 return (
                   <li key={item._id}>
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onAddCatalogItem(item)}
-                      className="flex w-full items-center justify-between gap-3 rounded-[10px] border border-[#E4E7EC] bg-[#FAFBFC] px-3 py-3 text-right transition hover:border-primary/40 hover:bg-[#F8FFFE] disabled:opacity-60"
-                    >
-                      <Plus className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-cairo text-[14px] font-extrabold text-[#101828]">
-                          {title}
-                        </div>
-                        {item.category ? (
-                          <div className="mt-0.5 font-cairo text-[11px] font-semibold text-[#667085]">
-                            {item.category}
+                    <div className="flex w-full items-center gap-2 rounded-[10px] border border-[#E4E7EC] bg-[#FAFBFC] px-3 py-3">
+                      {onToggleFavorite ? (
+                        <button
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => void onToggleFavorite(item)}
+                          className={cn(
+                            'flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border transition',
+                            item.isFavorited
+                              ? 'border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]'
+                              : 'border-[#E4E7EC] bg-white text-[#98A2B3] hover:text-primary',
+                          )}
+                          aria-label={
+                            item.isFavorited ? 'إزالة من المفضلة' : 'إضافة للمفضلة'
+                          }
+                        >
+                          <Star
+                            className={cn('h-4 w-4', item.isFavorited && 'fill-current')}
+                            aria-hidden
+                          />
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onAddCatalogItem(item)}
+                        className="flex min-w-0 flex-1 items-center justify-between gap-3 text-right transition hover:opacity-90 disabled:opacity-60"
+                      >
+                        <Plus className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-cairo text-[14px] font-extrabold text-[#101828]">
+                            {title}
                           </div>
-                        ) : null}
-                      </div>
-                    </button>
+                          {item.category ? (
+                            <div className="mt-0.5 font-cairo text-[11px] font-semibold text-[#667085]">
+                              {item.category}
+                            </div>
+                          ) : null}
+                        </div>
+                      </button>
+                    </div>
                   </li>
                 );
               })}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Copy, Pencil, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils/utils";
 import { ENCOUNTERS_EXPAND_TRANSITION } from "@/components/doctor/encounters/encounters-motion";
@@ -18,6 +18,7 @@ export function PrescriptionMedicationCard({
   item,
   onEdit,
   onDelete,
+  onDuplicate,
   collapsible = false,
   defaultExpanded = false,
   readOnly = false,
@@ -25,6 +26,7 @@ export function PrescriptionMedicationCard({
   item: PrescriptionMedicationItem;
   onEdit?: () => void;
   onDelete?: () => void;
+  onDuplicate?: () => void;
   collapsible?: boolean;
   defaultExpanded?: boolean;
   readOnly?: boolean;
@@ -49,6 +51,16 @@ export function PrescriptionMedicationCard({
         <div className="flex gap-2 items-center shrink-0">
           {!readOnly && onEdit && onDelete ? (
             <>
+              {onDuplicate ? (
+                <button
+                  type="button"
+                  onClick={onDuplicate}
+                  className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#BFEDEC] text-primary transition hover:bg-[#F0FAF9]"
+                  aria-label="نسخ الدواء"
+                >
+                  <Copy className="w-4 h-4" aria-hidden />
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={onEdit}

@@ -149,6 +149,10 @@ export default function App() {
               path="appointment-types"
               element={<DoctorPages.DoctorAppointmentTypesPage />}
             />
+            <Route
+              path="clinical-library"
+              element={<DoctorPages.DoctorClinicalLibraryPage />}
+            />
             <Route path="encounters" element={<DoctorPages.DoctorEncountersPage />} />
             <Route
               path="encounters/:patientId/:encounterId/summary"

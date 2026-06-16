@@ -367,6 +367,15 @@ export function useCancelBillingInvoice() {
   });
 }
 
+export function useIssueBillingInvoice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { invoiceId: string; dueAt?: string }) =>
+      billingApi.invoices.issue(input.invoiceId, input.dueAt ? { dueAt: input.dueAt } : undefined),
+    onSuccess: () => invalidateBilling(queryClient),
+  });
+}
+
 export function useCreateBillingRefund() {
   const queryClient = useQueryClient();
   return useMutation({

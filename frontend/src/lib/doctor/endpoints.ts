@@ -32,6 +32,8 @@ export const doctorEndpoints = {
       recordId: string,
     ) =>
       `/api/doctors/${doctorId}/patients/${patientId}/medical-records/${recordId}`,
+    medications: (doctorId: string, patientId: string) =>
+      `/api/doctors/${doctorId}/patients/${patientId}/medications`,
     encounters: (doctorId: string, patientId: string) =>
       `/api/doctors/${doctorId}/patients/${patientId}/encounters`,
     encounterById: (doctorId: string, patientId: string, encounterId: string) =>
@@ -254,6 +256,27 @@ export const doctorEndpoints = {
       `/api/doctors/${doctorId}/appointment-types/${typeId}`,
   },
   orderCatalogImaging: '/api/doctors/order-catalog/imaging',
+  orderFavorites: {
+    list: '/api/doctors/order-favorites',
+    create: '/api/doctors/order-favorites',
+    delete: (favoriteId: string) =>
+      `/api/doctors/order-favorites/${encodeURIComponent(favoriteId)}`,
+  },
+  library: {
+    recent: '/api/doctors/library/recent',
+    items: '/api/doctors/library/items',
+    itemById: (itemId: string) =>
+      `/api/doctors/library/items/${encodeURIComponent(itemId)}`,
+    itemFavorite: (itemId: string) =>
+      `/api/doctors/library/items/${encodeURIComponent(itemId)}/favorite`,
+  },
+  templates: {
+    list: '/api/doctors/templates',
+    byId: (templateId: string) =>
+      `/api/doctors/templates/${encodeURIComponent(templateId)}`,
+    apply: (templateId: string) =>
+      `/api/doctors/templates/${encodeURIComponent(templateId)}/apply`,
+  },
   orders: {
     list: '/api/doctors/orders',
     create: '/api/doctors/orders',

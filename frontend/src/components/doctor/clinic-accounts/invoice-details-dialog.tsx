@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Pencil, Plus, Receipt, XCircle } from "lucide-react";
+import { FileText, Pencil, Plus, Receipt, Send, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { ClinicInvoice } from "@/lib/doctor/clinicAccounts/types";
@@ -14,7 +14,7 @@ import { InvoiceEditDialog } from "@/components/doctor/clinic-accounts/invoice-e
 import { InvoiceRefundDialog } from "@/components/doctor/clinic-accounts/invoice-refund-dialog";
 import { InvoiceStatusBadge } from "@/components/doctor/clinic-accounts/invoice-status-badge";
 import { useToast } from "@/components/ui/ToastProvider";
-import { useCancelBillingInvoice } from "@/hooks/doctor/billing";
+import { useCancelBillingInvoice, useIssueBillingInvoice } from "@/hooks/doctor/billing";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils/utils";
 
@@ -40,11 +40,14 @@ export function InvoiceDetailsDialog({
 }) {
   const { toast } = useToast();
   const cancelInvoice = useCancelBillingInvoice();
+  const issueInvoice = useIssueBillingInvoice();
   const [editOpen, setEditOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [cancelBusy, setCancelBusy] = useState(false);
+  const [issueBusy, setIssueBusy] = useState(false);
 
   const canEdit = invoice?.apiStatus === "draft";
+  const canIssue = Boolean(invoice?.rawId && invoice.apiStatus === "draft");
   const canCancel =
     invoice?.rawId &&
     invoice.apiStatus !== "cancelled" &&
@@ -83,6 +86,29 @@ export function InvoiceDetailsDialog({
 
   const refreshInvoice = () => {
     onInvoiceUpdated?.();
+  };
+
+  const handleIssueClick = async () => {
+    if (!invoice?.rawId || !canIssue) {
+      toast('يمكن إصدار المسودات فقط.', {
+        title: 'لا يمكن الإصدار',
+        variant: 'error',
+      });
+      return;
+    }
+    setIssueBusy(true);
+    try {
+      await issueInvoice.mutateAsync({ invoiceId: invoice.rawId });
+      toast('تم إصدار الفاتورة.', { variant: 'success' });
+      refreshInvoice();
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: 'تعذّر إصدار الفاتورة',
+        variant: 'error',
+      });
+    } finally {
+      setIssueBusy(false);
+    }
   };
 
   const handleCancelClick = async () => {
@@ -290,6 +316,17 @@ export function InvoiceDetailsDialog({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
+            {canIssue ? (
+              <button
+                type="button"
+                onClick={() => void handleIssueClick()}
+                disabled={issueBusy}
+                className="col-span-2 inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white transition hover:bg-primary/90 disabled:opacity-60"
+              >
+                <Send className="h-4 w-4" aria-hidden />
+                {issueBusy ? 'جارٍ الإصدار...' : 'إصدار الفاتورة'}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={handleEditClick}

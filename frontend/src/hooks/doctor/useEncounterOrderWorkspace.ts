@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isAwaitingAnyInitialQueryData, isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+import { useToggleOrderCatalogFavorite } from '@/hooks/doctor/useOrderFavorites';
 import {
   ENCOUNTER_ORDER_CONFIG,
   type CatalogOrderCategory,
@@ -128,6 +129,7 @@ export function useEncounterOrderWorkspace(
 ) {
   const config = ENCOUNTER_ORDER_CONFIG[category];
   const queryClient = useQueryClient();
+  const toggleFavoriteMutation = useToggleOrderCatalogFavorite(category);
   const isEnabled =
     enabled && Boolean(doctorId) && Boolean(patientId) && Boolean(encounterId);
 
@@ -348,7 +350,8 @@ export function useEncounterOrderWorkspace(
     addItemMutation.isPending ||
     deleteItemMutation.isPending ||
     finalizeMutation.isPending ||
-    previewMutation.isPending;
+    previewMutation.isPending ||
+    toggleFavoriteMutation.isPending;
 
   const isAwaitingData = isAwaitingAnyInitialQueryData([
     { data: encounterQuery.data, isError: encounterQuery.isError },
@@ -388,7 +391,9 @@ export function useEncounterOrderWorkspace(
     refetch: () => {
       void encounterQuery.refetch();
       void orderQuery.refetch();
+      void catalogQuery.refetch();
     },
+    toggleCatalogFavorite: toggleFavoriteMutation.mutateAsync,
     validateClinicalForm,
     assertHasOrderItems,
     saveDraft: async () => {

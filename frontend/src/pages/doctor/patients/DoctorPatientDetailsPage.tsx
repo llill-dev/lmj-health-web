@@ -70,6 +70,8 @@ import {
   DocumentsTab,
   AppointmentsTab,
 } from "@/components/doctor/patients/patient-details";
+import { PatientAddMedicationDialog } from "@/components/doctor/patients/patient-details/patient-add-medication-dialog";
+import { useAddDoctorPatientMedication } from "@/hooks/doctor/useDoctorClinicalShortcuts";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import { countPatientAppointments } from "@/lib/doctor/countPatientAppointments";
 import { resolvePatientOrderCategory } from "@/lib/doctor/encounterOrderCategories";
@@ -161,6 +163,12 @@ export default function DoctorPatientDetailsPage() {
   const [timelineFilter, setTimelineFilter] = useState<
     "all" | "encounter" | "file" | "order" | "prescription" | "history"
   >("all");
+  const [medicationDialogOpen, setMedicationDialogOpen] = useState(false);
+
+  const addMedicationMutation = useAddDoctorPatientMedication(
+    doctorId,
+    patientId ?? "",
+  );
 
   const publicProfileQuery = useDoctorPatientPublicProfile(
     patientId ?? "",
@@ -696,7 +704,7 @@ export default function DoctorPatientDetailsPage() {
       return (
         <MedicationsTab
           fullProfileData={fullProfileData}
-          onAddMedication={() => navigate('/doctor/medical-records')}
+          onAddMedication={() => setMedicationDialogOpen(true)}
         />
       );
     }
@@ -1090,6 +1098,23 @@ export default function DoctorPatientDetailsPage() {
           </>
         )}
       </div>
+      <PatientAddMedicationDialog
+        open={medicationDialogOpen}
+        onOpenChange={setMedicationDialogOpen}
+        busy={addMedicationMutation.isPending}
+        onSubmit={async (values) => {
+          try {
+            await addMedicationMutation.mutateAsync(values);
+            toast("تمت إضافة الدواء للمريض.", { variant: "success" });
+          } catch (error) {
+            toast(getUserFacingRequestErrorMessage(error), {
+              title: "تعذّر إضافة الدواء",
+              variant: "error",
+            });
+            throw error;
+          }
+        }}
+      />
     </>
   );
 }

@@ -20,7 +20,6 @@ import {
   BarChart3,
   MessageSquareWarning,
   Tags,
-  Tags,
   Wallet,
   Building2,
   LifeBuoy,
@@ -37,6 +36,7 @@ export type SidebarItemId =
   | "online-consultations"
   | "work-schedule"
   | "appointment-types"
+  | "clinical-library"
   | "medical-records"
   | "prescription"
   | "radiology"
@@ -123,6 +123,12 @@ export const sidebarItems: Array<{
     path: "appointment-types",
     label: "أنواع المواعيد",
     icon: Tags,
+  },
+  {
+    id: "clinical-library",
+    path: "clinical-library",
+    label: "المكتبة السريرية",
+    icon: BookOpen,
   },
   {
     id: "medical-records",

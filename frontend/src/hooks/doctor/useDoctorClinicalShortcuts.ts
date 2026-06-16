@@ -1,0 +1,136 @@
+'use client';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  doctorApi,
+  doctorClinicalQueryKeys,
+  doctorPatientsQueryKeys,
+} from '@/lib/doctor/client';
+import type {
+  CreateDoctorLibraryItemBody,
+  UpdateDoctorLibraryItemBody,
+} from '@/lib/doctor/libraryTypes';
+import type {
+  CreateDoctorTemplateBody,
+  UpdateDoctorTemplateBody,
+} from '@/lib/doctor/templateTypes';
+import type { AddDoctorPatientMedicationBody } from '@/lib/doctor/types';
+import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+
+export function useDoctorLibraryItems(params: {
+  search?: string;
+  type?: string;
+  page?: number;
+  limit?: number;
+  favorite?: boolean;
+} = {}) {
+  const query = useQuery({
+    queryKey: doctorClinicalQueryKeys.libraryItems(params),
+    queryFn: () => doctorApi.library.list(params),
+    staleTime: 30_000,
+  });
+
+  return {
+    items: query.data?.items ?? [],
+    total: query.data?.total ?? 0,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    refetch: query.refetch,
+  };
+}
+
+export function useCreateDoctorLibraryItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateDoctorLibraryItemBody) => doctorApi.library.create(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorClinicalQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useUpdateDoctorLibraryItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { itemId: string; body: UpdateDoctorLibraryItemBody }) =>
+      doctorApi.library.update(input.itemId, input.body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorClinicalQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useDeleteDoctorLibraryItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (itemId: string) => doctorApi.library.delete(itemId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorClinicalQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useDoctorTemplates(params: {
+  search?: string;
+  type?: string;
+  page?: number;
+  limit?: number;
+} = {}) {
+  const query = useQuery({
+    queryKey: doctorClinicalQueryKeys.templates(params),
+    queryFn: () => doctorApi.templates.list(params),
+    staleTime: 30_000,
+  });
+
+  return {
+    templates: query.data?.templates ?? [],
+    total: query.data?.total ?? 0,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    refetch: query.refetch,
+  };
+}
+
+export function useCreateDoctorTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateDoctorTemplateBody) => doctorApi.templates.create(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorClinicalQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useDeleteDoctorTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (templateId: string) => doctorApi.templates.delete(templateId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorClinicalQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useAddDoctorPatientMedication(
+  doctorId: string,
+  patientId: string,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AddDoctorPatientMedicationBody) =>
+      doctorApi.patients.addPatientMedication(doctorId, patientId, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorPatientsQueryKeys.fullProfile(doctorId, patientId),
+      });
+    },
+  });
+}

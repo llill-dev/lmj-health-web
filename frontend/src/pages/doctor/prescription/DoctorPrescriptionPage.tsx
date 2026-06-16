@@ -177,6 +177,18 @@ export default function DoctorPrescriptionPage() {
                 if (!editable) return;
                 setDeleteTargetId(id);
               }}
+              onDuplicate={async (id) => {
+                if (!editable) return;
+                try {
+                  await workspace.duplicateItem(id);
+                  toast('تم نسخ الدواء.', { variant: 'success' });
+                } catch (error) {
+                  toast(workspace.getErrorMessage(error), {
+                    title: 'تعذّر نسخ الدواء',
+                    variant: 'error',
+                  });
+                }
+              }}
             />
 
             <PrescriptionGeneralInstructions

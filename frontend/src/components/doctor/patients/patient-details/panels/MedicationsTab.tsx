@@ -35,6 +35,16 @@ export function MedicationsTab({
 
   return (
     <motion.div variants={TAB_STAGGER_CONTAINER} initial="hidden" animate="show" className="space-y-4">
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={onAddMedication}
+          className="inline-flex items-center gap-2 rounded-[10px] bg-primary px-4 py-2 font-cairo text-[12px] font-extrabold text-white"
+        >
+          <Pill className="h-4 w-4" />
+          إضافة دواء
+        </button>
+      </div>
       {fullProfileData.medications.map((medication) => (
         <MedicationRecordCard key={medication.id} medication={medication} />
       ))}

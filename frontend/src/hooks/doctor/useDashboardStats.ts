@@ -26,19 +26,22 @@ function num(value: unknown): number {
 
 function normalizeDashboardStats(
   response: DoctorActivitySummaryResponse,
+  todayResponse?: DoctorActivitySummaryResponse | null,
 ): DoctorDashboardStats {
   const summary = parseSummaryAnalytics(response);
   const completed = num(response.totals?.appointmentsCompleted);
   const noShow = num(response.totals?.appointmentsNoShow);
   const attendanceBase = completed + noShow;
+  const todayCompleted = num(todayResponse?.totals?.appointmentsCompleted);
+  const todayNoShow = num(todayResponse?.totals?.appointmentsNoShow);
 
   return {
     totalPatients: summary.patients,
     activePatients: summary.patients,
     totalAppointments: completed + noShow,
-    todayAppointments: 0,
+    todayAppointments: todayCompleted + todayNoShow,
     completedAppointments: completed,
-    pendingAppointments: 0,
+    pendingAppointments: num(response.totals?.accessRequests),
     totalMedicalRecords: summary.diagnoses,
     appointmentsNoShow: noShow,
     attendanceRate:
@@ -50,14 +53,20 @@ export function useDashboardStats() {
   const query = useQuery({
     queryKey: ['doctor', 'dashboard', 'stats'],
     queryFn: async () => {
-      const response = await get<DoctorActivitySummaryResponse>(
-        doctorEndpoints.analytics.summary,
-        {
+      const today = new Date().toISOString().slice(0, 10);
+      const [summary, todaySlice] = await Promise.all([
+        get<DoctorActivitySummaryResponse>(doctorEndpoints.analytics.summary, {
           locale: 'ar',
-        },
-      );
+          range: 'month',
+        }),
+        get<DoctorActivitySummaryResponse>(doctorEndpoints.analytics.summary, {
+          locale: 'ar',
+          from: today,
+          to: today,
+        }).catch(() => null),
+      ]);
 
-      return normalizeDashboardStats(response);
+      return normalizeDashboardStats(summary, todaySlice);
     },
     staleTime: 1000 * 60 * 5,
   });

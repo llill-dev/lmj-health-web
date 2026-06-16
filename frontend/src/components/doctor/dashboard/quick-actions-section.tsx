@@ -46,7 +46,7 @@ const quickActions = [
     title: 'مكتبتي الطبية',
     description: 'تجمع الأدوية والتحاليل والإجراءات',
     icon: BookOpen,
-    href: '/doctor/medical-requests',
+    href: '/doctor/clinical-library',
   },
   {
     id: 'medical-services-guide',

@@ -5,10 +5,12 @@ export function PrescriptionSelectedMedications({
   items,
   onEdit,
   onDelete,
+  onDuplicate,
 }: {
   items: PrescriptionMedicationItem[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onDuplicate?: (id: string) => void;
 }) {
   return (
     <section className="mb-6">
@@ -29,6 +31,7 @@ export function PrescriptionSelectedMedications({
               collapsible
               onEdit={() => onEdit(item.id)}
               onDelete={() => onDelete(item.id)}
+              onDuplicate={onDuplicate ? () => onDuplicate(item.id) : undefined}
             />
           ))}
         </div>

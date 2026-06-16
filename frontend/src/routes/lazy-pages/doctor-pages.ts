@@ -24,6 +24,9 @@ export const DoctorWorkSchedulePage = lazy(
 export const DoctorAppointmentTypesPage = lazy(
   () => import("@/pages/doctor/appointment-types/DoctorAppointmentTypesPage"),
 );
+export const DoctorClinicalLibraryPage = lazy(
+  () => import("@/pages/doctor/clinical-library/DoctorClinicalLibraryPage"),
+);
 export const DoctorMedicalRecordsPage = lazy(
   () => import("@/pages/doctor/medical-records/DoctorMedicalRecordsPage"),
 );
