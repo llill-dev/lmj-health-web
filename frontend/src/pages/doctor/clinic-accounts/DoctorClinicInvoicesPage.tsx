@@ -12,6 +12,7 @@ import {
   InvoiceDetailsDialog,
   InvoiceListItem,
 } from "@/components/doctor/clinic-accounts";
+import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
@@ -156,6 +157,11 @@ export default function DoctorClinicInvoicesPage() {
           onChange={setSearch}
           onValueChangeExtra={() => setPage(1)}
           placeholder="بحث بالاسم أو رقم الفاتورة..."
+          onClear={() => {
+            setSearch('');
+            setFilter('all');
+            setPage(1);
+          }}
           trailing={
             <ClinicAccountsSearchCount count={listQuery.total} label="فاتورة" />
           }
@@ -171,9 +177,24 @@ export default function DoctorClinicInvoicesPage() {
             onRetry={() => void retryList()}
           />
         ) : listQuery.invoices.length === 0 ? (
-          <p className="py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-            لا توجد فواتير مطابقة للبحث أو الفلتر.
-          </p>
+          <DoctorListEmptyIllustration
+            variant="teal"
+            imageSrc="/images/photo-not-found_appotemint.png"
+            imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
+            title={
+              search.trim() || filter !== 'all'
+                ? 'لا توجد فواتير تطابق البحث أو الفلتر الحالي'
+                : 'لا توجد فواتير صادرة بعد'
+            }
+            subtitle={
+              search.trim() || filter !== 'all'
+                ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
+                : 'أنشئ فواتير للمرضى وتتبع المدفوعات والمبالغ المستحقة'
+            }
+            actionLabel="فاتورة جديدة"
+            onAction={() => navigate('/doctor/accounts/invoices/new')}
+            actionIcon={<Plus className="h-4 w-4" />}
+          />
         ) : (
           <div className="space-y-3">
             {listQuery.invoices.map((invoice, index) => (

@@ -946,13 +946,13 @@ const doctorAppointmentTypesApi = {
     );
   },
 
-  // PATCH /doctors/:doctorId/appointment-types/:typeId
+  // PUT /doctors/:doctorId/appointment-types/:typeId
   updateType: async (
     typeId: string,
     body: UpdateAppointmentTypeBody,
   ): Promise<AppointmentTypeMutationResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return patch<AppointmentTypeMutationResponse>(
+    return put<AppointmentTypeMutationResponse>(
       doctorEndpoints.appointmentTypes.update(doctorId, typeId),
       toAppointmentTypeApiBody(body),
       { locale: "ar" },

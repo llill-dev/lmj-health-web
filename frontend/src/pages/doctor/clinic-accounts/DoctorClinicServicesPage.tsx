@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import {
   ClinicAccountsSearchRow,
   ClinicAccountsSubNav,
   ClinicAccountsModalShell,
 } from '@/components/doctor/clinic-accounts';
+import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -124,15 +126,35 @@ export default function DoctorClinicServicesPage() {
           </button>
         </header>
 
-        <ClinicAccountsSearchRow search={search} onSearchChange={setSearch} />
+        <ClinicAccountsSearchRow
+          value={search}
+          onChange={setSearch}
+          placeholder="بحث عن خدمة..."
+          onClear={() => setSearch('')}
+        />
 
         <section className="mt-6 rounded-[12px] border border-[#EEF2F6] bg-white p-5">
           {list.isAwaitingData && !list.services.length ? (
             <DoctorTableSkeleton rows={5} columns={4} />
           ) : list.services.length === 0 ? (
-            <p className="py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-              لا توجد خدمات.
-            </p>
+            <DoctorListEmptyIllustration
+              variant="teal"
+              imageSrc="/images/photo-not-found_appotemint.png"
+              imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
+              title={
+                search.trim()
+                  ? 'لا توجد خدمات تطابق البحث الحالي'
+                  : 'لا توجد خدمات مضافة بعد'
+              }
+              subtitle={
+                search.trim()
+                  ? 'جرّب تعديل كلمات البحث لعرض النتائج'
+                  : 'أضف خدمات العيادة الطبية التي تقدمها للمرضى مع الأسعار والمدة الزمنية'
+              }
+              actionLabel="إضافة خدمة"
+              onAction={openCreate}
+              actionIcon={<Plus className="h-4 w-4" />}
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-right">

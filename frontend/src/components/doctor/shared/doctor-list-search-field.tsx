@@ -1,25 +1,29 @@
 import { Search, X } from 'lucide-react';
 
-export function MedicalRecordsToolbar({
-  search,
-  onSearchChange,
+export function DoctorListSearchField({
+  value,
+  onChange,
+  placeholder = 'ابحث...',
+  ariaLabel = 'بحث',
   onClear,
 }: {
-  search: string;
-  onSearchChange: (value: string) => void;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  ariaLabel?: string;
   onClear?: () => void;
 }) {
   return (
     <label className="relative block" dir="rtl">
-      <span className="sr-only">بحث عن مريض</span>
+      <span className="sr-only">{ariaLabel}</span>
       <input
         type="search"
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="ابحث عن مريض..."
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
         className="h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-4 pe-11 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/20 placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2"
       />
-      {search && onClear ? (
+      {value && onClear ? (
         <button
           type="button"
           onClick={onClear}

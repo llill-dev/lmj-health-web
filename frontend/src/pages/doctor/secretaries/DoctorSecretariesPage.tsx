@@ -8,6 +8,7 @@ import {
   ClinicAccountsSearchRow,
   ClinicAccountsSearchCount,
 } from '@/components/doctor/clinic-accounts';
+import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { DoctorExpandableCardSkeleton } from '@/components/doctor/shared/skeletons';
 import {
@@ -89,6 +90,16 @@ export default function DoctorSecretariesPage() {
       ).length,
     [listQuery.secretaries],
   );
+
+  const isTrulyEmpty =
+    listQuery.secretaries.length === 0 &&
+    !search.trim() &&
+    statusFilter === 'all';
+
+  const isFilteredEmpty =
+    filtered.length === 0 &&
+    listQuery.secretaries.length > 0 &&
+    (search.trim() !== '' || statusFilter !== 'all');
 
   const handleCreate = async (input: DoctorSecretaryCreateFormValues) => {
     if (listQuery.secretaries.length >= MAX_SECRETARIES) {
@@ -219,6 +230,10 @@ export default function DoctorSecretariesPage() {
             value={search}
             onChange={setSearch}
             placeholder="بحث..."
+            onClear={() => {
+              setSearch('');
+              setStatusFilter('all');
+            }}
             trailing={
               <ClinicAccountsSearchCount
                 count={filtered.length}
@@ -261,19 +276,25 @@ export default function DoctorSecretariesPage() {
             <DoctorExpandableCardSkeleton />
             <DoctorExpandableCardSkeleton />
           </div>
-        ) : filtered.length === 0 ? (
-          <section className="rounded-[16px] border border-dashed border-[#D1FAE5] bg-[#F0FDFA] px-6 py-12 text-center">
-            <p className="font-cairo text-[16px] font-extrabold text-primary">
-              {listQuery.secretaries.length === 0
-                ? 'لا يوجد سكرتير مرتبط بحسابك'
-                : 'لا توجد نتائج مطابقة'}
-            </p>
-            <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
-              {listQuery.secretaries.length === 0
-                ? 'يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم.'
-                : 'جرّب تغيير البحث أو الفلتر.'}
-            </p>
-          </section>
+        ) : isTrulyEmpty || isFilteredEmpty ? (
+          <DoctorListEmptyIllustration
+            variant="teal"
+            imageSrc="/images/photo-not-found_appotemint.png"
+            imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
+            title={
+              isFilteredEmpty
+                ? 'لا توجد نتائج مطابقة للبحث أو الفلتر الحالي'
+                : 'لا يوجد سكرتير مرتبط بحسابك'
+            }
+            subtitle={
+              isFilteredEmpty
+                ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
+                : 'يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك.'
+            }
+            actionLabel="إضافة سكرتير"
+            onAction={() => setCreateOpen(true)}
+            actionIcon={<Plus className="h-4 w-4" />}
+          />
         ) : (
           <div className="space-y-4">
             {filtered.map((secretary) => (

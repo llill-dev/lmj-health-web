@@ -1,6 +1,6 @@
 "use client";
 
-import { BookMarked, Loader2 } from "lucide-react";
+import { BookMarked, Loader2, Search } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -10,6 +10,8 @@ import {
   ClinicAccountsFilterTabs,
   ClinicAccountsSearchRow,
 } from "@/components/doctor/clinic-accounts";
+
+import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
 
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
 
@@ -165,6 +167,11 @@ export default function DoctorMedicalServicesDirectoryPage() {
           onChange={setSearch}
           placeholder="ابحث عن منشأة أو خدمة..."
           onValueChangeExtra={() => setPage(1)}
+          onClear={() => {
+            setSearch('');
+            setActiveCategory('labs');
+            setPage(1);
+          }}
         />
 
         <ClinicAccountsFilterTabs
@@ -175,9 +182,24 @@ export default function DoctorMedicalServicesDirectoryPage() {
 
         <section className="space-y-4">
           {directoryQuery.facilities.length === 0 ? (
-            <div className="rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-16 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-              لا توجد منشآت مطابقة لبحثك في هذا التصنيف.
-            </div>
+            <DoctorListEmptyIllustration
+              variant="teal"
+              imageSrc="/images/photo-not-found_appotemint.png"
+              imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
+              title={
+                debouncedSearch.trim()
+                  ? 'لا توجد منشآت تطابق البحث في هذا التصنيف'
+                  : 'لا توجد منشآت في هذا التصنيف بعد'
+              }
+              subtitle={
+                debouncedSearch.trim()
+                  ? 'جرّب تعديل كلمات البحث أو تغيير التصنيف لعرض المزيد من النتائج'
+                  : 'تصفح دليل المنشآت والخدمات الطبية المتاحة في المنطقة'
+              }
+              actionLabel="تصفح دليل الخدمات"
+              onAction={() => setActiveCategory('labs')}
+              actionIcon={<Search className="h-4 w-4" />}
+            />
           ) : (
             directoryQuery.facilities.map((facility) => (
               <FacilityDirectoryCard

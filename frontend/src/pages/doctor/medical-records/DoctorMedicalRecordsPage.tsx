@@ -306,6 +306,7 @@ export default function DoctorMedicalRecordsPage() {
                 <MedicalRecordsToolbar
                   search={search}
                   onSearchChange={setSearch}
+                  onClear={() => setSearch('')}
                 />
 
                 <div className="mt-6">
@@ -325,6 +326,11 @@ export default function DoctorMedicalRecordsPage() {
                     <MedicalRecordsTable
                       rows={list.rows}
                       onOpenDetails={openDetails}
+                      onAddNew={() => {
+                        setMode('create');
+                        setSelectedPatientId('');
+                      }}
+                      isFiltered={search.trim() !== ''}
                     />
                   )}
                 </div>

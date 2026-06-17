@@ -11,6 +11,7 @@ export function MedicalRecordsPagination({
   disabled,
   onPageChange,
   onPageSizeChange,
+  itemLabel = 'سجل',
 }: {
   page: number;
   totalPages: number;
@@ -21,13 +22,14 @@ export function MedicalRecordsPagination({
   disabled?: boolean;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  itemLabel?: string;
 }) {
   const safeTotalPages = Math.max(1, totalPages);
 
   return (
     <section className="flex flex-col gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:flex-row sm:items-center sm:justify-between">
       <div className="font-cairo text-[12px] font-bold text-[#667085]">
-        عرض {showingFrom}-{showingTo} من أصل {total} سجل
+        عرض {showingFrom}-{showingTo} من أصل {total} {itemLabel}
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end">

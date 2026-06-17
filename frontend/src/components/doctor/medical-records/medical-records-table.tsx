@@ -1,6 +1,7 @@
-import { Calendar, ChevronLeft } from 'lucide-react';
+import { Calendar, ChevronLeft, Plus } from 'lucide-react';
 import type { MedicalRecordRowVm } from './map-doctor-medical-records';
 import { MedicalRecordStatusBadge } from './medical-record-status-badge';
+import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
 
 const TABLE_COLUMNS = [
   'System ID',
@@ -19,15 +20,34 @@ const tdClass = 'px-4 py-4 text-center align-middle';
 export function MedicalRecordsTable({
   rows,
   onOpenDetails,
+  onAddNew,
+  isFiltered = false,
 }: {
   rows: MedicalRecordRowVm[];
   onOpenDetails: (row: MedicalRecordRowVm) => void;
+  onAddNew?: () => void;
+  isFiltered?: boolean;
 }) {
   if (!rows.length) {
     return (
-      <div className="rounded-[12px] border border-dashed border-[#E2E8F0] bg-white px-6 py-14 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        لا توجد سجلات تطابق البحث الحالي
-      </div>
+      <DoctorListEmptyIllustration
+        variant="teal"
+        imageSrc="/images/photo-not-found_appotemint.png"
+        imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
+        title={
+          isFiltered
+            ? 'لا توجد سجلات تطابق البحث الحالي'
+            : 'لا توجد سجلات طبية بعد'
+        }
+        subtitle={
+          isFiltered
+            ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
+            : 'أنشئ سجلات طبية للمرضى لتوثيق التشخيصات والعلاجات'
+        }
+        actionLabel="إنشاء سجل جديد"
+        onAction={onAddNew ?? (() => {})}
+        actionIcon={<Plus className="h-4 w-4" />}
+      />
     );
   }
 

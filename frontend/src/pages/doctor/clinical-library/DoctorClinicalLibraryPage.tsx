@@ -1,103 +1,343 @@
 'use client';
 
-import { BookOpen, Plus, Star, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+
+
+import { BookOpen, FileText, Pill, Plus, Star } from 'lucide-react';
+
+import { useEffect, useMemo, useState } from 'react';
+
 import { Helmet } from 'react-helmet-async';
+
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { useToast } from '@/components/ui/ToastProvider';
+
 import {
+
+  ClinicalLibraryItemsTable,
+
+  ClinicalLibraryTemplatesTable,
+
+} from '@/components/doctor/clinical-library/clinical-library-table';
+
+import {
+
+  ClinicalLibraryToolbar,
+
+  type ClinicalLibrarySection,
+
+  type ClinicalLibraryTypeFilter,
+
+  type ClinicalTemplateTypeFilter,
+
+} from '@/components/doctor/clinical-library/clinical-library-toolbar';
+
+import { ClinicalLibraryItemFormDialog } from '@/components/doctor/clinical-library/clinical-library-item-form-dialog';
+
+import {
+  ClinicalLibraryTemplateFormDialog,
+  type ClinicalLibraryTemplateFormValues,
+} from '@/components/doctor/clinical-library/clinical-library-template-form-dialog';
+
+import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
+
+import { MedicalRecordsPagination } from '@/components/doctor/medical-records/medical-records-pagination';
+
+import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
+
+import {
+
+  DoctorTableSkeleton,
+
+  DoctorToolbarSkeleton,
+
+} from '@/components/doctor/shared/skeletons';
+
+import { useToast } from '@/components/ui/ToastProvider';
+
+import {
+
   useCreateDoctorLibraryItem,
+
   useCreateDoctorTemplate,
+
   useDeleteDoctorLibraryItem,
+
   useDeleteDoctorTemplate,
+
   useDoctorLibraryItems,
+
   useDoctorTemplates,
+
 } from '@/hooks/doctor/useDoctorClinicalShortcuts';
+
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+
 import type { DoctorLibraryItemType } from '@/lib/doctor/libraryTypes';
+
 import type { DoctorTemplateType } from '@/lib/doctor/templateTypes';
-import { cn } from '@/lib/utils/utils';
+
+
 
 const LIBRARY_TYPE_LABELS: Record<DoctorLibraryItemType, string> = {
+
   MEDICATION: 'دواء',
+
   LAB: 'تحليل',
+
   IMAGING: 'أشعة',
+
   PROCEDURE: 'إجراء',
+
 };
+
+
 
 const TEMPLATE_TYPE_LABELS: Record<DoctorTemplateType, string> = {
+
   PRESCRIPTION: 'وصفة',
+
   LAB_ORDER: 'طلب مخبري',
+
   IMAGING_ORDER: 'طلب أشعة',
+
   PROCEDURE_ORDER: 'طلب إجراء',
+
   REFERRAL_ORDER: 'إحالة',
+
 };
 
+
+
 export default function DoctorClinicalLibraryPage() {
+
   const { toast } = useToast();
-  const [tab, setTab] = useState<'library' | 'templates'>('library');
+
+  const [section, setSection] = useState<ClinicalLibrarySection>('library');
+
   const [search, setSearch] = useState('');
+
+  const [libraryTypeFilter, setLibraryTypeFilter] =
+
+    useState<ClinicalLibraryTypeFilter>('all');
+
+  const [templateTypeFilter, setTemplateTypeFilter] =
+
+    useState<ClinicalTemplateTypeFilter>('all');
+
+  const [libraryPage, setLibraryPage] = useState(1);
+
+  const [templatesPage, setTemplatesPage] = useState(1);
+
+  const [pageSize, setPageSize] = useState(8);
+
   const [libraryFormOpen, setLibraryFormOpen] = useState(false);
+
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
+
   const [deleteLibraryId, setDeleteLibraryId] = useState<string | null>(null);
+
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
-  const [libraryType, setLibraryType] = useState<DoctorLibraryItemType>('MEDICATION');
-  const [libraryLabel, setLibraryLabel] = useState('');
-  const [libraryDosage, setLibraryDosage] = useState('');
-  const [libraryFrequency, setLibraryFrequency] = useState('');
 
-  const [templateType, setTemplateType] =
-    useState<DoctorTemplateType>('PRESCRIPTION');
-  const [templateName, setTemplateName] = useState('');
-  const [templateDescription, setTemplateDescription] = useState('');
 
-  const libraryQuery = useDoctorLibraryItems({ search, limit: 50 });
-  const templatesQuery = useDoctorTemplates({ search, limit: 50 });
+  const libraryQuery = useDoctorLibraryItems({
+
+    search,
+
+    page: libraryPage,
+
+    limit: pageSize,
+
+    type: libraryTypeFilter === 'all' ? undefined : libraryTypeFilter,
+
+  });
+
+  const templatesQuery = useDoctorTemplates({
+
+    search,
+
+    page: templatesPage,
+
+    limit: pageSize,
+
+    type: templateTypeFilter === 'all' ? undefined : templateTypeFilter,
+
+  });
+
+  const libraryStatsQuery = useDoctorLibraryItems({ limit: 1 });
+
+  const favoriteStatsQuery = useDoctorLibraryItems({ favorite: true, limit: 1 });
+
+  const medicationStatsQuery = useDoctorLibraryItems({
+
+    type: 'MEDICATION',
+
+    limit: 1,
+
+  });
+
+  const templatesStatsQuery = useDoctorTemplates({ limit: 1 });
+
   const createLibrary = useCreateDoctorLibraryItem();
+
   const deleteLibrary = useDeleteDoctorLibraryItem();
+
   const createTemplate = useCreateDoctorTemplate();
+
   const deleteTemplate = useDeleteDoctorTemplate();
 
+
+
   const isBusy =
+
     createLibrary.isPending ||
+
     deleteLibrary.isPending ||
+
     createTemplate.isPending ||
+
     deleteTemplate.isPending;
 
-  const tabs = useMemo(
-    () => [
-      { id: 'library' as const, label: 'المكتبة السريرية' },
-      { id: 'templates' as const, label: 'القوالب' },
-    ],
-    [],
+
+
+  const libraryTotalPages = Math.max(
+
+    1,
+
+    Math.ceil(libraryQuery.total / pageSize),
+
   );
 
-  const handleCreateLibrary = async () => {
-    const label = libraryLabel.trim();
-    if (!label) {
-      toast('أدخل عنواناً للعنصر.', { variant: 'error' });
-      return;
-    }
+  const templatesTotalPages = Math.max(
+
+    1,
+
+    Math.ceil(templatesQuery.total / pageSize),
+
+  );
+
+
+
+  useEffect(() => {
+
+    setLibraryPage(1);
+
+    setTemplatesPage(1);
+
+  }, [search, pageSize, libraryTypeFilter, templateTypeFilter, section]);
+
+
+
+  useEffect(() => {
+
+    if (libraryPage > libraryTotalPages) setLibraryPage(libraryTotalPages);
+
+  }, [libraryPage, libraryTotalPages]);
+
+
+
+  useEffect(() => {
+
+    if (templatesPage > templatesTotalPages) setTemplatesPage(templatesTotalPages);
+
+  }, [templatesPage, templatesTotalPages]);
+
+
+
+  const libraryShowingFrom =
+
+    libraryQuery.total === 0 ? 0 : (libraryPage - 1) * pageSize + 1;
+
+  const libraryShowingTo = Math.min(libraryPage * pageSize, libraryQuery.total);
+
+
+
+  const templatesShowingFrom =
+
+    templatesQuery.total === 0 ? 0 : (templatesPage - 1) * pageSize + 1;
+
+  const templatesShowingTo = Math.min(
+
+    templatesPage * pageSize,
+
+    templatesQuery.total,
+
+  );
+
+
+
+  const libraryTrulyEmpty =
+
+    section === 'library' &&
+
+    libraryQuery.items.length === 0 &&
+
+    !libraryQuery.isAwaitingData &&
+
+    !search.trim() &&
+
+    libraryTypeFilter === 'all';
+
+
+
+  const libraryFilteredEmpty =
+
+    section === 'library' &&
+
+    libraryQuery.items.length === 0 &&
+
+    !libraryQuery.isAwaitingData &&
+
+    !libraryTrulyEmpty;
+
+
+
+  const templatesTrulyEmpty =
+
+    section === 'templates' &&
+
+    templatesQuery.templates.length === 0 &&
+
+    !templatesQuery.isAwaitingData &&
+
+    !search.trim() &&
+
+    templateTypeFilter === 'all';
+
+
+
+  const templatesFilteredEmpty =
+
+    section === 'templates' &&
+
+    templatesQuery.templates.length === 0 &&
+
+    !templatesQuery.isAwaitingData &&
+
+    !templatesTrulyEmpty;
+
+
+
+  const handleCreateLibrary = async (values: {
+    type: DoctorLibraryItemType;
+    label: string;
+    dosage?: string;
+    frequency?: string;
+  }) => {
     try {
       await createLibrary.mutateAsync({
-        type: libraryType,
-        label,
+        type: values.type,
+        label: values.label,
         data:
-          libraryType === 'MEDICATION'
+          values.type === 'MEDICATION'
             ? {
-                name: label,
-                dosage: libraryDosage.trim() || undefined,
-                frequency: libraryFrequency.trim() || undefined,
+                name: values.label,
+                dosage: values.dosage,
+                frequency: values.frequency,
               }
-            : { displayName: label },
+            : { displayName: values.label },
       });
       toast('تمت إضافة العنصر للمكتبة.', { variant: 'success' });
       setLibraryFormOpen(false);
-      setLibraryLabel('');
-      setLibraryDosage('');
-      setLibraryFrequency('');
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: 'تعذّر الحفظ',
@@ -106,23 +346,18 @@ export default function DoctorClinicalLibraryPage() {
     }
   };
 
-  const handleCreateTemplate = async () => {
-    const name = templateName.trim();
-    if (!name) {
-      toast('اسم القالب مطلوب.', { variant: 'error' });
-      return;
-    }
+
+
+  const handleCreateTemplate = async (values: ClinicalLibraryTemplateFormValues) => {
     try {
       await createTemplate.mutateAsync({
-        type: templateType,
-        name,
-        description: templateDescription.trim() || undefined,
+        type: values.type,
+        name: values.name,
+        description: values.description,
         payload: {},
       });
       toast('تم إنشاء القالب.', { variant: 'success' });
       setTemplateFormOpen(false);
-      setTemplateName('');
-      setTemplateDescription('');
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: 'تعذّر إنشاء القالب',
@@ -131,312 +366,477 @@ export default function DoctorClinicalLibraryPage() {
     }
   };
 
+
+
+  const toolbarSkeletonTabs = useMemo(
+
+    () => (section === 'library' ? 5 : 3),
+
+    [section],
+
+  );
+
+
+
   return (
+
     <>
+
       <Helmet>
+
         <title>المكتبة السريرية • LMJ Health</title>
+
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-6">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="font-cairo text-[28px] font-black text-[#111827]">
-              المكتبة السريرية والقوالب
-            </h1>
-            <p className="mt-1 font-cairo text-[14px] font-semibold text-[#667085]">
-              اختصارات الأدوية والتحاليل والقوالب القابلة لإعادة الاستخدام
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() =>
-              tab === 'library'
-                ? setLibraryFormOpen(true)
-                : setTemplateFormOpen(true)
-            }
-            className="inline-flex items-center gap-2 rounded-[10px] bg-primary px-4 py-2.5 font-cairo text-[13px] font-extrabold text-white"
-          >
-            <Plus className="h-4 w-4" />
-            {tab === 'library' ? 'إضافة للمكتبة' : 'قالب جديد'}
-          </button>
-        </header>
 
-        <div className="flex flex-wrap gap-2 border-b border-[#E4E7EC]">
-          {tabs.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setTab(item.id)}
-              className={cn(
-                'border-b-2 px-4 py-2 font-cairo text-[13px] font-extrabold transition',
-                tab === item.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-[#667085]',
-              )}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
 
-        <input
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="بحث..."
-          className="h-11 w-full max-w-md rounded-[10px] border border-[#E4E7EC] bg-white px-3 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
+      <div dir="rtl" lang="ar" className="w-full pb-10">
+
+        <DoctorDashboardOverview
+
+          variant="medical-records"
+
+          surface="mint"
+
+          kpiColumns={4}
+
+          title="المكتبة السريرية والقوالب"
+
+          headerIcon={<BookOpen className="h-8 w-8 text-white" />}
+
+          subtitle={
+
+            <span>
+
+              <span className="font-extrabold text-primary">
+
+                {libraryStatsQuery.isAwaitingData
+
+                  ? '—'
+
+                  : libraryStatsQuery.total}
+
+              </span>
+
+              <span className="text-primary/90">
+
+                {' '}
+
+                — اختصارات الأدوية والتحاليل والقوالب القابلة لإعادة الاستخدام
+
+              </span>
+
+            </span>
+
+          }
+
+          actionLabel={section === 'library' ? 'إضافة للمكتبة' : 'قالب جديد'}
+
+          actionIcon={<Plus className="h-4 w-4" />}
+
+          onActionClick={() =>
+
+            section === 'library'
+
+              ? setLibraryFormOpen(true)
+
+              : setTemplateFormOpen(true)
+
+          }
+
+          kpis={[
+
+            {
+
+              key: 'library',
+
+              icon: <BookOpen className="h-5 w-5 shrink-0" />,
+
+              value: libraryStatsQuery.isAwaitingData
+
+                ? '—'
+
+                : libraryStatsQuery.total,
+
+              label: 'عناصر المكتبة',
+
+            },
+
+            {
+
+              key: 'templates',
+
+              icon: <FileText className="h-5 w-5 shrink-0" />,
+
+              value: templatesStatsQuery.isAwaitingData
+
+                ? '—'
+
+                : templatesStatsQuery.total,
+
+              label: 'القوالب',
+
+            },
+
+            {
+
+              key: 'favorites',
+
+              icon: <Star className="h-5 w-5 shrink-0" />,
+
+              value: favoriteStatsQuery.isAwaitingData
+
+                ? '—'
+
+                : favoriteStatsQuery.total,
+
+              label: 'المفضلة',
+
+            },
+
+            {
+
+              key: 'medications',
+
+              icon: <Pill className="h-5 w-5 shrink-0" />,
+
+              value: medicationStatsQuery.isAwaitingData
+
+                ? '—'
+
+                : medicationStatsQuery.total,
+
+              label: 'اختصارات الأدوية',
+
+            },
+
+          ]}
+
         />
 
-        {tab === 'library' ? (
-          libraryQuery.isAwaitingData ? (
-            <div className="rounded-[12px] border border-dashed border-[#E4E7EC] px-6 py-16 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-              جارٍ تحميل المكتبة...
-            </div>
-          ) : libraryQuery.items.length === 0 ? (
-            <div className="rounded-[12px] border border-dashed border-[#E4E7EC] px-6 py-16 text-center">
-              <BookOpen className="mx-auto h-10 w-10 text-primary" />
-              <p className="mt-3 font-cairo text-[15px] font-extrabold text-[#111827]">
-                لا توجد عناصر في المكتبة بعد
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-3">
-              {libraryQuery.items.map((item) => (
-                <article
-                  key={item._id}
-                  className="flex items-center justify-between gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-4"
-                >
-                  <div className="min-w-0 text-start">
-                    <div className="flex items-center gap-2">
-                      {item.isFavorite ? (
-                        <Star className="h-4 w-4 fill-[#D97706] text-[#D97706]" />
-                      ) : null}
-                      <p className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                        {item.label ?? '—'}
-                      </p>
-                    </div>
-                    <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-                      {item.type ? LIBRARY_TYPE_LABELS[item.type] : '—'}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setDeleteLibraryId(item._id)}
-                    className="inline-flex items-center gap-1 rounded-[8px] bg-[#FEF3F2] px-3 py-2 font-cairo text-[12px] font-extrabold text-[#B42318]"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    أرشفة
-                  </button>
-                </article>
-              ))}
-            </div>
-          )
-        ) : templatesQuery.isAwaitingData ? (
-          <div className="rounded-[12px] border border-dashed border-[#E4E7EC] px-6 py-16 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-            جارٍ تحميل القوالب...
-          </div>
-        ) : templatesQuery.templates.length === 0 ? (
-          <DoctorListErrorState
-            title="لا توجد قوالب"
-            brief="أنشئ قالباً لوصفة أو طلب مخبري أو إجراء."
-            onRetry={() => setTemplateFormOpen(true)}
+
+
+        <section className="rounded-[12px] border border-[#EEF2F6] bg-white p-5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6">
+
+          <ClinicalLibraryToolbar
+
+            search={search}
+
+            onSearchChange={setSearch}
+
+            onClear={() => {
+              setSearch('');
+              if (section === 'library') {
+                setLibraryTypeFilter('all');
+              } else {
+                setTemplateTypeFilter('all');
+              }
+            }}
+
+            section={section}
+
+            onSectionChange={setSection}
+
+            libraryTypeFilter={libraryTypeFilter}
+
+            onLibraryTypeFilterChange={setLibraryTypeFilter}
+
+            templateTypeFilter={templateTypeFilter}
+
+            onTemplateTypeFilterChange={setTemplateTypeFilter}
+
           />
-        ) : (
-          <div className="grid gap-3">
-            {templatesQuery.templates.map((template) => (
-              <article
-                key={template._id}
-                className="flex items-center justify-between gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-4"
-              >
-                <div className="min-w-0 text-start">
-                  <p className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                    {template.name ?? '—'}
-                  </p>
-                  <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-                    {template.type ? TEMPLATE_TYPE_LABELS[template.type] : '—'}
-                  </p>
-                  {template.description ? (
-                    <p className="mt-1 font-cairo text-[12px] text-[#98A2B3]">
-                      {template.description}
-                    </p>
-                  ) : null}
+
+
+
+          <div className="mt-6">
+
+            {section === 'library' ? (
+
+              libraryQuery.isAwaitingData && !libraryQuery.items.length ? (
+
+                <div className="space-y-4">
+
+                  <DoctorToolbarSkeleton tabs={toolbarSkeletonTabs} />
+
+                  <DoctorTableSkeleton rows={8} columns={4} />
+
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setDeleteTemplateId(template._id)}
-                  className="inline-flex items-center gap-1 rounded-[8px] bg-[#FEF3F2] px-3 py-2 font-cairo text-[12px] font-extrabold text-[#B42318]"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  حذف
-                </button>
-              </article>
-            ))}
+
+              ) : libraryTrulyEmpty || libraryFilteredEmpty ? (
+
+                <DoctorListEmptyIllustration
+
+                  variant="teal"
+
+                  imageSrc="/images/photo-not-medicines.png"
+
+                  imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
+
+                  title={libraryFilteredEmpty ? "لا توجد عناصر تطابق البحث أو الفلتر الحالي" : "لا توجد عناصر في المكتبة بعد"}
+
+                  subtitle={libraryFilteredEmpty ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج" : "احفظ اختصارات الأدوية والتحاليل والإجراءات لإعادة استخدامها بسرعة"}
+
+                  actionLabel="إضافة للمكتبة"
+
+                  onAction={() => setLibraryFormOpen(true)}
+
+                  actionIcon={<Plus className="h-4 w-4" />}
+
+                />
+
+              ) : (
+
+                <ClinicalLibraryItemsTable
+
+                  items={libraryQuery.items}
+
+                  typeLabels={LIBRARY_TYPE_LABELS}
+
+                  onArchive={setDeleteLibraryId}
+
+                />
+
+              )
+
+            ) : templatesQuery.isAwaitingData && !templatesQuery.templates.length ? (
+
+              <div className="space-y-4">
+
+                <DoctorToolbarSkeleton tabs={toolbarSkeletonTabs} />
+
+                <DoctorTableSkeleton rows={8} columns={4} />
+
+              </div>
+
+            ) : templatesTrulyEmpty || templatesFilteredEmpty ? (
+
+              <DoctorListEmptyIllustration
+
+                variant="violet"
+
+                imageSrc="/images/photo-not-meduical-file.png"
+
+                imageClassName="drop-shadow-[0_12px_32px_rgba(99,102,241,0.1)]"
+
+                title={templatesFilteredEmpty ? "لا توجد قوالب تطابق البحث أو الفلتر الحالي" : "لا توجد قوالب بعد"}
+
+                subtitle={templatesFilteredEmpty ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج" : "أنشئ قوالب جاهزة للوصفات وطلبات المختبر والأشعة والإحالات"}
+
+                actionLabel="قالب جديد"
+
+                onAction={() => setTemplateFormOpen(true)}
+
+                actionIcon={<Plus className="h-4 w-4" />}
+
+              />
+
+            ) : (
+
+              <ClinicalLibraryTemplatesTable
+
+                templates={templatesQuery.templates}
+
+                typeLabels={TEMPLATE_TYPE_LABELS}
+
+                onDelete={setDeleteTemplateId}
+
+              />
+
+            )}
+
           </div>
-        )}
+
+        </section>
+
+
+
+        {section === 'library' &&
+
+        !libraryQuery.isAwaitingData &&
+
+        libraryQuery.items.length > 0 ? (
+
+          <div className="mt-5">
+
+            <MedicalRecordsPagination
+
+              page={libraryPage}
+
+              totalPages={libraryTotalPages}
+
+              showingFrom={libraryShowingFrom}
+
+              showingTo={libraryShowingTo}
+
+              total={libraryQuery.total}
+
+              pageSize={pageSize}
+
+              itemLabel="عنصر"
+
+              onPageChange={setLibraryPage}
+
+              onPageSizeChange={(size) => {
+
+                setPageSize(size);
+
+                setLibraryPage(1);
+
+                setTemplatesPage(1);
+
+              }}
+
+            />
+
+          </div>
+
+        ) : null}
+
+
+
+        {section === 'templates' &&
+
+        !templatesQuery.isAwaitingData &&
+
+        templatesQuery.templates.length > 0 ? (
+
+          <div className="mt-5">
+
+            <MedicalRecordsPagination
+
+              page={templatesPage}
+
+              totalPages={templatesTotalPages}
+
+              showingFrom={templatesShowingFrom}
+
+              showingTo={templatesShowingTo}
+
+              total={templatesQuery.total}
+
+              pageSize={pageSize}
+
+              itemLabel="قالب"
+
+              onPageChange={setTemplatesPage}
+
+              onPageSizeChange={(size) => {
+
+                setPageSize(size);
+
+                setLibraryPage(1);
+
+                setTemplatesPage(1);
+
+              }}
+
+            />
+
+          </div>
+
+        ) : null}
+
       </div>
 
-      {libraryFormOpen ? (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/45 p-4">
-          <div
-            dir="rtl"
-            lang="ar"
-            className="w-full max-w-[480px] rounded-[12px] bg-white p-6 shadow-xl"
-          >
-            <h2 className="font-cairo text-[18px] font-extrabold text-[#111827]">
-              إضافة عنصر للمكتبة
-            </h2>
-            <div className="mt-4 space-y-3">
-              <select
-                value={libraryType}
-                onChange={(event) =>
-                  setLibraryType(event.target.value as DoctorLibraryItemType)
-                }
-                className="h-11 w-full rounded-[10px] border border-[#E4E7EC] px-3 font-cairo text-[13px]"
-              >
-                {Object.entries(LIBRARY_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <input
-                value={libraryLabel}
-                onChange={(event) => setLibraryLabel(event.target.value)}
-                placeholder="العنوان"
-                className="h-11 w-full rounded-[10px] border border-[#E4E7EC] px-3 font-cairo text-[13px]"
-              />
-              {libraryType === 'MEDICATION' ? (
-                <>
-                  <input
-                    value={libraryDosage}
-                    onChange={(event) => setLibraryDosage(event.target.value)}
-                    placeholder="الجرعة"
-                    className="h-11 w-full rounded-[10px] border border-[#E4E7EC] px-3 font-cairo text-[13px]"
-                  />
-                  <input
-                    value={libraryFrequency}
-                    onChange={(event) => setLibraryFrequency(event.target.value)}
-                    placeholder="التكرار"
-                    className="h-11 w-full rounded-[10px] border border-[#E4E7EC] px-3 font-cairo text-[13px]"
-                  />
-                </>
-              ) : null}
-            </div>
-            <div className="mt-5 flex gap-3">
-              <button
-                type="button"
-                disabled={isBusy}
-                onClick={() => void handleCreateLibrary()}
-                className="flex-1 rounded-[10px] bg-primary py-2.5 font-cairo text-[13px] font-extrabold text-white disabled:opacity-60"
-              >
-                حفظ
-              </button>
-              <button
-                type="button"
-                onClick={() => setLibraryFormOpen(false)}
-                className="flex-1 rounded-[10px] border border-[#E4E7EC] py-2.5 font-cairo text-[13px] font-extrabold text-[#667085]"
-              >
-                إلغاء
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
-      {templateFormOpen ? (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/45 p-4">
-          <div
-            dir="rtl"
-            lang="ar"
-            className="w-full max-w-[480px] rounded-[12px] bg-white p-6 shadow-xl"
-          >
-            <h2 className="font-cairo text-[18px] font-extrabold text-[#111827]">
-              قالب جديد
-            </h2>
-            <div className="mt-4 space-y-3">
-              <select
-                value={templateType}
-                onChange={(event) =>
-                  setTemplateType(event.target.value as DoctorTemplateType)
-                }
-                className="h-11 w-full rounded-[10px] border border-[#E4E7EC] px-3 font-cairo text-[13px]"
-              >
-                {Object.entries(TEMPLATE_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <input
-                value={templateName}
-                onChange={(event) => setTemplateName(event.target.value)}
-                placeholder="اسم القالب"
-                className="h-11 w-full rounded-[10px] border border-[#E4E7EC] px-3 font-cairo text-[13px]"
-              />
-              <textarea
-                value={templateDescription}
-                onChange={(event) => setTemplateDescription(event.target.value)}
-                placeholder="وصف (اختياري)"
-                rows={3}
-                className="w-full rounded-[10px] border border-[#E4E7EC] px-3 py-2 font-cairo text-[13px]"
-              />
-            </div>
-            <div className="mt-5 flex gap-3">
-              <button
-                type="button"
-                disabled={isBusy}
-                onClick={() => void handleCreateTemplate()}
-                className="flex-1 rounded-[10px] bg-primary py-2.5 font-cairo text-[13px] font-extrabold text-white disabled:opacity-60"
-              >
-                حفظ
-              </button>
-              <button
-                type="button"
-                onClick={() => setTemplateFormOpen(false)}
-                className="flex-1 rounded-[10px] border border-[#E4E7EC] py-2.5 font-cairo text-[13px] font-extrabold text-[#667085]"
-              >
-                إلغاء
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+
+      <ClinicalLibraryItemFormDialog
+        open={libraryFormOpen}
+        busy={createLibrary.isPending}
+        onClose={() => setLibraryFormOpen(false)}
+        onSubmit={handleCreateLibrary}
+      />
+
+
+
+      <ClinicalLibraryTemplateFormDialog
+        open={templateFormOpen}
+        busy={createTemplate.isPending}
+        onClose={() => setTemplateFormOpen(false)}
+        onSubmit={handleCreateTemplate}
+      />
+
+
 
       <ConfirmActionDialog
+
         open={Boolean(deleteLibraryId)}
+
         title="أرشفة عنصر المكتبة"
+
         description="سيتم إخفاء العنصر من القائمة النشطة."
+
         confirmLabel="أرشفة"
-        onClose={() => setDeleteLibraryId(null)}
-        onConfirm={async () => {
-          if (!deleteLibraryId) return;
-          try {
-            await deleteLibrary.mutateAsync(deleteLibraryId);
-            toast('تمت أرشفة العنصر.', { variant: 'success' });
-            setDeleteLibraryId(null);
-          } catch (error) {
-            toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
-          }
+
+        onOpenChange={(open) => {
+          if (!open) setDeleteLibraryId(null);
         }}
+
+        onConfirm={async () => {
+
+          if (!deleteLibraryId) return;
+
+          try {
+
+            await deleteLibrary.mutateAsync(deleteLibraryId);
+
+            toast('تمت أرشفة العنصر.', { variant: 'success' });
+
+            setDeleteLibraryId(null);
+
+          } catch (error) {
+
+            toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+
+          }
+
+        }}
+
       />
 
+
+
       <ConfirmActionDialog
+
         open={Boolean(deleteTemplateId)}
+
         title="حذف القالب"
+
         description="لا يمكن التراجع عن هذا الإجراء."
+
         confirmLabel="حذف"
-        onClose={() => setDeleteTemplateId(null)}
-        onConfirm={async () => {
-          if (!deleteTemplateId) return;
-          try {
-            await deleteTemplate.mutateAsync(deleteTemplateId);
-            toast('تم حذف القالب.', { variant: 'success' });
-            setDeleteTemplateId(null);
-          } catch (error) {
-            toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
-          }
+
+        onOpenChange={(open) => {
+          if (!open) setDeleteTemplateId(null);
         }}
+
+        onConfirm={async () => {
+
+          if (!deleteTemplateId) return;
+
+          try {
+
+            await deleteTemplate.mutateAsync(deleteTemplateId);
+
+            toast('تم حذف القالب.', { variant: 'success' });
+
+            setDeleteTemplateId(null);
+
+          } catch (error) {
+
+            toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+
+          }
+
+        }}
+
       />
+
     </>
+
   );
+
 }
+
+

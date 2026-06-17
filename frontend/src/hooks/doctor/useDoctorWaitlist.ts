@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import {
+  doctorAppointmentsQueryKeys,
+  doctorSlotsQueryKeys,
+} from '@/lib/doctor/client';
+import {
   waitlistApi,
   waitlistQueryKeys,
 } from '@/lib/doctor/waitlist/client';
@@ -86,7 +90,15 @@ export function useWaitlistMutations() {
   const bookRequest = useMutation({
     mutationFn: (input: { id: string; body: WaitlistBookBody }) =>
       waitlistApi.book(input.id, input.body),
-    onSuccess: () => invalidateWaitlist(queryClient),
+    onSuccess: () => {
+      invalidateWaitlist(queryClient);
+      void queryClient.invalidateQueries({
+        queryKey: doctorAppointmentsQueryKeys.all,
+      });
+      void queryClient.invalidateQueries({
+        queryKey: doctorSlotsQueryKeys.all,
+      });
+    },
   });
 
   return {
