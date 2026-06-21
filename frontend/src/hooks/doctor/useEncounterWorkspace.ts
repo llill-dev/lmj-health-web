@@ -166,7 +166,6 @@ export function useEncounterWorkspace(
       : undefined;
 
   const publicId =
-    publicProfileQuery.data?.patient?.patientId ??
     profile?.patientId ??
     profile?._id;
 

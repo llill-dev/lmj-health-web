@@ -30,8 +30,8 @@ jobs:
         run: npm run lint
 
       # Temporarily disabled due to pre-existing TS errors
-      # - name: Typecheck
-      #   run: npm run typecheck
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Build
         run: npm run build

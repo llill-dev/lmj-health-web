@@ -11,6 +11,10 @@ import {
   ShieldCheck,
   Check,
   Link,
+  Stethoscope,
+  TestTube2,
+  Scan,
+  FolderOpen,
 } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/ui/styled-select';
@@ -23,49 +27,74 @@ type PatientOption = {
   name: string;
 };
 
-type AccessScope = 'medical-records' | 'prescriptions' | 'diagnosis-tests';
+type MedicalDataType =
+  | 'medications'
+  | 'lab-results'
+  | 'imaging'
+  | 'diagnoses'
+  | 'prescriptions'
+  | 'encounters'
+  | 'files';
 
 const addAccessRequestSchema = z.object({
   patientId: z.string().min(1, 'اختر المريض'),
-  scope: z.enum(['medical-records', 'prescriptions', 'diagnosis-tests'], {
-    message: 'حدد ما تريد الوصول له',
-  }),
+  items: z.array(z.string()).min(1, 'اختر نوع بيانات واحد على الأقل'),
+  expiresAt: z.string().optional(),
   reason: z.string().min(2, 'سبب الطلب مطلوب'),
 });
 
 type AddAccessRequestValues = z.input<typeof addAccessRequestSchema>;
 
-function scopeCardMeta(scope: AccessScope) {
-  switch (scope) {
+function dataTypeMeta(type: MedicalDataType) {
+  switch (type) {
+    case 'medications':
+      return {
+        label: 'الأدوية',
+        subtitle: 'الأدوية النشطة والتاريخ الدوائي',
+        icon: <Pill className='h-4 w-4 text-[#16A34A]' />,
+        color: 'text-[#16A34A]',
+      };
+    case 'lab-results':
+      return {
+        label: 'نتائج المختبر',
+        subtitle: 'التحاليل والفحوصات المخبرية',
+        icon: <TestTube2 className='h-4 w-4 text-[#DC2626]' />,
+        color: 'text-[#DC2626]',
+      };
+    case 'imaging':
+      return {
+        label: 'الأشعة والتصوير',
+        subtitle: 'نتائج التصوير الطبي والأشعة',
+        icon: <Scan className='h-4 w-4 text-[#9333EA]' />,
+        color: 'text-[#9333EA]',
+      };
+    case 'diagnoses':
+      return {
+        label: 'التشخيصات',
+        subtitle: 'التشخيصات الطبية السابقة',
+        icon: <Stethoscope className='h-4 w-4 text-[#0F766E]' />,
+        color: 'text-[#0F766E]',
+      };
     case 'prescriptions':
       return {
-        label: 'الأدوية والوصفات',
-        subtitle: 'الأدوية النشطة السابقة والوصفات الطبية',
-        border: 'border-[#22C55E]',
-        bg: 'bg-[#ECFDF3]',
-        accent: 'text-[#027A48]',
-        radioBorder: 'border-[#22C55E]',
-        icon: <Link className='h-4 w-4 text-[#16A34A]' />,
+        label: 'الوصفات الطبية',
+        subtitle: 'الوصفات الطبية المسجلة',
+        icon: <FileText className='h-4 w-4 text-[#2563EB]' />,
+        color: 'text-[#2563EB]',
       };
-    case 'medical-records':
+    case 'encounters':
       return {
-        label: 'السجلات الطبية',
-        subtitle: 'جمع السجلات والفحوصات الطبية',
-        border: 'border-primary',
-        bg: 'bg-[#F8FAFC]',
-        accent: 'text-[#0F8F8B]',
-        radioBorder: 'border-[#D0D5DD]',
-        icon: <FileText className='h-4 w-4 text-[#98A2B3]' />,
+        label: 'الزيارات الطبية',
+        subtitle: 'سجل الزيارات والمواعيد',
+        icon: <Calendar className='h-4 w-4 text-[#EA580C]' />,
+        color: 'text-[#EA580C]',
       };
-    case 'diagnosis-tests':
+    case 'files':
       return {
-        label: 'التشخيصات والتحاليل',
-        subtitle: 'جمع التشخيصات والتحاليل المرضية',
-        border: 'border-[#A855F7]',
-        bg: 'bg-[#F5F3FF]',
-        accent: 'text-[#7C3AED]',
-        radioBorder: 'border-[#A855F7]',
-        icon: <Activity className='h-4 w-4 text-[#A855F7]' />,
+        label: 'الملفات والمرفقات',
+        subtitle: 'المستندات والملفات الطبية',
+        icon: <FolderOpen className='h-4 w-4 text-[#CA8A04]' />,
+        color: 'text-[#CA8A04]',
       };
   }
 }
@@ -79,7 +108,8 @@ export default function AddAccessRequestForm({
   onCancel: () => void;
   onSubmit?: (payload: {
     patientId: string;
-    scope: AccessScope;
+    items: string[];
+    expiresAt?: string;
     reason: string;
   }) => void;
 }) {
@@ -94,18 +124,52 @@ export default function AddAccessRequestForm({
     resolver: zodResolver(addAccessRequestSchema),
     defaultValues: {
       patientId: '',
+      items: [],
+      expiresAt: '',
       reason: '',
     },
     mode: 'onSubmit',
   });
 
   const patientId = watch('patientId');
-  const scope = watch('scope') as AccessScope | undefined;
+  const selectedItems = watch('items') || [];
 
   const patientLabel = useMemo(() => {
     const p = patients.find((x) => x.id === patientId);
     return p?.name ?? '';
   }, [patientId, patients]);
+
+  const toggleItem = (type: MedicalDataType) => {
+    const current = selectedItems || [];
+    if (current.includes(type)) {
+      setValue(
+        'items',
+        current.filter((item) => item !== type),
+        { shouldValidate: true },
+      );
+    } else {
+      setValue('items', [...current, type], { shouldValidate: true });
+    }
+  };
+
+  // Get today's date in YYYY-MM-DD format for min date
+  const today = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  // Get max date (+1 year) in YYYY-MM-DD format
+  const maxDate = useMemo(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
 
   const inputBase =
     'h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-[#0F8F8B] focus:ring-opacity-20';
@@ -116,17 +180,11 @@ export default function AddAccessRequestForm({
   const labelBase =
     'mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]';
 
-  const [localScope, setLocalScope] = useState<AccessScope | null>(null);
-
-  const handlePickScope = (s: AccessScope) => {
-    setLocalScope(s);
-    setValue('scope', s, { shouldValidate: true });
-  };
-
   const submit = (values: AddAccessRequestValues) => {
     onSubmit?.({
       patientId: values.patientId,
-      scope: values.scope as AccessScope,
+      items: values.items,
+      expiresAt: values.expiresAt || undefined,
       reason: values.reason,
     });
   };
@@ -221,65 +279,97 @@ export default function AddAccessRequestForm({
           </div>
 
           <div>
-            <div className={labelBase}>حدد سياق الطلب</div>
-            <div className='grid grid-cols-1 gap-3'>
+            <div className={labelBase}>نطاق البيانات المطلوبة</div>
+            <div className='grid grid-cols-1 gap-2.5'>
               {(
                 [
+                  'medications',
+                  'lab-results',
+                  'imaging',
+                  'diagnoses',
                   'prescriptions',
-                  'medical-records',
-                  'diagnosis-tests',
-                ] as AccessScope[]
-              ).map((s) => {
-                const meta = scopeCardMeta(s);
-                const active = (scope ?? localScope) === s;
+                  'encounters',
+                  'files',
+                ] as MedicalDataType[]
+              ).map((type) => {
+                const meta = dataTypeMeta(type);
+                const checked = selectedItems.includes(type);
 
                 return (
                   <button
-                    key={s}
+                    key={type}
                     type='button'
-                    onClick={() => handlePickScope(s)}
-                    className={`w-full rounded-[6px] border px-4 py-3 text-right ${active ? meta.border : 'border-[#E5E7EB]'} ${active ? meta.bg : 'bg-white'}`}
+                    onClick={() => toggleItem(type)}
+                    className={`flex w-full items-center justify-between rounded-[6px] border px-4 py-2.5 text-right transition ${
+                      checked
+                        ? 'border-primary bg-[#F0FDFA]'
+                        : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
+                    }`}
                   >
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-start gap-3'>
-                        <div className='flex h-[28px] w-[28px] items-center justify-center rounded-[10px] bg-white'>
-                          {meta.icon}
-                        </div>
-
-                        <div>
-                          <div className='font-cairo text-[12px] font-extrabold text-[#111827]'>
-                            {meta.label}
-                          </div>
-                          <div className='mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                            {meta.subtitle}
-                          </div>
-                        </div>
+                    <div className='flex items-center gap-3'>
+                      <div className='flex h-[28px] w-[28px] items-center justify-center rounded-[8px] bg-white'>
+                        {meta.icon}
                       </div>
 
-                      <div
-                        className={`flex h-[22px] w-[22px] items-center justify-center rounded-full border ${active ? meta.radioBorder : 'border-[#D0D5DD]'} bg-white`}
-                        aria-hidden
-                      >
-                        {active ? (
-                          <span
-                            className={`flex h-[18px] w-[18px] items-center justify-center rounded-full ${s === 'prescriptions' ? 'bg-[#22C55E]' : s === 'diagnosis-tests' ? 'bg-[#A855F7]' : 'bg-primary'}`}
-                          >
-                            <Check className='h-3 w-3 text-white' />
-                          </span>
-                        ) : null}
+                      <div className='text-right'>
+                        <div className='font-cairo text-[12px] font-extrabold text-[#111827]'>
+                          {meta.label}
+                        </div>
+                        <div className='font-cairo text-[10px] font-semibold text-[#98A2B3]'>
+                          {meta.subtitle}
+                        </div>
                       </div>
+                    </div>
+
+                    <div
+                      className={`flex h-[20px] w-[20px] items-center justify-center rounded-[4px] border-2 ${
+                        checked
+                          ? 'border-primary bg-primary'
+                          : 'border-[#D0D5DD] bg-white'
+                      }`}
+                      aria-hidden
+                    >
+                      {checked ? (
+                        <Check className='h-3 w-3 text-white' strokeWidth={3} />
+                      ) : null}
                     </div>
                   </button>
                 );
               })}
             </div>
-            {errors.scope?.message ? (
+            {errors.items?.message ? (
               <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
-                {errors.scope.message}
+                {errors.items.message}
               </div>
             ) : null}
             <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-              هذه الخيارات توضح سبب الطلب داخل الواجهة، بينما طلب الوصول في الباك هو طلب وصول للملف الطبي الكامل.
+              {selectedItems.length === 0
+                ? 'اختر نوع بيانات واحد أو أكثر'
+                : `تم اختيار ${selectedItems.length} من ${7} أنواع`}
+            </div>
+          </div>
+
+          <div>
+            <div className={labelBase}>
+              تاريخ انتهاء الصلاحية{' '}
+              <span className='font-normal text-[#98A2B3]'>(اختياري)</span>
+            </div>
+            <div className='relative'>
+              <input
+                type='date'
+                {...register('expiresAt')}
+                min={today}
+                max={maxDate}
+                className={`${inputBase} cursor-pointer`}
+                placeholder='اختر تاريخ انتهاء الصلاحية...'
+              />
+              <Calendar
+                className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]'
+                aria-hidden
+              />
+            </div>
+            <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+              إذا لم تحدد تاريخاً، سيكون الوصول دائماً (حتى يتم إلغاؤه)
             </div>
           </div>
 

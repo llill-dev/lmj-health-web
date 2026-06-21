@@ -7,10 +7,10 @@ export type GenerateDoctorDocumentBody = {
 };
 
 /** @deprecated استخدم GenerateDoctorDocumentBody */
-export type GenerateOrderDocumentBody = Extract<
-  GenerateDoctorDocumentBody,
-  { sourceType: 'order' | 'imaging_order' }
->;
+export type GenerateOrderDocumentBody = {
+  sourceType: 'order' | 'imaging_order';
+  sourceId: string;
+};
 
 export async function generateDoctorDocumentPdf(
   body: GenerateDoctorDocumentBody,

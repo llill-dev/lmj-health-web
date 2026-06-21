@@ -173,7 +173,9 @@ function mapOrderLineItems(orders: EncounterOrder[]): EncounterWorkspaceLineItem
 
     if (orderItems.length > 0) {
       return orderItems.map((item, itemIndex) => {
-        const { title, subtitle } = resolveOrderItemLine(order, item, category);
+        const { title, subtitle } = category === 'other' 
+          ? { title: resolveEncounterOrderTitle(order), subtitle: undefined }
+          : resolveOrderItemLine(order, item, category);
         return {
           id: item._id ?? `${order._id}-item-${itemIndex}`,
           title,

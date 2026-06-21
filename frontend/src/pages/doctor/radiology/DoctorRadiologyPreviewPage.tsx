@@ -67,7 +67,7 @@ export default function DoctorRadiologyPreviewPage() {
         return;
       }
       const blob = await generateDoctorOrderDocumentPdf({
-        sourceType: 'imaging_order',
+        sourceType: 'imaging_order' as const,
         sourceId: orderId,
       });
       openPdfBlobInNewTab(blob, `imaging-order-${orderId}.pdf`);

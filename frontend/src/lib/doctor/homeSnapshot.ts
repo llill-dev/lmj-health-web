@@ -1,4 +1,5 @@
 import { get } from '@/lib/api';
+import { doctorEndpoints } from '@/lib/doctor/endpoints';
 
 export type DoctorHomeSnapshotCounts = {
   appointments?: number;
@@ -35,7 +36,7 @@ export type DoctorHomeSnapshotResponse = {
 
 export const doctorHomeApi = {
   getSnapshot: () =>
-    get<DoctorHomeSnapshotResponse>('/api/doctors/home/snapshot', {
+    get<DoctorHomeSnapshotResponse>(doctorEndpoints.home.snapshot, {
       locale: 'ar',
     }),
 };

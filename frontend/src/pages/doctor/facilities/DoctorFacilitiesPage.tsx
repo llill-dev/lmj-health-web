@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Loader2, Plus } from "lucide-react";
+import { Building2, Lightbulb, Loader2, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
@@ -14,9 +14,11 @@ import {
   FacilitiesTable,
   FacilityEmptyState,
   FacilityFormDialog,
+  SuggestFacilityDialog,
 } from "@/components/doctor/facilities";
+import type { SuggestFacilityPayload } from "@/components/doctor/facilities/suggest-facility-dialog";
 import { useToast } from "@/components/ui/ToastProvider";
-import { useDoctorFacility, useDoctorFacilityTypes } from "@/hooks";
+import { useDoctorFacility, useDoctorFacilityTypes, useSuggestFacility } from "@/hooks";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { getDoctorFacilitySaveErrorToast } from "@/lib/doctor/facilities/errors";
@@ -30,6 +32,7 @@ export default function DoctorFacilitiesPage() {
   const { toast } = useToast();
   const { facility, facilityQuery, saveMutation, isAwaitingData } =
     useDoctorFacility();
+  const { suggestMutation } = useSuggestFacility();
   const typesQuery = useDoctorFacilityTypes();
   const { retry: retryFacility, retrying: retryingFacility } = useRetryAction(
     () => facilityQuery.refetch(),
@@ -39,6 +42,7 @@ export default function DoctorFacilitiesPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [suggestDialogOpen, setSuggestDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
   const [editTarget, setEditTarget] = useState<DoctorFacility | null>(null);
 
@@ -129,6 +133,31 @@ export default function DoctorFacilitiesPage() {
     }
   };
 
+  const handleSuggestSubmit = async (values: SuggestFacilityPayload) => {
+    try {
+      await suggestMutation.mutateAsync({
+        name: values.name,
+        city: values.city,
+        facilityType: values.facilityType,
+        kind: values.facilityType,
+        address: values.address,
+        phone: values.phone,
+        description: values.description,
+      });
+
+      toast("تم إرسال اقتراح المنشأة للمراجعة. سنقوم بإضافتها قريباً.", {
+        title: "تم الإرسال",
+        variant: "success",
+      });
+      setSuggestDialogOpen(false);
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "فشل الإرسال",
+        variant: "error",
+      });
+    }
+  };
+
   if (isAwaitingFacility) {
     return (
       <>
@@ -176,15 +205,26 @@ export default function DoctorFacilitiesPage() {
           title="المنشآت"
           icon={<Building2 className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
           action={
-            <button
-              type="button"
-              onClick={openCreate}
-              disabled={!canCreate || saveMutation.isPending}
-              className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              إضافة منشأة
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSuggestDialogOpen(true)}
+                disabled={suggestMutation.isPending}
+                className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-[#FEF6EE] bg-[#FEF6EE] px-4 font-cairo text-[13px] font-extrabold text-[#F79009] shadow-sm transition hover:border-[#F79009]/30 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Lightbulb className="h-4 w-4" aria-hidden />
+                اقتراح منشأة
+              </button>
+              <button
+                type="button"
+                onClick={openCreate}
+                disabled={!canCreate || saveMutation.isPending}
+                className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+                إضافة منشأة
+              </button>
+            </div>
           }
         />
 
@@ -230,6 +270,16 @@ export default function DoctorFacilitiesPage() {
             if (!saveMutation.isPending) setDialogOpen(false);
           }}
           onSubmit={handleSubmit}
+        />
+
+        <SuggestFacilityDialog
+          open={suggestDialogOpen}
+          typeOptions={typeOptions}
+          submitting={suggestMutation.isPending}
+          onClose={() => {
+            if (!suggestMutation.isPending) setSuggestDialogOpen(false);
+          }}
+          onSubmit={handleSuggestSubmit}
         />
       </div>
     </>

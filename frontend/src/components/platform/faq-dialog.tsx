@@ -12,11 +12,11 @@ export function FaqDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const { items, isLoading } = usePlatformFaqContent('ar');
+  const { items, isAwaitingData } = usePlatformFaqContent('ar');
 
   return (
     <PlatformModalShell open={open} onClose={onClose} title="الأسئلة الشائعة">
-      {isLoading ? (
+      {isAwaitingData ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>

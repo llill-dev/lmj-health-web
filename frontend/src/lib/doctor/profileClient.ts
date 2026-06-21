@@ -1,4 +1,5 @@
 import { get, patch } from '@/lib/api';
+import { doctorEndpoints } from '@/lib/doctor/endpoints';
 
 export type DoctorConsultationType = 'online' | 'offline';
 
@@ -86,7 +87,7 @@ function appendConsultationTypes(
 
 export const doctorProfileApi = {
   getProfile: () =>
-    get<DoctorProfileResponse>('/api/doctors/me/profile', { locale: 'ar' }),
+    get<DoctorProfileResponse>(doctorEndpoints.me.profile, { locale: 'ar' }),
 
   patchProfile: (input: DoctorProfilePatchInput) => {
     const form = new FormData();
@@ -106,7 +107,7 @@ export const doctorProfileApi = {
     if (input.photo) {
       form.append('photo', input.photo);
     }
-    return patch<DoctorProfileResponse>('/api/doctors/me/profile', form, {
+    return patch<DoctorProfileResponse>(doctorEndpoints.me.profile, form, {
       locale: 'ar',
     });
   },

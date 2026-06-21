@@ -300,8 +300,13 @@ export const doctorEndpoints = {
   },
   /** GET — internal staff directory (doctor / secretary). API-3 */
   internalDirectory: '/api/doctors/internal/directory',
+  home: {
+    snapshot: '/api/doctors/home/snapshot',
+  },
   me: {
     activityLog: '/api/doctors/me/activity-log',
     facility: '/api/doctors/me/facility',
+    profile: '/api/doctors/me/profile',
+    profileChangeRequests: '/api/doctors/me/profile-change-requests',
   },
 } as const;

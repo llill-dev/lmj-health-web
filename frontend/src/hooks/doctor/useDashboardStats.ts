@@ -55,14 +55,11 @@ export function useDashboardStats() {
     queryFn: async () => {
       const today = new Date().toISOString().slice(0, 10);
       const [summary, todaySlice] = await Promise.all([
-        get<DoctorActivitySummaryResponse>(doctorEndpoints.analytics.summary, {
+        get<DoctorActivitySummaryResponse>(`${doctorEndpoints.analytics.summary}?range=month`, {
           locale: 'ar',
-          range: 'month',
         }),
-        get<DoctorActivitySummaryResponse>(doctorEndpoints.analytics.summary, {
+        get<DoctorActivitySummaryResponse>(`${doctorEndpoints.analytics.summary}?from=${today}&to=${today}`, {
           locale: 'ar',
-          from: today,
-          to: today,
         }).catch(() => null),
       ]);
 

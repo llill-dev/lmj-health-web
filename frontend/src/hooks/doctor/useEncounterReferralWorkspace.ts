@@ -201,7 +201,7 @@ export function useEncounterReferralWorkspace(
     order: orderQuery.data,
     form,
     setForm,
-    statusLabel: resolveEncounterOrderStatusLabel(orderQuery.data ?? {}),
+    statusLabel: orderQuery.data ? resolveEncounterOrderStatusLabel(orderQuery.data) : '',
     isAwaitingData,
     isError: encounterQuery.isError || orderQuery.isError,
     error: encounterQuery.error ?? orderQuery.error,

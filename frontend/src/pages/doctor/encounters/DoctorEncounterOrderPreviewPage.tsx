@@ -67,7 +67,7 @@ export default function DoctorEncounterOrderPreviewPage({
         return;
       }
       const blob = await generateDoctorOrderDocumentPdf({
-        sourceType: preview.config.pdfSourceType,
+        sourceType: preview.config.pdfSourceType as 'order' | 'imaging_order',
         sourceId: preview.previewVm.orderId,
       });
       openPdfBlobInNewTab(blob, `${preview.config.title}.pdf`);

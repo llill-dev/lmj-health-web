@@ -1,13 +1,14 @@
-import { Activity, CheckCircle2, Clock } from 'lucide-react';
+import { Activity, Ban, CheckCircle2, Clock } from 'lucide-react';
 import { LayoutGroup, motion } from 'framer-motion';
 import { cn } from '@/lib/utils/utils';
 
-export type ConsultationStatusTab = 'waiting' | 'in_progress' | 'closed';
+export type ConsultationStatusTab = 'waiting' | 'in_progress' | 'closed' | 'dismissed';
 
 type TabCounts = {
   waiting: number;
   in_progress: number;
   closed: number;
+  dismissed: number;
 };
 
 const TABS: {
@@ -18,6 +19,7 @@ const TABS: {
   { id: 'waiting', label: 'جديدة', icon: Clock },
   { id: 'in_progress', label: 'نشطة', icon: Activity },
   { id: 'closed', label: 'مغلقة', icon: CheckCircle2 },
+  { id: 'dismissed', label: 'مرفوضة', icon: Ban },
 ];
 
 export function ConsultationsStatusTabs({
@@ -36,7 +38,7 @@ export function ConsultationsStatusTabs({
       <div
         role="tablist"
         aria-label="تصفية حالة الاستشارة"
-        className="relative grid grid-cols-3 gap-1 rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] p-1"
+        className="relative grid grid-cols-4 gap-1 rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] p-1"
       >
         {TABS.map((tab) => {
           const active = value === tab.id;

@@ -12,14 +12,13 @@ function formatPrescriptionCode(prescriptionId: string) {
 function formatPatientMeta(
   encounter?: DoctorEncounterSummary | null,
   publicProfile?: {
-    user?: { dateOfBirth?: string; phone?: string };
+    user?: { dateOfBirth?: string; phone?: string; fullName?: string };
     dateOfBirth?: string;
   } | null,
 ) {
   const dob =
     encounter?.patient?.dateOfBirth ??
     encounter?.patient?.user?.dateOfBirth ??
-    publicProfile?.user?.dateOfBirth ??
     publicProfile?.dateOfBirth;
   let ageLabel = '—';
   if (dob) {
@@ -43,7 +42,7 @@ export function mapPrescriptionPreviewVm({
   prescription: EncounterPrescriptionRecord;
   encounter?: DoctorEncounterSummary | null;
   publicProfile?: {
-    user?: { fullName?: string; phone?: string; dateOfBirth?: string };
+    user?: { fullName?: string; dateOfBirth?: string };
     dateOfBirth?: string;
   } | null;
   doctorName: string;
@@ -54,10 +53,7 @@ export function mapPrescriptionPreviewVm({
     publicProfile?.user?.fullName?.trim() ??
     '—';
 
-  const patientPhone =
-    publicProfile?.user?.phone?.trim() ??
-    encounter?.patient?.user?.phone?.trim() ??
-    '—';
+  const patientPhone = '—';
 
   const medications = (prescription.items ?? []).map((item, index) => {
     const instructions =

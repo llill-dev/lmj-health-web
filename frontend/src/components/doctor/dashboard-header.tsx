@@ -1,8 +1,10 @@
 'use client';
 
-import { Bell, MessageCircle } from 'lucide-react';
+import { Bell, MessageCircle, Loader2 } from 'lucide-react';
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/useDoctorNotifications';
 
 function greetingWord(): string {
   const h = new Date().getHours();
@@ -33,6 +35,10 @@ export default function DashboardHeader({
   subtitle?: string;
 }) {
   const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
+  
+  const { data: unreadTotal, isAwaitingData: unreadAwaiting } =
+    useDoctorUnreadNotificationCount();
 
   const displayName = useMemo(() => {
     if (subtitleProp?.trim()) return subtitleProp.trim();
@@ -61,6 +67,17 @@ export default function DashboardHeader({
   );
 
   const greeting = greetingWord();
+
+  const unreadBadge =
+    typeof unreadTotal === 'number' && unreadTotal > 0
+      ? unreadTotal > 99
+        ? '99+'
+        : String(unreadTotal)
+      : null;
+
+  const handleNotificationsClick = () => {
+    navigate('/doctor/notification');
+  };
 
   return (
     <header
@@ -129,10 +146,21 @@ export default function DashboardHeader({
             <div className='flex shrink-0 items-center gap-2 border-r border-[#e2e8f0]/80 pr-3 sm:gap-2.5 sm:pr-4'>
               <button
                 type='button'
-                className='flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]'
+                onClick={handleNotificationsClick}
+                className='relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]'
                 aria-label='الإشعارات'
+                title='الإشعارات'
               >
                 <Bell className='h-[17px] w-[17px]' strokeWidth={2.25} />
+                {unreadAwaiting ? (
+                  <span className='absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100'>
+                    <Loader2 className='h-3 w-3 animate-spin text-gray-500' aria-hidden />
+                  </span>
+                ) : unreadBadge ? (
+                  <span className='absolute -left-1 -top-1 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-cairo text-[10px] font-bold text-white shadow-md'>
+                    {unreadBadge}
+                  </span>
+                ) : null}
               </button>
               <button
                 type='button'

@@ -45,7 +45,7 @@ function patchDoctorDetails(
   const patchedDoctor = markAdminDoctorOffboarded(doctor);
   if (root.doctor) return { ...root, doctor: patchedDoctor };
   if (root.data?.doctor) {
-    return { ...root, data: { ...root.data, doctor: patchedDoctor } };
+    return { ...root, data: { ...root.data, doctor: patchedDoctor } } as AdminDoctorDetailsResponse;
   }
 
   return data;

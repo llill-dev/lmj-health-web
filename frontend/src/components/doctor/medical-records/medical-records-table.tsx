@@ -1,4 +1,4 @@
-import { Calendar, ChevronLeft, Plus } from 'lucide-react';
+import { Calendar, ChevronLeft, Plus, Edit2, FileDown } from 'lucide-react';
 import type { MedicalRecordRowVm } from './map-doctor-medical-records';
 import { MedicalRecordStatusBadge } from './medical-record-status-badge';
 import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
@@ -20,11 +20,15 @@ const tdClass = 'px-4 py-4 text-center align-middle';
 export function MedicalRecordsTable({
   rows,
   onOpenDetails,
+  onEdit,
+  onDownloadPdf,
   onAddNew,
   isFiltered = false,
 }: {
   rows: MedicalRecordRowVm[];
   onOpenDetails: (row: MedicalRecordRowVm) => void;
+  onEdit?: (row: MedicalRecordRowVm) => void;
+  onDownloadPdf?: (row: MedicalRecordRowVm) => void;
   onAddNew?: () => void;
   isFiltered?: boolean;
 }) {
@@ -115,14 +119,38 @@ export function MedicalRecordsTable({
                   />
                 </td>
                 <td className={tdClass}>
-                  <button
-                    type="button"
-                    onClick={() => onOpenDetails(row)}
-                    className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-primary/80"
-                  >
-                    <span>عرض التفاصيل</span>
-                    <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
-                  </button>
+                  <div className="flex items-center justify-center gap-3">
+                    {onDownloadPdf && (
+                      <button
+                        type="button"
+                        onClick={() => onDownloadPdf(row)}
+                        className="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 font-cairo text-[12px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDFA]"
+                        title="تحميل PDF"
+                      >
+                        <FileDown className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        <span>PDF</span>
+                      </button>
+                    )}
+                    {onEdit && (
+                      <button
+                        type="button"
+                        onClick={() => onEdit(row)}
+                        className="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 font-cairo text-[12px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDFA]"
+                        title="تعديل السجل"
+                      >
+                        <Edit2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        <span>تعديل</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onOpenDetails(row)}
+                      className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-primary/80"
+                    >
+                      <span>عرض التفاصيل</span>
+                      <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

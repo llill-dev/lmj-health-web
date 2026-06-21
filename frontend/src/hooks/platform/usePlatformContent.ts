@@ -154,7 +154,7 @@ export function usePlatformTermsContent(language: PlatformContentLanguage = 'ar'
 
 export function usePlatformPrivacyContent(language: PlatformContentLanguage = 'ar') {
   return usePlatformLegalContent(
-    'privacy',
+    'privacy-policy',
     mapContentToLegalDocument({
       id: PRIVACY_POLICY.id,
       type: 'SETTINGS_PAGE',
@@ -170,7 +170,7 @@ export function usePlatformPrivacyContent(language: PlatformContentLanguage = 'a
 
 export function usePlatformUsageContent(language: PlatformContentLanguage = 'ar') {
   return usePlatformLegalContent(
-    'usage',
+    'medical-policy',
     mapContentToLegalDocument({
       id: USAGE_POLICY.id,
       type: 'SETTINGS_PAGE',
@@ -186,7 +186,7 @@ export function usePlatformUsageContent(language: PlatformContentLanguage = 'ar'
 
 export function usePlatformAboutContent(language: PlatformContentLanguage = 'ar') {
   const { data, isAwaitingData } = usePlatformContentBySettingsKey(
-    'about',
+    'about-app',
     language,
   );
 
@@ -202,7 +202,7 @@ export function usePlatformAboutContent(language: PlatformContentLanguage = 'ar'
 
 export function usePlatformContactContent(language: PlatformContentLanguage = 'ar') {
   const { data, isAwaitingData } = usePlatformContentBySettingsKey(
-    'contact',
+    'contact-us',
     language,
   );
 

@@ -28,6 +28,8 @@ const DEFAULT_FILTERS = {
   status: 'open' as const,
   dateFrom: '',
   dateTo: '',
+  sortBy: 'startedAt' as const,
+  sortOrder: 'desc' as const,
 };
 
 function RadiologyVisitCardRow({

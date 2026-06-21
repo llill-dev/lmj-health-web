@@ -73,6 +73,7 @@ type Consultation = UiConsultationListItem;
 function tabToApiStatus(tab: ConsultationStatusTab): ConsultationTicketStatus {
   if (tab === 'waiting') return 'pending';
   if (tab === 'in_progress') return 'active';
+  if (tab === 'dismissed') return 'dismissed';
   return 'closed';
 }
 
@@ -141,6 +142,7 @@ export default function DoctorOnlineConsultationsPage() {
         new: counts.pending ?? 0,
         active: counts.active ?? 0,
         closed: counts.closed ?? 0,
+        dismissed: counts.dismissed ?? 0,
         loading: overviewAwaitingData,
       };
     }
@@ -148,6 +150,7 @@ export default function DoctorOnlineConsultationsPage() {
       new: tickets.filter((t) => t.status === 'pending').length,
       active: tickets.filter((t) => t.status === 'active').length,
       closed: tickets.filter((t) => t.status === 'closed').length,
+      dismissed: tickets.filter((t) => t.status === 'dismissed').length,
       loading: overviewAwaitingData,
     };
   }, [overviewQuery.data?.counts, overviewQuery.data?.tickets, overviewAwaitingData]);
@@ -253,8 +256,9 @@ export default function DoctorOnlineConsultationsPage() {
       waiting: overviewStats.new,
       in_progress: overviewStats.active,
       closed: overviewStats.closed,
+      dismissed: overviewStats.dismissed,
     }),
-    [overviewStats.active, overviewStats.closed, overviewStats.new],
+    [overviewStats.active, overviewStats.closed, overviewStats.new, overviewStats.dismissed],
   );
 
   const canReply =

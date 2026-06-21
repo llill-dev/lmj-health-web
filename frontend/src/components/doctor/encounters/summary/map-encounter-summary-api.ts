@@ -18,7 +18,7 @@ export type EncounterSummaryApiSources = {
   encounter?: DoctorEncounterSummary | null;
   profile?: DoctorPatientFullProfile | null;
   publicProfile?: DoctorPatientPublicProfile | null;
-  prescriptions?: EncounterPrescription[];
+  prescriptions?: EncounterPrescriptionRecord[];
   orders?: EncounterOrder[];
   medicalRecords?: DoctorPatientMedicalRecord[];
 };
@@ -37,9 +37,7 @@ function formatAgeFromProfile(
   }
   const dob =
     profile?.dateOfBirth ??
-    profile?.user?.dateOfBirth ??
-    encounter?.patient?.dateOfBirth ??
-    encounter?.patient?.user?.dateOfBirth;
+    encounter?.patient?.dateOfBirth;
   if (!dob) return '—';
   const birth = new Date(dob);
   if (Number.isNaN(birth.getTime())) return '—';

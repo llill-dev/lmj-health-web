@@ -308,11 +308,8 @@ export function mapUiItemToOrderItemBody(
         notes: item.notes?.trim() || undefined,
       }),
       details: {
-        displayName: title,
         type: modality || undefined,
-        modality: modality || undefined,
         bodyArea: bodyArea || undefined,
-        bodyPart: bodyArea || undefined,
         side: item.side?.trim() || undefined,
         position: item.position?.trim() || undefined,
         category: item.category?.trim() || undefined,

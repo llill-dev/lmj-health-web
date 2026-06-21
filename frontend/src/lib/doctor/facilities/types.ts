@@ -20,11 +20,11 @@ export type DoctorFacility = {
 export type DoctorFacilityFormValues = {
   name: string;
   facilityType: FacilityType;
-  description: string;
+  description?: string;
   city: string;
   address: string;
   phone: string;
-  email: string;
+  email?: string;
   workHoursFrom: string;
   workHoursTo: string;
 };

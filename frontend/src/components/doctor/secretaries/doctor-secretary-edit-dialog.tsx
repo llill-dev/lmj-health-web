@@ -92,7 +92,7 @@ function DoctorSecretaryEditForm({
     field: K,
     value: DoctorSecretaryEditFormValues[K],
   ) => {
-    setValue(field, value, { shouldDirty: true });
+    setValue(field, value as any, { shouldDirty: true });
     clearErrors(field);
   };
 

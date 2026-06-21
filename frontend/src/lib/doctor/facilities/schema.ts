@@ -22,7 +22,7 @@ export const doctorFacilityFormSchema = z
       .min(2, 'اسم المنشأة مطلوب (حرفان على الأقل)')
       .max(120, 'اسم المنشأة طويل جداً'),
     facilityType: z.enum(facilityTypeValues, {
-      errorMap: () => ({ message: 'نوع المنشأة مطلوب' }),
+      message: 'نوع المنشأة مطلوب',
     }),
     description: z
       .string()

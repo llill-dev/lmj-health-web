@@ -38,10 +38,10 @@ export default function ResetPasswordVerifyPage() {
           await authApi.resendResetOtp(body);
         }}
         onVerify={async (otp) => {
-          const body =
+          const body: { email: string; otp: string; phone?: never } | { phone: string; otp: string; email?: never } =
             pending.channel === 'email'
-              ? { email: pending.email!, otp }
-              : { phone: pending.phone!, otp };
+              ? { email: pending.email!, otp, phone: undefined as never }
+              : { phone: pending.phone!, otp, email: undefined as never };
 
           const response = await authApi.verifyResetOtp(body);
 

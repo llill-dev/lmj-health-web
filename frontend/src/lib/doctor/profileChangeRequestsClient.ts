@@ -1,4 +1,5 @@
 import { get, post } from '@/lib/api';
+import { doctorEndpoints } from '@/lib/doctor/endpoints';
 
 export type DoctorProfileChangeField =
   | 'medicalLicenseNumber'
@@ -57,14 +58,14 @@ export const doctorProfileChangeRequestsApi = {
     if (params?.limit) search.set('limit', String(params.limit));
     const qs = search.toString();
     return get<DoctorProfileChangeRequestsListResponse>(
-      `/api/doctors/me/profile-change-requests${qs ? `?${qs}` : ''}`,
+      `${doctorEndpoints.me.profileChangeRequests}${qs ? `?${qs}` : ''}`,
       { locale: 'ar' },
     );
   },
 
   submit: (input: DoctorProfileChangeRequestInput) =>
     post<DoctorProfileChangeRequestResponse>(
-      '/api/doctors/me/profile-change-requests',
+      doctorEndpoints.me.profileChangeRequests,
       input,
       { locale: 'ar' },
     ),

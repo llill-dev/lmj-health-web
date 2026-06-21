@@ -4,6 +4,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layout/sidebar';
 import DashboardHeader from '@/components/doctor/dashboard-header';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import DoctorInboxToastBridge from '@/components/doctor/DoctorInboxToastBridge';
 import { useToast } from '@/components/ui/ToastProvider';
 import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
 import { readAuthUser } from '@/lib/cookies';
@@ -57,6 +58,7 @@ export default function DoctorLayout() {
 
   return (
     <div className='h-screen overflow-hidden bg-white scrollbar-hide'>
+      <DoctorInboxToastBridge />
       <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
         <Sidebar
           active={active}

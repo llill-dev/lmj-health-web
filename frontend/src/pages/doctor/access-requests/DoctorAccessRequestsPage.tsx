@@ -235,6 +235,8 @@ export default function DoctorAccessRequestsPage() {
                       patientId: payload.patientId,
                       body: {
                         reason: payload.reason,
+                        items: payload.items.map((type) => ({ type })),
+                        expiresAt: payload.expiresAt || undefined,
                       },
                     });
                     toast('تم إرسال طلب الوصول بنجاح', {
@@ -242,6 +244,7 @@ export default function DoctorAccessRequestsPage() {
                       variant: 'success',
                     });
                     setMode('list');
+                    void listQuery.refetch();
                   } catch (error) {
                     toast(getUserFacingRequestErrorMessage(error), {
                       title: 'فشلت العملية',

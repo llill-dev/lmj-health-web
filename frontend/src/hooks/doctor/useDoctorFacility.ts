@@ -29,14 +29,16 @@ async function resolveFacilityFromResponse(
 
   const refreshed = await doctorFacilityApi.get();
   const refreshedRecord = parseDoctorFacilityRecordFromResponse(refreshed);
-  return mapApiFacilityToDoctorFacility(refreshedRecord ?? {});
+  if (!refreshedRecord) throw new Error('facility_record_null');
+  return mapApiFacilityToDoctorFacility(refreshedRecord);
 }
 
 async function fetchOwnedFacility() {
   try {
     const response = await doctorFacilityApi.get();
     const record = parseDoctorFacilityRecordFromResponse(response);
-    return mapApiFacilityToDoctorFacility(record ?? {});
+    if (!record) return null;
+    return mapApiFacilityToDoctorFacility(record);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
@@ -115,5 +117,21 @@ export function useDoctorFacility() {
       facilityQuery.data,
       facilityQuery.isError,
     ),
+  };
+}
+
+export function useSuggestFacility() {
+  const queryClient = useQueryClient();
+
+  const suggestMutation = useMutation({
+    mutationFn: (body: Parameters<typeof doctorFacilityApi.createRequest>[0]) =>
+      doctorFacilityApi.createRequest(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: DOCTOR_FACILITY_KEYS.all });
+    },
+  });
+
+  return {
+    suggestMutation,
   };
 }

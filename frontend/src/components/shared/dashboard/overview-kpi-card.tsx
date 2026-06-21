@@ -8,7 +8,8 @@ export type OverviewKpiCardVariant =
   | 'medical-records'
   | 'encounters'
   | 'consultations'
-  | 'admin';
+  | 'admin'
+  | 'doctor';
 
 export default function OverviewKpiCard({
   variant: _variant,

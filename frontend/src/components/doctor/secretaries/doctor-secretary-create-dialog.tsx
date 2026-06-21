@@ -13,17 +13,20 @@ import { useToast } from '@/components/ui/ToastProvider';
 import {
   DEFAULT_SECRETARY_CREATE_FORM,
   doctorSecretaryCreateFormSchema,
+  MAX_DOCTOR_SECRETARIES,
   type DoctorSecretaryCreateFormValues,
 } from '@/lib/doctor/secretaries/schema';
 
 export function DoctorSecretaryCreateDialog({
   open,
   saving,
+  secretaryCount = 0,
   onClose,
   onSave,
 }: {
   open: boolean;
   saving?: boolean;
+  secretaryCount?: number;
   onClose: () => void;
   onSave: (input: DoctorSecretaryCreateFormValues) => Promise<void> | void;
 }) {
@@ -45,6 +48,7 @@ export function DoctorSecretaryCreateDialog({
 
   const values = watch();
   const fieldErrors = toSecretaryFormFieldErrors(errors);
+  const atSecretaryLimit = secretaryCount >= MAX_DOCTOR_SECRETARIES;
 
   const closeDialog = () => {
     reset(DEFAULT_SECRETARY_CREATE_FORM);
@@ -56,7 +60,7 @@ export function DoctorSecretaryCreateDialog({
     field: K,
     value: DoctorSecretaryCreateFormValues[K],
   ) => {
-    setValue(field, value, { shouldDirty: true });
+    setValue(field, value as any, { shouldDirty: true });
     clearErrors(field);
   };
 
@@ -85,6 +89,16 @@ export function DoctorSecretaryCreateDialog({
       title="إضافة سكرتير"
       maxWidthClass="max-w-[640px]"
     >
+      {atSecretaryLimit ? (
+        <div
+          className="mb-4 rounded-[8px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B42318]"
+          role="alert"
+        >
+          لقد وصلت للحد الأقصى ({MAX_DOCTOR_SECRETARIES} سكرتيرين). ألغِ ربط
+          سكرتير حالي لإضافة حساب جديد.
+        </div>
+      ) : null}
+
       <DoctorSecretaryFormFields
         mode="create"
         fullName={values.fullName}
@@ -106,9 +120,14 @@ export function DoctorSecretaryCreateDialog({
 
       <button
         type="button"
-        disabled={saving}
+        disabled={saving || atSecretaryLimit}
+        title={
+          atSecretaryLimit
+            ? `الحد الأقصى ${MAX_DOCTOR_SECRETARIES} سكرتيرين`
+            : undefined
+        }
         onClick={() => void submit()}
-        className="mt-4 flex h-[48px] w-full items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
+        className="mt-4 flex h-[48px] w-full items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         {saving ? 'جاري الإنشاء...' : 'إنشاء السكرتير'}
       </button>

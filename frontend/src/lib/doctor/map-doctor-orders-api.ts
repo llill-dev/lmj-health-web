@@ -81,7 +81,7 @@ export function normalizeDoctorOrderFromApi(raw: unknown): DoctorOrderRecord | n
   const id = pickString(row._id, row.id, row.orderId);
   if (!id) return null;
 
-  const patientId = pickString(row.patientId, row.patient?._id);
+  const patientId = pickString(row.patientId, asRecord(row.patient)?._id as string | undefined);
   const statusFields = extractOrderStatusFieldsFromApi(row);
   const resultsRaw = Array.isArray(row.results) ? row.results : [];
   const attachmentsRaw = Array.isArray(row.attachments) ? row.attachments : [];

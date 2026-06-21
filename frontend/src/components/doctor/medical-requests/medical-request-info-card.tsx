@@ -1,4 +1,5 @@
 import { Calendar } from 'lucide-react';
+import type { ReactNode } from 'react';
 import type { MedicalRequestDetailVm } from './map-doctor-medical-requests';
 
 export function MedicalRequestInfoCard({
@@ -6,7 +7,7 @@ export function MedicalRequestInfoCard({
   subtitle,
 }: {
   vm: MedicalRequestDetailVm;
-  subtitle?: string;
+  subtitle?: ReactNode;
 }) {
   return (
     <div className="rounded-[8px] bg-[#E6F4F3] px-4 py-4">

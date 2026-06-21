@@ -31,6 +31,7 @@ import type {
   DoctorSecretaryCreateFormValues,
   DoctorSecretaryEditFormValues,
 } from '@/lib/doctor/secretaries/schema';
+import { MAX_DOCTOR_SECRETARIES } from '@/lib/doctor/secretaries/schema';
 import type {
   DoctorSecretary,
   SecretaryStatusFilter,
@@ -45,7 +46,7 @@ const STATUS_TABS: Array<{ id: SecretaryStatusFilter; label: string }> = [
   { id: 'disabled', label: 'المعطلة' },
 ];
 
-const MAX_SECRETARIES = 3;
+const MAX_SECRETARIES = MAX_DOCTOR_SECRETARIES;
 
 export default function DoctorSecretariesPage() {
   const { toast } = useToast();
@@ -311,6 +312,7 @@ export default function DoctorSecretariesPage() {
         <DoctorSecretaryCreateDialog
           open={createOpen}
           saving={createSecretary.isPending}
+          secretaryCount={listQuery.secretaries.length}
           onClose={() => setCreateOpen(false)}
           onSave={handleCreate}
         />

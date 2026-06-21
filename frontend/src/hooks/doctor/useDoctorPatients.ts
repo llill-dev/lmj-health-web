@@ -244,7 +244,7 @@ export function useLinkDoctorPatient(doctorId: string) {
         queryKey: doctorPatientsQueryKeys.fullProfile(doctorId, patientId),
       });
       queryClient.invalidateQueries({
-        queryKey: doctorPatientsQueryKeys.public(patientId),
+        queryKey: doctorPatientsQueryKeys.publicProfile(patientId),
       });
     },
   });

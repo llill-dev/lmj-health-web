@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Activity, CheckCircle, FileText, Files, X } from "lucide-react";
+import { Activity, CheckCircle, FileDown, FileText, Files, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
@@ -28,6 +28,7 @@ import { readAuthUser } from "@/lib/cookies";
 import { useToast } from "@/components/ui/ToastProvider";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { generateDoctorDocumentPdf, openPdfBlobInNewTab } from "@/lib/doctor/doctorOrderDocuments";
 
 function formatArabicDate(value?: string | null) {
   if (!value) return "غير محدد";
@@ -132,6 +133,36 @@ export default function DoctorMedicalRecordsPage() {
     setSelectedPatientId(row.patientId);
     setSelectedRecordId(row.id);
     setDetailsOpen(true);
+  };
+
+  const openEdit = (row: MedicalRecordRowVm) => {
+    setSelectedPatientId(row.patientId);
+    setSelectedRecordId(row.id);
+    setMode('edit');
+  };
+
+  const handleDownloadPdf = async (row: MedicalRecordRowVm) => {
+    try {
+      toast("جارٍ إنشاء ملف PDF...", {
+        title: "تحميل التقرير",
+        variant: "info",
+      });
+      const blob = await generateDoctorDocumentPdf({
+        sourceType: "diagnosis",
+        sourceId: row.id,
+      });
+      const filename = `medical-record-${row.systemId}-${row.id.slice(-6)}.pdf`;
+      openPdfBlobInNewTab(blob, filename);
+      toast("تم إنشاء ملف PDF بنجاح", {
+        title: "نجح التحميل",
+        variant: "success",
+      });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: "فشل إنشاء ملف PDF",
+        variant: "error",
+      });
+    }
   };
 
   return (
@@ -326,6 +357,8 @@ export default function DoctorMedicalRecordsPage() {
                     <MedicalRecordsTable
                       rows={list.rows}
                       onOpenDetails={openDetails}
+                      onEdit={openEdit}
+                      onDownloadPdf={handleDownloadPdf}
                       onAddNew={() => {
                         setMode('create');
                         setSelectedPatientId('');

@@ -8,6 +8,8 @@ import { Helmet } from 'react-helmet-async';
 
 import { useNavigate } from 'react-router-dom';
 
+import { motion } from 'framer-motion';
+
 import {
 
   CalendarClock,
@@ -15,6 +17,8 @@ import {
   CheckCircle,
 
   Hourglass,
+
+  Lightbulb,
 
   Phone,
 
@@ -41,6 +45,8 @@ import { WaitlistBookDialog } from '@/components/doctor/waitlist/waitlist-book-d
 import { WaitlistTable } from '@/components/doctor/waitlist/waitlist-table';
 
 import { WaitlistToolbar } from '@/components/doctor/waitlist/waitlist-toolbar';
+
+import WaitlistSuggestionsDialog from '@/components/doctor/waitlist/waitlist-suggestions-dialog';
 
 import { useToast } from '@/components/ui/ToastProvider';
 
@@ -159,6 +165,8 @@ export default function DoctorWaitlistPage() {
 
 
   const [bookTarget, setBookTarget] = useState<WaitlistRequest | null>(null);
+
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
 
 
@@ -378,22 +386,45 @@ export default function DoctorWaitlistPage() {
 
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white p-5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6">
 
-          <WaitlistToolbar
+          <div className="flex items-center justify-between gap-4 mb-4" dir="rtl">
 
-            search={search}
+            <div className="flex-1">
 
-            onSearchChange={setSearch}
+              <WaitlistToolbar
 
-            onClear={() => {
-              setSearch('');
-              setStatusTab('active');
-            }}
+                search={search}
 
-            statusTab={statusTab}
+                onSearchChange={setSearch}
 
-            onStatusTabChange={setStatusTab}
+                onClear={() => {
+                  setSearch('');
+                  setStatusTab('active');
+                }}
 
-          />
+                statusTab={statusTab}
+
+                onStatusTabChange={setStatusTab}
+
+              />
+
+            </div>
+
+            <motion.button
+              type="button"
+              onClick={() => setSuggestionsOpen(true)}
+              className="flex h-[44px] items-center gap-2 rounded-[6px] border border-[#FDB022] bg-[#FFFAEB] px-4 font-cairo text-[13px] font-extrabold text-[#F79009] shadow-sm transition hover:bg-[#FEF6EE]"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.12, ease: 'easeOut' }}
+            >
+
+              <span>اقتراحات المواعيد</span>
+
+              <Lightbulb className="h-4 w-4" />
+
+            </motion.button>
+
+          </div>
 
 
 
@@ -512,6 +543,13 @@ export default function DoctorWaitlistPage() {
         ) : null}
 
       </div>
+
+
+
+      <WaitlistSuggestionsDialog
+        open={suggestionsOpen}
+        onClose={() => setSuggestionsOpen(false)}
+      />
 
 
 

@@ -9,8 +9,10 @@ import { ASSIGNABLE_SECRETARY_PERMISSIONS } from '@/lib/doctor/secretaries/permi
 
 const assignablePermissionSet = new Set<string>(ASSIGNABLE_SECRETARY_PERMISSIONS);
 
+export const MAX_DOCTOR_SECRETARIES = 3;
+
 export const secretaryGenderSchema = z.enum(['Male', 'Female'], {
-  errorMap: () => ({ message: 'يجب اختيار الجنس.' }),
+  message: 'يجب اختيار الجنس.',
 });
 
 const fullNameSchema = z

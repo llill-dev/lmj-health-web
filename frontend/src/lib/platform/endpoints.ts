@@ -32,10 +32,10 @@ export const PLATFORM_SETTINGS_SLUG_ALIASES: Record<
   PlatformSettingsSlug,
   readonly string[]
 > = {
-  terms: ['terms', 'terms-of-use'],
-  privacy: ['privacy-policy', 'privacy'],
-  usage: ['medical-policy', 'usage-policy', 'usage'],
-  faq: ['faq', 'frequently-asked-questions'],
-  about: ['about-app', 'about', 'about-us'],
-  contact: ['contact-us', 'contact'],
+  'terms': ['terms', 'terms-of-use'],
+  'privacy-policy': ['privacy-policy', 'privacy'],
+  'medical-policy': ['medical-policy', 'usage-policy', 'usage'],
+  'faq': ['faq', 'frequently-asked-questions'],
+  'about-app': ['about-app', 'about', 'about-us'],
+  'contact-us': ['contact-us', 'contact'],
 };

@@ -61,6 +61,7 @@ export function resolvePatientOrderCategory(order: {
   orderName?: string | null;
 }): EncounterOrderCategoryKey | 'other' {
   return normalizeEncounterOrderCategory({
+    _id: 'temp',
     orderType: order.orderType ?? undefined,
     type: order.type ?? undefined,
     category: order.category ?? undefined,

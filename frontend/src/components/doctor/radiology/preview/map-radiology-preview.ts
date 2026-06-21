@@ -10,12 +10,11 @@ import type { RadiologyPreviewVm } from './radiology-preview-types';
 
 function formatPatientMeta(
   encounter?: DoctorEncounterSummary | null,
-  publicProfile?: { user?: { dateOfBirth?: string } } | null,
+  publicProfile?: { user?: { dateOfBirth?: string; fullName?: string } } | null,
 ) {
   const dob =
     encounter?.patient?.dateOfBirth ??
-    encounter?.patient?.user?.dateOfBirth ??
-    publicProfile?.user?.dateOfBirth;
+    encounter?.patient?.user?.dateOfBirth;
   if (!dob) return '—';
   const birth = new Date(dob);
   if (Number.isNaN(birth.getTime())) return '—';
