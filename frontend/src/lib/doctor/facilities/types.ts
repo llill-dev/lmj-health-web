@@ -29,6 +29,7 @@ export type DoctorFacilityFormValues = {
   email?: string;
   workHoursFrom: string;
   workHoursTo: string;
+  attributes?: string[];
 };
 
 export const FACILITY_STATUS_LABELS: Record<DoctorFacilityStatus, string> = {

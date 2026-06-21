@@ -2,8 +2,8 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Save, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { Save, Trash2, X, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   DoctorProfileFormField,
@@ -47,6 +47,8 @@ export function FacilityFormDialog({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<DoctorFacilityFormSchemaValues>({
     resolver: zodResolver(doctorFacilityFormSchema),
@@ -62,6 +64,29 @@ export function FacilityFormDialog({
         : EMPTY_DOCTOR_FACILITY_FORM,
     );
   }, [open, mode, initialFacility, reset]);
+
+  const [attrInput, setAttrInput] = useState('');
+  const attributes = watch('attributes') ?? [];
+
+  useEffect(() => {
+    if (!open) setAttrInput('');
+  }, [open]);
+
+  const addAttribute = () => {
+    const key = attrInput.trim().toLowerCase().replace(/\s+/g, '_');
+    if (!key) return;
+    const next = [...new Set([...attributes, key])];
+    setValue('attributes', next, { shouldDirty: true });
+    setAttrInput('');
+  };
+
+  const removeAttribute = (key: string) => {
+    setValue(
+      'attributes',
+      attributes.filter((item) => item !== key),
+      { shouldDirty: true },
+    );
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -297,6 +322,71 @@ export function FacilityFormDialog({
                     </DoctorProfileFormField>
                   </div>
                 </div>
+
+                {mode === 'edit' ? (
+                  <div>
+                    <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                      سمات المنشأة
+                    </h3>
+                    <DoctorProfileFormField
+                      label="إضافة سمة"
+                      hint="مثال: night_shift أو echo_available"
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={attrInput}
+                          onChange={(event) => setAttrInput(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              addAttribute();
+                            }
+                          }}
+                          placeholder="Night Shift"
+                          disabled={submitting}
+                          className={profileFieldClass(
+                            cn(profileInputClass, 'text-start placeholder:text-start'),
+                            false,
+                          )}
+                        />
+                        <button
+                          type="button"
+                          onClick={addAttribute}
+                          disabled={submitting || !attrInput.trim()}
+                          className="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white disabled:opacity-50"
+                          aria-label="إضافة سمة"
+                        >
+                          <Plus className="h-4 w-4" aria-hidden />
+                        </button>
+                      </div>
+                    </DoctorProfileFormField>
+                    {attributes.length > 0 ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {attributes.map((attr) => (
+                          <span
+                            key={attr}
+                            className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#E6F4F3] px-3 py-1 font-cairo text-[11px] font-bold text-primary"
+                          >
+                            {attr}
+                            <button
+                              type="button"
+                              onClick={() => removeAttribute(attr)}
+                              disabled={submitting}
+                              className="text-primary/70 transition hover:text-[#B42318] disabled:opacity-50"
+                              aria-label={`إزالة ${attr}`}
+                            >
+                              <Trash2 className="h-3 w-3" aria-hidden />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                        لا توجد سمات مضافة بعد.
+                      </p>
+                    )}
+                  </div>
+                ) : null}
 
                 {mode === 'edit' && initialFacility ? (
                   <div className="flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4">

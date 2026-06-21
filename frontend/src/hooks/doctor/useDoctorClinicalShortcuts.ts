@@ -12,8 +12,10 @@ import type {
 } from '@/lib/doctor/libraryTypes';
 import type {
   CreateDoctorTemplateBody,
+  DoctorTemplateApplyResponse,
   UpdateDoctorTemplateBody,
 } from '@/lib/doctor/templateTypes';
+import { storeDoctorTemplateDraft } from '@/lib/doctor/templateDraftStorage';
 import type { AddDoctorPatientMedicationBody } from '@/lib/doctor/types';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
@@ -107,6 +109,19 @@ export function useCreateDoctorTemplate() {
   });
 }
 
+export function useUpdateDoctorTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { templateId: string; body: UpdateDoctorTemplateBody }) =>
+      doctorApi.templates.update(input.templateId, input.body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorClinicalQueryKeys.all,
+      });
+    },
+  });
+}
+
 export function useDeleteDoctorTemplate() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -115,6 +130,16 @@ export function useDeleteDoctorTemplate() {
       void queryClient.invalidateQueries({
         queryKey: doctorClinicalQueryKeys.all,
       });
+    },
+  });
+}
+
+export function useApplyDoctorTemplate() {
+  return useMutation({
+    mutationFn: async (templateId: string) => {
+      const response = await doctorApi.templates.apply(templateId);
+      storeDoctorTemplateDraft(response, templateId);
+      return response as DoctorTemplateApplyResponse;
     },
   });
 }

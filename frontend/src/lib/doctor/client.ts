@@ -1865,6 +1865,12 @@ export const doctorApi = {
         doctorEndpoints.templates.byId(templateId),
         { locale: 'ar' },
       ),
+    apply: (templateId: string) =>
+      post<import('./templateTypes').DoctorTemplateApplyResponse>(
+        doctorEndpoints.templates.apply(templateId),
+        {},
+        { locale: 'ar' },
+      ),
   },
   internalDirectory: {
     list: (params: InternalDirectoryListParams = {}) => {

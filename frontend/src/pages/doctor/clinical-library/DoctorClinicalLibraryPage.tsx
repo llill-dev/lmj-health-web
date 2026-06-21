@@ -36,6 +36,7 @@ import {
   ClinicalLibraryTemplateFormDialog,
   type ClinicalLibraryTemplateFormValues,
 } from '@/components/doctor/clinical-library/clinical-library-template-form-dialog';
+import { ClinicalLibraryTemplateApplyDialog } from '@/components/doctor/clinical-library/clinical-library-template-apply-dialog';
 
 import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
 
@@ -55,6 +56,8 @@ import { useToast } from '@/components/ui/ToastProvider';
 
 import {
 
+  useApplyDoctorTemplate,
+
   useCreateDoctorLibraryItem,
 
   useCreateDoctorTemplate,
@@ -67,13 +70,15 @@ import {
 
   useDoctorTemplates,
 
+  useUpdateDoctorTemplate,
+
 } from '@/hooks/doctor/useDoctorClinicalShortcuts';
 
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 
 import type { DoctorLibraryItemType } from '@/lib/doctor/libraryTypes';
 
-import type { DoctorTemplateType } from '@/lib/doctor/templateTypes';
+import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/templateTypes';
 
 
 
@@ -132,6 +137,13 @@ export default function DoctorClinicalLibraryPage() {
   const [libraryFormOpen, setLibraryFormOpen] = useState(false);
 
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
+  const [templateFormMode, setTemplateFormMode] = useState<'create' | 'edit'>('create');
+  const [editTemplate, setEditTemplate] = useState<DoctorTemplateRecord | null>(null);
+  const [applyPreview, setApplyPreview] = useState<{
+    templateName: string;
+    templateType?: DoctorTemplateType;
+    application?: Record<string, unknown>;
+  } | null>(null);
 
   const [deleteLibraryId, setDeleteLibraryId] = useState<string | null>(null);
 
@@ -182,7 +194,8 @@ export default function DoctorClinicalLibraryPage() {
   const deleteLibrary = useDeleteDoctorLibraryItem();
 
   const createTemplate = useCreateDoctorTemplate();
-
+  const updateTemplate = useUpdateDoctorTemplate();
+  const applyTemplate = useApplyDoctorTemplate();
   const deleteTemplate = useDeleteDoctorTemplate();
 
 
@@ -194,6 +207,10 @@ export default function DoctorClinicalLibraryPage() {
     deleteLibrary.isPending ||
 
     createTemplate.isPending ||
+
+    updateTemplate.isPending ||
+
+    applyTemplate.isPending ||
 
     deleteTemplate.isPending;
 
@@ -350,17 +367,49 @@ export default function DoctorClinicalLibraryPage() {
 
   const handleCreateTemplate = async (values: ClinicalLibraryTemplateFormValues) => {
     try {
-      await createTemplate.mutateAsync({
-        type: values.type,
-        name: values.name,
-        description: values.description,
-        payload: {},
-      });
-      toast('تم إنشاء القالب.', { variant: 'success' });
+      if (templateFormMode === 'edit' && editTemplate?._id) {
+        await updateTemplate.mutateAsync({
+          templateId: editTemplate._id,
+          body: {
+            type: values.type,
+            name: values.name,
+            description: values.description,
+          },
+        });
+        toast('تم تحديث القالب.', { variant: 'success' });
+      } else {
+        await createTemplate.mutateAsync({
+          type: values.type,
+          name: values.name,
+          description: values.description,
+          payload: {},
+        });
+        toast('تم إنشاء القالب.', { variant: 'success' });
+      }
       setTemplateFormOpen(false);
+      setEditTemplate(null);
+      setTemplateFormMode('create');
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر إنشاء القالب',
+        title: templateFormMode === 'edit' ? 'تعذّر تحديث القالب' : 'تعذّر إنشاء القالب',
+        variant: 'error',
+      });
+    }
+  };
+
+  const handleApplyTemplate = async (templateId: string) => {
+    const template = templatesQuery.templates.find((item) => item._id === templateId);
+    try {
+      const response = await applyTemplate.mutateAsync(templateId);
+      setApplyPreview({
+        templateName: response.name?.trim() || template?.name?.trim() || 'قالب',
+        templateType: response.type ?? (template?.type as DoctorTemplateType | undefined),
+        application: response.application,
+      });
+      toast('تم تحميل مسودة القالب.', { variant: 'success' });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: 'تعذّر استخدام القالب',
         variant: 'error',
       });
     }
@@ -440,7 +489,11 @@ export default function DoctorClinicalLibraryPage() {
 
               ? setLibraryFormOpen(true)
 
-              : setTemplateFormOpen(true)
+              : (() => {
+                  setTemplateFormMode('create');
+                  setEditTemplate(null);
+                  setTemplateFormOpen(true);
+                })()
 
           }
 
@@ -639,6 +692,22 @@ export default function DoctorClinicalLibraryPage() {
 
                 typeLabels={TEMPLATE_TYPE_LABELS}
 
+                applyingTemplateId={
+                  applyTemplate.isPending ? applyTemplate.variables : null
+                }
+
+                onApply={handleApplyTemplate}
+
+                onEdit={(templateId) => {
+                  const template = templatesQuery.templates.find(
+                    (item) => item._id === templateId,
+                  );
+                  if (!template) return;
+                  setEditTemplate(template as DoctorTemplateRecord);
+                  setTemplateFormMode('edit');
+                  setTemplateFormOpen(true);
+                }}
+
                 onDelete={setDeleteTemplateId}
 
               />
@@ -752,9 +821,23 @@ export default function DoctorClinicalLibraryPage() {
 
       <ClinicalLibraryTemplateFormDialog
         open={templateFormOpen}
-        busy={createTemplate.isPending}
-        onClose={() => setTemplateFormOpen(false)}
+        mode={templateFormMode}
+        initialTemplate={editTemplate}
+        busy={createTemplate.isPending || updateTemplate.isPending}
+        onClose={() => {
+          setTemplateFormOpen(false);
+          setEditTemplate(null);
+          setTemplateFormMode('create');
+        }}
         onSubmit={handleCreateTemplate}
+      />
+
+      <ClinicalLibraryTemplateApplyDialog
+        open={Boolean(applyPreview)}
+        templateName={applyPreview?.templateName ?? 'قالب'}
+        templateType={applyPreview?.templateType}
+        application={applyPreview?.application}
+        onClose={() => setApplyPreview(null)}
       />
 
 

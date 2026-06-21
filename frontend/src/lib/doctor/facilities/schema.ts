@@ -49,6 +49,7 @@ export const doctorFacilityFormSchema = z
       .or(z.literal('')),
     workHoursFrom: z.string().min(1, 'وقت البداية مطلوب'),
     workHoursTo: z.string().min(1, 'وقت النهاية مطلوب'),
+    attributes: z.array(z.string()),
   })
   .superRefine((values, ctx) => {
     if (values.workHoursFrom && values.workHoursTo) {
@@ -76,4 +77,5 @@ export const EMPTY_DOCTOR_FACILITY_FORM: DoctorFacilityFormSchemaValues = {
   email: '',
   workHoursFrom: '09:00',
   workHoursTo: '17:00',
+  attributes: [],
 };

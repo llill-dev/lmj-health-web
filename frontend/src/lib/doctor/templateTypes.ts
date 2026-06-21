@@ -32,3 +32,13 @@ export type CreateDoctorTemplateBody = {
 };
 
 export type UpdateDoctorTemplateBody = Partial<CreateDoctorTemplateBody>;
+
+export type DoctorTemplateApplyResponse = {
+  messageKey?: string;
+  message?: string;
+  templateId?: string;
+  type?: DoctorTemplateType;
+  name?: string;
+  application?: Record<string, unknown>;
+  template?: DoctorTemplateRecord;
+};

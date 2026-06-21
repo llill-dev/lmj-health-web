@@ -121,7 +121,6 @@ export default function DoctorFacilitiesPage() {
       await saveMutation.mutateAsync({
         mode: dialogMode,
         values,
-        existingAttributes: editTarget?.attributes,
       });
 
       toast(

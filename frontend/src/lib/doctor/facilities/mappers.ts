@@ -162,7 +162,9 @@ export function formValuesToMutationBody(
   values: DoctorFacilityFormValues,
   existingAttributes?: string[],
 ): DoctorFacilityMutationBody {
-  const attributes = sanitizeFacilityAttributes(existingAttributes);
+  const attributes = sanitizeFacilityAttributes(
+    values.attributes?.length ? values.attributes : existingAttributes,
+  );
 
   return {
     name: values.name.trim(),
@@ -232,5 +234,6 @@ export function doctorFacilityToFormValues(
     email: facility.email ?? '',
     workHoursFrom: facility.workHoursFrom,
     workHoursTo: facility.workHoursTo,
+    attributes: facility.attributes ?? [],
   };
 }

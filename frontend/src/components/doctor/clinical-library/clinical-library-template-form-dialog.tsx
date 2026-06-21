@@ -8,7 +8,7 @@ import {
   profileInputClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
-import type { DoctorTemplateType } from '@/lib/doctor/templateTypes';
+import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/templateTypes';
 
 const TEMPLATE_TYPE_LABELS: Record<DoctorTemplateType, string> = {
   PRESCRIPTION: 'وصفة',
@@ -30,11 +30,15 @@ export type ClinicalLibraryTemplateFormValues = {
 
 export function ClinicalLibraryTemplateFormDialog({
   open,
+  mode = 'create',
+  initialTemplate,
   busy,
   onClose,
   onSubmit,
 }: {
   open: boolean;
+  mode?: 'create' | 'edit';
+  initialTemplate?: DoctorTemplateRecord | null;
   busy?: boolean;
   onClose: () => void;
   onSubmit: (values: ClinicalLibraryTemplateFormValues) => Promise<void>;
@@ -46,22 +50,34 @@ export function ClinicalLibraryTemplateFormDialog({
 
   useEffect(() => {
     if (!open) return;
+    if (mode === 'edit' && initialTemplate) {
+      setTemplateType(initialTemplate.type ?? 'PRESCRIPTION');
+      setName(initialTemplate.name?.trim() ?? '');
+      setDescription(initialTemplate.description?.trim() ?? '');
+      return;
+    }
     setTemplateType('PRESCRIPTION');
     setName('');
     setDescription('');
-  }, [open]);
+  }, [open, mode, initialTemplate]);
+
+  const title = mode === 'edit' ? 'تعديل القالب' : 'قالب جديد';
+  const hint =
+    mode === 'edit'
+      ? 'عدّل اسم القالب أو نوعه أو وصفه.'
+      : 'أنشئ قالباً جاهزاً للوصفات وطلبات المختبر والأشعة والإحالات.';
 
   return (
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title="قالب جديد"
+      title={title}
       maxWidthClass="max-w-[520px]"
       headerPattern
     >
       <div dir="rtl" lang="ar" className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
-          أنشئ قالباً جاهزاً للوصفات وطلبات المختبر والأشعة والإحالات.
+          {hint}
         </p>
 
         <DoctorProfileFormField label="نوع القالب" required>
@@ -123,7 +139,7 @@ export function ClinicalLibraryTemplateFormDialog({
             }
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_24px_-4px_rgba(15,143,139,0.35)] transition hover:bg-[#14B3AE] disabled:opacity-60"
           >
-            {busy ? 'جارٍ الحفظ...' : 'حفظ القالب'}
+            {busy ? 'جارٍ الحفظ...' : mode === 'edit' ? 'حفظ التعديلات' : 'حفظ القالب'}
           </button>
         </div>
       </div>

@@ -51,9 +51,8 @@ async function fetchOwnedFacility() {
 async function persistFacility(
   mode: 'create' | 'edit',
   values: DoctorFacilityFormValues,
-  existingAttributes?: string[],
 ) {
-  const body = formValuesToMutationBody(values, existingAttributes);
+  const body = formValuesToMutationBody(values);
 
   let response: Awaited<ReturnType<typeof doctorFacilityApi.create>>;
 
@@ -71,6 +70,7 @@ async function persistFacility(
     }
   } else {
     response = await doctorFacilityApi.update(body);
+    response = await doctorFacilityApi.updateAttributes(values.attributes ?? []);
   }
 
   const mapped = await resolveFacilityFromResponse(response);
@@ -101,12 +101,10 @@ export function useDoctorFacility() {
     mutationFn: ({
       mode,
       values,
-      existingAttributes,
     }: {
       mode: 'create' | 'edit';
       values: DoctorFacilityFormValues;
-      existingAttributes?: string[];
-    }) => persistFacility(mode, values, existingAttributes),
+    }) => persistFacility(mode, values),
     onSuccess: (facility) => {
       queryClient.setQueryData(DOCTOR_FACILITY_KEYS.detail(), facility);
     },

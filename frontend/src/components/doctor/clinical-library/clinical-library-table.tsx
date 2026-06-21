@@ -1,4 +1,4 @@
-import { Star, Trash2 } from 'lucide-react';
+import { Pencil, Play, Star, Trash2 } from 'lucide-react';
 import {
   DOCTOR_MINT_TABLE_TD,
   DoctorMintTableShell,
@@ -78,6 +78,9 @@ const TEMPLATE_TABLE_COLUMNS = [
 export function ClinicalLibraryTemplatesTable({
   templates,
   typeLabels,
+  applyingTemplateId,
+  onApply,
+  onEdit,
   onDelete,
 }: {
   templates: Array<{
@@ -87,6 +90,9 @@ export function ClinicalLibraryTemplatesTable({
     description?: string | null;
   }>;
   typeLabels: Record<string, string>;
+  applyingTemplateId?: string | null;
+  onApply: (templateId: string) => void;
+  onEdit: (templateId: string) => void;
   onDelete: (templateId: string) => void;
 }) {
   return (
@@ -120,14 +126,33 @@ export function ClinicalLibraryTemplatesTable({
             </div>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
-            <button
-              type="button"
-              onClick={() => onDelete(template._id)}
-              className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:text-[#912018]"
-            >
-              <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span>حذف</span>
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => onApply(template._id)}
+                disabled={applyingTemplateId === template._id}
+                className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-[#14B3AE] disabled:opacity-50"
+              >
+                <Play className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span>{applyingTemplateId === template._id ? '…' : 'استخدام'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onEdit(template._id)}
+                className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:text-primary"
+              >
+                <Pencil className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span>تعديل</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(template._id)}
+                className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:text-[#912018]"
+              >
+                <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span>حذف</span>
+              </button>
+            </div>
           </td>
         </tr>
       ))}
