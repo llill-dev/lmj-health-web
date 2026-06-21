@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { ApiError } from '@/lib/api';
 import { doctorFacilityApi } from '@/lib/doctor/facilities/client';
+import { medicalServicesDirectoryApi } from '@/lib/doctor/medical-services-directory/client';
 import {
   formValuesToCreateRequestBody,
   formValuesToMutationBody,
@@ -17,6 +18,8 @@ export const DOCTOR_FACILITY_KEYS = {
   all: ['doctor', 'facility'] as const,
   detail: () => [...DOCTOR_FACILITY_KEYS.all, 'me'] as const,
   types: () => [...DOCTOR_FACILITY_KEYS.all, 'types'] as const,
+  suggest: (q: string, city: string) =>
+    [...DOCTOR_FACILITY_KEYS.all, 'suggest', q, city] as const,
 };
 
 async function resolveFacilityFromResponse(
@@ -24,13 +27,13 @@ async function resolveFacilityFromResponse(
 ) {
   const record = parseDoctorFacilityRecordFromResponse(response);
   if (record && !isPartialFacilityRecord(record)) {
-    return mapApiFacilityToDoctorFacility(record);
+    return mapApiFacilityToDoctorFacility(record, { isOwned: true });
   }
 
   const refreshed = await doctorFacilityApi.get();
   const refreshedRecord = parseDoctorFacilityRecordFromResponse(refreshed);
   if (!refreshedRecord) throw new Error('facility_record_null');
-  return mapApiFacilityToDoctorFacility(refreshedRecord);
+  return mapApiFacilityToDoctorFacility(refreshedRecord, { isOwned: true });
 }
 
 async function fetchOwnedFacility() {
@@ -38,7 +41,7 @@ async function fetchOwnedFacility() {
     const response = await doctorFacilityApi.get();
     const record = parseDoctorFacilityRecordFromResponse(response);
     if (!record) return null;
-    return mapApiFacilityToDoctorFacility(record);
+    return mapApiFacilityToDoctorFacility(record, { isOwned: true });
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
@@ -133,5 +136,53 @@ export function useSuggestFacility() {
 
   return {
     suggestMutation,
+  };
+}
+
+export function useFacilitySuggestSearch(
+  query: string,
+  city: string,
+  enabled: boolean,
+) {
+  const normalizedQuery = query.trim();
+  const normalizedCity = city.trim();
+
+  return useQuery({
+    queryKey: DOCTOR_FACILITY_KEYS.suggest(normalizedQuery, normalizedCity),
+    queryFn: () =>
+      medicalServicesDirectoryApi.suggest({
+        q: normalizedQuery,
+        city: normalizedCity || undefined,
+        limit: 20,
+      }),
+    enabled: enabled && normalizedQuery.length >= 2,
+    staleTime: 30_000,
+  });
+}
+
+export function useLinkFacility() {
+  const queryClient = useQueryClient();
+
+  const linkMutation = useMutation({
+    mutationFn: (facilityId: string) =>
+      doctorFacilityApi.assign({ facilityId }),
+    onSuccess: (response) => {
+      const record = parseDoctorFacilityRecordFromResponse(response);
+      if (!record) {
+        void queryClient.invalidateQueries({
+          queryKey: DOCTOR_FACILITY_KEYS.detail(),
+        });
+        return;
+      }
+
+      const mapped = mapApiFacilityToDoctorFacility(record, { isOwned: false });
+      if (mapped) {
+        queryClient.setQueryData(DOCTOR_FACILITY_KEYS.detail(), mapped);
+      }
+    },
+  });
+
+  return {
+    linkMutation,
   };
 }

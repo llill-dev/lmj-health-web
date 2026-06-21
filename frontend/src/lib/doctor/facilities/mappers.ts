@@ -124,6 +124,7 @@ export function mapApiFacilityStatus(
 
 export function mapApiFacilityToDoctorFacility(
   record: DoctorFacilityRecord,
+  options?: { isOwned?: boolean },
 ): DoctorFacility | null {
   const id = record.id ?? record._id;
   const name = record.name?.trim();
@@ -153,6 +154,7 @@ export function mapApiFacilityToDoctorFacility(
     workHoursTo: parsedDescription.workHoursTo || legacyTo,
     status: mapApiFacilityStatus(record.status),
     attributes: sanitizeFacilityAttributes(record.attributes),
+    isOwned: options?.isOwned ?? true,
   };
 }
 

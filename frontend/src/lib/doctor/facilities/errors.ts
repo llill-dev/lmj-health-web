@@ -193,3 +193,31 @@ export function getDoctorFacilitySaveErrorToast(
     message: 'تعذّر إتمام الطلب. راجع البيانات وحاول مجدداً.',
   };
 }
+
+export function getDoctorFacilityLinkErrorToast(
+  error: unknown,
+): DoctorFacilitySaveToast {
+  if (error instanceof ApiError) {
+    if (error.messageKey === 'errors.facilities.invalidSelection') {
+      return MESSAGE_KEY_TOAST['errors.facilities.invalidSelection'];
+    }
+    if (error.messageKey === 'errors.facilities.ownerFacilityExists') {
+      return MESSAGE_KEY_TOAST['errors.facilities.ownerFacilityExists'];
+    }
+    if (error.messageKey === 'errors.facilities.notFound') {
+      return {
+        title: 'المنشأة غير موجودة',
+        message: 'المنشأة المختارة غير متاحة للربط. جرّب البحث مجدداً.',
+      };
+    }
+  }
+
+  const fallback = getDoctorFacilitySaveErrorToast(error, 'create');
+  if (fallback.title === 'تعذّر إنشاء المنشأة') {
+    return {
+      title: 'تعذّر ربط المنشأة',
+      message: fallback.message,
+    };
+  }
+  return fallback;
+}

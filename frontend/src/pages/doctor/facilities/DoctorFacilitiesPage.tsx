@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Lightbulb, Loader2, Plus } from "lucide-react";
+import { Building2, Lightbulb, Link2, Loader2, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
@@ -14,14 +14,15 @@ import {
   FacilitiesTable,
   FacilityEmptyState,
   FacilityFormDialog,
+  LinkFacilityDialog,
   SuggestFacilityDialog,
 } from "@/components/doctor/facilities";
 import type { SuggestFacilityPayload } from "@/components/doctor/facilities/suggest-facility-dialog";
 import { useToast } from "@/components/ui/ToastProvider";
-import { useDoctorFacility, useDoctorFacilityTypes, useSuggestFacility } from "@/hooks";
+import { useDoctorFacility, useDoctorFacilityTypes, useLinkFacility, useSuggestFacility } from "@/hooks";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
-import { getDoctorFacilitySaveErrorToast } from "@/lib/doctor/facilities/errors";
+import { getDoctorFacilityLinkErrorToast, getDoctorFacilitySaveErrorToast } from "@/lib/doctor/facilities/errors";
 import type { DoctorFacilityFormSchemaValues } from "@/lib/doctor/facilities/schema";
 import type { DoctorFacility } from "@/lib/doctor/facilities/types";
 import { DEFAULT_FACILITY_TYPE_OPTIONS } from "@/lib/doctor/facilities/types";
@@ -33,6 +34,7 @@ export default function DoctorFacilitiesPage() {
   const { facility, facilityQuery, saveMutation, isAwaitingData } =
     useDoctorFacility();
   const { suggestMutation } = useSuggestFacility();
+  const { linkMutation } = useLinkFacility();
   const typesQuery = useDoctorFacilityTypes();
   const { retry: retryFacility, retrying: retryingFacility } = useRetryAction(
     () => facilityQuery.refetch(),
@@ -43,6 +45,7 @@ export default function DoctorFacilitiesPage() {
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [suggestDialogOpen, setSuggestDialogOpen] = useState(false);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
   const [editTarget, setEditTarget] = useState<DoctorFacility | null>(null);
 
@@ -98,6 +101,16 @@ export default function DoctorFacilitiesPage() {
   };
 
   const openEdit = (target: DoctorFacility) => {
+    if (target.isOwned === false) {
+      toast(
+        "هذه منشأة مرتبطة بحسابك ولا تملكها. لا يمكن تعديل بياناتها من هنا.",
+        {
+          title: "تعديل غير متاح",
+          variant: "error",
+        },
+      );
+      return;
+    }
     setDialogMode("edit");
     setEditTarget(target);
     setDialogOpen(true);
@@ -126,6 +139,24 @@ export default function DoctorFacilitiesPage() {
         error,
         dialogMode,
       );
+      toast(message, {
+        title,
+        variant: "error",
+      });
+    }
+  };
+
+  const handleLinkSubmit = async (facilityId: string) => {
+    try {
+      await linkMutation.mutateAsync(facilityId);
+
+      toast("تم ربط حسابك بالمنشأة بنجاح.", {
+        title: "تم الربط",
+        variant: "success",
+      });
+      setLinkDialogOpen(false);
+    } catch (error) {
+      const { title, message } = getDoctorFacilityLinkErrorToast(error);
       toast(message, {
         title,
         variant: "error",
@@ -205,7 +236,18 @@ export default function DoctorFacilitiesPage() {
           title="المنشآت"
           icon={<Building2 className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
           action={
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              {canCreate ? (
+                <button
+                  type="button"
+                  onClick={() => setLinkDialogOpen(true)}
+                  disabled={linkMutation.isPending}
+                  className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-primary/30 bg-[#E6F4F3] px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/50 hover:bg-[#DDF0EF] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Link2 className="h-4 w-4" aria-hidden />
+                  ربط منشأة موجودة
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setSuggestDialogOpen(true)}
@@ -280,6 +322,15 @@ export default function DoctorFacilitiesPage() {
             if (!suggestMutation.isPending) setSuggestDialogOpen(false);
           }}
           onSubmit={handleSuggestSubmit}
+        />
+
+        <LinkFacilityDialog
+          open={linkDialogOpen}
+          submitting={linkMutation.isPending}
+          onClose={() => {
+            if (!linkMutation.isPending) setLinkDialogOpen(false);
+          }}
+          onLink={handleLinkSubmit}
         />
       </div>
     </>

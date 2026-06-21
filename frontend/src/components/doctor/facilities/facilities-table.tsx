@@ -152,8 +152,10 @@ export function FacilitiesTable({
               <button
                 type="button"
                 role="menuitem"
-                className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] hover:bg-[#F0FDFA]"
+                className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] hover:bg-[#F0FDFA] disabled:cursor-not-allowed disabled:text-[#98A2B3]"
+                disabled={activeRow.isOwned === false}
                 onClick={() => {
+                  if (activeRow.isOwned === false) return;
                   setMenu(null);
                   onEdit(activeRow);
                 }}

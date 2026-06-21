@@ -2,6 +2,7 @@ import { get, patch, post, put } from '@/lib/api';
 import { doctorEndpoints } from '@/lib/doctor/endpoints';
 import { serializeDoctorFacilityMutationBody } from '@/lib/doctor/facilities/mappers';
 import type {
+  DoctorFacilityAssignBody,
   DoctorFacilityCreateRequestBody,
   DoctorFacilityMutationBody,
   DoctorFacilityResponse,
@@ -37,6 +38,12 @@ export const doctorFacilityApi = {
       { attributes },
       { locale: 'ar' },
     ),
+
+  /** PATCH /api/doctors/me/facility — link doctor to an existing catalog facility. */
+  assign: (body: DoctorFacilityAssignBody) =>
+    patch<DoctorFacilityResponse>(doctorEndpoints.me.facility, body, {
+      locale: 'ar',
+    }),
 
   listTypes: () =>
     get<FacilityTypesResponse>(doctorEndpoints.facilities.types, {

@@ -15,6 +15,8 @@ export type DoctorFacility = {
   workHoursTo: string;
   status: DoctorFacilityStatus;
   attributes?: string[];
+  /** False when linked via PATCH assign to a catalog facility the doctor does not own. */
+  isOwned?: boolean;
 };
 
 export type DoctorFacilityFormValues = {

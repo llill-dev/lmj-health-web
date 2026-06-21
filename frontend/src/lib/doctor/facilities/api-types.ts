@@ -42,6 +42,10 @@ export type DoctorFacilityCreateRequestBody = {
   country?: string;
 };
 
+export type DoctorFacilityAssignBody = {
+  facilityId: string | null;
+};
+
 export type DoctorFacilityResponse = {
   messageKey?: string;
   message?: string;
