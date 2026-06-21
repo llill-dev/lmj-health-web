@@ -18,9 +18,9 @@ import {
 
   Hourglass,
 
-  Lightbulb,
-
   Phone,
+
+  Sparkles,
 
 } from 'lucide-react';
 
@@ -310,11 +310,32 @@ export default function DoctorWaitlistPage() {
 
           }
 
-          actionLabel="عرض المواعيد"
-
-          actionIcon={<CalendarClock className="h-4 w-4" />}
-
-          onActionClick={() => navigate('/doctor/appointments')}
+          headerActions={
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <motion.button
+                type="button"
+                onClick={() => setSuggestionsOpen(true)}
+                className="flex h-[48px] items-center gap-2 rounded-[6px] border-[1.5px] border-primary bg-[#E6F4F3] px-4 font-cairo text-[14px] font-bold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.15)] transition hover:bg-[#DDF0EF]"
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.12, ease: 'easeOut' }}
+              >
+                <Sparkles className="h-4 w-4" aria-hidden />
+                <span>اقتراحات المواعيد</span>
+              </motion.button>
+              <motion.button
+                type="button"
+                onClick={() => navigate('/doctor/appointments')}
+                className="flex h-[48px] items-center gap-2 rounded-[6px] border-[1.5px] border-primary bg-white px-4 font-cairo text-[14px] font-bold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.2)] transition hover:bg-[#F0FDFA]"
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.12, ease: 'easeOut' }}
+              >
+                <CalendarClock className="h-4 w-4" aria-hidden />
+                <span>عرض المواعيد</span>
+              </motion.button>
+            </div>
+          }
 
           kpis={[
 
@@ -386,44 +407,17 @@ export default function DoctorWaitlistPage() {
 
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white p-5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6">
 
-          <div className="flex items-center justify-between gap-4 mb-4" dir="rtl">
-
-            <div className="flex-1">
-
-              <WaitlistToolbar
-
-                search={search}
-
-                onSearchChange={setSearch}
-
-                onClear={() => {
-                  setSearch('');
-                  setStatusTab('active');
-                }}
-
-                statusTab={statusTab}
-
-                onStatusTabChange={setStatusTab}
-
-              />
-
-            </div>
-
-            <motion.button
-              type="button"
-              onClick={() => setSuggestionsOpen(true)}
-              className="flex h-[44px] items-center gap-2 rounded-[6px] border border-[#FDB022] bg-[#FFFAEB] px-4 font-cairo text-[13px] font-extrabold text-[#F79009] shadow-sm transition hover:bg-[#FEF6EE]"
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.12, ease: 'easeOut' }}
-            >
-
-              <span>اقتراحات المواعيد</span>
-
-              <Lightbulb className="h-4 w-4" />
-
-            </motion.button>
-
+          <div className="mb-4" dir="rtl">
+            <WaitlistToolbar
+              search={search}
+              onSearchChange={setSearch}
+              onClear={() => {
+                setSearch('');
+                setStatusTab('active');
+              }}
+              statusTab={statusTab}
+              onStatusTabChange={setStatusTab}
+            />
           </div>
 
 

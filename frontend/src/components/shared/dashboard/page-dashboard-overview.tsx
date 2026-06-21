@@ -48,6 +48,7 @@ export default function PageDashboardOverview({
   mode,
   onActionClick,
   actionDisabled,
+  headerActions,
   overlay,
   kpis = [],
   kpiColumns,
@@ -62,6 +63,7 @@ export default function PageDashboardOverview({
   actionIcon?: ReactNode;
   onActionClick?: () => void;
   actionDisabled?: boolean;
+  headerActions?: ReactNode;
   overlay?: ReactNode;
   kpis?: OverviewKpiItem[];
   kpiColumns?: PageDashboardKpiColumns;
@@ -135,7 +137,8 @@ export default function PageDashboardOverview({
         </div>
       }
       headerRight={
-        actionLabel && mode !== 'create' ? (
+        headerActions ??
+        (actionLabel && mode !== 'create' ? (
           <motion.button
             type='button'
             disabled={actionDisabled}
@@ -159,7 +162,7 @@ export default function PageDashboardOverview({
               {actionLabel}
             </span>
           </motion.button>
-        ) : undefined
+        ) : undefined)
       }
       kpiGridClassName={resolveKpiGridClass(variant, kpis.length, kpiColumns)}
       cards={kpis.map((kpi) => (

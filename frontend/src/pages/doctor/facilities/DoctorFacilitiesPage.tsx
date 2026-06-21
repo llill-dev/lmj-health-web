@@ -210,7 +210,7 @@ export default function DoctorFacilitiesPage() {
                 type="button"
                 onClick={() => setSuggestDialogOpen(true)}
                 disabled={suggestMutation.isPending}
-                className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-[#FEF6EE] bg-[#FEF6EE] px-4 font-cairo text-[13px] font-extrabold text-[#F79009] shadow-sm transition hover:border-[#F79009]/30 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-primary/30 bg-[#E6F4F3] px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/50 hover:bg-[#DDF0EF] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Lightbulb className="h-4 w-4" aria-hidden />
                 اقتراح منشأة
