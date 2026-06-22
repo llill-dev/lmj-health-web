@@ -10,7 +10,7 @@ export function MedicalRecordsToolbar({
   onClear?: () => void;
 }) {
   return (
-    <label className="relative block" dir="rtl">
+    <label className="relative block w-full min-w-0" dir="rtl">
       <span className="sr-only">بحث عن مريض</span>
       <input
         type="search"

@@ -347,7 +347,7 @@ export default function DoctorWorkSchedulePage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className='mb-6 flex items-center justify-between rounded-[14px] border border-[#FEE4E2] bg-[#FFF5F5] px-5 py-4 shadow-sm'
+              className='mb-6 flex flex-col gap-3 rounded-[14px] border border-[#FEE4E2] bg-[#FFF5F5] px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5'
             >
               <div className='flex gap-3 items-center'>
                 <AlertCircle className='h-5 w-5 text-[#B42318]' />
@@ -372,7 +372,7 @@ export default function DoctorWorkSchedulePage() {
             transition={{ delay: 0.2 }}
             className='relative z-[25] mt-6 overflow-visible rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
           >
-            <div className='border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-6 py-4'>
+            <div className='border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-4 py-4 sm:px-6'>
               <div className='flex gap-2 items-center'>
                 <SettingsIcon className='w-5 h-5 text-primary' />
                 <h2 className='font-cairo text-[16px] font-extrabold text-[#111827]'>
@@ -384,8 +384,8 @@ export default function DoctorWorkSchedulePage() {
               </p>
             </div>
 
-            <div className='p-6'>
-              <div className='grid grid-cols-2 gap-5'>
+            <div className='p-4 sm:p-6'>
+              <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
                 <div>
                   <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[13px] font-bold text-[#344054]'>
                     <Clock className='w-4 h-4 text-primary' />
@@ -423,14 +423,14 @@ export default function DoctorWorkSchedulePage() {
                 </div>
               </div>
 
-              <div className='flex justify-end mt-5'>
+              <div className='mt-5 flex justify-stretch sm:justify-end'>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type='button'
                   onClick={handleUpdateSettings}
                   disabled={isUpdatingSettings}
-                  className='flex h-[42px] items-center gap-2 rounded-[10px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_8px_16px_rgba(15,143,139,0.25)] transition-all hover:bg-[#0d7a77] disabled:opacity-50'
+                  className='flex h-[42px] w-full items-center justify-center gap-2 rounded-[10px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_8px_16px_rgba(15,143,139,0.25)] transition-all hover:bg-[#0d7a77] disabled:opacity-50 sm:w-auto'
                 >
                   <SettingsIcon className='w-4 h-4' />
                   {isUpdatingSettings ? 'جارٍ الحفظ...' : 'حفظ الإعدادات'}
@@ -446,7 +446,7 @@ export default function DoctorWorkSchedulePage() {
             transition={{ delay: 0.3 }}
             className='relative z-10 mt-6 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
           >
-            <div className='flex items-center justify-between border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-6 py-4'>
+            <div className='flex flex-col gap-4 border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
               <div>
                 <div className='flex gap-2 items-center'>
                   <Calendar className='w-5 h-5 text-primary' />
@@ -473,7 +473,7 @@ export default function DoctorWorkSchedulePage() {
               </motion.button>
             </div>
 
-            <div className='p-6'>
+            <div className='p-4 sm:p-6'>
               {isAwaitingData ? (
                 <DoctorScheduleSkeleton days={5} />
               ) : availableTimes.length === 0 ? (
@@ -502,7 +502,7 @@ export default function DoctorWorkSchedulePage() {
                         transition={{ delay: index * 0.05 }}
                         className='group rounded-[14px] border border-[#E5E7EB] bg-gradient-to-r from-white to-[#FAFBFC] p-4 transition-all hover:border-primary hover:shadow-md'
                       >
-                        <div className='flex justify-between items-start'>
+                        <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
                           <div className='flex-1'>
                             <div className='flex gap-3 items-center mb-3'>
                               <div className='flex h-[32px] items-center justify-center rounded-[10px] bg-primary px-4 font-cairo text-[13px] font-extrabold text-white shadow-sm'>
@@ -537,7 +537,7 @@ export default function DoctorWorkSchedulePage() {
                             </div>
                           </div>
 
-                          <div className='flex gap-2'>
+                          <div className='flex gap-2 self-end sm:self-start'>
                             <motion.button
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
@@ -584,7 +584,7 @@ export default function DoctorWorkSchedulePage() {
             transition={{ delay: 0.4 }}
             className='relative z-10 mt-6 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
           >
-            <div className='flex items-center justify-between border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-6 py-4'>
+            <div className='flex flex-col gap-4 border-b border-[#E5E7EB] bg-gradient-to-r from-[#F9FAFB] to-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
               <div>
                 <div className='flex gap-2 items-center'>
                   <Calendar className='w-5 h-5 text-primary' />
@@ -611,7 +611,7 @@ export default function DoctorWorkSchedulePage() {
               </motion.button>
             </div>
 
-            <div className='p-6'>
+            <div className='p-4 sm:p-6'>
               {exceptions.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -638,7 +638,7 @@ export default function DoctorWorkSchedulePage() {
                         transition={{ delay: index * 0.05 }}
                         className='group rounded-[14px] border border-[#E5E7EB] bg-gradient-to-r from-white to-[#FAFBFC] p-4 transition-all hover:border-[#FEE4E2] hover:shadow-md'
                       >
-                        <div className='flex items-start justify-between'>
+                        <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
                           <div className='flex gap-4 items-start flex-1'>
                             <div className='rounded-[10px] bg-[#FEF3F2] p-2'>
                               <Calendar className='h-4 w-4 text-[#F04438]' />
@@ -720,8 +720,8 @@ export default function DoctorWorkSchedulePage() {
               transition={{ delay: 0.45 }}
               className='relative z-10 mt-6 overflow-hidden rounded-[18px] border-[2px] border-primary/20 bg-white shadow-[0_8px_20px_rgba(15,143,139,0.08)]'
             >
-              <div className='border-b border-[#EEF2F6] bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4'>
-                <div className='flex justify-between items-center'>
+              <div className='border-b border-[#EEF2F6] bg-gradient-to-r from-primary/5 to-primary/10 px-4 py-4 sm:px-6'>
+                <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
                   <div className='flex gap-3 items-center'>
                     <div className='p-2 rounded-full bg-primary/10'>
                       <Calendar className='w-5 h-5 text-primary' />
@@ -735,12 +735,12 @@ export default function DoctorWorkSchedulePage() {
                     value={selectedPreviewDate}
                     onChange={(e) => setSelectedPreviewDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className='h-[40px] rounded-[10px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none transition-colors hover:border-primary/80'
+                    className='h-[40px] w-full rounded-[10px] border-[1.82px] border-primary bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none transition-colors hover:border-primary/80 sm:w-auto'
                   />
                 </div>
               </div>
 
-              <div className='p-6'>
+              <div className='p-4 sm:p-6'>
                 {selectedPreviewDate ? (
                   <SlotsPreview date={selectedPreviewDate} />
                 ) : (
@@ -768,7 +768,7 @@ export default function DoctorWorkSchedulePage() {
               transition={{ delay: 0.5 }}
               className='relative z-10 mt-6 overflow-hidden rounded-[18px] border-[2px] border-[#BFEDEC] bg-gradient-to-br from-[#F2FFFE] to-[#E6F9F8] shadow-[0_8px_20px_rgba(15,143,139,0.1)]'
             >
-              <div className='p-6'>
+              <div className='p-4 sm:p-6'>
                 <div className='flex gap-4 items-start'>
                   <div className='p-2 rounded-full bg-primary/10'>
                     <Info className='w-5 h-5 text-primary' />

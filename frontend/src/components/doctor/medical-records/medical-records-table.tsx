@@ -14,8 +14,8 @@ const TABLE_COLUMNS = [
 ] as const;
 
 const thClass =
-  'px-4 py-3 text-center align-middle font-cairo text-[12px] font-extrabold text-[#0F766E]';
-const tdClass = 'px-4 py-4 text-center align-middle';
+  'px-3 py-3 text-center align-middle font-cairo text-[11px] font-extrabold text-[#0F766E] sm:px-4 sm:text-[12px]';
+const tdClass = 'px-3 py-3 text-center align-middle sm:px-4 sm:py-4';
 
 export function MedicalRecordsTable({
   rows,
@@ -58,7 +58,7 @@ export function MedicalRecordsTable({
   return (
     <div className="rounded-[12px] border border-[#D4EFED] bg-white shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)]">
       <div className="overflow-x-auto overflow-y-visible">
-        <table className="min-w-full border-collapse text-center">
+        <table className="min-w-[840px] w-full border-collapse text-center">
           <thead>
             <tr className="border-b border-[#B9E6E1] bg-[#D4EFED]">
               {TABLE_COLUMNS.map((head) => (
@@ -81,7 +81,7 @@ export function MedicalRecordsTable({
                 </td>
                 <td className={tdClass}>
                   <div className="flex flex-col items-center justify-center gap-0.5">
-                    <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
+                    <div className="max-w-[180px] break-words font-cairo text-[13px] font-extrabold text-[#101828] sm:max-w-none">
                       {row.patientName}
                     </div>
                     <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
@@ -95,12 +95,12 @@ export function MedicalRecordsTable({
                   </div>
                 </td>
                 <td className={tdClass}>
-                  <div className="inline-flex items-center justify-center gap-1.5 font-cairo text-[12px] font-bold text-[#344054]">
+                  <div className="inline-flex max-w-[180px] items-center justify-center gap-1.5 font-cairo text-[12px] font-bold text-[#344054] sm:max-w-none">
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#F79009]"
                       aria-hidden
                     />
-                    <span>{row.facilityLabel}</span>
+                    <span className="break-words">{row.facilityLabel}</span>
                   </div>
                 </td>
                 <td className={tdClass}>
@@ -119,7 +119,7 @@ export function MedicalRecordsTable({
                   />
                 </td>
                 <td className={tdClass}>
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex min-w-[180px] items-center justify-center gap-2 sm:gap-3">
                     {onDownloadPdf && (
                       <button
                         type="button"

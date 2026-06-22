@@ -171,7 +171,7 @@ export default function DoctorMedicalRecordsPage() {
         <title>السجلات الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="pb-10 w-full">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <MedicalRecordDetailsDialog
           open={detailsOpen}
           onOpenChange={(open) => {
@@ -231,7 +231,7 @@ export default function DoctorMedicalRecordsPage() {
               <motion.button
                 type="button"
                 onClick={() => setMode("list")}
-                className="absolute left-[24px] top-[24px] flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)]"
+                className="absolute left-4 top-4 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:left-[24px] sm:top-[24px]"
                 aria-label="إغلاق"
               >
                 <X className="h-5 w-5 text-[#0F8F8B]" />
@@ -340,7 +340,7 @@ export default function DoctorMedicalRecordsPage() {
                   onClear={() => setSearch('')}
                 />
 
-                <div className="mt-6">
+                <div className="mt-5 sm:mt-6">
                   {list.isAwaitingData && !list.rows.length ? (
                     <div className="space-y-4">
                       <DoctorToolbarSkeleton tabs={0} />

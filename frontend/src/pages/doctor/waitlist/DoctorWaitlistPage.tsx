@@ -274,7 +274,7 @@ export default function DoctorWaitlistPage() {
 
 
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
 
         <DoctorDashboardOverview
 
@@ -311,7 +311,7 @@ export default function DoctorWaitlistPage() {
           }
 
           headerActions={
-            <div className="flex flex-wrap items-center justify-end gap-3">
+            <div className="flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <motion.button
                 type="button"
                 onClick={() => setSuggestionsOpen(true)}
@@ -422,7 +422,7 @@ export default function DoctorWaitlistPage() {
 
 
 
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
 
             {list.isAwaitingData && !list.requests.length ? (
 

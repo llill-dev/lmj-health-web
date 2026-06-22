@@ -1,10 +1,10 @@
 'use client';
 
-import { Bell, MessageCircle, Loader2 } from 'lucide-react';
+import { Bell, Loader2, Menu, MessageCircle } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
 import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/useDoctorNotifications';
+import { useAuthStore } from '@/store/authStore';
 
 function greetingWord(): string {
   const h = new Date().getHours();
@@ -29,14 +29,15 @@ function initialsFromName(name: string): string {
 export default function DashboardHeader({
   title = 'لوحة الطبيب',
   subtitle: subtitleProp,
+  onMenuClick,
 }: {
   title?: string;
-  /** إن وُجد يُستخدم بدلاً من الاسم القادم من الحساب */
   subtitle?: string;
+  onMenuClick?: () => void;
 }) {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-  
+
   const { data: unreadTotal, isAwaitingData: unreadAwaiting } =
     useDoctorUnreadNotificationCount();
 
@@ -59,9 +60,7 @@ export default function DashboardHeader({
   const initials = useMemo(
     () =>
       initialsFromName(
-        subtitleProp?.trim()
-          ? subtitleProp.trim()
-          : user?.name?.trim() ?? '',
+        subtitleProp?.trim() ? subtitleProp.trim() : user?.name?.trim() ?? '',
       ),
     [subtitleProp, user?.name],
   );
@@ -83,7 +82,7 @@ export default function DashboardHeader({
     <header
       dir='rtl'
       lang='ar'
-      className='px-6 pt-3 pb-3 w-full sm:px-10 lg:px-12'
+      className='w-full px-4 pb-3 pt-3 sm:px-6 lg:px-12'
     >
       <div className='mx-auto max-w-[1420px]'>
         <div className='relative overflow-hidden rounded-[18px] border border-white/70 bg-gradient-to-br from-[#e8faf8] via-white to-[#f0fdf9] shadow-[0_14px_36px_-14px_rgba(15,143,139,0.2),inset_0_1px_0_rgba(255,255,255,0.9)]'>
@@ -104,21 +103,29 @@ export default function DashboardHeader({
             aria-hidden
           />
 
-          {/* ارتفاع البطاقة ~80–96px مع مرونة صعوداً إلى ~100px على الشاشات الضيقة جداً */}
-          <div className='relative flex min-h-[80px] max-h-[100px] items-center gap-3 px-4 py-2.5 sm:min-h-[84px] sm:gap-5 sm:px-6 sm:py-3'>
-            <div className='flex flex-1 gap-3 items-center min-w-0 min-h-0 sm:gap-4'>
+          <div className='relative flex min-h-[80px] items-center gap-3 px-4 py-2.5 sm:min-h-[84px] sm:gap-5 sm:px-6 sm:py-3'>
+            <button
+              type='button'
+              onClick={onMenuClick}
+              className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden'
+              aria-label='فتح القائمة'
+            >
+              <Menu className='h-[18px] w-[18px]' strokeWidth={2.25} />
+            </button>
+
+            <div className='flex min-h-0 min-w-0 flex-1 items-center gap-3 sm:gap-4'>
               <div className='relative shrink-0'>
                 <div className='flex h-[52px] w-[52px] items-center justify-center rounded-[16px] bg-gradient-to-br from-[#0f766e] via-[#0f8f8b] to-[#14b8a6] font-cairo text-[15px] font-black tracking-wide text-white shadow-[0_12px_28px_rgba(15,143,139,0.32)] ring-2 ring-white/95 sm:h-[56px] sm:w-[56px] sm:rounded-[18px] sm:text-[16px]'>
                   {initials}
                 </div>
                 <span
-                  className='absolute -bottom-px -left-px w-3 h-3 bg-emerald-400 rounded-full border-2 border-white shadow-sm'
+                  className='absolute -bottom-px -left-px h-3 w-3 rounded-full border-2 border-white bg-emerald-400 shadow-sm'
                   aria-hidden
                   title='متصل'
                 />
               </div>
 
-              <div className='flex flex-col flex-1 gap-1 justify-center min-w-0 min-h-0 text-right'>
+              <div className='flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-1 text-right'>
                 <div className='flex min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-0.5'>
                   <h1 className='max-w-full truncate font-cairo text-[16px] font-black leading-tight text-[#0f172a] sm:text-[17px]'>
                     {titledDisplay}
@@ -143,7 +150,7 @@ export default function DashboardHeader({
               </div>
             </div>
 
-            <div className='flex shrink-0 items-center gap-2 border-r border-[#e2e8f0]/80 pr-3 sm:gap-2.5 sm:pr-4'>
+            <div className='flex shrink-0 items-center gap-2 border-r border-[#e2e8f0]/80 pr-2 sm:gap-2.5 sm:pr-4'>
               <button
                 type='button'
                 onClick={handleNotificationsClick}
@@ -154,7 +161,10 @@ export default function DashboardHeader({
                 <Bell className='h-[17px] w-[17px]' strokeWidth={2.25} />
                 {unreadAwaiting ? (
                   <span className='absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100'>
-                    <Loader2 className='h-3 w-3 animate-spin text-gray-500' aria-hidden />
+                    <Loader2
+                      className='h-3 w-3 animate-spin text-gray-500'
+                      aria-hidden
+                    />
                   </span>
                 ) : unreadBadge ? (
                   <span className='absolute -left-1 -top-1 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-cairo text-[10px] font-bold text-white shadow-md'>
@@ -173,7 +183,7 @@ export default function DashboardHeader({
           </div>
 
           <div
-            className='absolute inset-x-0 bottom-0 h-px bg-gradient-to-l from-transparent to-transparent pointer-events-none via-primary/25'
+            className='pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-l from-transparent via-primary/25 to-transparent'
             aria-hidden
           />
         </div>

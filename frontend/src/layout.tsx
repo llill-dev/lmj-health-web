@@ -32,6 +32,7 @@ export default function ProtectedLayout({
   const { toast } = useToast();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -84,17 +85,17 @@ export default function ProtectedLayout({
 
   return (
     <PlatformSupportProvider>
-      <div className='h-screen overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]'>
-        <div className='relative mx-auto flex h-screen w-full max-w-screen-2xl'>
-          <main className='flex h-screen flex-1 flex-col'>
+      <div className='min-h-dvh overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]'>
+        <div className='relative mx-auto flex min-h-dvh w-full max-w-screen-2xl'>
+          <main className='flex min-h-dvh min-w-0 flex-1 flex-col'>
             <div className='sticky top-0 z-40'>
-              <DashboardHeader />
+              <DashboardHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
             </div>
-            <div className='flex-1 overflow-y-auto bg-transparent py-8 scrollbar-hide'>
+            <div className='flex-1 overflow-y-auto bg-transparent py-5 scrollbar-hide sm:py-6 lg:py-8'>
               <MotionProvider>
                 <AnimatePresence mode='wait'>
                   <PageTransition key={pathname}>
-                    <div className='mx-auto w-full max-w-[1420px] px-12'>
+                    <div className='mx-auto w-full max-w-[1420px] px-4 sm:px-6 lg:px-12'>
                       <Suspense fallback={<DoctorRouteFallback />}>
                         {children ?? <Outlet />}
                       </Suspense>
@@ -111,7 +112,9 @@ export default function ProtectedLayout({
           <Sidebar
             active={active}
             collapsed={isSidebarCollapsed}
+            mobileOpen={isMobileSidebarOpen}
             onToggleCollapse={() => setIsSidebarCollapsed((value) => !value)}
+            onCloseMobile={() => setIsMobileSidebarOpen(false)}
             onLogout={() => setLogoutConfirmOpen(true)}
             profileName={doctorName}
             profileEmail={doctorEmail}

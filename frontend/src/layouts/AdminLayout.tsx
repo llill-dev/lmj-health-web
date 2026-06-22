@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
   const { toast } = useToast();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -62,20 +63,21 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
   return (
     <AdminAppSettingsProvider>
     <AdminInboxToastBridge />
-    <div className='h-screen overflow-hidden bg-[#F5F7FA] scrollbar-hide'>
-      <div className='relative flex mx-auto h-screen w-full max-w-screen-2xl'>
-        <main className='flex h-screen min-h-0 min-w-0 flex-1 flex-col bg-[#F5F7FA]'>
+    <div className='min-h-dvh overflow-hidden bg-[#F5F7FA] scrollbar-hide'>
+      <div className='relative mx-auto flex min-h-dvh w-full max-w-screen-2xl'>
+        <main className='flex min-h-dvh min-h-0 min-w-0 flex-1 flex-col bg-[#F5F7FA]'>
           <div className='sticky top-0 z-40 shrink-0 bg-white'>
             <AdminHeader
+              onMenuClick={() => setIsMobileSidebarOpen(true)}
               onLogoutClick={() => setLogoutConfirmOpen(true)}
               loggingOut={loggingOut}
             />
           </div>
-          <div className='min-h-0 flex-1 overflow-y-auto bg-[#F5F7FA] py-8 scrollbar-hide'>
+          <div className='min-h-0 flex-1 overflow-y-auto bg-[#F5F7FA] py-5 scrollbar-hide sm:py-6 lg:py-8'>
             <MotionProvider>
               <AnimatePresence mode='wait'>
                 <PageTransition key={pathname}>
-                  <div className='mx-auto min-h-full w-full max-w-[1420px] px-6 pb-6 sm:px-10 lg:px-12'>
+                  <div className='mx-auto min-h-full w-full max-w-[1420px] px-4 pb-5 sm:px-6 sm:pb-6 lg:px-12'>
                     <Suspense fallback={<AdminRouteFallback />}>
                       {children ?? <Outlet />}
                     </Suspense>
@@ -90,7 +92,9 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
           role='admin'
           active={active}
           collapsed={isSidebarCollapsed}
+          mobileOpen={isMobileSidebarOpen}
           onToggleCollapse={() => setIsSidebarCollapsed((v) => !v)}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
           onLogout={() => setLogoutConfirmOpen(true)}
         />
       </div>

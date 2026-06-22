@@ -127,7 +127,7 @@ export function WaitlistTable({
               </td>
               <td className={DOCTOR_MINT_TABLE_TD}>
                 <div className="flex flex-col items-center justify-center gap-0.5">
-                  <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
+                  <div className="max-w-[180px] text-balance font-cairo text-[13px] font-extrabold text-[#101828] sm:max-w-none">
                     {resolveWaitlistPatientName(request)}
                   </div>
                 </div>
@@ -139,12 +139,12 @@ export function WaitlistTable({
                 />
               </td>
               <td className={DOCTOR_MINT_TABLE_TD}>
-                <div className="inline-flex items-center justify-center gap-1.5 font-cairo text-[12px] font-semibold text-[#475467]">
+                <div className="inline-flex max-w-[180px] items-center justify-center gap-1.5 font-cairo text-[12px] font-semibold text-[#475467] sm:max-w-none">
                   <Calendar
                     className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]"
                     aria-hidden
                   />
-                  <span>{formatPreferredRange(request)}</span>
+                  <span className="break-words">{formatPreferredRange(request)}</span>
                 </div>
               </td>
               <td className={DOCTOR_MINT_TABLE_TD}>
@@ -196,7 +196,7 @@ export function WaitlistTable({
         ? createPortal(
             <div
               ref={menuRef}
-              className="fixed z-[250] min-w-[196px] -translate-y-full rounded-[10px] border border-[#E5E7EB] bg-white py-1 text-center shadow-[0_16px_40px_rgba(15,23,42,0.16)]"
+              className="fixed z-[250] min-w-[196px] max-w-[calc(100vw-24px)] -translate-y-full rounded-[10px] border border-[#E5E7EB] bg-white py-1 text-center shadow-[0_16px_40px_rgba(15,23,42,0.16)]"
               style={{ top: menu.top, left: menu.left }}
               role="menu"
             >

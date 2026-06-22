@@ -131,7 +131,7 @@ export default function ConfirmDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed left-1/2 top-1/2 z-[10000] max-h-[calc(100dvh-24px)] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             style={{ width: maxWidth }}
             dir='rtl'
             lang='ar'
@@ -155,11 +155,11 @@ export default function ConfirmDialog({
               }}
               style={{ transformOrigin: 'center' }}
             >
-              <div className='relative px-8 pt-7'>
+              <div className='relative px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7'>
                 <Dialog.Close asChild>
                   <button
                     type='button'
-                    className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
+                    className='absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] sm:left-5 sm:top-5 lg:left-6 lg:top-6'
                     aria-label='إغلاق'
                   >
                     <X className='h-5 w-5' />
@@ -186,16 +186,20 @@ export default function ConfirmDialog({
               {children && (
                 <>
                   <div className='mt-5 h-px w-full bg-[#EEF2F6]' />
-                  <div className='px-8 py-5'>{children}</div>
+                  <div className='max-h-[40dvh] overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 lg:px-8'>
+                    {children}
+                  </div>
                 </>
               )}
 
               <div className={`${children ? '' : 'mt-7'} h-px w-full bg-[#EEF2F6]`} />
 
               {customActions ? (
-                <div className='px-8 pb-7 pt-6'>{customActions}</div>
+                <div className='px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5 lg:px-8 lg:pb-7 lg:pt-6'>
+                  {customActions}
+                </div>
               ) : (
-                <div className='grid grid-cols-2 gap-4 px-8 pb-7 pt-6'>
+                <div className='grid grid-cols-1 gap-3 px-4 pb-5 pt-4 sm:grid-cols-2 sm:gap-4 sm:px-6 sm:pb-6 sm:pt-5 lg:px-8 lg:pb-7 lg:pt-6'>
                   <Dialog.Close asChild>
                     <button
                       type='button'

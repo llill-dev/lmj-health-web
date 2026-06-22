@@ -83,9 +83,10 @@ export default function DoctorNotificationPage() {
       <div
         dir='rtl'
         lang='ar'
+        className='pb-8 sm:pb-10'
       >
-        <section className='rounded-[6px] border border-[#E5E7EB] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex items-start justify-between'>
+        <section className='rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6'>
+          <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
             <div className='flex flex-col gap-1 text-right'>
               <h1 className='font-cairo text-[22px] font-black leading-[28px] text-[#111827]'>
                 الإشعارات
@@ -95,12 +96,12 @@ export default function DoctorNotificationPage() {
               </p>
             </div>
 
-            <div className='flex flex-col items-end gap-3'>
+            <div className='flex flex-col items-stretch gap-3 sm:items-end'>
               <div className='inline-flex h-[34px] items-center justify-center rounded-[6px] bg-primary px-3 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15, 143, 139,0.25)]'>
                 {newCount} جديد
               </div>
 
-              <div className='flex items-center gap-2'>
+              <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
                 <button
                   type='button'
                   onClick={markAllRead}
@@ -156,8 +157,8 @@ export default function DoctorNotificationPage() {
                       : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]'
                   }
                 >
-                  <div className='flex h-[151px] items-stretch justify-between gap-4 px-5 py-4'>
-                    <div className='flex flex-1 items-start justify-between gap-4'>
+                  <div className='flex min-h-[151px] flex-col gap-4 px-4 py-4 sm:px-5'>
+                    <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
                       <div className='flex items-center justify-center  bg-[#FFFFFF] w-12 h-12 rounded-[6px] shadow-[0px_4px_6px_-1px_#0000001A]'>
                         {getTypeIcon(n.kind)}
                       </div>
@@ -176,7 +177,7 @@ export default function DoctorNotificationPage() {
                           </span>
                         </div>
                       </div>
-                      <div className='flex items-start gap-3'>
+                      <div className='flex items-center justify-between gap-3 sm:justify-start sm:self-start'>
                         {n.isNew ? (
                           <div className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-primary px-2 font-cairo text-[12px] font-semibold text-white'>
                             جديد

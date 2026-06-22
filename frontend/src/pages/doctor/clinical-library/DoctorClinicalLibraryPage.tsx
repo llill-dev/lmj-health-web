@@ -439,7 +439,7 @@ export default function DoctorClinicalLibraryPage() {
 
 
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
 
         <DoctorDashboardOverview
 
@@ -602,7 +602,7 @@ export default function DoctorClinicalLibraryPage() {
 
 
 
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
 
             {section === 'library' ? (
 

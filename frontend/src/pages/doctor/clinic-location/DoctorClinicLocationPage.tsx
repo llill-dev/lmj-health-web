@@ -255,9 +255,9 @@ export default function DoctorClinicLocationPage() {
         <title>موقع العيادة • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
-        <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
-          <div className="flex items-start justify-between gap-4">
+      <div dir="rtl" lang="ar" className="pb-8 sm:pb-10">
+        <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
               <button
                 type="button"
@@ -295,7 +295,7 @@ export default function DoctorClinicLocationPage() {
           ) : null}
         </section>
 
-        <section className="mt-5 rounded-[6px] border border-[#EEF2F6] bg-white p-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
+        <section className="mt-5 rounded-[6px] border border-[#EEF2F6] bg-white p-4 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:p-5">
           <div className="relative">
             <div className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
               <Search className="h-4 w-4" />
@@ -364,7 +364,7 @@ export default function DoctorClinicLocationPage() {
               </div>
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 grid grid-cols-2 gap-3 bg-white/95 px-5 py-4 backdrop-blur-sm">
+            <div className="absolute bottom-0 left-0 right-0 grid grid-cols-1 gap-3 bg-white/95 px-4 py-4 backdrop-blur-sm sm:grid-cols-2 sm:px-5">
               <div className="text-right">
                 <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                   خط العرض
@@ -385,8 +385,8 @@ export default function DoctorClinicLocationPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
-          <div className="flex items-start justify-between">
+        <section className="mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-[#E9FFFE] text-primary">
                 <Navigation className="h-4 w-4" />
@@ -433,7 +433,7 @@ export default function DoctorClinicLocationPage() {
             />
           </div>
 
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-right">
               <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
                 حالة التحقق
@@ -464,8 +464,8 @@ export default function DoctorClinicLocationPage() {
           </button>
         </section>
 
-        <section className="mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
-          <div className="flex items-center justify-between">
+        <section className="mt-5 rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-[30px] w-[30px] items-center justify-center text-primary">
                 <MapPin className="h-4 w-4" />
@@ -498,7 +498,7 @@ export default function DoctorClinicLocationPage() {
           </div>
         </section>
 
-        <div className="h-10" />
+        <div className="h-8 sm:h-10" />
       </div>
     </>
   );

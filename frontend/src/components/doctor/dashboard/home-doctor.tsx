@@ -52,7 +52,7 @@ function KpiStatCard({
 }: KpiCard) {
   return (
     <article
-      className='min-h-[180px] max-w-[500px] rounded-[16px] border border-[#E7EDF5] bg-white px-4 py-4 shadow-[0_10px_20px_rgba(15,23,42,0.04)]'
+      className='min-h-[180px] w-full rounded-[16px] border border-[#E7EDF5] bg-white px-4 py-4 shadow-[0_10px_20px_rgba(15,23,42,0.04)] sm:px-5'
       style={{ borderBottomWidth: '4px', borderBottomColor: accent }}
     >
       <div className='flex justify-between items-start gap-5'>
@@ -93,7 +93,7 @@ function SurfaceSection({
 }) {
   return (
     <section className='overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]'>
-      <header className='border-b border-[#EDF2F7] px-8 py-9'>
+      <header className='border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9'>
         <h2 className='text-right font-cairo text-[23px] font-black leading-none text-[#243044]'>
           {title}
         </h2>
@@ -221,8 +221,8 @@ export default function HomeDoctor() {
     stats?.attendanceRate != null ? `${stats.attendanceRate}%` : '—';
 
   return (
-    <div dir='rtl' lang='ar' className='space-y-7 pb-8'>
-      <section className='grid gap-12 md:grid-cols-2 lg:grid-cols-4'>
+    <div dir='rtl' lang='ar' className='space-y-6 pb-6 sm:space-y-7 sm:pb-8'>
+      <section className='grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 xl:gap-8'>
         {kpis.map((card) => (
           <KpiStatCard
             key={card.key}
@@ -268,12 +268,12 @@ export default function HomeDoctor() {
       <section className='grid gap-6 xl:grid-cols-2'>
         <DiagnosisAnalyticsSection />
         <SurfaceSection title='مواعيد اليوم'>
-          <div className='space-y-4 px-5 py-6'>
+          <div className='space-y-4 px-4 py-5 sm:px-5 sm:py-6'>
             {todayRows.length > 0 ? (
               todayRows.map((row) => (
                 <article
                   key={`${row.time}-${row.name}`}
-                  className='flex items-center justify-between rounded-[16px] bg-[#F8FAFC] px-4 py-4'
+                  className='flex flex-col gap-4 rounded-[16px] bg-[#F8FAFC] px-4 py-4 sm:flex-row sm:items-center sm:justify-between'
                 >
                   <div className='flex items-center gap-4'>
                     <div className='flex h-[45px] w-[45px] items-center justify-center rounded-[10px] bg-primary text-white'>
@@ -290,7 +290,7 @@ export default function HomeDoctor() {
                       </div>
                     </div>
                   </div>
-                  <div className='text-left'>
+                  <div className='text-right sm:text-left'>
                     <div className='font-cairo text-[18px] font-black text-[#243044]'>
                       {row.time}
                     </div>
@@ -312,7 +312,7 @@ export default function HomeDoctor() {
 
       <DashboardPatientsTable {...patientsSearch} />
 
-      <div className='grid gap-8 md:grid-cols-3'>
+      <div className='grid gap-4 sm:gap-6 md:grid-cols-3 lg:gap-8'>
         {[
           {
             key: 'rating',
@@ -340,7 +340,7 @@ export default function HomeDoctor() {
           return (
             <div
               key={card.key}
-              className='rounded-[10px] bg-[#FFFFFF] px-8 py-8 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.10),0px_1px_3px_0px_rgba(0,0,0,0.10)]'
+              className='rounded-[10px] bg-[#FFFFFF] px-4 py-5 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.10),0px_1px_3px_0px_rgba(0,0,0,0.10)] sm:px-6 sm:py-6 lg:px-8 lg:py-8'
             >
               <div className='flex items-center justify-between'>
                 <div className='text-right'>

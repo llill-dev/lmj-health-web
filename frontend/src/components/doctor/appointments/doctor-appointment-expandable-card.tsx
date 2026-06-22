@@ -58,11 +58,11 @@ function DetailRow({
   return (
     <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
       <Icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
-      <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 text-right sm:flex-row sm:items-center sm:gap-4">
         <div className="font-cairo text-[16px] font-bold text-primary">
           {label}
         </div>
-        <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
+        <div className="mt-0.5 break-words font-cairo text-[16px] font-normal text-[#1F2937]">
           {value}
         </div>
       </div>
@@ -137,7 +137,7 @@ export default function DoctorAppointmentExpandableCard({
       )}
     >
       <div className="px-4 py-4 sm:px-5 sm:py-4">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-1 items-start gap-3">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary font-cairo text-[18px] font-extrabold text-white shadow-[0_8px_18px_rgba(15,143,139,0.22)]">
               {appointment.patientInitials}
@@ -174,7 +174,7 @@ export default function DoctorAppointmentExpandableCard({
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col items-center gap-2 sm:flex-row sm:items-start">
+          <div className="flex shrink-0 items-center justify-between gap-2 sm:flex-row sm:items-start">
             <span className="rounded-lg bg-primary px-2.5 py-1 font-cairo text-[11px] font-bold text-white">
               {kindLabel}
             </span>

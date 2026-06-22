@@ -96,7 +96,7 @@ function SurfaceSection({
 }) {
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-      <header className="border-b border-[#EDF2F7] px-8 py-9">
+      <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
         <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
           {title}
         </h2>
@@ -114,7 +114,7 @@ function PatientsSearchInput({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -139,8 +139,8 @@ function PatientTableRow({
   const status = accountStatusPresentation(patient);
 
   return (
-    <div className="grid grid-cols-12 items-center gap-4 border-b border-[#EEF2F6] px-8 py-5 last:border-b-0">
-      <div className="col-span-4 flex items-center gap-4">
+    <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
+      <div className="flex items-center gap-4 lg:col-span-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
           <span className="font-cairo text-[20px] font-black">
             {patientInitials(patient.user.fullName)}
@@ -156,20 +156,20 @@ function PatientTableRow({
         </div>
       </div>
 
-      <div className="col-span-3 truncate font-cairo text-[16px] font-bold text-[#243044]">
+      <div className="truncate font-cairo text-[16px] font-bold text-[#243044] lg:col-span-3">
         {patient.user.phone ?? "—"}
       </div>
-      <div className="col-span-2 font-cairo text-[16px] font-extrabold text-[#243044]">
+      <div className="font-cairo text-[16px] font-extrabold text-[#243044] lg:col-span-2">
         {formatIsoDate(patient.lastVisitAt)}
       </div>
-      <div className="col-span-1">
+      <div className="lg:col-span-1">
         <span
           className={`inline-flex rounded-[8px] px-3 py-1.5 font-cairo text-[13px] font-black ${status.className}`}
         >
           {status.label}
         </span>
       </div>
-      <div className="col-span-2 text-left">
+      <div className="text-right lg:col-span-2 lg:text-left">
         <button
           type="button"
           onClick={() => onOpen(patient._id)}
@@ -282,7 +282,7 @@ export function DashboardPatientsSearchCard({
 
   return (
     <SurfaceSection title="المرضى">
-      <div className="px-5 py-6">
+      <div className="px-4 py-5 sm:px-5 sm:py-6">
         <PatientsSearchInput
           value={searchInput}
           onChange={setSearchInput}
@@ -345,7 +345,7 @@ export function DashboardPatientsTable({
 
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-      <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-8 py-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
         <div className="text-right">
           <h2 className="font-cairo text-[23px] font-black text-[#243044]">
             المرضى
@@ -379,7 +379,7 @@ export function DashboardPatientsTable({
         </div>
       </div>
 
-      <div className="border-b border-[#EEF2F6] px-8 py-4">
+      <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
         <div className="grid grid-cols-12 gap-4 text-right font-cairo text-[14px] font-bold text-[#A1AAB9]">
           <div className="col-span-4">اسم المريض</div>
           <div className="col-span-3">رقم الهاتف</div>
@@ -406,7 +406,7 @@ export function DashboardPatientsTable({
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="grid grid-cols-12 gap-4 border-b border-[#EEF2F6] px-8 py-5 last:border-b-0"
+              className="grid grid-cols-12 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:px-8 lg:py-5"
             >
               <div className="col-span-4 flex items-center gap-4">
                 <div className="h-12 w-12 animate-pulse rounded-[12px] bg-[#E2E8F0]" />
@@ -423,7 +423,7 @@ export function DashboardPatientsTable({
           ))}
         </div>
       ) : patients.length === 0 ? (
-        <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-8 py-10 text-center">
+        <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
           <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
             {emptyMessage}
           </p>
@@ -445,7 +445,7 @@ export function DashboardPatientsTable({
           ))}
 
           {patientsQuery.total > patients.length ? (
-            <div className="border-t border-[#EEF2F6] px-8 py-4 text-center">
+            <div className="border-t border-[#EEF2F6] px-4 py-4 text-center sm:px-8">
               <Link
                 to="/doctor/patients"
                 className="inline-flex items-center gap-2 font-cairo text-[14px] font-black text-primary hover:underline"

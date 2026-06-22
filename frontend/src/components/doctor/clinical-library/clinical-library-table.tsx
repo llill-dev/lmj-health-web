@@ -30,7 +30,7 @@ export function ClinicalLibraryItemsTable({
           className="border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60"
         >
           <td className={DOCTOR_MINT_TABLE_TD}>
-            <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
+            <div className="max-w-[220px] break-words font-cairo text-[13px] font-extrabold text-[#101828] sm:max-w-none">
               {item.label ?? '—'}
             </div>
           </td>
@@ -106,7 +106,7 @@ export function ClinicalLibraryTemplatesTable({
           className="border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60"
         >
           <td className={DOCTOR_MINT_TABLE_TD}>
-            <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
+            <div className="max-w-[220px] break-words font-cairo text-[13px] font-extrabold text-[#101828] sm:max-w-none">
               {template.name ?? '—'}
             </div>
           </td>

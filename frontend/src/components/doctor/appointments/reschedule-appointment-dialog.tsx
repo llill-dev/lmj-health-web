@@ -191,7 +191,7 @@ export default function RescheduleAppointmentDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-visible rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed left-1/2 top-1/2 z-[10000] w-[680px] max-h-[calc(100dvh-24px)] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             dir='rtl'
             lang='ar'
           >
@@ -216,11 +216,11 @@ export default function RescheduleAppointmentDialog({
                 },
               }}
             >
-              <div className='relative px-8 pt-7'>
+              <div className='relative max-h-[calc(100dvh-24px)] overflow-y-auto px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7'>
                 <Dialog.Close asChild>
                   <button
                     type='button'
-                    className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
+                    className='absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] sm:left-5 sm:top-5 lg:left-6 lg:top-6'
                     aria-label='إغلاق'
                   >
                     <X className='h-5 w-5' />
@@ -231,12 +231,12 @@ export default function RescheduleAppointmentDialog({
                   إعادة جدولة الموعد
                 </Dialog.Title>
 
-                <div className='mt-8 text-right font-cairo text-[16px] font-extrabold text-[#101828]'>
+                <div className='mt-6 text-right font-cairo text-[16px] font-extrabold text-[#101828] sm:mt-8'>
                   {patientName}
                 </div>
 
                 <form
-                  className='mt-8 space-y-5 pb-7'
+                  className='mt-6 space-y-5 pb-5 sm:mt-8 sm:pb-6 lg:pb-7'
                   onSubmit={handleSubmit(async (values) => {
                     await onConfirm({
                       date: values.date,
@@ -247,7 +247,7 @@ export default function RescheduleAppointmentDialog({
                     onOpenChange(false);
                   })}
                 >
-                  <div className='grid grid-cols-2 gap-4'>
+                  <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
                     <div>
                       <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[14px] font-extrabold text-[#101828]'>
                         <CalendarDays className='h-4 w-4 text-primary' />
@@ -374,7 +374,7 @@ export default function RescheduleAppointmentDialog({
                     ) : null}
                   </div>
 
-                  <div className='grid grid-cols-2 gap-4'>
+                  <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4'>
                     <Dialog.Close asChild>
                       <button
                         type='button'

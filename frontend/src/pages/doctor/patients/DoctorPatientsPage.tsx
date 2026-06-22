@@ -1080,12 +1080,12 @@ export default function DoctorPatientsPage() {
           )}
         </section>
         {/* Modern pagination section - Admin style */}
-        <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="font-cairo text-[12px] font-bold text-[#667085]">
+        <section className="mt-5 flex flex-col gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="text-right font-cairo text-[12px] font-bold text-[#667085]">
             الصفحة {filters.page} من {totalPages}
           </div>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <div className="w-[118px] shrink-0">
               <StyledSelect
                 size="xs"

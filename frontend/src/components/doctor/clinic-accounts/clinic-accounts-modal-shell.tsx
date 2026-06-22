@@ -40,7 +40,7 @@ export function ClinicAccountsModalShell({
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
+          className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/45 px-3 py-4 sm:px-4 sm:py-8"
           role="dialog"
           aria-modal="true"
           aria-label={title}
@@ -53,7 +53,7 @@ export function ClinicAccountsModalShell({
           }}
         >
           <motion.div
-            className={`relative w-full ${maxWidthClass} max-h-[min(92vh,820px)] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]`}
+            className={`relative w-full ${maxWidthClass} max-h-[min(94dvh,820px)] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]`}
             initial={{ opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -63,8 +63,8 @@ export function ClinicAccountsModalShell({
             <div
               className={
                 headerPattern
-                  ? 'relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8'
-                  : 'border-b border-[#EEF2F6] px-8 pb-5 pt-8'
+                  ? 'relative overflow-hidden border-b border-[#EEF2F6] px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 lg:px-8 lg:pb-5 lg:pt-8'
+                  : 'border-b border-[#EEF2F6] px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 lg:px-8 lg:pb-5 lg:pt-8'
               }
             >
               {headerPattern ? (
@@ -82,7 +82,7 @@ export function ClinicAccountsModalShell({
               <button
                 type="button"
                 onClick={onClose}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
+                className="absolute left-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] sm:left-5 sm:top-5 lg:left-6 lg:top-6"
                 aria-label="إغلاق"
               >
                 <X className="h-5 w-5" aria-hidden />
@@ -92,7 +92,7 @@ export function ClinicAccountsModalShell({
               </h2>
             </div>
 
-            <div className="max-h-[calc(92vh-120px)] overflow-y-auto px-8 py-6">
+            <div className="max-h-[calc(94dvh-108px)] overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
               {children}
             </div>
           </motion.div>

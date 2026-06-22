@@ -908,7 +908,7 @@ export default function DoctorAppointmentsPage() {
         <section className="mb-6">
           <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.06),0_2px_8px_rgba(0,0,0,0.03)]">
             {filters.view === "waiting" && (
-              <div className="border-b border-[#F2F4F7] px-6 py-3">
+              <div className="border-b border-[#F2F4F7] px-4 py-3 sm:px-6">
                 <p className="font-cairo text-[13px] font-semibold text-[#667085]">
                   قائمة الانتظار تعرض المواعيد المجدولة ضمن نفس فلاتر الباكند
                   الحالية.
@@ -916,7 +916,7 @@ export default function DoctorAppointmentsPage() {
               </div>
             )}
 
-            <div className="px-6 py-4">
+            <div className="px-4 py-4 sm:px-6">
               {appointmentsListFailed ? (
                 <DoctorListErrorState
                   title={appointmentsLoadErrorPresentation.title}
@@ -1067,12 +1067,12 @@ export default function DoctorAppointmentsPage() {
         </section>
 
         {/* Pagination — متناغم مع بطاقة الفلاتر */}
-        <section className="mt-5 flex items-center justify-between rounded-2xl border border-[#E5E7EB] bg-white px-6 py-4 shadow-[0_20px_50px_rgba(15,143,139,0.06),0_2px_8px_rgba(0,0,0,0.03)]">
-          <div className="font-cairo text-[12px] font-bold text-[#667085]">
+        <section className="mt-5 flex flex-col gap-4 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_20px_50px_rgba(15,143,139,0.06),0_2px_8px_rgba(0,0,0,0.03)] sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="text-right font-cairo text-[12px] font-bold text-[#667085]">
             الصفحة {filters.page} من {totalPages}
           </div>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <div className="w-[118px] shrink-0">
               <StyledSelect
                 size="xs"

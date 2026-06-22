@@ -171,7 +171,7 @@ export default function DoctorPatientExpandableCard({
       )}
     >
       <div className="px-4 py-4 sm:px-5 sm:py-4">
-        <div className="flex gap-3 justify-between items-start">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-1 gap-3 items-start min-w-0">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-[0_8px_18px_rgba(15,143,139,0.22)]">
               <UserRound className="w-7 h-7" aria-hidden strokeWidth={1.75} />
@@ -230,7 +230,7 @@ export default function DoctorPatientExpandableCard({
             aria-expanded={expanded}
             aria-label={expanded ? "طي المعاينة السريعة" : "عرض المعاينة السريعة"}
             onClick={onToggle}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#344054] transition-colors hover:border-primary hover:text-primary"
+            className="flex h-9 w-9 shrink-0 self-end items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#344054] transition-colors hover:border-primary hover:text-primary sm:self-auto"
           >
             <ChevronDown
               className={cn(

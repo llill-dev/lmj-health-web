@@ -1,149 +1,107 @@
-# تدقيق تغطية Endpoints لداشبورد الطبيب فقط
+# Doctor Dashboard API Coverage Audit
 
-## النطاق
+## Scope
 
-هذا التقرير يطبق البروميت على **الـ endpoints المرتبطة مباشرة بصفحة داشبورد الطبيب** فقط:
+This audit is intentionally limited to the **doctor dashboard page only**:
 
-- route: `/doctor/dashboard`
-- page: `frontend/src/pages/doctor/dashboard/DoctorDashboardPage.tsx`
-- shell component: `frontend/src/components/doctor/dashboard/home-doctor.tsx`
-- hooks/live data المستخدمة داخل الصفحة نفسها
+- Route: `/doctor/dashboard`
+- Page: `frontend/src/pages/doctor/dashboard/DoctorDashboardPage.tsx`
+- Main shell: `frontend/src/components/doctor/dashboard/home-doctor.tsx`
+- Dashboard widgets directly rendered there
 
-لا يشمل هذا التقرير بقية صفحات بوابة الطبيب مثل:
+Excluded on purpose:
 
-- المرضى
-- المواعيد كصفحة مستقلة
-- الملف الشخصي
-- السجل الطبي
-- الزيارات
-- السكرتارية
+- Patient dashboard
+- Other doctor portal pages such as patients, appointments, records, encounters, profile settings, billing screens
+- Admin scope
 
-## ملخص تنفيذي
+## Executive Summary
 
-- تمّت مراجعة **6 قدرات/عناقيد API** مرتبطة مباشرة بالداشبورد.
-- الحالة الحالية:
-  - `1` مكتمل
-  - `4` جزئي
-  - `1` مفقود
-  - `0` غير منطبق
-- أكبر فجوة حالية أن الداشبورد ما يزال يعتمد جزئيًا على `api_mock` بدل endpoints الطبيب الحقيقية.
-- أهم مشكلة وظيفية: بطاقات الإحصاءات السفلية وبعض إحصاءات الأعلى لا تُغذّى من API canonical للطبيب.
-- أهم مشكلة عقد/تكامل: fallback إلى mock appointments عندما تُرجع الـ API قائمة فارغة فعليًا قد يخفي حالة "لا يوجد بيانات".
+- Total dashboard capability clusters reviewed: `7`
+- Status counts:
+  - Complete: `5`
+  - Partial: `2`
+  - Missing: `0`
+  - N/A: `0`
+- The doctor dashboard is now mostly backend-driven.
+- Core live integrations now in place:
+  - `/api/doctors/home/snapshot`
+  - `/api/doctors/analytics/summary`
+  - `/api/doctors/analytics/diagnosis`
+  - `/api/appointments`
+  - `/api/doctors/patients`
+  - `/api/doctors/internal/directory`
+- No patient-dashboard work is included in this report.
 
-## مصفوفة التغطية
+## Coverage Matrix
 
-| المجال | Method | Path | الحالة | دليل الواجهة | ملاحظات |
-|---|---|---|---|---|---|
-| Dashboard snapshot | `GET` | `/api/doctors/home/snapshot` | ✅ مكتمل | `lib/doctor/homeSnapshot.ts`, `hooks/doctor/useDoctorHomeSnapshot.ts`, `components/doctor/dashboard/home-doctor.tsx` | مربوط فعليًا ويغذي KPIs الرئيسية |
-| Dashboard stats | `GET` | `/api/doctors/analytics/summary` | ❌ مفقود | `hooks/doctor/useDashboardStats.ts` | الداشبورد لا يستخدم endpoint التحليلات، بل `api_mock.getDashboardStats()` |
-| Today appointments | `GET` | `/api/appointments` | ⚠️ جزئي | `hooks/doctor/useDoctorAppointmentsApi.ts`, `lib/doctor/client.ts`, `components/doctor/dashboard/home-doctor.tsx` | يوجد ربط live، لكن الصفحة تعمل fallback إلى mock إذا كانت القائمة live فارغة |
-| Quick patient search | `GET` | `/api/doctors/patients` | ✅ مكتمل | `hooks/doctor/useDashboardPatientsSearch.ts`, `hooks/doctor/useDoctorPatients.ts`, `lib/doctor/client.ts` | البحث السريع على مرضى الطبيب مربوط بالواجهة |
-| Active consultation summary | `GET` | `/api/doctors/home/snapshot` + consultation flows | ⚠️ جزئي | `components/doctor/dashboard/home-doctor.tsx` | الداشبورد يقرأ summary فقط من snapshot، بدون flow حي داخل الصفحة |
-| Waitlist summary | `GET` | `/api/doctors/home/snapshot` + waitlist endpoints | ⚠️ جزئي | `components/doctor/dashboard/home-doctor.tsx` | يعرض nearest waitlist request فقط، بلا تكامل أعمق من داخل الداشبورد |
+| Domain | Method | Path | Roles | Status | Frontend evidence | Notes |
+|---|---|---|---|---|---|---|
+| Dashboard snapshot | `GET` | `/api/doctors/home/snapshot` | doctor | Complete | `src/lib/doctor/homeSnapshot.ts`, `src/hooks/doctor/useDoctorHomeSnapshot.ts`, `src/components/doctor/dashboard/home-doctor.tsx` | Drives KPI cards and summary widgets |
+| Dashboard summary analytics | `GET` | `/api/doctors/analytics/summary` | doctor | Complete | `src/lib/doctor/endpoints.ts`, `src/hooks/doctor/useDashboardStats.ts`, `src/components/doctor/dashboard/home-doctor.tsx` | Replaced old mock stats |
+| Diagnosis analytics | `GET` | `/api/doctors/analytics/diagnosis` | doctor | Complete | `src/hooks/doctor/useDoctorDiagnosisAnalytics.ts`, `src/components/doctor/dashboard/diagnosis-analytics-section.tsx`, `src/lib/doctor/endpoints.ts` | Live diagnosis widget present |
+| Today appointments | `GET` | `/api/appointments` | doctor | Complete | `src/hooks/doctor/useDoctorAppointmentsApi.ts`, `src/lib/doctor/client.ts`, `src/components/doctor/dashboard/home-doctor.tsx` | Mock fallback removed from dashboard |
+| Quick patient search | `GET` | `/api/doctors/patients` | doctor | Complete | `src/hooks/doctor/useDashboardPatientsSearch.ts`, `src/hooks/doctor/useDoctorPatients.ts`, `src/lib/doctor/client.ts` | Live search table/card |
+| Self rating | `GET` | `/api/doctors/internal/directory` | doctor, secretary | Complete | `src/hooks/doctor/useDoctorSelfRating.ts`, `src/components/doctor/dashboard/home-doctor.tsx` | Used to render live rating |
+| Active consultation + waitlist summary | `GET` | `/api/doctors/home/snapshot` plus consultation/waitlist domains | doctor | Partial | `src/components/doctor/dashboard/active-consultations-section.tsx`, `src/components/doctor/dashboard/consultations-waiting-section.tsx`, `src/components/doctor/dashboard/home-doctor.tsx` | Summary display exists, but dashboard does not expose deeper workflow actions |
 
-## الفجوات التفصيلية
+## Detailed Gap Backlog
 
-### 1) إحصاءات الداشبورد التحليلية
+### P1: Active consultation widget is summary-only
 
-- **Backend:** `GET /api/doctors/analytics/summary`
-- **الغرض:** مصدر canonical لملخصات الطبيب التحليلية
-- **الحالة الحالية:** `frontend/src/hooks/doctor/useDashboardStats.ts` يستخدم `api_mock.getDashboardStats()` فقط
-- **نوع الفجوة:** `mock only`
-- **الأولوية:** `P0`
-- **الأثر:** بطاقات مثل عدد السجلات الطبية والمؤشرات العامة ليست قادمة من backend الحقيقي
-- **الإصلاح المقترح:**
-  - إضافة client/hook لطرف `GET /api/doctors/analytics/summary`
-  - استبدال `useDashboardStats` بمصدر live
-  - حذف الاعتماد على `api_mock` من الداشبورد
+- **Backend:** snapshot + consultation flows such as:
+  - `GET /api/doctors/home/snapshot`
+  - `GET /api/consultations`
+  - `GET /api/consultations/:ticketId`
+- **Purpose:** surface and continue active consultation work
+- **Current state:** `ActiveConsultationsSection` only displays snapshot-derived text in:
+  - `src/components/doctor/dashboard/active-consultations-section.tsx`
+  - `src/components/doctor/dashboard/home-doctor.tsx`
+- **Gap type:** partial workflow
+- **Why partial:** dashboard shows context, but not a concrete resume action into the consultation flow
+- **Suggested fix:**
+  - Add a CTA to open the consultation or encounter if an identifier is available
+  - If snapshot lacks the identifier, extend the widget input contract from a live consultation query
 
-### 2) مواعيد اليوم في الداشبورد
+### P2: Waitlist widget is summary-only
 
-- **Backend:** `GET /api/appointments`
-- **الغرض:** جلب المواعيد لليوم الحالي للطبيب
-- **الحالة الحالية:** يوجد ربط live عبر `useDoctorAppointmentsApi`، لكن `home-doctor.tsx` يستخدم:
-  - `apiAppointments.length ? apiAppointments : mockAppointments`
-- **نوع الفجوة:** `mock fallback / incorrect empty-state behavior`
-- **الأولوية:** `P0`
-- **الأثر:** إذا رجعت API الحقيقية قائمة فارغة بشكل صحيح، الواجهة قد تستبدلها ببيانات mock وتعرض حالة مضللة
-- **الإصلاح المقترح:**
-  - إزالة fallback إلى `useAppointments`
-  - اعتماد empty state حقيقي عندما تكون `apiAppointments.length === 0`
-  - الإبقاء على mock فقط في وضع تطوير صريح إن لزم
+- **Backend:** waitlist family such as:
+  - `GET /waitlist`
+  - `GET /waitlist/:id`
+  - `PATCH /waitlist/:id/contacted`
+  - `PATCH /waitlist/:id/close`
+- **Purpose:** surface nearest pending waitlist demand and allow follow-up
+- **Current state:** `ConsultationsWaitingSection` only shows a patient name from snapshot
+- **Gap type:** partial workflow
+- **Why partial:** dashboard displays nearest waitlist request but does not offer follow-up action from the card itself
+- **Suggested fix:**
+  - Add a deep-link or CTA to the doctor waitlist workflow once that page is in scope
+  - Or clearly label the card as informational-only
 
-### 3) بطاقات التقييم ونسبة الحضور
+## Quick Wins
 
-- **Backend المتوقع:** `GET /api/doctors/analytics/summary` وربما endpoints تحليلات/مراجعات ذات صلة
-- **الحالة الحالية:** داخل `frontend/src/components/doctor/dashboard/home-doctor.tsx`
-  - `4.9/5`
-  - `94%`
-  - مكتوبة كقيم ثابتة hardcoded
-- **نوع الفجوة:** `no client / hardcoded UI`
-- **الأولوية:** `P1`
-- **الأثر:** الواجهة توحي ببيانات حقيقية بينما هي ثابتة
-- **الإصلاح المقترح:**
-  - ربط القيم بمصدر backend حقيقي أو إخفاؤها مؤقتًا
-  - في حال عدم وجود endpoint واضح، توثيقها كـ deferred UI
+1. Add dashboard CTA for active consultation resume.
+2. Add dashboard CTA for nearest waitlist item.
+3. Standardize dashboard error copy to use the shared request error formatter.
 
-### 4) الاستشارات النشطة داخل الداشبورد
+## Current State Conclusion
 
-- **Backend:** يظهر في API-3 وجود consultation flows (`/consultations`, `/consultations/:ticketId`, messages, status...)
-- **الحالة الحالية:** الداشبورد يعرض ملخصًا محدودًا من `snapshot.activeConsultation`
-- **نوع الفجوة:** `partial workflow`
-- **الأولوية:** `P1`
-- **الأثر:** بطاقة الاستشارة النشطة informative فقط، وليست نقطة دخول كاملة إلى workflow حي من الداشبورد
-- **الإصلاح المقترح:**
-  - ربط البطاقة بتنقل مباشر إلى consultation/encounter المناسب
-  - أو تغذيتها من hook موحد يربط snapshot مع consultation state الفعلية
+The doctor dashboard is no longer mock-driven in its main data paths.
 
-### 5) قائمة الانتظار داخل الداشبورد
+What is now live:
 
-- **Backend:** API-3 يذكر waitlist endpoints (`GET /waitlist`, `GET /waitlist/me`, `PATCH /waitlist/:id/contacted`, ... )
-- **الحالة الحالية:** الداشبورد يقرأ `nearestWaitlistRequest` فقط من snapshot
-- **نوع الفجوة:** `summary only`
-- **الأولوية:** `P2`
-- **الأثر:** لا يوجد تعامل غني من الداشبورد مع waitlist beyond summary
-- **الإصلاح المقترح:**
-  - إضافة deep-link واضح إلى صفحة waitlist عندما تصبح ضمن نطاق الطبيب
-  - أو الاكتفاء بالملخص مع توضيح أنه summary card فقط
+- snapshot
+- summary stats
+- diagnosis analytics
+- today appointments
+- patient quick search
+- self rating
 
-## ما هو مكتمل وجيد
+What remains partially integrated:
 
-### Snapshot الرئيسي للداشبورد
+- active consultation widget
+- waitlist widget
 
-- `frontend/src/lib/doctor/homeSnapshot.ts`
-- `frontend/src/hooks/doctor/useDoctorHomeSnapshot.ts`
-- `frontend/src/components/doctor/dashboard/home-doctor.tsx`
+So the most accurate current label is:
 
-هذا الربط جيد، لأن:
-
-- endpoint حي
-- hook واضح
-- UI يستخدم النتيجة فعليًا
-- هناك loading/error state أساسي
-
-### بحث المرضى السريع
-
-- `frontend/src/hooks/doctor/useDashboardPatientsSearch.ts`
-- `frontend/src/hooks/doctor/useDoctorPatients.ts`
-- `frontend/src/lib/doctor/client.ts`
-
-هذا المسار يبدو مربوطًا live بشكل سليم، ويخدم الداشبورد مباشرة.
-
-## أولويات التنفيذ المقترحة
-
-1. استبدال `useDashboardStats` من mock إلى endpoint تحليلي حقيقي للطبيب.
-2. حذف fallback من `useAppointments` داخل `home-doctor.tsx`.
-3. تحويل القيم hardcoded (`rating`, `attendance`) إلى بيانات live أو إخفائها.
-4. تحسين ربط بطاقات `activeConsultation` و`waitlist` بتدفقات حقيقية أو روابط واضحة.
-
-## خلاصة عملية
-
-الداشبورد الحالي للطبيب **ليس غير مربوط**، لكنه **مختلط** بين:
-
-- بيانات live حقيقية: `home snapshot`, `patients search`, `appointments api`
-- وبيانات mock / hardcoded: `dashboard stats`, بعض مؤشرات الأداء, fallback المواعيد
-
-بالتالي الحالة الأدق له الآن:
-
-- **Live partially integrated dashboard**
-- وليس **fully backend-driven dashboard**
+- **Doctor dashboard: mostly complete, with two P1/P2 workflow-depth gaps**

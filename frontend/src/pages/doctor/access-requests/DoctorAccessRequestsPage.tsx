@@ -147,7 +147,7 @@ export default function DoctorAccessRequestsPage() {
         <title>Access Requests • LMJ Health</title>
       </Helmet>
 
-      <div dir='rtl' lang='ar'>
+      <div dir='rtl' lang='ar' className='pb-8 sm:pb-10'>
         <DashboardOverviewSection
           sectionClassName='flex flex-col gap-[18px] mb-6 py-[22px] px-[24px] rounded-[24px] bg-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
           overlay={
@@ -155,7 +155,7 @@ export default function DoctorAccessRequestsPage() {
               <motion.button
                 type='button'
                 onClick={() => setMode('list')}
-                className='absolute left-[16px] top-[16px] flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)]'
+                className='absolute left-4 top-4 flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:left-[16px] sm:top-[16px]'
                 aria-label='إغلاق'
               >
                 <X className='h-5 w-5 text-[#0F8F8B]' />
@@ -163,7 +163,7 @@ export default function DoctorAccessRequestsPage() {
             ) : null
           }
           headerLeft={
-            <div className='flex w-full flex-row items-start justify-between gap-[16px]'>
+            <div className='flex w-full flex-col items-start justify-between gap-[16px] sm:flex-row'>
               <div className='flex flex-row items-start gap-[12px]'>
                 <div className='bg-[#FFFFFF33] w-[56px] h-[56px] flex items-center justify-center rounded-[6px]'>
                   <Shield className='text-white w-[28px] h-[28px]' />
@@ -261,7 +261,7 @@ export default function DoctorAccessRequestsPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
             >
-              <section className='mb-6 rounded-[6px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)]'>
+              <section className='mb-6 rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)] sm:px-5'>
                 <div className='relative'>
                   <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
                     <Search className='h-4 w-4' />
@@ -305,7 +305,7 @@ export default function DoctorAccessRequestsPage() {
                         className='overflow-hidden rounded-[24px] border border-[#E7EEF5] bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] shadow-[0_18px_34px_rgba(15,23,42,0.08)] transition hover:shadow-[0_24px_44px_rgba(15,23,42,0.12)]'
                       >
                         <div className='border-b border-[#EEF2F6] bg-[linear-gradient(90deg,#f7fbfb_0%,#ffffff_100%)] px-6 py-5'>
-                          <div className='flex items-start justify-between gap-4'>
+                          <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
                             <div className='flex items-center gap-4'>
                               <div className='flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#0f8f8b_0%,#14b8a6_100%)] text-white shadow-[0_12px_22px_rgba(15,143,139,0.24)]'>
                                 <UserRound className='h-5 w-5' />

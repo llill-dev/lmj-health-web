@@ -69,6 +69,12 @@ html {
   scroll-behavior: smooth;
 }
 
+#root {
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: clip;
+}
+
 * {
   scrollbar-width: thin;
   scroll-behavior: smooth;

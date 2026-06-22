@@ -16,8 +16,8 @@ const TABLE_COLUMNS = [
 ] as const;
 
 const thClass =
-  'px-4 py-3 text-center align-middle font-cairo text-[12px] font-extrabold text-[#0F766E]';
-const tdClass = 'px-4 py-4 text-center align-middle';
+  'px-3 py-3 text-center align-middle font-cairo text-[11px] font-extrabold text-[#0F766E] sm:px-4 sm:text-[12px]';
+const tdClass = 'px-3 py-3 text-center align-middle sm:px-4 sm:py-4';
 
 type ActionsMenuState = {
   rowId: string;
@@ -77,7 +77,7 @@ export function FacilitiesTable({
     <>
       <div className="rounded-[12px] border border-[#D4EFED] bg-white shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)]">
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse text-center">
+          <table className="min-w-[720px] w-full border-collapse text-center">
             <thead>
               <tr className="border-b border-[#B9E6E1] bg-[#D4EFED]">
                 {TABLE_COLUMNS.map((head) => (
@@ -145,7 +145,7 @@ export function FacilitiesTable({
               initial={{ opacity: 0, scale: 0.96, y: 4 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 4 }}
-              className="fixed z-[250] min-w-[176px] -translate-x-1/2 -translate-y-full rounded-[10px] border border-[#E5E7EB] bg-white py-1 text-center shadow-[0_16px_40px_rgba(15,23,42,0.16)]"
+              className="fixed z-[250] min-w-[176px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-full rounded-[10px] border border-[#E5E7EB] bg-white py-1 text-center shadow-[0_16px_40px_rgba(15,23,42,0.16)]"
               style={{ top: menu.top, left: menu.left }}
               role="menu"
             >

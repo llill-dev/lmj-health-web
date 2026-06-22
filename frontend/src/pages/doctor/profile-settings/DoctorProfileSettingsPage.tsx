@@ -67,7 +67,7 @@ export default function DoctorProfileSettingsPage() {
         <title>الملف الشخصي • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="pb-10 space-y-5">
+      <div dir="rtl" lang="ar" className="space-y-5 pb-8 sm:pb-10">
         <DoctorProfileHeroCard
           fullName={user?.fullName}
           specialization={doctor.specialization}
@@ -112,7 +112,7 @@ export default function DoctorProfileSettingsPage() {
           fields={fieldRows.professional}
         />
 
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
             onClick={() =>

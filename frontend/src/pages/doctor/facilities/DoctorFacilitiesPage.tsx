@@ -235,7 +235,7 @@ export default function DoctorFacilitiesPage() {
           title="المنشآت"
           icon={<Building2 className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
           action={
-            <div className="flex flex-wrap items-center justify-end gap-3">
+            <div className="flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               {canCreate ? (
                 <button
                   type="button"
