@@ -105,10 +105,10 @@ export default function DoctorClinicServicesPage() {
         <title>خدمات الفوترة • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <ClinicAccountsSubNav />
 
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="text-right">
             <h1 className="font-cairo text-[28px] font-black text-[#111827]">
               كتالوج الخدمات
@@ -157,7 +157,7 @@ export default function DoctorClinicServicesPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full text-right">
+              <table className="min-w-[720px] w-full text-right">
                 <thead>
                   <tr className="border-b border-[#EEF2F6] font-cairo text-[12px] font-extrabold text-[#667085]">
                     <th className="px-3 py-3">الخدمة</th>

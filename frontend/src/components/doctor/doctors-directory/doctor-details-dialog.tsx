@@ -95,13 +95,13 @@ export default function DoctorDetailsDialog({
               <X className="h-4 w-4" />
             </button>
 
-            <div className="px-7 pb-6 pt-6">
+            <div className="px-5 pb-6 pt-6 sm:px-7">
               <div className="text-right font-cairo text-[24px] font-bold text-[#101828]">
                 تفاصيل الطبيب
               </div>
 
-              <div className="mt-6 flex gap-[24px]">
-                <div className="flex h-[128px] w-[128px] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3.65px] border-[#C7F3F1] bg-[#F8FAFC]">
+              <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:gap-6">
+                <div className="mx-auto flex h-[112px] w-[112px] shrink-0 items-center justify-center overflow-hidden rounded-full border-[3.65px] border-[#C7F3F1] bg-[#F8FAFC] sm:mx-0 sm:h-[128px] sm:w-[128px]">
                   {doctor.photoUrl ? (
                     <img
                       src={doctor.photoUrl}
@@ -167,7 +167,7 @@ export default function DoctorDetailsDialog({
             <div className="h-px w-full bg-[#EEF2F6]" />
 
             <div className="px-7 py-6">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                 <div className="text-right">
                   <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                     البريد الإلكتروني
@@ -233,7 +233,7 @@ export default function DoctorDetailsDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 px-7 pb-6">
+            <div className="grid grid-cols-1 gap-4 px-5 pb-6 sm:grid-cols-2 sm:px-7">
               {doctor.email ? (
                 <a
                   href={`mailto:${doctor.email}`}

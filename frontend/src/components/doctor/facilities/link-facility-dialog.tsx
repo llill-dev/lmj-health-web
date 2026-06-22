@@ -192,7 +192,7 @@ export default function LinkFacilityDialog({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
           <button
             type="button"
             onClick={handleClose}
