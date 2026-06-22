@@ -103,7 +103,7 @@ export function AppointmentTypeFormDialog({
         </DoctorProfileFormField>
 
         <div className="space-y-3 rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] p-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span
               id={priceVisibleId}
               className="font-cairo text-[13px] font-extrabold text-[#344054]"
@@ -121,7 +121,7 @@ export function AppointmentTypeFormDialog({
           </div>
 
           {mode === 'edit' ? (
-            <div className="flex items-center justify-between gap-4 border-t border-[#EEF2F6] pt-3">
+            <div className="flex flex-col gap-3 border-t border-[#EEF2F6] pt-3 sm:flex-row sm:items-center sm:justify-between">
               <span
                 id={activeId}
                 className="font-cairo text-[13px] font-extrabold text-[#344054]"
@@ -140,7 +140,7 @@ export function AppointmentTypeFormDialog({
           ) : null}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
           <button
             type="button"
             onClick={onClose}

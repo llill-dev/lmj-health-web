@@ -132,9 +132,9 @@ export default function DoctorDoctorsDirectoryPage() {
         <title>Doctors Directory • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
-        <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
-          <div className="flex justify-between items-start">
+      <div dir="rtl" lang="ar" className="pb-8 sm:pb-10">
+        <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="text-right">
               <div className="font-cairo text-[18px] font-extrabold text-[#111827]">
                 دليل الأطباء
@@ -188,7 +188,7 @@ export default function DoctorDoctorsDirectoryPage() {
           </div>
         </section>
 
-        <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch">
+        <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 md:items-stretch">
           {doctors.length === 0 ? (
             <div className="col-span-full rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-16 text-center font-cairo text-[14px] font-semibold text-[#667085]">
               لا توجد نتائج مطابقة لبحثك حالياً.
@@ -197,7 +197,7 @@ export default function DoctorDoctorsDirectoryPage() {
             doctors.map((d) => (
               <div
                 key={d.id}
-                className="relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white px-6 pb-5 pt-6 text-center shadow-[0_18px_30px_rgba(0,0,0,0.10)]"
+                className="relative flex h-full flex-col overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white px-4 pb-5 pt-6 text-center shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6"
               >
                 <div className="mx-auto flex h-[78px] w-[78px] items-center justify-center overflow-hidden rounded-full border-2 border-[#C7F3F1] bg-[#F8FAFC]">
                   {d.photoUrl ? (

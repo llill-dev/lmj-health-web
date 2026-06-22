@@ -60,7 +60,7 @@ export function MedicalRequestDetailsDialog({
               <ClipboardList className="h-4 w-4 shrink-0 text-primary" aria-hidden />
               <span>النتيجة</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
                 type="button"
                 disabled={documentBusy}
@@ -93,7 +93,7 @@ export function MedicalRequestDetailsDialog({
           </section>
         ) : null}
 
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
           <button
             type="button"
             onClick={onUploadResult}
@@ -113,7 +113,7 @@ export function MedicalRequestDetailsDialog({
           <button
             type="button"
             onClick={onReorder}
-            className="col-span-2 inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] transition hover:opacity-95"
+            className="inline-flex h-11 items-center justify-center rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_22px_rgba(15,143,139,0.28)] transition hover:opacity-95 sm:col-span-2"
           >
             إعادة الطلب
           </button>

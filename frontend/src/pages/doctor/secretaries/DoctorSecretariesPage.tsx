@@ -193,7 +193,7 @@ export default function DoctorSecretariesPage() {
         <title>إدارة السكرتارية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir="rtl" lang="ar" className="pb-8 sm:pb-10">
         <DoctorDashboardOverview
           variant="patients"
           surface="mint"
@@ -226,7 +226,7 @@ export default function DoctorSecretariesPage() {
           ]}
         />
 
-        <section className="mb-5 rounded-[16px] border border-[#EEF2F6] bg-white p-5 shadow-sm">
+        <section className="mb-5 rounded-[16px] border border-[#EEF2F6] bg-white p-4 shadow-sm sm:p-5">
           <ClinicAccountsSearchRow
             value={search}
             onChange={setSearch}

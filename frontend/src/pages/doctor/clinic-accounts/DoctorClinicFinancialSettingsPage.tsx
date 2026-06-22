@@ -193,7 +193,7 @@ export default function DoctorClinicFinancialSettingsPage() {
                   الضريبة
                 </h2>
               </div>
-              <div className="mb-4 flex items-center justify-between gap-4">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <span className="font-cairo text-[13px] font-bold text-[#667085]">
                   تفعيل الضريبة
                 </span>
@@ -261,7 +261,7 @@ export default function DoctorClinicFinancialSettingsPage() {
                 {BILLING_PAYMENT_METHOD_OPTIONS.map((method) => (
                   <div
                     key={method.id}
-                    className="flex items-center justify-between gap-4 rounded-[12px] border border-[#F2F4F7] bg-[#FAFAFA] px-4 py-3"
+                    className="flex flex-col gap-3 rounded-[12px] border border-[#F2F4F7] bg-[#FAFAFA] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   >
                     <span className="font-cairo text-[14px] font-extrabold text-[#111827]">
                       {method.label}

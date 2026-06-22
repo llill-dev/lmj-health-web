@@ -348,7 +348,7 @@ export default function DoctorAppointmentTypesPage() {
 
 
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
 
         <DoctorDashboardOverview
 

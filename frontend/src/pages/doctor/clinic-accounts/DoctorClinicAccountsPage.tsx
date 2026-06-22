@@ -256,7 +256,7 @@ export default function DoctorClinicAccountsPage() {
 
         <section className="grid grid-cols-1 gap-6 mt-6 xl:grid-cols-2">
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <ClinicAccountsSearchCount
                 count={overdueQuery.total}
                 label="فاتورة"
@@ -274,7 +274,7 @@ export default function DoctorClinicAccountsPage() {
                 overdueInvoices.map((invoice) => (
                   <div
                     key={invoice.rawId ?? invoice.id}
-                    className="flex items-center justify-between rounded-[12px] bg-[#F0FDFA] px-4 py-3"
+                    className="flex flex-col gap-2 rounded-[12px] bg-[#F0FDFA] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <span className="font-cairo text-[16px] font-black text-primary">
                       {formatBillingAmount(
@@ -310,7 +310,7 @@ export default function DoctorClinicAccountsPage() {
           </div>
 
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <ClinicAccountsSearchCount
                 count={outstandingTotal}
                 label="فاتورة"
@@ -328,7 +328,7 @@ export default function DoctorClinicAccountsPage() {
                 outstandingInvoices.slice(0, outstandingLimit).map((invoice) => (
                   <div
                     key={invoice.rawId ?? invoice.id}
-                    className="flex items-center justify-between rounded-[12px] bg-[#F0FDFA] px-4 py-3"
+                    className="flex flex-col gap-2 rounded-[12px] bg-[#F0FDFA] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <span className="font-cairo text-[16px] font-black text-primary">
                       {formatBillingAmount(
@@ -368,7 +368,7 @@ export default function DoctorClinicAccountsPage() {
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-          <div className="flex gap-3 justify-between items-center mb-4 w-full">
+          <div className="mb-4 flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#111827]">
               النشاطات الأخيرة
             </h2>

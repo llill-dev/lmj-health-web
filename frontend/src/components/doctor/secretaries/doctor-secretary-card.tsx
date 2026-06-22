@@ -78,7 +78,7 @@ export function DoctorSecretaryCard({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
             <button
               type="button"
               onClick={() => onUnassign(secretary)}
@@ -133,7 +133,7 @@ export function DoctorSecretaryCard({
               return (
                 <li
                   key={row.id}
-                  className="flex items-center justify-between gap-4 border-b border-[#F2F4F7] pb-3 last:border-b-0 last:pb-0"
+                  className="flex flex-col gap-2 border-b border-[#F2F4F7] pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 >
                   <span className="font-cairo text-[13px] font-semibold text-[#111827]">
                     {row.label}

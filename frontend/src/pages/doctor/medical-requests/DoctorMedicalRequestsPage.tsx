@@ -145,7 +145,7 @@ export default function DoctorMedicalRequestsPage() {
         <title>الطلبات الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <MedicalRequestsPageHeader />
 
         <div className="mb-6">
