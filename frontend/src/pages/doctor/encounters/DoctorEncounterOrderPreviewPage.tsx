@@ -94,7 +94,7 @@ export default function DoctorEncounterOrderPreviewPage({
         <title>معاينة {preview.config.title} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <RadiologyPreviewBanner
           patientName={preview.previewVm?.patientName}
           statusLabel={preview.previewVm?.statusLabel}

@@ -102,7 +102,7 @@ export function EncounterDocumentsPanel({
             return (
               <li
                 key={documentId}
-                className="flex items-center justify-between gap-3 rounded-[8px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-3"
+                className="flex flex-col gap-3 rounded-[8px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0 text-right">
                   <p className="truncate font-cairo text-[14px] font-extrabold text-[#111827]">
@@ -119,7 +119,7 @@ export function EncounterDocumentsPanel({
                     type="button"
                     disabled={mutations.isBusy}
                     onClick={() => void handleShare(documentId, title)}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-[6px] bg-primary px-3 py-2 font-cairo text-[11px] font-extrabold text-white disabled:opacity-60"
+                    className="inline-flex shrink-0 items-center justify-center gap-1 rounded-[6px] bg-primary px-3 py-2 font-cairo text-[11px] font-extrabold text-white disabled:opacity-60"
                   >
                     <Share2 className="h-3.5 w-3.5" />
                     مشاركة

@@ -133,7 +133,7 @@ export default function DoctorPrescriptionPage() {
         </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         {workspace.isAwaitingData ? (
           <DoctorWorkspaceFormSkeleton medicationCards={3} />
         ) : workspace.isError ? (

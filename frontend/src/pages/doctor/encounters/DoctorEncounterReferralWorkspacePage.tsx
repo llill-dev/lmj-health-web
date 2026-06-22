@@ -21,7 +21,7 @@ export default function DoctorEncounterReferralWorkspacePage() {
         <title>{REFERRAL_WORKSPACE_CONFIG.title} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <ReferralWorkspaceShell
           patientId={patientId}
           encounterId={encounterId}

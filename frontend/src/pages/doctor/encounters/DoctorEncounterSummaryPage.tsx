@@ -99,7 +99,7 @@ export default function DoctorEncounterSummaryPage() {
         <title>ملخص الزيارة الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <EncounterSummaryHeader />
 
         {isAwaitingData ? (

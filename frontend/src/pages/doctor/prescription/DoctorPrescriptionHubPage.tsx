@@ -49,7 +49,7 @@ export default function DoctorPrescriptionHubPage() {
         <title>الوصفات الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <PrescriptionsHubPageHeader />
 
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white p-5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6">

@@ -156,7 +156,7 @@ export default function DoctorRadiologyHubPage() {
       <Helmet>
         <title>طلبات الأشعة • LMJ Health</title>
       </Helmet>
-      <div dir="rtl" lang="ar" className="w-full pb-10">
+      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
         <RadiologyPageHeader
           patientName="الزيارات المفتوحة"
           statusLabel="قائمة"
