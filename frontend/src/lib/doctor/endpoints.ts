@@ -7,6 +7,9 @@ export const doctorEndpoints = {
     summary: '/api/doctors/analytics/summary',
     diagnosis: '/api/doctors/analytics/diagnosis',
   },
+  encounters: {
+    list: (doctorId: string) => `/api/doctors/${doctorId}/encounters`,
+  },
   patients: {
     list: "/api/doctors/patients",
     temp: "/api/doctors/patients/temp",

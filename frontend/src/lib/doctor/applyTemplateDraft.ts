@@ -2,6 +2,8 @@ import type { CatalogOrderCategory } from '@/components/doctor/encounters/orders
 import type { PrescriptionDraftForm } from '@/components/doctor/prescription/prescription-types';
 import type { RadiologyClinicalForm } from '@/components/doctor/radiology/radiology-types';
 import type { RadiologyOrderItemUi } from '@/components/doctor/radiology/radiology-types';
+import type { ReferralFormState } from '@/lib/doctor/referralFormSchema';
+import { mapReferralPriorityFromApi } from '@/lib/doctor/referralPriority';
 import type { DoctorTemplateType } from '@/lib/doctor/templateTypes';
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -158,4 +160,51 @@ export function parseOrderItemTemplateDrafts(
   }
 
   return items;
+}
+
+export function parseReferralTemplateDraft(
+  application: Record<string, unknown>,
+): Partial<ReferralFormState> {
+  const draft: Partial<ReferralFormState> = {};
+
+  const referralType = asString(application.referralType, application.type);
+  const specialty = asString(application.specialty, application.specialisation);
+  const reason = asString(
+    application.reason,
+    application.clinicalReason,
+    application.indication,
+  );
+  const referredDoctorName = asString(
+    application.referredDoctorName,
+    application.doctorName,
+    application.referredDoctor,
+  );
+  const institution = asString(application.institution, application.facility);
+  const clinicalSummary = asString(
+    application.clinicalSummary,
+    application.summary,
+    application.clinicalHistory,
+  );
+  const questionsToColleague = asString(
+    application.questionsToColleague,
+    application.questions,
+    application.questionsForColleague,
+  );
+  const notes = asString(application.notes, application.additionalNotes);
+  const urgencyRaw = asString(application.urgency, application.priority);
+  const priority = urgencyRaw
+    ? mapReferralPriorityFromApi(urgencyRaw)
+    : undefined;
+
+  if (referralType) draft.referralType = referralType;
+  if (specialty) draft.specialty = specialty;
+  if (reason) draft.reason = reason;
+  if (referredDoctorName) draft.referredDoctorName = referredDoctorName;
+  if (institution) draft.institution = institution;
+  if (clinicalSummary) draft.clinicalSummary = clinicalSummary;
+  if (questionsToColleague) draft.questionsToColleague = questionsToColleague;
+  if (notes) draft.notes = notes;
+  if (priority) draft.priority = priority;
+
+  return draft;
 }

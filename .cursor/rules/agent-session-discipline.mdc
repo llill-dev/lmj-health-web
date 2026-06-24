@@ -9,7 +9,7 @@ alwaysApply: true
 
 1. **One task per conversation** — implement a single PR-sized item unless the user lists explicit sub-items.
 2. **Never grep/read the whole repo** — scope to paths the user names or infer from open files (e.g. `frontend/src/hooks/doctor/`).
-3. **API lookup order:** `api3_endpoint_index.txt` → read only the matching section in `api_latest_extracted.txt`. reports unless asked.
+3. **API lookup order:** `api3_endpoint_index.txt` → read only the matching section in `api_latest_extracted.txt`. Do not read deprecated extracts or long audit reports unless asked.
 4. **No Task/explore subagent** for needle queries (single file, known endpoint, known hook).
 5. **Stop after:** scoped change + `npx tsc --noEmit` (frontend). No browser E2E if backend returns 500 — report blocker and stop.
 6. **No commit/push** unless the user says `commit` or `push`.
@@ -28,7 +28,7 @@ Phrases like «نعم», «ابدأ», «الخطوة التالية», «yes»,
 ```
 النطاق: [مجلد/ملفات]
 الهدف: [جملة واحدة]
-المصدر: api3_extracted — [METHOD path]
+المصدر: api_latest_extracted — [METHOD path]
 قيود: لا بحث كامل؛ لا commit؛ ملفات كحد أقصى N
 النجاح: tsc + [سلوك]
 ```

@@ -1,11 +1,14 @@
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { REFERRAL_WORKSPACE_CONFIG, ReferralWorkspaceShell } from '@/components/doctor/encounters/orders';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterReferralWorkspace } from '@/hooks/doctor/useEncounterReferralWorkspace';
 import { readAuthUser } from '@/lib/cookies';
 
 export default function DoctorEncounterReferralWorkspacePage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
 
@@ -14,6 +17,25 @@ export default function DoctorEncounterReferralWorkspacePage() {
     patientId,
     encounterId,
   );
+
+  const appliedTemplateDraftName = workspace.appliedTemplateDraftName;
+  const clearAppliedTemplateDraftName = workspace.clearAppliedTemplateDraftName;
+  const templateDraftNotice = workspace.templateDraftNotice;
+  const clearTemplateDraftNotice = workspace.clearTemplateDraftNotice;
+
+  useEffect(() => {
+    if (!appliedTemplateDraftName) return;
+    toast(`تم تطبيق قالب «${appliedTemplateDraftName}» على التحويل.`, {
+      variant: 'success',
+    });
+    clearAppliedTemplateDraftName();
+  }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast]);
+
+  useEffect(() => {
+    if (!templateDraftNotice) return;
+    toast(templateDraftNotice, { variant: 'warning' });
+    clearTemplateDraftNotice();
+  }, [clearTemplateDraftNotice, templateDraftNotice, toast]);
 
   return (
     <>

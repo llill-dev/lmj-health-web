@@ -99,6 +99,7 @@ import type {
   DoctorPatientFileDeleteResponse,
   DoctorCreateEncounterBody,
   DoctorUpdateEncounterBody,
+  DoctorEncountersListParams,
   DoctorPatientEncountersListParams,
   DoctorPatientEncountersListResponse,
   DoctorEncounterDetailsResponse,
@@ -200,6 +201,28 @@ function buildPatientEncountersListQuery(
   if (params.limit) qs.set("limit", String(params.limit));
   return qs.toString();
 }
+
+function buildDoctorEncountersListQuery(
+  params: DoctorEncountersListParams = {},
+): string {
+  const qs = new URLSearchParams();
+  if (params.patientId) qs.set("patientId", params.patientId);
+  if (params.status) qs.set("status", params.status);
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
+  if (params.sortBy) qs.set("sortBy", params.sortBy);
+  if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+  return qs.toString();
+}
+
+export const doctorEncountersQueryKeys = {
+  all: ["doctor", "encounters"] as const,
+  lists: () => [...doctorEncountersQueryKeys.all, "list"] as const,
+  list: (doctorId: string, params: DoctorEncountersListParams = {}) =>
+    [...doctorEncountersQueryKeys.lists(), doctorId, params] as const,
+};
 
 export const doctorPatientsQueryKeys = {
   all: ["doctor", "patients"] as const,
@@ -1668,6 +1691,16 @@ export const doctorApi = {
           expectedStatuses: [403, 404],
         },
       ),
+  },
+  encounters: {
+    list: (doctorId: string, params: DoctorEncountersListParams = {}) => {
+      const query = buildDoctorEncountersListQuery(params);
+      const base = doctorEndpoints.encounters.list(doctorId);
+      const endpoint = query ? `${base}?${query}` : base;
+      return get<DoctorPatientEncountersListResponse>(endpoint, {
+        locale: "ar",
+      });
+    },
   },
   accessRequests: {
     list: (params: DoctorAccessRequestListParams = {}) => {

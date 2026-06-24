@@ -385,6 +385,10 @@ export type DoctorPatientEncountersListParams = {
   limit?: number;
 };
 
+export type DoctorEncountersListParams = DoctorPatientEncountersListParams & {
+  patientId?: string;
+};
+
 export type DoctorEncounterPatientSummary = {
   _id?: string;
   publicId?: string;

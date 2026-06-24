@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import {
   doctorApi,
+  doctorEncountersQueryKeys,
   doctorPatientsQueryKeys,
 } from '@/lib/doctor/client';
 import type {
@@ -155,6 +156,9 @@ export function useCreateDoctorPatientEncounter(doctorId: string) {
         queryKey: doctorPatientsQueryKeys.encounters(doctorId, variables.patientId),
       });
       queryClient.invalidateQueries({
+        queryKey: doctorEncountersQueryKeys.all,
+      });
+      queryClient.invalidateQueries({
         queryKey: doctorPatientsQueryKeys.all,
       });
     },
@@ -175,6 +179,9 @@ export function useCloseDoctorPatientEncounter(doctorId: string) {
     onSuccess: (_response: DoctorCloseEncounterResponse, variables) => {
       queryClient.invalidateQueries({
         queryKey: doctorPatientsQueryKeys.encounters(doctorId, variables.patientId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: doctorEncountersQueryKeys.all,
       });
       queryClient.invalidateQueries({
         queryKey: doctorPatientsQueryKeys.encounterDetail(

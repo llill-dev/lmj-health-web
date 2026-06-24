@@ -1,9 +1,10 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
+import { consumeReferralTemplateDraft } from '@/lib/doctor/consumeTemplateDraft';
 import {
   resolveEncounterOrderStatusLabel,
 } from '@/lib/doctor/encounterOrderCategories';
@@ -17,6 +18,10 @@ import {
   mapReferralPriorityFromApi,
   mapReferralPriorityToApiUrgency,
 } from '@/lib/doctor/referralPriority';
+import {
+  clearDoctorTemplateDraft,
+  readDoctorTemplateDraft,
+} from '@/lib/doctor/templateDraftStorage';
 
 export type {
   ReferralFormState,
@@ -113,10 +118,58 @@ export function useEncounterReferralWorkspace(
   });
 
   const [form, setForm] = useState<ReferralFormState>(EMPTY_FORM);
+  const [appliedTemplateDraftName, setAppliedTemplateDraftName] = useState<
+    string | null
+  >(null);
+  const [templateDraftNotice, setTemplateDraftNotice] = useState<string | null>(
+    null,
+  );
+  const templateDraftAppliedRef = useRef(false);
 
   useEffect(() => {
     setForm(mapOrderToForm(orderQuery.data));
   }, [orderQuery.data]);
+
+  useEffect(() => {
+    if (!isEnabled || templateDraftAppliedRef.current) return;
+    if (!orderQuery.data || orderQuery.isLoading) return;
+
+    const draft = readDoctorTemplateDraft();
+    if (!draft || draft.type !== 'REFERRAL_ORDER') return;
+
+    templateDraftAppliedRef.current = true;
+
+    const existingForm = mapOrderToForm(orderQuery.data);
+    const result = consumeReferralTemplateDraft({
+      draft,
+      existingForm,
+      setForm,
+    });
+
+    if (result.consumed) {
+      clearDoctorTemplateDraft();
+      if (result.skipReason !== 'empty' && result.appliedItemCount > 0) {
+        setAppliedTemplateDraftName(draft.name);
+      }
+      return;
+    }
+
+    if (result.skipReason === 'existing_items') {
+      setTemplateDraftNotice(
+        `لم يُطبَّق قالب «${draft.name}» لأن التحويل يحتوي بيانات مسبقاً. المسودة ما زالت محفوظة.`,
+      );
+    }
+  }, [isEnabled, orderQuery.data, orderQuery.isLoading]);
+
+  const clearAppliedTemplateDraftName = useCallback(
+    () => setAppliedTemplateDraftName(null),
+    [],
+  );
+
+  const clearTemplateDraftNotice = useCallback(
+    () => setTemplateDraftNotice(null),
+    [],
+  );
 
   const invalidate = useCallback(() => {
     void queryClient.invalidateQueries({
@@ -201,6 +254,10 @@ export function useEncounterReferralWorkspace(
     order: orderQuery.data,
     form,
     setForm,
+    appliedTemplateDraftName,
+    clearAppliedTemplateDraftName,
+    templateDraftNotice,
+    clearTemplateDraftNotice,
     statusLabel: orderQuery.data ? resolveEncounterOrderStatusLabel(orderQuery.data) : '',
     isAwaitingData,
     isError: encounterQuery.isError || orderQuery.isError,

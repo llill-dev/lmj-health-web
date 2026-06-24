@@ -1,21 +1,32 @@
 import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
-import {
-  isAwaitingAnyQueryResults,
-} from "@/lib/query/queryUi";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import type {
   EncountersFiltersState,
   MedicalVisitCardData,
+  MedicalVisitDraft,
   MedicalVisitStatusFilter,
 } from "@/components/doctor/encounters/types";
-import { doctorApi, doctorPatientsQueryKeys } from "@/lib/doctor/client";
+import {
+  doctorApi,
+  doctorEncountersQueryKeys,
+  doctorPatientsQueryKeys,
+} from "@/lib/doctor/client";
 import type {
-  DoctorEncounterSummary,
-  DoctorPatientListItem,
-} from "@/lib/doctor/types";
-import { useDoctorPatients } from "./useDoctorPatients";
+  EncounterOrder,
+  EncounterPrescription,
+} from "@/lib/doctor/encounterClinicalTypes";
+import {
+  filterEncounterOrdersByCategory,
+  isDraftEncounterOrder,
+} from "@/lib/doctor/encounterOrderCategories";
+import { normalizeEncounterOrdersList } from "@/lib/doctor/encounterOrderLoad";
+import type { DoctorEncounterSummary } from "@/lib/doctor/types";
+import { useDoctorPatientEncounterDetail } from "./useDoctorPatients";
 
-const MAX_PATIENTS_FOR_ENCOUNTERS = 100;
+const ENCOUNTER_EXPAND_STALE_MS = 1000 * 30;
+
+const ENCOUNTERS_LIST_LIMIT = 100;
 
 function formatLinkedAppointmentDate(value?: string | null): string {
   if (!value) return "—";
@@ -94,10 +105,52 @@ function originToVisitType(origin?: string): string {
   }
 }
 
+function isDraftPrescription(rx: EncounterPrescription) {
+  const status = (rx.status ?? "").toLowerCase();
+  return !status.includes("final") && !rx.finalizedAt;
+}
+
+function buildVisitDrafts(
+  encounter: DoctorEncounterSummary,
+  clinical?: {
+    prescriptions?: EncounterPrescription[];
+    orders?: EncounterOrder[];
+  },
+): MedicalVisitDraft[] {
+  if (encounter.status === "closed" || !clinical) return [];
+
+  const prescriptions = clinical.prescriptions ?? [];
+  const orders = clinical.orders ?? [];
+  const prescriptionsCount = prescriptions.filter(isDraftPrescription).length;
+  const labTestsCount = filterEncounterOrdersByCategory(orders, "lab").filter(
+    isDraftEncounterOrder,
+  ).length;
+  const imagingCount = filterEncounterOrdersByCategory(
+    orders,
+    "radiology",
+  ).filter(isDraftEncounterOrder).length;
+
+  return [
+    {
+      id: `${encounter._id}-draft`,
+      code: `ENC-${encounter._id.slice(-6).toUpperCase()}`,
+      updatedAtLabel: formatVisitDate(encounter.createdAt),
+      prescriptionsCount,
+      labTestsCount,
+      imagingCount,
+    },
+  ];
+}
+
 function mapEncounterToMedicalVisit(
   encounter: DoctorEncounterSummary,
-  patient: Pick<DoctorPatientListItem, "_id" | "publicId" | "user">,
+  clinical?: {
+    prescriptions?: EncounterPrescription[];
+    orders?: EncounterOrder[];
+  },
 ): MedicalVisitCardData {
+  const patient = encounter.patient;
+  const patientId = patient?._id ?? "";
   const status: "open" | "closed" =
     encounter.status === "closed" ? "closed" : "open";
   const started = encounter.startedAt ?? encounter.createdAt;
@@ -109,10 +162,14 @@ function mapEncounterToMedicalVisit(
 
   return {
     id: encounter._id,
-    patientId: patient._id,
-    patientName: patient.user?.fullName ?? "مريض",
-    patientAge: null,
-    fileNumber: patient.publicId ? `#${patient.publicId}` : `#${patient._id.slice(-6)}`,
+    patientId,
+    patientName: patient?.user?.fullName ?? "مريض",
+    patientAge: patient?.age ?? null,
+    fileNumber: patient?.publicId
+      ? `#${patient.publicId}`
+      : patientId
+        ? `#${patientId.slice(-6)}`
+        : "#—",
     visitTypeLabel: originToVisitType(encounter.origin),
     status,
     origin: encounter.origin,
@@ -142,19 +199,28 @@ function mapEncounterToMedicalVisit(
                 : "—",
           }
         : null,
-    drafts:
-      status === "open"
-        ? [
-            {
-              id: `${encounter._id}-draft`,
-              code: `ENC-${encounter._id.slice(-6).toUpperCase()}`,
-              updatedAtLabel: formatVisitDate(encounter.createdAt),
-              prescriptionsCount: 0,
-              labTestsCount: 0,
-              imagingCount: 0,
-            },
-          ]
-        : [],
+    drafts: buildVisitDrafts(encounter, clinical),
+  };
+}
+
+function mergeListVisitWithEncounterDetail(
+  visit: MedicalVisitCardData,
+  encounter: DoctorEncounterSummary,
+  clinical?: {
+    prescriptions?: EncounterPrescription[];
+    orders?: EncounterOrder[];
+  },
+): MedicalVisitCardData {
+  const mapped = mapEncounterToMedicalVisit(encounter, clinical);
+
+  return {
+    ...visit,
+    ...mapped,
+    id: visit.id,
+    patientId: mapped.patientId || visit.patientId,
+    patientName:
+      mapped.patientName !== "مريض" ? mapped.patientName : visit.patientName,
+    patientAge: mapped.patientAge ?? visit.patientAge,
   };
 }
 
@@ -182,58 +248,39 @@ export function useDoctorMedicalEncountersPage(
   doctorId: string,
   filters: EncountersFiltersState,
 ) {
-  const patientsQuery = useDoctorPatients({
-    page: 1,
-    limit: MAX_PATIENTS_FOR_ENCOUNTERS,
-  });
+  const listParams = useMemo(
+    () => ({
+      status: filters.status === "all" ? undefined : filters.status,
+      dateFrom: filters.dateFrom || undefined,
+      dateTo: filters.dateTo || undefined,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+      page: 1,
+      limit: ENCOUNTERS_LIST_LIMIT,
+    }),
+    [
+      filters.status,
+      filters.dateFrom,
+      filters.dateTo,
+      filters.sortBy,
+      filters.sortOrder,
+    ],
+  );
 
-  const patients = patientsQuery.patients;
-
-  const encounterQueries = useQueries({
-    queries: patients.map((patient) => ({
-      queryKey: doctorPatientsQueryKeys.encounters(doctorId, patient._id, {
-        status: filters.status === "all" ? undefined : filters.status,
-        dateFrom: filters.dateFrom || undefined,
-        dateTo: filters.dateTo || undefined,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-        page: 1,
-        limit: 20,
-      }),
-      queryFn: () =>
-        doctorApi.patients.listEncounters(doctorId, patient._id, {
-          status: filters.status === "all" ? undefined : filters.status,
-          dateFrom: filters.dateFrom || undefined,
-          dateTo: filters.dateTo || undefined,
-          sortBy: filters.sortBy,
-          sortOrder: filters.sortOrder,
-          page: 1,
-          limit: 20,
-        }),
-      enabled: Boolean(doctorId && patient._id),
-      staleTime: 1000 * 30,
-    })),
+  const encountersQuery = useQuery({
+    queryKey: doctorEncountersQueryKeys.list(doctorId, listParams),
+    queryFn: () => doctorApi.encounters.list(doctorId, listParams),
+    enabled: Boolean(doctorId),
+    staleTime: 1000 * 30,
   });
 
   const apiVisits = useMemo(() => {
-    const items: MedicalVisitCardData[] = [];
-    encounterQueries.forEach((query, index) => {
-      const patient = patients[index];
-      if (!patient || !query.data?.encounters?.length) return;
-      for (const encounter of query.data.encounters) {
-        items.push(mapEncounterToMedicalVisit(encounter, patient));
-      }
-    });
-    return items;
-  }, [encounterQueries, patients]);
+    const encounters = encountersQuery.data?.encounters ?? [];
+    return encounters.map((encounter) => mapEncounterToMedicalVisit(encounter));
+  }, [encountersQuery.data?.encounters]);
 
   const visits = useMemo(() => {
-    const unique = new Map<string, MedicalVisitCardData>();
-    for (const visit of apiVisits) {
-      unique.set(visit.id, visit);
-    }
-
-    return [...unique.values()]
+    return apiVisits
       .filter((visit) => matchesStatus(visit, filters.status))
       .filter((visit) => matchesSearch(visit, filters.search));
   }, [apiVisits, filters.search, filters.status]);
@@ -245,53 +292,130 @@ export function useDoctorMedicalEncountersPage(
     return { all, active, closed };
   }, [visits]);
 
-  const firstEncounterError =
-    encounterQueries.find((query) => query.isError)?.error ?? null;
-  const isAwaitingData =
-    patientsQuery.isAwaitingData ||
-    isAwaitingAnyQueryResults(encounterQueries);
-  const isError = patientsQuery.isError || Boolean(firstEncounterError);
-  const error = patientsQuery.error ?? firstEncounterError;
-
   return {
     visits,
     stats,
-    isAwaitingData,
-    isError,
-    error,
+    isAwaitingData:
+      Boolean(doctorId) &&
+      isAwaitingInitialQueryData(encountersQuery.data, encountersQuery.isError),
+    isError: encountersQuery.isError,
+    error: encountersQuery.error,
     refetch: () => {
-      void patientsQuery.refetch();
-      encounterQueries.forEach((q) => void q.refetch());
+      void encountersQuery.refetch();
     },
+  };
+}
+
+/** Fetches encounter detail + clinical lists when a list card is expanded. */
+export function useDoctorEncounterCardExpandDetail(
+  doctorId: string,
+  visit: MedicalVisitCardData | null,
+  expanded: boolean,
+) {
+  const patientId = visit?.patientId ?? "";
+  const encounterId = visit?.id ?? "";
+  const enabled =
+    expanded &&
+    Boolean(doctorId) &&
+    Boolean(patientId) &&
+    Boolean(encounterId);
+
+  const encounterQuery = useDoctorPatientEncounterDetail(
+    doctorId,
+    patientId,
+    encounterId,
+    enabled,
+  );
+
+  const [prescriptionsQuery, ordersQuery] = useQueries({
+    queries: [
+      {
+        queryKey: [
+          ...doctorPatientsQueryKeys.encounterWorkspace(
+            doctorId,
+            patientId,
+            encounterId,
+          ),
+          "prescriptions",
+        ],
+        queryFn: () =>
+          doctorApi.patients.listEncounterPrescriptions(
+            doctorId,
+            patientId,
+            encounterId,
+            { limit: 100, page: 1 },
+          ),
+        enabled,
+        staleTime: ENCOUNTER_EXPAND_STALE_MS,
+      },
+      {
+        queryKey: [
+          ...doctorPatientsQueryKeys.encounterWorkspace(
+            doctorId,
+            patientId,
+            encounterId,
+          ),
+          "orders",
+        ],
+        queryFn: () =>
+          doctorApi.patients.listEncounterOrders(
+            doctorId,
+            patientId,
+            encounterId,
+            { limit: 100, page: 1 },
+          ),
+        enabled,
+        staleTime: ENCOUNTER_EXPAND_STALE_MS,
+      },
+    ],
+  });
+
+  const clinical = useMemo(
+    () => ({
+      prescriptions: prescriptionsQuery.data?.prescriptions,
+      orders: normalizeEncounterOrdersList(ordersQuery.data),
+    }),
+    [ordersQuery.data, prescriptionsQuery.data?.prescriptions],
+  );
+
+  const visitWithDetails = useMemo(() => {
+    if (!visit) return null;
+    if (!encounterQuery.encounter) return visit;
+    return mergeListVisitWithEncounterDetail(
+      visit,
+      encounterQuery.encounter,
+      clinical,
+    );
+  }, [clinical, encounterQuery.encounter, visit]);
+
+  const clinicalAwaiting =
+    enabled &&
+    (isAwaitingInitialQueryData(
+      prescriptionsQuery.data,
+      prescriptionsQuery.isError,
+    ) ||
+      isAwaitingInitialQueryData(ordersQuery.data, ordersQuery.isError));
+
+  return {
+    visit: visitWithDetails,
+    isAwaitingData: enabled && (encounterQuery.isAwaitingData || clinicalAwaiting),
+    isError: encounterQuery.isError,
+    error: encounterQuery.error,
   };
 }
 
 export function useDoctorEncounterDetailsView(
   visit: MedicalVisitCardData | null,
   encounter: DoctorEncounterSummary | null | undefined,
+  clinical?: {
+    prescriptions?: EncounterPrescription[];
+    orders?: EncounterOrder[];
+  },
 ) {
   return useMemo(() => {
     if (!visit || !encounter) return visit;
-
-    const mapped = mapEncounterToMedicalVisit(encounter, {
-      _id: visit.patientId,
-      publicId: visit.fileNumber.replace(/^#/, ""),
-      user: {
-        _id: visit.patientId,
-        fullName: visit.patientName,
-      },
-    });
-
-    return {
-      ...visit,
-      ...mapped,
-      id: visit.id,
-      patientId: visit.patientId,
-      patientName: visit.patientName,
-      patientAge: visit.patientAge,
-      drafts: visit.drafts,
-    };
-  }, [encounter, visit]);
+    return mergeListVisitWithEncounterDetail(visit, encounter, clinical);
+  }, [clinical, encounter, visit]);
 }
 
 export const useDoctorMedicalVisitsPage = useDoctorMedicalEncountersPage;

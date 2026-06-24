@@ -24,9 +24,8 @@ import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patien
 import {
   useCloseDoctorPatientEncounter,
   useCreateDoctorPatientEncounter,
-  useDoctorEncounterDetailsView,
+  useDoctorEncounterCardExpandDetail,
   useDoctorMedicalEncountersPage,
-  useDoctorPatientEncounterDetail,
   useDoctorPatients,
   prefetchEncounterWorkspace,
 } from "@/hooks/doctor";
@@ -106,16 +105,10 @@ export default function DoctorEncountersPage() {
     [expandedVisitId, visits],
   );
 
-  const encounterDetailQuery = useDoctorPatientEncounterDetail(
+  const expandDetail = useDoctorEncounterCardExpandDetail(
     doctorId,
-    expandedVisit?.patientId ?? "",
-    expandedVisit?.id ?? "",
-    Boolean(expandedVisit),
-  );
-
-  const expandedVisitWithDetails = useDoctorEncounterDetailsView(
     expandedVisit,
-    encounterDetailQuery.encounter,
+    Boolean(expandedVisit),
   );
 
   const displayStats = useMemo(
@@ -306,8 +299,8 @@ export default function DoctorEncountersPage() {
                   {visits.map((visit) => {
                     const isExpanded = expandedVisitId === visit.id;
                     const displayVisit =
-                      isExpanded && expandedVisitWithDetails
-                        ? expandedVisitWithDetails
+                      isExpanded && expandDetail.visit
+                        ? expandDetail.visit
                         : visit;
 
                     return (
@@ -323,12 +316,12 @@ export default function DoctorEncountersPage() {
                           visit={displayVisit}
                           expanded={isExpanded}
                           detailsLoading={
-                            isExpanded && encounterDetailQuery.isAwaitingData
+                            isExpanded && expandDetail.isAwaitingData
                           }
                           detailsError={
-                            isExpanded && encounterDetailQuery.isError
+                            isExpanded && expandDetail.isError
                               ? getUserFacingRequestErrorMessage(
-                                  encounterDetailQuery.error,
+                                  expandDetail.error,
                                 )
                               : null
                           }
