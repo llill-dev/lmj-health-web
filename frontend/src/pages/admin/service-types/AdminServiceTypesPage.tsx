@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
-import { Settings, Plus, Edit, Check, Loader2 } from 'lucide-react';
+import { Settings, Plus, Edit, Check, Loader2, Building2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import {
   useServiceTypesList,
@@ -182,6 +183,13 @@ export default function AdminServiceTypesPage() {
                         (قرب منتصف السطر) كما في التصميم المرفوع
                       */}
                       <div className='flex items-center justify-end gap-2 sm:gap-3'>
+                        <Link
+                          to={`/admin/service-providers?type=${encodeURIComponent(s.slug)}`}
+                          className='inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-[#CFFAFE] bg-white px-3 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#ECFEFF]'
+                        >
+                          <Building2 className='h-4 w-4' />
+                          المزودون
+                        </Link>
                         <button
                           type='button'
                           onClick={() => openEdit(s)}

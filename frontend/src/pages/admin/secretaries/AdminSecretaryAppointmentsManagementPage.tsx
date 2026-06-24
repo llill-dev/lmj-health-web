@@ -1,10 +1,14 @@
 import { Helmet } from 'react-helmet-async';
-import { CalendarClock } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { ArrowRight, CalendarClock } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
+import { SecretaryDoctorAppointmentsPanel } from '@/components/admin/secretaries/SecretaryDoctorAppointmentsPanel';
+import { useAdminSecretaryById } from '@/hooks/admin/useAdminSecretaryById';
 
 export default function AdminSecretaryAppointmentsManagementPage() {
-  const { secretaryId } = useParams();
+  const { secretaryId = '' } = useParams();
+  const { secretaryName, doctorName, assignedDoctorId, isAwaitingData } =
+    useAdminSecretaryById(secretaryId);
 
   return (
     <>
@@ -13,22 +17,31 @@ export default function AdminSecretaryAppointmentsManagementPage() {
       </Helmet>
 
       <div dir='rtl' lang='ar'>
+        <Link
+          to={`/admin/secretaries/${secretaryId}`}
+          className='mb-5 inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary'
+        >
+          <ArrowRight className='h-4 w-4' />
+          العودة إلى ملف السكرتير
+        </Link>
+
         <AdminDashboardOverview
           variant='admin'
           surface='mint'
           title='إدارة مواعيد السكرتير'
           subtitle={
-            secretaryId ? `المعرّف: ${secretaryId}` : 'إدارة مواعيد الطبيب المرتبط'
+            isAwaitingData
+              ? 'جارٍ التحميل…'
+              : `${secretaryName} — إدارة مواعيد ${doctorName}`
           }
           headerIcon={<CalendarClock className='h-8 w-8 text-white' />}
         />
 
-        <div className='mt-2 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-            هذه الصفحة مخصصة لتدفقات إدارة المواعيد (reschedule/cancel/book on
-            behalf) وفق الـABI وصلاحيات السكرتير. سيتم بناؤها تدريجيًا.
-          </div>
-        </div>
+        <SecretaryDoctorAppointmentsPanel
+          assignedDoctorId={assignedDoctorId}
+          doctorName={doctorName}
+          mode='manage'
+        />
       </div>
     </>
   );

@@ -914,6 +914,50 @@ export type FacilityResponse = ApiSuccessEnvelope & {
   facility: FacilitySummary;
 };
 
+export type FacilityDoctorSummary = {
+  id: string;
+  _id?: string;
+  specialization?: string;
+  approvalStatus?: AdminDoctorApprovalStatus;
+  isApproved?: boolean;
+  facilityId?: string;
+  user?: {
+    id?: string;
+    _id?: string;
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    photoUrl?: string;
+  };
+};
+
+export type FacilityDoctorsListParams = {
+  page?: number;
+  limit?: number;
+  q?: string;
+  name?: string;
+  specialty?: string;
+  status?: 'pending' | 'approved' | 'rejected';
+  sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'specialty' | 'status';
+  sortOrder?: 'asc' | 'desc';
+};
+
+export type FacilityDoctorsListResponse = ApiSuccessEnvelope & {
+  facility?: {
+    id: string;
+    name?: string;
+    facilityType?: FacilityType;
+    city?: string;
+    status?: FacilityStatus;
+    doctorCount?: number;
+  };
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  doctors: FacilityDoctorSummary[];
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Service Types (dynamic schema-as-data)
 // ─────────────────────────────────────────────────────────────────────────────

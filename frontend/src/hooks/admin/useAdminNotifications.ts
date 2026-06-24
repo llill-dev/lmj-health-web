@@ -8,11 +8,12 @@ import type { NotificationItem, NotificationsListResponse } from '@/lib/notifica
 import { notificationItemId, notificationsApi } from '@/lib/notifications/client';
 import { ADMIN_NOTIFICATIONS_MOCK } from '@/components/admin/notifications/admin-notifications-mock';
 import { normalizeNotificationRead } from '@/components/admin/notifications/map-api-to-rows';
+import { isUiOnlyMode } from '@/lib/env/uiOnlyMode';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 const PAGE_SIZE = 20;
 
-const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
+const UI_ONLY = isUiOnlyMode();
 
 function mockRowsToApiItems(): NotificationItem[] {
   return ADMIN_NOTIFICATIONS_MOCK.map((r) => ({

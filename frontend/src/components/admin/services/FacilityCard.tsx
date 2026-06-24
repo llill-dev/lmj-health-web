@@ -18,6 +18,7 @@ export function FacilityCard({
   onEdit,
   onDelete,
   onToggleStatus,
+  onViewDoctors,
   isToggling,
 }: {
   facility: FacilitySummary;
@@ -25,6 +26,7 @@ export function FacilityCard({
   onEdit: () => void;
   onDelete: () => void;
   onToggleStatus: () => void;
+  onViewDoctors?: () => void;
   isToggling: boolean;
 }) {
   const isActive = facility.status === 'ACTIVE';
@@ -84,6 +86,17 @@ export function FacilityCard({
         </div>
 
         <div className='flex shrink-0 items-center gap-2 pt-1'>
+          {onViewDoctors ? (
+            <button
+              type='button'
+              title='الأطباء'
+              onClick={onViewDoctors}
+              className='flex h-[30px] items-center gap-1 rounded-[8px] border border-[#CFFAFE] bg-white px-2.5 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-[#ECFEFF]'
+            >
+              <Stethoscope className='h-3.5 w-3.5' />
+              الأطباء
+            </button>
+          ) : null}
           <button
             type='button'
             title={isActive ? 'تعطيل' : 'تفعيل'}

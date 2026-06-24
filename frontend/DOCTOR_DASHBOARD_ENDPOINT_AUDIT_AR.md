@@ -19,8 +19,8 @@ Excluded on purpose:
 
 - Total dashboard capability clusters reviewed: `7`
 - Status counts:
-  - Complete: `5`
-  - Partial: `2`
+  - Complete: `7`
+  - Partial: `0`
   - Missing: `0`
   - N/A: `0`
 - The doctor dashboard is now mostly backend-driven.
@@ -43,46 +43,21 @@ Excluded on purpose:
 | Today appointments | `GET` | `/api/appointments` | doctor | Complete | `src/hooks/doctor/useDoctorAppointmentsApi.ts`, `src/lib/doctor/client.ts`, `src/components/doctor/dashboard/home-doctor.tsx` | Mock fallback removed from dashboard |
 | Quick patient search | `GET` | `/api/doctors/patients` | doctor | Complete | `src/hooks/doctor/useDashboardPatientsSearch.ts`, `src/hooks/doctor/useDoctorPatients.ts`, `src/lib/doctor/client.ts` | Live search table/card |
 | Self rating | `GET` | `/api/doctors/internal/directory` | doctor, secretary | Complete | `src/hooks/doctor/useDoctorSelfRating.ts`, `src/components/doctor/dashboard/home-doctor.tsx` | Used to render live rating |
-| Active consultation + waitlist summary | `GET` | `/api/doctors/home/snapshot` plus consultation/waitlist domains | doctor | Partial | `src/components/doctor/dashboard/active-consultations-section.tsx`, `src/components/doctor/dashboard/consultations-waiting-section.tsx`, `src/components/doctor/dashboard/home-doctor.tsx` | Summary display exists, but dashboard does not expose deeper workflow actions |
+| Active consultation + waitlist summary | `GET` | `/api/doctors/home/snapshot` plus consultation/waitlist domains | doctor | Complete | `src/lib/doctor/homeSnapshotMappers.ts`, `src/components/doctor/dashboard/active-consultations-section.tsx`, `src/components/doctor/dashboard/consultations-waiting-section.tsx` | Deep-links to consultations (`?ticket=`) and waitlist (`?request=`) |
 
 ## Detailed Gap Backlog
 
-### P1: Active consultation widget is summary-only
+### Resolved (2026-06)
 
-- **Backend:** snapshot + consultation flows such as:
-  - `GET /api/doctors/home/snapshot`
-  - `GET /api/consultations`
-  - `GET /api/consultations/:ticketId`
-- **Purpose:** surface and continue active consultation work
-- **Current state:** `ActiveConsultationsSection` only displays snapshot-derived text in:
-  - `src/components/doctor/dashboard/active-consultations-section.tsx`
-  - `src/components/doctor/dashboard/home-doctor.tsx`
-- **Gap type:** partial workflow
-- **Why partial:** dashboard shows context, but not a concrete resume action into the consultation flow
-- **Suggested fix:**
-  - Add a CTA to open the consultation or encounter if an identifier is available
-  - If snapshot lacks the identifier, extend the widget input contract from a live consultation query
-
-### P2: Waitlist widget is summary-only
-
-- **Backend:** waitlist family such as:
-  - `GET /waitlist`
-  - `GET /waitlist/:id`
-  - `PATCH /waitlist/:id/contacted`
-  - `PATCH /waitlist/:id/close`
-- **Purpose:** surface nearest pending waitlist demand and allow follow-up
-- **Current state:** `ConsultationsWaitingSection` only shows a patient name from snapshot
-- **Gap type:** partial workflow
-- **Why partial:** dashboard displays nearest waitlist request but does not offer follow-up action from the card itself
-- **Suggested fix:**
-  - Add a deep-link or CTA to the doctor waitlist workflow once that page is in scope
-  - Or clearly label the card as informational-only
+- **Active consultation widget** — CTA deep-links to `/doctor/online-consultations?ticket=…`
+- **Waitlist widget** — CTA deep-links to `/doctor/waitlist?request=…` with row highlight
+- **Dashboard errors** — standardized via `getUserFacingRequestErrorMessage` in `home-doctor.tsx`
 
 ## Quick Wins
 
-1. Add dashboard CTA for active consultation resume.
-2. Add dashboard CTA for nearest waitlist item.
-3. Standardize dashboard error copy to use the shared request error formatter.
+1. ~~Add dashboard CTA for active consultation resume.~~ Done
+2. ~~Add dashboard CTA for nearest waitlist item.~~ Done
+3. ~~Standardize dashboard error copy to use the shared request error formatter.~~ Done
 
 ## Current State Conclusion
 
@@ -99,9 +74,8 @@ What is now live:
 
 What remains partially integrated:
 
-- active consultation widget
-- waitlist widget
+- None on the dashboard page itself.
 
 So the most accurate current label is:
 
-- **Doctor dashboard: mostly complete, with two P1/P2 workflow-depth gaps**
+- **Doctor dashboard: complete for API-3 snapshot-driven widgets**

@@ -4,31 +4,145 @@ import {
   Droplets,
   FileCog,
   Heart,
+  Loader2,
   Plus,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
+import ConfirmActionDialog from '@/components/admin/dialogs/ConfirmActionDialog';
 import { MedicalFileOptionCard } from '@/components/admin/medical-file-options/MedicalFileOptionCard';
+import { useToast } from '@/components/ui/ToastProvider';
 import StyledSelect from '@/components/ui/styled-select';
+import {
+  useCreateLookup,
+  useRemoveLookup,
+} from '@/hooks/admin/useAdminLookupMutations';
+import { useAdminLookups } from '@/hooks/admin/useAdminLookups';
+import { generateLookupMachineKey } from '@/lib/admin/lookupKey';
+import { resolveLookupText } from '@/lib/admin/lookupUtils';
+import type { AdminLookupCategory, AdminLookupRecord } from '@/lib/admin/types';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+
+type CategoryUiKey =
+  | 'الأمراض المزمنة'
+  | 'أنواع الحساسية'
+  | 'فصائل الدم';
+
+const CATEGORY_UI_TO_API: Record<CategoryUiKey, AdminLookupCategory> = {
+  'الأمراض المزمنة': 'MEDICAL_CONDITION',
+  'أنواع الحساسية': 'ALLERGY',
+  'فصائل الدم': 'BLOOD_TYPE',
+};
+
+const CATEGORY_API_TO_UI: Record<AdminLookupCategoryDoc, CategoryUiKey> = {
+  MEDICAL_CONDITION: 'الأمراض المزمنة',
+  ALLERGY: 'أنواع الحساسية',
+  BLOOD_TYPE: 'فصائل الدم',
+};
+
+type AdminLookupCategoryDoc = 'MEDICAL_CONDITION' | 'ALLERGY' | 'BLOOD_TYPE';
+
+function mapLookupItems(records: AdminLookupRecord[]) {
+  return [...records]
+    .filter((row) => row.isActive)
+    .sort(
+      (a, b) =>
+        (a.order ?? 0) - (b.order ?? 0) ||
+        a.key.localeCompare(b.key, 'en'),
+    )
+    .map((row) => ({
+      id: row._id,
+      label: resolveLookupText(row.text, 'ar') || row.key,
+    }));
+}
 
 export default function AdminMedicalFileOptionsPage() {
+  const { toast } = useToast();
+  const createLookup = useCreateLookup();
+  const removeLookup = useRemoveLookup();
+
+  const chronicQuery = useAdminLookups({ category: 'MEDICAL_CONDITION' });
+  const allergyQuery = useAdminLookups({ category: 'ALLERGY' });
+  const bloodQuery = useAdminLookups({ category: 'BLOOD_TYPE' });
+
   const chronicDiseases = useMemo(
-    () => ['السكري', 'الضغط', 'القلب', 'الربو', 'الكلى', 'الكبد'],
-    [],
+    () => mapLookupItems(chronicQuery.data?.lookups ?? []),
+    [chronicQuery.data?.lookups],
   );
   const allergies = useMemo(
-    () => ['البنسلين', 'اللبان', 'الأسبرين', 'المكسرات', 'الحليب', 'القمح'],
-    [],
+    () => mapLookupItems(allergyQuery.data?.lookups ?? []),
+    [allergyQuery.data?.lookups],
   );
   const bloodTypes = useMemo(
-    () => ['AB+', 'B-', 'B+', 'A-', 'A+', 'O-', 'O+', 'AB-'],
-    [],
+    () => mapLookupItems(bloodQuery.data?.lookups ?? []),
+    [bloodQuery.data?.lookups],
   );
 
-  const [selectedCategory, setSelectedCategory] = useState<
-    'الأمراض المزمنة' | 'أنواع الحساسية' | 'فصائل الدم'
-  >('الأمراض المزمنة');
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryUiKey>('الأمراض المزمنة');
   const [newOption, setNewOption] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    label: string;
+    category: AdminLookupCategory;
+  } | null>(null);
+  const [quickAddCategory, setQuickAddCategory] =
+    useState<AdminLookupCategory | null>(null);
+
+  const isBusy = createLookup.isPending || removeLookup.isPending;
+
+  async function createLookupOption(
+    category: AdminLookupCategory,
+    label: string,
+  ) {
+    const trimmed = label.trim();
+    if (!trimmed) {
+      toast('أدخل اسم الخيار أولاً.', { variant: 'error' });
+      return;
+    }
+
+    try {
+      await createLookup.mutateAsync({
+        category,
+        key: generateLookupMachineKey(),
+        text: { ar: trimmed },
+        order: 0,
+      });
+      toast('تمت إضافة الخيار.', { variant: 'success' });
+      setNewOption('');
+      setQuickAddCategory(null);
+    } catch (error) {
+      toast(userFacingErrorMessage(error), {
+        title: 'تعذّر الإضافة',
+        variant: 'error',
+      });
+    }
+  }
+
+  async function handleBottomAdd() {
+    const category = CATEGORY_UI_TO_API[selectedCategory];
+    await createLookupOption(category, newOption);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    try {
+      await removeLookup.mutateAsync(deleteTarget.id);
+      toast('تم حذف الخيار.', { variant: 'success' });
+      setDeleteTarget(null);
+    } catch (error) {
+      toast(userFacingErrorMessage(error), {
+        title: 'تعذّر الحذف',
+        variant: 'error',
+      });
+    }
+  }
+
+  function openQuickAdd(category: AdminLookupCategory) {
+    setQuickAddCategory(category);
+    setSelectedCategory(CATEGORY_API_TO_UI[category as AdminLookupCategoryDoc]);
+    setNewOption('');
+  }
 
   return (
     <>
@@ -36,10 +150,7 @@ export default function AdminMedicalFileOptionsPage() {
         <title>خيارات الملف الطبي • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
+      <div dir='rtl' lang='ar'>
         <AdminDashboardOverview
           variant='admin'
           surface='mint'
@@ -51,19 +162,19 @@ export default function AdminMedicalFileOptionsPage() {
             {
               key: 'chronic',
               icon: <Heart className='h-5 w-5 shrink-0' />,
-              value: chronicDiseases.length,
+              value: chronicQuery.isAwaitingData ? '—' : chronicDiseases.length,
               label: 'أمراض مزمنة',
             },
             {
               key: 'allergies',
               icon: <AlertTriangle className='h-5 w-5 shrink-0' />,
-              value: allergies.length,
+              value: allergyQuery.isAwaitingData ? '—' : allergies.length,
               label: 'أنواع حساسية',
             },
             {
               key: 'blood',
               icon: <Droplets className='h-5 w-5 shrink-0' />,
-              value: bloodTypes.length,
+              value: bloodQuery.isAwaitingData ? '—' : bloodTypes.length,
               label: 'فصائل دم',
             },
           ]}
@@ -76,6 +187,17 @@ export default function AdminMedicalFileOptionsPage() {
               items={chronicDiseases}
               icon={Heart}
               addLabel='إضافة مرض'
+              onAdd={() => openQuickAdd('MEDICAL_CONDITION')}
+              onRemove={(id) => {
+                const row = chronicDiseases.find((item) => item.id === id);
+                if (!row) return;
+                setDeleteTarget({
+                  id,
+                  label: row.label,
+                  category: 'MEDICAL_CONDITION',
+                });
+              }}
+              removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
               tone={{
                 border: 'border-[#16C5C0]',
                 headerBg: 'bg-[#E7FBFA]',
@@ -90,6 +212,17 @@ export default function AdminMedicalFileOptionsPage() {
               items={allergies}
               icon={AlertTriangle}
               addLabel='إضافة حساسية'
+              onAdd={() => openQuickAdd('ALLERGY')}
+              onRemove={(id) => {
+                const row = allergies.find((item) => item.id === id);
+                if (!row) return;
+                setDeleteTarget({
+                  id,
+                  label: row.label,
+                  category: 'ALLERGY',
+                });
+              }}
+              removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
               tone={{
                 border: 'border-[#F59E0B]',
                 headerBg: 'bg-[#FFF7ED]',
@@ -105,6 +238,7 @@ export default function AdminMedicalFileOptionsPage() {
               icon={Droplets}
               addLabel='إضافة فصيلة'
               variant='chips'
+              onAdd={() => openQuickAdd('BLOOD_TYPE')}
               tone={{
                 border: 'border-[#FCA5A5]',
                 headerBg: 'bg-[#FFF1F2]',
@@ -140,10 +274,16 @@ export default function AdminMedicalFileOptionsPage() {
               <div className='mt-6 lg:col-span-1'>
                 <button
                   type='button'
-                  className='mx-auto flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white'
+                  onClick={() => void handleBottomAdd()}
+                  disabled={isBusy || !newOption.trim()}
+                  className='mx-auto flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white disabled:opacity-50'
                   aria-label='إضافة'
                 >
-                  <Plus className='h-5 w-5' />
+                  {createLookup.isPending ? (
+                    <Loader2 className='h-5 w-5 animate-spin' />
+                  ) : (
+                    <Plus className='h-5 w-5' />
+                  )}
                 </button>
               </div>
 
@@ -153,14 +293,7 @@ export default function AdminMedicalFileOptionsPage() {
                 </div>
                 <StyledSelect
                   value={selectedCategory}
-                  onChange={(v) =>
-                    setSelectedCategory(
-                      v as
-                        | 'الأمراض المزمنة'
-                        | 'أنواع الحساسية'
-                        | 'فصائل الدم',
-                    )
-                  }
+                  onChange={(v) => setSelectedCategory(v as CategoryUiKey)}
                   options={[
                     { value: 'الأمراض المزمنة', label: 'الأمراض المزمنة' },
                     { value: 'أنواع الحساسية', label: 'أنواع الحساسية' },
@@ -170,9 +303,34 @@ export default function AdminMedicalFileOptionsPage() {
                 />
               </div>
             </div>
+
+            {quickAddCategory ? (
+              <p className='mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]'>
+                إضافة سريعة لفئة{' '}
+                {CATEGORY_API_TO_UI[quickAddCategory as AdminLookupCategoryDoc]} —
+                اكتب الاسم واضغط إضافة.
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
+
+      <ConfirmActionDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        variant='destructive'
+        title='حذف الخيار'
+        description={
+          deleteTarget
+            ? `هل تريد حذف «${deleteTarget.label}» من خيارات الملف الطبي؟`
+            : ''
+        }
+        confirmLabel='حذف'
+        confirmDisabled={removeLookup.isPending}
+        onConfirm={() => void confirmDelete()}
+      />
     </>
   );
 }

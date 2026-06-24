@@ -7,6 +7,7 @@ import { AdminServicesHeader } from '@/components/admin/services/AdminServicesHe
 import { AdminServicesToolbar } from '@/components/admin/services/AdminServicesToolbar';
 import UpsertFacilityDialog from '@/components/admin/services/dialogs/UpsertFacilityDialog';
 import DeleteFacilityDialog from '@/components/admin/services/dialogs/DeleteFacilityDialog';
+import FacilityDoctorsDialog from '@/components/admin/services/dialogs/FacilityDoctorsDialog';
 import {
   ADMIN_SERVICES_PAGE_SIZE,
   ADMIN_SERVICES_TABS,
@@ -31,6 +32,9 @@ export default function AdminServicesPage() {
   const [deleteTarget, setDeleteTarget] = useState<FacilitySummary | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [statusToggleTarget, setStatusToggleTarget] =
+    useState<FacilitySummary | null>(null);
+  const [doctorsDialogOpen, setDoctorsDialogOpen] = useState(false);
+  const [doctorsFacility, setDoctorsFacility] =
     useState<FacilitySummary | null>(null);
 
   const activeTab = ADMIN_SERVICES_TABS[activeTabIdx];
@@ -118,6 +122,11 @@ export default function AdminServicesPage() {
         onOpenChange={setDeleteOpen}
         facility={deleteTarget}
       />
+      <FacilityDoctorsDialog
+        open={doctorsDialogOpen}
+        onOpenChange={setDoctorsDialogOpen}
+        facility={doctorsFacility}
+      />
 
       <ConfirmActionDialog
         open={statusToggleTarget !== null}
@@ -197,6 +206,10 @@ export default function AdminServicesPage() {
           onEditFacility={openEdit}
           onDeleteFacility={openDelete}
           onToggleFacilityStatus={(f) => setStatusToggleTarget(f)}
+          onViewFacilityDoctors={(f) => {
+            setDoctorsFacility(f);
+            setDoctorsDialogOpen(true);
+          }}
         />
       </div>
     </>

@@ -23,6 +23,8 @@ import type {
   ServiceProvidersListResponse,
   CreateProviderBody,
   UpdateProviderBody,
+  FacilityDoctorsListParams,
+  FacilityDoctorsListResponse,
 } from "@/lib/admin/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,6 +36,8 @@ export const SERVICES_KEYS = {
   facilities: (params: FacilitiesListParams) =>
     ["admin", "facilities", params] as const,
   facilityById: (id: string) => ["admin", "facility", id] as const,
+  facilityDoctors: (id: string, params: FacilityDoctorsListParams) =>
+    ["admin", "facility", id, "doctors", params] as const,
   serviceTypes: () => ["admin", "service-types"] as const,
   serviceProviders: (typeSlug?: string, cursor?: string) =>
     ["admin", "service-providers", typeSlug, cursor] as const,
@@ -141,6 +145,32 @@ export function useDeleteFacility() {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
     },
   });
+}
+
+export function useFacilityDoctors(
+  facilityId: string,
+  params: FacilityDoctorsListParams = {},
+  enabled = true,
+) {
+  const qs = buildQs(params as Record<string, unknown>);
+  const query = useQuery({
+    queryKey: SERVICES_KEYS.facilityDoctors(facilityId, params),
+    queryFn: () =>
+      get<FacilityDoctorsListResponse>(
+        `${adminEndpoints.facilities.listDoctors(facilityId)}${qs ? `?${qs}` : ""}`,
+        { locale: "ar" },
+      ),
+    enabled: Boolean(facilityId) && enabled,
+    staleTime: 30_000,
+  });
+
+  return {
+    ...query,
+    doctors: query.data?.doctors ?? [],
+    total: query.data?.total ?? 0,
+    facility: query.data?.facility,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

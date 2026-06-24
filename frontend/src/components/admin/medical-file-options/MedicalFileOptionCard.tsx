@@ -9,13 +9,21 @@ type MedicalFileOptionCardTone = {
   addText: string;
 };
 
+export type MedicalFileOptionItem = {
+  id: string;
+  label: string;
+};
+
 type MedicalFileOptionCardProps = {
   title: string;
-  items: string[];
+  items: MedicalFileOptionItem[];
   icon: LucideIcon;
   addLabel: string;
   tone: MedicalFileOptionCardTone;
   variant?: 'rows' | 'chips';
+  onRemove?: (id: string) => void;
+  onAdd?: () => void;
+  removingId?: string | null;
 };
 
 export function MedicalFileOptionCard({
@@ -25,6 +33,9 @@ export function MedicalFileOptionCard({
   addLabel,
   tone,
   variant = 'rows',
+  onRemove,
+  onAdd,
+  removingId = null,
 }: MedicalFileOptionCardProps) {
   return (
     <div
@@ -44,10 +55,10 @@ export function MedicalFileOptionCard({
           <div className='flex flex-1 flex-wrap justify-end gap-2'>
             {items.map((item) => (
               <span
-                key={item}
+                key={item.id}
                 className={`inline-flex h-[28px] items-center justify-center rounded-[8px] px-3 font-cairo text-[12px] font-extrabold ${tone.itemBg} ${tone.itemText}`}
               >
-                {item}
+                {item.label}
               </span>
             ))}
           </div>
@@ -55,16 +66,18 @@ export function MedicalFileOptionCard({
           <div className='space-y-2'>
             {items.map((item) => (
               <div
-                key={item}
+                key={item.id}
                 className={`flex h-[40px] items-center justify-between rounded-[6px] px-4 ${tone.itemBg}`}
               >
                 <div className={`font-cairo text-[12px] font-bold ${tone.itemText}`}>
-                  {item}
+                  {item.label}
                 </div>
                 <button
                   type='button'
-                  className='flex h-[24px] w-[24px] items-center justify-center rounded-[6px] text-[#EF4444]'
-                  aria-label='حذف'
+                  onClick={() => onRemove?.(item.id)}
+                  disabled={!onRemove || removingId === item.id}
+                  className='flex h-[24px] w-[24px] items-center justify-center rounded-[6px] text-[#EF4444] disabled:opacity-50'
+                  aria-label={`حذف ${item.label}`}
                 >
                   <Trash2 className='h-4 w-4' />
                 </button>
@@ -75,7 +88,9 @@ export function MedicalFileOptionCard({
 
         <button
           type='button'
-          className={`mt-4 inline-flex h-[36px] w-full items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[12px] font-extrabold ${tone.addText}`}
+          onClick={onAdd}
+          disabled={!onAdd}
+          className={`mt-4 inline-flex h-[36px] w-full items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[12px] font-extrabold ${tone.addText} disabled:opacity-50`}
         >
           <Plus className='h-4 w-4' />
           {addLabel}

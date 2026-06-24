@@ -421,6 +421,10 @@ export default function App() {
               element={<AdminPages.AdminServiceTypesPage />}
             />
             <Route
+              path="service-providers"
+              element={<AdminPages.AdminServiceProvidersPage />}
+            />
+            <Route
               path="appointments"
               element={<AdminPages.AdminAppointmentsPage />}
             />

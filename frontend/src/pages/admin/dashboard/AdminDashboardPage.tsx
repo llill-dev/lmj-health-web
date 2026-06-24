@@ -19,12 +19,16 @@ import {
   Trash2,
   Archive,
 } from "lucide-react";
+import { get } from "@/lib/api";
 import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import {
   useAdminContentList,
   useArchiveContent,
 } from "@/hooks/admin/useAdminContent";
+import { useAdminContentStatusCounts } from "@/hooks/admin/useAdminContentStatusCounts";
+import { useAdminPlatformStats } from "@/hooks/admin/useAdminAnalytics";
+import { useAdminUnreadNotificationCount } from "@/hooks/admin/useAdminNotifications";
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
 import type {
   AdminComplaintListItem,
@@ -85,6 +89,56 @@ export default function AdminDashboardPage() {
     complaintsQuery.isError,
   );
 
+  const { stats, isAwaitingData: statsAwaiting } = useAdminPlatformStats();
+  const contentCounts = useAdminContentStatusCounts();
+  const unreadNotifications = useAdminUnreadNotificationCount();
+
+  const pendingAccessQuery = useQuery({
+    queryKey: ["admin", "dashboard", "access-requests-pending"],
+    queryFn: () =>
+      get<{ total?: number }>(
+        "/api/access-requests?status=pending&page=1&limit=1",
+        { locale: "ar" },
+      ),
+    staleTime: 30_000,
+  });
+
+  const formatKpi = (value: number | undefined, awaiting: boolean) =>
+    awaiting ? "—" : String(value ?? 0);
+
+  const mainKpisAwaiting =
+    statsAwaiting || pendingAccessQuery.isLoading;
+
+  const secondaryCards = [
+    {
+      title: "إشعارات غير مقروءة",
+      value: formatKpi(
+        unreadNotifications.data,
+        unreadNotifications.isAwaitingData,
+      ),
+      icon: Bell,
+      tone: "border-[#FECACA] bg-[#FFF7F7] text-[#111827]",
+      iconBg: "bg-[#FEE2E2]",
+      iconColor: "text-[#EF4444]",
+    },
+    {
+      title: "محتوى منشور",
+      value: formatKpi(contentCounts.published, contentCounts.isAwaitingData),
+      icon: FileText,
+      tone: "border-[#CFFAFE] bg-white text-[#111827]",
+      iconBg: "bg-[#ECFEFF]",
+      iconColor: "text-primary",
+    },
+    {
+      title: "طلبات تحقق معلّقة",
+      value: formatKpi(stats.pendingVerifications, statsAwaiting),
+      icon: ClipboardList,
+      tone: "border-[#CFFAFE] bg-white text-[#111827]",
+      iconBg: "bg-[#ECFEFF]",
+      iconColor: "text-primary",
+    },
+  ];
+
   return (
     <>
       <Helmet>
@@ -103,57 +157,35 @@ export default function AdminDashboardPage() {
             {
               key: "access",
               icon: <UserCheck className="h-5 w-5 shrink-0" />,
-              value: "1",
+              value: formatKpi(
+                pendingAccessQuery.data?.total,
+                mainKpisAwaiting,
+              ),
               label: "طلبات الوصول المعلّقة",
             },
             {
               key: "appointments",
               icon: <CalendarDays className="h-5 w-5 shrink-0" />,
-              value: "2",
-              label: "مواعيد الشهر",
+              value: formatKpi(stats.totalAppointments, mainKpisAwaiting),
+              label: "إجمالي المواعيد",
             },
             {
               key: "doctors",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
-              value: "5",
+              value: formatKpi(stats.totalDoctors, mainKpisAwaiting),
               label: "إجمالي الأطباء",
             },
             {
               key: "patients",
               icon: <Users className="h-5 w-5 shrink-0" />,
-              value: "2",
+              value: formatKpi(stats.totalPatients, mainKpisAwaiting),
               label: "إجمالي المرضى",
             },
           ]}
         />
 
         <section className="grid grid-cols-1 gap-5 mt-5 md:grid-cols-3">
-          {[
-            {
-              title: "إشعارات غير مقروءة",
-              value: "2",
-              icon: Bell,
-              tone: "border-[#FECACA] bg-[#FFF7F7] text-[#111827]",
-              iconBg: "bg-[#FEE2E2]",
-              iconColor: "text-[#EF4444]",
-            },
-            {
-              title: "الملفات المنشورة",
-              value: "45",
-              icon: FileText,
-              tone: "border-[#CFFAFE] bg-white text-[#111827]",
-              iconBg: "bg-[#ECFEFF]",
-              iconColor: "text-primary",
-            },
-            {
-              title: "الندوات المنشورة",
-              value: "25",
-              icon: ClipboardList,
-              tone: "border-[#CFFAFE] bg-white text-[#111827]",
-              iconBg: "bg-[#ECFEFF]",
-              iconColor: "text-primary",
-            },
-          ].map((c, idx) => {
+          {secondaryCards.map((c, idx) => {
             const Icon = c.icon;
             return (
               <div

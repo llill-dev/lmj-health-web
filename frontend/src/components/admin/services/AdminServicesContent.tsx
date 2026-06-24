@@ -23,6 +23,7 @@ export function AdminServicesContent({
   onEditFacility,
   onDeleteFacility,
   onToggleFacilityStatus,
+  onViewFacilityDoctors,
 }: {
   isAwaitingData: boolean;
   isError: boolean;
@@ -39,6 +40,7 @@ export function AdminServicesContent({
   onEditFacility: (f: FacilitySummary) => void;
   onDeleteFacility: (f: FacilitySummary) => void;
   onToggleFacilityStatus: (f: FacilitySummary) => void;
+  onViewFacilityDoctors?: (f: FacilitySummary) => void;
 }) {
   return (
     <section className='mt-6 space-y-4'>
@@ -76,6 +78,11 @@ export function AdminServicesContent({
                 onEdit={() => onEditFacility(facility)}
                 onDelete={() => onDeleteFacility(facility)}
                 onToggleStatus={() => onToggleFacilityStatus(facility)}
+                onViewDoctors={
+                  onViewFacilityDoctors
+                    ? () => onViewFacilityDoctors(facility)
+                    : undefined
+                }
                 isToggling={togglingId === facility.id}
               />
             ))
