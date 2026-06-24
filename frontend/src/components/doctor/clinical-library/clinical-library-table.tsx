@@ -17,10 +17,14 @@ export function ClinicalLibraryItemsTable({
   items,
   typeLabels,
   onArchive,
+  onToggleFavorite,
+  togglingFavoriteId,
 }: {
   items: DoctorLibraryItem[];
   typeLabels: Record<string, string>;
   onArchive: (itemId: string) => void;
+  onToggleFavorite?: (itemId: string, isFavorite: boolean) => void;
+  togglingFavoriteId?: string | null;
 }) {
   return (
     <DoctorMintTableShell columns={[...TABLE_COLUMNS]} isEmpty={!items.length}>
@@ -41,16 +45,31 @@ export function ClinicalLibraryItemsTable({
             </div>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
-            {item.isFavorite ? (
-              <span className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-[#D97706]">
-                <Star className="h-4 w-4 fill-[#D97706]" aria-hidden />
-                نعم
-              </span>
-            ) : (
-              <span className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                —
-              </span>
-            )}
+            <button
+              type="button"
+              onClick={() =>
+                onToggleFavorite?.(item._id, !item.isFavorite)
+              }
+              disabled={
+                !onToggleFavorite || togglingFavoriteId === item._id
+              }
+              className={cn(
+                'inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold transition disabled:opacity-50',
+                item.isFavorite
+                  ? 'text-[#D97706]'
+                  : 'text-[#98A2B3] hover:text-[#D97706]',
+              )}
+              aria-label={item.isFavorite ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
+            >
+              <Star
+                className={cn(
+                  'h-4 w-4',
+                  item.isFavorite && 'fill-[#D97706]',
+                )}
+                aria-hidden
+              />
+              <span>{item.isFavorite ? 'نعم' : 'لا'}</span>
+            </button>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
             <button

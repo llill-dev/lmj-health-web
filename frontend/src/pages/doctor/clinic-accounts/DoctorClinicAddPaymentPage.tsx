@@ -20,7 +20,7 @@ import {
   getBillingPaymentErrorToast,
 } from "@/lib/doctor/billing/errors";
 import { formatBillingAmount } from "@/lib/doctor/billing/format";
-import { calcInvoiceTotals } from "@/lib/doctor/clinicAccounts/mockData";
+import { calcInvoiceTotals } from "@/lib/doctor/clinicAccounts/invoiceTotals";
 import { useToast } from "@/components/ui/ToastProvider";
 import { cn } from "@/lib/utils/utils";
 

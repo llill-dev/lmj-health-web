@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import type { ClinicInvoice } from '@/lib/doctor/clinicAccounts/types';
-import { formatUsd } from '@/lib/doctor/clinicAccounts/mockData';
+import { formatUsd } from '@/lib/doctor/billing/format';
 import { InvoiceStatusBadge } from '@/components/doctor/clinic-accounts/invoice-status-badge';
 
 export function InvoiceListItem({

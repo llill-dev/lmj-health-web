@@ -20,6 +20,11 @@ import {
   useDoctorProfile,
   useDoctorSelfRating,
 } from '@/hooks';
+import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import {
+  parseSnapshotActiveConsultation,
+  parseSnapshotNearestWaitlist,
+} from '@/lib/doctor/homeSnapshotMappers';
 import ActiveConsultationsSection from '@/components/doctor/dashboard/active-consultations-section';
 import ConsultationsWaitingSection from '@/components/doctor/dashboard/consultations-waiting-section';
 import DiagnosisAnalyticsSection from '@/components/doctor/dashboard/diagnosis-analytics-section';
@@ -147,14 +152,19 @@ export default function HomeDoctor() {
   }
 
   if (statsError || appointmentsError || snapshotError) {
+    const message = getUserFacingRequestErrorMessage(
+      statsError ?? appointmentsError ?? snapshotError,
+    );
     return (
       <div className='flex h-[400px] items-center justify-center'>
         <div className='text-center'>
           <AlertCircle className='mx-auto h-12 w-12 text-red-500' />
-          <p className='mt-2 text-red-600'>فشل تحميل البيانات</p>
+          <p className='mt-2 font-cairo text-[14px] font-semibold text-red-600'>
+            {message || 'فشل تحميل بيانات لوحة التحكم'}
+          </p>
           <button
             onClick={() => refetch()}
-            className='mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+            className='mt-3 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white hover:bg-primary/90'
           >
             إعادة المحاولة
           </button>
@@ -162,6 +172,13 @@ export default function HomeDoctor() {
       </div>
     );
   }
+
+  const activeConsultation = parseSnapshotActiveConsultation(
+    snapshot?.activeConsultation,
+  );
+  const nearestWaitlist = parseSnapshotNearestWaitlist(
+    snapshot?.nearestWaitlistRequest,
+  );
 
   const kpis: KpiCard[] = [
     {
@@ -241,27 +258,15 @@ export default function HomeDoctor() {
 
       <section className='grid items-start gap-6 xl:grid-cols-2'>
         <ActiveConsultationsSection
-          subject={
-            typeof snapshot?.activeConsultation?.subject === 'string'
-              ? snapshot.activeConsultation.subject
-              : undefined
-          }
-          patientName={
-            typeof snapshot?.activeConsultation?.patientSummary === 'object' &&
-            snapshot.activeConsultation.patientSummary &&
-            typeof (snapshot.activeConsultation.patientSummary as {
-              userId?: { fullName?: string };
-            }).userId?.fullName === 'string'
-              ? (snapshot.activeConsultation.patientSummary as {
-                  userId: { fullName: string };
-                }).userId.fullName
-              : undefined
-          }
+          ticketId={activeConsultation?.ticketId}
+          subject={activeConsultation?.subject}
+          patientName={activeConsultation?.patientName}
+          unreadCount={activeConsultation?.unreadCount}
         />
         <ConsultationsWaitingSection
-          patientName={snapshot?.nearestWaitlistRequest?.patientName as
-            | string
-            | undefined}
+          requestId={nearestWaitlist?.requestId}
+          patientName={nearestWaitlist?.patientName}
+          urgencyLevel={nearestWaitlist?.urgencyLevel}
         />
       </section>
 

@@ -3,6 +3,7 @@ import type { FacilityType } from '@/lib/admin/types';
 export type DoctorFacilityRecord = {
   id?: string;
   _id?: string;
+  facilityProviderId?: string;
   name: string;
   facilityType?: FacilityType | string;
   city: string;
@@ -30,20 +31,9 @@ export type DoctorFacilityMutationBody = {
   attributes?: string[];
 };
 
-/** Legacy doctor facility request (POST /api/facilities/requests). */
-export type DoctorFacilityCreateRequestBody = {
-  name: string;
-  city: string;
-  facilityType?: FacilityType;
-  kind?: FacilityType;
-  address?: string;
-  phone?: string;
-  description?: string;
-  country?: string;
-};
-
 export type DoctorFacilityAssignBody = {
   facilityId: string | null;
+  facilityProviderId: string | null;
 };
 
 export type DoctorFacilityResponse = {
@@ -53,6 +43,7 @@ export type DoctorFacilityResponse = {
   /** Swagger 201 may return `{ data: { id } }` or embed the full record. */
   data?: DoctorFacilityRecord | { id?: string; _id?: string };
   doctor?: Record<string, unknown>;
+  additionalProp1?: Record<string, unknown>;
 };
 
 export type FacilityTypeOption = {

@@ -3,7 +3,6 @@ import { doctorEndpoints } from '@/lib/doctor/endpoints';
 import { serializeDoctorFacilityMutationBody } from '@/lib/doctor/facilities/mappers';
 import type {
   DoctorFacilityAssignBody,
-  DoctorFacilityCreateRequestBody,
   DoctorFacilityMutationBody,
   DoctorFacilityResponse,
   FacilityTypesResponse,
@@ -19,11 +18,6 @@ export const doctorFacilityApi = {
       serializeDoctorFacilityMutationBody(body),
       { locale: 'ar' },
     ),
-
-  createRequest: (body: DoctorFacilityCreateRequestBody) =>
-    post<DoctorFacilityResponse>(doctorEndpoints.facilities.requests, body, {
-      locale: 'ar',
-    }),
 
   update: (body: DoctorFacilityMutationBody) =>
     put<DoctorFacilityResponse>(

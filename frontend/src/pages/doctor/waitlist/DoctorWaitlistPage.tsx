@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Helmet } from 'react-helmet-async';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
@@ -81,6 +81,10 @@ import { readAuthUser } from '@/lib/cookies';
 export default function DoctorWaitlistPage() {
 
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  const focusRequestId = searchParams.get('request')?.trim() ?? '';
 
   const { toast } = useToast();
 
@@ -175,6 +179,16 @@ export default function DoctorWaitlistPage() {
     setPage(1);
 
   }, [search, statusTab, pageSize]);
+
+
+
+  useEffect(() => {
+
+    if (!focusRequestId) return;
+
+    setStatusTab('active');
+
+  }, [focusRequestId]);
 
 
 
@@ -481,6 +495,8 @@ export default function DoctorWaitlistPage() {
                 urgencyLabel={waitlistUrgencyLabel}
 
                 statusLabel={waitlistStatusLabel}
+
+                highlightRequestId={focusRequestId || undefined}
 
                 onNavigateAppointments={() => navigate('/doctor/appointments')}
 

@@ -77,6 +77,38 @@ export function useDeleteDoctorLibraryItem() {
   });
 }
 
+export function useToggleDoctorLibraryFavorite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      itemId,
+      isFavorite,
+    }: {
+      itemId: string;
+      isFavorite: boolean;
+    }) => doctorApi.library.setFavorite(itemId, isFavorite),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: doctorClinicalQueryKeys.all,
+      });
+    },
+  });
+}
+
+export function useDoctorLibraryRecent(limit = 8) {
+  const query = useQuery({
+    queryKey: doctorClinicalQueryKeys.libraryRecent(),
+    queryFn: () => doctorApi.library.recent(limit),
+    staleTime: 30_000,
+  });
+
+  return {
+    items: query.data?.items ?? [],
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    refetch: query.refetch,
+  };
+}
+
 export function useDoctorTemplates(params: {
   search?: string;
   type?: string;
@@ -138,8 +170,11 @@ export function useApplyDoctorTemplate() {
   return useMutation({
     mutationFn: async (templateId: string) => {
       const response = await doctorApi.templates.apply(templateId);
-      storeDoctorTemplateDraft(response, templateId);
-      return response as DoctorTemplateApplyResponse;
+      const stored = storeDoctorTemplateDraft(response, templateId);
+      return {
+        ...(response as DoctorTemplateApplyResponse),
+        storedLocally: stored != null,
+      };
     },
   });
 }

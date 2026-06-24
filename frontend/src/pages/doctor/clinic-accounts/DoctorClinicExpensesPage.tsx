@@ -31,7 +31,7 @@ import {
   BILLING_FUTURE_DATE_MESSAGE,
   isBillingDateInputAfterToday,
 } from "@/lib/doctor/billing/dateInput";
-import { EXPENSE_CATEGORY_LABELS } from "@/lib/doctor/clinicAccounts/mockData";
+import { EXPENSE_CATEGORY_LABELS } from "@/lib/doctor/clinicAccounts/labels";
 import type { ExpenseCategory } from "@/lib/doctor/clinicAccounts/types";
 import { useToast } from "@/components/ui/ToastProvider";
 

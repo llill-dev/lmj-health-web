@@ -1,5 +1,5 @@
 import type { InvoiceStatus } from '@/lib/doctor/clinicAccounts/types';
-import { INVOICE_STATUS_LABELS } from '@/lib/doctor/clinicAccounts/mockData';
+import { INVOICE_STATUS_LABELS } from '@/lib/doctor/clinicAccounts/labels';
 import { cn } from '@/lib/utils/utils';
 
 const STYLES: Record<InvoiceStatus, string> = {

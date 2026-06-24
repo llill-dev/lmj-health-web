@@ -20,10 +20,7 @@ import type {
   MonthlyFinancePoint,
   WeeklyOverviewPoint,
 } from '@/lib/doctor/clinicAccounts/types';
-import {
-  formatBillingNumber,
-  formatUsd,
-} from '@/lib/doctor/clinicAccounts/mockData';
+import { formatBillingNumber, formatUsd } from '@/lib/doctor/billing/format';
 
 const formatAxisTick = (value: number) =>
   formatBillingNumber(value, { maximumFractionDigits: 0 });

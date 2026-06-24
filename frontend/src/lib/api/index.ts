@@ -16,9 +16,11 @@ function normalizeApiOrigin(value: string | undefined): string {
   return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
 }
 
+import { isUiOnlyMode } from '@/lib/env/uiOnlyMode';
+
 export const API_BASE_URL = normalizeApiOrigin(import.meta.env.VITE_API_ORIGIN);
 
-const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
+const UI_ONLY = isUiOnlyMode();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ApiError — carries the full HTTP context so callers can inspect status codes,

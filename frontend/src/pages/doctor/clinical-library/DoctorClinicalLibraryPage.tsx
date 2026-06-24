@@ -37,6 +37,7 @@ import {
   type ClinicalLibraryTemplateFormValues,
 } from '@/components/doctor/clinical-library/clinical-library-template-form-dialog';
 import { ClinicalLibraryTemplateApplyDialog } from '@/components/doctor/clinical-library/clinical-library-template-apply-dialog';
+import { ClinicalLibraryRecentStrip } from '@/components/doctor/clinical-library/clinical-library-recent-strip';
 
 import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
 
@@ -68,7 +69,11 @@ import {
 
   useDoctorLibraryItems,
 
+  useDoctorLibraryRecent,
+
   useDoctorTemplates,
+
+  useToggleDoctorLibraryFavorite,
 
   useUpdateDoctorTemplate,
 
@@ -163,6 +168,8 @@ export default function DoctorClinicalLibraryPage() {
 
   });
 
+  const recentLibraryQuery = useDoctorLibraryRecent(8);
+
   const templatesQuery = useDoctorTemplates({
 
     search,
@@ -193,6 +200,8 @@ export default function DoctorClinicalLibraryPage() {
 
   const deleteLibrary = useDeleteDoctorLibraryItem();
 
+  const toggleLibraryFavorite = useToggleDoctorLibraryFavorite();
+
   const createTemplate = useCreateDoctorTemplate();
   const updateTemplate = useUpdateDoctorTemplate();
   const applyTemplate = useApplyDoctorTemplate();
@@ -205,6 +214,8 @@ export default function DoctorClinicalLibraryPage() {
     createLibrary.isPending ||
 
     deleteLibrary.isPending ||
+
+    toggleLibraryFavorite.isPending ||
 
     createTemplate.isPending ||
 
@@ -332,7 +343,22 @@ export default function DoctorClinicalLibraryPage() {
 
     !templatesTrulyEmpty;
 
-
+  const handleToggleLibraryFavorite = async (
+    itemId: string,
+    isFavorite: boolean,
+  ) => {
+    try {
+      await toggleLibraryFavorite.mutateAsync({ itemId, isFavorite });
+      toast(isFavorite ? 'أُضيف إلى المفضلة.' : 'أُزيل من المفضلة.', {
+        variant: 'success',
+      });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), {
+        title: 'تعذّر تحديث المفضلة',
+        variant: 'error',
+      });
+    }
+  };
 
   const handleCreateLibrary = async (values: {
     type: DoctorLibraryItemType;
@@ -401,12 +427,19 @@ export default function DoctorClinicalLibraryPage() {
     const template = templatesQuery.templates.find((item) => item._id === templateId);
     try {
       const response = await applyTemplate.mutateAsync(templateId);
+      if (!response.storedLocally) {
+        toast('تعذّر حفظ مسودة القالب في المتصفح. يمكنك نسخها من المعاينة.', {
+          variant: 'warning',
+        });
+      }
       setApplyPreview({
         templateName: response.name?.trim() || template?.name?.trim() || 'قالب',
         templateType: response.type ?? (template?.type as DoctorTemplateType | undefined),
         application: response.application,
       });
-      toast('تم تحميل مسودة القالب.', { variant: 'success' });
+      if (response.storedLocally) {
+        toast('تم تحميل مسودة القالب.', { variant: 'success' });
+      }
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: 'تعذّر استخدام القالب',
@@ -600,7 +633,13 @@ export default function DoctorClinicalLibraryPage() {
 
           />
 
-
+          {section === 'library' ? (
+            <ClinicalLibraryRecentStrip
+              items={recentLibraryQuery.items}
+              typeLabels={LIBRARY_TYPE_LABELS}
+              isAwaitingData={recentLibraryQuery.isAwaitingData}
+            />
+          ) : null}
 
           <div className="mt-5 sm:mt-6">
 
@@ -647,6 +686,16 @@ export default function DoctorClinicalLibraryPage() {
                   typeLabels={LIBRARY_TYPE_LABELS}
 
                   onArchive={setDeleteLibraryId}
+
+                  onToggleFavorite={(itemId, isFavorite) => {
+                    void handleToggleLibraryFavorite(itemId, isFavorite);
+                  }}
+
+                  togglingFavoriteId={
+                    toggleLibraryFavorite.isPending
+                      ? (toggleLibraryFavorite.variables?.itemId ?? null)
+                      : null
+                  }
 
                 />
 

@@ -7,7 +7,9 @@ import {
   resolveDoctorOrderStatusUiMeta,
 } from '@/lib/doctor/orderStatusLabels';
 
-const UI_ONLY = import.meta.env.VITE_UI_ONLY === 'true';
+import { isUiOnlyMode } from '@/lib/env/uiOnlyMode';
+
+const UI_ONLY = isUiOnlyMode();
 
 export type MedicalRequestStatusKey =
   | 'pending'

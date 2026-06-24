@@ -4,13 +4,26 @@ import { UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import DashboardSectionHeading from '@/components/doctor/dashboard/dashboard-section-heading';
+import { doctorWaitlistDeepLink } from '@/lib/doctor/homeSnapshotMappers';
 
 export default function ConsultationsWaitingSection({
   patientName,
+  requestId,
+  urgencyLevel,
 }: {
   patientName?: string;
+  requestId?: string;
+  urgencyLevel?: string;
 }) {
   const navigate = useNavigate();
+
+  const openWaitlist = () => {
+    if (requestId) {
+      navigate(doctorWaitlistDeepLink(requestId));
+      return;
+    }
+    navigate('/doctor/waitlist');
+  };
 
   return (
     <section>
@@ -21,7 +34,7 @@ export default function ConsultationsWaitingSection({
         className='mb-[22px]'
       />
 
-      {patientName ? (
+      {patientName || requestId ? (
         <article className='h-[160px] w-full rounded-[8px] border border-[#18C3C0] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)]'>
           <div className='flex items-start justify-between gap-4'>
             <div className='flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.22)]'>
@@ -29,18 +42,19 @@ export default function ConsultationsWaitingSection({
             </div>
             <div className='flex-1 text-right'>
               <h3 className='font-cairo text-[18px] font-black leading-none text-[#243044]'>
-                {patientName}
+                {patientName ?? 'طلب انتظار'}
               </h3>
               <p className='mt-2 font-cairo text-[13px] font-semibold text-[#667085]'>
                 أقرب طلب في قائمة الانتظار
+                {urgencyLevel ? ` · ${urgencyLevel}` : ''}
               </p>
             </div>
             <button
               type='button'
-              onClick={() => navigate('/doctor/waitlist')}
+              onClick={openWaitlist}
               className='rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-black text-white'
             >
-              التفاصيل
+              متابعة
             </button>
           </div>
         </article>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
@@ -73,6 +73,25 @@ export default function DoctorPrescriptionPage() {
     workspace.prescription,
     workspace.encounter?.status,
   );
+
+  const appliedTemplateDraftName = workspace.appliedTemplateDraftName;
+  const clearAppliedTemplateDraftName = workspace.clearAppliedTemplateDraftName;
+  const templateDraftNotice = workspace.templateDraftNotice;
+  const clearTemplateDraftNotice = workspace.clearTemplateDraftNotice;
+
+  useEffect(() => {
+    if (!appliedTemplateDraftName) return;
+    toast(`تم تطبيق قالب «${appliedTemplateDraftName}» على الوصفة.`, {
+      variant: 'success',
+    });
+    clearAppliedTemplateDraftName();
+  }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast]);
+
+  useEffect(() => {
+    if (!templateDraftNotice) return;
+    toast(templateDraftNotice, { variant: 'warning' });
+    clearTemplateDraftNotice();
+  }, [clearTemplateDraftNotice, templateDraftNotice, toast]);
 
   const editingMedication = useMemo(
     () => workspace.medications.find((item) => item.id === editingItemId),

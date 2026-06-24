@@ -155,41 +155,6 @@ export const RECENT_ACTIVITIES: RecentActivity[] = [
   },
 ];
 
-export const EXPENSE_CATEGORY_LABELS: Record<
-  import('@/lib/doctor/clinicAccounts/types').ExpenseCategory,
-  string
-> = {
-  rent: 'إيجار',
-  salaries: 'رواتب',
-  services: 'خدمات',
-  materials: 'مواد',
-};
-
-export const INVOICE_STATUS_LABELS: Record<
-  import('@/lib/doctor/clinicAccounts/types').InvoiceStatus,
-  string
-> = {
-  paid: 'مدفوع',
-  unpaid: 'غير مدفوع',
-  partial: 'مدفوع جزئياً',
-  overdue: 'متأخرة',
-};
-
+export { EXPENSE_CATEGORY_LABELS, INVOICE_STATUS_LABELS } from '@/lib/doctor/clinicAccounts/labels';
+export { calcInvoiceTotals } from '@/lib/doctor/clinicAccounts/invoiceTotals';
 export { formatUsd, formatBillingAmount, formatBillingNumber } from '@/lib/doctor/billing/format';
-
-export function calcInvoiceTotals(invoice: ClinicInvoice) {
-  const subtotal = invoice.items.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
-    0,
-  );
-  const discount = subtotal * (invoice.discountPercent / 100);
-  const afterDiscount = subtotal - discount;
-  const tax = afterDiscount * (invoice.taxPercent / 100);
-  const computedTotal = afterDiscount + tax;
-  const total = invoice.total > 0 ? invoice.total : computedTotal;
-  const remaining =
-    typeof invoice.remaining === 'number'
-      ? invoice.remaining
-      : Math.max(0, total - invoice.paid);
-  return { subtotal, discount, tax, total, remaining };
-}

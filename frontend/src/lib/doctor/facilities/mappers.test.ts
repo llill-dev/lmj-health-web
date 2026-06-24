@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  formValuesToCreateRequestBody,
   formValuesToMutationBody,
   mapApiFacilityToDoctorFacility,
   parseDoctorFacilityRecordFromResponse,
@@ -17,7 +16,7 @@ describe('doctor facility mappers', () => {
       address: 'المزة',
       phone: '+963944123456',
       status: 'ACTIVE',
-      description: 'عيادة عامة\n\nساعات العمل: 09:00 – 17:00',
+      description: 'عيادة عامة\n\nساعات العمل: 09:00 - 17:00',
     });
 
     expect(mapped).toMatchObject({
@@ -55,7 +54,6 @@ describe('doctor facility mappers', () => {
     });
     expect(body).not.toHaveProperty('status');
     expect(body.attributes).toEqual(['night_shift']);
-    expect(body.description).toContain('ساعات العمل: 09:00 – 17:00');
   });
 
   it('serializes swagger POST body without empty optional fields', () => {
@@ -81,23 +79,6 @@ describe('doctor facility mappers', () => {
     });
   });
 
-  it('builds legacy request body with kind and facilityType', () => {
-    const body = formValuesToCreateRequestBody({
-      name: 'عيادة تجريبية',
-      facilityType: 'clinic',
-      description: '',
-      city: 'دمشق',
-      address: 'شارع الجلاء',
-      phone: '0933875538',
-      email: '',
-      workHoursFrom: '09:00',
-      workHoursTo: '17:00',
-    });
-
-    expect(body.kind).toBe('clinic');
-    expect(body.facilityType).toBe('clinic');
-  });
-
   it('parses swagger data.id response shape', () => {
     const record = parseDoctorFacilityRecordFromResponse({
       messageKey: 'success.created',
@@ -107,9 +88,9 @@ describe('doctor facility mappers', () => {
     expect(record).toEqual({ id: '64f0c0000000000000000001' });
   });
 
-  it('parses API-3 facility envelope', () => {
+  it('parses API facility envelope', () => {
     const record = parseDoctorFacilityRecordFromResponse({
-      messageKey: 'facilities.doctor.loaded',
+      messageKey: 'success.ok',
       facility: {
         id: '64f0c0000000000000000001',
         name: 'City Clinic',

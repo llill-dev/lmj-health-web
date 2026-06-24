@@ -11,6 +11,7 @@ import {
 } from '@/hooks/doctor/useDoctorWaitlist';
 import { isWaitlistActionable } from '@/lib/doctor/waitlist/labels';
 import type { WaitlistRequest } from '@/lib/doctor/waitlist/types';
+import { cn } from '@/lib/utils/utils';
 import {
   WaitlistStatusBadge,
   WaitlistUrgencyBadge,
@@ -46,6 +47,7 @@ export function WaitlistTable({
   busy,
   urgencyLabel,
   statusLabel,
+  highlightRequestId,
   onNavigateAppointments,
   onContacted,
   onBook,
@@ -55,6 +57,7 @@ export function WaitlistTable({
   busy: boolean;
   urgencyLabel: (urgency?: string) => string;
   statusLabel: (status?: string) => string;
+  highlightRequestId?: string;
   onNavigateAppointments: () => void;
   onContacted: (request: WaitlistRequest) => void;
   onBook: (request: WaitlistRequest) => void;
@@ -62,6 +65,15 @@ export function WaitlistTable({
 }) {
   const [menu, setMenu] = useState<ActionsMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const highlightRef = useRef<HTMLTableRowElement | null>(null);
+
+  useEffect(() => {
+    if (!highlightRequestId) return;
+    highlightRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
+  }, [highlightRequestId, requests]);
 
   useEffect(() => {
     if (!menu) return;
@@ -118,7 +130,12 @@ export function WaitlistTable({
           return (
             <tr
               key={request._id}
-              className="border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60"
+              ref={highlightRequestId === request._id ? highlightRef : undefined}
+              className={cn(
+                'border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60',
+                highlightRequestId === request._id &&
+                  'bg-[#F0FDFA] ring-2 ring-inset ring-primary/40',
+              )}
             >
               <td
                 className={`${DOCTOR_MINT_TABLE_TD} font-cairo text-[12px] font-extrabold text-primary`}

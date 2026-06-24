@@ -86,7 +86,9 @@ type DoctorAppointmentsFiltersState = {
   limit: number;
 };
 
-const UI_ONLY = import.meta.env.VITE_UI_ONLY === "true";
+import { isUiOnlyMode } from "@/lib/env/uiOnlyMode";
+
+const UI_ONLY = isUiOnlyMode();
 
 function filterLocalSearch<
   T extends {

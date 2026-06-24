@@ -7,6 +7,7 @@ import {
   apiRequestResult,
   apiMultipart,
 } from "@/lib/api";
+import { isUiOnlyMode } from "@/lib/env/uiOnlyMode";
 import {
   api,
   type Appointment as MockAppointment,
@@ -411,7 +412,7 @@ export const doctorAppointmentsQueryKeys = {
     [...doctorAppointmentsQueryKeys.files(appointmentId), fileId] as const,
 };
 
-const UI_ONLY = import.meta.env.VITE_UI_ONLY === "true";
+const UI_ONLY = isUiOnlyMode();
 
 function buildAppointmentsListQuery(
   params: DoctorAppointmentListParams,

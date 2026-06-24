@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isAwaitingAnyInitialQueryData, isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { useToggleOrderCatalogFavorite } from '@/hooks/doctor/useOrderFavorites';
 import {
@@ -33,6 +33,12 @@ import type {
   RadiologyOrderItemUi,
 } from '@/components/doctor/radiology/radiology-types';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
+import { orderCategoryForTemplateType } from '@/lib/doctor/applyTemplateDraft';
+import { consumeOrderTemplateDraft } from '@/lib/doctor/consumeTemplateDraft';
+import {
+  clearDoctorTemplateDraft,
+  readDoctorTemplateDraft,
+} from '@/lib/doctor/templateDraftStorage';
 import {
   loadEncounterImagingOrderForWorkspace,
   loadEncounterLabOrderForWorkspace,
@@ -165,6 +171,13 @@ export function useEncounterOrderWorkspace(
   const [clinicalFieldErrors, setClinicalFieldErrors] =
     useState<OrderClinicalFieldMessages>({});
   const [itemsSectionError, setItemsSectionError] = useState<string | undefined>();
+  const [appliedTemplateDraftName, setAppliedTemplateDraftName] = useState<
+    string | null
+  >(null);
+  const [templateDraftNotice, setTemplateDraftNotice] = useState<string | null>(
+    null,
+  );
+  const templateDraftAppliedRef = useRef(false);
 
   useEffect(() => {
     setClinical(mapOrderToClinicalForm(orderQuery.data, category));
@@ -276,6 +289,61 @@ export function useEncounterOrderWorkspace(
       addItemMutation.mutateAsync(mapManualFormToUiItem(form)),
   });
 
+  useEffect(() => {
+    if (!isEnabled || templateDraftAppliedRef.current) return;
+    if (!orderQuery.data || orderQuery.isLoading) return;
+
+    const draft = readDoctorTemplateDraft();
+    const draftCategory = draft
+      ? orderCategoryForTemplateType(draft.type)
+      : null;
+    if (!draft || draftCategory !== category) return;
+
+    templateDraftAppliedRef.current = true;
+
+    void (async () => {
+      const existingCount = mapRadiologyItemsToUi(orderQuery.data).length;
+      const existingClinical = mapOrderToClinicalForm(orderQuery.data, category);
+      const result = await consumeOrderTemplateDraft({
+        draft,
+        category,
+        existingClinical,
+        existingItemCount: existingCount,
+        setClinical: setClinicalValidated,
+        addItem: (item) => addItemMutation.mutateAsync(item),
+      });
+
+      if (result.consumed) {
+        clearDoctorTemplateDraft();
+        if (result.skipReason !== 'empty') {
+          setAppliedTemplateDraftName(draft.name);
+        }
+        return;
+      }
+
+      if (result.skipReason === 'existing_items') {
+        setTemplateDraftNotice(
+          `لم يُطبَّق قالب «${draft.name}» لأن الطلب يحتوي بنوداً مسبقاً. المسودة ما زالت محفوظة.`,
+        );
+        return;
+      }
+
+      if (result.skipReason === 'partial_failure') {
+        clearDoctorTemplateDraft();
+        setTemplateDraftNotice(
+          `تم تطبيق قالب «${draft.name}» جزئياً فقط. راجع البنود المتبقية يدوياً.`,
+        );
+      }
+    })();
+  }, [
+    addItemMutation,
+    category,
+    isEnabled,
+    orderQuery.data,
+    orderQuery.isLoading,
+    setClinicalValidated,
+  ]);
+
   const deleteItemMutation = useMutation({
     mutationFn: async (itemId: string) => {
       const orderId = await resolveOrderId();
@@ -345,6 +413,16 @@ export function useEncounterOrderWorkspace(
     throw new OrderItemsRequiredError();
   }, [items.length]);
 
+  const clearAppliedTemplateDraftName = useCallback(
+    () => setAppliedTemplateDraftName(null),
+    [],
+  );
+
+  const clearTemplateDraftNotice = useCallback(
+    () => setTemplateDraftNotice(null),
+    [],
+  );
+
   const isBusy =
     saveDraftMutation.isPending ||
     addItemMutation.isPending ||
@@ -375,6 +453,10 @@ export function useEncounterOrderWorkspace(
     setClinicalFieldErrors,
     itemsSectionError,
     setItemsSectionError,
+    appliedTemplateDraftName,
+    clearAppliedTemplateDraftName,
+    templateDraftNotice,
+    clearTemplateDraftNotice,
     catalogItems: normalizeCatalogItems(catalogQuery.data, category),
     isAwaitingCatalogData,
     statusLabel: resolveRadiologyStatusLabel(orderQuery.data),

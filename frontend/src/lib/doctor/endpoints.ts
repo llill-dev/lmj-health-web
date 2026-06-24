@@ -295,8 +295,6 @@ export const doctorEndpoints = {
   facilities: {
     suggest: '/api/facilities/suggest',
     types: '/api/facilities/types',
-    /** Legacy create flow — fallback when POST /doctors/me/facility fails (API-3). */
-    requests: '/api/facilities/requests',
   },
   /** GET — internal staff directory (doctor / secretary). API-3 */
   internalDirectory: '/api/doctors/internal/directory',

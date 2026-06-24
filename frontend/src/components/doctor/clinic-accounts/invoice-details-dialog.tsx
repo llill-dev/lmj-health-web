@@ -4,11 +4,8 @@ import { FileText, Pencil, Plus, Receipt, Send, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { ClinicInvoice } from "@/lib/doctor/clinicAccounts/types";
-import { formatBillingAmount } from "@/lib/doctor/billing/format";
-import {
-  calcInvoiceTotals,
-  formatUsd,
-} from "@/lib/doctor/clinicAccounts/mockData";
+import { formatBillingAmount, formatUsd } from "@/lib/doctor/billing/format";
+import { calcInvoiceTotals } from "@/lib/doctor/clinicAccounts/invoiceTotals";
 import { ClinicAccountsModalShell } from "@/components/doctor/clinic-accounts/clinic-accounts-modal-shell";
 import { InvoiceEditDialog } from "@/components/doctor/clinic-accounts/invoice-edit-dialog";
 import { InvoiceRefundDialog } from "@/components/doctor/clinic-accounts/invoice-refund-dialog";

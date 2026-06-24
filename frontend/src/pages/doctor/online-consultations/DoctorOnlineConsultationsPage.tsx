@@ -11,6 +11,7 @@ import {
   Star,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
 import {
   DoctorExpandableCardSkeleton,
@@ -81,12 +82,23 @@ function isTerminalConsultationStatus(status: ConsultationStatus) {
   return status === 'closed' || status === 'dismissed';
 }
 
+function tabForTicketStatus(status?: string): ConsultationStatusTab {
+  if (status === 'active') return 'in_progress';
+  if (status === 'dismissed') return 'dismissed';
+  if (status === 'closed') return 'closed';
+  return 'waiting';
+}
+
 export default function DoctorOnlineConsultationsPage() {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const ticketFromUrl = searchParams.get('ticket')?.trim() ?? '';
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const [tab, setTab] = useState<ConsultationStatusTab>('waiting');
   const [query, setQuery] = useState('');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(
+    ticketFromUrl || null,
+  );
   const [draft, setDraft] = useState('');
   const [closeOpen, setCloseOpen] = useState(false);
   const [dismissOpen, setDismissOpen] = useState(false);
@@ -154,6 +166,17 @@ export default function DoctorOnlineConsultationsPage() {
       loading: overviewAwaitingData,
     };
   }, [overviewQuery.data?.counts, overviewQuery.data?.tickets, overviewAwaitingData]);
+
+  useEffect(() => {
+    if (!ticketFromUrl) return;
+    setExpandedId(ticketFromUrl);
+    const ticket =
+      overviewQuery.data?.tickets?.find((row) => row._id === ticketFromUrl) ??
+      listQuery.data?.tickets?.find((row) => row._id === ticketFromUrl);
+    if (ticket?.status) {
+      setTab(tabForTicketStatus(ticket.status));
+    }
+  }, [ticketFromUrl, overviewQuery.data?.tickets, listQuery.data?.tickets]);
 
   const visibleConsultations = useMemo(() => {
     if (!query.trim()) return consultations;

@@ -11,6 +11,8 @@ export type FacilitiesSuggestParams = {
 export type SuggestFacilityRecord = {
   id?: string;
   _id?: string;
+  facilityProviderId?: string;
+  providerId?: string;
   name: string;
   facilityType?: FacilityType | string;
   city?: string;

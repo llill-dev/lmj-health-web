@@ -6,12 +6,18 @@ import { ApiError } from '@/lib/api';
 import { doctorFacilityApi } from '@/lib/doctor/facilities/client';
 import { medicalServicesDirectoryApi } from '@/lib/doctor/medical-services-directory/client';
 import {
-  formValuesToCreateRequestBody,
   formValuesToMutationBody,
   isPartialFacilityRecord,
   mapApiFacilityToDoctorFacility,
+  mapSuggestRecordToLinkedDoctorFacility,
   parseDoctorFacilityRecordFromResponse,
 } from '@/lib/doctor/facilities/mappers';
+import {
+  clearLinkedDoctorFacility,
+  readLinkedDoctorFacility,
+  storeLinkedDoctorFacility,
+} from '@/lib/doctor/facilities/linkedFacilityStorage';
+import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
 import type { DoctorFacilityFormValues } from '@/lib/doctor/facilities/types';
 
 export const DOCTOR_FACILITY_KEYS = {
@@ -36,14 +42,17 @@ async function resolveFacilityFromResponse(
   return mapApiFacilityToDoctorFacility(refreshedRecord, { isOwned: true });
 }
 
-async function fetchOwnedFacility() {
+async function fetchDoctorFacility() {
   try {
     const response = await doctorFacilityApi.get();
     const record = parseDoctorFacilityRecordFromResponse(response);
-    if (!record) return null;
+    if (!record) return readLinkedDoctorFacility();
+    clearLinkedDoctorFacility();
     return mapApiFacilityToDoctorFacility(record, { isOwned: true });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 404) return null;
+    if (error instanceof ApiError && error.status === 404) {
+      return readLinkedDoctorFacility();
+    }
     throw error;
   }
 }
@@ -57,17 +66,7 @@ async function persistFacility(
   let response: Awaited<ReturnType<typeof doctorFacilityApi.create>>;
 
   if (mode === 'create') {
-    try {
-      response = await doctorFacilityApi.create(body);
-    } catch (error) {
-      const shouldFallback =
-        error instanceof ApiError &&
-        (error.status >= 500 || error.messageKey === 'errors.unknown');
-      if (!shouldFallback) throw error;
-      response = await doctorFacilityApi.createRequest(
-        formValuesToCreateRequestBody(values),
-      );
-    }
+    response = await doctorFacilityApi.create(body);
   } else {
     response = await doctorFacilityApi.update(body);
     response = await doctorFacilityApi.updateAttributes(values.attributes ?? []);
@@ -77,6 +76,7 @@ async function persistFacility(
   if (!mapped) {
     throw new Error('facility_response_invalid');
   }
+  clearLinkedDoctorFacility();
   return mapped;
 }
 
@@ -93,7 +93,7 @@ export function useDoctorFacility() {
 
   const facilityQuery = useQuery({
     queryKey: DOCTOR_FACILITY_KEYS.detail(),
-    queryFn: fetchOwnedFacility,
+    queryFn: fetchDoctorFacility,
     staleTime: 30_000,
   });
 
@@ -106,6 +106,9 @@ export function useDoctorFacility() {
       values: DoctorFacilityFormValues;
     }) => persistFacility(mode, values),
     onSuccess: (facility) => {
+      if (facility.isOwned !== false) {
+        clearLinkedDoctorFacility();
+      }
       queryClient.setQueryData(DOCTOR_FACILITY_KEYS.detail(), facility);
     },
   });
@@ -118,22 +121,6 @@ export function useDoctorFacility() {
       facilityQuery.data,
       facilityQuery.isError,
     ),
-  };
-}
-
-export function useSuggestFacility() {
-  const queryClient = useQueryClient();
-
-  const suggestMutation = useMutation({
-    mutationFn: (body: Parameters<typeof doctorFacilityApi.createRequest>[0]) =>
-      doctorFacilityApi.createRequest(body),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: DOCTOR_FACILITY_KEYS.all });
-    },
-  });
-
-  return {
-    suggestMutation,
   };
 }
 
@@ -162,21 +149,36 @@ export function useLinkFacility() {
   const queryClient = useQueryClient();
 
   const linkMutation = useMutation({
-    mutationFn: (facilityId: string) =>
-      doctorFacilityApi.assign({ facilityId }),
-    onSuccess: (response) => {
+    mutationFn: ({
+      facilityId,
+      facilityProviderId,
+    }: {
+      facilityId: string;
+      facilityProviderId: string;
+      suggestSnapshot?: SuggestFacilityRecord;
+    }) => doctorFacilityApi.assign({ facilityId, facilityProviderId }),
+    onSuccess: (response, variables) => {
       const record = parseDoctorFacilityRecordFromResponse(response);
-      if (!record) {
+      let mapped = record
+        ? mapApiFacilityToDoctorFacility(record, { isOwned: false })
+        : null;
+
+      if (!mapped && variables.suggestSnapshot) {
+        mapped = mapSuggestRecordToLinkedDoctorFacility(
+          variables.suggestSnapshot,
+          variables.facilityId,
+        );
+      }
+
+      if (!mapped) {
         void queryClient.invalidateQueries({
           queryKey: DOCTOR_FACILITY_KEYS.detail(),
         });
         return;
       }
 
-      const mapped = mapApiFacilityToDoctorFacility(record, { isOwned: false });
-      if (mapped) {
-        queryClient.setQueryData(DOCTOR_FACILITY_KEYS.detail(), mapped);
-      }
+      storeLinkedDoctorFacility(mapped);
+      queryClient.setQueryData(DOCTOR_FACILITY_KEYS.detail(), mapped);
     },
   });
 

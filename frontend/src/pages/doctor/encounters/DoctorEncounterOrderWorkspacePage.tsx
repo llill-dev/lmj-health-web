@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -6,6 +6,7 @@ import {
   EncounterOrderWorkspaceShell,
   type CatalogOrderCategory,
 } from '@/components/doctor/encounters/orders';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterOrderWorkspace } from '@/hooks/doctor/useEncounterOrderWorkspace';
 import { readAuthUser } from '@/lib/cookies';
 
@@ -15,6 +16,7 @@ export default function DoctorEncounterOrderWorkspacePage({
   category: CatalogOrderCategory;
 }) {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const config = ENCOUNTER_ORDER_CONFIG[category];
@@ -36,6 +38,25 @@ export default function DoctorEncounterOrderWorkspacePage({
     if (!id) return undefined;
     return id.startsWith('P-') || id.startsWith('#') ? id : `P-${id}`;
   }, [workspace.encounter?.patient?.publicId]);
+
+  const appliedTemplateDraftName = workspace.appliedTemplateDraftName;
+  const clearAppliedTemplateDraftName = workspace.clearAppliedTemplateDraftName;
+  const templateDraftNotice = workspace.templateDraftNotice;
+  const clearTemplateDraftNotice = workspace.clearTemplateDraftNotice;
+
+  useEffect(() => {
+    if (!appliedTemplateDraftName) return;
+    toast(`تم تطبيق قالب «${appliedTemplateDraftName}» على الطلب.`, {
+      variant: 'success',
+    });
+    clearAppliedTemplateDraftName();
+  }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast]);
+
+  useEffect(() => {
+    if (!templateDraftNotice) return;
+    toast(templateDraftNotice, { variant: 'warning' });
+    clearTemplateDraftNotice();
+  }, [clearTemplateDraftNotice, templateDraftNotice, toast]);
 
   return (
     <>

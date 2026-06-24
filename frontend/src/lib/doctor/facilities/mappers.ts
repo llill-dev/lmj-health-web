@@ -4,6 +4,7 @@ import type {
   DoctorFacilityResponse,
   DoctorFacilityMutationBody,
 } from '@/lib/doctor/facilities/api-types';
+import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
 import type {
   DoctorFacility,
   DoctorFacilityFormValues,
@@ -95,13 +96,28 @@ export function parseDoctorFacilityRecordFromResponse(
   response: DoctorFacilityResponse | Record<string, unknown>,
 ): DoctorFacilityRecord | null {
   const payload = response as DoctorFacilityResponse;
+  const doctorRecord =
+    payload.doctor && typeof payload.doctor === 'object'
+      ? (payload.doctor as Record<string, unknown>)
+      : null;
   if (payload.facility && typeof payload.facility === 'object') {
     return payload.facility;
+  }
+
+  if (doctorRecord?.facility && typeof doctorRecord.facility === 'object') {
+    return doctorRecord.facility as DoctorFacilityRecord;
   }
 
   const data = payload.data;
   if (data && typeof data === 'object') {
     const record = data as DoctorFacilityRecord;
+    if (
+      'facility' in record &&
+      record.facility &&
+      typeof record.facility === 'object'
+    ) {
+      return record.facility as DoctorFacilityRecord;
+    }
     if (record.name?.trim() && record.city?.trim()) {
       return record;
     }
@@ -120,6 +136,31 @@ export function mapApiFacilityStatus(
   if (normalized === 'ACTIVE') return 'active';
   if (normalized === 'PENDING') return 'pending';
   return 'closed';
+}
+
+/** Best-effort map from catalog suggest row when assign response is partial. */
+export function mapSuggestRecordToLinkedDoctorFacility(
+  record: SuggestFacilityRecord,
+  facilityId: string,
+): DoctorFacility | null {
+  const name = record.name?.trim();
+  const city = record.city?.trim();
+  if (!name || !city) return null;
+
+  return {
+    id: facilityId,
+    name,
+    facilityType: (record.facilityType as FacilityType) ?? 'clinic',
+    description: record.description?.trim() || undefined,
+    city,
+    address: record.address?.trim() || '—',
+    phone: record.phone?.trim() || '—',
+    status: mapApiFacilityStatus(record.status),
+    attributes: sanitizeFacilityAttributes(record.attributes),
+    workHoursFrom: '',
+    workHoursTo: '',
+    isOwned: false,
+  };
 }
 
 export function mapApiFacilityToDoctorFacility(
@@ -201,24 +242,6 @@ export function serializeDoctorFacilityMutationBody(
   if (body.attributes?.length) next.attributes = body.attributes;
 
   return next;
-}
-
-export function formValuesToCreateRequestBody(
-  values: DoctorFacilityFormValues,
-): import('@/lib/doctor/facilities/api-types').DoctorFacilityCreateRequestBody {
-  return {
-    name: values.name.trim(),
-    city: values.city.trim(),
-    facilityType: values.facilityType,
-    kind: values.facilityType,
-    address: optionalTrim(values.address),
-    phone: optionalTrim(normalizeFacilityPhone(values.phone)),
-    description: appendWorkHoursToDescription(
-      values.description,
-      values.workHoursFrom,
-      values.workHoursTo,
-    ),
-  };
 }
 
 export function doctorFacilityToFormValues(

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import {
   mapPrescriptionItemsToUi,
@@ -10,7 +10,12 @@ import {
 import type { PrescriptionDraftForm } from '@/components/doctor/prescription/prescription-types';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
+import { consumePrescriptionTemplateDraft } from '@/lib/doctor/consumeTemplateDraft';
 import { loadEncounterPrescriptionForWorkspace } from '@/lib/doctor/encounterPrescriptionLoad';
+import {
+  clearDoctorTemplateDraft,
+  readDoctorTemplateDraft,
+} from '@/lib/doctor/templateDraftStorage';
 
 export function useEncounterPrescriptionWorkspace(
   doctorId: string,
@@ -47,6 +52,13 @@ export function useEncounterPrescriptionWorkspace(
   });
 
   const [generalInstructions, setGeneralInstructions] = useState('');
+  const [appliedTemplateDraftName, setAppliedTemplateDraftName] = useState<
+    string | null
+  >(null);
+  const [templateDraftNotice, setTemplateDraftNotice] = useState<string | null>(
+    null,
+  );
+  const templateDraftAppliedRef = useRef(false);
 
   useEffect(() => {
     setGeneralInstructions(prescriptionQuery.data?.generalInstructions ?? '');
@@ -144,6 +156,55 @@ export function useEncounterPrescriptionWorkspace(
     },
     onSuccess: invalidate,
   });
+
+  useEffect(() => {
+    if (!isEnabled || templateDraftAppliedRef.current) return;
+    if (!prescriptionQuery.data || prescriptionQuery.isLoading) return;
+
+    const draft = readDoctorTemplateDraft();
+    if (!draft || draft.type !== 'PRESCRIPTION') return;
+
+    templateDraftAppliedRef.current = true;
+
+    void (async () => {
+      const existingCount = mapPrescriptionItemsToUi(prescriptionQuery.data).length;
+      const result = await consumePrescriptionTemplateDraft({
+        draft,
+        existingInstructions:
+          prescriptionQuery.data?.generalInstructions ?? '',
+        existingItemCount: existingCount,
+        setGeneralInstructions,
+        addItem: (item) => addItemMutation.mutateAsync(item),
+      });
+
+      if (result.consumed) {
+        clearDoctorTemplateDraft();
+        if (result.skipReason !== 'empty') {
+          setAppliedTemplateDraftName(draft.name);
+        }
+        return;
+      }
+
+      if (result.skipReason === 'existing_items') {
+        setTemplateDraftNotice(
+          `لم يُطبَّق قالب «${draft.name}» لأن الوصفة تحتوي عناصر مسبقاً. المسودة ما زالت محفوظة.`,
+        );
+        return;
+      }
+
+      if (result.skipReason === 'partial_failure') {
+        clearDoctorTemplateDraft();
+        setTemplateDraftNotice(
+          `تم تطبيق قالب «${draft.name}» جزئياً فقط. راجع الأدوية المتبقية يدوياً.`,
+        );
+      }
+    })();
+  }, [
+    addItemMutation,
+    isEnabled,
+    prescriptionQuery.data,
+    prescriptionQuery.isLoading,
+  ]);
 
   const updateItemMutation = useMutation({
     mutationFn: async ({
@@ -266,6 +327,16 @@ export function useEncounterPrescriptionWorkspace(
     },
   });
 
+  const clearAppliedTemplateDraftName = useCallback(
+    () => setAppliedTemplateDraftName(null),
+    [],
+  );
+
+  const clearTemplateDraftNotice = useCallback(
+    () => setTemplateDraftNotice(null),
+    [],
+  );
+
   const isBusy =
     saveDraftMutation.isPending ||
     addItemMutation.isPending ||
@@ -286,6 +357,10 @@ export function useEncounterPrescriptionWorkspace(
     medications,
     generalInstructions,
     setGeneralInstructions,
+    appliedTemplateDraftName,
+    clearAppliedTemplateDraftName,
+    templateDraftNotice,
+    clearTemplateDraftNotice,
     isAwaitingData,
     isError: encounterQuery.isError || prescriptionQuery.isError,
     error: encounterQuery.error ?? prescriptionQuery.error ?? null,

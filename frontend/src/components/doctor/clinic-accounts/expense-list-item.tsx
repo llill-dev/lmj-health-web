@@ -9,7 +9,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { ClinicExpense, ExpenseCategory } from '@/lib/doctor/clinicAccounts/types';
-import { EXPENSE_CATEGORY_LABELS, formatUsd } from '@/lib/doctor/clinicAccounts/mockData';
+import { EXPENSE_CATEGORY_LABELS } from '@/lib/doctor/clinicAccounts/labels';
+import { formatUsd } from '@/lib/doctor/billing/format';
 
 const CATEGORY_ICONS: Record<ExpenseCategory, LucideIcon> = {
   rent: Home,

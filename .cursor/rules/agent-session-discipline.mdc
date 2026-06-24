@@ -1,0 +1,45 @@
+---
+description: Token/RAM discipline — scope, search limits, one task per session (LMJ Health)
+alwaysApply: true
+---
+
+# Agent session discipline
+
+## Default behavior (save tokens)
+
+1. **One task per conversation** — implement a single PR-sized item unless the user lists explicit sub-items.
+2. **Never grep/read the whole repo** — scope to paths the user names or infer from open files (e.g. `frontend/src/hooks/doctor/`).
+3. **API lookup order:** `api3_endpoint_index.txt` → read only the matching section in `api_latest_extracted.txt`. reports unless asked.
+4. **No Task/explore subagent** for needle queries (single file, known endpoint, known hook).
+5. **Stop after:** scoped change + `npx tsc --noEmit` (frontend). No browser E2E if backend returns 500 — report blocker and stop.
+6. **No commit/push** unless the user says `commit` or `push`.
+7. **Minimize diff** — match existing patterns; no drive-by refactors or new tests unless requested.
+
+## When the user says vague continuations
+
+Phrases like «نعم», «ابدأ», «الخطوة التالية», «yes», «continue»:
+
+- Do **not** resume the entire audit backlog.
+- Ask **one** clarifying question **or** pick the **next unchecked item** from `.cursor/CURSOR_SESSION_BACKLOG.md` and state it before coding.
+- State upfront: files to touch (max ~5) and what is out of scope.
+
+## Prompt template the user prefers
+
+```
+النطاق: [مجلد/ملفات]
+الهدف: [جملة واحدة]
+المصدر: api3_extracted — [METHOD path]
+قيود: لا بحث كامل؛ لا commit؛ ملفات كحد أقصى N
+النجاح: tsc + [سلوك]
+```
+
+## RAM / context hygiene
+
+- Prefer reading **one file** with offset/limit over loading huge files whole.
+- Do not re-read files already correct in the same session.
+- After summary/compression: re-read only files you will edit — do not re-audit the project.
+
+## Arabic-first UX
+
+- User-facing errors: Arabic via existing helpers (`getUserFacingRequestErrorMessage`, domain mappers).
+- Commit/PR messages: English, complete sentences (user rule).
