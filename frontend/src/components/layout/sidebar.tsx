@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronsRight, LogOut, Stethoscope, X } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
@@ -75,7 +76,7 @@ export default function Sidebar({
       <aside
         dir='rtl'
         lang='ar'
-        className={`fixed inset-y-0 right-0 z-50 flex h-dvh w-[min(20rem,calc(100vw-1rem))] max-w-full shrink-0 flex-col border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] shadow-[0_18px_48px_rgba(15,23,42,0.18)] transition-transform duration-300 lg:relative lg:min-h-dvh lg:translate-x-0 lg:shadow-none ${desktopWidthClass} ${
+        className={`fixed inset-y-0 right-0 z-50 flex h-dvh w-[min(20rem,calc(100vw-1rem))] max-w-full shrink-0 flex-col overflow-hidden border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] shadow-[0_18px_48px_rgba(15,23,42,0.18)] transition-[transform,width] duration-300 ease-in-out will-change-[transform,width] lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 lg:shadow-none ${desktopWidthClass} ${
           mobileOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -89,32 +90,41 @@ export default function Sidebar({
           >
             <div className='flex items-start justify-between'>
               <div className='flex items-center gap-2'>
-                {expanded ? (
-                  <>
-                    <div className='mt-0.5 flex h-[44px] w-[44px] shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
-                      {role === 'admin' && adminBranding.logo.dataUrl ? (
-                        <img
-                          src={adminBranding.logo.dataUrl}
-                          alt=''
-                          className='h-full w-full object-cover'
-                        />
-                      ) : (
-                        <Stethoscope className='h-6 w-6 text-white' aria-hidden />
-                      )}
-                    </div>
-                    <div className='flex min-w-0 flex-col items-center text-center'>
-                      <div className='max-w-[200px] truncate font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
-                        {brandTitle}
+                <AnimatePresence initial={false}>
+                  {expanded ? (
+                    <motion.div
+                      key='brand'
+                      initial={{ opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 12 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className='flex items-center gap-2'
+                    >
+                      <div className='mt-0.5 flex h-[44px] w-[44px] shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]'>
+                        {role === 'admin' && adminBranding.logo.dataUrl ? (
+                          <img
+                            src={adminBranding.logo.dataUrl}
+                            alt=''
+                            className='h-full w-full object-cover'
+                          />
+                        ) : (
+                          <Stethoscope className='h-6 w-6 text-white' aria-hidden />
+                        )}
                       </div>
-                      <div
-                        className='mt-1 max-w-[220px] line-clamp-2 font-cairo text-[12px] font-bold leading-[14px] text-primary'
-                        title={brandSubtitle}
-                      >
-                        {brandSubtitle}
+                      <div className='flex min-w-0 flex-col items-center text-center'>
+                        <div className='max-w-[200px] truncate font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]'>
+                          {brandTitle}
+                        </div>
+                        <div
+                          className='mt-1 max-w-[220px] line-clamp-2 font-cairo text-[12px] font-bold leading-[14px] text-primary'
+                          title={brandSubtitle}
+                        >
+                          {brandSubtitle}
+                        </div>
                       </div>
-                    </div>
-                  </>
-                ) : null}
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
               </div>
 
               <div className='flex items-center gap-2'>
@@ -139,9 +149,17 @@ export default function Sidebar({
               </div>
             </div>
 
-            {expanded ? (
-              <div className='mt-6 rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
-                <div className='flex items-center gap-3'>
+            <AnimatePresence initial={false}>
+              {expanded ? (
+                <motion.div
+                  key='profile'
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginTop: 24 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  className='overflow-hidden rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'
+                >
+                  <div className='flex items-center gap-3'>
                   <div className='flex h-[46px] w-[46px] items-center justify-center overflow-hidden rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15,143,139,0.30)]'>
                     {role === 'admin' && adminBranding.logo.dataUrl ? (
                       <img
@@ -171,9 +189,10 @@ export default function Sidebar({
                       {role === 'admin' ? 'admin@lmjhealth.com' : doctorEmail}
                     </div>
                   </div>
-                </div>
-              </div>
-            ) : null}
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
           </div>
 
           <nav

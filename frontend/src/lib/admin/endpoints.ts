@@ -99,6 +99,7 @@ export const adminEndpoints = {
     create: '/api/admin/facilities',
     getById: (id: string) => `/api/admin/facilities/${id}`,
     update: (id: string) => `/api/admin/facilities/${id}`,
+    action: (id: string) => `/api/admin/facilities/${id}`,
     updateStatus: (id: string) => `/api/admin/facilities/${id}/status`,
     delete: (id: string) => `/api/admin/facilities/${id}`,
     listDoctors: (id: string) => `/api/admin/facilities/${id}/doctors`,

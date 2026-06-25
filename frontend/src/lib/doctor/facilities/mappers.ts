@@ -155,7 +155,7 @@ export function formValuesToMutationBody(
     address: optionalTrim(values.address),
     phone: optionalTrim(normalizeFacilityPhone(values.phone)),
     description: optionalTrim(values.description),
-    ...(attributes.length ? { attributes } : {}),
+    attributes,
   };
 }
 
@@ -174,7 +174,9 @@ export function serializeDoctorFacilityMutationBody(
   if (body.address) next.address = body.address;
   if (body.phone) next.phone = body.phone;
   if (body.description) next.description = body.description;
-  if (body.attributes?.length) next.attributes = body.attributes;
+  // Always send attributes as an array (Swagger ["string"]); the create path
+  // crashes (500 errors.unknown) when the field is absent.
+  next.attributes = body.attributes ?? [];
 
   return next;
 }

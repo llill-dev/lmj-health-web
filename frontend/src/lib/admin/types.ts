@@ -861,6 +861,7 @@ export type FacilitySummary = {
   id: string;
   _id?: string;
   name: string;
+  normalizedName?: string;
   facilityType: FacilityType;
   city: string;
   country?: string;
@@ -869,7 +870,12 @@ export type FacilitySummary = {
   description?: string;
   status: FacilityStatus;
   attributes: string[];
-  ownerDoctorId?: string;
+  ownerDoctorId?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  legacyProviderId?: string | null;
   doctorCount: number;
   createdAt?: string;
   updatedAt?: string;
@@ -879,11 +885,21 @@ export type FacilitiesListParams = {
   page?: number;
   limit?: number;
   q?: string;
+  name?: string;
   facilityType?: FacilityType;
   status?: FacilityStatus;
   city?: string;
   hasDoctors?: boolean;
-  sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'city' | 'doctorCount';
+  ownerDoctorId?: string | null;
+  attribute?: string;
+  sortBy?:
+    | 'createdAt'
+    | 'updatedAt'
+    | 'name'
+    | 'city'
+    | 'status'
+    | 'facilityType'
+    | 'doctorCount';
   sortOrder?: 'asc' | 'desc';
 };
 
@@ -892,7 +908,16 @@ export type FacilitiesListResponse = ApiSuccessEnvelope & {
   limit: number;
   total: number;
   results: number;
-  facilities: FacilitySummary[];
+  facilities?: FacilitySummary[];
+  items?: FacilitySummary[];
+  data?: {
+    facilities?: FacilitySummary[];
+    items?: FacilitySummary[];
+    page?: number;
+    limit?: number;
+    total?: number;
+    results?: number;
+  };
 };
 
 export type CreateFacilityBody = {
@@ -905,13 +930,19 @@ export type CreateFacilityBody = {
   description?: string;
   status?: FacilityStatus;
   attributes?: string[];
-  ownerDoctorId?: string;
+  ownerDoctorId?: string | null;
 };
 
 export type UpdateFacilityBody = Partial<CreateFacilityBody>;
 
+export type FacilityActionBody = {
+  action: 'approve' | 'merge';
+  targetFacilityId?: string;
+};
+
 export type FacilityResponse = ApiSuccessEnvelope & {
-  facility: FacilitySummary;
+  facility?: FacilitySummary;
+  data?: FacilitySummary | { facility?: FacilitySummary };
 };
 
 export type FacilityDoctorSummary = {
@@ -955,7 +986,17 @@ export type FacilityDoctorsListResponse = ApiSuccessEnvelope & {
   limit: number;
   total: number;
   results: number;
-  doctors: FacilityDoctorSummary[];
+  doctors?: FacilityDoctorSummary[];
+  items?: FacilityDoctorSummary[];
+  data?: {
+    doctors?: FacilityDoctorSummary[];
+    items?: FacilityDoctorSummary[];
+    page?: number;
+    limit?: number;
+    total?: number;
+    results?: number;
+    facility?: FacilityDoctorsListResponse['facility'];
+  };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

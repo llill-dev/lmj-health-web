@@ -2,11 +2,22 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { Loader2, Stethoscope, X } from 'lucide-react';
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useFacilityDoctors } from '@/hooks/admin/useAdminServices';
 import type { FacilitySummary } from '@/lib/admin/types';
 
 const PAGE_SIZE = 10;
+
+function getDoctorStatusLabel(status?: string) {
+  switch (status) {
+    case 'approved':
+      return 'مقبول';
+    case 'rejected':
+      return 'مرفوض';
+    default:
+      return 'قيد المراجعة';
+  }
+}
 
 export default function FacilityDoctorsDialog({
   open,
@@ -21,21 +32,26 @@ export default function FacilityDoctorsDialog({
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search.trim());
 
+  useEffect(() => {
+    if (!open) {
+      setPage(1);
+      setSearch('');
+    }
+  }, [open, facility?.id]);
+
   const doctorsQuery = useFacilityDoctors(
     facility?.id ?? '',
     {
       page,
       limit: PAGE_SIZE,
       q: deferredSearch || undefined,
+      sortBy: 'name',
+      sortOrder: 'asc',
     },
     open && Boolean(facility?.id),
   );
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil((doctorsQuery.total || 0) / PAGE_SIZE),
-  );
-
+  const totalPages = Math.max(1, Math.ceil((doctorsQuery.total || 0) / PAGE_SIZE));
   const rows = useMemo(() => doctorsQuery.doctors, [doctorsQuery.doctors]);
 
   return (
@@ -50,9 +66,7 @@ export default function FacilityDoctorsDialog({
               </Dialog.Title>
               <Dialog.Description className='mt-1 font-cairo text-[12px] font-semibold text-[#667085]'>
                 {facility?.name ?? '—'}
-                {doctorsQuery.total > 0
-                  ? ` — ${doctorsQuery.total} طبيب`
-                  : ''}
+                {doctorsQuery.total > 0 ? ` — ${doctorsQuery.total} طبيب` : ''}
               </Dialog.Description>
             </div>
             <Dialog.Close className='rounded-[8px] p-2 text-[#667085] hover:bg-[#F9FAFB]'>
@@ -63,11 +77,11 @@ export default function FacilityDoctorsDialog({
           <div className='border-b border-[#EEF2F6] px-6 py-3'>
             <input
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
+              onChange={(event) => {
+                setSearch(event.target.value);
                 setPage(1);
               }}
-              placeholder='بحث بالاسم أو التخصص…'
+              placeholder='بحث بالاسم أو التخصص...'
               className='h-[40px] w-full rounded-[8px] border border-[#E5E7EB] px-3 text-right font-cairo text-[12px] font-bold text-[#111827]'
             />
           </div>
@@ -86,21 +100,18 @@ export default function FacilityDoctorsDialog({
                 {rows.map((doctor) => {
                   const doctorId = doctor.id ?? doctor._id ?? '';
                   const name = doctor.user?.fullName?.trim() || '—';
-                  const status = doctor.approvalStatus ?? 'pending';
+                  const status = getDoctorStatusLabel(doctor.approvalStatus);
+
                   return (
                     <div
                       key={doctorId}
                       className='flex items-center justify-between rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3'
                     >
                       <div className='text-right'>
-                        <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                          {name}
-                        </div>
+                        <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>{name}</div>
                         <div className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
                           {doctor.specialization?.trim() || '—'}
-                          {doctor.user?.email
-                            ? ` · ${doctor.user.email}`
-                            : ''}
+                          {doctor.user?.email ? ` · ${doctor.user.email}` : ''}
                         </div>
                       </div>
                       <span className='inline-flex items-center gap-1 rounded-[6px] bg-[#E7FBFA] px-2.5 py-1 font-cairo text-[11px] font-extrabold text-primary'>
@@ -119,7 +130,7 @@ export default function FacilityDoctorsDialog({
               <button
                 type='button'
                 disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
                 className='rounded-[8px] border border-[#E5E7EB] px-3 py-1.5 font-cairo text-[12px] font-bold disabled:opacity-50'
               >
                 السابق
@@ -130,7 +141,7 @@ export default function FacilityDoctorsDialog({
               <button
                 type='button'
                 disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
                 className='rounded-[8px] border border-[#E5E7EB] px-3 py-1.5 font-cairo text-[12px] font-bold disabled:opacity-50'
               >
                 التالي

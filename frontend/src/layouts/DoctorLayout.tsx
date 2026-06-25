@@ -58,9 +58,9 @@ export default function DoctorLayout() {
     )?.path ?? 'dashboard';
 
   return (
-    <div className='min-h-dvh overflow-hidden bg-white scrollbar-hide'>
+    <div className='h-dvh overflow-hidden bg-white scrollbar-hide'>
       <DoctorInboxToastBridge />
-      <div className='relative mx-auto flex min-h-dvh w-full max-w-screen-2xl'>
+      <div className='relative mx-auto flex h-dvh w-full max-w-screen-2xl'>
         <Sidebar
           active={active}
           collapsed={false}
@@ -71,12 +71,12 @@ export default function DoctorLayout() {
           profileEmail={doctorEmail}
         />
 
-        <main className='flex min-h-dvh min-w-0 flex-1 flex-col'>
+        <main className='flex h-full min-h-0 min-w-0 flex-1 flex-col'>
           <div className='sticky top-0 z-40'>
             <DashboardHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
           </div>
 
-          <div className='flex-1 overflow-y-auto bg-white py-5 scrollbar-hide sm:py-6 lg:py-8'>
+          <div className='min-h-0 flex-1 overflow-y-auto bg-white py-5 scrollbar-hide sm:py-6 lg:py-8'>
             <Suspense fallback={<DoctorRouteFallback />}>
               <Outlet />
             </Suspense>

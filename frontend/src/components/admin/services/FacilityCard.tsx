@@ -30,6 +30,7 @@ export function FacilityCard({
   isToggling: boolean;
 }) {
   const isActive = facility.status === 'ACTIVE';
+  const ownerLabel = facility.ownerDoctorId ? 'مربوطة بطبيب' : 'غير مربوطة بطبيب';
 
   return (
     <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_16px_32px_rgba(0,0,0,0.09)]'>
@@ -62,6 +63,10 @@ export function FacilityCard({
                   {facility.doctorCount} طبيب
                 </div>
               )}
+              <div className='inline-flex items-center gap-1.5'>
+                <Stethoscope className='h-3.5 w-3.5 text-primary' />
+                {ownerLabel}
+              </div>
             </div>
 
             {facility.description && (

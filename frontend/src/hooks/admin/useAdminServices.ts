@@ -14,8 +14,10 @@ import type {
   FacilitiesListParams,
   FacilitiesListResponse,
   FacilityResponse,
+  FacilitySummary,
   CreateFacilityBody,
   UpdateFacilityBody,
+  FacilityActionBody,
   ServiceTypesListResponse,
   ServiceTypeResponse,
   CreateServiceTypeBody,
@@ -25,6 +27,7 @@ import type {
   UpdateProviderBody,
   FacilityDoctorsListParams,
   FacilityDoctorsListResponse,
+  FacilityDoctorSummary,
 } from "@/lib/admin/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -50,9 +53,152 @@ export const SERVICES_KEYS = {
 function buildQs(params: Record<string, unknown>): string {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
+    if (v === undefined || v === null) return;
+    if (v === "" && k !== "ownerDoctorId") return;
+    qs.set(k, String(v));
   });
   return qs.toString();
+}
+
+function normalizeFacilityPayload<T extends CreateFacilityBody | UpdateFacilityBody>(
+  body: T,
+): T {
+  const attributes = Array.isArray(body.attributes)
+    ? body.attributes
+        .map((attr) => attr.trim())
+        .filter(Boolean)
+    : body.attributes;
+
+  const ownerDoctorId =
+    body.ownerDoctorId === ""
+      ? ""
+      : body.ownerDoctorId?.trim() || body.ownerDoctorId || undefined;
+
+  return {
+    ...body,
+    attributes,
+    ownerDoctorId,
+  };
+}
+
+function normalizeFacilityRecord(
+  facility: Partial<FacilitySummary> | null | undefined,
+): FacilitySummary | null {
+  if (!facility || typeof facility !== "object") return null;
+
+  const id = facility.id ?? facility._id;
+  const name = facility.name?.trim();
+  const city = facility.city?.trim();
+  const facilityType = facility.facilityType;
+  const status = facility.status;
+
+  if (!id || !name || !city || !facilityType || !status) return null;
+
+  return {
+    id,
+    _id: facility._id ?? id,
+    name,
+    normalizedName: facility.normalizedName,
+    facilityType,
+    city,
+    country: facility.country?.trim() || undefined,
+    address: facility.address?.trim() || undefined,
+    phone: facility.phone?.trim() || undefined,
+    description: facility.description?.trim() || undefined,
+    status,
+    attributes: Array.isArray(facility.attributes)
+      ? facility.attributes.map((attr) => attr.trim()).filter(Boolean)
+      : [],
+    ownerDoctorId: facility.ownerDoctorId ?? null,
+    createdBy: facility.createdBy ?? null,
+    updatedBy: facility.updatedBy ?? null,
+    approvedBy: facility.approvedBy ?? null,
+    approvedAt: facility.approvedAt ?? null,
+    legacyProviderId: facility.legacyProviderId ?? null,
+    doctorCount:
+      typeof facility.doctorCount === "number" ? facility.doctorCount : 0,
+    createdAt: facility.createdAt,
+    updatedAt: facility.updatedAt,
+  };
+}
+
+function normalizeFacilityDoctorRecord(
+  doctor: Partial<FacilityDoctorSummary> | null | undefined,
+): FacilityDoctorSummary | null {
+  if (!doctor || typeof doctor !== "object") return null;
+  const id = doctor.id ?? doctor._id;
+  if (!id) return null;
+
+  return {
+    ...doctor,
+    id,
+    _id: doctor._id ?? id,
+  };
+}
+
+function normalizeFacilitiesListResponse(
+  response: FacilitiesListResponse,
+): FacilitiesListResponse & { facilities: FacilitySummary[] } {
+  const sourceItems =
+    response.facilities ??
+    response.items ??
+    response.data?.facilities ??
+    response.data?.items ??
+    [];
+
+  return {
+    ...response,
+    page: response.page ?? response.data?.page ?? 1,
+    limit: response.limit ?? response.data?.limit ?? 10,
+    total: response.total ?? response.data?.total ?? 0,
+    results: response.results ?? response.data?.results ?? sourceItems.length,
+    facilities: sourceItems
+      .map((facility) => normalizeFacilityRecord(facility))
+      .filter((facility): facility is FacilitySummary => Boolean(facility)),
+  };
+}
+
+function normalizeFacilityResponse(
+  response: FacilityResponse,
+): FacilityResponse & { facility: FacilitySummary | null } {
+  const responseData = response.data;
+  const sourceFacility =
+    response.facility ??
+    (responseData &&
+    typeof responseData === "object" &&
+    "facility" in responseData
+      ? responseData.facility
+      : responseData);
+
+  return {
+    ...response,
+    facility: normalizeFacilityRecord(
+      sourceFacility as Partial<FacilitySummary> | null | undefined,
+    ),
+  };
+}
+
+function normalizeFacilityDoctorsResponse(
+  response: FacilityDoctorsListResponse,
+): FacilityDoctorsListResponse & { doctors: FacilityDoctorSummary[] } {
+  const sourceDoctors =
+    response.doctors ??
+    response.items ??
+    response.data?.doctors ??
+    response.data?.items ??
+    [];
+
+  return {
+    ...response,
+    facility: response.facility ?? response.data?.facility,
+    page: response.page ?? response.data?.page ?? 1,
+    limit: response.limit ?? response.data?.limit ?? 10,
+    total: response.total ?? response.data?.total ?? 0,
+    results: response.results ?? response.data?.results ?? sourceDoctors.length,
+    doctors: sourceDoctors
+      .map((doctor) => normalizeFacilityDoctorRecord(doctor))
+      .filter((doctor): doctor is FacilityDoctorSummary => Boolean(doctor)),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -67,7 +213,7 @@ export function useFacilitiesList(params: FacilitiesListParams = {}) {
       get<FacilitiesListResponse>(
         `${adminEndpoints.facilities.list}${qs ? `?${qs}` : ""}`,
         { locale: "ar" },
-      ),
+      ).then(normalizeFacilitiesListResponse),
     placeholderData: keepPreviousData,
   });
 
@@ -87,7 +233,7 @@ export function useFacilityById(id: string, enabled = true) {
     queryFn: () =>
       get<FacilityResponse>(adminEndpoints.facilities.getById(id), {
         locale: "ar",
-      }),
+      }).then(normalizeFacilityResponse),
     enabled: !!id && enabled,
   });
 }
@@ -96,9 +242,13 @@ export function useCreateFacility() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateFacilityBody) =>
-      post<FacilityResponse>(adminEndpoints.facilities.create, body, {
-        locale: "ar",
-      }),
+      post<FacilityResponse>(
+        adminEndpoints.facilities.create,
+        normalizeFacilityPayload(body),
+        {
+          locale: "ar",
+        },
+      ).then(normalizeFacilityResponse),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
     },
@@ -109,9 +259,27 @@ export function useUpdateFacility(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: UpdateFacilityBody) =>
-      put<FacilityResponse>(adminEndpoints.facilities.update(id), body, {
+      put<FacilityResponse>(
+        adminEndpoints.facilities.update(id),
+        normalizeFacilityPayload(body),
+        {
+          locale: "ar",
+        },
+      ).then(normalizeFacilityResponse),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
+      qc.invalidateQueries({ queryKey: SERVICES_KEYS.facilityById(id) });
+    },
+  });
+}
+
+export function useFacilityAction(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: FacilityActionBody) =>
+      patch<FacilityResponse>(adminEndpoints.facilities.action(id), body, {
         locale: "ar",
-      }),
+      }).then(normalizeFacilityResponse),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.facilityById(id) });
@@ -127,7 +295,7 @@ export function useUpdateFacilityStatus() {
         adminEndpoints.facilities.updateStatus(id),
         { status },
         { locale: "ar" },
-      ),
+      ).then(normalizeFacilityResponse),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
     },
@@ -140,7 +308,7 @@ export function useDeleteFacility() {
     mutationFn: (id: string) =>
       del<FacilityResponse>(adminEndpoints.facilities.delete(id), {
         locale: "ar",
-      }),
+      }).then(normalizeFacilityResponse),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
     },
@@ -159,7 +327,7 @@ export function useFacilityDoctors(
       get<FacilityDoctorsListResponse>(
         `${adminEndpoints.facilities.listDoctors(facilityId)}${qs ? `?${qs}` : ""}`,
         { locale: "ar" },
-      ),
+      ).then(normalizeFacilityDoctorsResponse),
     enabled: Boolean(facilityId) && enabled,
     staleTime: 30_000,
   });
@@ -293,4 +461,3 @@ export function useUpdateProviderStatus() {
     },
   });
 }
-

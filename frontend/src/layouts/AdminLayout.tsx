@@ -63,9 +63,9 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
   return (
     <AdminAppSettingsProvider>
     <AdminInboxToastBridge />
-    <div className='min-h-dvh overflow-hidden bg-[#F5F7FA] scrollbar-hide'>
-      <div className='relative mx-auto flex min-h-dvh w-full max-w-screen-2xl'>
-        <main className='flex min-h-dvh min-h-0 min-w-0 flex-1 flex-col bg-[#F5F7FA]'>
+    <div className='h-dvh overflow-hidden bg-[#F5F7FA] scrollbar-hide'>
+      <div className='relative mx-auto flex h-dvh w-full max-w-screen-2xl'>
+        <main className='flex h-full min-h-0 min-w-0 flex-1 flex-col bg-[#F5F7FA]'>
           <div className='sticky top-0 z-40 shrink-0 bg-white'>
             <AdminHeader
               onMenuClick={() => setIsMobileSidebarOpen(true)}

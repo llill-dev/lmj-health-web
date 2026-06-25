@@ -54,7 +54,7 @@ describe('doctor facility mappers', () => {
     expect(body.attributes).toEqual(['night_shift']);
   });
 
-  it('serializes Swagger POST body (keeps kind, drops empty optionals)', () => {
+  it('serializes Swagger POST body (keeps kind, always sends attributes array)', () => {
     const serialized = serializeDoctorFacilityMutationBody({
       name: 'عيادة تجريبية',
       city: 'دمشق',
@@ -74,6 +74,7 @@ describe('doctor facility mappers', () => {
       country: 'SY',
       phone: '+963944000000',
       description: 'وصف',
+      attributes: [],
     });
   });
 

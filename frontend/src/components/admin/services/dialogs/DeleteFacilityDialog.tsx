@@ -1,10 +1,11 @@
 'use client';
+
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import { useEffect } from 'react';
-import { useDeleteFacility } from '@/hooks/admin/useAdminServices';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useDeleteFacility } from '@/hooks/admin/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { FacilitySummary } from '@/lib/admin/types';
 
@@ -24,22 +25,26 @@ export default function DeleteFacilityDialog({
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
   }, [open]);
 
   const handleConfirm = async () => {
     if (!facility) return;
+
     try {
       await deleteMutation.mutateAsync(facility.id);
-      toast(
-        `حُذفت المنشأة «${facility.name}» نهائياً من دليل الخدمات.`,
-        { title: 'تم الحذف', variant: 'success', durationMs: 3800 },
-      );
+      toast('تم نقل المنشأة إلى حالة محذوفة مع فك ارتباط الأطباء المرتبطين بها.', {
+        title: 'تم تنفيذ الحذف',
+        variant: 'success',
+        durationMs: 3800,
+      });
       onOpenChange(false);
     } catch {
-      // error shown inline
+      // Error is rendered inline below.
     }
   };
 
@@ -51,8 +56,18 @@ export default function DeleteFacilityDialog({
             initial={false}
             animate={open ? 'open' : 'closed'}
             variants={{
-              open: { opacity: 1, visibility: 'visible' as const, pointerEvents: 'auto' as const, transition: { duration: 0.22 } },
-              closed: { opacity: 0, pointerEvents: 'none' as const, transition: { duration: 0.18 }, transitionEnd: { visibility: 'hidden' as const } },
+              open: {
+                opacity: 1,
+                visibility: 'visible' as const,
+                pointerEvents: 'auto' as const,
+                transition: { duration: 0.22 },
+              },
+              closed: {
+                opacity: 0,
+                pointerEvents: 'none' as const,
+                transition: { duration: 0.18 },
+                transitionEnd: { visibility: 'hidden' as const },
+              },
             }}
             className='fixed inset-0 z-[9999] bg-black/45 backdrop-blur-[2px]'
           />
@@ -87,7 +102,6 @@ export default function DeleteFacilityDialog({
             lang='ar'
           >
             <div className='px-7 pb-6 pt-5'>
-              {/* Close */}
               <Dialog.Close asChild>
                 <button
                   type='button'
@@ -97,7 +111,6 @@ export default function DeleteFacilityDialog({
                 </button>
               </Dialog.Close>
 
-              {/* Icon */}
               <div className='mx-auto mb-4 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-red-50'>
                 <AlertTriangle className='h-6 w-6 text-[#F04438]' />
               </div>
@@ -107,22 +120,18 @@ export default function DeleteFacilityDialog({
               </Dialog.Title>
 
               <Dialog.Description className='mt-2 text-center font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]'>
-                هل أنت متأكد من حذف{' '}
-                <span className='font-extrabold text-[#101828]'>
-                  {facility?.name}
-                </span>
-                ؟<br />
-                سيتم إلغاء تعيين جميع الأطباء المرتبطين بهذه المنشأة.
+                سيتم تعليم المنشأة
+                {' '}
+                <span className='font-extrabold text-[#101828]'>{facility?.name ?? '—'}</span>
+                {' '}
+                كمحذوفة بدل إزالتها نهائيًا، مع فك ارتباط الأطباء المرتبطين بها.
               </Dialog.Description>
 
-              {deleteMutation.isError && (
+              {deleteMutation.isError ? (
                 <div className='mt-3 rounded-[8px] bg-red-50 px-3 py-2 text-center font-cairo text-[12px] font-bold text-red-600'>
-                  {userFacingErrorMessage(
-                    deleteMutation.error,
-                    'تعذّر حذف المنشأة',
-                  )}
+                  {userFacingErrorMessage(deleteMutation.error, 'تعذّر حذف المنشأة')}
                 </div>
-              )}
+              ) : null}
 
               <div className='mt-6 flex items-center justify-center gap-3'>
                 <Dialog.Close asChild>
@@ -139,7 +148,7 @@ export default function DeleteFacilityDialog({
                   onClick={handleConfirm}
                   className='h-[40px] rounded-[10px] bg-[#F04438] px-8 font-cairo text-[13px] font-extrabold text-white disabled:opacity-60'
                 >
-                  {deleteMutation.isPending ? 'جارٍ الحذف...' : 'تأكيد الحذف'}
+                  {deleteMutation.isPending ? 'جارٍ التنفيذ...' : 'تأكيد الحذف'}
                 </button>
               </div>
             </div>
