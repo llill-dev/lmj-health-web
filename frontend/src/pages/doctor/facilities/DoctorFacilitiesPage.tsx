@@ -22,7 +22,7 @@ import {
   useDoctorFacilityTypes,
   useLinkFacility,
 } from "@/hooks";
-import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 import {
   getDoctorFacilityLinkErrorToast,
   getDoctorFacilitySaveErrorToast,
@@ -145,6 +145,15 @@ export default function DoctorFacilitiesPage() {
         title,
         variant: "error",
       });
+
+      // API guide: 409 ownerFacilityExists ⇒ doctor already owns one; load it (edit flow).
+      if (
+        error instanceof ApiError &&
+        error.messageKey === "errors.facilities.ownerFacilityExists"
+      ) {
+        setDialogOpen(false);
+        void facilityQuery.refetch();
+      }
     }
   };
 

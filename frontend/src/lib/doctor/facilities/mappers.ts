@@ -11,10 +11,9 @@ import type {
   DoctorFacilityStatus,
 } from '@/lib/doctor/facilities/types';
 
+/** Legacy pseudo-keys some older facilities stored before API-3; stripped on read. */
 const WORK_HOURS_FROM_PREFIX = 'work_hours_from_';
 const WORK_HOURS_TO_PREFIX = 'work_hours_to_';
-const WORK_HOURS_LINE_RE =
-  /\n\nساعات العمل:\s*(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})\s*$/;
 
 function optionalTrim(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
@@ -30,51 +29,6 @@ function normalizeFacilityPhone(phone: string): string {
   if (digits.startsWith('0')) return `+963${digits.slice(1)}`;
   if (digits.startsWith('9') && digits.length === 9) return `+963${digits}`;
   return digits ? `+${digits}` : trimmed;
-}
-
-function readLegacyWorkHourAttribute(
-  attributes: string[] | undefined,
-  prefix: string,
-): string {
-  const match = (attributes ?? []).find((item) => item.startsWith(prefix));
-  if (!match) return '';
-  const encoded = match.slice(prefix.length);
-  if (!encoded) return '';
-  if (encoded.includes(':')) return encoded;
-  if (encoded.length === 4) {
-    return `${encoded.slice(0, 2)}:${encoded.slice(2)}`;
-  }
-  return encoded;
-}
-
-function stripWorkHoursFromDescription(description: string | undefined): {
-  description: string;
-  workHoursFrom: string;
-  workHoursTo: string;
-} {
-  const raw = description?.trim() ?? '';
-  const match = raw.match(WORK_HOURS_LINE_RE);
-  if (!match) {
-    return { description: raw, workHoursFrom: '', workHoursTo: '' };
-  }
-  return {
-    description: raw.replace(WORK_HOURS_LINE_RE, '').trim(),
-    workHoursFrom: match[1],
-    workHoursTo: match[2],
-  };
-}
-
-function appendWorkHoursToDescription(
-  description: string | undefined,
-  workHoursFrom: string,
-  workHoursTo: string,
-): string | undefined {
-  const base = stripWorkHoursFromDescription(description).description;
-  if (!workHoursFrom || !workHoursTo) {
-    return optionalTrim(base);
-  }
-  const hoursLine = `ساعات العمل: ${workHoursFrom} – ${workHoursTo}`;
-  return base ? `${base}\n\n${hoursLine}` : hoursLine;
 }
 
 /** API-3 attributes are whitelisted snake_case keys only — never send work-hour pseudo-keys. */
@@ -157,8 +111,6 @@ export function mapSuggestRecordToLinkedDoctorFacility(
     phone: record.phone?.trim() || '—',
     status: mapApiFacilityStatus(record.status),
     attributes: sanitizeFacilityAttributes(record.attributes),
-    workHoursFrom: '',
-    workHoursTo: '',
     isOwned: false,
   };
 }
@@ -172,27 +124,14 @@ export function mapApiFacilityToDoctorFacility(
   const city = record.city?.trim();
   if (!id || !name || !city) return null;
 
-  const parsedDescription = stripWorkHoursFromDescription(record.description);
-  const legacyFrom = readLegacyWorkHourAttribute(
-    record.attributes,
-    WORK_HOURS_FROM_PREFIX,
-  );
-  const legacyTo = readLegacyWorkHourAttribute(
-    record.attributes,
-    WORK_HOURS_TO_PREFIX,
-  );
-
   return {
     id,
     name,
     facilityType: (record.facilityType as FacilityType) ?? 'clinic',
-    description: parsedDescription.description || undefined,
+    description: record.description?.trim() || undefined,
     city,
     address: record.address?.trim() || '—',
     phone: record.phone?.trim() || '—',
-    email: undefined,
-    workHoursFrom: parsedDescription.workHoursFrom || legacyFrom,
-    workHoursTo: parsedDescription.workHoursTo || legacyTo,
     status: mapApiFacilityStatus(record.status),
     attributes: sanitizeFacilityAttributes(record.attributes),
     isOwned: options?.isOwned ?? true,
@@ -215,11 +154,7 @@ export function formValuesToMutationBody(
     country: 'SY',
     address: optionalTrim(values.address),
     phone: optionalTrim(normalizeFacilityPhone(values.phone)),
-    description: appendWorkHoursToDescription(
-      values.description,
-      values.workHoursFrom,
-      values.workHoursTo,
-    ),
+    description: optionalTrim(values.description),
     ...(attributes.length ? { attributes } : {}),
   };
 }
@@ -254,9 +189,6 @@ export function doctorFacilityToFormValues(
     city: facility.city,
     address: facility.address === '—' ? '' : facility.address,
     phone: facility.phone === '—' ? '' : facility.phone,
-    email: facility.email ?? '',
-    workHoursFrom: facility.workHoursFrom,
-    workHoursTo: facility.workHoursTo,
     attributes: facility.attributes ?? [],
   };
 }

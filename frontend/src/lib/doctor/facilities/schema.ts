@@ -14,54 +14,34 @@ const facilityTypeValues = [
   'other',
 ] as const;
 
-export const doctorFacilityFormSchema = z
-  .object({
-    name: z
-      .string()
-      .trim()
-      .min(2, 'اسم المنشأة مطلوب (حرفان على الأقل)')
-      .max(120, 'اسم المنشأة طويل جداً'),
-    facilityType: z.enum(facilityTypeValues, {
-      message: 'نوع المنشأة مطلوب',
-    }),
-    description: z
-      .string()
-      .trim()
-      .max(500, 'الوصف طويل جداً (500 حرف كحد أقصى)')
-      .optional()
-      .or(z.literal('')),
-    city: z.string().trim().min(2, 'المدينة مطلوبة'),
-    address: z.string().trim().min(3, 'العنوان التفصيلي مطلوب'),
-    phone: z
-      .string()
-      .trim()
-      .min(8, 'رقم الهاتف قصير جداً')
-      .max(20, 'رقم الهاتف طويل جداً')
-      .regex(
-        /^[+]?[\d\s()-]+$/,
-        'صيغة الهاتف غير صحيحة. استخدم أرقاماً مع + اختيارياً',
-      ),
-    email: z
-      .string()
-      .trim()
-      .email('البريد الإلكتروني غير صالح')
-      .optional()
-      .or(z.literal('')),
-    workHoursFrom: z.string().min(1, 'وقت البداية مطلوب'),
-    workHoursTo: z.string().min(1, 'وقت النهاية مطلوب'),
-    attributes: z.array(z.string()),
-  })
-  .superRefine((values, ctx) => {
-    if (values.workHoursFrom && values.workHoursTo) {
-      if (values.workHoursFrom >= values.workHoursTo) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'وقت النهاية يجب أن يكون بعد وقت البداية',
-          path: ['workHoursTo'],
-        });
-      }
-    }
-  });
+export const doctorFacilityFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, 'اسم المنشأة مطلوب (حرفان على الأقل)')
+    .max(120, 'اسم المنشأة طويل جداً'),
+  facilityType: z.enum(facilityTypeValues, {
+    message: 'نوع المنشأة مطلوب',
+  }),
+  description: z
+    .string()
+    .trim()
+    .max(500, 'الوصف طويل جداً (500 حرف كحد أقصى)')
+    .optional()
+    .or(z.literal('')),
+  city: z.string().trim().min(2, 'المدينة مطلوبة'),
+  address: z.string().trim().min(3, 'العنوان التفصيلي مطلوب'),
+  phone: z
+    .string()
+    .trim()
+    .min(8, 'رقم الهاتف قصير جداً')
+    .max(20, 'رقم الهاتف طويل جداً')
+    .regex(
+      /^[+]?[\d\s()-]+$/,
+      'صيغة الهاتف غير صحيحة. استخدم أرقاماً مع + اختيارياً',
+    ),
+  attributes: z.array(z.string()),
+});
 
 export type DoctorFacilityFormSchemaValues = z.infer<
   typeof doctorFacilityFormSchema
@@ -74,8 +54,5 @@ export const EMPTY_DOCTOR_FACILITY_FORM: DoctorFacilityFormSchemaValues = {
   city: '',
   address: '',
   phone: '',
-  email: '',
-  workHoursFrom: '09:00',
-  workHoursTo: '17:00',
   attributes: [],
 };

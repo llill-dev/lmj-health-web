@@ -84,37 +84,37 @@ export default function LinkFacilityDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={handleClose}
-      title="ط±ط¨ط· ظ…ظ†ط´ط£ط© ظ…ظˆط¬ظˆط¯ط©"
+      title="ربط منشأة موجودة"
       maxWidthClass="max-w-[640px]"
       headerPattern
     >
       <div dir="rtl" lang="ar" className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
-          ط§ط¨ط­ط« ط¹ظ† ظ…ظ†ط´ط£ط© ظ…ط³ط¬ظ‘ظ„ط© ظپظٹ ط§ظ„ظ†ط¸ط§ظ… ظˆط§ط±ط¨ط· ط­ط³ط§ط¨ظƒ ط¨ظ‡ط§. ط¥ط°ط§ ظ„ظ… طھط¬ط¯ظ‡ط§طŒ ط§ط³طھط®ط¯ظ…
-          آ«ط§ظ‚طھط±ط§ط­ ظ…ظ†ط´ط£ط©آ» ظ„ط¥ط±ط³ط§ظ„ ط·ظ„ط¨ ط¥ط¶ط§ظپطھظ‡ط§.
+          ابحث عن منشأة مسجّلة في النظام واربط حسابك بها. إذا لم تجدها، استخدم
+          «اقتراح منشأة» لإرسال طلب إضافتها.
         </p>
 
-        <DoctorProfileFormField label="ط¨ط­ط« ط¨ط§ظ„ط§ط³ظ…" required hint="ط­ط±ظپط§ظ† ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„">
+        <DoctorProfileFormField label="بحث بالاسم" required hint="حرفان على الأقل">
           <input
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
               setSelectedId(null);
             }}
-            placeholder="ظ…ط«ط§ظ„: ظ…ط³طھط´ظپظ‰ ط§ظ„ط´ط§ظ…"
+            placeholder="مثال: مستشفى الشام"
             disabled={submitting}
             className={profileFieldClass(profileInputClass, false)}
           />
         </DoctorProfileFormField>
 
-        <DoctorProfileFormField label="ط§ظ„ظ…ط¯ظٹظ†ط©" hint="ط§ط®طھظٹط§ط±ظٹ â€” ظ„طھط¶ظٹظٹظ‚ ط§ظ„ظ†طھط§ط¦ط¬">
+        <DoctorProfileFormField label="المدينة" hint="اختياري — لتضييق النتائج">
           <input
             value={city}
             onChange={(event) => {
               setCity(event.target.value);
               setSelectedId(null);
             }}
-            placeholder="ظ…ط«ط§ظ„: ط¯ظ…ط´ظ‚"
+            placeholder="مثال: دمشق"
             disabled={submitting}
             className={profileFieldClass(profileInputClass, false)}
           />
@@ -122,30 +122,30 @@ export default function LinkFacilityDialog({
 
         <div>
           <h3 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
-            ط§ظ„ظ†طھط§ط¦ط¬
+            النتائج
           </h3>
 
           {showMinCharsHint ? (
             <p className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[12px] font-semibold text-[#98A2B3]">
-              ط§ظƒطھط¨ ط­ط±ظپظٹظ† ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„ ظ„ط¨ط¯ط، ط§ظ„ط¨ط­ط«
+              اكتب حرفين على الأقل لبدء البحث
             </p>
           ) : suggestQuery.isLoading ? (
             <div className="flex items-center justify-center gap-3 rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] py-10">
               <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden />
               <span className="font-cairo text-[13px] font-semibold text-[#667085]">
-                ط¬ط§ط±ظچ ط§ظ„ط¨ط­ط«...
+                جارٍ البحث...
               </span>
             </div>
           ) : suggestQuery.isError ? (
             <div className="flex items-start gap-2 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-[#B42318]">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               <p className="font-cairo text-[13px] font-semibold leading-relaxed">
-                طھط¹ط°ظ‘ط± طھط­ظ…ظٹظ„ ط§ظ„ظ†طھط§ط¦ط¬. ط­ط§ظˆظ„ ظ…ط±ط© ط£ط®ط±ظ‰.
+                تعذّر تحميل النتائج. حاول مرة أخرى.
               </p>
             </div>
           ) : debouncedSearch.trim().length < 2 ? (
             <p className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[12px] font-semibold text-[#98A2B3]">
-              ط§ط¨ط¯ط£ ط¨ط§ظ„ط¨ط­ط« ط¹ظ† ط§ط³ظ… ط§ظ„ظ…ظ†ط´ط£ط©
+              ابدأ بالبحث عن اسم المنشأة
             </p>
           ) : facilities.length === 0 ? (
             <div className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-5 py-8 text-center">
@@ -153,10 +153,10 @@ export default function LinkFacilityDialog({
                 <Building2 className="h-5 w-5 text-primary" aria-hidden />
               </div>
               <p className="font-cairo text-[13px] font-extrabold text-[#667085]">
-                ظ„ط§ طھظˆط¬ط¯ ظ†طھط§ط¦ط¬ ظ…ط·ط§ط¨ظ‚ط©
+                لا توجد نتائج مطابقة
               </p>
               <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                ط¬ط±ظ‘ط¨ ط§ط³ظ…ظ‹ط§ ط£ظˆ ظ…ط¯ظٹظ†ط© ظ…ط®طھظ„ظپط©طŒ ط£ظˆ ط§ظ‚طھط±ط­ ظ…ظ†ط´ط£ط© ط¬ط¯ظٹط¯ط©
+                جرّب اسمًا أو مدينة مختلفة، أو اقترح منشأة جديدة
               </p>
             </div>
           ) : (
@@ -203,12 +203,12 @@ export default function LinkFacilityDialog({
                           <p className="mt-0.5 flex items-center justify-end gap-1 font-cairo text-[11px] font-semibold text-[#667085]">
                             <MapPin className="h-3 w-3 shrink-0" aria-hidden />
                             {facility.city}
-                            {facility.address ? ` آ· ${facility.address}` : ''}
+                            {facility.address ? ` · ${facility.address}` : ''}
                           </p>
                         ) : null}
                         {!hasProviderId ? (
                           <p className="mt-1 font-cairo text-[11px] font-semibold text-[#B42318]">
-                            This result cannot be linked because `facilityProviderId` is missing.
+                            لا يمكن ربط هذه المنشأة لعدم توفّر معرّف مزوّد الخدمة.
                           </p>
                         ) : null}
                       </div>
@@ -227,7 +227,7 @@ export default function LinkFacilityDialog({
             disabled={submitting}
             className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
           >
-            ط¥ظ„ط؛ط§ط،
+            إلغاء
           </button>
           <button
             type="button"
@@ -236,7 +236,7 @@ export default function LinkFacilityDialog({
             className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
           >
             <Link2 className="h-4 w-4" aria-hidden />
-            {submitting ? 'ط¬ط§ط±ظچ ط§ظ„ط±ط¨ط·â€¦' : 'ط±ط¨ط· ط§ظ„ظ…ظ†ط´ط£ط©'}
+            {submitting ? 'جارٍ الربط…' : 'ربط المنشأة'}
           </button>
         </div>
       </div>

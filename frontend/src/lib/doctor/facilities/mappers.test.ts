@@ -7,7 +7,7 @@ import {
 } from '@/lib/doctor/facilities/mappers';
 
 describe('doctor facility mappers', () => {
-  it('maps API facility into UI model with work hours from description', () => {
+  it('maps API facility into UI model without smuggling work hours into description', () => {
     const mapped = mapApiFacilityToDoctorFacility({
       _id: '65f0c4f6e6a0d0d0d0d0d901',
       name: 'عيادة الشفاء',
@@ -16,7 +16,7 @@ describe('doctor facility mappers', () => {
       address: 'المزة',
       phone: '+963944123456',
       status: 'ACTIVE',
-      description: 'عيادة عامة\n\nساعات العمل: 09:00 - 17:00',
+      description: 'عيادة عامة',
     });
 
     expect(mapped).toMatchObject({
@@ -24,12 +24,12 @@ describe('doctor facility mappers', () => {
       name: 'عيادة الشفاء',
       status: 'active',
       description: 'عيادة عامة',
-      workHoursFrom: '09:00',
-      workHoursTo: '17:00',
     });
+    expect(mapped).not.toHaveProperty('workHoursFrom');
+    expect(mapped).not.toHaveProperty('email');
   });
 
-  it('builds swagger-aligned mutation body with facilityType and kind', () => {
+  it('builds Swagger mutation body with both facilityType and kind', () => {
     const body = formValuesToMutationBody(
       {
         name: 'عيادة تجريبية',
@@ -38,9 +38,6 @@ describe('doctor facility mappers', () => {
         city: 'دمشق',
         address: 'شارع الجلاء',
         phone: '0933875538',
-        email: '',
-        workHoursFrom: '09:00',
-        workHoursTo: '17:00',
       },
       ['work_hours_from_0900', 'night_shift'],
     );
@@ -50,13 +47,14 @@ describe('doctor facility mappers', () => {
       facilityType: 'clinic',
       kind: 'clinic',
       phone: '+963933875538',
+      description: 'وصف',
       attributes: ['night_shift'],
     });
     expect(body).not.toHaveProperty('status');
     expect(body.attributes).toEqual(['night_shift']);
   });
 
-  it('serializes swagger POST body without empty optional fields', () => {
+  it('serializes Swagger POST body (keeps kind, drops empty optionals)', () => {
     const serialized = serializeDoctorFacilityMutationBody({
       name: 'عيادة تجريبية',
       city: 'دمشق',

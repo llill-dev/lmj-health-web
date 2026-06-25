@@ -146,7 +146,7 @@ export function FacilityFormDialog({
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label="إغلاق"
               >
-                <X className="h-5 w-5" aria-hidden />
+                <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
@@ -252,75 +252,21 @@ export function FacilityFormDialog({
                   <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
                     التواصل
                   </h3>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <DoctorProfileFormField
-                      label="الهاتف"
-                      required
-                      error={errors.phone?.message}
-                    >
-                      <input
-                        {...register('phone')}
-                        placeholder="09xxxxxxxx"
-                        dir="ltr"
-                        className={profileFieldClass(
-                          cn(profileInputClass, 'text-start placeholder:text-start'),
-                          Boolean(errors.phone),
-                        )}
-                      />
-                    </DoctorProfileFormField>
-
-                    <DoctorProfileFormField
-                      label="البريد الإلكتروني"
-                      error={errors.email?.message}
-                    >
-                      <input
-                        {...register('email')}
-                        placeholder="email@example.com"
-                        dir="ltr"
-                        className={profileFieldClass(
-                          cn(profileInputClass, 'text-start placeholder:text-start'),
-                          Boolean(errors.email),
-                        )}
-                      />
-                    </DoctorProfileFormField>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                    ساعات العمل
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <DoctorProfileFormField
-                      label="من"
-                      required
-                      error={errors.workHoursFrom?.message}
-                    >
-                      <input
-                        type="time"
-                        {...register('workHoursFrom')}
-                        className={profileFieldClass(
-                          cn(profileInputClass, 'text-start'),
-                          Boolean(errors.workHoursFrom),
-                        )}
-                      />
-                    </DoctorProfileFormField>
-
-                    <DoctorProfileFormField
-                      label="إلى"
-                      required
-                      error={errors.workHoursTo?.message}
-                    >
-                      <input
-                        type="time"
-                        {...register('workHoursTo')}
-                        className={profileFieldClass(
-                          cn(profileInputClass, 'text-start'),
-                          Boolean(errors.workHoursTo),
-                        )}
-                      />
-                    </DoctorProfileFormField>
-                  </div>
+                  <DoctorProfileFormField
+                    label="الهاتف"
+                    required
+                    error={errors.phone?.message}
+                  >
+                    <input
+                      {...register('phone')}
+                      placeholder="09xxxxxxxx"
+                      dir="rtl"
+                      className={profileFieldClass(
+                        cn(profileInputClass, 'text-start placeholder:text-start'),
+                        Boolean(errors.phone),
+                      )}
+                    />
+                  </DoctorProfileFormField>
                 </div>
 
                 {mode === 'edit' ? (
@@ -332,7 +278,7 @@ export function FacilityFormDialog({
                       label="إضافة سمة"
                       hint="مثال: night_shift أو echo_available"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex gap-2 items-center">
                         <input
                           value={attrInput}
                           onChange={(event) => setAttrInput(event.target.value)}
@@ -356,12 +302,12 @@ export function FacilityFormDialog({
                           className="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white disabled:opacity-50"
                           aria-label="إضافة سمة"
                         >
-                          <Plus className="h-4 w-4" aria-hidden />
+                          <Plus className="w-4 h-4" aria-hidden />
                         </button>
                       </div>
                     </DoctorProfileFormField>
                     {attributes.length > 0 ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         {attributes.map((attr) => (
                           <span
                             key={attr}
@@ -375,7 +321,7 @@ export function FacilityFormDialog({
                               className="text-primary/70 transition hover:text-[#B42318] disabled:opacity-50"
                               aria-label={`إزالة ${attr}`}
                             >
-                              <Trash2 className="h-3 w-3" aria-hidden />
+                              <Trash2 className="w-3 h-3" aria-hidden />
                             </button>
                           </span>
                         ))}
@@ -417,7 +363,7 @@ export function FacilityFormDialog({
                   disabled={submitting}
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
-                  <Save className="h-4 w-4" aria-hidden />
+                  <Save className="w-4 h-4" aria-hidden />
                   {submitting ? 'جارٍ الحفظ…' : 'حفظ'}
                 </button>
               </div>

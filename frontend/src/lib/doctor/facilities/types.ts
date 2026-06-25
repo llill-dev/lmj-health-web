@@ -10,9 +10,6 @@ export type DoctorFacility = {
   city: string;
   address: string;
   phone: string;
-  email?: string;
-  workHoursFrom: string;
-  workHoursTo: string;
   status: DoctorFacilityStatus;
   attributes?: string[];
   /** False when linked via PATCH assign to a catalog facility the doctor does not own. */
@@ -26,9 +23,6 @@ export type DoctorFacilityFormValues = {
   city: string;
   address: string;
   phone: string;
-  email?: string;
-  workHoursFrom: string;
-  workHoursTo: string;
   attributes?: string[];
 };
 

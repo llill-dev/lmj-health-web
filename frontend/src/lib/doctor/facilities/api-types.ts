@@ -18,7 +18,11 @@ export type DoctorFacilityRecord = {
   updatedAt?: string;
 };
 
-/** POST/PUT /api/doctors/me/facility — Swagger validated body fields only. */
+/**
+ * POST/PUT /api/doctors/me/facility — Swagger-validated body fields.
+ * The route validation (src/routes/doctor.js) lists BOTH `facilityType` and
+ * legacy `kind`; we send both (equal) since `kind` is the canonical schema field.
+ */
 export type DoctorFacilityMutationBody = {
   name: string;
   city: string;

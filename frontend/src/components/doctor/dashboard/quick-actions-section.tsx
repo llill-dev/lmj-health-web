@@ -3,6 +3,7 @@
 import {
   BookMarked,
   BookOpen,
+  Building2,
   CalendarPlus,
   MessageSquare,
   Search,
@@ -55,6 +56,13 @@ const quickActions = [
     icon: BookMarked,
     href: '/doctor/medical-services-directory',
   },
+  {
+    id: 'facilities',
+    title: 'المنشآت',
+    description: 'إدارة منشأتك وربطها بحسابك',
+    icon: Building2,
+    href: '/doctor/facilities',
+  },
 ];
 
 export default function QuickActionsSection() {
@@ -62,7 +70,7 @@ export default function QuickActionsSection() {
     <section className='mt-6'>
       <DashboardSectionHeading title='الإجراءات السريعة' className='mb-[22px]' />
 
-      <div className='grid grid-cols-6 justify-items-center gap-5'>
+      <div className='grid grid-cols-2 justify-items-center gap-5 sm:grid-cols-4 lg:grid-cols-7'>
         {quickActions.map((action) => (
           <Link
             key={action.id}

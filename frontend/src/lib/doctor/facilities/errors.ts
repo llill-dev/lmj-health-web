@@ -49,6 +49,19 @@ const MESSAGE_KEY_TOAST: Record<string, DoctorFacilitySaveToast> = {
     title: 'اختيار غير صالح',
     message: 'المنشأة المختارة غير صالحة للربط أو التعديل.',
   },
+  'errors.validation.invalidId': {
+    title: 'معرّف غير صالح',
+    message: 'المعرّف المُرسل غير صالح. أعد تحميل الصفحة ثم حاول مجدداً.',
+  },
+  'errors.validation.invalidEnum': {
+    title: 'قيمة غير مدعومة',
+    message:
+      'أحد الحقول يحمل قيمة غير مدعومة (مثل نوع المنشأة). راجع الاختيارات ثم أعد المحاولة.',
+  },
+  'errors.forbidden': {
+    title: 'صلاحية غير كافية',
+    message: 'لا تملك صلاحية تنفيذ هذه العملية.',
+  },
   'errors.facilities.ownerOnly': {
     title: 'صلاحية غير كافية',
     message: 'يمكنك إدارة منشأتك التي تملكها فقط.',

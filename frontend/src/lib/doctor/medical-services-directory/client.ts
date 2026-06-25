@@ -46,8 +46,8 @@ function buildSuggestQuery(params: FacilitiesSuggestParams = {}): string {
   const q = params.q?.trim();
   if (q && q.length >= 2) qs.set('q', q);
   if (params.city?.trim()) qs.set('city', params.city.trim());
-  if (params.facilityType) qs.set('kind', String(params.facilityType));
-  if (params.kind) qs.set('kind', String(params.kind));
+  if (params.facilityType) qs.set('facilityType', String(params.facilityType));
+  else if (params.kind) qs.set('kind', String(params.kind));
   if (params.limit != null) qs.set('limit', String(params.limit));
   return qs.toString();
 }
