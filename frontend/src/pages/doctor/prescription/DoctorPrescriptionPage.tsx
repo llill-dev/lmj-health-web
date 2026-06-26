@@ -20,7 +20,7 @@ import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-s
 import { DoctorWorkspaceFormSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterPrescriptionWorkspace } from '@/hooks/doctor';
-import { resolvePrescriptionSaveFeedback } from '@/lib/doctor/prescriptionFormErrors';
+import { resolvePrescriptionSaveFeedback } from '@/lib/doctor/prescriptions/prescriptionFormErrors';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
 

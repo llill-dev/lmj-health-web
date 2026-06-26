@@ -19,7 +19,7 @@ import {
   type DoctorProfessionalEditForm,
 } from '@/components/doctor/profile-settings/doctor-profile-schemas';
 import { useDoctorProfileConfirm } from '@/components/doctor/profile-settings/use-doctor-profile-confirm';
-import type { DoctorProfileRecord } from '@/lib/doctor/profileClient';
+import type { DoctorProfileRecord } from '@/lib/doctor/profile/profileClient';
 
 export default function DoctorProfileProfessionalForm({
   doctor,

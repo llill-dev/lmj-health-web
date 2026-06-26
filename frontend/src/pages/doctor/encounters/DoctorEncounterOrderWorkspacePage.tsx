@@ -7,7 +7,7 @@ import {
   type CatalogOrderCategory,
 } from '@/components/doctor/encounters/orders';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useEncounterOrderWorkspace } from '@/hooks/doctor/useEncounterOrderWorkspace';
+import { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
 import { readAuthUser } from '@/lib/cookies';
 
 export default function DoctorEncounterOrderWorkspacePage({

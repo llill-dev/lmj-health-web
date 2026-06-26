@@ -1,7 +1,7 @@
 import { DoctorListFilterTabs } from '@/components/doctor/shared/doctor-list-filter-tabs';
 import { DoctorListSearchField } from '@/components/doctor/shared/doctor-list-search-field';
-import type { DoctorLibraryItemType } from '@/lib/doctor/libraryTypes';
-import type { DoctorTemplateType } from '@/lib/doctor/templateTypes';
+import type { DoctorLibraryItemType } from '@/lib/doctor/library/libraryTypes';
+import type { DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
 
 export type ClinicalLibrarySection = 'library' | 'templates';
 export type ClinicalLibraryTypeFilter = 'all' | DoctorLibraryItemType;

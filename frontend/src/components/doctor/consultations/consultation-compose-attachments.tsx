@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { PendingConsultationAttachment } from '@/lib/consultations/types';
 import { doctorApi } from '@/lib/doctor/client';
-import { useDoctorPatientFiles } from '@/hooks/doctor/useDoctorPatients';
+import { useDoctorPatientFiles } from '@/hooks/doctor/patients/useDoctorPatients';
 
 export default function ConsultationComposeAttachments({
   patientId,

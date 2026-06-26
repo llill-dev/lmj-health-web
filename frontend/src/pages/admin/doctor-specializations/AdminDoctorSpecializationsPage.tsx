@@ -17,13 +17,13 @@ import {
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import ConfirmActionDialog from "@/components/admin/dialogs/ConfirmActionDialog";
 import UpsertDoctorLookupDialog from "@/components/admin/doctor-specializations/UpsertDoctorLookupDialog";
-import { useAdminLookups } from "@/hooks/admin/useAdminLookups";
-import { useRemoveLookup } from "@/hooks/admin/useAdminLookupMutations";
+import { useAdminLookups } from "@/hooks/admin/lookups/useAdminLookups";
+import { useRemoveLookup } from "@/hooks/admin/lookups/useAdminLookupMutations";
 import {
   resolveLookupSecondaryText,
   resolveLookupText,
-} from "@/lib/admin/lookupUtils";
-import { resolveDoctorSpecialtyLookupCategory } from "@/lib/admin/doctorSpecialtyLookupCategory";
+} from "@/lib/admin/lookups/lookupUtils";
+import { resolveDoctorSpecialtyLookupCategory } from "@/lib/admin/doctors/doctorSpecialtyLookupCategory";
 import type { AdminLookupRecord } from "@/lib/admin/types";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useRetryAction } from "@/lib/query/useRetryAction";

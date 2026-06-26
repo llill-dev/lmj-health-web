@@ -9,7 +9,7 @@ import {
   profileFieldClass,
   profileInputClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
-import { useFacilitySuggestSearch } from '@/hooks/doctor/useDoctorFacility';
+import { useFacilitySuggestSearch } from '@/hooks/doctor/facilities/useDoctorFacility';
 import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
 import { cn } from '@/lib/utils/utils';
 

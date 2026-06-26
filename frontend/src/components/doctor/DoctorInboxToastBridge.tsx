@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/useDoctorNotifications';
+import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/notifications/useDoctorNotifications';
 
 /**
  * عند زيادة عدد غير المقروء (استطلاع/تركيز النافذة) يُعلَم المستخدم بإشعار جديد.

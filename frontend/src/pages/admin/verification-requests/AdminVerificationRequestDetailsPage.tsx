@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { DoctorSpecializationReviewBanner } from '@/components/admin/verification-requests/DoctorSpecializationReviewBanner';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
-import { resolveDoctorSpecializationReviewState } from '@/lib/admin/doctorSpecializationReview';
+import { resolveDoctorSpecializationReviewState } from '@/lib/admin/doctors/doctorSpecializationReview';
 import {
   buildChangeRows,
   extractRequestFromDetails,

@@ -14,8 +14,8 @@ import {
   profileTextareaClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
-import { useCreateFacility, useUpdateFacility } from '@/hooks/admin/useAdminServices';
-import { resolveAdminFacilityFormFeedback } from '@/lib/admin/facilityFormErrors';
+import { useCreateFacility, useUpdateFacility } from '@/hooks/admin/services/useAdminServices';
+import { resolveAdminFacilityFormFeedback } from '@/lib/admin/facilities/facilityFormErrors';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { cn } from '@/lib/utils/utils';
 import type { FacilityStatus, FacilitySummary, FacilityType } from '@/lib/admin/types';

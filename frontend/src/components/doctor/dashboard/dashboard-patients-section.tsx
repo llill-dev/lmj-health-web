@@ -8,17 +8,17 @@ import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-s
 import {
   DASHBOARD_PATIENT_FILTER_LABELS,
   type DashboardPatientFilter,
-} from "@/lib/doctor/dashboardPatientFilters";
+} from "@/lib/doctor/dashboard/dashboardPatientFilters";
 import type { DoctorPatientListItem } from "@/lib/doctor/types";
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import { useRetryAction } from "@/lib/query/useRetryAction";
-import type { useDashboardPatientsSearch } from "@/hooks/doctor/useDashboardPatientsSearch";
-import { useDashboardPatientsWeeklyActivity } from "@/hooks/doctor/useDashboardPatientsWeeklyActivity";
+import type { useDashboardPatientsSearch } from "@/hooks/doctor/dashboard/useDashboardPatientsSearch";
+import { useDashboardPatientsWeeklyActivity } from "@/hooks/doctor/dashboard/useDashboardPatientsWeeklyActivity";
 import {
   scaleWeeklyBarHeight,
   type PatientWeeklyActivityBar,
-} from "@/lib/doctor/buildPatientWeeklyActivityChart";
+} from "@/lib/doctor/dashboard/buildPatientWeeklyActivityChart";
 
 export type DashboardPatientsSearchState = ReturnType<
   typeof useDashboardPatientsSearch

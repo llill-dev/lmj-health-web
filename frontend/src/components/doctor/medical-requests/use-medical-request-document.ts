@@ -4,7 +4,7 @@ import {
   MEDICAL_REQUEST_NO_RESULT_FILES_AR,
   MEDICAL_REQUEST_NO_RESULT_VIEW_AR,
   resolveMedicalRequestDocumentErrorMessage,
-} from '@/lib/doctor/medicalRequestDocumentMessages';
+} from '@/lib/doctor/medical-requests/medicalRequestDocumentMessages';
 import { triggerBrowserFileDownload } from '@/lib/files/triggerBrowserFileDownload';
 import type { MedicalRequestDetailVm } from './map-doctor-medical-requests';
 

@@ -6,7 +6,7 @@ import {
   resolveClinicVerificationStatus,
   validateClinicLocationForm,
 } from '@/lib/doctor/clinicLocation/utils';
-import type { DoctorProfileRecord } from '@/lib/doctor/profileClient';
+import type { DoctorProfileRecord } from '@/lib/doctor/profile/profileClient';
 
 const doctor: DoctorProfileRecord = {
   clinicAddress: 'دمشق — جرمانا',

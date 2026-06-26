@@ -4,7 +4,7 @@ import { UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import DashboardSectionHeading from '@/components/doctor/dashboard/dashboard-section-heading';
-import { doctorWaitlistDeepLink } from '@/lib/doctor/homeSnapshotMappers';
+import { doctorWaitlistDeepLink } from '@/lib/doctor/dashboard/homeSnapshotMappers';
 
 export default function ConsultationsWaitingSection({
   patientName,

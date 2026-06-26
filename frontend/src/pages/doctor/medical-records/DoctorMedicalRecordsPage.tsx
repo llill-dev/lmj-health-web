@@ -28,7 +28,7 @@ import { readAuthUser } from "@/lib/cookies";
 import { useToast } from "@/components/ui/ToastProvider";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
-import { generateDoctorDocumentPdf, openPdfBlobInNewTab } from "@/lib/doctor/doctorOrderDocuments";
+import { generateDoctorDocumentPdf, openPdfBlobInNewTab } from "@/lib/doctor/orders/doctorOrderDocuments";
 
 function formatArabicDate(value?: string | null) {
   if (!value) return "غير محدد";

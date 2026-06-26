@@ -20,17 +20,17 @@ import type {
   EncounterDocumentShareBody,
   EncounterDocumentShareResponse,
   EncounterDocumentsListResponse,
-} from "./encounterDocumentsTypes";
-import { doctorEndpoints } from "./endpoints";
-import { toAppointmentTypeApiBody } from "./appointmentTypeApiBodies";
+} from "@/lib/doctor/encounters/encounterDocumentsTypes";
+import { doctorEndpoints } from "@/lib/doctor/endpoints";
+import { toAppointmentTypeApiBody } from "@/lib/doctor/appointments/appointmentTypeApiBodies";
 import type {
   InternalDirectoryListParams,
   InternalDirectoryListResponse,
-} from "./doctorDirectoryTypes";
+} from "@/lib/doctor/directory/doctorDirectoryTypes";
 import type {
   EncounterClinicalListParams,
   EncounterOrdersListResponse,
-} from "./encounterClinicalTypes";
+} from "@/lib/doctor/encounters/encounterClinicalTypes";
 import type {
   CreateEncounterPrescriptionBody,
   EncounterPrescriptionFinalizeResponse,
@@ -40,7 +40,7 @@ import type {
   EncounterPrescriptionsListResponse,
   PrescriptionItemBody,
   UpdateEncounterPrescriptionBody,
-} from "./prescriptionTypes";
+} from "@/lib/doctor/prescriptions/prescriptionTypes";
 import type {
   AppendDoctorOrderResultsBody,
   AppendDoctorOrderResultsResponse,
@@ -50,11 +50,11 @@ import type {
   DoctorOrdersListParams,
   DoctorOrdersListResponse,
   UpdateDoctorOrderStatusBody,
-} from "./doctorOrderTypes";
+} from "@/lib/doctor/orders/doctorOrderTypes";
 import {
   normalizeDoctorOrderFromApi,
   normalizeDoctorOrdersListResponse,
-} from "./map-doctor-orders-api";
+} from "@/lib/doctor/orders/map-doctor-orders-api";
 import type {
   CreateEncounterOrderBody,
   CreateImagingOrderBody,
@@ -66,7 +66,7 @@ import type {
   OrderCatalogListResponse,
   UpdateEncounterOrderBody,
   UpdateImagingOrderBody,
-} from "./encounterOrderTypes";
+} from "@/lib/doctor/encounters/encounterOrderTypes";
 import { readAuthUser } from "@/lib/cookies";
 import type {
   CreateTemporaryPatientBody,
@@ -132,22 +132,22 @@ import type {
   DoctorBookedSlotsResponse,
   AddDoctorPatientMedicationBody,
   AddDoctorPatientMedicationResponse,
-} from "./types";
+} from "@/lib/doctor/types";
 import type {
   CreateDoctorLibraryItemBody,
   DoctorLibraryListResponse,
   DoctorLibraryRecentResponse,
   UpdateDoctorLibraryItemBody,
-} from "./libraryTypes";
+} from "@/lib/doctor/library/libraryTypes";
 import type {
   CreateDoctorTemplateBody,
   DoctorTemplatesListResponse,
   UpdateDoctorTemplateBody,
-} from "./templateTypes";
+} from "@/lib/doctor/templates/templateTypes";
 import type {
   CreateOrderFavoriteBody,
   OrderFavoritesListResponse,
-} from "./orderFavoritesTypes";
+} from "@/lib/doctor/orders/orderFavoritesTypes";
 
 function buildPatientsListQuery(params: DoctorPatientsListParams): string {
   const qs = new URLSearchParams();
@@ -1900,7 +1900,7 @@ export const doctorApi = {
         { locale: 'ar' },
       ),
     apply: (templateId: string) =>
-      post<import('./templateTypes').DoctorTemplateApplyResponse>(
+      post<import('@/lib/doctor/templates/templateTypes').DoctorTemplateApplyResponse>(
         doctorEndpoints.templates.apply(templateId),
         {},
         { locale: 'ar' },

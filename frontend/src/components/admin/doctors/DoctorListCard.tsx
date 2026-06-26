@@ -12,8 +12,8 @@ import type {
   AdminDoctorApprovalStatus,
   AdminDoctorSummary,
 } from '@/lib/admin/types';
-import { isAdminDoctorOffboarded } from '@/lib/admin/isAdminDoctorOffboarded';
-import { resolveAdminDoctorUserId } from '@/lib/admin/resolveAdminDoctorUserId';
+import { isAdminDoctorOffboarded } from '@/lib/admin/doctors/isAdminDoctorOffboarded';
+import { resolveAdminDoctorUserId } from '@/lib/admin/doctors/resolveAdminDoctorUserId';
 import { formatPhoneForDisplay } from '@/lib/phone/formatPhoneForDisplay';
 
 const TEAL = '#108B8B';

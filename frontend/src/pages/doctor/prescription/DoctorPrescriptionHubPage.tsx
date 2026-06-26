@@ -10,7 +10,7 @@ import {
 } from '@/components/doctor/prescription/hub';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
-import { useDoctorPrescriptionsHub } from '@/hooks/doctor/useDoctorPrescriptionsHub';
+import { useDoctorPrescriptionsHub } from '@/hooks/doctor/prescriptions/useDoctorPrescriptionsHub';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';

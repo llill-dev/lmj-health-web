@@ -16,7 +16,7 @@ import {
   useServiceProvidersList,
   useServiceTypesList,
   useUpdateProviderStatus,
-} from '@/hooks/admin/useAdminServices';
+} from '@/hooks/admin/services/useAdminServices';
 import type { ProviderStatus, ServiceProvider } from '@/lib/admin/types';
 import { resolveLabel } from '@/lib/admin/types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';

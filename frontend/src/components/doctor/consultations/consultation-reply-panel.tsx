@@ -18,7 +18,7 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { ConsultationClinicalAction } from '@/lib/consultations/consultationEncounter';
 import type { PendingConsultationAttachment } from '@/lib/consultations/types';
 import { doctorApi } from '@/lib/doctor/client';
-import { useDoctorPatientFiles } from '@/hooks/doctor/useDoctorPatients';
+import { useDoctorPatientFiles } from '@/hooks/doctor/patients/useDoctorPatients';
 
 const CLINICAL_ACTIONS: Array<{
   key: ConsultationClinicalAction;

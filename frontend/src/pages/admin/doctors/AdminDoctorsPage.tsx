@@ -12,14 +12,14 @@ import DoctorListCard from '@/components/admin/doctors/DoctorListCard';
 import StyledSelect from '@/components/ui/styled-select';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { useAdminDoctors } from '@/hooks/admin/useAdminDoctors';
+import { useAdminDoctors } from '@/hooks/admin/doctors/useAdminDoctors';
 import type { AdminDoctorApprovalStatus } from '@/lib/admin/types';
 import OffboardDialog from '@/components/admin/secretaries/dialogs/OffboardDialog';
 import { phoneComparisonKey } from '@/lib/phone/formatPhoneForDisplay';
 import { adminApi } from '@/lib/admin/client';
-import { normalizeAdminDoctorDetailsResponse } from '@/lib/admin/normalizeAdminDoctorDetailsResponse';
-import { resolveAdminDoctorUserId } from '@/lib/admin/resolveAdminDoctorUserId';
-import { isAdminDoctorOffboarded } from '@/lib/admin/isAdminDoctorOffboarded';
+import { normalizeAdminDoctorDetailsResponse } from '@/lib/admin/doctors/normalizeAdminDoctorDetailsResponse';
+import { resolveAdminDoctorUserId } from '@/lib/admin/doctors/resolveAdminDoctorUserId';
+import { isAdminDoctorOffboarded } from '@/lib/admin/doctors/isAdminDoctorOffboarded';
 import { useToast } from '@/components/ui/ToastProvider';
 
 const TEAL = '#108B8B';

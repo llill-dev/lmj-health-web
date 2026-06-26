@@ -25,10 +25,10 @@ import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import {
   useAdminContentList,
   useArchiveContent,
-} from "@/hooks/admin/useAdminContent";
-import { useAdminContentStatusCounts } from "@/hooks/admin/useAdminContentStatusCounts";
-import { useAdminPlatformStats } from "@/hooks/admin/useAdminAnalytics";
-import { useAdminUnreadNotificationCount } from "@/hooks/admin/useAdminNotifications";
+} from "@/hooks/admin/content/useAdminContent";
+import { useAdminContentStatusCounts } from "@/hooks/admin/content/useAdminContentStatusCounts";
+import { useAdminPlatformStats } from "@/hooks/admin/analytics/useAdminAnalytics";
+import { useAdminUnreadNotificationCount } from "@/hooks/admin/notifications/useAdminNotifications";
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
 import type {
   AdminComplaintListItem,

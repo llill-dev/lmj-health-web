@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { OrderManualFormSubmitError, assertOrderManualFormValid } from '@/lib/doctor/orderManualFormSchema';
-import type { OrderManualFieldMessages } from '@/lib/doctor/orderManualFormSchema';
-import { resolveOrderManualServerFeedback } from '@/lib/doctor/orderFormErrors';
+import { OrderManualFormSubmitError, assertOrderManualFormValid } from '@/lib/doctor/orders/orderManualFormSchema';
+import type { OrderManualFieldMessages } from '@/lib/doctor/orders/orderManualFormSchema';
+import { resolveOrderManualServerFeedback } from '@/lib/doctor/orders/orderFormErrors';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -16,7 +16,7 @@ import { resolveRadiologyStatusLabel } from '@/components/doctor/radiology/map-r
 import type { RadiologyManualForm as ManualValues } from '@/components/doctor/radiology/radiology-types';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useEncounterOrderWorkspace } from '@/hooks/doctor/useEncounterOrderWorkspace';
+import { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
 import { readAuthUser } from '@/lib/cookies';
 
 const EMPTY: ManualValues = {

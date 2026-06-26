@@ -18,10 +18,10 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAdminPatient } from '@/hooks/admin/useAdminPatient';
-import { useAdminAppointments } from '@/hooks/admin/useAdminAppointments';
-import { useAdminAuditLogs } from '@/hooks/admin/useAdminAuditLogs';
-import { useAdminPatientFiles } from '@/hooks/admin/useAdminPatientFiles';
+import { useAdminPatient } from '@/hooks/admin/patients/useAdminPatient';
+import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppointments';
+import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
+import { useAdminPatientFiles } from '@/hooks/admin/patients/useAdminPatientFiles';
 import { AppointmentStatusChip } from '@/components/admin/patients/AppointmentStatusChip';
 import { useToast } from '@/components/ui/ToastProvider';
 import { adminApi } from '@/lib/admin/client';

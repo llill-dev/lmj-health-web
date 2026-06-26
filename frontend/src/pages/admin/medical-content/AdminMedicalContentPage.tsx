@@ -41,8 +41,8 @@ import {
   usePublishContent,
   useRejectContent,
   useSubmitContentReview,
-} from "@/hooks/admin/useAdminContent";
-import { useAdminContentStatusCounts } from "@/hooks/admin/useAdminContentStatusCounts";
+} from "@/hooks/admin/content/useAdminContent";
+import { useAdminContentStatusCounts } from "@/hooks/admin/content/useAdminContentStatusCounts";
 import type {
   AdminContentItem,
   AdminContentStatus,

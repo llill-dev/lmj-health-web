@@ -1,4 +1,4 @@
-import type { EncounterOrder } from '@/lib/doctor/encounterClinicalTypes';
+import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import type { RadiologyClinicalForm, RadiologyOrderItemUi } from '../radiology-types';
 
 export type RadiologyPreviewVm = {

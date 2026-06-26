@@ -16,10 +16,10 @@ import StyledSelect from '@/components/ui/styled-select';
 import {
   useCreateLookup,
   useRemoveLookup,
-} from '@/hooks/admin/useAdminLookupMutations';
-import { useAdminLookups } from '@/hooks/admin/useAdminLookups';
-import { generateLookupMachineKey } from '@/lib/admin/lookupKey';
-import { resolveLookupText } from '@/lib/admin/lookupUtils';
+} from '@/hooks/admin/lookups/useAdminLookupMutations';
+import { useAdminLookups } from '@/hooks/admin/lookups/useAdminLookups';
+import { generateLookupMachineKey } from '@/lib/admin/lookups/lookupKey';
+import { resolveLookupText } from '@/lib/admin/lookups/lookupUtils';
 import type { AdminLookupCategory, AdminLookupRecord } from '@/lib/admin/types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 

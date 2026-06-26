@@ -10,7 +10,7 @@ import {
   WhatsAppIcon,
 } from '@/components/platform/social-icons';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useDoctorProfile } from '@/hooks/doctor/useDoctorProfile';
+import { useDoctorProfile } from '@/hooks/doctor/profile/useDoctorProfile';
 import { usePlatformContactContent } from '@/hooks/platform/usePlatformContent';
 import { ApiError } from '@/lib/api';
 import { submitDoctorSupportRequest } from '@/lib/doctor/support/submitDoctorSupportRequest';

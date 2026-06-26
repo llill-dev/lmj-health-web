@@ -21,7 +21,7 @@ import { useRetryAction } from '@/lib/query/useRetryAction';
 import {
   generateDoctorDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/doctorOrderDocuments';
+} from '@/lib/doctor/orders/doctorOrderDocuments';
 
 export default function DoctorPrescriptionPreviewPage() {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 'use client';
 
 import { Activity } from 'lucide-react';
-import { useDoctorDiagnosisAnalytics } from '@/hooks/doctor/useDoctorDiagnosisAnalytics';
+import { useDoctorDiagnosisAnalytics } from '@/hooks/doctor/dashboard/useDoctorDiagnosisAnalytics';
 import DashboardSectionHeading from '@/components/doctor/dashboard/dashboard-section-heading';
 
 export default function DiagnosisAnalyticsSection() {

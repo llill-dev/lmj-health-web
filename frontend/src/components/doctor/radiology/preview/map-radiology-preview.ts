@@ -1,5 +1,5 @@
 import type { DoctorEncounterSummary } from '@/lib/doctor/types';
-import type { EncounterOrder } from '@/lib/doctor/encounterClinicalTypes';
+import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import {
   formatRadiologyOrderCode,
   mapOrderToClinicalForm,

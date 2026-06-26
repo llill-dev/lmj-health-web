@@ -12,7 +12,7 @@ import StyledSelect from '@/components/ui/styled-select';
 import {
   useCreateServiceType,
   useMutateServiceType,
-} from '@/hooks/admin/useAdminServices';
+} from '@/hooks/admin/services/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { resolveLabel } from '@/lib/admin/types';
 import type {

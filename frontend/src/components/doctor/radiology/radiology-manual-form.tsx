@@ -4,7 +4,7 @@ import {
   profileInputClass,
   profileTextareaClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
-import type { OrderManualFieldMessages } from '@/lib/doctor/orderManualFormSchema';
+import type { OrderManualFieldMessages } from '@/lib/doctor/orders/orderManualFormSchema';
 import type { RadiologyManualForm } from './radiology-types';
 
 export function RadiologyManualForm({

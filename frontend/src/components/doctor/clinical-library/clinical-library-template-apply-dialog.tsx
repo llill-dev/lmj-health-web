@@ -2,8 +2,8 @@
 
 import { Copy, FileText } from 'lucide-react';
 import { ClinicAccountsModalShell } from '@/components/doctor/clinic-accounts/clinic-accounts-modal-shell';
-import type { DoctorTemplateType } from '@/lib/doctor/templateTypes';
-import { summarizeTemplateApplication } from '@/lib/doctor/templateDraftStorage';
+import type { DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
+import { summarizeTemplateApplication } from '@/lib/doctor/templates/templateDraftStorage';
 
 const TYPE_LABELS: Record<DoctorTemplateType, string> = {
   PRESCRIPTION: 'وصفة',

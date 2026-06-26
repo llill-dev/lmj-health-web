@@ -1,11 +1,11 @@
-import type { DoctorOrderCategory, DoctorOrderRecord } from '@/lib/doctor/doctorOrderTypes';
+import type { DoctorOrderCategory, DoctorOrderRecord } from '@/lib/doctor/orders/doctorOrderTypes';
 import {
   buildDoctorOrderStatusUpdateOptions,
   isDoctorOrderEligibleForResultSection,
   isTerminalDoctorOrderStatus,
   canAppendDoctorOrderResults,
   resolveDoctorOrderStatusUiMeta,
-} from '@/lib/doctor/orderStatusLabels';
+} from '@/lib/doctor/orders/orderStatusLabels';
 
 import { isUiOnlyMode } from '@/lib/env/uiOnlyMode';
 

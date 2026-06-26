@@ -1,8 +1,8 @@
-import type { EncounterOrder } from '@/lib/doctor/encounterClinicalTypes';
-import type { EncounterOrderItem } from '@/lib/doctor/encounterClinicalTypes';
-import { resolveOrderStatusLabelAr } from '@/lib/doctor/orderStatusLabels';
-import { mapClinicalUrgencyFromApi } from '@/lib/doctor/referralPriority';
-import type { ImagingOrderItemBody } from '@/lib/doctor/encounterOrderTypes';
+import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
+import type { EncounterOrderItem } from '@/lib/doctor/encounters/encounterClinicalTypes';
+import { resolveOrderStatusLabelAr } from '@/lib/doctor/orders/orderStatusLabels';
+import { mapClinicalUrgencyFromApi } from '@/lib/doctor/referrals/referralPriority';
+import type { ImagingOrderItemBody } from '@/lib/doctor/encounters/encounterOrderTypes';
 import type {
   RadiologyClinicalForm,
   RadiologyManualForm,

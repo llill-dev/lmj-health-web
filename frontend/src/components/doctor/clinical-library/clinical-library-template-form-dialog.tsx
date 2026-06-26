@@ -8,7 +8,7 @@ import {
   profileInputClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
-import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/templateTypes';
+import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
 
 const TEMPLATE_TYPE_LABELS: Record<DoctorTemplateType, string> = {
   PRESCRIPTION: 'وصفة',

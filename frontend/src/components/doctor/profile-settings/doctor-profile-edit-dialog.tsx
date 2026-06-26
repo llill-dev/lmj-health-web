@@ -10,7 +10,7 @@ import DoctorSecurityFormDialog, {
 } from '@/components/doctor/profile-settings/doctor-security-form-dialog';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import type { DoctorProfileRecord } from '@/lib/doctor/profileClient';
+import type { DoctorProfileRecord } from '@/lib/doctor/profile/profileClient';
 
 const profileEditSchema = z.object({
   fullName: z.string().trim().min(1, 'الاسم الكامل مطلوب'),

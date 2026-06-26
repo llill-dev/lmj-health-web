@@ -30,7 +30,7 @@ import {
 } from '@/hooks/doctor';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
-import type { DoctorOrderCategory } from '@/lib/doctor/doctorOrderTypes';
+import type { DoctorOrderCategory } from '@/lib/doctor/orders/doctorOrderTypes';
 
 export default function DoctorMedicalRequestsPage() {
   const navigate = useNavigate();

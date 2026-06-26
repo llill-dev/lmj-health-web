@@ -60,7 +60,7 @@ import {
 
   useUpdateAppointmentType,
 
-} from '@/hooks/doctor/useAppointmentTypes';
+} from '@/hooks/doctor/appointments/useAppointmentTypes';
 
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 

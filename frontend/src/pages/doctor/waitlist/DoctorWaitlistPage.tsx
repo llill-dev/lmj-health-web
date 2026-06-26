@@ -56,9 +56,9 @@ import {
 
   useWaitlistMutations,
 
-} from '@/hooks/doctor/useDoctorWaitlist';
+} from '@/hooks/doctor/waitlist/useDoctorWaitlist';
 
-import { useAvailableAppointmentTypes } from '@/hooks/doctor/useAppointmentTypes';
+import { useAvailableAppointmentTypes } from '@/hooks/doctor/appointments/useAppointmentTypes';
 
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 

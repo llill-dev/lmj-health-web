@@ -19,7 +19,7 @@ import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
 import {
   countPatientAppointments,
   type PatientAppointmentCounts,
-} from "@/lib/doctor/countPatientAppointments";
+} from "@/lib/doctor/dashboard/countPatientAppointments";
 
 function patientInitialsFromName(name?: string): string {
   const value = name?.trim() ?? "";

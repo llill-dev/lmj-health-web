@@ -1,4 +1,4 @@
-import type { EncounterOrder, EncounterOrderItem } from '@/lib/doctor/encounterClinicalTypes';
+import type { EncounterOrder, EncounterOrderItem } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import {
   filterEncounterOrdersByCategory,
   isFinalizedEncounterOrder,
@@ -6,12 +6,12 @@ import {
   type EncounterOrderCategoryKey,
   resolveEncounterOrderStatusLabel,
   resolveEncounterOrderTitle,
-} from '@/lib/doctor/encounterOrderCategories';
+} from '@/lib/doctor/encounters/encounterOrderCategories';
 import {
   formatRadiologyItemBrief,
   resolveImagingOrderItemFields,
 } from '@/components/doctor/radiology/map-radiology-ui';
-import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptionTypes';
+import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptions/prescriptionTypes';
 import type { DoctorEncounterSummary, DoctorPatientFullProfile } from '@/lib/doctor/types';
 import type {
   EncounterWorkspaceLineItem,

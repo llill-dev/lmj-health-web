@@ -24,7 +24,7 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import {
   parseSnapshotActiveConsultation,
   parseSnapshotNearestWaitlist,
-} from '@/lib/doctor/homeSnapshotMappers';
+} from '@/lib/doctor/dashboard/homeSnapshotMappers';
 import ActiveConsultationsSection from '@/components/doctor/dashboard/active-consultations-section';
 import ConsultationsWaitingSection from '@/components/doctor/dashboard/consultations-waiting-section';
 import DiagnosisAnalyticsSection from '@/components/doctor/dashboard/diagnosis-analytics-section';

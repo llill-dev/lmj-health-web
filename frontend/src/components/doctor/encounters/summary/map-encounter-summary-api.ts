@@ -1,6 +1,6 @@
-import type { EncounterOrder } from '@/lib/doctor/encounterClinicalTypes';
-import { normalizeEncounterOrderCategory } from '@/lib/doctor/encounterOrderCategories';
-import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptionTypes';
+import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
+import { normalizeEncounterOrderCategory } from '@/lib/doctor/encounters/encounterOrderCategories';
+import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptions/prescriptionTypes';
 import type {
   DoctorEncounterSummary,
   DoctorPatientFullProfile,

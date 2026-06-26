@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
-import type { DoctorOrderCategory } from '@/lib/doctor/doctorOrderTypes';
+import type { DoctorOrderCategory } from '@/lib/doctor/orders/doctorOrderTypes';
 
 const TABS: Array<{
   id: Exclude<DoctorOrderCategory, 'all'>;

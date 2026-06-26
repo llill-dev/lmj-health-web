@@ -1,4 +1,4 @@
-import type { PatientAppointmentCounts } from "@/lib/doctor/countPatientAppointments";
+import type { PatientAppointmentCounts } from "@/lib/doctor/dashboard/countPatientAppointments";
 
 type PatientAppointmentsSummaryCardsProps = {
   counts: PatientAppointmentCounts;

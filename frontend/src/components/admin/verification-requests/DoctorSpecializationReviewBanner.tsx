@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import type { DoctorSpecializationReviewState } from '@/lib/admin/doctorSpecializationReview';
+import type { DoctorSpecializationReviewState } from '@/lib/admin/doctors/doctorSpecializationReview';
 
 const toneClasses: Record<
   DoctorSpecializationReviewState['statusTone'],

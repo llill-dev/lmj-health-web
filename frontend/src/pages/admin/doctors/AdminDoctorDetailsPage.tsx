@@ -3,23 +3,23 @@ import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ban, CheckCircle2, MapPin, UserX } from 'lucide-react';
-import { useAdminDoctor } from '@/hooks/admin/useAdminDoctor';
+import { useAdminDoctor } from '@/hooks/admin/doctors/useAdminDoctor';
 import { adminApi, verificationRequestsFromListEnvelope } from '@/lib/admin/client';
-import { resolveAdminDoctorUserId } from '@/lib/admin/resolveAdminDoctorUserId';
-import { isAdminDoctorOffboarded } from '@/lib/admin/isAdminDoctorOffboarded';
+import { resolveAdminDoctorUserId } from '@/lib/admin/doctors/resolveAdminDoctorUserId';
+import { isAdminDoctorOffboarded } from '@/lib/admin/doctors/isAdminDoctorOffboarded';
 import { formatPhoneForDisplay } from '@/lib/phone/formatPhoneForDisplay';
 import {
   mergeDoctorProfileIntoSummaryStats,
   parseDiagnosisAnalytics,
   parseSummaryAnalytics,
-} from '@/lib/admin/doctorAdminAnalytics';
+} from '@/lib/admin/doctors/doctorAdminAnalytics';
 import type { AdminDoctorDetailsDoctor, AdminDoctorAnalyticsRange } from '@/lib/admin/types';
 import { AdminDoctorAnalyticsPanels } from '@/components/admin/doctor/AdminDoctorAnalyticsPanels';
 import { FieldBlock, SectionTitle } from '@/components/admin/doctors/DoctorDetailsPrimitives';
 import { DoctorSpecializationReviewBanner } from '@/components/admin/verification-requests/DoctorSpecializationReviewBanner';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
 import OffboardDialog from '@/components/admin/secretaries/dialogs/OffboardDialog';
-import { resolveDoctorSpecializationReviewState } from '@/lib/admin/doctorSpecializationReview';
+import { resolveDoctorSpecializationReviewState } from '@/lib/admin/doctors/doctorSpecializationReview';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 
 

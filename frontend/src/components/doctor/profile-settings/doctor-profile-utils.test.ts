@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildProfessionalChangeItems } from '@/components/doctor/profile-settings/doctor-profile-utils';
-import type { DoctorProfileRecord } from '@/lib/doctor/profileClient';
+import type { DoctorProfileRecord } from '@/lib/doctor/profile/profileClient';
 
 const baseDoctor: DoctorProfileRecord = {
   medicalLicenseNumber: 'MED-12345',

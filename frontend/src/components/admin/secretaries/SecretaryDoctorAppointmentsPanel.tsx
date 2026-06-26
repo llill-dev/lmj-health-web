@@ -19,7 +19,7 @@ import {
   type UiAppointmentCard,
 } from '@/components/admin/appointments/appointmentListUtils';
 import StyledSelect from '@/components/ui/styled-select';
-import { useAdminAppointments } from '@/hooks/admin/useAdminAppointments';
+import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppointments';
 import { adminApi } from '@/lib/admin/client';
 import type { AppointmentStatus } from '@/lib/admin/types';
 

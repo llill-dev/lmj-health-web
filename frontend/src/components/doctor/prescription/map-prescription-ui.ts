@@ -1,4 +1,4 @@
-import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptionTypes';
+import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptions/prescriptionTypes';
 import type {
   PrescriptionDraftForm,
   PrescriptionMedicationItem,

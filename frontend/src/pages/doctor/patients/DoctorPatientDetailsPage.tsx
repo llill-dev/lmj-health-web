@@ -49,7 +49,7 @@ import {
   determinePatientState,
   getPatientStateInfo,
   getStateMessage,
-} from "@/lib/doctor/patient-states";
+} from "@/lib/doctor/patients/patient-states";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import type { FullProfileData, PatientDetailsTab } from "@/components/doctor/patients/patient-details";
 import {
@@ -71,10 +71,10 @@ import {
   AppointmentsTab,
 } from "@/components/doctor/patients/patient-details";
 import { PatientAddMedicationDialog } from "@/components/doctor/patients/patient-details/patient-add-medication-dialog";
-import { useAddDoctorPatientMedication } from "@/hooks/doctor/useDoctorClinicalShortcuts";
+import { useAddDoctorPatientMedication } from "@/hooks/doctor/patients/useDoctorClinicalShortcuts";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
-import { countPatientAppointments } from "@/lib/doctor/countPatientAppointments";
-import { resolvePatientOrderCategory } from "@/lib/doctor/encounterOrderCategories";
+import { countPatientAppointments } from "@/lib/doctor/dashboard/countPatientAppointments";
+import { resolvePatientOrderCategory } from "@/lib/doctor/encounters/encounterOrderCategories";
 import { cn } from "@/lib/utils/utils";
 
 function formatIsoDate(value?: string | null): string {

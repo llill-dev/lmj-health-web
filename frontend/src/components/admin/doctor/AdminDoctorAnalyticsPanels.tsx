@@ -10,7 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { DiagnosisChartItem, DoctorSummaryStats } from '@/lib/admin/types';
-import { scaleToChartBand } from '@/lib/admin/doctorAdminAnalytics';
+import { scaleToChartBand } from '@/lib/admin/doctors/doctorAdminAnalytics';
 
 const TEAL = '#0F8F8B';
 const GRID = '#EEF2F6';

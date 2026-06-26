@@ -10,7 +10,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-page-states';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { persistDoctorProfileSuccessNavState } from '@/lib/doctor/doctorProfileSuccessNavState';
+import { persistDoctorProfileSuccessNavState } from '@/lib/doctor/profile/doctorProfileSuccessNavState';
 import { useDoctorProfile, useUpdateDoctorProfile } from '@/hooks';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 

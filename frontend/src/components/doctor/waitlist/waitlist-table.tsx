@@ -8,7 +8,7 @@ import {
 import {
   resolveWaitlistPatientName,
   resolveWaitlistPatientPublicId,
-} from '@/hooks/doctor/useDoctorWaitlist';
+} from '@/hooks/doctor/waitlist/useDoctorWaitlist';
 import { isWaitlistActionable } from '@/lib/doctor/waitlist/labels';
 import type { WaitlistRequest } from '@/lib/doctor/waitlist/types';
 import { cn } from '@/lib/utils/utils';

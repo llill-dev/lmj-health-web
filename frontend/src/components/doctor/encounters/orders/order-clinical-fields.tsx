@@ -6,8 +6,8 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
 import type { RadiologyClinicalForm } from '@/components/doctor/radiology/radiology-types';
-import type { OrderClinicalFieldMessages } from '@/lib/doctor/orderClinicalFormSchema';
-import { CLINICAL_URGENCY_SELECT_OPTIONS } from '@/lib/doctor/referralPriority';
+import type { OrderClinicalFieldMessages } from '@/lib/doctor/orders/orderClinicalFormSchema';
+import { CLINICAL_URGENCY_SELECT_OPTIONS } from '@/lib/doctor/referrals/referralPriority';
 import type { EncounterOrderClinicalVariant } from './encounter-order-config';
 
 export function OrderClinicalFields({

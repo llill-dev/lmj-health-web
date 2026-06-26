@@ -7,10 +7,10 @@ import { useEffect } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateLookup, usePatchLookup } from '@/hooks/admin/useAdminLookupMutations';
+import { useCreateLookup, usePatchLookup } from '@/hooks/admin/lookups/useAdminLookupMutations';
 import type { AdminLookupCategory, AdminLookupRecord } from '@/lib/admin/types';
-import { generateLookupMachineKey } from '@/lib/admin/lookupKey';
-import { resolveLookupText, resolveLookupSecondaryText } from '@/lib/admin/lookupUtils';
+import { generateLookupMachineKey } from '@/lib/admin/lookups/lookupKey';
+import { resolveLookupText, resolveLookupSecondaryText } from '@/lib/admin/lookups/lookupUtils';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
 

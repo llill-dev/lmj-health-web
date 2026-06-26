@@ -44,7 +44,7 @@ import { doctorApi } from "@/lib/doctor/client";
 import {
   determinePatientState,
   type PatientRelationshipState,
-} from "@/lib/doctor/patient-states";
+} from "@/lib/doctor/patients/patient-states";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import { useNavigate } from "react-router-dom";
 

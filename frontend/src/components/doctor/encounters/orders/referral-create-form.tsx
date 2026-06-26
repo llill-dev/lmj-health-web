@@ -7,8 +7,8 @@ import {
   profileInputClass,
   profileTextareaClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
-import type { ReferralFormState } from '@/lib/doctor/referralFormSchema';
-import type { ReferralFormFieldMessages } from '@/lib/doctor/referralFormSchema';
+import type { ReferralFormState } from '@/lib/doctor/referrals/referralFormSchema';
+import type { ReferralFormFieldMessages } from '@/lib/doctor/referrals/referralFormSchema';
 
 const PRIORITY_OPTIONS: Array<{
   value: ReferralFormState['priority'];

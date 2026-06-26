@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useDeleteFacility } from '@/hooks/admin/useAdminServices';
+import { useDeleteFacility } from '@/hooks/admin/services/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { FacilitySummary } from '@/lib/admin/types';
 

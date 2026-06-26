@@ -9,7 +9,7 @@ import {
 import {
   useAdminMedicalOrderCatalog,
   useDeleteMedicalOrderCatalogItem,
-} from '@/hooks/admin/useAdminMedicalOrderCatalog';
+} from '@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog';
 import type {
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,

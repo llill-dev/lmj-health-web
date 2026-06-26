@@ -23,7 +23,7 @@ import {
   useDoctorSecretaries,
   useUnassignDoctorSecretary,
   useUpdateDoctorSecretary,
-} from '@/hooks/doctor/useDoctorSecretaries';
+} from '@/hooks/doctor/secretaries/useDoctorSecretaries';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { getSecretaryId } from '@/lib/doctor/secretaries/formUtils';
 import { isSecretaryActive } from '@/lib/doctor/secretaries/permissionsUi';

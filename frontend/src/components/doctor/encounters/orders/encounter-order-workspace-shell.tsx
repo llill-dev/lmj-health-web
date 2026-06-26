@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils/utils';
 import {
   OrderClinicalFormSubmitError,
   OrderItemsRequiredError,
-} from '@/lib/doctor/orderClinicalFormSchema';
+} from '@/lib/doctor/orders/orderClinicalFormSchema';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
 import {
   RadiologyActionButtons,
@@ -15,7 +15,7 @@ import {
 } from '@/components/doctor/radiology';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { useToast } from '@/components/ui/ToastProvider';
-import type { useEncounterOrderWorkspace } from '@/hooks/doctor/useEncounterOrderWorkspace';
+import type { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
 import {
   ENCOUNTER_ORDER_CONFIG,
   type CatalogOrderCategory,

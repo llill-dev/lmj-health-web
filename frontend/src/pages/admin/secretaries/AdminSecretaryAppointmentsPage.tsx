@@ -3,7 +3,7 @@ import { ArrowRight, CalendarDays } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { SecretaryDoctorAppointmentsPanel } from '@/components/admin/secretaries/SecretaryDoctorAppointmentsPanel';
-import { useAdminSecretaryById } from '@/hooks/admin/useAdminSecretaryById';
+import { useAdminSecretaryById } from '@/hooks/admin/secretaries/useAdminSecretaryById';
 
 export default function AdminSecretaryAppointmentsPage() {
   const { secretaryId = '' } = useParams();

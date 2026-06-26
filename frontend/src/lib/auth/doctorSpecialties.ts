@@ -1,5 +1,5 @@
 import { get } from "@/lib/api";
-import { resolveLookupText } from "@/lib/admin/lookupUtils";
+import { resolveLookupText } from "@/lib/admin/lookups/lookupUtils";
 import type { AdminLocalizedLookupText } from "@/lib/admin/types";
 import { authEndpoints } from "@/lib/auth/endpoints";
 import type { DoctorSignupSpecialtyOption } from "@/lib/auth/types";

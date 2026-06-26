@@ -8,7 +8,7 @@ import {
   profileInputClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
-import type { DoctorLibraryItemType } from '@/lib/doctor/libraryTypes';
+import type { DoctorLibraryItemType } from '@/lib/doctor/library/libraryTypes';
 
 const LIBRARY_TYPE_LABELS: Record<DoctorLibraryItemType, string> = {
   MEDICATION: 'دواء',

@@ -15,7 +15,7 @@ import {
   validatePhoneByDialCode,
 } from '@/components/auth/signUp/signup-schemas';
 import { cn } from '@/lib/utils/utils';
-import { resolveCreateTemporaryPatientServerFeedback } from '@/lib/doctor/temporaryPatientFormErrors';
+import { resolveCreateTemporaryPatientServerFeedback } from '@/lib/doctor/patients/temporaryPatientFormErrors';
 
 const TEMP_PATIENT_PHONE_DIAL_CODES = SIGNUP_PHONE_DIAL_OPTIONS.map(
   (option) => option.value,

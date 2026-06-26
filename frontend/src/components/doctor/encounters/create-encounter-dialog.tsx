@@ -18,7 +18,7 @@ import type {
 import {
   CreateEncounterSubmitError,
   isValidAppointmentObjectId,
-} from "@/lib/doctor/createEncounterFormErrors";
+} from "@/lib/doctor/encounters/createEncounterFormErrors";
 import { cn } from "@/lib/utils/utils";
 
 type CreateEncounterDialogProps = {

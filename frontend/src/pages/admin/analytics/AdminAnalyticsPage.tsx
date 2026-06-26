@@ -15,7 +15,7 @@ import {
   useAdminPlatformStats,
   useRecentAppointments,
   useTopApprovedDoctors,
-} from '@/hooks/admin/useAdminAnalytics';
+} from '@/hooks/admin/analytics/useAdminAnalytics';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { TableRowSkeleton } from '@/components/admin/analytics/AnalyticsSkeletons';
 import {

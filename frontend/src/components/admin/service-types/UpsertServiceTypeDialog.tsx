@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   useCreateServiceType,
   useMutateServiceType,
-} from '@/hooks/admin/useAdminServices';
+} from '@/hooks/admin/services/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { AppCheckbox } from '@/components/ui';
 import { useToast } from '@/components/ui/ToastProvider';

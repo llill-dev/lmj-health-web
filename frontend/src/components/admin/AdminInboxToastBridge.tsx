@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useAdminUnreadNotificationCount } from '@/hooks/admin/useAdminNotifications';
+import { useAdminUnreadNotificationCount } from '@/hooks/admin/notifications/useAdminNotifications';
 
 /**
  * عند زيادة عدد غير المقروء (استطلاع/تركيز النافذة) يُعلَم المستخدم بإشعار جديد.

@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { REFERRAL_WORKSPACE_CONFIG, ReferralWorkspaceShell } from '@/components/doctor/encounters/orders';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useEncounterReferralWorkspace } from '@/hooks/doctor/useEncounterReferralWorkspace';
+import { useEncounterReferralWorkspace } from '@/hooks/doctor/encounters/useEncounterReferralWorkspace';
 import { readAuthUser } from '@/lib/cookies';
 
 export default function DoctorEncounterReferralWorkspacePage() {

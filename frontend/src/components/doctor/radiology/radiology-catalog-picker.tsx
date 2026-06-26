@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, Plus, Search, Star } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
-import type { OrderCatalogItem } from '@/lib/doctor/encounterOrderTypes';
+import type { OrderCatalogItem } from '@/lib/doctor/encounters/encounterOrderTypes';
 import type { RadiologyCatalogTab } from './radiology-types';
 
 const DEFAULT_TABS: { id: RadiologyCatalogTab; label: string }[] = [

@@ -5,9 +5,9 @@ import { useToast } from '@/components/ui/ToastProvider';
 import {
   useEncounterDocumentMutations,
   useEncounterDocuments,
-} from '@/hooks/doctor/useEncounterDocuments';
+} from '@/hooks/doctor/encounters/useEncounterDocuments';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import type { EncounterDocumentLinkBody } from '@/lib/doctor/encounterDocumentsTypes';
+import type { EncounterDocumentLinkBody } from '@/lib/doctor/encounters/encounterDocumentsTypes';
 
 export function EncounterDocumentsPanel({
   doctorId,

@@ -21,7 +21,7 @@ import { readAuthUser } from '@/lib/cookies';
 import {
   generateDoctorOrderDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/doctorOrderDocuments';
+} from '@/lib/doctor/orders/doctorOrderDocuments';
 
 export default function DoctorRadiologyPreviewPage() {
   const navigate = useNavigate();

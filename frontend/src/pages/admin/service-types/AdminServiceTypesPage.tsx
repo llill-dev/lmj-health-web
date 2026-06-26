@@ -6,7 +6,7 @@ import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard
 import {
   useServiceTypesList,
   useMutateServiceType,
-} from '@/hooks/admin/useAdminServices';
+} from '@/hooks/admin/services/useAdminServices';
 import type { ServiceType } from '@/lib/admin/types';
 import { resolveLabel } from '@/lib/admin/types';
 import {

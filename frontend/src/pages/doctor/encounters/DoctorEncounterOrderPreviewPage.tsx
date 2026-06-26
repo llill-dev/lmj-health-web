@@ -11,12 +11,12 @@ import {
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { DoctorDocumentPreviewSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useEncounterOrderPreviewPage } from '@/hooks/doctor/useEncounterOrderPreviewPage';
-import { useEncounterOrderWorkspace } from '@/hooks/doctor/useEncounterOrderWorkspace';
+import { useEncounterOrderPreviewPage } from '@/hooks/doctor/encounters/useEncounterOrderPreviewPage';
+import { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
 import {
   generateDoctorOrderDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/doctorOrderDocuments';
+} from '@/lib/doctor/orders/doctorOrderDocuments';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';

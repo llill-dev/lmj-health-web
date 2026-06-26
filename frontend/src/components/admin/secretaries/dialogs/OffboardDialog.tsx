@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAdminOffboardUser } from '@/hooks/admin/useAdminOffboardUser';
+import { useAdminOffboardUser } from '@/hooks/admin/doctors/useAdminOffboardUser';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 const schema = z.object({

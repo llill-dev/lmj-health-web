@@ -1,5 +1,5 @@
 import type { DoctorEncounterSummary } from '@/lib/doctor/types';
-import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptionTypes';
+import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptions/prescriptionTypes';
 import type { PrescriptionPreviewVm } from './prescription-preview-types';
 import { resolvePrescriptionStatusLabel } from '../map-prescription-ui';
 

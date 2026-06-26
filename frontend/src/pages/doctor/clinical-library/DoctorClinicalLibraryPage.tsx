@@ -77,13 +77,13 @@ import {
 
   useUpdateDoctorTemplate,
 
-} from '@/hooks/doctor/useDoctorClinicalShortcuts';
+} from '@/hooks/doctor/patients/useDoctorClinicalShortcuts';
 
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 
-import type { DoctorLibraryItemType } from '@/lib/doctor/libraryTypes';
+import type { DoctorLibraryItemType } from '@/lib/doctor/library/libraryTypes';
 
-import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/templateTypes';
+import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
 
 
 

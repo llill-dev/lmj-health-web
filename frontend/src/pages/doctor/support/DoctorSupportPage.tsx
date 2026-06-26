@@ -15,7 +15,7 @@ import {
 import { FaqAccordionList } from '@/components/platform/faq-accordion';
 import { PlatformFooter } from '@/components/platform/platform-footer';
 import { usePlatformSupport } from '@/components/platform/platform-support-provider';
-import { useDoctorSupportPage } from '@/hooks/doctor/useDoctorSupportPage';
+import { useDoctorSupportPage } from '@/hooks/doctor/support/useDoctorSupportPage';
 import { Loader2 } from 'lucide-react';
 
 const SUPPORT_CARDS = [

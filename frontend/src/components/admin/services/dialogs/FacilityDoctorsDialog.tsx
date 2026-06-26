@@ -3,7 +3,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { Loader2, Stethoscope, X } from 'lucide-react';
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { useFacilityDoctors } from '@/hooks/admin/useAdminServices';
+import { useFacilityDoctors } from '@/hooks/admin/services/useAdminServices';
 import type { FacilitySummary } from '@/lib/admin/types';
 
 const PAGE_SIZE = 10;

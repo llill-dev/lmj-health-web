@@ -8,11 +8,11 @@ import {
   profileInputClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
-import { useSlots } from '@/hooks/doctor/useSlots';
+import { useSlots } from '@/hooks/doctor/appointments/useSlots';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { AppointmentType } from '@/lib/doctor/types';
 import type { WaitlistBookBody, WaitlistRequest } from '@/lib/doctor/waitlist/types';
-import { resolveWaitlistPatientName } from '@/hooks/doctor/useDoctorWaitlist';
+import { resolveWaitlistPatientName } from '@/hooks/doctor/waitlist/useDoctorWaitlist';
 
 function formatLocalDate(date: Date) {
   const year = date.getFullYear();

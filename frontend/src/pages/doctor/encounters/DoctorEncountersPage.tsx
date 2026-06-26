@@ -35,7 +35,7 @@ import {
   CreateEncounterSubmitError,
   isValidAppointmentObjectId,
   resolveCreateEncounterServerFeedback,
-} from "@/lib/doctor/createEncounterFormErrors";
+} from "@/lib/doctor/encounters/createEncounterFormErrors";
 import { readAuthUser } from "@/lib/cookies";
 import { useToast } from "@/components/ui/ToastProvider";
 

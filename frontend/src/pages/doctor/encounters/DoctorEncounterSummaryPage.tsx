@@ -17,7 +17,7 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import {
   generateDoctorDocumentPdf,
   openPdfBlobInNewTab,
-} from '@/lib/doctor/doctorOrderDocuments';
+} from '@/lib/doctor/orders/doctorOrderDocuments';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 
 export default function DoctorEncounterSummaryPage() {

@@ -3,7 +3,7 @@ import {
   DOCTOR_MINT_TABLE_TD,
   DoctorMintTableShell,
 } from '@/components/doctor/shared/doctor-mint-table';
-import type { DoctorLibraryItem } from '@/lib/doctor/libraryTypes';
+import type { DoctorLibraryItem } from '@/lib/doctor/library/libraryTypes';
 import { cn } from '@/lib/utils/utils';
 
 const TABLE_COLUMNS = [

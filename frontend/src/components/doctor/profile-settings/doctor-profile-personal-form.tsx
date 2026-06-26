@@ -29,8 +29,8 @@ import {
   type ConsultationModeSelection,
 } from "@/components/doctor/profile-settings/doctor-profile-utils";
 import { cn } from "@/lib/utils/utils";
-import type { DoctorProfileRecord } from "@/lib/doctor/profileClient";
-import { resolveDoctorProfilePatchFeedback } from "@/lib/doctor/doctorProfilePatchErrors";
+import type { DoctorProfileRecord } from "@/lib/doctor/profile/profileClient";
+import { resolveDoctorProfilePatchFeedback } from "@/lib/doctor/profile/doctorProfilePatchErrors";
 
 const consultationModeOptions: {
   value: ConsultationModeSelection;

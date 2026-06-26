@@ -1,5 +1,5 @@
 import { Clock } from 'lucide-react';
-import type { DoctorLibraryItem } from '@/lib/doctor/libraryTypes';
+import type { DoctorLibraryItem } from '@/lib/doctor/library/libraryTypes';
 
 export function ClinicalLibraryRecentStrip({
   items,

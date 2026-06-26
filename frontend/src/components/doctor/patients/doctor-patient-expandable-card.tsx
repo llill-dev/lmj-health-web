@@ -17,7 +17,7 @@ import {
   getStateActions,
   getStateMessage,
   type PatientRelationshipState,
-} from "@/lib/doctor/patient-states";
+} from "@/lib/doctor/patients/patient-states";
 
 export type PatientCardTab =
   | "basic"

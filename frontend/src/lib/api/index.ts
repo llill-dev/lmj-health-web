@@ -1,4 +1,4 @@
-import { localizeOrderStatusesInMessage } from '@/lib/doctor/orderStatusLabels';
+import { localizeOrderStatusesInMessage } from '@/lib/doctor/orders/orderStatusLabels';
 import { useAuthStore } from '@/store/authStore';
 import { runSessionExpiredFlow } from '@/lib/session/sessionExpiryFlow';
 import {

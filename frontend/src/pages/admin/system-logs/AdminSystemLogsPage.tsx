@@ -8,7 +8,7 @@ import { AdminAuditLogTable } from '@/components/admin/system-logs/AdminAuditLog
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { Activity, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { PAGE_SIZE } from '@/components/admin/system-logs/auditLogConstants';
-import { useAdminAuditLogs } from '@/hooks/admin/useAdminAuditLogs';
+import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
 import type { AuditLogCategory, AuditLogOutcome } from '@/lib/admin/types';
 
 export default function AdminSystemLogsPage() {

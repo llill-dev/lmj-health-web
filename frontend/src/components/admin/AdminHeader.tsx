@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { getAdminPageMeta } from '@/constant/adminPageMeta';
-import { useAdminUnreadNotificationCount } from '@/hooks/admin/useAdminNotifications';
+import { useAdminUnreadNotificationCount } from '@/hooks/admin/notifications/useAdminNotifications';
 import { useAuthStore } from '@/store/authStore';
 
 type Props = {

@@ -17,7 +17,7 @@ import {
   patientStatusTone,
 } from '@/components/admin/patients/patientListUtils';
 
-import { useAdminPatients } from '@/hooks/admin/useAdminPatients';
+import { useAdminPatients } from '@/hooks/admin/patients/useAdminPatients';
 import { AppCheckbox } from '@/components/ui';
 import StyledSelect from '@/components/ui/styled-select';
 import type {

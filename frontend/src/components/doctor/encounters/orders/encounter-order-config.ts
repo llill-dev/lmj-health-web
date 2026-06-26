@@ -1,5 +1,5 @@
 import type { RadiologyCatalogTab } from '@/components/doctor/radiology/radiology-types';
-import type { EncounterOrderCategoryKey } from '@/lib/doctor/encounterOrderCategories';
+import type { EncounterOrderCategoryKey } from '@/lib/doctor/encounters/encounterOrderCategories';
 import type { LucideIcon } from 'lucide-react';
 import { FlaskConical, ScanLine } from 'lucide-react';
 

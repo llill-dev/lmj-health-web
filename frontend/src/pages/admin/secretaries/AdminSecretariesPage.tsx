@@ -15,8 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { useAdminSecretariesList } from "@/hooks/admin/useAdminSecretaries";
-import { useAdminDoctors } from "@/hooks/admin/useAdminDoctors";
+import { useAdminSecretariesList } from "@/hooks/admin/secretaries/useAdminSecretaries";
+import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialog";
 import { SecretaryCardSkeleton } from "@/components/admin/secretaries/SecretaryCardSkeleton";
 import { PERM_LABEL } from "@/components/admin/secretaries/secretaryPermissions";

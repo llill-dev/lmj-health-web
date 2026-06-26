@@ -7,14 +7,14 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DoctorSpecializationReviewBanner } from '@/components/admin/verification-requests/DoctorSpecializationReviewBanner';
-import { useAdminLookups } from '@/hooks/admin/useAdminLookups';
+import { useAdminLookups } from '@/hooks/admin/lookups/useAdminLookups';
 import { adminApi } from '@/lib/admin/client';
-import { resolveDoctorSpecialtyLookupCategory } from '@/lib/admin/doctorSpecialtyLookupCategory';
+import { resolveDoctorSpecialtyLookupCategory } from '@/lib/admin/doctors/doctorSpecialtyLookupCategory';
 import {
   buildDoctorSpecializationLookupOptions,
   findDoctorSpecializationLookupId,
   resolveDoctorSpecializationReviewState,
-} from '@/lib/admin/doctorSpecializationReview';
+} from '@/lib/admin/doctors/doctorSpecializationReview';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { AppCheckbox } from '@/components/ui';
 import { useToast } from '@/components/ui/ToastProvider';

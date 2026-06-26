@@ -2,19 +2,19 @@
 
 import { useCallback, useState } from 'react';
 import { Save, Send } from 'lucide-react';
-import type { ReferralFormFieldMessages } from '@/lib/doctor/referralFormSchema';
+import type { ReferralFormFieldMessages } from '@/lib/doctor/referrals/referralFormSchema';
 import {
   ReferralFormSubmitError,
   assertReferralFormValid,
-} from '@/lib/doctor/referralFormSchema';
-import type { ReferralFormState } from '@/lib/doctor/referralFormSchema';
+} from '@/lib/doctor/referrals/referralFormSchema';
+import type { ReferralFormState } from '@/lib/doctor/referrals/referralFormSchema';
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
 import { RadiologyPageHeader } from '@/components/doctor/radiology';
 import { EncounterWorkspacePatientCard } from '@/components/doctor/encounters/workspace/encounter-workspace-patient-card';
 import { mapEncounterWorkspacePatient } from '@/components/doctor/encounters/workspace/map-encounter-workspace';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
 import { useToast } from '@/components/ui/ToastProvider';
-import type { useEncounterReferralWorkspace } from '@/hooks/doctor/useEncounterReferralWorkspace';
+import type { useEncounterReferralWorkspace } from '@/hooks/doctor/encounters/useEncounterReferralWorkspace';
 import { REFERRAL_WORKSPACE_CONFIG } from './encounter-order-config';
 import { ReferralCreateForm } from './referral-create-form';
 

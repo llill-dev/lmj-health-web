@@ -3,7 +3,7 @@
 import { Bell, Loader2, Menu, MessageCircle } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/useDoctorNotifications';
+import { useDoctorUnreadNotificationCount } from '@/hooks/doctor/notifications/useDoctorNotifications';
 import { useAuthStore } from '@/store/authStore';
 
 function greetingWord(): string {

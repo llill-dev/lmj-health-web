@@ -7,7 +7,7 @@ import {
   DoctorProfileFormField,
   profileInputClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
-import { useWaitlistSuggestions } from '@/hooks/doctor/useDoctorWaitlist';
+import { useWaitlistSuggestions } from '@/hooks/doctor/waitlist/useDoctorWaitlist';
 
 function formatLocalDate(date: Date) {
   const year = date.getFullYear();

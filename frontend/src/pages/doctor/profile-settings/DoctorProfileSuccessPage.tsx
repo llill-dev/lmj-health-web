@@ -7,7 +7,7 @@ import {
   peekDoctorProfileSuccessNavState,
   resolveDoctorProfileSuccessNavState,
   type DoctorProfileSuccessNavState,
-} from '@/lib/doctor/doctorProfileSuccessNavState';
+} from '@/lib/doctor/profile/doctorProfileSuccessNavState';
 
 export default function DoctorProfileSuccessPage() {
   const location = useLocation();

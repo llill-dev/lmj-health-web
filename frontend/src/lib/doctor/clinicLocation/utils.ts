@@ -1,8 +1,8 @@
-import type { DoctorProfileRecord } from '@/lib/doctor/profileClient';
+import type { DoctorProfileRecord } from '@/lib/doctor/profile/profileClient';
 import type {
   DoctorProfileChangeItem,
   DoctorProfileChangeRequest,
-} from '@/lib/doctor/profileChangeRequestsClient';
+} from '@/lib/doctor/profile/profileChangeRequestsClient';
 
 export type ClinicGeoStatus = 'missing' | 'pending' | 'verified' | string;
 

@@ -4,7 +4,7 @@ import { ChevronLeft, MessageSquare, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import DashboardSectionHeading from '@/components/doctor/dashboard/dashboard-section-heading';
-import { doctorConsultationDeepLink } from '@/lib/doctor/homeSnapshotMappers';
+import { doctorConsultationDeepLink } from '@/lib/doctor/dashboard/homeSnapshotMappers';
 
 export default function ActiveConsultationsSection({
   subject,

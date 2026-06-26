@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import StyledSelect from '@/components/ui/styled-select';
-import { buildDoctorOrderStatusUpdateOptions } from '@/lib/doctor/orderStatusLabels';
+import { buildDoctorOrderStatusUpdateOptions } from '@/lib/doctor/orders/orderStatusLabels';
 import { MedicalRequestModalShell } from './medical-request-modal-shell';
 
 export function MedicalRequestUpdateStatusDialog({

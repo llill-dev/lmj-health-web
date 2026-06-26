@@ -1,8 +1,8 @@
 import type {
   DoctorConsultationType,
   DoctorProfileRecord,
-} from '@/lib/doctor/profileClient';
-import type { DoctorProfileChangeItem } from '@/lib/doctor/profileChangeRequestsClient';
+} from '@/lib/doctor/profile/profileClient';
+import type { DoctorProfileChangeItem } from '@/lib/doctor/profile/profileChangeRequestsClient';
 import type { DoctorProfessionalEditForm } from '@/components/doctor/profile-settings/doctor-profile-schemas';
 
 export function formatDoctorDisplayName(fullName?: string | null) {
