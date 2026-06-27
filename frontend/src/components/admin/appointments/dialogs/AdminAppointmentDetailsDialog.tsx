@@ -1,14 +1,21 @@
 'use client';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
-import { X, CalendarDays, Clock, User, Stethoscope, Ban } from 'lucide-react';
+import {
+  X,
+  CalendarDays,
+  Clock,
+  User,
+  Stethoscope,
+  Ban,
+  Tag,
+  Wallet,
+  FileText,
+} from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
-import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
-import CancelAppointmentDialog from './CancelAppointmentDialog';
-import { useState } from 'react';
 
 export default function AdminAppointmentDetailsDialog({
   open,
@@ -19,8 +26,6 @@ export default function AdminAppointmentDetailsDialog({
   onOpenChange: (open: boolean) => void;
   appointmentId: string | null;
 }) {
-  const [cancelOpen, setCancelOpen] = useState(false);
-  const [lastError, setLastError] = useState<string | null>(null);
   const enabled = open && !!appointmentId;
 
   const detailsQuery = useQuery({
@@ -32,7 +37,6 @@ export default function AdminAppointmentDetailsDialog({
 
   useEffect(() => {
     if (!open) return;
-    setLastError(null);
 
     const prevOverflow = document.body.style.overflow;
     const prevPaddingRight = document.body.style.paddingRight;
@@ -57,14 +61,10 @@ export default function AdminAppointmentDetailsDialog({
   );
 
   return (
-    <>
-      <Dialog.Root
-        open={open}
-        onOpenChange={(next) => {
-          onOpenChange(next);
-          if (!next) setCancelOpen(false);
-        }}
-      >
+    <Dialog.Root
+      open={open}
+      onOpenChange={onOpenChange}
+    >
         <Dialog.Portal>
           <Dialog.Overlay
             forceMount
@@ -215,24 +215,51 @@ export default function AdminAppointmentDetailsDialog({
                           </div>
                         ) : null}
                       </div>
+
+                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
+                        <div className='flex items-center gap-2 text-primary'>
+                          <Tag className='h-4 w-4' />
+                          <div className='font-cairo text-[12px] font-extrabold'>
+                            نوع الموعد
+                          </div>
+                        </div>
+                        <div className='mt-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
+                          {appointment.appointmentTypeNameSnapshot ??
+                            appointment.appointmentType ??
+                            '—'}
+                        </div>
+                      </div>
+
+                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
+                        <div className='flex items-center gap-2 text-primary'>
+                          <Wallet className='h-4 w-4' />
+                          <div className='font-cairo text-[12px] font-extrabold'>
+                            السعر (لقطة)
+                          </div>
+                        </div>
+                        <div className='mt-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
+                          {typeof appointment.priceSnapshot === 'number'
+                            ? appointment.priceSnapshot.toLocaleString('ar-SA')
+                            : '—'}
+                        </div>
+                      </div>
                     </div>
 
-                    {lastError ? (
-                      <div className='mt-5 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[13px] font-bold text-[#991B1B]'>
-                        {lastError}
+                    {appointment.notes ? (
+                      <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
+                        <div className='flex items-center gap-2 text-primary'>
+                          <FileText className='h-4 w-4' />
+                          <div className='font-cairo text-[12px] font-extrabold'>
+                            ملاحظات
+                          </div>
+                        </div>
+                        <div className='mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#344054]'>
+                          {appointment.notes}
+                        </div>
                       </div>
                     ) : null}
 
                     <div className='mt-6 flex items-center justify-end gap-3'>
-                      <button
-                        type='button'
-                        onClick={() => setCancelOpen(true)}
-                        className='inline-flex h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white px-5 font-cairo text-[12px] font-extrabold text-[#F97316]'
-                      >
-                        <Ban className='h-4 w-4' />
-                        إلغاء الموعد
-                      </button>
-
                       <Dialog.Close asChild>
                         <button
                           type='button'
@@ -249,30 +276,6 @@ export default function AdminAppointmentDetailsDialog({
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-
-      <CancelAppointmentDialog
-        open={cancelOpen}
-        onOpenChange={setCancelOpen}
-        targetName={
-          appointment?.patient?.userId?.fullName
-            ? `المريض: ${appointment.patient.userId.fullName}`
-            : 'الموعد'
-        }
-        onConfirm={async (reason) => {
-          if (!appointmentId) return;
-          setLastError(null);
-          try {
-            await adminApi.appointments.cancel(appointmentId, reason);
-            // Refetch details to reflect cancelled state
-            await detailsQuery.refetch();
-          } catch (e: any) {
-            setLastError(
-              userFacingErrorMessage(e, 'فشل إلغاء الموعد'),
-            );
-          }
-        }}
-      />
-    </>
   );
 }
 

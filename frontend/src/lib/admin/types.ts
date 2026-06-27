@@ -28,6 +28,11 @@ export type AppointmentSummary = {
     userId?: { _id: string; fullName: string };
   };
   notes?: string;
+  /** معرّف نوع الموعد (مرجع)، والاسم/السعر يأتيان من لقطة الموعد المخزّنة. */
+  appointmentType?: string;
+  appointmentTypeNameSnapshot?: string;
+  priceSnapshot?: number | null;
+  priceVisibleToPatientSnapshot?: boolean;
   cancelledAt?: string;
   cancelledBy?: string;
   cancelReason?: string;

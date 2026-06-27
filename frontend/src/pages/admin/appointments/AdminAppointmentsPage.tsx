@@ -13,7 +13,6 @@ import { useMemo, useState } from 'react';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import StyledSelect from '@/components/ui/styled-select';
-import CancelAppointmentDialog from '@/components/admin/appointments/dialogs/CancelAppointmentDialog';
 import AdminAppointmentDetailsDialog from '@/components/admin/appointments/dialogs/AdminAppointmentDetailsDialog';
 import {
   formatDateLabel,
@@ -21,16 +20,11 @@ import {
   statusPill,
   type UiAppointmentCard,
 } from '@/components/admin/appointments/appointmentListUtils';
-import { adminApi } from '@/lib/admin/client';
-
 import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppointments';
 import type { AppointmentStatus } from '@/lib/admin/types';
 
 export default function AdminAppointmentsPage() {
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
-  const [cancelAppointmentOpen, setCancelAppointmentOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<UiAppointmentCard | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     string | null
@@ -341,23 +335,6 @@ export default function AdminAppointmentsPage() {
                         <button
                           type='button'
                           onClick={() => {
-                            setSelectedAppointment(a);
-                            setCancelAppointmentOpen(true);
-                          }}
-                          disabled={
-                            !(
-                              a.status === 'scheduled' ||
-                              a.status === 'rescheduled'
-                            )
-                          }
-                          className='inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#FEF2F2] px-4 font-cairo text-[12px] font-extrabold text-[#EF4444]'
-                        >
-                          <AlertCircle className='h-4 w-4' />
-                          إلغاء الموعد
-                        </button>
-                        <button
-                          type='button'
-                          onClick={() => {
                             setSelectedAppointmentId(a.id);
                             setDetailsOpen(true);
                           }}
@@ -450,29 +427,6 @@ export default function AdminAppointmentsPage() {
             title: 'تمت إعادة التعيين',
             message: 'أُعيد ضبط عرض البحث والتصفية والتاريخ. لم تتغيّر المواعيد نفسها.',
             variant: 'info',
-          }}
-        />
-
-        <CancelAppointmentDialog
-          open={cancelAppointmentOpen}
-          onOpenChange={setCancelAppointmentOpen}
-          targetName={selectedAppointment?.patientLabel || ''}
-          confirmDisabled={
-            !selectedAppointment ||
-            !(
-              selectedAppointment.status === 'scheduled' ||
-              selectedAppointment.status === 'rescheduled'
-            )
-          }
-          onConfirm={async (reason) => {
-            if (!selectedAppointment?.id) return;
-            await adminApi.appointments.cancel(selectedAppointment.id, reason);
-          }}
-          successToast={{
-            title: 'تم إلغاء الموعد',
-            message:
-              'سُجّل إلغاء الموعد في النظام. سيتم إشعار الأطراف عند اكتمال تدفق الإشعارات.',
-            variant: 'success',
           }}
         />
 
