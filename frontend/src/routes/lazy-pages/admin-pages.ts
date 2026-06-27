@@ -12,6 +12,9 @@ export const AdminDoctorDetailsPage = lazy(
 export const AdminPatientsPage = lazy(
   () => import("@/pages/admin/patients/AdminPatientsPage"),
 );
+export const AdminUsersPage = lazy(
+  () => import("@/pages/admin/users/AdminUsersPage"),
+);
 export const AdminPatientDetailsPage = lazy(
   () => import("@/pages/admin/patients/AdminPatientDetailsPage"),
 );

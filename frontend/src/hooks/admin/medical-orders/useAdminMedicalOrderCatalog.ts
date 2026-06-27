@@ -47,9 +47,16 @@ export function useUpdateMedicalOrderCatalogItem(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (vars: { id: string; label: string }) =>
+    mutationFn: (vars: {
+      id: string;
+      label: string;
+      isActive?: boolean;
+      isVisible?: boolean;
+    }) =>
       adminApi.medicalOrderCatalog.update(kind, vars.id, {
         label: vars.label,
+        isActive: vars.isActive,
+        isVisible: vars.isVisible,
       }),
     onSuccess: () => {
       void qc.invalidateQueries({

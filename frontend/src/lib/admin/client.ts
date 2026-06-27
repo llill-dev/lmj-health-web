@@ -17,6 +17,9 @@ import type {
   AdminPatientsListResponse,
   AdminSecretariesListParams,
   AdminSecretariesListResponse,
+  AdminUsersListResponse,
+  CreateAdminUserBody,
+  CreateAdminUserResponse,
   AdminUserOffboardResponse,
   AdminContentListParams,
   AdminContentListResponse,
@@ -24,6 +27,13 @@ import type {
   CreateAdminContentBody,
   UpdateAdminContentBody,
   AdminContentMutationResponse,
+  AdminContentTemplatesListResponse,
+  CreateAdminContentTemplateBody,
+  UpdateAdminContentTemplateBody,
+  AdminContentTemplateMutationResponse,
+  AdminNewsIngestBody,
+  AdminNewsPendingListParams,
+  AdminNewsPendingListResponse,
   AuditLogsListParams,
   AuditLogsListResponse,
   VerificationRequestReviewBody,
@@ -39,6 +49,7 @@ import type {
   ApiSuccessEnvelope,
   AdminMedicalOrderCatalogListParams,
   AdminMedicalOrderCatalogListResponse,
+  AdminMedicalOrderCatalogDetailsResponse,
   AdminMedicalOrderCatalogMutationResponse,
   AdminMedicalOrderCatalogUpsertBody,
   MedicalOrderCatalogItem,
@@ -301,6 +312,12 @@ export const adminApi = {
       ),
   },
   users: {
+    list: () =>
+      get<AdminUsersListResponse>(adminEndpoints.users.list, { locale: "ar" }),
+    create: (body: CreateAdminUserBody) =>
+      post<CreateAdminUserResponse>(adminEndpoints.users.create, body, {
+        locale: "ar",
+      }),
     offboard: (userId: string, reason?: string) =>
       post<AdminUserOffboardResponse>(
         adminEndpoints.users.offboard(userId),
@@ -359,6 +376,18 @@ export const adminApi = {
         : adminEndpoints.content.list;
       return get<AdminContentListResponse>(endpoint, { locale: "ar" });
     },
+    listMine: (params: AdminContentListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.type) qs.set("type", params.type);
+      if (params.status) qs.set("status", params.status);
+      if (params.language) qs.set("language", params.language);
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.content.mine}?${qs.toString()}`
+        : adminEndpoints.content.mine;
+      return get<AdminContentListResponse>(endpoint, { locale: "ar" });
+    },
     getById: (id: string) =>
       get<AdminContentDetailsResponse>(adminEndpoints.content.details(id), {
         locale: "ar",
@@ -396,6 +425,49 @@ export const adminApi = {
         locale: "ar",
       }),
   },
+  contentTemplates: {
+    list: () =>
+      get<AdminContentTemplatesListResponse>(adminEndpoints.contentTemplates.list, {
+        locale: "ar",
+      }),
+    create: (body: CreateAdminContentTemplateBody) =>
+      post<AdminContentTemplateMutationResponse>(
+        adminEndpoints.contentTemplates.create,
+        body,
+        { locale: "ar" },
+      ),
+    update: (id: string, body: UpdateAdminContentTemplateBody) =>
+      patch<AdminContentTemplateMutationResponse>(
+        adminEndpoints.contentTemplates.update(id),
+        body,
+        { locale: "ar" },
+      ),
+    disable: (id: string, force = false) => {
+      const endpoint = force
+        ? `${adminEndpoints.contentTemplates.disable(id)}?force=true`
+        : adminEndpoints.contentTemplates.disable(id);
+      return post<ApiSuccessEnvelope>(endpoint, undefined, { locale: "ar" });
+    },
+  },
+  news: {
+    ingest: (body: AdminNewsIngestBody) =>
+      post<ApiSuccessEnvelope>(adminEndpoints.news.ingest, body, {
+        locale: "ar",
+      }),
+    pending: (params: AdminNewsPendingListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      if (params.sourceUrl) qs.set("sourceUrl", params.sourceUrl);
+      if (params.language) qs.set("language", params.language);
+      if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+      if (params.dateTo) qs.set("dateTo", params.dateTo);
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.news.pending}?${qs.toString()}`
+        : adminEndpoints.news.pending;
+      return get<AdminNewsPendingListResponse>(endpoint, { locale: "ar" });
+    },
+  },
   medicalOrderCatalog: {
     list: async (params: AdminMedicalOrderCatalogListParams) => {
       const qs = new URLSearchParams();
@@ -421,13 +493,26 @@ export const adminApi = {
     create: (body: AdminMedicalOrderCatalogUpsertBody) =>
       post<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.collection(body.kind),
-        { label: body.label },
+        {
+          label: body.label,
+          ...(typeof body.isActive === "boolean"
+            ? { isActive: body.isActive }
+            : {}),
+          ...(typeof body.isVisible === "boolean"
+            ? { isVisible: body.isVisible }
+            : {}),
+        },
+        { locale: "ar" },
+      ),
+    getById: (kind: MedicalOrderCatalogKind, id: string) =>
+      get<AdminMedicalOrderCatalogDetailsResponse>(
+        adminEndpoints.orderCatalog.item(kind, id),
         { locale: "ar" },
       ),
     update: (
       kind: MedicalOrderCatalogKind,
       id: string,
-      body: Pick<AdminMedicalOrderCatalogUpsertBody, "label">,
+      body: Partial<Pick<AdminMedicalOrderCatalogUpsertBody, "label" | "isActive" | "isVisible">>,
     ) =>
       patch<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.item(kind, id),

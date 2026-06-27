@@ -22,7 +22,7 @@ const DRAFT_CONTENT_BLOCKS: AdminContentBlock[] = [
 ];
 
 const formSchema = z.object({
-  type: z.enum(['CONDITION', 'SYMPTOM', 'GENERAL_ADVICE', 'NEWS']),
+  type: z.enum(['CONDITION', 'SYMPTOM', 'GENERAL_ADVICE', 'NEWS', 'MEDICATION', 'SETTINGS_PAGE']),
   title: z.string().min(1, 'عنوان المحتوى مطلوب'),
   summary: z.string().optional(),
   language: z.enum(['ar', 'en']),
@@ -74,6 +74,8 @@ const typeOptions: { value: AdminContentType; label: string }[] = [
   { value: 'SYMPTOM', label: 'الأعراض' },
   { value: 'GENERAL_ADVICE', label: 'نصائح عامة' },
   { value: 'NEWS', label: 'الأخبار' },
+  { value: 'MEDICATION', label: 'الأدوية' },
+  { value: 'SETTINGS_PAGE', label: 'صفحات الإعدادات' },
 ];
 
 type Props = {

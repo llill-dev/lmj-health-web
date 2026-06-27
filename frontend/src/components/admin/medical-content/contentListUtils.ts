@@ -20,6 +20,8 @@ const ADMIN_CONTENT_TYPE_VALUES: AdminContentType[] = [
   'SYMPTOM',
   'GENERAL_ADVICE',
   'NEWS',
+  'MEDICATION',
+  'SETTINGS_PAGE',
 ];
 
 export function parseTypeQueryParam(
@@ -98,6 +100,8 @@ function toContentType(value: unknown): AdminContentType {
   if (value === 'SYMPTOM') return 'SYMPTOM';
   if (value === 'GENERAL_ADVICE') return 'GENERAL_ADVICE';
   if (value === 'NEWS') return 'NEWS';
+  if (value === 'MEDICATION') return 'MEDICATION';
+  if (value === 'SETTINGS_PAGE') return 'SETTINGS_PAGE';
   return 'GENERAL_ADVICE';
 }
 
@@ -199,6 +203,8 @@ export function contentTypeLabel(t?: AdminContentType) {
   if (t === 'SYMPTOM') return 'الأعراض';
   if (t === 'GENERAL_ADVICE') return 'نصائح عامة';
   if (t === 'NEWS') return 'الأخبار';
+  if (t === 'MEDICATION') return 'الأدوية';
+  if (t === 'SETTINGS_PAGE') return 'صفحات الإعدادات';
   return 'عام';
 }
 

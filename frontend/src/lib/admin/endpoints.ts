@@ -57,6 +57,8 @@ export const adminEndpoints = {
     list: '/api/admin/secretaries',
   },
   users: {
+    list: '/api/admin/users',
+    create: '/api/admin/users',
     offboard: (userId: string) => `/api/admin/users/${userId}/offboard`,
   },
   auditLogs: {
@@ -71,6 +73,7 @@ export const adminEndpoints = {
   content: {
     list: '/api/admin/content',
     create: '/api/admin/content',
+    mine: '/api/admin/content/mine',
     details: (id: string) => `/api/admin/content/${id}`,
     update: (id: string) => `/api/admin/content/${id}`,
     submitReview: (id: string) => `/api/admin/content/${id}/submit-review`,
@@ -78,6 +81,16 @@ export const adminEndpoints = {
     reject: (id: string) => `/api/admin/content/${id}/reject`,
     publish: (id: string) => `/api/admin/content/${id}/publish`,
     archive: (id: string) => `/api/admin/content/${id}/archive`,
+  },
+  contentTemplates: {
+    list: '/api/admin/content-templates',
+    create: '/api/admin/content-templates',
+    update: (id: string) => `/api/admin/content-templates/${id}`,
+    disable: (id: string) => `/api/admin/content-templates/${id}/disable`,
+  },
+  news: {
+    ingest: '/api/admin/news/ingest',
+    pending: '/api/admin/news/pending',
   },
   /**
    * كتالوج الطلبات الطبية — مسار لكل فئة (API-3: GET/POST /admin/order-catalog/lab-tests|imaging|procedures|…).

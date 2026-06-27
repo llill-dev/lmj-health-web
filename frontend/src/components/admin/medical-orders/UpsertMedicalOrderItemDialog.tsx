@@ -7,6 +7,7 @@ import {
   useCreateMedicalOrderCatalogItem,
   useUpdateMedicalOrderCatalogItem,
 } from '@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog';
+import { AppCheckbox } from '@/components/ui';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
 import type {
@@ -37,6 +38,8 @@ export default function UpsertMedicalOrderItemDialog({
   const { toast } = useToast();
   const isEdit = !!editTarget;
   const [label, setLabel] = useState('');
+  const [isActive, setIsActive] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
   const createMut = useCreateMedicalOrderCatalogItem();
   const updateMut = useUpdateMedicalOrderCatalogItem(kind);
   const pending = createMut.isPending || updateMut.isPending;
@@ -44,6 +47,8 @@ export default function UpsertMedicalOrderItemDialog({
   useEffect(() => {
     if (open) {
       setLabel(editTarget?.label ?? '');
+      setIsActive(editTarget?.isActive ?? true);
+      setIsVisible(editTarget?.isVisible ?? true);
     }
   }, [open, editTarget]);
 
@@ -63,7 +68,12 @@ export default function UpsertMedicalOrderItemDialog({
     const kindLabel = KIND_AR[kind] ?? kind;
     if (isEdit && editTarget) {
       updateMut.mutate(
-        { id: editTarget._id, label: trimmed },
+        {
+          id: editTarget._id,
+          label: trimmed,
+          isActive,
+          isVisible,
+        },
         {
           onSuccess: () => {
             toast(
@@ -76,7 +86,7 @@ export default function UpsertMedicalOrderItemDialog({
       );
     } else {
       createMut.mutate(
-        { kind, label: trimmed },
+        { kind, label: trimmed, isActive, isVisible },
         {
           onSuccess: () => {
             toast(
@@ -179,6 +189,24 @@ export default function UpsertMedicalOrderItemDialog({
                     {serverError}
                   </p>
                 )}
+                <div className='mt-4 grid gap-3 sm:grid-cols-2'>
+                  <label className='flex items-center justify-end gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
+                    <span>العنصر نشط</span>
+                    <AppCheckbox
+                      size='sm'
+                      checked={isActive}
+                      onChange={(event) => setIsActive(event.target.checked)}
+                    />
+                  </label>
+                  <label className='flex items-center justify-end gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
+                    <span>العنصر ظاهر للأطباء</span>
+                    <AppCheckbox
+                      size='sm'
+                      checked={isVisible}
+                      onChange={(event) => setIsVisible(event.target.checked)}
+                    />
+                  </label>
+                </div>
               </div>
               <div className='flex justify-end gap-2 border-t border-[#F2F4F7] px-5 py-4'>
                 <Dialog.Close asChild>

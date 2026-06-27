@@ -58,6 +58,7 @@ export type AdminSidebarItemId =
   | "notifications"
   | "doctors"
   | "doctor-specializations"
+  | "users"
   | "patients"
   | "secretaries"
   | "medical-content"
@@ -237,6 +238,7 @@ export const adminSidebarItems: Array<{
     label: "تخصصات الأطباء",
     icon: Tags,
   },
+  { id: "users", path: "users", label: "مستخدمو الإدارة", icon: UserCog },
   { id: "patients", path: "patients", label: "المرضى", icon: Users },
   {
     id: "secretaries",

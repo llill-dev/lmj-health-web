@@ -100,7 +100,10 @@ export default function AdminPatientDetailsPage() {
   const navigate = useNavigate();
   const initialPatient = (location.state as { patient?: AdminPatientSummary } | null)
     ?.patient;
-  const { patient, isAwaitingData, error } = useAdminPatient(patientId, initialPatient ?? null);
+  const { patient, isAwaitingData, error, refetch: refetchPatient } = useAdminPatient(
+    patientId,
+    initialPatient ?? null,
+  );
 
   // Fetch more appointments to improve per-patient accuracy.
   // NOTE: API admin/appointments does not support ?patientId filter,
@@ -151,6 +154,7 @@ export default function AdminPatientDetailsPage() {
   );
 
   const [fileActionKey, setFileActionKey] = useState<string | null>(null);
+  const [accountAction, setAccountAction] = useState<'activate' | 'unsuspend' | null>(null);
 
   const patientAuditLogs = useMemo(
     () =>
@@ -207,6 +211,48 @@ export default function AdminPatientDetailsPage() {
       });
     } finally {
       setFileActionKey(null);
+    }
+  }
+
+  async function runAccountAction(action: 'activate' | 'unsuspend') {
+    const resolvedPatientId = patient?._id ?? patientId;
+    if (!resolvedPatientId) return;
+    setAccountAction(action);
+    try {
+      if (action === 'activate') {
+        await adminApi.patients.activate(resolvedPatientId);
+        toast('تم تفعيل حساب المريض بنجاح.', {
+          title: 'تم التفعيل',
+          variant: 'success',
+          durationMs: 4200,
+        });
+      } else {
+        await adminApi.patients.unsuspend(resolvedPatientId);
+        toast('تمت إعادة تفعيل الحساب بعد رفع التعليق.', {
+          title: 'تم رفع التعليق',
+          variant: 'success',
+          durationMs: 4200,
+        });
+      }
+      await Promise.all([
+        refetchPatient(),
+        appointmentsQuery.refetch(),
+        auditQuery.refetch(),
+        filesQuery.refetch(),
+      ]);
+    } catch {
+      toast(
+        action === 'activate'
+          ? 'تعذر تفعيل حساب المريض حاليًا.'
+          : 'تعذر رفع تعليق الحساب حاليًا.',
+        {
+          title: 'خطأ',
+          variant: 'error',
+          durationMs: 5000,
+        },
+      );
+    } finally {
+      setAccountAction(null);
     }
   }
 
@@ -323,6 +369,42 @@ export default function AdminPatientDetailsPage() {
                     <div className='col-span-2 inline-flex items-start gap-2 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]'>
                       <Info className='mt-0.5 h-4 w-4 shrink-0' />
                       سبب التعليق: {patient.suspendReason}
+                    </div>
+                  )}
+                  {patient.user.accountStatus !== 'active' && (
+                    <div className='col-span-2 flex flex-wrap gap-2'>
+                      <button
+                        type='button'
+                        disabled={accountAction !== null}
+                        onClick={() => {
+                          void runAccountAction('activate');
+                        }}
+                        className='inline-flex h-[38px] items-center gap-2 rounded-[10px] bg-[#16A34A] px-4 font-cairo text-[12px] font-extrabold text-white disabled:opacity-60'
+                      >
+                        {accountAction === 'activate' ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          <ShieldCheck className='h-4 w-4' />
+                        )}
+                        تفعيل الحساب
+                      </button>
+                      {patient.user.accountStatus === 'suspended' && (
+                        <button
+                          type='button'
+                          disabled={accountAction !== null}
+                          onClick={() => {
+                            void runAccountAction('unsuspend');
+                          }}
+                          className='inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#16A34A] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#15803D] disabled:opacity-60'
+                        >
+                          {accountAction === 'unsuspend' ? (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          ) : (
+                            <ShieldCheck className='h-4 w-4' />
+                          )}
+                          رفع التعليق
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

@@ -15,6 +15,8 @@ import {
   HeartPulse,
   Stethoscope,
   Newspaper,
+  Pill,
+  Settings,
   ShieldCheck,
   ChevronRight,
   ChevronLeft,
@@ -414,6 +416,30 @@ export default function AdminMedicalContentPage() {
             >
               <Newspaper className="h-4 w-4 text-[#667085]" />
               الأخبار
+            </button>
+            <button
+              type="button"
+              onClick={() => setTypeFilter("MEDICATION")}
+              className={
+                activeType === "MEDICATION"
+                  ? "inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white"
+                  : "inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
+              }
+            >
+              <Pill className="h-4 w-4 text-[#667085]" />
+              الأدوية
+            </button>
+            <button
+              type="button"
+              onClick={() => setTypeFilter("SETTINGS_PAGE")}
+              className={
+                activeType === "SETTINGS_PAGE"
+                  ? "inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white"
+                  : "inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
+              }
+            >
+              <Settings className="h-4 w-4 text-[#667085]" />
+              صفحات الإعدادات
             </button>
           </div>
 
@@ -937,4 +963,3 @@ export default function AdminMedicalContentPage() {
     </>
   );
 }
-

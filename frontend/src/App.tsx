@@ -375,6 +375,7 @@ export default function App() {
               path="doctor-specializations"
               element={<AdminPages.AdminDoctorSpecializationsPage />}
             />
+            <Route path="users" element={<AdminPages.AdminUsersPage />} />
             <Route
               path="doctors/:doctorId"
               element={<AdminPages.AdminDoctorDetailsPage />}

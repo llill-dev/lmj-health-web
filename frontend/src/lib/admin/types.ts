@@ -482,6 +482,33 @@ export type AdminUserOffboardResponse = ApiSuccessEnvelope & {
   role: string;
 };
 
+export type AdminUserSummary = {
+  id: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  phoneNumber?: string;
+  role?: string;
+  isActive?: boolean;
+  createdAt?: string;
+};
+
+export type AdminUsersListResponse = ApiSuccessEnvelope & {
+  users: AdminUserSummary[];
+};
+
+export type CreateAdminUserBody = {
+  fullName: string;
+  email: string;
+  password: string;
+  role: 'data_entry' | string;
+  phoneNumber?: string;
+};
+
+export type CreateAdminUserResponse = ApiSuccessEnvelope & {
+  user?: AdminUserSummary;
+};
+
 export type AdminSecretariesListParams = {
   search?: string;
   doctorId?: string;
@@ -638,7 +665,9 @@ export type AdminContentType =
   | 'CONDITION'
   | 'SYMPTOM'
   | 'GENERAL_ADVICE'
-  | 'NEWS';
+  | 'NEWS'
+  | 'MEDICATION'
+  | 'SETTINGS_PAGE';
 
 export type AdminContentStatus =
   | 'DRAFT'
@@ -662,6 +691,7 @@ export type AdminContentItem = {
   summary?: string;
   language?: string;
   slug?: string;
+  pageVersion?: string | null;
   createdAt?: string;
   updatedAt?: string;
   viewCount?: number;
@@ -708,6 +738,7 @@ export type AdminContentDetailsItem = AdminContentItem & {
   contentBlocks?: AdminContentBlock[];
   tags?: string[];
   sources?: Array<{ title?: string; url?: string }>;
+  pageVersion?: string | null;
   disclaimerVersion?: number | string;
   rejectionReason?: string | null;
   templateId?: string | null;
@@ -755,6 +786,8 @@ export type MedicalOrderCatalogKind =
 export type MedicalOrderCatalogItem = {
   _id: string;
   label: string;
+  isActive?: boolean;
+  isVisible?: boolean;
 };
 
 export type AdminMedicalOrderCatalogListParams = {
@@ -769,10 +802,84 @@ export type AdminMedicalOrderCatalogListResponse = ApiSuccessEnvelope & {
 export type AdminMedicalOrderCatalogUpsertBody = {
   kind: MedicalOrderCatalogKind;
   label: string;
+  isActive?: boolean;
+  isVisible?: boolean;
 };
 
 export type AdminMedicalOrderCatalogMutationResponse = ApiSuccessEnvelope & {
   item?: MedicalOrderCatalogItem;
+};
+
+export type AdminMedicalOrderCatalogDetailsResponse = ApiSuccessEnvelope & {
+  item?: (MedicalOrderCatalogItem & {
+    isActive?: boolean;
+    isVisible?: boolean;
+  });
+};
+
+export type AdminContentTemplateField = {
+  key: string;
+  label?: string | { ar?: string; en?: string };
+  type?: string;
+  required?: boolean;
+};
+
+export type AdminContentTemplate = {
+  _id: string;
+  name?: string;
+  description?: string;
+  isActive?: boolean;
+  schemaVersion?: number;
+  fields?: AdminContentTemplateField[];
+};
+
+export type AdminContentTemplatesListResponse = ApiSuccessEnvelope & {
+  items?: AdminContentTemplate[];
+  templates?: AdminContentTemplate[];
+};
+
+export type CreateAdminContentTemplateBody = {
+  name: string;
+  description?: string;
+  fields?: AdminContentTemplateField[];
+};
+
+export type UpdateAdminContentTemplateBody =
+  Partial<CreateAdminContentTemplateBody>;
+
+export type AdminContentTemplateMutationResponse = ApiSuccessEnvelope & {
+  item?: AdminContentTemplate;
+  template?: AdminContentTemplate;
+};
+
+export type AdminNewsItem = {
+  _id?: string;
+  sourceUrl: string;
+  publishedAt?: string;
+  title: string;
+  summary?: string;
+  language?: 'ar' | 'en' | string;
+};
+
+export type AdminNewsIngestBody = {
+  items: AdminNewsItem[];
+};
+
+export type AdminNewsPendingListParams = {
+  page?: number;
+  limit?: number;
+  sourceUrl?: string;
+  language?: 'ar' | 'en';
+  dateFrom?: string;
+  dateTo?: string;
+};
+
+export type AdminNewsPendingListResponse = ApiSuccessEnvelope & {
+  items?: AdminContentDetailsItem[];
+  content?: AdminContentDetailsItem[];
+  total?: number;
+  page?: number;
+  limit?: number;
 };
 
 /** مجالات الكتالوج الموثّقة في API-3 لـ GET /admin/lookups */
@@ -938,6 +1045,7 @@ export type UpdateFacilityBody = Partial<CreateFacilityBody>;
 export type FacilityActionBody = {
   action: 'approve' | 'merge';
   targetFacilityId?: string;
+  mergeToId?: string;
 };
 
 export type FacilityResponse = ApiSuccessEnvelope & {

@@ -33,7 +33,7 @@ export default function AdminVerificationRequestsPage() {
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'pending' | 'approved' | 'rejected'
-  >('pending');
+  >('all');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 

@@ -15,3 +15,4 @@ export * from '@/hooks/admin/patients/useAdminPatientFiles';
 export * from '@/hooks/admin/patients/useAdminPatients';
 export * from '@/hooks/admin/secretaries/useAdminSecretaries';
 export * from '@/hooks/admin/services/useAdminServices';
+export * from '@/hooks/admin/users/useAdminUsers';

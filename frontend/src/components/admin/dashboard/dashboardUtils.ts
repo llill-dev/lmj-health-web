@@ -123,6 +123,8 @@ export function contentTypeCategoryLabel(
     SYMPTOM: 'الأعراض',
     GENERAL_ADVICE: 'نصائح عامة',
     NEWS: 'الأخبار',
+    MEDICATION: 'الأدوية',
+    SETTINGS_PAGE: 'صفحات الإعدادات',
   };
   if (type && type in map) return map[type as AdminContentType];
   return type ? String(type) : '—';
