@@ -767,6 +767,8 @@ export type CreateAdminContentBody = {
 
 export type UpdateAdminContentBody = Partial<CreateAdminContentBody> & {
   status?: AdminContentStatus;
+  /** إصدار الصفحة — مطلوب فعلياً لاعتماد SETTINGS_PAGE (راجع API-3). */
+  pageVersion?: string | null;
 };
 
 export type AdminContentMutationResponse = ApiSuccessEnvelope & {

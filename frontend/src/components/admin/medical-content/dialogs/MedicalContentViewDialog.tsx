@@ -38,6 +38,8 @@ function normalizeType(value: unknown): AdminContentType {
   if (value === 'SYMPTOM') return 'SYMPTOM';
   if (value === 'GENERAL_ADVICE') return 'GENERAL_ADVICE';
   if (value === 'NEWS') return 'NEWS';
+  if (value === 'MEDICATION') return 'MEDICATION';
+  if (value === 'SETTINGS_PAGE') return 'SETTINGS_PAGE';
   return 'GENERAL_ADVICE';
 }
 
@@ -86,6 +88,7 @@ function normalizeDetails(
     contentBlocks,
     tags,
     sources,
+    pageVersion: toDisplayText(item.pageVersion) || null,
     disclaimerVersion: toDisplayText(item.disclaimerVersion),
     rejectionReason: toDisplayText(item.rejectionReason) || null,
     templateId: toDisplayText(item.templateId) || null,
@@ -96,7 +99,10 @@ function typeLabel(t: AdminContentType) {
   if (t === 'CONDITION') return 'الحالات الطبية';
   if (t === 'SYMPTOM') return 'الأعراض';
   if (t === 'GENERAL_ADVICE') return 'نصائح عامة';
-  return 'الأخبار';
+  if (t === 'NEWS') return 'الأخبار';
+  if (t === 'MEDICATION') return 'الأدوية';
+  if (t === 'SETTINGS_PAGE') return 'صفحات الإعدادات';
+  return 'عام';
 }
 
 function statusLabel(s: AdminContentStatus) {
@@ -372,7 +378,40 @@ export default function MedicalContentViewDialog({
                       تاريخ النشر:{' '}
                       <span className='text-[#111827]'>{formatDate(details.publishedAt)}</span>
                     </div>
+                    {details.pageVersion ? (
+                      <div className='font-cairo font-bold text-[#667085]'>
+                        إصدار الصفحة:{' '}
+                        <span className='text-[#111827]'>{details.pageVersion}</span>
+                      </div>
+                    ) : null}
+                    {details.disclaimerVersion ? (
+                      <div className='font-cairo font-bold text-[#667085]'>
+                        إصدار التنبيه:{' '}
+                        <span className='text-[#111827]'>
+                          {String(details.disclaimerVersion)}
+                        </span>
+                      </div>
+                    ) : null}
+                    {details.templateId ? (
+                      <div className='font-cairo font-bold text-[#667085] sm:col-span-2'>
+                        معرّف القالب:{' '}
+                        <span className='font-mono text-[#111827]'>
+                          {details.templateId}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
+
+                  {details.rejectionReason ? (
+                    <div className='mt-3 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-3 py-2'>
+                      <div className='font-cairo text-[12px] font-extrabold text-[#991B1B]'>
+                        سبب الرفض
+                      </div>
+                      <div className='mt-0.5 font-cairo text-[13px] leading-6 text-[#B42318]'>
+                        {details.rejectionReason}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className='space-y-4 rounded-[14px] border border-[#E4E7EC] bg-white p-4'>

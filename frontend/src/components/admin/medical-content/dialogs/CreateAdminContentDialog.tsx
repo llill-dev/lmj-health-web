@@ -1,7 +1,6 @@
 'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { FileText, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Save, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,7 +8,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateAdminContent } from '@/hooks/admin/content/useAdminContent';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
+import {
+  DoctorProfileFormField,
+  profileFieldClass,
+  profileInputClass,
+  profileTextareaClass,
+} from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
+import { cn } from '@/lib/utils/utils';
 import type { AdminContentBlock, AdminContentType } from '@/lib/admin/types';
 
 /** جسم مبدئي تتوافق مع الـ API ويتجنّب أعطال التحقق عندما يتوقع الخادم مصفوفة بلوكات. */
@@ -37,38 +43,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const overlayOpen = {
-  opacity: 1,
-  visibility: 'visible' as const,
-  pointerEvents: 'auto' as const,
-  transition: { duration: 0.2, ease: 'easeOut' as const },
-};
-
-const overlayClosed = {
-  opacity: 0,
-  transition: { duration: 0.18, ease: 'easeOut' as const },
-  pointerEvents: 'none' as const,
-  transitionEnd: { visibility: 'hidden' as const },
-};
-
-const panelOpen = {
-  opacity: 1,
-  visibility: 'visible' as const,
-  pointerEvents: 'auto' as const,
-  y: 0,
-  scale: 1,
-  transition: { type: 'spring' as const, stiffness: 400, damping: 34 },
-};
-
-const panelClosed = {
-  opacity: 0,
-  y: 20,
-  scale: 0.97,
-  pointerEvents: 'none' as const,
-  transition: { duration: 0.2, ease: 'easeOut' as const },
-  transitionEnd: { visibility: 'hidden' as const },
-};
-
 const typeOptions: { value: AdminContentType; label: string }[] = [
   { value: 'CONDITION', label: 'الحالات الطبية' },
   { value: 'SYMPTOM', label: 'الأعراض' },
@@ -77,6 +51,14 @@ const typeOptions: { value: AdminContentType; label: string }[] = [
   { value: 'MEDICATION', label: 'الأدوية' },
   { value: 'SETTINGS_PAGE', label: 'صفحات الإعدادات' },
 ];
+
+const EMPTY_FORM: FormValues = {
+  type: 'GENERAL_ADVICE',
+  title: '',
+  summary: '',
+  language: 'ar',
+  slug: '',
+};
 
 type Props = {
   open: boolean;
@@ -89,6 +71,7 @@ export default function CreateAdminContentDialog({
 }: Props) {
   const { toast } = useToast();
   const createMut = useCreateAdminContent();
+  const submitting = createMut.isPending;
   const {
     register,
     handleSubmit,
@@ -97,236 +80,227 @@ export default function CreateAdminContentDialog({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      type: 'GENERAL_ADVICE',
-      title: '',
-      summary: '',
-      language: 'ar',
-      slug: '',
-    },
+    defaultValues: EMPTY_FORM,
   });
 
   useEffect(() => {
     if (!open) {
-      reset({
-        type: 'GENERAL_ADVICE',
-        title: '',
-        summary: '',
-        language: 'ar',
-        slug: '',
-      });
+      reset(EMPTY_FORM);
+      createMut.reset();
     }
-  }, [open, reset]);
+  }, [open, reset, createMut]);
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !submitting) onOpenChange(false);
     };
-  }, [open]);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, onOpenChange, submitting]);
+
+  const onSubmit = handleSubmit(async (v) => {
+    try {
+      await createMut.mutateAsync({
+        type: v.type,
+        title: v.title.trim(),
+        summary: v.summary?.trim() || undefined,
+        language: v.language,
+        slug: v.slug?.trim() || undefined,
+        contentBlocks: DRAFT_CONTENT_BLOCKS,
+      });
+      toast(
+        `أُضيفت مسودة «${v.title.trim()}» إلى المحتوى الطبي. أكمل التحرير والمراجعة والنشر من نفس الصفحة.`,
+        {
+          title: 'تم إضافة المحتوى',
+          variant: 'success',
+          durationMs: 4200,
+        },
+      );
+      onOpenChange(false);
+    } catch {
+      // الخطأ يظهر عبر createMut.isError ورسالة الـ API
+    }
+  });
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={(o) => {
-        if (!createMut.isPending) onOpenChange(o);
-      }}
-    >
-      <Dialog.Portal>
-        <Dialog.Overlay forceMount asChild>
-          <motion.div
-            initial={false}
-            animate={open ? 'open' : 'closed'}
-            variants={{ open: overlayOpen, closed: overlayClosed }}
-            className='fixed inset-0 z-[10050] bg-black/45 backdrop-blur-[2px]'
-            style={{ touchAction: 'none' }}
-          />
-        </Dialog.Overlay>
-        <Dialog.Content
-          forceMount
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,520px)] max-h-[min(92vh,640px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
-          dir='rtl'
-          lang='ar'
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className='fixed inset-0 z-[10050] flex items-center justify-center bg-black/45 px-4 py-8'
+          role='dialog'
+          aria-modal='true'
+          aria-label='إضافة محتوى طبي'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !submitting) {
+              onOpenChange(false);
+            }
+          }}
         >
-          <Dialog.Description className='sr-only'>
-            نموذج لإضافة مقال طبي تعليمي جديد ويعُدّ كمسودة.
-          </Dialog.Description>
           <motion.div
-            initial={false}
-            animate={open ? 'open' : 'closed'}
-            variants={{ open: panelOpen, closed: panelClosed }}
-            className='max-h-full w-full overflow-y-auto rounded-[16px] bg-white p-0 shadow-[0_24px_60px_rgba(0,0,0,0.2)]'
+            className='relative max-h-[min(92vh,860px)] w-full max-w-[640px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]'
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(event) => event.stopPropagation()}
           >
-            <form
-              onSubmit={handleSubmit(async (v) => {
-                try {
-                  await createMut.mutateAsync({
-                    type: v.type,
-                    title: v.title.trim(),
-                    summary: v.summary?.trim() || undefined,
-                    language: v.language,
-                    slug: v.slug?.trim() || undefined,
-                    contentBlocks: DRAFT_CONTENT_BLOCKS,
-                  });
-                  toast(
-                    `أُضيفت مسودة «${v.title.trim()}» إلى المحتوى الطبي. أكمل التحرير والمراجعة والنشر من نفس الصفحة.`,
-                    {
-                      title: 'تم إضافة المحتوى',
-                      variant: 'success',
-                      durationMs: 4200,
-                    },
-                  );
-                  onOpenChange(false);
-                } catch {
-                  // الخطأ يظهر عبر createMut.isError ورسالة الـ API
-                }
-              })}
-            >
-              <div className='flex items-start justify-between border-b border-[#F2F4F7] px-5 py-4'>
-                <div className='flex items-center gap-2'>
-                  <div className='flex h-10 w-10 items-center justify-center rounded-full bg-[#E7FBFA] text-primary'>
-                    <FileText className='h-5 w-5' />
-                  </div>
-                  <Dialog.Title className='font-cairo text-[16px] font-extrabold leading-snug text-[#101828]'>
-                    إضافة محتوى جديد
-                  </Dialog.Title>
-                </div>
-                <Dialog.Close asChild>
-                  <button
-                    type='button'
-                    className='flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F2F4F7] disabled:opacity-40'
-                    aria-label='إغلاق'
-                    disabled={createMut.isPending}
-                  >
-                    <X className='h-4 w-4' />
-                  </button>
-                </Dialog.Close>
+            <div className='relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8'>
+              <div className='pointer-events-none absolute inset-0 bg-[#E6F4F3]' aria-hidden />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[url('/images/bg-status-from-appotiment.png')] bg-cover bg-center opacity-80"
+                aria-hidden
+              />
+              <button
+                type='button'
+                onClick={() => onOpenChange(false)}
+                disabled={submitting}
+                className='absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50'
+                aria-label='إغلاق'
+              >
+                <X className='h-5 w-5' aria-hidden />
+              </button>
+              <div className='relative text-right'>
+                <h2 className='font-cairo text-[22px] font-extrabold text-primary'>
+                  إضافة محتوى طبي
+                </h2>
+                <p className='mt-1 font-cairo text-[13px] font-semibold text-[#5B7B79]'>
+                  أنشئ مسودة محتوى جديدة ثم أكمل التحرير والمراجعة والنشر لاحقاً.
+                </p>
               </div>
-              <div className='space-y-3 px-5 py-4'>
-                <div>
-                  <label className='block text-right font-cairo text-[12px] font-extrabold text-[#344054]'>
-                    نوع المحتوى
-                  </label>
-                  <Controller
-                    name='type'
-                    control={control}
-                    render={({ field }) => (
-                      <StyledSelect
-                        className='mt-1.5'
-                        options={typeOptions.map((o) => ({
-                          value: o.value,
-                          label: o.label,
-                        }))}
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        listboxAriaLabel='نوع المحتوى'
+            </div>
+
+            <form dir='rtl' onSubmit={onSubmit}>
+              <div className='max-h-[calc(92vh-240px)] overflow-y-auto px-8 py-6'>
+                <div className='space-y-5'>
+                  <DoctorProfileFormField label='نوع المحتوى' required>
+                    <Controller
+                      name='type'
+                      control={control}
+                      render={({ field }) => (
+                        <StyledSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          options={typeOptions}
+                          placeholder='اختر نوع المحتوى'
+                          listboxAriaLabel='نوع المحتوى'
+                        />
+                      )}
+                    />
+                  </DoctorProfileFormField>
+
+                  <DoctorProfileFormField
+                    label='العنوان'
+                    required
+                    error={errors.title?.message}
+                  >
+                    <input
+                      {...register('title')}
+                      placeholder='عنوان واضح للمحتوى'
+                      className={profileFieldClass(
+                        cn(profileInputClass, 'text-start placeholder:text-start'),
+                        Boolean(errors.title),
+                      )}
+                    />
+                  </DoctorProfileFormField>
+
+                  <DoctorProfileFormField label='ملخص' error={errors.summary?.message}>
+                    <textarea
+                      {...register('summary')}
+                      rows={3}
+                      placeholder='مقدمة قصيرة تصف المحتوى…'
+                      className={profileFieldClass(
+                        cn(profileTextareaClass, 'text-start placeholder:text-start'),
+                        Boolean(errors.summary),
+                      )}
+                    />
+                  </DoctorProfileFormField>
+
+                  <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                    <DoctorProfileFormField
+                      label='اللغة'
+                      required
+                      error={errors.language?.message}
+                    >
+                      <Controller
+                        name='language'
+                        control={control}
+                        render={({ field }) => (
+                          <StyledSelect
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            options={[
+                              { value: 'ar', label: 'العربية' },
+                              { value: 'en', label: 'English' },
+                            ]}
+                            placeholder='اختر اللغة'
+                            listboxAriaLabel='لغة المحتوى'
+                          />
+                        )}
                       />
-                    )}
-                  />
-                </div>
-                <div>
-                  <label className='block text-right font-cairo text-[12px] font-extrabold text-[#344054]'>
-                    العنوان
-                  </label>
-                  <input
-                    {...register('title')}
-                    className='mt-1.5 w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2.5 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20'
-                    placeholder='عنوان واضح'
-                  />
-                  {errors.title ? (
-                    <p className='mt-1 text-right font-cairo text-[11px] font-bold text-red-600'>
-                      {errors.title.message}
-                    </p>
+                    </DoctorProfileFormField>
+
+                    <DoctorProfileFormField
+                      label='Slug (اختياري)'
+                      error={errors.slug?.message}
+                    >
+                      <input
+                        {...register('slug')}
+                        dir='ltr'
+                        placeholder='my-article'
+                        className={profileFieldClass(
+                          cn(profileInputClass),
+                          Boolean(errors.slug),
+                        )}
+                      />
+                    </DoctorProfileFormField>
+                  </div>
+
+                  {createMut.isError ? (
+                    <div className='rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600'>
+                      {userFacingErrorMessage(createMut.error, 'تعذّر الإنشاء')}
+                    </div>
                   ) : null}
                 </div>
-                <div>
-                  <label className='block text-right font-cairo text-[12px] font-extrabold text-[#344054]'>
-                    ملخص (اختياري)
-                  </label>
-                  <textarea
-                    {...register('summary')}
-                    rows={3}
-                    className='mt-1.5 w-full resize-y rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2.5 text-right font-cairo text-[13px] font-semibold text-[#101828] placeholder:text-[#98A2B3] outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20'
-                    placeholder='مقدمة قصيرة…'
-                  />
-                </div>
-                <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                  <div>
-                    <label className='block text-right font-cairo text-[12px] font-extrabold text-[#344054]'>
-                      اللغة
-                    </label>
-                    <Controller
-                      name='language'
-                      control={control}
-                    render={({ field }) => (
-                      <StyledSelect
-                        className='mt-1.5'
-                        options={[
-                          { value: 'ar', label: 'العربية' },
-                          { value: 'en', label: 'English' },
-                        ]}
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        listboxAriaLabel='لغة المحتوى'
-                      />
-                    )}
-                    />
-                  </div>
-                  <div>
-                    <label className='block text-right font-cairo text-[12px] font-extrabold text-[#344054]'>
-                      Slug (اختياري)
-                    </label>
-                    <input
-                      {...register('slug')}
-                      dir='ltr'
-                      className='mt-1.5 w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2.5 font-cairo text-[13px] font-semibold text-[#101828] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20'
-                      placeholder='my-article'
-                    />
-                    {errors.slug ? (
-                      <p className='mt-1 text-right font-cairo text-[11px] font-bold text-red-600'>
-                        {errors.slug.message}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-                {createMut.isError ? (
-                  <p className='rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-right font-cairo text-[12px] font-semibold text-red-800'>
-                    {userFacingErrorMessage(
-                      createMut.error,
-                      'تعذّر الإنشاء',
-                    )}
-                  </p>
-                ) : null}
               </div>
-              <div className='flex items-center justify-end gap-2 border-t border-[#F2F4F7] px-5 py-4'>
-                <Dialog.Close asChild>
-                  <button
-                    type='button'
-                    className='h-10 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:bg-[#F9FAFB] disabled:opacity-50'
-                    disabled={createMut.isPending}
-                  >
-                    إلغاء
-                  </button>
-                </Dialog.Close>
+
+              <div className='grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5'>
+                <button
+                  type='button'
+                  onClick={() => onOpenChange(false)}
+                  disabled={submitting}
+                  className='inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50'
+                >
+                  إلغاء
+                </button>
                 <button
                   type='submit'
-                  disabled={createMut.isPending}
-                  className='h-10 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_8px_20px_rgba(15,143,139,0.35)] transition hover:brightness-105 disabled:opacity-50'
+                  disabled={submitting}
+                  className='inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60'
                 >
-                  {createMut.isPending ? 'جاري الحفظ…' : 'حفظ كمسودة'}
+                  <Save className='h-4 w-4' aria-hidden />
+                  {submitting ? 'جارٍ الحفظ…' : 'حفظ كمسودة'}
                 </button>
               </div>
             </form>
           </motion.div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

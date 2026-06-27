@@ -15,6 +15,7 @@ import {
   HeartPulse,
   Stethoscope,
   Newspaper,
+  Pencil,
   Pill,
   Settings,
   ShieldCheck,
@@ -29,6 +30,7 @@ import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard
 import MedicalContentViewDialog from "@/components/admin/medical-content/dialogs/MedicalContentViewDialog";
 import {
   CreateAdminContentDialog,
+  EditAdminContentDialog,
   ContentRejectDialog,
 } from "@/components/admin/medical-content";
 import {
@@ -101,6 +103,8 @@ export default function AdminMedicalContentPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewingContentId, setViewingContentId] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingContentId, setEditingContentId] = useState<string | null>(null);
   const [actionConfirm, setActionConfirm] = useState<{
     kind: "submitReview" | "approve" | "publish" | "archive";
     id: string;
@@ -707,6 +711,17 @@ export default function AdminMedicalContentPage() {
                     <button
                       type="button"
                       onClick={() => {
+                        setEditingContentId(it._id);
+                        setEditOpen(true);
+                      }}
+                      className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#0F8F8B]"
+                      aria-label="تعديل"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         setViewingContentId(it._id);
                         setViewOpen(true);
                       }}
@@ -872,6 +887,15 @@ export default function AdminMedicalContentPage() {
           if (!next) setViewingContentId(null);
         }}
         contentId={viewingContentId}
+      />
+
+      <EditAdminContentDialog
+        open={editOpen}
+        onOpenChange={(next) => {
+          setEditOpen(next);
+          if (!next) setEditingContentId(null);
+        }}
+        contentId={editingContentId}
       />
 
       <ConfirmActionDialog
