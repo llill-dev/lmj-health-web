@@ -824,30 +824,64 @@ export type AdminMedicalOrderCatalogDetailsResponse = ApiSuccessEnvelope & {
   });
 };
 
+/** أنواع المحتوى الأب المسموحة لقالب البيانات (API-3: parentType). */
+export type AdminContentTemplateParentType =
+  | 'CONDITION'
+  | 'SYMPTOM'
+  | 'GENERAL_ADVICE'
+  | 'MEDICATION';
+
+/** أنواع حقول القالب المعروضة في محرّر الحقول. */
+export type AdminContentTemplateFieldType =
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'date'
+  | 'boolean'
+  | 'select';
+
 export type AdminContentTemplateField = {
   key: string;
   label?: string | { ar?: string; en?: string };
-  type?: string;
+  type?: AdminContentTemplateFieldType | string;
   required?: boolean;
 };
 
 export type AdminContentTemplate = {
   _id: string;
   name?: string;
+  slug?: string;
   description?: string;
+  parentType?: AdminContentTemplateParentType | string;
   isActive?: boolean;
+  active?: boolean;
   schemaVersion?: number;
   fields?: AdminContentTemplateField[];
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AdminContentTemplatesListParams = {
+  parentType?: AdminContentTemplateParentType;
+  active?: boolean;
+  page?: number;
+  limit?: number;
 };
 
 export type AdminContentTemplatesListResponse = ApiSuccessEnvelope & {
   items?: AdminContentTemplate[];
   templates?: AdminContentTemplate[];
+  contentTemplates?: AdminContentTemplate[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  results?: number;
 };
 
 export type CreateAdminContentTemplateBody = {
   name: string;
-  description?: string;
+  slug?: string;
+  parentType: AdminContentTemplateParentType;
   fields?: AdminContentTemplateField[];
 };
 

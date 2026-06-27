@@ -406,6 +406,10 @@ export default function App() {
               element={<AdminPages.AdminMedicalContentPage />}
             />
             <Route
+              path="content-templates"
+              element={<AdminPages.AdminContentTemplatesPage />}
+            />
+            <Route
               path="content-review"
               element={
                 <Navigate to="/admin/medical-content?queue=review" replace />

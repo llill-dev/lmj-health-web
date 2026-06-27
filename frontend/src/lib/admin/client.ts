@@ -28,6 +28,7 @@ import type {
   UpdateAdminContentBody,
   AdminContentMutationResponse,
   AdminContentTemplatesListResponse,
+  AdminContentTemplatesListParams,
   CreateAdminContentTemplateBody,
   UpdateAdminContentTemplateBody,
   AdminContentTemplateMutationResponse,
@@ -426,10 +427,20 @@ export const adminApi = {
       }),
   },
   contentTemplates: {
-    list: () =>
-      get<AdminContentTemplatesListResponse>(adminEndpoints.contentTemplates.list, {
+    list: (params: AdminContentTemplatesListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.parentType) qs.set("parentType", params.parentType);
+      if (typeof params.active === "boolean")
+        qs.set("active", String(params.active));
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.contentTemplates.list}?${qs.toString()}`
+        : adminEndpoints.contentTemplates.list;
+      return get<AdminContentTemplatesListResponse>(endpoint, {
         locale: "ar",
-      }),
+      });
+    },
     create: (body: CreateAdminContentTemplateBody) =>
       post<AdminContentTemplateMutationResponse>(
         adminEndpoints.contentTemplates.create,
