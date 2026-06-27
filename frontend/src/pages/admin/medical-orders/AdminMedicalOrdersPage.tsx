@@ -1,5 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useEffect, useMemo, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 import {
   MedicalOrderCatalogCard,
   MedicalOrderCatalogToolbar,
@@ -30,8 +31,9 @@ export default function AdminMedicalOrdersPage() {
     null,
   );
 
+  const [debouncedSearch] = useDebounce(search, 300);
   const { data, isAwaitingData, isError, error, refetch } =
-    useAdminMedicalOrderCatalog(kind);
+    useAdminMedicalOrderCatalog(kind, debouncedSearch);
   const deleteMut = useDeleteMedicalOrderCatalogItem(kind);
 
   useEffect(() => {

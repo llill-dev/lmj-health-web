@@ -16,10 +16,18 @@ export const MEDICAL_ORDER_CATALOG_KEYS = {
     [...MEDICAL_ORDER_CATALOG_KEYS.all, 'list', kind] as const,
 };
 
-export function useAdminMedicalOrderCatalog(kind: MedicalOrderCatalogKind) {
+export function useAdminMedicalOrderCatalog(
+  kind: MedicalOrderCatalogKind,
+  search?: string,
+) {
+  const trimmedSearch = search?.trim() ?? '';
   const query = useQuery({
-    queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
-    queryFn: () => adminApi.medicalOrderCatalog.list({ type: kind }),
+    queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.list(kind), trimmedSearch],
+    queryFn: () =>
+      adminApi.medicalOrderCatalog.list({
+        type: kind,
+        ...(trimmedSearch ? { search: trimmedSearch } : {}),
+      }),
     staleTime: 30_000,
   });
 
