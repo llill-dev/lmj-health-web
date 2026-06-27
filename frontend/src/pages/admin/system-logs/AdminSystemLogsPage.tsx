@@ -1,7 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 import { useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
-import { AdminAuditLogFilters } from '@/components/admin/system-logs/AdminAuditLogFilters';
+import {
+  AdminAuditLogFilters,
+  type AuditAdvancedFilters,
+} from '@/components/admin/system-logs/AdminAuditLogFilters';
 import { AdminAuditLogPagination } from '@/components/admin/system-logs/AdminAuditLogPagination';
 import { AdminAuditLogPrivacyNote } from '@/components/admin/system-logs/AdminAuditLogPrivacyNote';
 import { AdminAuditLogTable } from '@/components/admin/system-logs/AdminAuditLogTable';
@@ -11,6 +14,17 @@ import { PAGE_SIZE } from '@/components/admin/system-logs/auditLogConstants';
 import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
 import type { AuditLogCategory, AuditLogOutcome } from '@/lib/admin/types';
 
+const EMPTY_ADVANCED: AuditAdvancedFilters = {
+  actorUserId: '',
+  targetUserId: '',
+  patientId: '',
+  entityType: '',
+  entityId: '',
+  action: '',
+  requestId: '',
+  ip: '',
+};
+
 export default function AdminSystemLogsPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<AuditLogCategory | ''>('');
@@ -18,12 +32,20 @@ export default function AdminSystemLogsPage() {
   const [actorRole, setActorRole] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [advanced, setAdvanced] = useState<AuditAdvancedFilters>(EMPTY_ADVANCED);
   const [page, setPage] = useState(1);
 
   const [debouncedSearch] = useDebounce(search, 350);
+  const [debouncedAdvanced] = useDebounce(advanced, 350);
 
-  const params = useMemo(
-    () => ({
+  const params = useMemo(() => {
+    const advancedParams = Object.fromEntries(
+      Object.entries(debouncedAdvanced)
+        .map(([key, value]) => [key, value.trim()])
+        .filter(([, value]) => value !== ''),
+    );
+
+    return {
       page,
       limit: PAGE_SIZE,
       ...(debouncedSearch ? { search: debouncedSearch } : {}),
@@ -32,9 +54,9 @@ export default function AdminSystemLogsPage() {
       ...(actorRole ? { actorRole } : {}),
       ...(from ? { from: new Date(from).toISOString() } : {}),
       ...(to ? { to: new Date(to).toISOString() } : {}),
-    }),
-    [page, debouncedSearch, category, outcome, actorRole, from, to],
-  );
+      ...advancedParams,
+    };
+  }, [page, debouncedSearch, category, outcome, actorRole, from, to, debouncedAdvanced]);
 
   const { data, isAwaitingData, isError, error } = useAdminAuditLogs(params);
 
@@ -53,10 +75,20 @@ export default function AdminSystemLogsPage() {
     setActorRole('');
     setFrom('');
     setTo('');
+    setAdvanced(EMPTY_ADVANCED);
     setPage(1);
   }
 
-  const hasActiveFilters = !!(debouncedSearch || category || outcome || actorRole || from || to);
+  const hasAdvancedFilters = Object.values(advanced).some((v) => v.trim() !== '');
+  const hasActiveFilters = !!(
+    debouncedSearch ||
+    category ||
+    outcome ||
+    actorRole ||
+    from ||
+    to ||
+    hasAdvancedFilters
+  );
 
   const bumpPage = () => setPage(1);
 
@@ -109,6 +141,7 @@ export default function AdminSystemLogsPage() {
           actorRole={actorRole}
           from={from}
           to={to}
+          advanced={advanced}
           hasActiveFilters={hasActiveFilters}
           onSearchChange={(v) => {
             setSearch(v);
@@ -132,6 +165,10 @@ export default function AdminSystemLogsPage() {
           }}
           onToChange={(v) => {
             setTo(v);
+            bumpPage();
+          }}
+          onAdvancedChange={(key, value) => {
+            setAdvanced((prev) => ({ ...prev, [key]: value }));
             bumpPage();
           }}
           onReset={resetFilters}
