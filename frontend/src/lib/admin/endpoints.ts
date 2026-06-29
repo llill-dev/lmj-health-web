@@ -1,15 +1,15 @@
-import type { MedicalOrderCatalogKind } from '@/lib/admin/types';
+import type { MedicalOrderCatalogKind } from "@/lib/admin/types";
 
 function orderCatalogSegment(kind: MedicalOrderCatalogKind): string {
   switch (kind) {
-    case 'lab':
-      return 'lab-tests';
-    case 'imaging':
-      return 'imaging';
-    case 'procedure':
-      return 'procedures';
-    case 'referral':
-      return 'referrals';
+    case "lab":
+      return "lab-tests";
+    case "imaging":
+      return "imaging";
+    case "procedure":
+      return "procedures";
+    case "referral":
+      return "referrals";
     default: {
       const _ex: never = kind;
       return _ex;
@@ -19,7 +19,7 @@ function orderCatalogSegment(kind: MedicalOrderCatalogKind): string {
 
 export const adminEndpoints = {
   doctors: {
-    list: '/api/admin/doctors',
+    list: "/api/admin/doctors",
     details: (doctorId: string) => `/api/admin/doctors/${doctorId}`,
     analyticsDiagnosis: (doctorId: string) =>
       `/api/admin/doctors/${doctorId}/analytics/diagnosis`,
@@ -27,7 +27,7 @@ export const adminEndpoints = {
       `/api/admin/doctors/${doctorId}/analytics/summary`,
   },
   patients: {
-    list: '/api/admin/patients',
+    list: "/api/admin/patients",
     details: (patientId: string) => `/api/admin/patients/${patientId}`,
     activate: (patientId: string) =>
       `/api/admin/patients/${patientId}/activate`,
@@ -35,45 +35,46 @@ export const adminEndpoints = {
     unsuspend: (patientId: string) =>
       `/api/admin/patients/${patientId}/unsuspend`,
     files: {
-      list: (patientId: string) => `/api/patients/${patientId}/files`,
+      list: (patientId: string) => `/api/admin/patients/${patientId}/files`,
       download: (patientId: string, fileId: string) =>
-        `/api/patients/${patientId}/files/${fileId}/download`,
+        `/api/admin/patients/${patientId}/files/${fileId}/download`,
     },
   },
   appointments: {
-    list: '/api/appointments',
-    details: (appointmentId: string) => `/api/appointments/${appointmentId}`,
+    list: "/api/admin/appointments",
+    details: (appointmentId: string) =>
+      `/api/admin/appointments/${appointmentId}`,
     cancel: (appointmentId: string) =>
-      `/api/appointments/${appointmentId}/cancel`,
+      `/api/admin/appointments/${appointmentId}/cancel`,
   },
   verificationRequests: {
-    list: '/api/admin/doctor-verification-requests',
+    list: "/api/admin/doctor-verification-requests",
     details: (requestId: string) =>
       `/api/admin/doctor-verification-requests/${requestId}`,
     review: (requestId: string) =>
       `/api/admin/doctor-verification-requests/${requestId}`,
   },
   secretaries: {
-    list: '/api/admin/secretaries',
+    list: "/api/admin/secretaries",
   },
   users: {
-    list: '/api/admin/users',
-    create: '/api/admin/users',
+    list: "/api/admin/users",
+    create: "/api/admin/users",
     offboard: (userId: string) => `/api/admin/users/${userId}/offboard`,
   },
   auditLogs: {
-    list: '/api/admin/audit-logs',
+    list: "/api/admin/audit-logs",
   },
   complaints: {
-    list: '/api/complaints',
-    details: (complaintId: string) => `/api/complaints/${complaintId}`,
+    list: "/api/admin/complaints",
+    details: (complaintId: string) => `/api/admin/complaints/${complaintId}`,
     updateStatus: (complaintId: string) =>
-      `/api/complaints/${complaintId}/status`,
+      `/api/admin/complaints/${complaintId}/status`,
   },
   content: {
-    list: '/api/admin/content',
-    create: '/api/admin/content',
-    mine: '/api/admin/content/mine',
+    list: "/api/admin/content",
+    create: "/api/admin/content",
+    mine: "/api/admin/content/mine",
     details: (id: string) => `/api/admin/content/${id}`,
     update: (id: string) => `/api/admin/content/${id}`,
     submitReview: (id: string) => `/api/admin/content/${id}/submit-review`,
@@ -83,14 +84,14 @@ export const adminEndpoints = {
     archive: (id: string) => `/api/admin/content/${id}/archive`,
   },
   contentTemplates: {
-    list: '/api/admin/content-templates',
-    create: '/api/admin/content-templates',
+    list: "/api/admin/content-templates",
+    create: "/api/admin/content-templates",
     update: (id: string) => `/api/admin/content-templates/${id}`,
     disable: (id: string) => `/api/admin/content-templates/${id}/disable`,
   },
   news: {
-    ingest: '/api/admin/news/ingest',
-    pending: '/api/admin/news/pending',
+    ingest: "/api/admin/news/ingest",
+    pending: "/api/admin/news/pending",
   },
   /**
    * كتالوج الطلبات الطبية — مسار لكل فئة (API-3: GET/POST /admin/order-catalog/lab-tests|imaging|procedures|…).
@@ -103,13 +104,13 @@ export const adminEndpoints = {
   },
   /** API-3.pdf — GET/POST/PATCH/DELETE /api/admin/lookups */
   lookups: {
-    list: '/api/admin/lookups',
+    list: "/api/admin/lookups",
     detail: (id: string) => `/api/admin/lookups/${id}`,
   },
 
   facilities: {
-    list: '/api/admin/facilities',
-    create: '/api/admin/facilities',
+    list: "/api/admin/facilities",
+    create: "/api/admin/facilities",
     getById: (id: string) => `/api/admin/facilities/${id}`,
     update: (id: string) => `/api/admin/facilities/${id}`,
     action: (id: string) => `/api/admin/facilities/${id}`,
@@ -118,16 +119,16 @@ export const adminEndpoints = {
     listDoctors: (id: string) => `/api/admin/facilities/${id}/doctors`,
   },
   serviceTypes: {
-    list: '/api/service-types',
-    listPublic: '/api/services/types',
-    create: '/api/service-types',
-    update: (id: string) => `/api/service-types/${id}`,
+    list: "/api/admin/service-types",
+    listPublic: "/api/services/types",
+    create: "/api/admin/service-types",
+    update: (id: string) => `/api/admin/service-types/${id}`,
   },
   serviceProviders: {
-    list: '/api/services',
-    getById: (id: string) => `/api/services/${id}`,
-    create: '/api/service-providers',
-    update: (id: string) => `/api/service-providers/${id}`,
-    updateStatus: (id: string) => `/api/service-providers/${id}/status`,
+    list: "/api/services",
+    getById: (id: string) => `/api/admin/services/${id}`,
+    create: "/api/admin/service-providers",
+    update: (id: string) => `/api/admin/service-providers/${id}`,
+    updateStatus: (id: string) => `/api/admin/service-providers/${id}/status`,
   },
 } as const;

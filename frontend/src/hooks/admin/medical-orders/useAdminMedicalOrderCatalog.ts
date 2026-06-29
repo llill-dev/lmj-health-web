@@ -1,33 +1,35 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
-import { adminApi } from '@/lib/admin/client';
-import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { adminApi } from "@/lib/admin/client";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import type {
   AdminMedicalOrderCatalogDetailsResponse,
   AdminMedicalOrderCatalogUpsertBody,
   MedicalOrderCatalogKind,
-} from '@/lib/admin/types';
+} from "@/lib/admin/types";
 
 export const MEDICAL_ORDER_CATALOG_KEYS = {
-  all: ['admin', 'medical-order-catalog'] as const,
+  all: ["admin", "medical-order-catalog"] as const,
   list: (kind: MedicalOrderCatalogKind) =>
-    [...MEDICAL_ORDER_CATALOG_KEYS.all, 'list', kind] as const,
+    [...MEDICAL_ORDER_CATALOG_KEYS.all, "list", kind] as const,
 };
 
 export function useAdminMedicalOrderCatalog(
   kind: MedicalOrderCatalogKind,
   search?: string,
+  isVisible?: boolean,
 ) {
-  const trimmedSearch = search?.trim() ?? '';
+  const trimmedSearch = search?.trim() ?? "";
   const query = useQuery({
-    queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.list(kind), trimmedSearch],
+    queryKey: [
+      ...MEDICAL_ORDER_CATALOG_KEYS.list(kind),
+      trimmedSearch,
+      isVisible,
+    ],
     queryFn: () =>
       adminApi.medicalOrderCatalog.list({
         type: kind,
         ...(trimmedSearch ? { search: trimmedSearch } : {}),
+        ...(isVisible !== undefined ? { isVisible } : {}),
       }),
     staleTime: 30_000,
   });
@@ -43,7 +45,7 @@ export function useAdminMedicalOrderCatalogItem(
   id?: string | null,
 ) {
   const query = useQuery({
-    queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, 'details', kind, id],
+    queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, "details", kind, id],
     queryFn: () => adminApi.medicalOrderCatalog.getById(kind, id as string),
     enabled: Boolean(id),
     staleTime: 30_000,
@@ -68,6 +70,7 @@ export function useCreateMedicalOrderCatalogItem() {
     onSuccess: (_, v) => {
       void qc.invalidateQueries({
         queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(v.kind),
+        refetchType: "all",
       });
     },
   });
@@ -92,6 +95,7 @@ export function useUpdateMedicalOrderCatalogItem(
     onSuccess: () => {
       void qc.invalidateQueries({
         queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
+        refetchType: "all",
       });
     },
   });
@@ -106,6 +110,7 @@ export function useDeleteMedicalOrderCatalogItem(
     onSuccess: () => {
       void qc.invalidateQueries({
         queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
+        refetchType: "all",
       });
     },
   });

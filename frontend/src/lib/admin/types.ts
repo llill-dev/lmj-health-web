@@ -783,14 +783,14 @@ export type CreateAdminContentBody = {
   summary?: string;
   language: "ar" | "en";
   slug?: string;
+  /** إصدار الصفحة — مطلوب فعلياً لاعتماد SETTINGS_PAGE (راجع API-3). */
+  pageVersion?: string | null;
   contentBlocks?: AdminContentBlock[];
   sources?: Array<{ title?: string; url?: string }>;
 };
 
 export type UpdateAdminContentBody = Partial<CreateAdminContentBody> & {
   status?: AdminContentStatus;
-  /** إصدار الصفحة — مطلوب فعلياً لاعتماد SETTINGS_PAGE (راجع API-3). */
-  pageVersion?: string | null;
 };
 
 export type AdminContentMutationResponse = ApiSuccessEnvelope & {
@@ -817,6 +817,7 @@ export type MedicalOrderCatalogItem = {
 export type AdminMedicalOrderCatalogListParams = {
   type: MedicalOrderCatalogKind;
   search?: string;
+  isVisible?: boolean;
 };
 
 export type AdminMedicalOrderCatalogListResponse = ApiSuccessEnvelope & {

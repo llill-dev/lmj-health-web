@@ -1,5 +1,13 @@
 import { Helmet } from "react-helmet-async";
-import { Eye, Link as LinkIcon, Newspaper, Plus, RefreshCw } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Link as LinkIcon,
+  Newspaper,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
@@ -19,6 +27,7 @@ export default function AdminMedicalNewsQueuePage() {
   const [sourceUrl, setSourceUrl] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [page, setPage] = useState(1);
   const [ingestOpen, setIngestOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewingContentId, setViewingContentId] = useState<string | null>(null);
@@ -30,7 +39,7 @@ export default function AdminMedicalNewsQueuePage() {
   const [ingestLanguage, setIngestLanguage] = useState<"ar" | "en">("ar");
 
   const pendingNewsQuery = useAdminPendingNews({
-    page: 1,
+    page,
     limit: 12,
     ...(langFilter !== "الكل" ? { language: langFilter as "ar" | "en" } : {}),
     ...(sourceUrl.trim() ? { sourceUrl: sourceUrl.trim() } : {}),
@@ -41,6 +50,13 @@ export default function AdminMedicalNewsQueuePage() {
 
   const pendingItems = pendingNewsQuery.items;
   const pendingTotal = pendingNewsQuery.data?.total ?? pendingItems.length;
+  const currentPage = Math.max(1, pendingNewsQuery.data?.page ?? page);
+  const pageSize = Math.max(1, pendingNewsQuery.data?.limit ?? 12);
+  const totalPages = Math.max(1, Math.ceil(pendingTotal / pageSize));
+  const canPrev = currentPage > 1;
+  const canNext = currentPage < totalPages;
+  const rangeStart = pendingTotal === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const rangeEnd = pendingTotal === 0 ? 0 : Math.min(currentPage * pageSize, pendingTotal);
   const visibleItems = useMemo(() => pendingItems, [pendingItems]);
 
   async function submitNewsIngest() {
@@ -140,7 +156,10 @@ export default function AdminMedicalNewsQueuePage() {
                 </span>
                 <input
                   value={sourceUrl}
-                  onChange={(e) => setSourceUrl(e.target.value)}
+                  onChange={(e) => {
+                      setSourceUrl(e.target.value);
+                      setPage(1);
+                    }}
                   placeholder="https://example.com/news/..."
                   dir="ltr"
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
@@ -153,7 +172,10 @@ export default function AdminMedicalNewsQueuePage() {
                 <input
                   type="date"
                   value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
+                  onChange={(e) => {
+                      setDateFrom(e.target.value);
+                      setPage(1);
+                    }}
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
                 />
               </label>
@@ -164,7 +186,10 @@ export default function AdminMedicalNewsQueuePage() {
                 <input
                   type="date"
                   value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
+                  onChange={(e) => {
+                      setDateTo(e.target.value);
+                      setPage(1);
+                    }}
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
                 />
               </label>
@@ -172,7 +197,13 @@ export default function AdminMedicalNewsQueuePage() {
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
                   اللغة
                 </span>
-                <LanguageModeToggle value={langFilter} onChange={setLangFilter} />
+                <LanguageModeToggle
+                  value={langFilter}
+                  onChange={(next) => {
+                    setLangFilter(next);
+                    setPage(1);
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -277,6 +308,42 @@ export default function AdminMedicalNewsQueuePage() {
             ))
           )}
         </section>
+
+        {!pendingNewsQuery.isAwaitingData && !pendingNewsQuery.isError && pendingTotal > 0 ? (
+          <section className="mt-4">
+            <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
+              <div className="text-right font-cairo text-[12px] font-semibold text-[#667085]">
+                عرض {rangeStart.toLocaleString("ar-SA")}–{rangeEnd.toLocaleString("ar-SA")} من{" "}
+                {pendingTotal.toLocaleString("ar-SA")} خبر · صفحة{" "}
+                {currentPage.toLocaleString("ar-SA")} / {totalPages.toLocaleString("ar-SA")}
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (canPrev) setPage((prev) => Math.max(1, prev - 1));
+                  }}
+                  disabled={!canPrev || pendingNewsQuery.isFetching}
+                  className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                  السابق
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (canNext) setPage((prev) => Math.min(totalPages, prev + 1));
+                  }}
+                  disabled={!canNext || pendingNewsQuery.isFetching}
+                  className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  التالي
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <MedicalContentViewDialog
           open={viewOpen}

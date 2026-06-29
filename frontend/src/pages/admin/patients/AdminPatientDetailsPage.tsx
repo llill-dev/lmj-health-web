@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import {
   Activity,
   AlertCircle,
+  Ban,
   CalendarClock,
   Download,
   Eye,
@@ -24,6 +25,7 @@ import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppoint
 import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
 import { useAdminPatientFiles } from '@/hooks/admin/patients/useAdminPatientFiles';
 import { AppointmentStatusChip } from '@/components/admin/patients/AppointmentStatusChip';
+import SuspendAccountDialog from '@/components/admin/patients/dialogs/SuspendAccountDialog';
 import { useToast } from '@/components/ui/ToastProvider';
 import { adminApi } from '@/lib/admin/client';
 import { triggerBrowserFileDownload } from '@/lib/files/triggerBrowserFileDownload';
@@ -159,6 +161,7 @@ export default function AdminPatientDetailsPage() {
 
   const [fileActionKey, setFileActionKey] = useState<string | null>(null);
   const [accountAction, setAccountAction] = useState<'activate' | 'unsuspend' | null>(null);
+  const [suspendOpen, setSuspendOpen] = useState(false);
 
   const patientAuditLogs = useMemo(
     () =>
@@ -375,42 +378,57 @@ export default function AdminPatientDetailsPage() {
                       سبب التعليق: {patient.suspendReason}
                     </div>
                   )}
-                  {patient.user.accountStatus !== 'active' && (
-                    <div className='col-span-2 flex flex-wrap gap-2'>
+                  <div className='col-span-2 flex flex-wrap gap-2'>
+                    {patient.user.accountStatus !== 'suspended' && (
                       <button
                         type='button'
                         disabled={accountAction !== null}
                         onClick={() => {
-                          void runAccountAction('activate');
+                          setSuspendOpen(true);
                         }}
-                        className='inline-flex h-[38px] items-center gap-2 rounded-[10px] bg-[#16A34A] px-4 font-cairo text-[12px] font-extrabold text-white disabled:opacity-60'
+                        className='inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#FB923C] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#F97316] disabled:opacity-60'
                       >
-                        {accountAction === 'activate' ? (
-                          <Loader2 className='h-4 w-4 animate-spin' />
-                        ) : (
-                          <ShieldCheck className='h-4 w-4' />
-                        )}
-                        تفعيل الحساب
+                        <Ban className='h-4 w-4' />
+                        تعليق الحساب
                       </button>
-                      {patient.user.accountStatus === 'suspended' && (
+                    )}
+                    {patient.user.accountStatus !== 'active' && (
+                      <>
                         <button
                           type='button'
                           disabled={accountAction !== null}
                           onClick={() => {
-                            void runAccountAction('unsuspend');
+                            void runAccountAction('activate');
                           }}
-                          className='inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#16A34A] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#15803D] disabled:opacity-60'
+                          className='inline-flex h-[38px] items-center gap-2 rounded-[10px] bg-[#16A34A] px-4 font-cairo text-[12px] font-extrabold text-white disabled:opacity-60'
                         >
-                          {accountAction === 'unsuspend' ? (
+                          {accountAction === 'activate' ? (
                             <Loader2 className='h-4 w-4 animate-spin' />
                           ) : (
                             <ShieldCheck className='h-4 w-4' />
                           )}
-                          رفع التعليق
+                          تفعيل الحساب
                         </button>
-                      )}
-                    </div>
-                  )}
+                        {patient.user.accountStatus === 'suspended' && (
+                          <button
+                            type='button'
+                            disabled={accountAction !== null}
+                            onClick={() => {
+                              void runAccountAction('unsuspend');
+                            }}
+                            className='inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#16A34A] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#15803D] disabled:opacity-60'
+                          >
+                            {accountAction === 'unsuspend' ? (
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                            ) : (
+                              <ShieldCheck className='h-4 w-4' />
+                            )}
+                            رفع التعليق
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
@@ -652,6 +670,23 @@ export default function AdminPatientDetailsPage() {
           </>
         )}
       </div>
+
+      <SuspendAccountDialog
+        open={suspendOpen}
+        onOpenChange={setSuspendOpen}
+        kind='patient'
+        targetId={patient?._id ?? patientId ?? null}
+        targetLabel={patient?.user.fullName ?? ''}
+        onSuccess={() => {
+          setSuspendOpen(false);
+          void Promise.all([
+            refetchPatient(),
+            appointmentsQuery.refetch(),
+            auditQuery.refetch(),
+            filesQuery.refetch(),
+          ]);
+        }}
+      />
     </>
   );
 }

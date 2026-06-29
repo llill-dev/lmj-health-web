@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   MapPin,
   MessageCircle,
+  Newspaper,
   ScrollText,
   UserCog,
   Settings,
@@ -52,7 +53,8 @@ export type SidebarItemId =
   | "support"
   | "notification"
   | "profile-settings"
-  | "secretaries";
+  | "secretaries"
+  | "medical-news";
 
 export type AdminSidebarItemId =
   | "overview"
@@ -63,6 +65,7 @@ export type AdminSidebarItemId =
   | "patients"
   | "secretaries"
   | "medical-content"
+  | "medical-news"
   | "content-templates"
   | "services"
   | "service-types"
@@ -132,6 +135,12 @@ export const sidebarItems: Array<{
     path: "clinical-library",
     label: "المكتبة السريرية",
     icon: BookOpen,
+  },
+  {
+    id: "medical-news",
+    path: "medical-news",
+    label: "الأخبار الطبية",
+    icon: Newspaper,
   },
   {
     id: "medical-records",
@@ -253,6 +262,12 @@ export const adminSidebarItems: Array<{
     path: "medical-content",
     label: "المحتوى الطبي",
     icon: BookOpen,
+  },
+  {
+    id: "medical-news",
+    path: "medical-news",
+    label: "الأخبار الطبية",
+    icon: Newspaper,
   },
   {
     id: "content-templates",
