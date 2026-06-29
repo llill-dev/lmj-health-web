@@ -6,6 +6,7 @@ import {
   Download,
   Eye,
   FileText,
+  Filter,
   HeartPulse,
   Loader2,
   Mail,
@@ -121,7 +122,8 @@ export default function AdminPatientDetailsPage() {
   const filesQuery = useAdminPatientFiles(patient?._id ?? patientId, {
     page: 1,
     limit: 8,
-    archived: false,
+    archived: showArchivedFiles,
+    ...(fileSearch.trim() ? { search: fileSearch.trim() } : {}),
   });
 
   const patientAppointments = useMemo(() => {
@@ -155,6 +157,8 @@ export default function AdminPatientDetailsPage() {
 
   const [fileActionKey, setFileActionKey] = useState<string | null>(null);
   const [accountAction, setAccountAction] = useState<'activate' | 'unsuspend' | null>(null);
+  const [fileSearch, setFileSearch] = useState('');
+  const [showArchivedFiles, setShowArchivedFiles] = useState(false);
 
   const patientAuditLogs = useMemo(
     () =>
@@ -499,6 +503,28 @@ export default function AdminPatientDetailsPage() {
                   <FileText className='h-4 w-4 text-primary' />
                   ملفات المريض
                 </div>
+              <div className='flex flex-col gap-3 border-b border-[#EEF2F6] px-6 py-4 lg:flex-row lg:items-center lg:justify-between'>
+                <div className='relative min-w-0 flex-1 lg:max-w-md'>
+                  <input
+                    type='search'
+                    value={fileSearch}
+                    onChange={(e) => setFileSearch(e.target.value)}
+                    placeholder='????? ?? ??? ????? ?? ????...'
+                    className='h-[40px] w-full rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+                  />
+                  <FileText className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+                </div>
+                <label className='inline-flex items-center gap-2 self-end rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#344054]'>
+                  <Filter className='h-4 w-4 text-primary' />
+                  <span>??? ??????? ????????</span>
+                  <input
+                    type='checkbox'
+                    checked={showArchivedFiles}
+                    onChange={(e) => setShowArchivedFiles(e.target.checked)}
+                    className='h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40'
+                  />
+                </label>
+              </div>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
                   {filesQuery.isAwaitingData ? 'جارِ التحميل...' : `${filesQuery.files.length} ملف`}
                 </div>
