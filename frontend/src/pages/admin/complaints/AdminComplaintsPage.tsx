@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { staggerContainer, staggerItem } from '@/motion';
 import { adminApi } from '@/lib/admin/client';
+import { complaintUserFacingError } from '@/lib/admin/complaints/complaintErrors';
 import StyledSelect from '@/components/ui/styled-select';
 import type { ComplaintLifecycleStatus, ComplaintType } from '@/lib/admin/types';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
@@ -148,6 +149,12 @@ export default function AdminComplaintsPage() {
   );
 
   const complaints = listQuery.data?.complaints ?? [];
+  const listErrorMessage = listQuery.isError
+    ? complaintUserFacingError(
+        listQuery.error,
+        '????? ????? ????? ???????.',
+      )
+    : null;
   const totalList = listQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalList / Math.max(limit, 1)));
   const canPrev = page > 1;
@@ -280,7 +287,7 @@ export default function AdminComplaintsPage() {
 
         {listQuery.isError ? (
           <p className='mt-8 text-center font-cairo text-sm font-semibold text-red-600'>
-            فشل تحميل قائمة الشكاوي. تحقق من الصلاحيات والاتصال بالخادم.
+            {listErrorMessage ?? '????? ????? ????? ???????.'}
           </p>
         ) : listAwaiting ? (
           <p className='mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]'>

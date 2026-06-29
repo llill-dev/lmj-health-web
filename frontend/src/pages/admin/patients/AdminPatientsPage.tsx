@@ -1,28 +1,31 @@
 import { Helmet } from 'react-helmet-async';
 import {
-  Eye,
+  Activity,
   Ban,
-  Users,
+  Eye,
   Mail,
   Phone,
-  Activity,
+  ShieldCheck,
+  Users,
 } from 'lucide-react';
 import { Filter, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import SuspendAccountDialog from '@/components/admin/patients/dialogs/SuspendAccountDialog';
 import {
   patientStatusLabel,
   patientStatusTone,
 } from '@/components/admin/patients/patientListUtils';
-
-import { useAdminPatients } from '@/hooks/admin/patients/useAdminPatients';
 import { AppCheckbox } from '@/components/ui';
+import { useToast } from '@/components/ui/ToastProvider';
 import StyledSelect from '@/components/ui/styled-select';
+import { useAdminPatients } from '@/hooks/admin/patients/useAdminPatients';
+import { adminApi } from '@/lib/admin/client';
 import type {
-  AdminPatientsAccountStatusFilter,
   AdminPatientSummary,
+  AdminPatientsAccountStatusFilter,
 } from '@/lib/admin/types';
 
 type AdminPatientsFiltersState = {
@@ -35,33 +38,42 @@ type AdminPatientsFiltersState = {
 
 export default function AdminPatientsPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     null,
   );
   const [selectedPatientLabel, setSelectedPatientLabel] = useState('');
+  const [accountActionTarget, setAccountActionTarget] = useState<{
+    id: string;
+    label: string;
+    action: 'activate' | 'unsuspend';
+  } | null>(null);
+  const [accountActionBusy, setAccountActionBusy] = useState(false);
 
-  const defaultFilters = useMemo<AdminPatientsFiltersState>(() => {
-    return {
+  const defaultFilters = useMemo<AdminPatientsFiltersState>(
+    () => ({
       account_status: 'all',
       search: '',
       includeDeleted: false,
       page: 1,
       limit: 20,
-    };
-  }, []);
+    }),
+    [],
+  );
 
   const [filters, setFilters] = useState<AdminPatientsFiltersState>({
     ...defaultFilters,
   });
 
-  const { patients, results, total, isAwaitingData, error } = useAdminPatients({
-    account_status: filters.account_status,
-    search: filters.search || undefined,
-    includeDeleted: filters.includeDeleted,
-    page: filters.page,
-    limit: filters.limit,
-  });
+  const { patients, results, total, isAwaitingData, error, refetch } =
+    useAdminPatients({
+      account_status: filters.account_status,
+      search: filters.search || undefined,
+      includeDeleted: filters.includeDeleted,
+      page: filters.page,
+      limit: filters.limit,
+    });
 
   const totalPages = useMemo(() => {
     const safeLimit = Math.max(1, filters.limit);
@@ -69,25 +81,45 @@ export default function AdminPatientsPage() {
     return pages || 1;
   }, [filters.limit, total]);
 
-  const hasActiveFilters = useMemo(() => {
-    return (
+  const hasActiveFilters = useMemo(
+    () =>
       filters.account_status !== defaultFilters.account_status ||
       Boolean(filters.search.trim()) ||
       filters.includeDeleted !== defaultFilters.includeDeleted ||
       filters.page !== defaultFilters.page ||
-      filters.limit !== defaultFilters.limit
-    );
-  }, [
-    defaultFilters.account_status,
-    defaultFilters.includeDeleted,
-    defaultFilters.limit,
-    defaultFilters.page,
-    filters.account_status,
-    filters.includeDeleted,
-    filters.limit,
-    filters.page,
-    filters.search,
-  ]);
+      filters.limit !== defaultFilters.limit,
+    [defaultFilters, filters],
+  );
+
+  async function runAccountAction() {
+    if (!accountActionTarget) return;
+    setAccountActionBusy(true);
+    try {
+      if (accountActionTarget.action === 'activate') {
+        await adminApi.patients.activate(accountActionTarget.id);
+      } else {
+        await adminApi.patients.unsuspend(accountActionTarget.id);
+      }
+
+      await refetch();
+      toast(
+        accountActionTarget.action === 'activate'
+          ? `تم تفعيل حساب المريض «${accountActionTarget.label}».`
+          : `تم رفع التعليق عن حساب «${accountActionTarget.label}».`,
+        {
+          title:
+            accountActionTarget.action === 'activate'
+              ? 'تم التفعيل'
+              : 'تم رفع التعليق',
+          variant: 'success',
+          durationMs: 4200,
+        },
+      );
+    } finally {
+      setAccountActionBusy(false);
+      setAccountActionTarget(null);
+    }
+  }
 
   return (
     <>
@@ -95,10 +127,7 @@ export default function AdminPatientsPage() {
         <title>إدارة المرضى • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
+      <div dir='rtl' lang='ar'>
         <AdminDashboardOverview
           variant='patients'
           surface='mint'
@@ -216,11 +245,11 @@ export default function AdminPatientsPage() {
         <section className='mt-5 space-y-5'>
           {isAwaitingData ? (
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
-              جارِ تحميل قائمة المرضى...
+              جاري تحميل قائمة المرضى...
             </div>
           ) : error ? (
             <div className='rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
-              تعذّر تحميل قائمة المرضى.
+              تعذر تحميل قائمة المرضى.
             </div>
           ) : patients.length === 0 ? (
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
@@ -229,6 +258,9 @@ export default function AdminPatientsPage() {
           ) : (
             patients.map((p) => {
               const tone = patientStatusTone(p.user.accountStatus);
+              const actionKind =
+                p.user.accountStatus === 'suspended' ? 'unsuspend' : 'activate';
+
               return (
                 <div
                   key={p._id}
@@ -275,14 +307,16 @@ export default function AdminPatientsPage() {
                           </div>
                         </div>
                         <div className='border-[#EEF2F6] bg-white px-5'>
-                          <div className='flex gap-2'>
+                          <div className='flex flex-wrap gap-2 justify-end'>
                             <button
                               type='button'
                               onClick={() =>
                                 navigate(
                                   `/admin/patients/${encodeURIComponent(p._id)}`,
                                   {
-                                    state: { patient: p satisfies AdminPatientSummary },
+                                    state: {
+                                      patient: p satisfies AdminPatientSummary,
+                                    },
                                   },
                                 )
                               }
@@ -299,11 +333,31 @@ export default function AdminPatientsPage() {
                                 setSelectedPatientLabel(p.user.fullName);
                                 setSuspendOpen(true);
                               }}
-                              className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316]'
+                              disabled={p.user.accountStatus === 'suspended'}
+                              className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316] disabled:cursor-not-allowed disabled:opacity-50'
                             >
                               <Ban className='w-4 h-4' />
                               تعليق الحساب
                             </button>
+
+                            {p.user.accountStatus !== 'active' && (
+                              <button
+                                type='button'
+                                onClick={() =>
+                                  setAccountActionTarget({
+                                    id: p._id,
+                                    label: p.user.fullName,
+                                    action: actionKind,
+                                  })
+                                }
+                                className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#BBF7D0] bg-[#ECFDF3] font-cairo text-[12px] font-extrabold text-[#15803D]'
+                              >
+                                <ShieldCheck className='w-4 h-4' />
+                                {actionKind === 'unsuspend'
+                                  ? 'رفع التعليق'
+                                  : 'تفعيل الحساب'}
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -382,7 +436,43 @@ export default function AdminPatientsPage() {
         targetLabel={selectedPatientLabel}
         onSuccess={() => {
           setSuspendOpen(false);
+          void refetch();
         }}
+      />
+
+      <ConfirmActionDialog
+        open={accountActionTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !accountActionBusy) setAccountActionTarget(null);
+        }}
+        variant='primary'
+        title={
+          accountActionTarget?.action === 'unsuspend'
+            ? 'تأكيد رفع التعليق'
+            : 'تأكيد تفعيل الحساب'
+        }
+        description={
+          accountActionTarget ? (
+            <>
+              {accountActionTarget.action === 'unsuspend'
+                ? 'سيتم رفع التعليق عن حساب المريض'
+                : 'سيتم تفعيل حساب المريض'}{' '}
+              <span className='font-extrabold text-[#344054]'>
+                {accountActionTarget.label}
+              </span>
+              .
+            </>
+          ) : (
+            '—'
+          )
+        }
+        confirmLabel={
+          accountActionTarget?.action === 'unsuspend'
+            ? 'رفع التعليق'
+            : 'تفعيل الحساب'
+        }
+        confirmDisabled={accountActionBusy}
+        onConfirm={runAccountAction}
       />
     </>
   );

@@ -9,6 +9,7 @@ import { MEDICAL_ORDER_TAB_META } from './constants';
 type Props = {
   kind: MedicalOrderCatalogKind;
   items: MedicalOrderCatalogItem[];
+  onView: (item: MedicalOrderCatalogItem) => void;
   onEdit: (item: MedicalOrderCatalogItem) => void;
   onDelete: (item: MedicalOrderCatalogItem) => void;
   isBusy?: boolean;
@@ -17,6 +18,7 @@ type Props = {
 export default function MedicalOrderCatalogCard({
   kind,
   items,
+  onView,
   onEdit,
   onDelete,
   isBusy,
@@ -46,6 +48,7 @@ export default function MedicalOrderCatalogCard({
             <MedicalOrderCatalogRow
               key={item._id}
               item={item}
+              onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
               deleteDisabled={isBusy}

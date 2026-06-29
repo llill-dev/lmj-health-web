@@ -1,8 +1,9 @@
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Eye, Trash2 } from 'lucide-react';
 import type { MedicalOrderCatalogItem } from '@/lib/admin/types';
 
 type Props = {
   item: MedicalOrderCatalogItem;
+  onView: (item: MedicalOrderCatalogItem) => void;
   onEdit: (item: MedicalOrderCatalogItem) => void;
   onDelete: (item: MedicalOrderCatalogItem) => void;
   deleteDisabled?: boolean;
@@ -10,6 +11,7 @@ type Props = {
 
 export default function MedicalOrderCatalogRow({
   item,
+  onView,
   onEdit,
   onDelete,
   deleteDisabled,
@@ -45,6 +47,14 @@ export default function MedicalOrderCatalogRow({
         </div>
       </div>
       <div className='flex shrink-0 items-center gap-1.5'>
+        <button
+          type='button'
+          onClick={() => onView(item)}
+          className='flex h-8 w-8 items-center justify-center rounded-[8px] border border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8] transition-colors hover:bg-[#DBEAFE]'
+          aria-label={`معاينة ${item.label}`}
+        >
+          <Eye className='w-4 h-4' />
+        </button>
         <button
           type='button'
           onClick={() => onEdit(item)}

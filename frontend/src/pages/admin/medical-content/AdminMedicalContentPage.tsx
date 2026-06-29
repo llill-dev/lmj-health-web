@@ -23,6 +23,7 @@ import {
   ChevronLeft,
   ChevronsLeft,
   ChevronsRight,
+  Link as LinkIcon,
 } from "lucide-react";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -40,14 +41,17 @@ import {
 import { useToast } from "@/components/ui/ToastProvider";
 import {
   useAdminContentList,
+  useAdminPendingNews,
   useApproveContent,
   useArchiveContent,
+  useIngestNews,
   usePublishContent,
   useRejectContent,
   useSubmitContentReview,
 } from "@/hooks/admin/content/useAdminContent";
 import { useAdminContentStatusCounts } from "@/hooks/admin/content/useAdminContentStatusCounts";
 import type {
+  AdminContentDetailsItem,
   AdminContentItem,
   AdminContentStatus,
   AdminContentType,
@@ -105,6 +109,15 @@ export default function AdminMedicalContentPage() {
   const [viewingContentId, setViewingContentId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editingContentId, setEditingContentId] = useState<string | null>(null);
+  const [ingestOpen, setIngestOpen] = useState(false);
+  const [pendingSourceUrl, setPendingSourceUrl] = useState("");
+  const [pendingDateFrom, setPendingDateFrom] = useState("");
+  const [pendingDateTo, setPendingDateTo] = useState("");
+  const [ingestSourceUrl, setIngestSourceUrl] = useState("");
+  const [ingestTitle, setIngestTitle] = useState("");
+  const [ingestSummary, setIngestSummary] = useState("");
+  const [ingestPublishedAt, setIngestPublishedAt] = useState("");
+  const [ingestLanguage, setIngestLanguage] = useState<"ar" | "en">("ar");
   const [actionConfirm, setActionConfirm] = useState<{
     kind: "submitReview" | "approve" | "publish" | "archive";
     id: string;
@@ -177,12 +190,25 @@ export default function AdminMedicalContentPage() {
 
   const contentQuery = useAdminContentList(listParams);
   const statusCounts = useAdminContentStatusCounts();
+  const pendingNewsQuery = useAdminPendingNews({
+    page: 1,
+    limit: 6,
+    ...(langFilter === "ar" || langFilter === "en"
+      ? { language: langFilter }
+      : {}),
+    ...(pendingSourceUrl.trim()
+      ? { sourceUrl: pendingSourceUrl.trim() }
+      : {}),
+    ...(pendingDateFrom ? { dateFrom: pendingDateFrom } : {}),
+    ...(pendingDateTo ? { dateTo: pendingDateTo } : {}),
+  });
 
   const submitReviewMutation = useSubmitContentReview();
   const approveMutation = useApproveContent();
   const rejectMutation = useRejectContent();
   const publishMutation = usePublishContent();
   const archiveMutation = useArchiveContent();
+  const ingestNewsMutation = useIngestNews();
 
   const items = useMemo<AdminContentItem[]>(
     () => normalizeContentItems(contentQuery.data),
@@ -239,6 +265,10 @@ export default function AdminMedicalContentPage() {
 
   const showPaginationBar =
     !contentQuery.isAwaitingData && !contentQuery.isError && serverTotal > 0;
+  const isNewsView = activeType === "NEWS";
+  const pendingNewsItems = pendingNewsQuery.items;
+  const pendingNewsTotal =
+    pendingNewsQuery.data?.total ?? pendingNewsItems.length;
 
   useEffect(() => {
     setPage(1);
@@ -282,6 +312,47 @@ export default function AdminMedicalContentPage() {
     rejectMutation.isPending ||
     publishMutation.isPending ||
     archiveMutation.isPending;
+
+  async function submitNewsIngest() {
+    const sourceUrl = ingestSourceUrl.trim();
+    const title = ingestTitle.trim();
+    if (!sourceUrl || !title) {
+      toast("أدخل رابط المصدر والعنوان على الأقل.", {
+        title: "بيانات ناقصة",
+        variant: "error",
+      });
+      return;
+    }
+
+    await ingestNewsMutation.mutateAsync({
+      items: [
+        {
+          sourceUrl,
+          title,
+          summary: ingestSummary.trim() || undefined,
+          language: ingestLanguage,
+          publishedAt: ingestPublishedAt || undefined,
+        },
+      ],
+    });
+
+    toast("تمت إضافة الخبر إلى طابور الأخبار المعلّقة.", {
+      title: "تمت الإضافة",
+      variant: "success",
+    });
+    setIngestOpen(false);
+    setIngestSourceUrl("");
+    setIngestTitle("");
+    setIngestSummary("");
+    setIngestPublishedAt("");
+    setIngestLanguage("ar");
+  }
+
+  function openPendingPreview(item: AdminContentDetailsItem) {
+    if (!item._id) return;
+    setViewingContentId(item._id);
+    setViewOpen(true);
+  }
 
   return (
     <>

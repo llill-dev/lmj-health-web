@@ -21,7 +21,9 @@ import {
   statusLabelAr,
 } from '@/components/admin/complaints/complaintDetailsUtils';
 import { adminApi } from '@/lib/admin/client';
+import { complaintUserFacingError } from '@/lib/admin/complaints/complaintErrors';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+import { useToast } from '@/components/ui/ToastProvider';
 import StyledSelect from '@/components/ui/styled-select';
 import type {
   ComplaintAttachmentRef,
@@ -32,6 +34,7 @@ export default function AdminComplaintDetailsPage() {
   const { complaintId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [nextStatus, setNextStatus] = useState<ComplaintLifecycleStatus | ''>(
     '',
   );
@@ -70,20 +73,50 @@ export default function AdminComplaintDetailsPage() {
     },
   });
 
+  const detailErrorMessage = detailQuery.isError
+    ? complaintUserFacingError(
+        detailQuery.error,
+        '????? ????? ?????? ??????.',
+      )
+    : null;
+  const updateErrorMessage = updateMutation.isError
+    ? complaintUserFacingError(
+        updateMutation.error,
+        '????? ????? ???? ??????.',
+      )
+    : null;
+
   async function openAttachment(
     attachment: ComplaintAttachmentRef,
     mode: 'view' | 'download',
   ) {
     const pid = c?.patientId;
     const fid = attachment.fileId;
-    if (!pid || !fid) return;
+    if (!pid || !fid) {
+      toast('????? ????? ????? ?? ?????? ??????? ???? ??????.', {
+        title: '????? ??? ??????',
+        variant: 'error',
+      });
+      return;
+    }
     setFileActionId(`${fid}-${mode}`);
     try {
       const res = await adminApi.patients.files.getDownloadUrl(pid, fid);
       const url = res.downloadUrl || res.url;
-      if (!url) return;
+      if (!url) {
+        toast('?? ????? ?????? ?????? ?????? ???? ??????.', {
+          title: '????? ??? ??????',
+          variant: 'error',
+        });
+        return;
+      }
       if (mode === 'view') {
         window.open(url, '_blank', 'noopener,noreferrer');
+        toast('?? ??? ?????? ?? ????? ?????.', {
+          title: '?? ??? ??????',
+          variant: 'success',
+          durationMs: 2600,
+        });
       } else {
         const a = document.createElement('a');
         a.href = url;
@@ -93,9 +126,26 @@ export default function AdminComplaintDetailsPage() {
         document.body.appendChild(a);
         a.click();
         a.remove();
+        toast('?? ??? ????? ??????.', {
+          title: '?? ??? ???????',
+          variant: 'success',
+          durationMs: 2600,
+        });
       }
-    } catch {
-      // واجهة هادئة؛ يمكن لاحقاً إظهار toast
+    } catch (error) {
+      toast(
+        complaintUserFacingError(
+          error,
+          mode === 'view'
+            ? '????? ??? ??????.'
+            : '????? ????? ??????.',
+        ),
+        {
+          title: mode === 'view' ? '????? ??? ??????' : '????? ????? ??????',
+          variant: 'error',
+          durationMs: 4200,
+        },
+      );
     } finally {
       setFileActionId(null);
     }
@@ -135,7 +185,7 @@ export default function AdminComplaintDetailsPage() {
           </div>
         ) : detailQuery.isError || !c ? (
           <div className='px-4 py-6 text-sm font-semibold text-red-800 bg-red-50 rounded-xl border border-red-200 font-cairo'>
-            تعذر تحميل الشكوى.
+            {detailErrorMessage ?? '????? ????? ??????.'}
           </div>
         ) : (
           <div className='flex flex-col gap-8'>
@@ -356,7 +406,7 @@ export default function AdminComplaintDetailsPage() {
                 </label>
                 {updateMutation.isError ? (
                   <p className='font-cairo text-[12px] font-semibold text-red-600'>
-                    فشل التحديث. تحقق من انتقال الحالة المسموح.
+                    {updateErrorMessage ?? '????? ????? ???? ??????.'}
                   </p>
                 ) : null}
                 <button

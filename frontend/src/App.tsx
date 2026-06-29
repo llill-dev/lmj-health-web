@@ -417,9 +417,7 @@ export default function App() {
             />
             <Route
               path="medical-news"
-              element={
-                <Navigate to="/admin/medical-content?type=NEWS" replace />
-              }
+              element={<AdminPages.AdminMedicalNewsQueuePage />}
             />
             <Route
               path="service-types"

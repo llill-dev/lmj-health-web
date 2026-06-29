@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import {
   MedicalOrderCatalogCard,
+  MedicalOrderCatalogDetailsDialog,
   MedicalOrderCatalogToolbar,
   MedicalOrderCategoryTabs,
   UpsertMedicalOrderItemDialog,
@@ -24,6 +25,9 @@ export default function AdminMedicalOrdersPage() {
   const [kind, setKind] = useState<MedicalOrderCatalogKind>('lab');
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewTarget, setViewTarget] = useState<MedicalOrderCatalogItem | null>(
+    null,
+  );
   const [editTarget, setEditTarget] = useState<MedicalOrderCatalogItem | null>(
     null,
   );
@@ -56,6 +60,10 @@ export default function AdminMedicalOrdersPage() {
   function openEdit(item: MedicalOrderCatalogItem) {
     setEditTarget(item);
     setDialogOpen(true);
+  }
+
+  function openView(item: MedicalOrderCatalogItem) {
+    setViewTarget(item);
   }
 
   function openDeleteConfirm(item: MedicalOrderCatalogItem) {
@@ -129,6 +137,7 @@ export default function AdminMedicalOrdersPage() {
           <MedicalOrderCatalogCard
             kind={kind}
             items={filteredItems}
+            onView={openView}
             onEdit={openEdit}
             onDelete={openDeleteConfirm}
             isBusy={deleteMut.isPending}
@@ -182,6 +191,15 @@ export default function AdminMedicalOrdersPage() {
           onOpenChange={setDialogOpen}
           kind={kind}
           editTarget={editTarget}
+        />
+
+        <MedicalOrderCatalogDetailsDialog
+          open={viewTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setViewTarget(null);
+          }}
+          kind={kind}
+          itemId={viewTarget?._id ?? null}
         />
       </div>
     </>

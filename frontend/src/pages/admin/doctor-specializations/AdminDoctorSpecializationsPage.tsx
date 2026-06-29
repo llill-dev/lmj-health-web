@@ -38,6 +38,7 @@ export default function AdminDoctorSpecializationsPage() {
   const deferredSearch = useDeferredValue(search.trim());
   const [page, setPage] = useState(1);
   const [includeInactive, setIncludeInactive] = useState(false);
+  const [langOnly, setLangOnly] = useState(true);
 
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<AdminLookupRecord | null>(null);
@@ -52,8 +53,9 @@ export default function AdminDoctorSpecializationsPage() {
     () => ({
       category: lookupCategory,
       includeInactive,
+      langOnly,
     }),
-    [lookupCategory, includeInactive],
+    [lookupCategory, includeInactive, langOnly],
   );
 
   const { data, isAwaitingData, error, refetch } =
@@ -91,7 +93,7 @@ export default function AdminDoctorSpecializationsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [deferredSearch, includeInactive]);
+  }, [deferredSearch, includeInactive, langOnly]);
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
@@ -242,6 +244,16 @@ export default function AdminDoctorSpecializationsPage() {
               onChange={(e) => setIncludeInactive(e.target.checked)}
             />
             عرض العناصر المعطّلة
+          </label>
+
+          <label className="flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054]">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40"
+              checked={langOnly}
+              onChange={(e) => setLangOnly(e.target.checked)}
+            />
+            نص اللغة الحالية فقط
           </label>
         </div>
 

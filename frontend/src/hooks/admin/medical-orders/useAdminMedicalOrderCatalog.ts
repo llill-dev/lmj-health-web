@@ -6,6 +6,7 @@ import {
 import { adminApi } from '@/lib/admin/client';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type {
+  AdminMedicalOrderCatalogDetailsResponse,
   AdminMedicalOrderCatalogUpsertBody,
   MedicalOrderCatalogKind,
 } from '@/lib/admin/types';
@@ -33,6 +34,28 @@ export function useAdminMedicalOrderCatalog(
 
   return {
     ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
+}
+
+export function useAdminMedicalOrderCatalogItem(
+  kind: MedicalOrderCatalogKind,
+  id?: string | null,
+) {
+  const query = useQuery({
+    queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, 'details', kind, id],
+    queryFn: () => adminApi.medicalOrderCatalog.getById(kind, id as string),
+    enabled: Boolean(id),
+    staleTime: 30_000,
+  });
+
+  const item =
+    (query.data as AdminMedicalOrderCatalogDetailsResponse | undefined)?.item ??
+    null;
+
+  return {
+    ...query,
+    item,
     isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
   };
 }

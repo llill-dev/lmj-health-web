@@ -3,6 +3,10 @@ import { adminApi } from '@/lib/admin/client';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type {
   AdminContentListParams,
+  AdminNewsIngestBody,
+  AdminNewsPendingListParams,
+  AdminNewsPendingListResponse,
+  AdminContentDetailsItem,
   CreateAdminContentBody,
   UpdateAdminContentBody,
 } from '@/lib/admin/types';
@@ -104,6 +108,38 @@ export function useUpdateAdminContent() {
       body: UpdateAdminContentBody;
     }) => adminApi.content.update(id, body),
     onSuccess: () => {
+      invalidateContentQueries(qc);
+      void qc.invalidateQueries({ queryKey: ['admin', 'content', 'count'] });
+    },
+  });
+}
+
+export function useAdminPendingNews(params: AdminNewsPendingListParams = {}) {
+  const query = useQuery({
+    queryKey: ['admin', 'news', 'pending', params],
+    queryFn: () => adminApi.news.pending(params),
+    staleTime: STALE,
+  });
+
+  const items = (
+    (query.data as AdminNewsPendingListResponse | undefined)?.items ??
+    (query.data as AdminNewsPendingListResponse | undefined)?.content ??
+    []
+  ) as AdminContentDetailsItem[];
+
+  return {
+    ...query,
+    items,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
+}
+
+export function useIngestNews() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AdminNewsIngestBody) => adminApi.news.ingest(body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'news', 'pending'] });
       invalidateContentQueries(qc);
       void qc.invalidateQueries({ queryKey: ['admin', 'content', 'count'] });
     },

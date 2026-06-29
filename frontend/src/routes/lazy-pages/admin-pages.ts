@@ -34,6 +34,9 @@ export const AdminSecretaryAppointmentsManagementPage = lazy(
 export const AdminMedicalContentPage = lazy(
   () => import("@/pages/admin/medical-content/AdminMedicalContentPage"),
 );
+export const AdminMedicalNewsQueuePage = lazy(
+  () => import("@/pages/admin/medical-news/AdminMedicalNewsQueuePage"),
+);
 export const AdminContentTemplatesPage = lazy(
   () => import("@/pages/admin/content-templates/AdminContentTemplatesPage"),
 );

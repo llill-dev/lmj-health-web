@@ -13,6 +13,7 @@ import { useMemo } from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
+import { useAdminDoctors } from '@/hooks/admin/doctors/useAdminDoctors';
 import { adminApi } from '@/lib/admin/client';
 import { isAwaitingInitialQueryDataWithPlaceholder } from '@/lib/query/queryUi';
 import StyledSelect from '@/components/ui/styled-select';
@@ -34,14 +35,30 @@ export default function AdminVerificationRequestsPage() {
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'pending' | 'approved' | 'rejected'
   >('all');
+  const [doctorIdFilter, setDoctorIdFilter] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
+  const { doctors: doctorOptions, isAwaitingData: doctorsAwaiting } =
+    useAdminDoctors({
+      page: 1,
+      limit: 200,
+      status: 'approved',
+    });
+
   const verificationQuery = useQuery({
-    queryKey: ['admin', 'verification-requests', statusFilter, page, limit],
+    queryKey: [
+      'admin',
+      'verification-requests',
+      statusFilter,
+      doctorIdFilter,
+      page,
+      limit,
+    ],
     queryFn: () =>
       adminApi.verificationRequests.list({
         ...(statusFilter === 'all' ? {} : { status: statusFilter }),
+        ...(doctorIdFilter ? { doctorId: doctorIdFilter } : {}),
         page,
         limit,
       }),
@@ -188,6 +205,27 @@ export default function AdminVerificationRequestsPage() {
                   </button>
                 );
               })}
+              <StyledSelect
+                id='admin-verification-requests-doctor-filter'
+                className='min-w-[15rem]'
+                size='xs'
+                tone='muted'
+                value={doctorIdFilter}
+                disabled={doctorsAwaiting}
+                onChange={(value) => {
+                  setDoctorIdFilter(value);
+                  setPage(1);
+                }}
+                placeholder='كل الأطباء'
+                options={[
+                  { value: '', label: 'كل الأطباء' },
+                  ...doctorOptions.map((doctor) => ({
+                    value: doctor._id,
+                    label: `${doctor.user?.fullName ?? doctor._id}${doctor.specialization ? ` — ${doctor.specialization}` : ''}`,
+                  })),
+                ]}
+                listboxAriaLabel='تصفية حسب الطبيب'
+              />
               <StyledSelect
                 className='min-w-[4.5rem]'
                 size='xs'
