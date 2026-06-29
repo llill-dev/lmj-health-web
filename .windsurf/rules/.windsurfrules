@@ -1,0 +1,51 @@
+# Windsurf Project Rules
+
+## Tech Stack
+- **Framework**: React with TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand (authStore)
+- **Data Fetching**: React Query (@tanstack/react-query)
+- **Routing**: React Router
+- **Forms**: React Hook Form + Zod
+- **Icons**: Lucide React
+- **Animations**: Framer Motion
+- **Build Tool**: Vite
+
+## Code Style
+- Use functional components with hooks
+- Prefer composition over inheritance
+- Keep components small and focused
+- Use TypeScript for type safety
+- Follow existing naming conventions (camelCase for variables, PascalCase for components)
+- Use meaningful variable and function names
+
+## File Structure
+- `src/components/` - Reusable UI components
+- `src/pages/` - Page-level components
+- `src/lib/` - Utilities, API clients, types
+- `src/hooks/` - Custom React hooks
+- `src/store/` - Zustand stores
+- `src/layouts/` - Layout components
+
+## API Integration
+- Use the `apiRequest` function from `src/lib/base.ts` for all API calls
+- Store tokens in `authStore` and localStorage
+- Use React Query for data fetching and caching
+- Handle errors gracefully with user-friendly messages
+
+## Styling Guidelines
+- Use Tailwind CSS for all styling
+- Follow the existing design system (colors, spacing, typography)
+- Use the `font-cairo` font for Arabic text
+- Ensure RTL support for Arabic content
+- Make components responsive (mobile-first approach)
+
+## Testing
+- Write unit tests for critical business logic
+- Test API endpoints
+- Ensure accessibility (ARIA labels, keyboard navigation)
+
+## Git Workflow
+- Write clear, descriptive commit messages
+- Use feature branches for new features
+- Keep commits atomic and focused

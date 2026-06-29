@@ -119,6 +119,8 @@ export default function AdminPatientDetailsPage() {
     limit: 10,
     ...(patientId ? { patientId } : {}),
   });
+  const [fileSearch, setFileSearch] = useState('');
+  const [showArchivedFiles, setShowArchivedFiles] = useState(false);
   const filesQuery = useAdminPatientFiles(patient?._id ?? patientId, {
     page: 1,
     limit: 8,
@@ -157,8 +159,6 @@ export default function AdminPatientDetailsPage() {
 
   const [fileActionKey, setFileActionKey] = useState<string | null>(null);
   const [accountAction, setAccountAction] = useState<'activate' | 'unsuspend' | null>(null);
-  const [fileSearch, setFileSearch] = useState('');
-  const [showArchivedFiles, setShowArchivedFiles] = useState(false);
 
   const patientAuditLogs = useMemo(
     () =>
@@ -509,14 +509,14 @@ export default function AdminPatientDetailsPage() {
                     type='search'
                     value={fileSearch}
                     onChange={(e) => setFileSearch(e.target.value)}
-                    placeholder='????? ?? ??? ????? ?? ????...'
+                    placeholder='ابحث باسم الملف أو نوعه...'
                     className='h-[40px] w-full rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
                   />
                   <FileText className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
                 </div>
                 <label className='inline-flex items-center gap-2 self-end rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#344054]'>
                   <Filter className='h-4 w-4 text-primary' />
-                  <span>??? ??????? ????????</span>
+                  <span>عرض الملفات المؤرشفة</span>
                   <input
                     type='checkbox'
                     checked={showArchivedFiles}
@@ -540,7 +540,9 @@ export default function AdminPatientDetailsPage() {
                   </div>
                 ) : filesQuery.files.length === 0 ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                    لا توجد ملفات مرفوعة لهذا المريض.
+                    {fileSearch.trim() || showArchivedFiles
+                      ? 'لا توجد ملفات مطابقة للفلاتر الحالية.'
+                      : 'لا توجد ملفات مرفوعة لهذا المريض.'}
                   </div>
                 ) : (
                   filesQuery.files.map((f) => {
