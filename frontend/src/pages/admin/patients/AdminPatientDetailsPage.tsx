@@ -15,8 +15,10 @@ import {
   Key,
   Calendar,
   Info,
+  Search,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAdminPatient } from '@/hooks/admin/patients/useAdminPatient';
 import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppointments';
@@ -118,10 +120,16 @@ export default function AdminPatientDetailsPage() {
     limit: 10,
     ...(patientId ? { patientId } : {}),
   });
+  const [fileActionKey, setFileActionKey] = useState<string | null>(null);
+  const [accountAction, setAccountAction] = useState<'activate' | 'unsuspend' | null>(null);
+  const [fileSearch, setFileSearch] = useState('');
+  const [showArchivedFiles, setShowArchivedFiles] = useState(false);
+  const [debouncedFileSearch] = useDebounce(fileSearch.trim(), 350);
   const filesQuery = useAdminPatientFiles(patient?._id ?? patientId, {
     page: 1,
     limit: 8,
-    archived: false,
+    archived: showArchivedFiles,
+    search: debouncedFileSearch || undefined,
   });
 
   const patientAppointments = useMemo(() => {
@@ -152,9 +160,6 @@ export default function AdminPatientDetailsPage() {
     () => patientAppointments.filter((a) => a.status === 'no-show').length,
     [patientAppointments],
   );
-
-  const [fileActionKey, setFileActionKey] = useState<string | null>(null);
-  const [accountAction, setAccountAction] = useState<'activate' | 'unsuspend' | null>(null);
 
   const patientAuditLogs = useMemo(
     () =>
@@ -501,6 +506,29 @@ export default function AdminPatientDetailsPage() {
                 </div>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
                   {filesQuery.isAwaitingData ? 'جارِ التحميل...' : `${filesQuery.files.length} ملف`}
+                </div>
+              </div>
+              <div className='border-b border-[#EEF2F6] px-6 py-4'>
+                <div className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+                  <label className='relative block flex-1'>
+                    <input
+                      value={fileSearch}
+                      onChange={(event) => setFileSearch(event.target.value)}
+                      placeholder='ابحث باسم الملف أو النوع...'
+                      className='h-[40px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15'
+                    />
+                    <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+                  </label>
+
+                  <label className='inline-flex cursor-pointer select-none items-center justify-end gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054]'>
+                    <input
+                      type='checkbox'
+                      className='h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40'
+                      checked={showArchivedFiles}
+                      onChange={(event) => setShowArchivedFiles(event.target.checked)}
+                    />
+                    عرض الملفات المؤرشفة
+                  </label>
                 </div>
               </div>
               <div className='space-y-3 px-6 py-4'>

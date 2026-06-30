@@ -33,6 +33,27 @@ export type AppointmentSummary = {
   appointmentTypeNameSnapshot?: string;
   priceSnapshot?: number | null;
   priceVisibleToPatientSnapshot?: boolean;
+  encounter?: {
+    _id?: string;
+    status?: string;
+    origin?: string;
+    startedAt?: string;
+    closedAt?: string;
+  } | null;
+  files?: Array<{
+    _id: string;
+    id?: string;
+    appointmentLinkId?: string;
+    appointmentId?: string;
+    patientId?: string;
+    originalName?: string;
+    mimeType?: string;
+    sizeBytes?: number;
+    linkedAt?: string;
+    linkedByRole?: string;
+    linkedByUserId?: string;
+    isArchived?: boolean;
+  }>;
   cancelledAt?: string;
   cancelledBy?: string;
   cancelReason?: string;

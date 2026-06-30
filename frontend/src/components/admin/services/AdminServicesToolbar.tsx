@@ -6,7 +6,14 @@ import type { FacilityStatus, FacilitiesListParams } from '@/lib/admin/types';
 
 type FacilityFilterState = Pick<
   FacilitiesListParams,
-  'status' | 'hasDoctors' | 'attribute' | 'ownerDoctorId' | 'sortBy' | 'sortOrder'
+  | 'status'
+  | 'hasDoctors'
+  | 'attribute'
+  | 'ownerDoctorId'
+  | 'name'
+  | 'city'
+  | 'sortBy'
+  | 'sortOrder'
 >;
 
 const DEFAULT_FILTERS: FacilityFilterState = {
@@ -91,6 +98,8 @@ export function AdminServicesToolbar({
         facilityFilters.hasDoctors !== undefined ||
         facilityFilters.attribute ||
         facilityFilters.ownerDoctorId ||
+        facilityFilters.name ||
+        facilityFilters.city ||
         (facilityFilters.sortBy ?? 'updatedAt') !== 'updatedAt' ||
         (facilityFilters.sortOrder ?? 'desc') !== 'desc' ||
         searchInput),
@@ -221,6 +230,34 @@ export function AdminServicesToolbar({
                   })
                 }
                 placeholder='مثال: night_shift'
+                className={inputClass}
+              />
+            </FilterField>
+
+            <FilterField label='اسم المنشأة'>
+              <input
+                value={facilityFilters!.name ?? ''}
+                onChange={(event) =>
+                  onFacilityFiltersChange!({
+                    ...facilityFilters!,
+                    name: event.target.value || undefined,
+                  })
+                }
+                placeholder='مثال: مستشفى الشفاء'
+                className={inputClass}
+              />
+            </FilterField>
+
+            <FilterField label='المدينة'>
+              <input
+                value={facilityFilters!.city ?? ''}
+                onChange={(event) =>
+                  onFacilityFiltersChange!({
+                    ...facilityFilters!,
+                    city: event.target.value || undefined,
+                  })
+                }
+                placeholder='مثال: دمشق'
                 className={inputClass}
               />
             </FilterField>

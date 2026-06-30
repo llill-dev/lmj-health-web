@@ -2,9 +2,6 @@ import { Helmet } from "react-helmet-async";
 import {
   AlertCircle,
   ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Mail,
   Phone,
   Search,
@@ -20,11 +17,8 @@ import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialog";
 import { SecretaryCardSkeleton } from "@/components/admin/secretaries/SecretaryCardSkeleton";
 import { PERM_LABEL } from "@/components/admin/secretaries/secretaryPermissions";
-import {
-  buildVisiblePageNumbers,
-  resolveUserId,
-} from "@/components/admin/secretaries/secretaryListUtils";
-import { cn } from "@/lib/utils/utils";
+import { resolveUserId } from "@/components/admin/secretaries/secretaryListUtils";
+import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
 import StyledSelect from "@/components/ui/styled-select";
 import type { AdminSecretarySummary } from "@/lib/admin/types";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
@@ -72,12 +66,8 @@ export default function AdminSecretariesPage() {
     return { start, end };
   }, [data, page]);
 
-  const visiblePageNumbers = useMemo(
-    () => buildVisiblePageNumbers(page, totalPages, 7),
-    [page, totalPages],
-  );
-
-  const showPaginationBar = !isAwaitingData && !isError && data && data.total > 0;
+  const showPaginationBar =
+    !isAwaitingData && !isError && data && data.total > 0;
 
   const openOffboard = useCallback((s: AdminSecretarySummary) => {
     const userId = resolveUserId(s);
@@ -108,7 +98,9 @@ export default function AdminSecretariesPage() {
             {
               key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
-              value: isAwaitingData ? "—" : (data?.total ?? 0).toLocaleString("ar-EG"),
+              value: isAwaitingData
+                ? "—"
+                : (data?.total ?? 0).toLocaleString("ar-EG"),
               label: "إجمالي السكرتارية",
             },
             {
@@ -139,25 +131,25 @@ export default function AdminSecretariesPage() {
           </div>
 
           <StyledSelect
-            id='admin-secretary-doctor-filter'
-            className='w-36 shrink-0'
-            size='sm'
-            tone='muted'
+            id="admin-secretary-doctor-filter"
+            className="w-36 shrink-0"
+            size="sm"
+            tone="muted"
             value={doctorIdFilter}
             disabled={doctorsListAwaiting}
             onChange={(v) => {
               setDoctorIdFilter(v);
               setPage(1);
             }}
-            placeholder='كل الأطباء'
+            placeholder="كل الأطباء"
             options={[
-              { value: '', label: 'كل الأطباء' },
+              { value: "", label: "كل الأطباء" },
               ...doctorOptions.map((d) => ({
                 value: d._id,
-                label: `${d.user?.fullName ?? d._id}${d.specialization ? ` — ${d.specialization}` : ''}`,
+                label: `${d.user?.fullName ?? d._id}${d.specialization ? ` — ${d.specialization}` : ""}`,
               })),
             ]}
-            listboxAriaLabel='تصفية حسب الطبيب'
+            listboxAriaLabel="تصفية حسب الطبيب"
           />
           {doctorOptions.length >= 200 ? (
             <p className="mt-1.5 text-right font-cairo text-[10px] font-semibold text-[#98A2B3]">
@@ -347,143 +339,18 @@ export default function AdminSecretariesPage() {
         </section>
 
         {showPaginationBar ? (
-          <div className="mt-6 rounded-[12px] border border-[#EEF2F6] bg-gradient-to-b from-[#FAFBFC] to-white px-4 py-4 sm:px-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-right font-cairo text-[12px] font-semibold text-[#667085]">
-                <span className="text-[#101828]">
-                  عرض{" "}
-                  <span className="font-extrabold tabular-nums">
-                    {paginationRange.start.toLocaleString("ar-SA")}–
-                    {paginationRange.end.toLocaleString("ar-SA")}
-                  </span>
-                </span>
-                <span> من </span>
-                <span className="font-extrabold text-[#101828] tabular-nums">
-                  {data!.total.toLocaleString("ar-SA")}
-                </span>
-                <span> سكرتيراً</span>
-                {totalPages > 1 ? (
-                  <span className="font-extrabold ms-1 text-primary">
-                    · صفحة {page.toLocaleString("ar-SA")} /{" "}
-                    {totalPages.toLocaleString("ar-SA")}
-                  </span>
-                ) : null}
-              </p>
-
-              {totalPages > 1 ? (
-                <div
-                  className="flex flex-wrap gap-1 justify-center items-center min-w-0 sm:justify-end"
-                  role="navigation"
-                  aria-label="تصفح الصفحات"
-                >
-                  <button
-                    type="button"
-                    disabled={page <= 1}
-                    onClick={() => setPage(1)}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                    aria-label="الصفحة الأولى"
-                  >
-                    <ChevronsRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                    aria-label="السابق"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-
-                  <div className="mx-0.5 flex max-w-full flex-wrap items-center justify-center gap-1 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    {visiblePageNumbers[0] > 1 ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setPage(1)}
-                          className="min-w-[2.25rem] rounded-[10px] border border-[#E5E7EB] bg-white px-2 py-1.5 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:border-primary/30 hover:bg-[#F0FDFA]"
-                        >
-                          1
-                        </button>
-                        {visiblePageNumbers[0] > 2 ? (
-                          <span
-                            className="px-0.5 font-cairo text-[12px] font-bold text-[#98A2B3]"
-                            aria-hidden
-                          >
-                            …
-                          </span>
-                        ) : null}
-                      </>
-                    ) : null}
-
-                    {visiblePageNumbers.map((n) => (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => setPage(n)}
-                        className={cn(
-                          "min-w-[2.25rem] rounded-[10px] border px-2.5 py-1.5 font-cairo text-[12px] font-extrabold transition",
-                          n === page
-                            ? "border-primary bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.25)]"
-                            : "border-[#E5E7EB] bg-white text-[#344054] hover:border-primary/30 hover:bg-[#F0FDFA]",
-                        )}
-                        aria-label={`الصفحة ${n}`}
-                        aria-current={n === page ? "page" : undefined}
-                      >
-                        {n.toLocaleString("ar-SA")}
-                      </button>
-                    ))}
-
-                    {visiblePageNumbers[visiblePageNumbers.length - 1] <
-                    totalPages ? (
-                      <>
-                        {visiblePageNumbers[visiblePageNumbers.length - 1] <
-                        totalPages - 1 ? (
-                          <span
-                            className="px-0.5 font-cairo text-[12px] font-bold text-[#98A2B3]"
-                            aria-hidden
-                          >
-                            …
-                          </span>
-                        ) : null}
-                        <button
-                          type="button"
-                          onClick={() => setPage(totalPages)}
-                          className="min-w-[2.25rem] rounded-[10px] border border-[#E5E7EB] bg-white px-2 py-1.5 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:border-primary/30 hover:bg-[#F0FDFA]"
-                          aria-label="الصفحة الأخيرة"
-                        >
-                          {totalPages.toLocaleString("ar-SA")}
-                        </button>
-                      </>
-                    ) : null}
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                    aria-label="التالي"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage(totalPages)}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                    aria-label="الصفحة الأخيرة"
-                  >
-                    <ChevronsLeft className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <p className="text-right font-cairo text-[11px] font-bold text-[#98A2B3]">
-                  كل النتائج في صفحة واحدة
-                </p>
-              )}
-            </div>
-          </div>
+          <DoctorTablePagination
+            page={page}
+            totalPages={totalPages}
+            pageSize={LIMIT}
+            pageSizeOptions={[10, 20, 50]}
+            summaryLabel={`عرض ${paginationRange.start.toLocaleString("ar-SA")}–${paginationRange.end.toLocaleString("ar-SA")} من ${data!.total.toLocaleString("ar-SA")} سكرتيراً`}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              // Note: LIMIT is fixed at 20 in this page, so pageSize change not supported
+              setPage(1);
+            }}
+          />
         ) : null}
 
         <div className="h-8" />
@@ -500,4 +367,3 @@ export default function AdminSecretariesPage() {
     </>
   );
 }
-

@@ -29,7 +29,14 @@ export default function AdminServicesPage() {
   const [facilityFilters, setFacilityFilters] = useState<
     Pick<
       FacilitiesListParams,
-      'status' | 'hasDoctors' | 'attribute' | 'ownerDoctorId' | 'sortBy' | 'sortOrder'
+      | 'status'
+      | 'hasDoctors'
+      | 'attribute'
+      | 'ownerDoctorId'
+      | 'name'
+      | 'city'
+      | 'sortBy'
+      | 'sortOrder'
     >
   >({
     sortBy: 'updatedAt',

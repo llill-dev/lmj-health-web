@@ -11,6 +11,9 @@ import {
   Tag,
   Wallet,
   FileText,
+  FolderOpen,
+  Paperclip,
+  ShieldCheck,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -55,10 +58,31 @@ export default function AdminAppointmentDetailsDialog({
   }, [open]);
 
   const appointment = detailsQuery.data?.appointment;
+  const appointmentFiles = appointment?.files ?? [];
   const detailsAwaiting = isAwaitingInitialQueryData(
     detailsQuery.data,
     detailsQuery.isError,
   );
+
+  function formatDateTime(value?: string | null) {
+    if (!value) return '—';
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime())
+      ? value
+      : parsed.toLocaleString('ar-SA');
+  }
+
+  function formatBytes(value?: number | null) {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+      return '—';
+    }
+
+    if (value < 1024) return `${value.toLocaleString('ar-SA')} B`;
+    const kb = value / 1024;
+    if (kb < 1024) return `${kb.toFixed(kb >= 100 ? 0 : 1)} KB`;
+    const mb = kb / 1024;
+    return `${mb.toFixed(mb >= 100 ? 0 : 1)} MB`;
+  }
 
   return (
     <Dialog.Root
@@ -259,6 +283,97 @@ export default function AdminAppointmentDetailsDialog({
                       </div>
                     ) : null}
 
+                    {appointment.encounter ? (
+                      <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
+                        <div className='flex items-center gap-2 text-primary'>
+                          <FolderOpen className='h-4 w-4' />
+                          <div className='font-cairo text-[12px] font-extrabold'>
+                            ملخص الـ encounter
+                          </div>
+                        </div>
+
+                        <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
+                            <div className='text-[#98A2B3]'>المعرّف</div>
+                            <div className='mt-1 break-all font-bold text-[#111827]'>
+                              {appointment.encounter._id ?? '—'}
+                            </div>
+                          </div>
+
+                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
+                            <div className='text-[#98A2B3]'>الحالة / المصدر</div>
+                            <div className='mt-1 font-bold text-[#111827]'>
+                              {appointment.encounter.status ?? '—'}
+                              {appointment.encounter.origin
+                                ? ` • ${appointment.encounter.origin}`
+                                : ''}
+                            </div>
+                          </div>
+
+                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
+                            <div className='text-[#98A2B3]'>بدأ في</div>
+                            <div className='mt-1 font-bold text-[#111827]'>
+                              {formatDateTime(appointment.encounter.startedAt)}
+                            </div>
+                          </div>
+
+                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
+                            <div className='text-[#98A2B3]'>أُغلق في</div>
+                            <div className='mt-1 font-bold text-[#111827]'>
+                              {formatDateTime(appointment.encounter.closedAt)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {appointmentFiles.length > 0 ? (
+                      <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
+                        <div className='flex items-center gap-2 text-primary'>
+                          <Paperclip className='h-4 w-4' />
+                          <div className='font-cairo text-[12px] font-extrabold'>
+                            المرفقات المرتبطة بالموعد
+                          </div>
+                        </div>
+
+                        <div className='mt-3 space-y-3'>
+                          {appointmentFiles.map((file) => (
+                            <div
+                              key={file.id ?? file._id}
+                              className='rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3'
+                            >
+                              <div className='flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between'>
+                                <div className='min-w-0 text-right'>
+                                  <div className='break-all font-cairo text-[12px] font-extrabold text-[#111827]'>
+                                    {file.originalName ?? file.id ?? file._id}
+                                  </div>
+                                  <div className='mt-1 flex flex-wrap items-center justify-end gap-2 font-cairo text-[11px] font-semibold text-[#667085]'>
+                                    <span dir='ltr'>{file.mimeType ?? '—'}</span>
+                                    <span>•</span>
+                                    <span>{formatBytes(file.sizeBytes)}</span>
+                                    <span>•</span>
+                                    <span>
+                                      {file.isArchived ? 'مؤرشف' : 'نشط'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className='rounded-[8px] bg-white px-3 py-2 text-right font-cairo text-[11px] font-semibold text-[#475467]'>
+                                  <div className='flex items-center justify-end gap-1 text-[#16A34A]'>
+                                    <ShieldCheck className='h-3.5 w-3.5' />
+                                    <span>{file.linkedByRole ?? '—'}</span>
+                                  </div>
+                                  <div className='mt-1'>
+                                    {formatDateTime(file.linkedAt)}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
                     <div className='mt-6 flex items-center justify-end gap-3'>
                       <Dialog.Close asChild>
                         <button
@@ -278,4 +393,3 @@ export default function AdminAppointmentDetailsDialog({
       </Dialog.Root>
   );
 }
-
