@@ -25,6 +25,8 @@ export default function AdminMedicalOrdersPage() {
   const [kind, setKind] = useState<MedicalOrderCatalogKind>('lab');
   const [search, setSearch] = useState('');
   const [showVisibleOnly, setShowVisibleOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewTarget, setViewTarget] = useState<MedicalOrderCatalogItem | null>(
     null,
@@ -44,6 +46,7 @@ export default function AdminMedicalOrdersPage() {
   useEffect(() => {
     setEditTarget(null);
     setDialogOpen(false);
+    setPage(1);
   }, [kind]);
 
   const filteredItems = useMemo(() => {
@@ -55,6 +58,16 @@ export default function AdminMedicalOrdersPage() {
       return i.label.toLowerCase().includes(q);
     });
   }, [data?.items, search, showVisibleOnly]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / Math.max(pageSize, 1)));
+  const currentPage = Math.min(page, totalPages);
+  const visibleItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredItems.slice(start, start + pageSize);
+  }, [currentPage, filteredItems, pageSize]);
+  const rangeStart = filteredItems.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const rangeEnd =
+    filteredItems.length === 0 ? 0 : Math.min(currentPage * pageSize, filteredItems.length);
 
   function openAdd() {
     setEditTarget(null);
@@ -107,9 +120,15 @@ export default function AdminMedicalOrdersPage() {
           <div className='order-2 w-full md:order-1 md:w-auto md:min-w-[16rem] md:max-w-md md:shrink-0 md:flex md:items-center'>
             <MedicalOrderCatalogToolbar
               search={search}
-              onSearchChange={setSearch}
+              onSearchChange={(value) => {
+                setSearch(value);
+                setPage(1);
+              }}
               showVisibleOnly={showVisibleOnly}
-              onShowVisibleOnlyChange={setShowVisibleOnly}
+              onShowVisibleOnlyChange={(value) => {
+                setShowVisibleOnly(value);
+                setPage(1);
+              }}
             />
           </div>
         </div>
@@ -142,13 +161,64 @@ export default function AdminMedicalOrdersPage() {
         ) : (
           <MedicalOrderCatalogCard
             kind={kind}
-            items={filteredItems}
+            items={visibleItems}
             onView={openView}
             onEdit={openEdit}
             onDelete={openDeleteConfirm}
             isBusy={deleteMut.isPending}
           />
         )}
+
+        {!isAwaitingData && !isError && filteredItems.length > 0 ? (
+          <section className='rounded-[10px] border border-[#E5E7EB] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.08)]'>
+            <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+              <div className='font-cairo text-[12px] font-bold text-[#667085]'>
+                عرض {rangeStart.toLocaleString('ar-SA')}–{rangeEnd.toLocaleString('ar-SA')} من{' '}
+                {filteredItems.length.toLocaleString('ar-SA')} عنصر · صفحة{' '}
+                {currentPage.toLocaleString('ar-SA')} / {totalPages.toLocaleString('ar-SA')}
+              </div>
+
+              <div className='flex flex-wrap items-center justify-end gap-3'>
+                <select
+                  value={String(pageSize)}
+                  onChange={(event) => {
+                    setPageSize(Number(event.target.value) || 10);
+                    setPage(1);
+                  }}
+                  className='h-[36px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827]'
+                >
+                  {[10, 20, 50].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (currentPage > 1) setPage((prev) => prev - 1);
+                  }}
+                  disabled={currentPage <= 1}
+                  className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60'
+                >
+                  السابق
+                </button>
+
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (currentPage < totalPages) setPage((prev) => prev + 1);
+                  }}
+                  disabled={currentPage >= totalPages}
+                  className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60'
+                >
+                  التالي
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <ConfirmActionDialog
           open={deleteTarget !== null}
