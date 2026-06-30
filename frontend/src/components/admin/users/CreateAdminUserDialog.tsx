@@ -49,7 +49,7 @@ const createAdminUserSchema = z
       .max(20, "رقم الهاتف طويل جداً")
       .optional()
       .refine(
-        (val) => !val || /^\+?[0-9]{10,15}$/.test(val),
+        (val) => !val || /^\+?[0-9\s-]{8,20}$/.test(val),
         "رقم الهاتف غير صالح",
       )
       .transform((val) => (val?.trim() ? val.trim() : undefined)),
@@ -72,7 +72,7 @@ type CreateAdminUserFormValues = z.infer<typeof createAdminUserSchema>;
 const DEFAULT_VALUES: CreateAdminUserFormValues = {
   fullName: "",
   email: "",
-  phoneNumber: undefined,
+  phoneNumber: "",
   password: "",
   role: "data_entry",
 };
@@ -145,7 +145,7 @@ export default function CreateAdminUserDialog({
       createMutation.reset();
       setShowPassword(false);
     }
-  }, [open, reset]);
+  }, [open, reset, createMutation]);
 
   useEffect(() => {
     if (!open) return;
@@ -272,7 +272,7 @@ export default function CreateAdminUserDialog({
                         id="phoneNumber"
                         {...register("phoneNumber")}
                         className={cn(inputClass, "pl-10")}
-                        placeholder="+15550001111"
+                        placeholder="09xxxxxxxx"
                         dir="ltr"
                         disabled={createMutation.isPending}
                       />
