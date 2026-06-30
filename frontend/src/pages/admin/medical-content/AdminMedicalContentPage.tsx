@@ -196,7 +196,9 @@ export default function AdminMedicalContentPage() {
     ...(langFilter === "ar" || langFilter === "en"
       ? { language: langFilter }
       : {}),
-    ...(pendingSourceUrl.trim() ? { sourceUrl: pendingSourceUrl.trim() } : {}),
+    ...(pendingSourceUrl.trim()
+      ? { sourceUrl: pendingSourceUrl.trim() }
+      : {}),
     ...(pendingDateFrom ? { dateFrom: pendingDateFrom } : {}),
     ...(pendingDateTo ? { dateTo: pendingDateTo } : {}),
   });
@@ -673,12 +675,6 @@ export default function AdminMedicalContentPage() {
                         <Clock className="w-4 h-4" />
                         آخر تحديث: {formatContentDate(it.updatedAt)}
                       </div>
-                      {it.pageVersion ? (
-                        <div className="inline-flex gap-2 items-center">
-                          <Settings className="w-4 h-4" />
-                          إصدار: {it.pageVersion}
-                        </div>
-                      ) : null}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 items-center sm:justify-start">
@@ -1036,17 +1032,6 @@ export default function AdminMedicalContentPage() {
           } else if (kind === "approve") {
             await approveMutation.mutateAsync(id);
           } else if (kind === "publish") {
-            const item = filteredItems.find((it) => it._id === id);
-            if (item?.type === "SETTINGS_PAGE" && !item.pageVersion) {
-              toast(
-                "يجب تحديد إصدار الصفحة (pageVersion) قبل نشر صفحات الإعدادات.",
-                {
-                  title: "إصدار الصفحة مطلوب",
-                  variant: "error",
-                },
-              );
-              return;
-            }
             await publishMutation.mutateAsync(id);
           } else {
             await archiveMutation.mutateAsync(id);

@@ -483,8 +483,6 @@ export const adminApi = {
     list: async (params: AdminMedicalOrderCatalogListParams) => {
       const qs = new URLSearchParams();
       if (params.search?.trim()) qs.set("search", params.search.trim());
-      if (params.isVisible !== undefined)
-        qs.set("isVisible", String(params.isVisible));
       const base = adminEndpoints.orderCatalog.collection(params.type);
       const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
       try {
@@ -525,12 +523,7 @@ export const adminApi = {
     update: (
       kind: MedicalOrderCatalogKind,
       id: string,
-      body: Partial<
-        Pick<
-          AdminMedicalOrderCatalogUpsertBody,
-          "label" | "isActive" | "isVisible"
-        >
-      >,
+      body: Partial<Pick<AdminMedicalOrderCatalogUpsertBody, "label" | "isActive" | "isVisible">>,
     ) =>
       patch<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.item(kind, id),

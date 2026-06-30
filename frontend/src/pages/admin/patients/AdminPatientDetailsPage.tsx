@@ -2,12 +2,10 @@ import { Helmet } from 'react-helmet-async';
 import {
   Activity,
   AlertCircle,
-  Ban,
   CalendarClock,
   Download,
   Eye,
   FileText,
-  Filter,
   HeartPulse,
   Loader2,
   Mail,
@@ -25,7 +23,6 @@ import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppoint
 import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
 import { useAdminPatientFiles } from '@/hooks/admin/patients/useAdminPatientFiles';
 import { AppointmentStatusChip } from '@/components/admin/patients/AppointmentStatusChip';
-import SuspendAccountDialog from '@/components/admin/patients/dialogs/SuspendAccountDialog';
 import { useToast } from '@/components/ui/ToastProvider';
 import { adminApi } from '@/lib/admin/client';
 import { triggerBrowserFileDownload } from '@/lib/files/triggerBrowserFileDownload';
@@ -121,13 +118,10 @@ export default function AdminPatientDetailsPage() {
     limit: 10,
     ...(patientId ? { patientId } : {}),
   });
-  const [fileSearch, setFileSearch] = useState('');
-  const [showArchivedFiles, setShowArchivedFiles] = useState(false);
   const filesQuery = useAdminPatientFiles(patient?._id ?? patientId, {
     page: 1,
     limit: 8,
-    archived: showArchivedFiles,
-    ...(fileSearch.trim() ? { search: fileSearch.trim() } : {}),
+    archived: false,
   });
 
   const patientAppointments = useMemo(() => {
@@ -161,7 +155,6 @@ export default function AdminPatientDetailsPage() {
 
   const [fileActionKey, setFileActionKey] = useState<string | null>(null);
   const [accountAction, setAccountAction] = useState<'activate' | 'unsuspend' | null>(null);
-  const [suspendOpen, setSuspendOpen] = useState(false);
 
   const patientAuditLogs = useMemo(
     () =>
@@ -378,57 +371,42 @@ export default function AdminPatientDetailsPage() {
                       سبب التعليق: {patient.suspendReason}
                     </div>
                   )}
-                  <div className='col-span-2 flex flex-wrap gap-2'>
-                    {patient.user.accountStatus !== 'suspended' && (
+                  {patient.user.accountStatus !== 'active' && (
+                    <div className='col-span-2 flex flex-wrap gap-2'>
                       <button
                         type='button'
                         disabled={accountAction !== null}
                         onClick={() => {
-                          setSuspendOpen(true);
+                          void runAccountAction('activate');
                         }}
-                        className='inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#FB923C] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#F97316] disabled:opacity-60'
+                        className='inline-flex h-[38px] items-center gap-2 rounded-[10px] bg-[#16A34A] px-4 font-cairo text-[12px] font-extrabold text-white disabled:opacity-60'
                       >
-                        <Ban className='h-4 w-4' />
-                        تعليق الحساب
+                        {accountAction === 'activate' ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          <ShieldCheck className='h-4 w-4' />
+                        )}
+                        تفعيل الحساب
                       </button>
-                    )}
-                    {patient.user.accountStatus !== 'active' && (
-                      <>
+                      {patient.user.accountStatus === 'suspended' && (
                         <button
                           type='button'
                           disabled={accountAction !== null}
                           onClick={() => {
-                            void runAccountAction('activate');
+                            void runAccountAction('unsuspend');
                           }}
-                          className='inline-flex h-[38px] items-center gap-2 rounded-[10px] bg-[#16A34A] px-4 font-cairo text-[12px] font-extrabold text-white disabled:opacity-60'
+                          className='inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#16A34A] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#15803D] disabled:opacity-60'
                         >
-                          {accountAction === 'activate' ? (
+                          {accountAction === 'unsuspend' ? (
                             <Loader2 className='h-4 w-4 animate-spin' />
                           ) : (
                             <ShieldCheck className='h-4 w-4' />
                           )}
-                          تفعيل الحساب
+                          رفع التعليق
                         </button>
-                        {patient.user.accountStatus === 'suspended' && (
-                          <button
-                            type='button'
-                            disabled={accountAction !== null}
-                            onClick={() => {
-                              void runAccountAction('unsuspend');
-                            }}
-                            className='inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#16A34A] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#15803D] disabled:opacity-60'
-                          >
-                            {accountAction === 'unsuspend' ? (
-                              <Loader2 className='h-4 w-4 animate-spin' />
-                            ) : (
-                              <ShieldCheck className='h-4 w-4' />
-                            )}
-                            رفع التعليق
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
@@ -521,28 +499,6 @@ export default function AdminPatientDetailsPage() {
                   <FileText className='h-4 w-4 text-primary' />
                   ملفات المريض
                 </div>
-              <div className='flex flex-col gap-3 border-b border-[#EEF2F6] px-6 py-4 lg:flex-row lg:items-center lg:justify-between'>
-                <div className='relative min-w-0 flex-1 lg:max-w-md'>
-                  <input
-                    type='search'
-                    value={fileSearch}
-                    onChange={(e) => setFileSearch(e.target.value)}
-                    placeholder='ابحث باسم الملف أو نوعه...'
-                    className='h-[40px] w-full rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 pe-10 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
-                  />
-                  <FileText className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
-                </div>
-                <label className='inline-flex items-center gap-2 self-end rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#344054]'>
-                  <Filter className='h-4 w-4 text-primary' />
-                  <span>عرض الملفات المؤرشفة</span>
-                  <input
-                    type='checkbox'
-                    checked={showArchivedFiles}
-                    onChange={(e) => setShowArchivedFiles(e.target.checked)}
-                    className='h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40'
-                  />
-                </label>
-              </div>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
                   {filesQuery.isAwaitingData ? 'جارِ التحميل...' : `${filesQuery.files.length} ملف`}
                 </div>
@@ -558,9 +514,7 @@ export default function AdminPatientDetailsPage() {
                   </div>
                 ) : filesQuery.files.length === 0 ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                    {fileSearch.trim() || showArchivedFiles
-                      ? 'لا توجد ملفات مطابقة للفلاتر الحالية.'
-                      : 'لا توجد ملفات مرفوعة لهذا المريض.'}
+                    لا توجد ملفات مرفوعة لهذا المريض.
                   </div>
                 ) : (
                   filesQuery.files.map((f) => {
@@ -670,23 +624,6 @@ export default function AdminPatientDetailsPage() {
           </>
         )}
       </div>
-
-      <SuspendAccountDialog
-        open={suspendOpen}
-        onOpenChange={setSuspendOpen}
-        kind='patient'
-        targetId={patient?._id ?? patientId ?? null}
-        targetLabel={patient?.user.fullName ?? ''}
-        onSuccess={() => {
-          setSuspendOpen(false);
-          void Promise.all([
-            refetchPatient(),
-            appointmentsQuery.refetch(),
-            auditQuery.refetch(),
-            filesQuery.refetch(),
-          ]);
-        }}
-      />
     </>
   );
 }

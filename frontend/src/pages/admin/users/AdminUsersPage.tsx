@@ -18,6 +18,8 @@ type CreateAdminUserFormValues = {
   role: string;
 };
 
+type UserStatusFilter = 'all' | 'active' | 'inactive';
+
 const DEFAULT_VALUES: CreateAdminUserFormValues = {
   fullName: '',
   email: '',
@@ -214,6 +216,9 @@ function userStatusTone(user: AdminUserSummary) {
 
 export default function AdminUsersPage() {
   const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<UserStatusFilter>('all');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [createOpen, setCreateOpen] = useState(false);
   const [offboardOpen, setOffboardOpen] = useState(false);
   const [offboardTarget, setOffboardTarget] = useState<{
@@ -225,13 +230,29 @@ export default function AdminUsersPage() {
 
   const filteredUsers = useMemo(() => {
     const text = query.trim().toLowerCase();
-    if (!text) return users;
-    return users.filter((user) =>
-      [user.fullName, user.email, user.phone, user.phoneNumber, user.role]
+    return users.filter((user) => {
+      const matchesStatus =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'active'
+            ? user.isActive !== false
+            : user.isActive === false;
+      if (!matchesStatus) return false;
+      if (!text) return true;
+      return [user.fullName, user.email, user.phone, user.phoneNumber, user.role]
         .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(text)),
-    );
-  }, [query, users]);
+        .some((value) => String(value).toLowerCase().includes(text));
+    });
+  }, [query, statusFilter, users]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / Math.max(pageSize, 1)));
+  const currentPage = Math.min(page, totalPages);
+  const visibleUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [currentPage, filteredUsers, pageSize]);
+  const rangeStart = filteredUsers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const rangeEnd = filteredUsers.length === 0 ? 0 : Math.min(currentPage * pageSize, filteredUsers.length);
 
   return (
     <>
@@ -265,14 +286,32 @@ export default function AdminUsersPage() {
         />
 
         <section className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='relative'>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder='ابحث بالاسم أو البريد أو الهاتف أو الدور...'
-              className='h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]'
-            />
-            <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+          <div className='grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]'>
+            <div className='relative'>
+              <input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPage(1);
+                }}
+                placeholder='ابحث بالاسم أو البريد أو الهاتف أو الدور...'
+                className='h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]'
+              />
+              <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(event.target.value as UserStatusFilter);
+                setPage(1);
+              }}
+              className='h-[44px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary'
+            >
+              <option value='all'>كل الحالات</option>
+              <option value='active'>الحسابات النشطة</option>
+              <option value='inactive'>الحسابات الموقوفة</option>
+            </select>
           </div>
         </section>
 
@@ -303,7 +342,7 @@ export default function AdminUsersPage() {
           </div>
         ) : (
           <section className='space-y-4'>
-            {filteredUsers.map((user) => (
+            {visibleUsers.map((user) => (
               <article
                 key={user.id}
                 className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
@@ -361,6 +400,57 @@ export default function AdminUsersPage() {
             ))}
           </section>
         )}
+
+        {!isAwaitingData && !isError && filteredUsers.length > 0 ? (
+          <section className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
+            <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+              <div className='font-cairo text-[12px] font-bold text-[#667085]'>
+                عرض {rangeStart.toLocaleString('ar-SA')}–{rangeEnd.toLocaleString('ar-SA')} من{' '}
+                {filteredUsers.length.toLocaleString('ar-SA')} حساب · صفحة{' '}
+                {currentPage.toLocaleString('ar-SA')} / {totalPages.toLocaleString('ar-SA')}
+              </div>
+
+              <div className='flex flex-wrap items-center justify-end gap-3'>
+                <select
+                  value={String(pageSize)}
+                  onChange={(event) => {
+                    setPageSize(Number(event.target.value) || 10);
+                    setPage(1);
+                  }}
+                  className='h-[36px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827]'
+                >
+                  {[10, 20, 50].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (currentPage > 1) setPage((prev) => prev - 1);
+                  }}
+                  disabled={currentPage <= 1}
+                  className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60'
+                >
+                  السابق
+                </button>
+
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (currentPage < totalPages) setPage((prev) => prev + 1);
+                  }}
+                  disabled={currentPage >= totalPages}
+                  className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60'
+                >
+                  التالي
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <CreateAdminUserDialog open={createOpen} onOpenChange={setCreateOpen} />
 

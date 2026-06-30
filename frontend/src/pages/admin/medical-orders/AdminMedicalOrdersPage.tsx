@@ -1,29 +1,29 @@
-import { Helmet } from "react-helmet-async";
-import { useEffect, useState } from "react";
-import { useDebounce } from "use-debounce";
+import { Helmet } from 'react-helmet-async';
+import { useEffect, useMemo, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 import {
   MedicalOrderCatalogCard,
   MedicalOrderCatalogDetailsDialog,
   MedicalOrderCatalogToolbar,
   MedicalOrderCategoryTabs,
   UpsertMedicalOrderItemDialog,
-} from "@/components/admin/medical-orders";
+} from '@/components/admin/medical-orders';
 import {
   useAdminMedicalOrderCatalog,
   useDeleteMedicalOrderCatalogItem,
-} from "@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog";
+} from '@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog';
 import type {
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,
-} from "@/lib/admin/types";
-import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
-import { ConfirmActionDialog } from "@/components/admin/dialogs";
-import { ClipboardList, Trash2 } from "lucide-react";
-import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+} from '@/lib/admin/types';
+import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { ConfirmActionDialog } from '@/components/admin/dialogs';
+import { ClipboardList, Trash2 } from 'lucide-react';
+import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 
 export default function AdminMedicalOrdersPage() {
-  const [kind, setKind] = useState<MedicalOrderCatalogKind>("lab");
-  const [search, setSearch] = useState("");
+  const [kind, setKind] = useState<MedicalOrderCatalogKind>('lab');
+  const [search, setSearch] = useState('');
   const [showVisibleOnly, setShowVisibleOnly] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewTarget, setViewTarget] = useState<MedicalOrderCatalogItem | null>(
@@ -32,21 +32,29 @@ export default function AdminMedicalOrdersPage() {
   const [editTarget, setEditTarget] = useState<MedicalOrderCatalogItem | null>(
     null,
   );
-  const [deleteTarget, setDeleteTarget] =
-    useState<MedicalOrderCatalogItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MedicalOrderCatalogItem | null>(
+    null,
+  );
 
   const [debouncedSearch] = useDebounce(search, 300);
   const { data, isAwaitingData, isError, error, refetch } =
-    useAdminMedicalOrderCatalog(kind, debouncedSearch, showVisibleOnly);
+    useAdminMedicalOrderCatalog(kind, debouncedSearch);
   const deleteMut = useDeleteMedicalOrderCatalogItem(kind);
 
   useEffect(() => {
     setEditTarget(null);
     setDialogOpen(false);
-    setShowVisibleOnly(false);
   }, [kind]);
 
-  const items = data?.items ?? [];
+  const filteredItems = useMemo(() => {
+    const items = data?.items ?? [];
+    const q = search.trim().toLowerCase();
+    return items.filter((i) => {
+      if (showVisibleOnly && i.isVisible === false) return false;
+      if (!q) return true;
+      return i.label.toLowerCase().includes(q);
+    });
+  }, [data?.items, search, showVisibleOnly]);
 
   function openAdd() {
     setEditTarget(null);
@@ -72,31 +80,31 @@ export default function AdminMedicalOrdersPage() {
         <title>كتالوج الطلبات الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-5">
+      <div dir='rtl' lang='ar' className='space-y-5'>
         <AdminDashboardOverview
-          variant="admin"
-          surface="mint"
-          title="كتالوج الطلبات الطبية"
-          subtitle="إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض"
-          headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
-          actionLabel="إضافة نوع جديد"
+          variant='admin'
+          surface='mint'
+          title='كتالوج الطلبات الطبية'
+          subtitle='إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض'
+          headerIcon={<ClipboardList className='h-8 w-8 text-white' />}
+          actionLabel='إضافة نوع جديد'
           actionDisabled={isAwaitingData}
           onActionClick={openAdd}
           kpis={[
             {
-              key: "items",
-              icon: <ClipboardList className="h-5 w-5 shrink-0" />,
-              value: isAwaitingData ? "—" : items.length,
-              label: "عناصر معروضة",
+              key: 'items',
+              icon: <ClipboardList className='h-5 w-5 shrink-0' />,
+              value: isAwaitingData ? '—' : filteredItems.length,
+              label: 'عناصر معروضة',
             },
           ]}
         />
 
-        <div className="flex flex-col gap-3 items-stretch md:flex-row md:items-center md:justify-between">
-          <div className="order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center">
+        <div className='flex flex-col gap-3 items-stretch md:flex-row md:items-center md:justify-between'>
+          <div className='order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center'>
             <MedicalOrderCategoryTabs active={kind} onChange={setKind} />
           </div>
-          <div className="order-2 w-full md:order-1 md:w-auto md:min-w-[16rem] md:max-w-md md:shrink-0 md:flex md:items-center">
+          <div className='order-2 w-full md:order-1 md:w-auto md:min-w-[16rem] md:max-w-md md:shrink-0 md:flex md:items-center'>
             <MedicalOrderCatalogToolbar
               search={search}
               onSearchChange={setSearch}
@@ -107,20 +115,20 @@ export default function AdminMedicalOrdersPage() {
         </div>
 
         {isError && (
-          <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-right">
-            <p className="font-cairo text-[13px] font-bold text-red-800">
+          <div className='rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-right'>
+            <p className='font-cairo text-[13px] font-bold text-red-800'>
               تعذر تحميل الكتالوج.
             </p>
-            <p className="mt-1 font-cairo text-[12px] font-semibold text-red-700">
+            <p className='mt-1 font-cairo text-[12px] font-semibold text-red-700'>
               {userFacingErrorMessage(
                 error,
-                "تحقق من الاتصال أو من واجهة الـ API.",
+                'تحقق من الاتصال أو من واجهة الـ API.',
               )}
             </p>
             <button
-              type="button"
+              type='button'
               onClick={() => void refetch()}
-              className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline"
+              className='mt-2 font-cairo text-[12px] font-extrabold text-primary underline'
             >
               إعادة المحاولة
             </button>
@@ -128,13 +136,13 @@ export default function AdminMedicalOrdersPage() {
         )}
 
         {isAwaitingData ? (
-          <div className="rounded-[10px] border border-[#E5E7EB] bg-white p-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
+          <div className='rounded-[10px] border border-[#E5E7EB] bg-white p-10 text-center font-cairo text-[14px] font-semibold text-[#667085]'>
             جاري التحميل…
           </div>
         ) : (
           <MedicalOrderCatalogCard
             kind={kind}
-            items={items}
+            items={filteredItems}
             onView={openView}
             onEdit={openEdit}
             onDelete={openDeleteConfirm}
@@ -147,40 +155,40 @@ export default function AdminMedicalOrdersPage() {
           onOpenChange={(open) => {
             if (!open) setDeleteTarget(null);
           }}
-          variant="destructive"
-          title="حذف بند من الكتالوج؟"
-          icon={<Trash2 className="w-6 h-6" strokeWidth={2} aria-hidden />}
+          variant='destructive'
+          title='حذف بند من الكتالوج؟'
+          icon={<Trash2 className='w-6 h-6' strokeWidth={2} aria-hidden />}
           description={
             deleteTarget ? (
               <>
                 سيتم حذف «
-                <span className="font-extrabold text-[#344054]">
+                <span className='font-extrabold text-[#344054]'>
                   {deleteTarget.label}
                 </span>
-                » نهائياً من فئة{" "}
-                {kind === "lab"
-                  ? "مختبر"
-                  : kind === "imaging"
-                    ? "تصوير"
-                    : kind === "procedure"
-                      ? "إجراء"
-                      : "تحويل"}
-                . لا يمكن التراجع عن الحذف من الواجهة.
+                » نهائياً من فئة{' '}
+                {kind === 'lab'
+                  ? 'مختبر'
+                  : kind === 'imaging'
+                    ? 'تصوير'
+                    : kind === 'procedure'
+                      ? 'إجراء'
+                      : 'تحويل'}. لا يمكن التراجع
+                عن الحذف من الواجهة.
               </>
             ) : (
-              "—"
+              '—'
             )
           }
-          confirmLabel="حذف"
+          confirmLabel='حذف'
           confirmDisabled={deleteMut.isPending}
           onConfirm={async () => {
             if (!deleteTarget) return;
             await deleteMut.mutateAsync(deleteTarget._id);
           }}
           successToast={{
-            title: "تم الحذف",
-            message: "حُذف بند الكتالوج من القائمة.",
-            variant: "success",
+            title: 'تم الحذف',
+            message: 'حُذف بند الكتالوج من القائمة.',
+            variant: 'success',
           }}
         />
 
