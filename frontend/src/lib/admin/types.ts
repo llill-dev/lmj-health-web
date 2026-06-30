@@ -4,11 +4,11 @@ export type ApiSuccessEnvelope = {
 };
 
 export type AppointmentStatus =
-  | 'scheduled'
-  | 'rescheduled'
-  | 'completed'
-  | 'cancelled'
-  | 'no-show';
+  | "scheduled"
+  | "rescheduled"
+  | "completed"
+  | "cancelled"
+  | "no-show";
 
 export type AppointmentSummary = {
   _id: string;
@@ -66,7 +66,7 @@ export type AppointmentDetailsResponse = ApiSuccessEnvelope & {
 export type AppointmentCancelResponse = ApiSuccessEnvelope & {
   appointment: Pick<
     AppointmentSummary,
-    '_id' | 'status' | 'cancelledAt' | 'cancelledBy' | 'cancelReason'
+    "_id" | "status" | "cancelledAt" | "cancelledBy" | "cancelReason"
   >;
 };
 
@@ -86,10 +86,10 @@ export type AdminAppointmentsListResponse = ApiSuccessEnvelope & {
 };
 
 export type PatientAccountStatus =
-  | 'active'
-  | 'temporary'
-  | 'suspended'
-  | 'locked';
+  | "active"
+  | "temporary"
+  | "suspended"
+  | "locked";
 
 export type AdminPatientSummary = {
   _id: string;
@@ -111,7 +111,7 @@ export type AdminPatientSummary = {
   suspendReason?: string | null;
 };
 
-export type AdminPatientsAccountStatusFilter = PatientAccountStatus | 'all';
+export type AdminPatientsAccountStatusFilter = PatientAccountStatus | "all";
 
 export type AdminPatientsListParams = {
   account_status?: AdminPatientsAccountStatusFilter;
@@ -174,7 +174,7 @@ export type AdminPatientAccountActionResponse = ApiSuccessEnvelope & {
   accountStatus: PatientAccountStatus;
 };
 
-export type VerificationRequestReviewDecision = 'approved' | 'rejected';
+export type VerificationRequestReviewDecision = "approved" | "rejected";
 
 export type VerificationRequestNewSpecializationBody = {
   key: string;
@@ -197,13 +197,13 @@ export type VerificationRequestReviewBody = {
 };
 
 export type AuditLogCategory =
-  | 'AUTH'
-  | 'AUTHZ'
-  | 'PHI'
-  | 'DATA'
-  | 'ADMIN'
-  | 'SYSTEM';
-export type AuditLogOutcome = 'SUCCESS' | 'FAIL' | 'DENY';
+  | "AUTH"
+  | "AUTHZ"
+  | "PHI"
+  | "DATA"
+  | "ADMIN"
+  | "SYSTEM";
+export type AuditLogOutcome = "SUCCESS" | "FAIL" | "DENY";
 
 export type AuditLogItem = {
   _id: string;
@@ -256,7 +256,7 @@ export type AuditLogsListResponse = ApiSuccessEnvelope & {
   auditLogs: AuditLogItem[];
 };
 
-export type AdminDoctorApprovalStatus = 'pending' | 'approved' | 'rejected';
+export type AdminDoctorApprovalStatus = "pending" | "approved" | "rejected";
 
 export type AdminDoctorSummary = {
   _id: string;
@@ -266,7 +266,7 @@ export type AdminDoctorSummary = {
   clinicAddress?: string;
   bio?: string;
   consultationFee?: number;
-  consultationTypes?: Array<'online' | 'offline' | string>;
+  consultationTypes?: Array<"online" | "offline" | string>;
   locationCity?: string;
   locationCountry?: string;
   isApproved?: boolean;
@@ -316,7 +316,7 @@ export type AdminDoctorsListResponse = ApiSuccessEnvelope & {
   doctors: AdminDoctorSummary[];
 };
 
-export type VerificationRequestStatus = 'pending' | 'approved' | 'rejected';
+export type VerificationRequestStatus = "pending" | "approved" | "rejected";
 
 export type VerificationRequestSummary = {
   _id: string;
@@ -338,7 +338,7 @@ export type VerificationRequestSummary = {
     locationCity?: string;
     locationCountry?: string;
     clinicLocation?: {
-      type?: 'Point';
+      type?: "Point";
       coordinates?: [number, number];
     };
     userId?: {
@@ -381,18 +381,18 @@ export type VerificationRequestDetailsResponse = ApiSuccessEnvelope & {
 
 /** Matches backend Complaint model (API-3.pdf). */
 export type ComplaintType =
-  | 'appointment'
-  | 'consultation'
-  | 'access_request'
-  | 'technical'
-  | 'other';
+  | "appointment"
+  | "consultation"
+  | "access_request"
+  | "technical"
+  | "other";
 
 export type ComplaintLifecycleStatus =
-  | 'submitted'
-  | 'under_review'
-  | 'in_progress'
-  | 'resolved'
-  | 'closed';
+  | "submitted"
+  | "under_review"
+  | "in_progress"
+  | "resolved"
+  | "closed";
 
 export type ComplaintContactSnapshot = {
   fullName?: string;
@@ -527,8 +527,8 @@ export type CreateAdminUserBody = {
   fullName: string;
   email: string;
   password: string;
-  role: 'data_entry' | string;
-  phoneNumber?: string;
+  role: "data_entry" | string;
+  phoneNumber: string;
 };
 
 export type CreateAdminUserResponse = ApiSuccessEnvelope & {
@@ -565,9 +565,9 @@ export type AdminDoctorDetailsDoctor = {
   locationCity?: string;
   locationCountry?: string;
   consultationFee?: number;
-  consultationTypes?: Array<'online' | 'offline' | string>;
+  consultationTypes?: Array<"online" | "offline" | string>;
   clinicLocation?: {
-    type?: 'Point';
+    type?: "Point";
     coordinates?: [number, number];
   };
   isApproved?: boolean;
@@ -626,7 +626,7 @@ export type AdminDoctorDetailsResponse = ApiSuccessEnvelope & {
 };
 
 /** GET /api/admin/doctors/:id/analytics/* — day | week | month | year (API-3) */
-export type AdminDoctorAnalyticsRange = 'day' | 'week' | 'month' | 'year';
+export type AdminDoctorAnalyticsRange = "day" | "week" | "month" | "year";
 
 export type AdminDoctorAnalyticsQuery = {
   range?: AdminDoctorAnalyticsRange;
@@ -688,23 +688,23 @@ export type DoctorSummaryStats = {
 };
 
 export type AdminContentType =
-  | 'CONDITION'
-  | 'SYMPTOM'
-  | 'GENERAL_ADVICE'
-  | 'NEWS'
-  | 'MEDICATION'
-  | 'SETTINGS_PAGE';
+  | "CONDITION"
+  | "SYMPTOM"
+  | "GENERAL_ADVICE"
+  | "NEWS"
+  | "MEDICATION"
+  | "SETTINGS_PAGE";
 
 export type AdminContentStatus =
-  | 'DRAFT'
-  | 'IN_REVIEW'
-  | 'PUBLISHED'
-  | 'ARCHIVED';
+  | "DRAFT"
+  | "IN_REVIEW"
+  | "PUBLISHED"
+  | "ARCHIVED";
 
 export type AdminContentListParams = {
   type?: AdminContentType;
   status?: AdminContentStatus;
-  language?: 'ar' | 'en';
+  language?: "ar" | "en";
   page?: number;
   limit?: number;
 };
@@ -738,26 +738,26 @@ export type AdminContentListResponse = ApiSuccessEnvelope & {
 };
 
 export type AdminContentBlock =
-  | { type: 'heading'; level?: number; text?: string }
-  | { type: 'paragraph'; text?: string }
-  | { type: 'list'; items?: string[]; ordered?: boolean }
+  | { type: "heading"; level?: number; text?: string }
+  | { type: "paragraph"; text?: string }
+  | { type: "list"; items?: string[]; ordered?: boolean }
   | {
-      type: 'callout';
-      variant?: 'info' | 'warn' | 'danger';
+      type: "callout";
+      variant?: "info" | "warn" | "danger";
       title?: string;
       text?: string;
     }
   | {
-      type: 'linkCard';
+      type: "linkCard";
       title?: string;
       url?: string;
       description?: string;
     }
   | {
-      type: 'faq';
+      type: "faq";
       items?: Array<{ question?: string; answer?: string }>;
     }
-  | { type: 'divider' }
+  | { type: "divider" }
   | { type: string; [key: string]: unknown };
 
 export type AdminContentDetailsItem = AdminContentItem & {
@@ -785,7 +785,7 @@ export type CreateAdminContentBody = {
   type: AdminContentType;
   title: string;
   summary?: string;
-  language: 'ar' | 'en';
+  language: "ar" | "en";
   slug?: string;
   contentBlocks?: AdminContentBlock[];
   sources?: Array<{ title?: string; url?: string }>;
@@ -806,10 +806,10 @@ export type AdminContentMutationResponse = ApiSuccessEnvelope & {
 
 /** فئات كتالوج الطلبات الطبية (تحاليل / أشعة / إجراءات / تحويلات) */
 export type MedicalOrderCatalogKind =
-  | 'lab'
-  | 'imaging'
-  | 'procedure'
-  | 'referral';
+  | "lab"
+  | "imaging"
+  | "procedure"
+  | "referral";
 
 export type MedicalOrderCatalogItem = {
   _id: string;
@@ -839,27 +839,27 @@ export type AdminMedicalOrderCatalogMutationResponse = ApiSuccessEnvelope & {
 };
 
 export type AdminMedicalOrderCatalogDetailsResponse = ApiSuccessEnvelope & {
-  item?: (MedicalOrderCatalogItem & {
+  item?: MedicalOrderCatalogItem & {
     isActive?: boolean;
     isVisible?: boolean;
-  });
+  };
 };
 
 /** أنواع المحتوى الأب المسموحة لقالب البيانات (API-3: parentType). */
 export type AdminContentTemplateParentType =
-  | 'CONDITION'
-  | 'SYMPTOM'
-  | 'GENERAL_ADVICE'
-  | 'MEDICATION';
+  | "CONDITION"
+  | "SYMPTOM"
+  | "GENERAL_ADVICE"
+  | "MEDICATION";
 
 /** أنواع حقول القالب المعروضة في محرّر الحقول. */
 export type AdminContentTemplateFieldType =
-  | 'text'
-  | 'textarea'
-  | 'number'
-  | 'date'
-  | 'boolean'
-  | 'select';
+  | "text"
+  | "textarea"
+  | "number"
+  | "date"
+  | "boolean"
+  | "select";
 
 export type AdminContentTemplateField = {
   key: string;
@@ -920,7 +920,7 @@ export type AdminNewsItem = {
   publishedAt?: string;
   title: string;
   summary?: string;
-  language?: 'ar' | 'en' | string;
+  language?: "ar" | "en" | string;
 };
 
 export type AdminNewsIngestBody = {
@@ -931,7 +931,7 @@ export type AdminNewsPendingListParams = {
   page?: number;
   limit?: number;
   sourceUrl?: string;
-  language?: 'ar' | 'en';
+  language?: "ar" | "en";
   dateFrom?: string;
   dateTo?: string;
 };
@@ -946,9 +946,9 @@ export type AdminNewsPendingListResponse = ApiSuccessEnvelope & {
 
 /** مجالات الكتالوج الموثّقة في API-3 لـ GET /admin/lookups */
 export type AdminLookupCategoryDoc =
-  | 'BLOOD_TYPE'
-  | 'ALLERGY'
-  | 'MEDICAL_CONDITION';
+  | "BLOOD_TYPE"
+  | "ALLERGY"
+  | "MEDICAL_CONDITION";
 
 /**
  * كتالوج تخصصات الطبيب عبر Lookups؛ حسب المرجع: `DOCTOR_SPECIALIZATION` يحدد هذا الجدول
@@ -956,16 +956,14 @@ export type AdminLookupCategoryDoc =
  * قد يبقى `SPECIALIZATION` لبيئات أو نسخ سابقة من الخادم.
  */
 export type AdminLookupDoctorSpecialtyCategory =
-  | 'SPECIALIZATION'
-  | 'DOCTOR_SPECIALIZATION';
+  | "SPECIALIZATION"
+  | "DOCTOR_SPECIALIZATION";
 
 export type AdminLookupCategory =
   | AdminLookupCategoryDoc
   | AdminLookupDoctorSpecialtyCategory;
 
-export type AdminLocalizedLookupText =
-  | string
-  | { ar?: string; en?: string };
+export type AdminLocalizedLookupText = string | { ar?: string; en?: string };
 
 export type AdminLookupRecord = {
   _id: string;
@@ -1012,19 +1010,19 @@ export type AdminLookupMutationResponse = ApiSuccessEnvelope & {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type FacilityType =
-  | 'hospital'
-  | 'clinic'
-  | 'polyclinic'
-  | 'medical_center'
-  | 'laboratory'
-  | 'imaging_center'
-  | 'pharmacy'
-  | 'rehabilitation_center'
-  | 'dialysis_center'
-  | 'emergency_center'
-  | 'other';
+  | "hospital"
+  | "clinic"
+  | "polyclinic"
+  | "medical_center"
+  | "laboratory"
+  | "imaging_center"
+  | "pharmacy"
+  | "rehabilitation_center"
+  | "dialysis_center"
+  | "emergency_center"
+  | "other";
 
-export type FacilityStatus = 'ACTIVE' | 'PENDING' | 'INACTIVE' | 'DELETED';
+export type FacilityStatus = "ACTIVE" | "PENDING" | "INACTIVE" | "DELETED";
 
 export type FacilitySummary = {
   id: string;
@@ -1062,14 +1060,14 @@ export type FacilitiesListParams = {
   ownerDoctorId?: string | null;
   attribute?: string;
   sortBy?:
-    | 'createdAt'
-    | 'updatedAt'
-    | 'name'
-    | 'city'
-    | 'status'
-    | 'facilityType'
-    | 'doctorCount';
-  sortOrder?: 'asc' | 'desc';
+    | "createdAt"
+    | "updatedAt"
+    | "name"
+    | "city"
+    | "status"
+    | "facilityType"
+    | "doctorCount";
+  sortOrder?: "asc" | "desc";
 };
 
 export type FacilitiesListResponse = ApiSuccessEnvelope & {
@@ -1105,7 +1103,7 @@ export type CreateFacilityBody = {
 export type UpdateFacilityBody = Partial<CreateFacilityBody>;
 
 export type FacilityActionBody = {
-  action: 'approve' | 'merge';
+  action: "approve" | "merge";
   targetFacilityId?: string;
   mergeToId?: string;
 };
@@ -1138,9 +1136,9 @@ export type FacilityDoctorsListParams = {
   q?: string;
   name?: string;
   specialty?: string;
-  status?: 'pending' | 'approved' | 'rejected';
-  sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'specialty' | 'status';
-  sortOrder?: 'asc' | 'desc';
+  status?: "pending" | "approved" | "rejected";
+  sortBy?: "createdAt" | "updatedAt" | "name" | "specialty" | "status";
+  sortOrder?: "asc" | "desc";
 };
 
 export type FacilityDoctorsListResponse = ApiSuccessEnvelope & {
@@ -1165,7 +1163,7 @@ export type FacilityDoctorsListResponse = ApiSuccessEnvelope & {
     limit?: number;
     total?: number;
     results?: number;
-    facility?: FacilityDoctorsListResponse['facility'];
+    facility?: FacilityDoctorsListResponse["facility"];
   };
 };
 
@@ -1176,7 +1174,7 @@ export type FacilityDoctorsListResponse = ApiSuccessEnvelope & {
 export type ServiceTypeField = {
   key: string;
   label: string | { en: string; ar: string };
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  type: "string" | "number" | "boolean" | "array" | "object";
   required?: boolean;
   isPublic?: boolean;
 };
@@ -1194,11 +1192,11 @@ export type ServiceType = {
 /** Helper: extract display string from bilingual or plain string field */
 export function resolveLabel(
   val: string | { en: string; ar: string } | undefined,
-  lang: 'ar' | 'en' = 'ar',
+  lang: "ar" | "en" = "ar",
 ): string {
-  if (!val) return '';
-  if (typeof val === 'string') return val;
-  return val[lang] || val.en || '';
+  if (!val) return "";
+  if (typeof val === "string") return val;
+  return val[lang] || val.en || "";
 }
 
 export type ServiceTypesListResponse = {
@@ -1225,7 +1223,7 @@ export type ServiceTypeResponse = {
 // Service Providers
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type ProviderStatus = 'active' | 'inactive' | 'draft';
+export type ProviderStatus = "active" | "inactive" | "draft";
 
 export type ServiceProvider = {
   _id: string;

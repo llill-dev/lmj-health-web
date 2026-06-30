@@ -22,6 +22,10 @@ import { useCreateAdminUser } from "@/hooks/admin/users/useAdminUsers";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type { CreateAdminUserBody } from "@/lib/admin/types";
 import { cn } from "@/lib/utils/utils";
+import {
+  PHONE_DIAL_CODE_OPTIONS,
+  type PhoneDialCode,
+} from "@/lib/phone/dialCodes";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Zod Schema - Professional validation matching backend requirements
@@ -44,11 +48,20 @@ const createAdminUserSchema = z
       .toLowerCase()
       .trim(),
 
-    phoneNumber: z
+    phoneDialCode: z.enum(
+      PHONE_DIAL_CODE_OPTIONS.map((o) => o.value) as [
+        PhoneDialCode,
+        ...PhoneDialCode[],
+      ],
+      {
+        message: "رمز النداء غير مدعوم",
+      },
+    ),
+    phoneLocal: z
       .string()
-      .max(20, "رقم الهاتف طويل جداً")
-      .optional()
-      .transform((val) => (val && val.trim() ? val.trim() : undefined)),
+      .min(1, "رقم الهاتف مطلوب")
+      .max(9, "رقم الهاتف طويل جداً")
+      .regex(/^\d+$/, "رقم الهاتف يجب أن يحتوي على أرقام فقط"),
 
     password: z
       .string()
@@ -68,7 +81,8 @@ type CreateAdminUserFormValues = z.infer<typeof createAdminUserSchema>;
 const DEFAULT_VALUES: CreateAdminUserFormValues = {
   fullName: "",
   email: "",
-  phoneNumber: undefined,
+  phoneDialCode: "+963",
+  phoneLocal: "",
   password: "",
   role: "data_entry",
 };
@@ -116,11 +130,8 @@ export default function CreateAdminUserDialog({
       email: values.email.trim(),
       password: values.password,
       role: values.role,
+      phoneNumber: `${values.phoneDialCode}${values.phoneLocal}`,
     };
-
-    if (values.phoneNumber) {
-      payload.phoneNumber = values.phoneNumber;
-    }
 
     try {
       await createMutation.mutateAsync(payload);
@@ -261,23 +272,46 @@ export default function CreateAdminUserDialog({
 
                   {/* Phone Number */}
                   <div>
-                    <label htmlFor="phoneNumber" className={labelClass}>
+                    <label htmlFor="phoneLocal" className={labelClass}>
                       رقم الهاتف
-                      <span className="mr-1 text-[#6B7280]">(اختياري)</span>
+                      <span className="mr-1 text-[#DC2626]">*</span>
                     </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
-                      <input
-                        id="phoneNumber"
-                        {...register("phoneNumber")}
-                        className={cn(inputClass, "pl-10")}
-                        placeholder="09xxxxxxxx"
-                        dir="ltr"
-                        disabled={createMutation.isPending}
+                    <div className="flex gap-2">
+                      <Controller
+                        name="phoneDialCode"
+                        control={control}
+                        render={({ field }) => (
+                          <StyledSelect
+                            {...field}
+                            options={PHONE_DIAL_CODE_OPTIONS as any}
+                            size="sm"
+                            tone="muted"
+                            disabled={createMutation.isPending}
+                            className="w-[140px] shrink-0"
+                          />
+                        )}
                       />
+                      <div className="relative flex-1">
+                        <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
+                        <input
+                          id="phoneLocal"
+                          {...register("phoneLocal")}
+                          className={cn(inputClass, "pl-10")}
+                          placeholder="912345678"
+                          dir="ltr"
+                          inputMode="numeric"
+                          maxLength={9}
+                          disabled={createMutation.isPending}
+                        />
+                      </div>
                     </div>
-                    {errors.phoneNumber && (
-                      <p className={errorClass}>{errors.phoneNumber.message}</p>
+                    {errors.phoneDialCode && (
+                      <p className={errorClass}>
+                        {errors.phoneDialCode.message}
+                      </p>
+                    )}
+                    {errors.phoneLocal && (
+                      <p className={errorClass}>{errors.phoneLocal.message}</p>
                     )}
                   </div>
 
