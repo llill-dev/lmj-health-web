@@ -20,6 +20,24 @@ export function stripHttpStatusFromMessage(s: string): string {
 }
 
 /**
+ * يستخرج أخطاء التحقق من الحقول المحددة من استجابة API 422.
+ */
+function extractValidationErrors(err: ApiError): string[] {
+  const errors = err.body.errors as
+    | Array<{ field?: string; message?: string }>
+    | undefined;
+  if (!Array.isArray(errors) || errors.length === 0) return [];
+
+  return errors
+    .map((e) => e.message)
+    .filter(
+      (msg): msg is string => typeof msg === "string" && msg.trim().length > 0,
+    )
+    .map((msg) => stripHttpStatusFromMessage(msg))
+    .filter((msg) => msg.length > 0);
+}
+
+/**
  * رسالة خطأ آمنة للمشرف: بدون رموز HTTP في النص المعروض.
  */
 export function userFacingErrorMessage(
@@ -27,6 +45,15 @@ export function userFacingErrorMessage(
   fallback = "تعذّر إكمال العملية.",
 ): string {
   if (err == null) return fallback;
+
+  // Handle 422 validation errors with field-specific messages
+  if (err instanceof ApiError && err.status === 422) {
+    const validationErrors = extractValidationErrors(err);
+    if (validationErrors.length > 0) {
+      return validationErrors.join(" • ");
+    }
+  }
+
   if (typeof err === "string") {
     const u = stripHttpStatusFromMessage(err);
     return u || fallback;

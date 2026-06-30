@@ -48,11 +48,7 @@ const createAdminUserSchema = z
       .string()
       .max(20, "رقم الهاتف طويل جداً")
       .optional()
-      .refine(
-        (val) => !val || /^\+?[0-9\s-]{8,20}$/.test(val),
-        "رقم الهاتف غير صالح",
-      )
-      .transform((val) => (val?.trim() ? val.trim() : undefined)),
+      .transform((val) => (val && val.trim() ? val.trim() : undefined)),
 
     password: z
       .string()
@@ -72,7 +68,7 @@ type CreateAdminUserFormValues = z.infer<typeof createAdminUserSchema>;
 const DEFAULT_VALUES: CreateAdminUserFormValues = {
   fullName: "",
   email: "",
-  phoneNumber: "",
+  phoneNumber: undefined,
   password: "",
   role: "data_entry",
 };
@@ -120,8 +116,11 @@ export default function CreateAdminUserDialog({
       email: values.email.trim(),
       password: values.password,
       role: values.role,
-      ...(values.phoneNumber ? { phoneNumber: values.phoneNumber } : {}),
     };
+
+    if (values.phoneNumber) {
+      payload.phoneNumber = values.phoneNumber;
+    }
 
     try {
       await createMutation.mutateAsync(payload);
