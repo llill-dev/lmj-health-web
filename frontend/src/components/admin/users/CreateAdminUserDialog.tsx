@@ -144,7 +144,7 @@ export default function CreateAdminUserDialog({
       createMutation.reset();
       setShowPassword(false);
     }
-  }, [open, reset, createMutation]);
+  }, [open, reset]);
 
   useEffect(() => {
     if (!open) return;
