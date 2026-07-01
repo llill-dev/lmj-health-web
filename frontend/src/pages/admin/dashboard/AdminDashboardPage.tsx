@@ -114,6 +114,28 @@ export default function AdminDashboardPage() {
     [],
   );
 
+  const handleArchive = useCallback((item: AdminContentItem) => {
+    if (item.status === "PUBLISHED") setArchiveTarget(item);
+  }, []);
+
+  const handleEditContent = useCallback(
+    (item: AdminContentItem) => {
+      navigate("/admin/medical-content", {
+        state: { focusContentId: item._id },
+      });
+    },
+    [navigate],
+  );
+
+  const handleViewContent = useCallback(
+    (item: AdminContentItem) => {
+      navigate("/admin/medical-content", {
+        state: { focusContentId: item._id },
+      });
+    },
+    [navigate],
+  );
+
   const mainKpisAwaiting = statsAwaiting || pendingAccessQuery.isLoading;
 
   const secondaryCards = useMemo(
@@ -459,9 +481,7 @@ export default function AdminDashboardPage() {
                                   ? "أرشفة (للمحتوى المنشور فقط)"
                                   : "الأرشفة متاحة للعناصر ذات حالة «منشور» فقط"
                               }
-                              onClick={() => {
-                                if (canArchive) setArchiveTarget(item);
-                              }}
+                              onClick={() => handleArchive(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#FECACA] bg-white text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
                               aria-label="أرشفة"
                             >
@@ -469,11 +489,7 @@ export default function AdminDashboardPage() {
                             </button>
                             <button
                               type="button"
-                              onClick={() =>
-                                navigate("/admin/medical-content", {
-                                  state: { focusContentId: item._id },
-                                })
-                              }
+                              onClick={() => handleEditContent(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#A5E3E1] bg-white text-primary transition hover:bg-[#F0FDFC]"
                               style={{ color: TEAL, borderColor: "#A5E3E1" }}
                               aria-label="تعديل"
@@ -482,11 +498,7 @@ export default function AdminDashboardPage() {
                             </button>
                             <button
                               type="button"
-                              onClick={() =>
-                                navigate("/admin/medical-content", {
-                                  state: { focusContentId: item._id },
-                                })
-                              }
+                              onClick={() => handleViewContent(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#BFDBFE] bg-white text-[#2563EB] transition hover:bg-[#EFF6FF]"
                               aria-label="عرض"
                             >

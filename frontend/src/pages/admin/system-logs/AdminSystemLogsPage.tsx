@@ -1,38 +1,39 @@
-import { Helmet } from 'react-helmet-async';
-import { useMemo, useState } from 'react';
-import { useDebounce } from 'use-debounce';
+import { Helmet } from "react-helmet-async";
+import { useCallback, useMemo, useState } from "react";
+import { useDebounce } from "use-debounce";
 import {
   AdminAuditLogFilters,
   type AuditAdvancedFilters,
-} from '@/components/admin/system-logs/AdminAuditLogFilters';
-import { AdminAuditLogPagination } from '@/components/admin/system-logs/AdminAuditLogPagination';
-import { AdminAuditLogPrivacyNote } from '@/components/admin/system-logs/AdminAuditLogPrivacyNote';
-import { AdminAuditLogTable } from '@/components/admin/system-logs/AdminAuditLogTable';
-import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
-import { Activity, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { PAGE_SIZE } from '@/components/admin/system-logs/auditLogConstants';
-import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
-import type { AuditLogCategory, AuditLogOutcome } from '@/lib/admin/types';
+} from "@/components/admin/system-logs/AdminAuditLogFilters";
+import { AdminAuditLogPagination } from "@/components/admin/system-logs/AdminAuditLogPagination";
+import { AdminAuditLogPrivacyNote } from "@/components/admin/system-logs/AdminAuditLogPrivacyNote";
+import { AdminAuditLogTable } from "@/components/admin/system-logs/AdminAuditLogTable";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+import { Activity, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import { PAGE_SIZE } from "@/components/admin/system-logs/auditLogConstants";
+import { useAdminAuditLogs } from "@/hooks/admin/audit/useAdminAuditLogs";
+import type { AuditLogCategory, AuditLogOutcome } from "@/lib/admin/types";
 
 const EMPTY_ADVANCED: AuditAdvancedFilters = {
-  actorUserId: '',
-  targetUserId: '',
-  patientId: '',
-  entityType: '',
-  entityId: '',
-  action: '',
-  requestId: '',
-  ip: '',
+  actorUserId: "",
+  targetUserId: "",
+  patientId: "",
+  entityType: "",
+  entityId: "",
+  action: "",
+  requestId: "",
+  ip: "",
 };
 
 export default function AdminSystemLogsPage() {
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<AuditLogCategory | ''>('');
-  const [outcome, setOutcome] = useState<AuditLogOutcome | ''>('');
-  const [actorRole, setActorRole] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [advanced, setAdvanced] = useState<AuditAdvancedFilters>(EMPTY_ADVANCED);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<AuditLogCategory | "">("");
+  const [outcome, setOutcome] = useState<AuditLogOutcome | "">("");
+  const [actorRole, setActorRole] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [advanced, setAdvanced] =
+    useState<AuditAdvancedFilters>(EMPTY_ADVANCED);
   const [page, setPage] = useState(1);
 
   const [debouncedSearch] = useDebounce(search, 350);
@@ -42,7 +43,7 @@ export default function AdminSystemLogsPage() {
     const advancedParams = Object.fromEntries(
       Object.entries(debouncedAdvanced)
         .map(([key, value]) => [key, value.trim()])
-        .filter(([, value]) => value !== ''),
+        .filter(([, value]) => value !== ""),
     );
 
     return {
@@ -56,7 +57,29 @@ export default function AdminSystemLogsPage() {
       ...(to ? { to: new Date(to).toISOString() } : {}),
       ...advancedParams,
     };
-  }, [page, debouncedSearch, category, outcome, actorRole, from, to, debouncedAdvanced]);
+  }, [
+    page,
+    debouncedSearch,
+    category,
+    outcome,
+    actorRole,
+    from,
+    to,
+    debouncedAdvanced,
+  ]);
+
+  const resetFilters = useCallback(() => {
+    setSearch("");
+    setCategory("");
+    setOutcome("");
+    setActorRole("");
+    setFrom("");
+    setTo("");
+    setAdvanced(EMPTY_ADVANCED);
+    setPage(1);
+  }, []);
+
+  const bumpPage = useCallback(() => setPage(1), []);
 
   const { data, isAwaitingData, isError, error } = useAdminAuditLogs(params);
 
@@ -64,22 +87,22 @@ export default function AdminSystemLogsPage() {
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const failCount = useMemo(() => logs.filter((l) => l.outcome === 'FAIL').length, [logs]);
-  const denyCount = useMemo(() => logs.filter((l) => l.outcome === 'DENY').length, [logs]);
-  const phiCount = useMemo(() => logs.filter((l) => l.category === 'PHI').length, [logs]);
+  const failCount = useMemo(
+    () => logs.filter((l) => l.outcome === "FAIL").length,
+    [logs],
+  );
+  const denyCount = useMemo(
+    () => logs.filter((l) => l.outcome === "DENY").length,
+    [logs],
+  );
+  const phiCount = useMemo(
+    () => logs.filter((l) => l.category === "PHI").length,
+    [logs],
+  );
 
-  function resetFilters() {
-    setSearch('');
-    setCategory('');
-    setOutcome('');
-    setActorRole('');
-    setFrom('');
-    setTo('');
-    setAdvanced(EMPTY_ADVANCED);
-    setPage(1);
-  }
-
-  const hasAdvancedFilters = Object.values(advanced).some((v) => v.trim() !== '');
+  const hasAdvancedFilters = Object.values(advanced).some(
+    (v) => v.trim() !== "",
+  );
   const hasActiveFilters = !!(
     debouncedSearch ||
     category ||
@@ -90,46 +113,44 @@ export default function AdminSystemLogsPage() {
     hasAdvancedFilters
   );
 
-  const bumpPage = () => setPage(1);
-
   return (
     <>
       <Helmet>
         <title>سجلات النظام • LMJ Health</title>
       </Helmet>
 
-      <div dir='rtl' lang='ar'>
+      <div dir="rtl" lang="ar">
         <AdminDashboardOverview
-          variant='admin'
-          surface='mint'
-          title='سجلات النظام'
-          subtitle='مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي'
-          headerIcon={<Activity className='h-8 w-8 text-white' />}
+          variant="admin"
+          surface="mint"
+          title="سجلات النظام"
+          subtitle="مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي"
+          headerIcon={<Activity className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={[
             {
-              key: 'total',
-              icon: <Activity className='h-5 w-5 shrink-0' />,
-              value: isAwaitingData ? '—' : total.toLocaleString('ar-SA'),
-              label: 'إجمالي السجلات',
+              key: "total",
+              icon: <Activity className="h-5 w-5 shrink-0" />,
+              value: isAwaitingData ? "—" : total.toLocaleString("ar-SA"),
+              label: "إجمالي السجلات",
             },
             {
-              key: 'fail',
-              icon: <ShieldAlert className='h-5 w-5 shrink-0' />,
-              value: isAwaitingData ? '—' : failCount,
-              label: 'إجراءات فاشلة',
+              key: "fail",
+              icon: <ShieldAlert className="h-5 w-5 shrink-0" />,
+              value: isAwaitingData ? "—" : failCount,
+              label: "إجراءات فاشلة",
             },
             {
-              key: 'deny',
-              icon: <Shield className='h-5 w-5 shrink-0' />,
-              value: isAwaitingData ? '—' : denyCount,
-              label: 'محاولات مرفوضة',
+              key: "deny",
+              icon: <Shield className="h-5 w-5 shrink-0" />,
+              value: isAwaitingData ? "—" : denyCount,
+              label: "محاولات مرفوضة",
             },
             {
-              key: 'phi',
-              icon: <ShieldCheck className='h-5 w-5 shrink-0' />,
-              value: isAwaitingData ? '—' : phiCount,
-              label: 'وصول للبيانات الطبية',
+              key: "phi",
+              icon: <ShieldCheck className="h-5 w-5 shrink-0" />,
+              value: isAwaitingData ? "—" : phiCount,
+              label: "وصول للبيانات الطبية",
             },
           ]}
         />
