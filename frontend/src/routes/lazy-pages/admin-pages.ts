@@ -92,3 +92,11 @@ export const AdminDoctorSpecializationsPage = lazy(
   () =>
     import("@/pages/admin/doctor-specializations/AdminDoctorSpecializationsPage"),
 );
+export const AdminDoctorRestoreRequestsPage = lazy(
+  () =>
+    import("@/pages/admin/doctor-restore-requests/AdminDoctorRestoreRequestsPage"),
+);
+export const AdminRestoreRequestDetailsPage = lazy(
+  () =>
+    import("@/pages/admin/doctor-restore-requests/AdminRestoreRequestDetailsPage"),
+);

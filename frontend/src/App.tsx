@@ -461,6 +461,14 @@ export default function App() {
               element={<AdminPages.AdminVerificationRequestDetailsPage />}
             />
             <Route
+              path="doctor-restore-requests"
+              element={<AdminPages.AdminDoctorRestoreRequestsPage />}
+            />
+            <Route
+              path="doctor-restore-requests/:requestId"
+              element={<AdminPages.AdminRestoreRequestDetailsPage />}
+            />
+            <Route
               path="complaints"
               element={<AdminPages.AdminComplaintsPage />}
             />
