@@ -27,6 +27,19 @@ export function useAdminContentList(params: AdminContentListParams = {}) {
   };
 }
 
+export function useAdminMyContentList(params: AdminContentListParams = {}) {
+  const query = useQuery({
+    queryKey: [...CONTENT_LIST_KEY, 'mine', params],
+    queryFn: () => adminApi.content.listMine(params),
+    staleTime: STALE,
+  });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
+}
+
 export function useAdminContentById(id?: string | null) {
   const query = useQuery({
     queryKey: [...CONTENT_LIST_KEY, 'details', id],

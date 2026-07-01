@@ -41,6 +41,7 @@ import {
 import { useToast } from "@/components/ui/ToastProvider";
 import {
   useAdminContentList,
+  useAdminMyContentList,
   useAdminPendingNews,
   useApproveContent,
   useArchiveContent,
@@ -77,6 +78,7 @@ export default function AdminMedicalContentPage() {
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState("");
+  const [showMineOnly, setShowMineOnly] = useState(false);
   const [activeStatus, setActiveStatus] = useState<UiContentStatus>("الكل");
   const [langFilter, setLangFilter] = useState<LangFilter>("الكل");
 
@@ -188,7 +190,9 @@ export default function AdminMedicalContentPage() {
     [page, activeType, activeStatus, langFilter, statusToApi],
   );
 
-  const contentQuery = useAdminContentList(listParams);
+  const contentQuery = showMineOnly
+    ? useAdminMyContentList(listParams)
+    : useAdminContentList(listParams);
   const statusCounts = useAdminContentStatusCounts();
   const pendingNewsQuery = useAdminPendingNews({
     page: 1,
@@ -425,7 +429,21 @@ export default function AdminMedicalContentPage() {
                 <Search className="w-5 h-5" />
               </div>
             </div>
-            <LanguageModeToggle value={langFilter} onChange={setLangFilter} />
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <label className="inline-flex h-[44px] cursor-pointer select-none items-center justify-end gap-2 rounded-[12px] border border-[#E5E7EB] bg-[#FAFBFC] px-4 font-cairo text-[12px] font-bold text-[#344054]">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40"
+                  checked={showMineOnly}
+                  onChange={(event) => {
+                    setShowMineOnly(event.target.checked);
+                    setPage(1);
+                  }}
+                />
+                محتواي فقط
+              </label>
+              <LanguageModeToggle value={langFilter} onChange={setLangFilter} />
+            </div>
           </div>
 
           <div className="mt-5 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
