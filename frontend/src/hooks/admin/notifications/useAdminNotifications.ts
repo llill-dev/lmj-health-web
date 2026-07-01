@@ -51,7 +51,7 @@ async function fetchList(
   }
   const res = await notificationsApi.list({ page, limit, unread_only });
   if (res == null) {
-    return uiOnlyListResponse(page, limit, unread_only);
+    throw new Error('Notifications API returned an empty response.');
   }
   return res;
 }
@@ -66,7 +66,7 @@ async function fetchUnreadTotal(): Promise<number> {
     unread_only: true,
   });
   if (res == null) {
-    return uiOnlyListResponse(1, 1, true).total ?? 0;
+    throw new Error('Notifications API returned an empty unread-total response.');
   }
   return res.total ?? 0;
 }
@@ -77,7 +77,7 @@ async function fetchAllTotal(): Promise<number> {
   }
   const res = await notificationsApi.list({ page: 1, limit: 1 });
   if (res == null) {
-    return uiOnlyListResponse(1, 1, false).total ?? 0;
+    throw new Error('Notifications API returned an empty total response.');
   }
   return res.total ?? 0;
 }
