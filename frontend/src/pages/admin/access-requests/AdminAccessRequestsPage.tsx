@@ -21,6 +21,7 @@ import StyledSelect from "@/components/ui/styled-select";
 import { useAdminAccessRequests } from "@/hooks/admin/access-requests/useAdminAccessRequests";
 import { useAdminAccessRequestDetails } from "@/hooks/admin/access-requests/useAdminAccessRequests";
 import AccessRequestDetailsDialog from "@/components/admin/access-requests/AccessRequestDetailsDialog";
+import AccessRequestCardSkeleton from "@/components/admin/access-requests/AccessRequestCardSkeleton";
 
 type RequestStatus = "pending" | "approved" | "rejected" | "all";
 
@@ -250,9 +251,11 @@ export default function AdminAccessRequestsPage() {
         {/* Requests List */}
         <section className="mt-5 space-y-4">
           {isAwaitingData ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              جارِ تحميل طلبات الوصول...
-            </div>
+            <>
+              <AccessRequestCardSkeleton />
+              <AccessRequestCardSkeleton />
+              <AccessRequestCardSkeleton />
+            </>
           ) : error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
               تعذّر تحميل طلبات الوصول.

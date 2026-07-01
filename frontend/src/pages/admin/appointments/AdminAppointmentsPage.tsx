@@ -14,6 +14,7 @@ import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
 import StyledSelect from "@/components/ui/styled-select";
 import AdminAppointmentDetailsDialog from "@/components/admin/appointments/dialogs/AdminAppointmentDetailsDialog";
+import AppointmentCardSkeleton from "@/components/admin/appointments/AppointmentCardSkeleton";
 import {
   formatDateLabel,
   statusLabel,
@@ -297,9 +298,11 @@ export default function AdminAppointmentsPage() {
 
         <section className="mt-5 space-y-4">
           {isAwaitingData ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              جارِ تحميل المواعيد...
-            </div>
+            <>
+              <AppointmentCardSkeleton />
+              <AppointmentCardSkeleton />
+              <AppointmentCardSkeleton />
+            </>
           ) : error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
               تعذّر تحميل المواعيد.
