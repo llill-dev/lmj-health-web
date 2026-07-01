@@ -21,6 +21,17 @@ import type { AdminUserSummary } from "@/lib/admin/types";
 
 type UserStatusFilter = "all" | "active" | "inactive";
 
+function formatUserCreatedAt(value?: string) {
+  if (!value) return "?";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "?";
+  return parsed.toLocaleDateString("ar-SA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 function userStatusLabel(user: AdminUserSummary) {
   return user.isActive === false ? "موقوف" : "نشط";
 }
@@ -218,6 +229,10 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="mt-4 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
+                  <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                    <span>أُنشئ في {formatUserCreatedAt(user.createdAt)}</span>
+                    <Users className="h-4 w-4 text-primary" />
+                  </div>
                   {user.email ? (
                     <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                       <span>{user.email}</span>

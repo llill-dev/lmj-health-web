@@ -7,6 +7,7 @@ import { AdminServicesContent } from '@/components/admin/services/AdminServicesC
 import { AdminServicesHeader } from '@/components/admin/services/AdminServicesHeader';
 import { AdminServicesToolbar } from '@/components/admin/services/AdminServicesToolbar';
 import DeleteFacilityDialog from '@/components/admin/services/dialogs/DeleteFacilityDialog';
+import FacilityDetailsDialog from '@/components/admin/services/dialogs/FacilityDetailsDialog';
 import FacilityDoctorsDialog from '@/components/admin/services/dialogs/FacilityDoctorsDialog';
 import UpsertFacilityDialog from '@/components/admin/services/dialogs/UpsertFacilityDialog';
 import UpsertServiceTypeDialog from '@/components/admin/services/dialogs/UpsertServiceTypeDialog';
@@ -48,6 +49,8 @@ export default function AdminServicesPage() {
   const [serviceTypeOpen, setServiceTypeOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FacilitySummary | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsTarget, setDetailsTarget] = useState<FacilitySummary | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [statusToggleTarget, setStatusToggleTarget] = useState<FacilitySummary | null>(null);
   const [doctorsDialogOpen, setDoctorsDialogOpen] = useState(false);
@@ -146,6 +149,11 @@ export default function AdminServicesPage() {
         onOpenChange={setDeleteOpen}
         facility={deleteTarget}
       />
+      <FacilityDetailsDialog
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        facility={detailsTarget}
+      />
       <FacilityDoctorsDialog
         open={doctorsDialogOpen}
         onOpenChange={setDoctorsDialogOpen}
@@ -237,6 +245,10 @@ export default function AdminServicesPage() {
           onEditFacility={openEdit}
           onDeleteFacility={openDelete}
           onToggleFacilityStatus={(facility) => setStatusToggleTarget(facility)}
+          onViewFacilityDetails={(facility) => {
+            setDetailsTarget(facility);
+            setDetailsOpen(true);
+          }}
           onViewFacilityDoctors={(facility) => {
             setDoctorsFacility(facility);
             setDoctorsDialogOpen(true);

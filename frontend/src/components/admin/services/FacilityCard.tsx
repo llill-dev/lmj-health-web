@@ -1,4 +1,5 @@
 import {
+  Eye,
   Loader2,
   MapPin,
   Pencil,
@@ -19,6 +20,7 @@ export function FacilityCard({
   onDelete,
   onToggleStatus,
   onViewDoctors,
+  onViewDetails,
   isToggling,
 }: {
   facility: FacilitySummary;
@@ -27,6 +29,7 @@ export function FacilityCard({
   onDelete: () => void;
   onToggleStatus: () => void;
   onViewDoctors?: () => void;
+  onViewDetails?: () => void;
   isToggling: boolean;
 }) {
   const isActive = facility.status === 'ACTIVE';
@@ -91,6 +94,16 @@ export function FacilityCard({
         </div>
 
         <div className='flex shrink-0 items-center gap-2 pt-1'>
+          {onViewDetails ? (
+            <button
+              type='button'
+              title='التفاصيل'
+              onClick={onViewDetails}
+              className='flex h-[30px] w-[30px] items-center justify-center rounded-[8px] border border-[#D1E9FF] bg-white text-[#175CD3] transition hover:bg-[#EFF8FF]'
+            >
+              <Eye className='h-3.5 w-3.5' />
+            </button>
+          ) : null}
           {onViewDoctors ? (
             <button
               type='button'

@@ -23,6 +23,7 @@ export function AdminServicesContent({
   onEditFacility,
   onDeleteFacility,
   onToggleFacilityStatus,
+  onViewFacilityDetails,
   onViewFacilityDoctors,
 }: {
   isAwaitingData: boolean;
@@ -40,6 +41,7 @@ export function AdminServicesContent({
   onEditFacility: (f: FacilitySummary) => void;
   onDeleteFacility: (f: FacilitySummary) => void;
   onToggleFacilityStatus: (f: FacilitySummary) => void;
+  onViewFacilityDetails?: (f: FacilitySummary) => void;
   onViewFacilityDoctors?: (f: FacilitySummary) => void;
 }) {
   return (
@@ -78,6 +80,11 @@ export function AdminServicesContent({
                 onEdit={() => onEditFacility(facility)}
                 onDelete={() => onDeleteFacility(facility)}
                 onToggleStatus={() => onToggleFacilityStatus(facility)}
+                onViewDetails={
+                  onViewFacilityDetails
+                    ? () => onViewFacilityDetails(facility)
+                    : undefined
+                }
                 onViewDoctors={
                   onViewFacilityDoctors
                     ? () => onViewFacilityDoctors(facility)
