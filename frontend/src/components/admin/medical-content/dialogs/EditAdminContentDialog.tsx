@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, Save, X } from 'lucide-react';
 import { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -26,26 +26,39 @@ import type {
   AdminContentType,
 } from '@/lib/admin/types';
 
-const formSchema = z.object({
-  type: z.enum([
-    'CONDITION',
-    'SYMPTOM',
-    'GENERAL_ADVICE',
-    'NEWS',
-    'MEDICATION',
-    'SETTINGS_PAGE',
-  ]),
-  title: z.string().min(1, 'عنوان المحتوى مطلوب'),
-  summary: z.string().optional(),
-  language: z.enum(['ar', 'en']),
-  slug: z
-    .string()
-    .optional()
-    .refine((s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s), {
-      message: 'المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات',
-    }),
-  pageVersion: z.string().optional(),
-});
+const formSchema = z
+  .object({
+    type: z.enum([
+      'CONDITION',
+      'SYMPTOM',
+      'GENERAL_ADVICE',
+      'NEWS',
+      'MEDICATION',
+      'SETTINGS_PAGE',
+    ]),
+    title: z.string().min(1, 'عنوان المحتوى مطلوب'),
+    summary: z.string().optional(),
+    language: z.enum(['ar', 'en']),
+    slug: z
+      .string()
+      .optional()
+      .refine((s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s), {
+        message: 'المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات',
+      }),
+    pageVersion: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (
+      value.type === 'SETTINGS_PAGE' &&
+      (!value.pageVersion || !value.pageVersion.trim())
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['pageVersion'],
+        message: 'إصدار الصفحة مطلوب لصفحات الإعدادات',
+      });
+    }
+  });
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -104,6 +117,7 @@ export default function EditAdminContentDialog({
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -116,6 +130,8 @@ export default function EditAdminContentDialog({
       pageVersion: '',
     },
   });
+
+  const selectedType = watch('type');
 
   useEffect(() => {
     if (!open || !details) return;
@@ -175,7 +191,7 @@ export default function EditAdminContentDialog({
       });
       onOpenChange(false);
     } catch {
-      // الخطأ يظهر عبر updateMut.isError ورسالة الـ API
+      // Surface API errors through the existing mutation error rendering.
     }
   });
 
@@ -232,12 +248,12 @@ export default function EditAdminContentDialog({
             {loading ? (
               <div className='flex items-center justify-center gap-2 px-8 py-20 font-cairo text-[13px] font-bold text-[#667085]'>
                 <Loader2 className='h-4 w-4 animate-spin' />
-                جارِ تحميل بيانات المحتوى...
+                جارٍ تحميل بيانات المحتوى...
               </div>
             ) : loadError || !details ? (
               <div className='px-8 py-12'>
                 <div className='rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[13px] font-bold text-red-600'>
-                  تعذّر تحميل بيانات المحتوى للتعديل.
+                  تعذر تحميل بيانات المحتوى للتعديل.
                 </div>
               </div>
             ) : (
@@ -333,7 +349,11 @@ export default function EditAdminContentDialog({
 
                     <DoctorProfileFormField
                       label='إصدار الصفحة (اختياري)'
-                      hint='مطلوب لاعتماد صفحات الإعدادات (SETTINGS_PAGE).'
+                      hint={
+                        selectedType === 'SETTINGS_PAGE'
+                          ? 'مطلوب لصفحات الإعدادات (SETTINGS_PAGE).'
+                          : 'استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE.'
+                      }
                       error={errors.pageVersion?.message}
                     >
                       <input
@@ -349,7 +369,7 @@ export default function EditAdminContentDialog({
 
                     {updateMut.isError ? (
                       <div className='rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600'>
-                        {userFacingErrorMessage(updateMut.error, 'تعذّر التعديل')}
+                        {userFacingErrorMessage(updateMut.error, 'تعذر التعديل')}
                       </div>
                     ) : null}
                   </div>

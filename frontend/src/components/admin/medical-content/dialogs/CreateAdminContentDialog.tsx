@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Save, X } from 'lucide-react';
 import { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateAdminContent } from '@/hooks/admin/content/useAdminContent';
@@ -18,28 +18,47 @@ import StyledSelect from '@/components/ui/styled-select';
 import { cn } from '@/lib/utils/utils';
 import type { AdminContentBlock, AdminContentType } from '@/lib/admin/types';
 
-/** جسم مبدئي تتوافق مع الـ API ويتجنّب أعطال التحقق عندما يتوقع الخادم مصفوفة بلوكات. */
 const DRAFT_CONTENT_BLOCKS: AdminContentBlock[] = [
   { type: 'heading', level: 2, text: 'نظرة عامة' },
   {
     type: 'paragraph',
-    text: 'أكمل تفاصيل المقال لاحقاً من صفحة عرض أو تحرير المحتوى.',
+    text: 'أكمل تفاصيل المقال لاحقًا من صفحة عرض أو تحرير المحتوى.',
   },
 ];
 
-const formSchema = z.object({
-  type: z.enum(['CONDITION', 'SYMPTOM', 'GENERAL_ADVICE', 'NEWS', 'MEDICATION', 'SETTINGS_PAGE']),
-  title: z.string().min(1, 'عنوان المحتوى مطلوب'),
-  summary: z.string().optional(),
-  language: z.enum(['ar', 'en']),
-  slug: z
-    .string()
-    .optional()
-    .refine(
-      (s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s),
-      { message: 'المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات' },
-    ),
-});
+const formSchema = z
+  .object({
+    type: z.enum([
+      'CONDITION',
+      'SYMPTOM',
+      'GENERAL_ADVICE',
+      'NEWS',
+      'MEDICATION',
+      'SETTINGS_PAGE',
+    ]),
+    title: z.string().min(1, 'عنوان المحتوى مطلوب'),
+    summary: z.string().optional(),
+    language: z.enum(['ar', 'en']),
+    slug: z
+      .string()
+      .optional()
+      .refine((s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s), {
+        message: 'المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات',
+      }),
+    pageVersion: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (
+      value.type === 'SETTINGS_PAGE' &&
+      (!value.pageVersion || !value.pageVersion.trim())
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['pageVersion'],
+        message: 'إصدار الصفحة مطلوب لصفحات الإعدادات',
+      });
+    }
+  });
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -58,6 +77,7 @@ const EMPTY_FORM: FormValues = {
   summary: '',
   language: 'ar',
   slug: '',
+  pageVersion: '',
 };
 
 type Props = {
@@ -77,11 +97,14 @@ export default function CreateAdminContentDialog({
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: EMPTY_FORM,
   });
+
+  const selectedType = watch('type');
 
   useEffect(() => {
     if (!open) {
@@ -115,19 +138,17 @@ export default function CreateAdminContentDialog({
         summary: v.summary?.trim() || undefined,
         language: v.language,
         slug: v.slug?.trim() || undefined,
+        pageVersion: v.pageVersion?.trim() || undefined,
         contentBlocks: DRAFT_CONTENT_BLOCKS,
       });
-      toast(
-        `أُضيفت مسودة «${v.title.trim()}» إلى المحتوى الطبي. أكمل التحرير والمراجعة والنشر من نفس الصفحة.`,
-        {
-          title: 'تم إضافة المحتوى',
-          variant: 'success',
-          durationMs: 4200,
-        },
-      );
+      toast(`أُضيفت مسودة «${v.title.trim()}» إلى المحتوى الطبي.`, {
+        title: 'تم إضافة المحتوى',
+        variant: 'success',
+        durationMs: 4200,
+      });
       onOpenChange(false);
     } catch {
-      // الخطأ يظهر عبر createMut.isError ورسالة الـ API
+      // Surface API errors through the existing mutation error rendering.
     }
   });
 
@@ -176,7 +197,7 @@ export default function CreateAdminContentDialog({
                   إضافة محتوى طبي
                 </h2>
                 <p className='mt-1 font-cairo text-[13px] font-semibold text-[#5B7B79]'>
-                  أنشئ مسودة محتوى جديدة ثم أكمل التحرير والمراجعة والنشر لاحقاً.
+                  أنشئ مسودة محتوى جديدة ثم أكمل التحرير والمراجعة والنشر لاحقًا.
                 </p>
               </div>
             </div>
@@ -271,9 +292,29 @@ export default function CreateAdminContentDialog({
                     </DoctorProfileFormField>
                   </div>
 
+                  <DoctorProfileFormField
+                    label='إصدار الصفحة (اختياري)'
+                    hint={
+                      selectedType === 'SETTINGS_PAGE'
+                        ? 'هذا الحقل مطلوب لصفحات الإعدادات.'
+                        : 'استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE.'
+                    }
+                    error={errors.pageVersion?.message}
+                  >
+                    <input
+                      {...register('pageVersion')}
+                      dir='ltr'
+                      placeholder='2026-04'
+                      className={profileFieldClass(
+                        cn(profileInputClass),
+                        Boolean(errors.pageVersion),
+                      )}
+                    />
+                  </DoctorProfileFormField>
+
                   {createMut.isError ? (
                     <div className='rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600'>
-                      {userFacingErrorMessage(createMut.error, 'تعذّر الإنشاء')}
+                      {userFacingErrorMessage(createMut.error, 'تعذر الإنشاء')}
                     </div>
                   ) : null}
                 </div>

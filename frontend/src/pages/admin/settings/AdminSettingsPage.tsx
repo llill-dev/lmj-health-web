@@ -386,9 +386,6 @@ export default function AdminSettingsPage() {
                   <div className="mt-2 text-right font-cairo text-[11px] font-medium text-[#98A2B3]">
                     الحجم المفضل 512×512 • الصيغة (PNG)
                   </div>
-                  <div className="mt-1 text-right font-cairo text-[11px] font-medium text-[#98A2B3]">
-                    ما يزال الشعار محفوظًا محليًا إلى أن يتوفر له عقد backend مستقل.
-                  </div>
                   {saveStates.logo === "saved" ? (
                     <div className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#16A34A]">
                       تم حفظ الشعار محليًا

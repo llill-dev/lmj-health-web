@@ -791,6 +791,7 @@ export type CreateAdminContentBody = {
   summary?: string;
   language: "ar" | "en";
   slug?: string;
+  pageVersion?: string | null;
   contentBlocks?: AdminContentBlock[];
   sources?: Array<{ title?: string; url?: string }>;
 };
