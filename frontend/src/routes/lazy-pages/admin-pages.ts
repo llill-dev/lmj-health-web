@@ -49,6 +49,9 @@ export const AdminServiceProvidersPage = lazy(
 export const AdminAppointmentsPage = lazy(
   () => import("@/pages/admin/appointments/AdminAppointmentsPage"),
 );
+export const AdminAccessRequestsPage = lazy(
+  () => import("@/pages/admin/access-requests/AdminAccessRequestsPage"),
+);
 export const AdminMedicalFileOptionsPage = lazy(
   () =>
     import("@/pages/admin/medical-file-options/AdminMedicalFileOptionsPage"),
@@ -62,9 +65,7 @@ export const AdminVerificationRequestsPage = lazy(
 );
 export const AdminVerificationRequestDetailsPage = lazy(
   () =>
-    import(
-      "@/pages/admin/verification-requests/AdminVerificationRequestDetailsPage"
-    ),
+    import("@/pages/admin/verification-requests/AdminVerificationRequestDetailsPage"),
 );
 export const AdminSystemLogsPage = lazy(
   () => import("@/pages/admin/system-logs/AdminSystemLogsPage"),

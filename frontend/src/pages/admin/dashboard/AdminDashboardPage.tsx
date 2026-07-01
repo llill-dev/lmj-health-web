@@ -106,8 +106,7 @@ export default function AdminDashboardPage() {
   const formatKpi = (value: number | undefined, awaiting: boolean) =>
     awaiting ? "—" : String(value ?? 0);
 
-  const mainKpisAwaiting =
-    statsAwaiting || pendingAccessQuery.isLoading;
+  const mainKpisAwaiting = statsAwaiting || pendingAccessQuery.isLoading;
 
   const secondaryCards = [
     {
@@ -183,6 +182,16 @@ export default function AdminDashboardPage() {
             },
           ]}
         />
+
+        <section className="mt-5 flex justify-end">
+          <Link
+            to="/admin/access-requests"
+            className="inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]"
+          >
+            <UserCheck className="h-4 w-4" />
+            إدارة طلبات الوصول
+          </Link>
+        </section>
 
         <section className="grid grid-cols-1 gap-5 mt-5 md:grid-cols-3">
           {secondaryCards.map((c, idx) => {

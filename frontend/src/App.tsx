@@ -124,7 +124,10 @@ export default function App() {
               path="waitlist"
               element={<DoctorPages.DoctorWaitlistPage />}
             />
-            <Route path="patients" element={<DoctorPages.DoctorPatientsPage />} />
+            <Route
+              path="patients"
+              element={<DoctorPages.DoctorPatientsPage />}
+            />
             <Route
               path="patients/:patientId"
               element={
@@ -153,7 +156,10 @@ export default function App() {
               path="clinical-library"
               element={<DoctorPages.DoctorClinicalLibraryPage />}
             />
-            <Route path="encounters" element={<DoctorPages.DoctorEncountersPage />} />
+            <Route
+              path="encounters"
+              element={<DoctorPages.DoctorEncountersPage />}
+            />
             <Route
               path="encounters/:patientId/:encounterId/summary"
               element={
@@ -365,7 +371,10 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<AdminPages.AdminDashboardPage />} />
+            <Route
+              path="overview"
+              element={<AdminPages.AdminDashboardPage />}
+            />
             <Route
               path="notifications"
               element={<AdminPages.AdminNotificationsPage />}
@@ -430,6 +439,10 @@ export default function App() {
             <Route
               path="appointments"
               element={<AdminPages.AdminAppointmentsPage />}
+            />
+            <Route
+              path="access-requests"
+              element={<AdminPages.AdminAccessRequestsPage />}
             />
             <Route
               path="medical-file-options"

@@ -69,6 +69,7 @@ export type AdminSidebarItemId =
   | "medical-file-options"
   | "medical-orders"
   | "appointments"
+  | "access-requests"
   | "system-logs"
   | "analytics"
   | "settings"
@@ -289,6 +290,12 @@ export const adminSidebarItems: Array<{
     path: "appointments",
     label: "جميع المواعيد",
     icon: CalendarDays,
+  },
+  {
+    id: "access-requests",
+    path: "access-requests",
+    label: "طلبات الوصول",
+    icon: ShieldCheck,
   },
   {
     id: "system-logs",
