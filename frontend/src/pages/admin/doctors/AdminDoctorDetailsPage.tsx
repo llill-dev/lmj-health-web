@@ -81,6 +81,16 @@ function coordsToLatLng(d: AdminDoctorDetailsDoctor) {
   return { lat: String(lat), lng: String(lng) };
 }
 
+const ANALYTICS_RANGE_OPTIONS: Array<{
+  value: AdminDoctorAnalyticsRange;
+  label: string;
+}> = [
+  { value: 'day', label: 'يومي' },
+  { value: 'week', label: 'أسبوعي' },
+  { value: 'month', label: 'شهري' },
+  { value: 'year', label: 'سنوي' },
+];
+
 export default function AdminDoctorDetailsPage() {
   const { doctorId } = useParams();
   const queryClient = useQueryClient();
@@ -98,6 +108,8 @@ export default function AdminDoctorDetailsPage() {
     'approve' | 'reject' | 'map'
   >('approve');
   const [offboardOpen, setOffboardOpen] = useState(false);
+  const [analyticsRange, setAnalyticsRange] =
+    useState<AdminDoctorAnalyticsRange>('month');
 
   const offboardUserId = useMemo(
     () => resolveAdminDoctorUserId(doctor),
@@ -165,7 +177,6 @@ export default function AdminDoctorDetailsPage() {
     });
   };
 
-  const analyticsRange: AdminDoctorAnalyticsRange = 'month';
   const diagnosisQuery = useQuery({
     queryKey: ['admin', 'doctor', doctorId, 'analytics', 'diagnosis', analyticsRange],
     queryFn: () =>
@@ -339,14 +350,51 @@ export default function AdminDoctorDetailsPage() {
                 </div>
               </section>
 
-              <AdminDoctorAnalyticsPanels
-                diagnosisItems={diagnosisItems}
-                summary={summaryStats}
-                isDiagnosisLoading={diagnosisAwaiting}
-                isSummaryLoading={summaryAwaiting}
-                hasDiagnosisError={diagnosisError}
-                hasSummaryError={summaryError}
-              />
+              <section className='flex flex-col gap-4'>
+                <div className='flex flex-col gap-3 rounded-[6px] border border-[#F3F4F6] bg-white p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:flex-row sm:items-center sm:justify-between sm:p-5'>
+                  <div className='text-right'>
+                    <h2 className='font-cairo text-base font-bold text-primary sm:text-lg'>
+                      نطاق التحليلات
+                    </h2>
+                    <p className='mt-1 font-cairo text-sm text-[#667085]'>
+                      اختر الفترة لعرض ملخص الأداء والتشخيصات.
+                    </p>
+                  </div>
+                  <div
+                    className='flex flex-wrap justify-end gap-2'
+                    role='group'
+                    aria-label='اختيار نطاق التحليلات'
+                  >
+                    {ANALYTICS_RANGE_OPTIONS.map((option) => {
+                      const active = analyticsRange === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type='button'
+                          onClick={() => setAnalyticsRange(option.value)}
+                          className={`rounded-full border px-4 py-2 font-cairo text-sm font-semibold transition-colors ${
+                            active
+                              ? 'border-primary bg-primary text-white'
+                              : 'border-[#D0D5DD] bg-white text-[#344054] hover:border-primary hover:text-primary'
+                          }`}
+                          aria-pressed={active}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <AdminDoctorAnalyticsPanels
+                  diagnosisItems={diagnosisItems}
+                  summary={summaryStats}
+                  isDiagnosisLoading={diagnosisAwaiting}
+                  isSummaryLoading={summaryAwaiting}
+                  hasDiagnosisError={diagnosisError}
+                  hasSummaryError={summaryError}
+                />
+              </section>
 
               {doctor.approvalStatus === 'pending' && !isOffboarded ? (
                 <div className='flex flex-col items-center gap-3 pb-6 pt-2'>
