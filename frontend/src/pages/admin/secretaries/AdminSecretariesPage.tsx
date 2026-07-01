@@ -7,6 +7,8 @@ import {
   Search,
   Stethoscope,
   UserMinus,
+  UserPlus,
+  Edit3,
   Users,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +17,8 @@ import { useDebounce } from "use-debounce";
 import { useAdminSecretariesList } from "@/hooks/admin/secretaries/useAdminSecretaries";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialog";
+import CreateSecretaryDialog from "@/components/admin/secretaries/dialogs/CreateSecretaryDialog";
+import EditSecretaryDialog from "@/components/admin/secretaries/dialogs/EditSecretaryDialog";
 import { SecretaryCardSkeleton } from "@/components/admin/secretaries/SecretaryCardSkeleton";
 import { PERM_LABEL } from "@/components/admin/secretaries/secretaryPermissions";
 import { resolveUserId } from "@/components/admin/secretaries/secretaryListUtils";
@@ -41,6 +45,13 @@ export default function AdminSecretariesPage() {
     userId: string;
     label: string;
   } | null>(null);
+
+  /* create/edit dialog state */
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<AdminSecretarySummary | null>(
+    null,
+  );
 
   const { doctors: doctorOptions, isAwaitingData: doctorsListAwaiting } =
     useAdminDoctors({
@@ -76,6 +87,11 @@ export default function AdminSecretariesPage() {
     setOffboardOpen(true);
   }, []);
 
+  const openEdit = useCallback((s: AdminSecretarySummary) => {
+    setEditTarget(s);
+    setEditOpen(true);
+  }, []);
+
   const handleSearchChange = (val: string) => {
     setSearchInput(val);
     setPage(1);
@@ -94,6 +110,8 @@ export default function AdminSecretariesPage() {
           title="إدارة السكرتارية"
           subtitle="مراقبة وإدارة حسابات السكرتيرين المرتبطين بالأطباء"
           headerIcon={<Users className="h-8 w-8 text-white" />}
+          actionLabel="إنشاء سكرتير"
+          onActionClick={() => setCreateOpen(true)}
           kpis={[
             {
               key: "total",
@@ -219,6 +237,15 @@ export default function AdminSecretariesPage() {
                       </div>
 
                       <div className="flex gap-2 items-center">
+                        <button
+                          type="button"
+                          onClick={() => openEdit(s)}
+                          title="تعديل البيانات"
+                          className="flex h-8 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
+                        >
+                          <Edit3 className="h-3.5 w-3.5" />
+                          تعديل
+                        </button>
                         {userId && (
                           <button
                             type="button"
@@ -362,6 +389,21 @@ export default function AdminSecretariesPage() {
         onOpenChange={setOffboardOpen}
         targetUserId={offboardTarget?.userId ?? null}
         targetLabel={offboardTarget?.label ?? ""}
+        onSuccess={() => refetch()}
+      />
+
+      {/* create secretary dialog */}
+      <CreateSecretaryDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSuccess={() => refetch()}
+      />
+
+      {/* edit secretary dialog */}
+      <EditSecretaryDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        secretary={editTarget}
         onSuccess={() => refetch()}
       />
     </>
