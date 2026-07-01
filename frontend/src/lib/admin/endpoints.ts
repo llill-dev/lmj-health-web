@@ -41,11 +41,13 @@ export const adminEndpoints = {
     },
   },
   appointments: {
-    list: "/api/admin/appointments",
-    details: (appointmentId: string) =>
-      `/api/admin/appointments/${appointmentId}`,
-    cancel: (appointmentId: string) =>
-      `/api/admin/appointments/${appointmentId}/cancel`,
+    list: "/appointments",
+    details: (appointmentId: string) => `/api/appointments/${appointmentId}`,
+    cancel: (appointmentId: string) => `/appointments/${appointmentId}/cancel`,
+  },
+  accessRequests: {
+    list: "/api/access-requests",
+    details: (requestId: string) => `/api/access-requests/${requestId}`,
   },
   verificationRequests: {
     list: "/api/admin/doctor-verification-requests",

@@ -262,6 +262,22 @@ export const adminApi = {
         { locale: "ar" },
       ),
   },
+  accessRequests: {
+    list: (params: { page?: number; limit?: number; status?: string } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      if (params.status) qs.set("status", params.status);
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.accessRequests.list}?${qs.toString()}`
+        : adminEndpoints.accessRequests.list;
+      return get<any>(endpoint, { locale: "ar" });
+    },
+    getById: (requestId: string) =>
+      get<any>(adminEndpoints.accessRequests.details(requestId), {
+        locale: "ar",
+      }),
+  },
   complaints: {
     list: (params: AdminComplaintsListParams = {}) => {
       const qs = new URLSearchParams();
@@ -523,7 +539,12 @@ export const adminApi = {
     update: (
       kind: MedicalOrderCatalogKind,
       id: string,
-      body: Partial<Pick<AdminMedicalOrderCatalogUpsertBody, "label" | "isActive" | "isVisible">>,
+      body: Partial<
+        Pick<
+          AdminMedicalOrderCatalogUpsertBody,
+          "label" | "isActive" | "isVisible"
+        >
+      >,
     ) =>
       patch<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.item(kind, id),
