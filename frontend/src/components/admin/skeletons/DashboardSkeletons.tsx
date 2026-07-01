@@ -1,8 +1,19 @@
-import { AdminSkeletonBlock } from './admin-skeleton-primitives';
+import {
+  AdminSkeletonBlock,
+  createStaggeredDelay,
+} from "./admin-skeleton-primitives";
 
-export function DashboardActivitySkeletonRow() {
+export function DashboardActivitySkeletonRow({
+  index = 0,
+}: {
+  index?: number;
+}) {
+  const delay = createStaggeredDelay(index);
   return (
-    <div className="flex gap-3 justify-between items-center px-6 py-4">
+    <div
+      className="flex gap-3 justify-between items-center px-6 py-4"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <div className="flex flex-1 gap-3 items-center min-w-0">
         <div className="flex justify-center items-center h-[36px] w-[36px] shrink-0 rounded-[10px] bg-[#F3F4F6] animate-pulse" />
         <div className="flex-1 min-w-0 text-right space-y-2">
@@ -15,9 +26,17 @@ export function DashboardActivitySkeletonRow() {
   );
 }
 
-export function DashboardComplaintCardSkeleton() {
+export function DashboardComplaintCardSkeleton({
+  index = 0,
+}: {
+  index?: number;
+}) {
+  const delay = createStaggeredDelay(index);
   return (
-    <div className="flex items-stretch overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-[#FAFBFC]">
+    <div
+      className="flex items-stretch overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-[#FAFBFC]"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <div className="flex flex-1 gap-3 p-4 min-w-0 sm:gap-4 sm:p-5">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] sm:h-14 sm:w-14 bg-[#F3F4F6] animate-pulse" />
         <div className="flex-1 min-w-0 text-right space-y-2">
@@ -35,9 +54,17 @@ export function DashboardComplaintCardSkeleton() {
   );
 }
 
-export function DashboardContentCardSkeleton() {
+export function DashboardContentCardSkeleton({
+  index = 0,
+}: {
+  index?: number;
+}) {
+  const delay = createStaggeredDelay(index);
   return (
-    <div className="rounded-[12px] border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-4 sm:px-5 sm:py-5">
+    <div
+      className="rounded-[12px] border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-4 sm:px-5 sm:py-5"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex-1 min-w-0 text-right space-y-3">
           <div className="flex flex-wrap gap-2 justify-start items-center">

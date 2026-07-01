@@ -259,7 +259,7 @@ export default function AdminDashboardPage() {
             {activityAwaiting ? (
               <>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <DashboardActivitySkeletonRow key={i} />
+                  <DashboardActivitySkeletonRow key={i} index={i} />
                 ))}
               </>
             ) : activityQuery.isError ? (
@@ -316,9 +316,9 @@ export default function AdminDashboardPage() {
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {complaintsAwaiting ? (
               <>
-                <DashboardComplaintCardSkeleton />
-                <DashboardComplaintCardSkeleton />
-                <DashboardComplaintCardSkeleton />
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <DashboardComplaintCardSkeleton key={i} index={i} />
+                ))}
               </>
             ) : complaintsQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">
@@ -398,9 +398,9 @@ export default function AdminDashboardPage() {
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {contentQuery.isAwaitingData ? (
               <>
-                <DashboardContentCardSkeleton />
-                <DashboardContentCardSkeleton />
-                <DashboardContentCardSkeleton />
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <DashboardContentCardSkeleton key={i} index={i} />
+                ))}
               </>
             ) : contentQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">

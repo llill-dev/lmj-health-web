@@ -19,7 +19,7 @@ export default function AdminNotificationsList({
       <ul className="space-y-4">
         {Array.from({ length: 5 }).map((_, i) => (
           <li key={i}>
-            <NotificationCardSkeleton />
+            <NotificationCardSkeleton index={i} />
           </li>
         ))}
       </ul>

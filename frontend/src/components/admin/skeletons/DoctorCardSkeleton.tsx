@@ -1,8 +1,15 @@
-import { AdminSkeletonBlock } from './admin-skeleton-primitives';
+import {
+  AdminSkeletonBlock,
+  createStaggeredDelay,
+} from "./admin-skeleton-primitives";
 
-export function DoctorCardSkeleton() {
+export function DoctorCardSkeleton({ index = 0 }: { index?: number }) {
+  const delay = createStaggeredDelay(index);
   return (
-    <div className="rounded-[12px] border border-[#E8ECEF] bg-white p-4 sm:p-5">
+    <div
+      className="rounded-[12px] border border-[#E8ECEF] bg-white p-4 sm:p-5"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <div className="flex gap-4">
         <div className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[10px] bg-[#F3F4F6] animate-pulse" />
         <div className="flex-1 space-y-3">

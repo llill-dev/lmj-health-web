@@ -9,15 +9,7 @@ export const ADMIN_SKELETON_PULSE =
 export const ADMIN_SKELETON_SHIMMER_DURATION = "1.5s";
 
 export function AdminSkeletonBlock({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(ADMIN_SKELETON_PULSE, className)}
-      style={{
-        animationDuration: ADMIN_SKELETON_SHIMMER_DURATION,
-      }}
-      aria-hidden
-    />
-  );
+  return <div className={cn(ADMIN_SKELETON_PULSE, className)} aria-hidden />;
 }
 
 export function AdminLoadingShell({

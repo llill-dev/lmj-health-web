@@ -50,7 +50,7 @@ export function AdminServicesContent({
       {isAwaitingData && (
         <>
           {Array.from({ length: 5 }).map((_, i) => (
-            <FacilityCardSkeleton key={i} />
+            <FacilityCardSkeleton key={i} index={i} />
           ))}
         </>
       )}

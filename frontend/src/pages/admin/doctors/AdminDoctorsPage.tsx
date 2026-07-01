@@ -298,7 +298,7 @@ export default function AdminDoctorsPage() {
             {isAwaitingData ? (
               <>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <DoctorCardSkeleton key={i} />
+                  <DoctorCardSkeleton key={i} index={i} />
                 ))}
               </>
             ) : error ? (

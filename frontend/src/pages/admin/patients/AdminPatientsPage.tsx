@@ -247,7 +247,7 @@ export default function AdminPatientsPage() {
           {isAwaitingData ? (
             <>
               {Array.from({ length: 5 }).map((_, i) => (
-                <PatientCardSkeleton key={i} />
+                <PatientCardSkeleton key={i} index={i} />
               ))}
             </>
           ) : error ? (

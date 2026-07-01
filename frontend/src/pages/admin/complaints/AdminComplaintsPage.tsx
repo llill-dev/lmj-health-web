@@ -287,7 +287,7 @@ export default function AdminComplaintsPage() {
           >
             {Array.from({ length: 5 }).map((_, i) => (
               <motion.li key={i} variants={staggerItem} className="block">
-                <ComplaintCardSkeleton />
+                <ComplaintCardSkeleton index={i} />
               </motion.li>
             ))}
           </motion.ul>
