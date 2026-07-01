@@ -1,9 +1,9 @@
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useQuery } from "@tanstack/react-query";
-import { CloudUpload, Settings } from "lucide-react";
-import { get } from "@/lib/api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { CloudUpload, Mail, Phone, Settings } from "lucide-react";
+import { get, post } from "@/lib/api";
 import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import { notificationsApi } from "@/lib/notifications/client";
@@ -22,9 +22,36 @@ type HealthResponse = {
   storage?: string;
 };
 
+type AdminGeneralSettingsResponse = {
+  platformName: string;
+  primaryEmail: string;
+  phone: string;
+  region: string;
+  lang?: "ar" | "en";
+};
+
+type AdminGeneralSettingsForm = {
+  platformName: string;
+  primaryEmail: string;
+  phone: string;
+  region: string;
+  lang: "ar" | "en";
+};
+
+function normalizeGeneralSettings(
+  data?: Partial<AdminGeneralSettingsResponse> | null,
+): AdminGeneralSettingsForm {
+  return {
+    platformName: data?.platformName?.trim() || "LMJ Health",
+    primaryEmail: data?.primaryEmail?.trim() || "",
+    phone: data?.phone?.trim() || "",
+    region: data?.region?.trim() || "",
+    lang: data?.lang === "en" ? "en" : "ar",
+  };
+}
+
 export default function AdminSettingsPage() {
-  const { settings, setSettings, applyGeneral } = useAdminAppSettings();
-  const [draftGeneral, setDraftGeneral] = useState(() => settings.general);
+  const { settings, setSettings } = useAdminAppSettings();
   const [confirmGeneralOpen, setConfirmGeneralOpen] = useState(false);
   const [logoConfirmOpen, setLogoConfirmOpen] = useState(false);
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
@@ -34,16 +61,25 @@ export default function AdminSettingsPage() {
   });
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    setDraftGeneral(settings.general);
-  }, [settings.general.appName, settings.general.appDescription]);
-
   const weekRange = useMemo(() => {
     const to = new Date();
     const from = new Date(to);
     from.setDate(to.getDate() - 7);
     return { from: from.toISOString(), to: to.toISOString() };
   }, []);
+
+  const generalSettingsQuery = useQuery({
+    queryKey: ["admin", "settings", "general"],
+    queryFn: () =>
+      get<AdminGeneralSettingsResponse>("/api/admin/settings/general", {
+        locale: "ar",
+      }),
+    staleTime: 60_000,
+  });
+
+  const [draftGeneral, setDraftGeneral] = useState<AdminGeneralSettingsForm>(
+    () => normalizeGeneralSettings(),
+  );
 
   const healthQuery = useQuery({
     queryKey: ["admin", "settings", "health"],
@@ -83,7 +119,35 @@ export default function AdminSettingsPage() {
     retry: 1,
   });
 
-  /** شكل الرد الموثَّق في API-3.pdf: total + notifications[] */
+  const saveGeneralMutation = useMutation({
+    mutationFn: (payload: AdminGeneralSettingsForm) =>
+      post<{
+        ok?: boolean;
+        settings?: Partial<AdminGeneralSettingsResponse>;
+      }>("/api/admin/settings/general", payload, {
+        locale: "ar",
+      }),
+    onSuccess: (data, payload) => {
+      const normalized = normalizeGeneralSettings(data.settings ?? payload);
+      setDraftGeneral(normalized);
+      generalSettingsQuery.refetch();
+      markSaved("general");
+    },
+  });
+
+  useEffect(() => {
+    if (!generalSettingsQuery.data) return;
+    setDraftGeneral((prev) => {
+      const isUntouched =
+        prev.platformName === "LMJ Health" &&
+        prev.primaryEmail === "" &&
+        prev.phone === "" &&
+        prev.region === "";
+      if (!isUntouched) return prev;
+      return normalizeGeneralSettings(generalSettingsQuery.data);
+    });
+  }, [generalSettingsQuery.data]);
+
   const unreadCount =
     unreadNotificationsQuery.data?.total ??
     unreadNotificationsQuery.data?.notifications?.filter((n) => !n.isRead)
@@ -102,20 +166,16 @@ export default function AdminSettingsPage() {
     auditSummaryQuery.data,
     auditSummaryQuery.isError,
   );
+  const generalAwaiting = isAwaitingInitialQueryData(
+    generalSettingsQuery.data,
+    generalSettingsQuery.isError,
+  );
 
   function markSaved(section: keyof SaveStates) {
     setSaveStates((prev) => ({ ...prev, [section]: "saved" }));
     window.setTimeout(() => {
       setSaveStates((prev) => ({ ...prev, [section]: "idle" }));
     }, 2200);
-  }
-
-  function commitGeneralFromDraft() {
-    applyGeneral({
-      appName: draftGeneral.appName,
-      appDescription: draftGeneral.appDescription,
-    });
-    markSaved("general");
   }
 
   function handleLogoPick(e: ChangeEvent<HTMLInputElement>) {
@@ -161,7 +221,7 @@ export default function AdminSettingsPage() {
   return (
     <>
       <Helmet>
-        <title>الإعدادات • {settings.general.appName}</title>
+        <title>الإعدادات • {draftGeneral.platformName || "LMJ Health"}</title>
       </Helmet>
 
       <div dir="rtl" lang="ar" className="min-h-[520px] bg-[#FCFDFE]">
@@ -170,7 +230,7 @@ export default function AdminSettingsPage() {
             variant="admin"
             surface="mint"
             title="الإعدادات"
-            subtitle="إدارة إعدادات التطبيق والشعار وحالة النظام"
+            subtitle="إدارة الإعدادات العامة المرتبطة بالخادم، مع إبقاء الشعار المحلي منفصلًا مؤقتًا"
             headerIcon={<Settings className="h-8 w-8 text-white" />}
             kpiColumns={3}
             kpis={[
@@ -207,42 +267,94 @@ export default function AdminSettingsPage() {
             >
               <div className="space-y-4">
                 <SettingsField
-                  label="اسم التطبيق"
-                  value={draftGeneral.appName}
+                  label="اسم المنصة"
+                  value={draftGeneral.platformName}
                   onChange={(v) =>
-                    setDraftGeneral((d) => ({ ...d, appName: v }))
+                    setDraftGeneral((prev) => ({ ...prev, platformName: v }))
                   }
                 />
                 <SettingsField
-                  label="وصف التطبيق"
-                  value={draftGeneral.appDescription}
+                  label="البريد الإلكتروني الرئيسي"
+                  value={draftGeneral.primaryEmail}
+                  type="email"
                   onChange={(v) =>
-                    setDraftGeneral((d) => ({ ...d, appDescription: v }))
+                    setDraftGeneral((prev) => ({ ...prev, primaryEmail: v }))
                   }
                 />
+                <SettingsField
+                  label="رقم الهاتف"
+                  value={draftGeneral.phone}
+                  type="tel"
+                  onChange={(v) =>
+                    setDraftGeneral((prev) => ({ ...prev, phone: v }))
+                  }
+                />
+                <SettingsField
+                  label="المنطقة"
+                  value={draftGeneral.region}
+                  onChange={(v) =>
+                    setDraftGeneral((prev) => ({ ...prev, region: v }))
+                  }
+                />
+
+                <div className="space-y-2">
+                  <div className="text-right font-cairo text-[12px] font-bold text-[#344054]">
+                    اللغة الافتراضية
+                  </div>
+                  <select
+                    value={draftGeneral.lang}
+                    onChange={(e) =>
+                      setDraftGeneral((prev) => ({
+                        ...prev,
+                        lang: e.target.value === "en" ? "en" : "ar",
+                      }))
+                    }
+                    className="h-[40px] w-full rounded-[8px] border border-[#EAECF0] bg-white px-4 font-cairo text-[12px] font-semibold text-[#111827] outline-none focus:border-[#BFEDEC] focus:ring-2 focus:ring-[#16C5C020]"
+                  >
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                  </select>
+                </div>
+
+                <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[11px] font-semibold text-[#667085]">
+                  ترتبط هذه الحقول الآن مباشرةً بعقد
+                  {" "}
+                  <span dir="ltr" className="font-extrabold text-[#111827]">
+                    /api/admin/settings/general
+                  </span>
+                  {" "}
+                  بدل الحفظ المحلي فقط.
+                </div>
+
                 <div className="flex justify-start pt-1">
                   <button
                     type="button"
+                    disabled={generalAwaiting || saveGeneralMutation.isPending}
                     onClick={() => setConfirmGeneralOpen(true)}
-                    className="inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)]"
+                    className="inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)] disabled:opacity-50"
                   >
-                    حفظ التغييرات
+                    حفظ الإعدادات
                   </button>
                 </div>
                 {saveStates.general === "saved" ? (
                   <div className="text-right font-cairo text-[11px] font-semibold text-[#16A34A]">
-                    تم الحفظ محلياً في المتصفح
+                    تم حفظ الإعدادات العامة على الخادم
+                  </div>
+                ) : null}
+                {generalSettingsQuery.isError ? (
+                  <div className="text-right font-cairo text-[11px] font-semibold text-[#B42318]">
+                    تعذر تحميل الإعدادات العامة من الخادم.
                   </div>
                 ) : null}
               </div>
             </SettingsSectionCard>
 
             <SettingsSectionCard
-              title="شعار التطبيق"
+              title="الشعار المحلي"
               icon={CloudUpload}
               className="xl:col-span-5"
             >
-              <div className="flex flex-col gap-5 items-start sm:flex-row sm:items-center">
+              <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
                 <div className="flex min-h-[96px] min-w-[96px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_14px_30px_rgba(15,143,139,0.25)]">
                   {settings.logo.dataUrl ? (
                     <img
@@ -272,11 +384,14 @@ export default function AdminSettingsPage() {
                     className="hidden"
                   />
                   <div className="mt-2 text-right font-cairo text-[11px] font-medium text-[#98A2B3]">
-                    الحجم المفضل 512×512 • صيغة (PNG)
+                    الحجم المفضل 512×512 • الصيغة (PNG)
+                  </div>
+                  <div className="mt-1 text-right font-cairo text-[11px] font-medium text-[#98A2B3]">
+                    ما يزال الشعار محفوظًا محليًا إلى أن يتوفر له عقد backend مستقل.
                   </div>
                   {saveStates.logo === "saved" ? (
                     <div className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#16A34A]">
-                      تم حفظ الشعار محلياً
+                      تم حفظ الشعار محليًا
                     </div>
                   ) : null}
                 </div>
@@ -294,23 +409,35 @@ export default function AdminSettingsPage() {
         icon={<Settings className="h-6 w-6" strokeWidth={2} aria-hidden />}
         description={
           <>
-            سيتُحدَّث الشريط الجانبي مباشرة بقيم:{" "}
-            <span className="font-extrabold text-[#344054]">اسم التطبيق</span> و
-            <span className="font-extrabold text-[#344054]">الوصف</span>،
-            وتُحفظان محلياً عبر
-            {` `}
-            <span className="font-extrabold">localStorage</span> ليبقيا بعد
-            إعادة تحميل الصفحة.
+            سيتم حفظ الحقول التالية على الخادم:{" "}
+            <span className="font-extrabold text-[#344054]">اسم المنصة</span>،
+            {" "}
+            <span className="font-extrabold text-[#344054]">
+              البريد الإلكتروني الرئيسي
+            </span>
+            ،{" "}
+            <span className="font-extrabold text-[#344054]">الهاتف</span>،
+            {" "}
+            <span className="font-extrabold text-[#344054]">المنطقة</span>
+            {" "}و
+            <span className="font-extrabold text-[#344054]">اللغة</span>.
           </>
         }
         cancelLabel="ليس الآن"
         confirmLabel="نعم، احفظ"
+        confirmDisabled={saveGeneralMutation.isPending}
         onConfirm={async () => {
-          commitGeneralFromDraft();
+          await saveGeneralMutation.mutateAsync({
+            platformName: draftGeneral.platformName.trim() || "LMJ Health",
+            primaryEmail: draftGeneral.primaryEmail.trim(),
+            phone: draftGeneral.phone.trim(),
+            region: draftGeneral.region.trim(),
+            lang: draftGeneral.lang,
+          });
         }}
         successToast={{
           title: "تم حفظ الإعدادات",
-          message: "تم تطبيق اسم التطبيق والوصف في الشريط الجانبي.",
+          message: "تم تحديث الإعدادات العامة على الخادم بنجاح.",
           variant: "success",
         }}
       />
@@ -322,20 +449,18 @@ export default function AdminSettingsPage() {
           if (!o) setPendingLogoFile(null);
         }}
         variant="primary"
-        title="تأكيد تغيير شعار التطبيق؟"
+        title="تأكيد تغيير شعار التطبيق"
         icon={<CloudUpload className="h-6 w-6" strokeWidth={2} aria-hidden />}
-        description="سيُستبدل الشعار الحالي بالصورة التي اخترتها (PNG) ويُحفظ محلياً ليظهر في الشريط والهوية داخل اللوحة."
+        description="سيُستبدل الشعار الحالي بالصورة التي اخترتها (PNG) وسيُحفظ محليًا مؤقتًا إلى أن يتوفر له دعم backend."
         cancelLabel="إلغاء"
         confirmLabel="نعم، استخدم هذا الشعار"
         onConfirm={() => applyPendingLogo()}
         successToast={{
           title: "تم تحديث الشعار",
-          message:
-            "يظهر شعارك الجديد فوراً في واجهة الإعدادات. احفظ نسخة احتياطية من الملف عند الحاجة.",
+          message: "يظهر شعارك الجديد فورًا في واجهة الإعدادات.",
           variant: "success",
         }}
       />
     </>
   );
 }
-
