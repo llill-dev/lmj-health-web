@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
@@ -103,40 +103,54 @@ export default function AdminDashboardPage() {
     staleTime: 30_000,
   });
 
-  const formatKpi = (value: number | undefined, awaiting: boolean) =>
-    awaiting ? "—" : String(value ?? 0);
+  const formatKpi = useCallback(
+    (value: number | undefined, awaiting: boolean) =>
+      awaiting ? "—" : String(value ?? 0),
+    [],
+  );
 
   const mainKpisAwaiting = statsAwaiting || pendingAccessQuery.isLoading;
 
-  const secondaryCards = [
-    {
-      title: "إشعارات غير مقروءة",
-      value: formatKpi(
-        unreadNotifications.data,
-        unreadNotifications.isAwaitingData,
-      ),
-      icon: Bell,
-      tone: "border-[#FECACA] bg-[#FFF7F7] text-[#111827]",
-      iconBg: "bg-[#FEE2E2]",
-      iconColor: "text-[#EF4444]",
-    },
-    {
-      title: "محتوى منشور",
-      value: formatKpi(contentCounts.published, contentCounts.isAwaitingData),
-      icon: FileText,
-      tone: "border-[#CFFAFE] bg-white text-[#111827]",
-      iconBg: "bg-[#ECFEFF]",
-      iconColor: "text-primary",
-    },
-    {
-      title: "طلبات تحقق معلّقة",
-      value: formatKpi(stats.pendingVerifications, statsAwaiting),
-      icon: ClipboardList,
-      tone: "border-[#CFFAFE] bg-white text-[#111827]",
-      iconBg: "bg-[#ECFEFF]",
-      iconColor: "text-primary",
-    },
-  ];
+  const secondaryCards = useMemo(
+    () => [
+      {
+        title: "إشعارات غير مقروءة",
+        value: formatKpi(
+          unreadNotifications.data,
+          unreadNotifications.isAwaitingData,
+        ),
+        icon: Bell,
+        tone: "border-[#FECACA] bg-[#FFF7F7] text-[#111827]",
+        iconBg: "bg-[#FEE2E2]",
+        iconColor: "text-[#EF4444]",
+      },
+      {
+        title: "محتوى منشور",
+        value: formatKpi(contentCounts.published, contentCounts.isAwaitingData),
+        icon: FileText,
+        tone: "border-[#CFFAFE] bg-white text-[#111827]",
+        iconBg: "bg-[#ECFEFF]",
+        iconColor: "text-primary",
+      },
+      {
+        title: "طلبات تحقق معلّقة",
+        value: formatKpi(stats.pendingVerifications, statsAwaiting),
+        icon: ClipboardList,
+        tone: "border-[#CFFAFE] bg-white text-[#111827]",
+        iconBg: "bg-[#ECFEFF]",
+        iconColor: "text-primary",
+      },
+    ],
+    [
+      formatKpi,
+      unreadNotifications.data,
+      unreadNotifications.isAwaitingData,
+      contentCounts.published,
+      contentCounts.isAwaitingData,
+      stats.pendingVerifications,
+      statsAwaiting,
+    ],
+  );
 
   return (
     <>
