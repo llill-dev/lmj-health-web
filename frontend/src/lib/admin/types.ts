@@ -764,6 +764,10 @@ export type AdminContentDetailsItem = AdminContentItem & {
   contentBlocks?: AdminContentBlock[];
   tags?: string[];
   sources?: Array<{ title?: string; url?: string }>;
+  sourceName?: string;
+  originalTitle?: string;
+  aiSummary?: string;
+  coverImage?: string;
   pageVersion?: string | null;
   disclaimerVersion?: number | string;
   rejectionReason?: string | null;

@@ -1,25 +1,15 @@
 import { Helmet } from 'react-helmet-async';
-import {
-  Building2,
-  ChevronLeft,
-  Loader2,
-  RefreshCw,
-  ToggleLeft,
-  ToggleRight,
-} from 'lucide-react';
+import { Building2, ChevronLeft, Loader2, RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import StyledSelect from '@/components/ui/styled-select';
-import { useToast } from '@/components/ui/ToastProvider';
 import {
   useServiceProvidersList,
   useServiceTypesList,
-  useUpdateProviderStatus,
 } from '@/hooks/admin/services/useAdminServices';
-import type { ProviderStatus, ServiceProvider } from '@/lib/admin/types';
+import type { ServiceProvider } from '@/lib/admin/types';
 import { resolveLabel } from '@/lib/admin/types';
-import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
 function resolveProviderSlug(provider: ServiceProvider): string {
   if (typeof provider.serviceType === 'string') return provider.serviceType;
@@ -39,22 +29,19 @@ function resolveProviderLabel(provider: ServiceProvider): string {
   return provider._id;
 }
 
-const STATUS_LABELS: Record<ProviderStatus, string> = {
+const STATUS_LABELS: Record<string, string> = {
   active: 'نشط',
   inactive: 'معطّل',
   draft: 'مسودة',
 };
 
 export default function AdminServiceProvidersPage() {
-  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedSlug = searchParams.get('type') ?? '';
   const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const typesQuery = useServiceTypesList();
   const providersQuery = useServiceProvidersList(selectedSlug, cursor);
-  const statusMutation = useUpdateProviderStatus();
 
   const serviceTypes = typesQuery.data?.serviceTypes ?? [];
   const providers = providersQuery.data?.items ?? [];
@@ -72,34 +59,6 @@ export default function AdminServiceProvidersPage() {
     const match = serviceTypes.find((type) => type.slug === selectedSlug);
     return match ? resolveLabel(match.name, 'ar') : selectedSlug;
   }, [selectedSlug, serviceTypes]);
-
-  async function handleToggleStatus(provider: ServiceProvider) {
-    const nextStatus: ProviderStatus =
-      provider.status === 'active' ? 'inactive' : 'active';
-    if (provider.status === 'draft' && nextStatus === 'inactive') return;
-
-    setTogglingId(provider._id);
-    try {
-      await statusMutation.mutateAsync({
-        id: provider._id,
-        status: nextStatus,
-      });
-      toast(
-        nextStatus === 'active'
-          ? 'تم تفعيل مزود الخدمة.'
-          : 'تم تعطيل مزود الخدمة.',
-        { variant: 'success' },
-      );
-      await providersQuery.refetch();
-    } catch (error) {
-      toast(userFacingErrorMessage(error), {
-        title: 'تعذّر تحديث الحالة',
-        variant: 'error',
-      });
-    } finally {
-      setTogglingId(null);
-    }
-  }
 
   return (
     <>
@@ -151,7 +110,7 @@ export default function AdminServiceProvidersPage() {
                 listboxAriaLabel='نوع الخدمة'
               />
             </div>
-            <div className='lg:col-span-6 flex justify-start'>
+            <div className='flex justify-start lg:col-span-6'>
               <button
                 type='button'
                 onClick={() => void providersQuery.refetch()}
@@ -167,6 +126,16 @@ export default function AdminServiceProvidersPage() {
           </div>
         </section>
 
+        <section className='mt-4 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.04)]'>
+          <p className='text-right font-cairo text-[12px] font-bold leading-6 text-[#475467]'>
+            هذه الصفحة للعرض فقط حاليًا. تعرض المزودين النشطين المتاحين من{' '}
+            <span dir='ltr' className='font-extrabold text-[#111827]'>
+              /services
+            </span>{' '}
+            إلى أن يتم تأكيد عقد إدارة خاص بمزودي الخدمة.
+          </p>
+        </section>
+
         <section className='mt-4 space-y-3'>
           {!selectedSlug ? (
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
@@ -178,47 +147,30 @@ export default function AdminServiceProvidersPage() {
             </div>
           ) : providers.length === 0 ? (
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-              لا يوجد مزودون منشورون لهذا النوع حالياً.
+              لا يوجد مزودون منشورون لهذا النوع حاليًا.
             </div>
           ) : (
-            providers.map((provider) => {
-              const isActive = provider.status === 'active';
-              const canToggle =
-                provider.status === 'active' || provider.status === 'inactive';
-              return (
-                <div
-                  key={provider._id}
-                  className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]'
-                >
-                  <div className='flex flex-wrap items-center justify-between gap-3'>
-                    <div className='text-right'>
-                      <div className='font-cairo text-[14px] font-black text-[#111827]'>
-                        {resolveProviderLabel(provider)}
-                      </div>
-                      <div className='mt-1 font-cairo text-[12px] font-semibold text-[#667085]'>
-                        {resolveProviderSlug(provider) || '—'} ·{' '}
-                        {STATUS_LABELS[provider.status]}
-                      </div>
+            providers.map((provider) => (
+              <div
+                key={provider._id}
+                className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]'
+              >
+                <div className='flex flex-wrap items-center justify-between gap-3'>
+                  <div className='text-right'>
+                    <div className='font-cairo text-[14px] font-black text-[#111827]'>
+                      {resolveProviderLabel(provider)}
                     </div>
-                    <button
-                      type='button'
-                      disabled={!canToggle || togglingId === provider._id}
-                      onClick={() => void handleToggleStatus(provider)}
-                      className='inline-flex h-[34px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50'
-                    >
-                      {togglingId === provider._id ? (
-                        <Loader2 className='h-4 w-4 animate-spin' />
-                      ) : isActive ? (
-                        <ToggleRight className='h-4 w-4 text-primary' />
-                      ) : (
-                        <ToggleLeft className='h-4 w-4' />
-                      )}
-                      {isActive ? 'تعطيل' : 'تفعيل'}
-                    </button>
+                    <div className='mt-1 font-cairo text-[12px] font-semibold text-[#667085]'>
+                      {resolveProviderSlug(provider) || '—'} ·{' '}
+                      {STATUS_LABELS[provider.status] ?? provider.status ?? '—'}
+                    </div>
+                  </div>
+                  <div className='inline-flex h-[34px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[12px] font-extrabold text-[#667085]'>
+                    قراءة فقط
                   </div>
                 </div>
-              );
-            })
+              </div>
+            ))
           )}
 
           {providersQuery.data?.nextCursor ? (

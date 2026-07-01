@@ -66,10 +66,10 @@ export const adminEndpoints = {
     list: "/api/admin/audit-logs",
   },
   complaints: {
-    list: "/api/admin/complaints",
-    details: (complaintId: string) => `/api/admin/complaints/${complaintId}`,
+    list: "/api/complaints",
+    details: (complaintId: string) => `/api/complaints/${complaintId}`,
     updateStatus: (complaintId: string) =>
-      `/api/admin/complaints/${complaintId}/status`,
+      `/api/complaints/${complaintId}/status`,
   },
   content: {
     list: "/api/admin/content",
@@ -119,10 +119,10 @@ export const adminEndpoints = {
     listDoctors: (id: string) => `/api/admin/facilities/${id}/doctors`,
   },
   serviceTypes: {
-    list: "/api/admin/service-types",
+    list: "/api/service-types",
     listPublic: "/api/services/types",
-    create: "/api/admin/service-types",
-    update: (id: string) => `/api/admin/service-types/${id}`,
+    create: "/api/service-types",
+    update: (id: string) => `/api/service-types/${id}`,
   },
   serviceProviders: {
     list: "/api/services",

@@ -44,8 +44,7 @@ type AdminLookupCategoryDoc = 'MEDICAL_CONDITION' | 'ALLERGY' | 'BLOOD_TYPE';
 
 function mapLookupItems(records: AdminLookupRecord[]) {
   return [...records]
-    .filter((row) => row.isActive)
-    .sort(
+        .sort(
       (a, b) =>
         (a.order ?? 0) - (b.order ?? 0) ||
         a.key.localeCompare(b.key, 'en'),
@@ -53,6 +52,7 @@ function mapLookupItems(records: AdminLookupRecord[]) {
     .map((row) => ({
       id: row._id,
       label: resolveLookupText(row.text, 'ar') || row.key,
+      isActive: row.isActive,
     }));
 }
 
@@ -61,13 +61,15 @@ export default function AdminMedicalFileOptionsPage() {
   const createLookup = useCreateLookup();
   const removeLookup = useRemoveLookup();
   const [langOnly, setLangOnly] = useState(true);
+  const [includeInactive, setIncludeInactive] = useState(false);
 
   const chronicQuery = useAdminLookups({
     category: 'MEDICAL_CONDITION',
     langOnly,
+    includeInactive,
   });
-  const allergyQuery = useAdminLookups({ category: 'ALLERGY', langOnly });
-  const bloodQuery = useAdminLookups({ category: 'BLOOD_TYPE', langOnly });
+  const allergyQuery = useAdminLookups({ category: 'ALLERGY', langOnly, includeInactive });
+  const bloodQuery = useAdminLookups({ category: 'BLOOD_TYPE', langOnly, includeInactive });
 
   const chronicDiseases = useMemo(
     () => mapLookupItems(chronicQuery.data?.lookups ?? []),
@@ -194,6 +196,15 @@ export default function AdminMedicalFileOptionsPage() {
                 onChange={(e) => setLangOnly(e.target.checked)}
               />
               نص اللغة الحالية فقط
+            </label>
+            <label className='mr-2 flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)]'>
+              <input
+                type='checkbox'
+                className='h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40'
+                checked={includeInactive}
+                onChange={(e) => setIncludeInactive(e.target.checked)}
+              />
+              عرض الخيارات المعطلة
             </label>
           </div>
 

@@ -243,6 +243,17 @@ export default function AdminMedicalNewsQueuePage() {
                 className="rounded-[12px] border border-[#E5E7EB] bg-white px-5 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  {item.coverImage ? (
+                    <div className="overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-[#F8FAFC] lg:w-[180px] lg:shrink-0">
+                      <img
+                        src={item.coverImage}
+                        alt={item.title ?? item.originalTitle ?? "news cover"}
+                        className="h-[120px] w-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : null}
+
                   <div className="min-w-0 flex-1 text-right">
                     <div className="flex flex-wrap items-center justify-start gap-2">
                       <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#B54708]">
@@ -256,11 +267,17 @@ export default function AdminMedicalNewsQueuePage() {
                     <div className="mt-3 font-cairo text-[15px] font-extrabold text-[#111827]">
                       {item.title ?? "—"}
                     </div>
+                    {item.originalTitle && item.originalTitle !== item.title ? (
+                      <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                        العنوان الأصلي: {item.originalTitle}
+                      </div>
+                    ) : null}
                     <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
-                      {item.summary ?? "لا يوجد ملخص."}
+                      {item.summary ?? item.aiSummary ?? "لا يوجد ملخص."}
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center justify-start gap-4 font-cairo text-[11px] font-bold text-[#667085]">
+                      {item.sourceName ? <span>المصدر: {item.sourceName}</span> : null}
                       <span>آخر تحديث: {formatContentDate(item.updatedAt ?? item.createdAt)}</span>
                       {item.publishedAt ? (
                         <span>نُشر أصلًا: {formatContentDate(item.publishedAt)}</span>
