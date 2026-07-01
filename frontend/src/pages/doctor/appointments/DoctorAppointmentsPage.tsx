@@ -12,7 +12,7 @@ import {
   WifiOff,
   XCircle,
 } from "lucide-react";
-import { useMemo, useState, type ChangeEvent } from "react";
+import { useCallback, useMemo, useState, type ChangeEvent } from "react";
 import { Helmet } from "react-helmet-async";
 import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -284,7 +284,8 @@ export default function DoctorAppointmentsPage() {
   const appointmentsListFailed = listQuery.isError;
   const appointmentsListPending =
     listQuery.isAwaitingData && !appointmentsListFailed;
-  const appointmentsListReady = !appointmentsListFailed && !appointmentsListPending;
+  const appointmentsListReady =
+    !appointmentsListFailed && !appointmentsListPending;
   const { retry: retryAppointmentsList, retrying: retryingAppointmentsList } =
     useRetryAction(() => listQuery.refetch());
 
@@ -293,120 +294,125 @@ export default function DoctorAppointmentsPage() {
     [listQuery.error],
   );
 
-  const handleAppointmentFileOpen = async (
-    appointmentId: string,
-    fileId: string,
-  ) => {
-    setAppointmentFileActionKey(fileId);
-    try {
-      const response = await doctorAppointmentsApi.getFileDownloadUrl(
-        appointmentId,
-        fileId,
-      );
-      if (response.url) {
-        window.open(response.url, "_blank", "noopener,noreferrer");
-      }
-    } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
-        title: "تعذر فتح الملف",
-        variant: "error",
-      });
-    } finally {
-      setAppointmentFileActionKey(null);
-    }
-  };
-
-  const handleAppointmentFileDownload = async (
-    appointmentId: string,
-    fileId: string,
-  ) => {
-    setAppointmentFileActionKey(fileId);
-    try {
-      const [downloadResponse, fileResponse] = await Promise.all([
-        doctorAppointmentsApi.getFileDownloadUrl(appointmentId, fileId),
-        doctorAppointmentsApi.getFile(appointmentId, fileId),
-      ]);
-      if (downloadResponse.url) {
-        triggerBrowserFileDownload(
-          downloadResponse.url,
-          fileResponse.file?.originalName ?? "appointment-file",
+  const handleAppointmentFileOpen = useCallback(
+    async (appointmentId: string, fileId: string) => {
+      setAppointmentFileActionKey(fileId);
+      try {
+        const response = await doctorAppointmentsApi.getFileDownloadUrl(
+          appointmentId,
+          fileId,
         );
+        if (response.url) {
+          window.open(response.url, "_blank", "noopener,noreferrer");
+        }
+      } catch (error) {
+        toast(getUserFacingRequestErrorMessage(error), {
+          title: "تعذر فتح الملف",
+          variant: "error",
+        });
+      } finally {
+        setAppointmentFileActionKey(null);
       }
-    } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
-        title: "تعذر تحميل الملف",
-        variant: "error",
-      });
-    } finally {
-      setAppointmentFileActionKey(null);
-    }
-  };
+    },
+    [toast],
+  );
 
-  const handleRequestUnlinkAppointmentFile = (
-    fileId: string,
-    fileName?: string,
-  ) => {
-    setUnlinkFileTarget({
-      fileId,
-      fileName: fileName?.trim() || "ملف مرفق",
-    });
-    setUnlinkFileConfirmOpen(true);
-  };
+  const handleAppointmentFileDownload = useCallback(
+    async (appointmentId: string, fileId: string) => {
+      setAppointmentFileActionKey(fileId);
+      try {
+        const [downloadResponse, fileResponse] = await Promise.all([
+          doctorAppointmentsApi.getFileDownloadUrl(appointmentId, fileId),
+          doctorAppointmentsApi.getFile(appointmentId, fileId),
+        ]);
+        if (downloadResponse.url) {
+          triggerBrowserFileDownload(
+            downloadResponse.url,
+            fileResponse.file?.originalName ?? "appointment-file",
+          );
+        }
+      } catch (error) {
+        toast(getUserFacingRequestErrorMessage(error), {
+          title: "تعذر تحميل الملف",
+          variant: "error",
+        });
+      } finally {
+        setAppointmentFileActionKey(null);
+      }
+    },
+    [toast],
+  );
+
+  const handleRequestUnlinkAppointmentFile = useCallback(
+    (fileId: string, fileName?: string) => {
+      setUnlinkFileTarget({
+        fileId,
+        fileName: fileName?.trim() || "ملف مرفق",
+      });
+      setUnlinkFileConfirmOpen(true);
+    },
+    [],
+  );
 
   /** تنفيذ فك الربط بعد التأكيد — يعرض نظام التوست داخلياً */
-  const handleAppointmentFileUnlinkConfirmed = async (fileId: string) => {
-    setAppointmentFileActionKey(fileId);
-    try {
-      const response = await unlinkAppointmentFileMutation.mutateAsync(fileId);
-      toast(response.message ?? "تم فك ربط الملف من الموعد بنجاح.", {
-        title: "تم فك الربط",
-        variant: "success",
-        durationMs: 4200,
-      });
-    } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
-        title: "تعذّر فك ربط الملف",
-        variant: "error",
-        durationMs: 4800,
-      });
-      throw error;
-    } finally {
-      setAppointmentFileActionKey(null);
-    }
-  };
+  const handleAppointmentFileUnlinkConfirmed = useCallback(
+    async (fileId: string) => {
+      setAppointmentFileActionKey(fileId);
+      try {
+        const response =
+          await unlinkAppointmentFileMutation.mutateAsync(fileId);
+        toast(response.message ?? "تم فك ربط الملف من الموعد بنجاح.", {
+          title: "تم فك الربط",
+          variant: "success",
+          durationMs: 4200,
+        });
+      } catch (error) {
+        toast(getUserFacingRequestErrorMessage(error), {
+          title: "تعذّر فك ربط الملف",
+          variant: "error",
+          durationMs: 4800,
+        });
+        throw error;
+      } finally {
+        setAppointmentFileActionKey(null);
+      }
+    },
+    [unlinkAppointmentFileMutation, toast],
+  );
 
-  const resetUnlinkDialog = (open: boolean) => {
+  const resetUnlinkDialog = useCallback((open: boolean) => {
     setUnlinkFileConfirmOpen(open);
     if (!open) setUnlinkFileTarget(null);
-  };
+  }, []);
 
-  const handleAppointmentFileUpload = async (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file || !expandedAppointmentId) return;
-    setAppointmentFileActionKey("upload");
-    try {
-      const response = await uploadAppointmentFileMutation.mutateAsync({
-        file,
-      });
-      toast(response.message ?? "تم رفع الملف وربطه بالموعد بنجاح.", {
-        title: "تم الرفع",
-        variant: "success",
-        durationMs: 4200,
-      });
-    } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
-        title: "تعذر رفع الملف",
-        variant: "error",
-      });
-    } finally {
-      event.target.value = "";
-      setAppointmentFileActionKey(null);
-    }
-  };
+  const handleAppointmentFileUpload = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file || !expandedAppointmentId) return;
+      setAppointmentFileActionKey("upload");
+      try {
+        const response = await uploadAppointmentFileMutation.mutateAsync({
+          file,
+        });
+        toast(response.message ?? "تم رفع الملف وربطه بالموعد بنجاح.", {
+          title: "تم الرفع",
+          variant: "success",
+          durationMs: 4200,
+        });
+      } catch (error) {
+        toast(getUserFacingRequestErrorMessage(error), {
+          title: "تعذر رفع الملف",
+          variant: "error",
+        });
+      } finally {
+        event.target.value = "";
+        setAppointmentFileActionKey(null);
+      }
+    },
+    [expandedAppointmentId, uploadAppointmentFileMutation, toast],
+  );
 
-  const handleBookingAction = () => {
+  const handleBookingAction = useCallback(() => {
     // Check if we have patients available (only when connected to backend)
     if (!UI_ONLY && doctorPatientsQuery.isAwaitingData) {
       toast("جارٍ تحميل قائمة المرضى...", {
@@ -430,7 +436,11 @@ export default function DoctorAppointmentsPage() {
     }
 
     setBookOpen(true);
-  };
+  }, [
+    doctorPatientsQuery.isAwaitingData,
+    doctorPatientsQuery.patients.length,
+    toast,
+  ]);
 
   return (
     <>
@@ -536,7 +546,10 @@ export default function DoctorAppointmentsPage() {
           confirmLabel="نعم، فك الربط"
           confirmDisabled={
             unlinkAppointmentFileMutation.isPending ||
-            Boolean(unlinkFileTarget && appointmentFileActionKey === unlinkFileTarget.fileId)
+            Boolean(
+              unlinkFileTarget &&
+              appointmentFileActionKey === unlinkFileTarget.fileId,
+            )
           }
           description={
             <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
@@ -549,8 +562,8 @@ export default function DoctorAppointmentsPage() {
                   </span>
                 </>
               ) : null}{" "}
-              عن هذا الموعد؟ لا يُحذف الملف من النظام بالكامل، لكن لن يعد ظاهراً ضمن هذا
-              الموعد.
+              عن هذا الموعد؟ لا يُحذف الملف من النظام بالكامل، لكن لن يعد ظاهراً
+              ضمن هذا الموعد.
             </span>
           }
           onConfirm={async () => {
@@ -976,10 +989,7 @@ export default function DoctorAppointmentsPage() {
                       className="mt-7 inline-flex h-[44px] min-w-[180px] items-center justify-center gap-2 rounded-[14px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.22)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#0d7d76] hover:shadow-[0_14px_32px_rgba(15,143,139,0.26)] active:translate-y-[0.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 disabled:pointer-events-none disabled:opacity-60"
                     >
                       {retryingAppointmentsList ? (
-                        <Loader2
-                          className="h-4 w-4 animate-spin"
-                          aria-hidden
-                        />
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                       ) : null}
                       إعادة المحاولة
                     </button>

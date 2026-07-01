@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils/utils";
+import { memo } from "react";
 import {
   Calendar,
   CheckCircle2,
@@ -93,7 +94,10 @@ export type DoctorPatientExpandableCardProps = {
   fileActionKey?: string | null;
 };
 
-function QuickInfo({ label, value }: { label: string; value: string }) {
+const QuickInfo = memo<{ label: string; value: string }>(function QuickInfo({
+  label,
+  value,
+}) {
   return (
     <div className="rounded-xl border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
       <div className="font-cairo text-[11px] font-bold text-[#667085]">
@@ -104,7 +108,7 @@ function QuickInfo({ label, value }: { label: string; value: string }) {
       </div>
     </div>
   );
-}
+});
 
 export default function DoctorPatientExpandableCard({
   patient,
@@ -211,14 +215,18 @@ export default function DoctorPatientExpandableCard({
               <div className="mt-4 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 font-cairo text-[13px] font-semibold text-[#667085]">
                 <span className="inline-flex items-center gap-1.5">
                   <Phone className="w-4 h-4 shrink-0 text-primary" />
-                  <span dir="ltr" className="text-left font-semibold text-[#344054]">
+                  <span
+                    dir="ltr"
+                    className="text-left font-semibold text-[#344054]"
+                  >
                     {phoneDisplay}
                   </span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-primary" />
                   <span>
-                    آخر زيارة: <span className="text-[#1F2937]">{patient.lastVisit}</span>
+                    آخر زيارة:{" "}
+                    <span className="text-[#1F2937]">{patient.lastVisit}</span>
                   </span>
                 </span>
               </div>
@@ -228,7 +236,9 @@ export default function DoctorPatientExpandableCard({
           <button
             type="button"
             aria-expanded={expanded}
-            aria-label={expanded ? "طي المعاينة السريعة" : "عرض المعاينة السريعة"}
+            aria-label={
+              expanded ? "طي المعاينة السريعة" : "عرض المعاينة السريعة"
+            }
             onClick={onToggle}
             className="flex h-9 w-9 shrink-0 self-end items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#344054] transition-colors hover:border-primary hover:text-primary sm:self-auto"
           >
@@ -251,10 +261,21 @@ export default function DoctorPatientExpandableCard({
             <div className="mt-4 border-t border-[#EEF2F6] pt-4">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <QuickInfo label="فصيلة الدم" value={patient.bloodType} />
-                <QuickInfo label="الحساسية" value={patient.allergies.length ? `${patient.allergies.length} عنصر` : "لا توجد"} />
+                <QuickInfo
+                  label="الحساسية"
+                  value={
+                    patient.allergies.length
+                      ? `${patient.allergies.length} عنصر`
+                      : "لا توجد"
+                  }
+                />
                 <QuickInfo
                   label="الأمراض المزمنة"
-                  value={patient.medicalConditions.length ? `${patient.medicalConditions.length} عنصر` : "لا توجد"}
+                  value={
+                    patient.medicalConditions.length
+                      ? `${patient.medicalConditions.length} عنصر`
+                      : "لا توجد"
+                  }
                 />
                 <QuickInfo label="حالة الوصول" value={stateInfo.label} />
               </div>
@@ -311,7 +332,10 @@ export default function DoctorPatientExpandableCard({
                           ? onRequestAccess
                           : undefined
                     }
-                    disabled={!stateInfo.canStartEncounter && !stateInfo.canRequestAccess}
+                    disabled={
+                      !stateInfo.canStartEncounter &&
+                      !stateInfo.canRequestAccess
+                    }
                     className={cn(
                       "inline-flex h-11 w-full items-center justify-center gap-2 rounded-[8px] px-2 font-cairo text-[13px] font-extrabold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                       stateActions.primary.variant === "primary"
@@ -324,7 +348,9 @@ export default function DoctorPatientExpandableCard({
                     ) : (
                       <Link2 className="w-4 h-4 shrink-0" aria-hidden />
                     )}
-                    <span className="truncate">{stateActions.primary.label}</span>
+                    <span className="truncate">
+                      {stateActions.primary.label}
+                    </span>
                   </button>
                 ) : null}
 

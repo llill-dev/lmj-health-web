@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Search, ChevronRight } from "lucide-react";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
@@ -129,13 +129,10 @@ function PatientsSearchInput({
   );
 }
 
-function PatientTableRow({
-  patient,
-  onOpen,
-}: {
+const PatientTableRow = memo<{
   patient: DoctorPatientListItem;
   onOpen: (patientId: string) => void;
-}) {
+}>(function PatientTableRow({ patient, onOpen }) {
   const status = accountStatusPresentation(patient);
 
   return (
@@ -181,18 +178,18 @@ function PatientTableRow({
       </div>
     </div>
   );
-}
+});
 
-function PatientsWeeklyActivityChart({
-  bars,
-  averagePatientsPerDay,
-  totalUniquePatients,
-  isLoading,
-}: {
+const PatientsWeeklyActivityChart = memo<{
   bars: PatientWeeklyActivityBar[];
   averagePatientsPerDay: number;
   totalUniquePatients: number;
   isLoading?: boolean;
+}>(function PatientsWeeklyActivityChart({
+  bars,
+  averagePatientsPerDay,
+  totalUniquePatients,
+  isLoading,
 }) {
   const maxCount = Math.max(...bars.map((bar) => bar.value), 0);
 
@@ -266,7 +263,7 @@ function PatientsWeeklyActivityChart({
       )}
     </div>
   );
-}
+});
 
 export function DashboardPatientsSearchCard({
   searchInput,
@@ -283,10 +280,7 @@ export function DashboardPatientsSearchCard({
   return (
     <SurfaceSection title="المرضى">
       <div className="px-4 py-5 sm:px-5 sm:py-6">
-        <PatientsSearchInput
-          value={searchInput}
-          onChange={setSearchInput}
-        />
+        <PatientsSearchInput value={searchInput} onChange={setSearchInput} />
 
         <PatientsWeeklyActivityChart
           bars={chart.bars}
@@ -327,8 +321,7 @@ export function DashboardPatientsTable({
     [],
   );
 
-  const isInitialLoad =
-    patientsQuery.isAwaitingData && !patientsQuery.isError;
+  const isInitialLoad = patientsQuery.isAwaitingData && !patientsQuery.isError;
   const { retry: retryPatients, retrying: retryingPatients } = useRetryAction(
     () => patientsQuery.refetch(),
   );

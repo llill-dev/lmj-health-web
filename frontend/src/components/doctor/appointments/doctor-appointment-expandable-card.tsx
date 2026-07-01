@@ -1,6 +1,6 @@
 import type { Appointment } from "@/lib/api_mock";
 import { cn } from "@/lib/utils/utils";
-import type { ComponentType } from "react";
+import { memo, type ComponentType } from "react";
 import {
   AlertTriangle,
   Calendar,
@@ -46,15 +46,11 @@ function visitKindLabel(type: Appointment["type"]): string {
   return "مراجعة";
 }
 
-function DetailRow({
-  icon: Icon,
-  label,
-  value,
-}: {
+const DetailRow = memo<{
   icon: ComponentType<{ className?: string }>;
   label: string;
   value: string;
-}) {
+}>(function DetailRow({ icon: Icon, label, value }) {
   return (
     <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
       <Icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
@@ -68,7 +64,7 @@ function DetailRow({
       </div>
     </div>
   );
-}
+});
 
 export type DoctorAppointmentExpandableCardProps = {
   appointment: Appointment & {
@@ -205,7 +201,11 @@ export default function DoctorAppointmentExpandableCard({
             <div className="mt-4 border-t border-[#EEF2F6] pt-4">
               <div className="rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-3">
                 <DetailRow icon={Calendar} label="التاريخ" value={detailDate} />
-                <DetailRow icon={Clock} label="الوقت" value={appointment.time} />
+                <DetailRow
+                  icon={Clock}
+                  label="الوقت"
+                  value={appointment.time}
+                />
                 <DetailRow
                   icon={Check}
                   label="الحالة"
