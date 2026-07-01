@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from "react-helmet-async";
 import {
   Activity,
   Ban,
@@ -7,26 +7,27 @@ import {
   Phone,
   ShieldCheck,
   Users,
-} from 'lucide-react';
-import { Filter, Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ConfirmActionDialog } from '@/components/admin/dialogs';
-import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
-import SuspendAccountDialog from '@/components/admin/patients/dialogs/SuspendAccountDialog';
+} from "lucide-react";
+import { Filter, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ConfirmActionDialog } from "@/components/admin/dialogs";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+import SuspendAccountDialog from "@/components/admin/patients/dialogs/SuspendAccountDialog";
 import {
   patientStatusLabel,
   patientStatusTone,
-} from '@/components/admin/patients/patientListUtils';
-import { AppCheckbox } from '@/components/ui';
-import { useToast } from '@/components/ui/ToastProvider';
-import StyledSelect from '@/components/ui/styled-select';
-import { useAdminPatients } from '@/hooks/admin/patients/useAdminPatients';
-import { adminApi } from '@/lib/admin/client';
+} from "@/components/admin/patients/patientListUtils";
+import { AppCheckbox } from "@/components/ui";
+import { useToast } from "@/components/ui/ToastProvider";
+import StyledSelect from "@/components/ui/styled-select";
+import { useAdminPatients } from "@/hooks/admin/patients/useAdminPatients";
+import { adminApi } from "@/lib/admin/client";
 import type {
   AdminPatientSummary,
   AdminPatientsAccountStatusFilter,
-} from '@/lib/admin/types';
+} from "@/lib/admin/types";
+import { PatientCardSkeleton } from "@/components/admin/skeletons/PatientCardSkeleton";
 
 type AdminPatientsFiltersState = {
   account_status: AdminPatientsAccountStatusFilter;
@@ -43,18 +44,18 @@ export default function AdminPatientsPage() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     null,
   );
-  const [selectedPatientLabel, setSelectedPatientLabel] = useState('');
+  const [selectedPatientLabel, setSelectedPatientLabel] = useState("");
   const [accountActionTarget, setAccountActionTarget] = useState<{
     id: string;
     label: string;
-    action: 'activate' | 'unsuspend';
+    action: "activate" | "unsuspend";
   } | null>(null);
   const [accountActionBusy, setAccountActionBusy] = useState(false);
 
   const defaultFilters = useMemo<AdminPatientsFiltersState>(
     () => ({
-      account_status: 'all',
-      search: '',
+      account_status: "all",
+      search: "",
       includeDeleted: false,
       page: 1,
       limit: 20,
@@ -95,7 +96,7 @@ export default function AdminPatientsPage() {
     if (!accountActionTarget) return;
     setAccountActionBusy(true);
     try {
-      if (accountActionTarget.action === 'activate') {
+      if (accountActionTarget.action === "activate") {
         await adminApi.patients.activate(accountActionTarget.id);
       } else {
         await adminApi.patients.unsuspend(accountActionTarget.id);
@@ -103,15 +104,15 @@ export default function AdminPatientsPage() {
 
       await refetch();
       toast(
-        accountActionTarget.action === 'activate'
+        accountActionTarget.action === "activate"
           ? `تم تفعيل حساب المريض «${accountActionTarget.label}».`
           : `تم رفع التعليق عن حساب «${accountActionTarget.label}».`,
         {
           title:
-            accountActionTarget.action === 'activate'
-              ? 'تم التفعيل'
-              : 'تم رفع التعليق',
-          variant: 'success',
+            accountActionTarget.action === "activate"
+              ? "تم التفعيل"
+              : "تم رفع التعليق",
+          variant: "success",
           durationMs: 4200,
         },
       );
@@ -127,69 +128,69 @@ export default function AdminPatientsPage() {
         <title>إدارة المرضى • LMJ Health</title>
       </Helmet>
 
-      <div dir='rtl' lang='ar'>
+      <div dir="rtl" lang="ar">
         <AdminDashboardOverview
-          variant='patients'
-          surface='mint'
-          title='إدارة المرضى'
-          subtitle='إدارة ومراقبة حسابات المرضى'
-          headerIcon={<Users className='h-8 w-8 text-white' />}
+          variant="patients"
+          surface="mint"
+          title="إدارة المرضى"
+          subtitle="إدارة ومراقبة حسابات المرضى"
+          headerIcon={<Users className="h-8 w-8 text-white" />}
           kpis={[
             {
-              key: 'total',
-              icon: <Users className='h-5 w-5 shrink-0' />,
-              value: isAwaitingData ? '—' : total,
-              label: 'إجمالي المرضى',
+              key: "total",
+              icon: <Users className="h-5 w-5 shrink-0" />,
+              value: isAwaitingData ? "—" : total,
+              label: "إجمالي المرضى",
             },
             {
-              key: 'page',
-              icon: <Activity className='h-5 w-5 shrink-0' />,
-              value: isAwaitingData ? '—' : results,
-              label: 'في هذه الصفحة',
+              key: "page",
+              icon: <Activity className="h-5 w-5 shrink-0" />,
+              value: isAwaitingData ? "—" : results,
+              label: "في هذه الصفحة",
             },
             {
-              key: 'pages',
-              icon: <Mail className='h-5 w-5 shrink-0' />,
-              value: isAwaitingData ? '—' : totalPages,
-              label: 'عدد الصفحات',
+              key: "pages",
+              icon: <Mail className="h-5 w-5 shrink-0" />,
+              value: isAwaitingData ? "—" : totalPages,
+              label: "عدد الصفحات",
             },
           ]}
         />
 
-        <section className='mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
-            <div className='flex flex-col gap-3 lg:flex-row lg:items-center'>
-              <div className='flex h-[42px] w-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#98A2B3]'>
-                <Filter className='w-4 h-4' />
+        <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+              <div className="flex h-[42px] w-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#98A2B3]">
+                <Filter className="w-4 h-4" />
               </div>
 
-              <div className='min-w-0 lg:w-[180px]'>
+              <div className="min-w-0 lg:w-[180px]">
                 <StyledSelect
-                  size='sm'
-                  tone='muted'
+                  size="sm"
+                  tone="muted"
                   value={filters.account_status}
                   onChange={(v) =>
                     setFilters((prev) => ({
                       ...prev,
                       account_status:
-                        (v as AdminPatientsAccountStatusFilter) || 'all',
+                        (v as AdminPatientsAccountStatusFilter) || "all",
                       page: 1,
                     }))
                   }
                   options={[
-                    { value: 'all', label: 'جميع الحالات' },
-                    { value: 'active', label: 'نشط' },
-                    { value: 'temporary', label: 'مؤقت' },
-                    { value: 'suspended', label: 'معلق' },
-                    { value: 'locked', label: 'موقوف' },
+                    { value: "all", label: "جميع الحالات" },
+                    { value: "active", label: "نشط" },
+                    { value: "temporary", label: "مؤقت" },
+                    { value: "suspended", label: "معلق" },
+                    { value: "locked", label: "موقوف" },
                   ]}
-                  listboxAriaLabel='حالة الحساب'
+                  listboxAriaLabel="حالة الحساب"
                 />
               </div>
 
-              <label className='flex h-[42px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]'>
+              <label className="flex h-[42px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827]">
                 <AppCheckbox
-                  size='sm'
+                  size="sm"
                   checked={filters.includeDeleted}
                   onChange={(e) =>
                     setFilters((prev) => ({
@@ -203,10 +204,10 @@ export default function AdminPatientsPage() {
               </label>
             </div>
 
-            <div className='relative flex-1'>
+            <div className="relative flex-1">
               <input
-                placeholder='البحث بالاسم / الإيميل / الهاتف / رقم المريض...'
-                className='h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-primary/40 focus:ring-2 focus:ring-primary/15'
+                placeholder="البحث بالاسم / الإيميل / الهاتف / رقم المريض..."
+                className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
                 value={filters.search}
                 onChange={(e) =>
                   setFilters((prev) => ({
@@ -216,75 +217,77 @@ export default function AdminPatientsPage() {
                   }))
                 }
               />
-              <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
-                <Search className='w-5 h-5' />
+              <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+                <Search className="w-5 h-5" />
               </div>
             </div>
 
-            <div className='flex flex-col gap-3 items-stretch sm:flex-row sm:items-center sm:justify-end'>
+            <div className="flex flex-col gap-3 items-stretch sm:flex-row sm:items-center sm:justify-end">
               <button
-                type='button'
+                type="button"
                 disabled={!hasActiveFilters}
                 onClick={() => setFilters({ ...defaultFilters })}
                 className={
                   !hasActiveFilters
-                    ? 'inline-flex h-[42px] cursor-not-allowed items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3]'
-                    : 'inline-flex h-[42px] items-center justify-center rounded-[10px] border border-primary/25 bg-primary/10 px-4 font-cairo text-[12px] font-extrabold text-primary transition-colors hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/20'
+                    ? "inline-flex h-[42px] cursor-not-allowed items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3]"
+                    : "inline-flex h-[42px] items-center justify-center rounded-[10px] border border-primary/25 bg-primary/10 px-4 font-cairo text-[12px] font-extrabold text-primary transition-colors hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 }
               >
                 مسح الفلاتر
               </button>
 
-              <div className='inline-flex h-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#667085]'>
+              <div className="inline-flex h-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#667085]">
                 {results} نتيجة
               </div>
             </div>
           </div>
         </section>
 
-        <section className='mt-5 space-y-5'>
+        <section className="mt-5 space-y-5">
           {isAwaitingData ? (
-            <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
-              جاري تحميل قائمة المرضى...
-            </div>
+            <>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <PatientCardSkeleton key={i} />
+              ))}
+            </>
           ) : error ? (
-            <div className='rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
+            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
               تعذر تحميل قائمة المرضى.
             </div>
           ) : patients.length === 0 ? (
-            <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
+            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
               لا توجد نتائج مطابقة.
             </div>
           ) : (
             patients.map((p) => {
               const tone = patientStatusTone(p.user.accountStatus);
               const actionKind =
-                p.user.accountStatus === 'suspended' ? 'unsuspend' : 'activate';
+                p.user.accountStatus === "suspended" ? "unsuspend" : "activate";
 
               return (
                 <div
                   key={p._id}
-                  className='overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.06)]'
+                  className="overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.06)]"
                 >
-                  <div className='flex'>
-                    <div className='flex-1 px-6 py-5'>
-                      <div className='flex justify-between items-start'>
-                        <div className='flex gap-3 items-start'>
-                          <div className='flex h-[52px] w-[52px] items-center justify-center rounded-[12px] bg-primary text-white'>
-                            <Users className='w-6 h-6' />
+                  <div className="flex">
+                    <div className="flex-1 px-6 py-5">
+                      <div className="flex justify-between items-start">
+                        <div className="flex gap-3 items-start">
+                          <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[12px] bg-primary text-white">
+                            <Users className="w-6 h-6" />
                           </div>
 
-                          <div className='text-right'>
-                            <div className='font-cairo text-[16px] font-black leading-[20px] text-[#111827]'>
+                          <div className="text-right">
+                            <div className="font-cairo text-[16px] font-black leading-[20px] text-[#111827]">
                               {p.user.fullName}
                             </div>
-                            <div className='mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]'>
+                            <div className="mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]">
                               {p.publicId}
                             </div>
                           </div>
                         </div>
 
-                        <div className='flex gap-3 items-start'>
+                        <div className="flex gap-3 items-start">
                           <div
                             className={`inline-flex h-[24px] items-center justify-center rounded-[6px] px-3 font-cairo text-[11px] font-extrabold ${tone.chip}`}
                           >
@@ -293,23 +296,23 @@ export default function AdminPatientsPage() {
                         </div>
                       </div>
 
-                      <div className='flex justify-between items-end'>
-                        <div className='mt-4 rounded-[10px] bg-[#F9FAFB] px-4 py-3'>
-                          <div className='flex flex-col gap-2 justify-start items-start'>
-                            <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                              <Phone className='w-4 h-4 text-primary' />
-                              {p.user.phone ?? '—'}
+                      <div className="flex justify-between items-end">
+                        <div className="mt-4 rounded-[10px] bg-[#F9FAFB] px-4 py-3">
+                          <div className="flex flex-col gap-2 justify-start items-start">
+                            <div className="flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                              <Phone className="w-4 h-4 text-primary" />
+                              {p.user.phone ?? "—"}
                             </div>
-                            <div className='flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
-                              <Mail className='w-4 h-4 text-primary' />
-                              {p.user.email ?? '—'}
+                            <div className="flex items-center justify-start gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                              <Mail className="w-4 h-4 text-primary" />
+                              {p.user.email ?? "—"}
                             </div>
                           </div>
                         </div>
-                        <div className='border-[#EEF2F6] bg-white px-5'>
-                          <div className='flex flex-wrap gap-2 justify-end'>
+                        <div className="border-[#EEF2F6] bg-white px-5">
+                          <div className="flex flex-wrap gap-2 justify-end">
                             <button
-                              type='button'
+                              type="button"
                               onClick={() =>
                                 navigate(
                                   `/admin/patients/${encodeURIComponent(p._id)}`,
@@ -320,29 +323,29 @@ export default function AdminPatientsPage() {
                                   },
                                 )
                               }
-                              className='flex h-[34px] w-[150px] bg-primary items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] font-cairo text-[12px] font-extrabold text-white'
+                              className="flex h-[34px] w-[150px] bg-primary items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] font-cairo text-[12px] font-extrabold text-white"
                             >
-                              <Eye className='w-4 h-4' />
+                              <Eye className="w-4 h-4" />
                               عرض التفاصيل
                             </button>
 
                             <button
-                              type='button'
+                              type="button"
                               onClick={() => {
                                 setSelectedPatientId(p._id);
                                 setSelectedPatientLabel(p.user.fullName);
                                 setSuspendOpen(true);
                               }}
-                              disabled={p.user.accountStatus === 'suspended'}
-                              className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316] disabled:cursor-not-allowed disabled:opacity-50'
+                              disabled={p.user.accountStatus === "suspended"}
+                              className="flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316] disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              <Ban className='w-4 h-4' />
+                              <Ban className="w-4 h-4" />
                               تعليق الحساب
                             </button>
 
-                            {p.user.accountStatus !== 'active' && (
+                            {p.user.accountStatus !== "active" && (
                               <button
-                                type='button'
+                                type="button"
                                 onClick={() =>
                                   setAccountActionTarget({
                                     id: p._id,
@@ -350,12 +353,12 @@ export default function AdminPatientsPage() {
                                     action: actionKind,
                                   })
                                 }
-                                className='flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#BBF7D0] bg-[#ECFDF3] font-cairo text-[12px] font-extrabold text-[#15803D]'
+                                className="flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#BBF7D0] bg-[#ECFDF3] font-cairo text-[12px] font-extrabold text-[#15803D]"
                               >
-                                <ShieldCheck className='w-4 h-4' />
-                                {actionKind === 'unsuspend'
-                                  ? 'رفع التعليق'
-                                  : 'تفعيل الحساب'}
+                                <ShieldCheck className="w-4 h-4" />
+                                {actionKind === "unsuspend"
+                                  ? "رفع التعليق"
+                                  : "تفعيل الحساب"}
                               </button>
                             )}
                           </div>
@@ -369,16 +372,16 @@ export default function AdminPatientsPage() {
           )}
         </section>
 
-        <section className='mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='font-cairo text-[12px] font-bold text-[#667085]'>
+        <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+          <div className="font-cairo text-[12px] font-bold text-[#667085]">
             الصفحة {filters.page} من {totalPages}
           </div>
 
-          <div className='flex gap-3 items-center'>
-            <div className='w-[118px] shrink-0'>
+          <div className="flex gap-3 items-center">
+            <div className="w-[118px] shrink-0">
               <StyledSelect
-                size='xs'
-                tone='emphasis'
+                size="xs"
+                tone="emphasis"
                 value={String(filters.limit)}
                 onChange={(v) =>
                   setFilters((prev) => ({
@@ -391,12 +394,12 @@ export default function AdminPatientsPage() {
                   value: String(v),
                   label: String(v),
                 }))}
-                listboxAriaLabel='عدد العناصر في الصفحة'
+                listboxAriaLabel="عدد العناصر في الصفحة"
               />
             </div>
 
             <button
-              type='button'
+              type="button"
               onClick={() =>
                 setFilters((prev) => ({
                   ...prev,
@@ -404,13 +407,13 @@ export default function AdminPatientsPage() {
                 }))
               }
               disabled={filters.page <= 1}
-              className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60'
+              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               السابق
             </button>
 
             <button
-              type='button'
+              type="button"
               onClick={() =>
                 setFilters((prev) => ({
                   ...prev,
@@ -418,20 +421,20 @@ export default function AdminPatientsPage() {
                 }))
               }
               disabled={filters.page >= totalPages}
-              className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60'
+              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
               التالي
             </button>
           </div>
         </section>
 
-        <div className='h-8' />
+        <div className="h-8" />
       </div>
 
       <SuspendAccountDialog
         open={suspendOpen}
         onOpenChange={setSuspendOpen}
-        kind='patient'
+        kind="patient"
         targetId={selectedPatientId}
         targetLabel={selectedPatientLabel}
         onSuccess={() => {
@@ -445,31 +448,31 @@ export default function AdminPatientsPage() {
         onOpenChange={(open) => {
           if (!open && !accountActionBusy) setAccountActionTarget(null);
         }}
-        variant='primary'
+        variant="primary"
         title={
-          accountActionTarget?.action === 'unsuspend'
-            ? 'تأكيد رفع التعليق'
-            : 'تأكيد تفعيل الحساب'
+          accountActionTarget?.action === "unsuspend"
+            ? "تأكيد رفع التعليق"
+            : "تأكيد تفعيل الحساب"
         }
         description={
           accountActionTarget ? (
             <>
-              {accountActionTarget.action === 'unsuspend'
-                ? 'سيتم رفع التعليق عن حساب المريض'
-                : 'سيتم تفعيل حساب المريض'}{' '}
-              <span className='font-extrabold text-[#344054]'>
+              {accountActionTarget.action === "unsuspend"
+                ? "سيتم رفع التعليق عن حساب المريض"
+                : "سيتم تفعيل حساب المريض"}{" "}
+              <span className="font-extrabold text-[#344054]">
                 {accountActionTarget.label}
               </span>
               .
             </>
           ) : (
-            '—'
+            "—"
           )
         }
         confirmLabel={
-          accountActionTarget?.action === 'unsuspend'
-            ? 'رفع التعليق'
-            : 'تفعيل الحساب'
+          accountActionTarget?.action === "unsuspend"
+            ? "رفع التعليق"
+            : "تفعيل الحساب"
         }
         confirmDisabled={accountActionBusy}
         onConfirm={runAccountAction}

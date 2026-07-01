@@ -50,6 +50,11 @@ import {
   formatShortDate,
   formatTimeTodayOrDate,
 } from "@/components/admin/dashboard/dashboardUtils";
+import {
+  DashboardActivitySkeletonRow,
+  DashboardComplaintCardSkeleton,
+  DashboardContentCardSkeleton,
+} from "@/components/admin/skeletons/DashboardSkeletons";
 
 const TEAL = "#0F8F8B";
 
@@ -252,9 +257,11 @@ export default function AdminDashboardPage() {
 
           <div className="divide-y divide-[#EEF2F6]">
             {activityAwaiting ? (
-              <div className="px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                جارِ تحميل آخر الأنشطة...
-              </div>
+              <>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <DashboardActivitySkeletonRow key={i} />
+                ))}
+              </>
             ) : activityQuery.isError ? (
               <div className="px-6 py-10 text-center font-cairo text-[13px] font-semibold text-red-600">
                 تعذر تحميل سجل الأنشطة. تحقق من الصلاحيات أو الشبكة.
@@ -308,9 +315,11 @@ export default function AdminDashboardPage() {
           </h2>
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {complaintsAwaiting ? (
-              <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                جارِ تحميل الشكاوى...
-              </div>
+              <>
+                <DashboardComplaintCardSkeleton />
+                <DashboardComplaintCardSkeleton />
+                <DashboardComplaintCardSkeleton />
+              </>
             ) : complaintsQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">
                 تعذر تحميل الشكاوى.
@@ -388,9 +397,11 @@ export default function AdminDashboardPage() {
           </h2>
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {contentQuery.isAwaitingData ? (
-              <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                جارِ تحميل المحتوى...
-              </div>
+              <>
+                <DashboardContentCardSkeleton />
+                <DashboardContentCardSkeleton />
+                <DashboardContentCardSkeleton />
+              </>
             ) : contentQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">
                 تعذر تحميل الأخبار.

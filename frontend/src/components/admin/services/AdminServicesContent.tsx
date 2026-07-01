@@ -1,11 +1,12 @@
-import type { ElementType } from 'react';
-import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
-import { EmptyState } from '@/components/admin/services/EmptyState';
-import { FacilityCard } from '@/components/admin/services/FacilityCard';
-import { Pagination } from '@/components/admin/services/Pagination';
-import { ServiceTypeCard } from '@/components/admin/services/ServiceTypeCard';
-import { ADMIN_SERVICES_PAGE_SIZE } from '@/components/admin/services/tabsConfig';
-import type { FacilitySummary, ServiceType } from '@/lib/admin/types';
+import type { ElementType } from "react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { EmptyState } from "@/components/admin/services/EmptyState";
+import { FacilityCard } from "@/components/admin/services/FacilityCard";
+import { Pagination } from "@/components/admin/services/Pagination";
+import { ServiceTypeCard } from "@/components/admin/services/ServiceTypeCard";
+import { ADMIN_SERVICES_PAGE_SIZE } from "@/components/admin/services/tabsConfig";
+import type { FacilitySummary, ServiceType } from "@/lib/admin/types";
+import { FacilityCardSkeleton } from "@/components/admin/skeletons/FacilityCardSkeleton";
 
 export function AdminServicesContent({
   isAwaitingData,
@@ -45,23 +46,27 @@ export function AdminServicesContent({
   onViewFacilityDoctors?: (f: FacilitySummary) => void;
 }) {
   return (
-    <section className='mt-6 space-y-4'>
+    <section className="mt-6 space-y-4">
       {isAwaitingData && (
-        <div className='flex items-center justify-center py-16'>
-          <Loader2 className='h-8 w-8 animate-spin text-primary' />
-        </div>
+        <>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <FacilityCardSkeleton key={i} />
+          ))}
+        </>
       )}
 
       {isError && !isAwaitingData && (
-        <div className='flex flex-col items-center gap-3 rounded-[12px] border border-[#FEE2E2] bg-white py-12 text-center'>
-          <AlertCircle className='h-8 w-8 text-[#F04438]' />
-          <p className='font-cairo text-[14px] font-bold text-[#F04438]'>حدث خطأ أثناء تحميل البيانات</p>
+        <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FEE2E2] bg-white py-12 text-center">
+          <AlertCircle className="h-8 w-8 text-[#F04438]" />
+          <p className="font-cairo text-[14px] font-bold text-[#F04438]">
+            حدث خطأ أثناء تحميل البيانات
+          </p>
           <button
-            type='button'
+            type="button"
             onClick={onRetry}
-            className='inline-flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-[#667085]'
+            className="inline-flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-[#667085]"
           >
-            <RefreshCw className='h-4 w-4' />
+            <RefreshCw className="h-4 w-4" />
             إعادة المحاولة
           </button>
         </div>
@@ -70,7 +75,7 @@ export function AdminServicesContent({
       {!isAwaitingData && !isError && isFacilityTab && (
         <>
           {facilities.length === 0 ? (
-            <EmptyState message='لا توجد منشآت لهذا النوع. أضف منشأة جديدة من الزر أعلاه.' />
+            <EmptyState message="لا توجد منشآت لهذا النوع. أضف منشأة جديدة من الزر أعلاه." />
           ) : (
             facilities.map((facility) => (
               <FacilityCard
@@ -96,12 +101,17 @@ export function AdminServicesContent({
           )}
 
           {total > 0 && (
-            <div className='flex items-center justify-between pt-2'>
-              <p className='font-cairo text-[12px] font-semibold text-[#98A2B3]'>
+            <div className="flex items-center justify-between pt-2">
+              <p className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
                 عرض {(page - 1) * ADMIN_SERVICES_PAGE_SIZE + 1}–
-                {Math.min(page * ADMIN_SERVICES_PAGE_SIZE, total)} من {total} منشأة
+                {Math.min(page * ADMIN_SERVICES_PAGE_SIZE, total)} من {total}{" "}
+                منشأة
               </p>
-              <Pagination page={page} totalPages={totalPages} onPage={onPageChange} />
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPage={onPageChange}
+              />
             </div>
           )}
         </>
@@ -110,7 +120,7 @@ export function AdminServicesContent({
       {!isAwaitingData && !isError && !isFacilityTab && (
         <>
           {serviceTypes.length === 0 ? (
-            <EmptyState message='لا توجد أنواع خدمات مُعرَّفة بعد.' />
+            <EmptyState message="لا توجد أنواع خدمات مُعرَّفة بعد." />
           ) : (
             serviceTypes.map((st) => <ServiceTypeCard key={st._id} st={st} />)
           )}
