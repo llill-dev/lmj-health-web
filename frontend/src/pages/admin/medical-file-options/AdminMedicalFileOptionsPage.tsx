@@ -10,11 +10,15 @@ import {
 import { useMemo, useState } from 'react';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import ConfirmActionDialog from '@/components/admin/dialogs/ConfirmActionDialog';
-import { MedicalFileOptionCard } from '@/components/admin/medical-file-options/MedicalFileOptionCard';
+import {
+  MedicalFileOptionCard,
+  type MedicalFileOptionItem,
+} from '@/components/admin/medical-file-options/MedicalFileOptionCard';
 import { useToast } from '@/components/ui/ToastProvider';
 import StyledSelect from '@/components/ui/styled-select';
 import {
   useCreateLookup,
+  usePatchLookup,
   useRemoveLookup,
 } from '@/hooks/admin/lookups/useAdminLookupMutations';
 import { useAdminLookups } from '@/hooks/admin/lookups/useAdminLookups';
@@ -42,23 +46,32 @@ const CATEGORY_API_TO_UI: Record<AdminLookupCategoryDoc, CategoryUiKey> = {
 
 type AdminLookupCategoryDoc = 'MEDICAL_CONDITION' | 'ALLERGY' | 'BLOOD_TYPE';
 
-function mapLookupItems(records: AdminLookupRecord[]) {
+type LookupCardItem = MedicalFileOptionItem & {
+  category: AdminLookupCategory;
+  key: string;
+  order: number;
+};
+
+function mapLookupItems(records: AdminLookupRecord[]): LookupCardItem[] {
   return [...records]
-        .sort(
+    .sort(
       (a, b) =>
-        (a.order ?? 0) - (b.order ?? 0) ||
-        a.key.localeCompare(b.key, 'en'),
+        (a.order ?? 0) - (b.order ?? 0) || a.key.localeCompare(b.key, 'en'),
     )
     .map((row) => ({
       id: row._id,
       label: resolveLookupText(row.text, 'ar') || row.key,
       isActive: row.isActive,
+      category: row.category,
+      key: row.key,
+      order: row.order ?? 0,
     }));
 }
 
 export default function AdminMedicalFileOptionsPage() {
   const { toast } = useToast();
   const createLookup = useCreateLookup();
+  const patchLookup = usePatchLookup();
   const removeLookup = useRemoveLookup();
   const [langOnly, setLangOnly] = useState(true);
   const [includeInactive, setIncludeInactive] = useState(false);
@@ -68,8 +81,16 @@ export default function AdminMedicalFileOptionsPage() {
     langOnly,
     includeInactive,
   });
-  const allergyQuery = useAdminLookups({ category: 'ALLERGY', langOnly, includeInactive });
-  const bloodQuery = useAdminLookups({ category: 'BLOOD_TYPE', langOnly, includeInactive });
+  const allergyQuery = useAdminLookups({
+    category: 'ALLERGY',
+    langOnly,
+    includeInactive,
+  });
+  const bloodQuery = useAdminLookups({
+    category: 'BLOOD_TYPE',
+    langOnly,
+    includeInactive,
+  });
 
   const chronicDiseases = useMemo(
     () => mapLookupItems(chronicQuery.data?.lookups ?? []),
@@ -87,15 +108,14 @@ export default function AdminMedicalFileOptionsPage() {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryUiKey>('الأمراض المزمنة');
   const [newOption, setNewOption] = useState('');
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: string;
-    label: string;
-    category: AdminLookupCategory;
-  } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<LookupCardItem | null>(null);
+  const [editTarget, setEditTarget] = useState<LookupCardItem | null>(null);
+  const [editValue, setEditValue] = useState('');
   const [quickAddCategory, setQuickAddCategory] =
     useState<AdminLookupCategory | null>(null);
 
-  const isBusy = createLookup.isPending || removeLookup.isPending;
+  const isBusy =
+    createLookup.isPending || removeLookup.isPending || patchLookup.isPending;
 
   async function createLookupOption(
     category: AdminLookupCategory,
@@ -103,7 +123,7 @@ export default function AdminMedicalFileOptionsPage() {
   ) {
     const trimmed = label.trim();
     if (!trimmed) {
-      toast('أدخل اسم الخيار أولاً.', { variant: 'error' });
+      toast('أدخل اسم الخيار أولًا.', { variant: 'error' });
       return;
     }
 
@@ -144,10 +164,54 @@ export default function AdminMedicalFileOptionsPage() {
     }
   }
 
+  async function confirmEdit() {
+    if (!editTarget) return;
+    const trimmed = editValue.trim();
+    if (!trimmed) {
+      toast('أدخل الاسم الجديد للخيار أولًا.', {
+        title: 'بيانات ناقصة',
+        variant: 'error',
+      });
+      return;
+    }
+
+    try {
+      await patchLookup.mutateAsync({
+        id: editTarget.id,
+        body: {
+          text: { ar: trimmed },
+          order: editTarget.order,
+          isActive: editTarget.isActive,
+        },
+      });
+      toast('تم تحديث الخيار.', { variant: 'success' });
+      setEditTarget(null);
+      setEditValue('');
+    } catch (error) {
+      toast(userFacingErrorMessage(error), {
+        title: 'تعذّر التحديث',
+        variant: 'error',
+      });
+    }
+  }
+
   function openQuickAdd(category: AdminLookupCategory) {
     setQuickAddCategory(category);
     setSelectedCategory(CATEGORY_API_TO_UI[category as AdminLookupCategoryDoc]);
     setNewOption('');
+  }
+
+  function openEdit(item: LookupCardItem) {
+    setEditTarget(item);
+    setEditValue(item.label);
+  }
+
+  function buildEditHandler(items: LookupCardItem[]) {
+    return (id: string) => {
+      const row = items.find((item) => item.id === id);
+      if (!row) return;
+      openEdit(row);
+    };
   }
 
   return (
@@ -215,15 +279,13 @@ export default function AdminMedicalFileOptionsPage() {
               icon={Heart}
               addLabel='إضافة مرض'
               onAdd={() => openQuickAdd('MEDICAL_CONDITION')}
+              onEdit={buildEditHandler(chronicDiseases)}
               onRemove={(id) => {
                 const row = chronicDiseases.find((item) => item.id === id);
                 if (!row) return;
-                setDeleteTarget({
-                  id,
-                  label: row.label,
-                  category: 'MEDICAL_CONDITION',
-                });
+                setDeleteTarget(row);
               }}
+              editingId={patchLookup.isPending ? editTarget?.id ?? null : null}
               removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
               tone={{
                 border: 'border-[#16C5C0]',
@@ -240,15 +302,13 @@ export default function AdminMedicalFileOptionsPage() {
               icon={AlertTriangle}
               addLabel='إضافة حساسية'
               onAdd={() => openQuickAdd('ALLERGY')}
+              onEdit={buildEditHandler(allergies)}
               onRemove={(id) => {
                 const row = allergies.find((item) => item.id === id);
                 if (!row) return;
-                setDeleteTarget({
-                  id,
-                  label: row.label,
-                  category: 'ALLERGY',
-                });
+                setDeleteTarget(row);
               }}
+              editingId={patchLookup.isPending ? editTarget?.id ?? null : null}
               removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
               tone={{
                 border: 'border-[#F59E0B]',
@@ -278,7 +338,7 @@ export default function AdminMedicalFileOptionsPage() {
           </div>
 
           <div className='mt-6 rounded-[10px] bg-white px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.18)]'>
-            <div className='flex items-center gap-2 justify-start'>
+            <div className='flex items-center justify-start gap-2'>
               <FileCog className='h-5 w-5 text-primary' />
               <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
                 إدارة الخيارات
@@ -341,6 +401,38 @@ export default function AdminMedicalFileOptionsPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmActionDialog
+        open={Boolean(editTarget)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditTarget(null);
+            setEditValue('');
+          }
+        }}
+        variant='primary'
+        title='تحديث الخيار'
+        description={
+          editTarget ? (
+            <div className='space-y-3 text-right'>
+              <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
+                عدّل اسم الخيار ثم احفظ التغييرات.
+              </div>
+              <input
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                placeholder='الاسم الجديد...'
+                className='h-[44px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+              />
+            </div>
+          ) : (
+            ''
+          )
+        }
+        confirmLabel='حفظ'
+        confirmDisabled={patchLookup.isPending || !editValue.trim()}
+        onConfirm={() => void confirmEdit()}
+      />
 
       <ConfirmActionDialog
         open={Boolean(deleteTarget)}

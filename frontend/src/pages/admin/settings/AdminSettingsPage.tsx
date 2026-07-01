@@ -316,16 +316,6 @@ export default function AdminSettingsPage() {
                   </select>
                 </div>
 
-                <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[11px] font-semibold text-[#667085]">
-                  ترتبط هذه الحقول الآن مباشرةً بعقد
-                  {" "}
-                  <span dir="ltr" className="font-extrabold text-[#111827]">
-                    /api/admin/settings/general
-                  </span>
-                  {" "}
-                  بدل الحفظ المحلي فقط.
-                </div>
-
                 <div className="flex justify-start pt-1">
                   <button
                     type="button"
@@ -407,16 +397,12 @@ export default function AdminSettingsPage() {
         description={
           <>
             سيتم حفظ الحقول التالية على الخادم:{" "}
-            <span className="font-extrabold text-[#344054]">اسم المنصة</span>،
-            {" "}
+            <span className="font-extrabold text-[#344054]">اسم المنصة</span>،{" "}
             <span className="font-extrabold text-[#344054]">
               البريد الإلكتروني الرئيسي
             </span>
-            ،{" "}
-            <span className="font-extrabold text-[#344054]">الهاتف</span>،
-            {" "}
-            <span className="font-extrabold text-[#344054]">المنطقة</span>
-            {" "}و
+            ، <span className="font-extrabold text-[#344054]">الهاتف</span>،{" "}
+            <span className="font-extrabold text-[#344054]">المنطقة</span> و
             <span className="font-extrabold text-[#344054]">اللغة</span>.
           </>
         }

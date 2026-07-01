@@ -1,4 +1,4 @@
-import { Plus, Trash2, type LucideIcon } from 'lucide-react';
+import { Pencil, Plus, Trash2, type LucideIcon } from 'lucide-react';
 
 type MedicalFileOptionCardTone = {
   border: string;
@@ -12,6 +12,7 @@ type MedicalFileOptionCardTone = {
 export type MedicalFileOptionItem = {
   id: string;
   label: string;
+  isActive?: boolean;
 };
 
 type MedicalFileOptionCardProps = {
@@ -22,8 +23,10 @@ type MedicalFileOptionCardProps = {
   tone: MedicalFileOptionCardTone;
   variant?: 'rows' | 'chips';
   onRemove?: (id: string) => void;
+  onEdit?: (id: string) => void;
   onAdd?: () => void;
   removingId?: string | null;
+  editingId?: string | null;
 };
 
 export function MedicalFileOptionCard({
@@ -34,8 +37,10 @@ export function MedicalFileOptionCard({
   tone,
   variant = 'rows',
   onRemove,
+  onEdit,
   onAdd,
   removingId = null,
+  editingId = null,
 }: MedicalFileOptionCardProps) {
   return (
     <div
@@ -72,15 +77,26 @@ export function MedicalFileOptionCard({
                 <div className={`font-cairo text-[12px] font-bold ${tone.itemText}`}>
                   {item.label}
                 </div>
-                <button
-                  type='button'
-                  onClick={() => onRemove?.(item.id)}
-                  disabled={!onRemove || removingId === item.id}
-                  className='flex h-[24px] w-[24px] items-center justify-center rounded-[6px] text-[#EF4444] disabled:opacity-50'
-                  aria-label={`حذف ${item.label}`}
-                >
-                  <Trash2 className='h-4 w-4' />
-                </button>
+                <div className='flex items-center gap-1'>
+                  <button
+                    type='button'
+                    onClick={() => onEdit?.(item.id)}
+                    disabled={!onEdit || editingId === item.id}
+                    className='flex h-[24px] w-[24px] items-center justify-center rounded-[6px] text-[#667085] disabled:opacity-50'
+                    aria-label={`تحرير ${item.label}`}
+                  >
+                    <Pencil className='h-4 w-4' />
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => onRemove?.(item.id)}
+                    disabled={!onRemove || removingId === item.id}
+                    className='flex h-[24px] w-[24px] items-center justify-center rounded-[6px] text-[#EF4444] disabled:opacity-50'
+                    aria-label={`حذف ${item.label}`}
+                  >
+                    <Trash2 className='h-4 w-4' />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
