@@ -1,9 +1,9 @@
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { CloudUpload, Mail, Phone, Settings } from "lucide-react";
-import { get, post } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { CloudUpload, Settings } from "lucide-react";
+import { get } from "@/lib/api";
 import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import { notificationsApi } from "@/lib/notifications/client";
@@ -12,6 +12,7 @@ import { ConfirmActionDialog } from "@/components/admin/dialogs";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import SettingsField from "@/components/admin/settings/SettingsField";
 import SettingsSectionCard from "@/components/admin/settings/SettingsSectionCard";
+import StyledSelect from "@/components/ui/styled-select";
 
 type SectionState = "idle" | "saved";
 type SaveStates = Record<"general" | "logo", SectionState>;
@@ -24,17 +25,11 @@ type HealthResponse = {
 
 type AdminGeneralSettingsResponse = {
   platformName: string;
-  primaryEmail: string;
-  phone: string;
-  region: string;
   lang?: "ar" | "en";
 };
 
 type AdminGeneralSettingsForm = {
   platformName: string;
-  primaryEmail: string;
-  phone: string;
-  region: string;
   lang: "ar" | "en";
 };
 
@@ -43,9 +38,6 @@ function normalizeGeneralSettings(
 ): AdminGeneralSettingsForm {
   return {
     platformName: data?.platformName?.trim() || "LMJ Health",
-    primaryEmail: data?.primaryEmail?.trim() || "",
-    phone: data?.phone?.trim() || "",
-    region: data?.region?.trim() || "",
     lang: data?.lang === "en" ? "en" : "ar",
   };
 }
@@ -68,17 +60,21 @@ export default function AdminSettingsPage() {
     return { from: from.toISOString(), to: to.toISOString() };
   }, []);
 
-  const generalSettingsQuery = useQuery({
-    queryKey: ["admin", "settings", "general"],
-    queryFn: () =>
-      get<AdminGeneralSettingsResponse>("/api/admin/settings/general", {
-        locale: "ar",
-      }),
-    staleTime: 60_000,
-  });
+  // Load general settings from localStorage on mount
+  const loadGeneralSettingsFromStorage = (): AdminGeneralSettingsForm => {
+    try {
+      const stored = localStorage.getItem("admin_general_settings");
+      if (stored) {
+        return normalizeGeneralSettings(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error("Failed to load general settings from localStorage", e);
+    }
+    return normalizeGeneralSettings();
+  };
 
   const [draftGeneral, setDraftGeneral] = useState<AdminGeneralSettingsForm>(
-    () => normalizeGeneralSettings(),
+    loadGeneralSettingsFromStorage,
   );
 
   const healthQuery = useQuery({
@@ -119,34 +115,15 @@ export default function AdminSettingsPage() {
     retry: 1,
   });
 
-  const saveGeneralMutation = useMutation({
-    mutationFn: (payload: AdminGeneralSettingsForm) =>
-      post<{
-        ok?: boolean;
-        settings?: Partial<AdminGeneralSettingsResponse>;
-      }>("/api/admin/settings/general", payload, {
-        locale: "ar",
-      }),
-    onSuccess: (data, payload) => {
-      const normalized = normalizeGeneralSettings(data.settings ?? payload);
-      setDraftGeneral(normalized);
-      generalSettingsQuery.refetch();
+  // Save general settings to localStorage
+  const saveGeneralSettings = (settings: AdminGeneralSettingsForm) => {
+    try {
+      localStorage.setItem("admin_general_settings", JSON.stringify(settings));
       markSaved("general");
-    },
-  });
-
-  useEffect(() => {
-    if (!generalSettingsQuery.data) return;
-    setDraftGeneral((prev) => {
-      const isUntouched =
-        prev.platformName === "LMJ Health" &&
-        prev.primaryEmail === "" &&
-        prev.phone === "" &&
-        prev.region === "";
-      if (!isUntouched) return prev;
-      return normalizeGeneralSettings(generalSettingsQuery.data);
-    });
-  }, [generalSettingsQuery.data]);
+    } catch (e) {
+      console.error("Failed to save general settings to localStorage", e);
+    }
+  };
 
   const unreadCount =
     unreadNotificationsQuery.data?.total ??
@@ -165,10 +142,6 @@ export default function AdminSettingsPage() {
   const auditSummaryAwaiting = isAwaitingInitialQueryData(
     auditSummaryQuery.data,
     auditSummaryQuery.isError,
-  );
-  const generalAwaiting = isAwaitingInitialQueryData(
-    generalSettingsQuery.data,
-    generalSettingsQuery.isError,
   );
 
   function markSaved(section: keyof SaveStates) {
@@ -230,7 +203,7 @@ export default function AdminSettingsPage() {
             variant="admin"
             surface="mint"
             title="الإعدادات"
-            subtitle="إدارة الإعدادات العامة المرتبطة بالخادم، مع إبقاء الشعار المحلي منفصلًا مؤقتًا"
+            subtitle="إدارة اسم المنصة واللغة، مع إبقاء الشعار المحلي منفصلًا مؤقتًا"
             headerIcon={<Settings className="h-8 w-8 text-white" />}
             kpiColumns={3}
             kpis={[
@@ -273,53 +246,31 @@ export default function AdminSettingsPage() {
                     setDraftGeneral((prev) => ({ ...prev, platformName: v }))
                   }
                 />
-                <SettingsField
-                  label="البريد الإلكتروني الرئيسي"
-                  value={draftGeneral.primaryEmail}
-                  type="email"
-                  onChange={(v) =>
-                    setDraftGeneral((prev) => ({ ...prev, primaryEmail: v }))
-                  }
-                />
-                <SettingsField
-                  label="رقم الهاتف"
-                  value={draftGeneral.phone}
-                  type="tel"
-                  onChange={(v) =>
-                    setDraftGeneral((prev) => ({ ...prev, phone: v }))
-                  }
-                />
-                <SettingsField
-                  label="المنطقة"
-                  value={draftGeneral.region}
-                  onChange={(v) =>
-                    setDraftGeneral((prev) => ({ ...prev, region: v }))
-                  }
-                />
 
                 <div className="space-y-2">
                   <div className="text-right font-cairo text-[12px] font-bold text-[#344054]">
                     اللغة الافتراضية
                   </div>
-                  <select
+                  <StyledSelect
                     value={draftGeneral.lang}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       setDraftGeneral((prev) => ({
                         ...prev,
-                        lang: e.target.value === "en" ? "en" : "ar",
+                        lang: value === "en" ? "en" : "ar",
                       }))
                     }
-                    className="h-[40px] w-full rounded-[8px] border border-[#EAECF0] bg-white px-4 font-cairo text-[12px] font-semibold text-[#111827] outline-none focus:border-[#BFEDEC] focus:ring-2 focus:ring-[#16C5C020]"
-                  >
-                    <option value="ar">العربية</option>
-                    <option value="en">English</option>
-                  </select>
+                    options={[
+                      { value: "ar", label: "العربية" },
+                      { value: "en", label: "English" },
+                    ]}
+                    size="sm"
+                    tone="muted"
+                  />
                 </div>
 
                 <div className="flex justify-start pt-1">
                   <button
                     type="button"
-                    disabled={generalAwaiting || saveGeneralMutation.isPending}
                     onClick={() => setConfirmGeneralOpen(true)}
                     className="inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)] disabled:opacity-50"
                   >
@@ -328,12 +279,7 @@ export default function AdminSettingsPage() {
                 </div>
                 {saveStates.general === "saved" ? (
                   <div className="text-right font-cairo text-[11px] font-semibold text-[#16A34A]">
-                    تم حفظ الإعدادات العامة على الخادم
-                  </div>
-                ) : null}
-                {generalSettingsQuery.isError ? (
-                  <div className="text-right font-cairo text-[11px] font-semibold text-[#B42318]">
-                    تعذر تحميل الإعدادات العامة من الخادم.
+                    تم حفظ الإعدادات العامة محليًا
                   </div>
                 ) : null}
               </div>
@@ -396,31 +342,22 @@ export default function AdminSettingsPage() {
         icon={<Settings className="h-6 w-6" strokeWidth={2} aria-hidden />}
         description={
           <>
-            سيتم حفظ الحقول التالية على الخادم:{" "}
-            <span className="font-extrabold text-[#344054]">اسم المنصة</span>،{" "}
-            <span className="font-extrabold text-[#344054]">
-              البريد الإلكتروني الرئيسي
-            </span>
-            ، <span className="font-extrabold text-[#344054]">الهاتف</span>،{" "}
-            <span className="font-extrabold text-[#344054]">المنطقة</span> و
+            سيتم حفظ الحقول التالية محليًا:{" "}
+            <span className="font-extrabold text-[#344054]">اسم المنصة</span> و
             <span className="font-extrabold text-[#344054]">اللغة</span>.
           </>
         }
         cancelLabel="ليس الآن"
         confirmLabel="نعم، احفظ"
-        confirmDisabled={saveGeneralMutation.isPending}
-        onConfirm={async () => {
-          await saveGeneralMutation.mutateAsync({
+        onConfirm={() => {
+          saveGeneralSettings({
             platformName: draftGeneral.platformName.trim() || "LMJ Health",
-            primaryEmail: draftGeneral.primaryEmail.trim(),
-            phone: draftGeneral.phone.trim(),
-            region: draftGeneral.region.trim(),
             lang: draftGeneral.lang,
           });
         }}
         successToast={{
           title: "تم حفظ الإعدادات",
-          message: "تم تحديث الإعدادات العامة على الخادم بنجاح.",
+          message: "تم تحديث الإعدادات العامة محليًا بنجاح.",
           variant: "success",
         }}
       />
