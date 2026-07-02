@@ -21,6 +21,8 @@ import {
   AdminSkeletonBlock,
   createStaggeredDelay,
 } from "@/components/admin/skeletons/admin-skeleton-primitives";
+import { useAdminDoctorRestoreRequests } from "@/hooks/admin/users/useAdminDoctorRestoreRequests";
+import ReviewRestoreRequestDialog from "@/components/admin/users/ReviewRestoreRequestDialog";
 
 type RestoreRequestStatusFilter = "all" | "pending" | "approved" | "rejected";
 
@@ -88,15 +90,18 @@ export default function AdminDoctorRestoreRequestsPage() {
     useState<RestoreRequestStatusFilter>("pending");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<RestoreRequest | null>(
+    null,
+  );
 
-  // TODO: Replace with actual API call
-  const { requests, isAwaitingData, isError, error, refetch } = {
-    requests: [] as RestoreRequest[],
-    isAwaitingData: false,
-    isError: false,
-    error: null,
-    refetch: () => {},
-  };
+  const { requests, isAwaitingData, isError, error, refetch } =
+    useAdminDoctorRestoreRequests({
+      status: statusFilter === "all" ? undefined : statusFilter,
+      search: query || undefined,
+      page,
+      limit: pageSize,
+    });
 
   const filteredRequests = useMemo(() => {
     const text = query.trim().toLowerCase();
@@ -391,12 +396,10 @@ export default function AdminDoctorRestoreRequestsPage() {
                       {request.status === "pending" ? (
                         <button
                           type="button"
-                          onClick={() =>
-                            navigate(
-                              `/admin/doctor-restore-requests/${request._id}`,
-                              { state: { request } },
-                            )
-                          }
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setReviewOpen(true);
+                          }}
                           className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-primary bg-primary px-4 font-cairo text-[11px] font-extrabold text-white transition hover:bg-primary/90"
                         >
                           <ShieldCheck className="h-3.5 w-3.5" />
@@ -439,6 +442,15 @@ export default function AdminDoctorRestoreRequestsPage() {
             }}
           />
         ) : null}
+
+        <ReviewRestoreRequestDialog
+          open={reviewOpen}
+          onOpenChange={setReviewOpen}
+          request={selectedRequest}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
 
         <div className="h-8" />
       </div>

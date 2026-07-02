@@ -297,6 +297,7 @@ export default function AdminUsersPage() {
             setOffboardOpen(open);
             if (!open) setOffboardTarget(null);
           }}
+          
           targetUserId={offboardTarget?.userId ?? null}
           targetLabel={offboardTarget?.label ?? ""}
           accountRole="staff"

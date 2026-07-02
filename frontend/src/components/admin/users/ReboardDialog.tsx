@@ -1,9 +1,10 @@
-'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { X, UserPlus, AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
-import { useToast } from '@/components/ui/ToastProvider';
+"use client";
+import * as Dialog from "@radix-ui/react-dialog";
+import { motion } from "framer-motion";
+import { X, UserPlus, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
+import { adminApi } from "@/lib/admin/client";
 
 interface ReboardDialogProps {
   open: boolean;
@@ -26,22 +27,21 @@ export default function ReboardDialog({
   const handleReboard = async () => {
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.users.reboard(userId);
+      await adminApi.users.reboard(userId);
 
-      toast('تم تفعيل حساب المستخدم بنجاح', {
-        title: 'تم التفعيل',
-        variant: 'success',
+      toast("تم تفعيل حساب المستخدم بنجاح", {
+        title: "تم التفعيل",
+        variant: "success",
         durationMs: 4200,
       });
 
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Error reboarding user:', error);
-      toast('حدث خطأ أثناء تفعيل الحساب. يرجى المحاولة مرة أخرى.', {
-        title: 'فشلت العملية',
-        variant: 'error',
+      console.error("Error reboarding user:", error);
+      toast("حدث خطأ أثناء تفعيل الحساب. يرجى المحاولة مرة أخرى.", {
+        title: "فشلت العملية",
+        variant: "error",
         durationMs: 4200,
       });
     } finally {
@@ -105,7 +105,7 @@ export default function ReboardDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#16A34A] bg-[#16A34A] px-4 font-cairo text-[12px] font-extrabold text-white transition hover:bg-[#15803D] disabled:opacity-50"
                 >
-                  {isSubmitting ? 'جاري التفعيل...' : 'تفعيل الحساب'}
+                  {isSubmitting ? "جاري التفعيل..." : "تفعيل الحساب"}
                 </button>
               </div>
             </div>

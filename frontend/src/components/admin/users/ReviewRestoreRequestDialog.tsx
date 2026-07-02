@@ -1,27 +1,27 @@
-'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { X, Check, XCircle, FileText, User, AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
-import { useToast } from '@/components/ui/ToastProvider';
-import StyledSelect from '@/components/ui/styled-select';
+"use client";
+import * as Dialog from "@radix-ui/react-dialog";
+import { motion } from "framer-motion";
+import { X, Check, XCircle, FileText, User, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
+import StyledSelect from "@/components/ui/styled-select";
+import { adminApi } from "@/lib/admin/client";
 
 const DECISION_OPTIONS = [
-  { value: 'approved', label: 'موافقة' },
-  { value: 'denied', label: 'رفض' },
+  { value: "approved", label: "موافقة" },
+  { value: "denied", label: "رفض" },
 ];
 
 interface RestoreRequest {
   _id: string;
   status?: string;
   userId?: string;
-  user?: {
-    _id: string;
-    fullName?: string;
-    email?: string;
-  };
+  doctorId?: string;
+  doctorName?: string;
+  doctorEmail?: string;
   requestedAt?: string;
   reason?: string;
+  deletionReason?: string;
 }
 
 interface ReviewRestoreRequestDialogProps {
@@ -39,25 +39,25 @@ export default function ReviewRestoreRequestDialog({
 }: ReviewRestoreRequestDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [decision, setDecision] = useState('');
-  const [reviewNote, setReviewNote] = useState('');
+  const [decision, setDecision] = useState("");
+  const [reviewNote, setReviewNote] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!decision) {
-      toast('يجب اختيار القرار', {
-        title: 'خطأ في التحقق',
-        variant: 'error',
+      toast("يجب اختيار القرار", {
+        title: "خطأ في التحقق",
+        variant: "error",
         durationMs: 4200,
       });
       return;
     }
 
-    if (decision === 'denied' && !reviewNote.trim()) {
-      toast('يجب إضافة ملاحظة عند رفض الطلب', {
-        title: 'خطأ في التحقق',
-        variant: 'error',
+    if (decision === "denied" && !reviewNote.trim()) {
+      toast("يجب إضافة ملاحظة عند رفض الطلب", {
+        title: "خطأ في التحقق",
+        variant: "error",
         durationMs: 4200,
       });
       return;
@@ -65,31 +65,30 @@ export default function ReviewRestoreRequestDialog({
 
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.users.reviewRestoreRequest(request?.userId || '', {
-      //   decision: decision as 'approved' | 'denied',
-      //   reviewNote: reviewNote || undefined,
-      // });
+      await adminApi.users.reviewRestoreRequest(request?.userId || "", {
+        decision: decision as "approved" | "denied",
+        reviewNote: reviewNote || undefined,
+      });
 
       const message =
-        decision === 'approved'
-          ? 'تمت الموافقة على طلب استعادة الحساب'
-          : 'تم رفض طلب استعادة الحساب';
+        decision === "approved"
+          ? "تمت الموافقة على طلب استعادة الحساب"
+          : "تم رفض طلب استعادة الحساب";
       toast(message, {
-        title: decision === 'approved' ? 'تمت الموافقة' : 'تم الرفض',
-        variant: 'success',
+        title: decision === "approved" ? "تمت الموافقة" : "تم الرفض",
+        variant: "success",
         durationMs: 4200,
       });
 
-      setDecision('');
-      setReviewNote('');
+      setDecision("");
+      setReviewNote("");
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Error reviewing restore request:', error);
-      toast('حدث خطأ أثناء مراجعة الطلب. يرجى المحاولة مرة أخرى.', {
-        title: 'فشلت العملية',
-        variant: 'error',
+      console.error("Error reviewing restore request:", error);
+      toast("حدث خطأ أثناء مراجعة الطلب. يرجى المحاولة مرة أخرى.", {
+        title: "فشلت العملية",
+        variant: "error",
         durationMs: 4200,
       });
     } finally {
@@ -121,7 +120,7 @@ export default function ReviewRestoreRequestDialog({
                       مراجعة طلب استعادة الحساب
                     </Dialog.Title>
                     <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                      {request.user?.fullName || request.user?.email}
+                      {request.doctorName || request.doctorEmail}
                     </Dialog.Description>
                   </div>
                 </div>
@@ -139,10 +138,10 @@ export default function ReviewRestoreRequestDialog({
                     </div>
                     <div>
                       <div className="font-cairo text-[13px] font-black text-[#111827]">
-                        {request.user?.fullName || '—'}
+                        {request.doctorName || "—"}
                       </div>
                       <div className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-                        {request.user?.email || '—'}
+                        {request.doctorEmail || "—"}
                       </div>
                     </div>
                   </div>
@@ -153,6 +152,16 @@ export default function ReviewRestoreRequestDialog({
                       </div>
                       <div className="font-cairo text-[12px] font-semibold text-[#111827]">
                         {request.reason}
+                      </div>
+                    </div>
+                  )}
+                  {request.deletionReason && (
+                    <div className="mt-3 pt-3 border-t border-[#EEF2F6]">
+                      <div className="font-cairo text-[11px] font-extrabold text-[#DC2626] mb-1">
+                        سبب الحذف:
+                      </div>
+                      <div className="font-cairo text-[12px] font-semibold text-[#991B1B]">
+                        {request.deletionReason}
                       </div>
                     </div>
                   )}
@@ -176,7 +185,7 @@ export default function ReviewRestoreRequestDialog({
                 {/* Review Note */}
                 <div>
                   <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    ملاحظة المراجعة {decision === 'denied' && '*'}
+                    ملاحظة المراجعة {decision === "denied" && "*"}
                   </label>
                   <textarea
                     value={reviewNote}
@@ -188,7 +197,7 @@ export default function ReviewRestoreRequestDialog({
                 </div>
 
                 {/* Warning */}
-                {decision === 'approved' && (
+                {decision === "approved" && (
                   <div className="flex items-start gap-3 rounded-[8px] bg-[#FFFBEB] border border-[#FDE68A] p-3">
                     <AlertTriangle className="h-4 w-4 flex-shrink-0 text-[#D97706] mt-0.5" />
                     <div className="font-cairo text-[11px] font-bold text-[#92400E]">
@@ -214,7 +223,7 @@ export default function ReviewRestoreRequestDialog({
                   disabled={isSubmitting || !decision}
                   className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {isSubmitting ? 'جاري الإرسال...' : 'إرسال القرار'}
+                  {isSubmitting ? "جاري الإرسال..." : "إرسال القرار"}
                 </button>
               </div>
             </div>
