@@ -110,7 +110,7 @@ const QuickInfo = memo<{ label: string; value: string }>(function QuickInfo({
   );
 });
 
-export default function DoctorPatientExpandableCard({
+const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
   patient,
   expanded,
   onToggle,
@@ -371,4 +371,6 @@ export default function DoctorPatientExpandableCard({
       </div>
     </div>
   );
-}
+});
+
+export default DoctorPatientExpandableCard;

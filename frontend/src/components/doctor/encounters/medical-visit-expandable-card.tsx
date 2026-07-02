@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
@@ -93,7 +93,7 @@ function LinkedAppointmentSection({
   );
 }
 
-export function MedicalVisitExpandableCard({
+export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCard({
   visit,
   expanded,
   detailsLoading = false,
@@ -379,5 +379,5 @@ export function MedicalVisitExpandableCard({
       </AnimatePresence>
     </motion.article>
   );
-}
+});
 
