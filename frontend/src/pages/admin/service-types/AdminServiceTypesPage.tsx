@@ -309,7 +309,6 @@ export default function AdminServiceTypesPage() {
               </div>
 
                 <Pagination page={currentPage} totalPages={totalPages} onPage={setPage} />
-
             </div>
           </section>
         )}

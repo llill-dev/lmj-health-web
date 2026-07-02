@@ -8,6 +8,7 @@ import {
   ShieldPlus,
   UserCog,
   UserMinus,
+  UserPlus,
   Users,
 } from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
@@ -18,6 +19,7 @@ import StyledSelect from "@/components/ui/styled-select";
 import { useAdminUsers } from "@/hooks/admin/users/useAdminUsers";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type { AdminUserSummary } from "@/lib/admin/types";
+import ReboardDialog from "@/components/admin/users/ReboardDialog";
 
 type UserStatusFilter = "all" | "active" | "inactive";
 
@@ -50,6 +52,12 @@ export default function AdminUsersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [offboardOpen, setOffboardOpen] = useState(false);
   const [offboardTarget, setOffboardTarget] = useState<{
+    userId: string;
+    label: string;
+  } | null>(null);
+
+  const [reboardOpen, setReboardOpen] = useState(false);
+  const [reboardTarget, setReboardTarget] = useState<{
     userId: string;
     label: string;
   } | null>(null);
@@ -227,7 +235,22 @@ export default function AdminUsersPage() {
                     </button>
                   </div>
                 </div>
-
+                {user.isActive === false && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReboardTarget({
+                        userId: user.id,
+                        label: user.fullName,
+                      });
+                      setReboardOpen(true);
+                    }}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    تفعيل الحساب
+                  </button>
+                )}
                 <div className="mt-4 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
                   <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                     <span>أُنشئ في {formatUserCreatedAt(user.createdAt)}</span>
@@ -278,6 +301,13 @@ export default function AdminUsersPage() {
           targetLabel={offboardTarget?.label ?? ""}
           accountRole="staff"
           onSuccess={() => void refetch()}
+        />
+        <ReboardDialog
+          open={reboardOpen}
+          onOpenChange={setReboardOpen}
+          userId={reboardTarget?.userId || ""}
+          userName={reboardTarget?.label || ""}
+          onSuccess={refetch}
         />
       </div>
     </>

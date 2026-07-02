@@ -341,6 +341,48 @@ export const adminApi = {
         reason ? { reason } : undefined,
         { locale: "ar" },
       ),
+    reboard: (userId: string) =>
+      post<ApiSuccessEnvelope>(
+        adminEndpoints.users.reboard(userId),
+        undefined,
+        {
+          locale: "ar",
+        },
+      ),
+    doctorRestoreRequests: (params: {
+      status?: string;
+      search?: string;
+      from?: string;
+      to?: string;
+      page?: number;
+      limit?: number;
+    }) => {
+      const qs = new URLSearchParams();
+      if (params.status) qs.set("status", params.status);
+      if (params.search) qs.set("search", params.search);
+      if (params.from) qs.set("from", params.from);
+      if (params.to) qs.set("to", params.to);
+      if (params.page) qs.set("page", params.page.toString());
+      if (params.limit) qs.set("limit", params.limit.toString());
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.users.doctorRestoreRequests}?${qs.toString()}`
+        : adminEndpoints.users.doctorRestoreRequests;
+      return get<ApiSuccessEnvelope & { results?: unknown[] }>(endpoint, {
+        locale: "ar",
+      });
+    },
+    reviewRestoreRequest: (
+      userId: string,
+      body: {
+        decision: "approved" | "denied";
+        reviewNote?: string;
+      },
+    ) =>
+      post<ApiSuccessEnvelope>(
+        adminEndpoints.users.reviewRestoreRequest(userId),
+        body,
+        { locale: "ar" },
+      ),
   },
   secretaries: {
     list: (params: AdminSecretariesListParams = {}) => {

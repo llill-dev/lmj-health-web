@@ -63,6 +63,10 @@ export const adminEndpoints = {
     list: "/api/admin/users",
     create: "/api/admin/users",
     offboard: (userId: string) => `/api/admin/users/${userId}/offboard`,
+    reboard: (userId: string) => `/api/admin/users/${userId}/reboard`,
+    doctorRestoreRequests: "/api/admin/users/doctor-restore-requests",
+    reviewRestoreRequest: (userId: string) =>
+      `/api/admin/users/${userId}/restore-request/review`,
   },
   auditLogs: {
     list: "/api/admin/audit-logs",
