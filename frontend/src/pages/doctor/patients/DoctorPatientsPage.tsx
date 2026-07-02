@@ -52,6 +52,9 @@ import { useNavigate } from "react-router-dom";
 const CreateTemporaryPatientDialog = lazy(
   () => import("@/components/doctor/patients/create-temporary-patient-dialog"),
 );
+const DoctorPatientsFiltersSection = lazy(
+  () => import("@/components/doctor/patients/doctor-patients-filters-section"),
+);
 
 type FilterStatus = "all" | "active" | "temporary" | "suspended";
 type RelationshipFilter = "all" | PatientRelationshipState;
@@ -671,7 +674,59 @@ export default function DoctorPatientsPage() {
           }}
         />
         </Suspense>
+        <Suspense fallback={<DoctorTableSkeleton rows={4} columns={3} />}>
+          <DoctorPatientsFiltersSection
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            total={listQuery.total}
+            patientsListFailed={patientsListFailed}
+            onReset={() => setFilters({ ...defaultFilters })}
+            onSearchChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                search: value,
+                page: 1,
+              }))
+            }
+            onDiagnosisChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                diagnosis: value,
+                page: 1,
+              }))
+            }
+            onAccountStatusChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                account_status: value,
+                page: 1,
+              }))
+            }
+            onRelationshipChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                relationship: value,
+                page: 1,
+              }))
+            }
+            onFromChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                from: value,
+                page: 1,
+              }))
+            }
+            onToChange={(value) =>
+              setFilters((prev) => ({
+                ...prev,
+                to: value,
+                page: 1,
+              }))
+            }
+          />
+        </Suspense>
         {/* شريط تصفية احترافي — البحث الرئيسي ~50% على الشاشات الواسعة */}
+        {false && (
         <section
           className="my-5 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
           aria-label="تصفية قائمة المرضى"
@@ -905,6 +960,7 @@ export default function DoctorPatientsPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Patients list section */}
         <section className="space-y-3">
