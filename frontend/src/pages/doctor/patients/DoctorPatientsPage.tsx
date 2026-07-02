@@ -1,9 +1,8 @@
 import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
 import DoctorPatientExpandableCard, {
-  type DoctorPatientExpandableCardData,
-  type PatientCardTab,
+  DoctorPatientExpandableCardData,
+  PatientCardTab,
 } from "@/components/doctor/patients/doctor-patient-expandable-card";
-import CreateTemporaryPatientDialog from "@/components/doctor/patients/create-temporary-patient-dialog";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import { DoctorTableSkeleton } from "@/components/doctor/shared/skeletons";
@@ -19,22 +18,24 @@ import {
 } from "@/hooks";
 import { Helmet } from "react-helmet-async";
 import {
-  Search,
+  AlertCircle,
+  Calendar,
   Filter,
+  Search,
+  Stethoscope,
   UserCheck,
   UserMinus,
   UserRoundPlus,
-  Link2,
-  Clock,
-  Hourglass,
-  CheckCircle2,
-  Stethoscope,
   Users,
-  Calendar,
-  Loader2,
-  AlertCircle,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+} from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { readAuthUser } from "@/lib/cookies";
@@ -47,6 +48,10 @@ import {
 } from "@/lib/doctor/patients/patient-states";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import { useNavigate } from "react-router-dom";
+
+const CreateTemporaryPatientDialog = lazy(
+  () => import("@/components/doctor/patients/create-temporary-patient-dialog"),
+);
 
 type FilterStatus = "all" | "active" | "temporary" | "suspended";
 type RelationshipFilter = "all" | PatientRelationshipState;
@@ -652,6 +657,7 @@ export default function DoctorPatientsPage() {
           ]}
         />
         {/* Create temporary patient dialog */}
+        <Suspense fallback={null}>
         <CreateTemporaryPatientDialog
           open={tempPatientOpen}
           onOpenChange={setTempPatientOpen}
@@ -664,6 +670,7 @@ export default function DoctorPatientsPage() {
             });
           }}
         />
+        </Suspense>
         {/* شريط تصفية احترافي — البحث الرئيسي ~50% على الشاشات الواسعة */}
         <section
           className="my-5 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
