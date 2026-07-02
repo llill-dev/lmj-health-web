@@ -6,15 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { useDoctorUnreadNotificationCount } from "@/hooks/doctor/notifications/useDoctorNotifications";
 import { useAuthStore } from "@/store/authStore";
 
-const greetingWord = useCallback((): string => {
+const greetingWord = (): string => {
   const h = new Date().getHours();
   if (h >= 5 && h < 12) return "صباح الخير";
   if (h >= 12 && h < 17) return "طاب يومك";
   if (h >= 17 && h < 23) return "مساء الخير";
   return "أهلاً بك";
-}, []);
+};
 
-const initialsFromName = useCallback((name: string): string => {
+const initialsFromName = (name: string): string => {
   const t = name.trim();
   if (!t) return "ط";
   const parts = t.split(/\s+/).filter(Boolean);
@@ -24,7 +24,7 @@ const initialsFromName = useCallback((name: string): string => {
     return `${a}${b}`.toUpperCase();
   }
   return t.slice(0, 2).toUpperCase();
-}, []);
+};
 
 export default function DashboardHeader({
   title = "لوحة الطبيب",
