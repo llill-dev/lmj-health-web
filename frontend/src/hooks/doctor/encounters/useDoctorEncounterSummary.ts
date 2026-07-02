@@ -63,8 +63,7 @@ export function useDoctorEncounterSummary(
           return { prescriptions, total: prescriptions.length };
         },
         enabled: isEnabled,
-        staleTime: 1000 * 30,
-        refetchOnMount: 'always',
+        staleTime: 1000 * 60,
       },
       {
         queryKey: [
@@ -83,8 +82,7 @@ export function useDoctorEncounterSummary(
             { limit: 100, page: 1 },
           ),
         enabled: isEnabled,
-        staleTime: 0,
-        refetchOnMount: 'always',
+        staleTime: 1000 * 60,
       },
       {
         queryKey: doctorPatientsQueryKeys.fullProfile(doctorId, patientId),

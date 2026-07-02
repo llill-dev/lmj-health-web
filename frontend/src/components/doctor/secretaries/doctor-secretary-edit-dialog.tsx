@@ -56,7 +56,7 @@ function DoctorSecretaryEditForm({
   const detailQuery = useQuery({
     queryKey: doctorSecretariesQueryKeys.detail(secretaryId),
     queryFn: () => doctorSecretariesApi.get(secretaryId),
-    staleTime: 0,
+    staleTime: 1000 * 60,
   });
 
   const resolvedSecretary = detailQuery.data ?? secretary;
