@@ -38,7 +38,6 @@ export default function ReboardDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error: any) {
-      console.error("Error reboarding user:", error);
       const message =
         error?.message || "حدث خطأ أثناء تفعيل الحساب. يرجى المحاولة مرة أخرى.";
       toast(message, {
