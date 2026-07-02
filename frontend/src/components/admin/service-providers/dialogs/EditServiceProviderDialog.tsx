@@ -139,7 +139,7 @@ export default function EditServiceProviderDialog({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl"
           >
             <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">
               <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">

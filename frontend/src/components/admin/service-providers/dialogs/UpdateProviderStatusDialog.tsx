@@ -1,15 +1,15 @@
-'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { X, AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
-import { useToast } from '@/components/ui/ToastProvider';
-import StyledSelect from '@/components/ui/styled-select';
+"use client";
+import * as Dialog from "@radix-ui/react-dialog";
+import { motion } from "framer-motion";
+import { X, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
+import StyledSelect from "@/components/ui/styled-select";
 
 const STATUS_OPTIONS = [
-  { value: 'draft', label: 'مسودة' },
-  { value: 'active', label: 'نشط' },
-  { value: 'inactive', label: 'معطّل' },
+  { value: "draft", label: "مسودة" },
+  { value: "active", label: "نشط" },
+  { value: "inactive", label: "معطّل" },
 ];
 
 interface UpdateProviderStatusDialogProps {
@@ -46,18 +46,18 @@ export default function UpdateProviderStatusDialog({
       // TODO: Replace with actual API call
       // await adminApi.serviceProviders.updateStatus(providerId, { status });
 
-      toast('تم تحديث حالة مزود الخدمة بنجاح', {
-        title: 'تم التحديث',
-        variant: 'success',
+      toast("تم تحديث حالة مزود الخدمة بنجاح", {
+        title: "تم التحديث",
+        variant: "success",
         durationMs: 4200,
       });
 
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast('حدث خطأ أثناء تحديث الحالة. يرجى المحاولة مرة أخرى.', {
-        title: 'فشلت العملية',
-        variant: 'error',
+      toast("حدث خطأ أثناء تحديث الحالة. يرجى المحاولة مرة أخرى.", {
+        title: "فشلت العملية",
+        variant: "error",
         durationMs: 4200,
       });
     } finally {
@@ -74,7 +74,7 @@ export default function UpdateProviderStatusDialog({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
           >
             <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">
               <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
@@ -138,7 +138,7 @@ export default function UpdateProviderStatusDialog({
                     disabled={isSubmitting || status === currentStatus}
                     className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isSubmitting ? 'جارٍ التحديث...' : 'تأكيد التغيير'}
+                    {isSubmitting ? "جارٍ التحديث..." : "تأكيد التغيير"}
                   </button>
                 </div>
               </form>
