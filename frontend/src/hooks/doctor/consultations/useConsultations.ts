@@ -19,7 +19,7 @@ export function useConsultationDetails(ticketId: string | null) {
     queryKey: ['consultations', 'detail', ticketId],
     queryFn: () => consultationsApi.getById(ticketId!),
     enabled: Boolean(ticketId),
-    staleTime: 1000 * 15,
+    staleTime: 1000 * 30,
   });
 }
 

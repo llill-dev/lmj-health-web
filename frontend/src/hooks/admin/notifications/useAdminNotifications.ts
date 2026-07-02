@@ -142,7 +142,7 @@ export function useAdminUnreadNotificationCount() {
     queryKey: adminNotificationsQueryKeys.unreadTotal,
     queryFn: fetchUnreadTotal,
     staleTime: 15_000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   return {

@@ -31,7 +31,7 @@ export function useDoctorUnreadNotificationCount() {
     queryFn: fetchUnreadTotal,
     staleTime: 15_000,
     refetchInterval: 30_000, // Poll every 30 seconds
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   return {
