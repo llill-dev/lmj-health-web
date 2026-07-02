@@ -5,6 +5,7 @@ import { X, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
+import { adminApi } from "@/lib/admin/client";
 
 const STATUS_OPTIONS = [
   { value: "draft", label: "مسودة" },
@@ -43,8 +44,7 @@ export default function UpdateProviderStatusDialog({
 
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.serviceProviders.updateStatus(providerId, { status });
+      await adminApi.serviceProviders.updateStatus(providerId, { status });
 
       toast("تم تحديث حالة مزود الخدمة بنجاح", {
         title: "تم التحديث",

@@ -30,6 +30,7 @@ import { useRetryAction } from "@/lib/query/useRetryAction";
 import { staggerContainer, staggerItem } from "@/motion";
 import { ApiError } from "@/lib/api";
 import { downloadUtf8Csv } from "@/lib/export/downloadUtf8Csv";
+import { Pagination } from "@/components/admin/services/Pagination";
 
 const PAGE_SIZE = 9;
 
@@ -58,8 +59,7 @@ export default function AdminDoctorSpecializationsPage() {
     [lookupCategory, includeInactive, langOnly],
   );
 
-  const { data, isAwaitingData, error, refetch } =
-    useAdminLookups(listParams);
+  const { data, isAwaitingData, error, refetch } = useAdminLookups(listParams);
   const { retry: retryLookups, retrying: retryingLookups } = useRetryAction(
     () => refetch(),
   );
@@ -391,27 +391,11 @@ export default function AdminDoctorSpecializationsPage() {
                 عنصراً مطابقاً
               </p>
 
-              <div className="flex flex-wrap gap-2 justify-center items-center">
-                <button
-                  type="button"
-                  disabled={safePage <= 1 || busy}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="h-[38px] min-w-[96px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-sm disabled:opacity-40"
-                >
-                  السابق
-                </button>
-                <span className="font-cairo text-[12px] font-bold text-[#475467]">
-                  صفحة {safePage} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  disabled={safePage >= totalPages || busy}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="h-[38px] min-w-[96px] rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_12px_26px_rgba(15,143,139,0.28)] disabled:opacity-40"
-                >
-                  التالي
-                </button>
-              </div>
+              <Pagination
+                page={safePage}
+                totalPages={totalPages}
+                onPage={setPage}
+              />
             </div>
           </>
         )}

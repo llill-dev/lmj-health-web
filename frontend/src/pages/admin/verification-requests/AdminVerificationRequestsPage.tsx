@@ -1,29 +1,28 @@
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from "react-helmet-async";
 import {
   AlertCircle,
   ChevronLeft,
   Stethoscope,
   Clock,
   Filter,
-  ChevronsLeft,
-  ChevronsRight,
-} from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ReviewVerificationRequestDialog from '@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog';
-import { useAdminDoctors } from '@/hooks/admin/doctors/useAdminDoctors';
-import { adminApi } from '@/lib/admin/client';
-import { isAwaitingInitialQueryDataWithPlaceholder } from '@/lib/query/queryUi';
-import StyledSelect from '@/components/ui/styled-select';
-import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ReviewVerificationRequestDialog from "@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog";
+import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
+import { adminApi } from "@/lib/admin/client";
+import { isAwaitingInitialQueryDataWithPlaceholder } from "@/lib/query/queryUi";
+import StyledSelect from "@/components/ui/styled-select";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+import { Pagination } from "@/components/admin/services/Pagination";
 
 export default function AdminVerificationRequestsPage() {
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState<'approve' | 'reject' | 'map'>(
-    'map',
+  const [dialogMode, setDialogMode] = useState<"approve" | "reject" | "map">(
+    "map",
   );
   const [selected, setSelected] = useState<{
     id: string;
@@ -33,9 +32,9 @@ export default function AdminVerificationRequestsPage() {
     doctorProfile: Record<string, unknown> | null;
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<
-    'all' | 'pending' | 'approved' | 'rejected'
-  >('all');
-  const [doctorIdFilter, setDoctorIdFilter] = useState('');
+    "all" | "pending" | "approved" | "rejected"
+  >("all");
+  const [doctorIdFilter, setDoctorIdFilter] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -43,13 +42,13 @@ export default function AdminVerificationRequestsPage() {
     useAdminDoctors({
       page: 1,
       limit: 200,
-      status: 'approved',
+      status: "approved",
     });
 
   const verificationQuery = useQuery({
     queryKey: [
-      'admin',
-      'verification-requests',
+      "admin",
+      "verification-requests",
       statusFilter,
       doctorIdFilter,
       page,
@@ -57,7 +56,7 @@ export default function AdminVerificationRequestsPage() {
     ],
     queryFn: () =>
       adminApi.verificationRequests.list({
-        ...(statusFilter === 'all' ? {} : { status: statusFilter }),
+        ...(statusFilter === "all" ? {} : { status: statusFilter }),
         ...(doctorIdFilter ? { doctorId: doctorIdFilter } : {}),
         page,
         limit,
@@ -73,53 +72,56 @@ export default function AdminVerificationRequestsPage() {
   );
 
   function formatRequestedAt(value?: string) {
-    if (!value) return '—';
+    if (!value) return "—";
     const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return '—';
+    if (Number.isNaN(d.getTime())) return "—";
     const now = new Date();
     const sameDay =
       d.getFullYear() === now.getFullYear() &&
       d.getMonth() === now.getMonth() &&
       d.getDate() === now.getDate();
-    const time = d.toLocaleTimeString('ar-SY', {
-      hour: '2-digit',
-      minute: '2-digit',
+    const time = d.toLocaleTimeString("ar-SY", {
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: true,
     });
-    return sameDay ? `اليوم ${time}` : d.toLocaleDateString('ar-SY');
+    return sameDay ? `اليوم ${time}` : d.toLocaleDateString("ar-SY");
   }
 
   const locationRequests = useMemo(() => {
     return (verificationQuery.data?.requests ?? []).map((request) => {
       const coords = request.doctor?.clinicLocation?.coordinates ?? [];
-      const lng = typeof coords[0] === 'number' ? coords[0].toFixed(4) : '—';
-      const lat = typeof coords[1] === 'number' ? coords[1].toFixed(4) : '—';
+      const lng = typeof coords[0] === "number" ? coords[0].toFixed(4) : "—";
+      const lat = typeof coords[1] === "number" ? coords[1].toFixed(4) : "—";
       const doctorName =
         request.doctor?.userId?.fullName ||
         request.requestedBy?.fullName ||
-        '—';
+        "—";
       const addressParts = [
         request.doctor?.clinicAddress,
         request.doctor?.locationCity,
         request.doctor?.locationCountry,
       ].filter(Boolean);
-      const address = addressParts.length > 0 ? addressParts.join('، ') : '—';
+      const address = addressParts.length > 0 ? addressParts.join("، ") : "—";
 
       return {
         id: request._id,
         doctor: doctorName,
-        specialty: request.doctor?.specialization || '—',
+        specialty: request.doctor?.specialization || "—",
         address,
         requestedAt: formatRequestedAt(request.createdAt),
         status:
-          request.status === 'pending'
-            ? 'معلق'
-            : request.status === 'approved'
-              ? 'مقبول'
-              : 'مرفوض',
+          request.status === "pending"
+            ? "معلق"
+            : request.status === "approved"
+              ? "مقبول"
+              : "مرفوض",
         lat,
         lng,
-        doctorProfile: (request.doctor ?? null) as Record<string, unknown> | null,
+        doctorProfile: (request.doctor ?? null) as Record<
+          string,
+          unknown
+        > | null,
       };
     });
   }, [verificationQuery.data?.requests]);
@@ -137,68 +139,65 @@ export default function AdminVerificationRequestsPage() {
         <title>طلبات التحقق • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
+      <div dir="rtl" lang="ar">
         <AdminDashboardOverview
-          variant='admin'
-          surface='mint'
-          title='طلبات التحقق'
-          subtitle='مراجعة طلبات التحقق من موقع العيادة وتخصص الأطباء'
-          headerIcon={<Stethoscope className='h-8 w-8 text-white' />}
+          variant="admin"
+          surface="mint"
+          title="طلبات التحقق"
+          subtitle="مراجعة طلبات التحقق من موقع العيادة وتخصص الأطباء"
+          headerIcon={<Stethoscope className="h-8 w-8 text-white" />}
           kpis={[
             {
-              key: 'pending',
-              icon: <AlertCircle className='h-5 w-5 shrink-0' />,
-              value: verificationAwaiting ? '—' : total,
-              label: 'طلبات في القائمة',
+              key: "pending",
+              icon: <AlertCircle className="h-5 w-5 shrink-0" />,
+              value: verificationAwaiting ? "—" : total,
+              label: "طلبات في القائمة",
             },
             {
-              key: 'page',
-              icon: <Clock className='h-5 w-5 shrink-0' />,
-              value: verificationAwaiting ? '—' : locationRequests.length,
-              label: 'معروضة الآن',
+              key: "page",
+              icon: <Clock className="h-5 w-5 shrink-0" />,
+              value: verificationAwaiting ? "—" : locationRequests.length,
+              label: "معروضة الآن",
             },
             {
-              key: 'pages',
-              icon: <Filter className='h-5 w-5 shrink-0' />,
-              value: verificationAwaiting ? '—' : totalPages,
-              label: 'عدد الصفحات',
+              key: "pages",
+              icon: <Filter className="h-5 w-5 shrink-0" />,
+              value: verificationAwaiting ? "—" : totalPages,
+              label: "عدد الصفحات",
             },
           ]}
         />
 
-        <section className='mt-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]'>
-          <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-            <div className='inline-flex items-center gap-2 text-[#475467]'>
-              <Filter className='h-4 w-4' />
-              <span className='font-cairo text-[12px] font-extrabold'>
+        <section className="mt-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="inline-flex items-center gap-2 text-[#475467]">
+              <Filter className="h-4 w-4" />
+              <span className="font-cairo text-[12px] font-extrabold">
                 تصفية الطلبات
               </span>
             </div>
-            <div className='flex flex-wrap items-center justify-end gap-2'>
+            <div className="flex flex-wrap items-center justify-end gap-2">
               {(
                 [
-                  { id: 'all', label: 'الكل' },
-                  { id: 'pending', label: 'معلق' },
-                  { id: 'approved', label: 'مقبول' },
-                  { id: 'rejected', label: 'مرفوض' },
+                  { id: "all", label: "الكل" },
+                  { id: "pending", label: "معلق" },
+                  { id: "approved", label: "مقبول" },
+                  { id: "rejected", label: "مرفوض" },
                 ] as const
               ).map((option) => {
                 const active = statusFilter === option.id;
                 return (
                   <button
                     key={option.id}
-                    type='button'
+                    type="button"
                     onClick={() => {
                       setStatusFilter(option.id);
                       setPage(1);
                     }}
                     className={
                       active
-                        ? 'inline-flex h-[32px] items-center rounded-[8px] border border-primary bg-[#E6FFFB] px-3 font-cairo text-[12px] font-extrabold text-primary'
-                        : 'inline-flex h-[32px] items-center rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#667085] hover:bg-[#F9FAFB]'
+                        ? "inline-flex h-[32px] items-center rounded-[8px] border border-primary bg-[#E6FFFB] px-3 font-cairo text-[12px] font-extrabold text-primary"
+                        : "inline-flex h-[32px] items-center rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#667085] hover:bg-[#F9FAFB]"
                     }
                   >
                     {option.label}
@@ -206,30 +205,30 @@ export default function AdminVerificationRequestsPage() {
                 );
               })}
               <StyledSelect
-                id='admin-verification-requests-doctor-filter'
-                className='min-w-[15rem]'
-                size='xs'
-                tone='muted'
+                id="admin-verification-requests-doctor-filter"
+                className="min-w-[15rem]"
+                size="xs"
+                tone="muted"
                 value={doctorIdFilter}
                 disabled={doctorsAwaiting}
                 onChange={(value) => {
                   setDoctorIdFilter(value);
                   setPage(1);
                 }}
-                placeholder='كل الأطباء'
+                placeholder="كل الأطباء"
                 options={[
-                  { value: '', label: 'كل الأطباء' },
+                  { value: "", label: "كل الأطباء" },
                   ...doctorOptions.map((doctor) => ({
                     value: doctor._id,
-                    label: `${doctor.user?.fullName ?? doctor._id}${doctor.specialization ? ` — ${doctor.specialization}` : ''}`,
+                    label: `${doctor.user?.fullName ?? doctor._id}${doctor.specialization ? ` — ${doctor.specialization}` : ""}`,
                   })),
                 ]}
-                listboxAriaLabel='تصفية حسب الطبيب'
+                listboxAriaLabel="تصفية حسب الطبيب"
               />
               <StyledSelect
-                className='min-w-[4.5rem]'
-                size='xs'
-                tone='muted'
+                className="min-w-[4.5rem]"
+                size="xs"
+                tone="muted"
                 value={String(limit)}
                 onChange={(v) => {
                   setLimit(Number(v));
@@ -239,79 +238,80 @@ export default function AdminVerificationRequestsPage() {
                   value: String(v),
                   label: `${v} / صفحة`,
                 }))}
-                listboxAriaLabel='عدد العناصر في الصفحة'
+                listboxAriaLabel="عدد العناصر في الصفحة"
               />
             </div>
           </div>
         </section>
 
-
-        <section className='mt-6'>
+        <section className="mt-6">
           {verificationAwaiting ? (
-            <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
+            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
               جارِ تحميل طلبات التحقق...
             </div>
           ) : verificationQuery.error ? (
-            <div className='rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>
+            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
               تعذّر تحميل طلبات التحقق من الخادم.
             </div>
           ) : locationRequests.length === 0 ? (
-            <div className='rounded-[12px] border border-[#D1E9FF] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
+            <div className="rounded-[12px] border border-[#D1E9FF] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
               لا توجد طلبات تحقق معلّقة حاليًا.
             </div>
           ) : (
-            <div className='space-y-3'>
+            <div className="space-y-3">
               {locationRequests.map((r) => (
                 <article
                   key={r.id}
-                  className='min-h-[122px] flex justify-between  overflow-hidden rounded-[8px] border border-[#B9D8D6] bg-[#F8FAFA]'
+                  className="min-h-[122px] flex justify-between  overflow-hidden rounded-[8px] border border-[#B9D8D6] bg-[#F8FAFA]"
                 >
-                  <div className='px-4 py-3 flex items-center justify-between flex-1'>
-                    <div className='flex items-start justify-start gap-3'>
+                  <div className="px-4 py-3 flex items-center justify-between flex-1">
+                    <div className="flex items-start justify-start gap-3">
                       <button
-                        type='button'
+                        type="button"
                         onClick={() => {
                           setSelected(r);
-                          setDialogMode('map');
+                          setDialogMode("map");
                           setDialogOpen(true);
                         }}
-                        className='flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white'
-                        aria-label='عرض الخريطة'
+                        className="flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white"
+                        aria-label="عرض الخريطة"
                       >
-                        <Stethoscope className='h-6 w-6' />
+                        <Stethoscope className="h-6 w-6" />
                       </button>
-                      <div className='text-right'>
-                        <div className='font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]'>
+                      <div className="text-right">
+                        <div className="font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]">
                           {r.doctor}
                         </div>
-                        <div className='mt-1 font-cairo text-[12px] font-bold leading-[22px] text-[#1F2937]'>
+                        <div className="mt-1 font-cairo text-[12px] font-bold leading-[22px] text-[#1F2937]">
                           {r.specialty}
                         </div>
-                        <div className='mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#4B5563]'>
+                        <div className="mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#4B5563]">
                           {r.address}
                         </div>
                       </div>
                     </div>
 
-                    <div className='mt-2 flex flex-col items-end justify-between h-full'>
-                      <div className='inline-flex h-[22px] items-center gap-1 rounded-full bg-[#129692] px-2.5 font-cairo text-[11px] font-bold text-white'>
-                        <Clock className='h-3 w-3' />
+                    <div className="mt-2 flex flex-col items-end justify-between h-full">
+                      <div className="inline-flex h-[22px] items-center gap-1 rounded-full bg-[#129692] px-2.5 font-cairo text-[11px] font-bold text-white">
+                        <Clock className="h-3 w-3" />
                         {r.status}
                       </div>
-                      <div className='font-cairo text-[12px] font-semibold leading-[20px] text-[#A0A7B0]'>
+                      <div className="font-cairo text-[12px] font-semibold leading-[20px] text-[#A0A7B0]">
                         {r.requestedAt}
                       </div>
                     </div>
                   </div>
                   <button
-                    type='button'
-                    aria-label='فتح صفحة تفاصيل طلب التحقق'
+                    type="button"
+                    aria-label="فتح صفحة تفاصيل طلب التحقق"
                     onClick={() => {
-                      navigate(`/admin/verification-requests/${encodeURIComponent(r.id)}`);
+                      navigate(
+                        `/admin/verification-requests/${encodeURIComponent(r.id)}`,
+                      );
                     }}
-                    className='flex w-[58px] self-stretch items-center justify-center bg-[#129692] text-white transition hover:bg-[#0F8885]'
+                    className="flex w-[58px] self-stretch items-center justify-center bg-[#129692] text-white transition hover:bg-[#0F8885]"
                   >
-                    <ChevronLeft className='h-6 w-6' />
+                    <ChevronLeft className="h-6 w-6" />
                   </button>
                 </article>
               ))}
@@ -320,39 +320,20 @@ export default function AdminVerificationRequestsPage() {
         </section>
 
         {!verificationAwaiting && total > 0 ? (
-          <section className='mt-4'>
-            <div className='flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between'>
-              <div className='text-right font-cairo text-[12px] font-semibold text-[#667085]'>
-                صفحة {currentPage} من {totalPages} • إجمالي {total} طلب
+          <section className="mt-4">
+            <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
+              <div className="text-right font-cairo text-[12px] font-semibold text-[#667085]">
+                إجمالي {total} طلب
               </div>
-              <div className='flex items-center justify-end gap-2'>
-                <button
-                  type='button'
-                  onClick={() => {
-                    if (canPrev) setPage((p) => p - 1);
-                  }}
-                  disabled={!canPrev}
-                  className='inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40'
-                >
-                  <ChevronsRight className='h-4 w-4' />
-                  السابق
-                </button>
-                <button
-                  type='button'
-                  onClick={() => {
-                    if (canNext) setPage((p) => p + 1);
-                  }}
-                  disabled={!canNext}
-                  className='inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40'
-                >
-                  التالي
-                  <ChevronsLeft className='h-4 w-4' />
-                </button>
-              </div>
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPage={setPage}
+              />
             </div>
           </section>
         ) : null}
-        
+
         <ReviewVerificationRequestDialog
           open={dialogOpen}
           onOpenChange={(next) => {
@@ -363,7 +344,7 @@ export default function AdminVerificationRequestsPage() {
             await verificationQuery.refetch();
           }}
           requestId={selected?.id ?? null}
-          doctorName={selected?.doctor ?? ''}
+          doctorName={selected?.doctor ?? ""}
           doctorProfile={selected?.doctorProfile}
           lat={selected?.lat}
           lng={selected?.lng}

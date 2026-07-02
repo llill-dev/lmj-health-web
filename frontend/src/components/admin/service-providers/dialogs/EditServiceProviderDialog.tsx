@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import type { ServiceProvider } from "@/lib/admin/types";
 import { resolveLabel } from "@/lib/admin/types";
+import { adminApi } from "@/lib/admin/client";
 
 const STATUS_OPTIONS = [
   { value: "draft", label: "مسودة" },
@@ -101,15 +102,14 @@ export default function EditServiceProviderDialog({
 
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.serviceProviders.update(provider._id, {
-      //   name: formData.name,
-      //   city: formData.city,
-      //   country: formData.country,
-      //   data: formData.data || undefined,
-      //   aliases: formData.aliases,
-      //   status: formData.status,
-      // });
+      await adminApi.serviceProviders.update(provider._id, {
+        name: formData.name,
+        city: formData.city,
+        country: formData.country,
+        data: formData.data ? JSON.parse(formData.data) : undefined,
+        aliases: formData.aliases,
+        status: formData.status,
+      });
 
       toast("تم تحديث بيانات مزود الخدمة بنجاح", {
         title: "تم التحديث",

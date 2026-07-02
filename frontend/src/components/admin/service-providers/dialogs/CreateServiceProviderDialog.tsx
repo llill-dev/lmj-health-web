@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { resolveLabel } from "@/lib/admin/types";
+import { adminApi } from "@/lib/admin/client";
 
 const STATUS_OPTIONS = [
   { value: "draft", label: "مسودة" },
@@ -99,16 +100,15 @@ export default function CreateServiceProviderDialog({
 
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.serviceProviders.create({
-      //   serviceType: formData.serviceType,
-      //   name: formData.name,
-      //   city: formData.city,
-      //   country: formData.country,
-      //   data: formData.data || undefined,
-      //   aliases: formData.aliases,
-      //   status: formData.status,
-      // });
+      await adminApi.serviceProviders.create({
+        serviceType: formData.serviceType,
+        name: formData.name,
+        city: formData.city,
+        country: formData.country,
+        data: formData.data ? JSON.parse(formData.data) : undefined,
+        aliases: formData.aliases,
+        status: formData.status,
+      });
 
       toast("تم إنشاء مزود الخدمة بنجاح", {
         title: "تم الإنشاء",

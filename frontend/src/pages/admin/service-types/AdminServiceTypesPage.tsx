@@ -16,6 +16,7 @@ import {
 } from '@/components/admin/service-types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Pagination } from '@/components/admin/services/Pagination';
 
 type ServiceTypeStatusFilter = 'all' | 'active' | 'inactive';
 
@@ -307,44 +308,8 @@ export default function AdminServiceTypesPage() {
                 {currentPage.toLocaleString('ar-SA')} / {totalPages.toLocaleString('ar-SA')}
               </div>
 
-              <div className='flex flex-wrap items-center justify-end gap-3'>
-                <select
-                  value={String(pageSize)}
-                  onChange={(event) => {
-                    setPageSize(Number(event.target.value) || 10);
-                    setPage(1);
-                  }}
-                  className='h-[36px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827]'
-                >
-                  {[10, 20, 50].map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
+                <Pagination page={currentPage} totalPages={totalPages} onPage={setPage} />
 
-                <button
-                  type='button'
-                  onClick={() => {
-                    if (currentPage > 1) setPage((prev) => prev - 1);
-                  }}
-                  disabled={currentPage <= 1}
-                  className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60'
-                >
-                  السابق
-                </button>
-
-                <button
-                  type='button'
-                  onClick={() => {
-                    if (currentPage < totalPages) setPage((prev) => prev + 1);
-                  }}
-                  disabled={currentPage >= totalPages}
-                  className='inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60'
-                >
-                  التالي
-                </button>
-              </div>
             </div>
           </section>
         )}

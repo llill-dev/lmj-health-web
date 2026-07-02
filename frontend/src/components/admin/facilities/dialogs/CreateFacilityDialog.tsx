@@ -1,30 +1,40 @@
-'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { X, Building2, MapPin, Phone, FileText, User, Plus, Tag } from 'lucide-react';
-import { useState } from 'react';
-import { useToast } from '@/components/ui/ToastProvider';
-import StyledSelect from '@/components/ui/styled-select';
+"use client";
+import * as Dialog from "@radix-ui/react-dialog";
+import { motion } from "framer-motion";
+import {
+  X,
+  Building2,
+  MapPin,
+  Phone,
+  FileText,
+  User,
+  Plus,
+  Tag,
+} from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
+import StyledSelect from "@/components/ui/styled-select";
+import { adminApi } from "@/lib/admin/client";
 
 const FACILITY_TYPE_OPTIONS = [
-  { value: 'hospital', label: 'مستشفى' },
-  { value: 'clinic', label: 'عيادة' },
-  { value: 'laboratory', label: 'مختبر' },
-  { value: 'radiology', label: 'أشعة' },
-  { value: 'pharmacy', label: 'صيدلية' },
-  { value: 'other', label: 'أخرى' },
+  { value: "hospital", label: "مستشفى" },
+  { value: "clinic", label: "عيادة" },
+  { value: "laboratory", label: "مختبر" },
+  { value: "radiology", label: "أشعة" },
+  { value: "pharmacy", label: "صيدلية" },
+  { value: "other", label: "أخرى" },
 ];
 
 const KIND_OPTIONS = [
-  { value: 'public', label: 'حكومي' },
-  { value: 'private', label: 'خاص' },
-  { value: 'non_profit', label: 'غير ربحي' },
+  { value: "public", label: "حكومي" },
+  { value: "private", label: "خاص" },
+  { value: "non_profit", label: "غير ربحي" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'ACTIVE', label: 'نشط' },
-  { value: 'INACTIVE', label: 'معطّل' },
-  { value: 'PENDING', label: 'قيد المراجعة' },
+  { value: "ACTIVE", label: "نشط" },
+  { value: "INACTIVE", label: "معطّل" },
+  { value: "PENDING", label: "قيد المراجعة" },
 ];
 
 interface CreateFacilityDialogProps {
@@ -44,21 +54,21 @@ export default function CreateFacilityDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
-    city: '',
-    facilityType: '',
-    kind: '',
-    country: '',
-    address: '',
-    phone: '',
-    description: '',
-    ownerDoctorId: '',
-    status: 'ACTIVE',
+    name: "",
+    city: "",
+    facilityType: "",
+    kind: "",
+    country: "",
+    address: "",
+    phone: "",
+    description: "",
+    ownerDoctorId: "",
+    status: "ACTIVE",
     attributes: [] as string[],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [newAttribute, setNewAttribute] = useState('');
+  const [newAttribute, setNewAttribute] = useState("");
 
   const doctorOptions = doctors.map((doctor) => ({
     value: doctor._id,
@@ -69,33 +79,33 @@ export default function CreateFacilityDialog({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'اسم المنشأة مطلوب';
+      newErrors.name = "اسم المنشأة مطلوب";
     }
 
     if (!formData.city.trim()) {
-      newErrors.city = 'المدينة مطلوبة';
+      newErrors.city = "المدينة مطلوبة";
     }
 
     if (!formData.facilityType) {
-      newErrors.facilityType = 'يجب اختيار نوع المنشأة';
+      newErrors.facilityType = "يجب اختيار نوع المنشأة";
     }
 
     if (!formData.kind) {
-      newErrors.kind = 'يجب اختيار نوع الملكية';
+      newErrors.kind = "يجب اختيار نوع الملكية";
     }
 
     if (!formData.country.trim()) {
-      newErrors.country = 'البلد مطلوب';
+      newErrors.country = "البلد مطلوب";
     }
 
     if (!formData.address.trim()) {
-      newErrors.address = 'العنوان مطلوب';
+      newErrors.address = "العنوان مطلوب";
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'رقم الهاتف مطلوب';
-    } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'رقم الهاتف غير صالح';
+      newErrors.phone = "رقم الهاتف مطلوب";
+    } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s/g, ""))) {
+      newErrors.phone = "رقم الهاتف غير صالح";
     }
 
     setErrors(newErrors);
@@ -109,7 +119,7 @@ export default function CreateFacilityDialog({
         ...prev,
         attributes: [...prev.attributes, trimmed],
       }));
-      setNewAttribute('');
+      setNewAttribute("");
     }
   };
 
@@ -127,48 +137,47 @@ export default function CreateFacilityDialog({
 
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.facilities.create({
-      //   name: formData.name,
-      //   city: formData.city,
-      //   facilityType: formData.facilityType,
-      //   kind: formData.kind,
-      //   country: formData.country,
-      //   address: formData.address,
-      //   phone: formData.phone,
-      //   description: formData.description || undefined,
-      //   ownerDoctorId: formData.ownerDoctorId || undefined,
-      //   status: formData.status,
-      //   attributes: formData.attributes,
-      // });
+      await adminApi.facilities.create({
+        name: formData.name,
+        city: formData.city,
+        facilityType: formData.facilityType,
+        kind: formData.kind,
+        country: formData.country,
+        address: formData.address,
+        phone: formData.phone,
+        description: formData.description || undefined,
+        ownerDoctorId: formData.ownerDoctorId || undefined,
+        status: formData.status,
+        attributes: formData.attributes,
+      });
 
-      toast('تم إنشاء المنشأة الطبية بنجاح', {
-        title: 'تم الإنشاء',
-        variant: 'success',
+      toast("تم إنشاء المنشأة الطبية بنجاح", {
+        title: "تم الإنشاء",
+        variant: "success",
         durationMs: 4200,
       });
 
       setFormData({
-        name: '',
-        city: '',
-        facilityType: '',
-        kind: '',
-        country: '',
-        address: '',
-        phone: '',
-        description: '',
-        ownerDoctorId: '',
-        status: 'ACTIVE',
+        name: "",
+        city: "",
+        facilityType: "",
+        kind: "",
+        country: "",
+        address: "",
+        phone: "",
+        description: "",
+        ownerDoctorId: "",
+        status: "ACTIVE",
         attributes: [],
       });
       setErrors({});
-      setNewAttribute('');
+      setNewAttribute("");
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast('حدث خطأ أثناء إنشاء المنشأة. يرجى المحاولة مرة أخرى.', {
-        title: 'فشلت العملية',
-        variant: 'error',
+      toast("حدث خطأ أثناء إنشاء المنشأة. يرجى المحاولة مرة أخرى.", {
+        title: "فشلت العملية",
+        variant: "error",
         durationMs: 4200,
       });
     } finally {
@@ -207,7 +216,10 @@ export default function CreateFacilityDialog({
                 </Dialog.Close>
               </div>
 
-              <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              <form
+                onSubmit={handleSubmit}
+                className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Name */}
                   <div>
@@ -218,12 +230,18 @@ export default function CreateFacilityDialog({
                       type="text"
                       value={formData.name}
                       onChange={(e) => {
-                        setFormData((prev) => ({ ...prev, name: e.target.value }));
-                        if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }));
+                        if (errors.name)
+                          setErrors((prev) => ({ ...prev, name: "" }));
                       }}
                       placeholder="أدخل اسم المنشأة"
                       className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.name ? 'border-[#FECACA] bg-[#FEF2F2]' : 'border-[#E5E7EB]'
+                        errors.name
+                          ? "border-[#FECACA] bg-[#FEF2F2]"
+                          : "border-[#E5E7EB]"
                       }`}
                     />
                     {errors.name && (
@@ -246,12 +264,18 @@ export default function CreateFacilityDialog({
                         type="text"
                         value={formData.city}
                         onChange={(e) => {
-                          setFormData((prev) => ({ ...prev, city: e.target.value }));
-                          if (errors.city) setErrors((prev) => ({ ...prev, city: '' }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            city: e.target.value,
+                          }));
+                          if (errors.city)
+                            setErrors((prev) => ({ ...prev, city: "" }));
                         }}
                         placeholder="أدخل المدينة"
                         className={`w-full h-[44px] rounded-[10px] border bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                          errors.city ? 'border-[#FECACA] bg-[#FEF2F2]' : 'border-[#E5E7EB]'
+                          errors.city
+                            ? "border-[#FECACA] bg-[#FEF2F2]"
+                            : "border-[#E5E7EB]"
                         }`}
                       />
                     </div>
@@ -270,8 +294,12 @@ export default function CreateFacilityDialog({
                     <StyledSelect
                       value={formData.facilityType}
                       onChange={(value) => {
-                        setFormData((prev) => ({ ...prev, facilityType: value }));
-                        if (errors.facilityType) setErrors((prev) => ({ ...prev, facilityType: '' }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          facilityType: value,
+                        }));
+                        if (errors.facilityType)
+                          setErrors((prev) => ({ ...prev, facilityType: "" }));
                       }}
                       options={FACILITY_TYPE_OPTIONS}
                       placeholder="اختر نوع المنشأة"
@@ -294,7 +322,8 @@ export default function CreateFacilityDialog({
                       value={formData.kind}
                       onChange={(value) => {
                         setFormData((prev) => ({ ...prev, kind: value }));
-                        if (errors.kind) setErrors((prev) => ({ ...prev, kind: '' }));
+                        if (errors.kind)
+                          setErrors((prev) => ({ ...prev, kind: "" }));
                       }}
                       options={KIND_OPTIONS}
                       placeholder="اختر نوع الملكية"
@@ -317,12 +346,18 @@ export default function CreateFacilityDialog({
                       type="text"
                       value={formData.country}
                       onChange={(e) => {
-                        setFormData((prev) => ({ ...prev, country: e.target.value }));
-                        if (errors.country) setErrors((prev) => ({ ...prev, country: '' }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          country: e.target.value,
+                        }));
+                        if (errors.country)
+                          setErrors((prev) => ({ ...prev, country: "" }));
                       }}
                       placeholder="أدخل البلد"
                       className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.country ? 'border-[#FECACA] bg-[#FEF2F2]' : 'border-[#E5E7EB]'
+                        errors.country
+                          ? "border-[#FECACA] bg-[#FEF2F2]"
+                          : "border-[#E5E7EB]"
                       }`}
                     />
                     {errors.country && (
@@ -345,12 +380,18 @@ export default function CreateFacilityDialog({
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => {
-                          setFormData((prev) => ({ ...prev, phone: e.target.value }));
-                          if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            phone: e.target.value,
+                          }));
+                          if (errors.phone)
+                            setErrors((prev) => ({ ...prev, phone: "" }));
                         }}
                         placeholder="+963944000000"
                         className={`w-full h-[44px] rounded-[10px] border bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                          errors.phone ? 'border-[#FECACA] bg-[#FEF2F2]' : 'border-[#E5E7EB]'
+                          errors.phone
+                            ? "border-[#FECACA] bg-[#FEF2F2]"
+                            : "border-[#E5E7EB]"
                         }`}
                       />
                     </div>
@@ -371,12 +412,18 @@ export default function CreateFacilityDialog({
                     type="text"
                     value={formData.address}
                     onChange={(e) => {
-                      setFormData((prev) => ({ ...prev, address: e.target.value }));
-                      if (errors.address) setErrors((prev) => ({ ...prev, address: '' }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        address: e.target.value,
+                      }));
+                      if (errors.address)
+                        setErrors((prev) => ({ ...prev, address: "" }));
                     }}
                     placeholder="أدخل العنوان الكامل"
                     className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                      errors.address ? 'border-[#FECACA] bg-[#FEF2F2]' : 'border-[#E5E7EB]'
+                      errors.address
+                        ? "border-[#FECACA] bg-[#FEF2F2]"
+                        : "border-[#E5E7EB]"
                     }`}
                   />
                   {errors.address && (
@@ -393,7 +440,12 @@ export default function CreateFacilityDialog({
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     placeholder="أدخل وصفاً للمنشأة"
                     rows={3}
                     className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none"
@@ -411,8 +463,16 @@ export default function CreateFacilityDialog({
                     </div>
                     <StyledSelect
                       value={formData.ownerDoctorId}
-                      onChange={(value) => setFormData((prev) => ({ ...prev, ownerDoctorId: value }))}
-                      options={[{ value: '', label: 'بدون طبيب مالك' }, ...doctorOptions]}
+                      onChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          ownerDoctorId: value,
+                        }))
+                      }
+                      options={[
+                        { value: "", label: "بدون طبيب مالك" },
+                        ...doctorOptions,
+                      ]}
                       placeholder="اختر الطبيب المالك"
                       size="sm"
                       tone="muted"
@@ -427,7 +487,9 @@ export default function CreateFacilityDialog({
                   </label>
                   <StyledSelect
                     value={formData.status}
-                    onChange={(value) => setFormData((prev) => ({ ...prev, status: value }))}
+                    onChange={(value) =>
+                      setFormData((prev) => ({ ...prev, status: value }))
+                    }
                     options={STATUS_OPTIONS}
                     placeholder="اختر الحالة"
                     size="sm"
@@ -447,7 +509,7 @@ export default function CreateFacilityDialog({
                       onChange={(e) => setNewAttribute(e.target.value)}
                       placeholder="أضف سمة (مثال: طوارئ، ICU)"
                       onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                           addAttribute();
                         }
@@ -499,7 +561,7 @@ export default function CreateFacilityDialog({
                     disabled={isSubmitting}
                     className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isSubmitting ? 'جارٍ الإنشاء...' : 'إنشاء المنشأة'}
+                    {isSubmitting ? "جارٍ الإنشاء..." : "إنشاء المنشأة"}
                   </button>
                 </div>
               </form>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { CheckCheck, ChevronsLeft, ChevronsRight, Send } from "lucide-react";
+import { CheckCheck, Send } from "lucide-react";
 import AdminNotificationsHeading from "@/components/admin/notifications/AdminNotificationsHeading";
 import AdminNotificationsList from "@/components/admin/notifications/AdminNotificationsList";
 import AdminNotificationsToolbar from "@/components/admin/notifications/AdminNotificationsToolbar";
@@ -10,6 +10,7 @@ import { mapNotificationsToRows } from "@/components/admin/notifications/map-api
 import { useAdminNotificationsPage } from "@/hooks/admin/notifications/useAdminNotifications";
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
 import { useToast } from "@/components/ui/ToastProvider";
+import { Pagination } from "@/components/admin/services/Pagination";
 
 export default function AdminNotificationsPage() {
   const { toast } = useToast();
@@ -147,32 +148,12 @@ export default function AdminNotificationsPage() {
               }}
             />
 
-            {totalPages > 1 && !isAwaitingData ? (
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <button
-                  type="button"
-                  disabled={!canPrev || isAwaitingData}
-                  onClick={() => handlePageChange(Math.max(1, page - 1))}
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <ChevronsRight className="h-4 w-4" aria-hidden />
-                  السابق
-                </button>
-                <span className="font-cairo text-[12px] font-semibold text-[#64748B]">
-                  صفحة {page} من {totalPages} — إجمالي {total}
-                </span>
-                <button
-                  type="button"
-                  disabled={!canNext || isAwaitingData}
-                  onClick={() =>
-                    handlePageChange(Math.min(totalPages, page + 1))
-                  }
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  التالي
-                  <ChevronsLeft className="h-4 w-4" aria-hidden />
-                </button>
-              </div>
+            {!isAwaitingData && totalPages > 1 ? (
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPage={handlePageChange}
+              />
             ) : null}
           </>
         )}

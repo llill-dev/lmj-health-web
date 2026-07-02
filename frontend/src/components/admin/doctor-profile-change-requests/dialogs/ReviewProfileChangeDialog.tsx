@@ -1,14 +1,15 @@
-'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { X, Check, XCircle, FileText, User, AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
-import { useToast } from '@/components/ui/ToastProvider';
-import StyledSelect from '@/components/ui/styled-select';
+"use client";
+import * as Dialog from "@radix-ui/react-dialog";
+import { motion } from "framer-motion";
+import { X, Check, XCircle, FileText, User, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
+import StyledSelect from "@/components/ui/styled-select";
+import { adminApi } from "@/lib/admin/client";
 
 const DECISION_OPTIONS = [
-  { value: 'approved', label: 'موافقة' },
-  { value: 'denied', label: 'رفض' },
+  { value: "approved", label: "موافقة" },
+  { value: "denied", label: "رفض" },
 ];
 
 interface ProfileChangeRequest {
@@ -47,14 +48,14 @@ interface ReviewProfileChangeDialogProps {
 }
 
 const FIELD_LABELS: Record<string, string> = {
-  specialization: 'التخصص',
-  medicalLicenseNumber: 'رقم الترخيص الطبي',
-  education: 'التعليم',
-  clinicAddress: 'عنوان العيادة',
-  bio: 'السيرة الذاتية',
-  consultationFee: 'رسوم الاستشارة',
-  clinicLat: 'خط عرض العيادة',
-  clinicLng: 'خط طول العيادة',
+  specialization: "التخصص",
+  medicalLicenseNumber: "رقم الترخيص الطبي",
+  education: "التعليم",
+  clinicAddress: "عنوان العيادة",
+  bio: "السيرة الذاتية",
+  consultationFee: "رسوم الاستشارة",
+  clinicLat: "خط عرض العيادة",
+  clinicLng: "خط طول العيادة",
 };
 
 export default function ReviewProfileChangeDialog({
@@ -65,8 +66,8 @@ export default function ReviewProfileChangeDialog({
 }: ReviewProfileChangeDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [decision, setDecision] = useState('');
-  const [adminNote, setAdminNote] = useState('');
+  const [decision, setDecision] = useState("");
+  const [adminNote, setAdminNote] = useState("");
 
   if (!request) return null;
 
@@ -74,18 +75,18 @@ export default function ReviewProfileChangeDialog({
     e.preventDefault();
 
     if (!decision) {
-      toast('يجب اختيار القرار (موافقة أو رفض)', {
-        title: 'خطأ في التحقق',
-        variant: 'error',
+      toast("يجب اختيار القرار (موافقة أو رفض)", {
+        title: "خطأ في التحقق",
+        variant: "error",
         durationMs: 4200,
       });
       return;
     }
 
-    if (decision === 'denied' && !adminNote.trim()) {
-      toast('يجب إضافة ملاحظة عند رفض الطلب', {
-        title: 'خطأ في التحقق',
-        variant: 'error',
+    if (decision === "denied" && !adminNote.trim()) {
+      toast("يجب إضافة ملاحظة عند رفض الطلب", {
+        title: "خطأ في التحقق",
+        variant: "error",
         durationMs: 4200,
       });
       return;
@@ -93,27 +94,29 @@ export default function ReviewProfileChangeDialog({
 
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.doctors.reviewProfileChangeRequest(request._id, {
-      //   decision,
-      //   adminNote: adminNote || undefined,
-      // });
+      await adminApi.doctorProfileChangeRequests.review(request._id, {
+        decision: decision as "approved" | "denied",
+        adminNote: adminNote || undefined,
+      });
 
-      const message = decision === 'approved' ? 'تمت الموافقة على طلب تغيير البيانات' : 'تم رفض طلب تغيير البيانات';
+      const message =
+        decision === "approved"
+          ? "تمت الموافقة على طلب تغيير البيانات"
+          : "تم رفض طلب تغيير البيانات";
       toast(message, {
-        title: decision === 'approved' ? 'تمت الموافقة' : 'تم الرفض',
-        variant: 'success',
+        title: decision === "approved" ? "تمت الموافقة" : "تم الرفض",
+        variant: "success",
         durationMs: 4200,
       });
 
-      setDecision('');
-      setAdminNote('');
+      setDecision("");
+      setAdminNote("");
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast('حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.', {
-        title: 'فشلت العملية',
-        variant: 'error',
+      toast("حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.", {
+        title: "فشلت العملية",
+        variant: "error",
         durationMs: 4200,
       });
     } finally {
@@ -122,8 +125,8 @@ export default function ReviewProfileChangeDialog({
   };
 
   const renderValue = (value: any) => {
-    if (value === null || value === undefined) return '—';
-    if (typeof value === 'object') return JSON.stringify(value);
+    if (value === null || value === undefined) return "—";
+    if (typeof value === "object") return JSON.stringify(value);
     return String(value);
   };
 
@@ -158,7 +161,10 @@ export default function ReviewProfileChangeDialog({
                 </Dialog.Close>
               </div>
 
-              <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              <form
+                onSubmit={handleSubmit}
+                className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto"
+              >
                 {/* Doctor Info */}
                 <div className="rounded-[10px] bg-[#F9FAFB] border border-[#E5E7EB] p-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -167,19 +173,20 @@ export default function ReviewProfileChangeDialog({
                     </div>
                     <div>
                       <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
-                        {request.doctor?.userId?.fullName || request.doctor?._id}
+                        {request.doctor?.userId?.fullName ||
+                          request.doctor?._id}
                       </div>
                       <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                        {request.doctor?.specialization || '—'}
+                        {request.doctor?.specialization || "—"}
                       </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div className="font-cairo font-semibold text-[#667085]">
-                      رقم الترخيص: {request.doctor?.medicalLicenseNumber || '—'}
+                      رقم الترخيص: {request.doctor?.medicalLicenseNumber || "—"}
                     </div>
                     <div className="font-cairo font-semibold text-[#667085]">
-                      طلب بواسطة: {request.requestedBy?.fullName || '—'}
+                      طلب بواسطة: {request.requestedBy?.fullName || "—"}
                     </div>
                   </div>
                 </div>
@@ -248,15 +255,15 @@ export default function ReviewProfileChangeDialog({
                 {/* Admin Note */}
                 <div>
                   <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    ملاحظة الإدارة {decision === 'denied' && '*'}
+                    ملاحظة الإدارة {decision === "denied" && "*"}
                   </label>
                   <textarea
                     value={adminNote}
                     onChange={(e) => setAdminNote(e.target.value)}
                     placeholder={
-                      decision === 'denied'
-                        ? 'أدخل سبب الرفض...'
-                        : 'أضف ملاحظة اختيارية...'
+                      decision === "denied"
+                        ? "أدخل سبب الرفض..."
+                        : "أضف ملاحظة اختيارية..."
                     }
                     rows={3}
                     className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none"
@@ -264,11 +271,12 @@ export default function ReviewProfileChangeDialog({
                 </div>
 
                 {/* Warning for approval */}
-                {decision === 'approved' && (
+                {decision === "approved" && (
                   <div className="rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] p-3 flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-[#D97706] shrink-0 mt-0.5" />
                     <div className="font-cairo text-[11px] font-semibold text-[#92400E]">
-                      سيتم تحديث بيانات الطبيب فوراً بعد الموافقة. تأكد من صحة جميع التغييرات.
+                      سيتم تحديث بيانات الطبيب فوراً بعد الموافقة. تأكد من صحة
+                      جميع التغييرات.
                     </div>
                   </div>
                 )}
@@ -289,10 +297,10 @@ export default function ReviewProfileChangeDialog({
                     className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSubmitting
-                      ? 'جارٍ المعالجة...'
-                      : decision === 'approved'
-                      ? 'موافقة وتحديث'
-                      : 'رفض الطلب'}
+                      ? "جارٍ المعالجة..."
+                      : decision === "approved"
+                        ? "موافقة وتحديث"
+                        : "رفض الطلب"}
                   </button>
                 </div>
               </form>

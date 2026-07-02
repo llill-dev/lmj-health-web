@@ -10,8 +10,6 @@ import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   ChevronLeft,
-  ChevronsLeft,
-  ChevronsRight,
   MessageSquare,
   Search,
   SlidersHorizontal,
@@ -35,6 +33,7 @@ import {
   statusLabelAr,
 } from "@/components/admin/complaints/complaintsListUtils";
 import { ComplaintCardSkeleton } from "@/components/admin/skeletons/ComplaintCardSkeleton";
+import { Pagination } from "@/components/admin/services/Pagination";
 
 export default function AdminComplaintsPage() {
   const navigate = useNavigate();
@@ -362,31 +361,7 @@ export default function AdminComplaintsPage() {
               </p>
             ) : null}
 
-            {totalPages > 1 ? (
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-                <button
-                  type="button"
-                  disabled={!canPrev}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:opacity-40"
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                  السابق
-                </button>
-                <span className="font-cairo text-[12px] font-semibold text-[#64748B]">
-                  صفحة {page} / {totalPages} · {totalList} شكوى
-                </span>
-                <button
-                  type="button"
-                  disabled={!canNext}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] disabled:opacity-40"
-                >
-                  التالي
-                  <ChevronsLeft className="h-4 w-4" />
-                </button>
-              </div>
-            ) : null}
+            <Pagination page={page} totalPages={totalPages} onPage={setPage} />
           </>
         )}
       </div>

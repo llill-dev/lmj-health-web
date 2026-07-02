@@ -580,4 +580,102 @@ export const adminApi = {
         locale: "ar",
       }),
   },
+  serviceProviders: {
+    create: (body: {
+      serviceType: string;
+      name: string;
+      city?: string;
+      country?: string;
+      data?: Record<string, unknown>;
+      aliases?: string[];
+      status?: string;
+    }) =>
+      post<ApiSuccessEnvelope & { data?: { id: string } }>(
+        adminEndpoints.serviceProviders.create,
+        body,
+        { locale: "ar" },
+      ),
+    update: (
+      id: string,
+      body: {
+        name?: string;
+        city?: string;
+        country?: string;
+        data?: Record<string, unknown>;
+        aliases?: string[];
+        status?: string;
+      },
+    ) =>
+      patch<ApiSuccessEnvelope>(
+        adminEndpoints.serviceProviders.update(id),
+        body,
+        { locale: "ar" },
+      ),
+    updateStatus: (
+      id: string,
+      body: {
+        status: string;
+      },
+    ) =>
+      patch<ApiSuccessEnvelope>(
+        adminEndpoints.serviceProviders.updateStatus(id),
+        body,
+        { locale: "ar" },
+      ),
+  },
+  facilities: {
+    create: (body: {
+      name: string;
+      city: string;
+      facilityType: string;
+      kind: string;
+      country: string;
+      address: string;
+      phone: string;
+      description?: string;
+      ownerDoctorId?: string;
+      status?: string;
+      attributes?: string[];
+    }) =>
+      post<ApiSuccessEnvelope & { data?: { id: string } }>(
+        adminEndpoints.facilities.create,
+        body,
+        { locale: "ar" },
+      ),
+    update: (
+      id: string,
+      body: {
+        name?: string;
+        city?: string;
+        facilityType?: string;
+        kind?: string;
+        country?: string;
+        address?: string;
+        phone?: string;
+        description?: string;
+        ownerDoctorId?: string;
+        attributes?: string[];
+      },
+    ) =>
+      patch<ApiSuccessEnvelope>(adminEndpoints.facilities.update(id), body, {
+        locale: "ar",
+      }),
+  },
+  doctorProfileChangeRequests: {
+    review: (
+      requestId: string,
+      body: {
+        decision: "approved" | "denied";
+        adminNote?: string;
+      },
+    ) =>
+      patch<
+        ApiSuccessEnvelope & {
+          request?: { status: string };
+          doctor?: Record<string, unknown>;
+        }
+      >(`/api/doctors/profile-change-requests/${requestId}`, body, {
+        locale: "ar",
+      }),
+  },
 };
