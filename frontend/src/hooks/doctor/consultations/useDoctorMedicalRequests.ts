@@ -107,7 +107,7 @@ export function useDoctorMedicalRequests(filters: MedicalRequestsFilters) {
   const listQuery = useQuery({
     queryKey: doctorOrdersQueryKeys.list(listParams),
     queryFn: () => doctorApi.orders.list(listParams),
-    staleTime: 20_000,
+    staleTime: 30_000,
     placeholderData: (previous) => previous,
   });
 
@@ -191,7 +191,7 @@ export function useDoctorMedicalRequestDetails(
     queryKey: doctorOrdersQueryKeys.detail(orderId ?? ''),
     queryFn: () => doctorApi.orders.getById(orderId!),
     enabled: Boolean(enabled && orderId && !orderId.startsWith('demo-')),
-    staleTime: 20_000,
+    staleTime: 30_000,
   });
 
   const vm: MedicalRequestDetailVm | null = useMemo(() => {

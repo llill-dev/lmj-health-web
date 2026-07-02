@@ -43,7 +43,7 @@ export function usePrescriptionPreviewPage(
     queryFn: () =>
       loadEncounterPrescriptionForPreview(doctorId, patientId, encounterId),
     enabled: isEnabled,
-    staleTime: 1000 * 15,
+    staleTime: 1000 * 30,
   });
 
   const publicProfileQuery = useQuery({

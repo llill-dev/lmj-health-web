@@ -114,7 +114,7 @@ export function useEncounterReferralWorkspace(
     queryFn: () =>
       loadEncounterReferralOrderForWorkspace(doctorId, patientId, encounterId),
     enabled: isEnabled && Boolean(encounterQuery.data?.encounter),
-    staleTime: 1000 * 15,
+    staleTime: 1000 * 30,
   });
 
   const [form, setForm] = useState<ReferralFormState>(EMPTY_FORM);

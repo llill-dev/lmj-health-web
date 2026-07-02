@@ -157,7 +157,7 @@ export function useEncounterOrderWorkspace(
     queryKey: orderKey,
     queryFn: () => LOADERS[category](doctorId, patientId, encounterId),
     enabled: isEnabled && Boolean(encounterQuery.data?.encounter),
-    staleTime: 1000 * 15,
+    staleTime: 1000 * 30,
   });
 
   const catalogQuery = useQuery({

@@ -49,6 +49,7 @@ export function useEncounterOrderPreviewPage(
     queryFn: () =>
       doctorApi.patients.getEncounter(doctorId, patientId, encounterId),
     enabled: isEnabled,
+    staleTime: 1000 * 30,
   });
 
   const orderQuery = useQuery({
@@ -61,12 +62,14 @@ export function useEncounterOrderPreviewPage(
         category,
       ),
     enabled: isEnabled,
+    staleTime: 1000 * 30,
   });
 
   const publicProfileQuery = useQuery({
     queryKey: doctorPatientsQueryKeys.publicProfile(patientId),
     queryFn: () => doctorApi.patients.getPublicProfile(patientId),
     enabled: isEnabled,
+    staleTime: 1000 * 30,
   });
 
   const previewVm = useMemo(() => {

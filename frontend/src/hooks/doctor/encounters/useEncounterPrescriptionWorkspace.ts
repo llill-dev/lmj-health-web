@@ -48,7 +48,7 @@ export function useEncounterPrescriptionWorkspace(
     queryFn: () =>
       loadEncounterPrescriptionForWorkspace(doctorId, patientId, encounterId),
     enabled: isEnabled && Boolean(encounterQuery.data?.encounter),
-    staleTime: 1000 * 15,
+    staleTime: 1000 * 30,
   });
 
   const [generalInstructions, setGeneralInstructions] = useState('');
