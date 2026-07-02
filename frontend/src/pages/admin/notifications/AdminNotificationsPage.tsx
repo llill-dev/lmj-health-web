@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { CheckCheck, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { CheckCheck, ChevronsLeft, ChevronsRight, Send } from "lucide-react";
 import AdminNotificationsHeading from "@/components/admin/notifications/AdminNotificationsHeading";
 import AdminNotificationsList from "@/components/admin/notifications/AdminNotificationsList";
 import AdminNotificationsToolbar from "@/components/admin/notifications/AdminNotificationsToolbar";
+import BroadcastNotificationDialog from "@/components/admin/notifications/dialogs/BroadcastNotificationDialog";
 import type { NotificationFilterTab } from "@/components/admin/notifications/AdminNotificationsToolbar";
 import { mapNotificationsToRows } from "@/components/admin/notifications/map-api-to-rows";
 import { useAdminNotificationsPage } from "@/hooks/admin/notifications/useAdminNotifications";
@@ -15,6 +16,7 @@ export default function AdminNotificationsPage() {
   const [filter, setFilter] = useState<NotificationFilterTab>("all");
   const [page, setPage] = useState(1);
   const [markAllOpen, setMarkAllOpen] = useState(false);
+  const [broadcastOpen, setBroadcastOpen] = useState(false);
   const filterUnread = filter === "unread";
 
   useEffect(() => {
@@ -84,7 +86,10 @@ export default function AdminNotificationsPage() {
       </Helmet>
 
       <div dir="rtl" lang="ar" className="space-y-6">
-        <AdminNotificationsHeading newCount={unreadTotal} />
+        <AdminNotificationsHeading
+          newCount={unreadTotal}
+          onBroadcastClick={() => setBroadcastOpen(true)}
+        />
 
         <div className="rounded-[14px] border border-[#EAECF0] bg-white p-5 shadow-[0_10px_28px_rgba(0,0,0,0.05)] md:p-6">
           <AdminNotificationsToolbar
@@ -172,6 +177,16 @@ export default function AdminNotificationsPage() {
           </>
         )}
       </div>
+
+      {/* Broadcast Notification Dialog */}
+      <BroadcastNotificationDialog
+        open={broadcastOpen}
+        onOpenChange={setBroadcastOpen}
+        onSuccess={() => {
+          // Optionally refetch notifications after broadcast
+          listQuery.refetch();
+        }}
+      />
     </>
   );
 }
