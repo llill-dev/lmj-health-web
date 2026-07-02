@@ -6,8 +6,8 @@ import {
   Eye,
   Mail,
   Phone,
-  UserX,
   UserPlus,
+  UserX,
 } from "lucide-react";
 import type {
   AdminDoctorApprovalStatus,
@@ -41,6 +41,7 @@ function StatusBadge({
       </span>
     );
   }
+
   if (status === "approved") {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#28A745] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
@@ -49,6 +50,7 @@ function StatusBadge({
       </span>
     );
   }
+
   if (status === "rejected") {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#DC3545] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
@@ -57,6 +59,7 @@ function StatusBadge({
       </span>
     );
   }
+
   return (
     <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#343A40] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
       <Clock className="h-3.5 w-3.5 shrink-0" />
@@ -94,6 +97,8 @@ export default function DoctorListCard({
   const userId = resolveAdminDoctorUserId(d);
   const phoneDisplay = formatPhoneForDisplay(d.user?.phone);
   const offboarded = isAdminDoctorOffboarded(d);
+  const canActivate = offboarded;
+  const canSuspend = !offboarded;
 
   return (
     <div className="rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
@@ -145,7 +150,7 @@ export default function DoctorListCard({
         <div className="flex w-full min-w-0 flex-col gap-2 text-right lg:min-w-0">
           <div className="flex items-start gap-2">
             <Award
-              className="h-4 w-4 shrink-0 mt-0.5"
+              className="mt-0.5 h-4 w-4 shrink-0"
               style={{ color: TEAL }}
               aria-hidden
             />
@@ -180,7 +185,7 @@ export default function DoctorListCard({
             </span>
             {isDuplicatePhone ? (
               <span className="rounded-[6px] bg-[#FEF3C7] px-2 py-0.5 font-cairo text-[10px] font-extrabold text-[#92400E]">
-                رقم مكرّر
+                رقم مكرر
               </span>
             ) : null}
           </div>
@@ -199,33 +204,51 @@ export default function DoctorListCard({
             <span>التفاصيل</span>
             <Eye className="h-4 w-4 shrink-0" />
           </button>
-          {onOffboard && !offboarded ? (
+          {onOffboard ? (
             <button
               type="button"
-              onClick={() =>
-                onOffboard({
-                  doctorId: d._id,
-                  userId,
-                  label: d.user?.fullName?.trim() || phoneDisplay,
-                })
+              onClick={
+                canSuspend
+                  ? () =>
+                      onOffboard({
+                        doctorId: d._id,
+                        userId,
+                        label: d.user?.fullName?.trim() || phoneDisplay,
+                      })
+                  : undefined
               }
-              className="inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-4 font-cairo text-[12px] font-extrabold text-[#B91C1C] transition hover:bg-[#FEE2E2] lg:w-auto lg:min-w-[8.5rem]"
+              disabled={!canSuspend}
+              aria-disabled={!canSuspend}
+              className={`inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border px-4 font-cairo text-[12px] font-extrabold transition lg:w-auto lg:min-w-[8.5rem] ${
+                canSuspend
+                  ? "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C] hover:bg-[#FEE2E2]"
+                  : "cursor-not-allowed border-[#E5E7EB] bg-[#F9FAFB] text-[#98A2B3] opacity-70"
+              }`}
             >
               <UserX className="h-4 w-4 shrink-0" />
               <span>إيقاف الحساب</span>
             </button>
           ) : null}
-          {onReboard && offboarded ? (
+          {onReboard ? (
             <button
               type="button"
-              onClick={() =>
-                onReboard({
-                  doctorId: d._id,
-                  userId,
-                  label: d.user?.fullName?.trim() || phoneDisplay,
-                })
+              onClick={
+                canActivate
+                  ? () =>
+                      onReboard({
+                        doctorId: d._id,
+                        userId,
+                        label: d.user?.fullName?.trim() || phoneDisplay,
+                      })
+                  : undefined
               }
-              className="inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#BBF7D0] bg-[#F0FDF4] px-4 font-cairo text-[12px] font-extrabold text-[#16A34A] transition hover:bg-[#DCFCE7] lg:w-auto lg:min-w-[8.5rem]"
+              disabled={!canActivate}
+              aria-disabled={!canActivate}
+              className={`inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border px-4 font-cairo text-[12px] font-extrabold transition lg:w-auto lg:min-w-[8.5rem] ${
+                canActivate
+                  ? "border-[#BBF7D0] bg-[#F0FDF4] text-[#16A34A] hover:bg-[#DCFCE7]"
+                  : "cursor-not-allowed border-[#E5E7EB] bg-[#F9FAFB] text-[#98A2B3] opacity-70"
+              }`}
             >
               <UserPlus className="h-4 w-4 shrink-0" />
               <span>تفعيل الحساب</span>
