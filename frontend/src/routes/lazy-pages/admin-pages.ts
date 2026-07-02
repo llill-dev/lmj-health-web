@@ -100,3 +100,6 @@ export const AdminRestoreRequestDetailsPage = lazy(
   () =>
     import("@/pages/admin/doctor-restore-requests/AdminRestoreRequestDetailsPage"),
 );
+export const AdminFacilitiesPage = lazy(
+  () => import("@/pages/admin/facilities/AdminFacilitiesPage"),
+);

@@ -469,6 +469,10 @@ export default function App() {
               element={<AdminPages.AdminRestoreRequestDetailsPage />}
             />
             <Route
+              path="facilities"
+              element={<AdminPages.AdminFacilitiesPage />}
+            />
+            <Route
               path="complaints"
               element={<AdminPages.AdminComplaintsPage />}
             />
