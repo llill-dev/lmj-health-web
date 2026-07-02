@@ -21,7 +21,7 @@ export function useDoctorPatients(params: DoctorPatientsListParams) {
   const query = useQuery({
     queryKey: doctorPatientsQueryKeys.list(params),
     queryFn: () => doctorApi.patients.list(params),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {
@@ -40,7 +40,7 @@ export function useDoctorPatientPublicProfile(patientId: string, enabled = true)
     queryKey: doctorPatientsQueryKeys.publicProfile(patientId),
     queryFn: () => doctorApi.patients.getPublicProfile(patientId),
     enabled: enabled && Boolean(patientId),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {
@@ -62,7 +62,7 @@ export function useDoctorPatientFullProfile(
     queryFn: () => doctorApi.patients.getFullProfileResult(doctorId, patientId),
     enabled: enabled && Boolean(doctorId) && Boolean(patientId),
     retry: false,
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {
@@ -89,7 +89,7 @@ export function useDoctorPatientEncounters(
     queryKey: doctorPatientsQueryKeys.encounters(doctorId, patientId, params),
     queryFn: () => doctorApi.patients.listEncounters(doctorId, patientId, params),
     enabled: enabled && Boolean(doctorId) && Boolean(patientId),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {
@@ -125,7 +125,7 @@ export function useDoctorPatientEncounterDetail(
       Boolean(doctorId) &&
       Boolean(patientId) &&
       Boolean(encounterId),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {
@@ -262,7 +262,7 @@ export function useDoctorPatientFiles(patientId: string, enabled = true) {
     queryKey: doctorPatientsQueryKeys.files(patientId),
     queryFn: () => doctorApi.patients.listFiles(patientId),
     enabled: enabled && Boolean(patientId),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   const items = query.data?.items ?? query.data?.files ?? [];

@@ -141,32 +141,6 @@ export default function HomeDoctor() {
 
   const isInitialLoading = statsAwaiting || snapshotAwaiting;
 
-  if (isInitialLoading) {
-    return <DoctorDashboardSkeleton />;
-  }
-
-  if (statsError || appointmentsError || snapshotError) {
-    const message = getUserFacingRequestErrorMessage(
-      statsError ?? appointmentsError ?? snapshotError,
-    );
-    return (
-      <div className="flex h-[400px] items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
-          <p className="mt-2 font-cairo text-[14px] font-semibold text-red-600">
-            {message || "فشل تحميل بيانات لوحة التحكم"}
-          </p>
-          <button
-            onClick={() => refetch()}
-            className="mt-3 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white hover:bg-primary/90"
-          >
-            إعادة المحاولة
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const activeConsultation = parseSnapshotActiveConsultation(
     snapshot?.activeConsultation,
   );
@@ -243,6 +217,32 @@ export default function HomeDoctor() {
       : "—";
   const attendanceValue =
     stats?.attendanceRate != null ? `${stats.attendanceRate}%` : "—";
+
+  if (isInitialLoading) {
+    return <DoctorDashboardSkeleton />;
+  }
+
+  if (statsError || appointmentsError || snapshotError) {
+    const message = getUserFacingRequestErrorMessage(
+      statsError ?? appointmentsError ?? snapshotError,
+    );
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+          <p className="mt-2 font-cairo text-[14px] font-semibold text-red-600">
+            {message || "فشل تحميل بيانات لوحة التحكم"}
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="mt-3 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white hover:bg-primary/90"
+          >
+            إعادة المحاولة
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">

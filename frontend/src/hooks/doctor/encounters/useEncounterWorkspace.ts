@@ -14,7 +14,7 @@ import type { EncounterWorkspaceSectionViewModel } from '@/components/doctor/enc
 import { doctorApi, doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { normalizeEncounterOrdersList } from '@/lib/doctor/encounters/encounterOrderLoad';
 
-const ENCOUNTER_WORKSPACE_STALE_MS = 1000 * 30;
+const ENCOUNTER_WORKSPACE_STALE_MS = 1000 * 60;
 
 export function prefetchEncounterWorkspace(
   queryClient: QueryClient,

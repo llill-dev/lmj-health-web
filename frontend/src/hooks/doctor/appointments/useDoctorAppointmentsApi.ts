@@ -20,7 +20,7 @@ export function useDoctorAppointmentsApi(params: DoctorAppointmentListParams) {
   const query = useQuery({
     queryKey: doctorAppointmentsQueryKeys.list(params),
     queryFn: () => doctorAppointmentsApi.list(params),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {
@@ -42,7 +42,7 @@ export function useDoctorAppointmentDetailsApi(appointmentId: string) {
     queryKey: doctorAppointmentsQueryKeys.detail(appointmentId),
     queryFn: () => doctorAppointmentsApi.getById(appointmentId),
     enabled: Boolean(appointmentId),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {
@@ -180,7 +180,7 @@ export function useDoctorAppointmentFilesApi(
     queryKey: doctorAppointmentsQueryKeys.files(appointmentId),
     queryFn: () => doctorAppointmentsApi.listFiles(appointmentId),
     enabled: enabled && Boolean(appointmentId),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   return {

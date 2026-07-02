@@ -24,7 +24,7 @@ import { normalizeEncounterOrdersList } from "@/lib/doctor/encounters/encounterO
 import type { DoctorEncounterSummary } from "@/lib/doctor/types";
 import { useDoctorPatientEncounterDetail } from "@/hooks/doctor/patients/useDoctorPatients";
 
-const ENCOUNTER_EXPAND_STALE_MS = 1000 * 30;
+const ENCOUNTER_EXPAND_STALE_MS = 1000 * 60;
 
 const ENCOUNTERS_LIST_LIMIT = 100;
 
@@ -271,7 +271,7 @@ export function useDoctorMedicalEncountersPage(
     queryKey: doctorEncountersQueryKeys.list(doctorId, listParams),
     queryFn: () => doctorApi.encounters.list(doctorId, listParams),
     enabled: Boolean(doctorId),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   });
 
   const apiVisits = useMemo(() => {
