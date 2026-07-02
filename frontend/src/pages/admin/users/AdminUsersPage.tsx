@@ -308,7 +308,9 @@ export default function AdminUsersPage() {
           onOpenChange={setReboardOpen}
           userId={reboardTarget?.userId || ""}
           userName={reboardTarget?.label || ""}
-          onSuccess={refetch}
+          onSuccess={async () => {
+            await refetch();
+          }}
         />
       </div>
     </>

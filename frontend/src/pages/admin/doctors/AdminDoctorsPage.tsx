@@ -498,8 +498,8 @@ export default function AdminDoctorsPage() {
         onOpenChange={setReboardOpen}
         userId={reboardTarget?.userId || ""}
         userName={reboardTarget?.label || ""}
-        onSuccess={() => {
-          void refetch();
+        onSuccess={async () => {
+          await refetch();
         }}
       />
     </>
