@@ -103,3 +103,7 @@ export const AdminRestoreRequestDetailsPage = lazy(
 export const AdminFacilitiesPage = lazy(
   () => import("@/pages/admin/facilities/AdminFacilitiesPage"),
 );
+export const AdminDoctorProfileChangeRequestsPage = lazy(
+  () =>
+    import("@/pages/admin/doctor-profile-change-requests/AdminDoctorProfileChangeRequestsPage"),
+);

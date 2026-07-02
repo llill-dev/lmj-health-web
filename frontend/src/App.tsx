@@ -473,6 +473,10 @@ export default function App() {
               element={<AdminPages.AdminFacilitiesPage />}
             />
             <Route
+              path="doctor-profile-change-requests"
+              element={<AdminPages.AdminDoctorProfileChangeRequestsPage />}
+            />
+            <Route
               path="complaints"
               element={<AdminPages.AdminComplaintsPage />}
             />
