@@ -7,21 +7,22 @@ import {
   Mail,
   Phone,
   UserX,
-} from 'lucide-react';
+  UserPlus,
+} from "lucide-react";
 import type {
   AdminDoctorApprovalStatus,
   AdminDoctorSummary,
-} from '@/lib/admin/types';
-import { isAdminDoctorOffboarded } from '@/lib/admin/doctors/isAdminDoctorOffboarded';
-import { resolveAdminDoctorUserId } from '@/lib/admin/doctors/resolveAdminDoctorUserId';
-import { formatPhoneForDisplay } from '@/lib/phone/formatPhoneForDisplay';
+} from "@/lib/admin/types";
+import { isAdminDoctorOffboarded } from "@/lib/admin/doctors/isAdminDoctorOffboarded";
+import { resolveAdminDoctorUserId } from "@/lib/admin/doctors/resolveAdminDoctorUserId";
+import { formatPhoneForDisplay } from "@/lib/phone/formatPhoneForDisplay";
 
-const TEAL = '#108B8B';
-const STAT_BG = '#E6F4F4';
+const TEAL = "#108B8B";
+const STAT_BG = "#E6F4F4";
 
 function doctorInitial(fullName?: string) {
-  const n = (fullName ?? '').trim();
-  if (!n.length) return 'د';
+  const n = (fullName ?? "").trim();
+  if (!n.length) return "د";
   return n.charAt(0);
 }
 
@@ -34,31 +35,31 @@ function StatusBadge({
 }) {
   if (offboarded) {
     return (
-      <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#7F1D1D] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
-        <UserX className='h-3.5 w-3.5 shrink-0' />
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7F1D1D] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+        <UserX className="h-3.5 w-3.5 shrink-0" />
         موقوف
       </span>
     );
   }
-  if (status === 'approved') {
+  if (status === "approved") {
     return (
-      <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#28A745] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
-        <CheckCircle2 className='h-3.5 w-3.5 shrink-0' />
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#28A745] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
         مقبول
       </span>
     );
   }
-  if (status === 'rejected') {
+  if (status === "rejected") {
     return (
-      <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#DC3545] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
-        <Ban className='h-3.5 w-3.5 shrink-0' />
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#DC3545] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+        <Ban className="h-3.5 w-3.5 shrink-0" />
         مرفوض
       </span>
     );
   }
   return (
-    <span className='inline-flex items-center gap-1.5 rounded-[8px] bg-[#343A40] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white'>
-      <Clock className='h-3.5 w-3.5 shrink-0' />
+    <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#343A40] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
+      <Clock className="h-3.5 w-3.5 shrink-0" />
       بانتظار الموافقة
     </span>
   );
@@ -68,11 +69,17 @@ export default function DoctorListCard({
   doctor: d,
   onDetails,
   onOffboard,
+  onReboard,
   isDuplicatePhone = false,
 }: {
   doctor: AdminDoctorSummary;
   onDetails: () => void;
   onOffboard?: (target: {
+    doctorId: string;
+    userId?: string | null;
+    label: string;
+  }) => void;
+  onReboard?: (target: {
     doctorId: string;
     userId?: string | null;
     label: string;
@@ -83,50 +90,50 @@ export default function DoctorListCard({
   const done = d.completedAppointmentsCount;
   const pts = d.linkedPatientsCount;
   const fmt = (n: number | undefined) =>
-    typeof n === 'number' && !Number.isNaN(n) ? String(n) : '—';
+    typeof n === "number" && !Number.isNaN(n) ? String(n) : "—";
   const userId = resolveAdminDoctorUserId(d);
   const phoneDisplay = formatPhoneForDisplay(d.user?.phone);
   const offboarded = isAdminDoctorOffboarded(d);
 
   return (
-    <div className='rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]'>
-      <div className='flex flex-col gap-4 px-3 py-4 sm:px-4 lg:grid lg:grid-cols-[minmax(0,16rem)_17.5rem_minmax(0,1fr)_auto] lg:items-stretch lg:gap-x-6 lg:gap-y-0 xl:grid-cols-[minmax(0,18rem)_17.5rem_minmax(0,1fr)_auto]'>
-        <div className='flex min-w-0 items-start gap-3 lg:min-w-0 lg:max-w-[16rem] xl:max-w-[18rem]'>
+    <div className="rounded-[10px] border border-[#E8ECEF] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-col gap-4 px-3 py-4 sm:px-4 lg:grid lg:grid-cols-[minmax(0,16rem)_17.5rem_minmax(0,1fr)_auto] lg:items-stretch lg:gap-x-6 lg:gap-y-0 xl:grid-cols-[minmax(0,18rem)_17.5rem_minmax(0,1fr)_auto]">
+        <div className="flex min-w-0 items-start gap-3 lg:min-w-0 lg:max-w-[16rem] xl:max-w-[18rem]">
           <div
-            className='flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] text-[22px] font-black text-white'
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] text-[22px] font-black text-white"
             style={{ backgroundColor: TEAL }}
           >
             {doctorInitial(d.user?.fullName)}
           </div>
-          <div className='min-w-0 flex-1 text-right'>
-            <div className='break-words font-cairo text-sm font-extrabold leading-snug text-[#1F2937] sm:text-[15px]'>
-              {d.user?.fullName ?? '—'}
+          <div className="min-w-0 flex-1 text-right">
+            <div className="break-words font-cairo text-sm font-extrabold leading-snug text-[#1F2937] sm:text-[15px]">
+              {d.user?.fullName ?? "—"}
             </div>
-            <div className='mt-1 break-words font-cairo text-[12px] font-semibold text-[#6B7280] sm:text-[13px]'>
-              {d.specialization ?? '—'}
+            <div className="mt-1 break-words font-cairo text-[12px] font-semibold text-[#6B7280] sm:text-[13px]">
+              {d.specialization ?? "—"}
             </div>
           </div>
         </div>
 
-        <div className='grid w-full shrink-0 grid-cols-3 gap-2 lg:w-[17.5rem] lg:justify-self-start'>
+        <div className="grid w-full shrink-0 grid-cols-3 gap-2 lg:w-[17.5rem] lg:justify-self-start">
           {[
-            { label: 'المواعيد', value: fmt(appt) },
-            { label: 'مكتملة', value: fmt(done) },
-            { label: 'المرضى', value: fmt(pts) },
+            { label: "المواعيد", value: fmt(appt) },
+            { label: "مكتملة", value: fmt(done) },
+            { label: "المرضى", value: fmt(pts) },
           ].map((box) => (
             <div
               key={box.label}
-              className='flex min-w-0 flex-col items-center justify-center rounded-[8px] px-1.5 py-2 sm:px-2'
+              className="flex min-w-0 flex-col items-center justify-center rounded-[8px] px-1.5 py-2 sm:px-2"
               style={{ backgroundColor: STAT_BG }}
             >
               <span
-                className='text-center font-cairo text-[10px] font-bold sm:text-[11px]'
+                className="text-center font-cairo text-[10px] font-bold sm:text-[11px]"
                 style={{ color: TEAL }}
               >
                 {box.label}
               </span>
               <span
-                className='mt-0.5 font-cairo text-base font-black leading-none sm:text-lg md:text-[20px]'
+                className="mt-0.5 font-cairo text-base font-black leading-none sm:text-lg md:text-[20px]"
                 style={{ color: TEAL }}
               >
                 {box.value}
@@ -135,66 +142,66 @@ export default function DoctorListCard({
           ))}
         </div>
 
-        <div className='flex w-full min-w-0 flex-col gap-2 text-right lg:min-w-0'>
-          <div className='flex items-start gap-2'>
+        <div className="flex w-full min-w-0 flex-col gap-2 text-right lg:min-w-0">
+          <div className="flex items-start gap-2">
             <Award
-              className='h-4 w-4 shrink-0 mt-0.5'
+              className="h-4 w-4 shrink-0 mt-0.5"
               style={{ color: TEAL }}
               aria-hidden
             />
-            <span className='font-cairo text-[12px] font-semibold text-[#6B7280]'>
-              رخصة:{' '}
-              <span className='text-[#374151]'>
-                {d.medicalLicenseNumber ?? '—'}
+            <span className="font-cairo text-[12px] font-semibold text-[#6B7280]">
+              رخصة:{" "}
+              <span className="text-[#374151]">
+                {d.medicalLicenseNumber ?? "—"}
               </span>
             </span>
           </div>
-          <div className='flex items-center gap-2'>
+          <div className="flex items-center gap-2">
             <Mail
-              className='h-4 w-4 shrink-0'
+              className="h-4 w-4 shrink-0"
               style={{ color: TEAL }}
               aria-hidden
             />
-            <span className='truncate font-cairo text-[12px] font-semibold text-[#6B7280]'>
-              {d.user?.email ?? '—'}
+            <span className="truncate font-cairo text-[12px] font-semibold text-[#6B7280]">
+              {d.user?.email ?? "—"}
             </span>
           </div>
-          <div className='flex flex-wrap items-center gap-2'>
+          <div className="flex flex-wrap items-center gap-2">
             <Phone
-              className='h-4 w-4 shrink-0'
+              className="h-4 w-4 shrink-0"
               style={{ color: TEAL }}
               aria-hidden
             />
             <span
-              className='font-cairo text-[12px] font-semibold text-[#6B7280]'
-              dir='ltr'
+              className="font-cairo text-[12px] font-semibold text-[#6B7280]"
+              dir="ltr"
             >
               {phoneDisplay}
             </span>
             {isDuplicatePhone ? (
-              <span className='rounded-[6px] bg-[#FEF3C7] px-2 py-0.5 font-cairo text-[10px] font-extrabold text-[#92400E]'>
+              <span className="rounded-[6px] bg-[#FEF3C7] px-2 py-0.5 font-cairo text-[10px] font-extrabold text-[#92400E]">
                 رقم مكرّر
               </span>
             ) : null}
           </div>
         </div>
 
-        <div className='flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:border-t-0 sm:pt-0 lg:w-auto lg:items-end lg:justify-self-end'>
-          <div className='flex justify-end'>
+        <div className="flex w-full shrink-0 flex-col items-stretch gap-3 border-t border-[#F3F4F6] pt-4 sm:border-t-0 sm:pt-0 lg:w-auto lg:items-end lg:justify-self-end">
+          <div className="flex justify-end">
             <StatusBadge status={d.approvalStatus} offboarded={offboarded} />
           </div>
           <button
-            type='button'
+            type="button"
             onClick={onDetails}
-            className='inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 lg:w-auto lg:min-w-[8.5rem]'
+            className="inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 lg:w-auto lg:min-w-[8.5rem]"
             style={{ backgroundColor: TEAL }}
           >
             <span>التفاصيل</span>
-            <Eye className='h-4 w-4 shrink-0' />
+            <Eye className="h-4 w-4 shrink-0" />
           </button>
           {onOffboard && !offboarded ? (
             <button
-              type='button'
+              type="button"
               onClick={() =>
                 onOffboard({
                   doctorId: d._id,
@@ -202,10 +209,26 @@ export default function DoctorListCard({
                   label: d.user?.fullName?.trim() || phoneDisplay,
                 })
               }
-              className='inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-4 font-cairo text-[12px] font-extrabold text-[#B91C1C] transition hover:bg-[#FEE2E2] lg:w-auto lg:min-w-[8.5rem]'
+              className="inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-4 font-cairo text-[12px] font-extrabold text-[#B91C1C] transition hover:bg-[#FEE2E2] lg:w-auto lg:min-w-[8.5rem]"
             >
-              <UserX className='h-4 w-4 shrink-0' />
+              <UserX className="h-4 w-4 shrink-0" />
               <span>إيقاف الحساب</span>
+            </button>
+          ) : null}
+          {onReboard && offboarded ? (
+            <button
+              type="button"
+              onClick={() =>
+                onReboard({
+                  doctorId: d._id,
+                  userId,
+                  label: d.user?.fullName?.trim() || phoneDisplay,
+                })
+              }
+              className="inline-flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#BBF7D0] bg-[#F0FDF4] px-4 font-cairo text-[12px] font-extrabold text-[#16A34A] transition hover:bg-[#DCFCE7] lg:w-auto lg:min-w-[8.5rem]"
+            >
+              <UserPlus className="h-4 w-4 shrink-0" />
+              <span>تفعيل الحساب</span>
             </button>
           ) : null}
         </div>

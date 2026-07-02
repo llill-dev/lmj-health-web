@@ -1,5 +1,12 @@
 import { Helmet } from "react-helmet-async";
-import { Ban, CheckCircle2, Clock, Stethoscope, UserX } from "lucide-react";
+import {
+  Ban,
+  CheckCircle2,
+  Clock,
+  Stethoscope,
+  UserX,
+  UserPlus,
+} from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import AdminSearchFiltersBar from "@/components/admin/AdminSearchFiltersBar";
 import DoctorListCard from "@/components/admin/doctors/DoctorListCard";
@@ -9,6 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import type { AdminDoctorApprovalStatus } from "@/lib/admin/types";
 import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialog";
+import ReboardDialog from "@/components/admin/users/ReboardDialog";
 import { phoneComparisonKey } from "@/lib/phone/formatPhoneForDisplay";
 import { adminApi } from "@/lib/admin/client";
 import { normalizeAdminDoctorDetailsResponse } from "@/lib/admin/doctors/normalizeAdminDoctorDetailsResponse";
@@ -70,6 +78,12 @@ export default function AdminDoctorsPage() {
 
   const [offboardOpen, setOffboardOpen] = useState(false);
   const [offboardTarget, setOffboardTarget] = useState<{
+    userId: string;
+    doctorId: string;
+    label: string;
+  } | null>(null);
+  const [reboardOpen, setReboardOpen] = useState(false);
+  const [reboardTarget, setReboardTarget] = useState<{
     userId: string;
     doctorId: string;
     label: string;
@@ -358,6 +372,42 @@ export default function AdminDoctorsPage() {
                       });
                       setOffboardOpen(true);
                     }}
+                    onReboard={async (target) => {
+                      let userId = target.userId ?? null;
+                      if (!userId) {
+                        try {
+                          const details = normalizeAdminDoctorDetailsResponse(
+                            await adminApi.doctors.getById(target.doctorId),
+                          );
+                          userId = resolveAdminDoctorUserId(details.doctor);
+                        } catch {
+                          toast(
+                            "تعذّر تحميل معرف المستخدم لتفعيل الحساب. افتح التفاصيل وحاول مجدداً.",
+                            {
+                              title: "تعذّر التفعيل",
+                              variant: "error",
+                            },
+                          );
+                          return;
+                        }
+                      }
+                      if (!userId) {
+                        toast(
+                          "لم يُعثَر على معرف المستخدم المرتبط بهذا الطبيب.",
+                          {
+                            title: "تعذّر التفعيل",
+                            variant: "error",
+                          },
+                        );
+                        return;
+                      }
+                      setReboardTarget({
+                        userId,
+                        doctorId: target.doctorId,
+                        label: target.label,
+                      });
+                      setReboardOpen(true);
+                    }}
                   />
                 );
               })
@@ -439,6 +489,15 @@ export default function AdminDoctorsPage() {
         targetDoctorId={offboardTarget?.doctorId ?? null}
         targetLabel={offboardTarget?.label ?? ""}
         accountRole="doctor"
+        onSuccess={() => {
+          void refetch();
+        }}
+      />
+      <ReboardDialog
+        open={reboardOpen}
+        onOpenChange={setReboardOpen}
+        userId={reboardTarget?.userId || ""}
+        userName={reboardTarget?.label || ""}
         onSuccess={() => {
           void refetch();
         }}

@@ -219,38 +219,39 @@ export default function AdminUsersPage() {
                   </div>
 
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOffboardTarget({
-                          userId: user.id,
-                          label: user.fullName,
-                        });
-                        setOffboardOpen(true);
-                      }}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
-                    >
-                      <UserMinus className="h-3.5 w-3.5" />
-                      إيقاف الحساب
-                    </button>
+                    {user.isActive === false ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReboardTarget({
+                            userId: user.id,
+                            label: user.fullName,
+                          });
+                          setReboardOpen(true);
+                        }}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                        تفعيل الحساب
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOffboardTarget({
+                            userId: user.id,
+                            label: user.fullName,
+                          });
+                          setOffboardOpen(true);
+                        }}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
+                      >
+                        <UserMinus className="h-3.5 w-3.5" />
+                        إيقاف الحساب
+                      </button>
+                    )}
                   </div>
                 </div>
-                {user.isActive === false && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReboardTarget({
-                        userId: user.id,
-                        label: user.fullName,
-                      });
-                      setReboardOpen(true);
-                    }}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
-                  >
-                    <UserPlus className="h-3.5 w-3.5" />
-                    تفعيل الحساب
-                  </button>
-                )}
                 <div className="mt-4 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
                   <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                     <span>أُنشئ في {formatUserCreatedAt(user.createdAt)}</span>
@@ -297,7 +298,6 @@ export default function AdminUsersPage() {
             setOffboardOpen(open);
             if (!open) setOffboardTarget(null);
           }}
-          
           targetUserId={offboardTarget?.userId ?? null}
           targetLabel={offboardTarget?.label ?? ""}
           accountRole="staff"
