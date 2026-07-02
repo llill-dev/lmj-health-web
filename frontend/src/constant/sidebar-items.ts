@@ -59,6 +59,7 @@ export type AdminSidebarItemId =
   | "notifications"
   | "doctors"
   | "doctor-specializations"
+  | "doctor-profile-change-requests"
   | "users"
   | "patients"
   | "secretaries"
@@ -66,6 +67,7 @@ export type AdminSidebarItemId =
   | "content-templates"
   | "services"
   | "service-types"
+  | "service-providers"
   | "medical-file-options"
   | "medical-orders"
   | "appointments"
@@ -74,7 +76,8 @@ export type AdminSidebarItemId =
   | "analytics"
   | "settings"
   | "verification-requests"
-  | "complaints";
+  | "complaints"
+  | "facilities";
 
 export const sidebarItems: Array<{
   id: string;
@@ -241,6 +244,12 @@ export const adminSidebarItems: Array<{
     label: "تخصصات الأطباء",
     icon: Tags,
   },
+  {
+    id: "doctor-profile-change-requests",
+    path: "doctor-profile-change-requests",
+    label: "طلبات تغيير البيانات",
+    icon: FileText,
+  },
   { id: "users", path: "users", label: "مستخدمو الإدارة", icon: UserCog },
   { id: "patients", path: "patients", label: "المرضى", icon: Users },
   {
@@ -272,6 +281,12 @@ export const adminSidebarItems: Array<{
     path: "service-types",
     label: "أنواع الخدمات",
     icon: Settings,
+  },
+  {
+    id: "service-providers",
+    path: "service-providers",
+    label: "مزودو الخدمة",
+    icon: Tags,
   },
   {
     id: "medical-file-options",
@@ -328,6 +343,12 @@ export const adminSidebarItems: Array<{
     label: "الشكاوي",
     icon: MessageSquareWarning,
     badge: 1,
+  },
+  {
+    id: "facilities",
+    path: "facilities",
+    label: "المنشآت الطبية",
+    icon: Building2,
   },
   {
     id: "settings",
