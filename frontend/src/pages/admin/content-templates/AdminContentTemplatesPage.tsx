@@ -105,7 +105,7 @@ export default function AdminContentTemplatesPage() {
   const disableSuccessToast: ConfirmSuccessToast | undefined = disableTarget
     ? {
         title: "تم التعطيل",
-        message: `عُطّل القالب «${disableTarget.name ?? "—"}».`,
+        message: `عُطّل القالب «${parentTypeLabel(disableTarget.name) ?? "—"}».`,
         variant: "success",
       }
     : undefined;
@@ -246,7 +246,7 @@ export default function AdminContentTemplatesPage() {
                     <div className="min-w-0 flex-1 text-right">
                       <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3">
                         <div className="min-w-0 font-cairo text-[14px] font-black text-[#111827]">
-                          {t.name ?? "—"}
+                          {parentTypeLabel(t.name) ?? "—"}
                         </div>
                         <span className="inline-flex h-[22px] items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#475467]">
                           {parentTypeLabel(t.parentType)}
