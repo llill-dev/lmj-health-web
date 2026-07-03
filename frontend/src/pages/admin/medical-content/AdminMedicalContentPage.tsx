@@ -59,6 +59,8 @@ import type {
 } from "@/lib/admin/types";
 import { cn } from "@/lib/utils/utils";
 import LanguageModeToggle from "@/components/admin/medical-content/LanguageModeToggle";
+import { MedicalContentRowSkeleton } from "@/components/admin/skeletons/MedicalContentRowSkeleton";
+import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import {
   buildVisiblePageNumbers,
   contentStatusLabel,
@@ -200,9 +202,7 @@ export default function AdminMedicalContentPage() {
     ...(langFilter === "ar" || langFilter === "en"
       ? { language: langFilter }
       : {}),
-    ...(pendingSourceUrl.trim()
-      ? { sourceUrl: pendingSourceUrl.trim() }
-      : {}),
+    ...(pendingSourceUrl.trim() ? { sourceUrl: pendingSourceUrl.trim() } : {}),
     ...(pendingDateFrom ? { dateFrom: pendingDateFrom } : {}),
     ...(pendingDateTo ? { dateTo: pendingDateTo } : {}),
   });
@@ -618,9 +618,10 @@ export default function AdminMedicalContentPage() {
 
           <div className="divide-y divide-[#EEF2F6]">
             {contentQuery.isAwaitingData ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                جارِ تحميل المحتوى...
-              </div>
+              <SkeletonList
+                count={8}
+                SkeletonComponent={MedicalContentRowSkeleton}
+              />
             ) : contentQuery.isError ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
                 تعذّر تحميل المحتوى الطبي.

@@ -8,6 +8,8 @@ import {
   MedicalOrderCategoryTabs,
   UpsertMedicalOrderItemDialog,
 } from "@/components/admin/medical-orders";
+import { MedicalOrderCardSkeleton } from "@/components/admin/skeletons/MedicalOrderCardSkeleton";
+import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import {
   useAdminMedicalOrderCatalog,
   useDeleteMedicalOrderCatalogItem,
@@ -161,9 +163,11 @@ export default function AdminMedicalOrdersPage() {
         )}
 
         {isAwaitingData ? (
-          <div className="rounded-[10px] border border-[#E5E7EB] bg-white p-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-            جاري التحميل…
-          </div>
+          <SkeletonList
+            count={5}
+            SkeletonComponent={MedicalOrderCardSkeleton}
+            className="space-y-3"
+          />
         ) : (
           <MedicalOrderCatalogCard
             kind={kind}

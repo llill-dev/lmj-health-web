@@ -17,6 +17,8 @@ import {
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import ConfirmActionDialog from "@/components/admin/dialogs/ConfirmActionDialog";
 import UpsertDoctorLookupDialog from "@/components/admin/doctor-specializations/UpsertDoctorLookupDialog";
+import { DoctorSpecializationCardSkeleton } from "@/components/admin/skeletons/DoctorSpecializationCardSkeleton";
+import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { useAdminLookups } from "@/hooks/admin/lookups/useAdminLookups";
 import { useRemoveLookup } from "@/hooks/admin/lookups/useAdminLookupMutations";
 import {
@@ -258,12 +260,11 @@ export default function AdminDoctorSpecializationsPage() {
         </div>
 
         {isAwaitingData ? (
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-[14px] border border-[#EEF2F6] bg-white py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-              جاري تحميل كتالوج التخصصات…
-            </p>
-          </div>
+          <SkeletonList
+            count={9}
+            SkeletonComponent={DoctorSpecializationCardSkeleton}
+            className="grid grid-cols-1 gap-4 mt-8 md:grid-cols-2 xl:grid-cols-3"
+          />
         ) : apiErrMsg ? (
           <div className="mt-8 rounded-[14px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-12 text-center">
             <p className="font-cairo text-[13px] font-bold text-[#B42318]">

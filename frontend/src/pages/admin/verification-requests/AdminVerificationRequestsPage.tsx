@@ -11,6 +11,8 @@ import { useMemo } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReviewVerificationRequestDialog from "@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog";
+import { VerificationRequestCardSkeleton } from "@/components/admin/skeletons/VerificationRequestCardSkeleton";
+import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryDataWithPlaceholder } from "@/lib/query/queryUi";
@@ -246,9 +248,11 @@ export default function AdminVerificationRequestsPage() {
 
         <section className="mt-6">
           {verificationAwaiting ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              جارِ تحميل طلبات التحقق...
-            </div>
+            <SkeletonList
+              count={5}
+              SkeletonComponent={VerificationRequestCardSkeleton}
+              className="space-y-3"
+            />
           ) : verificationQuery.error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
               تعذّر تحميل طلبات التحقق من الخادم.

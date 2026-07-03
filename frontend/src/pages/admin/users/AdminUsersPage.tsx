@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import CreateAdminUserDialog from "@/components/admin/users/CreateAdminUserDialog";
+import { DoctorCardSkeleton } from "@/components/admin/skeletons/DoctorCardSkeleton";
+import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
 import StyledSelect from "@/components/ui/styled-select";
 import { useAdminUsers } from "@/hooks/admin/users/useAdminUsers";
@@ -157,9 +159,11 @@ export default function AdminUsersPage() {
         </section>
 
         {isAwaitingData ? (
-          <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-            جارٍ تحميل مستخدمي الإدارة...
-          </div>
+          <SkeletonList
+            count={5}
+            SkeletonComponent={DoctorCardSkeleton}
+            className="space-y-4"
+          />
         ) : isError ? (
           <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <AlertCircle className="h-7 w-7 text-[#DC2626]" />

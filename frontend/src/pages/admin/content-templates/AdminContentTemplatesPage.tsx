@@ -12,6 +12,8 @@ import {
 import { useMemo, useState } from "react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import { ContentTemplateFormDialog } from "@/components/admin/content-templates";
+import { ContentTemplateRowSkeleton } from "@/components/admin/skeletons/ContentTemplateRowSkeleton";
+import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import {
   ConfirmActionDialog,
   type ConfirmSuccessToast,
@@ -209,9 +211,10 @@ export default function AdminContentTemplatesPage() {
 
           <div className="divide-y divide-[#EEF2F6]">
             {query.isAwaitingData ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                جارِ تحميل القوالب...
-              </div>
+              <SkeletonList
+                count={6}
+                SkeletonComponent={ContentTemplateRowSkeleton}
+              />
             ) : query.isError ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
                 تعذّر تحميل قوالب البيانات.
@@ -260,7 +263,10 @@ export default function AdminContentTemplatesPage() {
                           </div>
                         ) : null}
                         {t.slug ? (
-                          <div className="inline-flex items-center gap-2" dir="ltr">
+                          <div
+                            className="inline-flex items-center gap-2"
+                            dir="ltr"
+                          >
                             <LayoutGrid className="h-4 w-4" />
                             {t.slug}
                           </div>
