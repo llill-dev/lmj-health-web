@@ -1,52 +1,23 @@
-'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { AlertTriangle, X } from 'lucide-react';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+"use client";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertTriangle, X } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AdminFormField,
+  adminTextareaClass,
+} from "@/components/admin/form-field";
 
 const schema = z.object({
   reason: z
     .string()
-    .min(4, 'أدخل سبباً واضحاً (4 أحرف على الأقل)')
-    .max(2000, 'الحد الأقصى 2000 حرف'),
+    .min(4, "أدخل سبباً واضحاً (4 أحرف على الأقل)")
+    .max(2000, "الحد الأقصى 2000 حرف"),
 });
 
 type FormValues = z.infer<typeof schema>;
-
-const overlayOpen = {
-  opacity: 1,
-  visibility: 'visible' as const,
-  pointerEvents: 'auto' as const,
-  transition: { duration: 0.2, ease: 'easeOut' as const },
-};
-
-const overlayClosed = {
-  opacity: 0,
-  transition: { duration: 0.18, ease: 'easeOut' as const },
-  pointerEvents: 'none' as const,
-  transitionEnd: { visibility: 'hidden' as const },
-};
-
-const panelOpen = {
-  opacity: 1,
-  visibility: 'visible' as const,
-  pointerEvents: 'auto' as const,
-  y: 0,
-  scale: 1,
-  transition: { type: 'spring' as const, stiffness: 420, damping: 32 },
-};
-
-const panelClosed = {
-  opacity: 0,
-  y: 16,
-  scale: 0.96,
-  pointerEvents: 'none' as const,
-  transition: { duration: 0.2, ease: 'easeOut' as const },
-  transitionEnd: { visibility: 'hidden' as const },
-};
 
 type Props = {
   open: boolean;
@@ -70,126 +41,126 @@ export default function ContentRejectDialog({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { reason: '' },
+    defaultValues: { reason: "" },
   });
 
   useEffect(() => {
     if (!open) {
-      reset({ reason: '' });
+      reset({ reason: "" });
     }
   }, [open, reset]);
 
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
   }, [open]);
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={(o) => {
-        if (!isPending) onOpenChange(o);
-      }}
-    >
-      <Dialog.Portal>
-        <Dialog.Overlay forceMount asChild>
-          <motion.div
-            initial={false}
-            animate={open ? 'open' : 'closed'}
-            variants={{ open: overlayOpen, closed: overlayClosed }}
-            className='fixed inset-0 z-[10050] bg-black/45 backdrop-blur-[2px]'
-            style={{ touchAction: 'none' }}
-          />
-        </Dialog.Overlay>
-        <Dialog.Content
-          forceMount
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,460px)] max-h-[min(90vh,520px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
-          dir='rtl'
-          lang='ar'
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="رفض المحتوى"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !isPending) onOpenChange(false);
+          }}
         >
-          <Dialog.Description className='sr-only'>
-            نموذج لإدخال سبب رفض مراجعة عنصر المحتوى التعليمي.
-          </Dialog.Description>
           <motion.div
-            initial={false}
-            animate={open ? 'open' : 'closed'}
-            variants={{ open: panelOpen, closed: panelClosed }}
-            className='max-h-full w-full overflow-y-auto rounded-[16px] bg-white p-0 shadow-[0_24px_60px_rgba(0,0,0,0.2)]'
+            className="relative max-h-[min(92vh,860px)] w-full max-w-[460px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
+            <div className="relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[#FEF2F2]"
+                aria-hidden
+              />
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                disabled={isPending}
+                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                aria-label="إغلاق"
+              >
+                <X className="w-5 h-5" aria-hidden />
+              </button>
+              <div className="relative text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF2F2]">
+                    <AlertTriangle
+                      className="h-7 w-7 text-[#DC2626]"
+                      aria-hidden
+                    />
+                  </div>
+                </div>
+                <h2 className="font-cairo text-[22px] font-extrabold text-[#101828]">
+                  رفض المحتوى
+                </h2>
+                <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
+                  سيتم رفض:{" "}
+                  <span className="text-[#101827]">
+                    «{contentTitle || "—"}»
+                  </span>
+                </p>
+              </div>
+            </div>
+
             <form
+              dir="rtl"
               onSubmit={handleSubmit(async (v) => {
                 await onConfirm(v.reason.trim());
               })}
             >
-              <div className='flex items-start justify-between border-b border-[#F2F4F7] px-5 py-4'>
-                <div className='flex items-center gap-2'>
-                  <div className='flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600'>
-                    <AlertTriangle className='h-5 w-5' />
-                  </div>
-                  <Dialog.Title className='font-cairo text-[16px] font-extrabold leading-snug text-[#101828]'>
-                    رفض المحتوى
-                  </Dialog.Title>
+              <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
+                <div className="space-y-5">
+                  <AdminFormField
+                    label="سبب الرفض"
+                    required
+                    error={errors.reason?.message}
+                  >
+                    <textarea
+                      {...register("reason")}
+                      rows={4}
+                      placeholder="وضّح ما يجب تعديله…"
+                      className={adminTextareaClass}
+                    />
+                  </AdminFormField>
                 </div>
-                <Dialog.Close asChild>
-                  <button
-                    type='button'
-                    className='flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F2F4F7] disabled:opacity-40'
-                    aria-label='إغلاق'
-                    disabled={isPending}
-                  >
-                    <X className='h-4 w-4' />
-                  </button>
-                </Dialog.Close>
               </div>
-              <div className='px-5 py-4'>
-                <p className='text-right font-cairo text-[13px] font-semibold leading-relaxed text-[#475467]'>
-                  سيتم رفض:{' '}
-                  <span className='text-[#101828]'>
-                    «{contentTitle || '—'}»
-                  </span>
-                </p>
-                <label className='mt-4 block text-right font-cairo text-[12px] font-extrabold text-[#344054]'>
-                  سبب الرفض
-                </label>
-                <textarea
-                  {...register('reason')}
-                  rows={4}
-                  placeholder='وضّح ما يجب تعديله…'
-                  className='mt-1.5 w-full resize-y rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2.5 text-right font-cairo text-[13px] font-semibold text-[#101828] placeholder:text-[#98A2B3] outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20'
-                />
-                {errors.reason ? (
-                  <p className='mt-1.5 text-right font-cairo text-[11px] font-bold text-red-600'>
-                    {errors.reason.message}
-                  </p>
-                ) : null}
-              </div>
-              <div className='flex items-center justify-end gap-2 border-t border-[#F2F4F7] px-5 py-4'>
-                <Dialog.Close asChild>
-                  <button
-                    type='button'
-                    className='h-10 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:bg-[#F9FAFB] disabled:opacity-50'
-                    disabled={isPending}
-                  >
-                    إلغاء
-                  </button>
-                </Dialog.Close>
+
+              <div className="grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5">
                 <button
-                  type='submit'
+                  type="button"
+                  onClick={() => onOpenChange(false)}
                   disabled={isPending}
-                  className='h-10 rounded-[10px] bg-red-600 px-4 font-cairo text-[12px] font-extrabold text-white shadow-sm transition hover:brightness-105 disabled:opacity-50'
+                  className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#111827] disabled:opacity-50"
                 >
-                  {isPending ? 'جاري الرفض…' : 'تأكيد الرفض'}
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="inline-flex h-[48px] items-center justify-center rounded-[12px] bg-[#DC2626] font-cairo text-[14px] font-extrabold text-white hover:bg-[#B91C1C] disabled:opacity-60"
+                >
+                  {isPending ? "جاري الرفض…" : "تأكيد الرفض"}
                 </button>
               </div>
             </form>
           </motion.div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

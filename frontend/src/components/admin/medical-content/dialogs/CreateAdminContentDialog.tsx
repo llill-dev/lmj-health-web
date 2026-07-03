@@ -9,11 +9,11 @@ import { useCreateAdminContent } from "@/hooks/admin/content/useAdminContent";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
-  DoctorProfileFormField,
-  profileFieldClass,
-  profileInputClass,
-  profileTextareaClass,
-} from "@/components/doctor/profile-settings/doctor-profile-form-field";
+  AdminFormField,
+  adminFieldClass,
+  adminInputClass,
+  adminTextareaClass,
+} from "@/components/admin/form-field";
 import StyledSelect from "@/components/ui/styled-select";
 import { cn } from "@/lib/utils/utils";
 import type { AdminContentBlock, AdminContentType } from "@/lib/admin/types";
@@ -209,7 +209,7 @@ export default function CreateAdminContentDialog({
             <form dir="rtl" onSubmit={onSubmit}>
               <div className="max-h-[calc(92vh-240px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
-                  <DoctorProfileFormField label="نوع المحتوى" required>
+                  <AdminFormField label="نوع المحتوى" required>
                     <Controller
                       name="type"
                       control={control}
@@ -225,9 +225,9 @@ export default function CreateAdminContentDialog({
                         />
                       )}
                     />
-                  </DoctorProfileFormField>
+                  </AdminFormField>
 
-                  <DoctorProfileFormField
+                  <AdminFormField
                     label="العنوان"
                     required
                     error={errors.title?.message}
@@ -235,36 +235,33 @@ export default function CreateAdminContentDialog({
                     <input
                       {...register("title")}
                       placeholder="عنوان واضح للمحتوى"
-                      className={profileFieldClass(
+                      className={adminFieldClass(
                         cn(
-                          profileInputClass,
+                          adminInputClass,
                           "text-start placeholder:text-start",
                         ),
                         Boolean(errors.title),
                       )}
                     />
-                  </DoctorProfileFormField>
+                  </AdminFormField>
 
-                  <DoctorProfileFormField
-                    label="ملخص"
-                    error={errors.summary?.message}
-                  >
+                  <AdminFormField label="ملخص" error={errors.summary?.message}>
                     <textarea
                       {...register("summary")}
                       rows={3}
                       placeholder="مقدمة قصيرة تصف المحتوى…"
-                      className={profileFieldClass(
+                      className={adminFieldClass(
                         cn(
-                          profileTextareaClass,
+                          adminTextareaClass,
                           "text-start placeholder:text-start",
                         ),
                         Boolean(errors.summary),
                       )}
                     />
-                  </DoctorProfileFormField>
+                  </AdminFormField>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <DoctorProfileFormField
+                    <AdminFormField
                       label="اللغة"
                       required
                       error={errors.language?.message}
@@ -287,9 +284,9 @@ export default function CreateAdminContentDialog({
                           />
                         )}
                       />
-                    </DoctorProfileFormField>
+                    </AdminFormField>
 
-                    <DoctorProfileFormField
+                    <AdminFormField
                       label="Slug (اختياري)"
                       error={errors.slug?.message}
                     >
@@ -297,15 +294,15 @@ export default function CreateAdminContentDialog({
                         {...register("slug")}
                         dir="ltr"
                         placeholder="my-article"
-                        className={profileFieldClass(
-                          cn(profileInputClass),
+                        className={adminFieldClass(
+                          cn(adminInputClass),
                           Boolean(errors.slug),
                         )}
                       />
-                    </DoctorProfileFormField>
+                    </AdminFormField>
                   </div>
 
-                  <DoctorProfileFormField
+                  <AdminFormField
                     label="إصدار الصفحة (اختياري)"
                     hint={
                       selectedType === "SETTINGS_PAGE"
@@ -318,12 +315,12 @@ export default function CreateAdminContentDialog({
                       {...register("pageVersion")}
                       dir="ltr"
                       placeholder="2026-04"
-                      className={profileFieldClass(
-                        cn(profileInputClass),
+                      className={adminFieldClass(
+                        cn(adminInputClass),
                         Boolean(errors.pageVersion),
                       )}
                     />
-                  </DoctorProfileFormField>
+                  </AdminFormField>
 
                   {createMut.isError ? (
                     <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600">
