@@ -26,6 +26,11 @@ import {
   PHONE_DIAL_CODE_OPTIONS,
   type PhoneDialCode,
 } from "@/lib/phone/dialCodes";
+import {
+  AdminFormField,
+  adminFieldClass,
+  adminInputClass,
+} from "@/components/admin/form-field";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Zod Schema - Professional validation matching backend requirements
@@ -115,14 +120,6 @@ export default function CreateAdminUserDialog({
     defaultValues: DEFAULT_VALUES,
     mode: "onSubmit",
   });
-
-  const inputClass =
-    "h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-[#F9FAFB] disabled:text-[#9CA3AF]";
-
-  const labelClass =
-    "mb-1.5 block font-cairo text-[12px] font-bold text-[#344054]";
-
-  const errorClass = "mt-1 font-cairo text-[11px] font-bold text-[#D92D20]";
 
   async function onSubmit(values: CreateAdminUserFormValues) {
     const payload: CreateAdminUserBody = {
@@ -228,54 +225,55 @@ export default function CreateAdminUserDialog({
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   {/* Full Name */}
-                  <div>
-                    <label htmlFor="fullName" className={labelClass}>
-                      الاسم الكامل
-                      <span className="mr-1 text-[#DC2626]">*</span>
-                    </label>
+                  <AdminFormField
+                    label="الاسم الكامل"
+                    required
+                    error={errors.fullName?.message}
+                  >
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                       <input
-                        id="fullName"
                         {...register("fullName")}
-                        className={cn(inputClass, "pl-10")}
+                        className={adminFieldClass(
+                          cn(adminInputClass, "pl-10"),
+                          Boolean(errors.fullName),
+                        )}
                         placeholder="أدخل الاسم الكامل للمستخدم"
                         disabled={createMutation.isPending}
                       />
                     </div>
-                    {errors.fullName && (
-                      <p className={errorClass}>{errors.fullName.message}</p>
-                    )}
-                  </div>
+                  </AdminFormField>
 
                   {/* Email */}
-                  <div>
-                    <label htmlFor="email" className={labelClass}>
-                      البريد الإلكتروني
-                      <span className="mr-1 text-[#DC2626]">*</span>
-                    </label>
+                  <AdminFormField
+                    label="البريد الإلكتروني"
+                    required
+                    error={errors.email?.message}
+                  >
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                       <input
-                        id="email"
                         {...register("email")}
-                        className={cn(inputClass, "pl-10")}
+                        className={adminFieldClass(
+                          cn(adminInputClass, "pl-10"),
+                          Boolean(errors.email),
+                        )}
                         placeholder="name@example.com"
                         dir="ltr"
                         disabled={createMutation.isPending}
                       />
                     </div>
-                    {errors.email && (
-                      <p className={errorClass}>{errors.email.message}</p>
-                    )}
-                  </div>
+                  </AdminFormField>
 
                   {/* Phone Number */}
-                  <div>
-                    <label htmlFor="phoneLocal" className={labelClass}>
-                      رقم الهاتف
-                      <span className="mr-1 text-[#DC2626]">*</span>
-                    </label>
+                  <AdminFormField
+                    label="رقم الهاتف"
+                    required
+                    error={
+                      errors.phoneDialCode?.message ||
+                      errors.phoneLocal?.message
+                    }
+                  >
                     <div className="flex gap-2">
                       <Controller
                         name="phoneDialCode"
@@ -294,9 +292,11 @@ export default function CreateAdminUserDialog({
                       <div className="relative flex-1">
                         <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                         <input
-                          id="phoneLocal"
                           {...register("phoneLocal")}
-                          className={cn(inputClass, "pl-10")}
+                          className={adminFieldClass(
+                            cn(adminInputClass, "pl-10"),
+                            Boolean(errors.phoneLocal),
+                          )}
                           placeholder="912345678"
                           dir="ltr"
                           inputMode="numeric"
@@ -305,29 +305,23 @@ export default function CreateAdminUserDialog({
                         />
                       </div>
                     </div>
-                    {errors.phoneDialCode && (
-                      <p className={errorClass}>
-                        {errors.phoneDialCode.message}
-                      </p>
-                    )}
-                    {errors.phoneLocal && (
-                      <p className={errorClass}>{errors.phoneLocal.message}</p>
-                    )}
-                  </div>
+                  </AdminFormField>
 
                   {/* Password */}
-                  <div>
-                    <label htmlFor="password" className={labelClass}>
-                      كلمة المرور
-                      <span className="mr-1 text-[#DC2626]">*</span>
-                    </label>
+                  <AdminFormField
+                    label="كلمة المرور"
+                    required
+                    error={errors.password?.message}
+                  >
                     <div className="relative">
                       <Lock className="absolute left-10 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                       <input
-                        id="password"
                         {...register("password")}
                         type={showPassword ? "text" : "password"}
-                        className={cn(inputClass, "pl-10 pr-10")}
+                        className={adminFieldClass(
+                          cn(adminInputClass, "pl-10 pr-10"),
+                          Boolean(errors.password),
+                        )}
                         placeholder="••••••••"
                         dir="ltr"
                         disabled={createMutation.isPending}
@@ -345,9 +339,6 @@ export default function CreateAdminUserDialog({
                         )}
                       </button>
                     </div>
-                    {errors.password && (
-                      <p className={errorClass}>{errors.password.message}</p>
-                    )}
                     {/* Password Requirements */}
                     <div className="mt-2 space-y-1">
                       <p className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
@@ -373,20 +364,19 @@ export default function CreateAdminUserDialog({
                         رمز واحد على الأقل (!@#$%^&*)
                       </div>
                     </div>
-                  </div>
+                  </AdminFormField>
 
                   {/* Role */}
-                  <div>
-                    <label htmlFor="role" className={labelClass}>
-                      الدور
-                      <span className="mr-1 text-[#DC2626]">*</span>
-                    </label>
+                  <AdminFormField
+                    label="الدور"
+                    required
+                    error={errors.role?.message}
+                  >
                     <Controller
                       control={control}
                       name="role"
                       render={({ field }) => (
                         <StyledSelect
-                          id="role"
                           value={field.value}
                           onChange={field.onChange}
                           options={[
@@ -403,10 +393,7 @@ export default function CreateAdminUserDialog({
                         />
                       )}
                     />
-                    {errors.role && (
-                      <p className={errorClass}>{errors.role.message}</p>
-                    )}
-                  </div>
+                  </AdminFormField>
                 </div>
               </div>
 
