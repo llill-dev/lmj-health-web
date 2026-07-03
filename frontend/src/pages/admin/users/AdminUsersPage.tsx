@@ -1,3 +1,5 @@
+"use client";
+
 import { Helmet } from "react-helmet-async";
 import { useMemo, useState } from "react";
 import {
@@ -7,19 +9,15 @@ import {
   Search,
   ShieldPlus,
   UserCog,
-  UserMinus,
-  UserPlus,
   Users,
 } from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
-import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialog";
 import CreateAdminUserDialog from "@/components/admin/users/CreateAdminUserDialog";
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
 import StyledSelect from "@/components/ui/styled-select";
 import { useAdminUsers } from "@/hooks/admin/users/useAdminUsers";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type { AdminUserSummary } from "@/lib/admin/types";
-import ReboardDialog from "@/components/admin/users/ReboardDialog";
 
 type UserStatusFilter = "all" | "active" | "inactive";
 
@@ -50,17 +48,6 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [createOpen, setCreateOpen] = useState(false);
-  const [offboardOpen, setOffboardOpen] = useState(false);
-  const [offboardTarget, setOffboardTarget] = useState<{
-    userId: string;
-    label: string;
-  } | null>(null);
-
-  const [reboardOpen, setReboardOpen] = useState(false);
-  const [reboardTarget, setReboardTarget] = useState<{
-    userId: string;
-    label: string;
-  } | null>(null);
 
   const { users, isAwaitingData, isError, error, refetch } = useAdminUsers();
 
@@ -114,7 +101,7 @@ export default function AdminUsersPage() {
           variant="admin"
           surface="mint"
           title="مستخدمو الإدارة"
-          subtitle="إدارة حسابات الفريق الداخلي وإيقاف الوصول عند الحاجة"
+          subtitle="إدارة حسابات الفريق الداخلي. إيقاف وتفعيل الحسابات غير متاحين حالياً لأن المسارات غير موثقة في swagger_api.md"
           headerIcon={<UserCog className="h-8 w-8 text-white" />}
           actionLabel="إنشاء مستخدم"
           onActionClick={() => setCreateOpen(true)}
@@ -219,37 +206,9 @@ export default function AdminUsersPage() {
                   </div>
 
                   <div className="flex items-center justify-end gap-2">
-                    {user.isActive === false ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReboardTarget({
-                            userId: user.id,
-                            label: user.fullName,
-                          });
-                          setReboardOpen(true);
-                        }}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
-                      >
-                        <UserPlus className="h-3.5 w-3.5" />
-                        تفعيل الحساب
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOffboardTarget({
-                            userId: user.id,
-                            label: user.fullName,
-                          });
-                          setOffboardOpen(true);
-                        }}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
-                      >
-                        <UserMinus className="h-3.5 w-3.5" />
-                        إيقاف الحساب
-                      </button>
-                    )}
+                    <span className="inline-flex h-9 items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]">
+                      إيقاف/تفعيل الحساب غير متاح حالياً
+                    </span>
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
@@ -291,27 +250,6 @@ export default function AdminUsersPage() {
         ) : null}
 
         <CreateAdminUserDialog open={createOpen} onOpenChange={setCreateOpen} />
-
-        <OffboardDialog
-          open={offboardOpen}
-          onOpenChange={(open) => {
-            setOffboardOpen(open);
-            if (!open) setOffboardTarget(null);
-          }}
-          targetUserId={offboardTarget?.userId ?? null}
-          targetLabel={offboardTarget?.label ?? ""}
-          accountRole="staff"
-          onSuccess={() => void refetch()}
-        />
-        <ReboardDialog
-          open={reboardOpen}
-          onOpenChange={setReboardOpen}
-          userId={reboardTarget?.userId || ""}
-          userName={reboardTarget?.label || ""}
-          onSuccess={async () => {
-            await refetch();
-          }}
-        />
       </div>
     </>
   );
