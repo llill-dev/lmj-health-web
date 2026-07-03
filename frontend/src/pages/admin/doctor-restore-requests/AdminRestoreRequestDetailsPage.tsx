@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   AlertCircle,
-  ArrowRight,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
@@ -108,6 +107,7 @@ export default function AdminRestoreRequestDetailsPage() {
         variant: "error",
         durationMs: 4200,
       });
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
@@ -428,20 +428,8 @@ export default function AdminRestoreRequestDetailsPage() {
         confirmLabel={reviewAction === "approved" ? "قبول الطلب" : "رفض الطلب"}
         confirmDisabled={isSubmitting}
         onConfirm={handleReview}
-        successToast={
-          reviewAction === "approved"
-            ? {
-                title: "تم القبول",
-                message: "تم قبول طلب استعادة حساب الطبيب بنجاح",
-                variant: "success",
-              }
-            : {
-                title: "تم الرفض",
-                message: "تم رفض طلب استعادة حساب الطبيب",
-                variant: "success",
-              }
-        }
       />
     </>
   );
 }
+
