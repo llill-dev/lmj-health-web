@@ -315,14 +315,12 @@ export function useFacilityDoctors(
   params: FacilityDoctorsListParams = {},
   enabled = true,
 ) {
-  const qs = buildQs(params as Record<string, unknown>);
   const query = useQuery({
     queryKey: SERVICES_KEYS.facilityDoctors(facilityId, params),
     queryFn: () =>
-      get<FacilityDoctorsListResponse>(
-        `${adminEndpoints.facilities.listDoctors(facilityId)}${qs ? `?${qs}` : ""}`,
-        { locale: "ar" },
-      ).then(normalizeFacilityDoctorsResponse),
+      adminApi.facilities
+        .listDoctors(facilityId, params)
+        .then(normalizeFacilityDoctorsResponse),
     enabled: Boolean(facilityId) && enabled,
     staleTime: 30_000,
   });

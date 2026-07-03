@@ -63,6 +63,8 @@ import type {
   AdminLookupCreateBody,
   AdminLookupPatchBody,
   AdminLookupMutationResponse,
+  FacilityDoctorsListParams,
+  FacilityDoctorsListResponse,
 } from "@/lib/admin/types";
 
 function normalizeMedicalOrderCatalogList(
@@ -671,6 +673,25 @@ export const adminApi = {
         adminEndpoints.facilities.getById(id),
         { locale: "ar" },
       ),
+    listDoctors: (
+      id: string,
+      params: FacilityDoctorsListParams = {},
+    ) => {
+      const qs = new URLSearchParams();
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      if (params.q) qs.set("q", params.q);
+      if (params.name) qs.set("name", params.name);
+      if (params.specialty) qs.set("specialty", params.specialty);
+      if (params.status) qs.set("status", params.status);
+      if (params.sortBy) qs.set("sortBy", params.sortBy);
+      if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
+
+      const base = adminEndpoints.facilities.listDoctors(id);
+      const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
+
+      return get<FacilityDoctorsListResponse>(endpoint, { locale: "ar" });
+    },
     updateStatus: (id: string, status: string) =>
       patch<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
         adminEndpoints.facilities.updateStatus(id),
