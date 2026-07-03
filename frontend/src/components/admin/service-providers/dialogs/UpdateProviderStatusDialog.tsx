@@ -1,11 +1,11 @@
 "use client";
-import * as Dialog from "@radix-ui/react-dialog";
-import { motion } from "framer-motion";
-import { X, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, AlertTriangle, Check } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
+import { AdminFormField } from "@/components/admin/form-field";
 
 const STATUS_OPTIONS = [
   { value: "draft", label: "مسودة" },
@@ -33,6 +33,23 @@ export default function UpdateProviderStatusDialog({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(currentStatus);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSubmitting) onOpenChange(false);
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange, isSubmitting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,86 +83,103 @@ export default function UpdateProviderStatusDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-        <Dialog.Content asChild>
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="تغيير حالة مزود الخدمة"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !isSubmitting)
+              onOpenChange(false);
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+            className="relative max-h-[min(92vh,860px)] w-full max-w-[760px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">
-              <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FEF3C7] text-[#D97706]">
-                    <AlertTriangle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <Dialog.Title className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                      تغيير حالة مزود الخدمة
-                    </Dialog.Title>
-                    <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                      {providerName}
-                    </Dialog.Description>
-                  </div>
-                </div>
-                <Dialog.Close className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB]">
-                  <X className="h-4 w-4" />
-                </Dialog.Close>
+            <div className="relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[#E6F4F3]"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[url('/images/bg-status-from-appotiment.png')] bg-cover bg-center opacity-80"
+                aria-hidden
+              />
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                aria-label="إغلاق"
+              >
+                <X className="w-5 h-5" aria-hidden />
+              </button>
+              <div className="relative text-right">
+                <h2 className="font-cairo text-[22px] font-extrabold text-primary">
+                  تغيير حالة مزود الخدمة
+                </h2>
+                <p className="mt-1 font-cairo text-[13px] font-bold text-[#667085]">
+                  {providerName}
+                </p>
               </div>
+            </div>
 
-              <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-                {/* Status */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    الحالة الجديدة *
-                  </label>
-                  <StyledSelect
-                    value={status}
-                    onChange={setStatus}
-                    options={STATUS_OPTIONS}
-                    placeholder="اختر الحالة"
-                    size="sm"
-                    tone="muted"
-                  />
-                </div>
+            <form dir="rtl" onSubmit={handleSubmit}>
+              <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
+                <div className="space-y-5">
+                  <AdminFormField label="الحالة الجديدة" required>
+                    <StyledSelect
+                      value={status}
+                      onChange={setStatus}
+                      options={STATUS_OPTIONS}
+                      placeholder="اختر الحالة"
+                    />
+                  </AdminFormField>
 
-                {/* Warning */}
-                <div className="rounded-[8px] bg-[#FFFBEB] border border-[#FDE68A] p-3">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-[#D97706] mt-0.5" />
-                    <div className="font-cairo text-[11px] font-semibold text-[#92400E] leading-relaxed">
-                      سيؤثر تغيير الحالة على إمكانية عرض مزود الخدمة للمستخدمين.
-                      تأكد من صحة القرار قبل المتابعة.
+                  <div className="rounded-[12px] bg-[#FFFBEB] border border-[#FDE68A] p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-[#D97706] mt-0.5 shrink-0" />
+                      <div className="font-cairo text-[12px] font-semibold text-[#92400E] leading-relaxed">
+                        سيؤثر تغيير الحالة على إمكانية عرض مزود الخدمة
+                        للمستخدمين. تأكد من صحة القرار قبل المتابعة.
+                      </div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Actions */}
-                <div className="flex gap-3 pt-2">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
-                    >
-                      إلغاء
-                    </button>
-                  </Dialog.Close>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || status === currentStatus}
-                    className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isSubmitting ? "جارٍ التحديث..." : "تأكيد التغيير"}
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5">
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                  className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || status === currentStatus}
+                  className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
+                >
+                  <Check className="w-4 h-4" aria-hidden />
+                  {isSubmitting ? "جارٍ التحديث…" : "تأكيد التغيير"}
+                </button>
+              </div>
+            </form>
           </motion.div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

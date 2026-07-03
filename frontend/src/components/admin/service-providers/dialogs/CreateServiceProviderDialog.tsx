@@ -1,12 +1,18 @@
 "use client";
-import * as Dialog from "@radix-ui/react-dialog";
-import { motion } from "framer-motion";
-import { X, Building2, MapPin, Plus, Tag } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, Building2, MapPin, Plus, Tag, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { resolveLabel } from "@/lib/admin/types";
 import { adminApi } from "@/lib/admin/client";
+import {
+  AdminFormField,
+  adminFieldClass,
+  adminInputClass,
+  adminTextareaClass,
+} from "@/components/admin/form-field";
+import { cn } from "@/lib/utils/utils";
 
 const STATUS_OPTIONS = [
   { value: "draft", label: "مسودة" },
@@ -46,6 +52,23 @@ export default function CreateServiceProviderDialog({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [newAlias, setNewAlias] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSubmitting) onOpenChange(false);
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange, isSubmitting]);
 
   const typeOptions = serviceTypes.map((type) => ({
     value: type._id,
@@ -141,50 +164,62 @@ export default function CreateServiceProviderDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-        <div className="pointer-events-none fixed inset-0 z-[100] box-border grid place-items-center">
-          <Dialog.Content asChild forceMount>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="pointer-events-auto w-full max-w-2xl"
-            >
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="إنشاء مزود خدمة جديد"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !isSubmitting)
+              onOpenChange(false);
+          }}
+        >
+          <motion.div
+            className="relative max-h-[min(92vh,860px)] w-full max-w-[760px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8">
               <div
-                dir="rtl"
-                lang="ar"
-                className="bg-white rounded-[16px] shadow-2xl overflow-hidden"
+                className="pointer-events-none absolute inset-0 bg-[#E6F4F3]"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[url('/images/bg-status-from-appotiment.png')] bg-cover bg-center opacity-80"
+                aria-hidden
+              />
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                aria-label="إغلاق"
               >
-                <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Building2 className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <Dialog.Title className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                        إنشاء مزود خدمة جديد
-                      </Dialog.Title>
-                      <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                        أدخل بيانات مزود الخدمة
-                      </Dialog.Description>
-                    </div>
-                  </div>
-                  <Dialog.Close className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB]">
-                    <X className="h-4 w-4" />
-                  </Dialog.Close>
-                </div>
+                <X className="w-5 h-5" aria-hidden />
+              </button>
+              <div className="relative text-right">
+                <h2 className="font-cairo text-[22px] font-extrabold text-primary">
+                  إنشاء مزود خدمة جديد
+                </h2>
+              </div>
+            </div>
 
-                <form
-                  onSubmit={handleSubmit}
-                  className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto"
-                >
-                  {/* Service Type */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      نوع الخدمة *
-                    </label>
+            <form dir="rtl" onSubmit={handleSubmit}>
+              <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
+                <div className="space-y-5">
+                  <AdminFormField
+                    label="نوع الخدمة"
+                    required
+                    error={errors.serviceType}
+                  >
                     <StyledSelect
                       value={formData.serviceType}
                       onChange={(value) => {
@@ -197,21 +232,11 @@ export default function CreateServiceProviderDialog({
                       }}
                       options={typeOptions}
                       placeholder="اختر نوع الخدمة"
-                      size="sm"
-                      tone="muted"
+                      error={Boolean(errors.serviceType)}
                     />
-                    {errors.serviceType && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.serviceType}
-                      </p>
-                    )}
-                  </div>
+                  </AdminFormField>
 
-                  {/* Name */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      الاسم *
-                    </label>
+                  <AdminFormField label="الاسم" required error={errors.name}>
                     <input
                       type="text"
                       value={formData.name}
@@ -224,89 +249,81 @@ export default function CreateServiceProviderDialog({
                           setErrors((prev) => ({ ...prev, name: "" }));
                       }}
                       placeholder="أدخل اسم مزود الخدمة"
-                      className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.name
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
+                      className={adminFieldClass(
+                        cn(
+                          adminInputClass,
+                          "text-start placeholder:text-start",
+                        ),
+                        Boolean(errors.name),
+                      )}
                     />
-                    {errors.name && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.name}
-                      </p>
-                    )}
-                  </div>
+                  </AdminFormField>
 
-                  {/* City */}
                   <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      المدينة *
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                        <MapPin className="h-4 w-4" />
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.city}
-                        onChange={(e) => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            city: e.target.value,
-                          }));
-                          if (errors.city)
-                            setErrors((prev) => ({ ...prev, city: "" }));
-                        }}
-                        placeholder="أدخل المدينة"
-                        className={`w-full h-[44px] rounded-[10px] border bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                          errors.city
-                            ? "border-[#FECACA] bg-[#FEF2F2]"
-                            : "border-[#E5E7EB]"
-                        }`}
-                      />
+                    <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                      الموقع
+                    </h3>
+                    <div className="space-y-4">
+                      <AdminFormField
+                        label="المدينة"
+                        required
+                        error={errors.city}
+                      >
+                        <input
+                          type="text"
+                          value={formData.city}
+                          onChange={(e) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              city: e.target.value,
+                            }));
+                            if (errors.city)
+                              setErrors((prev) => ({ ...prev, city: "" }));
+                          }}
+                          placeholder="أدخل المدينة"
+                          className={adminFieldClass(
+                            cn(
+                              adminInputClass,
+                              "text-start placeholder:text-start",
+                            ),
+                            Boolean(errors.city),
+                          )}
+                        />
+                      </AdminFormField>
+
+                      <AdminFormField
+                        label="البلد"
+                        required
+                        error={errors.country}
+                      >
+                        <input
+                          type="text"
+                          value={formData.country}
+                          onChange={(e) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              country: e.target.value,
+                            }));
+                            if (errors.country)
+                              setErrors((prev) => ({ ...prev, country: "" }));
+                          }}
+                          placeholder="أدخل البلد"
+                          className={adminFieldClass(
+                            cn(
+                              adminInputClass,
+                              "text-start placeholder:text-start",
+                            ),
+                            Boolean(errors.country),
+                          )}
+                        />
+                      </AdminFormField>
                     </div>
-                    {errors.city && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.city}
-                      </p>
-                    )}
                   </div>
 
-                  {/* Country */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      البلد *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.country}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          country: e.target.value,
-                        }));
-                        if (errors.country)
-                          setErrors((prev) => ({ ...prev, country: "" }));
-                      }}
-                      placeholder="أدخل البلد"
-                      className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.country
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
-                    />
-                    {errors.country && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.country}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Data (Optional) */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      بيانات إضافية (اختياري)
-                    </label>
+                  <AdminFormField
+                    label="بيانات إضافية"
+                    hint="بيانات إضافية بصيغة JSON (اختياري)"
+                  >
                     <textarea
                       value={formData.data}
                       onChange={(e) => {
@@ -315,66 +332,78 @@ export default function CreateServiceProviderDialog({
                           data: e.target.value,
                         }));
                       }}
-                      placeholder="بيانات إضافية بصيغة JSON (اختياري)"
+                      placeholder="بيانات إضافية بصيغة JSON"
                       rows={2}
-                      className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[11px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none font-mono"
+                      className={adminFieldClass(
+                        cn(
+                          adminTextareaClass,
+                          "text-start placeholder:text-start font-mono",
+                        ),
+                        false,
+                      )}
                     />
-                  </div>
+                  </AdminFormField>
 
-                  {/* Aliases */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      الأسماء البديلة
-                    </label>
-                    <div className="flex gap-2 mb-2">
+                  <AdminFormField label="الأسماء البديلة">
+                    <div className="flex gap-2 items-center">
                       <input
-                        type="text"
                         value={newAlias}
-                        onChange={(e) => setNewAlias(e.target.value)}
-                        placeholder="أضف اسماً بديلاً"
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
+                        onChange={(event) => setNewAlias(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
                             addAlias();
                           }
                         }}
-                        className="flex-1 h-[44px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15"
+                        placeholder="أضف اسماً بديلاً"
+                        disabled={isSubmitting}
+                        className={adminFieldClass(
+                          cn(
+                            adminInputClass,
+                            "text-start placeholder:text-start",
+                          ),
+                          false,
+                        )}
                       />
                       <button
                         type="button"
                         onClick={addAlias}
-                        className="h-[44px] w-[44px] flex items-center justify-center rounded-[10px] border border-primary bg-primary text-white transition hover:bg-primary/90"
+                        disabled={isSubmitting || !newAlias.trim()}
+                        className="inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[12px] bg-primary text-white disabled:opacity-50"
+                        aria-label="إضافة اسم بديل"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="w-4 h-4" aria-hidden />
                       </button>
                     </div>
-                    {formData.aliases.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
+                    {formData.aliases.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mt-3">
                         {formData.aliases.map((alias) => (
                           <span
                             key={alias}
-                            className="inline-flex items-center gap-1 rounded-[8px] bg-[#F0FDF4] border border-[#BBF7D0] px-3 py-1.5 font-cairo text-[11px] font-bold text-[#166534]"
+                            className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#E6F4F3] px-3 py-1 font-cairo text-[11px] font-bold text-primary"
                           >
-                            <Tag className="h-3 w-3" />
+                            <Tag className="w-3 h-3" aria-hidden />
                             {alias}
                             <button
                               type="button"
                               onClick={() => removeAlias(alias)}
-                              className="mr-1 text-[#166534] hover:text-[#DC2626] transition"
+                              disabled={isSubmitting}
+                              className="text-primary/70 transition hover:text-[#B42318] disabled:opacity-50"
+                              aria-label={`إزالة ${alias}`}
                             >
-                              <X className="h-3 w-3" />
+                              <X className="w-3 h-3" aria-hidden />
                             </button>
                           </span>
                         ))}
                       </div>
+                    ) : (
+                      <p className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                        لا توجد أسماء بديلة مضافة بعد.
+                      </p>
                     )}
-                  </div>
+                  </AdminFormField>
 
-                  {/* Status */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      الحالة *
-                    </label>
+                  <AdminFormField label="الحالة" required>
                     <StyledSelect
                       value={formData.status}
                       onChange={(value) =>
@@ -382,35 +411,33 @@ export default function CreateServiceProviderDialog({
                       }
                       options={STATUS_OPTIONS}
                       placeholder="اختر الحالة"
-                      size="sm"
-                      tone="muted"
                     />
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-2">
-                    <Dialog.Close asChild>
-                      <button
-                        type="button"
-                        className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
-                      >
-                        إلغاء
-                      </button>
-                    </Dialog.Close>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isSubmitting ? "جارٍ الإنشاء..." : "إنشاء مزود الخدمة"}
-                    </button>
-                  </div>
-                </form>
+                  </AdminFormField>
+                </div>
               </div>
-            </motion.div>
-          </Dialog.Content>
-        </div>
-      </Dialog.Portal>
-    </Dialog.Root>
+
+              <div className="grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5">
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                  className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
+                >
+                  <Save className="w-4 h-4" aria-hidden />
+                  {isSubmitting ? "جارٍ الإنشاء…" : "إنشاء مزود الخدمة"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
