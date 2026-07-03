@@ -132,9 +132,9 @@ export const adminEndpoints = {
   },
   serviceProviders: {
     list: "/api/services",
-    getById: (id: string) => `/api/admin/services/${id}`,
-    create: "/api/admin/service-providers",
-    update: (id: string) => `/api/admin/service-providers/${id}`,
-    updateStatus: (id: string) => `/api/admin/service-providers/${id}/status`,
+    getById: (id: string) => `/api/services/${id}`,
+    create: "/api/service-providers",
+    update: (id: string) => `/api/service-providers/${id}`,
+    updateStatus: (id: string) => `/api/service-providers/${id}/status`,
   },
 } as const;
