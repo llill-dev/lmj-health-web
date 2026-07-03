@@ -419,7 +419,7 @@ export function useCreateProvider() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateProviderBody) =>
-      post(adminEndpoints.serviceProviders.create, body, { locale: "ar" }),
+      adminApi.serviceProviders.create(body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
     },
@@ -430,9 +430,7 @@ export function useUpdateProvider(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: UpdateProviderBody) =>
-      put(adminEndpoints.serviceProviders.update(id), body, {
-        locale: "ar",
-      }),
+      adminApi.serviceProviders.update(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
     },
@@ -443,11 +441,7 @@ export function useUpdateProviderStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
-      patch(
-        adminEndpoints.serviceProviders.updateStatus(id),
-        { status },
-        { locale: "ar" },
-      ),
+      adminApi.serviceProviders.updateStatus(id, { status }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
     },

@@ -1,4 +1,5 @@
 @import "@fontsource/cairo";
+@import "./ios-fixes.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -121,3 +122,4 @@ html {
     display: none;
   }
 }
+

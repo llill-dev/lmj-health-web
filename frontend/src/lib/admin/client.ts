@@ -1,4 +1,4 @@
-import { ApiError, del, get, patch, post } from "@/lib/api";
+import { ApiError, del, get, patch, post, put } from "@/lib/api";
 import { adminEndpoints } from "@/lib/admin/endpoints";
 import type {
   AppointmentCancelResponse,
@@ -634,7 +634,7 @@ export const adminApi = {
         status?: string;
       },
     ) =>
-      patch<ApiSuccessEnvelope>(
+      put<ApiSuccessEnvelope>(
         adminEndpoints.serviceProviders.update(id),
         body,
         { locale: "ar" },

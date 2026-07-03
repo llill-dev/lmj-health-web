@@ -1250,8 +1250,12 @@ export type ServiceProvidersListResponse = {
 
 export type CreateProviderBody = {
   serviceType: string;
-  status?: ProviderStatus;
-  data: Record<string, unknown>;
+  name: string;
+  city?: string;
+  country?: string;
+  data?: Record<string, unknown>;
+  aliases?: string[];
+  status?: string;
 };
 
 export type UpdateProviderBody = {
