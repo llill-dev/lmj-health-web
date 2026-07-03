@@ -1,33 +1,40 @@
-'use client';
+"use client";
 
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { useEffect } from 'react';
-import { useForm, type Resolver } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateLookup, usePatchLookup } from '@/hooks/admin/lookups/useAdminLookupMutations';
-import type { AdminLookupCategory, AdminLookupRecord } from '@/lib/admin/types';
-import { generateLookupMachineKey } from '@/lib/admin/lookups/lookupKey';
-import { resolveLookupText, resolveLookupSecondaryText } from '@/lib/admin/lookups/lookupUtils';
-import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
-import { useToast } from '@/components/ui/ToastProvider';
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
+import { useEffect } from "react";
+import { useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useCreateLookup,
+  usePatchLookup,
+} from "@/hooks/admin/lookups/useAdminLookupMutations";
+import type { AdminLookupCategory, AdminLookupRecord } from "@/lib/admin/types";
+import { generateLookupMachineKey } from "@/lib/admin/lookups/lookupKey";
+import {
+  resolveLookupText,
+  resolveLookupSecondaryText,
+} from "@/lib/admin/lookups/lookupUtils";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
+import { useToast } from "@/components/ui/ToastProvider";
+import {
+  AdminFormField,
+  adminFieldClass,
+  adminInputClass,
+} from "@/components/admin/form-field";
 
 const schema = z.object({
   key: z
     .string()
-    .min(1, 'المفتاح مطلوب')
-    .regex(/^[a-z][a-z0-9_]*$/, 'حروف إنجليزية صغيرة، أرقام، شرطة سفلية'),
-  textAr: z.string().min(1, 'الاسم العربي مطلوب'),
+    .min(1, "المفتاح مطلوب")
+    .regex(/^[a-z][a-z0-9_]*$/, "حروف إنجليزية صغيرة، أرقام، شرطة سفلية"),
+  textAr: z.string().min(1, "الاسم العربي مطلوب"),
   textEn: z.string(),
   order: z.coerce.number().int().min(0),
 });
 
 type FormValues = z.infer<typeof schema>;
-
-const inputClass =
-  'h-[40px] w-full rounded-[10px] border border-[#D0D5DD] bg-white px-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15';
 
 export default function UpsertDoctorLookupDialog({
   open,
@@ -53,9 +60,9 @@ export default function UpsertDoctorLookupDialog({
   } = useForm<FormValues>({
     resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: {
-      key: '',
-      textAr: '',
-      textEn: '',
+      key: "",
+      textAr: "",
+      textEn: "",
       order: 0,
     },
   });
@@ -67,17 +74,17 @@ export default function UpsertDoctorLookupDialog({
     if (editTarget) {
       reset({
         key: editTarget.key,
-        textAr: resolveLookupText(editTarget.text, 'ar'),
+        textAr: resolveLookupText(editTarget.text, "ar"),
         textEn:
-          resolveLookupText(editTarget.text, 'en') ||
-          resolveLookupSecondaryText(editTarget.text, 'ar'),
+          resolveLookupText(editTarget.text, "en") ||
+          resolveLookupSecondaryText(editTarget.text, "ar"),
         order: editTarget.order ?? 0,
       });
     } else {
       reset({
         key: generateLookupMachineKey(),
-        textAr: '',
-        textEn: '',
+        textAr: "",
+        textEn: "",
         order: 0,
       });
     }
@@ -86,7 +93,7 @@ export default function UpsertDoctorLookupDialog({
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
@@ -108,8 +115,8 @@ export default function UpsertDoctorLookupDialog({
           },
         });
         toast(`تم تحديث التخصص «${values.textAr}».`, {
-          title: 'تم الحفظ',
-          variant: 'success',
+          title: "تم الحفظ",
+          variant: "success",
           durationMs: 3800,
         });
       } else {
@@ -120,8 +127,8 @@ export default function UpsertDoctorLookupDialog({
           order: values.order,
         });
         toast(`تمت إضافة التخصص «${values.textAr}» إلى الكتالوج.`, {
-          title: 'تمت الإضافة',
-          variant: 'success',
+          title: "تمت الإضافة",
+          variant: "success",
           durationMs: 3800,
         });
       }
@@ -135,153 +142,161 @@ export default function UpsertDoctorLookupDialog({
   const serverErr = createMut.error ?? patchMut.error;
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={onOpenChange}
-    >
-      <Dialog.Portal>
-        <Dialog.Overlay
-          forceMount
-          asChild
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) onOpenChange(false);
+          }}
         >
           <motion.div
-            initial={false}
-            animate={{ opacity: open ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
-            className='fixed inset-0 z-[120] bg-black/45 backdrop-blur-[2px]'
-          />
-        </Dialog.Overlay>
-
-        <Dialog.Content className='fixed left-1/2 top-1/2 z-[121] w-[min(520px,calc(100vw-24px))] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[#E8ECEF] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.18)]'>
-          <div className='flex gap-3 justify-between items-start border-b border-[#F2F4F7] px-5 py-4'>
-            <Dialog.Close className='p-1.5 rounded-full text-[#98A2B3] transition hover:bg-[#F9FAFB] hover:text-[#475467]'>
-              <X className='w-5 h-5' />
-            </Dialog.Close>
-            <div className='text-right'>
-              <Dialog.Title className='font-cairo text-[16px] font-black text-[#111827]'>
-                {isEdit ? 'تعديل تخصص' : 'إضافة تخصص طبيب'}
-              </Dialog.Title>
-            </div>
-          </div>
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className='px-5 py-5 space-y-4'
+            className="relative w-[min(520px,calc(100vw-24px))] overflow-hidden rounded-[14px] border border-[#E8ECEF] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.18)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            <div>
-              <div className='flex gap-4 justify-end items-center my-2'>
-                {!isEdit ? (
-                  <button
-                    type='button'
-                    disabled={busy}
-                    onClick={() =>
-                      setValue('key', generateLookupMachineKey(), {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
-                    }
-                    className='rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#475467] transition hover:border-primary/35 hover:bg-[#F0FDFA] hover:text-primary disabled:opacity-50'
-                  >
-                    توليد مفتاح جديد
-                  </button>
-                ) : null}
-                <label className='block font-cairo text-[12px] font-bold text-[#344054]'>
-                  المفتاح (machine key)
-                </label>
-              </div>
-              <input
-                {...register('key')}
-                dir='ltr'
-                className={`font-mono ${inputClass} text-[12px]`}
-                placeholder='cardiology'
-                disabled={busy}
-              />
-              {errors.key && (
-                <p className='mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]'>
-                  {errors.key.message}
-                </p>
-              )}
-            </div>
-
-            <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-              <div>
-                <label className='mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                  الاسم العربي
-                </label>
-                <input
-                  {...register('textAr')}
-                  className={inputClass}
-                  disabled={busy}
-                />
-                {errors.textAr && (
-                  <p className='mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]'>
-                    {errors.textAr.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className='mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                  الاسم الإنجليزي
-                </label>
-                <input
-                  {...register('textEn')}
-                  dir='ltr'
-                  className={inputClass}
-                  disabled={busy}
-                />
-                {errors.textEn && (
-                  <p className='mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]'>
-                    {errors.textEn.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className='mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                الترتيب
-              </label>
-              <input
-                type='number'
-                {...register('order')}
-                className={inputClass}
-                disabled={busy}
-              />
-              {errors.order && (
-                <p className='mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]'>
-                  {errors.order.message}
-                </p>
-              )}
-            </div>
-
-            {serverErr && (
-              <div className='rounded-[10px] border border-red-200 bg-red-50 px-3 py-2 text-right'>
-                <p className='font-cairo text-[12px] font-semibold text-red-800'>
-                  {userFacingErrorMessage(serverErr)}
-                </p>
-              </div>
-            )}
-
-            <div className='flex flex-wrap items-center justify-end gap-2 border-t border-[#F2F4F7] pt-4'>
+            <div className="flex gap-3 justify-between items-start border-b border-[#F2F4F7] px-5 py-4">
               <button
-                type='button'
-                disabled={busy}
+                type="button"
                 onClick={() => onOpenChange(false)}
-                className='h-[40px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#475467]'
+                className="p-1.5 rounded-full text-[#98A2B3] transition hover:bg-[#F9FAFB] hover:text-[#475467]"
               >
-                إلغاء
+                <X className="w-5 h-5" />
               </button>
-              <button
-                type='submit'
-                disabled={busy}
-                className='inline-flex h-[40px] min-w-[120px] items-center justify-center rounded-[10px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_28px_rgba(15,143,139,0.28)] disabled:opacity-60'
-              >
-                {busy ? 'جاري الحفظ…' : isEdit ? 'حفظ التعديلات' : 'إضافة'}
-              </button>
+              <div className="text-right">
+                <h3 className="font-cairo text-[16px] font-black text-[#111827]">
+                  {isEdit ? "تعديل تخصص" : "إضافة تخصص طبيب"}
+                </h3>
+              </div>
             </div>
-          </form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="px-5 py-5 space-y-4"
+            >
+              <div>
+                <div className="flex gap-4 justify-end items-center my-2">
+                  {!isEdit ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        setValue("key", generateLookupMachineKey(), {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                      className="rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#475467] transition hover:border-primary/35 hover:bg-[#F0FDFA] hover:text-primary disabled:opacity-50"
+                    >
+                      توليد مفتاح جديد
+                    </button>
+                  ) : null}
+                  <label className="block font-cairo text-[12px] font-bold text-[#344054]">
+                    المفتاح (machine key)
+                  </label>
+                </div>
+                <input
+                  {...register("key")}
+                  dir="ltr"
+                  className={`font-mono ${adminInputClass} text-[12px]`}
+                  placeholder="cardiology"
+                  disabled={busy}
+                />
+                {errors.key && (
+                  <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                    {errors.key.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
+                    الاسم العربي
+                  </label>
+                  <input
+                    {...register("textAr")}
+                    className={adminInputClass}
+                    disabled={busy}
+                  />
+                  {errors.textAr && (
+                    <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                      {errors.textAr.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
+                    الاسم الإنجليزي
+                  </label>
+                  <input
+                    {...register("textEn")}
+                    dir="ltr"
+                    className={adminInputClass}
+                    disabled={busy}
+                  />
+                  {errors.textEn && (
+                    <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                      {errors.textEn.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
+                  الترتيب
+                </label>
+                <input
+                  type="number"
+                  {...register("order")}
+                  className={adminInputClass}
+                  disabled={busy}
+                />
+                {errors.order && (
+                  <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                    {errors.order.message}
+                  </p>
+                )}
+              </div>
+
+              {serverErr && (
+                <div className="rounded-[10px] border border-red-200 bg-red-50 px-3 py-2 text-right">
+                  <p className="font-cairo text-[12px] font-semibold text-red-800">
+                    {userFacingErrorMessage(serverErr)}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#F2F4F7] pt-4">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onOpenChange(false)}
+                  className="h-[40px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#475467]"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="inline-flex h-[40px] min-w-[120px] items-center justify-center rounded-[10px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_28px_rgba(15,143,139,0.28)] disabled:opacity-60"
+                >
+                  {busy ? "جاري الحفظ…" : isEdit ? "حفظ التعديلات" : "إضافة"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

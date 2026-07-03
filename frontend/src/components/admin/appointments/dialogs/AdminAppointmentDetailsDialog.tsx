@@ -1,6 +1,5 @@
-'use client';
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion } from 'framer-motion';
+"use client";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
   CalendarDays,
@@ -14,11 +13,11 @@ import {
   FolderOpen,
   Paperclip,
   ShieldCheck,
-} from 'lucide-react';
-import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { adminApi } from '@/lib/admin/client';
-import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+} from "lucide-react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { adminApi } from "@/lib/admin/client";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 export default function AdminAppointmentDetailsDialog({
   open,
@@ -32,8 +31,9 @@ export default function AdminAppointmentDetailsDialog({
   const enabled = open && !!appointmentId;
 
   const detailsQuery = useQuery({
-    queryKey: ['admin', 'appointment', appointmentId],
-    queryFn: async () => adminApi.appointments.getDetails(String(appointmentId)),
+    queryKey: ["admin", "appointment", appointmentId],
+    queryFn: async () =>
+      adminApi.appointments.getDetails(String(appointmentId)),
     enabled,
     staleTime: 10_000,
   });
@@ -46,7 +46,7 @@ export default function AdminAppointmentDetailsDialog({
     const scrollbarWidth =
       window.innerWidth - document.documentElement.clientWidth;
 
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     if (scrollbarWidth > 0) {
       document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
@@ -65,19 +65,19 @@ export default function AdminAppointmentDetailsDialog({
   );
 
   function formatDateTime(value?: string | null) {
-    if (!value) return '—';
+    if (!value) return "—";
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime())
       ? value
-      : parsed.toLocaleString('ar-SA');
+      : parsed.toLocaleString("ar-SA");
   }
 
   function formatBytes(value?: number | null) {
-    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
-      return '—';
+    if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+      return "—";
     }
 
-    if (value < 1024) return `${value.toLocaleString('ar-SA')} B`;
+    if (value < 1024) return `${value.toLocaleString("ar-SA")} B`;
     const kb = value / 1024;
     if (kb < 1024) return `${kb.toFixed(kb >= 100 ? 0 : 1)} KB`;
     const mb = kb / 1024;
@@ -85,311 +85,278 @@ export default function AdminAppointmentDetailsDialog({
   }
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={onOpenChange}
-    >
-        <Dialog.Portal>
-          <Dialog.Overlay
-            forceMount
-            asChild
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) onOpenChange(false);
+          }}
+        >
+          <motion.div
+            className="relative w-[720px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
+            dir="rtl"
+            lang="ar"
           >
-            <motion.div
-              initial={false}
-              animate={open ? 'open' : 'closed'}
-              variants={{
-                open: {
-                  opacity: 1,
-                  visibility: 'visible',
-                  pointerEvents: 'auto',
-                  transition: { duration: 0.22, ease: 'easeOut' },
-                },
-                closed: {
-                  opacity: 0,
-                  transition: { duration: 0.22, ease: 'easeOut' },
-                  pointerEvents: 'none',
-                  transitionEnd: { visibility: 'hidden' },
-                },
-              }}
-              className='fixed inset-0 z-[9999] bg-black/45 backdrop-blur-[2px]'
-              style={{ touchAction: 'none' }}
-            />
-          </Dialog.Overlay>
+            <div className="relative px-8 pb-7 pt-7">
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                aria-label="إغلاق"
+              >
+                <X className="h-5 w-5" />
+              </button>
 
-          <Dialog.Content
-            forceMount
-            asChild
-          >
-            <motion.div
-              initial={false}
-              animate={open ? 'open' : 'closed'}
-              variants={{
-                open: {
-                  opacity: 1,
-                  visibility: 'visible',
-                  pointerEvents: 'auto',
-                  transition: { duration: 0.18, ease: 'easeOut' },
-                },
-                closed: {
-                  opacity: 0,
-                  transition: { duration: 0.18, ease: 'easeOut' },
-                  pointerEvents: 'none',
-                  transitionEnd: { visibility: 'hidden' },
-                },
-              }}
-              className='fixed left-1/2 top-1/2 z-[10000] w-[720px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
-              dir='rtl'
-              lang='ar'
-            >
-              <div className='relative px-8 pb-7 pt-7'>
-                <Dialog.Close asChild>
-                  <button
-                    type='button'
-                    className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
-                    aria-label='إغلاق'
-                  >
-                    <X className='h-5 w-5' />
-                  </button>
-                </Dialog.Close>
+              <h2 className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
+                تفاصيل الموعد
+              </h2>
 
-                <Dialog.Title className='text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]'>
-                  تفاصيل الموعد
-                </Dialog.Title>
-
-                {detailsAwaiting ? (
-                  <div className='mt-6 font-cairo text-[13px] font-semibold text-[#667085]'>
-                    جارِ التحميل...
-                  </div>
-                ) : detailsQuery.isError ? (
-                  <div className='mt-6 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[13px] font-bold text-[#991B1B]'>
-                    تعذّر تحميل تفاصيل الموعد.
-                  </div>
-                ) : !appointment ? (
-                  <div className='mt-6 font-cairo text-[13px] font-semibold text-[#667085]'>
-                    لا توجد بيانات.
-                  </div>
-                ) : (
-                  <>
-                    <div className='mt-6 grid grid-cols-2 gap-4'>
-                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <CalendarDays className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            التاريخ/الوقت
-                          </div>
-                        </div>
-                        <div className='mt-3 space-y-2 font-cairo text-[12px] font-bold text-[#344054]'>
-                          <div className='flex items-center gap-2'>
-                            <Clock className='h-4 w-4 text-primary' />
-                            <span>{appointment.startTime ?? '—'}</span>
-                          </div>
-                          <div className='text-[#667085]'>
-                            {appointment.date ??
-                              (appointment.startDateTime
-                                ? new Date(appointment.startDateTime).toLocaleString()
-                                : '—')}
-                          </div>
+              {detailsAwaiting ? (
+                <div className="mt-6 font-cairo text-[13px] font-semibold text-[#667085]">
+                  جارِ التحميل...
+                </div>
+              ) : detailsQuery.isError ? (
+                <div className="mt-6 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[13px] font-bold text-[#991B1B]">
+                  تعذّر تحميل تفاصيل الموعد.
+                </div>
+              ) : !appointment ? (
+                <div className="mt-6 font-cairo text-[13px] font-semibold text-[#667085]">
+                  لا توجد بيانات.
+                </div>
+              ) : (
+                <>
+                  <div className="mt-6 grid grid-cols-2 gap-4">
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <CalendarDays className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          التاريخ/الوقت
                         </div>
                       </div>
-
-                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <Ban className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            الحالة
-                          </div>
+                      <div className="mt-3 space-y-2 font-cairo text-[12px] font-bold text-[#344054]">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-primary" />
+                          <span>{appointment.startTime ?? "—"}</span>
                         </div>
-                        <div className='mt-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                          {appointment.status}
-                        </div>
-                        {appointment.cancelReason ? (
-                          <div className='mt-2 font-cairo text-[12px] font-semibold text-[#667085]'>
-                            سبب الإلغاء: {appointment.cancelReason}
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <User className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            المريض
-                          </div>
-                        </div>
-                        <div className='mt-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                          {appointment.patient?.userId?.fullName ??
-                            appointment.patient?.publicId ??
-                            '—'}
-                        </div>
-                      </div>
-
-                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <Stethoscope className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            الطبيب
-                          </div>
-                        </div>
-                        <div className='mt-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                          {appointment.doctor?.userId?.fullName ?? '—'}
-                        </div>
-                        {appointment.doctor?.specialization ? (
-                          <div className='mt-2 font-cairo text-[12px] font-semibold text-[#667085]'>
-                            {appointment.doctor.specialization}
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <Tag className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            نوع الموعد
-                          </div>
-                        </div>
-                        <div className='mt-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                          {appointment.appointmentTypeNameSnapshot ??
-                            appointment.appointmentType ??
-                            '—'}
-                        </div>
-                      </div>
-
-                      <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <Wallet className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            السعر (لقطة)
-                          </div>
-                        </div>
-                        <div className='mt-3 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                          {typeof appointment.priceSnapshot === 'number'
-                            ? appointment.priceSnapshot.toLocaleString('ar-SA')
-                            : '—'}
+                        <div className="text-[#667085]">
+                          {appointment.date ??
+                            (appointment.startDateTime
+                              ? new Date(
+                                  appointment.startDateTime,
+                                ).toLocaleString()
+                              : "—")}
                         </div>
                       </div>
                     </div>
 
-                    {appointment.notes ? (
-                      <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <FileText className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            ملاحظات
-                          </div>
-                        </div>
-                        <div className='mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#344054]'>
-                          {appointment.notes}
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Ban className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          الحالة
                         </div>
                       </div>
-                    ) : null}
+                      <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
+                        {appointment.status}
+                      </div>
+                      {appointment.cancelReason ? (
+                        <div className="mt-2 font-cairo text-[12px] font-semibold text-[#667085]">
+                          سبب الإلغاء: {appointment.cancelReason}
+                        </div>
+                      ) : null}
+                    </div>
 
-                    {appointment.encounter ? (
-                      <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <FolderOpen className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            ملخص الـ encounter
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <User className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          المريض
+                        </div>
+                      </div>
+                      <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
+                        {appointment.patient?.userId?.fullName ??
+                          appointment.patient?.publicId ??
+                          "—"}
+                      </div>
+                    </div>
+
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Stethoscope className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          الطبيب
+                        </div>
+                      </div>
+                      <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
+                        {appointment.doctor?.userId?.fullName ?? "—"}
+                      </div>
+                      {appointment.doctor?.specialization ? (
+                        <div className="mt-2 font-cairo text-[12px] font-semibold text-[#667085]">
+                          {appointment.doctor.specialization}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Tag className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          نوع الموعد
+                        </div>
+                      </div>
+                      <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
+                        {appointment.appointmentTypeNameSnapshot ??
+                          appointment.appointmentType ??
+                          "—"}
+                      </div>
+                    </div>
+
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Wallet className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          السعر (لقطة)
+                        </div>
+                      </div>
+                      <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
+                        {typeof appointment.priceSnapshot === "number"
+                          ? appointment.priceSnapshot.toLocaleString("ar-SA")
+                          : "—"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {appointment.notes ? (
+                    <div className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <FileText className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          ملاحظات
+                        </div>
+                      </div>
+                      <div className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#344054]">
+                        {appointment.notes}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {appointment.encounter ? (
+                    <div className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <FolderOpen className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          ملخص الـ encounter
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
+                          <div className="text-[#98A2B3]">المعرّف</div>
+                          <div className="mt-1 break-all font-bold text-[#111827]">
+                            {appointment.encounter._id ?? "—"}
                           </div>
                         </div>
 
-                        <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
-                            <div className='text-[#98A2B3]'>المعرّف</div>
-                            <div className='mt-1 break-all font-bold text-[#111827]'>
-                              {appointment.encounter._id ?? '—'}
-                            </div>
+                        <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
+                          <div className="text-[#98A2B3]">الحالة / المصدر</div>
+                          <div className="mt-1 font-bold text-[#111827]">
+                            {appointment.encounter.status ?? "—"}
+                            {appointment.encounter.origin
+                              ? ` • ${appointment.encounter.origin}`
+                              : ""}
                           </div>
+                        </div>
 
-                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
-                            <div className='text-[#98A2B3]'>الحالة / المصدر</div>
-                            <div className='mt-1 font-bold text-[#111827]'>
-                              {appointment.encounter.status ?? '—'}
-                              {appointment.encounter.origin
-                                ? ` • ${appointment.encounter.origin}`
-                                : ''}
-                            </div>
+                        <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
+                          <div className="text-[#98A2B3]">بدأ في</div>
+                          <div className="mt-1 font-bold text-[#111827]">
+                            {formatDateTime(appointment.encounter.startedAt)}
                           </div>
+                        </div>
 
-                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
-                            <div className='text-[#98A2B3]'>بدأ في</div>
-                            <div className='mt-1 font-bold text-[#111827]'>
-                              {formatDateTime(appointment.encounter.startedAt)}
-                            </div>
-                          </div>
-
-                          <div className='rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]'>
-                            <div className='text-[#98A2B3]'>أُغلق في</div>
-                            <div className='mt-1 font-bold text-[#111827]'>
-                              {formatDateTime(appointment.encounter.closedAt)}
-                            </div>
+                        <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
+                          <div className="text-[#98A2B3]">أُغلق في</div>
+                          <div className="mt-1 font-bold text-[#111827]">
+                            {formatDateTime(appointment.encounter.closedAt)}
                           </div>
                         </div>
                       </div>
-                    ) : null}
+                    </div>
+                  ) : null}
 
-                    {appointmentFiles.length > 0 ? (
-                      <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4'>
-                        <div className='flex items-center gap-2 text-primary'>
-                          <Paperclip className='h-4 w-4' />
-                          <div className='font-cairo text-[12px] font-extrabold'>
-                            المرفقات المرتبطة بالموعد
-                          </div>
+                  {appointmentFiles.length > 0 ? (
+                    <div className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Paperclip className="h-4 w-4" />
+                        <div className="font-cairo text-[12px] font-extrabold">
+                          المرفقات المرتبطة بالموعد
                         </div>
+                      </div>
 
-                        <div className='mt-3 space-y-3'>
-                          {appointmentFiles.map((file) => (
-                            <div
-                              key={file.id ?? file._id}
-                              className='rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3'
-                            >
-                              <div className='flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between'>
-                                <div className='min-w-0 text-right'>
-                                  <div className='break-all font-cairo text-[12px] font-extrabold text-[#111827]'>
-                                    {file.originalName ?? file.id ?? file._id}
-                                  </div>
-                                  <div className='mt-1 flex flex-wrap items-center justify-end gap-2 font-cairo text-[11px] font-semibold text-[#667085]'>
-                                    <span dir='ltr'>{file.mimeType ?? '—'}</span>
-                                    <span>•</span>
-                                    <span>{formatBytes(file.sizeBytes)}</span>
-                                    <span>•</span>
-                                    <span>
-                                      {file.isArchived ? 'مؤرشف' : 'نشط'}
-                                    </span>
-                                  </div>
+                      <div className="mt-3 space-y-3">
+                        {appointmentFiles.map((file) => (
+                          <div
+                            key={file.id ?? file._id}
+                            className="rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3"
+                          >
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0 text-right">
+                                <div className="break-all font-cairo text-[12px] font-extrabold text-[#111827]">
+                                  {file.originalName ?? file.id ?? file._id}
                                 </div>
+                                <div className="mt-1 flex flex-wrap items-center justify-end gap-2 font-cairo text-[11px] font-semibold text-[#667085]">
+                                  <span dir="ltr">{file.mimeType ?? "—"}</span>
+                                  <span>•</span>
+                                  <span>{formatBytes(file.sizeBytes)}</span>
+                                  <span>•</span>
+                                  <span>
+                                    {file.isArchived ? "مؤرشف" : "نشط"}
+                                  </span>
+                                </div>
+                              </div>
 
-                                <div className='rounded-[8px] bg-white px-3 py-2 text-right font-cairo text-[11px] font-semibold text-[#475467]'>
-                                  <div className='flex items-center justify-end gap-1 text-[#16A34A]'>
-                                    <ShieldCheck className='h-3.5 w-3.5' />
-                                    <span>{file.linkedByRole ?? '—'}</span>
-                                  </div>
-                                  <div className='mt-1'>
-                                    {formatDateTime(file.linkedAt)}
-                                  </div>
+                              <div className="rounded-[8px] bg-white px-3 py-2 text-right font-cairo text-[11px] font-semibold text-[#475467]">
+                                <div className="flex items-center justify-end gap-1 text-[#16A34A]">
+                                  <ShieldCheck className="h-3.5 w-3.5" />
+                                  <span>{file.linkedByRole ?? "—"}</span>
+                                </div>
+                                <div className="mt-1">
+                                  {formatDateTime(file.linkedAt)}
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
-                    ) : null}
-
-                    <div className='mt-6 flex items-center justify-end gap-3'>
-                      <Dialog.Close asChild>
-                        <button
-                          type='button'
-                          className='h-[40px] rounded-[10px] bg-primary px-8 font-cairo text-[12px] font-extrabold text-white'
-                        >
-                          إغلاق
-                        </button>
-                      </Dialog.Close>
                     </div>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+                  ) : null}
+
+                  <div className="mt-6 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => onOpenChange(false)}
+                      className="h-[40px] rounded-[10px] bg-primary px-8 font-cairo text-[12px] font-extrabold text-white"
+                    >
+                      إغلاق
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
