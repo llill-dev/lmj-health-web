@@ -45,7 +45,7 @@ export default function AdminSecretariesPage() {
   const { doctors: doctorOptions, isAwaitingData: doctorsListAwaiting } =
     useAdminDoctors({
       page: 1,
-      limit: 200,
+      limit: 100,
       status: "approved",
     });
 
@@ -304,9 +304,12 @@ export default function AdminSecretariesPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            navigate(`/admin/secretaries/${s._id}/appointments`, {
-                              state: { secretary: s },
-                            })
+                            navigate(
+                              `/admin/secretaries/${s._id}/appointments`,
+                              {
+                                state: { secretary: s },
+                              },
+                            )
                           }
                           className="h-[30px] rounded-[8px] border border-primary bg-white px-4 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-[#E7FBFA]"
                         >

@@ -43,7 +43,7 @@ export default function AdminVerificationRequestsPage() {
   const { doctors: doctorOptions, isAwaitingData: doctorsAwaiting } =
     useAdminDoctors({
       page: 1,
-      limit: 200,
+      limit: 100,
       status: "approved",
     });
 
