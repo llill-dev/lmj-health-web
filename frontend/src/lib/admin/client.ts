@@ -117,6 +117,9 @@ const DEV_MEDICAL_ORDER_PLACEHOLDERS: Record<
   referral: [],
 };
 
+const ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE =
+  "Admin user lifecycle routes are not documented in swagger_api.md. Only GET /api/admin/users and POST /api/admin/users are currently supported.";
+
 export const adminApi = {
   doctors: {
     list: (params: AdminDoctorsListParams = {}) => {
@@ -338,18 +341,12 @@ export const adminApi = {
         locale: "ar",
       }),
     offboard: (userId: string, reason?: string) =>
-      post<AdminUserOffboardResponse>(
-        adminEndpoints.users.offboard(userId),
-        reason ? { reason } : undefined,
-        { locale: "ar" },
+      Promise.reject<AdminUserOffboardResponse>(
+        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
       ),
     reboard: (userId: string) =>
-      post<ApiSuccessEnvelope>(
-        adminEndpoints.users.reboard(userId),
-        undefined,
-        {
-          locale: "ar",
-        },
+      Promise.reject<ApiSuccessEnvelope>(
+        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
       ),
     doctorRestoreRequests: (params: {
       status?: string;
@@ -358,21 +355,10 @@ export const adminApi = {
       to?: string;
       page?: number;
       limit?: number;
-    }) => {
-      const qs = new URLSearchParams();
-      if (params.status) qs.set("status", params.status);
-      if (params.search) qs.set("search", params.search);
-      if (params.from) qs.set("from", params.from);
-      if (params.to) qs.set("to", params.to);
-      if (params.page) qs.set("page", params.page.toString());
-      if (params.limit) qs.set("limit", params.limit.toString());
-      const endpoint = qs.toString()
-        ? `${adminEndpoints.users.doctorRestoreRequests}?${qs.toString()}`
-        : adminEndpoints.users.doctorRestoreRequests;
-      return get<ApiSuccessEnvelope & { results?: unknown[] }>(endpoint, {
-        locale: "ar",
-      });
-    },
+    }) =>
+      Promise.reject<ApiSuccessEnvelope & { results?: unknown[] }>(
+        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
+      ),
     reviewRestoreRequest: (
       userId: string,
       body: {
@@ -380,10 +366,8 @@ export const adminApi = {
         reviewNote?: string;
       },
     ) =>
-      post<ApiSuccessEnvelope>(
-        adminEndpoints.users.reviewRestoreRequest(userId),
-        body,
-        { locale: "ar" },
+      Promise.reject<ApiSuccessEnvelope>(
+        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
       ),
   },
   secretaries: {
