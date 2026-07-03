@@ -23,12 +23,15 @@ import {
   confirmDeletionAndRequest,
   sendDeletionOtp,
   startDoctorAccountRecoveryOtp,
+  startDoctorAccountRestoreRequestOtp,
   verifyDeletionPassword,
   verifyDoctorAccountRecoveryOtp,
+  verifyDoctorAccountRestoreRequestOtp,
 } from '@/lib/auth/accountDeletionClient';
 import {
   clearAccountDeletionSessionMeta,
   persistAccountDeletionSessionMeta,
+  resolveDoctorRestoreMode,
   resolveRestorePath,
 } from '@/lib/auth/accountDeletionSession';
 import { getRoleRoot } from '@/routes/ProtectedRoute';
@@ -43,7 +46,6 @@ import { useAuthStore } from '@/store/authStore';
 
 type DeleteAccountStep = 1 | 2 | 3 | 4 | 5;
 
-/** تأكيد نهائي فقط: حذف الحساب أو استعادته برمز OTP. */
 type PendingConfirm =
   | { kind: 'delete-final'; otp?: string }
   | { kind: 'restore-otp'; otp: string }
@@ -79,7 +81,7 @@ function resolveReasonText(input?: FeedbackDraft): string | undefined {
     input?.feedback?.trim() ?? '',
   ].filter(Boolean);
 
-  return parts.length ? parts.join(' — ') : undefined;
+  return parts.length ? parts.join(' - ') : undefined;
 }
 
 export function DeleteAccountFlow({
@@ -106,6 +108,7 @@ export function DeleteAccountFlow({
   );
   const [otpRequired, setOtpRequired] = useState(true);
   const [recoverUntilLabel, setRecoverUntilLabel] = useState<string | null>(null);
+  const [recoverUntilRaw, setRecoverUntilRaw] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [resendBusy, setResendBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,12 +123,21 @@ export function DeleteAccountFlow({
   const caps = getAccountDeletionCapabilities(scope);
   const restoreHref = restoreHrefProp ?? resolveRestorePath(scope);
   const dashboardHref = getRoleRoot(scope === 'patient' ? 'patient' : 'doctor');
+  const doctorRestoreMode =
+    scope === 'doctor'
+      ? resolveDoctorRestoreMode({ recoverUntil: recoverUntilRaw })
+      : null;
+  const isDoctorRestoreRequestMode = doctorRestoreMode === 'restore_request';
 
   const subtitle = useMemo(() => {
-    if (restoreOtpMode) return 'استعادة الحساب';
+    if (restoreOtpMode) {
+      return isDoctorRestoreRequestMode
+        ? 'طلب استعادة الحساب'
+        : 'استعادة الحساب';
+    }
     if (step === 4) return 'عملية لا يمكن التراجع عنها';
     return undefined;
-  }, [step, restoreOtpMode]);
+  }, [isDoctorRestoreRequestMode, restoreOtpMode, step]);
 
   const handleError = (
     cause: unknown,
@@ -191,7 +203,9 @@ export function DeleteAccountFlow({
   const dispatchRestoreOtp = async (
     channel: DoctorRecoveryChannel = restoreOtpChannel,
   ) => {
-    const result = await startDoctorAccountRecoveryOtp(channel);
+    const result = isDoctorRestoreRequestMode
+      ? await startDoctorAccountRestoreRequestOtp(channel)
+      : await startDoctorAccountRecoveryOtp(channel);
     setRecoveryIdentity(result.identity);
     setRestoreOtpDestination(result.destination);
     setRestoreOtpChannel(result.identity.channel);
@@ -207,6 +221,7 @@ export function DeleteAccountFlow({
       reason: resolveReasonText(feedbackDraft),
     });
     persistDeletionResult(response);
+    setRecoverUntilRaw(response.recoverUntil ?? null);
     setRecoverUntilLabel(formatRecoverUntil(response.recoverUntil));
     setStep(5);
   };
@@ -219,7 +234,7 @@ export function DeleteAccountFlow({
       setPassword(value);
       setStep(3);
     } catch (cause) {
-      handleError(cause, 'تعذّر التحقق من كلمة المرور.', 'password');
+      handleError(cause, 'تعذر التحقق من كلمة المرور.', 'password');
     } finally {
       setBusy(false);
     }
@@ -237,7 +252,7 @@ export function DeleteAccountFlow({
       }
       setPendingConfirm({ kind: 'delete-final' });
     } catch (cause) {
-      handleError(cause, 'تعذّر إرسال رمز التحقق.');
+      handleError(cause, 'تعذر إرسال رمز التحقق.');
     } finally {
       setBusy(false);
     }
@@ -260,6 +275,22 @@ export function DeleteAccountFlow({
         if (!recoveryIdentity) {
           throw new Error('missing recovery identity');
         }
+
+        if (isDoctorRestoreRequestMode) {
+          await verifyDoctorAccountRestoreRequestOtp({
+            identity: recoveryIdentity,
+            otp: pendingConfirm.otp,
+          });
+          toast('تم إرسال طلب الاستعادة بنجاح. ستراجع الإدارة الطلب وتتواصل معك عند الموافقة.', {
+            title: 'طلب قيد المراجعة',
+            variant: 'success',
+          });
+          setRestoreOtpMode(false);
+          setPendingConfirm(null);
+          navigate('/login', { replace: true });
+          return;
+        }
+
         await verifyDoctorAccountRecoveryOtp({
           identity: recoveryIdentity,
           otp: pendingConfirm.otp,
@@ -277,8 +308,10 @@ export function DeleteAccountFlow({
       handleError(
         cause,
         pendingConfirm.kind === 'restore-otp'
-          ? 'تعذّر التحقق من رمز الاسترجاع.'
-          : 'تعذّر إكمال طلب الحذف.',
+          ? isDoctorRestoreRequestMode
+            ? 'تعذر إرسال طلب الاستعادة.'
+            : 'تعذر التحقق من رمز الاسترجاع.'
+          : 'تعذر إكمال طلب الحذف.',
         pendingConfirm.kind === 'restore-otp' ? 'restore-otp' : 'otp',
       );
       setPendingConfirm(null);
@@ -291,6 +324,15 @@ export function DeleteAccountFlow({
     if (!pendingConfirm) return null;
 
     if (pendingConfirm.kind === 'restore-otp') {
+      if (isDoctorRestoreRequestMode) {
+        return {
+          title: 'تأكيد طلب الاستعادة',
+          description:
+            'بعد التحقق من الرمز سيُرسل طلب الاستعادة للمراجعة الإدارية. هل تريد المتابعة؟',
+          confirmLabel: 'نعم، إرسال الطلب',
+        };
+      }
+
       return {
         title: 'تأكيد استعادة الحساب',
         description:
@@ -318,7 +360,7 @@ export function DeleteAccountFlow({
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذّر إعادة إرسال الرمز.', 'resend');
+      handleError(cause, 'تعذر إعادة إرسال الرمز.', 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -337,7 +379,7 @@ export function DeleteAccountFlow({
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذّر تغيير قناة التحقق.', 'resend');
+      handleError(cause, 'تعذر تغيير قناة التحقق.', 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -353,7 +395,7 @@ export function DeleteAccountFlow({
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذّر إعادة إرسال الرمز.', 'resend');
+      handleError(cause, 'تعذر إعادة إرسال الرمز.', 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -372,7 +414,7 @@ export function DeleteAccountFlow({
         variant: 'success',
       });
     } catch (cause) {
-      handleError(cause, 'تعذّر تغيير قناة التحقق.', 'resend');
+      handleError(cause, 'تعذر تغيير قناة التحقق.', 'resend');
     } finally {
       setResendBusy(false);
     }
@@ -392,7 +434,7 @@ export function DeleteAccountFlow({
         });
         navigate(dashboardHref, { replace: true });
       } catch (cause) {
-        handleError(cause, 'تعذّر استعادة الحساب.');
+        handleError(cause, 'تعذر استعادة الحساب.');
       } finally {
         setBusy(false);
       }
@@ -403,12 +445,22 @@ export function DeleteAccountFlow({
     try {
       await dispatchRestoreOtp();
       setRestoreOtpMode(true);
-      toast('أُرسل رمز التحقق. أدخله لاستعادة حسابك.', {
-        title: 'تحقق من الرمز',
-        variant: 'info',
-      });
+      toast(
+        isDoctorRestoreRequestMode
+          ? 'أُرسل رمز التحقق. أدخله لتقديم طلب الاستعادة.'
+          : 'أُرسل رمز التحقق. أدخله لاستعادة حسابك.',
+        {
+          title: 'تحقق من الرمز',
+          variant: 'info',
+        },
+      );
     } catch (cause) {
-      handleError(cause, 'تعذّر إرسال رمز الاسترجاع.');
+      handleError(
+        cause,
+        isDoctorRestoreRequestMode
+          ? 'تعذر إرسال رمز طلب الاستعادة.'
+          : 'تعذر إرسال رمز الاسترجاع.',
+      );
     } finally {
       setBusy(false);
     }
@@ -428,9 +480,21 @@ export function DeleteAccountFlow({
             busy={busy}
             resendBusy={resendBusy}
             error={error}
-            title="استعادة الحساب"
-            subtitle="أدخل رمز التحقق لإلغاء طلب الحذف واستعادة حسابك"
-            verifyLabel="تأكيد الاستعادة"
+            title={
+              isDoctorRestoreRequestMode
+                ? 'طلب استعادة الحساب'
+                : 'استعادة الحساب'
+            }
+            subtitle={
+              isDoctorRestoreRequestMode
+                ? 'أدخل رمز التحقق لتقديم طلب الاستعادة للمراجعة الإدارية'
+                : 'أدخل رمز التحقق لإلغاء طلب الحذف واستعادة حسابك'
+            }
+            verifyLabel={
+              isDoctorRestoreRequestMode
+                ? 'تأكيد طلب الاستعادة'
+                : 'تأكيد الاستعادة'
+            }
             onVerify={(value) =>
               setPendingConfirm({ kind: 'restore-otp', otp: value })
             }
