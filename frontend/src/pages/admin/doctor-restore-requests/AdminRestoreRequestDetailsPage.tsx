@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/components/ui/ToastProvider";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
+import { adminApi } from "@/lib/admin/client";
 
 interface RestoreRequest {
   _id: string;
@@ -82,11 +83,10 @@ export default function AdminRestoreRequestDetailsPage() {
   const handleReview = async () => {
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.restoreRequests.review(request._id, {
-      //   decision: reviewAction,
-      //   reviewNote: reviewNote || undefined,
-      // });
+      await adminApi.users.reviewRestoreRequest(request.userId, {
+        decision: reviewAction,
+        reviewNote: reviewNote || undefined,
+      });
 
       toast(
         reviewAction === "approved"

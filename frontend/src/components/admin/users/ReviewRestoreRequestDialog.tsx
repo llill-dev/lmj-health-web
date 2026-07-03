@@ -9,7 +9,7 @@ import { adminApi } from "@/lib/admin/client";
 
 const DECISION_OPTIONS = [
   { value: "approved", label: "موافقة" },
-  { value: "denied", label: "رفض" },
+  { value: "rejected", label: "رفض" },
 ];
 
 interface RestoreRequest {
@@ -42,8 +42,8 @@ export default function ReviewRestoreRequestDialog({
   const [decision, setDecision] = useState("");
   const [reviewNote, setReviewNote] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
     if (!decision) {
       toast("يجب اختيار القرار", {
@@ -54,7 +54,7 @@ export default function ReviewRestoreRequestDialog({
       return;
     }
 
-    if (decision === "denied" && !reviewNote.trim()) {
+    if (decision === "rejected" && !reviewNote.trim()) {
       toast("يجب إضافة ملاحظة عند رفض الطلب", {
         title: "خطأ في التحقق",
         variant: "error",
@@ -66,7 +66,7 @@ export default function ReviewRestoreRequestDialog({
     setIsSubmitting(true);
     try {
       await adminApi.users.reviewRestoreRequest(request?.userId || "", {
-        decision: decision as "approved" | "denied",
+        decision: decision as "approved" | "rejected",
         reviewNote: reviewNote || undefined,
       });
 
@@ -185,7 +185,7 @@ export default function ReviewRestoreRequestDialog({
                 {/* Review Note */}
                 <div>
                   <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    ملاحظة المراجعة {decision === "denied" && "*"}
+                    ملاحظة المراجعة {decision === "rejected" && "*"}
                   </label>
                   <textarea
                     value={reviewNote}
@@ -219,7 +219,7 @@ export default function ReviewRestoreRequestDialog({
                 </Dialog.Close>
                 <button
                   type="button"
-                  onClick={handleSubmit}
+                  onClick={() => void handleSubmit()}
                   disabled={isSubmitting || !decision}
                   className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:opacity-50"
                 >

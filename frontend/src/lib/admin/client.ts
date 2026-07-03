@@ -118,7 +118,7 @@ const DEV_MEDICAL_ORDER_PLACEHOLDERS: Record<
 };
 
 const ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE =
-  "Admin user lifecycle routes are not documented in swagger_api.md. Only GET /api/admin/users and POST /api/admin/users are currently supported.";
+  "Direct admin offboard/reboard actions are disabled in the frontend. Doctor restore requests use the documented review endpoint.";
 
 export const adminApi = {
   doctors: {
@@ -355,19 +355,38 @@ export const adminApi = {
       to?: string;
       page?: number;
       limit?: number;
-    }) =>
-      Promise.reject<ApiSuccessEnvelope & { results?: unknown[] }>(
-        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
-      ),
+    }) => {
+      const qs = new URLSearchParams();
+      if (params.status) qs.set("status", params.status);
+      if (params.search) qs.set("search", params.search);
+      if (params.from) qs.set("from", params.from);
+      if (params.to) qs.set("to", params.to);
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.users.doctorRestoreRequests}?${qs.toString()}`
+        : adminEndpoints.users.doctorRestoreRequests;
+      return get<
+        ApiSuccessEnvelope & {
+          restoreRequests?: unknown[];
+          results?: unknown[];
+          page?: number;
+          limit?: number;
+          total?: number;
+        }
+      >(endpoint, { locale: "ar" });
+    },
     reviewRestoreRequest: (
       userId: string,
       body: {
-        decision: "approved" | "denied";
+        decision: "approved" | "rejected";
         reviewNote?: string;
       },
     ) =>
-      Promise.reject<ApiSuccessEnvelope>(
-        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
+      post<ApiSuccessEnvelope>(
+        adminEndpoints.users.reviewRestoreRequest(userId),
+        body,
+        { locale: "ar" },
       ),
   },
   secretaries: {

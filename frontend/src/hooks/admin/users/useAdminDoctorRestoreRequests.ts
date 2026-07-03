@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
 
-interface RestoreRequest {
+export interface RestoreRequest {
   _id: string;
   userId: string;
   doctorId: string;
@@ -14,6 +14,7 @@ interface RestoreRequest {
   reviewedAt?: string;
   reviewedBy?: string;
   reviewNote?: string;
+  reason?: string;
   deletionReason?: string;
 }
 
@@ -33,7 +34,8 @@ export function useAdminDoctorRestoreRequests(
     queryKey: ["adminDoctorRestoreRequests", params],
     queryFn: async () => {
       const response = await adminApi.users.doctorRestoreRequests(params);
-      return (response.results || []) as RestoreRequest[];
+      const source = response.restoreRequests || response.results || [];
+      return source.map(normalizeRestoreRequest).filter(Boolean) as RestoreRequest[];
     },
     staleTime: 30 * 1000, // 30 seconds
   });
@@ -45,4 +47,66 @@ export function useAdminDoctorRestoreRequests(
     error: query.error,
     refetch: query.refetch,
   };
+}
+
+function normalizeRestoreRequest(raw: unknown): RestoreRequest | null {
+  if (!raw || typeof raw !== "object") return null;
+  const item = raw as Record<string, unknown>;
+  const user = item.user && typeof item.user === "object"
+    ? (item.user as Record<string, unknown>)
+    : {};
+  const doctor = item.doctor && typeof item.doctor === "object"
+    ? (item.doctor as Record<string, unknown>)
+    : {};
+  const accountDeletion =
+    item.accountDeletion && typeof item.accountDeletion === "object"
+      ? (item.accountDeletion as Record<string, unknown>)
+      : {};
+
+  const userId = String(item.userId ?? user.id ?? user._id ?? "");
+  const doctorId = String(item.doctorId ?? doctor.id ?? doctor._id ?? "");
+  const doctorName = String(
+    item.doctorName ??
+      doctor.fullName ??
+      doctor.name ??
+      user.fullName ??
+      user.name ??
+      "طبيب غير معروف",
+  );
+  const status = String(
+    item.status ?? item.restoreStatus ?? accountDeletion.restoreStatus ?? "pending",
+  );
+
+  if (!userId && !doctorId) return null;
+
+  return {
+    _id: String(item._id ?? item.id ?? `${userId}-${doctorId}`),
+    userId,
+    doctorId,
+    doctorName,
+    doctorEmail: stringOrUndefined(item.doctorEmail ?? doctor.email ?? user.email),
+    doctorPhone: stringOrUndefined(item.doctorPhone ?? doctor.phone ?? user.phone),
+    specialization: stringOrUndefined(item.specialization ?? doctor.specialization),
+    status:
+      status === "approved" || status === "rejected" || status === "pending"
+        ? status
+        : "pending",
+    requestedAt: String(
+      item.requestedAt ??
+        item.restoreRequestedAt ??
+        accountDeletion.restoreRequestedAt ??
+        "",
+    ),
+    reviewedAt: stringOrUndefined(item.reviewedAt ?? accountDeletion.reviewedAt),
+    reviewedBy: stringOrUndefined(item.reviewedBy ?? accountDeletion.reviewedBy),
+    reviewNote: stringOrUndefined(item.reviewNote ?? accountDeletion.reviewNote),
+    reason: stringOrUndefined(item.reason ?? accountDeletion.restoreReason),
+    deletionReason: stringOrUndefined(
+      item.deletionReason ?? accountDeletion.reason,
+    ),
+  };
+}
+
+function stringOrUndefined(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
 }
