@@ -15,6 +15,7 @@ import { persistClaimAccountPending } from '@/lib/auth/claimAccountNavState';
 import {
   clearPendingDoctorRecoveryLogin,
   persistPendingDoctorRecoveryLogin,
+  resolveDoctorRestoreMode,
   resolveRestorePath,
   sanitizePostLoginNextPath,
   shouldRedirectToRestore,
@@ -117,6 +118,7 @@ export default function LoginForm({
 
   const onSubmit = handleSubmit(async (values) => {
     setLoginError(null);
+    clearPendingDoctorRecoveryLogin();
 
     try {
       const loginIdentifier =
@@ -200,10 +202,14 @@ export default function LoginForm({
               ? details.recoverUntil
               : null;
 
-        const lifecycleAction =
+        const backendLifecycleAction =
           typeof details?.lifecycleAction === 'string'
             ? details.lifecycleAction
-            : 'self_recovery';
+            : null;
+        const lifecycleAction = resolveDoctorRestoreMode({
+          lifecycleAction: backendLifecycleAction,
+          recoverUntil,
+        });
         const isRestoreRequest = lifecycleAction === 'restore_request';
 
         persistPendingDoctorRecoveryLogin({
