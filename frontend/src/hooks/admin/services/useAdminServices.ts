@@ -301,11 +301,10 @@ export function useDeleteFacility() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
-      del<FacilityResponse>(adminEndpoints.facilities.delete(id), {
-        locale: "ar",
-      }).then(normalizeFacilityResponse),
-    onSuccess: () => {
+      adminApi.facilities.remove(id).then(normalizeFacilityResponse),
+    onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
+      qc.removeQueries({ queryKey: SERVICES_KEYS.facilityById(id) });
     },
   });
 }

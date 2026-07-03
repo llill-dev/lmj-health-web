@@ -698,6 +698,11 @@ export const adminApi = {
         { status },
         { locale: "ar" },
       ),
+    remove: (id: string) =>
+      del<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
+        adminEndpoints.facilities.delete(id),
+        { locale: "ar" },
+      ),
     create: (body: {
       name: string;
       city: string;
