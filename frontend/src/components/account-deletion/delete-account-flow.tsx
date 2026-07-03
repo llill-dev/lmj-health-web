@@ -108,7 +108,9 @@ export function DeleteAccountFlow({
   );
   const [otpRequired, setOtpRequired] = useState(true);
   const [recoverUntilLabel, setRecoverUntilLabel] = useState<string | null>(null);
-  const [recoverUntilRaw, setRecoverUntilRaw] = useState<string | null>(null);
+  const [recoverUntilRaw, setRecoverUntilRaw] = useState(
+    authUser?.deletionRecoverUntil ?? null,
+  );
   const [busy, setBusy] = useState(false);
   const [resendBusy, setResendBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -281,6 +283,8 @@ export function DeleteAccountFlow({
             identity: recoveryIdentity,
             otp: pendingConfirm.otp,
           });
+          clearAccountDeletionSessionMeta();
+          await useAuthStore.getState().logout({ skipRemoteRevoke: true });
           toast('تم إرسال طلب الاستعادة بنجاح. ستراجع الإدارة الطلب وتتواصل معك عند الموافقة.', {
             title: 'طلب قيد المراجعة',
             variant: 'success',
