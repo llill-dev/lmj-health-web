@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Send, Users, Bell } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import {
@@ -41,6 +41,7 @@ export default function BroadcastNotificationDialog({
 }: BroadcastNotificationDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     group: "all",
@@ -164,7 +165,8 @@ export default function BroadcastNotificationDialog({
           }}
         >
           <motion.div
-            className="relative w-[720px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)]"
+            ref={dialogRef}
+            className="relative w-[720px] max-w-[calc(100vw-32px)] max-h-[min(92vh,860px)] overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)]"
             initial={{ opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -172,6 +174,7 @@ export default function BroadcastNotificationDialog({
             onMouseDown={(e) => e.stopPropagation()}
             dir="rtl"
             lang="ar"
+            style={{ direction: "rtl" }}
           >
             <div className="relative px-8 pb-7 pt-7">
               <button
@@ -187,7 +190,10 @@ export default function BroadcastNotificationDialog({
                 بث إشعار للمستخدمين
               </h2>
 
-              <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+              <form
+                onSubmit={handleSubmit}
+                className="mt-10 max-h-[calc(92vh-220px)] overflow-y-auto space-y-6 pl-3 pr-2"
+              >
                 {/* Group */}
                 <AdminFormField
                   label="المجموعة المستهدفة"
@@ -205,6 +211,8 @@ export default function BroadcastNotificationDialog({
                     placeholder="اختر المجموعة"
                     size="sm"
                     tone="muted"
+                    dropdownMaxHeight={240}
+                    listboxZIndex={10050}
                   />
                 </AdminFormField>
 
@@ -225,6 +233,9 @@ export default function BroadcastNotificationDialog({
                     placeholder="اختر النوع"
                     size="sm"
                     tone="muted"
+                    dropdownMaxHeight={240}
+                    listboxZIndex={10050}
+                    listboxPortalRef={dialogRef}
                   />
                 </AdminFormField>
 
