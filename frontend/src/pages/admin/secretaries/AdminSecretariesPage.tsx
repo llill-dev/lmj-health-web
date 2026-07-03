@@ -1,3 +1,5 @@
+"use client";
+
 import { Helmet } from "react-helmet-async";
 import {
   AlertCircle,
@@ -6,7 +8,6 @@ import {
   Phone,
   Search,
   Stethoscope,
-  UserMinus,
   UserPlus,
   Edit3,
   Users,
@@ -16,7 +17,6 @@ import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useAdminSecretariesList } from "@/hooks/admin/secretaries/useAdminSecretaries";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
-import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialog";
 import CreateSecretaryDialog from "@/components/admin/secretaries/dialogs/CreateSecretaryDialog";
 import EditSecretaryDialog from "@/components/admin/secretaries/dialogs/EditSecretaryDialog";
 import { SecretaryCardSkeleton } from "@/components/admin/secretaries/SecretaryCardSkeleton";
@@ -27,9 +27,6 @@ import StyledSelect from "@/components/ui/styled-select";
 import type { AdminSecretarySummary } from "@/lib/admin/types";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 
-/* ─── permission label map ──────────────────────────────────── */
-/* ─── helpers ──────────────────────────────────────────────── */
-/* ─── page ──────────────────────────────────────────────────── */
 export default function AdminSecretariesPage() {
   const navigate = useNavigate();
 
@@ -39,14 +36,6 @@ export default function AdminSecretariesPage() {
   const [page, setPage] = useState(1);
   const LIMIT = 20;
 
-  /* offboard dialog state */
-  const [offboardOpen, setOffboardOpen] = useState(false);
-  const [offboardTarget, setOffboardTarget] = useState<{
-    userId: string;
-    label: string;
-  } | null>(null);
-
-  /* create/edit dialog state */
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<AdminSecretarySummary | null>(
@@ -80,13 +69,6 @@ export default function AdminSecretariesPage() {
   const showPaginationBar =
     !isAwaitingData && !isError && data && data.total > 0;
 
-  const openOffboard = useCallback((s: AdminSecretarySummary) => {
-    const userId = resolveUserId(s);
-    if (!userId) return;
-    setOffboardTarget({ userId, label: s.user?.fullName ?? "هذا الحساب" });
-    setOffboardOpen(true);
-  }, []);
-
   const openEdit = useCallback((s: AdminSecretarySummary) => {
     setEditTarget(s);
     setEditOpen(true);
@@ -108,7 +90,7 @@ export default function AdminSecretariesPage() {
           variant="admin"
           surface="mint"
           title="إدارة السكرتارية"
-          subtitle="مراقبة وإدارة حسابات السكرتيرين المرتبطين بالأطباء"
+          subtitle="مراقبة وإدارة حسابات السكرتيرين المرتبطين بالأطباء. إيقاف الحساب غير متاح حالياً لأن هذا التدفق غير موثق في swagger_api.md"
           headerIcon={<Users className="h-8 w-8 text-white" />}
           actionLabel="إنشاء سكرتير"
           onActionClick={() => setCreateOpen(true)}
@@ -136,8 +118,7 @@ export default function AdminSecretariesPage() {
           ]}
         />
 
-        {/* ── فلاتر: بحث + طبيب (مطابقة GET /api/admin/secretaries) ── */}
-        <div className="flex justify-between gap-16  items-center mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+        <div className="mt-5 flex items-center justify-between gap-16 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="relative flex-1">
             <input
               value={searchInput}
@@ -176,7 +157,6 @@ export default function AdminSecretariesPage() {
           ) : null}
         </div>
 
-        {/* ── list ── */}
         <section className="mt-5 space-y-4">
           {isAwaitingData ? (
             <>
@@ -217,11 +197,10 @@ export default function AdminSecretariesPage() {
                   className="overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_14px_32px_rgba(0,0,0,0.09)]"
                 >
                   <div className="px-6 py-5">
-                    {/* top row */}
-                    <div className="flex gap-3 justify-between items-start">
-                      <div className="flex gap-3 items-center">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
                         <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm">
-                          <Users className="w-5 h-5" />
+                          <Users className="h-5 w-5" />
                         </div>
                         <div className="text-right">
                           <div className="font-cairo text-[16px] font-black leading-[22px] text-[#111827]">
@@ -236,7 +215,7 @@ export default function AdminSecretariesPage() {
                         </div>
                       </div>
 
-                      <div className="flex gap-2 items-center">
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => openEdit(s)}
@@ -247,15 +226,9 @@ export default function AdminSecretariesPage() {
                           تعديل
                         </button>
                         {userId && (
-                          <button
-                            type="button"
-                            onClick={() => openOffboard(s)}
-                            title="إيقاف الحساب"
-                            className="flex h-8 items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
-                          >
-                            <UserMinus className="h-3.5 w-3.5" />
-                            إيقاف
-                          </button>
+                          <span className="flex h-8 items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]">
+                            إيقاف غير متاح
+                          </span>
                         )}
                         <button
                           type="button"
@@ -267,32 +240,30 @@ export default function AdminSecretariesPage() {
                           title="ملف السكرتير"
                           className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary text-white shadow-sm transition hover:bg-primary/90"
                         >
-                          <ChevronLeft className="w-4 h-4" />
+                          <ChevronLeft className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
 
-                    {/* contact */}
-                    <div className="flex flex-wrap gap-5 items-center mt-4">
+                    <div className="mt-4 flex flex-wrap items-center gap-5">
                       {s.user?.phone && (
                         <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                          <Phone className="w-4 h-4 text-primary" />
+                          <Phone className="h-4 w-4 text-primary" />
                           {s.user.phone}
                         </div>
                       )}
                       {s.user?.email && (
                         <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                          <Mail className="w-4 h-4 text-primary" />
+                          <Mail className="h-4 w-4 text-primary" />
                           {s.user.email}
                         </div>
                       )}
                     </div>
 
-                    {/* assigned doctor */}
                     {s.doctor && (
                       <div className="mt-4 flex items-center justify-between rounded-[10px] border border-[#BFEDEC] bg-[#E7FBFA] px-5 py-3">
-                        <div className="flex gap-2 items-center text-primary">
-                          <Stethoscope className="w-4 h-4" />
+                        <div className="flex items-center gap-2 text-primary">
+                          <Stethoscope className="h-4 w-4" />
                           <span className="font-cairo text-[12px] font-extrabold">
                             الطبيب المسؤول
                           </span>
@@ -310,7 +281,6 @@ export default function AdminSecretariesPage() {
                       </div>
                     )}
 
-                    {/* permissions */}
                     {perms.length > 0 && (
                       <div className="mt-4">
                         <div className="mb-2 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
@@ -329,16 +299,14 @@ export default function AdminSecretariesPage() {
                       </div>
                     )}
 
-                    {/* action buttons */}
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="mt-4 flex items-center justify-between">
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() =>
-                            navigate(
-                              `/admin/secretaries/${s._id}/appointments`,
-                              { state: { secretary: s } },
-                            )
+                            navigate(`/admin/secretaries/${s._id}/appointments`, {
+                              state: { secretary: s },
+                            })
                           }
                           className="h-[30px] rounded-[8px] border border-primary bg-white px-4 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-[#E7FBFA]"
                         >
@@ -373,8 +341,7 @@ export default function AdminSecretariesPage() {
             pageSizeOptions={[10, 20, 50]}
             summaryLabel={`عرض ${paginationRange.start.toLocaleString("ar-SA")}–${paginationRange.end.toLocaleString("ar-SA")} من ${data!.total.toLocaleString("ar-SA")} سكرتيراً`}
             onPageChange={setPage}
-            onPageSizeChange={(size) => {
-              // Note: LIMIT is fixed at 20 in this page, so pageSize change not supported
+            onPageSizeChange={() => {
               setPage(1);
             }}
           />
@@ -383,23 +350,12 @@ export default function AdminSecretariesPage() {
         <div className="h-8" />
       </div>
 
-      {/* offboard dialog */}
-      <OffboardDialog
-        open={offboardOpen}
-        onOpenChange={setOffboardOpen}
-        targetUserId={offboardTarget?.userId ?? null}
-        targetLabel={offboardTarget?.label ?? ""}
-        onSuccess={() => refetch()}
-      />
-
-      {/* create secretary dialog */}
       <CreateSecretaryDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
         onSuccess={() => refetch()}
       />
 
-      {/* edit secretary dialog */}
       <EditSecretaryDialog
         open={editOpen}
         onOpenChange={setEditOpen}

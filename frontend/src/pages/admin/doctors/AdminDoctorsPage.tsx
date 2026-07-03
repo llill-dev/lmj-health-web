@@ -1,12 +1,7 @@
+"use client";
+
 import { Helmet } from "react-helmet-async";
-import {
-  Ban,
-  CheckCircle2,
-  Clock,
-  Stethoscope,
-  UserX,
-  UserPlus,
-} from "lucide-react";
+import { Ban, CheckCircle2, Clock, Stethoscope, UserX } from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import AdminSearchFiltersBar from "@/components/admin/AdminSearchFiltersBar";
 import DoctorListCard from "@/components/admin/doctors/DoctorListCard";
@@ -15,21 +10,14 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import type { AdminDoctorApprovalStatus } from "@/lib/admin/types";
-import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialog";
-import ReboardDialog from "@/components/admin/users/ReboardDialog";
 import { phoneComparisonKey } from "@/lib/phone/formatPhoneForDisplay";
-import { adminApi } from "@/lib/admin/client";
-import { normalizeAdminDoctorDetailsResponse } from "@/lib/admin/doctors/normalizeAdminDoctorDetailsResponse";
-import { resolveAdminDoctorUserId } from "@/lib/admin/doctors/resolveAdminDoctorUserId";
 import { isAdminDoctorOffboarded } from "@/lib/admin/doctors/isAdminDoctorOffboarded";
-import { useToast } from "@/components/ui/ToastProvider";
 import { DoctorCardSkeleton } from "@/components/admin/skeletons/DoctorCardSkeleton";
 
 const TEAL = "#108B8B";
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const specializationParam = searchParams.get("specialization") ?? "";
 
@@ -63,31 +51,17 @@ export default function AdminDoctorsPage() {
     );
   }, [specializationParam]);
 
-  const { doctors, total, results, isAwaitingData, error, refetch } =
-    useAdminDoctors({
-      search: filters.search || undefined,
-      specialization: filters.specialization || undefined,
-      status: filters.status || undefined,
-      city: filters.city || undefined,
-      country: filters.country || undefined,
-      from: filters.from || undefined,
-      to: filters.to || undefined,
-      page: filters.page,
-      limit: filters.limit,
-    });
-
-  const [offboardOpen, setOffboardOpen] = useState(false);
-  const [offboardTarget, setOffboardTarget] = useState<{
-    userId: string;
-    doctorId: string;
-    label: string;
-  } | null>(null);
-  const [reboardOpen, setReboardOpen] = useState(false);
-  const [reboardTarget, setReboardTarget] = useState<{
-    userId: string;
-    doctorId: string;
-    label: string;
-  } | null>(null);
+  const { doctors, total, results, isAwaitingData, error } = useAdminDoctors({
+    search: filters.search || undefined,
+    specialization: filters.specialization || undefined,
+    status: filters.status || undefined,
+    city: filters.city || undefined,
+    country: filters.country || undefined,
+    from: filters.from || undefined,
+    to: filters.to || undefined,
+    page: filters.page,
+    limit: filters.limit,
+  });
 
   const duplicatePhoneKeys = useMemo(() => {
     const counts = new Map<string, number>();
@@ -125,66 +99,31 @@ export default function AdminDoctorsPage() {
       ...(offboardedCount > 0
         ? [
             {
-              title: "موقوف" as const,
+              title: "موقوف",
               value: offboardedCount,
               icon: UserX,
-              tone: {
-                border: "border-[#FCA5A5]",
-                bg: "bg-[#FEF2F2]",
-                iconBg: "bg-[#FEE2E2]",
-                iconColor: "text-[#991B1B]",
-                valueColor: "text-[#991B1B]",
-              },
             },
           ]
         : []),
       {
-        title: "مرفوض" as const,
+        title: "مرفوض",
         value: rejectedCount,
         icon: Ban,
-        tone: {
-          border: "border-[#FECACA]",
-          bg: "bg-[#FFF5F5]",
-          iconBg: "bg-[#FEE2E2]",
-          iconColor: "text-[#EF4444]",
-          valueColor: "text-[#EF4444]",
-        },
       },
       {
-        title: "معلّق" as const,
+        title: "معلّق",
         value: pendingCount,
         icon: Clock,
-        tone: {
-          border: "border-[#E5E7EB]",
-          bg: "bg-white",
-          iconBg: "bg-[#F3F4F6]",
-          iconColor: "text-[#475467]",
-          valueColor: "text-[#111827]",
-        },
       },
       {
-        title: "مقبول" as const,
+        title: "مقبول",
         value: approvedCount,
         icon: CheckCircle2,
-        tone: {
-          border: "border-[#BBF7D0]",
-          bg: "bg-[#F0FDF4]",
-          iconBg: "bg-[#DCFCE7]",
-          iconColor: "text-[#16A34A]",
-          valueColor: "text-[#16A34A]",
-        },
       },
       {
-        title: "إجمالي الأطباء" as const,
+        title: "إجمالي الأطباء",
         value: total,
         icon: Stethoscope,
-        tone: {
-          border: "border-[#CFFAFE]",
-          bg: "bg-[#ECFEFF]",
-          iconBg: "bg-primary/15",
-          iconColor: "text-primary",
-          valueColor: "text-primary",
-        },
       },
     ];
   }, [doctors, total]);
@@ -204,7 +143,7 @@ export default function AdminDoctorsPage() {
           variant="admin"
           surface="mint"
           title="إدارة الأطباء"
-          subtitle="إدارة ومتابعة بيانات الأطباء"
+          subtitle="عرض ومتابعة بيانات الأطباء. إيقاف وتفعيل الحسابات غير متاحين حالياً لأن مسارات هذا التدفق غير موثقة في swagger_api.md"
           headerIcon={<Stethoscope className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={stats.map((c) => {
@@ -336,78 +275,8 @@ export default function AdminDoctorsPage() {
                     onDetails={() =>
                       navigate(`/admin/doctors/${encodeURIComponent(d._id)}`)
                     }
-                    onOffboard={async (target) => {
-                      let userId = target.userId ?? null;
-                      if (!userId) {
-                        try {
-                          const details = normalizeAdminDoctorDetailsResponse(
-                            await adminApi.doctors.getById(target.doctorId),
-                          );
-                          userId = resolveAdminDoctorUserId(details.doctor);
-                        } catch {
-                          toast(
-                            "تعذّر تحميل معرف المستخدم لإيقاف الحساب. افتح التفاصيل وحاول مجدداً.",
-                            {
-                              title: "تعذّر الإيقاف",
-                              variant: "error",
-                            },
-                          );
-                          return;
-                        }
-                      }
-                      if (!userId) {
-                        toast(
-                          "لم يُعثَر على معرف المستخدم المرتبط بهذا الطبيب.",
-                          {
-                            title: "تعذّر الإيقاف",
-                            variant: "error",
-                          },
-                        );
-                        return;
-                      }
-                      setOffboardTarget({
-                        userId,
-                        doctorId: target.doctorId,
-                        label: target.label,
-                      });
-                      setOffboardOpen(true);
-                    }}
-                    onReboard={async (target) => {
-                      let userId = target.userId ?? null;
-                      if (!userId) {
-                        try {
-                          const details = normalizeAdminDoctorDetailsResponse(
-                            await adminApi.doctors.getById(target.doctorId),
-                          );
-                          userId = resolveAdminDoctorUserId(details.doctor);
-                        } catch {
-                          toast(
-                            "تعذّر تحميل معرف المستخدم لتفعيل الحساب. افتح التفاصيل وحاول مجدداً.",
-                            {
-                              title: "تعذّر التفعيل",
-                              variant: "error",
-                            },
-                          );
-                          return;
-                        }
-                      }
-                      if (!userId) {
-                        toast(
-                          "لم يُعثَر على معرف المستخدم المرتبط بهذا الطبيب.",
-                          {
-                            title: "تعذّر التفعيل",
-                            variant: "error",
-                          },
-                        );
-                        return;
-                      }
-                      setReboardTarget({
-                        userId,
-                        doctorId: target.doctorId,
-                        label: target.label,
-                      });
-                      setReboardOpen(true);
-                    }}
+                    onOffboard={undefined}
+                    onReboard={undefined}
                   />
                 );
               })
@@ -471,7 +340,7 @@ export default function AdminDoctorsPage() {
               className={
                 isAwaitingData || filters.page >= totalPages
                   ? "h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none"
-                  : "h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15, 143, 139,0.25)] sm:flex-none"
+                  : "h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15,143,139,0.25)] sm:flex-none"
               }
             >
               التالي
@@ -481,27 +350,6 @@ export default function AdminDoctorsPage() {
 
         <div className="h-4 sm:h-8" />
       </div>
-
-      <OffboardDialog
-        open={offboardOpen}
-        onOpenChange={setOffboardOpen}
-        targetUserId={offboardTarget?.userId ?? null}
-        targetDoctorId={offboardTarget?.doctorId ?? null}
-        targetLabel={offboardTarget?.label ?? ""}
-        accountRole="doctor"
-        onSuccess={() => {
-          void refetch();
-        }}
-      />
-      <ReboardDialog
-        open={reboardOpen}
-        onOpenChange={setReboardOpen}
-        userId={reboardTarget?.userId || ""}
-        userName={reboardTarget?.label || ""}
-        onSuccess={async () => {
-          await refetch();
-        }}
-      />
     </>
   );
 }

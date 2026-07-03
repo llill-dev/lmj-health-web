@@ -22,7 +22,6 @@ export default function AdminDoctorRestoreRequestsPage() {
           title="طلبات استعادة حساب الأطباء"
           subtitle="هذه الواجهة مرتبطة بمسارات غير موثقة في swagger_api.md لذلك تم تعطيلها حالياً"
           headerIcon={<ShieldCheck className="h-8 w-8 text-white" />}
-          kpiColumns={1}
           kpis={[
             {
               key: "requests",
