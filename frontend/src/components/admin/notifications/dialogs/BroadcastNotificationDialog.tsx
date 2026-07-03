@@ -1,10 +1,15 @@
 "use client";
-import * as Dialog from "@radix-ui/react-dialog";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { X, Send, Users, Bell } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
+import {
+  AdminFormField,
+  adminFieldClass,
+  adminInputClass,
+  adminTextareaClass,
+} from "@/components/admin/form-field";
 
 const GROUP_OPTIONS = [
   { value: "all", label: "جميع المستخدمين" },
@@ -46,6 +51,32 @@ export default function BroadcastNotificationDialog({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSubmitting) onOpenChange(false);
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    const prevPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPaddingRight;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange, isSubmitting]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -118,222 +149,213 @@ export default function BroadcastNotificationDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-        <div className="pointer-events-none fixed inset-0 z-[100] box-border grid place-items-center">
-          <Dialog.Content asChild forceMount>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="pointer-events-auto w-full max-w-lg"
-            >
-              <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Bell className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <Dialog.Title className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                        بث إشعار للمستخدمين
-                      </Dialog.Title>
-                      <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                        أرسل إشعاراً لمجموعة من المستخدمين
-                      </Dialog.Description>
-                    </div>
-                  </div>
-                  <Dialog.Close className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB]">
-                    <X className="h-4 w-4" />
-                  </Dialog.Close>
-                </div>
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !isSubmitting)
+              onOpenChange(false);
+          }}
+        >
+          <motion.div
+            className="relative w-[720px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
+            dir="rtl"
+            lang="ar"
+          >
+            <div className="relative px-8 pb-7 pt-7">
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                aria-label="إغلاق"
+              >
+                <X className="h-5 w-5" />
+              </button>
 
-                <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-                  {/* Group */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      المجموعة المستهدفة *
-                    </label>
-                    <StyledSelect
-                      value={formData.group}
-                      onChange={(value) => {
-                        setFormData((prev) => ({ ...prev, group: value }));
-                        if (errors.group)
-                          setErrors((prev) => ({ ...prev, group: "" }));
-                      }}
-                      options={GROUP_OPTIONS}
-                      placeholder="اختر المجموعة"
-                      size="sm"
-                      tone="muted"
-                    />
-                    {errors.group && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.group}
+              <h2 className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
+                بث إشعار للمستخدمين
+              </h2>
+
+              <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+                {/* Group */}
+                <AdminFormField
+                  label="المجموعة المستهدفة"
+                  required
+                  error={errors.group}
+                >
+                  <StyledSelect
+                    value={formData.group}
+                    onChange={(value) => {
+                      setFormData((prev) => ({ ...prev, group: value }));
+                      if (errors.group)
+                        setErrors((prev) => ({ ...prev, group: "" }));
+                    }}
+                    options={GROUP_OPTIONS}
+                    placeholder="اختر المجموعة"
+                    size="sm"
+                    tone="muted"
+                  />
+                </AdminFormField>
+
+                {/* Type */}
+                <AdminFormField
+                  label="نوع الإشعار"
+                  required
+                  error={errors.type}
+                >
+                  <StyledSelect
+                    value={formData.type}
+                    onChange={(value) => {
+                      setFormData((prev) => ({ ...prev, type: value }));
+                      if (errors.type)
+                        setErrors((prev) => ({ ...prev, type: "" }));
+                    }}
+                    options={TYPE_OPTIONS}
+                    placeholder="اختر النوع"
+                    size="sm"
+                    tone="muted"
+                  />
+                </AdminFormField>
+
+                {/* Title */}
+                <AdminFormField
+                  label="عنوان الإشعار"
+                  required
+                  error={errors.title}
+                >
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }));
+                      if (errors.title)
+                        setErrors((prev) => ({ ...prev, title: "" }));
+                    }}
+                    placeholder="أدخل عنوان الإشعار"
+                    maxLength={100}
+                    className={adminFieldClass(
+                      adminInputClass,
+                      Boolean(errors.title),
+                    )}
+                  />
+                  <div className="flex justify-between mt-1">
+                    {errors.title && (
+                      <p className="font-cairo text-[11px] font-semibold text-[#DC2626]">
+                        {errors.title}
                       </p>
                     )}
-                  </div>
-
-                  {/* Type */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      نوع الإشعار *
-                    </label>
-                    <StyledSelect
-                      value={formData.type}
-                      onChange={(value) => {
-                        setFormData((prev) => ({ ...prev, type: value }));
-                        if (errors.type)
-                          setErrors((prev) => ({ ...prev, type: "" }));
-                      }}
-                      options={TYPE_OPTIONS}
-                      placeholder="اختر النوع"
-                      size="sm"
-                      tone="muted"
-                    />
-                    {errors.type && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.type}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      عنوان الإشعار *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }));
-                        if (errors.title)
-                          setErrors((prev) => ({ ...prev, title: "" }));
-                      }}
-                      placeholder="أدخل عنوان الإشعار"
-                      maxLength={100}
-                      className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.title
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
-                    />
-                    <div className="flex justify-between mt-1">
-                      {errors.title && (
-                        <p className="font-cairo text-[11px] font-semibold text-[#DC2626]">
-                          {errors.title}
-                        </p>
-                      )}
-                      <p className="font-cairo text-[11px] font-semibold text-[#98A2B3] mr-auto">
-                        {formData.title.length}/100
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Body */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      محتوى الإشعار *
-                    </label>
-                    <textarea
-                      value={formData.body}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          body: e.target.value,
-                        }));
-                        if (errors.body)
-                          setErrors((prev) => ({ ...prev, body: "" }));
-                      }}
-                      placeholder="أدخل محتوى الإشعار"
-                      rows={4}
-                      maxLength={500}
-                      className={`w-full rounded-[10px] border bg-white px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none ${
-                        errors.body
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
-                    />
-                    <div className="flex justify-between mt-1">
-                      {errors.body && (
-                        <p className="font-cairo text-[11px] font-semibold text-[#DC2626]">
-                          {errors.body}
-                        </p>
-                      )}
-                      <p className="font-cairo text-[11px] font-semibold text-[#98A2B3] mr-auto">
-                        {formData.body.length}/500
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Data (Optional) */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      بيانات إضافية (اختياري)
-                    </label>
-                    <textarea
-                      value={formData.data}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          data: e.target.value,
-                        }));
-                      }}
-                      placeholder="بيانات إضافية بصيغة JSON (اختياري)"
-                      rows={2}
-                      className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[11px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none font-mono"
-                    />
-                    <p className="mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                      يمكنك إضافة بيانات إضافية بصيغة JSON
+                    <p className="font-cairo text-[11px] font-semibold text-[#98A2B3] mr-auto">
+                      {formData.title.length}/100
                     </p>
                   </div>
+                </AdminFormField>
 
-                  {/* Info Box */}
-                  <div className="rounded-[8px] bg-[#F0FDF4] border border-[#BBF7D0] p-3">
-                    <div className="flex items-start gap-2">
-                      <Users className="h-4 w-4 text-[#16A34A] mt-0.5" />
-                      <div className="font-cairo text-[11px] font-semibold text-[#14532D] leading-relaxed">
-                        سيتم إرسال هذا الإشعار إلى جميع المستخدمين في المجموعة
-                        المحددة. تأكد من صحة المحتوى قبل الإرسال.
-                      </div>
+                {/* Body */}
+                <AdminFormField
+                  label="محتوى الإشعار"
+                  required
+                  error={errors.body}
+                >
+                  <textarea
+                    value={formData.body}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        body: e.target.value,
+                      }));
+                      if (errors.body)
+                        setErrors((prev) => ({ ...prev, body: "" }));
+                    }}
+                    placeholder="أدخل محتوى الإشعار"
+                    rows={4}
+                    maxLength={500}
+                    className={adminTextareaClass}
+                  />
+                  <div className="flex justify-between mt-1">
+                    {errors.body && (
+                      <p className="font-cairo text-[11px] font-semibold text-[#DC2626]">
+                        {errors.body}
+                      </p>
+                    )}
+                    <p className="font-cairo text-[11px] font-semibold text-[#98A2B3] mr-auto">
+                      {formData.body.length}/500
+                    </p>
+                  </div>
+                </AdminFormField>
+
+                {/* Data (Optional) */}
+                <AdminFormField label="بيانات إضافية (اختياري)">
+                  <textarea
+                    value={formData.data}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        data: e.target.value,
+                      }));
+                    }}
+                    placeholder="بيانات إضافية بصيغة JSON (اختياري)"
+                    rows={2}
+                    className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[11px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none font-mono"
+                  />
+                  <p className="mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]">
+                    يمكنك إضافة بيانات إضافية بصيغة JSON
+                  </p>
+                </AdminFormField>
+
+                {/* Info Box */}
+                <div className="rounded-[8px] bg-[#F0FDF4] border border-[#BBF7D0] p-3">
+                  <div className="flex items-start gap-2">
+                    <Users className="h-4 w-4 text-[#16A34A] mt-0.5" />
+                    <div className="font-cairo text-[11px] font-semibold text-[#14532D] leading-relaxed">
+                      سيتم إرسال هذا الإشعار إلى جميع المستخدمين في المجموعة
+                      المحددة. تأكد من صحة المحتوى قبل الإرسال.
                     </div>
                   </div>
+                </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-2">
-                    <Dialog.Close asChild>
-                      <button
-                        type="button"
-                        className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
-                      >
-                        إلغاء
-                      </button>
-                    </Dialog.Close>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="flex-1 h-[44px] items-center justify-center gap-2 rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        "جارٍ الإرسال..."
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4" />
-                          إرسال الإشعار
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </Dialog.Content>
-        </div>
-      </Dialog.Portal>
-    </Dialog.Root>
+                {/* Actions */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => onOpenChange(false)}
+                    className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 h-[44px] items-center justify-center gap-2 rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      "جارٍ الإرسال..."
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4" />
+                        إرسال الإشعار
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
