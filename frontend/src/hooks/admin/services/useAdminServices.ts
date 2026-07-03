@@ -5,6 +5,7 @@ import {
   keepPreviousData,
 } from "@tanstack/react-query";
 import { get, post, put, patch, del } from "@/lib/api";
+import { adminApi } from "@/lib/admin/client";
 import { adminEndpoints } from "@/lib/admin/endpoints";
 import {
   isAwaitingInitialQueryData,
@@ -230,10 +231,7 @@ export function useFacilitiesList(params: FacilitiesListParams = {}) {
 export function useFacilityById(id: string, enabled = true) {
   return useQuery({
     queryKey: SERVICES_KEYS.facilityById(id),
-    queryFn: () =>
-      get<FacilityResponse>(adminEndpoints.facilities.getById(id), {
-        locale: "ar",
-      }).then(normalizeFacilityResponse),
+    queryFn: () => adminApi.facilities.getById(id).then(normalizeFacilityResponse),
     enabled: !!id && enabled,
   });
 }

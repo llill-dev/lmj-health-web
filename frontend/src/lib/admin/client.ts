@@ -666,6 +666,11 @@ export const adminApi = {
       ),
   },
   facilities: {
+    getById: (id: string) =>
+      get<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
+        adminEndpoints.facilities.getById(id),
+        { locale: "ar" },
+      ),
     create: (body: {
       name: string;
       city: string;
