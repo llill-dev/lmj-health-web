@@ -289,13 +289,10 @@ export function useUpdateFacilityStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
-      patch<FacilityResponse>(
-        adminEndpoints.facilities.updateStatus(id),
-        { status },
-        { locale: "ar" },
-      ).then(normalizeFacilityResponse),
-    onSuccess: () => {
+      adminApi.facilities.updateStatus(id, status).then(normalizeFacilityResponse),
+    onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
+      qc.invalidateQueries({ queryKey: SERVICES_KEYS.facilityById(id) });
     },
   });
 }

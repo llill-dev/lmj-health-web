@@ -671,6 +671,12 @@ export const adminApi = {
         adminEndpoints.facilities.getById(id),
         { locale: "ar" },
       ),
+    updateStatus: (id: string, status: string) =>
+      patch<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
+        adminEndpoints.facilities.updateStatus(id),
+        { status },
+        { locale: "ar" },
+      ),
     create: (body: {
       name: string;
       city: string;
