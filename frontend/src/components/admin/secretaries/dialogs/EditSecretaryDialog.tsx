@@ -1,11 +1,16 @@
 "use client";
-import * as Dialog from "@radix-ui/react-dialog";
-import { motion } from "framer-motion";
-import { X, User, Phone, Shield, Edit3 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, User, Phone, Shield, Edit3, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { AppCheckbox } from "@/components/ui";
+import {
+  AdminFormField,
+  adminFieldClass,
+  adminInputClass,
+} from "@/components/admin/form-field";
+import { cn } from "@/lib/utils/utils";
 
 const GENDER_OPTIONS = [
   { value: "Male", label: "ذكر" },
@@ -66,6 +71,23 @@ export default function EditSecretaryDialog({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSubmitting) onOpenChange(false);
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange, isSubmitting]);
 
   useEffect(() => {
     if (secretary) {
@@ -147,59 +169,74 @@ export default function EditSecretaryDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-        <Dialog.Content asChild>
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="تعديل بيانات السكرتير"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !isSubmitting)
+              onOpenChange(false);
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+            className="relative max-h-[min(92vh,860px)] w-full max-w-[760px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">
-              <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Edit3 className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <Dialog.Title className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                      تعديل بيانات السكرتير
-                    </Dialog.Title>
-                    <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                      قم بتحديث بيانات السكرتير
-                    </Dialog.Description>
-                  </div>
-                </div>
-                <Dialog.Close className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB]">
-                  <X className="h-4 w-4" />
-                </Dialog.Close>
+            <div className="relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[#E6F4F3]"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[url('/images/bg-status-from-appotiment.png')] bg-cover bg-center opacity-80"
+                aria-hidden
+              />
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                aria-label="إغلاق"
+              >
+                <X className="w-5 h-5" aria-hidden />
+              </button>
+              <div className="relative text-right">
+                <h2 className="font-cairo text-[22px] font-extrabold text-primary">
+                  تعديل بيانات السكرتير
+                </h2>
               </div>
+            </div>
 
-              <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-                {/* Email (Read-only) */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
-                    البريد الإلكتروني (لا يمكن التعديل)
-                  </label>
-                  <input
-                    type="email"
-                    value={secretary?.user?.email || ""}
-                    disabled
-                    className="w-full h-[44px] rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-right font-cairo text-[12px] font-bold text-[#667085] outline-none cursor-not-allowed"
-                  />
-                </div>
+            <form dir="rtl" onSubmit={handleSubmit}>
+              <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
+                <div className="space-y-5">
+                  <AdminFormField
+                    label="البريد الإلكتروني"
+                    hint="لا يمكن التعديل"
+                  >
+                    <input
+                      type="email"
+                      value={secretary?.user?.email || ""}
+                      disabled
+                      className="w-full h-[48px] rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-right font-cairo text-[13px] font-bold text-[#667085] outline-none cursor-not-allowed"
+                    />
+                  </AdminFormField>
 
-                {/* Full Name */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    الاسم الكامل *
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                      <User className="h-4 w-4" />
-                    </div>
+                  <AdminFormField
+                    label="الاسم الكامل"
+                    required
+                    error={errors.fullName}
+                  >
                     <input
                       type="text"
                       value={formData.fullName}
@@ -212,29 +249,21 @@ export default function EditSecretaryDialog({
                           setErrors((prev) => ({ ...prev, fullName: "" }));
                       }}
                       placeholder="أدخل الاسم الكامل"
-                      className={`w-full h-[44px] rounded-[10px] border bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.fullName
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
+                      className={adminFieldClass(
+                        cn(
+                          adminInputClass,
+                          "text-start placeholder:text-start",
+                        ),
+                        Boolean(errors.fullName),
+                      )}
                     />
-                  </div>
-                  {errors.fullName && (
-                    <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                      {errors.fullName}
-                    </p>
-                  )}
-                </div>
+                  </AdminFormField>
 
-                {/* Phone */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    رقم الهاتف *
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                      <Phone className="h-4 w-4" />
-                    </div>
+                  <AdminFormField
+                    label="رقم الهاتف"
+                    required
+                    error={errors.phone}
+                  >
                     <input
                       type="tel"
                       value={formData.phone}
@@ -247,93 +276,81 @@ export default function EditSecretaryDialog({
                           setErrors((prev) => ({ ...prev, phone: "" }));
                       }}
                       placeholder="+963944000000"
-                      className={`w-full h-[44px] rounded-[10px] border bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.phone
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
+                      className={adminFieldClass(
+                        cn(
+                          adminInputClass,
+                          "text-start placeholder:text-start",
+                        ),
+                        Boolean(errors.phone),
+                      )}
                     />
-                  </div>
-                  {errors.phone && (
-                    <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                      {errors.phone}
-                    </p>
-                  )}
-                </div>
+                  </AdminFormField>
 
-                {/* Gender */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    الجنس *
-                  </label>
-                  <StyledSelect
-                    value={formData.gender}
-                    onChange={(value) =>
-                      setFormData((prev) => ({ ...prev, gender: value }))
-                    }
-                    options={GENDER_OPTIONS}
-                    placeholder="اختر الجنس"
-                    size="sm"
-                    tone="muted"
-                  />
-                </div>
+                  <AdminFormField label="الجنس" required>
+                    <StyledSelect
+                      value={formData.gender}
+                      onChange={(value) =>
+                        setFormData((prev) => ({ ...prev, gender: value }))
+                      }
+                      options={GENDER_OPTIONS}
+                      placeholder="اختر الجنس"
+                    />
+                  </AdminFormField>
 
-                {/* Permissions */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    الصلاحيات *
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {PERMISSION_OPTIONS.map((option) => (
-                      <label
-                        key={option.value}
-                        className={`flex items-center gap-2 rounded-[8px] border px-3 py-2 cursor-pointer transition ${
-                          formData.permissions.includes(option.value)
-                            ? "border-primary bg-primary/5 text-primary"
-                            : "border-[#E5E7EB] bg-white text-[#667085] hover:border-[#D1D5DB]"
-                        }`}
-                      >
-                        <AppCheckbox
-                          size="sm"
-                          checked={formData.permissions.includes(option.value)}
-                          onChange={() => togglePermission(option.value)}
-                        />
-                        <span className="font-cairo text-[12px] font-bold">
-                          {option.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                  {errors.permissions && (
-                    <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                      {errors.permissions}
-                    </p>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3 pt-2">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
-                    >
-                      إلغاء
-                    </button>
-                  </Dialog.Close>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  <AdminFormField
+                    label="الصلاحيات"
+                    required
+                    error={errors.permissions}
                   >
-                    {isSubmitting ? "جارٍ التحديث..." : "حفظ التغييرات"}
-                  </button>
+                    <div className="flex flex-wrap gap-2">
+                      {PERMISSION_OPTIONS.map((option) => (
+                        <label
+                          key={option.value}
+                          className={`flex items-center gap-2 rounded-[8px] border px-3 py-2 cursor-pointer transition ${
+                            formData.permissions.includes(option.value)
+                              ? "border-primary bg-primary/5 text-primary"
+                              : "border-[#E5E7EB] bg-white text-[#667085] hover:border-[#D1D5DB]"
+                          }`}
+                        >
+                          <AppCheckbox
+                            size="sm"
+                            checked={formData.permissions.includes(
+                              option.value,
+                            )}
+                            onChange={() => togglePermission(option.value)}
+                          />
+                          <span className="font-cairo text-[12px] font-bold">
+                            {option.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </AdminFormField>
                 </div>
-              </form>
-            </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5">
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                  className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
+                >
+                  <Save className="w-4 h-4" aria-hidden />
+                  {isSubmitting ? "جارٍ التحديث…" : "حفظ التغييرات"}
+                </button>
+              </div>
+            </form>
           </motion.div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
-import * as Dialog from "@radix-ui/react-dialog";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
   Building2,
@@ -11,11 +10,19 @@ import {
   Plus,
   Tag,
   Edit3,
+  Save,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
+import {
+  AdminFormField,
+  adminFieldClass,
+  adminInputClass,
+  adminTextareaClass,
+} from "@/components/admin/form-field";
+import { cn } from "@/lib/utils/utils";
 
 const FACILITY_TYPE_OPTIONS = [
   { value: "hospital", label: "مستشفى" },
@@ -86,6 +93,23 @@ export default function EditFacilityDialog({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [newAttribute, setNewAttribute] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSubmitting) onOpenChange(false);
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange, isSubmitting]);
 
   const doctorOptions = doctors.map((doctor) => ({
     value: doctor._id,
@@ -205,80 +229,90 @@ export default function EditFacilityDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-        <Dialog.Content asChild>
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="تعديل بيانات المنشأة الطبية"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !isSubmitting)
+              onOpenChange(false);
+          }}
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl"
+            className="relative max-h-[min(92vh,860px)] w-full max-w-[760px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">
-              <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Edit3 className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <Dialog.Title className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                      تعديل بيانات المنشأة الطبية
-                    </Dialog.Title>
-                    <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                      قم بتحديث بيانات المنشأة
-                    </Dialog.Description>
-                  </div>
-                </div>
-                <Dialog.Close className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB]">
-                  <X className="h-4 w-4" />
-                </Dialog.Close>
-              </div>
-
-              <form
-                onSubmit={handleSubmit}
-                className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto"
+            <div className="relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[#E6F4F3]"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[url('/images/bg-status-from-appotiment.png')] bg-cover bg-center opacity-80"
+                aria-hidden
+              />
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                aria-label="إغلاق"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      اسم المنشأة *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }));
-                        if (errors.name)
-                          setErrors((prev) => ({ ...prev, name: "" }));
-                      }}
-                      placeholder="أدخل اسم المنشأة"
-                      className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.name
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
-                    />
-                    {errors.name && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.name}
-                      </p>
-                    )}
-                  </div>
+                <X className="w-5 h-5" aria-hidden />
+              </button>
+              <div className="relative text-right">
+                <h2 className="font-cairo text-[22px] font-extrabold text-primary">
+                  تعديل بيانات المنشأة الطبية
+                </h2>
+              </div>
+            </div>
 
-                  {/* City */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      المدينة *
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                        <MapPin className="h-4 w-4" />
-                      </div>
+            <form dir="rtl" onSubmit={handleSubmit}>
+              <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <AdminFormField
+                      label="اسم المنشأة"
+                      required
+                      error={errors.name}
+                    >
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }));
+                          if (errors.name)
+                            setErrors((prev) => ({ ...prev, name: "" }));
+                        }}
+                        placeholder="أدخل اسم المنشأة"
+                        className={adminFieldClass(
+                          cn(
+                            adminInputClass,
+                            "text-start placeholder:text-start",
+                          ),
+                          Boolean(errors.name),
+                        )}
+                      />
+                    </AdminFormField>
+
+                    <AdminFormField
+                      label="المدينة"
+                      required
+                      error={errors.city}
+                    >
                       <input
                         type="text"
                         value={formData.city}
@@ -291,110 +325,90 @@ export default function EditFacilityDialog({
                             setErrors((prev) => ({ ...prev, city: "" }));
                         }}
                         placeholder="أدخل المدينة"
-                        className={`w-full h-[44px] rounded-[10px] border bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                          errors.city
-                            ? "border-[#FECACA] bg-[#FEF2F2]"
-                            : "border-[#E5E7EB]"
-                        }`}
+                        className={adminFieldClass(
+                          cn(
+                            adminInputClass,
+                            "text-start placeholder:text-start",
+                          ),
+                          Boolean(errors.city),
+                        )}
                       />
-                    </div>
-                    {errors.city && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.city}
-                      </p>
-                    )}
-                  </div>
+                    </AdminFormField>
 
-                  {/* Facility Type */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      نوع المنشأة *
-                    </label>
-                    <StyledSelect
-                      value={formData.facilityType}
-                      onChange={(value) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          facilityType: value,
-                        }));
-                        if (errors.facilityType)
-                          setErrors((prev) => ({ ...prev, facilityType: "" }));
-                      }}
-                      options={FACILITY_TYPE_OPTIONS}
-                      placeholder="اختر نوع المنشأة"
-                      size="sm"
-                      tone="muted"
-                    />
-                    {errors.facilityType && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.facilityType}
-                      </p>
-                    )}
-                  </div>
+                    <AdminFormField
+                      label="نوع المنشأة"
+                      required
+                      error={errors.facilityType}
+                    >
+                      <StyledSelect
+                        value={formData.facilityType}
+                        onChange={(value) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            facilityType: value,
+                          }));
+                          if (errors.facilityType)
+                            setErrors((prev) => ({
+                              ...prev,
+                              facilityType: "",
+                            }));
+                        }}
+                        options={FACILITY_TYPE_OPTIONS}
+                        placeholder="اختر نوع المنشأة"
+                        error={Boolean(errors.facilityType)}
+                      />
+                    </AdminFormField>
 
-                  {/* Kind */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      نوع الملكية *
-                    </label>
-                    <StyledSelect
-                      value={formData.kind}
-                      onChange={(value) => {
-                        setFormData((prev) => ({ ...prev, kind: value }));
-                        if (errors.kind)
-                          setErrors((prev) => ({ ...prev, kind: "" }));
-                      }}
-                      options={KIND_OPTIONS}
-                      placeholder="اختر نوع الملكية"
-                      size="sm"
-                      tone="muted"
-                    />
-                    {errors.kind && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.kind}
-                      </p>
-                    )}
-                  </div>
+                    <AdminFormField
+                      label="نوع الملكية"
+                      required
+                      error={errors.kind}
+                    >
+                      <StyledSelect
+                        value={formData.kind}
+                        onChange={(value) => {
+                          setFormData((prev) => ({ ...prev, kind: value }));
+                          if (errors.kind)
+                            setErrors((prev) => ({ ...prev, kind: "" }));
+                        }}
+                        options={KIND_OPTIONS}
+                        placeholder="اختر نوع الملكية"
+                        error={Boolean(errors.kind)}
+                      />
+                    </AdminFormField>
 
-                  {/* Country */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      البلد *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.country}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          country: e.target.value,
-                        }));
-                        if (errors.country)
-                          setErrors((prev) => ({ ...prev, country: "" }));
-                      }}
-                      placeholder="أدخل البلد"
-                      className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                        errors.country
-                          ? "border-[#FECACA] bg-[#FEF2F2]"
-                          : "border-[#E5E7EB]"
-                      }`}
-                    />
-                    {errors.country && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.country}
-                      </p>
-                    )}
-                  </div>
+                    <AdminFormField
+                      label="البلد"
+                      required
+                      error={errors.country}
+                    >
+                      <input
+                        type="text"
+                        value={formData.country}
+                        onChange={(e) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            country: e.target.value,
+                          }));
+                          if (errors.country)
+                            setErrors((prev) => ({ ...prev, country: "" }));
+                        }}
+                        placeholder="أدخل البلد"
+                        className={adminFieldClass(
+                          cn(
+                            adminInputClass,
+                            "text-start placeholder:text-start",
+                          ),
+                          Boolean(errors.country),
+                        )}
+                      />
+                    </AdminFormField>
 
-                  {/* Phone */}
-                  <div>
-                    <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                      رقم الهاتف *
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                        <Phone className="h-4 w-4" />
-                      </div>
+                    <AdminFormField
+                      label="رقم الهاتف"
+                      required
+                      error={errors.phone}
+                    >
                       <input
                         type="tel"
                         value={formData.phone}
@@ -407,79 +421,72 @@ export default function EditFacilityDialog({
                             setErrors((prev) => ({ ...prev, phone: "" }));
                         }}
                         placeholder="+963944000000"
-                        className={`w-full h-[44px] rounded-[10px] border bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                          errors.phone
-                            ? "border-[#FECACA] bg-[#FEF2F2]"
-                            : "border-[#E5E7EB]"
-                        }`}
+                        className={adminFieldClass(
+                          cn(
+                            adminInputClass,
+                            "text-start placeholder:text-start",
+                          ),
+                          Boolean(errors.phone),
+                        )}
                       />
-                    </div>
-                    {errors.phone && (
-                      <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                        {errors.phone}
-                      </p>
-                    )}
+                    </AdminFormField>
                   </div>
-                </div>
 
-                {/* Address */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    العنوان *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        address: e.target.value,
-                      }));
-                      if (errors.address)
-                        setErrors((prev) => ({ ...prev, address: "" }));
-                    }}
-                    placeholder="أدخل العنوان الكامل"
-                    className={`w-full h-[44px] rounded-[10px] border bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 ${
-                      errors.address
-                        ? "border-[#FECACA] bg-[#FEF2F2]"
-                        : "border-[#E5E7EB]"
-                    }`}
-                  />
-                  {errors.address && (
-                    <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
-                      {errors.address}
-                    </p>
-                  )}
-                </div>
+                  <AdminFormField
+                    label="العنوان"
+                    required
+                    error={errors.address}
+                  >
+                    <input
+                      type="text"
+                      value={formData.address}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          address: e.target.value,
+                        }));
+                        if (errors.address)
+                          setErrors((prev) => ({ ...prev, address: "" }));
+                      }}
+                      placeholder="أدخل العنوان الكامل"
+                      className={adminFieldClass(
+                        cn(
+                          adminInputClass,
+                          "text-start placeholder:text-start",
+                        ),
+                        Boolean(errors.address),
+                      )}
+                    />
+                  </AdminFormField>
 
-                {/* Description */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    الوصف (اختياري)
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    placeholder="أدخل وصفاً للمنشأة"
-                    rows={3}
-                    className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none"
-                  />
-                </div>
+                  <AdminFormField
+                    label="الوصف"
+                    hint="أدخل وصفاً للمنشأة (اختياري)"
+                  >
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      placeholder="أدخل وصفاً للمنشأة"
+                      rows={3}
+                      className={adminFieldClass(
+                        cn(
+                          adminTextareaClass,
+                          "text-start placeholder:text-start",
+                        ),
+                        false,
+                      )}
+                    />
+                  </AdminFormField>
 
-                {/* Owner Doctor */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    الطبيب المالك (اختياري)
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                      <User className="h-4 w-4" />
-                    </div>
+                  <AdminFormField
+                    label="الطبيب المالك"
+                    hint="اختر الطبيب المالك (اختياري)"
+                  >
                     <StyledSelect
                       value={formData.ownerDoctorId}
                       onChange={(value) =>
@@ -493,84 +500,94 @@ export default function EditFacilityDialog({
                         ...doctorOptions,
                       ]}
                       placeholder="اختر الطبيب المالك"
-                      size="sm"
-                      tone="muted"
                     />
-                  </div>
-                </div>
+                  </AdminFormField>
 
-                {/* Attributes */}
-                <div>
-                  <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    السمات والخصائص
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={newAttribute}
-                      onChange={(e) => setNewAttribute(e.target.value)}
-                      placeholder="أضف سمة (مثال: طوارئ، ICU)"
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addAttribute();
+                  <AdminFormField label="السمات والخصائص">
+                    <div className="flex gap-2 items-center">
+                      <input
+                        value={newAttribute}
+                        onChange={(event) =>
+                          setNewAttribute(event.target.value)
                         }
-                      }}
-                      className="flex-1 h-[44px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15"
-                    />
-                    <button
-                      type="button"
-                      onClick={addAttribute}
-                      className="h-[44px] w-[44px] flex items-center justify-center rounded-[10px] border border-primary bg-primary text-white transition hover:bg-primary/90"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {formData.attributes.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.attributes.map((attribute) => (
-                        <span
-                          key={attribute}
-                          className="inline-flex items-center gap-1 rounded-[8px] bg-[#F0FDF4] border border-[#BBF7D0] px-3 py-1.5 font-cairo text-[11px] font-bold text-[#166534]"
-                        >
-                          <Tag className="h-3 w-3" />
-                          {attribute}
-                          <button
-                            type="button"
-                            onClick={() => removeAttribute(attribute)}
-                            className="mr-1 text-[#166534] hover:text-[#DC2626] transition"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            addAttribute();
+                          }
+                        }}
+                        placeholder="أضف سمة (مثال: طوارئ، ICU)"
+                        disabled={isSubmitting}
+                        className={adminFieldClass(
+                          cn(
+                            adminInputClass,
+                            "text-start placeholder:text-start",
+                          ),
+                          false,
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={addAttribute}
+                        disabled={isSubmitting || !newAttribute.trim()}
+                        className="inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[12px] bg-primary text-white disabled:opacity-50"
+                        aria-label="إضافة سمة"
+                      >
+                        <Plus className="w-4 h-4" aria-hidden />
+                      </button>
                     </div>
-                  )}
+                    {formData.attributes.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {formData.attributes.map((attribute) => (
+                          <span
+                            key={attribute}
+                            className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#E6F4F3] px-3 py-1 font-cairo text-[11px] font-bold text-primary"
+                          >
+                            <Tag className="w-3 h-3" aria-hidden />
+                            {attribute}
+                            <button
+                              type="button"
+                              onClick={() => removeAttribute(attribute)}
+                              disabled={isSubmitting}
+                              className="text-primary/70 transition hover:text-[#B42318] disabled:opacity-50"
+                              aria-label={`إزالة ${attribute}`}
+                            >
+                              <X className="w-3 h-3" aria-hidden />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                        لا توجد سمات مضافة بعد.
+                      </p>
+                    )}
+                  </AdminFormField>
                 </div>
+              </div>
 
-                {/* Actions */}
-                <div className="flex gap-3 pt-2">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
-                    >
-                      إلغاء
-                    </button>
-                  </Dialog.Close>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isSubmitting ? "جارٍ التحديث..." : "حفظ التغييرات"}
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="grid grid-cols-2 gap-3 border-t border-[#EEF2F6] px-8 py-5">
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                  className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
+                >
+                  <Save className="w-4 h-4" aria-hidden />
+                  {isSubmitting ? "جارٍ التحديث…" : "حفظ التغييرات"}
+                </button>
+              </div>
+            </form>
           </motion.div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
