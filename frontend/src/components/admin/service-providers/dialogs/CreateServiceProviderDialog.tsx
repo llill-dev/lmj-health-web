@@ -152,7 +152,11 @@ export default function CreateServiceProviderDialog({
               exit={{ opacity: 0, scale: 0.95 }}
               className="pointer-events-auto w-full max-w-2xl"
             >
-              <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">
+              <div
+                dir="rtl"
+                lang="ar"
+                className="bg-white rounded-[16px] shadow-2xl overflow-hidden"
+              >
                 <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
