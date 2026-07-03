@@ -39,6 +39,10 @@ function basePath(scope: AccountDeletionScope): string {
   return scope === 'patient' ? '/api/patient/me' : '/api/doctors/me';
 }
 
+function patientBasePath(): string {
+  return '/api/patient/me';
+}
+
 export function resolveAccountDeletionScope(
   role?: string | null,
 ): AccountDeletionScope | null {
@@ -163,25 +167,31 @@ export const accountDeletionApi = {
   },
 
   verifyPassword: (
-    scope: AccountDeletionScope,
+    _scope: Extract<AccountDeletionScope, 'patient'>,
     body: AccountDeletionVerifyPasswordBody,
   ) =>
     post<AccountDeletionVerifyPasswordResponse>(
-      `${basePath(scope)}/delete-request/verify-password`,
+      `${patientBasePath()}/delete-request/verify-password`,
       body,
       { locale: 'ar' },
     ),
 
-  sendOtp: (scope: AccountDeletionScope, body: AccountDeletionSendOtpBody = {}) =>
+  sendOtp: (
+    _scope: Extract<AccountDeletionScope, 'patient'>,
+    body: AccountDeletionSendOtpBody = {},
+  ) =>
     post<AccountDeletionSendOtpResponse>(
-      `${basePath(scope)}/delete-request/send-otp`,
+      `${patientBasePath()}/delete-request/send-otp`,
       body,
       { locale: 'ar' },
     ),
 
-  confirmOtp: (scope: AccountDeletionScope, body: AccountDeletionConfirmBody) =>
+  confirmOtp: (
+    _scope: Extract<AccountDeletionScope, 'patient'>,
+    body: AccountDeletionConfirmBody,
+  ) =>
     post<AccountDeletionConfirmResponse>(
-      `${basePath(scope)}/delete-request/confirm`,
+      `${patientBasePath()}/delete-request/confirm`,
       body,
       { locale: 'ar' },
     ),
@@ -206,7 +216,7 @@ export async function verifyDeletionPassword(
 ): Promise<AccountDeletionVerifyPasswordResponse | void> {
   const caps = getAccountDeletionCapabilities(scope);
 
-  if (caps.verifyPassword) {
+  if (scope === 'patient' && caps.verifyPassword) {
     try {
       return await accountDeletionApi.verifyPassword(scope, { currentPassword });
     } catch (error) {
@@ -231,7 +241,7 @@ export async function sendDeletionOtp(
   input: AccountDeletionSendOtpBody,
 ): Promise<AccountDeletionSendOtpResponse> {
   const caps = getAccountDeletionCapabilities(scope);
-  if (!caps.sendOtp) {
+  if (scope !== 'patient' || !caps.sendOtp) {
     return {
       message: 'OTP not required for this account scope.',
       otpSent: false,
@@ -262,7 +272,7 @@ export async function confirmDeletionAndRequest(
   const { otp, currentPassword, ...payload } = input;
   const trimmedOtp = otp?.trim();
 
-  if (caps.confirmOtp && trimmedOtp) {
+  if (scope === 'patient' && caps.confirmOtp && trimmedOtp) {
     try {
       const confirmed = await accountDeletionApi.confirmOtp(scope, {
         otp: trimmedOtp,
