@@ -1,54 +1,54 @@
-import { useQuery } from '@tanstack/react-query';
-import { adminApi } from '@/lib/admin/client';
+import { useQuery } from "@tanstack/react-query";
+import { adminApi } from "@/lib/admin/client";
 import {
   isAwaitingAnyInitialQueryData,
   isAwaitingInitialQueryData,
-} from '@/lib/query/queryUi';
+} from "@/lib/query/queryUi";
 
 const STALE = 5 * 60 * 1000;
 
 export function useAdminPlatformStats() {
   const patients = useQuery({
-    queryKey: ['admin', 'stats', 'patients'],
+    queryKey: ["admin", "stats", "patients"],
     queryFn: () => adminApi.patients.list({ limit: 1 }),
     staleTime: STALE,
   });
 
   const allDoctors = useQuery({
-    queryKey: ['admin', 'stats', 'doctors', 'all'],
+    queryKey: ["admin", "stats", "doctors", "all"],
     queryFn: () => adminApi.doctors.list({ limit: 1 }),
     staleTime: STALE,
   });
 
   const approvedDoctors = useQuery({
-    queryKey: ['admin', 'stats', 'doctors', 'approved'],
-    queryFn: () => adminApi.doctors.list({ status: 'approved', limit: 1 }),
+    queryKey: ["admin", "stats", "doctors", "approved"],
+    queryFn: () => adminApi.doctors.list({ status: "approved", limit: 1 }),
     staleTime: STALE,
   });
 
   const pendingDoctors = useQuery({
-    queryKey: ['admin', 'stats', 'doctors', 'pending'],
-    queryFn: () => adminApi.doctors.list({ status: 'pending', limit: 1 }),
+    queryKey: ["admin", "stats", "doctors", "pending"],
+    queryFn: () => adminApi.doctors.list({ status: "pending", limit: 1 }),
     staleTime: STALE,
   });
 
   const appointments = useQuery({
-    queryKey: ['admin', 'stats', 'appointments'],
+    queryKey: ["admin", "stats", "appointments"],
     queryFn: () => adminApi.appointments.list({ limit: 1 }),
     staleTime: STALE,
   });
 
   const secretaries = useQuery({
-    queryKey: ['admin', 'stats', 'secretaries'],
+    queryKey: ["admin", "stats", "secretaries"],
     queryFn: () => adminApi.secretaries.list({ limit: 1 }),
     staleTime: STALE,
   });
 
   const pendingVerifications = useQuery({
-    queryKey: ['admin', 'stats', 'verifications', 'pending'],
+    queryKey: ["admin", "stats", "verifications", "pending"],
     queryFn: () =>
       adminApi.verificationRequests.list({
-        status: 'pending',
+        status: "pending",
         page: 1,
         limit: 1,
       }),
@@ -89,8 +89,8 @@ export function useAdminPlatformStats() {
 
 export function useTopApprovedDoctors(limit = 8) {
   const query = useQuery({
-    queryKey: ['admin', 'analytics', 'top-doctors', limit],
-    queryFn: () => adminApi.doctors.list({ status: 'approved', limit }),
+    queryKey: ["admin", "analytics", "top-doctors", limit],
+    queryFn: () => adminApi.doctors.list({ status: "approved", limit }),
     staleTime: STALE,
   });
 
@@ -102,7 +102,7 @@ export function useTopApprovedDoctors(limit = 8) {
 
 export function useRecentAppointments(limit = 6) {
   const query = useQuery({
-    queryKey: ['admin', 'analytics', 'recent-appointments', limit],
+    queryKey: ["admin", "analytics", "recent-appointments", limit],
     queryFn: () => adminApi.appointments.list({ limit }),
     staleTime: STALE,
   });
