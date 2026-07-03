@@ -230,6 +230,7 @@ export default function RestoreAccountPage() {
   };
 
   const finishRestoreRequestSuccess = () => {
+    clearAccountDeletionSessionMeta();
     clearPendingDoctorRecoveryLogin();
     toast(
       'تم إرسال طلب الاستعادة. ستراجع الإدارة طلبك وستتواصل معك عند الموافقة.',
@@ -313,10 +314,15 @@ export default function RestoreAccountPage() {
     setError(null);
     try {
       if (isRestoreRequestMode) {
-        await verifyDoctorAccountRestoreRequestOtp({
+        const response = await verifyDoctorAccountRestoreRequestOtp({
           identity: recoveryIdentity,
           otp: pendingOtp,
         });
+        if (response.restoreRequestedAt) {
+          setStatus(response.status ?? 'requested');
+          setRecoverUntilRaw(null);
+          setRecoverUntil(formatRecoverUntil(response.restoreRequestedAt));
+        }
         setOtpConfirmOpen(false);
         setPendingOtp(null);
         finishRestoreRequestSuccess();

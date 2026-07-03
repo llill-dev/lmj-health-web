@@ -103,6 +103,11 @@ export type DoctorRecoveryOtpVerifyResponse = {
   message?: string;
   messageKey?: string;
   status?: AccountDeletionStatus;
+  userId?: string;
+  doctorId?: string;
+  restoreStatus?: 'pending' | 'approved' | 'rejected';
+  restoreRequestedAt?: string | null;
+  approvalFallbackUsed?: boolean;
 };
 
 export type DoctorRestoreRequestOtpVerifyBody = DoctorRecoveryOtpVerifyBody & {

@@ -351,6 +351,13 @@ function normalizeDoctorRecoveryStartResponse(
 function normalizeDoctorRecoveryVerifyResponse(
   raw: Record<string, unknown>,
 ): DoctorRecoveryOtpVerifyResponse {
+  const restoreStatus =
+    raw.restoreStatus === 'pending' ||
+    raw.restoreStatus === 'approved' ||
+    raw.restoreStatus === 'rejected'
+      ? raw.restoreStatus
+      : undefined;
+
   return {
     message: typeof raw.message === 'string' ? raw.message : undefined,
     messageKey:
@@ -361,6 +368,17 @@ function normalizeDoctorRecoveryVerifyResponse(
       raw.status === 'pending' ||
       raw.status === 'deleted'
         ? raw.status
+        : undefined,
+    userId: typeof raw.userId === 'string' ? raw.userId : undefined,
+    doctorId: typeof raw.doctorId === 'string' ? raw.doctorId : undefined,
+    restoreStatus,
+    restoreRequestedAt:
+      typeof raw.restoreRequestedAt === 'string'
+        ? raw.restoreRequestedAt
+        : null,
+    approvalFallbackUsed:
+      typeof raw.approvalFallbackUsed === 'boolean'
+        ? raw.approvalFallbackUsed
         : undefined,
   };
 }
