@@ -357,7 +357,7 @@ export default function AdminContentTemplatesPage() {
             <>
               القالب: «
               <span className="font-extrabold text-[#344054]">
-                {disableTarget?.name ?? "—"}
+                {parentTypeLabel(disableTarget?.name) ?? "—"}
               </span>
               ». لن يكون متاحاً لإنشاء محتوى جديد بعد التعطيل.
             </>
