@@ -46,12 +46,24 @@ const ACTIVE_FILTERS: { value: ActiveFilter; label: string }[] = [
   { value: "disabled", label: "معطّل" },
 ];
 
-function parentTypeLabel(t?: string): string {
-  if (t === "CONDITION") return "الحالات الطبية";
-  if (t === "SYMPTOM") return "الأعراض";
-  if (t === "GENERAL_ADVICE") return "نصائح عامة";
-  if (t === "MEDICATION") return "الأدوية";
-  return t ?? "—";
+function parentTypeLabel(t?: string | Record<string, unknown>): string {
+  if (!t) return "—";
+  if (typeof t === "string") {
+    if (t === "CONDITION") return "الحالات الطبية";
+    if (t === "SYMPTOM") return "الأعراض";
+    if (t === "GENERAL_ADVICE") return "نصائح عامة";
+    if (t === "MEDICATION") return "الأدوية";
+    return t;
+  }
+  // If t is an object, try to extract the value
+  if (typeof t === "object" && t !== null) {
+    const value =
+      (t as Record<string, unknown>).en ??
+      (t as Record<string, unknown>).ar ??
+      JSON.stringify(t);
+    return String(value);
+  }
+  return "—";
 }
 
 function isTemplateActive(t: AdminContentTemplate): boolean {
