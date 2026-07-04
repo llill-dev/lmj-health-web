@@ -598,6 +598,7 @@ export const adminApi = {
         body,
         { locale: "ar" },
       ),
+    // NOTE: DELETE not documented in Swagger (only GET/POST/PATCH), but frontend has remove helper
     remove: (kind: MedicalOrderCatalogKind, id: string) =>
       del<ApiSuccessEnvelope>(adminEndpoints.orderCatalog.item(kind, id), {
         locale: "ar",

@@ -60,6 +60,7 @@ export const adminEndpoints = {
       `/api/admin/doctor-verification-requests/${requestId}`,
   },
   secretaries: {
+    // NOTE: Only list endpoint documented in Swagger; create/update/delete lifecycle absent
     list: "/api/admin/secretaries",
   },
   users: {
