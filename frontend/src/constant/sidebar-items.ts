@@ -60,6 +60,7 @@ export type AdminSidebarItemId =
   | "doctors"
   | "doctor-specializations"
   | "doctor-profile-change-requests"
+  | "doctor-restore-requests"
   | "users"
   | "patients"
   | "secretaries"
@@ -249,6 +250,12 @@ export const adminSidebarItems: Array<{
     path: "doctor-profile-change-requests",
     label: "طلبات تغيير البيانات",
     icon: FileText,
+  },
+  {
+    id: "doctor-restore-requests",
+    path: "doctor-restore-requests",
+    label: "طلبات استعادة الحساب",
+    icon: LifeBuoy,
   },
   { id: "users", path: "users", label: "مستخدمو الإدارة", icon: UserCog },
   { id: "patients", path: "patients", label: "المرضى", icon: Users },

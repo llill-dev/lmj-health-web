@@ -229,7 +229,7 @@ export default function Sidebar({
                       className={
                         collapsed
                           ? "flex items-center"
-                          : "flex items-center gap-2"
+                          : "flex items-center gap-3"
                       }
                     >
                       <Icon

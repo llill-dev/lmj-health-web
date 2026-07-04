@@ -224,16 +224,12 @@ let state: AuthState = {
       setState(persisted);
       return;
     }
-    // Endpoint /api/admin/settings/general not documented in Swagger - rely on localStorage only
   },
 
   saveGeneralSettings: async (payload) => {
     // Endpoint /api/admin/settings/general not documented in Swagger - rely on localStorage only
     setState({
       platformName: payload.platformName,
-      primaryEmail: payload.primaryEmail,
-      phone: payload.phone,
-      region: payload.region,
       lang: payload.lang || "ar",
     });
     writePersistedGeneralSettings(payload);
