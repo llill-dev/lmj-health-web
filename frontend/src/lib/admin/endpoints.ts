@@ -66,7 +66,6 @@ export const adminEndpoints = {
   users: {
     list: "/api/admin/users",
     create: "/api/admin/users",
-    // NOTE: offboard/reboard disabled in client - not documented in Swagger
     offboard: (userId: string) => `/api/admin/users/${userId}/offboard`,
     reboard: (userId: string) => `/api/admin/users/${userId}/reboard`,
     // NOTE: doctor restore requests endpoints not documented in Swagger but actively used

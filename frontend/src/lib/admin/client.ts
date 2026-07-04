@@ -117,9 +117,6 @@ const DEV_MEDICAL_ORDER_PLACEHOLDERS: Record<
   referral: [],
 };
 
-const ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE =
-  "Direct admin offboard/reboard actions are disabled in the frontend. Doctor restore requests use the documented review endpoint.";
-
 export const adminApi = {
   doctors: {
     list: (params: AdminDoctorsListParams = {}) => {
@@ -341,12 +338,16 @@ export const adminApi = {
         locale: "ar",
       }),
     offboard: (userId: string, reason?: string) =>
-      Promise.reject<AdminUserOffboardResponse>(
-        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
+      post<AdminUserOffboardResponse>(
+        adminEndpoints.users.offboard(userId),
+        { reason },
+        { locale: "ar" },
       ),
     reboard: (userId: string) =>
-      Promise.reject<ApiSuccessEnvelope>(
-        new Error(ADMIN_USERS_LIFECYCLE_UNSUPPORTED_MESSAGE),
+      post<ApiSuccessEnvelope>(
+        adminEndpoints.users.reboard(userId),
+        {},
+        { locale: "ar" },
       ),
     doctorRestoreRequests: (params: {
       status?: string;
