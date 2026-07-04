@@ -196,15 +196,15 @@ export default function LoginForm({
               ? normalizeAuthPhoneIdentifier(values.identifier)
               : undefined,
           recoverUntil: null,
-          lifecycleAction: "restore_request",
+          lifecycleAction: "offboarded",
         });
 
-        toast("حسابك موقوف. يمكنك تقديم طلب استعادة للمراجعة.", {
-          title: "طلب استعادة الحساب",
+        toast("حسابك موقوف من قبل الإدارة. يمكنك تقديم طلب استعادة.", {
+          title: "حساب موقوف",
           variant: "info",
           durationMs: 5200,
         });
-        navigate("/doctor/restore-account", { replace: true });
+        navigate("/doctor/offboarded-restore", { replace: true });
         return;
       }
 

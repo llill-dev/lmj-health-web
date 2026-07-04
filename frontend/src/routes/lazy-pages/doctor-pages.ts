@@ -16,7 +16,8 @@ export const DoctorPatientDetailsPage = lazy(
   () => import("@/pages/doctor/patients/DoctorPatientDetailsPage"),
 );
 export const DoctorOnlineConsultationsPage = lazy(
-  () => import("@/pages/doctor/online-consultations/DoctorOnlineConsultationsPage"),
+  () =>
+    import("@/pages/doctor/online-consultations/DoctorOnlineConsultationsPage"),
 );
 export const DoctorWorkSchedulePage = lazy(
   () => import("@/pages/doctor/work-schedule/DoctorWorkSchedulePage"),
@@ -58,10 +59,12 @@ export const DoctorEncounterLabWorkspacePage = lazy(
   () => import("@/pages/doctor/encounters/DoctorEncounterLabWorkspacePage"),
 );
 export const DoctorEncounterProcedureWorkspacePage = lazy(
-  () => import("@/pages/doctor/encounters/DoctorEncounterProcedureWorkspacePage"),
+  () =>
+    import("@/pages/doctor/encounters/DoctorEncounterProcedureWorkspacePage"),
 );
 export const DoctorEncounterReferralWorkspacePage = lazy(
-  () => import("@/pages/doctor/encounters/DoctorEncounterReferralWorkspacePage"),
+  () =>
+    import("@/pages/doctor/encounters/DoctorEncounterReferralWorkspacePage"),
 );
 export const DoctorEncounterOrderManualPage = lazy(
   () => import("@/pages/doctor/encounters/DoctorEncounterOrderManualPage"),
@@ -106,6 +109,9 @@ export const DeleteAccountPage = lazy(
 );
 export const RestoreAccountPage = lazy(
   () => import("@/pages/account-deletion/RestoreAccountPage"),
+);
+export const OffboardedDoctorRestorePage = lazy(
+  () => import("@/pages/account-deletion/OffboardedDoctorRestorePage"),
 );
 export const DoctorClinicAccountsPage = lazy(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicAccountsPage"),

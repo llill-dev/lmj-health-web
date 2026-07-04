@@ -78,6 +78,10 @@ export default function App() {
             element={<DoctorPages.RestoreAccountPage />}
           />
           <Route
+            path="/doctor/offboarded-restore"
+            element={<DoctorPages.OffboardedDoctorRestorePage />}
+          />
+          <Route
             path="/patient/restore-account"
             element={<DoctorPages.RestoreAccountPage />}
           />
