@@ -4,8 +4,8 @@
  */
 export const doctorEndpoints = {
   analytics: {
-    summary: '/api/doctors/analytics/summary',
-    diagnosis: '/api/doctors/analytics/diagnosis',
+    summary: "/api/doctors/analytics/summary",
+    diagnosis: "/api/doctors/analytics/diagnosis",
   },
   encounters: {
     list: (doctorId: string) => `/api/doctors/${doctorId}/encounters`,
@@ -127,8 +127,8 @@ export const doctorEndpoints = {
       encounterId: string,
     ) =>
       `/api/doctors/${doctorId}/patients/${patientId}/encounters/${encounterId}/orders/referrals`,
-    orderCatalogLab: '/api/doctors/order-catalog/lab-tests',
-    orderCatalogProcedures: '/api/doctors/order-catalog/procedures',
+    orderCatalogLab: "/api/doctors/order-catalog/lab-tests",
+    orderCatalogProcedures: "/api/doctors/order-catalog/procedures",
     encounterOrderById: (
       doctorId: string,
       patientId: string,
@@ -253,61 +253,77 @@ export const doctorEndpoints = {
       `/api/doctors/${doctorId}/appointment-types/available`,
     list: (doctorId: string) => `/api/doctors/${doctorId}/appointment-types`,
     create: (doctorId: string) => `/api/doctors/${doctorId}/appointment-types`,
+    detail: (doctorId: string, typeId: string) =>
+      `/api/doctors/${doctorId}/appointment-types/${typeId}`,
     update: (doctorId: string, typeId: string) =>
       `/api/doctors/${doctorId}/appointment-types/${typeId}`,
+    toggleStatus: (doctorId: string, typeId: string) =>
+      `/api/doctors/${doctorId}/appointment-types/${typeId}/toggle-status`,
     delete: (doctorId: string, typeId: string) =>
       `/api/doctors/${doctorId}/appointment-types/${typeId}`,
   },
-  orderCatalogImaging: '/api/doctors/order-catalog/imaging',
+  orderCatalogImaging: "/api/doctors/order-catalog/imaging",
+  orderCatalogLab: "/api/doctors/order-catalog/lab-tests",
+  orderCatalogProcedures: "/api/doctors/order-catalog/procedures",
+  orderCatalogImagingDetail: (id: string) =>
+    `/api/doctors/order-catalog/imaging/${id}`,
+  orderCatalogLabDetail: (id: string) =>
+    `/api/doctors/order-catalog/lab-tests/${id}`,
+  orderCatalogProceduresDetail: (id: string) =>
+    `/api/doctors/order-catalog/procedures/${id}`,
   orderFavorites: {
-    list: '/api/doctors/order-favorites',
-    create: '/api/doctors/order-favorites',
+    list: "/api/doctors/order-favorites",
+    create: "/api/doctors/order-favorites",
     delete: (favoriteId: string) =>
       `/api/doctors/order-favorites/${encodeURIComponent(favoriteId)}`,
   },
   library: {
-    recent: '/api/doctors/library/recent',
-    items: '/api/doctors/library/items',
+    recent: "/api/doctors/library/recent",
+    items: "/api/doctors/library/items",
     itemById: (itemId: string) =>
       `/api/doctors/library/items/${encodeURIComponent(itemId)}`,
     itemFavorite: (itemId: string) =>
       `/api/doctors/library/items/${encodeURIComponent(itemId)}/favorite`,
   },
   templates: {
-    list: '/api/doctors/templates',
+    list: "/api/doctors/templates",
     byId: (templateId: string) =>
       `/api/doctors/templates/${encodeURIComponent(templateId)}`,
     apply: (templateId: string) =>
       `/api/doctors/templates/${encodeURIComponent(templateId)}/apply`,
   },
   orders: {
-    list: '/api/doctors/orders',
-    create: '/api/doctors/orders',
-    createLab: '/api/doctors/orders/lab',
-    createImaging: '/api/doctors/orders/imaging',
-    createProcedures: '/api/doctors/orders/procedures',
-    createReferrals: '/api/doctors/orders/referrals',
+    list: "/api/doctors/orders",
+    create: "/api/doctors/orders",
+    createLab: "/api/doctors/orders/lab",
+    createImaging: "/api/doctors/orders/imaging",
+    createProcedures: "/api/doctors/orders/procedures",
+    createReferrals: "/api/doctors/orders/referrals",
     byId: (orderId: string) => `/api/doctors/orders/${orderId}`,
     cancel: (orderId: string) => `/api/doctors/orders/${orderId}/cancel`,
     status: (orderId: string) => `/api/doctors/orders/${orderId}/status`,
     results: (orderId: string) => `/api/doctors/orders/${orderId}/results`,
   },
   documents: {
-    generate: '/api/documents/generate',
+    generate: "/api/documents/generate",
   },
   facilities: {
-    suggest: '/api/facilities/suggest',
-    types: '/api/facilities/types',
+    suggest: "/api/facilities/suggest",
+    types: "/api/facilities/types",
   },
   /** GET — internal staff directory (doctor / secretary). API-3 */
-  internalDirectory: '/api/doctors/internal/directory',
+  internalDirectory: "/api/doctors/internal/directory",
   home: {
-    snapshot: '/api/doctors/home/snapshot',
+    snapshot: "/api/doctors/home/snapshot",
   },
   me: {
-    activityLog: '/api/doctors/me/activity-log',
-    facility: '/api/doctors/me/facility',
-    profile: '/api/doctors/me/profile',
-    profileChangeRequests: '/api/doctors/me/profile-change-requests',
+    activityLog: "/api/doctors/me/activity-log",
+    facility: "/api/doctors/me/facility",
+    profile: "/api/doctors/me/profile",
+    profileChangeRequests: "/api/doctors/me/profile-change-requests",
+    profileChangeRequestDetail: (requestId: string) =>
+      `/api/doctors/me/profile-change-requests/${requestId}`,
   },
+  reviews: (doctorId: string) => `/api/doctors/${doctorId}/reviews`,
+  search: "/api/doctors/search",
 } as const;

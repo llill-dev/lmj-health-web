@@ -28,12 +28,14 @@ export const adminEndpoints = {
   },
   patients: {
     list: "/api/admin/patients",
+    // NOTE: details endpoint not documented in Swagger but actively used
     details: (patientId: string) => `/api/admin/patients/${patientId}`,
     activate: (patientId: string) =>
       `/api/admin/patients/${patientId}/activate`,
     suspend: (patientId: string) => `/api/admin/patients/${patientId}/suspend`,
     unsuspend: (patientId: string) =>
       `/api/admin/patients/${patientId}/unsuspend`,
+    // NOTE: files endpoints not documented in Swagger but actively used
     files: {
       list: (patientId: string) => `/api/admin/patients/${patientId}/files`,
       download: (patientId: string, fileId: string) =>
@@ -63,8 +65,10 @@ export const adminEndpoints = {
   users: {
     list: "/api/admin/users",
     create: "/api/admin/users",
+    // NOTE: offboard/reboard disabled in client - not documented in Swagger
     offboard: (userId: string) => `/api/admin/users/${userId}/offboard`,
     reboard: (userId: string) => `/api/admin/users/${userId}/reboard`,
+    // NOTE: doctor restore requests endpoints not documented in Swagger but actively used
     doctorRestoreRequests: "/api/admin/users/doctor-restore-requests",
     reviewRestoreRequest: (userId: string) =>
       `/api/admin/users/${userId}/restore-request/review`,
@@ -137,5 +141,9 @@ export const adminEndpoints = {
     create: "/api/service-providers",
     update: (id: string) => `/api/service-providers/${id}`,
     updateStatus: (id: string) => `/api/service-providers/${id}/status`,
+  },
+  doctorProfileChangeRequests: {
+    review: (requestId: string) =>
+      `/api/doctors/profile-change-requests/${requestId}`,
   },
 } as const;

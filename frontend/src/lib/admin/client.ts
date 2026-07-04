@@ -676,10 +676,7 @@ export const adminApi = {
         adminEndpoints.facilities.getById(id),
         { locale: "ar" },
       ),
-    listDoctors: (
-      id: string,
-      params: FacilityDoctorsListParams = {},
-    ) => {
+    listDoctors: (id: string, params: FacilityDoctorsListParams = {}) => {
       const qs = new URLSearchParams();
       if (params.page) qs.set("page", String(params.page));
       if (params.limit) qs.set("limit", String(params.limit));
@@ -756,7 +753,7 @@ export const adminApi = {
           request?: { status: string };
           doctor?: Record<string, unknown>;
         }
-      >(`/api/doctors/profile-change-requests/${requestId}`, body, {
+      >(adminEndpoints.doctorProfileChangeRequests.review(requestId), body, {
         locale: "ar",
       }),
   },

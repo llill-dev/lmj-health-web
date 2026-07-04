@@ -71,7 +71,7 @@ interface AuthState {
   setPendingVerification: (df: PendingVerification | null) => void;
   logout: (options?: {
     skipRemoteRevoke?: boolean;
-    scope?: 'current' | 'all';
+    scope?: "current" | "all";
   }) => Promise<void>;
 }
 
@@ -224,50 +224,19 @@ let state: AuthState = {
       setState(persisted);
       return;
     }
-
-    const data = await get<{
-      platformName: string;
-      primaryEmail: string;
-      phone: string;
-      region: string;
-      lang?: "ar" | "en";
-    }>("/api/admin/settings/general", { locale: "ar" });
-
-    setState({
-      platformName: data.platformName || "LMJ Health",
-      primaryEmail: data.primaryEmail || "",
-      phone: data.phone || "",
-      region: data.region || "",
-      lang: (data.lang as "ar" | "en" | undefined) || "ar",
-    });
+    // Endpoint /api/admin/settings/general not documented in Swagger - rely on localStorage only
   },
 
   saveGeneralSettings: async (payload) => {
-    try {
-      const data = await post<{
-        ok: boolean;
-        settings?: {
-          platformName: string;
-          primaryEmail: string;
-          phone: string;
-          region: string;
-          lang?: "ar" | "en";
-        };
-      }>("/api/admin/settings/general", payload, { locale: "ar" });
-
-      const s = (data as { settings?: typeof payload })?.settings ?? payload;
-      setState({
-        platformName: s.platformName,
-        primaryEmail: s.primaryEmail,
-        phone: s.phone,
-        region: s.region,
-        lang: s.lang || "ar",
-      });
-
-      writePersistedGeneralSettings(s);
-    } catch {
-      return;
-    }
+    // Endpoint /api/admin/settings/general not documented in Swagger - rely on localStorage only
+    setState({
+      platformName: payload.platformName,
+      primaryEmail: payload.primaryEmail,
+      phone: payload.phone,
+      region: payload.region,
+      lang: payload.lang || "ar",
+    });
+    writePersistedGeneralSettings(payload);
   },
 
   applySession: (pair, sessionUser) => {
@@ -353,14 +322,14 @@ let state: AuthState = {
 
   logout: async (options?: {
     skipRemoteRevoke?: boolean;
-    scope?: 'current' | 'all';
+    scope?: "current" | "all";
   }) => {
     const accessToken = state.accessToken;
-    const scope = options?.scope ?? 'all';
+    const scope = options?.scope ?? "all";
 
     if (accessToken && !options?.skipRemoteRevoke) {
       try {
-        if (scope === 'current') {
+        if (scope === "current") {
           await authApi.logout(accessToken);
         } else {
           await authApi.logoutAll(accessToken);
