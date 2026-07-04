@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin/doctors/doctorSpecializationReview";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { AppCheckbox } from "@/components/ui";
+import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
 
 const approveSchema = z.object({
@@ -488,26 +489,24 @@ export default function ReviewVerificationRequestDialog({
                               <span className="ms-1 text-[#F04438]">*</span>
                             ) : null}
                           </div>
-                          <select
+                          <StyledSelect
                             value={specializationLookupId}
-                            onChange={(event) => {
-                              setSpecializationLookupId(event.target.value);
+                            onChange={(value) => {
+                              setSpecializationLookupId(value);
                               setError(null);
                             }}
                             disabled={lookupsQuery.isAwaitingData}
-                            className="h-[42px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-semibold text-[#101828] outline-none disabled:opacity-60"
-                          >
-                            <option value="">
-                              {lookupsQuery.isAwaitingData
-                                ? "جارٍ تحميل التخصصات…"
-                                : "— اختر التخصص —"}
-                            </option>
-                            {lookupOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
+                            options={[
+                              {
+                                value: "",
+                                label: lookupsQuery.isAwaitingData
+                                  ? "جارٍ تحميل التخصصات…"
+                                  : "— اختر التخصص —",
+                              },
+                              ...lookupOptions,
+                            ]}
+                            listboxAriaLabel="اختر التخصص"
+                          />
                           {lookupsQuery.isError ? (
                             <p className="mt-2 font-cairo text-[11px] font-semibold text-[#B45309]">
                               تعذّر تحميل قائمة التخصصات. يمكنك إنشاء تخصص جديد
