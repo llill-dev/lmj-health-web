@@ -1,46 +1,46 @@
-import { AlertTriangle, Mail, Phone, Send } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useToast } from '@/components/ui/ToastProvider';
+import { AlertTriangle, Mail, Phone, Send } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   clearPendingDoctorRecoveryLogin,
   peekPendingDoctorRecoveryLogin,
-} from '@/lib/auth/accountDeletionSession';
+} from "@/lib/auth/accountDeletionSession";
 
 export default function OffboardedDoctorRestorePage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
-  
+  const [message, setMessage] = useState("");
+
   const pendingLogin = peekPendingDoctorRecoveryLogin();
-  const contactEmail = pendingLogin?.email || 'support@lmjhealth.com';
-  const contactPhone = pendingLogin?.phone || '—';
+  const contactEmail = pendingLogin?.email || "support@lmjhealth.com";
+  const contactPhone = pendingLogin?.phone || "—";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) {
-      toast('يرجى كتابة رسالتك قبل الإرسال', {
-        title: 'رسالة مطلوبة',
-        variant: 'error',
+      toast("يرجى كتابة رسالتك قبل الإرسال", {
+        title: "رسالة مطلوبة",
+        variant: "error",
       });
       return;
     }
 
     setIsSubmitting(true);
-    
+
     // Simulate sending request - in real implementation, this would call an API
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     setIsSubmitting(false);
-    toast('تم إرسال طلبك بنجاح. سيتم التواصل معك قريباً.', {
-      title: 'تم الإرسال',
-      variant: 'success',
+    toast("تم إرسال طلبك بنجاح. سيتم التواصل معك قريباً.", {
+      title: "تم الإرسال",
+      variant: "success",
     });
-    
+
     clearPendingDoctorRecoveryLogin();
-    navigate('/login', { replace: true });
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -49,7 +49,11 @@ export default function OffboardedDoctorRestorePage() {
         <title>طلب استعادة الحساب الموقوف | LMJ Health</title>
       </Helmet>
 
-      <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-[#F0FDF4] via-white to-[#E6F4F3] px-4 py-12 sm:px-6">
+      <div
+        dir="rtl"
+        lang="ar"
+        className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-[#F0FDF4] via-white to-[#E6F4F3] px-4 py-12 sm:px-6"
+      >
         <div className="w-full max-w-lg">
           {/* Header Card */}
           <div className="mb-6 rounded-2xl border-2 border-[#FEF3C7] bg-[#FFFBEB] p-6 shadow-sm">
@@ -62,7 +66,8 @@ export default function OffboardedDoctorRestorePage() {
                   حسابك موقوف من قبل الإدارة
                 </h1>
                 <p className="mt-2 font-cairo text-[14px] font-semibold leading-relaxed text-[#78350F]">
-                  تم إيقاف حسابك من قبل المشرف. لاستعادة حسابك، يرجى تقديم طلب للإدارة عبر النموذج أدناه.
+                  تم إيقاف حسابك من قبل المشرف. لاستعادة حسابك، يرجى تقديم طلب
+                  للإدارة عبر النموذج أدناه.
                 </p>
               </div>
             </div>
@@ -88,7 +93,7 @@ export default function OffboardedDoctorRestorePage() {
                     </p>
                   </div>
                 </div>
-                {contactPhone !== '—' && (
+                {contactPhone !== "—" && (
                   <div className="mt-3 flex items-center gap-3">
                     <Phone className="h-5 w-5 text-[#667085]" />
                     <div>
@@ -105,7 +110,10 @@ export default function OffboardedDoctorRestorePage() {
 
               {/* Message Input */}
               <div>
-                <label htmlFor="message" className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
+                <label
+                  htmlFor="message"
+                  className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]"
+                >
                   رسالتك للإدارة <span className="text-[#F04438]">*</span>
                 </label>
                 <textarea
