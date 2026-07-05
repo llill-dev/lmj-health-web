@@ -1,6 +1,6 @@
-import { UserX } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { DeleteAccountStepper } from './delete-account-stepper';
+import { UserX } from "lucide-react";
+import type { ReactNode } from "react";
+import { DeleteAccountStepper } from "./delete-account-stepper";
 
 export function DeleteAccountShell({
   step,
@@ -15,7 +15,7 @@ export function DeleteAccountShell({
     <div
       dir="rtl"
       lang="ar"
-      className="flex min-h-screen items-center justify-center bg-[#F3F4F6] px-4 py-10"
+      className="flex min-h-screen items-center justify-center px-4 py-10"
     >
       <div className="w-full max-w-[520px]">
         <div className="mb-6 text-center">

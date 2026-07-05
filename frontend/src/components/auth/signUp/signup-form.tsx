@@ -178,14 +178,6 @@ export default function SignUpForm({
         parsed.data.specialtySource === 'catalog'
           ? { specializationKey: parsed.data.specialty }
           : { customSpecializationText: parsed.data.specialty };
-      console.info('[signup] specialty payload', {
-        specialtySource: parsed.data.specialtySource,
-        ...specialtyPayload,
-      });
-      console.info("[signup] POST /api/auth/signup payload", {
-        ...signupPayload,
-        password: "<redacted>",
-      });
     }
 
     authApi

@@ -110,9 +110,6 @@ export const DeleteAccountPage = lazy(
 export const RestoreAccountPage = lazy(
   () => import("@/pages/account-deletion/RestoreAccountPage"),
 );
-export const OffboardedDoctorRestorePage = lazy(
-  () => import("@/pages/account-deletion/OffboardedDoctorRestorePage"),
-);
 export const DoctorClinicAccountsPage = lazy(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicAccountsPage"),
 );

@@ -204,7 +204,7 @@ export default function LoginForm({
           variant: "info",
           durationMs: 5200,
         });
-        navigate("/doctor/offboarded-restore", { replace: true });
+        navigate("/doctor/restore-account", { replace: true });
         return;
       }
 

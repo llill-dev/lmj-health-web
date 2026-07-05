@@ -28,13 +28,15 @@ function PublicPagesLayout() {
   const location = useLocation();
 
   return (
-    <Suspense fallback={<PublicRouteFallback />}>
-      <AnimatePresence mode="wait">
-        <PageTransition key={location.pathname}>
-          <Outlet />
-        </PageTransition>
-      </AnimatePresence>
-    </Suspense>
+    <div className="min-h-dvh bg-gradient-to-br from-[#F0FDF4] via-white to-[#E6F4F3]">
+      <Suspense fallback={<PublicRouteFallback />}>
+        <AnimatePresence mode="wait">
+          <PageTransition key={location.pathname}>
+            <Outlet />
+          </PageTransition>
+        </AnimatePresence>
+      </Suspense>
+    </div>
   );
 }
 
@@ -76,10 +78,6 @@ export default function App() {
           <Route
             path="/doctor/restore-account"
             element={<DoctorPages.RestoreAccountPage />}
-          />
-          <Route
-            path="/doctor/offboarded-restore"
-            element={<DoctorPages.OffboardedDoctorRestorePage />}
           />
           <Route
             path="/patient/restore-account"
