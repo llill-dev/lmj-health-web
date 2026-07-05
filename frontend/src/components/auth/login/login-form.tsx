@@ -13,10 +13,6 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { SIGNUP_EMAIL_INVALID_MESSAGE_AR } from "@/components/auth/signUp/signup-schemas";
 import { persistClaimAccountPending } from "@/lib/auth/claimAccountNavState";
 import {
-  clearPendingDoctorRecoveryLogin,
-  persistPendingDoctorRecoveryLogin,
-  resolveDoctorRestoreMode,
-  resolveRestorePath,
   sanitizePostLoginNextPath,
   shouldRedirectToRestore,
 } from "@/lib/auth/accountDeletionSession";
@@ -116,7 +112,6 @@ export default function LoginForm({
 
   const onSubmit = handleSubmit(async (values) => {
     setLoginError(null);
-    clearPendingDoctorRecoveryLogin();
 
     try {
       const loginIdentifier =
@@ -141,11 +136,8 @@ export default function LoginForm({
           variant: "info",
           durationMs: 5200,
         });
-        navigate(resolveRestorePath(loginData.role), { replace: true });
         return;
       }
-
-      clearPendingDoctorRecoveryLogin();
 
       const LOGIN_SUCCESS_AR: Record<string, string> = {
         admin: "تم تسجيل الدخول بنجاح. مرحباً بك في لوحة إدارة LMJ Health.",
@@ -187,24 +179,11 @@ export default function LoginForm({
       });
 
       if (code === "DELETED") {
-        persistPendingDoctorRecoveryLogin({
-          role: "doctor",
-          email:
-            values.method === "email" ? values.identifier.trim() : undefined,
-          phone:
-            values.method === "phone"
-              ? normalizeAuthPhoneIdentifier(values.identifier)
-              : undefined,
-          recoverUntil: null,
-          lifecycleAction: "offboarded",
-        });
-
-        toast("حسابك موقوف من قبل الإدارة. يمكنك تقديم طلب استعادة.", {
+        toast("حسابك موقوف من قبل الإدارة.", {
           title: "حساب موقوف",
           variant: "info",
           durationMs: 5200,
         });
-        navigate("/doctor/restore-account", { replace: true });
         return;
       }
 
@@ -218,39 +197,14 @@ export default function LoginForm({
               ? details.recoverUntil
               : null;
 
-        const backendLifecycleAction =
-          typeof details?.lifecycleAction === "string"
-            ? details.lifecycleAction
-            : null;
-        const lifecycleAction = resolveDoctorRestoreMode({
-          lifecycleAction: backendLifecycleAction,
-          recoverUntil,
-        });
-        const isRestoreRequest = lifecycleAction === "restore_request";
-
-        persistPendingDoctorRecoveryLogin({
-          role: "doctor",
-          email:
-            values.method === "email" ? values.identifier.trim() : undefined,
-          phone:
-            values.method === "phone"
-              ? normalizeAuthPhoneIdentifier(values.identifier)
-              : undefined,
-          recoverUntil,
-          lifecycleAction,
-        });
-
         toast(
-          isRestoreRequest
-            ? "انتهت فترة الاسترجاع التلقائي. يمكنك تقديم طلب استعادة للمراجعة."
-            : "حسابك في فترة استرجاع. يمكنك إلغاء طلب الحذف الآن.",
+          "تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.",
           {
-            title: isRestoreRequest ? "طلب استعادة" : "استعادة الحساب",
-            variant: "info",
+            title: "تعذّر تسجيل الدخول",
+            variant: "error",
             durationMs: 5200,
           },
         );
-        navigate(resolveRestorePath("doctor"), { replace: true });
         return;
       }
 

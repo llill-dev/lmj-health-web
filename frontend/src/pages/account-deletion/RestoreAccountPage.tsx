@@ -1,4 +1,4 @@
-import { AlertTriangle, RotateCcw, UserCheck } from "lucide-react";
+import { RotateCcw, UserCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -23,7 +23,6 @@ import {
 } from "@/lib/auth/accountDeletionSession";
 import {
   accountDeletionApi,
-  doctorRestoreRequestApi,
   resolveAccountDeletionScope,
   resolveDoctorRecoveryIdentity,
   startDoctorAccountRecoveryOtp,
@@ -95,10 +94,8 @@ export default function RestoreAccountPage() {
     useState<DoctorRecoveryIdentity | null>(null);
   const [otpDestination, setOtpDestination] = useState("");
   const [otpChannel, setOtpChannel] = useState<DoctorRecoveryChannel>("email");
-  const [offboardedMessage, setOffboardedMessage] = useState("");
 
   const guestRecoveryMode = !authUser && Boolean(pendingRecovery);
-  const isOffboarded = pendingRecovery?.lifecycleAction === "offboarded";
 
   const restoreMode = useMemo(() => {
     if (scope !== "doctor") return null;
@@ -243,73 +240,6 @@ export default function RestoreAccountPage() {
       },
     );
     navigate("/login", { replace: true });
-  };
-
-  const handleOffboardedRestoreStart = async () => {
-    if (!offboardedMessage.trim()) {
-      toast("يرجى كتابة رسالتك قبل الإرسال", {
-        title: "رسالة مطلوبة",
-        variant: "error",
-      });
-      return;
-    }
-
-    setBusy(true);
-    setError(null);
-
-    try {
-      const identity = resolveDoctorRecoveryIdentity({
-        email: pendingRecovery?.email,
-        phone: pendingRecovery?.phone,
-      });
-
-      const response = await doctorRestoreRequestApi.startOtp(identity);
-      setRecoveryIdentity(identity);
-      setOtpDestination(response.destination);
-      setOtpChannel(identity.channel);
-      setView("otp");
-      toast("تم إرسال رمز التحقق إلى " + response.destination, {
-        title: "تم الإرسال",
-        variant: "success",
-      });
-    } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "حدث خطأ أثناء إرسال الرمز",
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleOffboardedRestoreVerify = async () => {
-    if (!pendingOtp || !recoveryIdentity) return;
-
-    setBusy(true);
-    setError(null);
-
-    try {
-      await doctorRestoreRequestApi.verifyOtp({
-        ...recoveryIdentity,
-        otp: pendingOtp,
-        reason: offboardedMessage,
-      });
-
-      setOtpConfirmOpen(false);
-      setPendingOtp(null);
-      clearAccountDeletionSessionMeta();
-      clearPendingDoctorRecoveryLogin();
-      toast("تم إرسال طلبك بنجاح. سيتم مراجعته من قبل الإدارة.", {
-        title: "تم الإرسال",
-        variant: "success",
-      });
-      navigate("/login", { replace: true });
-    } catch (cause) {
-      setOtpConfirmOpen(false);
-      setPendingOtp(null);
-      setError(cause instanceof Error ? cause.message : "رمز التحقق غير صحيح");
-    } finally {
-      setBusy(false);
-    }
   };
 
   const executePatientRestore = async () => {
@@ -489,11 +419,9 @@ export default function RestoreAccountPage() {
       ? "بعد التحقق من الرمز سيُرسل طلب الاستعادة للمراجعة الإدارية. هل تريد المتابعة؟"
       : "بعد التحقق من الرمز سيتم إلغاء طلب الحذف واستعادة حسابك. هل تريد المتابعة؟"
     : "هل تريد إلغاء طلب حذف الحساب واستعادته؟ سيتم إرسال طلب الإلغاء إلى الخادم فور التأكيد.";
-  const confirmHandler = isOffboarded
-    ? handleOffboardedRestoreVerify
-    : isDoctorOtpFlow
-      ? executeOtpVerify
-      : executePatientRestoreConfirm;
+  const confirmHandler = isDoctorOtpFlow
+    ? executeOtpVerify
+    : executePatientRestoreConfirm;
 
   const infoSubtitle = isRestoreRequestMode
     ? "انتهت فترة الاسترجاع التلقائي (7 أيام). يمكنك تقديم طلب استعادة للمراجعة من الإدارة."
@@ -541,162 +469,98 @@ export default function RestoreAccountPage() {
           />
         ) : (
           <div className="text-center">
-            {isOffboarded ? (
-              <>
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FCD34D]">
-                  <AlertTriangle
-                    className="h-6 w-6 text-[#92400E]"
-                    aria-hidden
-                  />
-                </div>
+            <>
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#DCFCE7]">
+                <UserCheck className="h-6 w-6 text-[#16A34A]" aria-hidden />
+              </div>
 
-                <h2 className="font-cairo text-[18px] font-extrabold text-[#92400E]">
-                  حسابك موقوف من قبل الإدارة
-                </h2>
-                <p className="mt-2 font-cairo text-[14px] font-semibold leading-relaxed text-[#78350F]">
-                  تم إيقاف حسابك من قبل المشرف. لاستعادة حسابك، يرجى تقديم طلب
-                  للإدارة عبر النموذج أدناه.
-                </p>
+              <h2 className="font-cairo text-[18px] font-extrabold text-[#111827]">
+                {isRestoreRequestMode ? "طلب استعادة الحساب" : "استعادة الحساب"}
+              </h2>
+              <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
+                {infoSubtitle}
+              </p>
 
-                <div className="mt-6 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-right">
-                  <label className="mb-2 block font-cairo text-[13px] font-extrabold text-[#111827]">
-                    رسالتك للإدارة <span className="text-[#F04438]">*</span>
-                  </label>
-                  <textarea
-                    value={offboardedMessage}
-                    onChange={(e) => setOffboardedMessage(e.target.value)}
-                    placeholder="اكتب رسالتك هنا... يرجى توضيح سبب طلب استعادة الحساب وأي معلومات إضافية قد تساعد الإدارة في مراجعة طلبك."
-                    rows={4}
-                    className="w-full rounded-xl border border-[#D0D5DD] bg-white px-4 py-3 font-cairo text-[14px] font-semibold text-[#111827] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed resize-none"
-                    disabled={busy}
-                  />
-                </div>
-
-                {error ? (
-                  <p
-                    role="alert"
-                    className="mt-3 text-right font-cairo text-[12px] font-bold leading-[20px] text-[#DC2626]"
-                  >
-                    {error}
-                  </p>
-                ) : null}
-
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={handleOffboardedRestoreStart}
-                  className="mt-6 flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition hover:bg-primary/90 disabled:opacity-60"
-                >
-                  {busy ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      <span>جارٍ الإرسال...</span>
-                    </>
-                  ) : (
-                    <span>إرسال طلب الاستعادة</span>
-                  )}
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#DCFCE7]">
-                  <UserCheck className="h-6 w-6 text-[#16A34A]" aria-hidden />
-                </div>
-
-                <h2 className="font-cairo text-[18px] font-extrabold text-[#111827]">
+              {guestRecoveryMode ? (
+                <p className="mt-3 rounded-[10px] bg-[#EFF6FF] px-4 py-3 font-cairo text-[12px] font-semibold text-[#1D4ED8]">
                   {isRestoreRequestMode
-                    ? "طلب استعادة الحساب"
-                    : "استعادة الحساب"}
-                </h2>
-                <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
-                  {infoSubtitle}
+                    ? "تم التعرف على حسابك. أكّد هويتك برمز التحقق لتقديم طلب الاستعادة."
+                    : "تم التعرف على حسابك في فترة الاسترجاع. أكّد هويتك برمز التحقق لإتمام الاستعادة."}
                 </p>
+              ) : null}
 
-                {guestRecoveryMode ? (
-                  <p className="mt-3 rounded-[10px] bg-[#EFF6FF] px-4 py-3 font-cairo text-[12px] font-semibold text-[#1D4ED8]">
-                    {isRestoreRequestMode
-                      ? "تم التعرف على حسابك. أكّد هويتك برمز التحقق لتقديم طلب الاستعادة."
-                      : "تم التعرف على حسابك في فترة الاسترجاع. أكّد هويتك برمز التحقق لإتمام الاستعادة."}
-                  </p>
-                ) : null}
+              {loading ? (
+                <p className="mt-6 font-cairo text-[13px] font-semibold text-[#667085]">
+                  جارٍ التحقق من حالة الحساب…
+                </p>
+              ) : null}
 
-                {loading ? (
-                  <p className="mt-6 font-cairo text-[13px] font-semibold text-[#667085]">
-                    جارٍ التحقق من حالة الحساب…
-                  </p>
-                ) : null}
-
-                {!loading && canRestore ? (
-                  <>
-                    {!isRestoreRequestMode && recoverUntil ? (
-                      <p className="mt-4 rounded-[10px] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#92400E]">
-                        آخر موعد للاسترجاع: {recoverUntil}
-                      </p>
-                    ) : null}
-
-                    {isRestoreRequestMode ? (
-                      <p className="mt-4 rounded-[10px] bg-[#EFF6FF] px-4 py-3 font-cairo text-[12px] font-semibold text-[#1D4ED8]">
-                        بعد التحقق سيُراجع فريق الإدارة طلبك ويعيد تفعيل حسابك
-                        عند الموافقة.
-                      </p>
-                    ) : null}
-
-                    {error ? (
-                      <p
-                        role="alert"
-                        className="mt-3 text-right font-cairo text-[12px] font-bold leading-[20px] text-[#DC2626]"
-                      >
-                        {error}
-                      </p>
-                    ) : null}
-
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={handleStartRestore}
-                      className="mt-6 flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#22C55E] font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(34,197,94,0.22)] transition hover:bg-[#16A34A] disabled:opacity-60"
-                    >
-                      <RotateCcw className="h-4 w-4" aria-hidden />
-                      <span>{restoreButtonLabel}</span>
-                    </button>
-                  </>
-                ) : null}
-
-                {!loading && status === "none" && !guestRecoveryMode ? (
-                  <div className="mt-6 space-y-4">
-                    <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-                      لا يوجد طلب حذف نشط على حسابك.
+              {!loading && canRestore ? (
+                <>
+                  {!isRestoreRequestMode && recoverUntil ? (
+                    <p className="mt-4 rounded-[10px] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#92400E]">
+                      آخر موعد للاسترجاع: {recoverUntil}
                     </p>
-                    <Link
-                      to={getRoleRoot(
-                        role === "patient" ? "patient" : "doctor",
-                      )}
-                      className="inline-flex h-[44px] items-center justify-center rounded-[10px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white"
+                  ) : null}
+
+                  {isRestoreRequestMode ? (
+                    <p className="mt-4 rounded-[10px] bg-[#EFF6FF] px-4 py-3 font-cairo text-[12px] font-semibold text-[#1D4ED8]">
+                      بعد التحقق سيُراجع فريق الإدارة طلبك ويعيد تفعيل حسابك عند
+                      الموافقة.
+                    </p>
+                  ) : null}
+
+                  {error ? (
+                    <p
+                      role="alert"
+                      className="mt-3 text-right font-cairo text-[12px] font-bold leading-[20px] text-[#DC2626]"
                     >
-                      الذهاب إلى لوحة التحكم
-                    </Link>
-                  </div>
-                ) : null}
+                      {error}
+                    </p>
+                  ) : null}
 
-                {!loading &&
-                !canRestore &&
-                resolvedDeletionStatus !== "none" ? (
-                  <p className="mt-6 font-cairo text-[13px] font-semibold text-[#DC2626]">
-                    لا يمكن استعادة هذا الحساب حالياً. تواصل مع الدعم إذا كنت
-                    تعتقد أن هذا خطأ.
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={handleStartRestore}
+                    className="mt-6 flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#22C55E] font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(34,197,94,0.22)] transition hover:bg-[#16A34A] disabled:opacity-60"
+                  >
+                    <RotateCcw className="h-4 w-4" aria-hidden />
+                    <span>{restoreButtonLabel}</span>
+                  </button>
+                </>
+              ) : null}
+
+              {!loading && status === "none" && !guestRecoveryMode ? (
+                <div className="mt-6 space-y-4">
+                  <p className="font-cairo text-[13px] font-semibold text-[#667085]">
+                    لا يوجد طلب حذف نشط على حسابك.
                   </p>
-                ) : null}
+                  <Link
+                    to={getRoleRoot(role === "patient" ? "patient" : "doctor")}
+                    className="inline-flex h-[44px] items-center justify-center rounded-[10px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white"
+                  >
+                    الذهاب إلى لوحة التحكم
+                  </Link>
+                </div>
+              ) : null}
 
-                <Link
-                  to={authUser ? profileSettingsPath : "/login"}
-                  className="mt-5 inline-block font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-[#111827]"
-                >
-                  {authUser
-                    ? "الرجوع إلى الملف الشخصي ←"
-                    : "العودة لتسجيل الدخول ←"}
-                </Link>
-              </>
-            )}
+              {!loading && !canRestore && resolvedDeletionStatus !== "none" ? (
+                <p className="mt-6 font-cairo text-[13px] font-semibold text-[#DC2626]">
+                  لا يمكن استعادة هذا الحساب حالياً. تواصل مع الدعم إذا كنت
+                  تعتقد أن هذا خطأ.
+                </p>
+              ) : null}
+
+              <Link
+                to={authUser ? profileSettingsPath : "/login"}
+                className="mt-5 inline-block font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-[#111827]"
+              >
+                {authUser
+                  ? "الرجوع إلى الملف الشخصي ←"
+                  : "العودة لتسجيل الدخول ←"}
+              </Link>
+            </>
           </div>
         )}
       </DeleteAccountShell>

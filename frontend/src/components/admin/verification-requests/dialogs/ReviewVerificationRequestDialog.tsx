@@ -71,16 +71,20 @@ export default function ReviewVerificationRequestDialog({
   const [newSpecializationTextAr, setNewSpecializationTextAr] = useState("");
   const [newSpecializationTextEn, setNewSpecializationTextEn] = useState("");
 
-  const specializationState = useMemo(
-    () => resolveDoctorSpecializationReviewState(doctorProfile),
-    [doctorProfile],
-  );
-
   const lookupCategory = resolveDoctorSpecialtyLookupCategory();
   const lookupsQuery = useAdminLookups({
     category: lookupCategory,
     includeInactive: false,
   });
+
+  const specializationState = useMemo(
+    () =>
+      resolveDoctorSpecializationReviewState(
+        doctorProfile,
+        lookupsQuery.data?.lookups,
+      ),
+    [doctorProfile, lookupsQuery.data?.lookups],
+  );
 
   const lookupOptions = useMemo(
     () =>
@@ -417,7 +421,8 @@ export default function ReviewVerificationRequestDialog({
                     }
                   })}
                 >
-                  {mode === "approve" ? (
+                  {mode === "approve" &&
+                  specializationState.needsAdminResolve ? (
                     <div className="space-y-4 rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-4">
                       <div className="text-right font-cairo text-[13px] font-extrabold text-[#101828]">
                         ربط التخصص قبل الموافقة
@@ -485,9 +490,7 @@ export default function ReviewVerificationRequestDialog({
                         <div>
                           <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]">
                             اختر تخصصاً من القائمة
-                            {specializationState.needsAdminResolve ? (
-                              <span className="ms-1 text-[#F04438]">*</span>
-                            ) : null}
+                            <span className="ms-1 text-[#F04438]">*</span>
                           </div>
                           <StyledSelect
                             value={specializationLookupId}
@@ -506,6 +509,7 @@ export default function ReviewVerificationRequestDialog({
                               ...lookupOptions,
                             ]}
                             listboxAriaLabel="اختر التخصص"
+                            listboxZIndex={10001}
                           />
                           {lookupsQuery.isError ? (
                             <p className="mt-2 font-cairo text-[11px] font-semibold text-[#B45309]">

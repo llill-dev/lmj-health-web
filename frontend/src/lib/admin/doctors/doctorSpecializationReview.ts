@@ -1,10 +1,13 @@
-import type { AdminLookupRecord } from '@/lib/admin/types';
-import { resolveLookupSecondaryText, resolveLookupText } from '@/lib/admin/lookups/lookupUtils';
+import type { AdminLookupRecord } from "@/lib/admin/types";
+import {
+  resolveLookupSecondaryText,
+  resolveLookupText,
+} from "@/lib/admin/lookups/lookupUtils";
 
 export type DoctorSpecializationReviewMode =
-  | 'catalog'
-  | 'custom_pending'
-  | 'unknown';
+  | "catalog"
+  | "custom_pending"
+  | "unknown";
 
 export type DoctorSpecializationReviewState = {
   displayLabel: string;
@@ -13,7 +16,7 @@ export type DoctorSpecializationReviewState = {
   customSpecializationText: string | null;
   needsAdminResolve: boolean;
   statusLabel: string;
-  statusTone: 'success' | 'warning' | 'neutral';
+  statusTone: "success" | "warning" | "neutral";
 };
 
 export type DoctorSpecializationReviewSource =
@@ -27,17 +30,17 @@ function readString(
 ): string | null {
   for (const key of keys) {
     const value = raw[key];
-    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (typeof value === "string" && value.trim()) return value.trim();
   }
   return null;
 }
 
 function readPendingFlag(raw: Record<string, unknown>): boolean {
   const boolKeys = [
-    'customSpecializationPending',
-    'hasPendingCustomSpecialization',
-    'pendingCustomSpecialization',
-    'requiresSpecializationResolve',
+    "customSpecializationPending",
+    "hasPendingCustomSpecialization",
+    "pendingCustomSpecialization",
+    "requiresSpecializationResolve",
   ];
   for (const key of boolKeys) {
     if (raw[key] === true) return true;
@@ -45,71 +48,83 @@ function readPendingFlag(raw: Record<string, unknown>): boolean {
 
   const status = readString(
     raw,
-    'customSpecializationStatus',
-    'specializationStatus',
-    'specializationResolveStatus',
+    "customSpecializationStatus",
+    "specializationStatus",
+    "specializationResolveStatus",
   );
   if (!status) return false;
   const normalized = status.toLowerCase();
   return (
-    normalized === 'pending' ||
-    normalized === 'unresolved' ||
-    normalized === 'requested'
+    normalized === "pending" ||
+    normalized === "unresolved" ||
+    normalized === "requested"
   );
 }
 
 /** يستنتج حالة التخصص من كائن الطبيب/طلب التحقق (حقول API-3 + بدائل شائعة). */
 export function resolveDoctorSpecializationReviewState(
   source: DoctorSpecializationReviewSource,
+  lookups?: AdminLookupRecord[],
 ): DoctorSpecializationReviewState {
   const raw = (source ?? {}) as Record<string, unknown>;
   const specializationKey = readString(
     raw,
-    'specializationKey',
-    'specializationLookupKey',
+    "specializationKey",
+    "specializationLookupKey",
   );
   const customSpecializationText = readString(
     raw,
-    'customSpecializationText',
-    'pendingCustomSpecializationText',
-    'requestedCustomSpecialization',
+    "customSpecializationText",
+    "pendingCustomSpecializationText",
+    "requestedCustomSpecialization",
   );
   const displayLabel =
-    readString(raw, 'specialization') ??
+    readString(raw, "specialization") ??
     customSpecializationText ??
     specializationKey ??
-    '—';
+    "—";
 
   const pendingExplicit = readPendingFlag(raw);
+
+  // Check if specialization exists in lookups (try both key and text)
+  const existsInCatalog = lookups
+    ? Boolean(
+        findDoctorSpecializationLookupId(lookups, specializationKey) ||
+        findDoctorSpecializationLookupId(lookups, customSpecializationText) ||
+        findDoctorSpecializationLookupId(lookups, displayLabel),
+      )
+    : Boolean(specializationKey);
+
   const needsAdminResolve = Boolean(
-    pendingExplicit || (customSpecializationText && !specializationKey),
+    pendingExplicit ||
+    (customSpecializationText && !existsInCatalog && !specializationKey),
   );
 
-  let mode: DoctorSpecializationReviewMode = 'unknown';
-  if (needsAdminResolve) mode = 'custom_pending';
-  else if (specializationKey) mode = 'catalog';
+  let mode: DoctorSpecializationReviewMode = "unknown";
+  if (needsAdminResolve) mode = "custom_pending";
+  else if (existsInCatalog) mode = "catalog";
 
-  if (mode === 'catalog') {
+  if (mode === "catalog") {
     return {
       displayLabel,
       mode,
       specializationKey,
       customSpecializationText,
       needsAdminResolve: false,
-      statusLabel: 'مرتبط بالقائمة المعتمدة',
-      statusTone: 'success',
+      statusLabel: "مرتبط بالقائمة المعتمدة",
+      statusTone: "success",
     };
   }
 
-  if (mode === 'custom_pending') {
+  if (mode === "custom_pending") {
     return {
       displayLabel,
       mode,
       specializationKey,
       customSpecializationText,
       needsAdminResolve: true,
-      statusLabel: 'إدخال يدوي — بانتظار الربط',
-      statusTone: 'warning',
+      statusLabel: "إدخال يدوي — بانتظار الربط",
+      statusTone: "warning",
     };
   }
 
@@ -119,8 +134,8 @@ export function resolveDoctorSpecializationReviewState(
     specializationKey,
     customSpecializationText,
     needsAdminResolve: true,
-    statusLabel: 'غير محدّد — يحتاج مراجعة',
-    statusTone: 'neutral',
+    statusLabel: "غير محدّد — يحتاج مراجعة",
+    statusTone: "neutral",
   };
 }
 
@@ -130,10 +145,24 @@ export function findDoctorSpecializationLookupId(
 ): string | null {
   if (!specializationKey) return null;
   const normalized = specializationKey.trim().toLowerCase();
-  const match = lookups.find(
+
+  // First try matching by key
+  const keyMatch = lookups.find(
     (row) => row.key.trim().toLowerCase() === normalized && row.isActive,
   );
-  return match?._id ?? null;
+  if (keyMatch) return keyMatch._id ?? null;
+
+  // If no key match, try matching by Arabic or English text
+  const textMatch = lookups.find((row) => {
+    if (!row.isActive) return false;
+    const labelAr =
+      resolveLookupText(row.text, "ar")?.trim().toLowerCase() || "";
+    const labelEn =
+      resolveLookupSecondaryText(row.text, "ar")?.trim().toLowerCase() || "";
+    return labelAr === normalized || labelEn === normalized;
+  });
+
+  return textMatch?._id ?? null;
 }
 
 export function buildDoctorSpecializationLookupOptions(
@@ -143,12 +172,11 @@ export function buildDoctorSpecializationLookupOptions(
     .filter((row) => row.isActive)
     .sort(
       (a, b) =>
-        (a.order ?? 0) - (b.order ?? 0) ||
-        a.key.localeCompare(b.key, 'en'),
+        (a.order ?? 0) - (b.order ?? 0) || a.key.localeCompare(b.key, "en"),
     )
     .map((row) => {
-      const labelAr = resolveLookupText(row.text, 'ar');
-      const labelEn = resolveLookupSecondaryText(row.text, 'ar');
+      const labelAr = resolveLookupText(row.text, "ar");
+      const labelEn = resolveLookupSecondaryText(row.text, "ar");
       const label = labelAr || labelEn || row.key;
       return {
         value: row._id,
