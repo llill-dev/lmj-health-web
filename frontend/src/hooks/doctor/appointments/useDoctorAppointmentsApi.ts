@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 import {
   doctorAppointmentsApi,
   doctorAppointmentsQueryKeys,
-  normalizeDoctorAppointmentToUi,
-} from '@/lib/doctor/client';
+} from "@/lib/doctor/client";
 import type {
   DoctorAppointmentListParams,
   DoctorBookAppointmentBody,
@@ -14,7 +13,7 @@ import type {
   DoctorCompleteAppointmentBody,
   DoctorNoShowAppointmentBody,
   DoctorRescheduleAppointmentBody,
-} from '@/lib/doctor/types';
+} from "@/lib/doctor/types";
 
 export function useDoctorAppointmentsApi(params: DoctorAppointmentListParams) {
   const query = useQuery({
@@ -25,10 +24,7 @@ export function useDoctorAppointmentsApi(params: DoctorAppointmentListParams) {
 
   return {
     ...query,
-    appointments: (query.data?.appointments ?? []).map((appointment) =>
-      normalizeDoctorAppointmentToUi(appointment),
-    ),
-    rawAppointments: query.data?.appointments ?? [],
+    appointments: query.data?.appointments ?? [],
     page: query.data?.page ?? params.page ?? 1,
     limit: query.data?.limit ?? params.limit ?? 10,
     total: query.data?.total ?? 0,
@@ -47,13 +43,7 @@ export function useDoctorAppointmentDetailsApi(appointmentId: string) {
 
   return {
     ...query,
-    appointment: query.data?.appointment
-      ? normalizeDoctorAppointmentToUi(
-          query.data.appointment,
-          query.data.files ?? [],
-        )
-      : undefined,
-    rawAppointment: query.data?.appointment,
+    appointment: query.data?.appointment,
     files: query.data?.files ?? [],
     isAwaitingData:
       Boolean(appointmentId) &&
@@ -61,7 +51,9 @@ export function useDoctorAppointmentDetailsApi(appointmentId: string) {
   };
 }
 
-function invalidateDoctorAppointments(queryClient: ReturnType<typeof useQueryClient>) {
+function invalidateDoctorAppointments(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
   queryClient.invalidateQueries({
     queryKey: doctorAppointmentsQueryKeys.all,
   });
@@ -71,7 +63,8 @@ export function useBookDoctorAppointmentApi() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: DoctorBookAppointmentBody) => doctorAppointmentsApi.book(body),
+    mutationFn: (body: DoctorBookAppointmentBody) =>
+      doctorAppointmentsApi.book(body),
     onSuccess: () => invalidateDoctorAppointments(queryClient),
   });
 }
@@ -86,7 +79,7 @@ export function useCancelDoctorAppointmentApi(appointmentId?: string) {
     }: {
       id?: string;
       body: DoctorCancelAppointmentBody;
-    }) => doctorAppointmentsApi.cancel(id ?? appointmentId ?? '', body),
+    }) => doctorAppointmentsApi.cancel(id ?? appointmentId ?? "", body),
     onSuccess: (_, variables) => {
       invalidateDoctorAppointments(queryClient);
       if (variables.id ?? appointmentId) {
@@ -110,7 +103,7 @@ export function useRescheduleDoctorAppointmentApi(appointmentId?: string) {
     }: {
       id?: string;
       body: DoctorRescheduleAppointmentBody;
-    }) => doctorAppointmentsApi.reschedule(id ?? appointmentId ?? '', body),
+    }) => doctorAppointmentsApi.reschedule(id ?? appointmentId ?? "", body),
     onSuccess: (_, variables) => {
       invalidateDoctorAppointments(queryClient);
       if (variables.id ?? appointmentId) {
@@ -134,7 +127,7 @@ export function useCompleteDoctorAppointmentApi(appointmentId?: string) {
     }: {
       id?: string;
       body: DoctorCompleteAppointmentBody;
-    }) => doctorAppointmentsApi.complete(id ?? appointmentId ?? '', body),
+    }) => doctorAppointmentsApi.complete(id ?? appointmentId ?? "", body),
     onSuccess: (_, variables) => {
       invalidateDoctorAppointments(queryClient);
       if (variables.id ?? appointmentId) {
@@ -158,7 +151,7 @@ export function useNoShowDoctorAppointmentApi(appointmentId?: string) {
     }: {
       id?: string;
       body: DoctorNoShowAppointmentBody;
-    }) => doctorAppointmentsApi.markNoShow(id ?? appointmentId ?? '', body),
+    }) => doctorAppointmentsApi.markNoShow(id ?? appointmentId ?? "", body),
     onSuccess: (_, variables) => {
       invalidateDoctorAppointments(queryClient);
       if (variables.id ?? appointmentId) {

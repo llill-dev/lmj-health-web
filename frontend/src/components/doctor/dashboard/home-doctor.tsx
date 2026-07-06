@@ -203,10 +203,10 @@ export default function HomeDoctor() {
   const todayRows = useMemo(
     () =>
       appointments.slice(0, 2).map((row) => ({
-        time: row.time,
-        name: row.patientName,
-        mode: row.type,
-        initial: row.patientInitials,
+        time: row.startTime ?? "—",
+        name: row.patient?.userId?.fullName ?? "مريض",
+        mode: "clinic",
+        initial: (row.patient?.userId?.fullName ?? "مريض").charAt(0),
       })),
     [appointments],
   );

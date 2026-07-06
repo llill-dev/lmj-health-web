@@ -86,22 +86,29 @@ type DoctorAppointmentsFiltersState = {
   limit: number;
 };
 
-import { isUiOnlyMode } from "@/lib/env/uiOnlyMode";
-
-const UI_ONLY = isUiOnlyMode();
-
 function filterLocalSearch<
   T extends {
-    patientName?: string;
+    _id: string;
+    patient?: {
+      userId?: { fullName?: string };
+      _id?: string;
+      publicId?: string;
+    };
     notes?: string;
-    patientId?: string;
+    date?: string;
+    startTime?: string;
   },
 >(items: T[], searchTerm: string): T[] {
   const query = searchTerm.trim().toLowerCase();
   if (!query) return items;
 
   return items.filter((item) => {
-    const haystacks = [item.patientName, item.patientId, item.notes]
+    const haystacks = [
+      item.patient?.userId?.fullName,
+      item.patient?._id,
+      item.patient?.publicId,
+      item.notes,
+    ]
       .filter(Boolean)
       .map((value) => String(value).toLowerCase());
     return haystacks.some((value) => value.includes(query));
@@ -213,26 +220,22 @@ export default function DoctorAppointmentsPage() {
     expandedAppointmentId ?? "",
   );
 
-  // Use real doctor patients API when connected to backend
-  const { patients: uiOnlyPatients } = usePatients(1, 100);
   const doctorPatientsQuery = useDoctorPatients({
     page: 1,
     limit: 100, // Get enough patients for the dropdown
   });
 
   // Choose correct patient source based on mode
-  const availablePatients = UI_ONLY
-    ? uiOnlyPatients.map((p) => ({ id: p.id, name: p.name }))
-    : doctorPatientsQuery.patients.map((p) => ({
-        id: p._id,
-        name: p.user.fullName,
-      }));
+  const availablePatients = doctorPatientsQuery.patients.map((p) => ({
+    id: p._id,
+    name: p.user.fullName,
+  }));
 
   const mergedAppointments = useMemo(() => {
     return listQuery.appointments.map((appointment) => {
       if (
         expandedAppointmentId &&
-        expandedAppointmentId === appointment.id &&
+        expandedAppointmentId === appointment._id &&
         detailsQuery.appointment
       ) {
         const filesSource =
@@ -413,8 +416,8 @@ export default function DoctorAppointmentsPage() {
   );
 
   const handleBookingAction = useCallback(() => {
-    // Check if we have patients available (only when connected to backend)
-    if (!UI_ONLY && doctorPatientsQuery.isAwaitingData) {
+    // Check if we have patients available
+    if (doctorPatientsQuery.isAwaitingData) {
       toast("جارٍ تحميل قائمة المرضى...", {
         title: "انتظر قليلاً",
         variant: "info",
@@ -423,7 +426,7 @@ export default function DoctorAppointmentsPage() {
       return;
     }
 
-    if (!UI_ONLY && doctorPatientsQuery.patients.length === 0) {
+    if (doctorPatientsQuery.patients.length === 0) {
       toast(
         "لا توجد مرضى مرتبطين بحسابك حالياً. يرجى إضافة مرضى أولاً من صفحة المرضى.",
         {
@@ -695,8 +698,8 @@ export default function DoctorAppointmentsPage() {
           initialTime={rescheduleTarget?.time}
           initialAppointmentTypeId={
             expandedAppointmentId === rescheduleTarget?.id &&
-            detailsQuery.rawAppointment?.appointmentType
-              ? detailsQuery.rawAppointment.appointmentType
+            detailsQuery.appointment?.appointmentType
+              ? detailsQuery.appointment.appointmentType
               : undefined
           }
           doctorId={readAuthUser()?.actorIds?.doctorId}
@@ -1010,17 +1013,17 @@ export default function DoctorAppointmentsPage() {
                 <div className="space-y-3">
                   {visibleAppointments.map((appointment) => (
                     <DoctorAppointmentExpandableCard
-                      key={appointment.id}
+                      key={appointment._id}
                       appointment={appointment}
-                      expanded={expandedAppointmentId === appointment.id}
+                      expanded={expandedAppointmentId === appointment._id}
                       detailsLoading={
-                        expandedAppointmentId === appointment.id &&
+                        expandedAppointmentId === appointment._id &&
                         (detailsQuery.isAwaitingData ||
                           appointmentFilesQuery.isAwaitingData)
                       }
                       onToggle={() => {
                         setExpandedAppointmentId((current) =>
-                          current === appointment.id ? null : appointment.id,
+                          current === appointment._id ? null : appointment._id,
                         );
                       }}
                       cancelling={cancelMutation.isPending}
@@ -1029,31 +1032,35 @@ export default function DoctorAppointmentsPage() {
                       noShowing={noShowMutation.isPending}
                       onCancel={() => {
                         setCancelTarget({
-                          id: appointment.id,
-                          patientName: appointment.patientName,
+                          id: appointment._id,
+                          patientName:
+                            appointment.patient?.userId?.fullName || "",
                         });
                         setCancelOpen(true);
                       }}
                       onComplete={() => {
                         setCompleteTarget({
-                          id: appointment.id,
-                          patientName: appointment.patientName,
+                          id: appointment._id,
+                          patientName:
+                            appointment.patient?.userId?.fullName || "",
                         });
                         setCompleteOpen(true);
                       }}
                       onEdit={() => {
                         setRescheduleTarget({
-                          id: appointment.id,
-                          patientName: appointment.patientName,
-                          date: appointment.date,
-                          time: appointment.time,
+                          id: appointment._id,
+                          patientName:
+                            appointment.patient?.userId?.fullName || "",
+                          date: appointment.date || "",
+                          time: appointment.startTime || "",
                         });
                         setRescheduleOpen(true);
                       }}
                       onNoShow={() => {
                         setNoShowTarget({
-                          id: appointment.id,
-                          patientName: appointment.patientName,
+                          id: appointment._id,
+                          patientName:
+                            appointment.patient?.userId?.fullName || "",
                         });
                         setNoShowOpen(true);
                       }}
@@ -1063,10 +1070,10 @@ export default function DoctorAppointmentsPage() {
                           ?.click()
                       }
                       onOpenFile={(fileId) =>
-                        handleAppointmentFileOpen(appointment.id, fileId)
+                        handleAppointmentFileOpen(appointment._id, fileId)
                       }
                       onDownloadFile={(fileId) =>
-                        handleAppointmentFileDownload(appointment.id, fileId)
+                        handleAppointmentFileDownload(appointment._id, fileId)
                       }
                       onUnlinkFile={handleRequestUnlinkAppointmentFile}
                       fileActionKey={appointmentFileActionKey}

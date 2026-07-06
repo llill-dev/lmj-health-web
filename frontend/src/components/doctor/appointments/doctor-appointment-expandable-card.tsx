@@ -1,4 +1,4 @@
-import type { Appointment } from "@/lib/api_mock";
+import type { DoctorAppointmentSummary } from "@/lib/doctor/types";
 import { cn } from "@/lib/utils/utils";
 import { memo, type ComponentType } from "react";
 import {
@@ -25,7 +25,7 @@ function formatDashDate(iso: string) {
   return `${d}-${m}-${y}`;
 }
 
-function statusLabelAr(status: Appointment["status"]): string {
+function statusLabelAr(status: string): string {
   switch (status) {
     case "scheduled":
       return "مؤكد";
@@ -33,14 +33,16 @@ function statusLabelAr(status: Appointment["status"]): string {
       return "مكتمل";
     case "cancelled":
       return "ملغي";
-    case "in-progress":
-      return "قيد التنفيذ";
+    case "no-show":
+      return "لم يحضر";
+    case "rescheduled":
+      return "إعادة جدولة";
     default:
       return status;
   }
 }
 
-function visitKindLabel(type: Appointment["type"]): string {
+function visitKindLabel(type: string | undefined): string {
   if (type === "video") return "استشارة";
   if (type === "home") return "زيارة منزلية";
   return "مراجعة";
@@ -67,10 +69,13 @@ const DetailRow = memo<{
 });
 
 export type DoctorAppointmentExpandableCardProps = {
-  appointment: Appointment & {
-    appointmentTypeNameSnapshot?: string | null;
-    priceSnapshot?: number | null;
-    priceVisibleToPatientSnapshot?: boolean;
+  appointment: DoctorAppointmentSummary & {
+    appointmentFiles?: Array<{
+      id: string;
+      name: string;
+      date: string;
+      url?: string;
+    }>;
   };
   expanded: boolean;
   onToggle: () => void;
@@ -109,20 +114,21 @@ export default function DoctorAppointmentExpandableCard({
   onUnlinkFile,
   fileActionKey,
 }: DoctorAppointmentExpandableCardProps) {
-  const phone = appointment.patientPhone ?? "—";
-  const modeLine = appointment.type === "video" ? "أونلاين" : "عيادة";
+  const patientName = appointment.patient?.userId?.fullName ?? "مريض";
+  const patientInitials = patientName.charAt(0);
+  const phone = "—";
+  const modeLine = "عيادة";
   const files = (appointment.appointmentFiles ?? []) as Array<{
     id?: string;
     name: string;
     date: string;
     url?: string;
   }>;
-  const detailDate = formatDashDate(appointment.date);
-  const location =
-    appointment.location ??
-    (appointment.type === "video" ? "جلسة فيديو" : "غير محدد");
+  const detailDate = appointment.date ? formatDashDate(appointment.date) : "—";
+  const location = "عيادة";
   const reason = appointment.notes?.trim() || "لم يذكر سبب الزيارة";
-  const kindLabel = visitKindLabel(appointment.type);
+  const kindLabel = "مراجعة";
+  const time = appointment.startTime ?? "—";
 
   return (
     <div
@@ -136,12 +142,12 @@ export default function DoctorAppointmentExpandableCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-1 items-start gap-3">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary font-cairo text-[18px] font-extrabold text-white shadow-[0_8px_18px_rgba(15,143,139,0.22)]">
-              {appointment.patientInitials}
+              {patientInitials}
             </div>
 
             <div className="min-w-0 flex-1 space-y-2">
               <div className="font-cairo text-[17px] font-extrabold leading-tight text-[#101828]">
-                {appointment.patientName}
+                {patientName}
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-cairo text-[13px] font-semibold text-[#667085]">
                 <span className="inline-flex items-center gap-1.5">
@@ -149,18 +155,14 @@ export default function DoctorAppointmentExpandableCard({
                   {phone}
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-primary">
-                  {appointment.type === "video" ? (
-                    <Video className="h-4 w-4" />
-                  ) : (
-                    <Hospital className="h-4 w-4" />
-                  )}
+                  <Hospital className="h-4 w-4" />
                   {modeLine}
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <span className="inline-flex h-9 items-center gap-1.5 rounded-[6px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary">
                   <Clock className="h-3.5 w-3.5" />
-                  {appointment.time}
+                  {time}
                 </span>
                 <span className="inline-flex h-9 items-center gap-1.5 rounded-[6px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary">
                   <Calendar className="h-3.5 w-3.5" />
@@ -201,11 +203,7 @@ export default function DoctorAppointmentExpandableCard({
             <div className="mt-4 border-t border-[#EEF2F6] pt-4">
               <div className="rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-3">
                 <DetailRow icon={Calendar} label="التاريخ" value={detailDate} />
-                <DetailRow
-                  icon={Clock}
-                  label="الوقت"
-                  value={appointment.time}
-                />
+                <DetailRow icon={Clock} label="الوقت" value={time} />
                 <DetailRow
                   icon={Check}
                   label="الحالة"

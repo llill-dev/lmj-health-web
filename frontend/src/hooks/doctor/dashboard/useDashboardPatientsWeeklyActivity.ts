@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
-import { useDoctorAppointmentsApi } from '@/hooks/doctor/appointments/useDoctorAppointmentsApi';
+import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
 import {
   buildPatientWeeklyActivityChart,
   getLastSevenDaysRange,
-} from '@/lib/doctor/dashboard/buildPatientWeeklyActivityChart';
+} from "@/lib/doctor/dashboard/buildPatientWeeklyActivityChart";
 
 export function useDashboardPatientsWeeklyActivity() {
   const range = useMemo(() => getLastSevenDaysRange(), []);
@@ -19,8 +19,8 @@ export function useDashboardPatientsWeeklyActivity() {
   });
 
   const chart = useMemo(
-    () => buildPatientWeeklyActivityChart(appointmentsQuery.rawAppointments),
-    [appointmentsQuery.rawAppointments],
+    () => buildPatientWeeklyActivityChart(appointmentsQuery.appointments),
+    [appointmentsQuery.appointments],
   );
 
   return {

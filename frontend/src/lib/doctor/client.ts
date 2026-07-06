@@ -7,13 +7,6 @@ import {
   apiRequestResult,
   apiMultipart,
 } from "@/lib/api";
-import { isUiOnlyMode } from "@/lib/env/uiOnlyMode";
-import {
-  api,
-  type Appointment as MockAppointment,
-  type Appointment as UiAppointment,
-  type WorkSchedule as MockWorkSchedule,
-} from "@/lib/api_mock";
 import type {
   EncounterDocumentLinkBody,
   EncounterDocumentLinkResponse,
@@ -354,7 +347,11 @@ export const doctorPatientsQueryKeys = {
   labCatalog: (search?: string) =>
     [...doctorPatientsQueryKeys.all, "lab-catalog", search ?? ""] as const,
   procedureCatalog: (search?: string) =>
-    [...doctorPatientsQueryKeys.all, "procedure-catalog", search ?? ""] as const,
+    [
+      ...doctorPatientsQueryKeys.all,
+      "procedure-catalog",
+      search ?? "",
+    ] as const,
   files: (patientId: string) =>
     [...doctorPatientsQueryKeys.all, "files", patientId] as const,
   file: (patientId: string, fileId: string) =>
@@ -362,15 +359,19 @@ export const doctorPatientsQueryKeys = {
 };
 
 export const doctorClinicalQueryKeys = {
-  all: ['doctor', 'clinical'] as const,
+  all: ["doctor", "clinical"] as const,
   orderFavorites: (section?: string) =>
-    [...doctorClinicalQueryKeys.all, 'order-favorites', section ?? 'all'] as const,
+    [
+      ...doctorClinicalQueryKeys.all,
+      "order-favorites",
+      section ?? "all",
+    ] as const,
   libraryItems: (params: Record<string, unknown>) =>
-    [...doctorClinicalQueryKeys.all, 'library-items', params] as const,
+    [...doctorClinicalQueryKeys.all, "library-items", params] as const,
   libraryRecent: () =>
-    [...doctorClinicalQueryKeys.all, 'library-recent'] as const,
+    [...doctorClinicalQueryKeys.all, "library-recent"] as const,
   templates: (params: Record<string, unknown>) =>
-    [...doctorClinicalQueryKeys.all, 'templates', params] as const,
+    [...doctorClinicalQueryKeys.all, "templates", params] as const,
 };
 
 function buildDoctorOrdersListQuery(params: DoctorOrdersListParams = {}) {
@@ -435,8 +436,6 @@ export const doctorAppointmentsQueryKeys = {
     [...doctorAppointmentsQueryKeys.files(appointmentId), fileId] as const,
 };
 
-const UI_ONLY = isUiOnlyMode();
-
 function buildAppointmentsListQuery(
   params: DoctorAppointmentListParams,
 ): string {
@@ -476,100 +475,8 @@ function deriveTime(summary: DoctorAppointmentSummary): string {
   return "";
 }
 
-function normalizeStatus(
-  status: DoctorAppointmentStatus,
-): UiAppointment["status"] {
-  switch (status) {
-    case "rescheduled":
-      return "scheduled";
-    case "no-show":
-      return "cancelled";
-    default:
-      return status;
-  }
-}
-
-function summarizeMockAppointment(
-  appointment: MockAppointment,
-): DoctorAppointmentSummary {
-  return {
-    _id: appointment.id,
-    doctor: { _id: "mock-doctor", userId: { fullName: "Doctor" } },
-    patient: {
-      _id: appointment.patientId,
-      userId: { fullName: appointment.patientName },
-    },
-    status:
-      appointment.status === "scheduled" ||
-      appointment.status === "completed" ||
-      appointment.status === "cancelled"
-        ? appointment.status
-        : "scheduled",
-    date: appointment.date,
-    startTime: appointment.time,
-    endTime: appointment.time,
-    notes: appointment.notes,
-    priceSnapshot: appointment.price ?? null,
-  };
-}
-
-function mapMockStatus(
-  status?: DoctorAppointmentStatus,
-): MockAppointment["status"] | undefined {
-  if (!status) return undefined;
-  if (status === "rescheduled") return "scheduled";
-  if (status === "no-show") return "cancelled";
-  return status;
-}
-
-export function normalizeDoctorAppointmentToUi(
-  summary: DoctorAppointmentSummary,
-  files: DoctorAppointmentFile[] = [],
-): UiAppointment {
-  const patientName = pickPatientName(summary);
-  const appointmentFiles = files.map((file) => ({
-    name: file.originalName ?? "Attachment",
-    date: (file.linkedAt ?? "").slice(0, 10),
-    url: undefined,
-  }));
-
-  return {
-    id: summary._id,
-    patientId: summary.patient?._id ?? "",
-    patientName,
-    patientInitials: pickPatientInitial(summary),
-    patientPhone: undefined,
-    date: deriveDate(summary),
-    time: deriveTime(summary),
-    duration: 30,
-    type: "clinic",
-    status: normalizeStatus(summary.status),
-    notes: summary.notes,
-    price: summary.priceSnapshot ?? undefined,
-    appointmentFiles,
-  };
-}
-
 export const doctorAppointmentsApi = {
   list: async (params: DoctorAppointmentListParams = {}) => {
-    if (UI_ONLY) {
-      const response = await api.getAppointments(
-        params.page ?? 1,
-        params.limit ?? 10,
-        params.date,
-        mapMockStatus(params.status),
-      );
-      return {
-        messageKey: "success.ok",
-        message: "Request completed successfully.",
-        page: response.page,
-        limit: response.limit,
-        total: response.total,
-        results: response.data.length,
-        appointments: response.data.map(summarizeMockAppointment),
-      } satisfies DoctorAppointmentsListResponse;
-    }
-
     return get<DoctorAppointmentsListResponse>(
       buildAppointmentsListQuery(params),
       {
@@ -578,47 +485,12 @@ export const doctorAppointmentsApi = {
     );
   },
   getById: async (appointmentId: string) => {
-    if (UI_ONLY) {
-      const response = await api.getAppointmentById(appointmentId);
-      return {
-        messageKey: "success.ok",
-        message: "Request completed successfully.",
-        appointment: summarizeMockAppointment(response.data),
-        files: (response.data.appointmentFiles ?? []).map((file, index) => ({
-          _id: `${appointmentId}-file-${index}`,
-          id: `${appointmentId}-file-${index}`,
-          appointmentId,
-          originalName: file.name,
-          linkedAt: file.date,
-          isArchived: false,
-        })),
-      } satisfies DoctorAppointmentDetailsResponse;
-    }
-
     return get<DoctorAppointmentDetailsResponse>(
       doctorEndpoints.appointments.details(appointmentId),
       { locale: "ar" },
     );
   },
   book: async (body: DoctorBookAppointmentBody) => {
-    if (UI_ONLY) {
-      const created = await api.createAppointment({
-        patientId: body.patientId ?? "mock-patient",
-        patientName: "مريض",
-        patientInitials: "م",
-        date: body.date,
-        time: body.startTime,
-        duration: 30,
-        type: "clinic",
-        status: "scheduled",
-        notes: body.notes,
-      });
-      return {
-        message: "Appointment booked successfully.",
-        appointment: summarizeMockAppointment(created.data),
-      } satisfies DoctorAppointmentMutationResponse;
-    }
-
     return post<DoctorAppointmentMutationResponse>(
       doctorEndpoints.appointments.book,
       body,
@@ -628,21 +500,6 @@ export const doctorAppointmentsApi = {
     );
   },
   cancel: async (appointmentId: string, body: DoctorCancelAppointmentBody) => {
-    if (UI_ONLY) {
-      await api.cancelAppointment(appointmentId);
-      const appointment = await api.getAppointmentById(appointmentId);
-      return {
-        message: body.reason
-          ? "Appointment cancelled successfully."
-          : "Appointment cancelled successfully.",
-        appointment: {
-          ...summarizeMockAppointment(appointment.data),
-          status: "cancelled",
-          cancelReason: body.reason,
-        },
-      } satisfies DoctorAppointmentMutationResponse;
-    }
-
     return patch<DoctorAppointmentMutationResponse>(
       doctorEndpoints.appointments.cancel(appointmentId),
       body,
@@ -659,19 +516,6 @@ export const doctorAppointmentsApi = {
     appointmentId: string,
     body: DoctorCompleteAppointmentBody,
   ) => {
-    if (UI_ONLY) {
-      await api.completeAppointment(appointmentId);
-      const appointment = await api.getAppointmentById(appointmentId);
-      return {
-        message: "Appointment marked as completed.",
-        appointment: {
-          ...summarizeMockAppointment(appointment.data),
-          status: "completed",
-          notes: body.notes,
-        },
-      } satisfies DoctorAppointmentMutationResponse;
-    }
-
     return patch<DoctorAppointmentMutationResponse>(
       doctorEndpoints.appointments.complete(appointmentId),
       body,
@@ -749,40 +593,6 @@ function getDoctorIdFromAuth(): string {
 const doctorScheduleApi = {
   // GET /doctors/:doctorId/schedule
   get: async (): Promise<DoctorScheduleResponse> => {
-    if (UI_ONLY) {
-      // Convert mock data to API format
-      const mockResponse = await api.getWorkSchedule();
-      const mockData = mockResponse.data;
-
-      // Convert mock format to real API format
-      const availableTimes: ScheduleDayTemplate[] = Object.entries(
-        mockData.weekly,
-      )
-        .filter(([_, day]) => day.enabled)
-        .map(([dayKey, day]) => ({
-          day: (dayKey.charAt(0).toUpperCase() +
-            dayKey.slice(1)) as ScheduleDayKey,
-          slots: [{ startTime: day.from, endTime: day.to }],
-        }));
-
-      const exceptions: ScheduleException[] = mockData.exceptions.map((ex) => ({
-        _id: ex.id,
-        date: ex.date,
-        slots: [],
-        note: ex.title,
-      }));
-
-      return {
-        message: "Schedule retrieved successfully.",
-        availableTimes,
-        exceptions,
-        slotSettings: {
-          duration: parseInt(mockData.settings.appointmentDuration),
-          gap: 5, // default
-        },
-      };
-    }
-
     const doctorId = getDoctorIdFromAuth();
     return get<DoctorScheduleResponse>(doctorEndpoints.schedule.get(doctorId), {
       locale: "ar",
@@ -793,48 +603,6 @@ const doctorScheduleApi = {
   update: async (
     body: DoctorUpdateScheduleBody,
   ): Promise<DoctorScheduleResponse> => {
-    if (UI_ONLY) {
-      // Convert API format to mock format for storage
-      const mockBody: MockWorkSchedule = {
-        settings: {
-          appointmentDuration: "30",
-          breakStart: "",
-          breakEnd: "",
-        },
-        weekly: {
-          sunday: { enabled: false, from: "", to: "" },
-          monday: { enabled: false, from: "", to: "" },
-          tuesday: { enabled: false, from: "", to: "" },
-          wednesday: { enabled: false, from: "", to: "" },
-          thursday: { enabled: false, from: "", to: "" },
-          friday: { enabled: false, from: "", to: "" },
-          saturday: { enabled: false, from: "", to: "" },
-        },
-        exceptions: [],
-      };
-
-      // Convert availableTimes to weekly
-      body.availableTimes.forEach((dayTemplate) => {
-        const dayKey =
-          dayTemplate.day.toLowerCase() as keyof typeof mockBody.weekly;
-        if (dayTemplate.slots.length > 0) {
-          mockBody.weekly[dayKey] = {
-            enabled: true,
-            from: dayTemplate.slots[0].startTime,
-            to: dayTemplate.slots[0].endTime,
-          };
-        }
-      });
-
-      await api.updateWorkSchedule(mockBody);
-      return {
-        message: "Schedule updated successfully.",
-        availableTimes: body.availableTimes,
-        exceptions: body.exceptions,
-        slotSettings: { duration: 30, gap: 5 },
-      };
-    }
-
     const doctorId = getDoctorIdFromAuth();
     return put<DoctorScheduleResponse>(
       doctorEndpoints.schedule.update(doctorId),
@@ -1401,29 +1169,31 @@ export const doctorApi = {
         ),
         { locale: "ar" },
       ),
-    listImagingCatalog: (params: { q?: string; page?: number; limit?: number } = {}) => {
+    listImagingCatalog: (
+      params: { q?: string; page?: number; limit?: number } = {},
+    ) => {
       const search = new URLSearchParams();
       if (params.q?.trim()) search.set("q", params.q.trim());
       if (params.page) search.set("page", String(params.page));
       if (params.limit) search.set("limit", String(params.limit));
       const query = search.toString();
       const base = doctorEndpoints.orderCatalogImaging;
-      return get<OrderCatalogListResponse>(
-        query ? `${base}?${query}` : base,
-        { locale: "ar" },
-      );
+      return get<OrderCatalogListResponse>(query ? `${base}?${query}` : base, {
+        locale: "ar",
+      });
     },
-    listLabCatalog: (params: { q?: string; page?: number; limit?: number } = {}) => {
+    listLabCatalog: (
+      params: { q?: string; page?: number; limit?: number } = {},
+    ) => {
       const search = new URLSearchParams();
       if (params.q?.trim()) search.set("q", params.q.trim());
       if (params.page) search.set("page", String(params.page));
       if (params.limit) search.set("limit", String(params.limit));
       const query = search.toString();
       const base = doctorEndpoints.patients.orderCatalogLab;
-      return get<OrderCatalogListResponse>(
-        query ? `${base}?${query}` : base,
-        { locale: "ar" },
-      );
+      return get<OrderCatalogListResponse>(query ? `${base}?${query}` : base, {
+        locale: "ar",
+      });
     },
     listProcedureCatalog: (
       params: { q?: string; page?: number; limit?: number } = {},
@@ -1434,10 +1204,9 @@ export const doctorApi = {
       if (params.limit) search.set("limit", String(params.limit));
       const query = search.toString();
       const base = doctorEndpoints.patients.orderCatalogProcedures;
-      return get<OrderCatalogListResponse>(
-        query ? `${base}?${query}` : base,
-        { locale: "ar" },
-      );
+      return get<OrderCatalogListResponse>(query ? `${base}?${query}` : base, {
+        locale: "ar",
+      });
     },
     createEncounterPrescription: (
       doctorId: string,
@@ -1762,11 +1531,9 @@ export const doctorApi = {
         locale: "ar",
       }),
     createImaging: (body: CreateEncounterOrderBody) =>
-      post<EncounterOrderResponse>(
-        doctorEndpoints.orders.createImaging,
-        body,
-        { locale: "ar" },
-      ),
+      post<EncounterOrderResponse>(doctorEndpoints.orders.createImaging, body, {
+        locale: "ar",
+      }),
     createProcedure: (body: CreateEncounterOrderBody) =>
       post<EncounterOrderResponse>(
         doctorEndpoints.orders.createProcedures,
@@ -1784,155 +1551,179 @@ export const doctorApi = {
         { locale: "ar" },
       ),
     createReferral: (body: Record<string, unknown>) =>
-      post<EncounterOrderResponse>(doctorEndpoints.orders.createReferrals, body, {
-        locale: "ar",
-      }),
+      post<EncounterOrderResponse>(
+        doctorEndpoints.orders.createReferrals,
+        body,
+        {
+          locale: "ar",
+        },
+      ),
   },
   orderFavorites: {
-    list: (params: { catalogSection?: string; page?: number; limit?: number } = {}) => {
+    list: (
+      params: { catalogSection?: string; page?: number; limit?: number } = {},
+    ) => {
       const qs = new URLSearchParams();
-      if (params.catalogSection) qs.set('catalogSection', params.catalogSection);
-      if (params.page != null) qs.set('page', String(params.page));
-      if (params.limit != null) qs.set('limit', String(params.limit));
+      if (params.catalogSection)
+        qs.set("catalogSection", params.catalogSection);
+      if (params.page != null) qs.set("page", String(params.page));
+      if (params.limit != null) qs.set("limit", String(params.limit));
       const query = qs.toString();
       const path = query
         ? `${doctorEndpoints.orderFavorites.list}?${query}`
         : doctorEndpoints.orderFavorites.list;
-      return get<OrderFavoritesListResponse>(path, { locale: 'ar' });
+      return get<OrderFavoritesListResponse>(path, { locale: "ar" });
     },
     create: (body: CreateOrderFavoriteBody) =>
       post<{ favorite?: { _id?: string }; message?: string }>(
         doctorEndpoints.orderFavorites.create,
         body,
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
     remove: (favoriteId: string) =>
-      del<{ message?: string }>(doctorEndpoints.orderFavorites.delete(favoriteId), {
-        locale: 'ar',
-      }),
+      del<{ message?: string }>(
+        doctorEndpoints.orderFavorites.delete(favoriteId),
+        {
+          locale: "ar",
+        },
+      ),
   },
   library: {
     recent: (limit = 10) =>
       get<DoctorLibraryRecentResponse>(
         `${doctorEndpoints.library.recent}?limit=${limit}`,
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
-    list: (params: {
-      page?: number;
-      limit?: number;
-      type?: string;
-      favorite?: boolean;
-      includeArchived?: boolean;
-      search?: string;
-    } = {}) => {
+    list: (
+      params: {
+        page?: number;
+        limit?: number;
+        type?: string;
+        favorite?: boolean;
+        includeArchived?: boolean;
+        search?: string;
+      } = {},
+    ) => {
       const qs = new URLSearchParams();
-      if (params.page != null) qs.set('page', String(params.page));
-      if (params.limit != null) qs.set('limit', String(params.limit));
-      if (params.type) qs.set('type', params.type);
-      if (params.favorite) qs.set('favorite', 'true');
-      if (params.includeArchived) qs.set('includeArchived', 'true');
-      if (params.search?.trim()) qs.set('search', params.search.trim());
+      if (params.page != null) qs.set("page", String(params.page));
+      if (params.limit != null) qs.set("limit", String(params.limit));
+      if (params.type) qs.set("type", params.type);
+      if (params.favorite) qs.set("favorite", "true");
+      if (params.includeArchived) qs.set("includeArchived", "true");
+      if (params.search?.trim()) qs.set("search", params.search.trim());
       const query = qs.toString();
       const path = query
         ? `${doctorEndpoints.library.items}?${query}`
         : doctorEndpoints.library.items;
-      return get<DoctorLibraryListResponse>(path, { locale: 'ar' });
+      return get<DoctorLibraryListResponse>(path, { locale: "ar" });
     },
     create: (body: CreateDoctorLibraryItemBody) =>
-      post<{ item?: DoctorLibraryListResponse['items'] extends (infer T)[] | undefined ? T : never; message?: string }>(
-        doctorEndpoints.library.items,
-        body,
-        { locale: 'ar' },
-      ),
+      post<{
+        item?: DoctorLibraryListResponse["items"] extends
+          | (infer T)[]
+          | undefined
+          ? T
+          : never;
+        message?: string;
+      }>(doctorEndpoints.library.items, body, { locale: "ar" }),
     update: (itemId: string, body: UpdateDoctorLibraryItemBody) =>
-      patch<{ item?: DoctorLibraryListResponse['items'] extends (infer T)[] | undefined ? T : never; message?: string }>(
-        doctorEndpoints.library.itemById(itemId),
-        body,
-        { locale: 'ar' },
-      ),
+      patch<{
+        item?: DoctorLibraryListResponse["items"] extends
+          | (infer T)[]
+          | undefined
+          ? T
+          : never;
+        message?: string;
+      }>(doctorEndpoints.library.itemById(itemId), body, { locale: "ar" }),
     delete: (itemId: string) =>
       del<{ itemId?: string; message?: string }>(
         doctorEndpoints.library.itemById(itemId),
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
     setFavorite: (itemId: string, isFavorite: boolean) =>
       patch<{ itemId?: string; isFavorite?: boolean; message?: string }>(
         doctorEndpoints.library.itemFavorite(itemId),
         { isFavorite },
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
   },
   templates: {
-    list: (params: {
-      page?: number;
-      limit?: number;
-      type?: string;
-      includeArchived?: boolean;
-      search?: string;
-    } = {}) => {
+    list: (
+      params: {
+        page?: number;
+        limit?: number;
+        type?: string;
+        includeArchived?: boolean;
+        search?: string;
+      } = {},
+    ) => {
       const qs = new URLSearchParams();
-      if (params.page != null) qs.set('page', String(params.page));
-      if (params.limit != null) qs.set('limit', String(params.limit));
-      if (params.type) qs.set('type', params.type);
-      if (params.includeArchived) qs.set('includeArchived', 'true');
-      if (params.search?.trim()) qs.set('search', params.search.trim());
+      if (params.page != null) qs.set("page", String(params.page));
+      if (params.limit != null) qs.set("limit", String(params.limit));
+      if (params.type) qs.set("type", params.type);
+      if (params.includeArchived) qs.set("includeArchived", "true");
+      if (params.search?.trim()) qs.set("search", params.search.trim());
       const query = qs.toString();
       const path = query
         ? `${doctorEndpoints.templates.list}?${query}`
         : doctorEndpoints.templates.list;
-      return get<DoctorTemplatesListResponse>(path, { locale: 'ar' });
+      return get<DoctorTemplatesListResponse>(path, { locale: "ar" });
     },
     create: (body: CreateDoctorTemplateBody) =>
-      post<{ template?: DoctorTemplatesListResponse['templates'] extends (infer T)[] | undefined ? T : never; message?: string }>(
-        doctorEndpoints.templates.list,
-        body,
-        { locale: 'ar' },
-      ),
+      post<{
+        template?: DoctorTemplatesListResponse["templates"] extends
+          | (infer T)[]
+          | undefined
+          ? T
+          : never;
+        message?: string;
+      }>(doctorEndpoints.templates.list, body, { locale: "ar" }),
     update: (templateId: string, body: UpdateDoctorTemplateBody) =>
-      patch<{ template?: DoctorTemplatesListResponse['templates'] extends (infer T)[] | undefined ? T : never; message?: string }>(
-        doctorEndpoints.templates.byId(templateId),
-        body,
-        { locale: 'ar' },
-      ),
+      patch<{
+        template?: DoctorTemplatesListResponse["templates"] extends
+          | (infer T)[]
+          | undefined
+          ? T
+          : never;
+        message?: string;
+      }>(doctorEndpoints.templates.byId(templateId), body, { locale: "ar" }),
     delete: (templateId: string) =>
       del<{ templateId?: string; message?: string }>(
         doctorEndpoints.templates.byId(templateId),
-        { locale: 'ar' },
+        { locale: "ar" },
       ),
     apply: (templateId: string) =>
-      post<import('@/lib/doctor/templates/templateTypes').DoctorTemplateApplyResponse>(
-        doctorEndpoints.templates.apply(templateId),
-        {},
-        { locale: 'ar' },
-      ),
+      post<
+        import("@/lib/doctor/templates/templateTypes").DoctorTemplateApplyResponse
+      >(doctorEndpoints.templates.apply(templateId), {}, { locale: "ar" }),
   },
   internalDirectory: {
     list: (params: InternalDirectoryListParams = {}) => {
       const qs = new URLSearchParams();
-      if (params.search?.trim()) qs.set('search', params.search.trim());
+      if (params.search?.trim()) qs.set("search", params.search.trim());
       if (params.specialization?.trim()) {
-        qs.set('specialization', params.specialization.trim());
+        qs.set("specialization", params.specialization.trim());
       }
-      if (params.city?.trim()) qs.set('city', params.city.trim());
-      if (params.country?.trim()) qs.set('country', params.country.trim());
+      if (params.city?.trim()) qs.set("city", params.city.trim());
+      if (params.country?.trim()) qs.set("country", params.country.trim());
       if (params.consultationType) {
-        qs.set('consultationType', params.consultationType);
+        qs.set("consultationType", params.consultationType);
       }
       if (params.minRating != null) {
-        qs.set('minRating', String(params.minRating));
+        qs.set("minRating", String(params.minRating));
       }
-      if (params.page != null) qs.set('page', String(params.page));
-      if (params.limit != null) qs.set('limit', String(params.limit));
-      if (params.lat != null) qs.set('lat', String(params.lat));
-      if (params.lng != null) qs.set('lng', String(params.lng));
-      if (params.radiusKm != null) qs.set('radiusKm', String(params.radiusKm));
+      if (params.page != null) qs.set("page", String(params.page));
+      if (params.limit != null) qs.set("limit", String(params.limit));
+      if (params.lat != null) qs.set("lat", String(params.lat));
+      if (params.lng != null) qs.set("lng", String(params.lng));
+      if (params.radiusKm != null) qs.set("radiusKm", String(params.radiusKm));
 
       const query = qs.toString();
       const path = query
         ? `${doctorEndpoints.internalDirectory}?${query}`
         : doctorEndpoints.internalDirectory;
 
-      return get<InternalDirectoryListResponse>(path, { locale: 'ar' });
+      return get<InternalDirectoryListResponse>(path, { locale: "ar" });
     },
   },
 } as const;
