@@ -25,7 +25,11 @@ import ChangeFacilityStatusDialog from "@/components/admin/facilities/dialogs/Ch
 import DeleteFacilityDialog from "@/components/admin/facilities/dialogs/DeleteFacilityDialog";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
-import type { FacilitySummary } from "@/lib/admin/types";
+import type {
+  FacilitySummary,
+  FacilityStatus,
+  FacilityType,
+} from "@/lib/admin/types";
 
 const FACILITY_TYPE_LABELS: Record<string, string> = {
   hospital: "مستشفى",
@@ -55,13 +59,12 @@ export default function AdminFacilitiesPage() {
   const [doctorsOpen, setDoctorsOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(
-    null,
-  );
+  const [selectedFacility, setSelectedFacility] =
+    useState<FacilitySummary | null>(null);
   const [filters, setFilters] = useState({
     q: "",
-    status: "",
-    facilityType: "",
+    status: "" as FacilityStatus | "",
+    facilityType: "" as FacilityType | "",
     city: "",
     hasDoctors: "",
   });
