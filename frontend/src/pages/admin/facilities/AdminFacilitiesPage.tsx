@@ -254,7 +254,7 @@ export default function AdminFacilitiesPage() {
           ) : (
             facilities.map((facility) => (
               <div
-                key={facility._id}
+                key={facility._id || facility.id}
                 className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
