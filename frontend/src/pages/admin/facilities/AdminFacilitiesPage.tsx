@@ -100,27 +100,27 @@ export default function AdminFacilitiesPage() {
     { _id: "2", user: { fullName: "د. سارة علي" } },
   ];
 
-  const openEdit = useCallback((facility: Facility) => {
+  const openEdit = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
     setEditOpen(true);
   }, []);
 
-  const openDetails = useCallback((facility: Facility) => {
+  const openDetails = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
     setDetailsOpen(true);
   }, []);
 
-  const openDoctors = useCallback((facility: Facility) => {
+  const openDoctors = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
     setDoctorsOpen(true);
   }, []);
 
-  const openStatus = useCallback((facility: Facility) => {
+  const openStatus = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
     setStatusOpen(true);
   }, []);
 
-  const openDelete = useCallback((facility: Facility) => {
+  const openDelete = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
     setDeleteOpen(true);
   }, []);
@@ -186,7 +186,9 @@ export default function AdminFacilitiesPage() {
 
             <StyledSelect
               value={filters.status}
-              onChange={(value) => setFilters({ ...filters, status: value })}
+              onChange={(value) =>
+                setFilters({ ...filters, status: value as FacilityStatus | "" })
+              }
               options={[
                 { value: "", label: "كل الحالات" },
                 { value: "ACTIVE", label: "نشط" },
@@ -200,7 +202,10 @@ export default function AdminFacilitiesPage() {
             <StyledSelect
               value={filters.facilityType}
               onChange={(value) =>
-                setFilters({ ...filters, facilityType: value })
+                setFilters({
+                  ...filters,
+                  facilityType: value as FacilityType | "",
+                })
               }
               options={[
                 { value: "", label: "كل الأنواع" },

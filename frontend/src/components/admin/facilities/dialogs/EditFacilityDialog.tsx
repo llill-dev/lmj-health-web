@@ -23,6 +23,7 @@ import {
   adminTextareaClass,
 } from "@/components/admin/form-field";
 import { cn } from "@/lib/utils/utils";
+import type { FacilitySummary } from "@/lib/admin/types";
 
 const FACILITY_TYPE_OPTIONS = [
   { value: "hospital", label: "مستشفى" },
@@ -45,24 +46,10 @@ const STATUS_OPTIONS = [
   { value: "DELETED", label: "محذوف" },
 ];
 
-interface Facility {
-  _id: string;
-  name?: string;
-  city?: string;
-  facilityType?: string;
-  country?: string;
-  address?: string;
-  phone?: string;
-  description?: string;
-  ownerDoctorId?: string;
-  status?: string;
-  attributes?: string[];
-}
-
 interface EditFacilityDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  facility: Facility | null;
+  facility: FacilitySummary | null;
   doctors: Array<{ _id: string; user?: { fullName?: string } }>;
   onSuccess?: () => void;
 }
@@ -189,7 +176,7 @@ export default function EditFacilityDialog({
 
     setIsSubmitting(true);
     try {
-      await adminApi.facilities.update(facility._id, {
+      await adminApi.facilities.update(facility._id || facility.id, {
         name: formData.name,
         city: formData.city,
         facilityType: formData.facilityType,
