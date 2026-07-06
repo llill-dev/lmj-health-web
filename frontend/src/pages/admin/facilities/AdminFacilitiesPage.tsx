@@ -1,54 +1,100 @@
-import { Helmet } from 'react-helmet-async';
-import { Building2, Plus, Edit3, RefreshCw, Loader2, MapPin, Phone } from 'lucide-react';
-import { useState, useCallback } from 'react';
-import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
-import CreateFacilityDialog from '@/components/admin/facilities/dialogs/CreateFacilityDialog';
-import EditFacilityDialog from '@/components/admin/facilities/dialogs/EditFacilityDialog';
-
-interface Facility {
-  _id: string;
-  name?: string;
-  city?: string;
-  facilityType?: string;
-  kind?: string;
-  country?: string;
-  address?: string;
-  phone?: string;
-  status?: string;
-}
+import { Helmet } from "react-helmet-async";
+import {
+  Building2,
+  Plus,
+  Edit3,
+  RefreshCw,
+  Loader2,
+  MapPin,
+  Phone,
+  Users,
+  Search,
+  Filter,
+  Eye,
+  UserCheck,
+  Trash2,
+} from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+import CreateFacilityDialog from "@/components/admin/facilities/dialogs/CreateFacilityDialog";
+import EditFacilityDialog from "@/components/admin/facilities/dialogs/EditFacilityDialog";
+import FacilityDetailsDialog from "@/components/admin/facilities/dialogs/FacilityDetailsDialog";
+import FacilityDoctorsDialog from "@/components/admin/facilities/dialogs/FacilityDoctorsDialog";
+import ChangeFacilityStatusDialog from "@/components/admin/facilities/dialogs/ChangeFacilityStatusDialog";
+import DeleteFacilityDialog from "@/components/admin/facilities/dialogs/DeleteFacilityDialog";
+import StyledSelect from "@/components/ui/styled-select";
+import { adminApi } from "@/lib/admin/client";
+import type { FacilitySummary } from "@/lib/admin/types";
 
 const FACILITY_TYPE_LABELS: Record<string, string> = {
-  hospital: 'مستشفى',
-  clinic: 'عيادة',
-  laboratory: 'مختبر',
-  radiology: 'أشعة',
-  pharmacy: 'صيدلية',
-  other: 'أخرى',
-};
-
-const KIND_LABELS: Record<string, string> = {
-  public: 'حكومي',
-  private: 'خاص',
-  non_profit: 'غير ربحي',
+  hospital: "مستشفى",
+  clinic: "عيادة",
+  polyclinic: "عيادات متعددة",
+  medical_center: "مركز طبي",
+  laboratory: "مختبر",
+  imaging_center: "مركز أشعة",
+  pharmacy: "صيدلية",
+  rehabilitation_center: "مركز تأهيل",
+  dialysis_center: "مركز غسيل كلوي",
+  emergency_center: "طوارئ",
+  other: "أخرى",
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'نشط',
-  INACTIVE: 'معطّل',
-  PENDING: 'قيد المراجعة',
+  ACTIVE: "نشط",
+  PENDING: "قيد المراجعة",
+  INACTIVE: "معطّل",
+  DELETED: "محذوف",
 };
 
 export default function AdminFacilitiesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [doctorsOpen, setDoctorsOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(
+    null,
+  );
+  const [filters, setFilters] = useState({
+    q: "",
+    status: "",
+    facilityType: "",
+    city: "",
+    hasDoctors: "",
+  });
+
+  const {
+    data: facilitiesData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["admin", "facilities", filters],
+    queryFn: () =>
+      adminApi.facilities.list({
+        page: 1,
+        limit: 20,
+        q: filters.q || undefined,
+        status: filters.status || undefined,
+        facilityType: filters.facilityType || undefined,
+        city: filters.city || undefined,
+        hasDoctors:
+          filters.hasDoctors === "true"
+            ? true
+            : filters.hasDoctors === "false"
+              ? false
+              : undefined,
+      }),
+  });
+
+  const facilities = facilitiesData?.facilities || [];
 
   // Mock doctors for owner selection - in real app, fetch from API
   const mockDoctors = [
-    { _id: '1', user: { fullName: 'د. أحمد محمد' } },
-    { _id: '2', user: { fullName: 'د. سارة علي' } },
+    { _id: "1", user: { fullName: "د. أحمد محمد" } },
+    { _id: "2", user: { fullName: "د. سارة علي" } },
   ];
 
   const openEdit = useCallback((facility: Facility) => {
@@ -56,12 +102,28 @@ export default function AdminFacilitiesPage() {
     setEditOpen(true);
   }, []);
 
+  const openDetails = useCallback((facility: Facility) => {
+    setSelectedFacility(facility);
+    setDetailsOpen(true);
+  }, []);
+
+  const openDoctors = useCallback((facility: Facility) => {
+    setSelectedFacility(facility);
+    setDoctorsOpen(true);
+  }, []);
+
+  const openStatus = useCallback((facility: Facility) => {
+    setSelectedFacility(facility);
+    setStatusOpen(true);
+  }, []);
+
+  const openDelete = useCallback((facility: Facility) => {
+    setSelectedFacility(facility);
+    setDeleteOpen(true);
+  }, []);
+
   const handleRefresh = () => {
-    setIsLoading(true);
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    refetch();
   };
 
   return (
@@ -81,16 +143,16 @@ export default function AdminFacilitiesPage() {
           onActionClick={() => setCreateOpen(true)}
           kpis={[
             {
-              key: 'total',
+              key: "total",
               icon: <Building2 className="h-5 w-5 shrink-0" />,
-              value: facilities.length.toLocaleString('ar-EG'),
-              label: 'إجمالي المنشآت',
+              value: facilities.length.toLocaleString("ar-EG"),
+              label: "إجمالي المنشآت",
             },
           ]}
         />
 
         <section className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mb-4">
             <div className="font-cairo text-[12px] font-extrabold text-[#667085]">
               قائمة المنشآت الطبية
             </div>
@@ -100,9 +162,75 @@ export default function AdminFacilitiesPage() {
               disabled={isLoading}
               className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              />
               تحديث
             </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mt-4">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
+              <input
+                type="text"
+                value={filters.q}
+                onChange={(e) => setFilters({ ...filters, q: e.target.value })}
+                placeholder="بحث بالاسم..."
+                className="w-full rounded-[8px] border border-[#E5E7EB] bg-white pr-10 pl-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
+              />
+            </div>
+
+            <StyledSelect
+              value={filters.status}
+              onChange={(value) => setFilters({ ...filters, status: value })}
+              options={[
+                { value: "", label: "كل الحالات" },
+                { value: "ACTIVE", label: "نشط" },
+                { value: "PENDING", label: "قيد المراجعة" },
+                { value: "INACTIVE", label: "معطّل" },
+                { value: "DELETED", label: "محذوف" },
+              ]}
+              placeholder="الحالة"
+            />
+
+            <StyledSelect
+              value={filters.facilityType}
+              onChange={(value) =>
+                setFilters({ ...filters, facilityType: value })
+              }
+              options={[
+                { value: "", label: "كل الأنواع" },
+                ...Object.entries(FACILITY_TYPE_LABELS).map(
+                  ([value, label]) => ({
+                    value,
+                    label,
+                  }),
+                ),
+              ]}
+              placeholder="نوع المنشأة"
+            />
+
+            <input
+              type="text"
+              value={filters.city}
+              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+              placeholder="المدينة..."
+              className="w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
+            />
+
+            <StyledSelect
+              value={filters.hasDoctors}
+              onChange={(value) =>
+                setFilters({ ...filters, hasDoctors: value })
+              }
+              options={[
+                { value: "", label: "الكل" },
+                { value: "true", label: "لديها أطباء" },
+                { value: "false", label: "بدون أطباء" },
+              ]}
+              placeholder="الأطباء"
+            />
           </div>
         </section>
 
@@ -129,11 +257,12 @@ export default function AdminFacilitiesPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="font-cairo text-[16px] font-black leading-[22px] text-[#111827]">
-                          {facility.name || '—'}
+                          {facility.name || "—"}
                         </div>
                         <div className="mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                          {FACILITY_TYPE_LABELS[facility.facilityType || ''] || facility.facilityType || '—'} ·{' '}
-                          {KIND_LABELS[facility.kind || ''] || facility.kind || '—'}
+                          {FACILITY_TYPE_LABELS[facility.facilityType || ""] ||
+                            facility.facilityType ||
+                            "—"}
                         </div>
                       </div>
                     </div>
@@ -150,12 +279,49 @@ export default function AdminFacilitiesPage() {
                           {facility.phone}
                         </div>
                       )}
+                      {facility.doctorCount !== undefined && (
+                        <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                          <Users className="h-3.5 w-3.5" />
+                          {facility.doctorCount === 0
+                            ? "لا يوجد أطباء"
+                            : `${facility.doctorCount} طبيب`}
+                        </div>
+                      )}
                       <div className="inline-flex items-center rounded-[6px] border px-2 py-1 font-cairo text-[11px] font-bold">
-                        {STATUS_LABELS[facility.status || ''] || facility.status || '—'}
+                        {STATUS_LABELS[facility.status || ""] ||
+                          facility.status ||
+                          "—"}
                       </div>
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openDetails(facility)}
+                      title="عرض التفاصيل"
+                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      تفاصيل
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openDoctors(facility)}
+                      title="الأطباء"
+                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
+                    >
+                      <UserCheck className="h-3.5 w-3.5" />
+                      الأطباء
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openStatus(facility)}
+                      title="تغيير الحالة"
+                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
+                    >
+                      <Filter className="h-3.5 w-3.5" />
+                      الحالة
+                    </button>
                     <button
                       type="button"
                       onClick={() => openEdit(facility)}
@@ -164,6 +330,15 @@ export default function AdminFacilitiesPage() {
                     >
                       <Edit3 className="h-3.5 w-3.5" />
                       تعديل
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openDelete(facility)}
+                      title="حذف"
+                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      حذف
                     </button>
                   </div>
                 </div>
@@ -178,7 +353,7 @@ export default function AdminFacilitiesPage() {
           onOpenChange={setCreateOpen}
           doctors={mockDoctors}
           onSuccess={() => {
-            // TODO: Refetch facilities
+            refetch();
           }}
         />
 
@@ -189,8 +364,40 @@ export default function AdminFacilitiesPage() {
           facility={selectedFacility}
           doctors={mockDoctors}
           onSuccess={() => {
-            // TODO: Refetch facilities
+            refetch();
           }}
+        />
+
+        {/* Facility Details Dialog */}
+        <FacilityDetailsDialog
+          open={detailsOpen}
+          onOpenChange={setDetailsOpen}
+          facilityId={selectedFacility?._id || null}
+        />
+
+        {/* Facility Doctors Dialog */}
+        <FacilityDoctorsDialog
+          open={doctorsOpen}
+          onOpenChange={setDoctorsOpen}
+          facilityId={selectedFacility?._id || null}
+          facilityName={selectedFacility?.name || undefined}
+        />
+
+        {/* Change Facility Status Dialog */}
+        <ChangeFacilityStatusDialog
+          open={statusOpen}
+          onOpenChange={setStatusOpen}
+          facilityId={selectedFacility?._id || null}
+          facilityName={selectedFacility?.name || undefined}
+          currentStatus={selectedFacility?.status || undefined}
+        />
+
+        {/* Delete Facility Dialog */}
+        <DeleteFacilityDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          facilityId={selectedFacility?._id || null}
+          facilityName={selectedFacility?.name || undefined}
         />
       </div>
     </>

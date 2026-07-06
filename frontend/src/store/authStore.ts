@@ -227,7 +227,6 @@ let state: AuthState = {
   },
 
   saveGeneralSettings: async (payload) => {
-    // Endpoint /api/admin/settings/general not documented in Swagger - rely on localStorage only
     setState({
       platformName: payload.platformName,
       lang: payload.lang || "ar",

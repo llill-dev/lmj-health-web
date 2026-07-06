@@ -1,0 +1,172 @@
+"use client";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminApi } from "@/lib/admin/client";
+import StyledSelect from "@/components/ui/styled-select";
+
+const STATUS_OPTIONS = [
+  { value: "ACTIVE", label: "نشط" },
+  { value: "PENDING", label: "قيد المراجعة" },
+  { value: "INACTIVE", label: "معطّل" },
+  { value: "DELETED", label: "محذوف" },
+];
+
+interface ChangeFacilityStatusDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  facilityId: string | null;
+  facilityName?: string;
+  currentStatus?: string;
+}
+
+export default function ChangeFacilityStatusDialog({
+  open,
+  onOpenChange,
+  facilityId,
+  facilityName,
+  currentStatus,
+}: ChangeFacilityStatusDialogProps) {
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (status: string) =>
+      adminApi.facilities.updateStatus(facilityId!, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "facilities"] });
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "facility", facilityId],
+      });
+      onOpenChange(false);
+    },
+  });
+
+  useEffect(() => {
+    if (open) {
+      setSelectedStatus(currentStatus || "");
+    }
+  }, [open, currentStatus]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false);
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onOpenChange]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStatus || !facilityId) return;
+    mutation.mutate(selectedStatus);
+  };
+
+  return (
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="تغيير حالة المنشأة"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) onOpenChange(false);
+          }}
+        >
+          <motion.div
+            className="relative w-full max-w-[480px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="relative overflow-hidden border-b border-[#EEF2F6] px-8 pb-5 pt-8">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[#E6F4F3]"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[url('/images/bg-status-from-appotiment.png')] bg-cover bg-center opacity-80"
+                aria-hidden
+              />
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
+                aria-label="إغلاق"
+              >
+                <X className="w-5 h-5" aria-hidden />
+              </button>
+              <div className="relative text-right">
+                <h2 className="font-cairo text-[22px] font-extrabold text-primary">
+                  تغيير حالة المنشأة
+                </h2>
+                {facilityName && (
+                  <p className="mt-1 font-cairo text-[12px] font-bold text-[#667085]">
+                    {facilityName}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="px-8 py-6">
+              <div className="mb-6">
+                <label className="block font-cairo text-[12px] font-extrabold text-[#111827] mb-2">
+                  الحالة الجديدة
+                </label>
+                <StyledSelect
+                  value={selectedStatus}
+                  onChange={setSelectedStatus}
+                  options={STATUS_OPTIONS}
+                  placeholder="اختر الحالة"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1 h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#344054]"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={!selectedStatus || mutation.isPending}
+                  className="flex-1 h-[48px] items-center justify-center rounded-[12px] border border-primary bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-50"
+                >
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2
+                        className="w-4 h-4 animate-spin ml-2"
+                        aria-hidden
+                      />
+                      جاري الحفظ...
+                    </>
+                  ) : (
+                    "تغيير الحالة"
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+}

@@ -26,22 +26,22 @@ import { cn } from "@/lib/utils/utils";
 const FACILITY_TYPE_OPTIONS = [
   { value: "hospital", label: "مستشفى" },
   { value: "clinic", label: "عيادة" },
+  { value: "polyclinic", label: "عيادات متعددة" },
+  { value: "medical_center", label: "مركز طبي" },
   { value: "laboratory", label: "مختبر" },
-  { value: "radiology", label: "أشعة" },
+  { value: "imaging_center", label: "مركز أشعة" },
   { value: "pharmacy", label: "صيدلية" },
+  { value: "rehabilitation_center", label: "مركز تأهيل" },
+  { value: "dialysis_center", label: "مركز غسيل كلوي" },
+  { value: "emergency_center", label: "طوارئ" },
   { value: "other", label: "أخرى" },
-];
-
-const KIND_OPTIONS = [
-  { value: "public", label: "حكومي" },
-  { value: "private", label: "خاص" },
-  { value: "non_profit", label: "غير ربحي" },
 ];
 
 const STATUS_OPTIONS = [
   { value: "ACTIVE", label: "نشط" },
-  { value: "INACTIVE", label: "معطّل" },
   { value: "PENDING", label: "قيد المراجعة" },
+  { value: "INACTIVE", label: "معطّل" },
+  { value: "DELETED", label: "محذوف" },
 ];
 
 interface CreateFacilityDialogProps {
@@ -64,7 +64,6 @@ export default function CreateFacilityDialog({
     name: "",
     city: "",
     facilityType: "",
-    kind: "",
     country: "",
     address: "",
     phone: "",
@@ -114,10 +113,6 @@ export default function CreateFacilityDialog({
       newErrors.facilityType = "يجب اختيار نوع المنشأة";
     }
 
-    if (!formData.kind) {
-      newErrors.kind = "يجب اختيار نوع الملكية";
-    }
-
     if (!formData.country.trim()) {
       newErrors.country = "البلد مطلوب";
     }
@@ -165,7 +160,6 @@ export default function CreateFacilityDialog({
         name: formData.name,
         city: formData.city,
         facilityType: formData.facilityType,
-        kind: formData.kind,
         country: formData.country,
         address: formData.address,
         phone: formData.phone,
@@ -185,7 +179,6 @@ export default function CreateFacilityDialog({
         name: "",
         city: "",
         facilityType: "",
-        kind: "",
         country: "",
         address: "",
         phone: "",
@@ -337,24 +330,6 @@ export default function CreateFacilityDialog({
                         options={FACILITY_TYPE_OPTIONS}
                         placeholder="اختر نوع المنشأة"
                         error={Boolean(errors.facilityType)}
-                      />
-                    </AdminFormField>
-
-                    <AdminFormField
-                      label="نوع الملكية"
-                      required
-                      error={errors.kind}
-                    >
-                      <StyledSelect
-                        value={formData.kind}
-                        onChange={(value) => {
-                          setFormData((prev) => ({ ...prev, kind: value }));
-                          if (errors.kind)
-                            setErrors((prev) => ({ ...prev, kind: "" }));
-                        }}
-                        options={KIND_OPTIONS}
-                        placeholder="اختر نوع الملكية"
-                        error={Boolean(errors.kind)}
                       />
                     </AdminFormField>
 

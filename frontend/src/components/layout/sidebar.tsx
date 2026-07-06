@@ -228,7 +228,7 @@ export default function Sidebar({
                     <div
                       className={
                         collapsed
-                          ? "flex items-center"
+                          ? "flex items-center gap-3"
                           : "flex items-center gap-3"
                       }
                     >

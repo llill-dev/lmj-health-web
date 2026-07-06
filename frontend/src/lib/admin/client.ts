@@ -18,6 +18,8 @@ import type {
   AdminSecretariesListParams,
   AdminSecretariesListResponse,
   AdminUsersListResponse,
+  FacilitiesListParams,
+  FacilitiesListResponse,
   CreateAdminUserBody,
   CreateAdminUserResponse,
   AdminUserOffboardResponse,
@@ -673,6 +675,28 @@ export const adminApi = {
       ),
   },
   facilities: {
+    list: (params: FacilitiesListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      if (params.q) qs.set("q", params.q);
+      if (params.name) qs.set("name", params.name);
+      if (params.city) qs.set("city", params.city);
+      if (params.facilityType) qs.set("facilityType", params.facilityType);
+      if (params.status) qs.set("status", params.status);
+      if (params.hasDoctors !== undefined)
+        qs.set("hasDoctors", String(params.hasDoctors));
+      if (params.ownerDoctorId) qs.set("ownerDoctorId", params.ownerDoctorId);
+      if (params.attribute) qs.set("attribute", params.attribute);
+      if (params.sortBy) qs.set("sortBy", params.sortBy);
+      if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
+
+      const endpoint = qs.toString()
+        ? `${adminEndpoints.facilities.list}?${qs.toString()}`
+        : adminEndpoints.facilities.list;
+
+      return get<FacilitiesListResponse>(endpoint, { locale: "ar" });
+    },
     getById: (id: string) =>
       get<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
         adminEndpoints.facilities.getById(id),
@@ -709,10 +733,9 @@ export const adminApi = {
       name: string;
       city: string;
       facilityType: string;
-      kind: string;
-      country: string;
-      address: string;
-      phone: string;
+      country?: string;
+      address?: string;
+      phone?: string;
       description?: string;
       ownerDoctorId?: string;
       status?: string;
@@ -729,7 +752,6 @@ export const adminApi = {
         name?: string;
         city?: string;
         facilityType?: string;
-        kind?: string;
         country?: string;
         address?: string;
         phone?: string;
@@ -738,7 +760,7 @@ export const adminApi = {
         attributes?: string[];
       },
     ) =>
-      patch<ApiSuccessEnvelope>(adminEndpoints.facilities.update(id), body, {
+      put<ApiSuccessEnvelope>(adminEndpoints.facilities.update(id), body, {
         locale: "ar",
       }),
   },

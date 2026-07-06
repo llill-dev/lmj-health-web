@@ -1,19 +1,19 @@
-import type { FacilityType } from '@/lib/admin/types';
+import type { FacilityType } from "@/lib/admin/types";
 import type {
   DoctorFacilityRecord,
   DoctorFacilityResponse,
   DoctorFacilityMutationBody,
-} from '@/lib/doctor/facilities/api-types';
-import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
+} from "@/lib/doctor/facilities/api-types";
+import type { SuggestFacilityRecord } from "@/lib/doctor/medical-services-directory/api-types";
 import type {
   DoctorFacility,
   DoctorFacilityFormValues,
   DoctorFacilityStatus,
-} from '@/lib/doctor/facilities/types';
+} from "@/lib/doctor/facilities/types";
 
 /** Legacy pseudo-keys some older facilities stored before API-3; stripped on read. */
-const WORK_HOURS_FROM_PREFIX = 'work_hours_from_';
-const WORK_HOURS_TO_PREFIX = 'work_hours_to_';
+const WORK_HOURS_FROM_PREFIX = "work_hours_from_";
+const WORK_HOURS_TO_PREFIX = "work_hours_to_";
 
 function optionalTrim(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
@@ -21,18 +21,20 @@ function optionalTrim(value: string | undefined): string | undefined {
 }
 
 function normalizeFacilityPhone(phone: string): string {
-  const trimmed = phone.trim().replace(/\s+/g, '');
-  if (!trimmed) return '';
-  if (trimmed.startsWith('+')) return trimmed;
-  const digits = trimmed.replace(/\D/g, '');
-  if (digits.startsWith('963')) return `+${digits}`;
-  if (digits.startsWith('0')) return `+963${digits.slice(1)}`;
-  if (digits.startsWith('9') && digits.length === 9) return `+963${digits}`;
+  const trimmed = phone.trim().replace(/\s+/g, "");
+  if (!trimmed) return "";
+  if (trimmed.startsWith("+")) return trimmed;
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.startsWith("963")) return `+${digits}`;
+  if (digits.startsWith("0")) return `+963${digits.slice(1)}`;
+  if (digits.startsWith("9") && digits.length === 9) return `+963${digits}`;
   return digits ? `+${digits}` : trimmed;
 }
 
 /** API-3 attributes are whitelisted snake_case keys only — never send work-hour pseudo-keys. */
-function sanitizeFacilityAttributes(attributes: string[] | undefined): string[] {
+function sanitizeFacilityAttributes(
+  attributes: string[] | undefined,
+): string[] {
   return (attributes ?? []).filter(
     (item) =>
       !item.startsWith(WORK_HOURS_FROM_PREFIX) &&
@@ -51,24 +53,24 @@ export function parseDoctorFacilityRecordFromResponse(
 ): DoctorFacilityRecord | null {
   const payload = response as DoctorFacilityResponse;
   const doctorRecord =
-    payload.doctor && typeof payload.doctor === 'object'
+    payload.doctor && typeof payload.doctor === "object"
       ? (payload.doctor as Record<string, unknown>)
       : null;
-  if (payload.facility && typeof payload.facility === 'object') {
+  if (payload.facility && typeof payload.facility === "object") {
     return payload.facility;
   }
 
-  if (doctorRecord?.facility && typeof doctorRecord.facility === 'object') {
+  if (doctorRecord?.facility && typeof doctorRecord.facility === "object") {
     return doctorRecord.facility as DoctorFacilityRecord;
   }
 
   const data = payload.data;
-  if (data && typeof data === 'object') {
+  if (data && typeof data === "object") {
     const record = data as DoctorFacilityRecord;
     if (
-      'facility' in record &&
+      "facility" in record &&
       record.facility &&
-      typeof record.facility === 'object'
+      typeof record.facility === "object"
     ) {
       return record.facility as DoctorFacilityRecord;
     }
@@ -87,9 +89,9 @@ export function mapApiFacilityStatus(
   status?: string | null,
 ): DoctorFacilityStatus {
   const normalized = status?.trim().toUpperCase();
-  if (normalized === 'ACTIVE') return 'active';
-  if (normalized === 'PENDING') return 'pending';
-  return 'closed';
+  if (normalized === "ACTIVE") return "active";
+  if (normalized === "PENDING") return "pending";
+  return "closed";
 }
 
 /** Best-effort map from catalog suggest row when assign response is partial. */
@@ -104,11 +106,11 @@ export function mapSuggestRecordToLinkedDoctorFacility(
   return {
     id: facilityId,
     name,
-    facilityType: (record.facilityType as FacilityType) ?? 'clinic',
+    facilityType: (record.facilityType as FacilityType) ?? "clinic",
     description: record.description?.trim() || undefined,
     city,
-    address: record.address?.trim() || '—',
-    phone: record.phone?.trim() || '—',
+    address: record.address?.trim() || "—",
+    phone: record.phone?.trim() || "—",
     status: mapApiFacilityStatus(record.status),
     attributes: sanitizeFacilityAttributes(record.attributes),
     isOwned: false,
@@ -127,11 +129,11 @@ export function mapApiFacilityToDoctorFacility(
   return {
     id,
     name,
-    facilityType: (record.facilityType as FacilityType) ?? 'clinic',
+    facilityType: (record.facilityType as FacilityType) ?? "clinic",
     description: record.description?.trim() || undefined,
     city,
-    address: record.address?.trim() || '—',
-    phone: record.phone?.trim() || '—',
+    address: record.address?.trim() || "—",
+    phone: record.phone?.trim() || "—",
     status: mapApiFacilityStatus(record.status),
     attributes: sanitizeFacilityAttributes(record.attributes),
     isOwned: options?.isOwned ?? true,
@@ -151,7 +153,7 @@ export function formValuesToMutationBody(
     facilityType: values.facilityType,
     kind: values.facilityType,
     city: values.city.trim(),
-    country: 'SY',
+    country: optionalTrim(values.country),
     address: optionalTrim(values.address),
     phone: optionalTrim(normalizeFacilityPhone(values.phone)),
     description: optionalTrim(values.description),
@@ -187,10 +189,10 @@ export function doctorFacilityToFormValues(
   return {
     name: facility.name,
     facilityType: facility.facilityType,
-    description: facility.description ?? '',
+    description: facility.description ?? "",
     city: facility.city,
-    address: facility.address === '—' ? '' : facility.address,
-    phone: facility.phone === '—' ? '' : facility.phone,
+    address: facility.address === "—" ? "" : facility.address,
+    phone: facility.phone === "—" ? "" : facility.phone,
     attributes: facility.attributes ?? [],
   };
 }
