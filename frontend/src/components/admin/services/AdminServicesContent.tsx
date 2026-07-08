@@ -8,6 +8,10 @@ import { ADMIN_SERVICES_PAGE_SIZE } from "@/components/admin/services/tabsConfig
 import type { FacilitySummary, ServiceType } from "@/lib/admin/types";
 import { FacilityCardSkeleton } from "@/components/admin/skeletons/FacilityCardSkeleton";
 
+function resolveFacilityId(facility: FacilitySummary): string {
+  return facility.id || facility._id || "";
+}
+
 export function AdminServicesContent({
   isAwaitingData,
   isError,
@@ -79,7 +83,7 @@ export function AdminServicesContent({
           ) : (
             facilities.map((facility) => (
               <FacilityCard
-                key={facility.id}
+                key={resolveFacilityId(facility)}
                 facility={facility}
                 tabIcon={facilityTabIcon}
                 onEdit={() => onEditFacility(facility)}
@@ -95,7 +99,7 @@ export function AdminServicesContent({
                     ? () => onViewFacilityDoctors(facility)
                     : undefined
                 }
-                isToggling={togglingId === facility.id}
+                isToggling={togglingId === resolveFacilityId(facility)}
               />
             ))
           )}

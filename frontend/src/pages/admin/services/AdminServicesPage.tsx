@@ -22,6 +22,10 @@ import {
 } from '@/hooks/admin/services/useAdminServices';
 import type { FacilitiesListParams, FacilityStatus, FacilitySummary } from '@/lib/admin/types';
 
+function resolveFacilityId(facility: FacilitySummary | null | undefined): string | null {
+  return facility?.id || facility?._id || null;
+}
+
 export default function AdminServicesPage() {
   const [activeTabIdx, setActiveTabIdx] = useState(0);
   const [searchInput, setSearchInput] = useState('');
@@ -91,11 +95,14 @@ export default function AdminServicesPage() {
   };
 
   const handleToggleStatus = async (facility: FacilitySummary) => {
-    setTogglingId(facility.id);
+    const facilityId = resolveFacilityId(facility);
+    if (!facilityId) return;
+
+    setTogglingId(facilityId);
     const newStatus: FacilityStatus = facility.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
 
     try {
-      await statusMutation.mutateAsync({ id: facility.id, status: newStatus });
+      await statusMutation.mutateAsync({ id: facilityId, status: newStatus });
     } finally {
       setTogglingId(null);
       setStatusToggleTarget(null);
