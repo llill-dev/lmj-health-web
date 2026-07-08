@@ -27,6 +27,7 @@ export default function FacilityDetailsDialog({
   const detailsQuery = useFacilityById(facility?.id ?? '', open && Boolean(facility?.id));
   const details: FacilitySummary | null =
     (detailsQuery.data?.facility as FacilitySummary | null | undefined) ?? facility;
+  const ownerName = details?.owner?.user?.fullName || details?.owner?.fullName;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -108,7 +109,11 @@ export default function FacilityDetailsDialog({
                       </div>
                       <div className='inline-flex items-center gap-1.5'>
                         <UserRound className='h-4 w-4 text-primary' />
-                        {details.ownerDoctorId ?? 'غير مربوطة بطبيب مالك'}
+                        {ownerName
+                          ? ownerName
+                          : details.ownerDoctorId
+                            ? 'طبيب مالك محدد'
+                            : 'غير مربوطة بطبيب مالك'}
                       </div>
                     </div>
                   </div>
