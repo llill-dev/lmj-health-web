@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
+import { resolveAdminFacilityFormFeedback } from "@/lib/admin/facilities/facilityFormErrors";
 import {
   AdminFormField,
   adminFieldClass,
@@ -51,6 +52,16 @@ interface CreateFacilityDialogProps {
   onSuccess?: () => void;
 }
 
+function normalizeFacilityAttribute(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 export default function CreateFacilityDialog({
   open,
   onOpenChange,
@@ -75,6 +86,7 @@ export default function CreateFacilityDialog({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [newAttribute, setNewAttribute] = useState("");
+  const [rootError, setRootError] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -113,17 +125,10 @@ export default function CreateFacilityDialog({
       newErrors.facilityType = "يجب اختيار نوع المنشأة";
     }
 
-    if (!formData.country.trim()) {
-      newErrors.country = "البلد مطلوب";
-    }
-
-    if (!formData.address.trim()) {
-      newErrors.address = "العنوان مطلوب";
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = "رقم الهاتف مطلوب";
-    } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s/g, ""))) {
+    if (
+      formData.phone.trim() &&
+      !/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s/g, ""))
+    ) {
       newErrors.phone = "رقم الهاتف غير صالح";
     }
 
@@ -132,13 +137,16 @@ export default function CreateFacilityDialog({
   };
 
   const addAttribute = () => {
-    const trimmed = newAttribute.trim();
-    if (trimmed && !formData.attributes.includes(trimmed)) {
+    const normalized = normalizeFacilityAttribute(newAttribute);
+    if (normalized && !formData.attributes.includes(normalized)) {
       setFormData((prev) => ({
         ...prev,
-        attributes: [...prev.attributes, trimmed],
+        attributes: [...prev.attributes, normalized],
       }));
       setNewAttribute("");
+      if (errors.attributes) {
+        setErrors((prev) => ({ ...prev, attributes: "" }));
+      }
     }
   };
 
@@ -155,15 +163,16 @@ export default function CreateFacilityDialog({
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setRootError("");
     try {
       await adminApi.facilities.create({
-        name: formData.name,
-        city: formData.city,
+        name: formData.name.trim(),
+        city: formData.city.trim(),
         facilityType: formData.facilityType,
-        country: formData.country,
-        address: formData.address,
-        phone: formData.phone,
-        description: formData.description || undefined,
+        country: formData.country.trim() || undefined,
+        address: formData.address.trim() || undefined,
+        phone: formData.phone.trim() || undefined,
+        description: formData.description.trim() || undefined,
         ownerDoctorId: formData.ownerDoctorId || undefined,
         status: formData.status,
         attributes: formData.attributes,
@@ -189,11 +198,15 @@ export default function CreateFacilityDialog({
       });
       setErrors({});
       setNewAttribute("");
+      setRootError("");
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast("حدث خطأ أثناء إنشاء المنشأة. يرجى المحاولة مرة أخرى.", {
-        title: "فشلت العملية",
+      const feedback = resolveAdminFacilityFormFeedback(error, "create");
+      setErrors(feedback.fields);
+      setRootError(feedback.rootBanner ?? "");
+      toast(feedback.toastMessage, {
+        title: feedback.toastTitle,
         variant: "error",
         durationMs: 4200,
       });
@@ -254,6 +267,11 @@ export default function CreateFacilityDialog({
             <form dir="rtl" onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
+                  {rootError ? (
+                    <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
+                      {rootError}
+                    </div>
+                  ) : null}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <AdminFormField
                       label="اسم المنشأة"
@@ -335,7 +353,6 @@ export default function CreateFacilityDialog({
 
                     <AdminFormField
                       label="البلد"
-                      required
                       error={errors.country}
                     >
                       <input
@@ -390,7 +407,6 @@ export default function CreateFacilityDialog({
 
                   <AdminFormField
                     label="العنوان"
-                    required
                     error={errors.address}
                   >
                     <input
@@ -445,12 +461,15 @@ export default function CreateFacilityDialog({
                   >
                     <StyledSelect
                       value={formData.ownerDoctorId}
-                      onChange={(value) =>
+                      onChange={(value) => {
                         setFormData((prev) => ({
                           ...prev,
                           ownerDoctorId: value,
-                        }))
-                      }
+                        }));
+                        if (errors.ownerDoctorId) {
+                          setErrors((prev) => ({ ...prev, ownerDoctorId: "" }));
+                        }
+                      }}
                       options={[
                         { value: "", label: "بدون طبيب مالك" },
                         ...doctorOptions,
@@ -470,7 +489,11 @@ export default function CreateFacilityDialog({
                     />
                   </AdminFormField>
 
-                  <AdminFormField label="السمات والخصائص">
+                  <AdminFormField
+                    label="السمات والخصائص"
+                    error={errors.attributes}
+                    hint="سيتم حفظ السمات بصيغة مفاتيح مثل night_shift و echo_available."
+                  >
                     <div className="flex gap-2 items-center">
                       <input
                         value={newAttribute}
