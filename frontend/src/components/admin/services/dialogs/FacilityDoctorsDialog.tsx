@@ -8,6 +8,10 @@ import type { FacilitySummary } from '@/lib/admin/types';
 
 const PAGE_SIZE = 10;
 
+function resolveFacilityId(facility: FacilitySummary | null): string {
+  return facility?.id || facility?._id || '';
+}
+
 function getDoctorStatusLabel(status?: string) {
   switch (status) {
     case 'approved':
@@ -31,16 +35,17 @@ export default function FacilityDoctorsDialog({
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search.trim());
+  const facilityId = resolveFacilityId(facility);
 
   useEffect(() => {
     if (!open) {
       setPage(1);
       setSearch('');
     }
-  }, [open, facility?.id]);
+  }, [facilityId, open]);
 
   const doctorsQuery = useFacilityDoctors(
-    facility?.id ?? '',
+    facilityId,
     {
       page,
       limit: PAGE_SIZE,
@@ -48,7 +53,7 @@ export default function FacilityDoctorsDialog({
       sortBy: 'name',
       sortOrder: 'asc',
     },
-    open && Boolean(facility?.id),
+    open && Boolean(facilityId),
   );
 
   const totalPages = Math.max(1, Math.ceil((doctorsQuery.total || 0) / PAGE_SIZE));
