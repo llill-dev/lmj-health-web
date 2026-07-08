@@ -129,24 +129,46 @@ export default function FacilityDoctorsDialog({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {doctors.map((doctor: Record<string, unknown>) => (
-                    <div
-                      key={doctor._id as string}
-                      className="flex items-center gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
-                    >
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm">
-                        <User className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-cairo text-[15px] font-black leading-[20px] text-[#111827]">
-                          {(doctor.user as Record<string, unknown>)?.fullName as string || "—"}
+                  {doctors.map((doctor: Record<string, unknown>) => {
+                    const doctorUser =
+                      doctor.user && typeof doctor.user === "object"
+                        ? (doctor.user as Record<string, unknown>)
+                        : null;
+                    const doctorId =
+                      (doctor.id as string | undefined) ||
+                      (doctor._id as string | undefined) ||
+                      "";
+
+                    return (
+                      <div
+                        key={doctorId}
+                        className="flex items-center gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
+                      >
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm">
+                          <User className="w-5 h-5" />
                         </div>
-                        <div className="mt-1 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                          {doctor._id as string}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-cairo text-[15px] font-black leading-[20px] text-[#111827]">
+                            {(doctorUser?.fullName as string | undefined) || "—"}
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-cairo text-[11px] font-bold text-[#98A2B3]">
+                            <span>{doctorId || "—"}</span>
+                            {doctor.specialization && (
+                              <span>{doctor.specialization as string}</span>
+                            )}
+                            {doctor.approvalStatus && (
+                              <span>{doctor.approvalStatus as string}</span>
+                            )}
+                          </div>
+                          {doctorUser?.email && (
+                            <div className="mt-1 font-cairo text-[11px] font-semibold text-[#667085]">
+                              {doctorUser.email as string}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

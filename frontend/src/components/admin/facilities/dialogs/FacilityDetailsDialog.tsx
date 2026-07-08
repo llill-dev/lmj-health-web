@@ -1,10 +1,9 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Building2, MapPin, Phone, FileText, User, Tag } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
-import { cn } from "@/lib/utils/utils";
 
 const FACILITY_TYPE_LABELS: Record<string, string> = {
   hospital: "مستشفى",
@@ -47,6 +46,18 @@ export default function FacilityDetailsDialog({
   const facility = facilityData?.facility as
     | Record<string, unknown>
     | undefined;
+  const owner =
+    facility?.owner && typeof facility.owner === "object"
+      ? (facility.owner as Record<string, unknown>)
+      : null;
+  const ownerUser =
+    owner?.user && typeof owner.user === "object"
+      ? (owner.user as Record<string, unknown>)
+      : null;
+  const ownerDisplayName =
+    (ownerUser?.fullName as string | undefined) ||
+    (owner?.fullName as string | undefined) ||
+    (facility?.ownerDoctorId as string | undefined);
 
   useEffect(() => {
     if (!open) return;
@@ -143,6 +154,20 @@ export default function FacilityDetailsDialog({
                   </div>
 
                   <div className="grid grid-cols-1 gap-4">
+                    {typeof facility.doctorCount === "number" && (
+                      <div className="flex items-start gap-3">
+                        <User className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
+                        <div className="flex-1">
+                          <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mb-1">
+                            عدد الأطباء المرتبطين
+                          </div>
+                          <div className="font-cairo text-[14px] font-bold text-[#111827]">
+                            {facility.doctorCount as number}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {facility.city && (
                       <div className="flex items-start gap-3">
                         <MapPin className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
@@ -191,7 +216,7 @@ export default function FacilityDetailsDialog({
                       </div>
                     )}
 
-                    {facility.ownerDoctorId && (
+                    {ownerDisplayName && (
                       <div className="flex items-start gap-3">
                         <User className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
                         <div className="flex-1">
@@ -199,8 +224,18 @@ export default function FacilityDetailsDialog({
                             الطبيب المالك
                           </div>
                           <div className="font-cairo text-[14px] font-bold text-[#111827]">
-                            {facility.ownerDoctorId as string}
+                            {ownerDisplayName}
                           </div>
+                          {owner?.specialization && (
+                            <div className="font-cairo text-[12px] font-semibold text-[#667085] mt-0.5">
+                              {owner.specialization as string}
+                            </div>
+                          )}
+                          {owner?.approvalStatus && (
+                            <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mt-1">
+                              حالة الاعتماد: {owner.approvalStatus as string}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}

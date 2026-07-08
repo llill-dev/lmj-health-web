@@ -92,13 +92,22 @@ export default function AdminFacilitiesPage() {
       }),
   });
 
-  const facilities = facilitiesData?.facilities || [];
+  const { data: doctorsData } = useQuery({
+    queryKey: ["admin", "facility-owner-options"],
+    queryFn: () =>
+      adminApi.doctors.list({
+        status: "approved",
+        page: 1,
+        limit: 100,
+      }),
+  });
 
-  // Mock doctors for owner selection - in real app, fetch from API
-  const mockDoctors = [
-    { _id: "1", user: { fullName: "د. أحمد محمد" } },
-    { _id: "2", user: { fullName: "د. سارة علي" } },
-  ];
+  const facilities = facilitiesData?.facilities || [];
+  const ownerDoctors =
+    doctorsData?.doctors?.map((doctor) => ({
+      _id: doctor._id,
+      user: { fullName: doctor.user?.fullName || doctor._id },
+    })) || [];
 
   const openEdit = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
@@ -359,7 +368,7 @@ export default function AdminFacilitiesPage() {
         <CreateFacilityDialog
           open={createOpen}
           onOpenChange={setCreateOpen}
-          doctors={mockDoctors}
+          doctors={ownerDoctors}
           onSuccess={() => {
             refetch();
           }}
@@ -370,7 +379,7 @@ export default function AdminFacilitiesPage() {
           open={editOpen}
           onOpenChange={setEditOpen}
           facility={selectedFacility}
-          doctors={mockDoctors}
+          doctors={ownerDoctors}
           onSuccess={() => {
             refetch();
           }}
@@ -380,14 +389,14 @@ export default function AdminFacilitiesPage() {
         <FacilityDetailsDialog
           open={detailsOpen}
           onOpenChange={setDetailsOpen}
-          facilityId={selectedFacility?._id || null}
+          facilityId={selectedFacility?.id || selectedFacility?._id || null}
         />
 
         {/* Facility Doctors Dialog */}
         <FacilityDoctorsDialog
           open={doctorsOpen}
           onOpenChange={setDoctorsOpen}
-          facilityId={selectedFacility?._id || null}
+          facilityId={selectedFacility?.id || selectedFacility?._id || null}
           facilityName={selectedFacility?.name || undefined}
         />
 
@@ -395,7 +404,7 @@ export default function AdminFacilitiesPage() {
         <ChangeFacilityStatusDialog
           open={statusOpen}
           onOpenChange={setStatusOpen}
-          facilityId={selectedFacility?._id || null}
+          facilityId={selectedFacility?.id || selectedFacility?._id || null}
           facilityName={selectedFacility?.name || undefined}
           currentStatus={selectedFacility?.status || undefined}
         />
@@ -404,7 +413,7 @@ export default function AdminFacilitiesPage() {
         <DeleteFacilityDialog
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
-          facilityId={selectedFacility?._id || null}
+          facilityId={selectedFacility?.id || selectedFacility?._id || null}
           facilityName={selectedFacility?.name || undefined}
         />
       </div>
