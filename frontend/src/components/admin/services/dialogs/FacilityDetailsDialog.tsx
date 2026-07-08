@@ -15,6 +15,20 @@ import { StatusBadge } from '@/components/admin/services/StatusBadge';
 import { useFacilityById } from '@/hooks/admin/services/useAdminServices';
 import type { FacilitySummary } from '@/lib/admin/types';
 
+const FACILITY_TYPE_LABELS: Record<string, string> = {
+  hospital: 'مستشفى',
+  clinic: 'عيادة',
+  polyclinic: 'عيادات متعددة',
+  medical_center: 'مركز طبي',
+  laboratory: 'مختبر',
+  imaging_center: 'مركز أشعة',
+  pharmacy: 'صيدلية',
+  rehabilitation_center: 'مركز تأهيل',
+  dialysis_center: 'مركز غسيل كلوي',
+  emergency_center: 'طوارئ',
+  other: 'أخرى',
+};
+
 export default function FacilityDetailsDialog({
   open,
   onOpenChange,
@@ -68,7 +82,7 @@ export default function FacilityDetailsDialog({
                       <div className='mt-2 flex flex-wrap items-center justify-end gap-2 font-cairo text-[12px] font-bold text-[#667085]'>
                         <span className='inline-flex items-center gap-1.5'>
                           <Building2 className='h-4 w-4 text-primary' />
-                          {details.facilityType}
+                          {FACILITY_TYPE_LABELS[details.facilityType] ?? details.facilityType}
                         </span>
                         <span>•</span>
                         <span className='inline-flex items-center gap-1.5'>
