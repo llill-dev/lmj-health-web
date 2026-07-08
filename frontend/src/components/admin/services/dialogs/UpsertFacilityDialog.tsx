@@ -86,6 +86,16 @@ interface Props {
   editTarget?: FacilitySummary | null;
 }
 
+function normalizeFacilityAttribute(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_]/g, '')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 export default function UpsertFacilityDialog({
   open,
   onOpenChange,
@@ -162,7 +172,7 @@ export default function UpsertFacilityDialog({
   }, [open, onOpenChange, submitting]);
 
   const addAttribute = () => {
-    const next = attrInput.trim().toLowerCase().replace(/\s+/g, '_');
+    const next = normalizeFacilityAttribute(attrInput);
     if (!next || attributes.includes(next)) return;
     setValue('attributes', [...attributes, next], { shouldDirty: true, shouldValidate: true });
     setAttrInput('');
@@ -178,7 +188,7 @@ export default function UpsertFacilityDialog({
 
   const onSubmit = handleSubmit(async (values) => {
     clearErrors();
-    const ownerDoctorId = values.ownerDoctorId?.trim() ?? '';
+    const ownerDoctorId = values.ownerDoctorId?.trim() || undefined;
     const body = {
       name: values.name.trim(),
       facilityType: values.facilityType,
@@ -189,7 +199,7 @@ export default function UpsertFacilityDialog({
       description: values.description?.trim() || undefined,
       status: values.status,
       ownerDoctorId,
-      attributes: values.attributes.map((attr) => attr.trim()).filter(Boolean),
+      attributes: values.attributes.map(normalizeFacilityAttribute).filter(Boolean),
     };
 
     try {
