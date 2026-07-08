@@ -1,7 +1,9 @@
 import { RotateCcw, Search, SlidersHorizontal } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import StyledSelect from '@/components/ui/styled-select';
 import type { Tab } from '@/components/admin/services/tabsConfig';
+import { adminApi } from '@/lib/admin/client';
 import type { FacilityStatus, FacilitiesListParams } from '@/lib/admin/types';
 
 type FacilityFilterState = Pick<
@@ -83,6 +85,20 @@ export function AdminServicesToolbar({
   const inputClass =
     'h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3.5 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15';
 
+  const showFilters = !searchDisabled && facilityFilters && onFacilityFiltersChange;
+
+  const ownerDoctorsQuery = useQuery({
+    queryKey: ['admin', 'facility-owner-filter-options'],
+    queryFn: () =>
+      adminApi.doctors.list({
+        status: 'approved',
+        page: 1,
+        limit: 100,
+      }),
+    enabled: Boolean(showFilters),
+    staleTime: 60_000,
+  });
+
   const doctorLinkValue =
     facilityFilters?.hasDoctors === true
       ? 'yes'
@@ -90,7 +106,13 @@ export function AdminServicesToolbar({
         ? 'no'
         : 'all';
 
-  const showFilters = !searchDisabled && facilityFilters && onFacilityFiltersChange;
+  const ownerDoctorOptions = [
+    { value: '', label: 'كل المالكين' },
+    ...(ownerDoctorsQuery.data?.doctors ?? []).map((doctor) => ({
+      value: doctor._id,
+      label: doctor.user?.fullName || doctor._id,
+    })),
+  ];
 
   const hasActiveFilters = Boolean(
     facilityFilters &&
@@ -262,18 +284,20 @@ export function AdminServicesToolbar({
               />
             </FilterField>
 
-            <FilterField label='معرّف طبيب المالك'>
-              <input
+            <FilterField label='الطبيب المالك'>
+              <StyledSelect
+                size='sm'
+                tone='muted'
+                listboxAriaLabel='الطبيب المالك'
                 value={facilityFilters!.ownerDoctorId ?? ''}
-                onChange={(event) =>
+                options={ownerDoctorOptions}
+                onChange={(next) =>
                   onFacilityFiltersChange!({
                     ...facilityFilters!,
-                    ownerDoctorId: event.target.value || undefined,
+                    ownerDoctorId: next || undefined,
                   })
                 }
-                placeholder='ObjectId أو فارغ'
-                dir='ltr'
-                className={`${inputClass} text-left`}
+                disabled={ownerDoctorsQuery.isLoading}
               />
             </FilterField>
 
