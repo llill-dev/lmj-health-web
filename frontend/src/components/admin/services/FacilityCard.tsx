@@ -13,6 +13,10 @@ import type { ElementType } from 'react';
 import { StatusBadge } from '@/components/admin/services/StatusBadge';
 import type { FacilitySummary } from '@/lib/admin/types';
 
+function formatFacilityAttributeLabel(value: string): string {
+  return value.replace(/_/g, ' ');
+}
+
 export function FacilityCard({
   facility,
   tabIcon: TabIcon,
@@ -90,7 +94,7 @@ export function FacilityCard({
                     key={attr}
                     className='inline-flex h-[22px] items-center rounded-[6px] bg-[#E7FBFA] px-2.5 font-cairo text-[11px] font-extrabold text-primary'
                   >
-                    {attr}
+                    {formatFacilityAttributeLabel(attr)}
                   </span>
                 ))}
               </div>

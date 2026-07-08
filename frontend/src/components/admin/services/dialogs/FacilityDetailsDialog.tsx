@@ -29,6 +29,10 @@ const FACILITY_TYPE_LABELS: Record<string, string> = {
   other: 'أخرى',
 };
 
+function formatFacilityAttributeLabel(value: string): string {
+  return value.replace(/_/g, ' ');
+}
+
 export default function FacilityDetailsDialog({
   open,
   onOpenChange,
@@ -158,7 +162,7 @@ export default function FacilityDetailsDialog({
                             key={attr}
                             className='inline-flex h-[24px] items-center rounded-[6px] bg-[#E7FBFA] px-2.5 font-cairo text-[11px] font-extrabold text-primary'
                           >
-                            {attr}
+                            {formatFacilityAttributeLabel(attr)}
                           </span>
                         ))
                       ) : (
