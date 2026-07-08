@@ -1043,6 +1043,14 @@ export type FacilitySummary = {
   status: FacilityStatus;
   attributes: string[];
   ownerDoctorId?: string | null;
+  owner?: {
+    id?: string;
+    _id?: string;
+    fullName?: string;
+    user?: {
+      fullName?: string;
+    };
+  } | null;
   createdBy?: string | null;
   updatedBy?: string | null;
   approvedBy?: string | null;
