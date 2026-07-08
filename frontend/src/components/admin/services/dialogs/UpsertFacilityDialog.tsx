@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Save, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
@@ -15,6 +16,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
 import { useCreateFacility, useUpdateFacility } from '@/hooks/admin/services/useAdminServices';
+import { adminApi } from '@/lib/admin/client';
 import { resolveAdminFacilityFormFeedback } from '@/lib/admin/facilities/facilityFormErrors';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { cn } from '@/lib/utils/utils';
@@ -105,6 +107,17 @@ export default function UpsertFacilityDialog({
   const isEdit = Boolean(editTarget);
   const createMutation = useCreateFacility();
   const updateMutation = useUpdateFacility(editTarget?.id ?? '');
+  const ownerDoctorsQuery = useQuery({
+    queryKey: ['admin', 'facility-owner-options', 'services-dialog'],
+    queryFn: () =>
+      adminApi.doctors.list({
+        status: 'approved',
+        page: 1,
+        limit: 100,
+      }),
+    enabled: open,
+    staleTime: 60_000,
+  });
   const submitting = createMutation.isPending || updateMutation.isPending;
   const [attrInput, setAttrInput] = useState('');
 
@@ -124,6 +137,13 @@ export default function UpsertFacilityDialog({
   });
 
   const attributes = watch('attributes') ?? [];
+  const ownerDoctorOptions = [
+    { value: '', label: 'بدون طبيب مالك' },
+    ...(ownerDoctorsQuery.data?.doctors ?? []).map((doctor) => ({
+      value: doctor._id,
+      label: doctor.user?.fullName || doctor._id,
+    })),
+  ];
 
   useEffect(() => {
     if (!open) return;
@@ -428,15 +448,23 @@ export default function UpsertFacilityDialog({
                       <DoctorProfileFormField
                         label='معرّف طبيب المالك'
                         error={errors.ownerDoctorId?.message}
-                        hint='اتركه فارغًا لفك الربط أو لإبقاء المنشأة بدون مالك.'
+                        hint='اختياري. اختر طبيبًا معتمدًا أو اترك الحقل بدون مالك.'
                       >
-                        <input
-                          {...register('ownerDoctorId')}
-                          dir='rtl'
-                          placeholder='ObjectId أو فارغ'
-                          className={profileFieldClass(
-                            cn(profileInputClass),
-                            Boolean(errors.ownerDoctorId),
+                        <Controller
+                          control={control}
+                          name='ownerDoctorId'
+                          render={({ field }) => (
+                            <StyledSelect
+                              value={field.value ?? ''}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              options={ownerDoctorOptions}
+                              placeholder='اختر الطبيب المالك'
+                              error={Boolean(errors.ownerDoctorId)}
+                              listboxAriaLabel='الطبيب المالك'
+                              disabled={ownerDoctorsQuery.isLoading}
+                            />
                           )}
                         />
                       </DoctorProfileFormField>
