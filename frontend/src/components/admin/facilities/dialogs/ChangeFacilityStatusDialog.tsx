@@ -3,7 +3,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/ToastProvider";
 import { adminApi } from "@/lib/admin/client";
+import { resolveAdminFacilityFormFeedback } from "@/lib/admin/facilities/facilityFormErrors";
 import StyledSelect from "@/components/ui/styled-select";
 
 const STATUS_OPTIONS = [
@@ -29,7 +31,9 @@ export default function ChangeFacilityStatusDialog({
   currentStatus,
 }: ChangeFacilityStatusDialogProps) {
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [rootError, setRootError] = useState("");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const mutation = useMutation({
     mutationFn: (status: string) =>
@@ -39,13 +43,24 @@ export default function ChangeFacilityStatusDialog({
       queryClient.invalidateQueries({
         queryKey: ["admin", "facility", facilityId],
       });
+      setRootError("");
       onOpenChange(false);
+    },
+    onError: (error) => {
+      const feedback = resolveAdminFacilityFormFeedback(error, "edit");
+      setRootError(feedback.rootBanner ?? "");
+      toast(feedback.toastMessage, {
+        title: feedback.toastTitle,
+        variant: "error",
+        durationMs: 4200,
+      });
     },
   });
 
   useEffect(() => {
     if (open) {
       setSelectedStatus(currentStatus || "");
+      setRootError("");
     }
   }, [open, currentStatus]);
 
@@ -125,17 +140,31 @@ export default function ChangeFacilityStatusDialog({
             </div>
 
             <form onSubmit={handleSubmit} className="px-8 py-6">
+              {rootError ? (
+                <div className="mb-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
+                  {rootError}
+                </div>
+              ) : null}
               <div className="mb-6">
                 <label className="block font-cairo text-[12px] font-extrabold text-[#111827] mb-2">
                   الحالة الجديدة
                 </label>
                 <StyledSelect
                   value={selectedStatus}
-                  onChange={setSelectedStatus}
+                  onChange={(value) => {
+                    setSelectedStatus(value);
+                    if (rootError) setRootError("");
+                  }}
                   options={STATUS_OPTIONS}
                   placeholder="اختر الحالة"
                 />
               </div>
+
+              {selectedStatus === "DELETED" ? (
+                <div className="mb-6 rounded-[12px] border border-[#FECACA] bg-[#FFF1F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
+                  تعيين الحالة إلى "محذوف" سيؤدي إلى فك ارتباط الأطباء بهذه المنشأة حسب عقد الـ API.
+                </div>
+              ) : null}
 
               <div className="flex gap-3">
                 <button

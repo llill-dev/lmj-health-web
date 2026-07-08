@@ -3,7 +3,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Loader2, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/ToastProvider";
 import { adminApi } from "@/lib/admin/client";
+import { resolveAdminFacilityFormFeedback } from "@/lib/admin/facilities/facilityFormErrors";
 
 interface DeleteFacilityDialogProps {
   open: boolean;
@@ -19,20 +21,33 @@ export default function DeleteFacilityDialog({
   facilityName,
 }: DeleteFacilityDialogProps) {
   const [confirmText, setConfirmText] = useState("");
+  const [rootError, setRootError] = useState("");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const mutation = useMutation({
     mutationFn: () => adminApi.facilities.remove(facilityId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "facilities"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "facility", facilityId] });
+      setRootError("");
       onOpenChange(false);
+    },
+    onError: (error) => {
+      const feedback = resolveAdminFacilityFormFeedback(error, "edit");
+      setRootError(feedback.rootBanner ?? "");
+      toast(feedback.toastMessage, {
+        title: "حذف المنشأة",
+        variant: "error",
+        durationMs: 4200,
+      });
     },
   });
 
   useEffect(() => {
     if (open) {
       setConfirmText("");
+      setRootError("");
     }
   }, [open]);
 
@@ -105,6 +120,11 @@ export default function DeleteFacilityDialog({
             </div>
 
             <form onSubmit={handleSubmit} className="px-8 py-6">
+              {rootError ? (
+                <div className="mb-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
+                  {rootError}
+                </div>
+              ) : null}
               <div className="flex items-start gap-3 mb-6">
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] bg-red-50 text-red-600">
                   <AlertTriangle className="w-5 h-5" />
@@ -119,7 +139,7 @@ export default function DeleteFacilityDialog({
                     </p>
                   )}
                   <p className="font-cairo text-[11px] font-semibold text-[#DC2626] mt-2">
-                    هذا الإجراء لا يمكن التراجع عنه.
+                    الحذف هنا حذف منطقي فقط، وسيؤدي أيضًا إلى إزالة ربط الأطباء بهذه المنشأة.
                   </p>
                 </div>
               </div>
@@ -132,7 +152,10 @@ export default function DeleteFacilityDialog({
                   <input
                     type="text"
                     value={confirmText}
-                    onChange={(e) => setConfirmText(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmText(e.target.value);
+                      if (rootError) setRootError("");
+                    }}
                     placeholder={facilityName}
                     className="w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-red-600 focus:outline-none"
                   />
