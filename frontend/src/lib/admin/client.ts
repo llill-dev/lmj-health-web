@@ -86,6 +86,112 @@ function normalizeMedicalOrderCatalogList(
     .filter((x): x is MedicalOrderCatalogItem => x != null);
 }
 
+function normalizeFacilitiesListResponse(
+  raw: FacilitiesListResponse | Record<string, unknown>,
+): FacilitiesListResponse {
+  const body = raw as FacilitiesListResponse & { data?: Record<string, unknown> };
+  const nested =
+    body.data && typeof body.data === "object"
+      ? (body.data as Record<string, unknown>)
+      : null;
+
+  const facilities = Array.isArray(body.facilities)
+    ? body.facilities
+    : Array.isArray(body.items)
+      ? body.items
+      : Array.isArray(nested?.facilities)
+        ? (nested.facilities as FacilitiesListResponse["facilities"])
+        : Array.isArray(nested?.items)
+          ? (nested.items as FacilitiesListResponse["items"])
+          : [];
+
+  return {
+    ...body,
+    page:
+      body.page ??
+      (typeof nested?.page === "number" ? (nested.page as number) : 1),
+    limit:
+      body.limit ??
+      (typeof nested?.limit === "number" ? (nested.limit as number) : facilities.length),
+    total:
+      body.total ??
+      (typeof nested?.total === "number" ? (nested.total as number) : facilities.length),
+    results:
+      body.results ??
+      (typeof nested?.results === "number"
+        ? (nested.results as number)
+        : facilities.length),
+    facilities,
+  };
+}
+
+function normalizeFacilityResponse(
+  raw: ApiSuccessEnvelope & {
+    facility?: Record<string, unknown>;
+    data?: Record<string, unknown> | { facility?: Record<string, unknown> };
+  },
+) {
+  const directFacility =
+    raw.facility && typeof raw.facility === "object" ? raw.facility : undefined;
+  const nestedData =
+    raw.data && typeof raw.data === "object"
+      ? (raw.data as Record<string, unknown>)
+      : undefined;
+  const nestedFacility =
+    nestedData?.facility && typeof nestedData.facility === "object"
+      ? (nestedData.facility as Record<string, unknown>)
+      : nestedData && ("id" in nestedData || "_id" in nestedData)
+        ? nestedData
+        : undefined;
+
+  return {
+    ...raw,
+    facility: directFacility ?? nestedFacility,
+  };
+}
+
+function normalizeFacilityDoctorsListResponse(
+  raw: FacilityDoctorsListResponse | Record<string, unknown>,
+): FacilityDoctorsListResponse {
+  const body = raw as FacilityDoctorsListResponse & { data?: Record<string, unknown> };
+  const nested =
+    body.data && typeof body.data === "object"
+      ? (body.data as Record<string, unknown>)
+      : null;
+
+  const doctors = Array.isArray(body.doctors)
+    ? body.doctors
+    : Array.isArray(body.items)
+      ? body.items
+      : Array.isArray(nested?.doctors)
+        ? (nested.doctors as FacilityDoctorsListResponse["doctors"])
+        : Array.isArray(nested?.items)
+          ? (nested.items as FacilityDoctorsListResponse["items"])
+          : [];
+
+  return {
+    ...body,
+    facility:
+      body.facility ??
+      (nested?.facility as FacilityDoctorsListResponse["facility"] | undefined),
+    page:
+      body.page ??
+      (typeof nested?.page === "number" ? (nested.page as number) : 1),
+    limit:
+      body.limit ??
+      (typeof nested?.limit === "number" ? (nested.limit as number) : doctors.length),
+    total:
+      body.total ??
+      (typeof nested?.total === "number" ? (nested.total as number) : doctors.length),
+    results:
+      body.results ??
+      (typeof nested?.results === "number"
+        ? (nested.results as number)
+        : doctors.length),
+    doctors,
+  };
+}
+
 export function verificationRequestsFromListEnvelope(
   raw:
     | VerificationRequestsListResponse
@@ -695,13 +801,19 @@ export const adminApi = {
         ? `${adminEndpoints.facilities.list}?${qs.toString()}`
         : adminEndpoints.facilities.list;
 
-      return get<FacilitiesListResponse>(endpoint, { locale: "ar" });
+      return get<FacilitiesListResponse | Record<string, unknown>>(endpoint, {
+        locale: "ar",
+      }).then(normalizeFacilitiesListResponse);
     },
     getById: (id: string) =>
-      get<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
-        adminEndpoints.facilities.getById(id),
-        { locale: "ar" },
-      ),
+      get<
+        ApiSuccessEnvelope & {
+          facility?: Record<string, unknown>;
+          data?: Record<string, unknown> | { facility?: Record<string, unknown> };
+        }
+      >(adminEndpoints.facilities.getById(id), {
+        locale: "ar",
+      }).then(normalizeFacilityResponse),
     listDoctors: (id: string, params: FacilityDoctorsListParams = {}) => {
       const qs = new URLSearchParams();
       if (params.page) qs.set("page", String(params.page));
@@ -716,7 +828,9 @@ export const adminApi = {
       const base = adminEndpoints.facilities.listDoctors(id);
       const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
 
-      return get<FacilityDoctorsListResponse>(endpoint, { locale: "ar" });
+      return get<FacilityDoctorsListResponse | Record<string, unknown>>(endpoint, {
+        locale: "ar",
+      }).then(normalizeFacilityDoctorsListResponse);
     },
     updateStatus: (id: string, status: string) =>
       patch<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(

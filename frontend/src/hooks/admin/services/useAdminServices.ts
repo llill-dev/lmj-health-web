@@ -231,7 +231,7 @@ export function useFacilitiesList(params: FacilitiesListParams = {}) {
 export function useFacilityById(id: string, enabled = true) {
   return useQuery({
     queryKey: SERVICES_KEYS.facilityById(id),
-    queryFn: () => adminApi.facilities.getById(id).then(normalizeFacilityResponse),
+    queryFn: () => adminApi.facilities.getById(id),
     enabled: !!id && enabled,
   });
 }
@@ -289,7 +289,7 @@ export function useUpdateFacilityStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
-      adminApi.facilities.updateStatus(id, status).then(normalizeFacilityResponse),
+      adminApi.facilities.updateStatus(id, status),
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.facilityById(id) });
@@ -300,8 +300,7 @@ export function useUpdateFacilityStatus() {
 export function useDeleteFacility() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      adminApi.facilities.remove(id).then(normalizeFacilityResponse),
+    mutationFn: (id: string) => adminApi.facilities.remove(id),
     onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
       qc.removeQueries({ queryKey: SERVICES_KEYS.facilityById(id) });

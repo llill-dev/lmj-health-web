@@ -25,7 +25,8 @@ export default function FacilityDetailsDialog({
   facility: FacilitySummary | null;
 }) {
   const detailsQuery = useFacilityById(facility?.id ?? '', open && Boolean(facility?.id));
-  const details = detailsQuery.data?.facility ?? facility;
+  const details: FacilitySummary | null =
+    (detailsQuery.data?.facility as FacilitySummary | null | undefined) ?? facility;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
