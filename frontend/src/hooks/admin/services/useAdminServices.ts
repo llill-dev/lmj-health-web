@@ -61,12 +61,22 @@ function buildQs(params: Record<string, unknown>): string {
   return qs.toString();
 }
 
+function normalizeFacilityAttribute(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 function normalizeFacilityPayload<T extends CreateFacilityBody | UpdateFacilityBody>(
   body: T,
 ): T {
   const attributes = Array.isArray(body.attributes)
     ? body.attributes
-        .map((attr) => attr.trim())
+        .map((attr) => normalizeFacilityAttribute(attr))
         .filter(Boolean)
     : body.attributes;
 
