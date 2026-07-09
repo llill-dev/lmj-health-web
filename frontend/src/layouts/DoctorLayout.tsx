@@ -61,16 +61,6 @@ export default function DoctorLayout() {
     <div className="h-dvh overflow-hidden bg-white scrollbar-hide">
       <DoctorInboxToastBridge />
       <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
-        <Sidebar
-          active={active}
-          collapsed={false}
-          mobileOpen={isMobileSidebarOpen}
-          onCloseMobile={() => setIsMobileSidebarOpen(false)}
-          onLogout={() => setLogoutConfirmOpen(true)}
-          profileName={doctorName}
-          profileEmail={doctorEmail}
-        />
-
         <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
           <div className="sticky top-0 z-40">
             <DashboardHeader
@@ -85,6 +75,16 @@ export default function DoctorLayout() {
             </Suspense>
           </div>
         </main>
+
+        <Sidebar
+          active={active}
+          collapsed={false}
+          mobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          onLogout={() => setLogoutConfirmOpen(true)}
+          profileName={doctorName}
+          profileEmail={doctorEmail}
+        />
       </div>
 
       <ConfirmActionDialog

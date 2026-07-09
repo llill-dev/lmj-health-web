@@ -57,17 +57,6 @@ export default function SecretaryLayout() {
   return (
     <div className="h-dvh overflow-hidden bg-white scrollbar-hide">
       <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
-        <Sidebar
-          role="secretary"
-          active={active}
-          collapsed={false}
-          mobileOpen={isMobileSidebarOpen}
-          onCloseMobile={() => setIsMobileSidebarOpen(false)}
-          onLogout={() => setLogoutConfirmOpen(true)}
-          profileName={secretaryName}
-          profileEmail={secretaryEmail}
-        />
-
         <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
           <div className="sticky top-0 z-40">
             <DashboardHeader
@@ -84,6 +73,17 @@ export default function SecretaryLayout() {
             </Suspense>
           </div>
         </main>
+
+        <Sidebar
+          role="secretary"
+          active={active}
+          collapsed={false}
+          mobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          onLogout={() => setLogoutConfirmOpen(true)}
+          profileName={secretaryName}
+          profileEmail={secretaryEmail}
+        />
       </div>
 
       <ConfirmActionDialog
