@@ -11,6 +11,8 @@ import {
 import { readAuthUser } from "@/lib/cookies";
 import { SecretaryRouteFallback } from "@/routes/RouteFallbacks";
 import { useAuthStore } from "@/store/authStore";
+import MotionProvider from "@/motion/MotionProvider";
+import PageTransition from "@/motion/PageTransition";
 
 export default function SecretaryLayout() {
   const location = useLocation();
@@ -62,23 +64,6 @@ export default function SecretaryLayout() {
       className="h-dvh overflow-hidden bg-white scrollbar-hide"
     >
       <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
-        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
-          <div className="sticky top-0 z-40">
-            <DashboardHeader
-              role="secretary"
-              onMenuClick={() => setIsMobileSidebarOpen(true)}
-              showMessages={false}
-              showUnreadBadge={false}
-            />
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto bg-white py-5 scrollbar-hide sm:py-6 lg:py-8">
-            <Suspense fallback={<SecretaryRouteFallback />}>
-              <Outlet />
-            </Suspense>
-          </div>
-        </main>
-
         <Sidebar
           role="secretary"
           active={active}
@@ -90,6 +75,28 @@ export default function SecretaryLayout() {
           profileName={secretaryName}
           profileEmail={secretaryEmail}
         />
+        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+          <div className="sticky top-0 z-40">
+            <DashboardHeader
+              role="secretary"
+              onMenuClick={() => setIsMobileSidebarOpen(true)}
+              showMessages={false}
+              showUnreadBadge={false}
+            />
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto bg-white py-5 scrollbar-hide sm:py-6 lg:py-8">
+            <MotionProvider>
+              <PageTransition key={pathname}>
+                <div className="mx-auto min-h-full w-full max-w-[1420px] px-4 pb-5 sm:px-6 sm:pb-6 lg:px-12">
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <Outlet />
+                  </Suspense>
+                </div>
+              </PageTransition>
+            </MotionProvider>
+          </div>
+        </main>
       </div>
 
       <ConfirmActionDialog

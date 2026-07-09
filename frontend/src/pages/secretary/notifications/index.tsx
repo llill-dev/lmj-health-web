@@ -1,37 +1,168 @@
-import { Bell, Filter, Check, X } from "lucide-react";
+import { Bell, Clock, CheckCircle, AlertCircle, Info } from "lucide-react";
+
+function SurfaceSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+      <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
+        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+          {title}
+        </h2>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function NotificationCard({
+  title,
+  message,
+  time,
+  type,
+  isRead,
+}: {
+  title: string;
+  message: string;
+  time: string;
+  type: "info" | "success" | "warning";
+  isRead?: boolean;
+}) {
+  const typeConfig = {
+    info: {
+      icon: Info,
+      bgColor: "bg-[#EAF1FF]",
+      iconColor: "text-[#3B82F6]",
+    },
+    success: {
+      icon: CheckCircle,
+      bgColor: "bg-[#EAFBF0]",
+      iconColor: "text-[#22C55E]",
+    },
+    warning: {
+      icon: AlertCircle,
+      bgColor: "bg-[#FFF2E8]",
+      iconColor: "text-[#FF6A00]",
+    },
+  };
+
+  const config = typeConfig[type];
+  const Icon = config.icon;
+
+  return (
+    <div
+      className={`flex gap-4 rounded-[16px] px-4 py-4 sm:px-6 sm:py-5 ${
+        isRead ? "bg-white" : "bg-[#F8FAFC]"
+      }`}
+    >
+      <div
+        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] ${config.bgColor} ${config.iconColor}`}
+      >
+        <Icon className="h-6 w-6" />
+      </div>
+      <div className="flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <div className="font-cairo text-[16px] font-bold text-[#243044]">
+              {title}
+            </div>
+            <div className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              {message}
+            </div>
+          </div>
+          {!isRead && (
+            <div className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+          )}
+        </div>
+        <div className="mt-2 flex items-center gap-2 font-cairo text-[13px] font-semibold text-[#98A2B3]">
+          <Clock className="h-3 w-3" />
+          {time}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function SecretaryNotificationsPage() {
+  const notifications = [
+    {
+      id: 1,
+      title: "موعد جديد",
+      message: "تم حجز موعد جديد للمريض سارة علي",
+      time: "منذ 5 دقائق",
+      type: "success" as const,
+      isRead: false,
+    },
+    {
+      id: 2,
+      title: "تذكير بموعد",
+      message: "موعد المريض أحمد نور بعد 30 دقيقة",
+      time: "منذ ساعة",
+      type: "warning" as const,
+      isRead: false,
+    },
+    {
+      id: 3,
+      title: "تحديث النظام",
+      message: "تم تحديث نظام المواعيد بنجاح",
+      time: "منذ يومين",
+      type: "info" as const,
+      isRead: true,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-cairo text-2xl font-bold text-[#0f172a]">
-            الإشعارات
-          </h1>
-          <p className="font-cairo text-sm font-medium text-[#64748b] mt-1">
-            إدارة الإشعارات
-          </p>
-        </div>
-      </div>
+    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+      <SurfaceSection title="الإشعارات">
+        <div className="px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="text-right">
+              <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
+                الإشعارات
+              </h3>
+              <p className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
+                {notifications.length} إشعار
+              </p>
+            </div>
+            <button className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]">
+              تحديد الكل كمقروء
+            </button>
+          </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button className="flex items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 font-cairo text-sm font-bold text-[#0f172a] shadow-sm transition hover:bg-gray-50">
-          <Filter className="h-4 w-4" />
-          تصفية
-        </button>
-      </div>
-
-      <div className="rounded-xl border border-[#e2e8f0] bg-white p-12 shadow-sm">
-        <div className="flex flex-col items-center justify-center text-center">
-          <Bell className="h-16 w-16 text-[#cbd5e1] mb-4" />
-          <h3 className="font-cairo text-lg font-bold text-[#0f172a] mb-2">
-            لا توجد إشعارات
-          </h3>
-          <p className="font-cairo text-sm font-medium text-[#64748b]">
-            سيتم عرض الإشعارات الجديدة هنا
-          </p>
+          {notifications.length === 0 ? (
+            <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-12">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#E9F7F6] text-primary">
+                <Bell className="h-10 w-10" />
+              </div>
+              <div className="text-center">
+                <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
+                  لا توجد إشعارات
+                </h3>
+                <p className="mt-2 font-cairo text-[14px] font-semibold text-[#98A2B3]">
+                  سيتم عرض الإشعارات الجديدة هنا
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notifications.map((notification) => (
+                <NotificationCard
+                  key={notification.id}
+                  title={notification.title}
+                  message={notification.message}
+                  time={notification.time}
+                  type={notification.type}
+                  isRead={notification.isRead}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      </SurfaceSection>
     </div>
   );
 }

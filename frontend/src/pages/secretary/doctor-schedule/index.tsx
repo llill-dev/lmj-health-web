@@ -1,154 +1,111 @@
+import { memo } from "react";
 import { Calendar, Clock, Check, X } from "lucide-react";
 
-export default function SecretaryDoctorSchedulePage() {
+function SurfaceSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-cairo text-2xl font-bold text-[#0f172a]">
-            جدول عمل الطبيب
-          </h1>
-          <p className="font-cairo text-sm font-medium text-[#64748b] mt-1">
-            عرض وإدارة جدول عمل الطبيب
-          </p>
-        </div>
-      </div>
+    <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+      <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
+        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+          {title}
+        </h2>
+      </header>
+      {children}
+    </section>
+  );
+}
 
-      <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
-        <div className="mb-4">
-          <h3 className="font-cairo text-lg font-bold text-[#0f172a]">
-            جدول الأسبوع الحالي
-          </h3>
+function ScheduleDayCard({
+  day,
+  timeRange,
+  isAvailable,
+  isHoliday,
+}: {
+  day: string;
+  timeRange: string;
+  isAvailable: boolean;
+  isHoliday?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-[16px] bg-[#F8FAFC] px-4 py-4 sm:px-6 sm:py-5">
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-[12px] ${
+            isHoliday
+              ? "bg-[#FEE2E2] text-[#B42318]"
+              : "bg-[#E9F7F6] text-primary"
+          }`}
+        >
+          {isHoliday ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Calendar className="h-6 w-6" />
+          )}
         </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  السبت
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  09:00 - 17:00
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-              متاح
-            </span>
+        <div className="text-right">
+          <div className="font-cairo text-[18px] font-black text-[#243044]">
+            {day}
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  الأحد
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  09:00 - 17:00
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-              متاح
-            </span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  الاثنين
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  09:00 - 17:00
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-              متاح
-            </span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  الثلاثاء
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  09:00 - 17:00
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-              متاح
-            </span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  الأربعاء
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  09:00 - 17:00
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-              متاح
-            </span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  الخميس
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  09:00 - 17:00
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-              متاح
-            </span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
-                <X className="h-5 w-5 text-red-600" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  الجمعة
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  عطلة
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-red-100 px-3 py-1 font-cairo text-xs font-bold text-red-700">
-              مغلق
-            </span>
+          <div className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
+            {isHoliday ? "عطلة" : timeRange}
           </div>
         </div>
       </div>
+      <span
+        className={`inline-flex rounded-[8px] px-3 py-1.5 font-cairo text-[13px] font-black ${
+          isHoliday
+            ? "bg-[#FEE2E2] text-[#B42318]"
+            : "bg-[#EAFBF0] text-[#22C55E]"
+        }`}
+      >
+        {isHoliday ? "مغلق" : "متاح"}
+      </span>
+    </div>
+  );
+}
+
+export default function SecretaryDoctorSchedulePage() {
+  const scheduleDays = [
+    { day: "السبت", timeRange: "09:00 - 17:00", isAvailable: true },
+    { day: "الأحد", timeRange: "09:00 - 17:00", isAvailable: true },
+    { day: "الاثنين", timeRange: "09:00 - 17:00", isAvailable: true },
+    { day: "الثلاثاء", timeRange: "09:00 - 17:00", isAvailable: true },
+    { day: "الأربعاء", timeRange: "09:00 - 17:00", isAvailable: true },
+    { day: "الخميس", timeRange: "09:00 - 17:00", isAvailable: true },
+    { day: "الجمعة", timeRange: "—", isAvailable: false, isHoliday: true },
+  ];
+
+  return (
+    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+      <SurfaceSection title="جدول عمل الطبيب">
+        <div className="px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+          <div className="mb-6 text-right">
+            <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
+              جدول الأسبوع الحالي
+            </h3>
+            <p className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              د. خالد عبد الله
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {scheduleDays.map((schedule) => (
+              <ScheduleDayCard
+                key={schedule.day}
+                day={schedule.day}
+                timeRange={schedule.timeRange}
+                isAvailable={schedule.isAvailable}
+                isHoliday={schedule.isHoliday}
+              />
+            ))}
+          </div>
+        </div>
+      </SurfaceSection>
     </div>
   );
 }
