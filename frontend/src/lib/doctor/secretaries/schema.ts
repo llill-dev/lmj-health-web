@@ -6,6 +6,7 @@ import {
 } from "@/components/auth/signUp/signup-schemas";
 import { isValidAuthPhoneIdentifier } from "@/lib/phone/normalizeAuthPhone";
 import { ASSIGNABLE_SECRETARY_PERMISSIONS } from "@/lib/doctor/secretaries/permissionsUi";
+import { PHONE_DIAL_CODE_OPTIONS } from "@/lib/phone/dialCodes";
 
 const assignablePermissionSet = new Set<string>(
   ASSIGNABLE_SECRETARY_PERMISSIONS,
@@ -23,21 +24,35 @@ const fullNameSchema = z
   .min(2, "الاسم الكامل مطلوب (حرفان على الأقل).")
   .max(120, "الاسم الكامل طويل جداً.");
 
-const phoneSchema = z
+const phoneLocalSchema = z
   .string()
   .trim()
   .refine(
-    (value) => !value || value.length <= 20,
-    "رقم الهاتف طويل جداً. الحد الأقصى 20 حرف.",
+    (value) => !value || value.length <= 15,
+    "رقم الهاتف طويل جداً. الحد الأقصى 15 رقم.",
   )
   .refine(
-    (value) => !value || value.length >= 8,
-    "رقم الهاتف قصير جداً. الحد الأدنى 8 أرقام.",
+    (value) => !value || value.length >= 6,
+    "رقم الهاتف قصير جداً. الحد الأدنى 6 أرقام.",
   )
   .refine(
-    (value) => !value || isValidAuthPhoneIdentifier(value),
-    "صيغة رقم الهاتف غير صحيحة. استخدم الصيغة الدولية مثل +963912345678.",
+    (value) => !value || /^\d+$/.test(value),
+    "رقم الهاتف يجب أن يحتوي على أرقام فقط.",
   );
+
+const phoneCountryCodeSchema = z
+  .string()
+  .refine(
+    (value) => PHONE_DIAL_CODE_OPTIONS.some((opt) => opt.value === value),
+    "اختر رمز الدولة.",
+  );
+
+const phoneSchema = z
+  .object({
+    countryCode: phoneCountryCodeSchema,
+    localNumber: phoneLocalSchema,
+  })
+  .optional();
 
 const permissionsSchema = z
   .array(z.string())
@@ -87,7 +102,10 @@ export const DEFAULT_SECRETARY_CREATE_FORM: DoctorSecretaryCreateFormValues = {
   fullName: "",
   email: "",
   password: "",
-  phone: "",
+  phone: {
+    countryCode: "+963",
+    localNumber: "",
+  },
   gender: "Female",
   permissions: ["appointments:view", "patients:view"],
 };

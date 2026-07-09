@@ -36,7 +36,6 @@ import type {
   DoctorSecretary,
   SecretaryStatusFilter,
 } from "@/lib/doctor/secretaries/types";
-import { normalizeAuthPhoneIdentifier } from "@/lib/phone/normalizeAuthPhone";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { cn } from "@/lib/utils/utils";
 
@@ -112,8 +111,8 @@ export default function DoctorSecretariesPage() {
       return;
     }
 
-    const phone = input.phone.trim()
-      ? normalizeAuthPhoneIdentifier(input.phone.trim())
+    const phone = input.phone
+      ? `${input.phone.countryCode}${input.phone.localNumber}`
       : undefined;
 
     try {
@@ -143,8 +142,8 @@ export default function DoctorSecretariesPage() {
     const secretaryId = getSecretaryId(editTarget);
     if (!secretaryId) return;
 
-    const phone = input.phone.trim()
-      ? normalizeAuthPhoneIdentifier(input.phone.trim())
+    const phone = input.phone
+      ? `${input.phone.countryCode}${input.phone.localNumber}`
       : undefined;
 
     try {

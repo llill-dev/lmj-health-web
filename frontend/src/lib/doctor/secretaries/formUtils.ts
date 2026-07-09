@@ -1,12 +1,16 @@
-import { ASSIGNABLE_SECRETARY_PERMISSIONS } from '@/lib/doctor/secretaries/permissionsUi';
-import type { DoctorSecretary, DoctorSecretaryUser } from '@/lib/doctor/secretaries/types';
+import { ASSIGNABLE_SECRETARY_PERMISSIONS } from "@/lib/doctor/secretaries/permissionsUi";
+import type {
+  DoctorSecretary,
+  DoctorSecretaryUser,
+} from "@/lib/doctor/secretaries/types";
+import { PHONE_DIAL_CODES } from "@/lib/phone/dialCodes";
 
-export type SecretaryGender = 'Male' | 'Female';
+export type SecretaryGender = "Male" | "Female";
 
 export function normalizeSecretaryGender(value?: string): SecretaryGender {
   const normalized = value?.trim().toLowerCase();
-  if (normalized === 'male' || normalized === 'm') return 'Male';
-  return 'Female';
+  if (normalized === "male" || normalized === "m") return "Male";
+  return "Female";
 }
 
 export function filterAssignablePermissions(permissions: string[] = []) {
@@ -14,13 +18,43 @@ export function filterAssignablePermissions(permissions: string[] = []) {
   return permissions.filter((permission) => allowed.has(permission));
 }
 
-function readString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+function parsePhoneNumber(phone: string): {
+  countryCode: string;
+  localNumber: string;
+} {
+  const trimmed = phone.trim();
+  if (!trimmed) {
+    return { countryCode: "+963", localNumber: "" };
+  }
+
+  // Try to find matching country code
+  const sortedCodes = [...PHONE_DIAL_CODES].sort((a, b) => b.length - a.length);
+  for (const code of sortedCodes) {
+    if (trimmed.startsWith(code) && trimmed.length > code.length) {
+      return {
+        countryCode: code,
+        localNumber: trimmed.slice(code.length),
+      };
+    }
+  }
+
+  // Default to Syria if no match
+  if (/^\d+$/.test(trimmed)) {
+    return { countryCode: "+963", localNumber: trimmed };
+  }
+
+  return { countryCode: "+963", localNumber: "" };
 }
 
-function resolveSecretaryUser(raw: Record<string, unknown>): DoctorSecretaryUser | undefined {
+function readString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function resolveSecretaryUser(
+  raw: Record<string, unknown>,
+): DoctorSecretaryUser | undefined {
   const nestedUser = raw.user;
-  if (nestedUser && typeof nestedUser === 'object') {
+  if (nestedUser && typeof nestedUser === "object") {
     const userRecord = nestedUser as Record<string, unknown>;
     const fullName = readString(userRecord.fullName);
     if (fullName) {
@@ -37,7 +71,7 @@ function resolveSecretaryUser(raw: Record<string, unknown>): DoctorSecretaryUser
   }
 
   const populatedUserId = raw.userId;
-  if (populatedUserId && typeof populatedUserId === 'object') {
+  if (populatedUserId && typeof populatedUserId === "object") {
     const userRecord = populatedUserId as Record<string, unknown>;
     const fullName = readString(userRecord.fullName);
     if (fullName) {
@@ -68,7 +102,7 @@ function resolveSecretaryUser(raw: Record<string, unknown>): DoctorSecretaryUser
 
 /** Normalizes list/detail/create API shapes into one secretary model. */
 export function normalizeDoctorSecretary(raw: unknown): DoctorSecretary | null {
-  if (!raw || typeof raw !== 'object') return null;
+  if (!raw || typeof raw !== "object") return null;
 
   const record = raw as Record<string, unknown>;
   const id = readString(record._id) ?? readString(record.id);
@@ -76,19 +110,26 @@ export function normalizeDoctorSecretary(raw: unknown): DoctorSecretary | null {
 
   const user = resolveSecretaryUser(record);
   const userId =
-    typeof record.userId === 'string'
+    typeof record.userId === "string"
       ? record.userId
-      : user?._id ?? readString((record.userId as Record<string, unknown> | undefined)?._id);
+      : (user?._id ??
+        readString(
+          (record.userId as Record<string, unknown> | undefined)?._id,
+        ));
 
   return {
     _id: id,
     id,
     userId,
     permissions: Array.isArray(record.permissions)
-      ? record.permissions.filter((item): item is string => typeof item === 'string')
+      ? record.permissions.filter(
+          (item): item is string => typeof item === "string",
+        )
       : undefined,
     assignedDoctor:
-      typeof record.assignedDoctor === 'string' ? record.assignedDoctor : undefined,
+      typeof record.assignedDoctor === "string"
+        ? record.assignedDoctor
+        : undefined,
     user,
     fullName: user?.fullName ?? readString(record.fullName),
     email: user?.email ?? readString(record.email),
@@ -97,16 +138,20 @@ export function normalizeDoctorSecretary(raw: unknown): DoctorSecretary | null {
   };
 }
 
-export function getSecretaryId(secretary?: DoctorSecretary | null): string | null {
+export function getSecretaryId(
+  secretary?: DoctorSecretary | null,
+): string | null {
   if (!secretary) return null;
   return secretary._id ?? secretary.id ?? null;
 }
 
 export function resolveSecretaryFormValues(secretary: DoctorSecretary) {
   const fullName =
-    secretary.user?.fullName?.trim() ?? secretary.fullName?.trim() ?? '';
-  const email = secretary.user?.email?.trim() ?? secretary.email?.trim() ?? '';
-  const phone = secretary.user?.phone?.trim() ?? secretary.phone?.trim() ?? '';
+    secretary.user?.fullName?.trim() ?? secretary.fullName?.trim() ?? "";
+  const email = secretary.user?.email?.trim() ?? secretary.email?.trim() ?? "";
+  const phoneString =
+    secretary.user?.phone?.trim() ?? secretary.phone?.trim() ?? "";
+  const phone = parsePhoneNumber(phoneString);
   const gender = normalizeSecretaryGender(
     secretary.user?.gender ?? secretary.gender,
   );

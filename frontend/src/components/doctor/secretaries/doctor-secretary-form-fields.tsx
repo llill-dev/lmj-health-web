@@ -8,6 +8,7 @@ import {
 } from "@/lib/doctor/secretaries/permissionsUi";
 import type { SecretaryGender } from "@/lib/doctor/secretaries/formUtils";
 import type { SecretaryFormFieldErrors } from "@/lib/doctor/secretaries/schema";
+import { PHONE_DIAL_CODE_OPTIONS } from "@/lib/phone/dialCodes";
 import { cn } from "@/lib/utils/utils";
 
 const inputClass =
@@ -38,8 +39,10 @@ type SecretaryFormFieldsProps = {
   onPasswordChange?: (value: string) => void;
   showPassword?: boolean;
   onToggleShowPassword?: () => void;
-  phone: string;
-  onPhoneChange: (value: string) => void;
+  phone: { countryCode: string; localNumber: string } | undefined;
+  onPhoneChange: (
+    value: { countryCode: string; localNumber: string } | undefined,
+  ) => void;
   gender: SecretaryGender;
   onGenderChange: (value: SecretaryGender) => void;
   permissions: string[];
@@ -160,19 +163,42 @@ export function DoctorSecretaryFormFields({
           <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
             الهاتف
           </label>
-          <input
-            value={phone}
-            onChange={(e) => onPhoneChange(e.target.value)}
-            placeholder="+963912345678"
-            className={cn(
-              inputClass,
-              fieldErrors?.phone ? inputErrorClass : "border-[#E5E7EB]",
-            )}
-          />
+          <div className="flex gap-2">
+            <StyledSelect
+              value={phone?.countryCode ?? "+963"}
+              onChange={(value) =>
+                onPhoneChange({
+                  countryCode: value,
+                  localNumber: phone?.localNumber ?? "",
+                })
+              }
+              options={[...PHONE_DIAL_CODE_OPTIONS]}
+              size="sm"
+              tone="muted"
+              className="w-[140px]"
+              listboxAriaLabel="اختيار رمز الدولة"
+              error={Boolean(fieldErrors?.phone)}
+            />
+            <input
+              value={phone?.localNumber ?? ""}
+              onChange={(e) =>
+                onPhoneChange({
+                  countryCode: phone?.countryCode ?? "+963",
+                  localNumber: e.target.value,
+                })
+              }
+              placeholder="912345678"
+              className={cn(
+                inputClass,
+                "flex-1",
+                fieldErrors?.phone ? inputErrorClass : "border-[#E5E7EB]",
+              )}
+            />
+          </div>
           <FieldError message={fieldErrors?.phone} />
           {!fieldErrors?.phone && (
             <p className="mt-1.5 text-start font-cairo text-[11px] font-medium text-[#667085]">
-              استخدم الصيغة الدولية مثل +963912345678
+              أدخل الرقم المحلي (بدون رمز الدولة)
             </p>
           )}
         </div>
