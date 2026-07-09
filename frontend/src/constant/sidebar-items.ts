@@ -80,6 +80,20 @@ export type AdminSidebarItemId =
   | "complaints"
   | "facilities";
 
+export type SecretarySidebarItemId =
+  | "dashboard"
+  | "patients"
+  | "create-temporary-patient"
+  | "book-appointment"
+  | "doctor-schedule"
+  | "patient-files"
+  | "doctors-directory"
+  | "appointments"
+  | "appointment-suggestions"
+  | "waitlist"
+  | "profile"
+  | "notifications";
+
 export const sidebarItems: Array<{
   id: string;
   path: SidebarItemId;
@@ -362,5 +376,86 @@ export const adminSidebarItems: Array<{
     path: "settings",
     label: "الإعدادات",
     icon: Settings,
+  },
+];
+
+export const secretarySidebarItems: Array<{
+  id: string;
+  path: SecretarySidebarItemId;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  badge?: number;
+}> = [
+  {
+    id: "dashboard",
+    path: "dashboard",
+    label: "لوحة التحكم",
+    icon: LayoutGrid,
+  },
+  {
+    id: "patients",
+    path: "patients",
+    label: "المرضى",
+    icon: Users,
+  },
+  {
+    id: "create-temporary-patient",
+    path: "create-temporary-patient",
+    label: "إنشاء مريض مؤقت",
+    icon: UserCog,
+  },
+  {
+    id: "book-appointment",
+    path: "book-appointment",
+    label: "حجز موعد",
+    icon: CalendarDays,
+  },
+  {
+    id: "doctor-schedule",
+    path: "doctor-schedule",
+    label: "جدول عمل الطبيب",
+    icon: Activity,
+  },
+  {
+    id: "patient-files",
+    path: "patient-files",
+    label: "ملفات المرضى",
+    icon: FileText,
+  },
+  {
+    id: "doctors-directory",
+    path: "doctors-directory",
+    label: "دليل الأطباء",
+    icon: Stethoscope,
+  },
+  {
+    id: "appointments",
+    path: "appointments",
+    label: "المواعيد",
+    icon: CalendarDays,
+  },
+  {
+    id: "appointment-suggestions",
+    path: "appointment-suggestions",
+    label: "اقتراحات المواعيد",
+    icon: Bell,
+  },
+  {
+    id: "waitlist",
+    path: "waitlist",
+    label: "قائمة الانتظار",
+    icon: Hourglass,
+  },
+  {
+    id: "profile",
+    path: "profile",
+    label: "الملف الشخصي",
+    icon: Settings,
+  },
+  {
+    id: "notifications",
+    path: "notifications",
+    label: "الإشعارات",
+    icon: Bell,
   },
 ];

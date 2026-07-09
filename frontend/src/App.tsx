@@ -3,6 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import DoctorLayout from "@/layout";
 import AdminLayout from "@/layouts/AdminLayout";
+import SecretaryLayout from "@/layouts/SecretaryLayout";
 import { PageTransition } from "@/motion";
 import ProtectedRoute, {
   GuestRoute,
@@ -18,11 +19,13 @@ import {
   DoctorSummaryRouteFallback,
   DoctorWorkspaceRouteFallback,
   PublicRouteFallback,
+  SecretaryRouteFallback,
 } from "@/routes/RouteFallbacks";
 import * as AdminPages from "@/routes/lazy-pages/admin-pages";
 import * as DoctorPages from "@/routes/lazy-pages/doctor-pages";
 import * as MiscPages from "@/routes/lazy-pages/misc-pages";
 import * as PublicPages from "@/routes/lazy-pages/public-pages";
+import * as SecretaryPages from "@/routes/lazy-pages/secretary-pages";
 
 function PublicPagesLayout() {
   const location = useLocation();
@@ -504,6 +507,108 @@ export default function App() {
         </Route>
 
         <Route path="/secretaries" element={<LegacySecretariesRedirect />} />
+
+        <Route element={<ProtectedRoute allowedRoles={["secretary"]} />}>
+          <Route path="/secretary" element={<SecretaryLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route
+              path="dashboard"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryDashboardPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="patients"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryPatientsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="create-temporary-patient"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryCreateTemporaryPatientPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="book-appointment"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryBookAppointmentPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="doctor-schedule"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryDoctorSchedulePage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="patient-files"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryPatientFilesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="doctors-directory"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryDoctorsDirectoryPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="appointments"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryAppointmentsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="appointment-suggestions"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryAppointmentSuggestionsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="waitlist"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryWaitlistPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="profile"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryProfilePage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="notifications"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <SecretaryPages.SecretaryNotificationsPage />
+                </Suspense>
+              }
+            />
+          </Route>
+        </Route>
 
         <Route path="*" element={<MiscPages.NotFoundPage />} />
       </Routes>

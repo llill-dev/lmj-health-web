@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import AuthBackground from "@/components/auth/AuthBackground";
-import { StatCardSkeleton, TableRowSkeleton } from "@/components/admin/analytics/AnalyticsSkeletons";
+import {
+  StatCardSkeleton,
+  TableRowSkeleton,
+} from "@/components/admin/analytics/AnalyticsSkeletons";
 import {
   DoctorDashboardSkeleton,
   DoctorInlineDetailsSkeleton,
@@ -99,4 +102,8 @@ export function AdminRouteFallback() {
       </div>
     </AdminShellFallback>
   );
+}
+
+export function SecretaryRouteFallback() {
+  return <DoctorListPageSkeleton withStats />;
 }
