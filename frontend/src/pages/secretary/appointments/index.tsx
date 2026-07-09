@@ -1,27 +1,25 @@
-import { Search, Filter, Clock, UserPlus, Phone, Calendar } from "lucide-react";
+import { Search, Filter, Calendar, Clock, CheckCircle, XCircle, MoreHorizontal } from "lucide-react";
 
-export default function SecretaryWaitlistPage() {
+export default function SecretaryAppointmentsPage() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-cairo text-2xl font-bold text-[#0f172a]">
-            قائمة الانتظار
+            المواعيد
           </h1>
           <p className="font-cairo text-sm font-medium text-[#64748b] mt-1">
-            إدارة المرضى في قائمة الانتظار
+            إدارة مواعيد المرضى
           </p>
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-1 min-w-[200px] items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 shadow-sm">
           <Search className="h-4 w-4 text-[#64748b]" />
           <input
             type="text"
-            placeholder="بحث في قائمة الانتظار..."
+            placeholder="بحث عن موعد..."
             className="flex-1 bg-transparent font-cairo text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none"
           />
         </div>
@@ -31,7 +29,6 @@ export default function SecretaryWaitlistPage() {
         </button>
       </div>
 
-      {/* Waitlist Table */}
       <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -41,13 +38,13 @@ export default function SecretaryWaitlistPage() {
                   المريض
                 </th>
                 <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
-                  رقم الهاتف
+                  التاريخ
                 </th>
                 <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
-                  وقت الانتظار
+                  الوقت
                 </th>
                 <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
-                  الأولوية
+                  الحالة
                 </th>
                 <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
                   الإجراءات
@@ -73,9 +70,9 @@ export default function SecretaryWaitlistPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-[#64748b]" />
+                    <Calendar className="h-4 w-4 text-[#64748b]" />
                     <span className="font-cairo text-sm text-[#0f172a]">
-                      +966506789012
+                      2024-01-15
                     </span>
                   </div>
                 </td>
@@ -83,18 +80,18 @@ export default function SecretaryWaitlistPage() {
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-[#64748b]" />
                     <span className="font-cairo text-sm text-[#0f172a]">
-                      15 دقيقة
+                      09:00
                     </span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="rounded-full bg-red-100 px-3 py-1 font-cairo text-xs font-bold text-red-700">
-                    عالية
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
+                    مجدول
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
-                    حجز موعد
+                    عرض
                   </button>
                 </td>
               </tr>
@@ -116,9 +113,9 @@ export default function SecretaryWaitlistPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-[#64748b]" />
+                    <Calendar className="h-4 w-4 text-[#64748b]" />
                     <span className="font-cairo text-sm text-[#0f172a]">
-                      +966598765432
+                      2024-01-15
                     </span>
                   </div>
                 </td>
@@ -126,18 +123,18 @@ export default function SecretaryWaitlistPage() {
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-[#64748b]" />
                     <span className="font-cairo text-sm text-[#0f172a]">
-                      30 دقيقة
+                      10:30
                     </span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <span className="rounded-full bg-orange-100 px-3 py-1 font-cairo text-xs font-bold text-orange-700">
-                    متوسطة
+                    مؤجل
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
-                    حجز موعد
+                    عرض
                   </button>
                 </td>
               </tr>
@@ -159,9 +156,9 @@ export default function SecretaryWaitlistPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-[#64748b]" />
+                    <Calendar className="h-4 w-4 text-[#64748b]" />
                     <span className="font-cairo text-sm text-[#0f172a]">
-                      +966511223344
+                      2024-01-15
                     </span>
                   </div>
                 </td>
@@ -169,18 +166,18 @@ export default function SecretaryWaitlistPage() {
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-[#64748b]" />
                     <span className="font-cairo text-sm text-[#0f172a]">
-                      45 دقيقة
+                      11:00
                     </span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-                    منخفضة
+                  <span className="rounded-full bg-blue-100 px-3 py-1 font-cairo text-xs font-bold text-blue-700">
+                    مكتمل
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
-                    حجز موعد
+                    عرض
                   </button>
                 </td>
               </tr>

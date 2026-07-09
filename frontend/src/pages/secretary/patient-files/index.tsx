@@ -1,16 +1,8 @@
-import {
-  Search,
-  Filter,
-  FileText,
-  Calendar,
-  Download,
-  Eye,
-} from "lucide-react";
+import { Search, Filter, FileText, Calendar, Download, Eye } from "lucide-react";
 
 export default function SecretaryPatientFilesPage() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-cairo text-2xl font-bold text-[#0f172a]">
@@ -22,7 +14,6 @@ export default function SecretaryPatientFilesPage() {
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-1 min-w-[200px] items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 shadow-sm">
           <Search className="h-4 w-4 text-[#64748b]" />
@@ -38,7 +29,6 @@ export default function SecretaryPatientFilesPage() {
         </button>
       </div>
 
-      {/* Files Table */}
       <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">

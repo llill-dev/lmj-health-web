@@ -1,17 +1,8 @@
-import {
-  Search,
-  Filter,
-  Stethoscope,
-  Star,
-  MapPin,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { Search, Filter, Stethoscope, Star, MapPin, Phone, Mail } from "lucide-react";
 
 export default function SecretaryDoctorsDirectoryPage() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-cairo text-2xl font-bold text-[#0f172a]">
@@ -23,7 +14,6 @@ export default function SecretaryDoctorsDirectoryPage() {
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-1 min-w-[200px] items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 shadow-sm">
           <Search className="h-4 w-4 text-[#64748b]" />
@@ -39,9 +29,7 @@ export default function SecretaryDoctorsDirectoryPage() {
         </button>
       </div>
 
-      {/* Doctors Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Doctor Card 1 */}
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
@@ -81,7 +69,6 @@ export default function SecretaryDoctorsDirectoryPage() {
           </div>
         </div>
 
-        {/* Doctor Card 2 */}
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
@@ -121,7 +108,6 @@ export default function SecretaryDoctorsDirectoryPage() {
           </div>
         </div>
 
-        {/* Doctor Card 3 */}
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">

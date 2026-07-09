@@ -3,7 +3,6 @@ import { Calendar, Clock, Check, X } from "lucide-react";
 export default function SecretaryAppointmentSuggestionsPage() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-cairo text-2xl font-bold text-[#0f172a]">
@@ -15,7 +14,6 @@ export default function SecretaryAppointmentSuggestionsPage() {
         </div>
       </div>
 
-      {/* Suggestions Card */}
       <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
         <div className="mb-4">
           <h3 className="font-cairo text-lg font-bold text-[#0f172a]">
