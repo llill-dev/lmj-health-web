@@ -19,6 +19,7 @@ export default function SecretaryLayout() {
 
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const authUser = readAuthUser();
@@ -55,7 +56,11 @@ export default function SecretaryLayout() {
     )?.path ?? "dashboard";
 
   return (
-    <div className="h-dvh overflow-hidden bg-white scrollbar-hide">
+    <div
+      dir="rtl"
+      lang="ar"
+      className="h-dvh overflow-hidden bg-white scrollbar-hide"
+    >
       <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
         <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
           <div className="sticky top-0 z-40">
@@ -77,8 +82,9 @@ export default function SecretaryLayout() {
         <Sidebar
           role="secretary"
           active={active}
-          collapsed={false}
+          collapsed={isSidebarCollapsed}
           mobileOpen={isMobileSidebarOpen}
+          onToggleCollapse={() => setIsSidebarCollapsed((v) => !v)}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
           onLogout={() => setLogoutConfirmOpen(true)}
           profileName={secretaryName}
