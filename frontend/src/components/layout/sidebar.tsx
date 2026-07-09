@@ -7,7 +7,9 @@ import { Link } from "react-router-dom";
 import {
   adminSidebarItems,
   sidebarItems,
+  secretarySidebarItems,
   type AdminSidebarItemId,
+  type SecretarySidebarItemId,
   type SidebarItemId,
 } from "@/constant/sidebar-items";
 import { useAdminBrandingForSidebar } from "@/contexts/AdminAppSettingsContext";
@@ -24,8 +26,8 @@ export default function Sidebar({
   profileEmail,
   profilePhotoUrl,
 }: {
-  active?: SidebarItemId | AdminSidebarItemId;
-  role?: "doctor" | "admin";
+  active?: SidebarItemId | AdminSidebarItemId | SecretarySidebarItemId;
+  role?: "doctor" | "admin" | "secretary";
   collapsed?: boolean;
   mobileOpen?: boolean;
   onToggleCollapse?: () => void;
@@ -36,7 +38,9 @@ export default function Sidebar({
   profilePhotoUrl?: string | null;
 }) {
   const navItems = useMemo(() => {
-    return role === "admin" ? adminSidebarItems : sidebarItems;
+    if (role === "admin") return adminSidebarItems;
+    if (role === "secretary") return secretarySidebarItems;
+    return sidebarItems;
   }, [role]);
 
   const adminBranding = useAdminBrandingForSidebar();
@@ -47,16 +51,26 @@ export default function Sidebar({
   const brandSubtitle =
     role === "admin"
       ? adminBranding.appDescription.trim() || "بوابة الإدارة"
-      : "بوابة الطبيب";
+      : role === "secretary"
+        ? "بوابة السكرتير"
+        : "بوابة الطبيب";
 
-  const basePath = role === "admin" ? "/admin" : "/doctor";
-  const doctorDisplayName = profileName?.trim() || "الطبيب";
-  const doctorEmail = profileEmail?.trim() || "—";
-  const doctorInitial = doctorDisplayName.charAt(0).toUpperCase() || "د";
+  const basePath =
+    role === "admin"
+      ? "/admin"
+      : role === "secretary"
+        ? "/secretary"
+        : "/doctor";
+  const displayName =
+    profileName?.trim() || (role === "secretary" ? "السكرتير" : "الطبيب");
+  const displayEmail = profileEmail?.trim() || "—";
+  const displayInitial =
+    displayName.charAt(0).toUpperCase() || (role === "secretary" ? "س" : "د");
 
   const resolvedActive =
-    (active as (SidebarItemId | AdminSidebarItemId) | undefined) ??
-    (role === "admin" ? "overview" : "dashboard");
+    (active as
+      | (SidebarItemId | AdminSidebarItemId | SecretarySidebarItemId)
+      | undefined) ?? (role === "admin" ? "overview" : "dashboard");
 
   const desktopWidthClass = collapsed ? "lg:w-[88px]" : "lg:w-[320px]";
   const expanded = !collapsed || mobileOpen;
@@ -173,23 +187,25 @@ export default function Sidebar({
                       ) : role === "doctor" && profilePhotoUrl ? (
                         <img
                           src={profilePhotoUrl}
-                          alt={doctorDisplayName}
+                          alt={displayName}
                           className="h-full w-full object-cover"
                         />
                       ) : (
                         <span className="font-cairo text-[18px] font-extrabold leading-none">
                           {role === "admin"
                             ? adminBranding.appName.trim().charAt(0) || "م"
-                            : doctorInitial}
+                            : displayInitial}
                         </span>
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]">
-                        {role === "admin" ? "المشرف" : doctorDisplayName}
+                        {role === "admin" ? "المشرف" : displayName}
                       </div>
                       <div className="mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
-                        {role === "admin" ? "admin@lmjhealth.com" : doctorEmail}
+                        {role === "admin"
+                          ? "admin@lmjhealth.com"
+                          : displayEmail}
                       </div>
                     </div>
                   </div>
