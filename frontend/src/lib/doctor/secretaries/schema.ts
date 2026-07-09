@@ -1,40 +1,50 @@
-import { z } from 'zod';
+import { z } from "zod";
 import {
   SIGNUP_EMAIL_INVALID_MESSAGE_AR,
   SIGNUP_EMAIL_REQUIRED_MESSAGE_AR,
   signupPasswordSchema,
-} from '@/components/auth/signUp/signup-schemas';
-import { isValidAuthPhoneIdentifier } from '@/lib/phone/normalizeAuthPhone';
-import { ASSIGNABLE_SECRETARY_PERMISSIONS } from '@/lib/doctor/secretaries/permissionsUi';
+} from "@/components/auth/signUp/signup-schemas";
+import { isValidAuthPhoneIdentifier } from "@/lib/phone/normalizeAuthPhone";
+import { ASSIGNABLE_SECRETARY_PERMISSIONS } from "@/lib/doctor/secretaries/permissionsUi";
 
-const assignablePermissionSet = new Set<string>(ASSIGNABLE_SECRETARY_PERMISSIONS);
+const assignablePermissionSet = new Set<string>(
+  ASSIGNABLE_SECRETARY_PERMISSIONS,
+);
 
 export const MAX_DOCTOR_SECRETARIES = 3;
 
-export const secretaryGenderSchema = z.enum(['Male', 'Female'], {
-  message: 'يجب اختيار الجنس.',
+export const secretaryGenderSchema = z.enum(["Male", "Female"], {
+  message: "يجب اختيار الجنس.",
 });
 
 const fullNameSchema = z
   .string()
   .trim()
-  .min(2, 'الاسم الكامل مطلوب (حرفان على الأقل).')
-  .max(120, 'الاسم الكامل طويل جداً.');
+  .min(2, "الاسم الكامل مطلوب (حرفان على الأقل).")
+  .max(120, "الاسم الكامل طويل جداً.");
 
 const phoneSchema = z
   .string()
   .trim()
   .refine(
+    (value) => !value || value.length <= 20,
+    "رقم الهاتف طويل جداً. الحد الأقصى 20 حرف.",
+  )
+  .refine(
+    (value) => !value || value.length >= 8,
+    "رقم الهاتف قصير جداً. الحد الأدنى 8 أرقام.",
+  )
+  .refine(
     (value) => !value || isValidAuthPhoneIdentifier(value),
-    'أدخل رقم هاتف بصيغة دولية صحيحة مثل +963912345678.',
+    "صيغة رقم الهاتف غير صحيحة. استخدم الصيغة الدولية مثل +963912345678.",
   );
 
 const permissionsSchema = z
   .array(z.string())
-  .min(1, 'اختر صلاحية واحدة على الأقل.')
+  .min(1, "اختر صلاحية واحدة على الأقل.")
   .refine(
     (items) => items.every((item) => assignablePermissionSet.has(item)),
-    'توجد صلاحيات غير مدعومة.',
+    "توجد صلاحيات غير مدعومة.",
   );
 
 export const doctorSecretaryCreateFormSchema = z.object({
@@ -74,12 +84,12 @@ export type SecretaryFormFieldErrors = Partial<
 >;
 
 export const DEFAULT_SECRETARY_CREATE_FORM: DoctorSecretaryCreateFormValues = {
-  fullName: '',
-  email: '',
-  password: '',
-  phone: '',
-  gender: 'Female',
-  permissions: ['appointments:view', 'patients:view'],
+  fullName: "",
+  email: "",
+  password: "",
+  phone: "",
+  gender: "Female",
+  permissions: ["appointments:view", "patients:view"],
 };
 
 export function pickFirstSecretaryValidationMessage(
@@ -92,16 +102,13 @@ export function pickFirstSecretaryValidationMessage(
     errors.phone ??
     errors.gender ??
     errors.permissions ??
-    'يرجى تصحيح الحقول المميزة.'
+    "يرجى تصحيح الحقول المميزة."
   );
 }
 
 export function mapSecretaryFieldErrors(
   fieldErrors: Partial<
-    Record<
-      SecretaryFormFieldName,
-      { message?: string } | undefined
-    >
+    Record<SecretaryFormFieldName, { message?: string } | undefined>
   >,
 ): SecretaryFormFieldErrors {
   const mapped: SecretaryFormFieldErrors = {};

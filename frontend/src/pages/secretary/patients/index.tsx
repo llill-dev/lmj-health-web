@@ -1,6 +1,6 @@
 import { UserPlus } from "lucide-react";
-import PageHeader from "@/components/secretary/shared/PageHeader";
-import SearchFilterBar from "@/components/secretary/shared/SearchFilterBar";
+import PageHeader from "@/components/shared/dashboard/PageHeader";
+import SearchFilterBar from "@/components/shared/dashboard/SearchFilterBar";
 import PatientsTable from "@/components/secretary/patients/PatientsTable";
 
 export default function SecretaryPatientsPage() {

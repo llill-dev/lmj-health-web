@@ -1,22 +1,22 @@
-import { localizeOrderStatusesInMessage } from '@/lib/doctor/orders/orderStatusLabels';
-import { useAuthStore } from '@/store/authStore';
-import { runSessionExpiredFlow } from '@/lib/session/sessionExpiryFlow';
+import { localizeOrderStatusesInMessage } from "@/lib/doctor/orders/orderStatusLabels";
+import { useAuthStore } from "@/store/authStore";
+import { runSessionExpiredFlow } from "@/lib/session/sessionExpiryFlow";
 import {
   isAccessTokenExpired,
   isSessionExpiry401Exempt,
-} from '@/lib/session/sessionExpiryGuards';
+} from "@/lib/session/sessionExpiryGuards";
 import {
   ensureFreshAccessToken,
   refreshAccessToken,
-} from '@/lib/auth/sessionRefresh';
+} from "@/lib/auth/sessionRefresh";
 
 function normalizeApiOrigin(value: string | undefined): string {
-  const trimmed = value?.trim() ?? '';
-  if (!trimmed) return '';
-  return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) return "";
+  return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 }
 
-import { isUiOnlyMode } from '@/lib/env/uiOnlyMode';
+import { isUiOnlyMode } from "@/lib/env/uiOnlyMode";
 
 export const API_BASE_URL = normalizeApiOrigin(import.meta.env.VITE_API_ORIGIN);
 
@@ -41,7 +41,7 @@ export class ApiError extends Error {
     message: string,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.messageKey = messageKey;
     this.body = body;
@@ -49,29 +49,35 @@ export class ApiError extends Error {
 }
 
 /** نصوص HTTP تلقائية من المتصفح/الوسيط (إنجليزي) لا نعرضها للمستخدم العربي؛ نستبدلها برسالة عربية واضحة. */
-function shouldReplaceArabicBackendMessage(status: number, msg: string): boolean {
+function shouldReplaceArabicBackendMessage(
+  status: number,
+  msg: string,
+): boolean {
   const m = msg.trim().toLowerCase();
   if (!m.length) return true;
   if (/^<!doctype|^<html\b/i.test(msg.trim())) return true;
   const genericByStatus: Record<number, readonly string[]> = {
-    400: ['bad request'],
-    401: ['unauthorized'],
-    403: ['forbidden'],
-    404: ['not found'],
-    408: ['request timeout'],
-    409: ['conflict'],
-    413: ['payload too large', 'request entity too large', 'content too large'],
-    415: ['unsupported media type'],
-    422: ['unprocessable entity', 'unprocessable'],
-    429: ['too many requests'],
-    500: ['internal server error', 'server error'],
-    502: ['bad gateway'],
-    503: ['service unavailable', 'service temporarily unavailable'],
-    504: ['gateway timeout', 'request timeout'],
+    400: ["bad request"],
+    401: ["unauthorized"],
+    403: ["forbidden"],
+    404: ["not found"],
+    408: ["request timeout"],
+    409: ["conflict"],
+    413: ["payload too large", "request entity too large", "content too large"],
+    415: ["unsupported media type"],
+    422: ["unprocessable entity", "unprocessable"],
+    429: ["too many requests"],
+    500: ["internal server error", "server error"],
+    502: ["bad gateway"],
+    503: ["service unavailable", "service temporarily unavailable"],
+    504: ["gateway timeout", "request timeout"],
   };
   const list = genericByStatus[status];
-  if (!list) return status >= 500 && m.length < 120 && /^[a-z\s.-]+$/i.test(m.trim());
-  return list.some((g) => m === g || m.startsWith(`${g}.`) || m.startsWith(`${g} `));
+  if (!list)
+    return status >= 500 && m.length < 120 && /^[a-z\s.-]+$/i.test(m.trim());
+  return list.some(
+    (g) => m === g || m.startsWith(`${g}.`) || m.startsWith(`${g} `),
+  );
 }
 
 /**
@@ -82,123 +88,161 @@ function userFacingHttpErrorMessage(
   status: number,
   backendMsg: string,
   statusText: string,
-  locale: 'ar' | 'en',
+  locale: "ar" | "en",
 ): string {
   const trimmed = backendMsg.trim();
-  if (locale === 'ar') {
+  if (locale === "ar") {
     if (trimmed && !shouldReplaceArabicBackendMessage(status, trimmed)) {
       return trimmed;
     }
 
     switch (status) {
       case 400:
-        return 'البيانات المرسلة غير مقبولة. راجع الحقول المطلوبة والصيغة ثم أعد المحاولة.';
+        return "البيانات المرسلة غير مقبولة. راجع الحقول المطلوبة والصيغة ثم أعد المحاولة.";
       case 401:
-        return 'لم يتم التحقّق من هويتك أو انتهت صلاحية الجلسة. سجّل الدخول من جديد إن لزم.';
+        return "لم يتم التحقّق من هويتك أو انتهت صلاحية الجلسة. سجّل الدخول من جديد إن لزم.";
       case 403:
-        return 'لا تملك صلاحية تنفيذ هذه العملية. إذا ظننت أن ذلك خطأ فتواصل مع الدعم.';
+        return "لا تملك صلاحية تنفيذ هذه العملية. إذا ظننت أن ذلك خطأ فتواصل مع الدعم.";
       case 404:
-        return 'لم يُعثَر على المطلوب؛ ربما أُزيل أو العنوان غير صحيح.';
+        return "لم يُعثَر على المطلوب؛ ربما أُزيل أو العنوان غير صحيح.";
       case 408:
-        return 'انتهى وقت انتظار الخادم لهذا الطلب. أعد المحاولة.';
+        return "انتهى وقت انتظار الخادم لهذا الطلب. أعد المحاولة.";
       case 409:
-        return 'تعارض مع بيانات موجودة لدينا (مثلاً حساب أو سجل مسجَّل بالفعل). راجع مدخلاتك.';
+        return "تعارض مع بيانات موجودة لدينا (مثلاً حساب أو سجل مسجَّل بالفعل). راجع مدخلاتك.";
       case 413:
-        return 'حجم البيانات أو الملف كبير أكثر من المسموح. قلّل الحجم ثم أعد المحاولة.';
+        return "حجم البيانات أو الملف كبير أكثر من المسموح. قلّل الحجم ثم أعد المحاولة.";
       case 415:
-        return 'نوع المحتوى غير مدعوم. حاول بصيغة أخرى أو من متصفّح مختلف.';
+        return "نوع المحتوى غير مدعوم. حاول بصيغة أخرى أو من متصفّح مختلف.";
       case 422:
-        return 'البيانات غير متوافقة مع قواعد التحقّق على الخادم؛ صحّح الحقول الظاهرة في الرسالة ثم أعد الإرسال.';
+        return "البيانات غير متوافقة مع قواعد التحقّق على الخادم؛ صحّح الحقول الظاهرة في الرسالة ثم أعد الإرسال.";
       case 429:
-        return 'تم إرسال طلبات كثيرة في وقت قصير. انتظر قليلاً ثم حاول مرّة أخرى.';
+        return "تم إرسال طلبات كثيرة في وقت قصير. انتظر قليلاً ثم حاول مرّة أخرى.";
       case 502:
-        return 'تعذّر إتمام الطلب عبر شبكة الوصول (غالبًا وسيطًا أو VPN). تحقَّق من الاتصال أو جرّب لاحقًا أو بدون VPN.';
+        return "تعذّر إتمام الطلب عبر شبكة الوصول (غالبًا وسيطًا أو VPN). تحقَّق من الاتصال أو جرّب لاحقًا أو بدون VPN.";
       case 503:
-        return 'الخدمة غير متاحة مؤقتاً (صيانة، ضغط، أو قطع شبكة نحو الخادم). أعد المحاولة بعد قليل.';
+        return "الخدمة غير متاحة مؤقتاً (صيانة، ضغط، أو قطع شبكة نحو الخادم). أعد المحاولة بعد قليل.";
       case 504:
-        return 'انتهى وقت الاتصال نحو الخادم؛ غالبًا بسبب الشبكة أو VPN أو بطء الوصول. أعد المحاولة لاحقاً.';
+        return "انتهى وقت الاتصال نحو الخادم؛ غالبًا بسبب الشبكة أو VPN أو بطء الوصول. أعد المحاولة لاحقاً.";
       default:
         if (status >= 500)
-          return 'لم نتمكن من إتمام الطلب مع الخادم. غالبًا يكون ذلك بسبب انقطاع مؤقت في الشبكة، أو تأثّر المسار بـ VPN أو جدار الحماية، أو توقيت خاطئ على الجهاز. تحقَّق من الإنترنت ثم أعد المحاولة لاحقًا. إذا كان الاتصال سليمًا واستمر ذلك، يمكن أن يكون هناك عطلًا بالخدمة — أبلغ الدعم عند الحاجة.';
+          return "لم نتمكن من إتمام الطلب مع الخادم. غالبًا يكون ذلك بسبب انقطاع مؤقت في الشبكة، أو تأثّر المسار بـ VPN أو جدار الحماية، أو توقيت خاطئ على الجهاز. تحقَّق من الإنترنت ثم أعد المحاولة لاحقًا. إذا كان الاتصال سليمًا واستمر ذلك، يمكن أن يكون هناك عطلًا بالخدمة — أبلغ الدعم عند الحاجة.";
         if (status >= 400)
-          return 'تعذّر تنفيذ الطلب. راجع البيانات أو حاول لاحقاً.';
-        return 'تعذّر إكمال الطلب.';
+          return "تعذّر تنفيذ الطلب. راجع البيانات أو حاول لاحقاً.";
+        return "تعذّر إكمال الطلب.";
     }
   }
 
   if (trimmed) return trimmed;
-  if (status === 401) return 'Session expired or unauthorized.';
-  if (status === 403) return 'You are not allowed to perform this action.';
-  if (status === 404) return 'Resource not found.';
+  if (status === 401) return "Session expired or unauthorized.";
+  if (status === 403) return "You are not allowed to perform this action.";
+  if (status === 404) return "Resource not found.";
   if (status === 422)
-    return 'The data does not match server validation rules. Review the fields and try again.';
-  if (status === 429) return 'Too many requests. Please wait and try again.';
+    return "The data does not match server validation rules. Review the fields and try again.";
+  if (status === 429) return "Too many requests. Please wait and try again.";
   if (status >= 500)
-    return 'We could not complete the request. Check your internet, VPN/firewall settings, try again shortly, or report if it persists.';
-  return statusText || 'Request failed';
+    return "We could not complete the request. Check your internet, VPN/firewall settings, try again shortly, or report if it persists.";
+  return statusText || "Request failed";
 }
 
 /** أعطال fetch / TLS / إلغاء الطلب — رسائل جاهزة للعرض على الواجهة. */
 export function transportFailureUserMessage(
   error: unknown,
-  locale: 'ar' | 'en' = 'ar',
+  locale: "ar" | "en" = "ar",
 ): string {
-  if (locale === 'en') {
-    if (error instanceof DOMException && error.name === 'AbortError')
-      return 'The request was cancelled.';
-    if (error instanceof Error && error.name === 'AbortError')
-      return 'The request was cancelled.';
+  if (locale === "en") {
+    if (error instanceof DOMException && error.name === "AbortError")
+      return "The request was cancelled.";
+    if (error instanceof Error && error.name === "AbortError")
+      return "The request was cancelled.";
     if (error instanceof TypeError)
-      return 'Could not reach the server. Check your internet connection.';
-    if (error instanceof Error && error.message)
-      return error.message;
-    return 'Network error';
+      return "Could not reach the server. Check your internet connection.";
+    if (error instanceof Error && error.message) return error.message;
+    return "Network error";
   }
 
-  if (error instanceof DOMException && error.name === 'AbortError')
-    return 'تم إلغاء الطلب. أعد المحاولة إذا احتجت إكمال العملية.';
-  if (error instanceof Error && error.name === 'AbortError')
-    return 'تم إلغاء الطلب. أعد المحاولة إذا احتجت إكمال العملية.';
+  if (error instanceof DOMException && error.name === "AbortError")
+    return "تم إلغاء الطلب. أعد المحاولة إذا احتجت إكمال العملية.";
+  if (error instanceof Error && error.name === "AbortError")
+    return "تم إلغاء الطلب. أعد المحاولة إذا احتجت إكمال العملية.";
 
-  const m = error instanceof Error ? error.message : '';
+  const m = error instanceof Error ? error.message : "";
   const lower = m.toLowerCase();
 
   if (
     error instanceof TypeError ||
-    lower.includes('failed to fetch') ||
-    lower.includes('networkerror when attempting to fetch') ||
-    lower.includes('network request failed') ||
-    lower.includes('load failed')
+    lower.includes("failed to fetch") ||
+    lower.includes("networkerror when attempting to fetch") ||
+    lower.includes("network request failed") ||
+    lower.includes("load failed")
   ) {
-    return 'تعذّر الوصول إلى الخادم عبر المتصفّح — غالبًا بسبب الشبكة أو VPN أو قطع مسار الوصول لحظياً. تحقَّق من الإنترنت، أو جرّب لاحقاً أو بدون VPN ثم أعد المحاولة.';
+    return "تعذّر الوصول إلى الخادم عبر المتصفّح — غالبًا بسبب الشبكة أو VPN أو قطع مسار الوصول لحظياً. تحقَّق من الإنترنت، أو جرّب لاحقاً أو بدون VPN ثم أعد المحاولة.";
   }
 
   if (
-    lower.includes('ssl') ||
-    lower.includes('certificate') ||
-    lower.includes('revocation') ||
-    lower.includes('schannel') ||
-    lower.includes('tls') ||
-    lower.includes('secure connection')
+    lower.includes("ssl") ||
+    lower.includes("certificate") ||
+    lower.includes("revocation") ||
+    lower.includes("schannel") ||
+    lower.includes("tls") ||
+    lower.includes("secure connection")
   ) {
-    return 'تعذّر إنشاء اتصال آمن مع الخادم. تأكد من ضبط الوقت والتاريخ على جهازك، أو استخدم شبكة أخرى.';
+    return "تعذّر إنشاء اتصال آمن مع الخادم. تأكد من ضبط الوقت والتاريخ على جهازك، أو استخدم شبكة أخرى.";
   }
 
-  if (lower.includes('aborted')) {
-    return 'انقطع الاتصال أثناء الطلب. تحقّق من الشبكة ثم حاول مرّة أخرى.';
+  if (lower.includes("aborted")) {
+    return "انقطع الاتصال أثناء الطلب. تحقّق من الشبكة ثم حاول مرّة أخرى.";
   }
 
-  return 'تعذّر إتمام الطلب بسبب مشكلة اتصال. تحقّق من الإنترنت ثم أعد المحاولة.';
+  return "تعذّر إتمام الطلب بسبب مشكلة اتصال. تحقّق من الإنترنت ثم أعد المحاولة.";
 }
 
 /** رسالة موحّدة لواجهة المستخدم بعد فشل طلب: ApiError أو فشل نقل الشبكة. */
 export function getUserFacingRequestErrorMessage(
   error: unknown,
-  locale: 'ar' | 'en' = 'ar',
+  locale: "ar" | "en" = "ar",
 ): string {
   if (error instanceof ApiError) {
+    // Handle validation errors with field-specific messages
+    if (
+      error.status === 422 &&
+      error.messageKey === "errors.validationFailed"
+    ) {
+      const errors = error.body.errors as Array<{
+        type: string;
+        path: string;
+        location: string;
+        msg: string;
+      }> | null;
+
+      if (errors && errors.length > 0) {
+        const phoneError = errors.find((e) => e.path === "phone");
+        if (phoneError && locale === "ar") {
+          // Provide clear Arabic error message for phone validation
+          if (
+            phoneError.msg.includes("too long") ||
+            phoneError.msg.includes("maximum")
+          ) {
+            return "رقم الهاتف طويل جداً. الحد الأقصى 20 حرف.";
+          }
+          if (
+            phoneError.msg.includes("too short") ||
+            phoneError.msg.includes("minimum")
+          ) {
+            return "رقم الهاتف قصير جداً. الحد الأدنى 8 أرقام.";
+          }
+          if (
+            phoneError.msg.includes("invalid") ||
+            phoneError.msg.includes("format")
+          ) {
+            return "صيغة رقم الهاتف غير صحيحة. استخدم الصيغة الدولية مثل +963912345678.";
+          }
+          return phoneError.msg;
+        }
+      }
+    }
+
     const msg = error.message;
-    return locale === 'ar' ? localizeOrderStatusesInMessage(msg) : msg;
+    return locale === "ar" ? localizeOrderStatusesInMessage(msg) : msg;
   }
   return transportFailureUserMessage(error, locale);
 }
@@ -213,7 +257,7 @@ export type ApiOptions = RequestInit & {
   signal?: AbortSignal;
   onError?: (error: Error) => void;
   onProgress?: (progress: number) => void;
-  locale?: 'ar' | 'en';
+  locale?: "ar" | "en";
 };
 
 export type ApiResult<T, E = Error> =
@@ -224,8 +268,8 @@ export type ApiResult<T, E = Error> =
 // Core request function
 // ─────────────────────────────────────────────────────────────────────────────
 function scheduleSessionExpiryHandling(
-  locale: 'ar' | 'en',
-  reason: 'expired' | 'invalidated' = 'expired',
+  locale: "ar" | "en",
+  reason: "expired" | "invalidated" = "expired",
 ): void {
   runSessionExpiredFlow(locale, reason);
 }
@@ -233,7 +277,7 @@ function scheduleSessionExpiryHandling(
 /** استجابة 401 مع طلب كان يحمل توكن مصادقة → انتهاء الجلسة (مع استثناء مسارات /api/auth العامة). */
 function maybeHandleUnauthorizedSession(
   endpoint: string,
-  locale: 'ar' | 'en',
+  locale: "ar" | "en",
   hadBearerToken: boolean,
 ): void {
   if (!hadBearerToken) return;
@@ -244,7 +288,7 @@ function maybeHandleUnauthorizedSession(
 /** فحص JWT محلياً؛ يحاول refresh قبل إيقاف الطلب */
 async function ensureAccessTokenLive(
   endpoint: string,
-  locale: 'ar' | 'en',
+  locale: "ar" | "en",
   token: string,
   omitAuth: boolean,
 ): Promise<string> {
@@ -260,24 +304,22 @@ async function ensureAccessTokenLive(
   scheduleSessionExpiryHandling(locale);
   throw new ApiError(
     401,
-    'errors.auth.sessionExpired',
+    "errors.auth.sessionExpired",
     {},
-    locale === 'ar'
-      ? 'انتهت صلاحية جلسة الدخول.'
-      : 'Session expired.',
+    locale === "ar" ? "انتهت صلاحية جلسة الدخول." : "Session expired.",
   );
 }
 
 async function tryRecoverUnauthorizedSession(
   endpoint: string,
-  locale: 'ar' | 'en',
+  locale: "ar" | "en",
   hadBearerToken: boolean,
 ): Promise<boolean> {
   if (!hadBearerToken) return false;
   if (isSessionExpiry401Exempt(endpoint)) return false;
   const refreshed = await refreshAccessToken();
   if (!refreshed) {
-    scheduleSessionExpiryHandling(locale, 'invalidated');
+    scheduleSessionExpiryHandling(locale, "invalidated");
   }
   return refreshed;
 }
@@ -294,26 +336,31 @@ export async function apiRequest<T = unknown>(
     headers,
     signal,
     onError,
-    locale = 'ar',
+    locale = "ar",
     ...rest
   } = options;
 
-  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  const url = `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
   let token =
     omitAuth === true
-      ? ''
+      ? ""
       : providedToken !== undefined
         ? providedToken
-        : useAuthStore.getState().accessToken || '';
+        : useAuthStore.getState().accessToken || "";
 
-  token = await ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
+  token = await ensureAccessTokenLive(
+    endpoint,
+    locale,
+    token,
+    omitAuth === true,
+  );
 
   const isFormData = rest.body instanceof FormData;
 
   const finalHeaders: Record<string, string> = {
-    ...(!headers || !('x-lang' in (headers as object))
-      ? { 'x-lang': locale }
+    ...(!headers || !("x-lang" in (headers as object))
+      ? { "x-lang": locale }
       : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(headers as Record<string, string> | undefined),
@@ -321,13 +368,13 @@ export async function apiRequest<T = unknown>(
 
   const hadBearerToken = Boolean(token && finalHeaders.Authorization);
 
-  if (!isFormData && !finalHeaders['Content-Type']) {
-    finalHeaders['Content-Type'] = 'application/json';
+  if (!isFormData && !finalHeaders["Content-Type"]) {
+    finalHeaders["Content-Type"] = "application/json";
   }
 
   const config: RequestInit = {
     headers: finalHeaders,
-    cache: 'no-store',
+    cache: "no-store",
     signal,
     ...rest,
   };
@@ -335,18 +382,18 @@ export async function apiRequest<T = unknown>(
   const execute = async (retryAfterRefresh: boolean): Promise<T> => {
     const res = await fetch(url, config);
 
-    const contentType = res.headers.get('content-type') ?? '';
+    const contentType = res.headers.get("content-type") ?? "";
     let body: Record<string, unknown> = {};
-    let rawText = '';
+    let rawText = "";
 
-    if (contentType.includes('application/json')) {
+    if (contentType.includes("application/json")) {
       try {
         body = (await res.json()) as Record<string, unknown>;
       } catch {
         // empty body
       }
     } else {
-      rawText = await res.text().catch(() => '');
+      rawText = await res.text().catch(() => "");
     }
 
     if (!res.ok) {
@@ -360,7 +407,7 @@ export async function apiRequest<T = unknown>(
           const nextToken =
             providedToken !== undefined && omitAuth !== true
               ? providedToken
-              : useAuthStore.getState().accessToken || '';
+              : useAuthStore.getState().accessToken || "";
           if (nextToken) {
             config.headers = {
               ...(config.headers as Record<string, string>),
@@ -387,7 +434,7 @@ export async function apiRequest<T = unknown>(
 
       const displayMsg = userFacingHttpErrorMessage(
         res.status,
-        typeof backendMsg === 'string' ? backendMsg : String(backendMsg ?? ''),
+        typeof backendMsg === "string" ? backendMsg : String(backendMsg ?? ""),
         res.statusText,
         locale,
       );
@@ -424,10 +471,7 @@ export async function apiRequestResult<T = unknown>(
     const data = await apiRequest<T>(endpoint, requestOptions);
     return { ok: true, data };
   } catch (error) {
-    if (
-      error instanceof ApiError &&
-      expectedStatuses.includes(error.status)
-    ) {
+    if (error instanceof ApiError && expectedStatuses.includes(error.status)) {
       return { ok: false, error };
     }
 
@@ -447,27 +491,27 @@ export async function apiMultipart<T = unknown>(
 
   const {
     onProgress,
-    locale = 'ar',
+    locale = "ar",
     token: providedToken,
     omitAuth = false,
     ...rest
   } = options;
   const token =
     omitAuth === true
-      ? ''
+      ? ""
       : providedToken !== undefined
         ? providedToken
-        : useAuthStore.getState().accessToken || '';
+        : useAuthStore.getState().accessToken || "";
 
-  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  const url = `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
   ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
 
   if (onProgress) {
     const xhr = new XMLHttpRequest();
-    xhr.open(rest.method || 'POST', url);
-    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-    xhr.setRequestHeader('x-lang', locale);
+    xhr.open(rest.method || "POST", url);
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("x-lang", locale);
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress((e.loaded / e.total) * 100);
@@ -490,9 +534,9 @@ export async function apiMultipart<T = unknown>(
               xhr.status,
               null,
               {},
-              locale === 'ar'
-                ? 'تعذّر رفع الملف. تحقق من الاتصال والملف والصلاحيات.'
-                : 'Upload failed. Check your connection, file, and permissions.',
+              locale === "ar"
+                ? "تعذّر رفع الملف. تحقق من الاتصال والملف والصلاحيات."
+                : "Upload failed. Check your connection, file, and permissions.",
             ),
           );
         }
@@ -500,9 +544,9 @@ export async function apiMultipart<T = unknown>(
       xhr.onerror = () =>
         reject(
           new Error(
-            locale === 'ar'
-              ? 'تعذّر إرسال الملف بسبب فشل الاتصال. تحقّق من الشبكة وحجم الملف ثم حاول مرّة أخرى.'
-              : 'Upload failed due to a network error. Try again.',
+            locale === "ar"
+              ? "تعذّر إرسال الملف بسبب فشل الاتصال. تحقّق من الشبكة وحجم الملف ثم حاول مرّة أخرى."
+              : "Upload failed due to a network error. Try again.",
           ),
         );
       xhr.send(formData);
@@ -510,7 +554,7 @@ export async function apiMultipart<T = unknown>(
   }
 
   return apiRequest<T>(endpoint, {
-    method: 'POST',
+    method: "POST",
     body: formData,
     ...rest,
     omitAuth,
@@ -522,7 +566,7 @@ export async function apiMultipart<T = unknown>(
 // Convenience wrappers
 // ─────────────────────────────────────────────────────────────────────────────
 export const get = <T = unknown>(endpoint: string, options?: ApiOptions) =>
-  apiRequest<T>(endpoint, { ...options, method: 'GET' });
+  apiRequest<T>(endpoint, { ...options, method: "GET" });
 
 function jsonBody(body: unknown): BodyInit | undefined {
   if (body instanceof FormData) return body;
@@ -538,7 +582,7 @@ export const post = <T = unknown>(
 ) =>
   apiRequest<T>(endpoint, {
     ...options,
-    method: 'POST',
+    method: "POST",
     body: jsonBody(body),
   });
 
@@ -551,7 +595,7 @@ export const postResult = <T = unknown>(
 ) =>
   apiRequestResult<T>(endpoint, {
     ...options,
-    method: 'POST',
+    method: "POST",
     body: jsonBody(body),
   });
 
@@ -562,7 +606,7 @@ export const put = <T = unknown>(
 ) =>
   apiRequest<T>(endpoint, {
     ...options,
-    method: 'PUT',
+    method: "PUT",
     body: jsonBody(body),
   });
 
@@ -573,9 +617,9 @@ export const patch = <T = unknown>(
 ) =>
   apiRequest<T>(endpoint, {
     ...options,
-    method: 'PATCH',
+    method: "PATCH",
     body: jsonBody(body),
   });
 
 export const del = <T = unknown>(endpoint: string, options?: ApiOptions) =>
-  apiRequest<T>(endpoint, { ...options, method: 'DELETE' });
+  apiRequest<T>(endpoint, { ...options, method: "DELETE" });

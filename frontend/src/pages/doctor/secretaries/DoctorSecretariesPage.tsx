@@ -1,49 +1,49 @@
-'use client';
+"use client";
 
-import { Plus, UserCog, Users } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
+import { Plus, UserCog, Users } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import DoctorDashboardOverview from "@/components/doctor/dashboard/doctor-dashboard-overview";
 import {
   ClinicAccountsSearchRow,
   ClinicAccountsSearchCount,
-} from '@/components/doctor/clinic-accounts';
-import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
-import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
-import { DoctorExpandableCardSkeleton } from '@/components/doctor/shared/skeletons';
+} from "@/components/doctor/clinic-accounts";
+import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
+import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
+import { DoctorExpandableCardSkeleton } from "@/components/doctor/shared/skeletons";
 import {
   DoctorSecretaryCard,
   DoctorSecretaryCreateDialog,
   DoctorSecretaryEditDialog,
-} from '@/components/doctor/secretaries';
-import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
-import { useToast } from '@/components/ui/ToastProvider';
+} from "@/components/doctor/secretaries";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   useCreateDoctorSecretary,
   useDoctorSecretaries,
   useUnassignDoctorSecretary,
   useUpdateDoctorSecretary,
-} from '@/hooks/doctor/secretaries/useDoctorSecretaries';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
-import { getSecretaryId } from '@/lib/doctor/secretaries/formUtils';
-import { isSecretaryActive } from '@/lib/doctor/secretaries/permissionsUi';
+} from "@/hooks/doctor/secretaries/useDoctorSecretaries";
+import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { getSecretaryId } from "@/lib/doctor/secretaries/formUtils";
+import { isSecretaryActive } from "@/lib/doctor/secretaries/permissionsUi";
 import type {
   DoctorSecretaryCreateFormValues,
   DoctorSecretaryEditFormValues,
-} from '@/lib/doctor/secretaries/schema';
-import { MAX_DOCTOR_SECRETARIES } from '@/lib/doctor/secretaries/schema';
+} from "@/lib/doctor/secretaries/schema";
+import { MAX_DOCTOR_SECRETARIES } from "@/lib/doctor/secretaries/schema";
 import type {
   DoctorSecretary,
   SecretaryStatusFilter,
-} from '@/lib/doctor/secretaries/types';
-import { normalizeAuthPhoneIdentifier } from '@/lib/phone/normalizeAuthPhone';
-import { useRetryAction } from '@/lib/query/useRetryAction';
-import { cn } from '@/lib/utils/utils';
+} from "@/lib/doctor/secretaries/types";
+import { normalizeAuthPhoneIdentifier } from "@/lib/phone/normalizeAuthPhone";
+import { useRetryAction } from "@/lib/query/useRetryAction";
+import { cn } from "@/lib/utils/utils";
 
 const STATUS_TABS: Array<{ id: SecretaryStatusFilter; label: string }> = [
-  { id: 'all', label: 'الكل' },
-  { id: 'active', label: 'المفعلة' },
-  { id: 'disabled', label: 'المعطلة' },
+  { id: "all", label: "الكل" },
+  { id: "active", label: "المفعلة" },
+  { id: "disabled", label: "المعطلة" },
 ];
 
 const MAX_SECRETARIES = MAX_DOCTOR_SECRETARIES;
@@ -58,8 +58,9 @@ export default function DoctorSecretariesPage() {
     listQuery.refetch(),
   );
 
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<SecretaryStatusFilter>('all');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<SecretaryStatusFilter>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<DoctorSecretary | null>(null);
   const [unassignTarget, setUnassignTarget] = useState<DoctorSecretary | null>(
@@ -70,8 +71,8 @@ export default function DoctorSecretariesPage() {
     const q = search.trim().toLowerCase();
     return listQuery.secretaries.filter((secretary) => {
       const active = isSecretaryActive(secretary.user);
-      if (statusFilter === 'active' && !active) return false;
-      if (statusFilter === 'disabled' && active) return false;
+      if (statusFilter === "active" && !active) return false;
+      if (statusFilter === "disabled" && active) return false;
       if (!q) return true;
       const haystacks = [
         secretary.user?.fullName,
@@ -95,18 +96,18 @@ export default function DoctorSecretariesPage() {
   const isTrulyEmpty =
     listQuery.secretaries.length === 0 &&
     !search.trim() &&
-    statusFilter === 'all';
+    statusFilter === "all";
 
   const isFilteredEmpty =
     filtered.length === 0 &&
     listQuery.secretaries.length > 0 &&
-    (search.trim() !== '' || statusFilter !== 'all');
+    (search.trim() !== "" || statusFilter !== "all");
 
   const handleCreate = async (input: DoctorSecretaryCreateFormValues) => {
     if (listQuery.secretaries.length >= MAX_SECRETARIES) {
       toast(`الحد الأقصى ${MAX_SECRETARIES} سكرتيرين لكل طبيب.`, {
-        title: 'لا يمكن الإضافة',
-        variant: 'error',
+        title: "لا يمكن الإضافة",
+        variant: "error",
       });
       return;
     }
@@ -124,15 +125,16 @@ export default function DoctorSecretariesPage() {
         gender: input.gender,
         permissions: input.permissions,
       });
-      toast('تم إنشاء السكرتير وربطه بحسابك.', {
-        title: 'تمت الإضافة',
-        variant: 'success',
+      toast("تم إنشاء السكرتير وربطه بحسابك.", {
+        title: "تمت الإضافة",
+        variant: "success",
       });
       setCreateOpen(false);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر إنشاء السكرتير',
-        variant: 'error',
+      const errorMessage = getUserFacingRequestErrorMessage(error);
+      toast(errorMessage, {
+        title: "تعذّر إنشاء السكرتير",
+        variant: "error",
       });
     }
   };
@@ -155,15 +157,15 @@ export default function DoctorSecretariesPage() {
           permissions: input.permissions,
         },
       });
-      toast('تم تحديث بيانات السكرتير.', {
-        title: 'تم الحفظ',
-        variant: 'success',
+      toast("تم تحديث بيانات السكرتير.", {
+        title: "تم الحفظ",
+        variant: "success",
       });
       setEditTarget(null);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر الحفظ',
-        variant: 'error',
+        title: "تعذّر الحفظ",
+        variant: "error",
       });
     }
   };
@@ -173,15 +175,15 @@ export default function DoctorSecretariesPage() {
     if (!secretaryId) return;
     try {
       await unassignSecretary.mutateAsync(secretaryId);
-      toast('تم إلغاء ربط السكرتير من حسابك.', {
-        title: 'تم الإلغاء',
-        variant: 'success',
+      toast("تم إلغاء ربط السكرتير من حسابك.", {
+        title: "تم الإلغاء",
+        variant: "success",
       });
       setUnassignTarget(null);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر الإلغاء',
-        variant: 'error',
+        title: "تعذّر الإلغاء",
+        variant: "error",
       });
       throw error;
     }
@@ -206,22 +208,22 @@ export default function DoctorSecretariesPage() {
           actionDisabled={listQuery.secretaries.length >= MAX_SECRETARIES}
           kpis={[
             {
-              key: 'total',
+              key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
-              value: listQuery.isAwaitingData ? '—' : listQuery.total,
-              label: 'إجمالي السكرتير',
+              value: listQuery.isAwaitingData ? "—" : listQuery.total,
+              label: "إجمالي السكرتير",
             },
             {
-              key: 'active',
+              key: "active",
               icon: <UserCog className="h-5 w-5 shrink-0" />,
-              value: listQuery.isAwaitingData ? '—' : activeCount,
-              label: 'مفعل',
+              value: listQuery.isAwaitingData ? "—" : activeCount,
+              label: "مفعل",
             },
             {
-              key: 'limit',
+              key: "limit",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: MAX_SECRETARIES,
-              label: 'الحد الأقصى',
+              label: "الحد الأقصى",
             },
           ]}
         />
@@ -232,8 +234,8 @@ export default function DoctorSecretariesPage() {
             onChange={setSearch}
             placeholder="بحث..."
             onClear={() => {
-              setSearch('');
-              setStatusFilter('all');
+              setSearch("");
+              setStatusFilter("all");
             }}
             trailing={
               <ClinicAccountsSearchCount
@@ -252,10 +254,10 @@ export default function DoctorSecretariesPage() {
                   type="button"
                   onClick={() => setStatusFilter(tab.id)}
                   className={cn(
-                    'rounded-[10px] px-4 py-2 font-cairo text-[12px] font-extrabold transition',
+                    "rounded-[10px] px-4 py-2 font-cairo text-[12px] font-extrabold transition",
                     active
-                      ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.25)]'
-                      : 'border border-[#EEF2F6] bg-[#F9FAFB] text-[#667085] hover:bg-[#F0FDFA] hover:text-primary',
+                      ? "bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.25)]"
+                      : "border border-[#EEF2F6] bg-[#F9FAFB] text-[#667085] hover:bg-[#F0FDFA] hover:text-primary",
                   )}
                 >
                   {tab.label}
@@ -284,13 +286,13 @@ export default function DoctorSecretariesPage() {
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
             title={
               isFilteredEmpty
-                ? 'لا توجد نتائج مطابقة للبحث أو الفلتر الحالي'
-                : 'لا يوجد سكرتير مرتبط بحسابك'
+                ? "لا توجد نتائج مطابقة للبحث أو الفلتر الحالي"
+                : "لا يوجد سكرتير مرتبط بحسابك"
             }
             subtitle={
               isFilteredEmpty
-                ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
-                : 'يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك.'
+                ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج"
+                : "يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك."
             }
             actionLabel="إضافة سكرتير"
             onAction={() => setCreateOpen(true)}
@@ -335,10 +337,10 @@ export default function DoctorSecretariesPage() {
           confirmDisabled={unassignSecretary.isPending}
           description={
             <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
-              هل تريد إلغاء ربط{' '}
+              هل تريد إلغاء ربط{" "}
               <span className="font-black text-[#101828]">
-                {unassignTarget?.user?.fullName ?? 'هذا السكرتير'}
-              </span>{' '}
+                {unassignTarget?.user?.fullName ?? "هذا السكرتير"}
+              </span>{" "}
               من عيادتك؟ لن يُحذف حساب المستخدم من النظام، لكنه لن يعود مرتبطاً
               بك.
             </span>
