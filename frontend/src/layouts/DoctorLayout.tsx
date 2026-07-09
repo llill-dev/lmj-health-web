@@ -1,15 +1,15 @@
-import { Suspense, useCallback, useMemo, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import Sidebar from '@/components/layout/sidebar';
-import DashboardHeader from '@/components/doctor/dashboard-header';
-import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
-import DoctorInboxToastBridge from '@/components/doctor/DoctorInboxToastBridge';
-import { useToast } from '@/components/ui/ToastProvider';
-import { sidebarItems, type SidebarItemId } from '@/constant/sidebar-items';
-import { readAuthUser } from '@/lib/cookies';
-import { DoctorRouteFallback } from '@/routes/RouteFallbacks';
-import { useAuthStore } from '@/store/authStore';
+import Sidebar from "@/components/layout/sidebar";
+import DashboardHeader from "@/components/layout/dashboard-header";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
+import DoctorInboxToastBridge from "@/components/doctor/DoctorInboxToastBridge";
+import { useToast } from "@/components/ui/ToastProvider";
+import { sidebarItems, type SidebarItemId } from "@/constant/sidebar-items";
+import { readAuthUser } from "@/lib/cookies";
+import { DoctorRouteFallback } from "@/routes/RouteFallbacks";
+import { useAuthStore } from "@/store/authStore";
 
 export default function DoctorLayout() {
   const location = useLocation();
@@ -23,26 +23,26 @@ export default function DoctorLayout() {
   const authUser = readAuthUser();
   const doctorName = useMemo(() => {
     const fullName = authUser?.fullName?.trim();
-    if (!fullName) return 'الطبيب';
+    if (!fullName) return "الطبيب";
     return /^د\.?\s/u.test(fullName) ? fullName : `د. ${fullName}`;
   }, [authUser?.fullName]);
-  const doctorEmail = authUser?.email?.trim() || '';
+  const doctorEmail = authUser?.email?.trim() || "";
 
   const performLogout = useCallback(async () => {
     setLoggingOut(true);
     try {
       await useAuthStore.getState().logout();
-      toast('نراك في زيارة قادمة.', {
-        title: 'تم تسجيل الخروج',
-        variant: 'success',
+      toast("نراك في زيارة قادمة.", {
+        title: "تم تسجيل الخروج",
+        variant: "success",
       });
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     } catch {
-      toast('تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.', {
-        title: 'فشل تسجيل الخروج',
-        variant: 'error',
+      toast("تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.", {
+        title: "فشل تسجيل الخروج",
+        variant: "error",
       });
-      throw new Error('logout_failed');
+      throw new Error("logout_failed");
     } finally {
       setLoggingOut(false);
     }
@@ -55,12 +55,12 @@ export default function DoctorLayout() {
       (item) =>
         pathname === `/doctor/${item.path}` ||
         pathname.startsWith(`/doctor/${item.path}/`),
-    )?.path ?? 'dashboard';
+    )?.path ?? "dashboard";
 
   return (
-    <div className='h-dvh overflow-hidden bg-white scrollbar-hide'>
+    <div className="h-dvh overflow-hidden bg-white scrollbar-hide">
       <DoctorInboxToastBridge />
-      <div className='relative mx-auto flex h-dvh w-full max-w-screen-2xl'>
+      <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
         <Sidebar
           active={active}
           collapsed={false}
@@ -71,12 +71,15 @@ export default function DoctorLayout() {
           profileEmail={doctorEmail}
         />
 
-        <main className='flex h-full min-h-0 min-w-0 flex-1 flex-col'>
-          <div className='sticky top-0 z-40'>
-            <DashboardHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
+        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+          <div className="sticky top-0 z-40">
+            <DashboardHeader
+              role="doctor"
+              onMenuClick={() => setIsMobileSidebarOpen(true)}
+            />
           </div>
 
-          <div className='min-h-0 flex-1 overflow-y-auto bg-white py-5 scrollbar-hide sm:py-6 lg:py-8'>
+          <div className="min-h-0 flex-1 overflow-y-auto bg-white py-5 scrollbar-hide sm:py-6 lg:py-8">
             <Suspense fallback={<DoctorRouteFallback />}>
               <Outlet />
             </Suspense>
@@ -87,9 +90,9 @@ export default function DoctorLayout() {
       <ConfirmActionDialog
         open={logoutConfirmOpen}
         onOpenChange={setLogoutConfirmOpen}
-        title='تأكيد تسجيل الخروج'
-        description='سيتم إنهاء جلستك الحالية وإعادتك إلى صفحة تسجيل الدخول. إذا كنت لا تزال بحاجة إلى العمل، اختر إلغاء.'
-        confirmLabel={loggingOut ? 'جاري تسجيل الخروج…' : 'تسجيل الخروج'}
+        title="تأكيد تسجيل الخروج"
+        description="سيتم إنهاء جلستك الحالية وإعادتك إلى صفحة تسجيل الدخول. إذا كنت لا تزال بحاجة إلى العمل، اختر إلغاء."
+        confirmLabel={loggingOut ? "جاري تسجيل الخروج…" : "تسجيل الخروج"}
         confirmDisabled={loggingOut}
         onConfirm={performLogout}
       />

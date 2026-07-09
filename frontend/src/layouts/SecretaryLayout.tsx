@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/layout/sidebar";
-import SecretaryHeader from "@/components/secretary/layout/SecretaryHeader";
+import DashboardHeader from "@/components/layout/dashboard-header";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
@@ -70,7 +70,12 @@ export default function SecretaryLayout() {
 
         <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
           <div className="sticky top-0 z-40">
-            <SecretaryHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
+            <DashboardHeader
+              role="secretary"
+              onMenuClick={() => setIsMobileSidebarOpen(true)}
+              showMessages={false}
+              showUnreadBadge={false}
+            />
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto bg-white py-5 scrollbar-hide sm:py-6 lg:py-8">
