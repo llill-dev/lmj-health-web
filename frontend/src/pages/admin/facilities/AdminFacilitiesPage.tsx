@@ -67,6 +67,11 @@ function getFacilityOwnerLabel(facility: FacilitySummary): string {
   return "المالك: غير محدد";
 }
 
+function getFacilityLocationLabel(facility: FacilitySummary): string {
+  if (facility.city && facility.country) return `${facility.city}, ${facility.country}`;
+  return facility.city || facility.country || "—";
+}
+
 export default function AdminFacilitiesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -318,7 +323,7 @@ export default function AdminFacilitiesPage() {
                       {facility.city && (
                         <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                           <MapPin className="h-3.5 w-3.5" />
-                          {facility.city}, {facility.country}
+                          {getFacilityLocationLabel(facility)}
                         </div>
                       )}
                       {facility.phone && (
