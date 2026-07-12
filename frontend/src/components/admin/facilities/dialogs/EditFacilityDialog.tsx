@@ -65,6 +65,10 @@ function normalizeFacilityAttribute(value: string): string {
     .replace(/^_+|_+$/g, "");
 }
 
+function formatFacilityAttributeLabel(value: string): string {
+  return value.replace(/_/g, " ");
+}
+
 export default function EditFacilityDialog({
   open,
   onOpenChange,
@@ -529,7 +533,7 @@ export default function EditFacilityDialog({
                             className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#E6F4F3] px-3 py-1 font-cairo text-[11px] font-bold text-primary"
                           >
                             <Tag className="w-3 h-3" aria-hidden />
-                            {attribute}
+                            {formatFacilityAttributeLabel(attribute)}
                             <button
                               type="button"
                               onClick={() => removeAttribute(attribute)}
