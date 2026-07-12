@@ -127,6 +127,7 @@ export default function EditFacilityDialog({
         attributes: facility.attributes || [],
       });
       setErrors({});
+      setNewAttribute("");
       setRootError("");
     }
   }, [facility]);
