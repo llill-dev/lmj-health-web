@@ -153,6 +153,16 @@ export default function AdminFacilitiesPage() {
     refetch();
   };
 
+  const handleFacilityDialogOpenChange = (
+    setOpen: (open: boolean) => void,
+    open: boolean,
+  ) => {
+    setOpen(open);
+    if (!open) {
+      setSelectedFacility(null);
+    }
+  };
+
   const hasActiveFilters = Boolean(
     filters.q ||
       filters.status ||
@@ -424,7 +434,9 @@ export default function AdminFacilitiesPage() {
         {/* Edit Facility Dialog */}
         <EditFacilityDialog
           open={editOpen}
-          onOpenChange={setEditOpen}
+          onOpenChange={(open) =>
+            handleFacilityDialogOpenChange(setEditOpen, open)
+          }
           facility={selectedFacility}
           doctors={ownerDoctors}
           onSuccess={() => {
@@ -435,14 +447,18 @@ export default function AdminFacilitiesPage() {
         {/* Facility Details Dialog */}
         <FacilityDetailsDialog
           open={detailsOpen}
-          onOpenChange={setDetailsOpen}
+          onOpenChange={(open) =>
+            handleFacilityDialogOpenChange(setDetailsOpen, open)
+          }
           facilityId={selectedFacility?.id || selectedFacility?._id || null}
         />
 
         {/* Facility Doctors Dialog */}
         <FacilityDoctorsDialog
           open={doctorsOpen}
-          onOpenChange={setDoctorsOpen}
+          onOpenChange={(open) =>
+            handleFacilityDialogOpenChange(setDoctorsOpen, open)
+          }
           facilityId={selectedFacility?.id || selectedFacility?._id || null}
           facilityName={selectedFacility?.name || undefined}
         />
@@ -450,7 +466,9 @@ export default function AdminFacilitiesPage() {
         {/* Change Facility Status Dialog */}
         <ChangeFacilityStatusDialog
           open={statusOpen}
-          onOpenChange={setStatusOpen}
+          onOpenChange={(open) =>
+            handleFacilityDialogOpenChange(setStatusOpen, open)
+          }
           facilityId={selectedFacility?.id || selectedFacility?._id || null}
           facilityName={selectedFacility?.name || undefined}
           currentStatus={selectedFacility?.status || undefined}
@@ -459,7 +477,9 @@ export default function AdminFacilitiesPage() {
         {/* Delete Facility Dialog */}
         <DeleteFacilityDialog
           open={deleteOpen}
-          onOpenChange={setDeleteOpen}
+          onOpenChange={(open) =>
+            handleFacilityDialogOpenChange(setDeleteOpen, open)
+          }
           facilityId={selectedFacility?.id || selectedFacility?._id || null}
           facilityName={selectedFacility?.name || undefined}
         />
