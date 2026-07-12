@@ -52,6 +52,14 @@ const STATUS_LABELS: Record<string, string> = {
   DELETED: "محذوف",
 };
 
+const DEFAULT_FILTERS = {
+  q: "",
+  status: "" as FacilityStatus | "",
+  facilityType: "" as FacilityType | "",
+  city: "",
+  hasDoctors: "",
+};
+
 function getFacilityOwnerLabel(facility: FacilitySummary): string {
   const ownerName = facility.owner?.user?.fullName || facility.owner?.fullName;
   if (ownerName) return `المالك: ${ownerName}`;
@@ -68,13 +76,7 @@ export default function AdminFacilitiesPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedFacility, setSelectedFacility] =
     useState<FacilitySummary | null>(null);
-  const [filters, setFilters] = useState({
-    q: "",
-    status: "" as FacilityStatus | "",
-    facilityType: "" as FacilityType | "",
-    city: "",
-    hasDoctors: "",
-  });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   const {
     data: facilitiesData,
@@ -145,6 +147,14 @@ export default function AdminFacilitiesPage() {
     refetch();
   };
 
+  const hasActiveFilters = Boolean(
+    filters.q ||
+      filters.status ||
+      filters.facilityType ||
+      filters.city ||
+      filters.hasDoctors,
+  );
+
   return (
     <>
       <Helmet>
@@ -171,21 +181,32 @@ export default function AdminFacilitiesPage() {
         />
 
         <section className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div className="font-cairo text-[12px] font-extrabold text-[#667085]">
               قائمة المنشآت الطبية
             </div>
-            <button
-              type="button"
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-              />
-              تحديث
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setFilters(DEFAULT_FILTERS)}
+                disabled={!hasActiveFilters || isLoading}
+                className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
+              >
+                <Filter className="h-4 w-4" />
+                إعادة التصفية
+              </button>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+                تحديث
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mt-4">
