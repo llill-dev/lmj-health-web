@@ -58,6 +58,7 @@ const DEFAULT_FILTERS = {
   facilityType: "" as FacilityType | "",
   city: "",
   hasDoctors: "",
+  ownerDoctorId: "",
 };
 
 function getFacilityOwnerLabel(facility: FacilitySummary): string {
@@ -97,6 +98,7 @@ export default function AdminFacilitiesPage() {
         status: filters.status || undefined,
         facilityType: filters.facilityType || undefined,
         city: filters.city || undefined,
+        ownerDoctorId: filters.ownerDoctorId || undefined,
         hasDoctors:
           filters.hasDoctors === "true"
             ? true
@@ -168,7 +170,8 @@ export default function AdminFacilitiesPage() {
       filters.status ||
       filters.facilityType ||
       filters.city ||
-      filters.hasDoctors,
+      filters.hasDoctors ||
+      filters.ownerDoctorId,
   );
 
   return (
@@ -225,7 +228,7 @@ export default function AdminFacilitiesPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mt-4">
+          <div className="grid grid-cols-1 gap-3 mt-4 md:grid-cols-6">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
               <input
@@ -291,6 +294,21 @@ export default function AdminFacilitiesPage() {
                 { value: "false", label: "بدون أطباء" },
               ]}
               placeholder="الأطباء"
+            />
+
+            <StyledSelect
+              value={filters.ownerDoctorId}
+              onChange={(value) =>
+                setFilters({ ...filters, ownerDoctorId: value })
+              }
+              options={[
+                { value: "", label: "كل المالكين" },
+                ...ownerDoctors.map((doctor) => ({
+                  value: doctor._id,
+                  label: doctor.user.fullName,
+                })),
+              ]}
+              placeholder="الطبيب المالك"
             />
           </div>
         </section>
