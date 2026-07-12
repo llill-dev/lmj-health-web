@@ -31,6 +31,12 @@ export default function FacilityDoctorsDialog({
 }: FacilityDoctorsDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery("");
+    }
+  }, [facilityId, open]);
+
   const { data: doctorsData, isLoading } = useQuery({
     queryKey: ["admin", "facility", facilityId, "doctors", searchQuery],
     queryFn: () =>
