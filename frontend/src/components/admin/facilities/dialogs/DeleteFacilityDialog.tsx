@@ -49,7 +49,7 @@ export default function DeleteFacilityDialog({
       setConfirmText("");
       setRootError("");
     }
-  }, [open]);
+  }, [facilityId, facilityName, open]);
 
   useEffect(() => {
     if (!open) return;

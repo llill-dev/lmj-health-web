@@ -62,7 +62,7 @@ export default function ChangeFacilityStatusDialog({
       setSelectedStatus(currentStatus || "");
       setRootError("");
     }
-  }, [open, currentStatus]);
+  }, [facilityId, facilityName, open, currentStatus]);
 
   useEffect(() => {
     if (!open) return;
