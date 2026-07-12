@@ -297,7 +297,10 @@ export default function AdminFacilitiesPage() {
                 : "لا توجد منشآت طبية حالياً."}
             </div>
           ) : (
-            facilities.map((facility) => (
+            facilities.map((facility) => {
+              const isDeleted = facility.status === "DELETED";
+
+              return (
               <div
                 key={facility._id || facility.id}
                 className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
@@ -374,7 +377,8 @@ export default function AdminFacilitiesPage() {
                       type="button"
                       onClick={() => openStatus(facility)}
                       title="تغيير الحالة"
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
+                      disabled={isDeleted}
+                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Filter className="h-3.5 w-3.5" />
                       الحالة
@@ -383,7 +387,8 @@ export default function AdminFacilitiesPage() {
                       type="button"
                       onClick={() => openEdit(facility)}
                       title="تعديل البيانات"
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
+                      disabled={isDeleted}
+                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Edit3 className="h-3.5 w-3.5" />
                       تعديل
@@ -392,7 +397,8 @@ export default function AdminFacilitiesPage() {
                       type="button"
                       onClick={() => openDelete(facility)}
                       title="حذف"
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
+                      disabled={isDeleted}
+                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       حذف
@@ -400,7 +406,8 @@ export default function AdminFacilitiesPage() {
                   </div>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </section>
 
