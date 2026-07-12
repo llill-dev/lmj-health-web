@@ -52,6 +52,13 @@ const STATUS_LABELS: Record<string, string> = {
   DELETED: "محذوف",
 };
 
+function getFacilityOwnerLabel(facility: FacilitySummary): string {
+  const ownerName = facility.owner?.user?.fullName || facility.owner?.fullName;
+  if (ownerName) return `المالك: ${ownerName}`;
+  if (facility.ownerDoctorId) return "المالك: طبيب محدد";
+  return "المالك: غير محدد";
+}
+
 export default function AdminFacilitiesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -304,6 +311,10 @@ export default function AdminFacilitiesPage() {
                             : `${facility.doctorCount} طبيب`}
                         </div>
                       )}
+                      <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                        <UserCheck className="h-3.5 w-3.5" />
+                        {getFacilityOwnerLabel(facility)}
+                      </div>
                       <div className="inline-flex items-center rounded-[6px] border px-2 py-1 font-cairo text-[11px] font-bold">
                         {STATUS_LABELS[facility.status || ""] ||
                           facility.status ||
