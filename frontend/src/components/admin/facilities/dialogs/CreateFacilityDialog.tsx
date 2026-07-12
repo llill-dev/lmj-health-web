@@ -91,6 +91,10 @@ export default function CreateFacilityDialog({
   useEffect(() => {
     if (!open) return;
 
+    setErrors({});
+    setNewAttribute("");
+    setRootError("");
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !isSubmitting) onOpenChange(false);
     };
