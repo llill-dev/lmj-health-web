@@ -26,6 +26,16 @@ const STATUS_LABELS: Record<string, string> = {
   DELETED: "محذوف",
 };
 
+const DOCTOR_APPROVAL_STATUS_LABELS: Record<string, string> = {
+  approved: "مقبول",
+  pending: "قيد المراجعة",
+  rejected: "مرفوض",
+};
+
+function formatFacilityAttributeLabel(value: string): string {
+  return value.replace(/_/g, " ");
+}
+
 interface FacilityDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -233,7 +243,9 @@ export default function FacilityDetailsDialog({
                           )}
                           {owner?.approvalStatus && (
                             <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mt-1">
-                              حالة الاعتماد: {owner.approvalStatus as string}
+                              حالة الاعتماد:{" "}
+                              {DOCTOR_APPROVAL_STATUS_LABELS[owner.approvalStatus as string] ||
+                                (owner.approvalStatus as string)}
                             </div>
                           )}
                         </div>
@@ -257,7 +269,7 @@ export default function FacilityDetailsDialog({
                                     className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#E6F4F3] px-3 py-1 font-cairo text-[11px] font-bold text-primary"
                                   >
                                     <Tag className="w-3 h-3" aria-hidden />
-                                    {attribute}
+                                    {formatFacilityAttributeLabel(attribute)}
                                   </span>
                                 ),
                               )}

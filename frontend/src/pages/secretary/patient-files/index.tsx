@@ -26,9 +26,13 @@ function patientInitials(name: string): string {
 function SurfaceSection({
   title,
   children,
+  count,
+  searchMatch,
 }: {
   title: string;
   children: React.ReactNode;
+  count?: number;
+  searchMatch?: boolean;
 }) {
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
@@ -36,6 +40,12 @@ function SurfaceSection({
         <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
           {title}
         </h2>
+        {count !== undefined && (
+          <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
+            {count} ملف
+            {searchMatch ? " مطابق للبحث" : ""}
+          </p>
+        )}
       </header>
       {children}
     </section>
@@ -159,19 +169,11 @@ export default function SecretaryPatientFilesPage() {
 
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title="ملفات المرضى">
-        <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
-          <div className="text-right">
-            <h2 className="font-cairo text-[23px] font-black text-[#243044]">
-              ملفات المرضى
-            </h2>
-            <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {files.length} ملف
-              {searchInput ? " مطابق للبحث" : ""}
-            </p>
-          </div>
-        </div>
-
+      <SurfaceSection
+        title="ملفات المرضى"
+        count={files.length}
+        searchMatch={!!searchInput}
+      >
         <div className="px-4 py-5 sm:px-5 sm:py-6">
           <FilesSearchInput value={searchInput} onChange={setSearchInput} />
         </div>

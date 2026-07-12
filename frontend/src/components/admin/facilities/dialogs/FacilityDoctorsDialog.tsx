@@ -10,6 +10,12 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
 
+const DOCTOR_APPROVAL_STATUS_LABELS: Record<string, string> = {
+  approved: "مقبول",
+  pending: "قيد المراجعة",
+  rejected: "مرفوض",
+};
+
 interface FacilityDoctorsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -154,10 +160,13 @@ export default function FacilityDoctorsDialog({
                           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-cairo text-[11px] font-bold text-[#98A2B3]">
                             <span>{doctorId || "—"}</span>
                             {doctor.specialization && (
-                              <span>{doctor.specialization as string}</span>
-                            )}
-                            {doctor.approvalStatus && (
-                              <span>{doctor.approvalStatus as string}</span>
+                            <span>{doctor.specialization as string}</span>
+                          )}
+                          {doctor.approvalStatus && (
+                              <span>
+                                {DOCTOR_APPROVAL_STATUS_LABELS[doctor.approvalStatus as string] ||
+                                  (doctor.approvalStatus as string)}
+                              </span>
                             )}
                           </div>
                           {doctorUser?.email && (
