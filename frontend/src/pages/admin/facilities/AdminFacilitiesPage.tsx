@@ -112,6 +112,7 @@ export default function AdminFacilitiesPage() {
   });
 
   const facilities = facilitiesData?.facilities || [];
+  const totalFacilities = facilitiesData?.total ?? facilities.length;
   const ownerDoctors =
     doctorsData?.doctors?.map((doctor) => ({
       _id: doctor._id,
@@ -171,13 +172,13 @@ export default function AdminFacilitiesPage() {
           actionLabel="إضافة منشأة"
           onActionClick={() => setCreateOpen(true)}
           kpis={[
-            {
-              key: "total",
-              icon: <Building2 className="h-5 w-5 shrink-0" />,
-              value: facilities.length.toLocaleString("ar-EG"),
-              label: "إجمالي المنشآت",
-            },
-          ]}
+              {
+                key: "total",
+                icon: <Building2 className="h-5 w-5 shrink-0" />,
+                value: totalFacilities.toLocaleString("ar-EG"),
+                label: "إجمالي المنشآت",
+              },
+            ]}
         />
 
         <section className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
@@ -286,7 +287,9 @@ export default function AdminFacilitiesPage() {
             </div>
           ) : facilities.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              لا توجد منشآت طبية حالياً.
+              {hasActiveFilters
+                ? "لا توجد منشآت تطابق التصفية الحالية."
+                : "لا توجد منشآت طبية حالياً."}
             </div>
           ) : (
             facilities.map((facility) => (
