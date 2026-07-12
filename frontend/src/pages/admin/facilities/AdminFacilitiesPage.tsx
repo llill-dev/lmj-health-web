@@ -381,6 +381,11 @@ export default function AdminFacilitiesPage() {
                           "—"}
                       </div>
                     </div>
+                    {facility.description ? (
+                      <p className="mt-3 max-w-[720px] font-cairo text-[12px] font-semibold leading-[20px] text-[#667085]">
+                        {facility.description}
+                      </p>
+                    ) : null}
                   </div>
                   <div className="flex gap-2">
                     <button
