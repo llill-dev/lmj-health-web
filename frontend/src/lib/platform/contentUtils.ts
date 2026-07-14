@@ -32,6 +32,20 @@ function normalizeContentItem(
       typeof raw.lastReviewedAt === 'string' ? raw.lastReviewedAt : null,
     coverImage:
       typeof raw.coverImage === 'string' ? raw.coverImage : undefined,
+    sourceName:
+      typeof raw.sourceName === 'string' ? raw.sourceName : undefined,
+    sources: Array.isArray(raw.sources)
+      ? raw.sources
+          .filter((entry) => entry && typeof entry === 'object')
+          .map((entry) => {
+            const record = entry as Record<string, unknown>;
+            return {
+              title:
+                typeof record.title === 'string' ? record.title : undefined,
+              url: typeof record.url === 'string' ? record.url : undefined,
+            };
+          })
+      : undefined,
     contentBlocks: Array.isArray(raw.contentBlocks)
       ? (raw.contentBlocks as AdminContentBlock[])
       : [],
@@ -67,6 +81,8 @@ export function normalizePlatformContentItems(
         typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
       coverImage:
         typeof row.coverImage === 'string' ? row.coverImage : undefined,
+      sourceName:
+        typeof row.sourceName === 'string' ? row.sourceName : undefined,
       viewCount:
         typeof row.viewCount === 'number'
           ? row.viewCount

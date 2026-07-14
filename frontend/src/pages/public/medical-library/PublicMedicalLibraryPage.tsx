@@ -186,6 +186,12 @@ export default function PublicMedicalLibraryPage() {
                   {item.summary?.trim() || "افتح التفاصيل لقراءة المحتوى الطبي الكامل."}
                 </p>
 
+                {item.sourceName?.trim() ? (
+                  <div className="mt-4 inline-flex rounded-full bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#475467]">
+                    المصدر: {item.sourceName.trim()}
+                  </div>
+                ) : null}
+
                 <div className="mt-5 flex items-center justify-between">
                   <span className="font-cairo text-[12px] font-extrabold text-primary">
                     قراءة التفاصيل

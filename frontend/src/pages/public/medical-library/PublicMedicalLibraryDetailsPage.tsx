@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowLeft, CalendarDays, ExternalLink, FileText, Loader2 } from "lucide-react";
-import { useMemo } from "react";
+import { ArrowLeft, CalendarDays, ExternalLink, FileText, Loader2, Share2 } from "lucide-react";
+import { useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
@@ -32,8 +32,27 @@ export default function PublicMedicalLibraryDetailsPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug ? decodeURIComponent(params.slug) : "";
   const contentQuery = usePlatformContentBySlug(slug, "ar");
-
   const blocks = contentQuery.data?.contentBlocks ?? [];
+  const handleShare = useCallback(async () => {
+    if (!contentQuery.data) return;
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: contentQuery.data.title,
+      text: contentQuery.data.summary || contentQuery.data.title,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // fall through to clipboard
+      }
+    }
+
+    await navigator.clipboard.writeText(shareUrl);
+  }, [contentQuery.data]);
 
   if (contentQuery.isLoading) {
     return (
@@ -102,12 +121,27 @@ export default function PublicMedicalLibraryDetailsPage() {
                 <CalendarDays className="h-4 w-4 text-primary" />
                 {formatPublishedAt(contentQuery.data.publishedAt)}
               </span>
+              {contentQuery.data.sourceName?.trim() ? (
+                <span className="rounded-full bg-white px-3 py-1 text-[#475467] shadow-sm">
+                  المصدر: {contentQuery.data.sourceName.trim()}
+                </span>
+              ) : null}
             </div>
             {contentQuery.data.summary ? (
               <p className="mt-5 font-cairo text-[14px] font-semibold leading-8 text-[#475467]">
                 {contentQuery.data.summary}
               </p>
             ) : null}
+            <div className="mt-5">
+              <button
+                type="button"
+                onClick={() => void handleShare()}
+                className="inline-flex items-center gap-2 rounded-[12px] border border-[#B8E6E0] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
+              >
+                <Share2 className="h-4 w-4" />
+                مشاركة المقال
+              </button>
+            </div>
           </div>
 
           <div className="px-6 py-8 sm:px-8">
@@ -124,6 +158,31 @@ export default function PublicMedicalLibraryDetailsPage() {
             )}
 
             <div className="mt-8 flex flex-wrap gap-3 border-t border-[#EAECF0] pt-6">
+              {contentQuery.data.sources?.filter((source) => source.url?.trim()).length ? (
+                <div className="w-full space-y-3 rounded-[18px] border border-[#EAECF0] bg-[#FCFCFD] px-5 py-4">
+                  <h3 className="font-cairo text-[16px] font-black text-[#101828]">
+                    المراجع والمصادر
+                  </h3>
+                  <div className="space-y-2">
+                    {contentQuery.data.sources
+                      ?.filter((source) => source.url?.trim())
+                      .map((source, index) => (
+                        <a
+                          key={`${source.url}-${index}`}
+                          href={source.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-between gap-3 rounded-[12px] border border-[#D9F2EF] bg-white px-4 py-3 transition hover:border-primary"
+                        >
+                          <span className="font-cairo text-[13px] font-bold text-[#344054]">
+                            {source.title?.trim() || source.url}
+                          </span>
+                          <ExternalLink className="h-4 w-4 shrink-0 text-primary" />
+                        </a>
+                      ))}
+                  </div>
+                </div>
+              ) : null}
               <Link
                 to="/medical-library"
                 className="inline-flex items-center justify-center rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"

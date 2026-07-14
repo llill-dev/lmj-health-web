@@ -18,6 +18,7 @@ export type PlatformSettingsListItem = {
 export type PlatformContentListItem = PlatformSettingsListItem & {
   viewCount?: number;
   coverImage?: string;
+  sourceName?: string;
 };
 
 export type PlatformContentDetails = {
@@ -31,6 +32,8 @@ export type PlatformContentDetails = {
   publishedAt?: string;
   lastReviewedAt?: string | null;
   coverImage?: string;
+  sourceName?: string;
+  sources?: Array<{ title?: string; url?: string }>;
   contentBlocks: AdminContentBlock[];
 };
 
