@@ -159,7 +159,7 @@ export default function DoctorFacilitiesPage() {
 
   const handleLinkSubmit = async (payload: {
     facilityId: string;
-    facilityProviderId: string;
+    facilityProviderId?: string | null;
     suggestSnapshot: SuggestFacilityRecord;
   }) => {
     try {
