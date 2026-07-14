@@ -1,7 +1,8 @@
 'use client';
 
-import { Send, UploadCloud } from 'lucide-react';
+import { BookOpen, Send, UploadCloud } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { PlatformModalShell } from '@/components/platform/platform-modal-shell';
 import {
   FacebookIcon,
@@ -426,6 +427,22 @@ export function ContactUsDialog({
                 <Icon className="w-5 h-5" />
               </a>
             ))}
+          </div>
+          <div className="mt-5 rounded-[12px] border border-[#D9F2EF] bg-white px-4 py-4 text-right">
+            <div className="flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
+              <BookOpen className="h-4 w-4 text-primary" />
+              قبل إرسال الطلب
+            </div>
+            <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
+              قد تجد إجابة سريعة ضمن المقالات والنصائح الطبية المنشورة في المكتبة الطبية.
+            </p>
+            <Link
+              to="/medical-library"
+              onClick={onClose}
+              className="mt-3 inline-flex items-center justify-center rounded-[10px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
+            >
+              تصفح المكتبة الطبية
+            </Link>
           </div>
         </div>
       </form>
