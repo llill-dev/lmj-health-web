@@ -137,7 +137,7 @@ export default function AdminFacilitiesPage() {
   const ownerFilterPlaceholder = isLoadingOwnerDoctors
     ? "جارٍ تحميل الأطباء..."
     : ownerDoctors.length === 0
-      ? "لا يوجد أطباء معتمدون"
+      ? "تصفية حسب المالك"
       : "الطبيب المالك";
 
   const openEdit = useCallback((facility: FacilitySummary) => {
@@ -331,7 +331,7 @@ export default function AdminFacilitiesPage() {
                 })),
               ]}
               placeholder={ownerFilterPlaceholder}
-              disabled={isLoadingOwnerDoctors || ownerDoctors.length === 0}
+              disabled={isLoadingOwnerDoctors}
             />
           </div>
         </section>
