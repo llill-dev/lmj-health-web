@@ -17,6 +17,7 @@ import {
   readLinkedDoctorFacility,
   storeLinkedDoctorFacility,
 } from '@/lib/doctor/facilities/linkedFacilityStorage';
+import type { DoctorFacilitySuggestRequestBody } from '@/lib/doctor/facilities/api-types';
 import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
 import type { DoctorFacilityFormValues } from '@/lib/doctor/facilities/types';
 
@@ -184,5 +185,16 @@ export function useLinkFacility() {
 
   return {
     linkMutation,
+  };
+}
+
+export function useSuggestFacilityRequest() {
+  const suggestMutation = useMutation({
+    mutationFn: (values: DoctorFacilitySuggestRequestBody) =>
+      doctorFacilityApi.requestAddition(values),
+  });
+
+  return {
+    suggestMutation,
   };
 }

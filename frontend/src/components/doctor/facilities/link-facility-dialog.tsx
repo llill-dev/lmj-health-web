@@ -26,6 +26,7 @@ export default function LinkFacilityDialog({
   submitting,
   onClose,
   onLink,
+  onSuggestFacility,
 }: {
   open: boolean;
   submitting?: boolean;
@@ -35,6 +36,7 @@ export default function LinkFacilityDialog({
     facilityProviderId?: string | null;
     suggestSnapshot: SuggestFacilityRecord;
   }) => void;
+  onSuggestFacility?: () => void;
 }) {
   const [search, setSearch] = useState('');
   const [city, setCity] = useState('');
@@ -89,6 +91,19 @@ export default function LinkFacilityDialog({
           ابحث عن منشأة مسجّلة في النظام واربط حسابك بها. إذا لم تجدها، استخدم
           «اقتراح منشأة» لإرسال طلب إضافتها.
         </p>
+
+        {onSuggestFacility ? (
+          <div className="flex justify-start">
+            <button
+              type="button"
+              onClick={onSuggestFacility}
+              disabled={submitting}
+              className="inline-flex h-[40px] items-center justify-center rounded-[10px] border border-primary/20 bg-[#E6F4F3] px-4 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-50"
+            >
+              اقتراح منشأة جديدة
+            </button>
+          </div>
+        ) : null}
 
         <DoctorProfileFormField label="بحث بالاسم" required hint="حرفان على الأقل">
           <input

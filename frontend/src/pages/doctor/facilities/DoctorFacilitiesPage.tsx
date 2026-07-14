@@ -13,6 +13,7 @@ import {
   FacilityEmptyState,
   FacilityFormDialog,
   LinkFacilityDialog,
+  SuggestFacilityDialog,
 } from "@/components/doctor/facilities";
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
@@ -21,12 +22,15 @@ import {
   useDoctorFacility,
   useDoctorFacilityTypes,
   useLinkFacility,
+  useSuggestFacilityRequest,
 } from "@/hooks";
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 import {
   getDoctorFacilityLinkErrorToast,
   getDoctorFacilitySaveErrorToast,
+  getDoctorFacilitySuggestErrorToast,
 } from "@/lib/doctor/facilities/errors";
+import type { SuggestFacilityPayload } from "@/components/doctor/facilities/suggest-facility-dialog";
 import type { DoctorFacilityFormSchemaValues } from "@/lib/doctor/facilities/schema";
 import type { SuggestFacilityRecord } from "@/lib/doctor/medical-services-directory/api-types";
 import type { DoctorFacility } from "@/lib/doctor/facilities/types";
@@ -40,6 +44,7 @@ export default function DoctorFacilitiesPage() {
   const { facility, facilityQuery, saveMutation, isAwaitingData } =
     useDoctorFacility();
   const { linkMutation } = useLinkFacility();
+  const { suggestMutation } = useSuggestFacilityRequest();
   const typesQuery = useDoctorFacilityTypes();
   const { retry: retryFacility, retrying: retryingFacility } = useRetryAction(
     () => facilityQuery.refetch(),
@@ -49,6 +54,7 @@ export default function DoctorFacilitiesPage() {
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [suggestDialogOpen, setSuggestDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
   const [editTarget, setEditTarget] = useState<DoctorFacility | null>(null);
 
@@ -178,6 +184,24 @@ export default function DoctorFacilitiesPage() {
     }
   };
 
+  const handleSuggestSubmit = async (payload: SuggestFacilityPayload) => {
+    try {
+      await suggestMutation.mutateAsync(payload);
+      toast("تم إرسال اقتراح المنشأة وسيتم مراجعته من الإدارة.", {
+        title: "تم إرسال الاقتراح",
+        variant: "success",
+      });
+      setSuggestDialogOpen(false);
+      setLinkDialogOpen(false);
+    } catch (error) {
+      const { title, message } = getDoctorFacilitySuggestErrorToast(error);
+      toast(message, {
+        title,
+        variant: "error",
+      });
+    }
+  };
+
   if (isAwaitingData) {
     return (
       <>
@@ -300,7 +324,22 @@ export default function DoctorFacilitiesPage() {
           onClose={() => {
             if (!linkMutation.isPending) setLinkDialogOpen(false);
           }}
+          onSuggestFacility={() => {
+            if (linkMutation.isPending || suggestMutation.isPending) return;
+            setLinkDialogOpen(false);
+            setSuggestDialogOpen(true);
+          }}
           onLink={handleLinkSubmit}
+        />
+
+        <SuggestFacilityDialog
+          open={suggestDialogOpen}
+          submitting={suggestMutation.isPending}
+          typeOptions={typeOptions}
+          onClose={() => {
+            if (!suggestMutation.isPending) setSuggestDialogOpen(false);
+          }}
+          onSubmit={handleSuggestSubmit}
         />
       </div>
     </>

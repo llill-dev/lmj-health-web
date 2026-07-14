@@ -234,3 +234,13 @@ export function getDoctorFacilityLinkErrorToast(
   }
   return fallback;
 }
+
+export function getDoctorFacilitySuggestErrorToast(
+  error: unknown,
+): DoctorFacilitySaveToast {
+  const fallback = getDoctorFacilitySaveErrorToast(error, 'create');
+  return {
+    title: 'تعذّر إرسال الاقتراح',
+    message: fallback.message,
+  };
+}

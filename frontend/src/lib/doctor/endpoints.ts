@@ -309,6 +309,7 @@ export const doctorEndpoints = {
   },
   facilities: {
     suggest: "/api/facilities/suggest",
+    requests: "/api/facilities/requests",
     types: "/api/facilities/types",
   },
   /** GET — internal staff directory (doctor / secretary). API-3 */

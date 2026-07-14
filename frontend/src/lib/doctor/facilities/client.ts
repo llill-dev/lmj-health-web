@@ -5,6 +5,8 @@ import type {
   DoctorFacilityAssignBody,
   DoctorFacilityMutationBody,
   DoctorFacilityResponse,
+  DoctorFacilitySuggestRequestBody,
+  DoctorFacilitySuggestRequestResponse,
   FacilityTypesResponse,
 } from '@/lib/doctor/facilities/api-types';
 
@@ -38,6 +40,13 @@ export const doctorFacilityApi = {
     patch<DoctorFacilityResponse>(doctorEndpoints.me.facility, body, {
       locale: 'ar',
     }),
+
+  requestAddition: (body: DoctorFacilitySuggestRequestBody) =>
+    post<DoctorFacilitySuggestRequestResponse>(
+      doctorEndpoints.facilities.requests,
+      body,
+      { locale: 'ar' },
+    ),
 
   listTypes: () =>
     get<FacilityTypesResponse>(doctorEndpoints.facilities.types, {

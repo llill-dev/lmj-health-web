@@ -40,6 +40,15 @@ export type DoctorFacilityAssignBody = {
   facilityProviderId?: string | null;
 };
 
+export type DoctorFacilitySuggestRequestBody = {
+  name: string;
+  city: string;
+  facilityType?: FacilityType;
+  address?: string;
+  phone?: string;
+  description?: string;
+};
+
 export type DoctorFacilityResponse = {
   messageKey?: string;
   message?: string;
@@ -59,4 +68,11 @@ export type FacilityTypeOption = {
 export type FacilityTypesResponse = {
   messageKey?: string;
   types?: FacilityTypeOption[];
+};
+
+export type DoctorFacilitySuggestRequestResponse = {
+  messageKey?: string;
+  message?: string;
+  request?: Record<string, unknown>;
+  data?: Record<string, unknown>;
 };
