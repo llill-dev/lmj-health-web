@@ -116,6 +116,8 @@ export default function EditFacilityDialog({
     value: doctor._id,
     label: doctor.user?.fullName || doctor._id,
   }));
+  const ownerDoctorPlaceholder =
+    doctorOptions.length > 0 ? "اختر الطبيب المالك" : "لا يوجد أطباء متاحون";
 
   useEffect(() => {
     if (facility) {
@@ -484,7 +486,7 @@ export default function EditFacilityDialog({
                         { value: "", label: "بدون طبيب مالك" },
                         ...doctorOptions,
                       ]}
-                      placeholder="اختر الطبيب المالك"
+                      placeholder={ownerDoctorPlaceholder}
                     />
                   </AdminFormField>
 

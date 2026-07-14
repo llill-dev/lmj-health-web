@@ -117,6 +117,8 @@ export default function CreateFacilityDialog({
     value: doctor._id,
     label: doctor.user?.fullName || doctor._id,
   }));
+  const ownerDoctorPlaceholder =
+    doctorOptions.length > 0 ? "اختر الطبيب المالك" : "لا يوجد أطباء متاحون";
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -482,7 +484,7 @@ export default function CreateFacilityDialog({
                         { value: "", label: "بدون طبيب مالك" },
                         ...doctorOptions,
                       ]}
-                      placeholder="اختر الطبيب المالك"
+                      placeholder={ownerDoctorPlaceholder}
                     />
                   </AdminFormField>
 
