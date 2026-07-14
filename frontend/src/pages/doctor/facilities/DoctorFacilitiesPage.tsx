@@ -285,7 +285,25 @@ export default function DoctorFacilitiesPage() {
         />
 
         {!filtered.length ? (
-          <FacilityEmptyState onAdd={openCreate} />
+          <FacilityEmptyState
+            onAdd={openCreate}
+            onLink={
+              canCreate
+                ? () => {
+                    if (suggestMutation.isPending) return;
+                    setLinkDialogOpen(true);
+                  }
+                : undefined
+            }
+            onSuggest={
+              canCreate
+                ? () => {
+                    if (linkMutation.isPending) return;
+                    setSuggestDialogOpen(true);
+                  }
+                : undefined
+            }
+          />
         ) : (
           <>
             <FacilitiesTable rows={pageRows} onEdit={openEdit} />

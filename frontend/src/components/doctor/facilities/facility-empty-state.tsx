@@ -1,9 +1,17 @@
 'use client';
 
-import { Building2, ClipboardList, Search } from 'lucide-react';
+import { Building2, ClipboardList, Link2, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function FacilityEmptyState({ onAdd }: { onAdd: () => void }) {
+export function FacilityEmptyState({
+  onAdd,
+  onLink,
+  onSuggest,
+}: {
+  onAdd: () => void;
+  onLink?: () => void;
+  onSuggest?: () => void;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -22,14 +30,35 @@ export function FacilityEmptyState({ onAdd }: { onAdd: () => void }) {
       <p className="font-cairo text-[16px] font-extrabold text-[#667085]">
         لا يوجد منشأة حالياً
       </p>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="mt-6 inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary px-8 font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
-      >
-        <Building2 className="h-4 w-4" aria-hidden />
-        إضافة منشأة
-      </button>
+      <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        {onLink ? (
+          <button
+            type="button"
+            onClick={onLink}
+            className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] border border-primary/25 bg-[#E6F4F3] px-6 font-cairo text-[14px] font-extrabold text-primary"
+          >
+            <Link2 className="h-4 w-4" aria-hidden />
+            ربط منشأة موجودة
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary px-8 font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
+        >
+          <Building2 className="h-4 w-4" aria-hidden />
+          إضافة منشأة
+        </button>
+        {onSuggest ? (
+          <button
+            type="button"
+            onClick={onSuggest}
+            className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white px-6 font-cairo text-[14px] font-extrabold text-[#344054]"
+          >
+            اقتراح منشأة
+          </button>
+        ) : null}
+      </div>
     </motion.div>
   );
 }
