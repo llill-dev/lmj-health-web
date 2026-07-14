@@ -1,9 +1,11 @@
+import { resolveLabel, type ServiceProvider } from '@/lib/admin/types';
 import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
 import { resolveMedicalServiceCategory } from '@/lib/doctor/medical-services-directory/category-map';
 import { getMedicalServiceFacilityImage } from '@/lib/doctor/medical-services-directory/placeholders';
 import type {
   MedicalServiceCategory,
   MedicalServiceFacility,
+  WorkingHoursEntry,
 } from '@/lib/doctor/medical-services-directory/types';
 
 export function formatFacilityAttributeLabel(value: string): string {
@@ -33,6 +35,127 @@ function buildWhatsAppHref(phone?: string | null): string | undefined {
   const digits = trimmed.replace(/[^\d+]/g, '');
   if (!digits) return undefined;
   return `https://wa.me/${digits.replace(/^\+/, '')}`;
+}
+
+function readTextValue(value: unknown): string {
+  if (typeof value === 'string') return value.trim();
+  if (value && typeof value === 'object') {
+    return resolveLabel(value as { en?: string; ar?: string }, 'ar').trim();
+  }
+  return '';
+}
+
+function readStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => readTextValue(entry))
+      .filter(Boolean);
+  }
+  const single = readTextValue(value);
+  return single ? [single] : [];
+}
+
+function pickFirstText(
+  record: Record<string, unknown>,
+  keys: string[],
+): string {
+  for (const key of keys) {
+    const value = readTextValue(record[key]);
+    if (value) return value;
+  }
+  return '';
+}
+
+function buildAbsoluteUrl(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (/^(https?:|tel:)/i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, '')}`;
+}
+
+function mapWorkingHours(value: unknown): WorkingHoursEntry[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const record = entry as Record<string, unknown>;
+      const days = pickFirstText(record, ['days', 'day', 'label', 'title']);
+      const hours = pickFirstText(record, [
+        'hours',
+        'time',
+        'value',
+        'fromTo',
+        'range',
+      ]);
+      if (!days || !hours) return null;
+      return { days, hours };
+    })
+    .filter((entry): entry is WorkingHoursEntry => entry != null);
+}
+
+function resolveProviderLocation(data: Record<string, unknown>): string {
+  const address = pickFirstText(data, ['address', 'location', 'streetAddress']);
+  if (address) return address;
+  const city = pickFirstText(data, ['city']);
+  const country = pickFirstText(data, ['country']);
+  if (city && country) return `${city} — ${country}`;
+  return city || country || '—';
+}
+
+function resolveProviderCategory(
+  serviceTypeSlug: string,
+  serviceTypeName: string,
+): MedicalServiceCategory {
+  const normalized = `${serviceTypeSlug} ${serviceTypeName}`.toLowerCase();
+  if (
+    normalized.includes('lab') ||
+    normalized.includes('مختبر') ||
+    normalized.includes('مخبر') ||
+    normalized.includes('تحاليل')
+  ) {
+    return 'labs';
+  }
+  if (
+    normalized.includes('imag') ||
+    normalized.includes('radi') ||
+    normalized.includes('scan') ||
+    normalized.includes('ash') ||
+    normalized.includes('أشعة') ||
+    normalized.includes('تصوير')
+  ) {
+    return 'imaging';
+  }
+  if (
+    normalized.includes('dialysis') ||
+    normalized.includes('rehab') ||
+    normalized.includes('therapy') ||
+    normalized.includes('treat') ||
+    normalized.includes('غسيل') ||
+    normalized.includes('تأهيل') ||
+    normalized.includes('علاج')
+  ) {
+    return 'treatment';
+  }
+  return 'clinics';
+}
+
+function matchesDirectorySearch(
+  facility: MedicalServiceFacility,
+  search?: string,
+): boolean {
+  const normalized = search?.trim().toLowerCase();
+  if (!normalized) return true;
+  const haystack = [
+    facility.name,
+    facility.location,
+    facility.description,
+    facility.shortDescription,
+    ...facility.tags,
+    ...facility.services,
+  ]
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(normalized);
 }
 
 export function mapSuggestFacilityToDirectoryItem(
@@ -99,4 +222,115 @@ export function mergeSuggestFacilities(
   return [...merged.values()].sort((a, b) =>
     a.name.localeCompare(b.name, 'ar'),
   );
+}
+
+export function mapServiceProviderToDirectoryItem(
+  provider: ServiceProvider,
+  options?: {
+    serviceTypeLabel?: string;
+  },
+): MedicalServiceFacility | null {
+  const id = provider.id?.trim() || provider._id?.trim();
+  if (!id) return null;
+
+  const data = provider.data ?? {};
+  const serviceTypeSlug =
+    typeof provider.serviceType === 'string'
+      ? provider.serviceType
+      : provider.serviceType?.slug || '';
+  const serviceTypeName =
+    options?.serviceTypeLabel ||
+    (typeof provider.serviceType === 'string'
+      ? provider.serviceType
+      : readTextValue(provider.serviceType?.name));
+
+  const name =
+    pickFirstText(data, ['name', 'title', 'providerName']) ||
+    serviceTypeName ||
+    id;
+
+  const description =
+    pickFirstText(data, [
+      'description',
+      'about',
+      'summary',
+      'bio',
+      'details',
+    ]) || 'مزود خدمة صحي منشور ضمن دليل LMJ Health.';
+
+  const services = [
+    ...readStringArray(data.services),
+    ...readStringArray(data.specialties),
+    ...readStringArray(data.features),
+    ...readStringArray(data.aliases),
+  ].filter((value, index, array) => array.indexOf(value) === index);
+
+  const tags = [
+    serviceTypeName,
+    ...services,
+    pickFirstText(data, ['city']),
+  ].filter((value, index, array) => value && array.indexOf(value) === index);
+
+  const shortDescription =
+    description.length > 72 ? `${description.slice(0, 69).trim()}…` : description;
+
+  const website = buildAbsoluteUrl(
+    pickFirstText(data, ['website', 'site', 'url']),
+  );
+  const facebook = buildAbsoluteUrl(
+    pickFirstText(data, ['facebook', 'facebookUrl']),
+  );
+  const phoneRaw = pickFirstText(data, ['phone', 'mobile', 'telephone']);
+  const whatsappRaw = pickFirstText(data, ['whatsapp']) || phoneRaw;
+  const imageUrl =
+    pickFirstText(data, ['imageUrl', 'logoUrl', 'coverImageUrl']) ||
+    getMedicalServiceFacilityImage(
+      resolveProviderCategory(serviceTypeSlug, serviceTypeName),
+    );
+
+  return {
+    id,
+    category: resolveProviderCategory(serviceTypeSlug, serviceTypeName),
+    name,
+    location: resolveProviderLocation(data),
+    description,
+    shortDescription,
+    tags: tags.slice(0, 4),
+    services,
+    workingHours: mapWorkingHours(data.workingHours ?? data.hours ?? data.schedule),
+    imageUrl,
+    contact: {
+      phone: buildPhoneHref(phoneRaw),
+      whatsapp: buildWhatsAppHref(whatsappRaw),
+      facebook,
+      website,
+    },
+  };
+}
+
+export function mergeServiceProviders(
+  batches: ServiceProvider[][],
+  options?: {
+    search?: string;
+    serviceTypeLabelsBySlug?: Record<string, string>;
+  },
+): MedicalServiceFacility[] {
+  const merged = new Map<string, MedicalServiceFacility>();
+
+  for (const batch of batches) {
+    for (const provider of batch) {
+      const slug =
+        typeof provider.serviceType === 'string'
+          ? provider.serviceType
+          : provider.serviceType?.slug || '';
+      const mapped = mapServiceProviderToDirectoryItem(provider, {
+        serviceTypeLabel: options?.serviceTypeLabelsBySlug?.[slug],
+      });
+      if (!mapped) continue;
+      if (!matchesDirectorySearch(mapped, options?.search)) continue;
+      merged.set(mapped.id, mapped);
+    }
+  }
+
+  return [...merged.values()].sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 }

@@ -24,15 +24,40 @@ function buildCategoryCounts(facilities: MedicalServiceFacility[]) {
   return counts;
 }
 
+function matchesSearch(
+  facility: MedicalServiceFacility,
+  normalizedSearch: string,
+) {
+  if (!normalizedSearch) return true;
+  return [
+    facility.name,
+    facility.location,
+    facility.description,
+    facility.shortDescription,
+    ...facility.tags,
+    ...facility.services,
+  ]
+    .join(' ')
+    .toLowerCase()
+    .includes(normalizedSearch);
+}
+
 export function useMedicalServicesDirectory(search: string) {
   const query = useQuery({
-    queryKey: ['medical-services-directory', 'catalog', search] as const,
-    queryFn: () => fetchMedicalServicesCatalog(search),
+    queryKey: ['medical-services-directory', 'catalog'] as const,
+    queryFn: () => fetchMedicalServicesCatalog(),
     staleTime: 1000 * 60,
     placeholderData: (previous) => previous,
   });
 
-  const allFacilities = query.data ?? [];
+  const normalizedSearch = search.trim().toLowerCase();
+  const allFacilities = useMemo(
+    () =>
+      (query.data ?? []).filter((facility) =>
+        matchesSearch(facility, normalizedSearch),
+      ),
+    [normalizedSearch, query.data],
+  );
   const counts = useMemo(
     () => buildCategoryCounts(allFacilities),
     [allFacilities],

@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   CheckCircle2,
   ChevronDown,
@@ -8,10 +9,13 @@ import {
   Clock3,
   Facebook,
   Globe,
+  Loader2,
   MapPin,
   Phone,
   Share2,
+  TriangleAlert,
 } from 'lucide-react';
+import { fetchMedicalServiceDetails } from '@/lib/doctor/medical-services-directory/fetch';
 import type { MedicalServiceFacility } from '@/lib/doctor/medical-services-directory/types';
 import { cn } from '@/lib/utils/utils';
 
@@ -63,10 +67,18 @@ export function FacilityDirectoryCard({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const detailsQuery = useQuery({
+    queryKey: ['medical-services-directory', 'details', facility.id] as const,
+    queryFn: () => fetchMedicalServiceDetails(facility.id),
+    enabled: expanded,
+    staleTime: 1000 * 60 * 5,
+  });
+  const displayFacility = detailsQuery.data ?? facility;
+
   const handleShare = async () => {
     const shareData = {
-      title: facility.name,
-      text: facility.shortDescription,
+      title: displayFacility.name,
+      text: displayFacility.shortDescription,
       url: window.location.href,
     };
     if (navigator.share) {
@@ -77,7 +89,9 @@ export function FacilityDirectoryCard({
       }
       return;
     }
-    await navigator.clipboard.writeText(`${facility.name} — ${facility.location}`);
+    await navigator.clipboard.writeText(
+      `${displayFacility.name} — ${displayFacility.location}`,
+    );
   };
 
   if (!expanded) {
@@ -90,7 +104,7 @@ export function FacilityDirectoryCard({
         >
           <div className="h-[72px] w-[96px] shrink-0 overflow-hidden rounded-[10px] border border-[#EEF2F6] bg-[#F3F4F6]">
             <img
-              src={facility.imageUrl}
+              src={displayFacility.imageUrl}
               alt=""
               className="h-full w-full object-cover"
             />
@@ -98,13 +112,13 @@ export function FacilityDirectoryCard({
 
           <div className="min-w-0 flex-1">
             <h3 className="font-cairo text-[15px] font-extrabold text-[#111827]">
-              {facility.name}
+              {displayFacility.name}
             </h3>
             <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-              {facility.shortDescription}
+              {displayFacility.shortDescription}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {facility.tags.map((tag) => (
+              {displayFacility.tags.map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary"
@@ -128,7 +142,7 @@ export function FacilityDirectoryCard({
     <article className="overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.08)]">
       <div className="relative h-[180px] overflow-hidden sm:h-[200px]">
         <img
-          src={facility.imageUrl}
+          src={displayFacility.imageUrl}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -137,11 +151,11 @@ export function FacilityDirectoryCard({
         <div className="absolute inset-y-0 start-0 flex w-[min(100%,320px)] items-stretch">
           <div className="flex flex-1 flex-col justify-center bg-primary/90 px-5 py-4 pt-12 text-white backdrop-blur-[2px] sm:pt-4">
             <h3 className="font-cairo text-[18px] font-black leading-tight sm:text-[20px]">
-              {facility.name}
+              {displayFacility.name}
             </h3>
             <p className="mt-2 flex items-center gap-2 font-cairo text-[12px] font-bold opacity-95">
               <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-              {facility.location}
+              {displayFacility.location}
             </p>
           </div>
         </div>
@@ -166,11 +180,25 @@ export function FacilityDirectoryCard({
       </div>
 
       <div className="space-y-6 px-5 py-6 sm:px-6">
+        {detailsQuery.isFetching ? (
+          <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            جارٍ تحديث التفاصيل...
+          </div>
+        ) : null}
+
+        {detailsQuery.isError ? (
+          <div className="flex items-center gap-2 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 font-cairo text-[12px] font-bold text-[#92400E]">
+            <TriangleAlert className="h-4 w-4 shrink-0" />
+            تعذّر تحميل التفاصيل الإضافية، ويتم عرض البيانات المتاحة حالياً.
+          </div>
+        ) : null}
+
         <p className="font-cairo text-[13px] font-semibold leading-[24px] text-[#667085]">
-          {facility.description}
+          {displayFacility.description}
         </p>
 
-        {facility.workingHours.length > 0 ? (
+        {displayFacility.workingHours.length > 0 ? (
           <section>
             <div className="mb-3 flex items-center gap-2">
               <Clock3 className="h-4 w-4 text-primary" aria-hidden />
@@ -179,7 +207,7 @@ export function FacilityDirectoryCard({
               </h4>
             </div>
             <div className="space-y-2 rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3">
-              {facility.workingHours.map((entry) => (
+              {displayFacility.workingHours.map((entry) => (
                 <div
                   key={`${entry.days}-${entry.hours}`}
                   className="flex items-center justify-between gap-4 font-cairo text-[12px]"
@@ -196,13 +224,13 @@ export function FacilityDirectoryCard({
           </section>
         ) : null}
 
-        {facility.services.length > 0 ? (
+        {displayFacility.services.length > 0 ? (
           <section>
             <h4 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
               الخدمات
             </h4>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {facility.services.map((service) => (
+              {displayFacility.services.map((service) => (
                 <div
                   key={service}
                   className="flex items-center gap-2 font-cairo text-[12px] font-semibold text-[#667085]"
@@ -218,45 +246,45 @@ export function FacilityDirectoryCard({
           </section>
         ) : null}
 
-        {facility.contact.phone ||
-        facility.contact.whatsapp ||
-        facility.contact.facebook ||
-        facility.contact.website ? (
+        {displayFacility.contact.phone ||
+        displayFacility.contact.whatsapp ||
+        displayFacility.contact.facebook ||
+        displayFacility.contact.website ? (
           <section>
             <h4 className="mb-3 font-cairo text-[14px] font-extrabold text-[#111827]">
               التواصل
             </h4>
             <div className="flex flex-wrap items-center gap-3">
-            {facility.contact.whatsapp ? (
+            {displayFacility.contact.whatsapp ? (
               <ContactButton
-                href={facility.contact.whatsapp}
+                href={displayFacility.contact.whatsapp}
                 label="واتساب"
                 className="bg-[#25D366]"
               >
                 <WhatsAppIcon />
               </ContactButton>
             ) : null}
-            {facility.contact.phone ? (
+            {displayFacility.contact.phone ? (
               <ContactButton
-                href={facility.contact.phone}
+                href={displayFacility.contact.phone}
                 label="اتصال"
                 className="bg-primary"
               >
                 <Phone className="h-4 w-4" />
               </ContactButton>
             ) : null}
-            {facility.contact.facebook ? (
+            {displayFacility.contact.facebook ? (
               <ContactButton
-                href={facility.contact.facebook}
+                href={displayFacility.contact.facebook}
                 label="فيسبوك"
                 className="bg-[#1877F2]"
               >
                 <Facebook className="h-4 w-4" />
               </ContactButton>
             ) : null}
-            {facility.contact.website ? (
+            {displayFacility.contact.website ? (
               <ContactButton
-                href={facility.contact.website}
+                href={displayFacility.contact.website}
                 label="الموقع"
                 className="bg-[#4B5563]"
               >

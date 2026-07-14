@@ -43,7 +43,7 @@ export default function DoctorMedicalServicesDirectoryPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [activeCategory, setActiveCategory] =
-    useState<MedicalServiceCategory>("labs");
+    useState<MedicalServiceCategory>("clinics");
 
   const [page, setPage] = useState(1);
 
@@ -124,7 +124,7 @@ export default function DoctorMedicalServicesDirectoryPage() {
           title="تعذّر تحميل دليل الخدمات الطبية"
           brief={
             errorMessage ??
-            "حدث خطأ أثناء جلب المنشآت من الخادم. حاول مرة أخرى."
+            "حدث خطأ أثناء جلب الجهات الطبية المنشورة. حاول مرة أخرى."
           }
           onRetry={() => void retryDirectory()}
           retrying={retryingDirectory}
@@ -165,11 +165,11 @@ export default function DoctorMedicalServicesDirectoryPage() {
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
-          placeholder="ابحث عن منشأة أو خدمة..."
+          placeholder="ابحث عن جهة أو خدمة..."
           onValueChangeExtra={() => setPage(1)}
           onClear={() => {
             setSearch('');
-            setActiveCategory('labs');
+            setActiveCategory('clinics');
             setPage(1);
           }}
         />
@@ -188,16 +188,16 @@ export default function DoctorMedicalServicesDirectoryPage() {
               imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
               title={
                 debouncedSearch.trim()
-                  ? 'لا توجد منشآت تطابق البحث في هذا التصنيف'
-                  : 'لا توجد منشآت في هذا التصنيف بعد'
+                  ? 'لا توجد جهات تطابق البحث في هذا التصنيف'
+                  : 'لا توجد جهات منشورة في هذا التصنيف بعد'
               }
               subtitle={
                 debouncedSearch.trim()
                   ? 'جرّب تعديل كلمات البحث أو تغيير التصنيف لعرض المزيد من النتائج'
-                  : 'تصفح دليل المنشآت والخدمات الطبية المتاحة في المنطقة'
+                  : 'تصفح الجهات والخدمات الطبية المنشورة والمتاحة حالياً'
               }
               actionLabel="تصفح دليل الخدمات"
-              onAction={() => setActiveCategory('labs')}
+              onAction={() => setActiveCategory('clinics')}
               actionIcon={<Search className="h-4 w-4" />}
             />
           ) : (
