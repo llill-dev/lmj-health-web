@@ -2,11 +2,13 @@
 
 import { Helmet } from 'react-helmet-async';
 import {
+  BookOpen,
   FileText,
   HelpCircle,
   MessageSquare,
   ShieldCheck,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import DoctorDashboardOverview from '@/components/doctor/dashboard/doctor-dashboard-overview';
 import {
   DoctorSupportChannels,
@@ -19,6 +21,13 @@ import { useDoctorSupportPage } from '@/hooks/doctor/support/useDoctorSupportPag
 import { Loader2 } from 'lucide-react';
 
 const SUPPORT_CARDS = [
+  {
+    id: 'medical-library',
+    title: 'المكتبة الطبية',
+    description: 'مقالات ونصائح ومحتوى صحي منشور للقراءة السريعة',
+    icon: BookOpen,
+    href: '/medical-library',
+  },
   {
     id: 'faq',
     title: 'الأسئلة الشائعة',
@@ -71,24 +80,42 @@ export default function DoctorSupportPage() {
         />
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {SUPPORT_CARDS.map(({ id, title, description, icon: Icon, modal }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => openModal(modal)}
-              className="rounded-[14px] border border-[#D1FAE5] bg-white p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[10px] bg-[#F0FDFA] text-primary">
-                <Icon className="h-5 w-5" aria-hidden />
-              </div>
-              <h2 className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                {title}
-              </h2>
-              <p className="mt-2 font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
-                {description}
-              </p>
-            </button>
-          ))}
+          {SUPPORT_CARDS.map(({ id, title, description, icon: Icon, modal, href }) =>
+            href ? (
+              <Link
+                key={id}
+                to={href}
+                className="rounded-[14px] border border-[#D1FAE5] bg-white p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              >
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[10px] bg-[#F0FDFA] text-primary">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </div>
+                <h2 className="font-cairo text-[16px] font-extrabold text-[#111827]">
+                  {title}
+                </h2>
+                <p className="mt-2 font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
+                  {description}
+                </p>
+              </Link>
+            ) : (
+              <button
+                key={id}
+                type="button"
+                onClick={() => openModal(modal!)}
+                className="rounded-[14px] border border-[#D1FAE5] bg-white p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              >
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[10px] bg-[#F0FDFA] text-primary">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </div>
+                <h2 className="font-cairo text-[16px] font-extrabold text-[#111827]">
+                  {title}
+                </h2>
+                <p className="mt-2 font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
+                  {description}
+                </p>
+              </button>
+            ),
+          )}
         </div>
 
         <section className="mb-8 rounded-[14px] border border-[#D1FAE5] bg-white p-6 shadow-sm">
