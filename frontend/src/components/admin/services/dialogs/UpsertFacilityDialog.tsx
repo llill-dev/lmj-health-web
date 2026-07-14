@@ -455,7 +455,7 @@ export default function UpsertFacilityDialog({
                       </DoctorProfileFormField>
 
                       <DoctorProfileFormField
-                        label='معرّف طبيب المالك'
+                        label='الطبيب المالك'
                         error={errors.ownerDoctorId?.message}
                         hint='اختياري. اختر طبيبًا معتمدًا أو اترك الحقل بدون مالك.'
                       >

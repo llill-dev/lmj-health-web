@@ -25,6 +25,10 @@ import { DEFAULT_FACILITY_TYPE_OPTIONS } from '@/lib/doctor/facilities/types';
 import { FacilityStatusBadge } from '@/components/doctor/facilities/facility-status-badge';
 import { cn } from '@/lib/utils/utils';
 
+function formatFacilityAttributeLabel(value: string): string {
+  return value.replace(/_/g, ' ');
+}
+
 export function FacilityFormDialog({
   open,
   mode,
@@ -313,7 +317,7 @@ export function FacilityFormDialog({
                             key={attr}
                             className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#E6F4F3] px-3 py-1 font-cairo text-[11px] font-bold text-primary"
                           >
-                            {attr}
+                            {formatFacilityAttributeLabel(attr)}
                             <button
                               type="button"
                               onClick={() => removeAttribute(attr)}
