@@ -132,6 +132,14 @@ export function PlatformFooter() {
                 </button>
               </li>
               <li>
+                <a
+                  href="/medical-library"
+                  className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
+                >
+                  المكتبة الطبية
+                </a>
+              </li>
+              <li>
                 <button
                   type="button"
                   onClick={() => openModal('contact')}

@@ -91,22 +91,13 @@ export function usePlatformContentBySlug(
   slug: string | null | undefined,
   language: PlatformContentLanguage = 'ar',
 ) {
-  const catalogQuery = usePlatformSettingsCatalog(language);
-
-  const publishedSlug = useMemo(() => {
-    if (!slug || !catalogQuery.data?.length) return null;
-    const normalized = slug.trim().toLowerCase();
-    const match = catalogQuery.data.find(
-      (row) => row.slug.trim().toLowerCase() === normalized,
-    );
-    return match?.slug ?? null;
-  }, [catalogQuery.data, slug]);
+  const publishedSlug = useMemo(() => slug?.trim() || null, [slug]);
 
   return useQuery({
     queryKey: ['platform', 'content', 'raw-slug', publishedSlug, language],
     queryFn: () =>
       platformApi.content.getBySlugSafe(String(publishedSlug), language),
-    enabled: Boolean(publishedSlug) && catalogQuery.isSuccess,
+    enabled: Boolean(publishedSlug),
     staleTime: STALE_MS,
     retry: false,
   });

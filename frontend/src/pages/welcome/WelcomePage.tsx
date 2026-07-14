@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { Activity, Heart, Pill, Sparkles } from 'lucide-react';
+import { Activity, BookOpen, Heart, Pill, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AuthBackground from '@/components/auth/AuthBackground';
 
@@ -88,13 +88,21 @@ export default function WelcomePage() {
               رعاية شاملة ... متابعة مستمرة ... أدوية منظمة
             </p>
 
-            <div className='mt-5 flex items-center justify-center'>
+            <div className='mt-5 flex flex-col items-center justify-center gap-3'>
               <button
                 className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-primary pl-[0.03px] text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
                 type='button'
                 onClick={() => navigate('/login')}
               >
                 ابدأ الآن
+              </button>
+              <button
+                className='inline-flex h-[48px] w-[297px] items-center justify-center gap-2 rounded-[6px] border border-[#B8E6E0] bg-white/80 text-[14px] font-bold text-primary shadow-[0px_18px_40px_-20px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#F0FDFA]'
+                type='button'
+                onClick={() => navigate('/medical-library')}
+              >
+                <BookOpen size={18} />
+                تصفح المكتبة الطبية
               </button>
             </div>
           </div>

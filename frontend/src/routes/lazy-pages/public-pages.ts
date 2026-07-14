@@ -29,3 +29,10 @@ export const SignupSuccessPage = lazy(
 export const OnboardingPage = lazy(
   () => import("@/pages/onboarding/OnboardingPage"),
 );
+export const PublicMedicalLibraryPage = lazy(
+  () => import("@/pages/public/medical-library/PublicMedicalLibraryPage"),
+);
+export const PublicMedicalLibraryDetailsPage = lazy(
+  () =>
+    import("@/pages/public/medical-library/PublicMedicalLibraryDetailsPage"),
+);

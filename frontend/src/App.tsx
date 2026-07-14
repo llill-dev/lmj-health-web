@@ -79,6 +79,14 @@ export default function App() {
 
         <Route element={<PublicPagesLayout />}>
           <Route
+            path="/medical-library"
+            element={<PublicPages.PublicMedicalLibraryPage />}
+          />
+          <Route
+            path="/medical-library/:slug"
+            element={<PublicPages.PublicMedicalLibraryDetailsPage />}
+          />
+          <Route
             path="/doctor/restore-account"
             element={<DoctorPages.RestoreAccountPage />}
           />
