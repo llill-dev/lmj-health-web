@@ -36,6 +36,16 @@ function formatFacilityAttributeLabel(value: string): string {
   return value.replace(/_/g, " ");
 }
 
+function getFacilityLocationLabel(facility: Record<string, unknown>): string {
+  const city =
+    typeof facility.city === "string" ? facility.city.trim() : "";
+  const country =
+    typeof facility.country === "string" ? facility.country.trim() : "";
+
+  if (city && country) return `${city}, ${country}`;
+  return city || country || "—";
+}
+
 interface FacilityDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -186,8 +196,7 @@ export default function FacilityDetailsDialog({
                             الموقع
                           </div>
                           <div className="font-cairo text-[14px] font-bold text-[#111827]">
-                            {facility.city as string},{" "}
-                            {facility.country as string}
+                            {getFacilityLocationLabel(facility)}
                           </div>
                           {facility.address && (
                             <div className="font-cairo text-[12px] font-semibold text-[#667085] mt-0.5">
