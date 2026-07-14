@@ -3,6 +3,7 @@ import { resolveLabel } from '@/lib/admin/types';
 import type { ServiceType, ServiceTypesListResponse } from '@/lib/admin/types';
 import {
   normalizePlatformContentDetailsResponse,
+  normalizePlatformContentItems,
   normalizePlatformContentListResponse,
 } from '@/lib/platform/contentUtils';
 import { platformEndpoints } from '@/lib/platform/endpoints';
@@ -10,13 +11,14 @@ import type {
   CreateComplaintBody,
   CreateComplaintResponse,
   PlatformContentDetails,
+  PlatformContentSearchParams,
+  PlatformContentType,
   PlatformContentLanguage,
-  PlatformServiceTypeItem,
-  PlatformSettingsListItem,
+  PlatformContentListItem,
 } from '@/lib/platform/types';
 
 export type PlatformContentListParams = {
-  type?: 'SETTINGS_PAGE';
+  type?: PlatformContentType;
   language?: PlatformContentLanguage;
   page?: number;
   limit?: number;
@@ -24,22 +26,28 @@ export type PlatformContentListParams = {
 
 function buildContentListUrl(params: PlatformContentListParams = {}) {
   const qs = new URLSearchParams();
-  qs.set('type', params.type ?? 'SETTINGS_PAGE');
+  if (params.type) qs.set('type', params.type);
   qs.set('language', params.language ?? 'ar');
   qs.set('page', String(params.page ?? 1));
   qs.set('limit', String(params.limit ?? 20));
   return `${platformEndpoints.content.list}?${qs.toString()}`;
 }
 
+function buildContentSearchUrl(params: PlatformContentSearchParams) {
+  const qs = new URLSearchParams();
+  qs.set('q', params.q.trim());
+  qs.set('language', params.language ?? 'ar');
+  if (params.type) qs.set('type', params.type);
+  qs.set('page', String(params.page ?? 1));
+  qs.set('limit', String(params.limit ?? 20));
+  return `${platformEndpoints.content.search}?${qs.toString()}`;
+}
+
 export const platformApi = {
   content: {
-    listSettingsPages: (params: PlatformContentListParams = {}) =>
-      platformApi.content.listSettingsPagesSafe(params).then(
-        (items) => items ?? [],
-      ),
-
-    /** Returns [] on 404/empty — does not throw. */
-    listSettingsPagesSafe: async (params: PlatformContentListParams = {}) => {
+    list: async (
+      params: PlatformContentListParams = {},
+    ): Promise<PlatformContentListItem[]> => {
       const locale = params.language ?? 'ar';
       const result = await apiRequestResult<Record<string, unknown>>(
         buildContentListUrl(params),
@@ -47,7 +55,42 @@ export const platformApi = {
       );
 
       if (!result.ok) return [];
+      return normalizePlatformContentItems(result.data);
+    },
+
+    listSettingsPages: (params: PlatformContentListParams = {}) =>
+      platformApi.content
+        .listSettingsPagesSafe({ ...params, type: 'SETTINGS_PAGE' })
+        .then(
+        (items) => items ?? [],
+      ),
+
+    /** Returns [] on 404/empty — does not throw. */
+    listSettingsPagesSafe: async (params: PlatformContentListParams = {}) => {
+      const locale = params.language ?? 'ar';
+      const result = await apiRequestResult<Record<string, unknown>>(
+        buildContentListUrl({ ...params, type: 'SETTINGS_PAGE' }),
+        { locale, expectedStatuses: [404] },
+      );
+
+      if (!result.ok) return [];
       return normalizePlatformContentListResponse(result.data);
+    },
+
+    search: async (
+      params: PlatformContentSearchParams,
+    ): Promise<PlatformContentListItem[]> => {
+      const q = params.q.trim();
+      if (!q) return [];
+
+      const locale = params.language ?? 'ar';
+      const result = await apiRequestResult<Record<string, unknown>>(
+        buildContentSearchUrl({ ...params, q }),
+        { locale, expectedStatuses: [404] },
+      );
+
+      if (!result.ok) return [];
+      return normalizePlatformContentItems(result.data);
     },
 
     getBySlug: (slug: string, language: PlatformContentLanguage = 'ar') =>

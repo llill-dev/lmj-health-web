@@ -1,10 +1,12 @@
 import type { AdminContentBlock } from '@/lib/admin/types';
+import type { AdminContentType } from '@/lib/admin/types';
 
 export type PlatformContentLanguage = 'ar' | 'en';
+export type PlatformContentType = AdminContentType;
 
 export type PlatformSettingsListItem = {
   id: string;
-  type: string;
+  type: PlatformContentType | string;
   title: string;
   slug: string;
   language?: string;
@@ -13,9 +15,13 @@ export type PlatformSettingsListItem = {
   publishedAt?: string;
 };
 
+export type PlatformContentListItem = PlatformSettingsListItem & {
+  viewCount?: number;
+};
+
 export type PlatformContentDetails = {
   id: string;
-  type: string;
+  type: PlatformContentType | string;
   title: string;
   slug: string;
   language?: string;
@@ -31,7 +37,15 @@ export type PlatformContentListResponse = {
   limit?: number;
   total?: number;
   results?: number;
-  items?: PlatformSettingsListItem[];
+  items?: PlatformContentListItem[];
+};
+
+export type PlatformContentSearchResponse = {
+  page?: number;
+  limit?: number;
+  total?: number;
+  results?: number;
+  items?: PlatformContentListItem[];
 };
 
 export type PlatformContentDetailsResponse = {
@@ -80,4 +94,12 @@ export type PlatformServiceTypeItem = {
   slug: string;
   name: string;
   description: string;
+};
+
+export type PlatformContentSearchParams = {
+  q: string;
+  language?: PlatformContentLanguage;
+  type?: PlatformContentType;
+  page?: number;
+  limit?: number;
 };

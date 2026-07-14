@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import {
   extractAboutSummary,
   extractContactChannelsFromBlocks,
@@ -12,6 +12,8 @@ import { resolvePublishedSettingsSlug } from '@/lib/platform/resolveSettingsSlug
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type {
   PlatformContentLanguage,
+  PlatformContentListItem,
+  PlatformContentType,
   PlatformLegalDocument,
 } from '@/lib/platform/types';
 import { PLATFORM_FAQ_ITEMS } from '@/lib/platform/faqData';
@@ -25,6 +27,13 @@ const STALE_MS = 1000 * 60 * 10;
 
 const CATALOG_QUERY_KEY = (language: PlatformContentLanguage) =>
   ['platform', 'settings-catalog', language] as const;
+const MEDICAL_LIBRARY_TYPES: PlatformContentType[] = [
+  'NEWS',
+  'GENERAL_ADVICE',
+  'CONDITION',
+  'SYMPTOM',
+  'MEDICATION',
+];
 
 export function usePlatformSettingsCatalog(
   language: PlatformContentLanguage = 'ar',
@@ -221,4 +230,136 @@ export function usePlatformServiceTypes(language: PlatformContentLanguage = 'ar'
     staleTime: STALE_MS,
     retry: false,
   });
+}
+
+export function usePlatformContentList(
+  params: {
+    type?: PlatformContentType;
+    language?: PlatformContentLanguage;
+    limit?: number;
+    page?: number;
+  } = {},
+) {
+  const language = params.language ?? 'ar';
+
+  return useQuery({
+    queryKey: ['platform', 'content-list', params.type ?? 'all', language, params.page ?? 1, params.limit ?? 20],
+    queryFn: () =>
+      platformApi.content.list({
+        type: params.type,
+        language,
+        page: params.page,
+        limit: params.limit,
+      }),
+    staleTime: STALE_MS,
+    retry: false,
+  });
+}
+
+export function usePlatformContentSearch(
+  params: {
+    q: string;
+    type?: PlatformContentType;
+    language?: PlatformContentLanguage;
+    limit?: number;
+    page?: number;
+  },
+) {
+  const language = params.language ?? 'ar';
+  const normalizedQuery = params.q.trim();
+
+  return useQuery({
+    queryKey: [
+      'platform',
+      'content-search',
+      normalizedQuery,
+      params.type ?? 'all',
+      language,
+      params.page ?? 1,
+      params.limit ?? 20,
+    ],
+    queryFn: () =>
+      platformApi.content.search({
+        q: normalizedQuery,
+        type: params.type,
+        language,
+        page: params.page,
+        limit: params.limit,
+      }),
+    enabled: normalizedQuery.length >= 2,
+    staleTime: STALE_MS,
+    retry: false,
+  });
+}
+
+export function usePlatformMedicalLibrary(
+  params: {
+    q?: string;
+    language?: PlatformContentLanguage;
+    limitPerType?: number;
+  } = {},
+) {
+  const language = params.language ?? 'ar';
+  const normalizedQuery = params.q?.trim() ?? '';
+  const searching = normalizedQuery.length >= 2;
+
+  const typeQueries = useQueries({
+    queries: MEDICAL_LIBRARY_TYPES.map((type) => ({
+      queryKey: [
+        'platform',
+        'medical-library',
+        searching ? 'search' : 'list',
+        type,
+        normalizedQuery,
+        language,
+        params.limitPerType ?? 12,
+      ],
+      queryFn: () =>
+        searching
+          ? platformApi.content.search({
+              q: normalizedQuery,
+              type,
+              language,
+              limit: params.limitPerType ?? 12,
+            })
+          : platformApi.content.list({
+              type,
+              language,
+              limit: params.limitPerType ?? 12,
+            }),
+      staleTime: STALE_MS,
+      retry: false,
+      enabled: !searching || normalizedQuery.length >= 2,
+    })),
+  });
+
+  const items = useMemo(() => {
+    const merged = new Map<string, PlatformContentListItem>();
+    for (const query of typeQueries) {
+      for (const item of query.data ?? []) {
+        merged.set(item.id, item);
+      }
+    }
+    return [...merged.values()].sort((a, b) => {
+      const aDate = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+      const bDate = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+      return bDate - aDate;
+    });
+  }, [typeQueries]);
+
+  const isAwaitingData = typeQueries.some(
+    (query) => isAwaitingInitialQueryData(query.data, query.isError),
+  );
+  const isError = typeQueries.every((query) => query.isError);
+  const refetch = async () => {
+    await Promise.all(typeQueries.map((query) => query.refetch()));
+  };
+
+  return {
+    items,
+    isAwaitingData,
+    isError,
+    queries: typeQueries,
+    refetch,
+  };
 }

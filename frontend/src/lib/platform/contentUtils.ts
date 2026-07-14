@@ -2,6 +2,7 @@ import type { AdminContentBlock } from '@/lib/admin/types';
 import type {
   PlatformContactChannel,
   PlatformContentDetails,
+  PlatformContentListItem,
   PlatformFaqItem,
   PlatformLegalDocument,
   PlatformSettingsListItem,
@@ -38,6 +39,12 @@ function normalizeContentItem(
 export function normalizePlatformContentListResponse(
   data: Record<string, unknown>,
 ): PlatformSettingsListItem[] {
+  return normalizePlatformContentItems(data);
+}
+
+export function normalizePlatformContentItems(
+  data: Record<string, unknown>,
+): PlatformContentListItem[] {
   const rows = (data.items ?? data.contentItems ?? data.content ?? []) as
     | Record<string, unknown>[]
     | undefined;
@@ -56,6 +63,12 @@ export function normalizePlatformContentListResponse(
           : undefined,
       publishedAt:
         typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
+      viewCount:
+        typeof row.viewCount === 'number'
+          ? row.viewCount
+          : typeof row.views === 'number'
+            ? row.views
+            : undefined,
     }))
     .filter((row) => row.id && row.slug);
 }
