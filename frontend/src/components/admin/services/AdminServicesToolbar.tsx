@@ -23,6 +23,8 @@ const DEFAULT_FILTERS: FacilityFilterState = {
   sortOrder: 'desc',
 };
 
+export const UNOWNED_OWNER_FILTER = '__unowned__';
+
 function FilterField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className='space-y-1.5'>
@@ -108,11 +110,17 @@ export function AdminServicesToolbar({
 
   const ownerDoctorOptions = [
     { value: '', label: 'كل المالكين' },
+    { value: UNOWNED_OWNER_FILTER, label: 'بدون مالك' },
     ...(ownerDoctorsQuery.data?.doctors ?? []).map((doctor) => ({
       value: doctor._id,
       label: doctor.user?.fullName || doctor._id,
     })),
   ];
+  const ownerDoctorPlaceholder = ownerDoctorsQuery.isLoading
+    ? 'جارٍ تحميل الأطباء...'
+    : ownerDoctorOptions.length > 2
+      ? 'الطبيب المالك'
+      : 'تصفية حسب المالك';
 
   const hasActiveFilters = Boolean(
     facilityFilters &&
@@ -298,6 +306,7 @@ export function AdminServicesToolbar({
                   })
                 }
                 disabled={ownerDoctorsQuery.isLoading}
+                placeholder={ownerDoctorPlaceholder}
               />
             </FilterField>
 

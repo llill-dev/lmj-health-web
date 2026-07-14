@@ -5,7 +5,10 @@ import { useDebounce } from 'use-debounce';
 import { ConfirmActionDialog } from '@/components/admin/dialogs';
 import { AdminServicesContent } from '@/components/admin/services/AdminServicesContent';
 import { AdminServicesHeader } from '@/components/admin/services/AdminServicesHeader';
-import { AdminServicesToolbar } from '@/components/admin/services/AdminServicesToolbar';
+import {
+  AdminServicesToolbar,
+  UNOWNED_OWNER_FILTER,
+} from '@/components/admin/services/AdminServicesToolbar';
 import DeleteFacilityDialog from '@/components/admin/services/dialogs/DeleteFacilityDialog';
 import FacilityDetailsDialog from '@/components/admin/services/dialogs/FacilityDetailsDialog';
 import FacilityDoctorsDialog from '@/components/admin/services/dialogs/FacilityDoctorsDialog';
@@ -71,6 +74,10 @@ export default function AdminServicesPage() {
           page,
           limit: ADMIN_SERVICES_PAGE_SIZE,
           ...facilityFilters,
+          ownerDoctorId:
+            facilityFilters.ownerDoctorId === UNOWNED_OWNER_FILTER
+              ? ''
+              : facilityFilters.ownerDoctorId,
         }
       : { page: 1, limit: 1 },
   );

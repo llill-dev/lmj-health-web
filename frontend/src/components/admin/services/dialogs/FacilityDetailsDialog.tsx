@@ -33,6 +33,11 @@ function formatFacilityAttributeLabel(value: string): string {
   return value.replace(/_/g, ' ');
 }
 
+function getFacilityLocationLabel(facility: FacilitySummary): string {
+  if (facility.city && facility.country) return `${facility.city} • ${facility.country}`;
+  return facility.city || facility.country || '—';
+}
+
 export default function FacilityDetailsDialog({
   open,
   onOpenChange,
@@ -106,8 +111,7 @@ export default function FacilityDetailsDialog({
                     </div>
                     <div className='mt-1 inline-flex items-center gap-1.5 font-cairo text-[13px] font-bold text-[#111827]'>
                       <MapPin className='h-4 w-4 text-primary' />
-                      {details.city}
-                      {details.country ? ` • ${details.country}` : ''}
+                      {getFacilityLocationLabel(details)}
                     </div>
                     {details.address ? (
                       <div className='mt-2 font-cairo text-[12px] font-semibold text-[#667085]'>

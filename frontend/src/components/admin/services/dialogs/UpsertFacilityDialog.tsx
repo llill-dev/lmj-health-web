@@ -144,6 +144,11 @@ export default function UpsertFacilityDialog({
       label: doctor.user?.fullName || doctor._id,
     })),
   ];
+  const ownerDoctorPlaceholder = ownerDoctorsQuery.isLoading
+    ? 'جارٍ تحميل الأطباء...'
+    : ownerDoctorOptions.length > 1
+      ? 'اختر الطبيب المالك'
+      : 'لا يوجد أطباء متاحون';
 
   useEffect(() => {
     if (!open) return;
@@ -460,7 +465,7 @@ export default function UpsertFacilityDialog({
                               onBlur={field.onBlur}
                               name={field.name}
                               options={ownerDoctorOptions}
-                              placeholder='اختر الطبيب المالك'
+                              placeholder={ownerDoctorPlaceholder}
                               error={Boolean(errors.ownerDoctorId)}
                               listboxAriaLabel='الطبيب المالك'
                               disabled={ownerDoctorsQuery.isLoading}

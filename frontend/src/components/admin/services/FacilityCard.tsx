@@ -17,6 +17,11 @@ function formatFacilityAttributeLabel(value: string): string {
   return value.replace(/_/g, ' ');
 }
 
+function getFacilityLocationLabel(facility: FacilitySummary): string {
+  if (facility.city && facility.country) return `${facility.city} · ${facility.country}`;
+  return facility.city || facility.country || '—';
+}
+
 export function FacilityCard({
   facility,
   tabIcon: TabIcon,
@@ -60,8 +65,7 @@ export function FacilityCard({
             <div className='mt-2 flex flex-wrap items-center justify-start gap-5 font-cairo text-[12px] font-bold text-[#98A2B3]'>
               <div className='inline-flex items-center gap-1.5'>
                 <MapPin className='h-3.5 w-3.5 text-primary' />
-                {facility.city}
-                {facility.country ? ` · ${facility.country}` : ''}
+                {getFacilityLocationLabel(facility)}
               </div>
               {facility.phone && (
                 <div className='inline-flex items-center gap-1.5' dir='ltr'>
