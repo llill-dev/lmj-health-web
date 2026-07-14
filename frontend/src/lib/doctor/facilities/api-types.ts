@@ -37,7 +37,7 @@ export type DoctorFacilityMutationBody = {
 
 export type DoctorFacilityAssignBody = {
   facilityId: string | null;
-  facilityProviderId: string | null;
+  facilityProviderId?: string | null;
 };
 
 export type DoctorFacilityResponse = {

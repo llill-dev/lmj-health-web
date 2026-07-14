@@ -32,7 +32,7 @@ export default function LinkFacilityDialog({
   onClose: () => void;
   onLink: (payload: {
     facilityId: string;
-    facilityProviderId: string;
+    facilityProviderId?: string | null;
     suggestSnapshot: SuggestFacilityRecord;
   }) => void;
 }) {
@@ -57,8 +57,7 @@ export default function LinkFacilityDialog({
   };
 
   const canLinkSelected = facilities.some(
-    (facility) =>
-      facilityId(facility) === selectedId && Boolean(facilityProviderId(facility)),
+    (facility) => facilityId(facility) === selectedId,
   );
 
   const handleLink = () => {
@@ -66,13 +65,10 @@ export default function LinkFacilityDialog({
     const selectedFacility = facilities.find(
       (facility) => facilityId(facility) === selectedId,
     );
-    const providerId = selectedFacility
-      ? facilityProviderId(selectedFacility)
-      : undefined;
-    if (!providerId) return;
+    if (!selectedFacility) return;
     onLink({
       facilityId: selectedId,
-      facilityProviderId: providerId,
+      facilityProviderId: facilityProviderId(selectedFacility) ?? null,
       suggestSnapshot: selectedFacility,
     });
   };
@@ -165,21 +161,19 @@ export default function LinkFacilityDialog({
                 const id = facilityId(facility);
                 if (!id) return null;
                 const isSelected = selectedId === id;
-                const hasProviderId = Boolean(facilityProviderId(facility));
 
                 return (
                   <li key={id}>
                     <button
                       type="button"
-                      disabled={submitting || !hasProviderId}
+                      disabled={submitting}
                       onClick={() => setSelectedId(id)}
                       className={cn(
                         'flex w-full items-start gap-3 rounded-[12px] border px-4 py-3 text-right transition',
                         isSelected
                           ? 'border-primary bg-[#E6F4F3] shadow-sm'
                           : 'border-[#EEF2F6] bg-white hover:border-primary/30 hover:bg-[#F0FDFA]',
-                        (submitting || !hasProviderId) &&
-                          'cursor-not-allowed opacity-60',
+                        submitting && 'cursor-not-allowed opacity-60',
                       )}
                     >
                       <div
@@ -204,11 +198,6 @@ export default function LinkFacilityDialog({
                             <MapPin className="h-3 w-3 shrink-0" aria-hidden />
                             {facility.city}
                             {facility.address ? ` · ${facility.address}` : ''}
-                          </p>
-                        ) : null}
-                        {!hasProviderId ? (
-                          <p className="mt-1 font-cairo text-[11px] font-semibold text-[#B42318]">
-                            لا يمكن ربط هذه المنشأة لعدم توفّر معرّف مزوّد الخدمة.
                           </p>
                         ) : null}
                       </div>

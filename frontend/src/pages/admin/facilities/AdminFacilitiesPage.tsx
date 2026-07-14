@@ -61,6 +61,8 @@ const DEFAULT_FILTERS = {
   ownerDoctorId: "",
 };
 
+const UNOWNED_OWNER_FILTER = "__unowned__";
+
 function getFacilityOwnerLabel(facility: FacilitySummary): string {
   const ownerName = facility.owner?.user?.fullName || facility.owner?.fullName;
   if (ownerName) return `المالك: ${ownerName}`;
@@ -102,7 +104,10 @@ export default function AdminFacilitiesPage() {
         status: filters.status || undefined,
         facilityType: filters.facilityType || undefined,
         city: filters.city || undefined,
-        ownerDoctorId: filters.ownerDoctorId || undefined,
+        ownerDoctorId:
+          filters.ownerDoctorId === UNOWNED_OWNER_FILTER
+            ? ""
+            : filters.ownerDoctorId || undefined,
         hasDoctors:
           filters.hasDoctors === "true"
             ? true
@@ -319,6 +324,7 @@ export default function AdminFacilitiesPage() {
               }
               options={[
                 { value: "", label: "كل المالكين" },
+                { value: UNOWNED_OWNER_FILTER, label: "بدون مالك" },
                 ...ownerDoctors.map((doctor) => ({
                   value: doctor._id,
                   label: doctor.user.fullName,

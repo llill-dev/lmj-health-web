@@ -154,7 +154,7 @@ export function useLinkFacility() {
       facilityProviderId,
     }: {
       facilityId: string;
-      facilityProviderId: string;
+      facilityProviderId?: string | null;
       suggestSnapshot?: SuggestFacilityRecord;
     }) => doctorFacilityApi.assign({ facilityId, facilityProviderId }),
     onSuccess: (response, variables) => {

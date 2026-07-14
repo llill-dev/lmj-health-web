@@ -792,7 +792,8 @@ export const adminApi = {
       if (params.status) qs.set("status", params.status);
       if (params.hasDoctors !== undefined)
         qs.set("hasDoctors", String(params.hasDoctors));
-      if (params.ownerDoctorId) qs.set("ownerDoctorId", params.ownerDoctorId);
+      if (params.ownerDoctorId !== undefined)
+        qs.set("ownerDoctorId", params.ownerDoctorId);
       if (params.attribute) qs.set("attribute", params.attribute);
       if (params.sortBy) qs.set("sortBy", params.sortBy);
       if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
