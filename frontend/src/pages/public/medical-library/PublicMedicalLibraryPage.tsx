@@ -16,6 +16,8 @@ const TYPE_LABELS: Record<string, string> = {
   SYMPTOM: "أعراض",
   MEDICATION: "أدوية",
 };
+const TYPE_OPTIONS = ["all", "NEWS", "GENERAL_ADVICE", "CONDITION", "SYMPTOM", "MEDICATION"] as const;
+type MedicalLibraryFilter = (typeof TYPE_OPTIONS)[number];
 
 function formatPublishedAt(value?: string) {
   if (!value) return "—";
@@ -30,6 +32,7 @@ function formatPublishedAt(value?: string) {
 
 export default function PublicMedicalLibraryPage() {
   const [search, setSearch] = useState("");
+  const [activeType, setActiveType] = useState<MedicalLibraryFilter>("all");
   const libraryQuery = usePlatformMedicalLibrary({
     q: search,
     language: "ar",
@@ -40,6 +43,13 @@ export default function PublicMedicalLibraryPage() {
     const failed = libraryQuery.queries.find((query) => query.error)?.error;
     return failed ? getUserFacingRequestErrorMessage(failed) : null;
   }, [libraryQuery.queries]);
+  const filteredItems = useMemo(
+    () =>
+      activeType === "all"
+        ? libraryQuery.items
+        : libraryQuery.items.filter((item) => item.type === activeType),
+    [activeType, libraryQuery.items],
+  );
 
   return (
     <>
@@ -76,15 +86,24 @@ export default function PublicMedicalLibraryPage() {
         </section>
 
         <div className="mt-6 flex flex-wrap gap-2">
-          {Object.entries(TYPE_LABELS).map(([key, label]) => {
-            const count = libraryQuery.items.filter((item) => item.type === key).length;
+          {TYPE_OPTIONS.map((type) => {
+            const count =
+              type === "all"
+                ? libraryQuery.items.length
+                : libraryQuery.items.filter((item) => item.type === type).length;
             return (
-              <div
-                key={key}
-                className="rounded-full border border-[#D9F2EF] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-primary shadow-[0_8px_18px_rgba(15,23,42,0.04)]"
+              <button
+                key={type}
+                type="button"
+                onClick={() => setActiveType(type)}
+                className={`rounded-full border px-4 py-2 font-cairo text-[12px] font-extrabold shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition ${
+                  activeType === type
+                    ? "border-primary bg-primary text-white"
+                    : "border-[#D9F2EF] bg-white text-primary hover:bg-[#F0FDFA]"
+                }`}
               >
-                {label} {count ? `(${count})` : ""}
-              </div>
+                {type === "all" ? "الكل" : TYPE_LABELS[type]} {count ? `(${count})` : ""}
+              </button>
             );
           })}
         </div>
@@ -107,7 +126,7 @@ export default function PublicMedicalLibraryPage() {
               onRetry={() => void libraryQuery.refetch()}
             />
           </div>
-        ) : libraryQuery.items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="mt-6">
             <DoctorListEmptyIllustration
               variant="teal"
@@ -116,7 +135,9 @@ export default function PublicMedicalLibraryPage() {
               title={
                 search.trim()
                   ? "لا توجد نتائج مطابقة للبحث"
-                  : "لا يوجد محتوى طبي منشور حالياً"
+                  : activeType === "all"
+                    ? "لا يوجد محتوى طبي منشور حالياً"
+                    : `لا يوجد محتوى منشور ضمن ${TYPE_LABELS[activeType]} حالياً`
               }
               subtitle={
                 search.trim()
@@ -124,18 +145,30 @@ export default function PublicMedicalLibraryPage() {
                   : "عند نشر مقالات ونصائح طبية جديدة ستظهر هنا تلقائياً."
               }
               actionLabel="مسح البحث"
-              onAction={() => setSearch("")}
+              onAction={() => {
+                setSearch("");
+                setActiveType("all");
+              }}
               actionIcon={<Search className="h-4 w-4" />}
             />
           </div>
         ) : (
           <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {libraryQuery.items.map((item) => (
+            {filteredItems.map((item) => (
               <Link
                 key={item.id}
                 to={`/medical-library/${encodeURIComponent(item.slug)}`}
                 className="group rounded-[22px] border border-[#E4E7EC] bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-[#B8E6E0] hover:shadow-[0_20px_50px_rgba(15,23,42,0.1)]"
               >
+                {item.coverImage ? (
+                  <div className="mb-4 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-[#F8FAFC]">
+                    <img
+                      src={item.coverImage}
+                      alt={item.title}
+                      className="h-[180px] w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                    />
+                  </div>
+                ) : null}
                 <div className="flex items-start justify-between gap-3">
                   <span className="rounded-full bg-[#E6F7F5] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary">
                     {TYPE_LABELS[item.type] ?? item.type}

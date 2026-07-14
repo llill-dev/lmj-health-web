@@ -30,6 +30,8 @@ function normalizeContentItem(
       typeof raw.publishedAt === 'string' ? raw.publishedAt : undefined,
     lastReviewedAt:
       typeof raw.lastReviewedAt === 'string' ? raw.lastReviewedAt : null,
+    coverImage:
+      typeof raw.coverImage === 'string' ? raw.coverImage : undefined,
     contentBlocks: Array.isArray(raw.contentBlocks)
       ? (raw.contentBlocks as AdminContentBlock[])
       : [],
@@ -63,6 +65,8 @@ export function normalizePlatformContentItems(
           : undefined,
       publishedAt:
         typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
+      coverImage:
+        typeof row.coverImage === 'string' ? row.coverImage : undefined,
       viewCount:
         typeof row.viewCount === 'number'
           ? row.viewCount
