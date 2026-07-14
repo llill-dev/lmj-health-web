@@ -9,6 +9,14 @@ import { usePlatformContentBySlug } from "@/hooks/platform";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { contentBlocksToPlainText } from "@/lib/platform/contentUtils";
 
+const TYPE_LABELS: Record<string, string> = {
+  NEWS: "أخبار طبية",
+  GENERAL_ADVICE: "نصائح عامة",
+  CONDITION: "حالات مرضية",
+  SYMPTOM: "أعراض",
+  MEDICATION: "أدوية",
+};
+
 function formatPublishedAt(value?: string) {
   if (!value) return "—";
   const parsed = new Date(value);
@@ -86,7 +94,7 @@ export default function PublicMedicalLibraryDetailsPage() {
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-4 font-cairo text-[12px] font-bold text-[#667085]">
               <span className="rounded-full bg-white px-3 py-1 text-primary shadow-sm">
-                {contentQuery.data.type}
+                {TYPE_LABELS[contentQuery.data.type] ?? contentQuery.data.type}
               </span>
               <span className="inline-flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-primary" />
@@ -103,6 +111,21 @@ export default function PublicMedicalLibraryDetailsPage() {
           <div className="px-6 py-8 sm:px-8">
             <div className="whitespace-pre-line font-cairo text-[15px] font-semibold leading-9 text-[#344054]">
               {body || "لا يوجد نص تفصيلي متاح لهذا المحتوى حالياً."}
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3 border-t border-[#EAECF0] pt-6">
+              <Link
+                to="/medical-library"
+                className="inline-flex items-center justify-center rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
+              >
+                المزيد من المحتوى الطبي
+              </Link>
+              <Link
+                to="/welcome"
+                className="inline-flex items-center justify-center rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#475467] transition hover:border-[#B8E6E0] hover:text-primary"
+              >
+                الصفحة الرئيسية
+              </Link>
             </div>
           </div>
         </article>
