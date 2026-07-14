@@ -73,6 +73,10 @@ function getFacilityLocationLabel(facility: FacilitySummary): string {
   return facility.city || facility.country || "—";
 }
 
+function formatFacilityAttributeLabel(value: string): string {
+  return value.replace(/_/g, " ");
+}
+
 export default function AdminFacilitiesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -108,7 +112,7 @@ export default function AdminFacilitiesPage() {
       }),
   });
 
-  const { data: doctorsData } = useQuery({
+  const { data: doctorsData, isLoading: isLoadingOwnerDoctors } = useQuery({
     queryKey: ["admin", "facility-owner-options"],
     queryFn: () =>
       adminApi.doctors.list({
@@ -125,6 +129,11 @@ export default function AdminFacilitiesPage() {
       _id: doctor._id,
       user: { fullName: doctor.user?.fullName || doctor._id },
     })) || [];
+  const ownerFilterPlaceholder = isLoadingOwnerDoctors
+    ? "جارٍ تحميل الأطباء..."
+    : ownerDoctors.length === 0
+      ? "لا يوجد أطباء معتمدون"
+      : "الطبيب المالك";
 
   const openEdit = useCallback((facility: FacilitySummary) => {
     setSelectedFacility(facility);
@@ -201,8 +210,15 @@ export default function AdminFacilitiesPage() {
 
         <section className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <div className="font-cairo text-[12px] font-extrabold text-[#667085]">
-              قائمة المنشآت الطبية
+            <div>
+              <div className="font-cairo text-[12px] font-extrabold text-[#667085]">
+                قائمة المنشآت الطبية
+              </div>
+              <div className="mt-1 font-cairo text-[11px] font-bold text-[#98A2B3]">
+                {hasActiveFilters
+                  ? `عرض ${facilities.length} من أصل ${totalFacilities} منشأة`
+                  : `إجمالي النتائج: ${totalFacilities}`}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -308,7 +324,8 @@ export default function AdminFacilitiesPage() {
                   label: doctor.user.fullName,
                 })),
               ]}
-              placeholder="الطبيب المالك"
+              placeholder={ownerFilterPlaceholder}
+              disabled={isLoadingOwnerDoctors || ownerDoctors.length === 0}
             />
           </div>
         </section>
@@ -329,116 +346,139 @@ export default function AdminFacilitiesPage() {
               const isDeleted = facility.status === "DELETED";
 
               return (
-              <div
-                key={facility._id || facility.id}
-                className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm">
-                        <Building2 className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-cairo text-[16px] font-black leading-[22px] text-[#111827]">
-                          {facility.name || "—"}
+                <div
+                  key={facility._id || facility.id}
+                  className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="mb-2 flex items-center gap-3">
+                        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br from-primary to-primary/70 text-white shadow-sm">
+                          <Building2 className="w-5 h-5" />
                         </div>
-                        <div className="mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                          {FACILITY_TYPE_LABELS[facility.facilityType || ""] ||
-                            facility.facilityType ||
+                        <div className="min-w-0">
+                          <div className="font-cairo text-[16px] font-black leading-[22px] text-[#111827]">
+                            {facility.name || "—"}
+                          </div>
+                          <div className="mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]">
+                            {FACILITY_TYPE_LABELS[facility.facilityType || ""] ||
+                              facility.facilityType ||
+                              "—"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-4">
+                        {(facility.city || facility.country) && (
+                          <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {getFacilityLocationLabel(facility)}
+                          </div>
+                        )}
+                        {facility.phone && (
+                          <div
+                            dir="ltr"
+                            className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]"
+                          >
+                            <Phone className="h-3.5 w-3.5" />
+                            {facility.phone}
+                          </div>
+                        )}
+                        {facility.doctorCount !== undefined && (
+                          <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                            <Users className="h-3.5 w-3.5" />
+                            {facility.doctorCount === 0
+                              ? "لا يوجد أطباء"
+                              : `${facility.doctorCount} طبيب`}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                          <UserCheck className="h-3.5 w-3.5" />
+                          {getFacilityOwnerLabel(facility)}
+                        </div>
+                        <div className="inline-flex items-center rounded-[6px] border px-2 py-1 font-cairo text-[11px] font-bold">
+                          {STATUS_LABELS[facility.status || ""] ||
+                            facility.status ||
                             "—"}
                         </div>
                       </div>
+
+                      {facility.description ? (
+                        <p className="mt-3 max-w-[720px] font-cairo text-[12px] font-semibold leading-[20px] text-[#667085]">
+                          {facility.description}
+                        </p>
+                      ) : null}
+                      {facility.attributes?.length ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {facility.attributes.map((attribute) => (
+                            <span
+                              key={attribute}
+                              className="inline-flex items-center rounded-[6px] bg-[#E7FBFA] px-2.5 py-1 font-cairo text-[11px] font-extrabold text-primary"
+                            >
+                              {formatFacilityAttributeLabel(attribute)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      {isDeleted ? (
+                        <p className="mt-3 font-cairo text-[11px] font-bold text-[#B42318]">
+                          هذه المنشأة محذوفة حاليًا، لذلك تم تعطيل إجراءات التعديل والحالة والحذف.
+                        </p>
+                      ) : null}
                     </div>
-                    <div className="flex flex-wrap gap-4 items-center mt-3">
-                      {facility.city && (
-                        <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                          <MapPin className="h-3.5 w-3.5" />
-                          {getFacilityLocationLabel(facility)}
-                        </div>
-                      )}
-                      {facility.phone && (
-                        <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                          <Phone className="h-3.5 w-3.5" />
-                          {facility.phone}
-                        </div>
-                      )}
-                      {facility.doctorCount !== undefined && (
-                        <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                          <Users className="h-3.5 w-3.5" />
-                          {facility.doctorCount === 0
-                            ? "لا يوجد أطباء"
-                            : `${facility.doctorCount} طبيب`}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => openDetails(facility)}
+                        title="عرض التفاصيل"
+                        className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        تفاصيل
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openDoctors(facility)}
+                        title="الأطباء"
+                        className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
+                      >
                         <UserCheck className="h-3.5 w-3.5" />
-                        {getFacilityOwnerLabel(facility)}
-                      </div>
-                      <div className="inline-flex items-center rounded-[6px] border px-2 py-1 font-cairo text-[11px] font-bold">
-                        {STATUS_LABELS[facility.status || ""] ||
-                          facility.status ||
-                          "—"}
-                      </div>
+                        الأطباء
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openStatus(facility)}
+                        title="تغيير الحالة"
+                        disabled={isDeleted}
+                        className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Filter className="h-3.5 w-3.5" />
+                        الحالة
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openEdit(facility)}
+                        title="تعديل البيانات"
+                        disabled={isDeleted}
+                        className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        تعديل
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openDelete(facility)}
+                        title="حذف"
+                        disabled={isDeleted}
+                        className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        حذف
+                      </button>
                     </div>
-                    {facility.description ? (
-                      <p className="mt-3 max-w-[720px] font-cairo text-[12px] font-semibold leading-[20px] text-[#667085]">
-                        {facility.description}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openDetails(facility)}
-                      title="عرض التفاصيل"
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      تفاصيل
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openDoctors(facility)}
-                      title="الأطباء"
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6]"
-                    >
-                      <UserCheck className="h-3.5 w-3.5" />
-                      الأطباء
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openStatus(facility)}
-                      title="تغيير الحالة"
-                      disabled={isDeleted}
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#344054] transition hover:bg-[#F3F4F6] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Filter className="h-3.5 w-3.5" />
-                      الحالة
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openEdit(facility)}
-                      title="تعديل البيانات"
-                      disabled={isDeleted}
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Edit3 className="h-3.5 w-3.5" />
-                      تعديل
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openDelete(facility)}
-                      title="حذف"
-                      disabled={isDeleted}
-                      className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      حذف
-                    </button>
                   </div>
                 </div>
-              </div>
               );
             })
           )}

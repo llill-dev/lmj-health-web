@@ -137,7 +137,9 @@ export default function FacilityDoctorsDialog({
                 </div>
               ) : doctors.length === 0 ? (
                 <div className="text-center py-8 font-cairo text-[13px] font-semibold text-[#667085]">
-                  لا يوجد أطباء في هذه المنشأة
+                  {searchQuery.trim()
+                    ? "لا يوجد أطباء يطابقون البحث الحالي"
+                    : "لا يوجد أطباء في هذه المنشأة"}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -166,9 +168,9 @@ export default function FacilityDoctorsDialog({
                           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-cairo text-[11px] font-bold text-[#98A2B3]">
                             <span>{doctorId || "—"}</span>
                             {doctor.specialization && (
-                            <span>{doctor.specialization as string}</span>
-                          )}
-                          {doctor.approvalStatus && (
+                              <span>{doctor.specialization as string}</span>
+                            )}
+                            {doctor.approvalStatus && (
                               <span>
                                 {DOCTOR_APPROVAL_STATUS_LABELS[doctor.approvalStatus as string] ||
                                   (doctor.approvalStatus as string)}
@@ -176,7 +178,10 @@ export default function FacilityDoctorsDialog({
                             )}
                           </div>
                           {doctorUser?.email && (
-                            <div className="mt-1 font-cairo text-[11px] font-semibold text-[#667085]">
+                            <div
+                              dir="ltr"
+                              className="mt-1 font-cairo text-[11px] font-semibold text-[#667085]"
+                            >
                               {doctorUser.email as string}
                             </div>
                           )}
