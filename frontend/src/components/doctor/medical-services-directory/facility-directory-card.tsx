@@ -58,6 +58,34 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
+function mergeFacilityDetails(
+  base: MedicalServiceFacility,
+  details: MedicalServiceFacility | null | undefined,
+): MedicalServiceFacility {
+  if (!details) return base;
+
+  return {
+    ...base,
+    ...details,
+    tags: details.tags.length > 0 ? details.tags : base.tags,
+    services: details.services.length > 0 ? details.services : base.services,
+    workingHours:
+      details.workingHours.length > 0
+        ? details.workingHours
+        : base.workingHours,
+    imageUrl: details.imageUrl || base.imageUrl,
+    description: details.description || base.description,
+    shortDescription: details.shortDescription || base.shortDescription,
+    location: details.location || base.location,
+    contact: {
+      phone: details.contact.phone || base.contact.phone,
+      whatsapp: details.contact.whatsapp || base.contact.whatsapp,
+      facebook: details.contact.facebook || base.contact.facebook,
+      website: details.contact.website || base.contact.website,
+    },
+  };
+}
+
 export function FacilityDirectoryCard({
   facility,
   expanded,
@@ -73,7 +101,7 @@ export function FacilityDirectoryCard({
     enabled: expanded,
     staleTime: 1000 * 60 * 5,
   });
-  const displayFacility = detailsQuery.data ?? facility;
+  const displayFacility = mergeFacilityDetails(facility, detailsQuery.data);
 
   const handleShare = async () => {
     const shareData = {

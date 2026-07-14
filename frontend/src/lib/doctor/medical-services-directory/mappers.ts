@@ -158,6 +158,12 @@ function matchesDirectorySearch(
   return haystack.includes(normalized);
 }
 
+function isPubliclyVisibleProvider(provider: ServiceProvider): boolean {
+  const normalizedStatus = provider.status?.trim().toLowerCase();
+  if (!normalizedStatus) return true;
+  return normalizedStatus === 'active';
+}
+
 export function mapSuggestFacilityToDirectoryItem(
   facility: SuggestFacilityRecord,
   fallbackCategory?: MedicalServiceCategory,
@@ -319,6 +325,7 @@ export function mergeServiceProviders(
 
   for (const batch of batches) {
     for (const provider of batch) {
+      if (!isPubliclyVisibleProvider(provider)) continue;
       const slug =
         typeof provider.serviceType === 'string'
           ? provider.serviceType
