@@ -330,6 +330,19 @@ export default function PublicMedicalLibraryPage() {
           </div>
         ) : null}
 
+        {!libraryQuery.isAwaitingData && !libraryQuery.isError ? (
+          <section className="mt-4 rounded-[18px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
+            <h2 className="font-cairo text-[14px] font-black text-[#92400E]">
+              ملاحظات حول الميزة الحالية
+            </h2>
+            <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
+              <p>المتاح حالياً هو قراءة المحتوى الطبي المنشور وتصفح تفاصيله ومصادره.</p>
+              <p>مكتبة ملفات PDF المشتركة أو المستندات الطبية العامة غير متاحة حالياً من خلال هذا القسم.</p>
+              <p>الحجز أو طلب الخدمات الطبية يتم عبر المسارات المخصصة الأخرى وليس من داخل هذه المكتبة.</p>
+            </div>
+          </section>
+        ) : null}
+
         {libraryQuery.isAwaitingData ? (
           <div className="flex min-h-[260px] items-center justify-center">
             <div className="flex items-center gap-3 font-cairo text-[14px] font-bold text-[#667085]">
