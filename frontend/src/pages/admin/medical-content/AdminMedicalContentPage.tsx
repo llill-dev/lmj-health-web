@@ -53,10 +53,12 @@ import {
 import { useAdminContentStatusCounts } from "@/hooks/admin/content/useAdminContentStatusCounts";
 import type {
   AdminContentDetailsItem,
+  AdminContentDetailsResponse,
   AdminContentItem,
   AdminContentStatus,
   AdminContentType,
 } from "@/lib/admin/types";
+import { adminApi } from "@/lib/admin/client";
 import { cn } from "@/lib/utils/utils";
 import LanguageModeToggle from "@/components/admin/medical-content/LanguageModeToggle";
 import { MedicalContentRowSkeleton } from "@/components/admin/skeletons/MedicalContentRowSkeleton";
@@ -75,6 +77,19 @@ import {
   type LangFilter,
   type UiContentStatus,
 } from "@/components/admin/medical-content/contentListUtils";
+
+function extractContentDetails(
+  payload?: AdminContentDetailsResponse | null,
+): AdminContentDetailsItem | null {
+  if (!payload || typeof payload !== "object") return null;
+  return (
+    payload.item ??
+    payload.content ??
+    payload.contentItem ??
+    payload.data ??
+    null
+  );
+}
 
 export default function AdminMedicalContentPage() {
   const { toast } = useToast();
@@ -1047,6 +1062,21 @@ export default function AdminMedicalContentPage() {
           if (!actionConfirm) return;
           const { kind, id } = actionConfirm;
           if (kind === "submitReview") {
+            const details = extractContentDetails(
+              await adminApi.content.getById(id),
+            );
+            const validSources =
+              details?.sources?.filter((source) => source.url?.trim()).length ?? 0;
+            if (validSources === 0) {
+              setActionConfirm(null);
+              toast("أضف مصدراً واحداً على الأقل قبل إرسال المحتوى للمراجعة.", {
+                title: "المصادر مطلوبة",
+                variant: "error",
+              });
+              setEditingContentId(id);
+              setEditOpen(true);
+              return;
+            }
             await submitReviewMutation.mutateAsync({
               id,
               reviewNotes: "تم إرسال المحتوى للمراجعة من لوحة الإدارة.",
