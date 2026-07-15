@@ -8,12 +8,79 @@ import type {
   PlatformSettingsListItem,
 } from '@/lib/platform/types';
 
+function readString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function extractCoverImageFromBlocks(blocks: AdminContentBlock[]): string | undefined {
+  for (const block of blocks) {
+    const record = block as { imageUrl?: unknown; image?: unknown; coverImage?: unknown };
+    const image =
+      readString(record.coverImage) ||
+      readString(record.imageUrl) ||
+      readString(record.image);
+    if (image) return image;
+  }
+  return undefined;
+}
+
+function extractSourceNameFromBlocks(blocks: AdminContentBlock[]): string | undefined {
+  for (const block of blocks) {
+    if (block.type === 'linkCard') {
+      const title = readString(block.title);
+      if (title) return title;
+    }
+    const record = block as { sourceName?: unknown; source?: unknown };
+    const sourceName = readString(record.sourceName) || readString(record.source);
+    if (sourceName) return sourceName;
+  }
+  return undefined;
+}
+
+function extractSourcesFromBlocks(
+  blocks: AdminContentBlock[],
+): Array<{ title?: string; url?: string }> | undefined {
+  const sources = blocks
+    .flatMap((block) => {
+      if (block.type === 'linkCard') {
+        return [
+          {
+            title: readString(block.title),
+            url: readString(block.url),
+          },
+        ];
+      }
+
+      const record = block as {
+        sourceTitle?: unknown;
+        sourceUrl?: unknown;
+        title?: unknown;
+        url?: unknown;
+      };
+      const url = readString(record.sourceUrl) || readString(record.url);
+      if (!url) return [];
+
+      return [
+        {
+          title: readString(record.sourceTitle) || readString(record.title),
+          url,
+        },
+      ];
+    })
+    .filter((entry) => entry.url);
+
+  return sources.length ? sources : undefined;
+}
+
 function normalizeContentItem(
   raw: Record<string, unknown> | null | undefined,
 ): PlatformContentDetails | null {
   if (!raw || typeof raw !== 'object') return null;
   const id = String(raw.id ?? raw._id ?? '');
   if (!id) return null;
+  const contentBlocks = Array.isArray(raw.contentBlocks)
+    ? (raw.contentBlocks as AdminContentBlock[])
+    : [];
 
   return {
     id,
@@ -30,10 +97,9 @@ function normalizeContentItem(
       typeof raw.publishedAt === 'string' ? raw.publishedAt : undefined,
     lastReviewedAt:
       typeof raw.lastReviewedAt === 'string' ? raw.lastReviewedAt : null,
-    coverImage:
-      typeof raw.coverImage === 'string' ? raw.coverImage : undefined,
+    coverImage: readString(raw.coverImage) ?? extractCoverImageFromBlocks(contentBlocks),
     sourceName:
-      typeof raw.sourceName === 'string' ? raw.sourceName : undefined,
+      readString(raw.sourceName) ?? extractSourceNameFromBlocks(contentBlocks),
     sources: Array.isArray(raw.sources)
       ? raw.sources
           .filter((entry) => entry && typeof entry === 'object')
@@ -45,10 +111,8 @@ function normalizeContentItem(
               url: typeof record.url === 'string' ? record.url : undefined,
             };
           })
-      : undefined,
-    contentBlocks: Array.isArray(raw.contentBlocks)
-      ? (raw.contentBlocks as AdminContentBlock[])
-      : [],
+      : extractSourcesFromBlocks(contentBlocks),
+    contentBlocks,
   };
 }
 
@@ -66,30 +130,36 @@ export function normalizePlatformContentItems(
     | undefined;
 
   return (rows ?? [])
-    .map((row) => ({
-      id: String(row.id ?? row._id ?? ''),
-      type: String(row.type ?? ''),
-      title: String(row.title ?? ''),
-      slug: String(row.slug ?? ''),
-      language: typeof row.language === 'string' ? row.language : undefined,
-      summary: typeof row.summary === 'string' ? row.summary : undefined,
-      pageVersion:
-        typeof row.pageVersion === 'string' || row.pageVersion === null
-          ? (row.pageVersion as string | null)
-          : undefined,
-      publishedAt:
-        typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
-      coverImage:
-        typeof row.coverImage === 'string' ? row.coverImage : undefined,
-      sourceName:
-        typeof row.sourceName === 'string' ? row.sourceName : undefined,
-      viewCount:
-        typeof row.viewCount === 'number'
-          ? row.viewCount
-          : typeof row.views === 'number'
-            ? row.views
+    .map((row) => {
+      const contentBlocks = Array.isArray(row.contentBlocks)
+        ? (row.contentBlocks as AdminContentBlock[])
+        : [];
+
+      return {
+        id: String(row.id ?? row._id ?? ''),
+        type: String(row.type ?? ''),
+        title: String(row.title ?? ''),
+        slug: String(row.slug ?? ''),
+        language: typeof row.language === 'string' ? row.language : undefined,
+        summary: typeof row.summary === 'string' ? row.summary : undefined,
+        pageVersion:
+          typeof row.pageVersion === 'string' || row.pageVersion === null
+            ? (row.pageVersion as string | null)
             : undefined,
-    }))
+        publishedAt:
+          typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
+        coverImage:
+          readString(row.coverImage) ?? extractCoverImageFromBlocks(contentBlocks),
+        sourceName:
+          readString(row.sourceName) ?? extractSourceNameFromBlocks(contentBlocks),
+        viewCount:
+          typeof row.viewCount === 'number'
+            ? row.viewCount
+            : typeof row.views === 'number'
+              ? row.views
+              : undefined,
+      };
+    })
     .filter((row) => row.id && row.slug);
 }
 
