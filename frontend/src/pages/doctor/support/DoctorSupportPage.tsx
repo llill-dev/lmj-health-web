@@ -20,7 +20,29 @@ import { usePlatformSupport } from '@/components/platform/platform-support-provi
 import { useDoctorSupportPage } from '@/hooks/doctor/support/useDoctorSupportPage';
 import { Loader2 } from 'lucide-react';
 
-const SUPPORT_CARDS = [
+type SupportCard =
+  | {
+      id: string;
+      title: string;
+      description: string;
+      icon: typeof BookOpen;
+      href: string;
+      modal?: never;
+    }
+  | {
+      id: string;
+      title: string;
+      description: string;
+      icon:
+        | typeof HelpCircle
+        | typeof MessageSquare
+        | typeof FileText
+        | typeof ShieldCheck;
+      modal: 'faq' | 'contact' | 'terms' | 'privacy';
+      href?: never;
+    };
+
+const SUPPORT_CARDS: readonly SupportCard[] = [
   {
     id: 'medical-library',
     title: 'المكتبة الطبية',
@@ -56,7 +78,7 @@ const SUPPORT_CARDS = [
     icon: ShieldCheck,
     modal: 'privacy' as const,
   },
-] as const;
+];
 
 export default function DoctorSupportPage() {
   const { openModal } = usePlatformSupport();

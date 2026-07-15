@@ -61,7 +61,13 @@ function invalidateContentQueries(qc: ReturnType<typeof useQueryClient>) {
 export function useSubmitContentReview() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => adminApi.content.submitReview(id),
+    mutationFn: ({
+      id,
+      reviewNotes,
+    }: {
+      id: string;
+      reviewNotes?: string;
+    }) => adminApi.content.submitReview(id, reviewNotes),
     onSuccess: () => invalidateContentQueries(qc),
   });
 }

@@ -43,7 +43,10 @@ function buildWhatsAppHref(phone?: string | null): string | undefined {
 function readTextValue(value: unknown): string {
   if (typeof value === 'string') return value.trim();
   if (value && typeof value === 'object') {
-    return resolveLabel(value as { en?: string; ar?: string }, 'ar').trim();
+    return resolveLabel(
+      value as { en: string; ar: string } | undefined,
+      'ar',
+    ).trim();
   }
   return '';
 }

@@ -1047,7 +1047,10 @@ export default function AdminMedicalContentPage() {
           if (!actionConfirm) return;
           const { kind, id } = actionConfirm;
           if (kind === "submitReview") {
-            await submitReviewMutation.mutateAsync(id);
+            await submitReviewMutation.mutateAsync({
+              id,
+              reviewNotes: "تم إرسال المحتوى للمراجعة من لوحة الإدارة.",
+            });
           } else if (kind === "approve") {
             await approveMutation.mutateAsync(id);
           } else if (kind === "publish") {

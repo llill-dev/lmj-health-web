@@ -575,10 +575,17 @@ export const adminApi = {
         body,
         { locale: "ar" },
       ),
-    submitReview: (id: string) =>
-      post<any>(adminEndpoints.content.submitReview(id), undefined, {
+    submitReview: (id: string, reviewNotes?: string) =>
+      post<any>(
+        adminEndpoints.content.submitReview(id),
+        {
+          reviewNotes:
+            reviewNotes?.trim() || "تم إرسال المحتوى للمراجعة من لوحة الإدارة.",
+        },
+        {
         locale: "ar",
-      }),
+      },
+      ),
     approve: (id: string) =>
       post<any>(adminEndpoints.content.approve(id), undefined, {
         locale: "ar",

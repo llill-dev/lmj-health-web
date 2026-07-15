@@ -17,6 +17,34 @@ const TYPE_LABELS: Record<string, string> = {
   MEDICATION: "أدوية",
 };
 
+function readText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function readHeadingLevel(value: unknown): number | undefined {
+  return typeof value === "number" ? value : undefined;
+}
+
+function readStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function readFaqItems(
+  value: unknown,
+): Array<{ question?: string; answer?: string }> {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item) => item && typeof item === "object")
+    .map((item) => {
+      const record = item as Record<string, unknown>;
+      return {
+        question: readText(record.question),
+        answer: readText(record.answer),
+      };
+    });
+}
+
 function formatPublishedAt(value?: string) {
   if (!value) return "—";
   const parsed = new Date(value);
@@ -299,14 +327,18 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
     alt?: string;
     embedUrl?: string;
     provider?: string;
+    title?: string;
+    description?: string;
+    url?: string;
     images?: Array<{ url?: string; caption?: string; alt?: string }>;
   };
 
   if (block.type === "heading") {
-    const Tag = block.level && block.level <= 2 ? "h2" : "h3";
+    const level = readHeadingLevel((block as { level?: unknown }).level);
+    const Tag = level && level <= 2 ? "h2" : "h3";
     return (
       <Tag className="font-cairo text-[22px] font-black leading-10 text-[#101828]">
-        {block.text?.trim() || "عنوان"}
+        {readText((block as { text?: unknown }).text) || "عنوان"}
       </Tag>
     );
   }
@@ -314,14 +346,14 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
   if (block.type === "paragraph") {
     return (
       <p className="whitespace-pre-line font-cairo text-[15px] font-semibold leading-9 text-[#344054]">
-        {block.text?.trim() || "—"}
+        {readText((block as { text?: unknown }).text) || "—"}
       </p>
     );
   }
 
   if (block.type === "list") {
-    const items = block.items ?? [];
-    const ListTag = block.ordered ? "ol" : "ul";
+    const items = readStringList((block as { items?: unknown }).items);
+    const ListTag = (block as { ordered?: boolean }).ordered ? "ol" : "ul";
     return (
       <ListTag className="space-y-3 pr-5 font-cairo text-[15px] font-semibold leading-8 text-[#344054] marker:text-primary">
         {items.map((item, index) => (
@@ -333,38 +365,43 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
 
   if (block.type === "callout") {
     const tone =
-      block.variant === "danger"
+      (block as { variant?: string }).variant === "danger"
         ? "border-[#FECACA] bg-[#FEF2F2] text-[#991B1B]"
-        : block.variant === "warn"
+        : (block as { variant?: string }).variant === "warn"
           ? "border-[#FDE68A] bg-[#FFFBEB] text-[#92400E]"
           : "border-[#B8E6E0] bg-[#F0FDFA] text-[#115E59]";
+    const title = readText(flexibleBlock.title);
+    const text = readText((block as { text?: unknown }).text);
     return (
       <div className={`rounded-[18px] border px-5 py-4 ${tone}`}>
-        {block.title ? (
-          <h3 className="font-cairo text-[16px] font-black">{block.title}</h3>
+        {title ? (
+          <h3 className="font-cairo text-[16px] font-black">{title}</h3>
         ) : null}
         <p className="mt-2 whitespace-pre-line font-cairo text-[14px] font-bold leading-8">
-          {block.text?.trim() || "—"}
+          {text || "—"}
         </p>
       </div>
     );
   }
 
   if (block.type === "linkCard") {
+    const url = readText(flexibleBlock.url) || "#";
+    const title = readText(flexibleBlock.title);
+    const description = readText(flexibleBlock.description);
     return (
       <a
-        href={block.url || "#"}
+        href={url}
         target="_blank"
         rel="noreferrer"
         className="flex items-start justify-between gap-4 rounded-[18px] border border-[#D9F2EF] bg-[#F8FFFE] px-5 py-4 transition hover:border-primary"
       >
         <div>
           <h3 className="font-cairo text-[16px] font-black text-[#101828]">
-            {block.title?.trim() || "رابط خارجي"}
+            {title || "رابط خارجي"}
           </h3>
-          {block.description ? (
+          {description ? (
             <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
-              {block.description}
+              {description}
             </p>
           ) : null}
         </div>
@@ -374,9 +411,10 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
   }
 
   if (block.type === "faq") {
+    const items = readFaqItems((block as { items?: unknown }).items);
     return (
       <div className="space-y-3">
-        {(block.items ?? []).map((item, index) => (
+        {items.map((item, index) => (
           <div
             key={`${item.question}-${index}`}
             className="rounded-[18px] border border-[#EAECF0] bg-[#FCFCFD] px-5 py-4"
@@ -398,19 +436,21 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
   }
 
   if (block.type === "image" || flexibleBlock.imageUrl || flexibleBlock.image) {
-    const imageUrl = flexibleBlock.imageUrl || flexibleBlock.image;
+    const imageUrl = readText(flexibleBlock.imageUrl) || readText(flexibleBlock.image);
     if (!imageUrl) return null;
+    const caption = readText(flexibleBlock.caption);
+    const alt = readText(flexibleBlock.alt) || caption || "صورة توضيحية";
 
     return (
       <figure className="overflow-hidden rounded-[22px] border border-[#E4E7EC] bg-[#FCFCFD]">
         <img
           src={imageUrl}
-          alt={flexibleBlock.alt || flexibleBlock.caption || "صورة توضيحية"}
+          alt={alt}
           className="max-h-[460px] w-full object-cover"
         />
-        {flexibleBlock.caption ? (
+        {caption ? (
           <figcaption className="px-5 py-4 font-cairo text-[13px] font-bold leading-7 text-[#667085]">
-            {flexibleBlock.caption}
+            {caption}
           </figcaption>
         ) : null}
       </figure>
@@ -444,20 +484,27 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
   }
 
   if (block.type === "embed" && flexibleBlock.embedUrl) {
+    const embedUrl = readText(flexibleBlock.embedUrl);
+    const title =
+      readText(flexibleBlock.title) ||
+      readText(flexibleBlock.provider) ||
+      "محتوى مضمّن";
+    const caption = readText(flexibleBlock.caption);
+    if (!embedUrl) return null;
     return (
       <a
-        href={flexibleBlock.embedUrl}
+        href={embedUrl}
         target="_blank"
         rel="noreferrer"
         className="flex items-center justify-between gap-4 rounded-[18px] border border-[#D9F2EF] bg-[#F8FFFE] px-5 py-4 transition hover:border-primary"
       >
         <div>
           <h3 className="font-cairo text-[16px] font-black text-[#101828]">
-            {flexibleBlock.title?.trim() || flexibleBlock.provider?.trim() || "محتوى مضمّن"}
+            {title}
           </h3>
-          {flexibleBlock.caption ? (
+          {caption ? (
             <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
-              {flexibleBlock.caption}
+              {caption}
             </p>
           ) : null}
         </div>

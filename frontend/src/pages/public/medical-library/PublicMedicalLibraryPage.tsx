@@ -223,12 +223,12 @@ export default function PublicMedicalLibraryPage() {
         <section className="overflow-hidden rounded-[28px] border border-[#D9F2EF] bg-[linear-gradient(135deg,#E6F7F5_0%,#FFFFFF_60%,#F5FBFA_100%)] p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.2)]">
+    <div className="flex gap-2">          <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.2)]">
                 <BookOpen className="h-6 w-6" />
               </div>
               <h1 className="font-cairo text-[28px] font-black text-[#101828] sm:text-[34px]">
                 المكتبة الطبية
-              </h1>
+              </h1></div>
               <p className="mt-3 font-cairo text-[14px] font-semibold leading-7 text-[#475467] sm:text-[15px]">
                 تصفح الأخبار الطبية والنصائح العامة والمحتوى الصحي المنشور ضمن المنصة.
               </p>
