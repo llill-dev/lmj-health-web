@@ -180,6 +180,16 @@ export default function DoctorMedicalServicesDirectoryPage() {
           options={MEDICAL_SERVICE_CATEGORY_TABS}
         />
 
+        <section className="mt-4 rounded-[14px] border border-[#FDE68A] bg-[#FFFBEB] px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
+          <h2 className="font-cairo text-[14px] font-extrabold text-[#92400E]">
+            تنبيه مهم
+          </h2>
+          <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
+            <p>هذا الدليل مخصّص لاستعراض الجهات الطبية المنشورة وبيانات التواصل معها.</p>
+            <p>الحجز أو طلب الخدمة من داخل هذا المسار غير متاح حالياً.</p>
+          </div>
+        </section>
+
         <section className="space-y-4">
           {directoryQuery.facilities.length === 0 ? (
             <DoctorListEmptyIllustration
