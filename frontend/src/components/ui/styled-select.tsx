@@ -120,7 +120,7 @@ function StyledSelectInner(
     chevronAriaLabelOpen = "إغلاق القائمة",
     chevronAriaLabelClose = "فتح القائمة",
     dropdownResetKey,
-    listboxZIndex = 5000,
+    listboxZIndex = 11050,
     listboxPortalRef,
   }: StyledSelectProps,
   forwardedRef: ForwardedRef<HTMLDivElement>,

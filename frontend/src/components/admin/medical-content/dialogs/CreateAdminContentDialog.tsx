@@ -26,6 +26,58 @@ const DRAFT_CONTENT_BLOCKS: AdminContentBlock[] = [
   },
 ];
 
+function isValidNewsSourceUrl(value: string): boolean {
+  const trimmed = normalizeNewsSourceUrl(value);
+  if (!trimmed) return false;
+
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+
+    const hostname = url.hostname.trim().toLowerCase();
+    if (!hostname) return false;
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1" ||
+      hostname.endsWith(".local")
+    ) {
+      return false;
+    }
+
+    if (typeof window !== "undefined") {
+      const currentOrigin = window.location.origin.toLowerCase();
+      if (url.origin.toLowerCase() === currentOrigin) return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function normalizeNewsSourceUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  try {
+    const url = new URL(trimmed);
+    const hostname = url.hostname.trim().toLowerCase();
+    const isGoogleRedirect =
+      hostname.includes("google.") && (url.pathname === "/url" || url.pathname.endsWith("/url"));
+
+    if (isGoogleRedirect) {
+      const redirected =
+        url.searchParams.get("url")?.trim() || url.searchParams.get("q")?.trim() || "";
+      if (redirected) return redirected;
+    }
+
+    return url.toString();
+  } catch {
+    return trimmed;
+  }
+}
+
 const formSchema = z
   .object({
     type: z.enum([
@@ -45,6 +97,14 @@ const formSchema = z
       .refine((s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s), {
         message: "المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات",
       }),
+    sourceTitle: z.string().optional(),
+    sourceUrl: z
+      .string()
+      .optional()
+      .refine((value) => {
+        if (!value?.trim()) return true;
+        return isValidNewsSourceUrl(value);
+      }, "أدخل رابط مصدر خارجي صحيح يبدأ بـ http:// أو https://،  ."),
     pageVersion: z.string().optional(),
   })
   .superRefine((value, ctx) => {
@@ -56,6 +116,13 @@ const formSchema = z
         code: z.ZodIssueCode.custom,
         path: ["pageVersion"],
         message: "إصدار الصفحة مطلوب لصفحات الإعدادات",
+      });
+    }
+    if (value.type === "NEWS" && (!value.sourceUrl || !value.sourceUrl.trim())) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["sourceUrl"],
+        message: "رابط مصدر الخبر مطلوب",
       });
     }
   });
@@ -77,6 +144,8 @@ const EMPTY_FORM: FormValues = {
   summary: "",
   language: "ar",
   slug: "",
+  sourceTitle: "",
+  sourceUrl: "",
   pageVersion: "",
 };
 
@@ -132,6 +201,9 @@ export default function CreateAdminContentDialog({
 
   const onSubmit = handleSubmit(async (v) => {
     try {
+      const normalizedSourceUrl =
+        v.type === "NEWS" ? normalizeNewsSourceUrl(v.sourceUrl ?? "") : "";
+
       await createMut.mutateAsync({
         type: v.type,
         title: v.title.trim(),
@@ -140,6 +212,19 @@ export default function CreateAdminContentDialog({
         slug: v.slug?.trim() || undefined,
         pageVersion: v.pageVersion?.trim() || undefined,
         contentBlocks: DRAFT_CONTENT_BLOCKS,
+        sourceName:
+          v.type === "NEWS" ? v.sourceTitle?.trim() || v.title.trim() : undefined,
+        sourceUrl:
+          v.type === "NEWS" ? normalizedSourceUrl || undefined : undefined,
+        sources:
+          v.type === "NEWS" && normalizedSourceUrl
+            ? [
+                {
+                  title: v.sourceTitle?.trim() || v.title.trim(),
+                  url: normalizedSourceUrl,
+                },
+              ]
+            : undefined,
       });
       toast(`أُضيفت مسودة «${v.title.trim()}» إلى المحتوى الطبي.`, {
         title: "تم إضافة المحتوى",
@@ -301,6 +386,44 @@ export default function CreateAdminContentDialog({
                       />
                     </AdminFormField>
                   </div>
+
+                  {selectedType === "NEWS" ? (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <AdminFormField
+                        label="اسم المصدر"
+                        error={errors.sourceTitle?.message}
+                      >
+                        <input
+                          {...register("sourceTitle")}
+                          placeholder="مثال: WHO أو Mayo Clinic"
+                          className={adminFieldClass(
+                            cn(
+                              adminInputClass,
+                              "text-start placeholder:text-start",
+                            ),
+                            Boolean(errors.sourceTitle),
+                          )}
+                        />
+                      </AdminFormField>
+
+                      <AdminFormField
+                        label="رابط المصدر"
+                        required
+                        hint="أدخل رابط الخبر الأصلي من موقع خارجي، وليس رابطاً من لوحة التحكم أو localhost."
+                        error={errors.sourceUrl?.message}
+                      >
+                        <input
+                          {...register("sourceUrl")}
+                          dir="ltr"
+                          placeholder="https://example.com/news"
+                          className={adminFieldClass(
+                            cn(adminInputClass),
+                            Boolean(errors.sourceUrl),
+                          )}
+                        />
+                      </AdminFormField>
+                    </div>
+                  ) : null}
 
                   <AdminFormField
                     label="إصدار الصفحة (اختياري)"

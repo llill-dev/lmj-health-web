@@ -794,6 +794,8 @@ export type CreateAdminContentBody = {
   pageVersion?: string | null;
   contentBlocks?: AdminContentBlock[];
   sources?: Array<{ title?: string; url?: string }>;
+  sourceName?: string;
+  sourceUrl?: string;
 };
 
 export type UpdateAdminContentBody = Partial<CreateAdminContentBody> & {

@@ -91,6 +91,43 @@ function extractContentDetails(
   );
 }
 
+function readSourceText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function countValidContentSources(item: AdminContentDetailsItem | null): number {
+  if (!item) return 0;
+
+  const directSources = Array.isArray(item.sources)
+    ? item.sources.filter((source) => {
+        const record = source as Record<string, unknown>;
+        return Boolean(
+          readSourceText(record.url) ||
+            readSourceText(record.href) ||
+            readSourceText(record.sourceUrl) ||
+            readSourceText(record.link),
+        );
+      }).length
+    : 0;
+
+  if (directSources > 0) return directSources;
+
+  const blockSources = Array.isArray(item.contentBlocks)
+    ? item.contentBlocks.filter((block) => {
+        const record = block as Record<string, unknown>;
+        return Boolean(
+          readSourceText(record.url) ||
+            readSourceText(record.href) ||
+            readSourceText(record.sourceUrl) ||
+            readSourceText(record.sourceLink) ||
+            readSourceText(record.link),
+        );
+      }).length
+    : 0;
+
+  return blockSources;
+}
+
 export default function AdminMedicalContentPage() {
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -1065,8 +1102,7 @@ export default function AdminMedicalContentPage() {
             const details = extractContentDetails(
               await adminApi.content.getById(id),
             );
-            const validSources =
-              details?.sources?.filter((source) => source.url?.trim()).length ?? 0;
+            const validSources = countValidContentSources(details);
             if (validSources === 0) {
               setActionConfirm(null);
               toast("أضف مصدراً واحداً على الأقل قبل إرسال المحتوى للمراجعة.", {
@@ -1075,12 +1111,22 @@ export default function AdminMedicalContentPage() {
               });
               setEditingContentId(id);
               setEditOpen(true);
-              return;
+              throw new Error("sources_required");
             }
             await submitReviewMutation.mutateAsync({
               id,
               reviewNotes: "تم إرسال المحتوى للمراجعة من لوحة الإدارة.",
             });
+            setActiveStatus("الكل");
+            setPage(1);
+            setSearchParams(
+              (prev) => {
+                const next = new URLSearchParams(prev);
+                next.delete("queue");
+                return next;
+              },
+              { replace: true },
+            );
           } else if (kind === "approve") {
             await approveMutation.mutateAsync(id);
           } else if (kind === "publish") {

@@ -89,9 +89,32 @@ function toDisplayText(value: unknown): string {
 }
 
 function toContentStatus(value: unknown): AdminContentStatus {
-  if (value === 'PUBLISHED') return 'PUBLISHED';
-  if (value === 'IN_REVIEW') return 'IN_REVIEW';
-  if (value === 'ARCHIVED') return 'ARCHIVED';
+  const normalized = String(value ?? '')
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, '_');
+  if (
+    normalized === 'PUBLISHED' ||
+    normalized === 'PUBLISH' ||
+    normalized === 'LIVE'
+  ) {
+    return 'PUBLISHED';
+  }
+  if (
+    normalized === 'IN_REVIEW' ||
+    normalized === 'UNDER_REVIEW' ||
+    normalized === 'PENDING_REVIEW' ||
+    normalized === 'SUBMITTED_FOR_REVIEW' ||
+    normalized === 'REVIEW'
+  ) {
+    return 'IN_REVIEW';
+  }
+  if (
+    normalized === 'ARCHIVED' ||
+    normalized === 'ARCHIVE'
+  ) {
+    return 'ARCHIVED';
+  }
   return 'DRAFT';
 }
 
