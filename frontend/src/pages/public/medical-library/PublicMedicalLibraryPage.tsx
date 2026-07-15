@@ -342,6 +342,14 @@ export default function PublicMedicalLibraryPage() {
                       >
                         عرض القسم
                       </button>
+                    ) : activeType === section.type ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveType("all")}
+                        className="inline-flex items-center justify-center rounded-full border border-[#E4E7EC] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#475467] transition hover:border-[#B8E6E0] hover:text-primary"
+                      >
+                        عرض كل الأقسام
+                      </button>
                     ) : null}
                   </div>
                 </div>
