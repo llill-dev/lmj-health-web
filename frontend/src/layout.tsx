@@ -78,9 +78,19 @@ export default function ProtectedLayout({
 
   const active: SidebarItemId =
     sidebarItems.find(
-      (item) =>
-        pathname === `/doctor/${item.path}` ||
-        pathname.startsWith(`/doctor/${item.path}/`),
+      (item) => {
+        const explicitMatches = item.activeMatchPrefixes?.some(
+          (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+        );
+        if (explicitMatches) {
+          return true;
+        }
+
+        return (
+          pathname === `/doctor/${item.path}` ||
+          pathname.startsWith(`/doctor/${item.path}/`)
+        );
+      },
     )?.path ?? 'dashboard';
 
   return (

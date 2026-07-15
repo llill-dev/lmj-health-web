@@ -7,6 +7,7 @@ import {
   MessageCircle,
   Send,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   FacebookIcon,
   InstagramIcon,
@@ -132,12 +133,12 @@ export function PlatformFooter() {
                 </button>
               </li>
               <li>
-                <a
-                  href="/medical-library"
+                <Link
+                  to="/medical-library"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
                   المكتبة الطبية
-                </a>
+                </Link>
               </li>
               <li>
                 <button
@@ -168,20 +169,20 @@ export function PlatformFooter() {
             <h3 className="mb-4 font-cairo text-[18px] font-extrabold">خدماتنا</h3>
             <ul className="space-y-3">
               <li>
-                <a
-                  href="/doctor/appointments"
+                <Link
+                  to="/doctor/appointments"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
                   احجز موعد
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="/doctor/doctors-directory"
+                <Link
+                  to="/doctor/doctors-directory"
                   className="font-cairo text-[13px] font-semibold text-white/90 transition hover:text-white"
                 >
                   الأطباء
-                </a>
+                </Link>
               </li>
               {services.map((service) => (
                 <li key={service.id}>

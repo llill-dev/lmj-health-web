@@ -30,6 +30,7 @@ import type { ComponentType } from "react";
 
 export type SidebarItemId =
   | "dashboard"
+  | "medical-library"
   | "appointments"
   | "waitlist"
   | "patients"
@@ -100,12 +101,22 @@ export const sidebarItems: Array<{
   label: string;
   icon: ComponentType<{ className?: string }>;
   badge?: number;
+  href?: string;
+  activeMatchPrefixes?: string[];
 }> = [
   {
     id: "dashboard",
     path: "dashboard",
     label: "لوحة التحكم",
     icon: LayoutGrid,
+  },
+  {
+    id: "medical-library",
+    path: "medical-library",
+    label: "المكتبة الطبية",
+    icon: BookOpen,
+    href: "/medical-library",
+    activeMatchPrefixes: ["/medical-library"],
   },
   {
     id: "appointments",

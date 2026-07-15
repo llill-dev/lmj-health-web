@@ -225,11 +225,15 @@ export default function Sidebar({
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = item.path === resolvedActive;
+                const itemHref =
+                  "href" in item && typeof item.href === "string"
+                    ? item.href
+                    : `${basePath}/${item.path}`;
 
                 return (
                   <Link
                     key={item.path}
-                    to={`${basePath}/${item.path}`}
+                    to={itemHref}
                     onClick={onCloseMobile}
                     className={
                       isActive
