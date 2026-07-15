@@ -33,14 +33,26 @@ function formatPublishedAt(value?: string) {
 export default function PublicMedicalLibraryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(
+    searchParams.get("q") ?? "",
+  );
   const initialType = searchParams.get("type");
   const [activeType, setActiveType] = useState<MedicalLibraryFilter>(
     initialType && TYPE_OPTIONS.includes(initialType as MedicalLibraryFilter)
       ? (initialType as MedicalLibraryFilter)
       : "all",
   );
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
   const libraryQuery = usePlatformMedicalLibrary({
-    q: search,
+    q: debouncedSearch,
     language: "ar",
     limitPerType: 12,
   });
@@ -58,18 +70,18 @@ export default function PublicMedicalLibraryPage() {
   );
   const listQueryString = useMemo(() => {
     const qs = new URLSearchParams();
-    if (search.trim()) qs.set("q", search.trim());
+    if (debouncedSearch.trim()) qs.set("q", debouncedSearch.trim());
     if (activeType !== "all") qs.set("type", activeType);
     const value = qs.toString();
     return value ? `?${value}` : "";
-  }, [activeType, search]);
+  }, [activeType, debouncedSearch]);
 
   useEffect(() => {
     const next = new URLSearchParams();
-    if (search.trim()) next.set("q", search.trim());
+    if (debouncedSearch.trim()) next.set("q", debouncedSearch.trim());
     if (activeType !== "all") next.set("type", activeType);
     setSearchParams(next, { replace: true });
-  }, [activeType, search, setSearchParams]);
+  }, [activeType, debouncedSearch, setSearchParams]);
 
   return (
     <>
