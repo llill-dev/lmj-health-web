@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, CalendarDays, ExternalLink, FileText, Loader2, Share2 } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "react-router-dom";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
@@ -33,6 +33,7 @@ export default function PublicMedicalLibraryDetailsPage() {
   const location = useLocation();
   const slug = params.slug ? decodeURIComponent(params.slug) : "";
   const contentQuery = usePlatformContentBySlug(slug, "ar");
+  const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
   const blocks = contentQuery.data?.contentBlocks ?? [];
   const backToList = `/medical-library${location.search || ""}`;
   const handleShare = useCallback(async () => {
@@ -47,6 +48,8 @@ export default function PublicMedicalLibraryDetailsPage() {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
+        setShareState("shared");
+        window.setTimeout(() => setShareState("idle"), 2200);
         return;
       } catch {
         // fall through to clipboard
@@ -54,6 +57,8 @@ export default function PublicMedicalLibraryDetailsPage() {
     }
 
     await navigator.clipboard.writeText(shareUrl);
+    setShareState("copied");
+    window.setTimeout(() => setShareState("idle"), 2200);
   }, [contentQuery.data]);
 
   if (contentQuery.isLoading) {
@@ -143,6 +148,13 @@ export default function PublicMedicalLibraryDetailsPage() {
                 <Share2 className="h-4 w-4" />
                 مشاركة المقال
               </button>
+              {shareState !== "idle" ? (
+                <p className="mt-3 font-cairo text-[12px] font-bold text-[#0F766E]">
+                  {shareState === "shared"
+                    ? "تم فتح نافذة المشاركة."
+                    : "تم نسخ الرابط إلى الحافظة."}
+                </p>
+              ) : null}
             </div>
           </div>
 
