@@ -75,6 +75,8 @@ export default function PublicMedicalLibraryPage() {
     const value = qs.toString();
     return value ? `?${value}` : "";
   }, [activeType, debouncedSearch]);
+  const activeTypeLabel =
+    activeType === "all" ? "كل الأنواع" : TYPE_LABELS[activeType];
 
   useEffect(() => {
     const next = new URLSearchParams();
@@ -139,6 +141,19 @@ export default function PublicMedicalLibraryPage() {
             );
           })}
         </div>
+
+        {!libraryQuery.isAwaitingData && !libraryQuery.isError ? (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
+            <div className="font-cairo text-[13px] font-extrabold text-[#344054]">
+              {filteredItems.length} نتيجة ضمن <span className="text-primary">{activeTypeLabel}</span>
+            </div>
+            <div className="font-cairo text-[12px] font-bold text-[#667085]">
+              {debouncedSearch.trim()
+                ? `البحث الحالي: ${debouncedSearch.trim()}`
+                : "يعرض أحدث المحتوى المنشور"}
+            </div>
+          </div>
+        ) : null}
 
         {libraryQuery.isAwaitingData ? (
           <div className="flex min-h-[260px] items-center justify-center">
