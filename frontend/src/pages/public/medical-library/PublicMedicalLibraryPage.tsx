@@ -77,6 +77,7 @@ export default function PublicMedicalLibraryPage() {
   }, [activeType, debouncedSearch]);
   const activeTypeLabel =
     activeType === "all" ? "كل الأنواع" : TYPE_LABELS[activeType];
+  const hasActiveFilters = Boolean(debouncedSearch.trim()) || activeType !== "all";
 
   useEffect(() => {
     const next = new URLSearchParams();
@@ -154,14 +155,32 @@ export default function PublicMedicalLibraryPage() {
 
         {!libraryQuery.isAwaitingData && !libraryQuery.isError ? (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
-            <div className="font-cairo text-[13px] font-extrabold text-[#344054]">
-              {filteredItems.length} نتيجة ضمن <span className="text-primary">{activeTypeLabel}</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="font-cairo text-[13px] font-extrabold text-[#344054]">
+                {filteredItems.length} نتيجة ضمن <span className="text-primary">{activeTypeLabel}</span>
+              </div>
+              <div className="font-cairo text-[12px] font-bold text-[#667085]">
+                {debouncedSearch.trim()
+                  ? `البحث الحالي: ${debouncedSearch.trim()}`
+                  : "يعرض أحدث المحتوى المنشور"}
+              </div>
             </div>
-            <div className="font-cairo text-[12px] font-bold text-[#667085]">
-              {debouncedSearch.trim()
-                ? `البحث الحالي: ${debouncedSearch.trim()}`
-                : "يعرض أحدث المحتوى المنشور"}
-            </div>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setActiveType("all");
+                }}
+                className="inline-flex items-center justify-center rounded-full border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
+              >
+                إعادة ضبط
+              </button>
+            ) : (
+              <div className="font-cairo text-[12px] font-bold text-[#98A2B3]">
+                عرض كامل
+              </div>
+            )}
           </div>
         ) : null}
 
