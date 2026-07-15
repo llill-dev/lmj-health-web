@@ -12,14 +12,57 @@ function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+function readNestedString(
+  record: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = readString(record[key]);
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function readMediaUrl(value: unknown): string | undefined {
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (!value || typeof value !== 'object') return undefined;
+
+  const record = value as Record<string, unknown>;
+  return readNestedString(record, [
+    'url',
+    'src',
+    'href',
+    'imageUrl',
+    'secure_url',
+    'downloadUrl',
+  ]);
+}
+
 function extractCoverImageFromBlocks(blocks: AdminContentBlock[]): string | undefined {
   for (const block of blocks) {
-    const record = block as { imageUrl?: unknown; image?: unknown; coverImage?: unknown };
+    const record = block as {
+      imageUrl?: unknown;
+      image?: unknown;
+      coverImage?: unknown;
+      media?: unknown;
+      thumbnail?: unknown;
+      poster?: unknown;
+      images?: unknown;
+    };
     const image =
-      readString(record.coverImage) ||
-      readString(record.imageUrl) ||
-      readString(record.image);
+      readMediaUrl(record.coverImage) ||
+      readMediaUrl(record.imageUrl) ||
+      readMediaUrl(record.image) ||
+      readMediaUrl(record.media) ||
+      readMediaUrl(record.thumbnail) ||
+      readMediaUrl(record.poster);
     if (image) return image;
+    if (Array.isArray(record.images)) {
+      for (const item of record.images) {
+        const url = readMediaUrl(item);
+        if (url) return url;
+      }
+    }
   }
   return undefined;
 }
@@ -56,13 +99,22 @@ function extractSourcesFromBlocks(
         sourceUrl?: unknown;
         title?: unknown;
         url?: unknown;
+        sourceLink?: unknown;
+        href?: unknown;
       };
-      const url = readString(record.sourceUrl) || readString(record.url);
+      const url =
+        readString(record.sourceUrl) ||
+        readString(record.url) ||
+        readString(record.sourceLink) ||
+        readString(record.href);
       if (!url) return [];
 
       return [
         {
-          title: readString(record.sourceTitle) || readString(record.title),
+          title:
+            readString(record.sourceTitle) ||
+            readString(record.title) ||
+            readString((block as { label?: unknown }).label),
           url,
         },
       ];
@@ -97,9 +149,18 @@ function normalizeContentItem(
       typeof raw.publishedAt === 'string' ? raw.publishedAt : undefined,
     lastReviewedAt:
       typeof raw.lastReviewedAt === 'string' ? raw.lastReviewedAt : null,
-    coverImage: readString(raw.coverImage) ?? extractCoverImageFromBlocks(contentBlocks),
+    coverImage:
+      readMediaUrl(raw.coverImage) ??
+      readMediaUrl(raw.image) ??
+      readMediaUrl(raw.imageUrl) ??
+      readMediaUrl(raw.thumbnail) ??
+      readMediaUrl(raw.media) ??
+      extractCoverImageFromBlocks(contentBlocks),
     sourceName:
-      readString(raw.sourceName) ?? extractSourceNameFromBlocks(contentBlocks),
+      readString(raw.sourceName) ??
+      readString(raw.source) ??
+      readString(raw.publisher) ??
+      extractSourceNameFromBlocks(contentBlocks),
     sources: Array.isArray(raw.sources)
       ? raw.sources
           .filter((entry) => entry && typeof entry === 'object')
@@ -107,8 +168,13 @@ function normalizeContentItem(
             const record = entry as Record<string, unknown>;
             return {
               title:
-                typeof record.title === 'string' ? record.title : undefined,
-              url: typeof record.url === 'string' ? record.url : undefined,
+                readString(record.title) ??
+                readString(record.label) ??
+                readString(record.name),
+              url:
+                readString(record.url) ??
+                readString(record.href) ??
+                readString(record.sourceUrl),
             };
           })
       : extractSourcesFromBlocks(contentBlocks),
@@ -149,9 +215,16 @@ export function normalizePlatformContentItems(
         publishedAt:
           typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
         coverImage:
-          readString(row.coverImage) ?? extractCoverImageFromBlocks(contentBlocks),
+          readMediaUrl(row.coverImage) ??
+          readMediaUrl(row.image) ??
+          readMediaUrl(row.imageUrl) ??
+          readMediaUrl(row.thumbnail) ??
+          extractCoverImageFromBlocks(contentBlocks),
         sourceName:
-          readString(row.sourceName) ?? extractSourceNameFromBlocks(contentBlocks),
+          readString(row.sourceName) ??
+          readString(row.source) ??
+          readString(row.publisher) ??
+          extractSourceNameFromBlocks(contentBlocks),
         viewCount:
           typeof row.viewCount === 'number'
             ? row.viewCount
