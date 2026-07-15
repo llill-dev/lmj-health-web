@@ -209,6 +209,16 @@ export default function PublicMedicalLibraryDetailsPage() {
 }
 
 function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
+  const flexibleBlock = block as AdminContentBlock & {
+    imageUrl?: string;
+    image?: string;
+    caption?: string;
+    alt?: string;
+    embedUrl?: string;
+    provider?: string;
+    images?: Array<{ url?: string; caption?: string; alt?: string }>;
+  };
+
   if (block.type === "heading") {
     const Tag = block.level && block.level <= 2 ? "h2" : "h3";
     return (
@@ -302,6 +312,75 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
 
   if (block.type === "divider") {
     return <div className="h-px w-full bg-[#EAECF0]" />;
+  }
+
+  if (block.type === "image" || flexibleBlock.imageUrl || flexibleBlock.image) {
+    const imageUrl = flexibleBlock.imageUrl || flexibleBlock.image;
+    if (!imageUrl) return null;
+
+    return (
+      <figure className="overflow-hidden rounded-[22px] border border-[#E4E7EC] bg-[#FCFCFD]">
+        <img
+          src={imageUrl}
+          alt={flexibleBlock.alt || flexibleBlock.caption || "صورة توضيحية"}
+          className="max-h-[460px] w-full object-cover"
+        />
+        {flexibleBlock.caption ? (
+          <figcaption className="px-5 py-4 font-cairo text-[13px] font-bold leading-7 text-[#667085]">
+            {flexibleBlock.caption}
+          </figcaption>
+        ) : null}
+      </figure>
+    );
+  }
+
+  if (block.type === "gallery" && Array.isArray(flexibleBlock.images) && flexibleBlock.images.length > 0) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {flexibleBlock.images.map((image, index) =>
+          image.url ? (
+            <figure
+              key={`${image.url}-${index}`}
+              className="overflow-hidden rounded-[20px] border border-[#E4E7EC] bg-[#FCFCFD]"
+            >
+              <img
+                src={image.url}
+                alt={image.alt || image.caption || `صورة ${index + 1}`}
+                className="h-[220px] w-full object-cover"
+              />
+              {image.caption ? (
+                <figcaption className="px-4 py-3 font-cairo text-[12px] font-bold text-[#667085]">
+                  {image.caption}
+                </figcaption>
+              ) : null}
+            </figure>
+          ) : null,
+        )}
+      </div>
+    );
+  }
+
+  if (block.type === "embed" && flexibleBlock.embedUrl) {
+    return (
+      <a
+        href={flexibleBlock.embedUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center justify-between gap-4 rounded-[18px] border border-[#D9F2EF] bg-[#F8FFFE] px-5 py-4 transition hover:border-primary"
+      >
+        <div>
+          <h3 className="font-cairo text-[16px] font-black text-[#101828]">
+            {flexibleBlock.title?.trim() || flexibleBlock.provider?.trim() || "محتوى مضمّن"}
+          </h3>
+          {flexibleBlock.caption ? (
+            <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
+              {flexibleBlock.caption}
+            </p>
+          ) : null}
+        </div>
+        <ExternalLink className="h-5 w-5 shrink-0 text-primary" />
+      </a>
+    );
   }
 
   return null;
