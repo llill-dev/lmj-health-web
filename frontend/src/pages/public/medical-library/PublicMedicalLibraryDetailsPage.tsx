@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, CalendarDays, ExternalLink, FileText, Loader2, Share2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "react-router-dom";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
@@ -36,6 +36,16 @@ export default function PublicMedicalLibraryDetailsPage() {
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
   const blocks = contentQuery.data?.contentBlocks ?? [];
   const backToList = `/medical-library${location.search || ""}`;
+
+  useEffect(() => {
+    if (shareState === "idle") return;
+    const timer = window.setTimeout(() => {
+      setShareState("idle");
+    }, 2200);
+
+    return () => window.clearTimeout(timer);
+  }, [shareState]);
+
   const handleShare = useCallback(async () => {
     if (!contentQuery.data) return;
     const shareUrl = window.location.href;
@@ -49,7 +59,6 @@ export default function PublicMedicalLibraryDetailsPage() {
       try {
         await navigator.share(shareData);
         setShareState("shared");
-        window.setTimeout(() => setShareState("idle"), 2200);
         return;
       } catch {
         // fall through to clipboard
@@ -58,7 +67,6 @@ export default function PublicMedicalLibraryDetailsPage() {
 
     await navigator.clipboard.writeText(shareUrl);
     setShareState("copied");
-    window.setTimeout(() => setShareState("idle"), 2200);
   }, [contentQuery.data]);
 
   if (contentQuery.isLoading) {
