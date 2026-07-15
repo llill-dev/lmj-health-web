@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "react-router-dom";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
-import { usePlatformContentBySlug } from "@/hooks/platform";
+import { usePlatformContentBySlug, usePlatformMedicalLibrary } from "@/hooks/platform";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import type { AdminContentBlock } from "@/lib/admin/types";
 
@@ -36,6 +36,10 @@ export default function PublicMedicalLibraryDetailsPage() {
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
   const blocks = contentQuery.data?.contentBlocks ?? [];
   const backToList = `/medical-library${location.search || ""}`;
+  const relatedQuery = usePlatformMedicalLibrary({
+    language: "ar",
+    limitPerType: 6,
+  });
 
   useEffect(() => {
     if (shareState === "idle") return;
@@ -45,6 +49,14 @@ export default function PublicMedicalLibraryDetailsPage() {
 
     return () => window.clearTimeout(timer);
   }, [shareState]);
+
+  const relatedItems = relatedQuery.items
+    .filter(
+      (item) =>
+        item.slug !== slug &&
+        item.type === contentQuery.data?.type,
+    )
+    .slice(0, 3);
 
   const handleShare = useCallback(async () => {
     if (!contentQuery.data) return;
@@ -223,6 +235,41 @@ export default function PublicMedicalLibraryDetailsPage() {
                 الصفحة الرئيسية
               </Link>
             </div>
+
+            {relatedItems.length > 0 ? (
+              <section className="mt-8 border-t border-[#EAECF0] pt-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h3 className="font-cairo text-[18px] font-black text-[#101828]">
+                    محتوى مشابه
+                  </h3>
+                  <Link
+                    to={backToList}
+                    className="font-cairo text-[12px] font-extrabold text-primary transition hover:opacity-80"
+                  >
+                    عرض المزيد
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {relatedItems.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/medical-library/${encodeURIComponent(item.slug)}${location.search || ""}`}
+                      className="rounded-[18px] border border-[#E4E7EC] bg-[#FCFCFD] p-4 transition hover:border-[#B8E6E0] hover:bg-white"
+                    >
+                      <div className="rounded-full bg-[#E6F7F5] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary w-fit">
+                        {TYPE_LABELS[item.type] ?? item.type}
+                      </div>
+                      <h4 className="mt-3 line-clamp-2 font-cairo text-[15px] font-black leading-7 text-[#101828]">
+                        {item.title}
+                      </h4>
+                      <p className="mt-2 line-clamp-3 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
+                        {item.summary?.trim() || "افتح المقال لقراءة التفاصيل."}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
         </article>
       </div>

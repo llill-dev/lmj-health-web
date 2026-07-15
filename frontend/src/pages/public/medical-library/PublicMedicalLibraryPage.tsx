@@ -18,6 +18,21 @@ const TYPE_LABELS: Record<string, string> = {
 };
 const TYPE_OPTIONS = ["all", "NEWS", "GENERAL_ADVICE", "CONDITION", "SYMPTOM", "MEDICATION"] as const;
 type MedicalLibraryFilter = (typeof TYPE_OPTIONS)[number];
+type MedicalLibraryItem = (typeof usePlatformMedicalLibrary extends (...args: any[]) => infer R
+  ? R extends { items: infer T }
+    ? T extends Array<infer U>
+      ? U
+      : never
+    : never
+  : never);
+
+const TYPE_DESCRIPTIONS: Record<Exclude<MedicalLibraryFilter, "all">, string> = {
+  NEWS: "آخر الأخبار والتحديثات الطبية المنشورة من المصادر المعتمدة.",
+  GENERAL_ADVICE: "إرشادات يومية ونصائح وقائية لتحسين نمط الحياة والصحة العامة.",
+  CONDITION: "شروحات مبسطة حول الحالات المرضية والأسباب والعلامات المرتبطة بها.",
+  SYMPTOM: "محتوى يساعد على فهم الأعراض الشائعة ومتى تستدعي المتابعة الطبية.",
+  MEDICATION: "مقالات ومواد توعوية مرتبطة بالأدوية والاستعمال الآمن.",
+};
 
 function formatPublishedAt(value?: string) {
   if (!value) return "—";
@@ -28,6 +43,58 @@ function formatPublishedAt(value?: string) {
     month: "long",
     day: "numeric",
   });
+}
+
+function renderLibraryCard(item: MedicalLibraryItem, listQueryString: string) {
+  return (
+    <Link
+      key={item.id}
+      to={`/medical-library/${encodeURIComponent(item.slug)}${listQueryString}`}
+      className="group rounded-[22px] border border-[#E4E7EC] bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-[#B8E6E0] hover:shadow-[0_20px_50px_rgba(15,23,42,0.1)]"
+    >
+      {item.coverImage ? (
+        <div className="mb-4 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-[#F8FAFC]">
+          <img
+            src={item.coverImage}
+            alt={item.title}
+            className="h-[180px] w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+          />
+        </div>
+      ) : null}
+      <div className="flex items-start justify-between gap-3">
+        <span className="rounded-full bg-[#E6F7F5] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary">
+          {TYPE_LABELS[item.type] ?? item.type}
+        </span>
+        <span className="font-cairo text-[11px] font-bold text-[#98A2B3]">
+          {formatPublishedAt(item.publishedAt)}
+        </span>
+      </div>
+
+      <h2 className="mt-4 font-cairo text-[18px] font-black leading-8 text-[#101828] transition group-hover:text-primary">
+        {item.title}
+      </h2>
+
+      <p className="mt-3 line-clamp-4 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
+        {item.summary?.trim() || "افتح التفاصيل لقراءة المحتوى الطبي الكامل."}
+      </p>
+
+      {item.sourceName?.trim() ? (
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#475467]">
+          <ExternalLink className="h-3.5 w-3.5 text-primary" />
+          المصدر: {item.sourceName.trim()}
+        </div>
+      ) : null}
+
+      <div className="mt-5 flex items-center justify-between">
+        <span className="font-cairo text-[12px] font-extrabold text-primary">
+          قراءة التفاصيل
+        </span>
+        <span className="font-cairo text-[11px] font-bold text-[#98A2B3]">
+          {item.viewCount != null ? `${item.viewCount} مشاهدة` : ""}
+        </span>
+      </div>
+    </Link>
+  );
 }
 
 export default function PublicMedicalLibraryPage() {
@@ -78,6 +145,25 @@ export default function PublicMedicalLibraryPage() {
   const activeTypeLabel =
     activeType === "all" ? "كل الأنواع" : TYPE_LABELS[activeType];
   const hasActiveFilters = Boolean(debouncedSearch.trim()) || activeType !== "all";
+  const groupedItems = useMemo(
+    () =>
+      TYPE_OPTIONS.filter(
+        (type): type is Exclude<MedicalLibraryFilter, "all"> => type !== "all",
+      ).map((type) => ({
+        type,
+        label: TYPE_LABELS[type],
+        description: TYPE_DESCRIPTIONS[type],
+        items: libraryQuery.items.filter((item) => item.type === type),
+      })),
+    [libraryQuery.items],
+  );
+  const visibleSections = useMemo(
+    () =>
+      activeType === "all"
+        ? groupedItems.filter((section) => section.items.length > 0)
+        : groupedItems.filter((section) => section.type === activeType),
+    [activeType, groupedItems],
+  );
 
   useEffect(() => {
     const next = new URLSearchParams();
@@ -229,57 +315,43 @@ export default function PublicMedicalLibraryPage() {
             />
           </div>
         ) : (
-          <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredItems.map((item) => (
-              <Link
-                key={item.id}
-                to={`/medical-library/${encodeURIComponent(item.slug)}${listQueryString}`}
-                className="group rounded-[22px] border border-[#E4E7EC] bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-[#B8E6E0] hover:shadow-[0_20px_50px_rgba(15,23,42,0.1)]"
+          <div className="mt-6 space-y-8">
+            {visibleSections.map((section) => (
+              <section
+                key={section.type}
+                className="rounded-[24px] border border-[#E4E7EC] bg-[linear-gradient(180deg,#FCFFFE_0%,#FFFFFF_100%)] p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)] sm:p-6"
               >
-                {item.coverImage ? (
-                  <div className="mb-4 overflow-hidden rounded-[18px] border border-[#EEF2F6] bg-[#F8FAFC]">
-                    <img
-                      src={item.coverImage}
-                      alt={item.title}
-                      className="h-[180px] w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                    />
+                <div className="mb-5 flex flex-col gap-3 border-b border-[#EEF2F6] pb-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h2 className="font-cairo text-[22px] font-black text-[#101828]">
+                      {section.label}
+                    </h2>
+                    <p className="mt-2 max-w-2xl font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
+                      {section.description}
+                    </p>
                   </div>
-                ) : null}
-                <div className="flex items-start justify-between gap-3">
-                  <span className="rounded-full bg-[#E6F7F5] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary">
-                    {TYPE_LABELS[item.type] ?? item.type}
-                  </span>
-                  <span className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-                    {formatPublishedAt(item.publishedAt)}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="rounded-full bg-[#E6F7F5] px-4 py-2 font-cairo text-[12px] font-extrabold text-primary">
+                      {section.items.length} عنصر
+                    </div>
+                    {activeType === "all" ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveType(section.type)}
+                        className="inline-flex items-center justify-center rounded-full border border-[#B8E6E0] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
+                      >
+                        عرض القسم
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
 
-                <h2 className="mt-4 font-cairo text-[18px] font-black leading-8 text-[#101828] transition group-hover:text-primary">
-                  {item.title}
-                </h2>
-
-                <p className="mt-3 line-clamp-4 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
-                  {item.summary?.trim() || "افتح التفاصيل لقراءة المحتوى الطبي الكامل."}
-                </p>
-
-                {item.sourceName?.trim() ? (
-                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#475467]">
-                    <ExternalLink className="h-3.5 w-3.5 text-primary" />
-                    المصدر: {item.sourceName.trim()}
-                  </div>
-                ) : null}
-
-                <div className="mt-5 flex items-center justify-between">
-                  <span className="font-cairo text-[12px] font-extrabold text-primary">
-                    قراءة التفاصيل
-                  </span>
-                  <span className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-                    {item.viewCount != null ? `${item.viewCount} مشاهدة` : ""}
-                  </span>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {section.items.map((item) => renderLibraryCard(item, listQueryString))}
                 </div>
-              </Link>
+              </section>
             ))}
-          </section>
+          </div>
         )}
       </div>
     </>
