@@ -29,6 +29,8 @@ export const waitlistQueryKeys = {
   all: ['doctor', 'waitlist'] as const,
   list: (params: WaitlistListParams) =>
     [...waitlistQueryKeys.all, 'list', params] as const,
+  mine: (params: WaitlistListParams) =>
+    [...waitlistQueryKeys.all, 'mine', params] as const,
   detail: (id: string) => [...waitlistQueryKeys.all, 'detail', id] as const,
   suggestions: (params: WaitlistSuggestionsParams) =>
     [...waitlistQueryKeys.all, 'suggestions', params] as const,
@@ -43,8 +45,23 @@ export const waitlistApi = {
     return get<WaitlistListResponse>(path, { locale: 'ar' });
   },
 
+  listMine: (params: WaitlistListParams = {}) => {
+    const query = buildWaitlistQuery(params);
+    const path = query
+      ? `${waitlistEndpoints.mine}?${query}`
+      : waitlistEndpoints.mine;
+    return get<WaitlistListResponse>(path, { locale: 'ar' });
+  },
+
   getById: (id: string) =>
     get<WaitlistDetailResponse>(waitlistEndpoints.byId(id), { locale: 'ar' }),
+
+  cancel: (id: string, body?: { cancelReason?: string }) =>
+    patch<{ messageKey?: string; message?: string; waitlistRequest?: unknown }>(
+      waitlistEndpoints.cancel(id),
+      body ?? {},
+      { locale: 'ar' },
+    ),
 
   markContacted: (id: string, body?: { note?: string }) =>
     patch<{ messageKey?: string; message?: string; waitlistRequest?: unknown }>(

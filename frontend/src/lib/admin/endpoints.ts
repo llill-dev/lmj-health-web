@@ -28,14 +28,12 @@ export const adminEndpoints = {
   },
   patients: {
     list: "/api/admin/patients",
-    // NOTE: details endpoint not documented in Swagger but actively used
     details: (patientId: string) => `/api/admin/patients/${patientId}`,
     activate: (patientId: string) =>
       `/api/admin/patients/${patientId}/activate`,
     suspend: (patientId: string) => `/api/admin/patients/${patientId}/suspend`,
     unsuspend: (patientId: string) =>
       `/api/admin/patients/${patientId}/unsuspend`,
-    // NOTE: files endpoints not documented in Swagger but actively used
     files: {
       list: (patientId: string) => `/api/admin/patients/${patientId}/files`,
       download: (patientId: string, fileId: string) =>
@@ -68,7 +66,6 @@ export const adminEndpoints = {
     create: "/api/admin/users",
     offboard: (userId: string) => `/api/admin/users/${userId}/offboard`,
     reboard: (userId: string) => `/api/admin/users/${userId}/reboard`,
-    // NOTE: doctor restore requests endpoints not documented in Swagger but actively used
     doctorRestoreRequests: "/api/admin/users/doctor-restore-requests",
     reviewRestoreRequest: (userId: string) =>
       `/api/admin/users/${userId}/restore-request/review`,

@@ -225,6 +225,10 @@ const DEV_MEDICAL_ORDER_PLACEHOLDERS: Record<
   referral: [],
 };
 
+function unsupportedApiOperation(message: string): Promise<never> {
+  return Promise.reject(new Error(message));
+}
+
 export const adminApi = {
   doctors: {
     list: (params: AdminDoctorsListParams = {}) => {
@@ -714,11 +718,10 @@ export const adminApi = {
         body,
         { locale: "ar" },
       ),
-    // NOTE: DELETE not documented in Swagger (only GET/POST/PATCH), but frontend has remove helper
     remove: (kind: MedicalOrderCatalogKind, id: string) =>
-      del<ApiSuccessEnvelope>(adminEndpoints.orderCatalog.item(kind, id), {
-        locale: "ar",
-      }),
+      unsupportedApiOperation(
+        `DELETE ${adminEndpoints.orderCatalog.item(kind, id)} is not documented in API-3.`,
+      ),
   },
   lookups: {
     list: (params: AdminLookupsListParams) => {
