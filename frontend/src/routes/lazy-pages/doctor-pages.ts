@@ -85,6 +85,10 @@ export const DoctorMedicalServicesDirectoryPage = lazy(
   () =>
     import("@/pages/doctor/medical-services-directory/DoctorMedicalServicesDirectoryPage"),
 );
+export const DoctorMedicalServiceDetailsPage = lazy(
+  () =>
+    import("@/pages/doctor/medical-services-directory/DoctorMedicalServiceDetailsPage"),
+);
 export const DoctorClinicLocationPage = lazy(
   () => import("@/pages/doctor/clinic-location/DoctorClinicLocationPage"),
 );

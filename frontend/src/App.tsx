@@ -298,6 +298,10 @@ export default function App() {
               element={<DoctorPages.DoctorMedicalServicesDirectoryPage />}
             />
             <Route
+              path="medical-services-directory/:serviceId"
+              element={<DoctorPages.DoctorMedicalServiceDetailsPage />}
+            />
+            <Route
               path="clinic-location"
               element={<DoctorPages.DoctorClinicLocationPage />}
             />

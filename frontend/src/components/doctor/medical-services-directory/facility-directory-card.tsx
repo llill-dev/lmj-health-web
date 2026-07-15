@@ -16,6 +16,7 @@ import {
   TriangleAlert,
   Info,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { fetchMedicalServiceDetails } from '@/lib/doctor/medical-services-directory/fetch';
 import type { MedicalServiceFacility } from '@/lib/doctor/medical-services-directory/types';
 import { cn } from '@/lib/utils/utils';
@@ -333,6 +334,15 @@ export function FacilityDirectoryCard({
             </div>
           </div>
         </section>
+
+        <div className="flex justify-end">
+          <Link
+            to={`/doctor/medical-services-directory/${encodeURIComponent(displayFacility.id)}`}
+            className="inline-flex items-center justify-center rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
+          >
+            عرض الملف الكامل
+          </Link>
+        </div>
       </div>
     </article>
   );
