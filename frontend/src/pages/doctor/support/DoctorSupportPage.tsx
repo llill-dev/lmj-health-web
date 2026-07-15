@@ -131,6 +131,15 @@ export default function DoctorSupportPage() {
             channels={support.contactChannels}
             loading={support.isAwaitingContactData}
           />
+          <div className="mt-5 border-t border-[#ECFDF3] pt-5">
+            <Link
+              to="/medical-library"
+              className="inline-flex items-center gap-2 rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
+            >
+              <BookOpen className="h-4 w-4" aria-hidden />
+              تصفح المكتبة الطبية العامة
+            </Link>
+          </div>
         </section>
 
         <section className="mb-8 rounded-[14px] border border-[#D1FAE5] bg-white p-6 shadow-sm">

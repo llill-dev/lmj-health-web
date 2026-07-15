@@ -17,7 +17,10 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
-import { fetchMedicalServiceDetails } from "@/lib/doctor/medical-services-directory/fetch";
+import {
+  fetchMedicalServiceDetails,
+  fetchMedicalServicesCatalog,
+} from "@/lib/doctor/medical-services-directory/fetch";
 
 function ContactLink({
   href,
@@ -50,6 +53,12 @@ export default function DoctorMedicalServiceDetailsPage() {
     enabled: Boolean(serviceId),
     staleTime: 1000 * 60 * 5,
   });
+  const relatedQuery = useQuery({
+    queryKey: ["doctor", "medical-service-related", serviceId],
+    queryFn: () => fetchMedicalServicesCatalog(),
+    enabled: Boolean(serviceId),
+    staleTime: 1000 * 60 * 5,
+  });
 
   if (detailsQuery.isLoading) {
     return (
@@ -79,6 +88,12 @@ export default function DoctorMedicalServiceDetailsPage() {
   }
 
   const facility = detailsQuery.data;
+  const relatedFacilities = (relatedQuery.data ?? [])
+    .filter(
+      (item) =>
+        item.id !== facility.id && item.category === facility.category,
+    )
+    .slice(0, 3);
 
   return (
     <>
@@ -219,6 +234,41 @@ export default function DoctorMedicalServiceDetailsPage() {
                 استعراض المعلومات والتواصل المباشر مع الجهة الطبية.
               </p>
             </section>
+
+            {relatedFacilities.length > 0 ? (
+              <section>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h2 className="font-cairo text-[18px] font-black text-[#101828]">
+                    جهات مشابهة
+                  </h2>
+                  <Link
+                    to="/doctor/medical-services-directory"
+                    className="font-cairo text-[12px] font-extrabold text-primary transition hover:opacity-80"
+                  >
+                    العودة إلى الدليل
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {relatedFacilities.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/doctor/medical-services-directory/${encodeURIComponent(item.id)}`}
+                      className="rounded-[18px] border border-[#E4E7EC] bg-[#FCFCFD] p-4 transition hover:border-[#B8E6E0] hover:bg-white"
+                    >
+                      <div className="font-cairo text-[11px] font-extrabold text-primary">
+                        {item.location}
+                      </div>
+                      <h3 className="mt-2 line-clamp-2 font-cairo text-[15px] font-black leading-7 text-[#101828]">
+                        {item.name}
+                      </h3>
+                      <p className="mt-2 line-clamp-3 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
+                        {item.shortDescription}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
         </article>
       </div>
