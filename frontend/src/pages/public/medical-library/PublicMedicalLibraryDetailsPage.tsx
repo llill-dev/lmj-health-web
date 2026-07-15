@@ -3,7 +3,7 @@
 import { ArrowLeft, CalendarDays, ExternalLink, FileText, Loader2, Share2 } from "lucide-react";
 import { useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import { usePlatformContentBySlug } from "@/hooks/platform";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
@@ -30,9 +30,11 @@ function formatPublishedAt(value?: string) {
 
 export default function PublicMedicalLibraryDetailsPage() {
   const params = useParams<{ slug: string }>();
+  const location = useLocation();
   const slug = params.slug ? decodeURIComponent(params.slug) : "";
   const contentQuery = usePlatformContentBySlug(slug, "ar");
   const blocks = contentQuery.data?.contentBlocks ?? [];
+  const backToList = `/medical-library${location.search || ""}`;
   const handleShare = useCallback(async () => {
     if (!contentQuery.data) return;
     const shareUrl = window.location.href;
@@ -89,7 +91,7 @@ export default function PublicMedicalLibraryDetailsPage() {
 
       <div dir="rtl" lang="ar" className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <Link
-          to="/medical-library"
+          to={backToList}
           className="mb-5 inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -189,7 +191,7 @@ export default function PublicMedicalLibraryDetailsPage() {
                 </div>
               ) : null}
               <Link
-                to="/medical-library"
+                to={backToList}
                 className="inline-flex items-center justify-center rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
               >
                 المزيد من المحتوى الطبي

@@ -1,9 +1,9 @@
 "use client";
 
 import { BookOpen, ExternalLink, Loader2, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
 import { usePlatformMedicalLibrary } from "@/hooks/platform";
@@ -31,8 +31,14 @@ function formatPublishedAt(value?: string) {
 }
 
 export default function PublicMedicalLibraryPage() {
-  const [search, setSearch] = useState("");
-  const [activeType, setActiveType] = useState<MedicalLibraryFilter>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
+  const initialType = searchParams.get("type");
+  const [activeType, setActiveType] = useState<MedicalLibraryFilter>(
+    initialType && TYPE_OPTIONS.includes(initialType as MedicalLibraryFilter)
+      ? (initialType as MedicalLibraryFilter)
+      : "all",
+  );
   const libraryQuery = usePlatformMedicalLibrary({
     q: search,
     language: "ar",
@@ -50,6 +56,20 @@ export default function PublicMedicalLibraryPage() {
         : libraryQuery.items.filter((item) => item.type === activeType),
     [activeType, libraryQuery.items],
   );
+  const listQueryString = useMemo(() => {
+    const qs = new URLSearchParams();
+    if (search.trim()) qs.set("q", search.trim());
+    if (activeType !== "all") qs.set("type", activeType);
+    const value = qs.toString();
+    return value ? `?${value}` : "";
+  }, [activeType, search]);
+
+  useEffect(() => {
+    const next = new URLSearchParams();
+    if (search.trim()) next.set("q", search.trim());
+    if (activeType !== "all") next.set("type", activeType);
+    setSearchParams(next, { replace: true });
+  }, [activeType, search, setSearchParams]);
 
   return (
     <>
@@ -157,7 +177,7 @@ export default function PublicMedicalLibraryPage() {
             {filteredItems.map((item) => (
               <Link
                 key={item.id}
-                to={`/medical-library/${encodeURIComponent(item.slug)}`}
+                to={`/medical-library/${encodeURIComponent(item.slug)}${listQueryString}`}
                 className="group rounded-[22px] border border-[#E4E7EC] bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-[#B8E6E0] hover:shadow-[0_20px_50px_rgba(15,23,42,0.1)]"
               >
                 {item.coverImage ? (
