@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Loader2, Search } from "lucide-react";
+import { BookOpen, ExternalLink, Loader2, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
@@ -187,7 +187,8 @@ export default function PublicMedicalLibraryPage() {
                 </p>
 
                 {item.sourceName?.trim() ? (
-                  <div className="mt-4 inline-flex rounded-full bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#475467]">
+                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#475467]">
+                    <ExternalLink className="h-3.5 w-3.5 text-primary" />
                     المصدر: {item.sourceName.trim()}
                   </div>
                 ) : null}

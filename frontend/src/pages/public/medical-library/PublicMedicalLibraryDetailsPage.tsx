@@ -160,9 +160,14 @@ export default function PublicMedicalLibraryDetailsPage() {
             <div className="mt-8 flex flex-wrap gap-3 border-t border-[#EAECF0] pt-6">
               {contentQuery.data.sources?.filter((source) => source.url?.trim()).length ? (
                 <div className="w-full space-y-3 rounded-[18px] border border-[#EAECF0] bg-[#FCFCFD] px-5 py-4">
-                  <h3 className="font-cairo text-[16px] font-black text-[#101828]">
-                    المراجع والمصادر
-                  </h3>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="font-cairo text-[16px] font-black text-[#101828]">
+                      المراجع والمصادر
+                    </h3>
+                    <span className="rounded-full bg-white px-3 py-1 font-cairo text-[11px] font-extrabold text-primary shadow-sm">
+                      {contentQuery.data.sources.filter((source) => source.url?.trim()).length} مرجع
+                    </span>
+                  </div>
                   <div className="space-y-2">
                     {contentQuery.data.sources
                       ?.filter((source) => source.url?.trim())
