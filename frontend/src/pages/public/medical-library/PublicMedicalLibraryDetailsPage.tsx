@@ -50,12 +50,17 @@ export default function PublicMedicalLibraryDetailsPage() {
     return () => window.clearTimeout(timer);
   }, [shareState]);
 
-  const relatedItems = relatedQuery.items
+  const relatedItems = [...relatedQuery.items]
     .filter(
       (item) =>
         item.slug !== slug &&
         item.type === contentQuery.data?.type,
     )
+    .sort((a, b) => {
+      const aDate = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+      const bDate = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+      return bDate - aDate;
+    })
     .slice(0, 3);
 
   const handleShare = useCallback(async () => {
@@ -192,6 +197,15 @@ export default function PublicMedicalLibraryDetailsPage() {
             )}
 
             <div className="mt-8 flex flex-wrap gap-3 border-t border-[#EAECF0] pt-6">
+              <div className="w-full rounded-[18px] border border-[#FDE68A] bg-[#FFFBEB] px-5 py-4">
+                <h3 className="font-cairo text-[16px] font-black text-[#92400E]">
+                  ملاحظة حول الميزة الحالية
+                </h3>
+                <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
+                  <p>هذه الصفحة مخصّصة لقراءة المحتوى الطبي المنشور ومراجعة مصادره فقط.</p>
+                  <p>تنزيل مكتبة PDF مشتركة أو طلب خدمة طبية من داخل هذا المحتوى غير متاح حالياً.</p>
+                </div>
+              </div>
               {contentQuery.data.sources?.filter((source) => source.url?.trim()).length ? (
                 <div className="w-full space-y-3 rounded-[18px] border border-[#EAECF0] bg-[#FCFCFD] px-5 py-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
