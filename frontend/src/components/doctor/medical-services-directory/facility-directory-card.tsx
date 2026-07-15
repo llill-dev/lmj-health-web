@@ -14,6 +14,7 @@ import {
   Phone,
   Share2,
   TriangleAlert,
+  Info,
 } from 'lucide-react';
 import { fetchMedicalServiceDetails } from '@/lib/doctor/medical-services-directory/fetch';
 import type { MedicalServiceFacility } from '@/lib/doctor/medical-services-directory/types';
@@ -322,6 +323,16 @@ export function FacilityDirectoryCard({
           </div>
         </section>
         ) : null}
+
+        <section className="rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3">
+          <div className="flex items-start gap-2 font-cairo text-[12px] font-bold text-[#475467]">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <div className="space-y-1">
+              <p>المتاح حالياً هو استعراض البيانات والتواصل المباشر مع الجهة.</p>
+              <p>الحجز أو طلب الخدمة من داخل المنصة غير متاح حالياً لهذا الدليل.</p>
+            </div>
+          </div>
+        </section>
       </div>
     </article>
   );

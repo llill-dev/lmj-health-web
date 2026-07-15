@@ -1,6 +1,9 @@
 import { resolveLabel, type ServiceProvider } from '@/lib/admin/types';
 import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
-import { resolveMedicalServiceCategory } from '@/lib/doctor/medical-services-directory/category-map';
+import {
+  resolveMedicalServiceCategory,
+  resolveMedicalServiceCategoryFromServiceType,
+} from '@/lib/doctor/medical-services-directory/category-map';
 import { getMedicalServiceFacilityImage } from '@/lib/doctor/medical-services-directory/placeholders';
 import type {
   MedicalServiceCategory,
@@ -100,43 +103,6 @@ function resolveProviderLocation(data: Record<string, unknown>): string {
   const country = pickFirstText(data, ['country']);
   if (city && country) return `${city} — ${country}`;
   return city || country || '—';
-}
-
-function resolveProviderCategory(
-  serviceTypeSlug: string,
-  serviceTypeName: string,
-): MedicalServiceCategory {
-  const normalized = `${serviceTypeSlug} ${serviceTypeName}`.toLowerCase();
-  if (
-    normalized.includes('lab') ||
-    normalized.includes('مختبر') ||
-    normalized.includes('مخبر') ||
-    normalized.includes('تحاليل')
-  ) {
-    return 'labs';
-  }
-  if (
-    normalized.includes('imag') ||
-    normalized.includes('radi') ||
-    normalized.includes('scan') ||
-    normalized.includes('ash') ||
-    normalized.includes('أشعة') ||
-    normalized.includes('تصوير')
-  ) {
-    return 'imaging';
-  }
-  if (
-    normalized.includes('dialysis') ||
-    normalized.includes('rehab') ||
-    normalized.includes('therapy') ||
-    normalized.includes('treat') ||
-    normalized.includes('غسيل') ||
-    normalized.includes('تأهيل') ||
-    normalized.includes('علاج')
-  ) {
-    return 'treatment';
-  }
-  return 'clinics';
 }
 
 function matchesDirectorySearch(
@@ -291,12 +257,18 @@ export function mapServiceProviderToDirectoryItem(
   const imageUrl =
     pickFirstText(data, ['imageUrl', 'logoUrl', 'coverImageUrl']) ||
     getMedicalServiceFacilityImage(
-      resolveProviderCategory(serviceTypeSlug, serviceTypeName),
+      resolveMedicalServiceCategoryFromServiceType(
+        serviceTypeSlug,
+        serviceTypeName,
+      ),
     );
 
   return {
     id,
-    category: resolveProviderCategory(serviceTypeSlug, serviceTypeName),
+    category: resolveMedicalServiceCategoryFromServiceType(
+      serviceTypeSlug,
+      serviceTypeName,
+    ),
     name,
     location: resolveProviderLocation(data),
     description,

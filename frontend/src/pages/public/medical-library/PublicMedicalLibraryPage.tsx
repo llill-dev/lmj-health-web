@@ -18,6 +18,8 @@ const TYPE_LABELS: Record<string, string> = {
 };
 const TYPE_OPTIONS = ["all", "NEWS", "GENERAL_ADVICE", "CONDITION", "SYMPTOM", "MEDICATION"] as const;
 type MedicalLibraryFilter = (typeof TYPE_OPTIONS)[number];
+const SORT_OPTIONS = ["latest", "popular"] as const;
+type MedicalLibrarySort = (typeof SORT_OPTIONS)[number];
 type MedicalLibraryItem = (typeof usePlatformMedicalLibrary extends (...args: any[]) => infer R
   ? R extends { items: infer T }
     ? T extends Array<infer U>
@@ -109,6 +111,12 @@ export default function PublicMedicalLibraryPage() {
       ? (initialType as MedicalLibraryFilter)
       : "all",
   );
+  const initialSort = searchParams.get("sort");
+  const [activeSort, setActiveSort] = useState<MedicalLibrarySort>(
+    initialSort && SORT_OPTIONS.includes(initialSort as MedicalLibrarySort)
+      ? (initialSort as MedicalLibrarySort)
+      : "latest",
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -135,16 +143,48 @@ export default function PublicMedicalLibraryPage() {
         : libraryQuery.items.filter((item) => item.type === activeType),
     [activeType, libraryQuery.items],
   );
+  const sortedItems = useMemo(() => {
+    const items = [...filteredItems];
+    if (activeSort === "popular") {
+      return items.sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0));
+    }
+    return items.sort((a, b) => {
+      const aDate = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+      const bDate = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+      return bDate - aDate;
+    });
+  }, [activeSort, filteredItems]);
   const listQueryString = useMemo(() => {
     const qs = new URLSearchParams();
     if (debouncedSearch.trim()) qs.set("q", debouncedSearch.trim());
     if (activeType !== "all") qs.set("type", activeType);
+    if (activeSort !== "latest") qs.set("sort", activeSort);
     const value = qs.toString();
     return value ? `?${value}` : "";
-  }, [activeType, debouncedSearch]);
+  }, [activeSort, activeType, debouncedSearch]);
   const activeTypeLabel =
     activeType === "all" ? "كل الأنواع" : TYPE_LABELS[activeType];
-  const hasActiveFilters = Boolean(debouncedSearch.trim()) || activeType !== "all";
+  const hasActiveFilters =
+    Boolean(debouncedSearch.trim()) ||
+    activeType !== "all" ||
+    activeSort !== "latest";
+  const surfacedSections = useMemo(() => {
+    const latest = [...libraryQuery.items]
+      .sort((a, b) => {
+        const aDate = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+        const bDate = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+        return bDate - aDate;
+      })
+      .slice(0, 3);
+    const featured = [...libraryQuery.items]
+      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+      .slice(0, 3);
+    const quickTips = libraryQuery.items
+      .filter((item) => item.type === "GENERAL_ADVICE")
+      .slice(0, 3);
+
+    return { latest, featured, quickTips };
+  }, [libraryQuery.items]);
   const groupedItems = useMemo(
     () =>
       TYPE_OPTIONS.filter(
@@ -153,9 +193,9 @@ export default function PublicMedicalLibraryPage() {
         type,
         label: TYPE_LABELS[type],
         description: TYPE_DESCRIPTIONS[type],
-        items: libraryQuery.items.filter((item) => item.type === type),
+        items: sortedItems.filter((item) => item.type === type),
       })),
-    [libraryQuery.items],
+    [sortedItems],
   );
   const visibleSections = useMemo(
     () =>
@@ -169,8 +209,9 @@ export default function PublicMedicalLibraryPage() {
     const next = new URLSearchParams();
     if (debouncedSearch.trim()) next.set("q", debouncedSearch.trim());
     if (activeType !== "all") next.set("type", activeType);
+    if (activeSort !== "latest") next.set("sort", activeSort);
     setSearchParams(next, { replace: true });
-  }, [activeType, debouncedSearch, setSearchParams]);
+  }, [activeSort, activeType, debouncedSearch, setSearchParams]);
 
   return (
     <>
@@ -238,17 +279,35 @@ export default function PublicMedicalLibraryPage() {
             );
           })}
         </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {SORT_OPTIONS.map((sort) => (
+            <button
+              key={sort}
+              type="button"
+              onClick={() => setActiveSort(sort)}
+              className={`rounded-full border px-4 py-2 font-cairo text-[12px] font-extrabold transition ${
+                activeSort === sort
+                  ? "border-[#0F766E] bg-[#0F766E] text-white"
+                  : "border-[#D9F2EF] bg-white text-[#0F766E] hover:bg-[#F0FDFA]"
+              }`}
+            >
+              {sort === "latest" ? "الأحدث" : "الأكثر قراءة"}
+            </button>
+          ))}
+        </div>
 
         {!libraryQuery.isAwaitingData && !libraryQuery.isError ? (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
             <div className="flex flex-wrap items-center gap-3">
               <div className="font-cairo text-[13px] font-extrabold text-[#344054]">
-                {filteredItems.length} نتيجة ضمن <span className="text-primary">{activeTypeLabel}</span>
+                {sortedItems.length} نتيجة ضمن <span className="text-primary">{activeTypeLabel}</span>
               </div>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
                 {debouncedSearch.trim()
                   ? `البحث الحالي: ${debouncedSearch.trim()}`
-                  : "يعرض أحدث المحتوى المنشور"}
+                  : activeSort === "popular"
+                    ? "يعرض المحتوى الأعلى قراءة"
+                    : "يعرض أحدث المحتوى المنشور"}
               </div>
             </div>
             {hasActiveFilters ? (
@@ -257,6 +316,7 @@ export default function PublicMedicalLibraryPage() {
                 onClick={() => {
                   setSearch("");
                   setActiveType("all");
+                  setActiveSort("latest");
                 }}
                 className="inline-flex items-center justify-center rounded-full border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
               >
@@ -288,7 +348,7 @@ export default function PublicMedicalLibraryPage() {
               onRetry={() => void libraryQuery.refetch()}
             />
           </div>
-        ) : filteredItems.length === 0 ? (
+        ) : sortedItems.length === 0 ? (
           <div className="mt-6">
             <DoctorListEmptyIllustration
               variant="teal"
@@ -310,12 +370,74 @@ export default function PublicMedicalLibraryPage() {
               onAction={() => {
                 setSearch("");
                 setActiveType("all");
+                setActiveSort("latest");
               }}
               actionIcon={<Search className="h-4 w-4" />}
             />
           </div>
         ) : (
           <div className="mt-6 space-y-8">
+            {!debouncedSearch.trim() && activeType === "all" ? (
+              <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+                {[
+                  {
+                    key: "latest",
+                    title: "أحدث الأخبار",
+                    description: "آخر ما نُشر حديثاً في المكتبة الطبية.",
+                    items: surfacedSections.latest,
+                  },
+                  {
+                    key: "featured",
+                    title: "مقالات مميزة",
+                    description: "المحتوى الأعلى قراءة وتفاعلاً.",
+                    items: surfacedSections.featured,
+                  },
+                  {
+                    key: "quick-tips",
+                    title: "نصائح سريعة",
+                    description: "مختارات سريعة من النصائح العامة العملية.",
+                    items: surfacedSections.quickTips,
+                  },
+                ].map((section) => (
+                  <div
+                    key={section.key}
+                    className="rounded-[24px] border border-[#E4E7EC] bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)]"
+                  >
+                    <h2 className="font-cairo text-[20px] font-black text-[#101828]">
+                      {section.title}
+                    </h2>
+                    <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
+                      {section.description}
+                    </p>
+                    <div className="mt-4 space-y-3">
+                      {section.items.length ? (
+                        section.items.map((item) => (
+                          <Link
+                            key={item.id}
+                            to={`/medical-library/${encodeURIComponent(item.slug)}${listQueryString}`}
+                            className="block rounded-[16px] border border-[#EEF2F6] bg-[#FCFCFD] p-4 transition hover:border-[#B8E6E0] hover:bg-white"
+                          >
+                            <div className="font-cairo text-[11px] font-extrabold text-primary">
+                              {TYPE_LABELS[item.type] ?? item.type}
+                            </div>
+                            <div className="mt-2 line-clamp-2 font-cairo text-[14px] font-black leading-7 text-[#101828]">
+                              {item.title}
+                            </div>
+                            <div className="mt-2 font-cairo text-[11px] font-bold text-[#98A2B3]">
+                              {formatPublishedAt(item.publishedAt)}
+                            </div>
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="rounded-[16px] border border-dashed border-[#D9F2EF] px-4 py-6 text-center font-cairo text-[12px] font-bold text-[#98A2B3]">
+                          لا يوجد محتوى متاح حالياً.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </section>
+            ) : null}
             {visibleSections.map((section) => (
               <section
                 key={section.type}
@@ -355,7 +477,9 @@ export default function PublicMedicalLibraryPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {section.items.map((item) => renderLibraryCard(item, listQueryString))}
+                  {(activeType === "all" ? section.items.slice(0, 3) : section.items).map((item) =>
+                    renderLibraryCard(item, listQueryString),
+                  )}
                 </div>
               </section>
             ))}
