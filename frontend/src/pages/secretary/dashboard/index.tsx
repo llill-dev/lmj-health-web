@@ -12,7 +12,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
-import { useDashboardStats } from "@/hooks/doctor/dashboard/useDashboardStats";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
@@ -124,12 +123,10 @@ function QuickActionCard({
 
 export default function SecretaryDashboardPage() {
   const { hasPermission } = useSecretaryPermissions();
-  const statsQuery = useDashboardStats();
   const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 4 });
   const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
   const waitlistQuery = useDoctorWaitlist({ page: 1, limit: 1 });
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
-  const stats = statsQuery.stats;
   const rating = assignedDoctorQuery.data?.doctor?.averageRating;
   const canViewAppointments = hasPermission("appointments:view");
   const canViewPatients = hasPermission("patients:view");
@@ -142,8 +139,8 @@ export default function SecretaryDashboardPage() {
     {
       key: "today",
       label: "مواعيد اليوم",
-      value: stats?.todayAppointments ?? 0,
-      delta: `${stats?.todayAppointments ?? 0} مجدول`,
+      value: appointmentsQuery.total ?? 0,
+      delta: `${appointmentsQuery.total ?? 0} مجدول`,
       icon: Calendar,
       accent: "#129A98",
       soft: "#E9F7F6",
@@ -222,14 +219,14 @@ export default function SecretaryDashboardPage() {
     {
       key: "attendance",
       label: "نسبة الحضور",
-      value: stats?.attendanceRate != null ? `${stats.attendanceRate}%` : "—",
+      value: "—",
       icon: Activity,
       iconClass: "bg-[#F4EBFF] text-[#A855F7]",
     },
     {
       key: "records",
       label: "السجلات الطبية",
-      value: `${stats?.totalMedicalRecords ?? 0}`,
+      value: "—",
       icon: FileText,
       iconClass: "bg-[#EAF1FF] text-[#3B82F6]",
     },

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { readAuthUser } from "@/lib/cookies";
-import { doctorSecretariesApi } from "@/lib/doctor/secretaries/client";
+import { get } from "@/lib/api";
 import {
   canAccessSecretaryItem,
   hasSecretaryPermission,
@@ -9,46 +9,85 @@ import {
 } from "@/lib/secretary/permissions";
 import type { SecretarySidebarItemId } from "@/constant/sidebar-items";
 
+type SecretaryPermissionsPayload = {
+  _id?: string;
+  id?: string;
+  permissions?: string[];
+  secretary?: {
+    _id?: string;
+    id?: string;
+    permissions?: string[];
+  };
+};
+
+function normalizePermissionsPayload(raw: unknown): SecretaryPermissionsPayload | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const record = raw as Record<string, unknown>;
+  const secretary =
+    record.secretary && typeof record.secretary === "object" && !Array.isArray(record.secretary)
+      ? (record.secretary as Record<string, unknown>)
+      : undefined;
+
+  const toStringArray = (value: unknown): string[] | undefined =>
+    Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === "string")
+      : undefined;
+
+  return {
+    _id: typeof record._id === "string" ? record._id : undefined,
+    id: typeof record.id === "string" ? record.id : undefined,
+    permissions: toStringArray(record.permissions),
+    secretary: secretary
+      ? {
+          _id: typeof secretary._id === "string" ? secretary._id : undefined,
+          id: typeof secretary.id === "string" ? secretary.id : undefined,
+          permissions: toStringArray(secretary.permissions),
+        }
+      : undefined,
+  };
+}
+
 export function useSecretaryPermissions() {
   const authUser = readAuthUser();
-  const secretaryIdentifiers = useMemo(() => {
-    const candidates = [
-      authUser?.actorIds?.secretaryId?.trim() || "",
-      authUser?.userId?.trim() || "",
-    ].filter(Boolean);
-    return [...new Set(candidates)];
-  }, [authUser?.actorIds?.secretaryId, authUser?.userId]);
-  const primarySecretaryIdentifier = secretaryIdentifiers[0] || "";
+  const primarySecretaryIdentifier =
+    authUser?.actorIds?.secretaryId?.trim() || authUser?.userId?.trim() || "";
 
   const query = useQuery({
-    queryKey: ["secretary", "permissions", ...secretaryIdentifiers],
+    queryKey: ["secretary", "permissions", primarySecretaryIdentifier],
     queryFn: async () => {
-      let lastError: unknown = null;
-      for (const identifier of secretaryIdentifiers) {
+      const endpointCandidates = ["/api/secretaries/me", "/api/secretaries/me/doctor"];
+      for (const endpoint of endpointCandidates) {
         try {
-          const result = await doctorSecretariesApi.get(identifier);
-          if (result) return result;
+          const response = await get<unknown>(endpoint);
+          const normalized = normalizePermissionsPayload(response);
+          if (normalized) return normalized;
         } catch (error) {
-          lastError = error;
+          // Try next endpoint candidate
         }
       }
-      if (lastError) throw lastError;
       return null;
     },
-    enabled: secretaryIdentifiers.length > 0,
+    enabled: Boolean(primarySecretaryIdentifier),
     staleTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
   });
 
-  const permissions = useMemo(
-    () => query.data?.permissions ?? [],
-    [query.data?.permissions],
-  );
+  const permissions = useMemo(() => {
+    const direct = query.data?.permissions ?? [];
+    const nested = query.data?.secretary?.permissions ?? [];
+    const merged = [...direct, ...nested];
+    return [...new Set(merged)];
+  }, [query.data?.permissions, query.data?.secretary?.permissions]);
 
   return {
     ...query,
-    secretaryId: query.data?._id ?? primarySecretaryIdentifier,
+    secretaryId:
+      query.data?.secretary?._id ??
+      query.data?.secretary?.id ??
+      query.data?._id ??
+      query.data?.id ??
+      primarySecretaryIdentifier,
     permissions,
     hasPermission: (permission: SecretaryPermissionKey) =>
       hasSecretaryPermission(permissions, permission),
