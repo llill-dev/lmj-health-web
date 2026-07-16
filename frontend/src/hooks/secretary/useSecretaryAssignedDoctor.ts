@@ -8,6 +8,11 @@ type AssignedDoctorResponse = {
     _id?: string;
     specialization?: string;
     averageRating?: number;
+    user?: {
+      fullName?: string;
+      email?: string;
+      phone?: string;
+    };
     userId?: {
       fullName?: string;
       email?: string;

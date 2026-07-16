@@ -125,7 +125,10 @@ export default function SecretaryProfilePage() {
   ];
 
   const doctorInfo = [
-    { label: "الاسم", value: assignedDoctor?.userId?.fullName || "—" },
+    {
+      label: "الاسم",
+      value: assignedDoctor?.user?.fullName || assignedDoctor?.userId?.fullName || "—",
+    },
     { label: "التخصص", value: assignedDoctor?.specialization || "—" },
     { label: "التقييم", value: `${assignedDoctor?.averageRating ?? "—"}` },
   ];
