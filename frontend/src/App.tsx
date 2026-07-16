@@ -26,6 +26,8 @@ import * as DoctorPages from "@/routes/lazy-pages/doctor-pages";
 import * as MiscPages from "@/routes/lazy-pages/misc-pages";
 import * as PublicPages from "@/routes/lazy-pages/public-pages";
 import * as SecretaryPages from "@/routes/lazy-pages/secretary-pages";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
+import type { SecretaryPermissionKey } from "@/lib/secretary/permissions";
 
 function PublicPagesLayout() {
   const location = useLocation();
@@ -41,6 +43,19 @@ function PublicPagesLayout() {
       </Suspense>
     </div>
   );
+}
+
+function SecretaryPermissionRoute({
+  required,
+}: {
+  required: SecretaryPermissionKey[];
+}) {
+  const { hasPermission, isLoading } = useSecretaryPermissions();
+  if (required.length === 0) return <Outlet />;
+  if (isLoading) return <SecretaryRouteFallback />;
+  const allowed = required.every((permission) => hasPermission(permission));
+  if (!allowed) return <Navigate to="/secretary/dashboard" replace />;
+  return <Outlet />;
 }
 
 export default function App() {
@@ -534,75 +549,138 @@ export default function App() {
             <Route
               path="patients"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryPatientsPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["patients:view"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryPatientsPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="create-temporary-patient"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryCreateTemporaryPatientPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["patients:temporary:create"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryCreateTemporaryPatientPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="book-appointment"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryBookAppointmentPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["appointments:book"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryBookAppointmentPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="doctor-schedule"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryDoctorSchedulePage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["schedule:view"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryDoctorSchedulePage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="patient-files"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryPatientFilesPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["patients:files:view"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryPatientFilesPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="doctors-directory"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryDoctorsDirectoryPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["appointments:book"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryDoctorsDirectoryPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="appointments"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryAppointmentsPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["appointments:view"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryAppointmentsPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="appointment-suggestions"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryAppointmentSuggestionsPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["waitlist:book"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryAppointmentSuggestionsPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="waitlist"
               element={
-                <Suspense fallback={<SecretaryRouteFallback />}>
-                  <SecretaryPages.SecretaryWaitlistPage />
-                </Suspense>
+                <SecretaryPermissionRoute required={["waitlist:view"]} />
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <SecretaryPages.SecretaryWaitlistPage />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route
               path="profile"
               element={

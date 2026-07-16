@@ -12,6 +12,8 @@ import { readAuthUser } from "@/lib/cookies";
 import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
+import { SECRETARY_PERMISSION_LABELS } from "@/lib/doctor/secretaries/permissionsUi";
 
 function SurfaceSection({
   title,
@@ -110,6 +112,7 @@ export default function SecretaryProfilePage() {
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 1 });
   const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
+  const secretaryPermissions = useSecretaryPermissions();
   const secretaryName = authUser?.fullName?.trim() || "السكرتير";
   const secretaryEmail = authUser?.email?.trim() || "—";
   const secretaryPhone = authUser?.phone?.trim() || "—";
@@ -133,12 +136,9 @@ export default function SecretaryProfilePage() {
     { label: "المرضى", value: patientsQuery.total ?? 0, icon: UserRound },
   ];
 
-  const permissions = [
-    "حجز المواعيد",
-    "عرض المواعيد",
-    "إلغاء المواعيد",
-    "إدارة الملفات",
-  ];
+  const permissions = secretaryPermissions.permissions.map(
+    (permission) => SECRETARY_PERMISSION_LABELS[permission] ?? permission,
+  );
 
   return (
     <div dir="rtl" lang="ar" className="space-y-5 pb-8 sm:pb-10">
@@ -194,9 +194,13 @@ export default function SecretaryProfilePage() {
 
       <SurfaceSection title="الصلاحيات" icon={ShieldCheck}>
         <div className="flex flex-wrap gap-3 px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
-          {permissions.map((permission) => (
+          {permissions.length > 0 ? permissions.map((permission) => (
             <PermissionBadge key={permission} permission={permission} />
-          ))}
+          )) : (
+            <span className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              لا توجد صلاحيات مخصصة حالياً.
+            </span>
+          )}
         </div>
       </SurfaceSection>
 

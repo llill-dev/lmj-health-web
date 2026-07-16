@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Calendar, Check, X } from "lucide-react";
 import { useWaitlistSuggestions } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 
 export default function SecretaryAppointmentSuggestionsPage() {
+  const { hasPermission } = useSecretaryPermissions();
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const suggestionsQuery = useWaitlistSuggestions({ date }, Boolean(date));
   const suggestions = suggestionsQuery.data?.freeSlots ?? [];
+  const canBookFromWaitlist = hasPermission("waitlist:book");
 
   return (
     <div className="space-y-6">
@@ -62,14 +65,16 @@ export default function SecretaryAppointmentSuggestionsPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
-                    <Check className="h-4 w-4" />
-                  </button>
-                  <button className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
+                {canBookFromWaitlist ? (
+                  <div className="flex items-center gap-2">
+                    <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
+                      <Check className="h-4 w-4" />
+                    </button>
+                    <button className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ))
           )}

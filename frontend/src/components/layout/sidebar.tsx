@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronsRight, LogOut, Stethoscope, X } from "lucide-react";
-import { useMemo } from "react";
+import { type ComponentType, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   adminSidebarItems,
@@ -13,6 +13,15 @@ import {
   type SidebarItemId,
 } from "@/constant/sidebar-items";
 import { useAdminBrandingForSidebar } from "@/contexts/AdminAppSettingsContext";
+
+type SidebarNavItem = {
+  id: string;
+  path: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  badge?: number;
+  href?: string;
+};
 
 export default function Sidebar({
   active,
@@ -25,6 +34,7 @@ export default function Sidebar({
   profileName,
   profileEmail,
   profilePhotoUrl,
+  items,
 }: {
   active?: SidebarItemId | AdminSidebarItemId | SecretarySidebarItemId;
   role?: "doctor" | "admin" | "secretary";
@@ -36,12 +46,14 @@ export default function Sidebar({
   profileName?: string;
   profileEmail?: string;
   profilePhotoUrl?: string | null;
+  items?: SidebarNavItem[];
 }) {
   const navItems = useMemo(() => {
+    if (items?.length) return items;
     if (role === "admin") return adminSidebarItems;
     if (role === "secretary") return secretarySidebarItems;
     return sidebarItems;
-  }, [role]);
+  }, [items, role]);
 
   const adminBranding = useAdminBrandingForSidebar();
   const brandTitle =

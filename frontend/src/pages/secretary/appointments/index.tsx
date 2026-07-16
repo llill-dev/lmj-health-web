@@ -2,6 +2,7 @@ import { memo, useMemo, useState } from "react";
 import { Search, Calendar, Clock, ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import type { DoctorAppointmentStatus } from "@/lib/doctor/types";
 
 function formatIsoDate(value?: string | null): string {
@@ -156,6 +157,7 @@ const AppointmentTableRow = memo<{
 });
 
 export default function SecretaryAppointmentsPage() {
+  const { hasPermission } = useSecretaryPermissions();
   const [searchInput, setSearchInput] = useState("");
   const [filter, setFilter] = useState<
     "all" | "scheduled" | "completed" | "postponed" | "cancelled"
@@ -226,15 +228,17 @@ export default function SecretaryAppointmentsPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/secretary/book-appointment"
-              className="flex h-[42px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[15px] font-black text-white shadow-[0_10px_20px_rgba(15,143,139,0.30)] transition-colors hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              حجز موعد جديد
-            </Link>
-          </div>
+          {hasPermission("appointments:book") ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                to="/secretary/book-appointment"
+                className="flex h-[42px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[15px] font-black text-white shadow-[0_10px_20px_rgba(15,143,139,0.30)] transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                حجز موعد جديد
+              </Link>
+            </div>
+          ) : null}
         </div>
 
         <div className="px-4 py-5 sm:px-5 sm:py-6">

@@ -16,6 +16,8 @@ import { useDashboardStats } from "@/hooks/doctor/dashboard/useDashboardStats";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
+import { Link } from "react-router-dom";
 
 type KpiCard = {
   key: string;
@@ -88,10 +90,12 @@ function QuickActionCard({
   icon: Icon,
   label,
   variant,
+  href,
 }: {
   icon: typeof Search;
   label: string;
   variant: "default" | "primary";
+  href: string;
 }) {
   const baseClasses =
     "flex flex-col items-center justify-center gap-3 rounded-[16px] px-4 py-6 transition-all duration-200 hover:shadow-lg sm:gap-4 sm:px-6 sm:py-8";
@@ -101,7 +105,7 @@ function QuickActionCard({
       : "bg-white border border-[#E8EEF6] text-[#243044] shadow-[0_4px_12px_rgba(15,23,42,0.04)] hover:border-primary/30 hover:bg-[#F8FAFC]";
 
   return (
-    <button type="button" className={`${baseClasses} ${variantClasses}`}>
+    <Link to={href} className={`${baseClasses} ${variantClasses}`}>
       <div
         className={`flex h-[56px] w-[56px] items-center justify-center rounded-[12px] ${
           variant === "primary"
@@ -114,11 +118,12 @@ function QuickActionCard({
       <span className="font-cairo text-[15px] font-bold leading-tight">
         {label}
       </span>
-    </button>
+    </Link>
   );
 }
 
 export default function SecretaryDashboardPage() {
+  const { hasPermission } = useSecretaryPermissions();
   const statsQuery = useDashboardStats();
   const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 4 });
   const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
@@ -126,6 +131,12 @@ export default function SecretaryDashboardPage() {
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const stats = statsQuery.stats;
   const rating = assignedDoctorQuery.data?.doctor?.averageRating;
+  const canViewAppointments = hasPermission("appointments:view");
+  const canViewPatients = hasPermission("patients:view");
+  const canViewWaitlist = hasPermission("waitlist:view");
+  const canCreateTemporaryPatient = hasPermission("patients:temporary:create");
+  const canBookAppointment = hasPermission("appointments:book");
+  const canViewFiles = hasPermission("patients:files:view");
 
   const kpis: KpiCard[] = [
     {
@@ -181,18 +192,24 @@ export default function SecretaryDashboardPage() {
       icon: Search,
       label: "بحث عن مريض",
       variant: "default" as const,
+      href: "/secretary/patients",
+      visible: canViewPatients,
     },
     {
       icon: UserPlus,
       label: "إضافة مريض مؤقت",
       variant: "default" as const,
+      href: "/secretary/create-temporary-patient",
+      visible: canCreateTemporaryPatient,
     },
     {
       icon: Plus,
       label: "حجز موعد جديد",
       variant: "primary" as const,
+      href: "/secretary/book-appointment",
+      visible: canBookAppointment,
     },
-  ];
+  ].filter((item) => item.visible);
 
   const secondaryStats = [
     {
@@ -221,7 +238,14 @@ export default function SecretaryDashboardPage() {
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
       <section className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 xl:gap-8">
-        {kpis.map((card) => (
+        {kpis
+          .filter((card) => {
+            if (card.key === "today" || card.key === "available") return canViewAppointments;
+            if (card.key === "patients") return canViewPatients;
+            if (card.key === "waitlist") return canViewWaitlist;
+            return true;
+          })
+          .map((card) => (
           <KpiStatCard
             key={card.key}
             label={card.label}
@@ -242,11 +266,13 @@ export default function SecretaryDashboardPage() {
             icon={action.icon}
             label={action.label}
             variant={action.variant}
+            href={action.href}
           />
         ))}
       </section>
 
-      <SurfaceSection title="مواعيد اليوم">
+      {canViewAppointments ? (
+        <SurfaceSection title="مواعيد اليوم">
         <div className="space-y-4 px-4 py-5 sm:px-5 sm:py-6">
           {todayAppointments.length > 0 ? (
             todayAppointments.map((row) => (
@@ -302,9 +328,15 @@ export default function SecretaryDashboardPage() {
           )}
         </div>
       </SurfaceSection>
+      ) : null}
 
       <div className="grid gap-4 sm:gap-6 md:grid-cols-3 lg:gap-8">
-        {secondaryStats.map((card) => {
+        {secondaryStats
+          .filter((card) => {
+            if (card.key === "records") return canViewFiles;
+            return true;
+          })
+          .map((card) => {
           const Icon = card.icon;
           return (
             <div

@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/layout/sidebar";
 import DashboardHeader from "@/components/layout/dashboard-header";
@@ -8,6 +8,7 @@ import {
   secretarySidebarItems,
   type SecretarySidebarItemId,
 } from "@/constant/sidebar-items";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { readAuthUser } from "@/lib/cookies";
 import { SecretaryRouteFallback } from "@/routes/RouteFallbacks";
 import { useAuthStore } from "@/store/authStore";
@@ -23,10 +24,18 @@ export default function SecretaryLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const secretaryPermissions = useSecretaryPermissions();
 
   const authUser = readAuthUser();
   const secretaryName = authUser?.fullName?.trim() || "السكرتير";
   const secretaryEmail = authUser?.email?.trim() || "";
+  const visibleSidebarItems = useMemo(
+    () =>
+      secretarySidebarItems.filter((item) =>
+        secretaryPermissions.canAccessItem(item.path),
+      ),
+    [secretaryPermissions.permissions],
+  );
 
   const performLogout = useCallback(async () => {
     setLoggingOut(true);
@@ -51,11 +60,19 @@ export default function SecretaryLayout() {
   const pathname = location.pathname;
 
   const active: SecretarySidebarItemId =
-    secretarySidebarItems.find(
+    visibleSidebarItems.find(
       (item) =>
         pathname === `/secretary/${item.path}` ||
         pathname.startsWith(`/secretary/${item.path}/`),
     )?.path ?? "dashboard";
+
+  useEffect(() => {
+    const firstPath = visibleSidebarItems[0]?.path ?? "dashboard";
+    const currentSegment = pathname.split("/")[2] as SecretarySidebarItemId | undefined;
+    if (!currentSegment) return;
+    if (secretaryPermissions.canAccessItem(currentSegment)) return;
+    navigate(`/secretary/${firstPath}`, { replace: true });
+  }, [navigate, pathname, secretaryPermissions.permissions, visibleSidebarItems]);
 
   return (
     <div
@@ -74,6 +91,7 @@ export default function SecretaryLayout() {
           onLogout={() => setLogoutConfirmOpen(true)}
           profileName={secretaryName}
           profileEmail={secretaryEmail}
+          items={visibleSidebarItems}
         />
         <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
           <div className="sticky top-0 z-40">

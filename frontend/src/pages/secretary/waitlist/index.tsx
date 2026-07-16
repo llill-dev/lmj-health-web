@@ -1,6 +1,7 @@
 import { memo, useMemo, useState } from "react";
 import { Search, Clock, Phone, ChevronRight, Calendar } from "lucide-react";
 import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 
 function patientInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -85,7 +86,7 @@ const WaitlistRow = memo<{
     waitTime: string;
     priority: string;
   };
-  onBookAppointment: (patientId: string) => void;
+  onBookAppointment?: (patientId: string) => void;
 }>(function WaitlistRow({ patient, onBookAppointment }) {
   const priority = priorityPresentation(patient.priority);
 
@@ -126,20 +127,23 @@ const WaitlistRow = memo<{
       </div>
 
       <div className="text-right lg:col-span-1 lg:text-left">
-        <button
-          type="button"
-          onClick={() => onBookAppointment(patient.id)}
-          className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
-        >
-          حجز موعد
-          <ChevronRight className="h-4 w-4" />
-        </button>
+        {onBookAppointment ? (
+          <button
+            type="button"
+            onClick={() => onBookAppointment(patient.id)}
+            className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
+          >
+            حجز موعد
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
     </div>
   );
 });
 
 export default function SecretaryWaitlistPage() {
+  const { hasPermission } = useSecretaryPermissions();
   const [searchInput, setSearchInput] = useState("");
   const waitlistQuery = useDoctorWaitlist({
     page: 1,
@@ -227,7 +231,7 @@ export default function SecretaryWaitlistPage() {
               <WaitlistRow
                 key={patient.id}
                 patient={patient}
-                onBookAppointment={() => {}}
+                onBookAppointment={hasPermission("waitlist:book") ? () => {} : undefined}
               />
             ))}
           </>

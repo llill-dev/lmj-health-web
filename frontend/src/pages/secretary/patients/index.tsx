@@ -2,6 +2,7 @@ import { memo, useMemo, useState } from "react";
 import { Search, ChevronRight, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 
 function formatIsoDate(value?: string | null): string {
   if (!value) return "—";
@@ -49,19 +50,12 @@ function accountStatusPresentation(patient: {
 }
 
 function SurfaceSection({
-  title,
   children,
 }: {
-  title: string;
   children: React.ReactNode;
 }) {
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-      <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
-        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
-          {title}
-        </h2>
-      </header>
       {children}
     </section>
   );
@@ -84,7 +78,7 @@ function PatientsSearchInput({
         className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
       <div className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
-        <Search className="h-5 w-5" />
+        <Search className="w-5 h-5" />
       </div>
     </div>
   );
@@ -106,7 +100,7 @@ const PatientTableRow = memo<{
 
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
-      <div className="flex items-center gap-4 lg:col-span-4">
+      <div className="flex gap-4 items-center lg:col-span-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
           <span className="font-cairo text-[20px] font-black">
             {patientInitials(patient.name)}
@@ -142,7 +136,7 @@ const PatientTableRow = memo<{
           className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
         >
           عرض التفاصيل
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -150,6 +144,7 @@ const PatientTableRow = memo<{
 });
 
 export default function SecretaryPatientsPage() {
+  const { hasPermission } = useSecretaryPermissions();
   const [searchInput, setSearchInput] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "temporary">("all");
   const patientsQuery = useDoctorPatients({
@@ -162,12 +157,12 @@ export default function SecretaryPatientsPage() {
     () =>
       (patientsQuery.patients ?? []).map((p) => ({
         id: p._id,
-        name: p.userId?.fullName || "مريض",
-        phone: p.userId?.phone || "—",
-        email: p.userId?.email || "—",
-        registrationDate: p.createdAt || "",
+        name: p.user?.fullName || "مريض",
+        phone: p.user?.phone || "—",
+        email: p.user?.email || "—",
+        registrationDate: p.lastVisitAt || "",
         isTemporary: p.isTemporary,
-        accountStatus: p.accountStatus,
+        accountStatus: p.user?.accountStatus,
       })),
     [patientsQuery.patients],
   );
@@ -191,8 +186,8 @@ export default function SecretaryPatientsPage() {
   const searchedPatients = filteredPatients;
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title="المرضى">
+    <div dir="rtl" lang="ar" className="pb-6 space-y-6 sm:space-y-7 sm:pb-8">
+      <SurfaceSection>
         <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
           <div className="text-right">
             <h2 className="font-cairo text-[23px] font-black text-[#243044]">
@@ -204,15 +199,17 @@ export default function SecretaryPatientsPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/secretary/create-temporary-patient"
-              className="flex h-[42px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[15px] font-black text-white shadow-[0_10px_20px_rgba(15,143,139,0.30)] transition-colors hover:bg-primary/90"
-            >
-              <UserPlus className="h-4 w-4" />
-              إضافة مريض مؤقت
-            </Link>
-          </div>
+          {hasPermission("patients:temporary:create") ? (
+            <div className="flex flex-wrap gap-2 items-center">
+              <Link
+                to="/secretary/create-temporary-patient"
+                className="flex h-[42px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[15px] font-black text-white shadow-[0_10px_20px_rgba(15,143,139,0.30)] transition-colors hover:bg-primary/90"
+              >
+                <UserPlus className="w-4 h-4" />
+                إضافة مريض مؤقت
+              </Link>
+            </div>
+          ) : null}
         </div>
 
         <div className="px-4 py-5 sm:px-5 sm:py-6">
