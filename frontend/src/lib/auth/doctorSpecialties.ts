@@ -15,7 +15,7 @@ function asDoctorSpecialtiesRecord(
   value: unknown,
 ): DoctorSpecialtiesApiRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value
+    ? (value as DoctorSpecialtiesApiRecord)
     : null;
 }
 
@@ -36,7 +36,7 @@ function asLocalizedLookupText(
   const record = asDoctorSpecialtiesRecord(value);
   if (!record) return undefined;
   return typeof record.ar === "string" || typeof record.en === "string"
-    ? record
+    ? (record as AdminLocalizedLookupText)
     : undefined;
 }
 

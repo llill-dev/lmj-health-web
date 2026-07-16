@@ -26,7 +26,7 @@ function asEncounterValidationErrorRecord(
   value: unknown,
 ): EncounterValidationErrorRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as EncounterValidationErrorRecord)
     : null;
 }
 

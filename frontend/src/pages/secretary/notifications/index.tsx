@@ -98,8 +98,16 @@ function NotificationCard({
 
 export default function SecretaryNotificationsPage() {
   const notificationsQuery = useDoctorNotificationsPage(false, 1, 100);
-  const notifications = (notificationsQuery.listQuery.data?.notifications ?? []).map(
-    (item) => ({
+  type UiNotification = {
+    id: string;
+    title: string;
+    message: string;
+    time: string;
+    type: "info" | "success" | "warning";
+    isRead: boolean;
+  };
+  const notifications: UiNotification[] = (notificationsQuery.listQuery.data?.notifications ?? []).map(
+    (item): UiNotification => ({
       id: notificationItemId(item) || `${item.title || "notice"}-${item.createdAt || "time"}`,
       title: item.title || "إشعار",
       message: item.body || "لا توجد تفاصيل إضافية.",

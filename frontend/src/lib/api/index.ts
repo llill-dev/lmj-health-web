@@ -34,7 +34,9 @@ type ValidationIssueRecord = {
 };
 
 function asApiBodyRecord(value: unknown): ApiBodyRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as ApiBodyRecord)
+    : {};
 }
 
 function asStringHeaderRecord(
@@ -266,26 +268,28 @@ export function getUserFacingRequestErrorMessage(
       if (errors && errors.length > 0) {
         const phoneError = errors.find((e) => e.path === "phone");
         if (phoneError && locale === "ar") {
+          const phoneMessage =
+            typeof phoneError.msg === "string" ? phoneError.msg : "";
           // Provide clear Arabic error message for phone validation
           if (
-            phoneError.msg.includes("too long") ||
-            phoneError.msg.includes("maximum")
+            phoneMessage.includes("too long") ||
+            phoneMessage.includes("maximum")
           ) {
             return "رقم الهاتف طويل جداً. الحد الأقصى 20 حرف.";
           }
           if (
-            phoneError.msg.includes("too short") ||
-            phoneError.msg.includes("minimum")
+            phoneMessage.includes("too short") ||
+            phoneMessage.includes("minimum")
           ) {
             return "رقم الهاتف قصير جداً. الحد الأدنى 8 أرقام.";
           }
           if (
-            phoneError.msg.includes("invalid") ||
-            phoneError.msg.includes("format")
+            phoneMessage.includes("invalid") ||
+            phoneMessage.includes("format")
           ) {
             return "صيغة رقم الهاتف غير صحيحة. استخدم الصيغة الدولية مثل +963912345678.";
           }
-          return phoneError.msg;
+          return phoneMessage || "تنسيق رقم الهاتف غير صالح.";
         }
       }
     }

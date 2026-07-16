@@ -34,7 +34,11 @@ export function useAdminDoctorRestoreRequests(
     queryKey: ["adminDoctorRestoreRequests", params],
     queryFn: async () => {
       const response = await adminApi.users.doctorRestoreRequests(params);
-      const source = response.restoreRequests || response.results || [];
+      const source = Array.isArray(response.restoreRequests)
+        ? response.restoreRequests
+        : Array.isArray(response.results)
+          ? response.results
+          : [];
       return source.map(normalizeRestoreRequest).filter(Boolean) as RestoreRequest[];
     },
     staleTime: 30 * 1000, // 30 seconds

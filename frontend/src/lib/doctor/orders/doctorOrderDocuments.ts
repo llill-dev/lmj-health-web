@@ -22,7 +22,7 @@ function asDoctorDocumentErrorPayload(
   value: unknown,
 ): DoctorDocumentErrorPayload | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DoctorDocumentErrorPayload)
     : null;
 }
 

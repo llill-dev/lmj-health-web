@@ -35,7 +35,7 @@ type SignupErrorBodyRecord = {
 
 function asSignupErrorBodyRecord(value: unknown): SignupErrorBodyRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value
+    ? (value as SignupErrorBodyRecord)
     : null;
 }
 

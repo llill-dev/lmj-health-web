@@ -104,7 +104,7 @@ type VerificationRequestEnvelope =
 
 function asAdminRecord(value: unknown): AdminApiRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value
+    ? (value as AdminApiRecord)
     : null;
 }
 
@@ -187,7 +187,7 @@ function normalizeMedicalOrderCatalogList(
 function normalizeFacilitiesListResponse(
   raw: FacilitiesListResponse | AdminApiRecord,
 ): FacilitiesListResponse {
-  const body = raw;
+  const body = asAdminRecord(raw) ?? {};
   const nested = asAdminRecord(body.data);
 
   const facilities =
@@ -198,12 +198,18 @@ function normalizeFacilitiesListResponse(
     [];
 
   return {
-    ...body,
-    page: body.page ?? readAdminNumber(nested?.page) ?? 1,
-    limit: body.limit ?? readAdminNumber(nested?.limit) ?? facilities.length,
-    total: body.total ?? readAdminNumber(nested?.total) ?? facilities.length,
+    ...(body as FacilitiesListResponse),
+    page: readAdminNumber(body.page) ?? readAdminNumber(nested?.page) ?? 1,
+    limit:
+      readAdminNumber(body.limit) ??
+      readAdminNumber(nested?.limit) ??
+      facilities.length,
+    total:
+      readAdminNumber(body.total) ??
+      readAdminNumber(nested?.total) ??
+      facilities.length,
     results:
-      body.results ??
+      readAdminNumber(body.results) ??
       readAdminNumber(nested?.results) ??
       facilities.length,
     facilities,
@@ -211,8 +217,7 @@ function normalizeFacilitiesListResponse(
 }
 
 function normalizeFacilityResponse(raw: FacilityResponse): FacilityResponse {
-  const directFacility =
-    raw.facility && typeof raw.facility === "object" ? raw.facility : undefined;
+  const directFacility = asAdminRecord(raw.facility);
   const nestedData = asAdminRecord(raw.data) ?? undefined;
   const nestedFacility =
     nestedData?.facility && typeof nestedData.facility === "object"
@@ -223,14 +228,16 @@ function normalizeFacilityResponse(raw: FacilityResponse): FacilityResponse {
 
   return {
     ...raw,
-    facility: directFacility ?? nestedFacility,
+    facility:
+      (directFacility as FacilityResponse["facility"]) ??
+      (nestedFacility as FacilityResponse["facility"]),
   };
 }
 
 function normalizeFacilityDoctorsListResponse(
   raw: FacilityDoctorsListResponse | AdminApiRecord,
 ): FacilityDoctorsListResponse {
-  const body = raw;
+  const body = asAdminRecord(raw) ?? {};
   const nested = asAdminRecord(body.data);
 
   const doctors =
@@ -241,13 +248,22 @@ function normalizeFacilityDoctorsListResponse(
     [];
 
   return {
-    ...body,
-    facility: body.facility ?? asAdminRecord(nested?.facility) ?? undefined,
-    page: body.page ?? readAdminNumber(nested?.page) ?? 1,
-    limit: body.limit ?? readAdminNumber(nested?.limit) ?? doctors.length,
-    total: body.total ?? readAdminNumber(nested?.total) ?? doctors.length,
+    ...(body as FacilityDoctorsListResponse),
+    facility:
+      (asAdminRecord(body.facility) as FacilityDoctorsListResponse["facility"]) ??
+      (asAdminRecord(nested?.facility) as FacilityDoctorsListResponse["facility"]) ??
+      undefined,
+    page: readAdminNumber(body.page) ?? readAdminNumber(nested?.page) ?? 1,
+    limit:
+      readAdminNumber(body.limit) ??
+      readAdminNumber(nested?.limit) ??
+      doctors.length,
+    total:
+      readAdminNumber(body.total) ??
+      readAdminNumber(nested?.total) ??
+      doctors.length,
     results:
-      body.results ??
+      readAdminNumber(body.results) ??
       readAdminNumber(nested?.results) ??
       doctors.length,
     doctors,

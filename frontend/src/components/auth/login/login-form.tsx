@@ -190,11 +190,15 @@ export default function LoginForm({
       if (code === "DELETION_RECOVERY") {
         const details =
           error instanceof AuthFlowError ? error.authError?.details : null;
+        const detailsRecord =
+          details && typeof details === "object" && !Array.isArray(details)
+            ? (details as Record<string, unknown>)
+            : null;
         const recoverUntil =
-          typeof details?.recoveryExpiresAt === "string"
-            ? details.recoveryExpiresAt
-            : typeof details?.recoverUntil === "string"
-              ? details.recoverUntil
+          typeof detailsRecord?.recoveryExpiresAt === "string"
+            ? detailsRecord.recoveryExpiresAt
+            : typeof detailsRecord?.recoverUntil === "string"
+              ? detailsRecord.recoverUntil
               : null;
 
         toast(

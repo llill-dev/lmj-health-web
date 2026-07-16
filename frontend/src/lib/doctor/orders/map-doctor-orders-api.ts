@@ -6,7 +6,9 @@ type DoctorOrderApiRecord = {
 };
 
 function asRecord(value: unknown): DoctorOrderApiRecord | null {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as DoctorOrderApiRecord)
+    : null;
 }
 
 function pickString(...values: ReadonlyArray<unknown>): string | undefined {

@@ -20,7 +20,7 @@ function asDoctorOrderValidationErrorRecord(
   value: unknown,
 ): DoctorOrderValidationErrorRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DoctorOrderValidationErrorRecord)
     : null;
 }
 

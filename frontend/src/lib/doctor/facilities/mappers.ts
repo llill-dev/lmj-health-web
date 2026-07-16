@@ -28,7 +28,7 @@ const FACILITY_TYPES: readonly FacilityType[] = [
 
 function asDoctorFacilityRecord(value: unknown): DoctorFacilityRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value
+    ? (value as DoctorFacilityRecord)
     : null;
 }
 

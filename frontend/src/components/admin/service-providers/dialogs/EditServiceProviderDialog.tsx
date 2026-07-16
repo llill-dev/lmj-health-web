@@ -7,6 +7,7 @@ import StyledSelect from "@/components/ui/styled-select";
 import type { ServiceProvider } from "@/lib/admin/types";
 import { resolveLabel } from "@/lib/admin/types";
 import { adminApi } from "@/lib/admin/client";
+import type { ProviderStatus } from "@/lib/admin/types";
 import {
   AdminFormField,
   adminFieldClass,
@@ -131,7 +132,7 @@ export default function EditServiceProviderDialog({
         country: formData.country,
         data: formData.data ? JSON.parse(formData.data) : undefined,
         aliases: formData.aliases,
-        status: formData.status,
+        status: formData.status as ProviderStatus,
       });
 
       toast("تم تحديث بيانات مزود الخدمة بنجاح", {

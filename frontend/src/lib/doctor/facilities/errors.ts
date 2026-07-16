@@ -16,7 +16,7 @@ function asDoctorFacilityValidationErrorRecord(
   value: unknown,
 ): DoctorFacilityValidationErrorRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DoctorFacilityValidationErrorRecord)
     : null;
 }
 

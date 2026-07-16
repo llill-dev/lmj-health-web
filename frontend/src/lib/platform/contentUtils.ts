@@ -45,7 +45,7 @@ type PlatformBlockWithSourceLink = AdminContentBlock & PlatformBlockSourceLinkRe
 
 function asPlatformRecord(value: unknown): PlatformContentApiRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as PlatformContentApiRecord)
     : null;
 }
 
@@ -60,12 +60,13 @@ function asAdminContentBlocks(value: unknown): AdminContentBlock[] {
 
 function asPlatformSourceItem(value: unknown): PlatformContentApiRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as PlatformContentApiRecord)
     : null;
 }
 
 function readNullableString(value: unknown): string | null | undefined {
-  return typeof value === 'string' || value === null ? value : undefined;
+  if (typeof value === 'string') return value;
+  return value === null ? null : undefined;
 }
 
 function readString(value: unknown): string | undefined {

@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
+import type { FacilityStatus, FacilityType } from "@/lib/admin/types";
 import { resolveAdminFacilityFormFeedback } from "@/lib/admin/facilities/facilityFormErrors";
 import {
   AdminFormField,
@@ -178,13 +179,13 @@ export default function CreateFacilityDialog({
       await adminApi.facilities.create({
         name: formData.name.trim(),
         city: formData.city.trim(),
-        facilityType: formData.facilityType,
+        facilityType: formData.facilityType as FacilityType,
         country: formData.country.trim() || undefined,
         address: formData.address.trim() || undefined,
         phone: formData.phone.trim() || undefined,
         description: formData.description.trim() || undefined,
         ownerDoctorId: formData.ownerDoctorId || undefined,
-        status: formData.status,
+        status: formData.status as FacilityStatus,
         attributes: formData.attributes,
       });
 

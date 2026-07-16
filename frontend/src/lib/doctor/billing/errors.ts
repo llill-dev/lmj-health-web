@@ -19,7 +19,7 @@ function asBillingValidationErrorRecord(
   value: unknown,
 ): BillingValidationErrorRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as BillingValidationErrorRecord)
     : null;
 }
 
@@ -96,10 +96,13 @@ function findKnownMessageKey(error: ApiError): string | null {
   for (const entry of errors) {
     const item = asBillingValidationErrorRecord(entry);
     if (!item) continue;
-    if (item.messageKey && MESSAGE_KEY_TOAST[item.messageKey]) {
+    if (
+      typeof item.messageKey === 'string' &&
+      MESSAGE_KEY_TOAST[item.messageKey]
+    ) {
       return item.messageKey;
     }
-    const nestedMsg = item.msg?.trim();
+    const nestedMsg = typeof item.msg === 'string' ? item.msg.trim() : '';
     if (nestedMsg && looksLikeMessageKey(nestedMsg) && MESSAGE_KEY_TOAST[nestedMsg]) {
       return nestedMsg;
     }

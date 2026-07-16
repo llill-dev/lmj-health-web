@@ -12,7 +12,7 @@ export function useAdminAccessRequests(params: { page?: number; limit?: number; 
   });
 
   return {
-    requests: query.data?.requests ?? query.data?.data ?? [],
+    requests: query.data?.requests ?? [],
     total: query.data?.total ?? 0,
     page: query.data?.page ?? params.page ?? 1,
     limit: query.data?.limit ?? params.limit ?? 10,

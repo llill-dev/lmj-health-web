@@ -159,11 +159,11 @@ export default function SecretaryPatientFilesPage() {
       (filesQuery.files ?? []).map((file) => ({
         id: file.id || file._id || "",
         patientName:
-          patientDirectory.get(patientId)?.userId?.fullName || "مريض",
+          patientDirectory.get(patientId)?.user?.fullName || "مريض",
         patientId:
           patientDirectory.get(patientId)?.publicId || patientId || "—",
         fileType: file.mimeType || file.originalName || "ملف",
-        date: file.linkedAt || "",
+        date: file.createdAt || "",
         filename: file.originalName || "ملف",
       })),
     [filesQuery.files, patientDirectory, patientId],
@@ -232,7 +232,7 @@ export default function SecretaryPatientFilesPage() {
             <option value="">اختر مريضاً لعرض ملفاته</option>
             {(patientsQuery.patients ?? []).map((patient) => (
               <option key={patient._id} value={patient._id}>
-                {patient.userId?.fullName || "مريض"} - {patient.publicId || patient._id}
+                {patient.user?.fullName || "مريض"} - {patient.publicId || patient._id}
               </option>
             ))}
           </select>

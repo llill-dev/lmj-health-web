@@ -27,7 +27,7 @@ function asTemporaryPatientValidationErrorRecord(
   value: unknown,
 ): TemporaryPatientValidationErrorRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? value
+    ? (value as TemporaryPatientValidationErrorRecord)
     : null;
 }
 

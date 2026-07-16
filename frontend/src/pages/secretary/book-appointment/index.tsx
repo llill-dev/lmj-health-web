@@ -101,8 +101,8 @@ export default function SecretaryBookAppointmentPage() {
                   <option value="">اختر مريضاً</option>
                   {(patientsQuery.patients ?? []).map((patient) => (
                     <option key={patient._id} value={patient._id}>
-                      {patient.userId?.fullName || "مريض"} -{" "}
-                      {patient.publicId || patient.userId?.phone || patient._id}
+                      {patient.user?.fullName || "مريض"} -{" "}
+                      {patient.publicId || patient.user?.phone || patient._id}
                     </option>
                   ))}
                 </select>

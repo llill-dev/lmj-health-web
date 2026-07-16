@@ -64,7 +64,10 @@ export default function SecretaryCreateTemporaryPatientPage() {
   const [address, setAddress] = useState("");
 
   const isSubmitting = createTemporaryPatient.isPending;
-  const canSubmit = fullName.trim().length > 1 && phone.trim().length > 0;
+  const canSubmit =
+    fullName.trim().length > 1 &&
+    phone.trim().length > 0 &&
+    email.trim().length > 0;
 
   async function handleSubmit() {
     if (!canSubmit || isSubmitting) return;
@@ -72,9 +75,7 @@ export default function SecretaryCreateTemporaryPatientPage() {
       await createTemporaryPatient.mutateAsync({
         fullName: fullName.trim(),
         phone: phone.trim(),
-        email: email.trim() || undefined,
-        birthDate: birthDate || undefined,
-        address: address.trim() || undefined,
+        email: email.trim(),
       });
       toast("تم إنشاء المريض المؤقت بنجاح.", {
         title: "تم الحفظ",

@@ -45,14 +45,16 @@ type TemplateApplyPayloadRecord = TemplateDraftStorageRecord & {
 };
 
 function asObjectRecord(value: unknown): TemplateDraftStorageRecord | null {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as TemplateDraftStorageRecord)
+    : null;
 }
 
 function asTemplateApplication(
   value: unknown,
 ): DoctorTemplateApplication | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DoctorTemplateApplication)
     : null;
 }
 
@@ -132,7 +134,7 @@ function parseStoredDraft(raw: string): StoredDoctorTemplateDraft | null {
   if (!application) return null;
 
   if (record.storedAt) {
-    const storedAtMs = new Date(record.storedAt).getTime();
+    const storedAtMs = new Date(String(record.storedAt)).getTime();
     if (Number.isNaN(storedAtMs)) return null;
     if (Date.now() - storedAtMs > DRAFT_MAX_AGE_MS) return null;
   }

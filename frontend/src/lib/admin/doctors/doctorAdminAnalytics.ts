@@ -32,7 +32,7 @@ function num(x: unknown): number {
 
 function asRecord(x: unknown): AdminDoctorAnalyticsRecord | null {
   return x && typeof x === 'object' && !Array.isArray(x)
-    ? x
+    ? (x as AdminDoctorAnalyticsRecord)
     : null;
 }
 

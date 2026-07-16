@@ -154,9 +154,21 @@ export default function SecretaryWaitlistPage() {
     () =>
       (waitlistQuery.requests ?? []).map((request) => ({
         id: request._id,
-        patientName: request.patient?.userId?.fullName || "مريض",
-        patientId: request.patient?.publicId || request.patient?._id || "—",
-        phone: request.patient?.userId?.phone || "—",
+        patientName:
+          (request.patient &&
+          typeof request.patient === "object" &&
+          request.patient.userId?.fullName) ||
+          "مريض",
+        patientId:
+          (request.patient &&
+          typeof request.patient === "object" &&
+          (request.patient.publicId || request.patient._id)) ||
+          "—",
+        phone:
+          (request.patient &&
+          typeof request.patient === "object" &&
+          request.patient.userId?.phone) ||
+          "—",
         waitTime: request.createdAt
           ? `${Math.max(
               1,

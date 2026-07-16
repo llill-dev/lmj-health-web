@@ -22,7 +22,7 @@ function asReferralValidationErrorRecord(
   value: unknown,
 ): ReferralValidationErrorRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as ReferralValidationErrorRecord)
     : null;
 }
 

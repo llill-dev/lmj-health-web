@@ -56,7 +56,7 @@ export function rememberAdminDoctorOffboardedIds(input: {
 function asRecord(v: unknown): AdminDoctorOffboardRecord | undefined {
   if (v === null || v === undefined) return undefined;
   if (typeof v === 'object' && !Array.isArray(v)) {
-    return v;
+    return v as AdminDoctorOffboardRecord;
   }
   return undefined;
 }

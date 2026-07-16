@@ -51,7 +51,9 @@ type DoctorOrderStatusRecord = {
 };
 
 function asRecord(value: unknown): DoctorOrderStatusRecord | null {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as DoctorOrderStatusRecord)
+    : null;
 }
 
 function pickStatusString(...values: ReadonlyArray<unknown>): string | undefined {

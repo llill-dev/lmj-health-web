@@ -21,7 +21,7 @@ function asVerificationRequestSummary(
     typeof record.status === 'string' ||
     typeof record.doctorId === 'string'
   )
-    ? record
+    ? (record as VerificationRequestSummary)
     : null;
 }
 
@@ -38,7 +38,7 @@ function asAdminDoctorDetailsDoctor(
     typeof record.phone === 'string' ||
     typeof record.user === 'object'
   )
-    ? record
+    ? (record as AdminDoctorDetailsDoctor)
     : undefined;
 }
 
@@ -51,7 +51,7 @@ function pickTrimmedString(v: unknown): string | undefined {
 function asRecord(v: unknown): AdminDoctorDetailsApiRecord | undefined {
   if (v === null || v === undefined) return undefined;
   if (typeof v === 'object' && !Array.isArray(v))
-    return v;
+    return v as AdminDoctorDetailsApiRecord;
   return undefined;
 }
 

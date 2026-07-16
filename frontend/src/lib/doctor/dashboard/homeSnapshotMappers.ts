@@ -42,7 +42,7 @@ function asSnapshotAppointmentLike(
 
 function asRecord(value: unknown): DoctorHomeSnapshotRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DoctorHomeSnapshotRecord)
     : null;
 }
 

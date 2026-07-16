@@ -20,7 +20,7 @@ function asDoctorSecretaryApiRecord(
   value: unknown,
 ): DoctorSecretaryApiRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DoctorSecretaryApiRecord)
     : null;
 }
 

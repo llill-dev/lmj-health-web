@@ -18,7 +18,7 @@ type LocalizedLabel = { en: string; ar: string };
 
 function asDirectoryRecord(value: unknown): DirectoryRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DirectoryRecord)
     : null;
 }
 

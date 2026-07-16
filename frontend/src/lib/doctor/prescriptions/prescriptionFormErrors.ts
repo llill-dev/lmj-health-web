@@ -22,7 +22,7 @@ function asPrescriptionValidationErrorRecord(
   value: unknown,
 ): PrescriptionValidationErrorRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as PrescriptionValidationErrorRecord)
     : null;
 }
 

@@ -17,7 +17,7 @@ type TemplateDraftItem = TemplateDraftRecord;
 
 function asRecord(value: unknown): TemplateDraftRecord {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as TemplateDraftRecord)
     : {};
 }
 

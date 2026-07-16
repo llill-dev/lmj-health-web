@@ -16,7 +16,9 @@ type DoctorSpecializationReviewRecord = {
 function asDoctorSpecializationReviewRecord(
   value: unknown,
 ): DoctorSpecializationReviewRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as DoctorSpecializationReviewRecord)
+    : {};
 }
 
 export type DoctorSpecializationReviewState = {

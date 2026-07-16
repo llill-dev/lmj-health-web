@@ -23,7 +23,7 @@ function asDoctorProfileValidationErrorRecord(
   value: unknown,
 ): DoctorProfileValidationErrorRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DoctorProfileValidationErrorRecord)
     : null;
 }
 
