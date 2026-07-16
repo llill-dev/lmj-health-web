@@ -4,15 +4,24 @@ import type { RadiologyClinicalForm } from '@/components/doctor/radiology/radiol
 import type { RadiologyOrderItemUi } from '@/components/doctor/radiology/radiology-types';
 import type { ReferralFormState } from '@/lib/doctor/referrals/referralFormSchema';
 import { mapReferralPriorityFromApi } from '@/lib/doctor/referrals/referralPriority';
-import type { DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
+import type {
+  DoctorTemplateApplication,
+  DoctorTemplateType,
+} from '@/lib/doctor/templates/templateTypes';
 
-function asRecord(value: unknown): Record<string, unknown> {
+type TemplateDraftRecord = {
+  [key: string]: unknown;
+};
+
+type TemplateDraftItem = TemplateDraftRecord;
+
+function asRecord(value: unknown): TemplateDraftRecord {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
+    ? value
     : {};
 }
 
-function asString(...values: unknown[]): string | undefined {
+function asString(...values: ReadonlyArray<unknown>): string | undefined {
   for (const value of values) {
     if (typeof value !== 'string') continue;
     const trimmed = value.trim();
@@ -37,8 +46,8 @@ export function orderCategoryForTemplateType(
 }
 
 function collectApplicationItemArrays(
-  application: Record<string, unknown>,
-): unknown[] {
+  application: DoctorTemplateApplication,
+): TemplateDraftItem[] {
   const keys = [
     'items',
     'medications',
@@ -47,18 +56,24 @@ function collectApplicationItemArrays(
     'procedures',
     'orderItems',
   ];
-  const merged: unknown[] = [];
+  const merged: TemplateDraftItem[] = [];
 
   for (const key of keys) {
     const value = application[key];
-    if (Array.isArray(value)) merged.push(...value);
+    if (!Array.isArray(value)) continue;
+    for (const entry of value) {
+      const record = entry && typeof entry === 'object' && !Array.isArray(entry)
+        ? entry
+        : null;
+      if (record) merged.push(record);
+    }
   }
 
   return merged;
 }
 
 export function parsePrescriptionTemplateDraft(
-  application: Record<string, unknown>,
+  application: DoctorTemplateApplication,
 ): {
   generalInstructions?: string;
   items: PrescriptionDraftForm[];
@@ -94,7 +109,7 @@ export function parsePrescriptionTemplateDraft(
 }
 
 export function parseOrderClinicalTemplateDraft(
-  application: Record<string, unknown>,
+  application: DoctorTemplateApplication,
   category: CatalogOrderCategory,
 ): Partial<RadiologyClinicalForm> {
   const clinicalReason = asString(
@@ -130,7 +145,7 @@ export function parseOrderClinicalTemplateDraft(
 }
 
 export function parseOrderItemTemplateDrafts(
-  application: Record<string, unknown>,
+  application: DoctorTemplateApplication,
 ): Array<Omit<RadiologyOrderItemUi, 'id'>> {
   const rawItems = collectApplicationItemArrays(application);
   const items: Array<Omit<RadiologyOrderItemUi, 'id'>> = [];
@@ -163,7 +178,7 @@ export function parseOrderItemTemplateDrafts(
 }
 
 export function parseReferralTemplateDraft(
-  application: Record<string, unknown>,
+  application: DoctorTemplateApplication,
 ): Partial<ReferralFormState> {
   const draft: Partial<ReferralFormState> = {};
 

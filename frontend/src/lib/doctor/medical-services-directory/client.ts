@@ -1,17 +1,24 @@
 import { get } from '@/lib/api';
 import { doctorEndpoints } from '@/lib/doctor/endpoints';
 import type {
+  DirectoryObjectIdLike,
   FacilitiesSuggestParams,
   FacilitiesSuggestResponse,
   FacilityTypesResponse,
   SuggestFacilityRecord,
 } from '@/lib/doctor/medical-services-directory/api-types';
 
+function asDirectoryObjectIdLike(value: unknown): DirectoryObjectIdLike | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 function stringifyRecordId(value: unknown): string | undefined {
   if (value == null) return undefined;
   if (typeof value === 'string') return value.trim() || undefined;
-  if (typeof value === 'object' && value !== null) {
-    const record = value as Record<string, unknown>;
+  const record = asDirectoryObjectIdLike(value);
+  if (record) {
     if (typeof record.$oid === 'string') return record.$oid;
     if (typeof record.toString === 'function') {
       const text = String(record.toString()).trim();

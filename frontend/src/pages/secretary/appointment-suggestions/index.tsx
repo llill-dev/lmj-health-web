@@ -1,6 +1,12 @@
-import { Calendar, Clock, Check, X } from "lucide-react";
+import { useState } from "react";
+import { Calendar, Check, X } from "lucide-react";
+import { useWaitlistSuggestions } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
 
 export default function SecretaryAppointmentSuggestionsPage() {
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const suggestionsQuery = useWaitlistSuggestions({ date }, Boolean(date));
+  const suggestions = suggestionsQuery.data?.freeSlots ?? [];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -16,80 +22,57 @@ export default function SecretaryAppointmentSuggestionsPage() {
 
       <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
         <div className="mb-4">
+          <label className="mb-2 block font-cairo text-sm font-bold text-[#0f172a]">
+            التاريخ
+          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+            className="h-10 rounded-xl border border-[#e2e8f0] px-3 font-cairo text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        </div>
+        <div className="mb-4">
           <h3 className="font-cairo text-lg font-bold text-[#0f172a]">
             اقتراحات متاحة
           </h3>
         </div>
         <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  2024-01-20
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  09:00 - 10:00
-                </p>
-              </div>
+          {suggestionsQuery.isLoading ? (
+            <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
+              جاري تحميل الاقتراحات...
             </div>
-            <div className="flex items-center gap-2">
-              <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
-                <Check className="h-4 w-4" />
-              </button>
-              <button className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50">
-                <X className="h-4 w-4" />
-              </button>
+          ) : suggestions.length === 0 ? (
+            <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
+              لا توجد اقتراحات متاحة لهذا التاريخ.
             </div>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
+          ) : (
+            suggestions.map((slot, index) => (
+              <div key={`${slot.startTime}-${index}`} className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-cairo text-sm font-bold text-[#0f172a]">
+                      {date}
+                    </p>
+                    <p className="font-cairo text-xs font-medium text-[#64748b]">
+                      {slot.startTime || "—"} - {slot.endTime || "—"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
+                    <Check className="h-4 w-4" />
+                  </button>
+                  <button className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  2024-01-20
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  10:30 - 11:30
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
-                <Check className="h-4 w-4" />
-              </button>
-              <button className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cairo text-sm font-bold text-[#0f172a]">
-                  2024-01-21
-                </p>
-                <p className="font-cairo text-xs font-medium text-[#64748b]">
-                  14:00 - 15:00
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90">
-                <Check className="h-4 w-4" />
-              </button>
-              <button className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>

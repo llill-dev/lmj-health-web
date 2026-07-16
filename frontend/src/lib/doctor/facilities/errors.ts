@@ -5,6 +5,21 @@ export type DoctorFacilitySaveToast = {
   message: string;
 };
 
+type DoctorFacilityValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  msg?: unknown;
+  [key: string]: unknown;
+};
+
+function asDoctorFacilityValidationErrorRecord(
+  value: unknown,
+): DoctorFacilityValidationErrorRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 const FIELD_LABELS: Record<string, string> = {
   name: 'اسم المنشأة',
   city: 'المدينة',
@@ -84,14 +99,16 @@ const MESSAGE_KEY_TOAST: Record<string, DoctorFacilitySaveToast> = {
   },
 };
 
-function formatValidationErrors(body: Record<string, unknown>): string | null {
+function formatValidationErrors(body: DoctorFacilityValidationErrorRecord): string | null {
   const errors = body.errors;
   if (!Array.isArray(errors) || errors.length === 0) return null;
 
   const parts = errors.slice(0, 4).map((entry) => {
-    const item = entry as { path?: string; msg?: string };
-    const field = FIELD_LABELS[item.path ?? ''] ?? item.path ?? 'حقل';
-    const detail = item.msg?.trim() || 'قيمة غير صالحة';
+    const item = asDoctorFacilityValidationErrorRecord(entry) ?? {};
+    const path = typeof item.path === 'string' ? item.path : '';
+    const field = FIELD_LABELS[path] ?? path ?? 'حقل';
+    const detail =
+      (typeof item.msg === 'string' ? item.msg.trim() : '') || 'قيمة غير صالحة';
     return `${field}: ${detail}`;
   });
 

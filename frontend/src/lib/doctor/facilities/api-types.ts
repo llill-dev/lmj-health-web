@@ -49,14 +49,19 @@ export type DoctorFacilitySuggestRequestBody = {
   description?: string;
 };
 
+export type DoctorFacilityDoctorPayload = {
+  _id?: string;
+  id?: string;
+  facility?: DoctorFacilityRecord;
+};
+
 export type DoctorFacilityResponse = {
   messageKey?: string;
   message?: string;
   facility?: DoctorFacilityRecord;
   /** Swagger 201 may return `{ data: { id } }` or embed the full record. */
   data?: DoctorFacilityRecord | { id?: string; _id?: string };
-  doctor?: Record<string, unknown>;
-  additionalProp1?: Record<string, unknown>;
+  doctor?: DoctorFacilityDoctorPayload;
 };
 
 export type FacilityTypeOption = {
@@ -73,6 +78,19 @@ export type FacilityTypesResponse = {
 export type DoctorFacilitySuggestRequestResponse = {
   messageKey?: string;
   message?: string;
-  request?: Record<string, unknown>;
-  data?: Record<string, unknown>;
+  request?: {
+    _id?: string;
+    id?: string;
+    status?: string;
+    facilityId?: string | null;
+    facilityProviderId?: string | null;
+    createdAt?: string;
+  };
+  data?: {
+    _id?: string;
+    id?: string;
+    status?: string;
+    facilityId?: string | null;
+    facilityProviderId?: string | null;
+  };
 };

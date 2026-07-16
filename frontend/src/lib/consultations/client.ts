@@ -1,10 +1,15 @@
 import { get, patch, post } from '@/lib/api';
 import type {
   ConsultationAttachmentFile,
+  ConsultationReviewInput,
   ConsultationReview,
 } from '@/lib/consultations/types';
 
-export type { ConsultationAttachmentFile, ConsultationReview };
+export type {
+  ConsultationAttachmentFile,
+  ConsultationReview,
+  ConsultationReviewInput,
+};
 
 export type ConsultationTicketStatus =
   | 'pending'
@@ -71,6 +76,22 @@ export type ConsultationTicketDetailsResponse = {
   messages?: ConsultationMessage[];
 };
 
+export type ConsultationReviewResponse = {
+  ticket?: ConsultationTicketDetails;
+  review?: ConsultationReview;
+  message?: string;
+};
+
+export type ConsultationMessageMutationResponse = {
+  message?: ConsultationMessage;
+  ticket?: ConsultationTicketDetails;
+};
+
+export type ConsultationStatusMutationResponse = {
+  ticket?: ConsultationTicketSummary;
+  message?: string;
+};
+
 export type ConsultationSendMessageInput = {
   content: string;
   attachments?: string[];
@@ -92,7 +113,7 @@ export const consultationsApi = {
     }),
 
   sendMessage: (ticketId: string, body: ConsultationSendMessageInput) =>
-    post<{ message?: ConsultationMessage; ticket?: ConsultationTicketDetails }>(
+    post<ConsultationMessageMutationResponse>(
       `/api/consultations/${ticketId}/messages`,
       body,
       { locale: 'ar' },
@@ -102,16 +123,23 @@ export const consultationsApi = {
     ticketId: string,
     body: { status: 'closed' | 'dismissed'; reason?: string },
   ) =>
-    patch<{ ticket?: ConsultationTicketSummary; message?: string }>(
+    patch<ConsultationStatusMutationResponse>(
       `/api/consultations/${ticketId}/status`,
       body,
       { locale: 'ar' },
     ),
 
   markRead: (ticketId: string) =>
-    post<{ ticket?: ConsultationTicketSummary; message?: string }>(
+    post<ConsultationStatusMutationResponse>(
       `/api/consultations/${ticketId}/mark-read`,
       {},
+      { locale: 'ar' },
+    ),
+
+  review: (ticketId: string, body: ConsultationReviewInput) =>
+    post<ConsultationReviewResponse>(
+      `/api/consultations/${ticketId}/review`,
+      body,
       { locale: 'ar' },
     ),
 };

@@ -1,4 +1,5 @@
 import type {
+  AppointmentTypeApiBody,
   CreateAppointmentTypeBody,
   UpdateAppointmentTypeBody,
 } from '@/lib/doctor/types';
@@ -6,9 +7,11 @@ import type {
 /** Maps frontend form fields to API-3 POST/PATCH body (`isPriceVisibleToPatient`). */
 export function toAppointmentTypeApiBody(
   body: CreateAppointmentTypeBody | UpdateAppointmentTypeBody,
-): Record<string, unknown> {
-  const payload: Record<string, unknown> = {};
+): AppointmentTypeApiBody {
+  const payload: AppointmentTypeApiBody = {};
   if (body.name != null) payload.name = body.name;
+  if (body.description != null) payload.description = body.description;
+  if (body.duration != null) payload.duration = body.duration;
   if (body.price != null) payload.price = body.price;
   if (body.priceVisibleToPatient != null) {
     payload.isPriceVisibleToPatient = body.priceVisibleToPatient;

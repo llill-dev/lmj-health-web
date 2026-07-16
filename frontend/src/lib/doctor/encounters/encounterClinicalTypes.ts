@@ -4,6 +4,10 @@ export type EncounterClinicalListParams = {
   status?: string;
 };
 
+export type EncounterOrderItemPayload = {
+  [key: string]: unknown;
+};
+
 export type EncounterPrescriptionItem = {
   _id?: string;
   name?: string;
@@ -54,8 +58,8 @@ export type EncounterOrderItem = {
   category?: string;
   side?: string;
   position?: string;
-  details?: Record<string, unknown>;
-  data?: Record<string, unknown>;
+  details?: EncounterOrderItemPayload;
+  data?: EncounterOrderItemPayload;
 };
 
 export type EncounterOrder = {

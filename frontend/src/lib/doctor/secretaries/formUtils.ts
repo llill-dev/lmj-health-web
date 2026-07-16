@@ -6,6 +6,29 @@ import type {
 import { PHONE_DIAL_CODES } from "@/lib/phone/dialCodes";
 
 export type SecretaryGender = "Male" | "Female";
+type DoctorSecretaryApiRecord = {
+  user?: unknown;
+  userId?: unknown;
+  _id?: unknown;
+  id?: unknown;
+  fullName?: unknown;
+  email?: unknown;
+  phone?: unknown;
+  gender?: unknown;
+  accountStatus?: unknown;
+  photoUrl?: unknown;
+  permissions?: unknown;
+  assignedDoctor?: unknown;
+  [key: string]: unknown;
+};
+
+function asDoctorSecretaryApiRecord(
+  value: unknown,
+): DoctorSecretaryApiRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : null;
+}
 
 export function normalizeSecretaryGender(value?: string): SecretaryGender {
   const normalized = value?.trim().toLowerCase();
@@ -51,11 +74,11 @@ function readString(value: unknown): string | undefined {
 }
 
 function resolveSecretaryUser(
-  raw: Record<string, unknown>,
+  raw: DoctorSecretaryApiRecord,
 ): DoctorSecretaryUser | undefined {
-  const nestedUser = raw.user;
-  if (nestedUser && typeof nestedUser === "object") {
-    const userRecord = nestedUser as Record<string, unknown>;
+  const nestedUser = asDoctorSecretaryApiRecord(raw.user);
+  if (nestedUser) {
+    const userRecord = nestedUser;
     const fullName = readString(userRecord.fullName);
     if (fullName) {
       return {
@@ -70,9 +93,9 @@ function resolveSecretaryUser(
     }
   }
 
-  const populatedUserId = raw.userId;
-  if (populatedUserId && typeof populatedUserId === "object") {
-    const userRecord = populatedUserId as Record<string, unknown>;
+  const populatedUserId = asDoctorSecretaryApiRecord(raw.userId);
+  if (populatedUserId) {
+    const userRecord = populatedUserId;
     const fullName = readString(userRecord.fullName);
     if (fullName) {
       return {
@@ -102,9 +125,8 @@ function resolveSecretaryUser(
 
 /** Normalizes list/detail/create API shapes into one secretary model. */
 export function normalizeDoctorSecretary(raw: unknown): DoctorSecretary | null {
-  if (!raw || typeof raw !== "object") return null;
-
-  const record = raw as Record<string, unknown>;
+  const record = asDoctorSecretaryApiRecord(raw);
+  if (!record) return null;
   const id = readString(record._id) ?? readString(record.id);
   if (!id) return null;
 
@@ -112,10 +134,7 @@ export function normalizeDoctorSecretary(raw: unknown): DoctorSecretary | null {
   const userId =
     typeof record.userId === "string"
       ? record.userId
-      : (user?._id ??
-        readString(
-          (record.userId as Record<string, unknown> | undefined)?._id,
-        ));
+      : (user?._id ?? readString(asDoctorSecretaryApiRecord(record.userId)?._id));
 
   return {
     _id: id,

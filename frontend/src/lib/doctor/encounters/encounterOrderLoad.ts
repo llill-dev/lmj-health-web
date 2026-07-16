@@ -57,7 +57,12 @@ function extractEncounterOrdersRows(
     return data.orders;
   }
   const results = list.results;
-  if (Array.isArray(results)) return results as EncounterOrder[];
+  if (Array.isArray(results)) {
+    return results.filter(
+      (item): item is EncounterOrder =>
+        !!item && typeof item === 'object' && !Array.isArray(item),
+    );
+  }
   return [];
 }
 

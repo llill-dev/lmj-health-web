@@ -13,7 +13,7 @@ import { useAuthStore } from "@/store/authStore";
 let refreshInFlight: Promise<boolean> | null = null;
 
 function applyRefreshedTokens(data: RefreshTokenResponse): boolean {
-  const pair = normalizeTokenPair(data as unknown as Record<string, unknown>);
+  const pair = normalizeTokenPair(data);
   if (!pair) return false;
 
   const stored = readStoredAuthSession();

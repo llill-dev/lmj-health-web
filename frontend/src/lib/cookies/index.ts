@@ -130,12 +130,30 @@ export type PersistedUser = {
   deletionRecoverUntil?: string | null;
 };
 
+function asPersistedUserRecord(
+  value: unknown,
+): { userId?: unknown; role?: unknown } | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
+function isPersistedUser(value: unknown): value is PersistedUser {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const record = asPersistedUserRecord(value);
+  if (!record) return false;
+  return (
+    typeof record.userId === 'string' &&
+    record.userId.trim().length > 0 &&
+    typeof record.role === 'string' &&
+    record.role.trim().length > 0
+  );
+}
+
 export function readAuthUser(): PersistedUser | null {
   const raw = getCookie(COOKIE_NAMES.USER);
   if (!raw) return null;
   try {
-    const parsed = JSON.parse(raw) as PersistedUser;
-    if (!parsed?.userId || !parsed?.role) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPersistedUser(parsed)) return null;
     return parsed;
   } catch {
     return null;

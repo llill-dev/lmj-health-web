@@ -11,13 +11,33 @@ export type TemporaryPatientServerFieldMessages = Partial<
   Record<TemporaryPatientFormField, string>
 >;
 
+type TemporaryPatientValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  param?: unknown;
+  field?: unknown;
+  property?: unknown;
+  message?: unknown;
+  msg?: unknown;
+  details?: unknown;
+  [key: string]: unknown;
+};
+
+function asTemporaryPatientValidationErrorRecord(
+  value: unknown,
+): TemporaryPatientValidationErrorRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 function normalizeForMatch(raw: string): string {
   return raw.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 /** يستنتج حقولًا من مخطط أخطاء شائعة (مصفوفة errors أو كائن) */
 function collectStructuredFieldTexts(
-  body: Record<string, unknown>,
+  body: TemporaryPatientValidationErrorRecord,
 ): Map<string, string> {
   const out = new Map<string, string>();
   const errs = body.errors;
@@ -43,14 +63,14 @@ function collectStructuredFieldTexts(
         push("_root", item);
         continue;
       }
-      if (item && typeof item === "object") {
-        const o = item as Record<string, unknown>;
+      const o = asTemporaryPatientValidationErrorRecord(item);
+      if (o) {
         let pathLeaf = "";
         const pathVal =
-          (o.path as unknown) ??
-          (o.param as unknown) ??
-          (o.field as unknown) ??
-          (o.property as unknown);
+          o.path ??
+          o.param ??
+          o.field ??
+          o.property;
         if (Array.isArray(pathVal))
           pathLeaf = pathVal[pathVal.length - 1]!.toString();
         else if (typeof pathVal === "string")

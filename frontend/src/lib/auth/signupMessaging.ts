@@ -26,6 +26,19 @@ type SignupValidationIssue = {
   messages: string[];
 };
 
+type SignupErrorBodyRecord = {
+  errors?: unknown;
+  message?: unknown;
+  detail?: unknown;
+  [key: string]: unknown;
+};
+
+function asSignupErrorBodyRecord(value: unknown): SignupErrorBodyRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 function normalizeIssueKey(key: string | null | undefined): string | null {
   if (!key) return null;
   const trimmed = key.trim();
@@ -99,7 +112,7 @@ function serverDetailAlreadyContainedIn(
   return false;
 }
 
-function formatValidationDetails(body: Record<string, unknown>): string | null {
+function formatValidationDetails(body: SignupErrorBodyRecord): string | null {
   const issues = collectValidationIssues(body);
   if (!issues.length) return null;
 
@@ -122,7 +135,8 @@ function collectMessagesFromIssueValue(val: unknown): string[] {
     return out.filter(Boolean);
   }
   if (typeof val === "object") {
-    const o = val as Record<string, unknown>;
+    const o = asSignupErrorBodyRecord(val);
+    if (!o) return [];
     const m =
       (typeof o.message === "string" && o.message.trim()) ||
       (typeof o.msg === "string" && o.msg.trim()) ||
@@ -132,7 +146,7 @@ function collectMessagesFromIssueValue(val: unknown): string[] {
   return [];
 }
 
-function issueKeyFromObject(o: Record<string, unknown>): string | null {
+function issueKeyFromObject(o: SignupErrorBodyRecord): string | null {
   for (const key of ["path", "param", "field", "key", "property", "name"]) {
     const val = o[key];
     if (typeof val === "string" && val.trim()) {
@@ -143,7 +157,7 @@ function issueKeyFromObject(o: Record<string, unknown>): string | null {
 }
 
 function collectValidationIssues(
-  body: Record<string, unknown>,
+  body: SignupErrorBodyRecord,
 ): SignupValidationIssue[] {
   const errs = body.errors;
   if (errs == null) return [];
@@ -177,8 +191,8 @@ function collectValidationIssues(
         add(null, [item]);
         continue;
       }
-      if (item && typeof item === "object") {
-        const obj = item as Record<string, unknown>;
+      const obj = asSignupErrorBodyRecord(item);
+      if (obj) {
         add(issueKeyFromObject(obj), collectMessagesFromIssueValue(obj));
         continue;
       }
@@ -188,9 +202,9 @@ function collectValidationIssues(
   }
 
   if (typeof errs === "object") {
-    for (const [rawKey, rawVal] of Object.entries(
-      errs as Record<string, unknown>,
-    )) {
+    const record = asSignupErrorBodyRecord(errs);
+    if (!record) return [...grouped.values()];
+    for (const [rawKey, rawVal] of Object.entries(record)) {
       add(rawKey, collectMessagesFromIssueValue(rawVal));
     }
   }
@@ -234,7 +248,7 @@ function issueMessagesExplicitlyDescribeContactField(
 }
 
 function responseBodyLooksLikeMedicalLicenseViolation(
-  body: Record<string, unknown>,
+  body: SignupErrorBodyRecord,
 ): boolean {
   try {
     const haystack = JSON.stringify(body ?? {}).toLowerCase();
@@ -672,4 +686,3 @@ export function formatVerifyFlowError(error: unknown): string {
 
   return VERIFY_OTP_FALLBACK_AR;
 }
-

@@ -64,6 +64,7 @@ import { readAuthUser } from "@/lib/cookies";
 import type {
   CreateTemporaryPatientBody,
   CreateTemporaryPatientResponse,
+  DoctorActionResponse,
   DoctorAppointmentDetailsResponse,
   DoctorAppointmentFile,
   DoctorAppointmentListParams,
@@ -128,17 +129,23 @@ import type {
 } from "@/lib/doctor/types";
 import type {
   CreateDoctorLibraryItemBody,
+  DoctorLibraryItemDeleteResponse,
+  DoctorLibraryItemFavoriteResponse,
+  DoctorLibraryItemMutationResponse,
   DoctorLibraryListResponse,
   DoctorLibraryRecentResponse,
   UpdateDoctorLibraryItemBody,
 } from "@/lib/doctor/library/libraryTypes";
 import type {
   CreateDoctorTemplateBody,
+  DoctorTemplateDeleteResponse,
+  DoctorTemplateMutationResponse,
   DoctorTemplatesListResponse,
   UpdateDoctorTemplateBody,
 } from "@/lib/doctor/templates/templateTypes";
 import type {
   CreateOrderFavoriteBody,
+  OrderFavoriteMutationResponse,
   OrderFavoritesListResponse,
 } from "@/lib/doctor/orders/orderFavoritesTypes";
 
@@ -366,12 +373,54 @@ export const doctorClinicalQueryKeys = {
       "order-favorites",
       section ?? "all",
     ] as const,
-  libraryItems: (params: Record<string, unknown>) =>
+  libraryItems: (params: DoctorLibraryListParams = {}) =>
     [...doctorClinicalQueryKeys.all, "library-items", params] as const,
   libraryRecent: () =>
     [...doctorClinicalQueryKeys.all, "library-recent"] as const,
-  templates: (params: Record<string, unknown>) =>
+  templates: (params: DoctorTemplatesListParams = {}) =>
     [...doctorClinicalQueryKeys.all, "templates", params] as const,
+};
+
+export type DoctorLibraryListParams = {
+  page?: number;
+  limit?: number;
+  type?: string;
+  favorite?: boolean;
+  includeArchived?: boolean;
+  search?: string;
+};
+
+export type DoctorTemplatesListParams = {
+  page?: number;
+  limit?: number;
+  type?: string;
+  includeArchived?: boolean;
+  search?: string;
+};
+
+export type CreateDoctorReferralOrderBody = {
+  specialty?: string;
+  reason?: string;
+  referralType?: string;
+  referredDoctorName?: string;
+  institution?: string;
+  clinicalSummary?: string;
+  questionsToColleague?: string;
+  notes?: string;
+  urgency?: string;
+  priority?: string;
+};
+
+export type DoctorCatalogSearchParams = {
+  q?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type DoctorOrderFavoritesListParams = {
+  catalogSection?: string;
+  page?: number;
+  limit?: number;
 };
 
 function buildDoctorOrdersListQuery(params: DoctorOrdersListParams = {}) {
@@ -614,9 +663,9 @@ const doctorScheduleApi = {
   // PATCH /doctors/:doctorId/schedule/settings
   updateSettings: async (
     body: DoctorUpdateScheduleSettingsBody,
-  ): Promise<{ message?: string }> => {
+  ): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return patch<{ message?: string }>(
+    return patch<DoctorActionResponse>(
       doctorEndpoints.schedule.updateSettings(doctorId),
       body,
       { locale: "ar" },
@@ -624,9 +673,9 @@ const doctorScheduleApi = {
   },
 
   // POST /doctors/:doctorId/schedule/day
-  addDay: async (body: DoctorAddDayBody): Promise<{ message?: string }> => {
+  addDay: async (body: DoctorAddDayBody): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return post<{ message?: string }>(
+    return post<DoctorActionResponse>(
       doctorEndpoints.schedule.addDay(doctorId),
       body,
       { locale: "ar" },
@@ -637,9 +686,9 @@ const doctorScheduleApi = {
   updateDay: async (
     day: ScheduleDayKey,
     body: DoctorUpdateDayBody,
-  ): Promise<{ message?: string }> => {
+  ): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return patch<{ message?: string }>(
+    return patch<DoctorActionResponse>(
       doctorEndpoints.schedule.updateDay(doctorId, day),
       body,
       { locale: "ar" },
@@ -647,9 +696,9 @@ const doctorScheduleApi = {
   },
 
   // DELETE /doctors/:doctorId/schedule/day/:day
-  deleteDay: async (day: ScheduleDayKey): Promise<{ message?: string }> => {
+  deleteDay: async (day: ScheduleDayKey): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return del<{ message?: string }>(
+    return del<DoctorActionResponse>(
       doctorEndpoints.schedule.deleteDay(doctorId, day),
       { locale: "ar" },
     );
@@ -658,9 +707,9 @@ const doctorScheduleApi = {
   // POST /doctors/:doctorId/schedule/exception
   addException: async (
     body: DoctorAddExceptionBody,
-  ): Promise<{ message?: string }> => {
+  ): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return post<{ message?: string }>(
+    return post<DoctorActionResponse>(
       doctorEndpoints.schedule.addException(doctorId),
       body,
       { locale: "ar" },
@@ -670,9 +719,9 @@ const doctorScheduleApi = {
   // PATCH /doctors/:doctorId/schedule/exceptions
   updateExceptions: async (
     body: DoctorUpdateExceptionsBody,
-  ): Promise<{ message?: string }> => {
+  ): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return patch<{ message?: string }>(
+    return patch<DoctorActionResponse>(
       doctorEndpoints.schedule.updateExceptions(doctorId),
       body,
       { locale: "ar" },
@@ -682,9 +731,9 @@ const doctorScheduleApi = {
   // DELETE /doctors/:doctorId/schedule/exception/:exceptionId
   deleteException: async (
     exceptionId: string,
-  ): Promise<{ message?: string }> => {
+  ): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return del<{ message?: string }>(
+    return del<DoctorActionResponse>(
       doctorEndpoints.schedule.deleteException(doctorId, exceptionId),
       { locale: "ar" },
     );
@@ -752,9 +801,9 @@ const doctorAppointmentTypesApi = {
   },
 
   // DELETE /doctors/:doctorId/appointment-types/:typeId
-  deleteType: async (typeId: string): Promise<{ message?: string }> => {
+  deleteType: async (typeId: string): Promise<DoctorActionResponse> => {
     const doctorId = getDoctorIdFromAuth();
-    return del<{ message?: string }>(
+    return del<DoctorActionResponse>(
       doctorEndpoints.appointmentTypes.delete(doctorId, typeId),
       { locale: "ar" },
     );
@@ -1030,18 +1079,7 @@ export const doctorApi = {
       doctorId: string,
       patientId: string,
       encounterId: string,
-      body: {
-        specialty?: string;
-        reason?: string;
-        referralType?: string;
-        referredDoctorName?: string;
-        institution?: string;
-        clinicalSummary?: string;
-        questionsToColleague?: string;
-        notes?: string;
-        urgency?: string;
-        priority?: string;
-      },
+      body: CreateDoctorReferralOrderBody,
     ) =>
       post<EncounterOrderResponse>(
         doctorEndpoints.patients.encounterOrdersReferrals(
@@ -1170,7 +1208,7 @@ export const doctorApi = {
         { locale: "ar" },
       ),
     listImagingCatalog: (
-      params: { q?: string; page?: number; limit?: number } = {},
+      params: DoctorCatalogSearchParams = {},
     ) => {
       const search = new URLSearchParams();
       if (params.q?.trim()) search.set("q", params.q.trim());
@@ -1183,7 +1221,7 @@ export const doctorApi = {
       });
     },
     listLabCatalog: (
-      params: { q?: string; page?: number; limit?: number } = {},
+      params: DoctorCatalogSearchParams = {},
     ) => {
       const search = new URLSearchParams();
       if (params.q?.trim()) search.set("q", params.q.trim());
@@ -1196,7 +1234,7 @@ export const doctorApi = {
       });
     },
     listProcedureCatalog: (
-      params: { q?: string; page?: number; limit?: number } = {},
+      params: DoctorCatalogSearchParams = {},
     ) => {
       const search = new URLSearchParams();
       if (params.q?.trim()) search.set("q", params.q.trim());
@@ -1550,7 +1588,7 @@ export const doctorApi = {
         body,
         { locale: "ar" },
       ),
-    createReferral: (body: Record<string, unknown>) =>
+    createReferral: (body: CreateDoctorReferralOrderBody) =>
       post<EncounterOrderResponse>(
         doctorEndpoints.orders.createReferrals,
         body,
@@ -1560,9 +1598,7 @@ export const doctorApi = {
       ),
   },
   orderFavorites: {
-    list: (
-      params: { catalogSection?: string; page?: number; limit?: number } = {},
-    ) => {
+    list: (params: DoctorOrderFavoritesListParams = {}) => {
       const qs = new URLSearchParams();
       if (params.catalogSection)
         qs.set("catalogSection", params.catalogSection);
@@ -1575,13 +1611,13 @@ export const doctorApi = {
       return get<OrderFavoritesListResponse>(path, { locale: "ar" });
     },
     create: (body: CreateOrderFavoriteBody) =>
-      post<{ favorite?: { _id?: string }; message?: string }>(
+      post<OrderFavoriteMutationResponse>(
         doctorEndpoints.orderFavorites.create,
         body,
         { locale: "ar" },
       ),
     remove: (favoriteId: string) =>
-      del<{ message?: string }>(
+      del<DoctorActionResponse>(
         doctorEndpoints.orderFavorites.delete(favoriteId),
         {
           locale: "ar",
@@ -1595,14 +1631,7 @@ export const doctorApi = {
         { locale: "ar" },
       ),
     list: (
-      params: {
-        page?: number;
-        limit?: number;
-        type?: string;
-        favorite?: boolean;
-        includeArchived?: boolean;
-        search?: string;
-      } = {},
+      params: DoctorLibraryListParams = {},
     ) => {
       const qs = new URLSearchParams();
       if (params.page != null) qs.set("page", String(params.page));
@@ -1618,30 +1647,24 @@ export const doctorApi = {
       return get<DoctorLibraryListResponse>(path, { locale: "ar" });
     },
     create: (body: CreateDoctorLibraryItemBody) =>
-      post<{
-        item?: DoctorLibraryListResponse["items"] extends
-          | (infer T)[]
-          | undefined
-          ? T
-          : never;
-        message?: string;
-      }>(doctorEndpoints.library.items, body, { locale: "ar" }),
+      post<DoctorLibraryItemMutationResponse>(
+        doctorEndpoints.library.items,
+        body,
+        { locale: "ar" },
+      ),
     update: (itemId: string, body: UpdateDoctorLibraryItemBody) =>
-      patch<{
-        item?: DoctorLibraryListResponse["items"] extends
-          | (infer T)[]
-          | undefined
-          ? T
-          : never;
-        message?: string;
-      }>(doctorEndpoints.library.itemById(itemId), body, { locale: "ar" }),
+      patch<DoctorLibraryItemMutationResponse>(
+        doctorEndpoints.library.itemById(itemId),
+        body,
+        { locale: "ar" },
+      ),
     delete: (itemId: string) =>
-      del<{ itemId?: string; message?: string }>(
+      del<DoctorLibraryItemDeleteResponse>(
         doctorEndpoints.library.itemById(itemId),
         { locale: "ar" },
       ),
     setFavorite: (itemId: string, isFavorite: boolean) =>
-      patch<{ itemId?: string; isFavorite?: boolean; message?: string }>(
+      patch<DoctorLibraryItemFavoriteResponse>(
         doctorEndpoints.library.itemFavorite(itemId),
         { isFavorite },
         { locale: "ar" },
@@ -1649,13 +1672,7 @@ export const doctorApi = {
   },
   templates: {
     list: (
-      params: {
-        page?: number;
-        limit?: number;
-        type?: string;
-        includeArchived?: boolean;
-        search?: string;
-      } = {},
+      params: DoctorTemplatesListParams = {},
     ) => {
       const qs = new URLSearchParams();
       if (params.page != null) qs.set("page", String(params.page));
@@ -1670,25 +1687,19 @@ export const doctorApi = {
       return get<DoctorTemplatesListResponse>(path, { locale: "ar" });
     },
     create: (body: CreateDoctorTemplateBody) =>
-      post<{
-        template?: DoctorTemplatesListResponse["templates"] extends
-          | (infer T)[]
-          | undefined
-          ? T
-          : never;
-        message?: string;
-      }>(doctorEndpoints.templates.list, body, { locale: "ar" }),
+      post<DoctorTemplateMutationResponse>(
+        doctorEndpoints.templates.list,
+        body,
+        { locale: "ar" },
+      ),
     update: (templateId: string, body: UpdateDoctorTemplateBody) =>
-      patch<{
-        template?: DoctorTemplatesListResponse["templates"] extends
-          | (infer T)[]
-          | undefined
-          ? T
-          : never;
-        message?: string;
-      }>(doctorEndpoints.templates.byId(templateId), body, { locale: "ar" }),
+      patch<DoctorTemplateMutationResponse>(
+        doctorEndpoints.templates.byId(templateId),
+        body,
+        { locale: "ar" },
+      ),
     delete: (templateId: string) =>
-      del<{ templateId?: string; message?: string }>(
+      del<DoctorTemplateDeleteResponse>(
         doctorEndpoints.templates.byId(templateId),
         { locale: "ar" },
       ),

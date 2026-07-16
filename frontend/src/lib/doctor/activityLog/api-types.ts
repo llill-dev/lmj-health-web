@@ -1,3 +1,13 @@
+export type DoctorActivityLogDetails = {
+  clientType?: string;
+  userAgent?: string;
+  platform?: string;
+  patientName?: string;
+  patientPublicId?: string;
+  ip?: string;
+  [key: string]: unknown;
+};
+
 export type DoctorActivityLogRecord = {
   _id: string;
   type: string;
@@ -6,7 +16,7 @@ export type DoctorActivityLogRecord = {
   entityType?: string;
   entityId?: string;
   occurredAt: string;
-  details?: Record<string, unknown>;
+  details?: DoctorActivityLogDetails;
 };
 
 export type DoctorActivityLogListParams = {

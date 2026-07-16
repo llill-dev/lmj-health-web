@@ -1,6 +1,7 @@
 import type { AdminContentBlock } from '@/lib/admin/types';
 import type {
   PlatformContactChannel,
+  PlatformContentApiRecord,
   PlatformContentDetails,
   PlatformContentListItem,
   PlatformFaqItem,
@@ -8,12 +9,71 @@ import type {
   PlatformSettingsListItem,
 } from '@/lib/platform/types';
 
+type PlatformSourceItem = {
+  title?: string;
+  url?: string;
+};
+
+type PlatformBlockMediaRecord = {
+  imageUrl?: unknown;
+  image?: unknown;
+  coverImage?: unknown;
+  media?: unknown;
+  thumbnail?: unknown;
+  poster?: unknown;
+  images?: unknown;
+};
+
+type PlatformBlockSourceRecord = {
+  sourceName?: unknown;
+  source?: unknown;
+};
+
+type PlatformBlockSourceLinkRecord = {
+  sourceTitle?: unknown;
+  sourceUrl?: unknown;
+  title?: unknown;
+  url?: unknown;
+  sourceLink?: unknown;
+  href?: unknown;
+  label?: unknown;
+};
+
+type PlatformBlockWithMedia = AdminContentBlock & PlatformBlockMediaRecord;
+type PlatformBlockWithSource = AdminContentBlock & PlatformBlockSourceRecord;
+type PlatformBlockWithSourceLink = AdminContentBlock & PlatformBlockSourceLinkRecord;
+
+function asPlatformRecord(value: unknown): PlatformContentApiRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function asAdminContentBlocks(value: unknown): AdminContentBlock[] {
+  return Array.isArray(value)
+    ? value.filter(
+        (item): item is AdminContentBlock =>
+          !!item && typeof item === 'object' && !Array.isArray(item),
+      )
+    : [];
+}
+
+function asPlatformSourceItem(value: unknown): PlatformContentApiRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function readNullableString(value: unknown): string | null | undefined {
+  return typeof value === 'string' || value === null ? value : undefined;
+}
+
 function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
 function readNestedString(
-  record: Record<string, unknown>,
+  record: PlatformContentApiRecord,
   keys: string[],
 ): string | undefined {
   for (const key of keys) {
@@ -25,9 +85,8 @@ function readNestedString(
 
 function readMediaUrl(value: unknown): string | undefined {
   if (typeof value === 'string' && value.trim()) return value.trim();
-  if (!value || typeof value !== 'object') return undefined;
-
-  const record = value as Record<string, unknown>;
+  const record = asPlatformRecord(value);
+  if (!record) return undefined;
   return readNestedString(record, [
     'url',
     'src',
@@ -40,15 +99,7 @@ function readMediaUrl(value: unknown): string | undefined {
 
 function extractCoverImageFromBlocks(blocks: AdminContentBlock[]): string | undefined {
   for (const block of blocks) {
-    const record = block as {
-      imageUrl?: unknown;
-      image?: unknown;
-      coverImage?: unknown;
-      media?: unknown;
-      thumbnail?: unknown;
-      poster?: unknown;
-      images?: unknown;
-    };
+    const record: PlatformBlockWithMedia = block;
     const image =
       readMediaUrl(record.coverImage) ||
       readMediaUrl(record.imageUrl) ||
@@ -73,7 +124,7 @@ function extractSourceNameFromBlocks(blocks: AdminContentBlock[]): string | unde
       const title = readString(block.title);
       if (title) return title;
     }
-    const record = block as { sourceName?: unknown; source?: unknown };
+    const record: PlatformBlockWithSource = block;
     const sourceName = readString(record.sourceName) || readString(record.source);
     if (sourceName) return sourceName;
   }
@@ -82,7 +133,7 @@ function extractSourceNameFromBlocks(blocks: AdminContentBlock[]): string | unde
 
 function extractSourcesFromBlocks(
   blocks: AdminContentBlock[],
-): Array<{ title?: string; url?: string }> | undefined {
+): PlatformSourceItem[] | undefined {
   const sources = blocks
     .flatMap((block) => {
       if (block.type === 'linkCard') {
@@ -94,14 +145,7 @@ function extractSourcesFromBlocks(
         ];
       }
 
-      const record = block as {
-        sourceTitle?: unknown;
-        sourceUrl?: unknown;
-        title?: unknown;
-        url?: unknown;
-        sourceLink?: unknown;
-        href?: unknown;
-      };
+      const record: PlatformBlockWithSourceLink = block;
       const url =
         readString(record.sourceUrl) ||
         readString(record.url) ||
@@ -114,7 +158,7 @@ function extractSourcesFromBlocks(
           title:
             readString(record.sourceTitle) ||
             readString(record.title) ||
-            readString((block as { label?: unknown }).label),
+            readString(record.label),
           url,
         },
       ];
@@ -125,14 +169,12 @@ function extractSourcesFromBlocks(
 }
 
 function normalizeContentItem(
-  raw: Record<string, unknown> | null | undefined,
+  raw: PlatformContentApiRecord | null | undefined,
 ): PlatformContentDetails | null {
   if (!raw || typeof raw !== 'object') return null;
   const id = String(raw.id ?? raw._id ?? '');
   if (!id) return null;
-  const contentBlocks = Array.isArray(raw.contentBlocks)
-    ? (raw.contentBlocks as AdminContentBlock[])
-    : [];
+  const contentBlocks = asAdminContentBlocks(raw.contentBlocks);
 
   return {
     id,
@@ -141,10 +183,7 @@ function normalizeContentItem(
     slug: String(raw.slug ?? ''),
     language: typeof raw.language === 'string' ? raw.language : undefined,
     summary: typeof raw.summary === 'string' ? raw.summary : undefined,
-    pageVersion:
-      typeof raw.pageVersion === 'string' || raw.pageVersion === null
-        ? (raw.pageVersion as string | null)
-        : undefined,
+    pageVersion: readNullableString(raw.pageVersion),
     publishedAt:
       typeof raw.publishedAt === 'string' ? raw.publishedAt : undefined,
     lastReviewedAt:
@@ -163,9 +202,9 @@ function normalizeContentItem(
       extractSourceNameFromBlocks(contentBlocks),
     sources: Array.isArray(raw.sources)
       ? raw.sources
-          .filter((entry) => entry && typeof entry === 'object')
+          .filter((entry): entry is PlatformContentApiRecord => Boolean(asPlatformSourceItem(entry)))
           .map((entry) => {
-            const record = entry as Record<string, unknown>;
+            const record = asPlatformSourceItem(entry) ?? {};
             return {
               title:
                 readString(record.title) ??
@@ -183,23 +222,25 @@ function normalizeContentItem(
 }
 
 export function normalizePlatformContentListResponse(
-  data: Record<string, unknown>,
+  data: PlatformContentApiRecord,
 ): PlatformSettingsListItem[] {
   return normalizePlatformContentItems(data);
 }
 
 export function normalizePlatformContentItems(
-  data: Record<string, unknown>,
+  data: PlatformContentApiRecord,
 ): PlatformContentListItem[] {
-  const rows = (data.items ?? data.contentItems ?? data.content ?? []) as
-    | Record<string, unknown>[]
-    | undefined;
+  const rowsValue = data.items ?? data.contentItems ?? data.content ?? [];
+  const rows = Array.isArray(rowsValue)
+    ? rowsValue.filter(
+        (row): row is PlatformContentApiRecord =>
+          !!row && typeof row === 'object' && !Array.isArray(row),
+      )
+    : [];
 
-  return (rows ?? [])
+  return rows
     .map((row) => {
-      const contentBlocks = Array.isArray(row.contentBlocks)
-        ? (row.contentBlocks as AdminContentBlock[])
-        : [];
+      const contentBlocks = asAdminContentBlocks(row.contentBlocks);
 
       return {
         id: String(row.id ?? row._id ?? ''),
@@ -208,10 +249,7 @@ export function normalizePlatformContentItems(
         slug: String(row.slug ?? ''),
         language: typeof row.language === 'string' ? row.language : undefined,
         summary: typeof row.summary === 'string' ? row.summary : undefined,
-        pageVersion:
-          typeof row.pageVersion === 'string' || row.pageVersion === null
-            ? (row.pageVersion as string | null)
-            : undefined,
+        pageVersion: readNullableString(row.pageVersion),
         publishedAt:
           typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
         coverImage:
@@ -237,12 +275,12 @@ export function normalizePlatformContentItems(
 }
 
 export function normalizePlatformContentDetailsResponse(
-  data: Record<string, unknown>,
+  data: PlatformContentApiRecord,
 ): PlatformContentDetails | null {
   const raw =
-    (data.contentItem as Record<string, unknown> | undefined) ??
-    (data.item as Record<string, unknown> | undefined) ??
-    (data.content as Record<string, unknown> | undefined);
+    asPlatformRecord(data.contentItem) ??
+    asPlatformRecord(data.item) ??
+    asPlatformRecord(data.content);
   return normalizeContentItem(raw);
 }
 

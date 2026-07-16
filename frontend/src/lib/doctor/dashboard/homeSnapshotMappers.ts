@@ -1,4 +1,7 @@
-import type { DoctorHomeSnapshot } from '@/lib/doctor/dashboard/homeSnapshot';
+import type {
+  DoctorHomeSnapshot,
+  DoctorHomeSnapshotAppointment,
+} from '@/lib/doctor/dashboard/homeSnapshot';
 
 export type SnapshotActiveConsultation = {
   ticketId: string;
@@ -15,9 +18,31 @@ export type SnapshotNearestWaitlist = {
   urgencyLevel?: string;
 };
 
-function asRecord(value: unknown): Record<string, unknown> | null {
+type DoctorHomeSnapshotRecord = {
+  [key: string]: unknown;
+};
+
+type SnapshotAppointmentLike = DoctorHomeSnapshotRecord & {
+  _id?: unknown;
+  id?: unknown;
+  patientName?: unknown;
+  patientSummary?: {
+    userId?: {
+      fullName?: unknown;
+    };
+  };
+};
+
+function asSnapshotAppointmentLike(
+  value: unknown,
+): SnapshotAppointmentLike | null {
+  const record = asRecord(value);
+  return record ? record : null;
+}
+
+function asRecord(value: unknown): DoctorHomeSnapshotRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
+    ? value
     : null;
 }
 
@@ -25,23 +50,23 @@ function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
-function readId(raw: Record<string, unknown>): string | undefined {
+function readId(raw: SnapshotAppointmentLike): string | undefined {
   return readString(raw._id) ?? readString(raw.id);
 }
 
-function readSnapshotPatientName(raw: Record<string, unknown>): string | undefined {
+function readSnapshotPatientName(
+  raw: SnapshotAppointmentLike,
+): string | undefined {
   const direct = readString(raw.patientName);
   if (direct) return direct;
 
-  const summary = asRecord(raw.patientSummary);
-  const userId = summary ? asRecord(summary.userId) : null;
-  return readString(userId?.fullName);
+  return readString(raw.patientSummary?.userId?.fullName);
 }
 
 export function parseSnapshotActiveConsultation(
   raw: DoctorHomeSnapshot['activeConsultation'],
 ): SnapshotActiveConsultation | null {
-  const record = asRecord(raw);
+  const record = asSnapshotAppointmentLike(raw);
   if (!record) return null;
 
   const ticketId = readId(record);
@@ -60,7 +85,7 @@ export function parseSnapshotActiveConsultation(
 export function parseSnapshotNearestWaitlist(
   raw: DoctorHomeSnapshot['nearestWaitlistRequest'],
 ): SnapshotNearestWaitlist | null {
-  const record = asRecord(raw);
+  const record = asSnapshotAppointmentLike(raw);
   if (!record) return null;
 
   const requestId = readId(record);

@@ -55,6 +55,30 @@ export function useDoctorWaitlist(params: WaitlistListParams) {
   };
 }
 
+export function useMyWaitlist(params: WaitlistListParams) {
+  const query = useQuery({
+    queryKey: waitlistQueryKeys.mine(params),
+    queryFn: () => waitlistApi.listMine(params),
+    staleTime: 30_000,
+  });
+
+  const requests = query.data?.waitlistRequests ?? [];
+  const total = query.data?.total ?? requests.length;
+  const limit = params.limit ?? 10;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  return {
+    requests,
+    total,
+    totalPages,
+    page: query.data?.page ?? params.page ?? 1,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  };
+}
+
 export function useWaitlistSuggestions(
   params: WaitlistSuggestionsParams | null,
   enabled: boolean,
@@ -101,11 +125,19 @@ export function useWaitlistMutations() {
     },
   });
 
+  const cancelRequest = useMutation({
+    mutationFn: (input: { id: string; cancelReason?: string }) =>
+      waitlistApi.cancel(input.id, { cancelReason: input.cancelReason }),
+    onSuccess: () => invalidateWaitlist(queryClient),
+  });
+
   return {
+    cancelRequest: cancelRequest.mutateAsync,
     markContacted: markContacted.mutateAsync,
     closeRequest: closeRequest.mutateAsync,
     bookRequest: bookRequest.mutateAsync,
     isBusy:
+      cancelRequest.isPending ||
       markContacted.isPending ||
       closeRequest.isPending ||
       bookRequest.isPending,

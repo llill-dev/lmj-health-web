@@ -51,11 +51,34 @@ export type PlatformContentSearchResponse = {
   total?: number;
   results?: number;
   items?: PlatformContentListItem[];
+  contentItems?: PlatformContentListItem[];
+  content?: PlatformContentListItem[];
 };
 
 export type PlatformContentDetailsResponse = {
   contentItem?: PlatformContentDetails;
   item?: PlatformContentDetails;
+  content?: PlatformContentDetails;
+};
+
+export type PlatformContentApiRecord = {
+  [key: string]: unknown;
+};
+
+export type PlatformContentListEnvelope = {
+  page?: number;
+  limit?: number;
+  total?: number;
+  results?: number;
+  items?: PlatformContentApiRecord[];
+  contentItems?: PlatformContentApiRecord[];
+  content?: PlatformContentApiRecord[];
+};
+
+export type PlatformContentDetailsEnvelope = {
+  contentItem?: PlatformContentApiRecord;
+  item?: PlatformContentApiRecord;
+  content?: PlatformContentApiRecord;
 };
 
 export type PlatformContactChannel = {

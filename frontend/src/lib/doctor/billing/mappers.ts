@@ -151,7 +151,7 @@ export function mapApiPaymentToClinicPayment(
 export function mapApiExpenseToClinicExpense(
   expense: ApiBillingExpense,
 ): ClinicExpense {
-  return {
+  const mapped: ClinicExpense = {
     id: expense.number ?? expense.id,
     category: guessExpenseCategory(expense.category),
     title: expense.description ?? expense.category ?? 'مصروف',
@@ -160,11 +160,8 @@ export function mapApiExpenseToClinicExpense(
     currency: expense.currency,
     rawId: expense.id,
     rawCategory: expense.category,
-  } as ClinicExpense & {
-    currency?: string;
-    rawId?: string;
-    rawCategory?: string;
   };
+  return mapped;
 }
 
 function pickSummary(

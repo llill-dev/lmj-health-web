@@ -20,6 +20,29 @@ export type PendingDoctorRecoveryLogin = {
   lifecycleAction?: string;
 };
 
+type AccountDeletionRecoveryPayload = {
+  recoverUntil?: unknown;
+  recoveryExpiresAt?: unknown;
+  recoveryUntil?: unknown;
+  recover_until?: unknown;
+  [key: string]: unknown;
+};
+
+function asPendingDoctorRecoveryLoginRecord(
+  value: unknown,
+): { role?: unknown } | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
+function isPendingDoctorRecoveryLogin(
+  value: unknown,
+): value is PendingDoctorRecoveryLogin {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const record = asPendingDoctorRecoveryLoginRecord(value);
+  if (!record) return false;
+  return record.role === 'doctor' || record.role === 'patient';
+}
+
 const PENDING_DOCTOR_RECOVERY_KEY = 'lmj:pending-doctor-recovery';
 
 export function persistPendingDoctorRecoveryLogin(
@@ -36,8 +59,8 @@ export function peekPendingDoctorRecoveryLogin(): PendingDoctorRecoveryLogin | n
   try {
     const raw = sessionStorage.getItem(PENDING_DOCTOR_RECOVERY_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as PendingDoctorRecoveryLogin;
-    if (!parsed?.role) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPendingDoctorRecoveryLogin(parsed)) return null;
     return parsed;
   } catch {
     return null;
@@ -53,7 +76,7 @@ export function clearPendingDoctorRecoveryLogin() {
 }
 
 export function normalizeRecoverUntil(
-  raw: Record<string, unknown>,
+  raw: AccountDeletionRecoveryPayload,
 ): string | null | undefined {
   const value =
     raw.recoverUntil ??

@@ -640,10 +640,24 @@ export type UpdateAppointmentTypeBody = {
   isActive?: boolean;
 };
 
+export type AppointmentTypeApiBody = {
+  name?: string;
+  description?: string;
+  duration?: number;
+  price?: number;
+  isPriceVisibleToPatient?: boolean;
+  isActive?: boolean;
+};
+
 export type AppointmentTypeMutationResponse = {
   messageKey?: string;
   message?: string;
   appointmentType: AppointmentType;
+};
+
+export type DoctorActionResponse = {
+  messageKey?: string;
+  message?: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -761,7 +775,7 @@ export interface DoctorBookedSlotsResponse {
 }
 
 // All slots response from GET /doctors/:doctorId/slots?type=all
-// NOTE: The exact structure for type=all is not fully documented in API-4.pdf
+// NOTE: The exact structure for type=all is not fully documented in API-3 extract.
 // We assume it returns both free and booked data - adjust if API returns different structure
 export interface DoctorAllSlotsResponse {
   messageKey?: string;

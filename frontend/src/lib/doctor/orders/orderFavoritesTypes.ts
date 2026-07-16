@@ -13,9 +13,17 @@ export type CreateOrderFavoriteBody = {
 };
 
 export type OrderFavoritesListResponse = {
+  messageKey?: string;
+  message?: string;
   page?: number;
   limit?: number;
   total?: number;
   results?: number;
   favorites?: OrderFavoriteRecord[];
+};
+
+export type OrderFavoriteMutationResponse = {
+  messageKey?: string;
+  message?: string;
+  favorite?: OrderFavoriteRecord;
 };

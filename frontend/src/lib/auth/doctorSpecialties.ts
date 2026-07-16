@@ -2,7 +2,43 @@ import { get } from "@/lib/api";
 import { resolveLookupText } from "@/lib/admin/lookups/lookupUtils";
 import type { AdminLocalizedLookupText } from "@/lib/admin/types";
 import { authEndpoints } from "@/lib/auth/endpoints";
-import type { DoctorSignupSpecialtyOption } from "@/lib/auth/types";
+import type {
+  DoctorSignupSpecialtyOption,
+  DoctorSpecialtiesMetaResponse,
+} from "@/lib/auth/types";
+
+type DoctorSpecialtiesApiRecord = {
+  [key: string]: unknown;
+};
+
+function asDoctorSpecialtiesRecord(
+  value: unknown,
+): DoctorSpecialtiesApiRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function asDoctorSpecialtiesRows(
+  value: unknown,
+): DoctorSpecialtiesApiRecord[] | null {
+  return Array.isArray(value)
+    ? value.filter(
+        (entry): entry is DoctorSpecialtiesApiRecord =>
+          !!entry && typeof entry === "object" && !Array.isArray(entry),
+      )
+    : null;
+}
+
+function asLocalizedLookupText(
+  value: unknown,
+): AdminLocalizedLookupText | undefined {
+  const record = asDoctorSpecialtiesRecord(value);
+  if (!record) return undefined;
+  return typeof record.ar === "string" || typeof record.en === "string"
+    ? record
+    : undefined;
+}
 
 /** PDF: GET /meta/doctor-specializations مع `includeAllLangs=true` تعيد حقول `{ ar, en }` للنص. */
 function doctorSpecializationsRequestUrl(): string {
@@ -15,9 +51,9 @@ function doctorSpecializationsRequestUrl(): string {
 }
 
 function mapLookupLikeRow(
-  row: Record<string, unknown>,
+  row: DoctorSpecialtiesApiRecord,
 ): DoctorSignupSpecialtyOption | null {
-  const rawText = row.text as AdminLocalizedLookupText | undefined;
+  const rawText = asLocalizedLookupText(row.text);
   const fallbackLabel = String(row.label ?? row.name ?? row.title ?? "").trim();
   const labelAr = resolveLookupText(rawText ?? fallbackLabel, "ar").trim();
   const labelEn = resolveLookupText(rawText ?? fallbackLabel, "en").trim();
@@ -59,23 +95,26 @@ const ARRAY_PAYLOAD_KEYS_INNER = [
   "result",
 ] as const;
 
-function extractRows(raw: Record<string, unknown>): Record<string, unknown>[] {
+function extractRows(raw: DoctorSpecialtiesApiRecord): DoctorSpecialtiesApiRecord[] {
   const tryNest = (
-    inner: Record<string, unknown>,
-  ): Record<string, unknown>[] | null => {
+    inner: DoctorSpecialtiesApiRecord,
+  ): DoctorSpecialtiesApiRecord[] | null => {
     for (const ik of ARRAY_PAYLOAD_KEYS_INNER) {
       const a = inner[ik];
-      if (Array.isArray(a)) return a as Record<string, unknown>[];
+      const rows = asDoctorSpecialtiesRows(a);
+      if (rows) return rows;
     }
     return null;
   };
 
   for (const k of ARRAY_PAYLOAD_KEYS_OUTER) {
     const v = raw[k];
-    if (Array.isArray(v)) return v as Record<string, unknown>[];
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      const inner = tryNest(v as Record<string, unknown>);
-      if (inner?.length ?? 0) return inner!;
+    const rows = asDoctorSpecialtiesRows(v);
+    if (rows) return rows;
+    const nested = asDoctorSpecialtiesRecord(v);
+    if (nested) {
+      const inner = tryNest(nested);
+      if (inner && inner.length > 0) return inner;
     }
   }
   return [];
@@ -90,13 +129,12 @@ export async function fetchDoctorSignupSpecialties(): Promise<
   DoctorSignupSpecialtyOption[]
 > {
   const url = doctorSpecializationsRequestUrl();
-  const raw =
-    ((await get<Record<string, unknown>>(url, {
-      locale: "ar",
-      omitAuth: true,
-    })) as Record<string, unknown> | undefined) ?? {};
+  const raw = (await get<DoctorSpecialtiesMetaResponse>(url, {
+    locale: "ar",
+    omitAuth: true,
+  })) ?? {};
 
-  const rows = extractRows(raw);
+  const rows = extractRows(asDoctorSpecialtiesRecord(raw) ?? {});
   const mapped = rows
     .map((r) => mapLookupLikeRow(r))
     .filter((x): x is DoctorSignupSpecialtyOption => x != null);

@@ -3,15 +3,30 @@ import { doctorSecretaryEndpoints } from '@/lib/doctor/secretaries/endpoints';
 import { normalizeDoctorSecretary } from '@/lib/doctor/secretaries/formUtils';
 import type {
   CreateDoctorSecretaryBody,
+  DoctorSecretaryDeleteResponse,
   DoctorSecretariesListResponse,
   DoctorSecretary,
+  DoctorSecretaryMutationResponse,
+  DoctorSecretaryResponse,
   UpdateDoctorSecretaryBody,
 } from '@/lib/doctor/secretaries/types';
 
-function unwrapSecretaryPayload(payload: unknown): DoctorSecretary | null {
-  if (!payload || typeof payload !== 'object') return null;
+type DoctorSecretaryApiRecord = {
+  secretary?: unknown;
+  [key: string]: unknown;
+};
 
-  const record = payload as Record<string, unknown>;
+function asDoctorSecretaryApiRecord(
+  value: unknown,
+): DoctorSecretaryApiRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function unwrapSecretaryPayload(payload: unknown): DoctorSecretary | null {
+  const record = asDoctorSecretaryApiRecord(payload);
+  if (!record) return null;
   if (record.secretary) {
     return normalizeDoctorSecretary(record.secretary);
   }
@@ -36,24 +51,40 @@ export const doctorSecretariesApi = {
   },
 
   get: async (secretaryId: string) => {
-    const response = await get<unknown>(doctorSecretaryEndpoints.byId(secretaryId));
+    const response = await get<DoctorSecretaryResponse>(
+      doctorSecretaryEndpoints.byId(secretaryId),
+    );
     return unwrapSecretaryPayload(response);
   },
 
-  create: (body: CreateDoctorSecretaryBody) =>
-    post<{ secretary?: DoctorSecretary; message?: string }>(
+  create: async (body: CreateDoctorSecretaryBody) => {
+    const response = await post<DoctorSecretaryMutationResponse>(
       doctorSecretaryEndpoints.list,
       body,
-    ),
+    );
 
-  update: (secretaryId: string, body: UpdateDoctorSecretaryBody) =>
-    put<{ secretary?: DoctorSecretary; message?: string }>(
+    return {
+      ...response,
+      secretary: unwrapSecretaryPayload(response) ?? response.secretary,
+    } satisfies DoctorSecretaryMutationResponse;
+  },
+
+  update: async (secretaryId: string, body: UpdateDoctorSecretaryBody) => {
+    const response = await put<DoctorSecretaryMutationResponse>(
       doctorSecretaryEndpoints.byId(secretaryId),
       body,
-    ),
+    );
+
+    return {
+      ...response,
+      secretary: unwrapSecretaryPayload(response) ?? response.secretary,
+    } satisfies DoctorSecretaryMutationResponse;
+  },
 
   unassign: (secretaryId: string) =>
-    del<{ message?: string }>(doctorSecretaryEndpoints.unassign(secretaryId)),
+    del<DoctorSecretaryDeleteResponse>(
+      doctorSecretaryEndpoints.unassign(secretaryId),
+    ),
 };
 
 export const doctorSecretariesQueryKeys = {

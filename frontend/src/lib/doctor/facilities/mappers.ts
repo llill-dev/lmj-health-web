@@ -14,6 +14,29 @@ import type {
 /** Legacy pseudo-keys some older facilities stored before API-3; stripped on read. */
 const WORK_HOURS_FROM_PREFIX = "work_hours_from_";
 const WORK_HOURS_TO_PREFIX = "work_hours_to_";
+const FACILITY_TYPES: readonly FacilityType[] = [
+  "clinic",
+  "polyclinic",
+  "medical_center",
+  "hospital",
+  "laboratory",
+  "imaging_center",
+  "rehabilitation_center",
+  "dialysis_center",
+  "emergency_center",
+];
+
+function asDoctorFacilityRecord(value: unknown): DoctorFacilityRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function resolveFacilityType(value: unknown): FacilityType {
+  if (typeof value !== "string") return "clinic";
+  const normalized = value.trim();
+  return FACILITY_TYPES.find((entry) => entry === normalized) ?? "clinic";
+}
 
 function optionalTrim(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
@@ -49,30 +72,27 @@ export function isPartialFacilityRecord(record: DoctorFacilityRecord): boolean {
 
 /** Supports API-3 `facility` and Swagger `{ data: { id } }` shapes. */
 export function parseDoctorFacilityRecordFromResponse(
-  response: DoctorFacilityResponse | Record<string, unknown>,
+  response: DoctorFacilityResponse,
 ): DoctorFacilityRecord | null {
-  const payload = response as DoctorFacilityResponse;
-  const doctorRecord =
-    payload.doctor && typeof payload.doctor === "object"
-      ? (payload.doctor as Record<string, unknown>)
-      : null;
+  const payload = response;
+  const doctorRecord = payload.doctor;
   if (payload.facility && typeof payload.facility === "object") {
     return payload.facility;
   }
 
   if (doctorRecord?.facility && typeof doctorRecord.facility === "object") {
-    return doctorRecord.facility as DoctorFacilityRecord;
+    return doctorRecord.facility;
   }
 
   const data = payload.data;
-  if (data && typeof data === "object") {
-    const record = data as DoctorFacilityRecord;
+  const record = asDoctorFacilityRecord(data);
+  if (record) {
     if (
       "facility" in record &&
       record.facility &&
       typeof record.facility === "object"
     ) {
-      return record.facility as DoctorFacilityRecord;
+      return asDoctorFacilityRecord(record.facility);
     }
     if (record.name?.trim() && record.city?.trim()) {
       return record;
@@ -106,7 +126,7 @@ export function mapSuggestRecordToLinkedDoctorFacility(
   return {
     id: facilityId,
     name,
-    facilityType: (record.facilityType as FacilityType) ?? "clinic",
+    facilityType: resolveFacilityType(record.facilityType),
     description: record.description?.trim() || undefined,
     city,
     address: record.address?.trim() || "—",
@@ -129,7 +149,7 @@ export function mapApiFacilityToDoctorFacility(
   return {
     id,
     name,
-    facilityType: (record.facilityType as FacilityType) ?? "clinic",
+    facilityType: resolveFacilityType(record.facilityType),
     description: record.description?.trim() || undefined,
     city,
     address: record.address?.trim() || "—",

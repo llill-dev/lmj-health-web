@@ -22,6 +22,60 @@ export const API_BASE_URL = normalizeApiOrigin(import.meta.env.VITE_API_ORIGIN);
 
 const UI_ONLY = isUiOnlyMode();
 
+export type ApiBodyRecord = {
+  [key: string]: unknown;
+};
+
+type ValidationIssueRecord = {
+  type?: unknown;
+  path?: unknown;
+  location?: unknown;
+  msg?: unknown;
+};
+
+function asApiBodyRecord(value: unknown): ApiBodyRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asStringHeaderRecord(
+  value: unknown,
+): Record<string, string> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    ),
+  );
+}
+
+function readBodyString(
+  body: ApiBodyRecord,
+  key: string,
+): string | undefined {
+  const value = body[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function noApiContent<T>(): T {
+  return undefined!;
+}
+
+function valueOrNoContent<T>(value: unknown, hasContent: boolean): T {
+  return hasContent ? (value as T) : noApiContent<T>();
+}
+
+function parseApiJsonText(raw: string): ApiBodyRecord {
+  return asApiBodyRecord(JSON.parse(raw));
+}
+
+function asValidationIssueRecordArray(value: unknown): ValidationIssueRecord[] | null {
+  if (!Array.isArray(value)) return null;
+  return value.filter(
+    (item): item is ValidationIssueRecord =>
+      !!item && typeof item === "object" && !Array.isArray(item),
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ApiError — carries the full HTTP context so callers can inspect status codes,
 // messageKey (for i18n), and the raw JSON body without any information loss.
@@ -32,12 +86,12 @@ export class ApiError extends Error {
   /** Backend i18n key e.g. "errors.auth.invalidCredentials" */
   readonly messageKey: string | null;
   /** Full parsed response body */
-  readonly body: Record<string, unknown>;
+  readonly body: ApiBodyRecord;
 
   constructor(
     status: number,
     messageKey: string | null,
-    body: Record<string, unknown>,
+    body: ApiBodyRecord,
     message: string,
   ) {
     super(message);
@@ -207,12 +261,7 @@ export function getUserFacingRequestErrorMessage(
       error.status === 422 &&
       error.messageKey === "errors.validationFailed"
     ) {
-      const errors = error.body.errors as Array<{
-        type: string;
-        path: string;
-        location: string;
-        msg: string;
-      }> | null;
+      const errors = asValidationIssueRecordArray(error.body.errors);
 
       if (errors && errors.length > 0) {
         const phoneError = errors.find((e) => e.path === "phone");
@@ -328,7 +377,7 @@ export async function apiRequest<T = unknown>(
   endpoint: string,
   options: ApiOptions = {},
 ): Promise<T> {
-  if (UI_ONLY) return undefined as unknown as T;
+  if (UI_ONLY) return noApiContent<T>();
 
   const {
     token: providedToken,
@@ -359,11 +408,11 @@ export async function apiRequest<T = unknown>(
   const isFormData = rest.body instanceof FormData;
 
   const finalHeaders: Record<string, string> = {
-    ...(!headers || !("x-lang" in (headers as object))
+    ...(!headers || !("x-lang" in headers)
       ? { "x-lang": locale }
       : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(headers as Record<string, string> | undefined),
+    ...asStringHeaderRecord(headers),
   };
 
   const hadBearerToken = Boolean(token && finalHeaders.Authorization);
@@ -383,12 +432,12 @@ export async function apiRequest<T = unknown>(
     const res = await fetch(url, config);
 
     const contentType = res.headers.get("content-type") ?? "";
-    let body: Record<string, unknown> = {};
+    let body: ApiBodyRecord = {};
     let rawText = "";
 
     if (contentType.includes("application/json")) {
       try {
-        body = (await res.json()) as Record<string, unknown>;
+        body = asApiBodyRecord(await res.json());
       } catch {
         // empty body
       }
@@ -410,7 +459,7 @@ export async function apiRequest<T = unknown>(
               : useAuthStore.getState().accessToken || "";
           if (nextToken) {
             config.headers = {
-              ...(config.headers as Record<string, string>),
+              ...(asStringHeaderRecord(config.headers) ?? {}),
               Authorization: `Bearer ${nextToken}`,
             };
             return execute(true);
@@ -423,14 +472,14 @@ export async function apiRequest<T = unknown>(
       }
 
       const backendMsg =
-        (body.message as string | undefined) ||
-        (body.detail as string | undefined) ||
-        (body.title as string | undefined) ||
-        (body.error as string | undefined) ||
+        readBodyString(body, "message") ||
+        readBodyString(body, "detail") ||
+        readBodyString(body, "title") ||
+        readBodyString(body, "error") ||
         rawText ||
         res.statusText;
 
-      const messageKey = (body.messageKey as string | undefined) ?? null;
+      const messageKey = readBodyString(body, "messageKey") ?? null;
 
       const displayMsg = userFacingHttpErrorMessage(
         res.status,
@@ -444,7 +493,7 @@ export async function apiRequest<T = unknown>(
       throw err;
     }
 
-    return (Object.keys(body).length ? body : undefined) as unknown as T;
+    return valueOrNoContent<T>(body, Object.keys(body).length > 0);
   };
 
   try {
@@ -487,7 +536,7 @@ export async function apiMultipart<T = unknown>(
   formData: FormData,
   options: ApiOptions = {},
 ): Promise<T> {
-  if (UI_ONLY) return undefined as unknown as T;
+  if (UI_ONLY) return noApiContent<T>();
 
   const {
     onProgress,
@@ -521,9 +570,10 @@ export async function apiMultipart<T = unknown>(
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
-            resolve(JSON.parse(xhr.responseText) as T);
+            const parsed = parseApiJsonText(xhr.responseText);
+            resolve(valueOrNoContent<T>(parsed, Object.keys(parsed).length > 0));
           } catch {
-            resolve(undefined as unknown as T);
+            resolve(noApiContent<T>());
           }
         } else {
           if (xhr.status === 401) {

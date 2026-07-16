@@ -4,16 +4,54 @@ import type {
   VerificationRequestSummary,
 } from '@/lib/admin/types';
 
+type AdminDoctorDetailsApiRecord = {
+  [key: string]: unknown;
+};
+
+type AdminDoctorDetailsUser = NonNullable<AdminDoctorDetailsDoctor['user']>;
+
+function asVerificationRequestSummary(
+  value: unknown,
+): VerificationRequestSummary | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const record = asRecord(value);
+  if (!record) return null;
+  return (
+    typeof (record._id ?? record.id) === 'string' ||
+    typeof record.status === 'string' ||
+    typeof record.doctorId === 'string'
+  )
+    ? record
+    : null;
+}
+
+function asAdminDoctorDetailsDoctor(
+  value: unknown,
+): AdminDoctorDetailsDoctor | undefined {
+  const record = asRecord(value);
+  if (!record) return undefined;
+  return (
+    typeof (record._id ?? record.id) === 'string' ||
+    typeof record.status === 'string' ||
+    typeof record.specialization === 'string' ||
+    typeof record.email === 'string' ||
+    typeof record.phone === 'string' ||
+    typeof record.user === 'object'
+  )
+    ? record
+    : undefined;
+}
+
 function pickTrimmedString(v: unknown): string | undefined {
   if (v == null || v === '') return undefined;
   const s = String(v).trim();
   return s || undefined;
 }
 
-function asRecord(v: unknown): Record<string, unknown> | undefined {
+function asRecord(v: unknown): AdminDoctorDetailsApiRecord | undefined {
   if (v === null || v === undefined) return undefined;
   if (typeof v === 'object' && !Array.isArray(v))
-    return v as Record<string, unknown>;
+    return v;
   return undefined;
 }
 
@@ -23,7 +61,7 @@ function asRecord(v: unknown): Record<string, unknown> | undefined {
 function mergeDoctorPersonalIntoUser(
   doctor: AdminDoctorDetailsDoctor,
 ): AdminDoctorDetailsDoctor {
-  const d = doctor as unknown as Record<string, unknown>;
+  const d = asRecord(doctor) ?? {};
   const fromUser = asRecord(doctor.user);
   const uid = doctor.userId;
   const uidRec =
@@ -34,10 +72,9 @@ function mergeDoctorPersonalIntoUser(
 
   /** ترتيب الأولوية: user → userId المعبأ → جذر الطبيب */
   const pick = (...keyGroups: string[][]): string | undefined => {
-    const sources = [fromUser, uidRec, doctorRoot].filter(Boolean) as Record<
-      string,
-      unknown
-    >[];
+    const sources = [fromUser, uidRec, doctorRoot].filter(
+      (value): value is AdminDoctorDetailsApiRecord => Boolean(value),
+    );
     for (const keys of keyGroups) {
       for (const src of sources) {
         for (const k of keys) {
@@ -64,7 +101,7 @@ function mergeDoctorPersonalIntoUser(
   );
   const photoUrl = pick(['photoUrl'], ['avatar', 'avatarUrl', 'image']);
 
-  const nextUser = {
+  const nextUser: AdminDoctorDetailsUser = {
     ...(fromUser ?? {}),
     fullName: fullName || pickTrimmedString(fromUser?.fullName) || '',
     ...(email ? { email } : {}),
@@ -72,7 +109,7 @@ function mergeDoctorPersonalIntoUser(
     ...(gender ? { gender } : {}),
     ...(dateOfBirth ? { dateOfBirth } : {}),
     ...(photoUrl ? { photoUrl } : {}),
-  } as NonNullable<AdminDoctorDetailsDoctor['user']>;
+  };
 
   return { ...doctor, user: nextUser };
 }
@@ -87,19 +124,15 @@ export function normalizeAdminDoctorDetailsResponse(
   verificationRequest?: VerificationRequestSummary | null;
   pendingVerificationRequestId?: string;
 } {
-  const root = res as unknown as Record<string, unknown>;
-  const payload =
-    root.data && typeof root.data === 'object' && root.data !== null
-      ? (root.data as Record<string, unknown>)
-      : root;
+  const root = asRecord(res) ?? {};
+  const payload = asRecord(root.data) ?? root;
 
-  const doctor = (payload.doctor ?? root.doctor) as
-    | AdminDoctorDetailsDoctor
-    | undefined;
+  const doctorCandidate = payload.doctor ?? root.doctor;
+  const doctor = asAdminDoctorDetailsDoctor(doctorCandidate);
 
-  const verificationRequest = (payload.verificationRequest ??
-    root.verificationRequest ??
-    null) as VerificationRequestSummary | null;
+  const verificationRequest = asVerificationRequestSummary(
+    payload.verificationRequest ?? root.verificationRequest,
+  );
 
   const pendingVerificationRequestId = [
     payload.pendingVerificationRequestId,

@@ -17,15 +17,35 @@ export type DoctorHomeSnapshotAccessRequest = {
   reason?: string;
 };
 
+export type DoctorHomeSnapshotPatientSummary = {
+  _id?: string;
+  publicId?: string;
+  userId?: {
+    _id?: string;
+    fullName?: string;
+  };
+};
+
+export type DoctorHomeSnapshotAppointment = {
+  _id?: string;
+  id?: string;
+  status?: string;
+  subject?: string;
+  patientName?: string;
+  unreadCount?: number;
+  urgencyLevel?: string;
+  patientSummary?: DoctorHomeSnapshotPatientSummary;
+};
+
 export type DoctorHomeSnapshot = {
   counts?: DoctorHomeSnapshotCounts;
   pendingAccessRequestAlert?: {
     count?: number;
     latestRequest?: DoctorHomeSnapshotAccessRequest | null;
   };
-  nextAppointment?: Record<string, unknown> | null;
-  activeConsultation?: Record<string, unknown> | null;
-  nearestWaitlistRequest?: Record<string, unknown> | null;
+  nextAppointment?: DoctorHomeSnapshotAppointment | null;
+  activeConsultation?: DoctorHomeSnapshotAppointment | null;
+  nearestWaitlistRequest?: DoctorHomeSnapshotAppointment | null;
 };
 
 export type DoctorHomeSnapshotResponse = {

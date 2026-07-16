@@ -4,6 +4,28 @@ export type GeocodeResult = {
   displayName: string;
 };
 
+type PhotonFeature = {
+  geometry?: { coordinates?: [number, number] };
+  properties?: {
+    name?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+};
+
+function asPhotonResponse(value: unknown): { features?: PhotonFeature[] } | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const record: { features?: unknown } = value;
+  const features = Array.isArray(record.features)
+    ? record.features.filter(
+        (feature): feature is PhotonFeature =>
+          !!feature && typeof feature === 'object' && !Array.isArray(feature),
+      )
+    : undefined;
+  return { features };
+}
+
 /**
  * Photon (Komoot) geocoder — browser-friendly CORS for address search.
  */
@@ -21,17 +43,8 @@ export async function geocodeAddress(query: string): Promise<GeocodeResult | nul
     throw new Error('geocode_failed');
   }
 
-  const data = (await response.json()) as {
-    features?: Array<{
-      geometry?: { coordinates?: [number, number] };
-      properties?: {
-        name?: string;
-        city?: string;
-        state?: string;
-        country?: string;
-      };
-    }>;
-  };
+  const data = asPhotonResponse(await response.json());
+  if (!data) return null;
 
   const feature = data.features?.[0];
   const coords = feature?.geometry?.coordinates;

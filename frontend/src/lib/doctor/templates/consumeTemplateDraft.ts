@@ -28,7 +28,7 @@ export async function consumePrescriptionTemplateDraft(input: {
   existingInstructions: string;
   existingItemCount: number;
   setGeneralInstructions: (value: string) => void;
-  addItem: (item: PrescriptionDraftForm) => Promise<unknown>;
+  addItem: (item: PrescriptionDraftForm) => Promise<void>;
 }): Promise<TemplateDraftConsumeResult> {
   const parsed = parsePrescriptionTemplateDraft(input.draft.application);
   let appliedInstructions = false;
@@ -93,7 +93,7 @@ export async function consumeOrderTemplateDraft(input: {
   existingClinical: RadiologyClinicalForm;
   existingItemCount: number;
   setClinical: (next: RadiologyClinicalForm) => void;
-  addItem: (item: Omit<RadiologyOrderItemUi, 'id'>) => Promise<unknown>;
+  addItem: (item: Omit<RadiologyOrderItemUi, 'id'>) => Promise<void>;
 }): Promise<TemplateDraftConsumeResult> {
   const clinicalDraft = parseOrderClinicalTemplateDraft(
     input.draft.application,

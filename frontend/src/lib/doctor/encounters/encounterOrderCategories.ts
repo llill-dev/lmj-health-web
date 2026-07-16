@@ -1,6 +1,13 @@
 import type { EncounterOrder } from '@/lib/doctor/encounters/encounterClinicalTypes';
 import { resolveOrderStatusLabelAr } from '@/lib/doctor/orders/orderStatusLabels';
 
+function readEncounterUpdatedAt(order: EncounterOrder): string | undefined {
+  const record: unknown = order;
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return undefined;
+  const candidate: { updatedAt?: unknown } = record;
+  return typeof candidate.updatedAt === 'string' ? candidate.updatedAt : undefined;
+}
+
 export type EncounterOrderCategoryKey =
   | 'lab'
   | 'radiology'
@@ -86,12 +93,8 @@ export function isFinalizedEncounterOrder(order: EncounterOrder) {
 
 export function sortEncounterOrdersByRecent(orders: EncounterOrder[]) {
   return [...orders].sort((a, b) => {
-    const aTime = new Date(
-      (a as { updatedAt?: string }).updatedAt ?? a.createdAt ?? 0,
-    ).getTime();
-    const bTime = new Date(
-      (b as { updatedAt?: string }).updatedAt ?? b.createdAt ?? 0,
-    ).getTime();
+    const aTime = new Date(readEncounterUpdatedAt(a) ?? a.createdAt ?? 0).getTime();
+    const bTime = new Date(readEncounterUpdatedAt(b) ?? b.createdAt ?? 0).getTime();
     return bTime - aTime;
   });
 }

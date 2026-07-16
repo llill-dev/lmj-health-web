@@ -5,12 +5,16 @@ export type DoctorTemplateType =
   | 'PROCEDURE_ORDER'
   | 'REFERRAL_ORDER';
 
+export type DoctorTemplateApplication = {
+  [key: string]: unknown;
+};
+
 export type DoctorTemplateRecord = {
   _id: string;
   type?: DoctorTemplateType;
   name?: string;
   description?: string;
-  payload?: Record<string, unknown>;
+  payload?: DoctorTemplateApplication;
   isArchived?: boolean;
   updatedAt?: string;
   createdAt?: string;
@@ -28,7 +32,7 @@ export type CreateDoctorTemplateBody = {
   type: DoctorTemplateType;
   name: string;
   description?: string;
-  payload?: Record<string, unknown>;
+  payload?: DoctorTemplateApplication;
 };
 
 export type UpdateDoctorTemplateBody = Partial<CreateDoctorTemplateBody>;
@@ -39,6 +43,18 @@ export type DoctorTemplateApplyResponse = {
   templateId?: string;
   type?: DoctorTemplateType;
   name?: string;
-  application?: Record<string, unknown>;
+  application?: DoctorTemplateApplication;
   template?: DoctorTemplateRecord;
+};
+
+export type DoctorTemplateMutationResponse = {
+  messageKey?: string;
+  message?: string;
+  template?: DoctorTemplateRecord;
+};
+
+export type DoctorTemplateDeleteResponse = {
+  messageKey?: string;
+  message?: string;
+  templateId?: string;
 };

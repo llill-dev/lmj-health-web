@@ -11,6 +11,10 @@ import {
   FileText,
   TrendingUp,
 } from "lucide-react";
+import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
+import { useDashboardStats } from "@/hooks/doctor/dashboard/useDashboardStats";
+import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
+import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
 
 type KpiCard = {
   key: string;
@@ -114,12 +118,18 @@ function QuickActionCard({
 }
 
 export default function SecretaryDashboardPage() {
+  const statsQuery = useDashboardStats();
+  const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 4 });
+  const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
+  const waitlistQuery = useDoctorWaitlist({ page: 1, limit: 1 });
+  const stats = statsQuery.stats;
+
   const kpis: KpiCard[] = [
     {
       key: "today",
       label: "مواعيد اليوم",
-      value: 2,
-      delta: "2 مجدول",
+      value: stats?.todayAppointments ?? 0,
+      delta: `${stats?.todayAppointments ?? 0} مجدول`,
       icon: Calendar,
       accent: "#129A98",
       soft: "#E9F7F6",
@@ -128,8 +138,8 @@ export default function SecretaryDashboardPage() {
     {
       key: "patients",
       label: "المرضى",
-      value: 2,
-      delta: "2 مريض",
+      value: patientsQuery.total ?? 0,
+      delta: `${patientsQuery.total ?? 0} مريض`,
       icon: Users,
       accent: "#2D74F5",
       soft: "#EAF1FF",
@@ -138,8 +148,8 @@ export default function SecretaryDashboardPage() {
     {
       key: "waitlist",
       label: "قائمة الانتظار",
-      value: 2,
-      delta: "2 طلب",
+      value: waitlistQuery.total ?? 0,
+      delta: `${waitlistQuery.total ?? 0} طلب`,
       icon: Check,
       accent: "#22C55E",
       soft: "#EAFBF0",
@@ -148,8 +158,8 @@ export default function SecretaryDashboardPage() {
     {
       key: "available",
       label: "الأوقات المتاحة",
-      value: 0,
-      delta: "0 وقت",
+      value: appointmentsQuery.total ?? 0,
+      delta: `${appointmentsQuery.total ?? 0} موعد`,
       icon: Clock,
       accent: "#FF6A00",
       soft: "#FFF2E8",
@@ -157,12 +167,11 @@ export default function SecretaryDashboardPage() {
     },
   ];
 
-  const todayAppointments = [
-    { time: "09:00", patientName: "سارة علي", status: "scheduled" },
-    { time: "10:30", patientName: "أحمد نور", status: "postponed" },
-    { time: "11:00", patientName: "ليلى محمد", status: "scheduled" },
-    { time: "14:00", patientName: "كريم حسن", status: "completed" },
-  ];
+  const todayAppointments = (appointmentsQuery.appointments ?? []).map((appointment) => ({
+    time: appointment.startTime || "—",
+    patientName: appointment.patient?.userId?.fullName || "مريض",
+    status: appointment.status === "rescheduled" ? "postponed" : appointment.status,
+  }));
 
   const quickActions = [
     {
@@ -200,7 +209,7 @@ export default function SecretaryDashboardPage() {
     {
       key: "records",
       label: "السجلات الطبية",
-      value: "156",
+      value: `${stats?.totalMedicalRecords ?? 0}`,
       icon: FileText,
       iconClass: "bg-[#EAF1FF] text-[#3B82F6]",
     },
@@ -279,6 +288,10 @@ export default function SecretaryDashboardPage() {
                 </div>
               </article>
             ))
+          ) : appointmentsQuery.isAwaitingData ? (
+            <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              جاري تحميل مواعيد اليوم...
+            </div>
           ) : (
             <div className="flex min-h-[250px] items-center justify-center rounded-[18px] border border-dashed border-[#D8E2EE] bg-[#FBFDFE] px-6 text-center font-cairo text-[15px] font-semibold leading-7 text-[#8A94A6]">
               لا توجد مواعيد مجدولة لهذا اليوم بعد.

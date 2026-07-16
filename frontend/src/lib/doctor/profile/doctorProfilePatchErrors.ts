@@ -7,8 +7,28 @@ export type DoctorProfilePatchFieldMessages = Partial<
   Record<DoctorProfilePatchField, string>
 >;
 
+type DoctorProfileValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  param?: unknown;
+  field?: unknown;
+  property?: unknown;
+  propertyName?: unknown;
+  message?: unknown;
+  msg?: unknown;
+  [key: string]: unknown;
+};
+
+function asDoctorProfileValidationErrorRecord(
+  value: unknown,
+): DoctorProfileValidationErrorRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 function collectStructuredFieldTexts(
-  body: Record<string, unknown>,
+  body: DoctorProfileValidationErrorRecord,
 ): Map<string, string> {
   const out = new Map<string, string>();
   const errs = body.errors;
@@ -34,8 +54,8 @@ function collectStructuredFieldTexts(
         push('_root', item);
         continue;
       }
-      if (!item || typeof item !== 'object') continue;
-      const row = item as Record<string, unknown>;
+      const row = asDoctorProfileValidationErrorRecord(item);
+      if (!row) continue;
       const pathVal =
         row.path ?? row.param ?? row.field ?? row.property ?? row.propertyName;
       let leaf = '';

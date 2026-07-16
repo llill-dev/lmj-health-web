@@ -15,6 +15,14 @@ const SESSION_EXEMPT_401_PREFIXES = [
   '/api/auth/logout-all',
 ] as const;
 
+function asJwtPayloadRecord(value: unknown): { exp?: unknown } | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
+function parseJwtPayload(raw: string): unknown {
+  return JSON.parse(raw);
+}
+
 function normalizeEndpoint(endpoint: string): string {
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   return path.split('?')[0] ?? path;
@@ -34,7 +42,8 @@ export function getJwtExpiryUnix(token: string): number | null {
   try {
     const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
     const padded = payload.padEnd(payload.length + ((4 - (payload.length % 4)) % 4), '=');
-    const json = JSON.parse(atob(padded)) as { exp?: unknown };
+    const json = asJwtPayloadRecord(parseJwtPayload(atob(padded)));
+    if (!json) return null;
     return typeof json.exp === 'number' ? json.exp : null;
   } catch {
     return null;

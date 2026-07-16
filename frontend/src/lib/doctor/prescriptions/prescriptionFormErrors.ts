@@ -6,8 +6,28 @@ export type PrescriptionServerFieldMessages = Partial<
   Record<PrescriptionFormField, string>
 >;
 
+type PrescriptionValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  param?: unknown;
+  field?: unknown;
+  property?: unknown;
+  propertyName?: unknown;
+  message?: unknown;
+  msg?: unknown;
+  [key: string]: unknown;
+};
+
+function asPrescriptionValidationErrorRecord(
+  value: unknown,
+): PrescriptionValidationErrorRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 function collectStructuredFieldTexts(
-  body: Record<string, unknown>,
+  body: PrescriptionValidationErrorRecord,
 ): Map<string, string> {
   const out = new Map<string, string>();
   const errs = body.errors;
@@ -33,8 +53,8 @@ function collectStructuredFieldTexts(
         push('_root', item);
         continue;
       }
-      if (!item || typeof item !== 'object') continue;
-      const row = item as Record<string, unknown>;
+      const row = asPrescriptionValidationErrorRecord(item);
+      if (!row) continue;
       const pathVal =
         row.path ?? row.param ?? row.field ?? row.property ?? row.propertyName;
       let leaf = '';

@@ -16,16 +16,27 @@ export const MEDICAL_SERVICE_CATEGORY_FACILITY_TYPES: Record<
   labs: ['laboratory'],
 };
 
+function isFacilityType(value: string): value is FacilityType {
+  return Object.values(MEDICAL_SERVICE_CATEGORY_FACILITY_TYPES)
+    .flat()
+    .some((facilityType) => facilityType === value);
+}
+
 export function resolveMedicalServiceCategory(
   facilityType?: string | null,
 ): MedicalServiceCategory | null {
   const normalized = facilityType?.trim().toLowerCase();
   if (!normalized) return null;
 
-  for (const [category, types] of Object.entries(
-    MEDICAL_SERVICE_CATEGORY_FACILITY_TYPES,
-  ) as Array<[MedicalServiceCategory, FacilityType[]]>) {
-    if (types.includes(normalized as FacilityType)) return category;
+  const entries: Array<[MedicalServiceCategory, FacilityType[]]> = [
+    ['clinics', MEDICAL_SERVICE_CATEGORY_FACILITY_TYPES.clinics],
+    ['imaging', MEDICAL_SERVICE_CATEGORY_FACILITY_TYPES.imaging],
+    ['treatment', MEDICAL_SERVICE_CATEGORY_FACILITY_TYPES.treatment],
+    ['labs', MEDICAL_SERVICE_CATEGORY_FACILITY_TYPES.labs],
+  ];
+
+  for (const [category, types] of entries) {
+    if (isFacilityType(normalized) && types.includes(normalized)) return category;
   }
 
   return null;

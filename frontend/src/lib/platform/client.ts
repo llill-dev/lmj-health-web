@@ -11,10 +11,13 @@ import type {
   CreateComplaintBody,
   CreateComplaintResponse,
   PlatformContentDetails,
+  PlatformContentDetailsEnvelope,
   PlatformContentSearchParams,
+  PlatformContentSearchResponse,
   PlatformContentType,
   PlatformContentLanguage,
   PlatformContentListItem,
+  PlatformContentListEnvelope,
 } from '@/lib/platform/types';
 
 export type PlatformContentListParams = {
@@ -49,7 +52,7 @@ export const platformApi = {
       params: PlatformContentListParams = {},
     ): Promise<PlatformContentListItem[]> => {
       const locale = params.language ?? 'ar';
-      const result = await apiRequestResult<Record<string, unknown>>(
+      const result = await apiRequestResult<PlatformContentListEnvelope>(
         buildContentListUrl(params),
         { locale, expectedStatuses: [404] },
       );
@@ -68,7 +71,7 @@ export const platformApi = {
     /** Returns [] on 404/empty — does not throw. */
     listSettingsPagesSafe: async (params: PlatformContentListParams = {}) => {
       const locale = params.language ?? 'ar';
-      const result = await apiRequestResult<Record<string, unknown>>(
+      const result = await apiRequestResult<PlatformContentListEnvelope>(
         buildContentListUrl({ ...params, type: 'SETTINGS_PAGE' }),
         { locale, expectedStatuses: [404] },
       );
@@ -84,7 +87,7 @@ export const platformApi = {
       if (!q) return [];
 
       const locale = params.language ?? 'ar';
-      const result = await apiRequestResult<Record<string, unknown>>(
+      const result = await apiRequestResult<PlatformContentSearchResponse>(
         buildContentSearchUrl({ ...params, q }),
         { locale, expectedStatuses: [404] },
       );
@@ -103,7 +106,7 @@ export const platformApi = {
       slug: string,
       language: PlatformContentLanguage = 'ar',
     ): Promise<PlatformContentDetails | null> => {
-      const result = await apiRequestResult<Record<string, unknown>>(
+      const result = await apiRequestResult<PlatformContentDetailsEnvelope>(
         `${platformEndpoints.content.bySlug(slug)}?language=${language}`,
         { locale: language, expectedStatuses: [404] },
       );

@@ -1,5 +1,6 @@
 import type {
   DoctorTemplateApplyResponse,
+  DoctorTemplateApplication,
   DoctorTemplateType,
 } from '@/lib/doctor/templates/templateTypes';
 
@@ -19,20 +20,56 @@ export type StoredDoctorTemplateDraft = {
   templateId: string;
   type: DoctorTemplateType;
   name: string;
-  application: Record<string, unknown>;
+  application: DoctorTemplateApplication;
   storedAt: string;
 };
+
+type TemplateApplicationEnvelope = {
+  application?: DoctorTemplateApplication;
+};
+
+type TemplateDraftStorageRecord = {
+  [key: string]: unknown;
+};
+
+type StoredDoctorTemplateDraftRecord = {
+  templateId?: unknown;
+  type?: unknown;
+  name?: unknown;
+  application?: unknown;
+  storedAt?: unknown;
+};
+
+type TemplateApplyPayloadRecord = TemplateDraftStorageRecord & {
+  application?: unknown;
+};
+
+function asObjectRecord(value: unknown): TemplateDraftStorageRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+}
+
+function asTemplateApplication(
+  value: unknown,
+): DoctorTemplateApplication | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function parseTemplateDraftRaw(raw: string): unknown {
+  return JSON.parse(raw);
+}
 
 function isValidTemplateType(value: unknown): value is DoctorTemplateType {
   return (
     typeof value === 'string' &&
-    (VALID_TEMPLATE_TYPES as readonly string[]).includes(value)
+    VALID_TEMPLATE_TYPES.some((entry) => entry === value)
   );
 }
 
 function resolveApplicationFromApplyResponse(
   response: DoctorTemplateApplyResponse,
-): Record<string, unknown> | null {
+): DoctorTemplateApplication | null {
   if (
     response.application &&
     typeof response.application === 'object' &&
@@ -42,16 +79,15 @@ function resolveApplicationFromApplyResponse(
   }
 
   const payload = response.template?.payload;
-  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+  const payloadRecord = asObjectRecord(payload);
+  if (!payloadRecord) {
     return null;
   }
 
-  const nested = (payload as Record<string, unknown>).application;
-  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
-    return nested as Record<string, unknown>;
-  }
+  const nested = asTemplateApplication(payloadRecord.application);
+  if (nested) return nested;
 
-  return payload as Record<string, unknown>;
+  return asTemplateApplication(payloadRecord);
 }
 
 export function storeDoctorTemplateDraft(
@@ -82,23 +118,18 @@ export function storeDoctorTemplateDraft(
 function parseStoredDraft(raw: string): StoredDoctorTemplateDraft | null {
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    parsed = parseTemplateDraftRaw(raw);
   } catch {
     return null;
   }
 
-  if (!parsed || typeof parsed !== 'object') return null;
-  const record = parsed as Partial<StoredDoctorTemplateDraft>;
+  const record = asObjectRecord(parsed);
+  if (!record) return null;
 
   if (!record.templateId || typeof record.templateId !== 'string') return null;
   if (!isValidTemplateType(record.type)) return null;
-  if (
-    !record.application ||
-    typeof record.application !== 'object' ||
-    Array.isArray(record.application)
-  ) {
-    return null;
-  }
+  const application = asTemplateApplication(record.application);
+  if (!application) return null;
 
   if (record.storedAt) {
     const storedAtMs = new Date(record.storedAt).getTime();
@@ -109,9 +140,10 @@ function parseStoredDraft(raw: string): StoredDoctorTemplateDraft | null {
   return {
     templateId: record.templateId,
     type: record.type,
-    name: record.name?.trim() || 'قالب',
-    application: record.application,
-    storedAt: record.storedAt ?? new Date().toISOString(),
+    name: typeof record.name === 'string' && record.name.trim() ? record.name.trim() : 'قالب',
+    application,
+    storedAt:
+      typeof record.storedAt === 'string' ? record.storedAt : new Date().toISOString(),
   };
 }
 
@@ -142,7 +174,7 @@ export function clearDoctorTemplateDraft(): void {
 }
 
 export function summarizeTemplateApplication(
-  application: Record<string, unknown> | undefined,
+  application: DoctorTemplateApplication | undefined,
 ): string[] {
   if (!application) return [];
 

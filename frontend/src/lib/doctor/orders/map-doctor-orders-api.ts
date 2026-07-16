@@ -1,11 +1,15 @@
 import type { DoctorOrderRecord, DoctorOrderResultAttachment } from '@/lib/doctor/orders/doctorOrderTypes';
 import { extractOrderStatusFieldsFromApi } from '@/lib/doctor/orders/orderStatusLabels';
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+type DoctorOrderApiRecord = {
+  [key: string]: unknown;
+};
+
+function asRecord(value: unknown): DoctorOrderApiRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
 }
 
-function pickString(...values: unknown[]): string | undefined {
+function pickString(...values: ReadonlyArray<unknown>): string | undefined {
   for (const value of values) {
     if (typeof value === 'string' && value.trim()) return value.trim();
   }
@@ -73,7 +77,7 @@ function normalizeResult(entry: unknown): DoctorOrderResultAttachment | null {
   };
 }
 
-/** يطبّع استجابة القائمة/التفاصيل إلى شكل موحّد حسب API-4. */
+/** يطبّع استجابة القائمة/التفاصيل إلى شكل موحّد حسب API-3. */
 export function normalizeDoctorOrderFromApi(raw: unknown): DoctorOrderRecord | null {
   const row = asRecord(raw);
   if (!row) return null;
@@ -81,7 +85,7 @@ export function normalizeDoctorOrderFromApi(raw: unknown): DoctorOrderRecord | n
   const id = pickString(row._id, row.id, row.orderId);
   if (!id) return null;
 
-  const patientId = pickString(row.patientId, asRecord(row.patient)?._id as string | undefined);
+  const patientId = pickString(row.patientId, asRecord(row.patient)?._id);
   const statusFields = extractOrderStatusFieldsFromApi(row);
   const resultsRaw = Array.isArray(row.results) ? row.results : [];
   const attachmentsRaw = Array.isArray(row.attachments) ? row.attachments : [];
@@ -139,7 +143,7 @@ export function normalizeDoctorOrderFromApi(raw: unknown): DoctorOrderRecord | n
 }
 
 export function normalizeDoctorOrdersListResponse(raw: {
-  orders?: unknown[];
+  orders?: DoctorOrderApiRecord[];
 } | null | undefined): DoctorOrderRecord[] {
   const orders = raw?.orders ?? [];
   if (!Array.isArray(orders)) return [];

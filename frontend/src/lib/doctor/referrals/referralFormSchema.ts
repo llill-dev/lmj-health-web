@@ -14,7 +14,7 @@ export type ReferralFormState = {
   priority: ReferralPriority;
 };
 
-/** رسائل التحقق — متوافقة مع POST/PATCH .../orders/referrals (API-4) */
+/** رسائل التحقق — متوافقة مع POST/PATCH .../orders/referrals (API-3) */
 export const REFERRAL_FORM_MESSAGES = {
   specialtyRequired: 'التخصص مطلوب قبل اعتماد التحويل.',
   specialtyMin: 'التخصص قصير جداً (حرفان على الأقل).',

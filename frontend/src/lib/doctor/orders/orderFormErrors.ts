@@ -4,8 +4,28 @@ import { ORDER_CLINICAL_MESSAGES } from '@/lib/doctor/orders/orderClinicalFormSc
 import type { OrderManualFieldMessages } from '@/lib/doctor/orders/orderManualFormSchema';
 import { REFERRAL_API_URGENCY_VALUES } from '@/lib/doctor/referrals/referralPriority';
 
+type DoctorOrderValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  param?: unknown;
+  field?: unknown;
+  property?: unknown;
+  propertyName?: unknown;
+  message?: unknown;
+  msg?: unknown;
+  [key: string]: unknown;
+};
+
+function asDoctorOrderValidationErrorRecord(
+  value: unknown,
+): DoctorOrderValidationErrorRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 function collectStructuredFieldTexts(
-  body: Record<string, unknown>,
+  body: DoctorOrderValidationErrorRecord,
 ): Map<string, string> {
   const out = new Map<string, string>();
   const errs = body.errors;
@@ -19,8 +39,8 @@ function collectStructuredFieldTexts(
   if (Array.isArray(errs)) {
     for (const item of errs) {
       if (typeof item === 'string') continue;
-      if (!item || typeof item !== 'object') continue;
-      const row = item as Record<string, unknown>;
+      const row = asDoctorOrderValidationErrorRecord(item);
+      if (!row) continue;
       const pathVal =
         row.path ?? row.param ?? row.field ?? row.property ?? row.propertyName;
       let leaf = '';

@@ -63,16 +63,28 @@ type ServiceProviderDetailsResponse = {
   data?: ServiceProvider | { item?: ServiceProvider; provider?: ServiceProvider };
 };
 
+type MedicalServicesCatalogFailure = Error | unknown;
+
+function isServiceProviderLike(value: unknown): value is ServiceProvider {
+  return !!value && typeof value === 'object' && 'serviceType' in value;
+}
+
+function isServiceProviderDetailsNested(
+  value: unknown,
+): value is { item?: ServiceProvider; provider?: ServiceProvider } {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
 function normalizeServiceProviderDetailsResponse(
   response: ServiceProviderDetailsResponse,
 ): ServiceProvider | null {
   if (response.item) return response.item;
   if (response.provider) return response.provider;
-  if (response.data && 'serviceType' in response.data) {
-    return response.data as ServiceProvider;
+  if (isServiceProviderLike(response.data)) {
+    return response.data;
   }
-  if (response.data && typeof response.data === 'object') {
-    const nested = response.data as { item?: ServiceProvider; provider?: ServiceProvider };
+  if (isServiceProviderDetailsNested(response.data)) {
+    const nested = response.data;
     return nested.item ?? nested.provider ?? null;
   }
   return null;
@@ -125,7 +137,7 @@ export async function fetchMedicalServicesCatalog(search?: string) {
   );
 
   const batches: ServiceProvider[][] = [];
-  const failures: unknown[] = [];
+  const failures: MedicalServicesCatalogFailure[] = [];
 
   for (const result of results) {
     if (result.status === 'fulfilled') {
@@ -163,8 +175,8 @@ export async function fetchMedicalServicesByCategory(
 
   if (batches.length === 0) {
     const failed = results.find(
-      (result) => result.status === 'rejected',
-    ) as PromiseRejectedResult | undefined;
+      (result): result is PromiseRejectedResult => result.status === 'rejected',
+    );
     throw failed?.reason ?? new Error('services_category_unavailable');
   }
 

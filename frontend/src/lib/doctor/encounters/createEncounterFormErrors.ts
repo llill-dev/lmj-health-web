@@ -10,6 +10,26 @@ export type CreateEncounterServerFieldMessages = Partial<
   Record<CreateEncounterFormField, string>
 >;
 
+type EncounterValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  param?: unknown;
+  field?: unknown;
+  property?: unknown;
+  propertyName?: unknown;
+  message?: unknown;
+  msg?: unknown;
+  [key: string]: unknown;
+};
+
+function asEncounterValidationErrorRecord(
+  value: unknown,
+): EncounterValidationErrorRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 export class CreateEncounterSubmitError extends Error {
   readonly fields: CreateEncounterServerFieldMessages;
 
@@ -30,7 +50,7 @@ export function isValidAppointmentObjectId(value: string): boolean {
 }
 
 function collectStructuredFieldTexts(
-  body: Record<string, unknown>,
+  body: EncounterValidationErrorRecord,
 ): Map<string, string> {
   const out = new Map<string, string>();
   const errs = body.errors;
@@ -56,8 +76,8 @@ function collectStructuredFieldTexts(
         push('_root', item);
         continue;
       }
-      if (!item || typeof item !== 'object') continue;
-      const row = item as Record<string, unknown>;
+      const row = asEncounterValidationErrorRecord(item);
+      if (!row) continue;
       const pathVal =
         row.path ?? row.param ?? row.field ?? row.property ?? row.propertyName;
       let leaf = '';

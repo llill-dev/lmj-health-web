@@ -130,10 +130,19 @@ export function mapSecretaryFieldErrors(
   >,
 ): SecretaryFormFieldErrors {
   const mapped: SecretaryFormFieldErrors = {};
+  const allowedFields: readonly SecretaryFormFieldName[] = [
+    "fullName",
+    "email",
+    "password",
+    "phone",
+    "gender",
+    "permissions",
+  ];
   for (const [key, value] of Object.entries(fieldErrors)) {
-    if (value?.message) {
-      mapped[key as SecretaryFormFieldName] = value.message;
-    }
+    if (!value?.message) continue;
+    const field = allowedFields.find((entry) => entry === key);
+    if (!field) continue;
+    mapped[field] = value.message;
   }
   return mapped;
 }

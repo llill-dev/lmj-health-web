@@ -1,6 +1,7 @@
 import { memo, useMemo, useState } from "react";
-import { Search, ChevronRight, UserPlus, Loader2 } from "lucide-react";
+import { Search, ChevronRight, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 
 function formatIsoDate(value?: string | null): string {
   if (!value) return "—";
@@ -151,33 +152,25 @@ const PatientTableRow = memo<{
 export default function SecretaryPatientsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "temporary">("all");
+  const patientsQuery = useDoctorPatients({
+    page: 1,
+    limit: 100,
+    search: searchInput.trim() || undefined,
+  });
 
-  const patients = [
-    {
-      id: "1234567890",
-      name: "سارة علي",
-      phone: "+966506789012",
-      email: "sara@example.com",
-      registrationDate: "2024-01-15",
-      accountStatus: "active",
-    },
-    {
-      id: "0987654321",
-      name: "أحمد نور",
-      phone: "+966598765432",
-      email: "ahmed@example.com",
-      registrationDate: "2024-02-20",
-      accountStatus: "active",
-    },
-    {
-      id: "1122334455",
-      name: "ليلى محمد",
-      phone: "+966511223344",
-      email: "layla@example.com",
-      registrationDate: "2024-03-10",
-      isTemporary: true,
-    },
-  ];
+  const patients = useMemo(
+    () =>
+      (patientsQuery.patients ?? []).map((p) => ({
+        id: p._id,
+        name: p.userId?.fullName || "مريض",
+        phone: p.userId?.phone || "—",
+        email: p.userId?.email || "—",
+        registrationDate: p.createdAt || "",
+        isTemporary: p.isTemporary,
+        accountStatus: p.accountStatus,
+      })),
+    [patientsQuery.patients],
+  );
 
   const filterTabs = useMemo(
     () => [
@@ -195,16 +188,7 @@ export default function SecretaryPatientsPage() {
     );
   }, [patients, filter]);
 
-  const searchedPatients = useMemo(() => {
-    if (!searchInput.trim()) return filteredPatients;
-    const search = searchInput.toLowerCase();
-    return filteredPatients.filter(
-      (p) =>
-        p.name.toLowerCase().includes(search) ||
-        p.phone.includes(search) ||
-        p.email.toLowerCase().includes(search),
-    );
-  }, [filteredPatients, searchInput]);
+  const searchedPatients = filteredPatients;
 
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
@@ -215,7 +199,7 @@ export default function SecretaryPatientsPage() {
               المرضى
             </h2>
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {patients.length} مريض
+              {patientsQuery.total || patients.length} مريض
               {searchInput ? " مطابق للبحث" : ""}
             </p>
           </div>
@@ -245,7 +229,13 @@ export default function SecretaryPatientsPage() {
           </div>
         </div>
 
-        {searchedPatients.length === 0 ? (
+        {patientsQuery.isAwaitingData ? (
+          <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              جاري تحميل بيانات المرضى...
+            </p>
+          </div>
+        ) : searchedPatients.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
@@ -259,7 +249,7 @@ export default function SecretaryPatientsPage() {
               <PatientTableRow
                 key={patient.id}
                 patient={patient}
-                onOpen={(patientId) => console.log("Open patient", patientId)}
+                onOpen={() => {}}
               />
             ))}
           </>

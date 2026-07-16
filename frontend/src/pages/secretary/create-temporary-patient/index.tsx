@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { UserPlus, Phone, Mail, Calendar, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useCreateTemporaryDoctorPatient } from "@/hooks/doctor/patients/useDoctorPatients";
 
 function SurfaceSection({
   title,
@@ -52,11 +54,40 @@ function FormField({
 }
 
 export default function SecretaryCreateTemporaryPatientPage() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const createTemporaryPatient = useCreateTemporaryDoctorPatient();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [address, setAddress] = useState("");
+
+  const isSubmitting = createTemporaryPatient.isPending;
+  const canSubmit = fullName.trim().length > 1 && phone.trim().length > 0;
+
+  async function handleSubmit() {
+    if (!canSubmit || isSubmitting) return;
+    try {
+      await createTemporaryPatient.mutateAsync({
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        email: email.trim() || undefined,
+        birthDate: birthDate || undefined,
+        address: address.trim() || undefined,
+      });
+      toast("تم إنشاء المريض المؤقت بنجاح.", {
+        title: "تم الحفظ",
+        variant: "success",
+      });
+      navigate("/secretary/patients");
+    } catch {
+      toast("تعذر إنشاء المريض المؤقت. تحقق من البيانات وحاول مجدداً.", {
+        title: "فشل الحفظ",
+        variant: "error",
+      });
+    }
+  }
 
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
@@ -115,10 +146,12 @@ export default function SecretaryCreateTemporaryPatientPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
+                onClick={handleSubmit}
+                disabled={!canSubmit || isSubmitting}
                 className="flex h-[48px] w-full items-center justify-center rounded-[8px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.25)] transition hover:bg-[#0A7A77]"
               >
                 <UserPlus className="ml-2 h-4 w-4" />
-                إنشاء مريض مؤقت
+                {isSubmitting ? "جاري الإنشاء..." : "إنشاء مريض مؤقت"}
               </button>
               <Link
                 to="/secretary/patients"

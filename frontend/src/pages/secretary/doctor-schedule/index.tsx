@@ -1,5 +1,8 @@
 import { memo } from "react";
-import { Calendar, Clock, Check, X } from "lucide-react";
+import { Calendar, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
+import { get } from "@/lib/api";
 
 function SurfaceSection({
   title,
@@ -70,15 +73,48 @@ function ScheduleDayCard({
 }
 
 export default function SecretaryDoctorSchedulePage() {
-  const scheduleDays = [
-    { day: "السبت", timeRange: "09:00 - 17:00", isAvailable: true },
-    { day: "الأحد", timeRange: "09:00 - 17:00", isAvailable: true },
-    { day: "الاثنين", timeRange: "09:00 - 17:00", isAvailable: true },
-    { day: "الثلاثاء", timeRange: "09:00 - 17:00", isAvailable: true },
-    { day: "الأربعاء", timeRange: "09:00 - 17:00", isAvailable: true },
-    { day: "الخميس", timeRange: "09:00 - 17:00", isAvailable: true },
-    { day: "الجمعة", timeRange: "—", isAvailable: false, isHoliday: true },
-  ];
+  const assignedDoctorQuery = useSecretaryAssignedDoctor();
+  const doctorId = assignedDoctorQuery.data?.doctor?._id ?? "";
+  const doctorName =
+    assignedDoctorQuery.data?.doctor?.userId?.fullName || "الطبيب المسؤول";
+  const scheduleQuery = useQuery({
+    queryKey: ["secretary", "doctor-schedule", doctorId],
+    enabled: Boolean(doctorId),
+    queryFn: () =>
+      get<{
+        availableTimes?: Array<{
+          day?: string;
+          slots?: Array<{ startTime?: string; endTime?: string }>;
+        }>;
+      }>(`/api/doctors/${doctorId}/schedule`),
+    staleTime: 60_000,
+  });
+
+  const dayLabels: Record<string, string> = {
+    Sunday: "الأحد",
+    Monday: "الاثنين",
+    Tuesday: "الثلاثاء",
+    Wednesday: "الأربعاء",
+    Thursday: "الخميس",
+    Friday: "الجمعة",
+    Saturday: "السبت",
+  };
+
+  const scheduleDays = Object.entries(dayLabels).map(([key, label]) => {
+    const dayEntry = scheduleQuery.data?.availableTimes?.find(
+      (entry) => entry.day === key,
+    );
+    const firstSlot = dayEntry?.slots?.[0];
+    return {
+      day: label,
+      timeRange:
+        firstSlot?.startTime && firstSlot?.endTime
+          ? `${firstSlot.startTime} - ${firstSlot.endTime}`
+          : "—",
+      isAvailable: Boolean(firstSlot?.startTime && firstSlot?.endTime),
+      isHoliday: !firstSlot?.startTime || !firstSlot?.endTime,
+    };
+  });
 
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
@@ -89,21 +125,27 @@ export default function SecretaryDoctorSchedulePage() {
               جدول الأسبوع الحالي
             </h3>
             <p className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
-              د. خالد عبد الله
+              {doctorName}
             </p>
           </div>
 
-          <div className="space-y-3">
-            {scheduleDays.map((schedule) => (
-              <ScheduleDayCard
-                key={schedule.day}
-                day={schedule.day}
-                timeRange={schedule.timeRange}
-                isAvailable={schedule.isAvailable}
-                isHoliday={schedule.isHoliday}
-              />
-            ))}
-          </div>
+          {scheduleQuery.isLoading ? (
+            <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              جاري تحميل جدول الطبيب...
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {scheduleDays.map((schedule) => (
+                <ScheduleDayCard
+                  key={schedule.day}
+                  day={schedule.day}
+                  timeRange={schedule.timeRange}
+                  isAvailable={schedule.isAvailable}
+                  isHoliday={schedule.isHoliday}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </SurfaceSection>
     </div>

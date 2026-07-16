@@ -28,6 +28,14 @@ import type {
 import { AUTH_ERROR_MESSAGES } from "@/lib/auth/types";
 import type { SignupFieldConflictMessages } from "@/lib/auth/signupMessaging";
 
+function readAuthBodyString(
+  body: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = body[key];
+  return typeof value === "string" ? value : undefined;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Error normaliser
 // Reads the structured ApiError (status + messageKey + body) produced by
@@ -38,8 +46,8 @@ const handleAuthError = (error: unknown): AuthError => {
   if (error instanceof ApiError) {
     const { status, messageKey, body } = error;
     const backendMessage =
-      (body.message as string | undefined) ||
-      (body.error as string | undefined) ||
+      readAuthBodyString(body, "message") ||
+      readAuthBodyString(body, "error") ||
       error.message;
 
     let code: AuthError["code"] = "UNKNOWN";

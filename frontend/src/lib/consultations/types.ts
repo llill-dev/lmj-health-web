@@ -14,6 +14,11 @@ export type ConsultationReview = {
   updatedAt?: string;
 };
 
+export type ConsultationReviewInput = {
+  rating: number;
+  comment?: string;
+};
+
 export type PendingConsultationAttachment = {
   ref: string;
   fileName: string;

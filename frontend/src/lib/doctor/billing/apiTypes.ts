@@ -88,6 +88,11 @@ export type CreateBillingServiceBody = {
 
 export type UpdateBillingServiceBody = Partial<CreateBillingServiceBody>;
 
+export type BillingMutationEnvelope = {
+  messageKey?: string;
+  message?: string;
+};
+
 export type ApiBillingInvoice = {
   id: string;
   number?: string;
@@ -242,4 +247,80 @@ export type CreateBillingExpenseBody = {
   amount: number;
   expenseDate: string;
   description?: string;
+};
+
+export type BillingInvoicesListResponse = BillingMutationEnvelope & {
+  invoices?: ApiBillingInvoice[];
+  total?: number;
+  page?: number;
+  limit?: number;
+};
+
+export type BillingInvoiceResponse = BillingMutationEnvelope & {
+  invoice?: ApiBillingInvoice;
+};
+
+export type BillingInvoicePrefillResponse = BillingMutationEnvelope & {
+  prefill?: ApiBillingInvoicePrefill;
+};
+
+export type BillingRefundResponse = BillingMutationEnvelope & {
+  refund?: ApiBillingRefund;
+  payment?: ApiBillingPayment;
+  invoice?: ApiBillingInvoice;
+};
+
+export type BillingPaymentsListResponse = BillingMutationEnvelope & {
+  payments?: ApiBillingPayment[];
+  total?: number;
+  page?: number;
+  limit?: number;
+};
+
+export type BillingPaymentResponse = BillingMutationEnvelope & {
+  payment?: ApiBillingPayment;
+  invoice?: ApiBillingInvoice;
+};
+
+export type BillingExpensesListResponse = BillingMutationEnvelope & {
+  expenses?: ApiBillingExpense[];
+  total?: number;
+  page?: number;
+  limit?: number;
+};
+
+export type BillingExpenseResponse = BillingMutationEnvelope & {
+  expense?: ApiBillingExpense;
+};
+
+export type BillingDashboardResponse = BillingMutationEnvelope & {
+  dashboard?: ApiBillingDashboard;
+};
+
+export type BillingReportResponse = BillingMutationEnvelope & {
+  report?: ApiBillingReport;
+};
+
+export type BillingReportExportResponse = BillingMutationEnvelope & {
+  downloadUrl?: string;
+  url?: string;
+  fileName?: string;
+  expiresIn?: number;
+};
+
+export type BillingSettingsResponse = BillingMutationEnvelope & {
+  settings?: ApiBillingSettings;
+  supportedCurrencies?: ApiSupportedCurrency[];
+  defaultCurrency?: string;
+};
+
+export type BillingServicesListResponse = BillingMutationEnvelope & {
+  services?: ApiBillingService[];
+  total?: number;
+  page?: number;
+  limit?: number;
+};
+
+export type BillingServiceResponse = BillingMutationEnvelope & {
+  service?: ApiBillingService;
 };

@@ -1,7 +1,7 @@
 import type { ReferralPriority } from '@/lib/doctor/referrals/referralFormSchema';
 
 /**
- * قيم الباك إند لدرجة الأهمية (متوافقة مع urgencyLevel: low | medium | high في API-4).
+ * قيم الباك إند لدرجة الأهمية (متوافقة مع urgencyLevel: low | medium | high في API-3).
  * الواجهة تبقى normal | urgent | emergency للطبيب.
  */
 export const REFERRAL_API_URGENCY_VALUES = ['low', 'medium', 'high'] as const;

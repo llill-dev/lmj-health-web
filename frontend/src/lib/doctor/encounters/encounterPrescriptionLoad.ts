@@ -1,6 +1,15 @@
 import { doctorApi } from '@/lib/doctor/client';
 import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptions/prescriptionTypes';
 
+function readPrescriptionUpdatedAt(
+  value: EncounterPrescriptionRecord,
+): string | undefined {
+  const record: unknown = value;
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return undefined;
+  const candidate: { updatedAt?: unknown } = record;
+  return typeof candidate.updatedAt === 'string' ? candidate.updatedAt : undefined;
+}
+
 function isFinalizedPrescription(rx: EncounterPrescriptionRecord) {
   return (rx.status ?? '').toLowerCase().includes('final');
 }
@@ -9,12 +18,8 @@ function sortByRecent(
   prescriptions: EncounterPrescriptionRecord[],
 ): EncounterPrescriptionRecord[] {
   return [...prescriptions].sort((a, b) => {
-    const aTime = new Date(
-      a.finalizedAt ?? (a as { updatedAt?: string }).updatedAt ?? 0,
-    ).getTime();
-    const bTime = new Date(
-      b.finalizedAt ?? (b as { updatedAt?: string }).updatedAt ?? 0,
-    ).getTime();
+    const aTime = new Date(a.finalizedAt ?? readPrescriptionUpdatedAt(a) ?? 0).getTime();
+    const bTime = new Date(b.finalizedAt ?? readPrescriptionUpdatedAt(b) ?? 0).getTime();
     return bTime - aTime;
   });
 }

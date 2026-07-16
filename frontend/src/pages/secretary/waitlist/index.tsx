@@ -1,5 +1,6 @@
 import { memo, useMemo, useState } from "react";
 import { Search, Clock, Phone, ChevronRight, Calendar } from "lucide-react";
+import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
 
 function patientInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -140,33 +141,31 @@ const WaitlistRow = memo<{
 
 export default function SecretaryWaitlistPage() {
   const [searchInput, setSearchInput] = useState("");
+  const waitlistQuery = useDoctorWaitlist({
+    page: 1,
+    limit: 100,
+  });
 
-  const waitlistPatients = [
-    {
-      id: "wl-001",
-      patientName: "سارة علي",
-      patientId: "1234567890",
-      phone: "+966506789012",
-      waitTime: "15 دقيقة",
-      priority: "high",
-    },
-    {
-      id: "wl-002",
-      patientName: "أحمد نور",
-      patientId: "0987654321",
-      phone: "+966598765432",
-      waitTime: "30 دقيقة",
-      priority: "medium",
-    },
-    {
-      id: "wl-003",
-      patientName: "ليلى محمد",
-      patientId: "1122334455",
-      phone: "+966511223344",
-      waitTime: "45 دقيقة",
-      priority: "low",
-    },
-  ];
+  const waitlistPatients = useMemo(
+    () =>
+      (waitlistQuery.requests ?? []).map((request) => ({
+        id: request._id,
+        patientName: request.patient?.userId?.fullName || "مريض",
+        patientId: request.patient?.publicId || request.patient?._id || "—",
+        phone: request.patient?.userId?.phone || "—",
+        waitTime: request.createdAt
+          ? `${Math.max(
+              1,
+              Math.round(
+                (Date.now() - new Date(request.createdAt).getTime()) /
+                  (1000 * 60),
+              ),
+            )} دقيقة`
+          : "—",
+        priority: request.urgencyLevel || "low",
+      })),
+    [waitlistQuery.requests],
+  );
 
   const searchedPatients = useMemo(() => {
     if (!searchInput.trim()) return waitlistPatients;
@@ -208,7 +207,13 @@ export default function SecretaryWaitlistPage() {
           </div>
         </div>
 
-        {searchedPatients.length === 0 ? (
+        {waitlistQuery.isAwaitingData ? (
+          <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              جاري تحميل قائمة الانتظار...
+            </p>
+          </div>
+        ) : searchedPatients.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
@@ -222,9 +227,7 @@ export default function SecretaryWaitlistPage() {
               <WaitlistRow
                 key={patient.id}
                 patient={patient}
-                onBookAppointment={(patientId) =>
-                  console.log("Book appointment for", patientId)
-                }
+                onBookAppointment={() => {}}
               />
             ))}
           </>

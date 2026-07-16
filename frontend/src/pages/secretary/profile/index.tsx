@@ -8,6 +8,10 @@ import {
   UserRound,
   Briefcase,
 } from "lucide-react";
+import { readAuthUser } from "@/lib/cookies";
+import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
+import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
+import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 
 function SurfaceSection({
   title,
@@ -102,22 +106,31 @@ function PermissionBadge({ permission }: { permission: string }) {
 }
 
 export default function SecretaryProfilePage() {
+  const authUser = readAuthUser();
+  const assignedDoctorQuery = useSecretaryAssignedDoctor();
+  const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 1 });
+  const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
+  const secretaryName = authUser?.fullName?.trim() || "السكرتير";
+  const secretaryEmail = authUser?.email?.trim() || "—";
+  const secretaryPhone = authUser?.phone?.trim() || "—";
+  const assignedDoctor = assignedDoctorQuery.data?.doctor;
+
   const contactInfo = [
-    { label: "البريد الإلكتروني", value: "sara@example.com", icon: Mail },
-    { label: "رقم الهاتف", value: "+966506789012", icon: Phone },
-    { label: "العنوان", value: "دمشق، سوريا", icon: MapPin },
+    { label: "البريد الإلكتروني", value: secretaryEmail, icon: Mail },
+    { label: "رقم الهاتف", value: secretaryPhone, icon: Phone },
+    { label: "العنوان", value: "—", icon: MapPin },
   ];
 
   const doctorInfo = [
-    { label: "الاسم", value: "د. خالد عبد الله" },
-    { label: "التخصص", value: "طب القلب" },
-    { label: "التقييم", value: "4.8/5" },
+    { label: "الاسم", value: assignedDoctor?.userId?.fullName || "—" },
+    { label: "التخصص", value: assignedDoctor?.specialization || "—" },
+    { label: "التقييم", value: `${assignedDoctor?.averageRating ?? "—"}` },
   ];
 
   const stats = [
     { label: "معدل الحضور", value: "98%", icon: Calendar },
-    { label: "المواعيد", value: "127", icon: Briefcase },
-    { label: "المرضى", value: "85", icon: UserRound },
+    { label: "المواعيد", value: appointmentsQuery.total ?? 0, icon: Briefcase },
+    { label: "المرضى", value: patientsQuery.total ?? 0, icon: UserRound },
   ];
 
   const permissions = [
@@ -137,7 +150,7 @@ export default function SecretaryProfilePage() {
             </div>
             <div className="flex-1">
               <div className="font-cairo text-[24px] font-black text-[#243044]">
-                سارة محمد
+                {secretaryName}
               </div>
               <div className="mt-1 font-cairo text-[16px] font-semibold text-[#98A2B3]">
                 سكرتير

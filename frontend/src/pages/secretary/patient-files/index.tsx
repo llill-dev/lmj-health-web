@@ -5,8 +5,8 @@ import {
   Calendar,
   Download,
   Eye,
-  ChevronRight,
 } from "lucide-react";
+import { useDoctorPatientFiles, useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 
 function formatIsoDate(value?: string | null): string {
   if (!value) return "—";
@@ -138,23 +138,28 @@ const PatientFileRow = memo<{
 
 export default function SecretaryPatientFilesPage() {
   const [searchInput, setSearchInput] = useState("");
+  const [patientId, setPatientId] = useState("");
+  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
+  const filesQuery = useDoctorPatientFiles(patientId, Boolean(patientId));
 
-  const files = [
-    {
-      id: "file-001",
-      patientName: "سارة علي",
-      patientId: "1234567890",
-      fileType: "تقرير طبي",
-      date: "2024-01-15",
-    },
-    {
-      id: "file-002",
-      patientName: "أحمد نور",
-      patientId: "0987654321",
-      fileType: "وصفة طبية",
-      date: "2024-01-15",
-    },
-  ];
+  const patientDirectory = useMemo(
+    () =>
+      new Map((patientsQuery.patients ?? []).map((patient) => [patient._id, patient])),
+    [patientsQuery.patients],
+  );
+  const files = useMemo(
+    () =>
+      (filesQuery.files ?? []).map((file) => ({
+        id: file.id || file._id || "",
+        patientName:
+          patientDirectory.get(patientId)?.userId?.fullName || "مريض",
+        patientId:
+          patientDirectory.get(patientId)?.publicId || patientId || "—",
+        fileType: file.mimeType || file.originalName || "ملف",
+        date: file.linkedAt || "",
+      })),
+    [filesQuery.files, patientDirectory, patientId],
+  );
 
   const searchedFiles = useMemo(() => {
     if (!searchInput.trim()) return files;
@@ -174,6 +179,20 @@ export default function SecretaryPatientFilesPage() {
         count={files.length}
         searchMatch={!!searchInput}
       >
+        <div className="px-4 pt-5 sm:px-5 sm:pt-6">
+          <select
+            value={patientId}
+            onChange={(event) => setPatientId(event.target.value)}
+            className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none focus:border-primary"
+          >
+            <option value="">اختر مريضاً لعرض ملفاته</option>
+            {(patientsQuery.patients ?? []).map((patient) => (
+              <option key={patient._id} value={patient._id}>
+                {patient.userId?.fullName || "مريض"} - {patient.publicId || patient._id}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="px-4 py-5 sm:px-5 sm:py-6">
           <FilesSearchInput value={searchInput} onChange={setSearchInput} />
         </div>
@@ -187,7 +206,19 @@ export default function SecretaryPatientFilesPage() {
           </div>
         </div>
 
-        {searchedFiles.length === 0 ? (
+        {!patientId ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              اختر مريضاً أولاً لعرض الملفات.
+            </p>
+          </div>
+        ) : filesQuery.isAwaitingData ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              جاري تحميل الملفات...
+            </p>
+          </div>
+        ) : searchedFiles.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
@@ -201,8 +232,8 @@ export default function SecretaryPatientFilesPage() {
               <PatientFileRow
                 key={file.id}
                 file={file}
-                onView={(fileId) => console.log("View file", fileId)}
-                onDownload={(fileId) => console.log("Download file", fileId)}
+                onView={() => {}}
+                onDownload={() => {}}
               />
             ))}
           </>

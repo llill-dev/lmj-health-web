@@ -8,12 +8,19 @@ const OFFBOARDED_USERS_KEY = 'lmj.admin.offboardedUserIds';
 const OFFBOARDED_DOCTORS_KEY = 'lmj.admin.offboardedDoctorIds';
 
 type DoctorLike = AdminDoctorSummary | AdminDoctorDetailsDoctor;
+type AdminDoctorOffboardRecord = {
+  [key: string]: unknown;
+};
+type AdminDoctorOffboardSource =
+  | DoctorLike['userId']
+  | DoctorLike['user']
+  | DoctorLike;
 
 function readStoredIds(key: string): Set<string> {
   try {
     const raw = sessionStorage.getItem(key);
     if (!raw) return new Set();
-    const parsed = JSON.parse(raw) as unknown;
+    const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return new Set();
     return new Set(parsed.filter((id): id is string => typeof id === 'string'));
   } catch {
@@ -46,10 +53,10 @@ export function rememberAdminDoctorOffboardedIds(input: {
   }
 }
 
-function asRecord(v: unknown): Record<string, unknown> | undefined {
+function asRecord(v: unknown): AdminDoctorOffboardRecord | undefined {
   if (v === null || v === undefined) return undefined;
   if (typeof v === 'object' && !Array.isArray(v)) {
-    return v as Record<string, unknown>;
+    return v;
   }
   return undefined;
 }
@@ -85,7 +92,7 @@ export function isAdminDoctorOffboarded(
   if (linkedUserId && storedUsers.has(linkedUserId)) return true;
   if (doctor._id && storedDoctors.has(doctor._id)) return true;
 
-  const sources: unknown[] = [doctor.userId, doctor.user, doctor];
+  const sources: AdminDoctorOffboardSource[] = [doctor.userId, doctor.user, doctor];
   for (const source of sources) {
     if (readDeletionStatus(source) === 'deleted') return true;
   }

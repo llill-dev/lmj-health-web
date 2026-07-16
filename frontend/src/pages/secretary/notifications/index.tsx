@@ -1,4 +1,13 @@
 import { Bell, Clock, CheckCircle, AlertCircle, Info } from "lucide-react";
+import { useDoctorNotificationsPage } from "@/hooks/doctor/notifications/useDoctorNotifications";
+import { notificationItemId } from "@/lib/notifications/client";
+
+function formatRelativeDate(value?: string): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("ar-SA");
+}
 
 function SurfaceSection({
   title,
@@ -88,32 +97,17 @@ function NotificationCard({
 }
 
 export default function SecretaryNotificationsPage() {
-  const notifications = [
-    {
-      id: 1,
-      title: "موعد جديد",
-      message: "تم حجز موعد جديد للمريض سارة علي",
-      time: "منذ 5 دقائق",
-      type: "success" as const,
-      isRead: false,
-    },
-    {
-      id: 2,
-      title: "تذكير بموعد",
-      message: "موعد المريض أحمد نور بعد 30 دقيقة",
-      time: "منذ ساعة",
-      type: "warning" as const,
-      isRead: false,
-    },
-    {
-      id: 3,
-      title: "تحديث النظام",
-      message: "تم تحديث نظام المواعيد بنجاح",
-      time: "منذ يومين",
-      type: "info" as const,
-      isRead: true,
-    },
-  ];
+  const notificationsQuery = useDoctorNotificationsPage(false, 1, 100);
+  const notifications = (notificationsQuery.listQuery.data?.notifications ?? []).map(
+    (item) => ({
+      id: notificationItemId(item) || `${item.title || "notice"}-${item.createdAt || "time"}`,
+      title: item.title || "إشعار",
+      message: item.body || "لا توجد تفاصيل إضافية.",
+      time: formatRelativeDate(item.createdAt),
+      type: item.type === "warning" ? "warning" : "info",
+      isRead: Boolean(item.isRead ?? item.read ?? item.is_read),
+    }),
+  );
 
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
@@ -128,12 +122,22 @@ export default function SecretaryNotificationsPage() {
                 {notifications.length} إشعار
               </p>
             </div>
-            <button className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]">
+            <button
+              type="button"
+              onClick={() => notificationsQuery.markAllReadMutation.mutate()}
+              className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]"
+            >
               تحديد الكل كمقروء
             </button>
           </div>
 
-          {notifications.length === 0 ? (
+          {notificationsQuery.listQuery.isLoading ? (
+            <div className="flex min-h-[300px] items-center justify-center py-12">
+              <p className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
+                جاري تحميل الإشعارات...
+              </p>
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-12">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#E9F7F6] text-primary">
                 <Bell className="h-10 w-10" />

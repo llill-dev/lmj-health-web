@@ -2,6 +2,22 @@ import type { AuthError } from '@/lib/auth/types';
 
 export type LoginMethod = 'phone' | 'email';
 
+function isAuthErrorCode(value: string): value is AuthError['code'] {
+  return [
+    'INVALID_CREDENTIALS',
+    'NOT_VERIFIED',
+    'INACTIVE',
+    'PENDING_APPROVAL',
+    'NOT_ALLOWED',
+    'TEMPORARY',
+    'LOCKED',
+    'DELETED',
+    'DELETION_RECOVERY',
+    'NETWORK_ERROR',
+    'UNKNOWN',
+  ].some((entry) => entry === value);
+}
+
 const LOGIN_ERROR_MESSAGES_BY_METHOD: Record<
   LoginMethod,
   Partial<Record<AuthError['code'], string>>
@@ -47,8 +63,12 @@ export function resolveLoginErrorMessageAr(
   method: LoginMethod,
 ): string {
   const byMethod = LOGIN_ERROR_MESSAGES_BY_METHOD[method];
+  const resolvedCode = typeof code === 'string' ? code.trim().toUpperCase() : code;
+  const message = isAuthErrorCode(resolvedCode)
+    ? byMethod[resolvedCode]
+    : undefined;
   return (
-    byMethod[code as AuthError['code']] ??
+    message ??
     LOGIN_ERROR_MESSAGES_BY_METHOD.email.UNKNOWN!
   );
 }

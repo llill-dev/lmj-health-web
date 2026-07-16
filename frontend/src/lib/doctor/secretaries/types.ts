@@ -28,6 +28,23 @@ export type DoctorSecretariesListResponse = {
   message?: string;
 };
 
+export type DoctorSecretaryResponse = {
+  message?: string;
+  secretary?: DoctorSecretary;
+  data?: DoctorSecretary;
+};
+
+export type DoctorSecretaryMutationResponse = {
+  message?: string;
+  secretary?: DoctorSecretary;
+  data?: DoctorSecretary;
+};
+
+export type DoctorSecretaryDeleteResponse = {
+  message?: string;
+  messageKey?: string;
+};
+
 export type CreateDoctorSecretaryBody = {
   fullName: string;
   email: string;

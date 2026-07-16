@@ -4,6 +4,10 @@ export type DoctorLibraryItemType =
   | 'IMAGING'
   | 'PROCEDURE';
 
+export type DoctorLibraryItemPayload = {
+  [key: string]: unknown;
+};
+
 export type DoctorLibraryItem = {
   _id: string;
   type?: DoctorLibraryItemType;
@@ -13,7 +17,7 @@ export type DoctorLibraryItem = {
   catalogItemId?: string;
   isFavorite?: boolean;
   isArchived?: boolean;
-  data?: Record<string, unknown>;
+  data?: DoctorLibraryItemPayload;
   updatedAt?: string;
   createdAt?: string;
 };
@@ -27,6 +31,8 @@ export type DoctorLibraryListResponse = {
 };
 
 export type DoctorLibraryRecentResponse = {
+  messageKey?: string;
+  message?: string;
   items?: DoctorLibraryItem[];
 };
 
@@ -36,8 +42,27 @@ export type CreateDoctorLibraryItemBody = {
   source?: string;
   catalogSection?: string;
   catalogItemId?: string;
-  data?: Record<string, unknown>;
+  data?: DoctorLibraryItemPayload;
   isFavorite?: boolean;
 };
 
 export type UpdateDoctorLibraryItemBody = Partial<CreateDoctorLibraryItemBody>;
+
+export type DoctorLibraryItemMutationResponse = {
+  messageKey?: string;
+  message?: string;
+  item?: DoctorLibraryItem;
+};
+
+export type DoctorLibraryItemDeleteResponse = {
+  messageKey?: string;
+  message?: string;
+  itemId?: string;
+};
+
+export type DoctorLibraryItemFavoriteResponse = {
+  messageKey?: string;
+  message?: string;
+  itemId?: string;
+  isFavorite?: boolean;
+};

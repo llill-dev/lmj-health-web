@@ -35,6 +35,53 @@ import type {
 import { readAuthUser } from '@/lib/cookies';
 import { resolveLoginIdentifier } from '@/lib/phone/normalizeAuthPhone';
 
+type AccountDeletionStatusPayload = Partial<AccountDeletionStatusResponse> & {
+  [key: string]: unknown;
+};
+type AccountDeletionRequestPayload = Partial<AccountDeletionRequestResponse> & {
+  [key: string]: unknown;
+};
+type AccountDeletionCancelPayload = Partial<AccountDeletionCancelResponse> & {
+  [key: string]: unknown;
+};
+type DoctorRecoveryStartPayload = Partial<DoctorRecoveryOtpStartResponse> & {
+  [key: string]: unknown;
+};
+type DoctorRecoveryVerifyPayload = Partial<DoctorRecoveryOtpVerifyResponse> & {
+  [key: string]: unknown;
+};
+
+type AccountDeletionResponsePayload = {
+  message?: unknown;
+  messageKey?: unknown;
+  status?: unknown;
+  requestedAt?: unknown;
+  deletedAt?: unknown;
+  destination?: unknown;
+  maskedDestination?: unknown;
+  channel?: unknown;
+  userId?: unknown;
+  doctorId?: unknown;
+  restoreStatus?: unknown;
+  restoreRequestedAt?: unknown;
+  approvalFallbackUsed?: unknown;
+  recoverUntil?: unknown;
+  recoveryExpiresAt?: unknown;
+  recoveryUntil?: unknown;
+  recover_until?: unknown;
+  [key: string]: unknown;
+};
+
+const ACCOUNT_DELETION_REQUEST_STATUSES = ['requested', 'pending', 'deleted'] as const;
+const ACCOUNT_DELETION_CANCEL_STATUSES = ['none', 'requested', 'pending'] as const;
+
+function isOneOf<const T extends readonly string[]>(
+  value: unknown,
+  allowed: T,
+): value is T[number] {
+  return typeof value === 'string' && allowed.some((entry) => entry === value);
+}
+
 function basePath(scope: AccountDeletionScope): string {
   return scope === 'patient' ? '/api/patient/me' : '/api/doctors/me';
 }
@@ -52,7 +99,7 @@ export function resolveAccountDeletionScope(
 }
 
 function normalizeStatusResponse(
-  raw: Record<string, unknown>,
+  raw: AccountDeletionResponsePayload,
 ): AccountDeletionStatusResponse {
   return {
     message: typeof raw.message === 'string' ? raw.message : undefined,
@@ -68,12 +115,17 @@ function normalizeStatusResponse(
 }
 
 function normalizeRequestResponse(
-  raw: Record<string, unknown>,
+  raw: AccountDeletionResponsePayload,
 ): AccountDeletionRequestResponse {
+  const status =
+    isOneOf(raw.status, ACCOUNT_DELETION_REQUEST_STATUSES)
+      ? raw.status
+      : 'requested';
+
   return {
     message: typeof raw.message === 'string' ? raw.message : undefined,
     messageKey: typeof raw.messageKey === 'string' ? raw.messageKey : undefined,
-    status: (raw.status as AccountDeletionRequestResponse['status']) ?? 'requested',
+    status,
     requestedAt:
       typeof raw.requestedAt === 'string' ? raw.requestedAt : null,
     recoverUntil: normalizeRecoverUntil(raw) ?? null,
@@ -130,7 +182,7 @@ function readDeletionStatusFallback(): AccountDeletionStatusResponse | null {
 export const accountDeletionApi = {
   getStatus: async (scope: AccountDeletionScope) => {
     try {
-      const response = await get<Record<string, unknown>>(
+      const response = await get<AccountDeletionStatusPayload>(
         `${basePath(scope)}/deletion-status`,
         { locale: 'ar' },
       );
@@ -153,7 +205,7 @@ export const accountDeletionApi = {
       );
     }
 
-    const response = await post<Record<string, unknown>>(
+    const response = await post<AccountDeletionCancelPayload>(
       `${basePath(scope)}/delete-cancel`,
       {},
       { locale: 'ar' },
@@ -162,7 +214,9 @@ export const accountDeletionApi = {
       message: typeof response.message === 'string' ? response.message : undefined,
       messageKey:
         typeof response.messageKey === 'string' ? response.messageKey : undefined,
-      status: (response.status as AccountDeletionCancelResponse['status']) ?? 'none',
+      status: isOneOf(response.status, ACCOUNT_DELETION_CANCEL_STATUSES)
+        ? response.status
+        : 'none',
     } satisfies AccountDeletionCancelResponse;
   },
 
@@ -200,7 +254,7 @@ export const accountDeletionApi = {
     scope: AccountDeletionScope,
     body: AccountDeletionRequestBody,
   ) => {
-    const response = await post<Record<string, unknown>>(
+    const response = await post<AccountDeletionRequestPayload>(
       `${basePath(scope)}/delete-request`,
       body,
       { locale: 'ar' },
@@ -329,7 +383,7 @@ const DOCTOR_RESTORE_REQUEST_BASE =
   '/api/doctors/account-deletion/restore-request';
 
 function normalizeDoctorRecoveryStartResponse(
-  raw: Record<string, unknown>,
+  raw: AccountDeletionResponsePayload,
 ): DoctorRecoveryOtpStartResponse {
   return {
     message: typeof raw.message === 'string' ? raw.message : undefined,
@@ -349,7 +403,7 @@ function normalizeDoctorRecoveryStartResponse(
 }
 
 function normalizeDoctorRecoveryVerifyResponse(
-  raw: Record<string, unknown>,
+  raw: AccountDeletionResponsePayload,
 ): DoctorRecoveryOtpVerifyResponse {
   const restoreStatus =
     raw.restoreStatus === 'pending' ||
@@ -396,7 +450,7 @@ export function resolveDoctorRecoveryIdentity(input?: {
   const phone = (input?.phone ?? authUser?.phone ?? pending?.phone ?? '').trim();
   const channel =
     input?.channel ??
-    (email ? 'email' : phone ? 'whatsapp' : ('email' as DoctorRecoveryChannel));
+    (email ? 'email' : phone ? 'whatsapp' : 'email');
 
   return { channel, email, phone };
 }
@@ -414,7 +468,7 @@ export function resolveDoctorRecoveryDestination(
 export const doctorAccountRecoveryApi = {
   startOtp: async (body: DoctorRecoveryIdentity) => {
     try {
-      const response = await post<Record<string, unknown>>(
+      const response = await post<DoctorRecoveryStartPayload>(
         `${DOCTOR_RECOVERY_BASE}/start`,
         body,
         { locale: 'ar', omitAuth: true },
@@ -432,7 +486,7 @@ export const doctorAccountRecoveryApi = {
 
   verifyOtp: async (body: DoctorRecoveryIdentity & { otp: string }) => {
     try {
-      const response = await post<Record<string, unknown>>(
+      const response = await post<DoctorRecoveryVerifyPayload>(
         `${DOCTOR_RECOVERY_BASE}/verify`,
         body,
         { locale: 'ar', omitAuth: true },
@@ -460,7 +514,7 @@ export const doctorAccountRecoveryApi = {
 export const doctorRestoreRequestApi = {
   startOtp: async (body: DoctorRecoveryIdentity) => {
     try {
-      const response = await post<Record<string, unknown>>(
+      const response = await post<DoctorRecoveryStartPayload>(
         `${DOCTOR_RESTORE_REQUEST_BASE}/start`,
         body,
         { locale: 'ar', omitAuth: true },
@@ -481,7 +535,7 @@ export const doctorRestoreRequestApi = {
 
   verifyOtp: async (body: DoctorRestoreRequestOtpVerifyBody) => {
     try {
-      const response = await post<Record<string, unknown>>(
+      const response = await post<DoctorRecoveryVerifyPayload>(
         `${DOCTOR_RESTORE_REQUEST_BASE}/verify`,
         body,
         { locale: 'ar', omitAuth: true },

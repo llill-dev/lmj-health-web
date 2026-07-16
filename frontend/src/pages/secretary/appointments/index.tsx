@@ -1,6 +1,8 @@
 import { memo, useMemo, useState } from "react";
 import { Search, Calendar, Clock, ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
+import type { DoctorAppointmentStatus } from "@/lib/doctor/types";
 
 function formatIsoDate(value?: string | null): string {
   if (!value) return "—";
@@ -156,35 +158,32 @@ const AppointmentTableRow = memo<{
 export default function SecretaryAppointmentsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [filter, setFilter] = useState<
-    "all" | "scheduled" | "completed" | "postponed"
+    "all" | "scheduled" | "completed" | "postponed" | "cancelled"
   >("all");
+  const selectedStatus: DoctorAppointmentStatus | undefined =
+    filter === "all"
+      ? undefined
+      : filter === "postponed"
+        ? "rescheduled"
+        : filter;
+  const appointmentsQuery = useDoctorAppointmentsApi({
+    page: 1,
+    limit: 50,
+    status: selectedStatus,
+  });
 
-  const appointments = [
-    {
-      id: "apt-001",
-      patientName: "سارة علي",
-      patientId: "1234567890",
-      date: "2024-01-15",
-      time: "09:00",
-      status: "scheduled",
-    },
-    {
-      id: "apt-002",
-      patientName: "أحمد نور",
-      patientId: "0987654321",
-      date: "2024-01-15",
-      time: "10:30",
-      status: "postponed",
-    },
-    {
-      id: "apt-003",
-      patientName: "ليلى محمد",
-      patientId: "1122334455",
-      date: "2024-01-15",
-      time: "11:00",
-      status: "completed",
-    },
-  ];
+  const appointments = useMemo(
+    () =>
+      (appointmentsQuery.appointments ?? []).map((row) => ({
+        id: row._id,
+        patientName: row.patient?.userId?.fullName || "مريض",
+        patientId: row.patient?.publicId || row.patient?._id || "—",
+        date: row.date || row.startDateTime || "",
+        time: row.startTime || "—",
+        status: row.status === "rescheduled" ? "postponed" : row.status,
+      })),
+    [appointmentsQuery.appointments],
+  );
 
   const filterTabs = useMemo(
     () => [
@@ -192,6 +191,7 @@ export default function SecretaryAppointmentsPage() {
       { key: "scheduled" as const, label: "مجدول" },
       { key: "completed" as const, label: "مكتمل" },
       { key: "postponed" as const, label: "مؤجل" },
+      { key: "cancelled" as const, label: "ملغي" },
     ],
     [],
   );
@@ -221,7 +221,7 @@ export default function SecretaryAppointmentsPage() {
               المواعيد
             </h2>
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {appointments.length} موعد
+              {appointmentsQuery.total || appointments.length} موعد
               {searchInput ? " مطابق للبحث" : ""}
             </p>
           </div>
@@ -271,7 +271,13 @@ export default function SecretaryAppointmentsPage() {
           </div>
         </div>
 
-        {searchedAppointments.length === 0 ? (
+        {appointmentsQuery.isAwaitingData ? (
+          <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              جاري تحميل المواعيد...
+            </p>
+          </div>
+        ) : searchedAppointments.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
@@ -285,9 +291,7 @@ export default function SecretaryAppointmentsPage() {
               <AppointmentTableRow
                 key={appointment.id}
                 appointment={appointment}
-                onOpen={(appointmentId) =>
-                  console.log("Open appointment", appointmentId)
-                }
+                onOpen={() => {}}
               />
             ))}
           </>

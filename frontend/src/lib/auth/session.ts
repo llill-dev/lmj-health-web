@@ -18,6 +18,21 @@ export type AuthTokenPair = {
   refreshExpiresAt?: string | null;
 };
 
+export type AuthTokenPairPayload = {
+  accessToken?: unknown;
+  access_token?: unknown;
+  token?: unknown;
+  refreshToken?: unknown;
+  refresh_token?: unknown;
+  refreshExpiresAt?: unknown;
+  refresh_expires_at?: unknown;
+  [key: string]: unknown;
+};
+
+type PersistedActorIds = {
+  [key: string]: string | undefined;
+};
+
 export type AuthSessionUser = {
   userId: string;
   role: string;
@@ -36,7 +51,7 @@ const DEFAULT_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
 /** Accept new API fields and legacy `token` during backend transition. */
 export function normalizeTokenPair(
-  raw: Record<string, unknown>,
+  raw: AuthTokenPairPayload,
 ): AuthTokenPair | null {
   const accessToken =
     (typeof raw.accessToken === "string" && raw.accessToken) ||
@@ -70,18 +85,18 @@ export function cookieMaxAgeFromRefreshExpires(
 }
 
 export function toPersistedUser(user: AuthSessionUser): PersistedUser {
+  const actorIds: PersistedActorIds = {};
+  for (const [key, value] of Object.entries(user.actorIds ?? {})) {
+    actorIds[key] = value ?? undefined;
+  }
+
   return {
     userId: user.userId,
     role: user.role,
     fullName: user.fullName,
     email: user.email,
     phone: user.phone,
-    actorIds: Object.fromEntries(
-      Object.entries(user.actorIds ?? {}).map(([key, value]) => [
-        key,
-        value ?? undefined,
-      ]),
-    ) as Record<string, string | undefined>,
+    actorIds,
     patientPublicId: user.patientPublicId,
     accountDeletionStatus: user.accountDeletionStatus,
     deletionRequestedAt: user.deletionRequestedAt,

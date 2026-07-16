@@ -9,6 +9,16 @@ export type DoctorSpecializationReviewMode =
   | "custom_pending"
   | "unknown";
 
+type DoctorSpecializationReviewRecord = {
+  [key: string]: unknown;
+};
+
+function asDoctorSpecializationReviewRecord(
+  value: unknown,
+): DoctorSpecializationReviewRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
 export type DoctorSpecializationReviewState = {
   displayLabel: string;
   mode: DoctorSpecializationReviewMode;
@@ -20,12 +30,12 @@ export type DoctorSpecializationReviewState = {
 };
 
 export type DoctorSpecializationReviewSource =
-  | Record<string, unknown>
+  | DoctorSpecializationReviewRecord
   | null
   | undefined;
 
 function readString(
-  raw: Record<string, unknown>,
+  raw: DoctorSpecializationReviewRecord,
   ...keys: string[]
 ): string | null {
   for (const key of keys) {
@@ -35,7 +45,7 @@ function readString(
   return null;
 }
 
-function readPendingFlag(raw: Record<string, unknown>): boolean {
+function readPendingFlag(raw: DoctorSpecializationReviewRecord): boolean {
   const boolKeys = [
     "customSpecializationPending",
     "hasPendingCustomSpecialization",
@@ -66,7 +76,7 @@ export function resolveDoctorSpecializationReviewState(
   source: DoctorSpecializationReviewSource,
   lookups?: AdminLookupRecord[],
 ): DoctorSpecializationReviewState {
-  const raw = (source ?? {}) as Record<string, unknown>;
+  const raw = asDoctorSpecializationReviewRecord(source);
   const specializationKey = readString(
     raw,
     "specializationKey",

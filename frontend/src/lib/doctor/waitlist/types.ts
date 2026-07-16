@@ -63,6 +63,23 @@ export type WaitlistDetailResponse = {
   waitlistRequest?: WaitlistRequest;
 };
 
+export type CreateWaitlistRequestBody = {
+  patientId?: string;
+  preferredDateFrom?: string;
+  preferredDateTo?: string;
+  preferredTimeWindows?: WaitlistTimeWindow[];
+  urgencyLevel?: WaitlistUrgency | string;
+  contactPreference?: string;
+  reason?: string;
+  notes?: string;
+};
+
+export type CreateWaitlistRequestResponse = {
+  messageKey?: string;
+  message?: string;
+  waitlistRequest?: WaitlistRequest;
+};
+
 export type WaitlistBookBody = {
   date: string;
   startTime: string;

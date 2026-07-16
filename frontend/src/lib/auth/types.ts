@@ -238,7 +238,7 @@ export interface AuthError {
     | 'NETWORK_ERROR'
     | 'UNKNOWN';
   message: string;
-  details?: any;
+  details?: unknown;
 }
 export type DoctorSignupSpecialtyOption = {
   /** Backend specialization key, sent as `specializationKey` during signup. */
@@ -251,16 +251,20 @@ export type DoctorSignupSpecialtyOption = {
   value: string;
 };
 
+export type DoctorSpecialtiesMetaItem = {
+  [key: string]: unknown;
+};
+
 export type DoctorSpecialtiesMetaResponse = {
   messageKey?: string;
   message?: string;
-  doctorSpecializations?: unknown[];
-  specialties?: unknown[];
-  lookups?: unknown[];
-  options?: unknown[];
-  items?: unknown[];
-  results?: unknown[];
-  data?: unknown[];
+  doctorSpecializations?: DoctorSpecialtiesMetaItem[];
+  specialties?: DoctorSpecialtiesMetaItem[];
+  lookups?: DoctorSpecialtiesMetaItem[];
+  options?: DoctorSpecialtiesMetaItem[];
+  items?: DoctorSpecialtiesMetaItem[];
+  results?: DoctorSpecialtiesMetaItem[];
+  data?: DoctorSpecialtiesMetaItem[];
 };
 
 

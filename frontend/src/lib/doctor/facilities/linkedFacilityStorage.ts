@@ -7,6 +7,23 @@ type StoredLinkedFacility = {
   linkedAt: string;
 };
 
+type StoredLinkedFacilityRecord = {
+  facility?: DoctorFacility | null;
+  linkedAt?: string;
+};
+
+function asStoredLinkedFacilityRecord(
+  value: unknown,
+): StoredLinkedFacilityRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function parseStoredLinkedFacility(raw: string): unknown {
+  return JSON.parse(raw);
+}
+
 function canUseSessionStorage(): boolean {
   return typeof sessionStorage !== 'undefined';
 }
@@ -26,9 +43,10 @@ export function readLinkedDoctorFacility(): DoctorFacility | null {
   if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(raw) as StoredLinkedFacility;
-    if (!parsed?.facility?.id || !parsed.facility.name) return null;
-    return { ...parsed.facility, isOwned: false };
+    const parsed = asStoredLinkedFacilityRecord(parseStoredLinkedFacility(raw));
+    const facility = parsed?.facility;
+    if (!facility?.id || !facility.name) return null;
+    return { ...facility, isOwned: false };
   } catch {
     sessionStorage.removeItem(STORAGE_KEY);
     return null;

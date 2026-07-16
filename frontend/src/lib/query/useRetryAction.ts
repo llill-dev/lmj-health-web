@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 /**
  * Local retry busy state — use instead of React Query `isFetching` on error retry buttons.
  */
-export function useRetryAction(refetch: () => Promise<unknown>) {
+export function useRetryAction(refetch: () => Promise<void>) {
   const [retrying, setRetrying] = useState(false);
 
   const retry = useCallback(async () => {

@@ -5,15 +5,53 @@ import type {
   DoctorSummaryStats,
 } from '@/lib/admin/types';
 
+type AdminDoctorAnalyticsRecord = {
+  [key: string]: unknown;
+};
+
+type DiagnosisSeriesPoint = {
+  periodStart: string;
+  count: number;
+};
+
+type SummarySeriesPoint = AdminDoctorAnalyticsRecord & {
+  periodStart?: string;
+  consultations?: number;
+  ordersCreated?: number;
+  accessRequests?: number;
+  medicalRecords?: number;
+  appointmentsCompleted?: number;
+  appointmentsNoShow?: number;
+  newLinkedPatients?: number;
+};
+
 function num(x: unknown): number {
   const n = Number(x);
   return Number.isFinite(n) ? n : 0;
 }
 
-function asRecord(x: unknown): Record<string, unknown> | null {
+function asRecord(x: unknown): AdminDoctorAnalyticsRecord | null {
   return x && typeof x === 'object' && !Array.isArray(x)
-    ? (x as Record<string, unknown>)
+    ? x
     : null;
+}
+
+function isAdminDoctorAnalyticsRange(
+  value: unknown,
+): value is AdminDoctorAnalyticsRange {
+  return (
+    value === 'day' ||
+    value === 'week' ||
+    value === 'month' ||
+    value === 'year'
+  );
+}
+
+function asRecordArray(value: unknown): AdminDoctorAnalyticsRecord[] | null {
+  if (!Array.isArray(value)) return null;
+  return value
+    .map((entry) => asRecord(entry))
+    .filter((entry): entry is AdminDoctorAnalyticsRecord => entry != null);
 }
 
 export function formatPeriodStartLabel(
@@ -39,7 +77,7 @@ export function formatPeriodStartLabel(
 
 function isDiagnosisTimeSeries(
   s: unknown,
-): s is Array<{ periodStart: string; count: number }> {
+): s is DiagnosisSeriesPoint[] {
   if (!Array.isArray(s)) return false;
   if (s.length === 0) return true;
   const r = asRecord(s[0]);
@@ -64,16 +102,16 @@ export function parseDiagnosisAnalytics(
 
   const fromBody = (() => {
     const range =
-      (inner.range as string | undefined) ??
-      (root.range as string | undefined) ??
+      (typeof inner.range === 'string' ? inner.range : undefined) ??
+      (typeof root.range === 'string' ? root.range : undefined) ??
       requestRange;
 
     if (Array.isArray(inner.series) && isDiagnosisTimeSeries(inner.series)) {
-      if (inner.series.length === 0) return [] as DiagnosisChartItem[];
+      if (inner.series.length === 0) return [];
       return inner.series.map((p) => ({
         label: formatPeriodStartLabel(
           p.periodStart,
-          (range as AdminDoctorAnalyticsRange) ?? requestRange,
+          isAdminDoctorAnalyticsRange(range) ? range : requestRange,
         ),
         value: num(p.count),
       }));
@@ -82,14 +120,18 @@ export function parseDiagnosisAnalytics(
   })();
   if (fromBody != null) return fromBody;
 
-  const tried: unknown[] = [
+  const tried: AdminDoctorAnalyticsRecord[][] = [];
+  for (const candidate of [
     inner.items,
     inner.diagnoses,
     inner.rows,
-    (inner as { topDiagnoses?: unknown[] }).topDiagnoses,
-  ].filter(Array.isArray);
+    inner.topDiagnoses,
+  ]) {
+    const normalized = asRecordArray(candidate);
+    if (normalized) tried.push(normalized);
+  }
 
-  const arr = (tried[0] as unknown[]) ?? [];
+  const arr = tried[0] ?? [];
   return arr
     .map((row) => {
       const r = asRecord(row);
@@ -133,8 +175,14 @@ export function parseSummaryAnalytics(raw: unknown): DoctorSummaryStats {
     };
   }
 
-  const ser = (inner.series as unknown[]) ?? (root.series as unknown[]);
-  if (Array.isArray(ser) && ser.length > 0) {
+  const ser = asRecordArray(
+    Array.isArray(inner.series)
+      ? inner.series
+      : Array.isArray(root.series)
+        ? root.series
+        : [],
+  );
+  if (ser && ser.length > 0) {
     const sum = (k: string): number =>
       ser.reduce<number>(
         (acc, row) => acc + num(asRecord(row)?.[k]),

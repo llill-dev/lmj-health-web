@@ -17,6 +17,26 @@ export type SignupSuccessLocationState =
 
 const STORAGE_KEY = 'lmj:signup-success-location-state';
 
+function asSignupSuccessLocationRecord(
+  value: unknown,
+): { flow?: unknown; redirectTo?: unknown } | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
+function isSignupSuccessLocationState(
+  value: unknown,
+): value is SignupSuccessLocationState {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const record = asSignupSuccessLocationRecord(value);
+  if (!record) return false;
+  if (record.flow === 'pending_doctor') return true;
+  return (
+    record.flow === 'session_ready' &&
+    typeof record.redirectTo === 'string' &&
+    record.redirectTo.trim().length > 0
+  );
+}
+
 /** يُستدعى قبل `navigate('/signup-success')`. */
 export function persistSignupSuccessNavState(state: SignupSuccessLocationState) {
   try {
@@ -31,12 +51,8 @@ export function peekSignupSuccessNavState(): SignupSuccessLocationState | null {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as SignupSuccessLocationState;
-    if (!parsed || typeof parsed !== 'object' || !('flow' in parsed)) return null;
-    if (parsed.flow === 'session_ready') {
-      if (typeof parsed.redirectTo !== 'string' || !parsed.redirectTo.trim())
-        return null;
-    }
+    const parsed: unknown = JSON.parse(raw);
+    if (!isSignupSuccessLocationState(parsed)) return null;
     return parsed;
   } catch {
     return null;

@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { Calendar, Clock, User, Search, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Calendar, Clock, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useAvailableAppointmentTypes } from "@/hooks/doctor/appointments/useAppointmentTypes";
+import { useBookDoctorAppointmentApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
+import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
+import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 
 function SurfaceSection({
   title,
@@ -42,18 +47,44 @@ function FormField({
 }
 
 export default function SecretaryBookAppointmentPage() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const assignedDoctorQuery = useSecretaryAssignedDoctor();
+  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
+  const doctorId = assignedDoctorQuery.data?.doctor?._id ?? "";
+  const appointmentTypesQuery = useAvailableAppointmentTypes(doctorId);
+  const bookAppointment = useBookDoctorAppointmentApi();
+
   const [selectedPatient, setSelectedPatient] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [appointmentType, setAppointmentType] = useState("");
   const [notes, setNotes] = useState("");
+  const isSubmitting = bookAppointment.isPending;
 
-  const appointmentTypes = [
-    { value: "general", label: "استشارة عامة" },
-    { value: "checkup", label: "فحص دوري" },
-    { value: "followup", label: "متابعة" },
-    { value: "emergency", label: "طوارئ" },
-  ];
+  async function handleBook() {
+    if (!doctorId || !selectedPatient || !selectedDate || !selectedTime) return;
+    try {
+      await bookAppointment.mutateAsync({
+        doctorId,
+        patientId: selectedPatient,
+        date: selectedDate,
+        startTime: selectedTime,
+        appointmentTypeId: appointmentType || undefined,
+        notes: notes.trim() || undefined,
+      });
+      toast("تم حجز الموعد بنجاح.", {
+        title: "تم الحجز",
+        variant: "success",
+      });
+      navigate("/secretary/appointments");
+    } catch {
+      toast("تعذر حجز الموعد. تحقق من البيانات ثم أعد المحاولة.", {
+        title: "فشل الحجز",
+        variant: "error",
+      });
+    }
+  }
 
   return (
     <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
@@ -61,16 +92,22 @@ export default function SecretaryBookAppointmentPage() {
         <div className="px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
           <div className="space-y-6">
             <FormField label="المريض" required>
-              <div className="relative min-w-0">
-                <input
+              <div className="relative">
+                <select
                   value={selectedPatient}
-                  onChange={(e) => setSelectedPatient(e.target.value)}
-                  placeholder="ابحث عن مريض بالاسم أو رقم الهاتف…"
-                  aria-label="بحث عن مريض"
-                  className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
-                />
-                <div className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
-                  <Search className="h-5 w-5" />
+                  onChange={(event) => setSelectedPatient(event.target.value)}
+                  className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none focus:border-primary"
+                >
+                  <option value="">اختر مريضاً</option>
+                  {(patientsQuery.patients ?? []).map((patient) => (
+                    <option key={patient._id} value={patient._id}>
+                      {patient.userId?.fullName || "مريض"} -{" "}
+                      {patient.publicId || patient.userId?.phone || patient._id}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
+                  <User className="h-5 w-5" />
                 </div>
               </div>
             </FormField>
@@ -112,9 +149,9 @@ export default function SecretaryBookAppointmentPage() {
                 className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none focus:border-primary"
               >
                 <option value="">اختر نوع الموعد</option>
-                {appointmentTypes.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
+                {(appointmentTypesQuery.appointmentTypes ?? []).map((type) => (
+                  <option key={type._id} value={type._id}>
+                    {type.name}
                   </option>
                 ))}
               </select>
@@ -133,9 +170,17 @@ export default function SecretaryBookAppointmentPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
+                onClick={handleBook}
+                disabled={
+                  isSubmitting ||
+                  !doctorId ||
+                  !selectedPatient ||
+                  !selectedDate ||
+                  !selectedTime
+                }
                 className="flex h-[48px] w-full items-center justify-center rounded-[8px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.25)] transition hover:bg-[#0A7A77]"
               >
-                حجز الموعد
+                {isSubmitting ? "جاري الحجز..." : "حجز الموعد"}
               </button>
               <Link
                 to="/secretary/appointments"

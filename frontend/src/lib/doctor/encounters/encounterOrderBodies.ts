@@ -11,15 +11,22 @@ import type {
 import type { RadiologyClinicalForm } from '@/components/doctor/radiology/radiology-types';
 import type { RadiologyOrderItemUi } from '@/components/doctor/radiology/radiology-types';
 
+function asEncounterOrderCreateRecord(
+  value: unknown,
+): { _id?: unknown; id?: unknown } | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
 export function resolveEncounterOrderIdFromCreateResponse(
   response: EncounterOrderResponse,
 ): string {
-  const order = response.order as { _id?: string; id?: string } | undefined;
+  const order = asEncounterOrderCreateRecord(response.order);
+  const root = asEncounterOrderCreateRecord(response);
   const id =
-    order?._id?.trim() ??
-    order?.id?.trim() ??
+    (typeof order?._id === 'string' ? order._id.trim() : undefined) ??
+    (typeof order?.id === 'string' ? order.id.trim() : undefined) ??
     response.orderId?.trim() ??
-    (response as { _id?: string })._id?.trim();
+    (typeof root?._id === 'string' ? root._id.trim() : undefined);
   if (!id || id === 'undefined') throw new Error('missing_order');
   return id;
 }
@@ -182,15 +189,21 @@ export function buildEncounterOrderCreateBody(
   );
 }
 
+function asValidationErrorRow(
+  value: unknown,
+): { path?: unknown; msg?: unknown; value?: unknown } | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
 function formatValidationErrors(error: ApiError): string | null {
   const errors = error.body.errors;
   if (!Array.isArray(errors) || errors.length === 0) return null;
 
   const hint = errors
     .map((entry) => {
-      const row = entry as { path?: string; msg?: string; value?: unknown };
-      const path = row.path?.trim();
-      const msg = row.msg?.trim();
+      const row = asValidationErrorRow(entry);
+      const path = typeof row?.path === 'string' ? row.path.trim() : undefined;
+      const msg = typeof row?.msg === 'string' ? row.msg.trim() : undefined;
       if (path === 'patientId') {
         return 'معرّف المريض (patientId) مطلوب أو غير صالح';
       }

@@ -42,3 +42,8 @@ export type FacilityTypesResponse = {
   messageKey?: string;
   types?: FacilityTypeOption[];
 };
+
+export type DirectoryObjectIdLike = {
+  $oid?: string;
+  toString?: () => string;
+};

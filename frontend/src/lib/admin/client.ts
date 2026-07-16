@@ -15,8 +15,13 @@ import type {
   AdminPatientDetailsResponse,
   AdminPatientsListParams,
   AdminPatientsListResponse,
+  AdminAccessRequestDetailsResponse,
+  AdminAccessRequestsListResponse,
   AdminSecretariesListParams,
   AdminSecretariesListResponse,
+  AdminDoctorRestoreRequestReviewResponse,
+  AdminDoctorRestoreRequestsListResponse,
+  AdminUserReboardResponse,
   AdminUsersListResponse,
   FacilitiesListParams,
   FacilitiesListResponse,
@@ -29,6 +34,7 @@ import type {
   CreateAdminContentBody,
   UpdateAdminContentBody,
   AdminContentMutationResponse,
+  AdminContentReviewActionResponse,
   AdminContentTemplatesListResponse,
   AdminContentTemplatesListParams,
   CreateAdminContentTemplateBody,
@@ -41,6 +47,7 @@ import type {
   AuditLogsListResponse,
   VerificationRequestReviewBody,
   VerificationRequestDetailsResponse,
+  VerificationRequestReviewResponse,
   VerificationRequestSummary,
   VerificationRequestsListParams,
   VerificationRequestsListResponse,
@@ -67,17 +74,108 @@ import type {
   AdminLookupMutationResponse,
   FacilityDoctorsListParams,
   FacilityDoctorsListResponse,
+  FacilityCreateResponse,
+  FacilityDeleteResponse,
+  FacilityResponse,
+  FacilityStatusMutationResponse,
+  FacilityUpdateResponse,
+  CreateFacilityBody,
+  UpdateFacilityBody,
+  AdminContentTemplateDisableResponse,
+  AdminLookupDeleteResponse,
+  AdminNewsIngestResponse,
+  DoctorProfileChangeRequestReviewResponse,
+  CreateProviderBody,
+  ServiceProviderCreateResponse,
+  ServiceProviderStatusUpdateResponse,
+  ServiceProviderUpdateResponse,
+  UpdateProviderBody,
 } from "@/lib/admin/types";
 
+type AdminApiRecord = {
+  [key: string]: unknown;
+};
+
+type VerificationRequestEnvelope =
+  | VerificationRequestSummary
+  | AdminApiRecord
+  | null
+  | undefined;
+
+function asAdminRecord(value: unknown): AdminApiRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function readAdminNumber(value: unknown): number | undefined {
+  return typeof value === "number" ? value : undefined;
+}
+
+function isVerificationRequestSummary(
+  value: VerificationRequestEnvelope,
+): value is VerificationRequestSummary {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const record = asAdminRecord(value);
+  if (!record) return false;
+  return (
+    typeof (record._id ?? record.id) === "string" ||
+    typeof record.status === "string" ||
+    typeof record.doctorId === "string"
+  );
+}
+
+function readFacilityArray(
+  value: unknown,
+): FacilitiesListResponse["facilities"] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter(
+    (entry): entry is FacilitiesListResponse["facilities"][number] =>
+      entry != null,
+  );
+}
+
+function readFacilityDoctorArray(
+  value: unknown,
+): FacilityDoctorsListResponse["doctors"] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter(
+    (entry): entry is FacilityDoctorsListResponse["doctors"][number] =>
+      entry != null,
+  );
+}
+
+function readVerificationRequestArray(
+  value: unknown,
+): VerificationRequestSummary[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value.filter(isVerificationRequestSummary);
+  return items.length > 0 ? items : undefined;
+}
+
+function readVerificationRequestEnvelopeChildren(
+  value: unknown,
+): VerificationRequestSummary[] | undefined {
+  const envelope = asAdminRecord(value);
+  if (!envelope) return undefined;
+  return (
+    readVerificationRequestArray(envelope.requests) ??
+    readVerificationRequestArray(envelope.items) ??
+    readVerificationRequestArray(envelope.data) ??
+    readVerificationRequestArray(envelope.results)
+  );
+}
+
 function normalizeMedicalOrderCatalogList(
-  raw: AdminMedicalOrderCatalogListResponse | Record<string, unknown>,
+  raw: AdminMedicalOrderCatalogListResponse | AdminApiRecord,
 ): MedicalOrderCatalogItem[] {
-  const body = raw as Record<string, unknown>;
+  const body = asAdminRecord(raw) ?? {};
   const candidates = body.items ?? body.catalog ?? body.results ?? body.data;
   if (!Array.isArray(candidates)) return [];
   return candidates
     .map((x) => {
-      const r = x as Record<string, unknown>;
+      const r = asAdminRecord(x);
+      if (!r) return null;
       const id = r._id ?? r.id;
       const label = r.label ?? r.name ?? r.title;
       if (id == null || label == null) return null;
@@ -87,59 +185,38 @@ function normalizeMedicalOrderCatalogList(
 }
 
 function normalizeFacilitiesListResponse(
-  raw: FacilitiesListResponse | Record<string, unknown>,
+  raw: FacilitiesListResponse | AdminApiRecord,
 ): FacilitiesListResponse {
-  const body = raw as FacilitiesListResponse & { data?: Record<string, unknown> };
-  const nested =
-    body.data && typeof body.data === "object"
-      ? (body.data as Record<string, unknown>)
-      : null;
+  const body = raw;
+  const nested = asAdminRecord(body.data);
 
-  const facilities = Array.isArray(body.facilities)
-    ? body.facilities
-    : Array.isArray(body.items)
-      ? body.items
-      : Array.isArray(nested?.facilities)
-        ? (nested.facilities as FacilitiesListResponse["facilities"])
-        : Array.isArray(nested?.items)
-          ? (nested.items as FacilitiesListResponse["items"])
-          : [];
+  const facilities =
+    readFacilityArray(body.facilities) ??
+    readFacilityArray(body.items) ??
+    readFacilityArray(nested?.facilities) ??
+    readFacilityArray(nested?.items) ??
+    [];
 
   return {
     ...body,
-    page:
-      body.page ??
-      (typeof nested?.page === "number" ? (nested.page as number) : 1),
-    limit:
-      body.limit ??
-      (typeof nested?.limit === "number" ? (nested.limit as number) : facilities.length),
-    total:
-      body.total ??
-      (typeof nested?.total === "number" ? (nested.total as number) : facilities.length),
+    page: body.page ?? readAdminNumber(nested?.page) ?? 1,
+    limit: body.limit ?? readAdminNumber(nested?.limit) ?? facilities.length,
+    total: body.total ?? readAdminNumber(nested?.total) ?? facilities.length,
     results:
       body.results ??
-      (typeof nested?.results === "number"
-        ? (nested.results as number)
-        : facilities.length),
+      readAdminNumber(nested?.results) ??
+      facilities.length,
     facilities,
   };
 }
 
-function normalizeFacilityResponse(
-  raw: ApiSuccessEnvelope & {
-    facility?: Record<string, unknown>;
-    data?: Record<string, unknown> | { facility?: Record<string, unknown> };
-  },
-) {
+function normalizeFacilityResponse(raw: FacilityResponse): FacilityResponse {
   const directFacility =
     raw.facility && typeof raw.facility === "object" ? raw.facility : undefined;
-  const nestedData =
-    raw.data && typeof raw.data === "object"
-      ? (raw.data as Record<string, unknown>)
-      : undefined;
+  const nestedData = asAdminRecord(raw.data) ?? undefined;
   const nestedFacility =
     nestedData?.facility && typeof nestedData.facility === "object"
-      ? (nestedData.facility as Record<string, unknown>)
+      ? asAdminRecord(nestedData.facility) ?? undefined
       : nestedData && ("id" in nestedData || "_id" in nestedData)
         ? nestedData
         : undefined;
@@ -151,43 +228,28 @@ function normalizeFacilityResponse(
 }
 
 function normalizeFacilityDoctorsListResponse(
-  raw: FacilityDoctorsListResponse | Record<string, unknown>,
+  raw: FacilityDoctorsListResponse | AdminApiRecord,
 ): FacilityDoctorsListResponse {
-  const body = raw as FacilityDoctorsListResponse & { data?: Record<string, unknown> };
-  const nested =
-    body.data && typeof body.data === "object"
-      ? (body.data as Record<string, unknown>)
-      : null;
+  const body = raw;
+  const nested = asAdminRecord(body.data);
 
-  const doctors = Array.isArray(body.doctors)
-    ? body.doctors
-    : Array.isArray(body.items)
-      ? body.items
-      : Array.isArray(nested?.doctors)
-        ? (nested.doctors as FacilityDoctorsListResponse["doctors"])
-        : Array.isArray(nested?.items)
-          ? (nested.items as FacilityDoctorsListResponse["items"])
-          : [];
+  const doctors =
+    readFacilityDoctorArray(body.doctors) ??
+    readFacilityDoctorArray(body.items) ??
+    readFacilityDoctorArray(nested?.doctors) ??
+    readFacilityDoctorArray(nested?.items) ??
+    [];
 
   return {
     ...body,
-    facility:
-      body.facility ??
-      (nested?.facility as FacilityDoctorsListResponse["facility"] | undefined),
-    page:
-      body.page ??
-      (typeof nested?.page === "number" ? (nested.page as number) : 1),
-    limit:
-      body.limit ??
-      (typeof nested?.limit === "number" ? (nested.limit as number) : doctors.length),
-    total:
-      body.total ??
-      (typeof nested?.total === "number" ? (nested.total as number) : doctors.length),
+    facility: body.facility ?? asAdminRecord(nested?.facility) ?? undefined,
+    page: body.page ?? readAdminNumber(nested?.page) ?? 1,
+    limit: body.limit ?? readAdminNumber(nested?.limit) ?? doctors.length,
+    total: body.total ?? readAdminNumber(nested?.total) ?? doctors.length,
     results:
       body.results ??
-      (typeof nested?.results === "number"
-        ? (nested.results as number)
-        : doctors.length),
+      readAdminNumber(nested?.results) ??
+      doctors.length,
     doctors,
   };
 }
@@ -195,23 +257,26 @@ function normalizeFacilityDoctorsListResponse(
 export function verificationRequestsFromListEnvelope(
   raw:
     | VerificationRequestsListResponse
-    | Record<string, unknown>
+    | AdminApiRecord
     | null
     | undefined,
 ): VerificationRequestSummary[] {
   if (!raw || typeof raw !== "object") return [];
-  const o = raw as Record<string, unknown>;
-  for (const key of ["requests", "data", "items", "results"] as const) {
-    const v = o[key];
-    if (Array.isArray(v)) return v as VerificationRequestSummary[];
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      const inner = v as Record<string, unknown>;
-      for (const k of ["requests", "items", "data", "results"] as const) {
-        const a = inner[k];
-        if (Array.isArray(a)) return a as VerificationRequestSummary[];
-      }
-    }
-  }
+  const o = asAdminRecord(raw) ?? {};
+  const direct =
+    readVerificationRequestArray(o.requests) ??
+    readVerificationRequestArray(o.data) ??
+    readVerificationRequestArray(o.items) ??
+    readVerificationRequestArray(o.results);
+  if (direct) return direct;
+
+  const nested =
+    readVerificationRequestEnvelopeChildren(o.requests) ??
+    readVerificationRequestEnvelopeChildren(o.data) ??
+    readVerificationRequestEnvelopeChildren(o.items) ??
+    readVerificationRequestEnvelopeChildren(o.results);
+  if (nested) return nested;
+
   return [];
 }
 
@@ -385,10 +450,10 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.accessRequests.list}?${qs.toString()}`
         : adminEndpoints.accessRequests.list;
-      return get<any>(endpoint, { locale: "ar" });
+      return get<AdminAccessRequestsListResponse>(endpoint, { locale: "ar" });
     },
     getById: (requestId: string) =>
-      get<any>(adminEndpoints.accessRequests.details(requestId), {
+      get<AdminAccessRequestDetailsResponse>(adminEndpoints.accessRequests.details(requestId), {
         locale: "ar",
       }),
   },
@@ -433,9 +498,13 @@ export const adminApi = {
       return get<VerificationRequestsListResponse>(endpoint, { locale: "ar" });
     },
     review: (requestId: string, body: VerificationRequestReviewBody) =>
-      patch<any>(adminEndpoints.verificationRequests.review(requestId), body, {
-        locale: "ar",
-      }),
+      patch<VerificationRequestReviewResponse>(
+        adminEndpoints.verificationRequests.review(requestId),
+        body,
+        {
+          locale: "ar",
+        },
+      ),
     getById: (requestId: string) =>
       get<VerificationRequestDetailsResponse>(
         adminEndpoints.verificationRequests.details(requestId),
@@ -456,7 +525,7 @@ export const adminApi = {
         { locale: "ar" },
       ),
     reboard: (userId: string) =>
-      post<ApiSuccessEnvelope>(
+      post<AdminUserReboardResponse>(
         adminEndpoints.users.reboard(userId),
         {},
         { locale: "ar" },
@@ -479,15 +548,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.users.doctorRestoreRequests}?${qs.toString()}`
         : adminEndpoints.users.doctorRestoreRequests;
-      return get<
-        ApiSuccessEnvelope & {
-          restoreRequests?: unknown[];
-          results?: unknown[];
-          page?: number;
-          limit?: number;
-          total?: number;
-        }
-      >(endpoint, { locale: "ar" });
+      return get<AdminDoctorRestoreRequestsListResponse>(endpoint, {
+        locale: "ar",
+      });
     },
     reviewRestoreRequest: (
       userId: string,
@@ -496,7 +559,7 @@ export const adminApi = {
         reviewNote?: string;
       },
     ) =>
-      post<ApiSuccessEnvelope>(
+      post<AdminDoctorRestoreRequestReviewResponse>(
         adminEndpoints.users.reviewRestoreRequest(userId),
         body,
         { locale: "ar" },
@@ -580,7 +643,7 @@ export const adminApi = {
         { locale: "ar" },
       ),
     submitReview: (id: string, reviewNotes?: string) =>
-      post<any>(
+      post<AdminContentReviewActionResponse>(
         adminEndpoints.content.submitReview(id),
         {
           reviewNotes:
@@ -591,21 +654,21 @@ export const adminApi = {
       },
       ),
     approve: (id: string) =>
-      post<any>(adminEndpoints.content.approve(id), undefined, {
+      post<AdminContentReviewActionResponse>(adminEndpoints.content.approve(id), undefined, {
         locale: "ar",
       }),
     reject: (id: string, rejectionReason: string) =>
-      post<any>(
+      post<AdminContentReviewActionResponse>(
         adminEndpoints.content.reject(id),
         rejectionReason ? { rejectionReason } : undefined,
         { locale: "ar" },
       ),
     publish: (id: string) =>
-      post<any>(adminEndpoints.content.publish(id), undefined, {
+      post<AdminContentReviewActionResponse>(adminEndpoints.content.publish(id), undefined, {
         locale: "ar",
       }),
     archive: (id: string) =>
-      post<any>(adminEndpoints.content.archive(id), undefined, {
+      post<AdminContentReviewActionResponse>(adminEndpoints.content.archive(id), undefined, {
         locale: "ar",
       }),
   },
@@ -640,12 +703,14 @@ export const adminApi = {
       const endpoint = force
         ? `${adminEndpoints.contentTemplates.disable(id)}?force=true`
         : adminEndpoints.contentTemplates.disable(id);
-      return post<ApiSuccessEnvelope>(endpoint, undefined, { locale: "ar" });
+      return post<AdminContentTemplateDisableResponse>(endpoint, undefined, {
+        locale: "ar",
+      });
     },
   },
   news: {
     ingest: (body: AdminNewsIngestBody) =>
-      post<ApiSuccessEnvelope>(adminEndpoints.news.ingest, body, {
+      post<AdminNewsIngestResponse>(adminEndpoints.news.ingest, body, {
         locale: "ar",
       }),
     pending: (params: AdminNewsPendingListParams = {}) => {
@@ -670,7 +735,7 @@ export const adminApi = {
       const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
       try {
         const raw = await get<
-          AdminMedicalOrderCatalogListResponse | Record<string, unknown>
+          AdminMedicalOrderCatalogListResponse | AdminApiRecord
         >(endpoint, { locale: "ar" });
         return { items: normalizeMedicalOrderCatalogList(raw) };
       } catch (e) {
@@ -743,37 +808,27 @@ export const adminApi = {
         { locale: "ar" },
       ),
     remove: (id: string) =>
-      del<ApiSuccessEnvelope>(adminEndpoints.lookups.detail(id), {
+      del<AdminLookupDeleteResponse>(adminEndpoints.lookups.detail(id), {
         locale: "ar",
       }),
   },
   serviceProviders: {
-    create: (body: {
-      serviceType: string;
-      name: string;
-      city?: string;
-      country?: string;
-      data?: Record<string, unknown>;
-      aliases?: string[];
-      status?: string;
-    }) =>
-      post<ApiSuccessEnvelope & { data?: { id: string } }>(
+    create: (body: CreateProviderBody) =>
+      post<ServiceProviderCreateResponse>(
         adminEndpoints.serviceProviders.create,
         body,
         { locale: "ar" },
       ),
     update: (
       id: string,
-      body: {
+      body: UpdateProviderBody & {
         name?: string;
         city?: string;
         country?: string;
-        data?: Record<string, unknown>;
         aliases?: string[];
-        status?: string;
       },
     ) =>
-      put<ApiSuccessEnvelope>(
+      put<ServiceProviderUpdateResponse>(
         adminEndpoints.serviceProviders.update(id),
         body,
         { locale: "ar" },
@@ -784,7 +839,7 @@ export const adminApi = {
         status: string;
       },
     ) =>
-      patch<ApiSuccessEnvelope>(
+      patch<ServiceProviderStatusUpdateResponse>(
         adminEndpoints.serviceProviders.updateStatus(id),
         body,
         { locale: "ar" },
@@ -812,17 +867,12 @@ export const adminApi = {
         ? `${adminEndpoints.facilities.list}?${qs.toString()}`
         : adminEndpoints.facilities.list;
 
-      return get<FacilitiesListResponse | Record<string, unknown>>(endpoint, {
+      return get<FacilitiesListResponse>(endpoint, {
         locale: "ar",
       }).then(normalizeFacilitiesListResponse);
     },
     getById: (id: string) =>
-      get<
-        ApiSuccessEnvelope & {
-          facility?: Record<string, unknown>;
-          data?: Record<string, unknown> | { facility?: Record<string, unknown> };
-        }
-      >(adminEndpoints.facilities.getById(id), {
+      get<FacilityResponse>(adminEndpoints.facilities.getById(id), {
         locale: "ar",
       }).then(normalizeFacilityResponse),
     listDoctors: (id: string, params: FacilityDoctorsListParams = {}) => {
@@ -839,53 +889,32 @@ export const adminApi = {
       const base = adminEndpoints.facilities.listDoctors(id);
       const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
 
-      return get<FacilityDoctorsListResponse | Record<string, unknown>>(endpoint, {
+      return get<FacilityDoctorsListResponse>(endpoint, {
         locale: "ar",
       }).then(normalizeFacilityDoctorsListResponse);
     },
     updateStatus: (id: string, status: string) =>
-      patch<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
+      patch<FacilityStatusMutationResponse>(
         adminEndpoints.facilities.updateStatus(id),
         { status },
         { locale: "ar" },
       ),
     remove: (id: string) =>
-      del<ApiSuccessEnvelope & { facility?: Record<string, unknown> }>(
+      del<FacilityDeleteResponse>(
         adminEndpoints.facilities.delete(id),
         { locale: "ar" },
       ),
-    create: (body: {
-      name: string;
-      city: string;
-      facilityType: string;
-      country?: string;
-      address?: string;
-      phone?: string;
-      description?: string;
-      ownerDoctorId?: string;
-      status?: string;
-      attributes?: string[];
-    }) =>
-      post<ApiSuccessEnvelope & { data?: { id: string } }>(
+    create: (body: CreateFacilityBody) =>
+      post<FacilityCreateResponse>(
         adminEndpoints.facilities.create,
         body,
         { locale: "ar" },
       ),
     update: (
       id: string,
-      body: {
-        name?: string;
-        city?: string;
-        facilityType?: string;
-        country?: string;
-        address?: string;
-        phone?: string;
-        description?: string;
-        ownerDoctorId?: string;
-        attributes?: string[];
-      },
+      body: UpdateFacilityBody,
     ) =>
-      put<ApiSuccessEnvelope>(adminEndpoints.facilities.update(id), body, {
+      put<FacilityUpdateResponse>(adminEndpoints.facilities.update(id), body, {
         locale: "ar",
       }),
   },
@@ -897,13 +926,12 @@ export const adminApi = {
         adminNote?: string;
       },
     ) =>
-      patch<
-        ApiSuccessEnvelope & {
-          request?: { status: string };
-          doctor?: Record<string, unknown>;
-        }
-      >(adminEndpoints.doctorProfileChangeRequests.review(requestId), body, {
-        locale: "ar",
-      }),
+      patch<DoctorProfileChangeRequestReviewResponse>(
+        adminEndpoints.doctorProfileChangeRequests.review(requestId),
+        body,
+        {
+          locale: "ar",
+        },
+      ),
   },
 };

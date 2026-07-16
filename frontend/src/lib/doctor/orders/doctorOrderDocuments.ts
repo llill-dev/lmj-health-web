@@ -12,6 +12,20 @@ export type GenerateOrderDocumentBody = {
   sourceId: string;
 };
 
+type DoctorDocumentErrorPayload = {
+  messageKey?: unknown;
+  message?: unknown;
+  [key: string]: unknown;
+};
+
+function asDoctorDocumentErrorPayload(
+  value: unknown,
+): DoctorDocumentErrorPayload | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 export async function generateDoctorDocumentPdf(
   body: GenerateDoctorDocumentBody,
 ): Promise<Blob> {
@@ -34,13 +48,14 @@ export async function generateDoctorDocumentPdf(
   if (!res.ok || contentType.includes('application/json')) {
     let message = 'تعذّر إنشاء ملف PDF.';
     let messageKey: string | null = null;
-    let body: Record<string, unknown> = {};
+    let errorBody: DoctorDocumentErrorPayload = {};
 
     try {
-      body = (await res.json()) as Record<string, unknown>;
-      messageKey = (body.messageKey as string | null) ?? null;
+      errorBody = asDoctorDocumentErrorPayload(await res.json()) ?? {};
+      messageKey =
+        typeof errorBody.messageKey === 'string' ? errorBody.messageKey : null;
       message =
-        (typeof body.message === 'string' && body.message.trim()) || message;
+        (typeof errorBody.message === 'string' && errorBody.message.trim()) || message;
     } catch {
       // body غير JSON
     }
@@ -48,7 +63,7 @@ export async function generateDoctorDocumentPdf(
     throw new ApiError(
       res.ok ? 500 : res.status,
       messageKey,
-      body,
+      errorBody,
       message,
     );
   }

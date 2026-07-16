@@ -11,6 +11,26 @@ import type {
   WorkingHoursEntry,
 } from '@/lib/doctor/medical-services-directory/types';
 
+type DirectoryRecord = {
+  [key: string]: unknown;
+};
+type LocalizedLabel = { en: string; ar: string };
+
+function asDirectoryRecord(value: unknown): DirectoryRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
+function asLocalizedLabel(value: unknown): LocalizedLabel | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const record = asDirectoryRecord(value);
+  if (!record) return undefined;
+  return typeof record.ar === 'string' && typeof record.en === 'string'
+    ? { ar: record.ar, en: record.en }
+    : undefined;
+}
+
 export function formatFacilityAttributeLabel(value: string): string {
   return value.replace(/_/g, ' ').trim();
 }
@@ -42,11 +62,9 @@ function buildWhatsAppHref(phone?: string | null): string | undefined {
 
 function readTextValue(value: unknown): string {
   if (typeof value === 'string') return value.trim();
-  if (value && typeof value === 'object') {
-    return resolveLabel(
-      value as { en: string; ar: string } | undefined,
-      'ar',
-    ).trim();
+  const label = asLocalizedLabel(value);
+  if (label) {
+    return resolveLabel(label, 'ar').trim();
   }
   return '';
 }
@@ -62,7 +80,7 @@ function readStringArray(value: unknown): string[] {
 }
 
 function pickFirstText(
-  record: Record<string, unknown>,
+  record: DirectoryRecord,
   keys: string[],
 ): string {
   for (const key of keys) {
@@ -83,8 +101,8 @@ function mapWorkingHours(value: unknown): WorkingHoursEntry[] {
   if (!Array.isArray(value)) return [];
   return value
     .map((entry) => {
-      if (!entry || typeof entry !== 'object') return null;
-      const record = entry as Record<string, unknown>;
+      const record = asDirectoryRecord(entry);
+      if (!record) return null;
       const days = pickFirstText(record, ['days', 'day', 'label', 'title']);
       const hours = pickFirstText(record, [
         'hours',
@@ -99,7 +117,7 @@ function mapWorkingHours(value: unknown): WorkingHoursEntry[] {
     .filter((entry): entry is WorkingHoursEntry => entry != null);
 }
 
-function resolveProviderLocation(data: Record<string, unknown>): string {
+function resolveProviderLocation(data: DirectoryRecord): string {
   const address = pickFirstText(data, ['address', 'location', 'streetAddress']);
   if (address) return address;
   const city = pickFirstText(data, ['city']);

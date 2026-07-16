@@ -15,7 +15,8 @@ export type AppointmentSummary = {
 
   status: AppointmentStatus;
   startTime?: string;
-  date?: string; // sometimes returned as ISO date string
+  /** API may return either YYYY-MM-DD or full ISO datetime-like string depending on source aggregate. */
+  date?: string;
   startDateTime?: string;
   doctor?: {
     _id: string;
@@ -174,6 +175,35 @@ export type AdminPatientAccountActionResponse = ApiSuccessEnvelope & {
   accountStatus: PatientAccountStatus;
 };
 
+export type AdminAccessRequestSummary = {
+  _id?: string;
+  id?: string;
+  status?: string;
+  doctorId?: string;
+  patientId?: string;
+  reason?: string;
+  expiresAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AdminAccessRequestsListResponse = ApiSuccessEnvelope & {
+  page?: number;
+  limit?: number;
+  total?: number;
+  results?: number;
+  requests?: AdminAccessRequestSummary[];
+  accessRequests?: AdminAccessRequestSummary[];
+  items?: AdminAccessRequestSummary[];
+};
+
+export type AdminAccessRequestDetailsResponse = ApiSuccessEnvelope & {
+  request?: AdminAccessRequestSummary;
+  accessRequest?: AdminAccessRequestSummary;
+  item?: AdminAccessRequestSummary;
+  data?: AdminAccessRequestSummary;
+};
+
 export type VerificationRequestReviewDecision = "approved" | "rejected";
 
 export type VerificationRequestNewSpecializationBody = {
@@ -318,14 +348,18 @@ export type AdminDoctorsListResponse = ApiSuccessEnvelope & {
 
 export type VerificationRequestStatus = "pending" | "approved" | "rejected";
 
+export type VerificationRequestChangesPayload = {
+  [key: string]: unknown;
+};
+
 export type VerificationRequestSummary = {
   _id: string;
   status: VerificationRequestStatus;
   adminNote?: string | null;
   reviewedAt?: string | null;
   createdAt?: string;
-  requestedChanges?: Record<string, unknown>;
-  changes?: Record<string, unknown>;
+  requestedChanges?: VerificationRequestChangesPayload;
+  changes?: VerificationRequestChangesPayload;
   doctor?: {
     _id: string;
     specialization?: string;
@@ -377,6 +411,12 @@ export type VerificationRequestDetailsResponse = ApiSuccessEnvelope & {
   verificationRequest?: VerificationRequestSummary;
   item?: VerificationRequestSummary;
   data?: VerificationRequestSummary;
+};
+
+export type VerificationRequestReviewResponse = ApiSuccessEnvelope & {
+  request?: VerificationRequestSummary;
+  verificationRequest?: VerificationRequestSummary;
+  doctor?: AdminDoctorDetailsDoctor | VerificationRequestChangesPayload;
 };
 
 /** Matches backend Complaint model (API-3.pdf). */
@@ -506,6 +546,59 @@ export type AdminSecretarySummary = {
 export type AdminUserOffboardResponse = ApiSuccessEnvelope & {
   userId: string;
   role: string;
+};
+
+export type AdminUserReboardResponse = ApiSuccessEnvelope & {
+  userId?: string;
+  role?: string;
+};
+
+export type AdminDoctorRestoreRequestStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | string;
+
+export type AdminDoctorRestoreRequestSummary = {
+  _id?: string;
+  id?: string;
+  status?: AdminDoctorRestoreRequestStatus;
+  reviewNote?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  reviewedAt?: string | null;
+  recoverUntil?: string | null;
+  user?: {
+    _id?: string;
+    fullName?: string;
+    email?: string;
+    phone?: string;
+  };
+  doctor?: {
+    _id?: string;
+    specialization?: string;
+    user?: {
+      _id?: string;
+      fullName?: string;
+      email?: string;
+      phone?: string;
+    };
+  };
+};
+
+export type AdminDoctorRestoreRequestsListResponse = ApiSuccessEnvelope & {
+  restoreRequests?: AdminDoctorRestoreRequestSummary[];
+  results?: number | AdminDoctorRestoreRequestSummary[];
+  items?: AdminDoctorRestoreRequestSummary[];
+  page?: number;
+  limit?: number;
+  total?: number;
+};
+
+export type AdminDoctorRestoreRequestReviewResponse = ApiSuccessEnvelope & {
+  restoreRequest?: AdminDoctorRestoreRequestSummary;
+  user?: AdminUserSummary;
+  doctor?: AdminDoctorSummary;
 };
 
 export type AdminUserSummary = {
@@ -811,6 +904,13 @@ export type AdminContentMutationResponse = ApiSuccessEnvelope & {
   data?: AdminContentDetailsItem;
 };
 
+export type AdminContentReviewActionResponse = ApiSuccessEnvelope & {
+  item?: AdminContentDetailsItem;
+  content?: AdminContentDetailsItem;
+  contentItem?: AdminContentDetailsItem;
+  data?: AdminContentDetailsItem;
+};
+
 /** فئات كتالوج الطلبات الطبية (تحاليل / أشعة / إجراءات / تحويلات) */
 export type MedicalOrderCatalogKind =
   | "lab"
@@ -921,6 +1021,11 @@ export type AdminContentTemplateMutationResponse = ApiSuccessEnvelope & {
   template?: AdminContentTemplate;
 };
 
+export type AdminContentTemplateDisableResponse = ApiSuccessEnvelope & {
+  item?: AdminContentTemplate;
+  template?: AdminContentTemplate;
+};
+
 export type AdminNewsItem = {
   _id?: string;
   sourceUrl: string;
@@ -949,6 +1054,10 @@ export type AdminNewsPendingListResponse = ApiSuccessEnvelope & {
   total?: number;
   page?: number;
   limit?: number;
+};
+
+export type AdminNewsIngestResponse = ApiSuccessEnvelope & {
+  data?: { id?: string };
 };
 
 /** مجالات الكتالوج الموثّقة في API-3 لـ GET /admin/lookups */
@@ -1009,6 +1118,10 @@ export type AdminLookupPatchBody = Partial<{
 
 export type AdminLookupMutationResponse = ApiSuccessEnvelope & {
   lookups?: AdminLookupRecord[];
+  lookup?: AdminLookupRecord;
+};
+
+export type AdminLookupDeleteResponse = ApiSuccessEnvelope & {
   lookup?: AdminLookupRecord;
 };
 
@@ -1128,6 +1241,24 @@ export type FacilityResponse = ApiSuccessEnvelope & {
   data?: FacilitySummary | { facility?: FacilitySummary };
 };
 
+export type FacilityStatusMutationResponse = ApiSuccessEnvelope & {
+  facility?: FacilitySummary;
+  data?: FacilitySummary | { facility?: FacilitySummary };
+};
+
+export type FacilityDeleteResponse = ApiSuccessEnvelope & {
+  facility?: FacilitySummary;
+};
+
+export type FacilityCreateResponse = ApiSuccessEnvelope & {
+  data?: { id: string };
+};
+
+export type FacilityUpdateResponse = ApiSuccessEnvelope & {
+  facility?: FacilitySummary;
+  data?: FacilitySummary | { facility?: FacilitySummary };
+};
+
 export type FacilityDoctorSummary = {
   id: string;
   _id?: string;
@@ -1240,6 +1371,10 @@ export type ServiceTypeResponse = {
 
 export type ProviderStatus = "active" | "inactive" | "draft";
 
+export type ServiceProviderPayload = {
+  [key: string]: unknown;
+};
+
 export type ServiceProvider = {
   _id: string;
   id?: string;
@@ -1248,7 +1383,7 @@ export type ServiceProvider = {
     | { id: string; slug: string; name: string | { en: string; ar: string } };
   status: ProviderStatus;
   schemaVersionAtWrite?: number;
-  data: Record<string, unknown>;
+  data: ServiceProviderPayload;
   createdAt?: string;
 };
 
@@ -1258,17 +1393,38 @@ export type ServiceProvidersListResponse = {
   nextCursor: string | null;
 };
 
+export type ServiceProviderCreateResponse = ApiSuccessEnvelope & {
+  data?: { id: string };
+};
+
+export type ServiceProviderUpdateResponse = ApiSuccessEnvelope & {
+  provider?: ServiceProvider;
+  item?: ServiceProvider;
+  data?: ServiceProvider;
+};
+
+export type ServiceProviderStatusUpdateResponse = ApiSuccessEnvelope & {
+  provider?: ServiceProvider;
+  item?: ServiceProvider;
+  data?: ServiceProvider;
+};
+
+export type DoctorProfileChangeRequestReviewResponse = ApiSuccessEnvelope & {
+  request?: { status: string };
+  doctor?: AdminDoctorDetailsDoctor | VerificationRequestChangesPayload;
+};
+
 export type CreateProviderBody = {
   serviceType: string;
   name: string;
   city?: string;
   country?: string;
-  data?: Record<string, unknown>;
+  data?: ServiceProviderPayload;
   aliases?: string[];
   status?: string;
 };
 
 export type UpdateProviderBody = {
-  data?: Record<string, unknown>;
+  data?: ServiceProviderPayload;
   status?: ProviderStatus;
 };

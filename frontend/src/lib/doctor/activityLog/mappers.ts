@@ -1,4 +1,7 @@
-import type { DoctorActivityLogRecord } from '@/lib/doctor/activityLog/api-types';
+import type {
+  DoctorActivityLogDetails,
+  DoctorActivityLogRecord,
+} from '@/lib/doctor/activityLog/api-types';
 import type {
   ActivityLogActionType,
   DoctorActivityLogItem,
@@ -47,7 +50,7 @@ const ACTIVITY_TYPE_LABELS: Record<string, string> = {
 };
 
 function readDetailString(
-  details: Record<string, unknown> | undefined,
+  details: DoctorActivityLogDetails | undefined,
   key: string,
 ): string | undefined {
   const value = details?.[key];
@@ -141,7 +144,7 @@ export function resolveActivityLogActionType(type: string): ActivityLogActionTyp
   return 'other';
 }
 
-function formatClientDevice(details?: Record<string, unknown>): string | undefined {
+function formatClientDevice(details?: DoctorActivityLogDetails): string | undefined {
   const clientType = readDetailString(details, 'clientType');
   const userAgent = readDetailString(details, 'userAgent');
   const platform = readDetailString(details, 'platform');

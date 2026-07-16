@@ -46,11 +46,15 @@ export const ORDER_STATUS_CODE_AR: Record<string, string> = {
 const STATUS_TOKEN_RE =
   /\b(REQUESTED|PENDING|DRAFT|FINALIZED|FINAL|IN_PROGRESS|INPROGRESS|COMPLETED|COMPLETE|CANCELLED|CANCELED|ACCEPTED|REJECTED|EXPIRED)\b/gi;
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+type DoctorOrderStatusRecord = {
+  [key: string]: unknown;
+};
+
+function asRecord(value: unknown): DoctorOrderStatusRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
 }
 
-function pickStatusString(...values: unknown[]): string | undefined {
+function pickStatusString(...values: ReadonlyArray<unknown>): string | undefined {
   for (const value of values) {
     if (typeof value === 'string' && value.trim()) return value.trim();
     const row = asRecord(value);
@@ -249,7 +253,7 @@ export function resolveOrderStatusLabelAr(
   return raw;
 }
 
-/** حالات نهائية — API-4: لا PATCH status ولا إلحاق نتائج. */
+/** حالات نهائية — API-3: لا PATCH status ولا إلحاق نتائج. */
 const DOCTOR_ORDER_TERMINAL_CODES = new Set([
   'COMPLETED',
   'COMPLETE',
@@ -290,7 +294,7 @@ export function canAppendDoctorOrderResults(code?: string | null): boolean {
 }
 
 /**
- * خيارات PATCH /api/doctors/orders/:orderId/status حسب سياسة الانتقال في API-4.
+ * خيارات PATCH /api/doctors/orders/:orderId/status حسب سياسة الانتقال في API-3.
  * الحالات النهائية: COMPLETED، CANCELLED، REJECTED، EXPIRED (+ FINALIZED للطلبات المعتمدة).
  */
 export function buildDoctorOrderStatusUpdateOptions(currentCode?: string | null): Array<{

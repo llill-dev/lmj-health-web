@@ -25,6 +25,12 @@ type BackendValidationIssue = {
   messageKey?: string;
 };
 
+function asBackendValidationIssue(value: unknown): BackendValidationIssue | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 const FIELD_LABELS: Record<AdminFacilityFormName, string> = {
   name: 'اسم المنشأة',
   facilityType: 'نوع المنشأة',
@@ -76,7 +82,10 @@ function toArabicMessageKeyFallback(messageKey: string | null, fallback: string)
 }
 
 function summarizeFieldErrors(fields: Partial<Record<AdminFacilityFormName, string>>): string | null {
-  const entries = Object.entries(fields) as Array<[AdminFacilityFormName, string]>;
+  const entries = Object.entries(fields).filter(
+    (entry): entry is [AdminFacilityFormName, string] =>
+      typeof entry[1] === 'string' && entry[1].trim().length > 0,
+  );
   if (entries.length === 0) return null;
 
   return entries
@@ -123,7 +132,9 @@ export function resolveAdminFacilityFormFeedback(
   }
 
   const issues = Array.isArray(error.body.errors)
-    ? (error.body.errors as BackendValidationIssue[])
+    ? error.body.errors
+        .map((issue) => asBackendValidationIssue(issue))
+        .filter((issue): issue is BackendValidationIssue => issue != null)
     : [];
   const fields = mapValidationIssues(issues);
 

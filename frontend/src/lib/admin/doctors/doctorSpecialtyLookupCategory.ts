@@ -18,8 +18,9 @@ const ALLOWED: readonly AdminLookupCategory[] = [
  */
 export function resolveDoctorSpecialtyLookupCategory(): AdminLookupCategory {
   const raw = import.meta.env.VITE_ADMIN_DOCTOR_LOOKUP_CATEGORY?.trim();
-  if (raw && (ALLOWED as readonly string[]).includes(raw)) {
-    return raw as AdminLookupCategory;
+  if (raw) {
+    const matched = ALLOWED.find((value) => value === raw);
+    if (matched) return matched;
   }
   return 'DOCTOR_SPECIALIZATION';
 }

@@ -6,8 +6,28 @@ import type {
 import { REFERRAL_FORM_MESSAGES } from '@/lib/doctor/referrals/referralFormSchema';
 import { REFERRAL_API_URGENCY_VALUES } from '@/lib/doctor/referrals/referralPriority';
 
+type ReferralValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  param?: unknown;
+  field?: unknown;
+  property?: unknown;
+  propertyName?: unknown;
+  message?: unknown;
+  msg?: unknown;
+  [key: string]: unknown;
+};
+
+function asReferralValidationErrorRecord(
+  value: unknown,
+): ReferralValidationErrorRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 function collectStructuredFieldTexts(
-  body: Record<string, unknown>,
+  body: ReferralValidationErrorRecord,
 ): Map<string, string> {
   const out = new Map<string, string>();
   const errs = body.errors;
@@ -33,8 +53,8 @@ function collectStructuredFieldTexts(
         push('_root', item);
         continue;
       }
-      if (!item || typeof item !== 'object') continue;
-      const row = item as Record<string, unknown>;
+      const row = asReferralValidationErrorRecord(item);
+      if (!row) continue;
       const pathVal =
         row.path ?? row.param ?? row.field ?? row.property ?? row.propertyName;
       let leaf = '';

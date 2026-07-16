@@ -38,13 +38,30 @@ export const DEFAULT_ADMIN_LOCAL_SETTINGS: AdminLocalSettings = {
   },
 };
 
+type AdminLocalSettingsInput = Partial<AdminLocalSettings>;
+
+function asAdminLocalSettingsRecord(
+  value: unknown,
+): AdminLocalSettingsInput | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
+function parseAdminLocalSettingsRaw(raw: string): unknown {
+  return JSON.parse(raw);
+}
+
+function isAdminLocalSettingsInput(value: unknown): value is AdminLocalSettingsInput {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
 export function loadAdminLocalSettings(): AdminLocalSettings {
   if (typeof window === 'undefined') return DEFAULT_ADMIN_LOCAL_SETTINGS;
 
   try {
     const raw = window.localStorage.getItem(ADMIN_LOCAL_SETTINGS_KEY);
     if (!raw) return DEFAULT_ADMIN_LOCAL_SETTINGS;
-    const parsed = JSON.parse(raw) as Partial<AdminLocalSettings>;
+    const parsedRaw = asAdminLocalSettingsRecord(parseAdminLocalSettingsRaw(raw));
+    const parsed = isAdminLocalSettingsInput(parsedRaw) ? parsedRaw : {};
     return {
       general: {
         ...DEFAULT_ADMIN_LOCAL_SETTINGS.general,

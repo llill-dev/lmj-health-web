@@ -7,6 +7,22 @@ export type BillingPaymentErrorToast = {
 
 export type BillingErrorToast = BillingPaymentErrorToast;
 
+type BillingValidationErrorRecord = {
+  errors?: unknown;
+  path?: unknown;
+  msg?: unknown;
+  messageKey?: unknown;
+  [key: string]: unknown;
+};
+
+function asBillingValidationErrorRecord(
+  value: unknown,
+): BillingValidationErrorRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : null;
+}
+
 const GENERIC_BACKEND_MESSAGES = new Set([
   'حدث خطأ غير متوقع.',
   'حدث خطأ غير متوقع',
@@ -78,7 +94,8 @@ function findKnownMessageKey(error: ApiError): string | null {
   if (!Array.isArray(errors)) return null;
 
   for (const entry of errors) {
-    const item = entry as { messageKey?: string; msg?: string };
+    const item = asBillingValidationErrorRecord(entry);
+    if (!item) continue;
     if (item.messageKey && MESSAGE_KEY_TOAST[item.messageKey]) {
       return item.messageKey;
     }
@@ -99,23 +116,23 @@ function isGenericBackendMessage(message: string, messageKey: string | null): bo
   return normalized === 'internal server error' || normalized === 'server error';
 }
 
-function formatValidationErrors(body: Record<string, unknown>): string | null {
+function formatValidationErrors(body: BillingValidationErrorRecord): string | null {
   const errors = body.errors;
   if (!Array.isArray(errors) || errors.length === 0) return null;
 
   const parts = errors.slice(0, 3).map((entry) => {
-    const item = entry as { path?: string; msg?: string; messageKey?: string };
+    const item = asBillingValidationErrorRecord(entry) ?? {};
     const key =
-      item.messageKey ??
-      (item.msg && looksLikeMessageKey(item.msg) ? item.msg.trim() : null);
+      (typeof item.messageKey === 'string' ? item.messageKey : null) ??
+      (typeof item.msg === 'string' && looksLikeMessageKey(item.msg) ? item.msg.trim() : null);
     if (key && MESSAGE_KEY_TOAST[key]) {
       return MESSAGE_KEY_TOAST[key].message;
     }
-    const msg = item.msg?.trim();
+    const msg = typeof item.msg === 'string' ? item.msg.trim() : '';
     if (msg && !looksLikeMessageKey(msg)) {
       return msg;
     }
-    return item.path || 'قيمة غير صالحة';
+    return (typeof item.path === 'string' ? item.path : '') || 'قيمة غير صالحة';
   });
 
   return parts.join(' · ');

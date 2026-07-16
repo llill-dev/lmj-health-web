@@ -103,7 +103,7 @@ export default function AdminUsersPage() {
           variant="admin"
           surface="mint"
           title="مستخدمو الإدارة"
-          subtitle="إدارة حسابات الفريق الداخلي. إيقاف وتفعيل الحسابات غير متاحين حالياً لأن المسارات غير موثقة في swagger_api.md"
+          subtitle="إدارة حسابات الفريق الداخلي. إيقاف وتفعيل الحسابات غير متاحين حالياً."
           headerIcon={<UserCog className="h-8 w-8 text-white" />}
           actionLabel="إنشاء مستخدم"
           onActionClick={() => setCreateOpen(true)}

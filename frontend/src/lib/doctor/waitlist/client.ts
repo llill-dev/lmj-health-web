@@ -1,6 +1,8 @@
 import { get, patch, post } from '@/lib/api';
 import { waitlistEndpoints } from '@/lib/doctor/waitlist/endpoints';
 import type {
+  CreateWaitlistRequestBody,
+  CreateWaitlistRequestResponse,
   WaitlistBookBody,
   WaitlistBookResponse,
   WaitlistDetailResponse,
@@ -44,6 +46,11 @@ export const waitlistApi = {
       : waitlistEndpoints.list;
     return get<WaitlistListResponse>(path, { locale: 'ar' });
   },
+
+  create: (body: CreateWaitlistRequestBody) =>
+    post<CreateWaitlistRequestResponse>(waitlistEndpoints.list, body, {
+      locale: 'ar',
+    }),
 
   listMine: (params: WaitlistListParams = {}) => {
     const query = buildWaitlistQuery(params);
