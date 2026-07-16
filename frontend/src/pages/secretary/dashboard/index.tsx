@@ -15,6 +15,7 @@ import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorA
 import { useDashboardStats } from "@/hooks/doctor/dashboard/useDashboardStats";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
+import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 
 type KpiCard = {
   key: string;
@@ -122,7 +123,9 @@ export default function SecretaryDashboardPage() {
   const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 4 });
   const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
   const waitlistQuery = useDoctorWaitlist({ page: 1, limit: 1 });
+  const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const stats = statsQuery.stats;
+  const rating = assignedDoctorQuery.data?.doctor?.averageRating;
 
   const kpis: KpiCard[] = [
     {
@@ -195,14 +198,14 @@ export default function SecretaryDashboardPage() {
     {
       key: "rating",
       label: "التقييم",
-      value: "4.8/5",
+      value: rating != null ? `${rating.toFixed(1)}/5` : "—",
       icon: TrendingUp,
       iconClass: "bg-[#ECFDF3] text-[#22C55E]",
     },
     {
       key: "attendance",
       label: "نسبة الحضور",
-      value: "95%",
+      value: stats?.attendanceRate != null ? `${stats.attendanceRate}%` : "—",
       icon: Activity,
       iconClass: "bg-[#F4EBFF] text-[#A855F7]",
     },

@@ -6,7 +6,11 @@ import {
   Download,
   Eye,
 } from "lucide-react";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useDoctorPatientFiles, useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
+import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
+import { doctorApi } from "@/lib/doctor/client";
+import { triggerBrowserFileDownload, triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
 
 function formatIsoDate(value?: string | null): string {
   if (!value) return "—";
@@ -139,6 +143,9 @@ const PatientFileRow = memo<{
 export default function SecretaryPatientFilesPage() {
   const [searchInput, setSearchInput] = useState("");
   const [patientId, setPatientId] = useState("");
+  const { toast } = useToast();
+  const assignedDoctorQuery = useSecretaryAssignedDoctor();
+  const doctorId = assignedDoctorQuery.data?.doctor?._id ?? "";
   const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
   const filesQuery = useDoctorPatientFiles(patientId, Boolean(patientId));
 
@@ -157,9 +164,46 @@ export default function SecretaryPatientFilesPage() {
           patientDirectory.get(patientId)?.publicId || patientId || "—",
         fileType: file.mimeType || file.originalName || "ملف",
         date: file.linkedAt || "",
+        filename: file.originalName || "ملف",
       })),
     [filesQuery.files, patientDirectory, patientId],
   );
+
+  async function resolveDownloadUrl(fileId: string) {
+    if (!doctorId || !patientId || !fileId) return null;
+    const response = await doctorApi.patients.getFileDownloadUrl(
+      doctorId,
+      patientId,
+      fileId,
+    );
+    return response.downloadUrl || response.url || null;
+  }
+
+  async function handleDownload(fileId: string, filename: string) {
+    try {
+      const url = await resolveDownloadUrl(fileId);
+      if (!url) throw new Error("missing_url");
+      await triggerBrowserFileDownload(url, filename);
+    } catch {
+      toast("تعذر تنزيل الملف الآن. حاول مرة أخرى.", {
+        title: "فشل التنزيل",
+        variant: "error",
+      });
+    }
+  }
+
+  async function handleView(fileId: string, filename: string) {
+    try {
+      const url = await resolveDownloadUrl(fileId);
+      if (!url) throw new Error("missing_url");
+      await triggerBrowserFileDownloadAndOpen(url, filename);
+    } catch {
+      toast("تعذر فتح الملف الآن. حاول مرة أخرى.", {
+        title: "فشل الفتح",
+        variant: "error",
+      });
+    }
+  }
 
   const searchedFiles = useMemo(() => {
     if (!searchInput.trim()) return files;
@@ -232,8 +276,8 @@ export default function SecretaryPatientFilesPage() {
               <PatientFileRow
                 key={file.id}
                 file={file}
-                onView={() => {}}
-                onDownload={() => {}}
+                onView={(fileId) => handleView(fileId, file.filename)}
+                onDownload={(fileId) => handleDownload(fileId, file.filename)}
               />
             ))}
           </>
