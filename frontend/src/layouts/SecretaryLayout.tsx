@@ -29,12 +29,18 @@ export default function SecretaryLayout() {
   const authUser = readAuthUser();
   const secretaryName = authUser?.fullName?.trim() || "السكرتير";
   const secretaryEmail = authUser?.email?.trim() || "";
+  const permissionsReady =
+    !secretaryPermissions.isLoading &&
+    !secretaryPermissions.isFetching &&
+    !secretaryPermissions.isPending;
   const visibleSidebarItems = useMemo(
     () =>
-      secretarySidebarItems.filter((item) =>
-        secretaryPermissions.canAccessItem(item.path),
-      ),
-    [secretaryPermissions.permissions],
+      !permissionsReady
+        ? []
+        : secretarySidebarItems.filter((item) =>
+            secretaryPermissions.canAccessItem(item.path),
+          ),
+    [permissionsReady, secretaryPermissions.permissions],
   );
 
   const performLogout = useCallback(async () => {
@@ -67,12 +73,23 @@ export default function SecretaryLayout() {
     )?.path ?? "dashboard";
 
   useEffect(() => {
+    if (!permissionsReady) return;
     const firstPath = visibleSidebarItems[0]?.path ?? "dashboard";
     const currentSegment = pathname.split("/")[2] as SecretarySidebarItemId | undefined;
     if (!currentSegment) return;
     if (secretaryPermissions.canAccessItem(currentSegment)) return;
     navigate(`/secretary/${firstPath}`, { replace: true });
-  }, [navigate, pathname, secretaryPermissions.permissions, visibleSidebarItems]);
+  }, [
+    navigate,
+    pathname,
+    permissionsReady,
+    secretaryPermissions.permissions,
+    visibleSidebarItems,
+  ]);
+
+  if (!permissionsReady) {
+    return <SecretaryRouteFallback />;
+  }
 
   return (
     <div
