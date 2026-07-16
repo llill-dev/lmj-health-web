@@ -179,6 +179,7 @@ export default function SecretaryDashboardPage() {
   ];
 
   const todayAppointments = (appointmentsQuery.appointments ?? []).map((appointment) => ({
+    id: appointment._id || appointment.startDateTime || appointment.date || "",
     time: appointment.startTime || "—",
     patientName: appointment.patient?.userId?.fullName || "مريض",
     status: appointment.status === "rescheduled" ? "postponed" : appointment.status,
@@ -272,9 +273,9 @@ export default function SecretaryDashboardPage() {
         <SurfaceSection title="مواعيد اليوم">
         <div className="space-y-4 px-4 py-5 sm:px-5 sm:py-6">
           {todayAppointments.length > 0 ? (
-            todayAppointments.map((row) => (
+            todayAppointments.map((row, index) => (
               <article
-                key={`${row.time}-${row.patientName}`}
+                key={row.id || `${row.time}-${row.patientName}-${index}`}
                 className="flex flex-col gap-4 rounded-[16px] bg-[#F8FAFC] px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-4">
