@@ -30,9 +30,7 @@ export default function SecretaryLayout() {
   const secretaryName = authUser?.fullName?.trim() || "السكرتير";
   const secretaryEmail = authUser?.email?.trim() || "";
   const permissionsReady =
-    !secretaryPermissions.isLoading &&
-    !secretaryPermissions.isFetching &&
-    !secretaryPermissions.isPending;
+    !secretaryPermissions.isLoading && !secretaryPermissions.isPending;
   const visibleSidebarItems = useMemo(
     () =>
       !permissionsReady

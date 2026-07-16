@@ -55,21 +55,13 @@ export function useSecretaryPermissions() {
   const query = useQuery({
     queryKey: ["secretary", "permissions", primarySecretaryIdentifier],
     queryFn: async () => {
-      const endpointCandidates = ["/api/secretaries/me", "/api/secretaries/me/doctor"];
-      for (const endpoint of endpointCandidates) {
-        try {
-          const response = await get<unknown>(endpoint);
-          const normalized = normalizePermissionsPayload(response);
-          if (normalized) return normalized;
-        } catch (error) {
-          // Try next endpoint candidate
-        }
-      }
-      return null;
+      // Secretary role can access this endpoint; `/api/secretaries/me` returns 403.
+      const response = await get<unknown>("/api/secretaries/me/doctor");
+      return normalizePermissionsPayload(response);
     },
     enabled: Boolean(primarySecretaryIdentifier),
-    staleTime: 0,
-    refetchOnMount: "always",
+    staleTime: 60_000,
+    retry: false,
     refetchOnWindowFocus: true,
   });
 
