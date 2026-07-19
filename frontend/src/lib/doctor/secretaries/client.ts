@@ -13,6 +13,9 @@ import type {
 
 type DoctorSecretaryApiRecord = {
   secretary?: unknown;
+  secretaries?: unknown;
+  items?: unknown;
+  data?: unknown;
   [key: string]: unknown;
 };
 
@@ -24,14 +27,84 @@ function asDoctorSecretaryApiRecord(
     : null;
 }
 
+function readDoctorSecretaryNestedRecord(
+  value: unknown,
+): DoctorSecretaryApiRecord | null {
+  const record = asDoctorSecretaryApiRecord(value);
+  return (
+    asDoctorSecretaryApiRecord(record?.data) ??
+    asDoctorSecretaryApiRecord(record?.item) ??
+    null
+  );
+}
+
+function readDoctorSecretaryNumber(value: unknown): number | undefined {
+  return typeof value === 'number' ? value : undefined;
+}
+
+function readDoctorSecretaryArray(value: unknown): unknown[] | null {
+  return Array.isArray(value) ? value : null;
+}
+
+function readFirstDoctorSecretaryArray(
+  sources: unknown[],
+): unknown[] | null {
+  for (const source of sources) {
+    const items = readDoctorSecretaryArray(source);
+    if (items) return items;
+  }
+  return null;
+}
+
 function unwrapSecretaryPayload(payload: unknown): DoctorSecretary | null {
   const record = asDoctorSecretaryApiRecord(payload);
   if (!record) return null;
   if (record.secretary) {
     return normalizeDoctorSecretary(record.secretary);
   }
+  if ('item' in record && record.item) {
+    const nested = normalizeDoctorSecretary(record.item);
+    if (nested) return nested;
+  }
+  const nestedRecord = readDoctorSecretaryNestedRecord(record);
+  if (nestedRecord) {
+    const nested =
+      unwrapSecretaryPayload(nestedRecord) ?? normalizeDoctorSecretary(nestedRecord);
+    if (nested) return nested;
+  }
 
   return normalizeDoctorSecretary(record);
+}
+
+function readSecretaryList(payload: unknown): DoctorSecretary[] {
+  const record = asDoctorSecretaryApiRecord(payload);
+  if (!record) return [];
+
+  const nested = readDoctorSecretaryNestedRecord(record);
+  const candidate = readFirstDoctorSecretaryArray([
+    record.secretaries,
+    record.items,
+    nested?.secretaries,
+    nested?.items,
+    nested?.data,
+  ]);
+
+  if (!candidate) return [];
+
+  return candidate
+    .map((item) => normalizeDoctorSecretary(item))
+    .filter((item): item is DoctorSecretary => item != null);
+}
+
+function readSecretaryTotal(payload: unknown, fallbackTotal: number): number {
+  const record = asDoctorSecretaryApiRecord(payload);
+  if (!record) return fallbackTotal;
+  const directTotal = readDoctorSecretaryNumber(record.total);
+  if (directTotal != null) return directTotal;
+  const nested = readDoctorSecretaryNestedRecord(record);
+  const nestedTotal = readDoctorSecretaryNumber(nested?.total);
+  if (nestedTotal != null) return nestedTotal;
+  return fallbackTotal;
 }
 
 export const doctorSecretariesApi = {
@@ -39,14 +112,12 @@ export const doctorSecretariesApi = {
     const response = await get<DoctorSecretariesListResponse>(
       doctorSecretaryEndpoints.list,
     );
-    const secretaries = (response.secretaries ?? [])
-      .map((item) => normalizeDoctorSecretary(item))
-      .filter((item): item is DoctorSecretary => item != null);
+    const secretaries = readSecretaryList(response);
 
     return {
       ...response,
       secretaries,
-      total: response.total ?? secretaries.length,
+      total: readSecretaryTotal(response, secretaries.length),
     } satisfies DoctorSecretariesListResponse;
   },
 

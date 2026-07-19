@@ -31,6 +31,13 @@ function asBackendValidationIssue(value: unknown): BackendValidationIssue | null
     : null;
 }
 
+function readValidationIssueArray(value: unknown): BackendValidationIssue[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((issue) => asBackendValidationIssue(issue))
+    .filter((issue): issue is BackendValidationIssue => issue != null);
+}
+
 const FIELD_LABELS: Record<AdminFacilityFormName, string> = {
   name: 'اسم المنشأة',
   facilityType: 'نوع المنشأة',
@@ -131,11 +138,7 @@ export function resolveAdminFacilityFormFeedback(
     };
   }
 
-  const issues = Array.isArray(error.body.errors)
-    ? error.body.errors
-        .map((issue) => asBackendValidationIssue(issue))
-        .filter((issue): issue is BackendValidationIssue => issue != null)
-    : [];
+  const issues = readValidationIssueArray(error.body.errors);
   const fields = mapValidationIssues(issues);
 
   if (error.messageKey === 'errors.validationFailed' || error.status === 422) {

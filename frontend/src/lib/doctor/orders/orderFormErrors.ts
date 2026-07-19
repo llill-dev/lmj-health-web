@@ -24,6 +24,19 @@ function asDoctorOrderValidationErrorRecord(
     : null;
 }
 
+function readDoctorOrderValidationString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function readDoctorOrderValidationLeaf(value: unknown): string {
+  if (Array.isArray(value)) {
+    return readDoctorOrderValidationString(value[value.length - 1]) ?? '';
+  }
+
+  const path = readDoctorOrderValidationString(value);
+  return path?.replace(/[[\]/]+/g, '.').split('.').filter(Boolean).at(-1) ?? path ?? '';
+}
+
 function collectStructuredFieldTexts(
   body: DoctorOrderValidationErrorRecord,
 ): Map<string, string> {
@@ -41,18 +54,15 @@ function collectStructuredFieldTexts(
       if (typeof item === 'string') continue;
       const row = asDoctorOrderValidationErrorRecord(item);
       if (!row) continue;
+
       const pathVal =
         row.path ?? row.param ?? row.field ?? row.property ?? row.propertyName;
-      let leaf = '';
-      if (Array.isArray(pathVal)) {
-        leaf = String(pathVal[pathVal.length - 1] ?? '');
-      } else if (typeof pathVal === 'string') {
-        leaf = pathVal.split(/[.[\]/]/).filter(Boolean).at(-1) ?? pathVal;
-      }
+      const leaf = readDoctorOrderValidationLeaf(pathVal);
       const msg =
-        (typeof row.message === 'string' && row.message.trim()) ||
-        (typeof row.msg === 'string' && row.msg.trim()) ||
+        readDoctorOrderValidationString(row.message) ||
+        readDoctorOrderValidationString(row.msg) ||
         '';
+
       if (leaf && msg) out.set(leaf, msg);
     }
   }

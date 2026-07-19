@@ -34,6 +34,21 @@ function asPendingDoctorRecoveryLoginRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readRecoveryPayloadString(
+  payload: AccountDeletionRecoveryPayload,
+  key: string,
+): string | null {
+  const value = payload[key];
+  return typeof value === 'string' ? value : null;
+}
+
+function parsePendingDoctorRecoveryLogin(
+  raw: string,
+): PendingDoctorRecoveryLogin | null {
+  const parsed = JSON.parse(raw);
+  return isPendingDoctorRecoveryLogin(parsed) ? parsed : null;
+}
+
 function isPendingDoctorRecoveryLogin(
   value: unknown,
 ): value is PendingDoctorRecoveryLogin {
@@ -59,9 +74,7 @@ export function peekPendingDoctorRecoveryLogin(): PendingDoctorRecoveryLogin | n
   try {
     const raw = sessionStorage.getItem(PENDING_DOCTOR_RECOVERY_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!isPendingDoctorRecoveryLogin(parsed)) return null;
-    return parsed;
+    return parsePendingDoctorRecoveryLogin(raw);
   } catch {
     return null;
   }
@@ -78,12 +91,12 @@ export function clearPendingDoctorRecoveryLogin() {
 export function normalizeRecoverUntil(
   raw: AccountDeletionRecoveryPayload,
 ): string | null | undefined {
-  const value =
-    raw.recoverUntil ??
-    raw.recoveryExpiresAt ??
-    raw.recoveryUntil ??
-    raw.recover_until;
-  return typeof value === 'string' ? value : null;
+  return (
+    readRecoveryPayloadString(raw, 'recoverUntil') ??
+    readRecoveryPayloadString(raw, 'recoveryExpiresAt') ??
+    readRecoveryPayloadString(raw, 'recoveryUntil') ??
+    readRecoveryPayloadString(raw, 'recover_until')
+  );
 }
 
 export function readAccountDeletionSessionMeta():

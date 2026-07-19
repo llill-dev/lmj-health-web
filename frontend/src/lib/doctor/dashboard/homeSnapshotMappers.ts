@@ -50,8 +50,19 @@ function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+function readFirstString(
+  record: DoctorHomeSnapshotRecord,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = readString(record[key]);
+    if (value) return value;
+  }
+  return undefined;
+}
+
 function readId(raw: SnapshotAppointmentLike): string | undefined {
-  return readString(raw._id) ?? readString(raw.id);
+  return readFirstString(raw, ['_id', 'id']);
 }
 
 function readSnapshotPatientName(

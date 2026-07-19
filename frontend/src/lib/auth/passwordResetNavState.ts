@@ -23,14 +23,26 @@ function asPasswordResetPendingRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readPasswordResetPendingString(
+  record: { channel?: unknown; destination?: unknown },
+  key: 'destination',
+): string | undefined {
+  const value = record[key];
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
+function parsePasswordResetPending(raw: string): PasswordResetPending | null {
+  const parsed = JSON.parse(raw);
+  return isPasswordResetPending(parsed) ? parsed : null;
+}
+
 function isPasswordResetPending(value: unknown): value is PasswordResetPending {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const record = asPasswordResetPendingRecord(value);
   if (!record) return false;
   return (
     (record.channel === 'email' || record.channel === 'whatsapp') &&
-    typeof record.destination === 'string' &&
-    record.destination.trim().length > 0
+    Boolean(readPasswordResetPendingString(record, 'destination'))
   );
 }
 
@@ -40,6 +52,18 @@ function asPasswordResetTokenRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readPasswordResetTokenString(
+  record: { resetToken?: unknown; expiresInMinutes?: unknown },
+): string | undefined {
+  const value = record.resetToken;
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
+function parsePasswordResetToken(raw: string): PasswordResetTokenState | null {
+  const parsed = JSON.parse(raw);
+  return isPasswordResetTokenState(parsed) ? parsed : null;
+}
+
 function isPasswordResetTokenState(
   value: unknown,
 ): value is PasswordResetTokenState {
@@ -47,8 +71,7 @@ function isPasswordResetTokenState(
   const record = asPasswordResetTokenRecord(value);
   if (!record) return false;
   return (
-    typeof record.resetToken === 'string' &&
-    record.resetToken.trim().length > 0 &&
+    Boolean(readPasswordResetTokenString(record)) &&
     typeof record.expiresInMinutes === 'number'
   );
 }
@@ -65,9 +88,7 @@ export function peekPasswordResetPending(): PasswordResetPending | null {
   try {
     const raw = sessionStorage.getItem(PENDING_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!isPasswordResetPending(parsed)) return null;
-    return parsed;
+    return parsePasswordResetPending(raw);
   } catch {
     return null;
   }
@@ -93,9 +114,7 @@ export function peekPasswordResetToken(): PasswordResetTokenState | null {
   try {
     const raw = sessionStorage.getItem(TOKEN_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!isPasswordResetTokenState(parsed)) return null;
-    return parsed;
+    return parsePasswordResetToken(raw);
   } catch {
     return null;
   }

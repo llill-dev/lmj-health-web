@@ -73,6 +73,12 @@ function writeCachedEncounterId(consultationId: string, encounterId: string) {
   }
 }
 
+function readEncounterRows(
+  value: { encounters?: DoctorEncounterSummary[] } | null | undefined,
+): DoctorEncounterSummary[] {
+  return Array.isArray(value?.encounters) ? value.encounters : [];
+}
+
 async function verifyOpenEncounter(
   doctorId: string,
   patientId: string,
@@ -148,7 +154,7 @@ export async function ensureConsultationEncounter(input: {
   });
 
   const existing = pickConsultationEncounter(
-    list.encounters ?? [],
+    readEncounterRows(list),
     consultationId,
   );
   if (existing) {

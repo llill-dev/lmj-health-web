@@ -82,6 +82,39 @@ function isOneOf<const T extends readonly string[]>(
   return typeof value === 'string' && allowed.some((entry) => entry === value);
 }
 
+function asDeletionResponsePayload(
+  value: unknown,
+): AccountDeletionResponsePayload | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as AccountDeletionResponsePayload)
+    : null;
+}
+
+function readDeletionString(
+  payload: AccountDeletionResponsePayload,
+  key: string,
+): string | undefined {
+  const value = payload[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
+function readDeletionBoolean(
+  payload: AccountDeletionResponsePayload,
+  key: string,
+): boolean | undefined {
+  const value = payload[key];
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+function resolveDeletionPayload(
+  raw: AccountDeletionResponsePayload,
+): AccountDeletionResponsePayload {
+  const nested = asDeletionResponsePayload(raw.data);
+  const item = asDeletionResponsePayload(raw.item);
+  const result = asDeletionResponsePayload(raw.result);
+  return nested ?? item ?? result ?? raw;
+}
+
 function basePath(scope: AccountDeletionScope): string {
   return scope === 'patient' ? '/api/patient/me' : '/api/doctors/me';
 }
@@ -101,34 +134,49 @@ export function resolveAccountDeletionScope(
 function normalizeStatusResponse(
   raw: AccountDeletionResponsePayload,
 ): AccountDeletionStatusResponse {
+  const payload = resolveDeletionPayload(raw);
   return {
-    message: typeof raw.message === 'string' ? raw.message : undefined,
-    messageKey: typeof raw.messageKey === 'string' ? raw.messageKey : undefined,
+    message: readDeletionString(payload, 'message') ?? readDeletionString(raw, 'message'),
+    messageKey:
+      readDeletionString(payload, 'messageKey') ??
+      readDeletionString(raw, 'messageKey'),
     status: normalizeAccountDeletionStatus(
-      typeof raw.status === 'string' ? raw.status : undefined,
+      readDeletionString(payload, 'status') ?? readDeletionString(raw, 'status'),
     ),
     requestedAt:
-      typeof raw.requestedAt === 'string' ? raw.requestedAt : null,
-    recoverUntil: normalizeRecoverUntil(raw) ?? null,
-    deletedAt: typeof raw.deletedAt === 'string' ? raw.deletedAt : null,
+      readDeletionString(payload, 'requestedAt') ??
+      readDeletionString(raw, 'requestedAt') ??
+      null,
+    recoverUntil: normalizeRecoverUntil(payload) ?? normalizeRecoverUntil(raw) ?? null,
+    deletedAt:
+      readDeletionString(payload, 'deletedAt') ??
+      readDeletionString(raw, 'deletedAt') ??
+      null,
   };
 }
 
 function normalizeRequestResponse(
   raw: AccountDeletionResponsePayload,
 ): AccountDeletionRequestResponse {
+  const payload = resolveDeletionPayload(raw);
   const status =
-    isOneOf(raw.status, ACCOUNT_DELETION_REQUEST_STATUSES)
-      ? raw.status
+    isOneOf(payload.status, ACCOUNT_DELETION_REQUEST_STATUSES)
+      ? payload.status
+      : isOneOf(raw.status, ACCOUNT_DELETION_REQUEST_STATUSES)
+        ? raw.status
       : 'requested';
 
   return {
-    message: typeof raw.message === 'string' ? raw.message : undefined,
-    messageKey: typeof raw.messageKey === 'string' ? raw.messageKey : undefined,
+    message: readDeletionString(payload, 'message') ?? readDeletionString(raw, 'message'),
+    messageKey:
+      readDeletionString(payload, 'messageKey') ??
+      readDeletionString(raw, 'messageKey'),
     status,
     requestedAt:
-      typeof raw.requestedAt === 'string' ? raw.requestedAt : null,
-    recoverUntil: normalizeRecoverUntil(raw) ?? null,
+      readDeletionString(payload, 'requestedAt') ??
+      readDeletionString(raw, 'requestedAt') ??
+      null,
+    recoverUntil: normalizeRecoverUntil(payload) ?? normalizeRecoverUntil(raw) ?? null,
   };
 }
 
@@ -211,9 +259,8 @@ export const accountDeletionApi = {
       { locale: 'ar' },
     );
     return {
-      message: typeof response.message === 'string' ? response.message : undefined,
-      messageKey:
-        typeof response.messageKey === 'string' ? response.messageKey : undefined,
+      message: readDeletionString(response, 'message'),
+      messageKey: readDeletionString(response, 'messageKey'),
       status: isOneOf(response.status, ACCOUNT_DELETION_CANCEL_STATUSES)
         ? response.status
         : 'none',
@@ -385,19 +432,22 @@ const DOCTOR_RESTORE_REQUEST_BASE =
 function normalizeDoctorRecoveryStartResponse(
   raw: AccountDeletionResponsePayload,
 ): DoctorRecoveryOtpStartResponse {
+  const payload = resolveDeletionPayload(raw);
   return {
-    message: typeof raw.message === 'string' ? raw.message : undefined,
+    message: readDeletionString(payload, 'message') ?? readDeletionString(raw, 'message'),
     messageKey:
-      typeof raw.messageKey === 'string' ? raw.messageKey : undefined,
+      readDeletionString(payload, 'messageKey') ??
+      readDeletionString(raw, 'messageKey'),
     destination:
-      typeof raw.destination === 'string'
-        ? raw.destination
-        : typeof raw.maskedDestination === 'string'
-          ? raw.maskedDestination
-          : undefined,
+      readDeletionString(payload, 'destination') ??
+      readDeletionString(payload, 'maskedDestination') ??
+      readDeletionString(raw, 'destination') ??
+      readDeletionString(raw, 'maskedDestination'),
     channel:
-      raw.channel === 'email' || raw.channel === 'whatsapp'
-        ? raw.channel
+      payload.channel === 'email' || payload.channel === 'whatsapp'
+        ? payload.channel
+        : raw.channel === 'email' || raw.channel === 'whatsapp'
+          ? raw.channel
         : undefined,
   };
 }
@@ -405,35 +455,47 @@ function normalizeDoctorRecoveryStartResponse(
 function normalizeDoctorRecoveryVerifyResponse(
   raw: AccountDeletionResponsePayload,
 ): DoctorRecoveryOtpVerifyResponse {
+  const payload = resolveDeletionPayload(raw);
   const restoreStatus =
-    raw.restoreStatus === 'pending' ||
-    raw.restoreStatus === 'approved' ||
-    raw.restoreStatus === 'rejected'
-      ? raw.restoreStatus
+    payload.restoreStatus === 'pending' ||
+    payload.restoreStatus === 'approved' ||
+    payload.restoreStatus === 'rejected'
+      ? payload.restoreStatus
+      : raw.restoreStatus === 'pending' ||
+          raw.restoreStatus === 'approved' ||
+          raw.restoreStatus === 'rejected'
+        ? raw.restoreStatus
       : undefined;
 
   return {
-    message: typeof raw.message === 'string' ? raw.message : undefined,
+    message: readDeletionString(payload, 'message') ?? readDeletionString(raw, 'message'),
     messageKey:
-      typeof raw.messageKey === 'string' ? raw.messageKey : undefined,
+      readDeletionString(payload, 'messageKey') ??
+      readDeletionString(raw, 'messageKey'),
     status:
-      raw.status === 'none' ||
-      raw.status === 'requested' ||
-      raw.status === 'pending' ||
-      raw.status === 'deleted'
-        ? raw.status
+      payload.status === 'none' ||
+      payload.status === 'requested' ||
+      payload.status === 'pending' ||
+      payload.status === 'deleted'
+        ? payload.status
+        : raw.status === 'none' ||
+            raw.status === 'requested' ||
+            raw.status === 'pending' ||
+            raw.status === 'deleted'
+          ? raw.status
         : undefined,
-    userId: typeof raw.userId === 'string' ? raw.userId : undefined,
-    doctorId: typeof raw.doctorId === 'string' ? raw.doctorId : undefined,
+    userId:
+      readDeletionString(payload, 'userId') ?? readDeletionString(raw, 'userId'),
+    doctorId:
+      readDeletionString(payload, 'doctorId') ?? readDeletionString(raw, 'doctorId'),
     restoreStatus,
     restoreRequestedAt:
-      typeof raw.restoreRequestedAt === 'string'
-        ? raw.restoreRequestedAt
-        : null,
+      readDeletionString(payload, 'restoreRequestedAt') ??
+      readDeletionString(raw, 'restoreRequestedAt') ??
+      null,
     approvalFallbackUsed:
-      typeof raw.approvalFallbackUsed === 'boolean'
-        ? raw.approvalFallbackUsed
-        : undefined,
+      readDeletionBoolean(payload, 'approvalFallbackUsed') ??
+      readDeletionBoolean(raw, 'approvalFallbackUsed'),
   };
 }
 

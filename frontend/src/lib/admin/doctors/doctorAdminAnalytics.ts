@@ -36,6 +36,14 @@ function asRecord(x: unknown): AdminDoctorAnalyticsRecord | null {
     : null;
 }
 
+function readRecordString(
+  record: AdminDoctorAnalyticsRecord,
+  key: string,
+): string | undefined {
+  const value = record[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
 function isAdminDoctorAnalyticsRange(
   value: unknown,
 ): value is AdminDoctorAnalyticsRange {
@@ -102,8 +110,8 @@ export function parseDiagnosisAnalytics(
 
   const fromBody = (() => {
     const range =
-      (typeof inner.range === 'string' ? inner.range : undefined) ??
-      (typeof root.range === 'string' ? root.range : undefined) ??
+      readRecordString(inner, 'range') ??
+      readRecordString(root, 'range') ??
       requestRange;
 
     if (Array.isArray(inner.series) && isDiagnosisTimeSeries(inner.series)) {

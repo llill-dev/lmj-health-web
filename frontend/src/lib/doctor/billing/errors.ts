@@ -23,6 +23,10 @@ function asBillingValidationErrorRecord(
     : null;
 }
 
+function readBillingValidationString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
 const GENERIC_BACKEND_MESSAGES = new Set([
   'حدث خطأ غير متوقع.',
   'حدث خطأ غير متوقع',
@@ -85,7 +89,7 @@ function findKnownMessageKey(error: ApiError): string | null {
     return error.messageKey;
   }
 
-  const message = error.message.trim();
+  const message = readBillingValidationString(error.message) ?? '';
   if (looksLikeMessageKey(message) && MESSAGE_KEY_TOAST[message]) {
     return message;
   }
@@ -96,13 +100,11 @@ function findKnownMessageKey(error: ApiError): string | null {
   for (const entry of errors) {
     const item = asBillingValidationErrorRecord(entry);
     if (!item) continue;
-    if (
-      typeof item.messageKey === 'string' &&
-      MESSAGE_KEY_TOAST[item.messageKey]
-    ) {
-      return item.messageKey;
+    const messageKey = readBillingValidationString(item.messageKey);
+    if (messageKey && MESSAGE_KEY_TOAST[messageKey]) {
+      return messageKey;
     }
-    const nestedMsg = typeof item.msg === 'string' ? item.msg.trim() : '';
+    const nestedMsg = readBillingValidationString(item.msg) ?? '';
     if (nestedMsg && looksLikeMessageKey(nestedMsg) && MESSAGE_KEY_TOAST[nestedMsg]) {
       return nestedMsg;
     }
@@ -125,17 +127,19 @@ function formatValidationErrors(body: BillingValidationErrorRecord): string | nu
 
   const parts = errors.slice(0, 3).map((entry) => {
     const item = asBillingValidationErrorRecord(entry) ?? {};
+    const itemMessageKey = readBillingValidationString(item.messageKey);
+    const itemMsg = readBillingValidationString(item.msg);
     const key =
-      (typeof item.messageKey === 'string' ? item.messageKey : null) ??
-      (typeof item.msg === 'string' && looksLikeMessageKey(item.msg) ? item.msg.trim() : null);
+      itemMessageKey ??
+      (itemMsg && looksLikeMessageKey(itemMsg) ? itemMsg : null);
     if (key && MESSAGE_KEY_TOAST[key]) {
       return MESSAGE_KEY_TOAST[key].message;
     }
-    const msg = typeof item.msg === 'string' ? item.msg.trim() : '';
+    const msg = itemMsg ?? '';
     if (msg && !looksLikeMessageKey(msg)) {
       return msg;
     }
-    return (typeof item.path === 'string' ? item.path : '') || 'قيمة غير صالحة';
+    return readBillingValidationString(item.path) ?? 'قيمة غير صالحة';
   });
 
   return parts.join(' · ');

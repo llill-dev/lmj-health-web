@@ -30,13 +30,24 @@ function asDoctorSpecialtiesRows(
     : null;
 }
 
+function readDoctorSpecialtiesString(
+  record: DoctorSpecialtiesApiRecord,
+  key: string,
+): string | undefined {
+  const value = record[key];
+  return typeof value === "string" ? value : undefined;
+}
+
 function asLocalizedLookupText(
   value: unknown,
 ): AdminLocalizedLookupText | undefined {
   const record = asDoctorSpecialtiesRecord(value);
   if (!record) return undefined;
-  return typeof record.ar === "string" || typeof record.en === "string"
-    ? (record as AdminLocalizedLookupText)
+  return readDoctorSpecialtiesString(record, "ar") || readDoctorSpecialtiesString(record, "en")
+    ? {
+        ar: readDoctorSpecialtiesString(record, "ar"),
+        en: readDoctorSpecialtiesString(record, "en"),
+      }
     : undefined;
 }
 

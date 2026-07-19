@@ -18,6 +18,18 @@ function pickString(...values: ReadonlyArray<unknown>): string | undefined {
   return undefined;
 }
 
+function readOrderArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function readFirstOrderArray(sources: unknown[]): unknown[] {
+  for (const source of sources) {
+    const items = readOrderArray(source);
+    if (items.length > 0) return items;
+  }
+  return [];
+}
+
 function normalizePatient(raw: unknown, patientId?: string) {
   const patient = asRecord(raw);
   if (!patient) {
@@ -48,11 +60,7 @@ function normalizeResult(entry: unknown): DoctorOrderResultAttachment | null {
   const row = asRecord(entry);
   if (!row) return null;
 
-  const files = Array.isArray(row.attachmentFiles)
-    ? row.attachmentFiles
-    : Array.isArray(row.files)
-      ? row.files
-      : [];
+  const files = readFirstOrderArray([row.attachmentFiles, row.files]);
 
   const firstFile = asRecord(files[0]);
   const downloadUrl = pickString(
@@ -89,15 +97,15 @@ export function normalizeDoctorOrderFromApi(raw: unknown): DoctorOrderRecord | n
 
   const patientId = pickString(row.patientId, asRecord(row.patient)?._id);
   const statusFields = extractOrderStatusFieldsFromApi(row);
-  const resultsRaw = Array.isArray(row.results) ? row.results : [];
-  const attachmentsRaw = Array.isArray(row.attachments) ? row.attachments : [];
+  const resultsRaw = readOrderArray(row.results);
+  const attachmentsRaw = readOrderArray(row.attachments);
   const mergedResults = [
     ...resultsRaw,
     ...attachmentsRaw,
     ...(asRecord(row.resultDocument) ? [row.resultDocument] : []),
     ...(asRecord(row.latestResult) ? [row.latestResult] : []),
   ];
-  const itemsRaw = Array.isArray(row.items) ? row.items : [];
+  const itemsRaw = readOrderArray(row.items);
 
   return {
     _id: id,
@@ -146,9 +154,22 @@ export function normalizeDoctorOrderFromApi(raw: unknown): DoctorOrderRecord | n
 
 export function normalizeDoctorOrdersListResponse(raw: {
   orders?: DoctorOrderApiRecord[];
+  items?: DoctorOrderApiRecord[];
+  results?: unknown;
+  data?: {
+    orders?: DoctorOrderApiRecord[];
+    items?: DoctorOrderApiRecord[];
+    results?: unknown;
+  };
 } | null | undefined): DoctorOrderRecord[] {
-  const orders = raw?.orders ?? [];
-  if (!Array.isArray(orders)) return [];
+  const orders = readFirstOrderArray([
+    raw?.orders,
+    raw?.items,
+    raw?.results,
+    raw?.data?.orders,
+    raw?.data?.items,
+    raw?.data?.results,
+  ]);
   return orders
     .map(normalizeDoctorOrderFromApi)
     .filter((order): order is DoctorOrderRecord => Boolean(order));

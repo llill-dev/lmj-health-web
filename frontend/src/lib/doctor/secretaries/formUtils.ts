@@ -73,6 +73,17 @@ function readString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+function readRecordId(record: DoctorSecretaryApiRecord): string | undefined {
+  return readString(record._id) ?? readString(record.id);
+}
+
+function readPreferredSecretaryField(
+  primary: string | undefined,
+  fallback: unknown,
+): string | undefined {
+  return primary ?? readString(fallback);
+}
+
 function resolveSecretaryUser(
   raw: DoctorSecretaryApiRecord,
 ): DoctorSecretaryUser | undefined {
@@ -82,7 +93,7 @@ function resolveSecretaryUser(
     const fullName = readString(userRecord.fullName);
     if (fullName) {
       return {
-        _id: readString(userRecord._id),
+        _id: readRecordId(userRecord),
         fullName,
         email: readString(userRecord.email),
         phone: readString(userRecord.phone),
@@ -99,7 +110,7 @@ function resolveSecretaryUser(
     const fullName = readString(userRecord.fullName);
     if (fullName) {
       return {
-        _id: readString(userRecord._id),
+        _id: readRecordId(userRecord),
         fullName,
         email: readString(userRecord.email),
         phone: readString(userRecord.phone),
@@ -127,14 +138,15 @@ function resolveSecretaryUser(
 export function normalizeDoctorSecretary(raw: unknown): DoctorSecretary | null {
   const record = asDoctorSecretaryApiRecord(raw);
   if (!record) return null;
-  const id = readString(record._id) ?? readString(record.id);
+  const id = readRecordId(record);
   if (!id) return null;
 
   const user = resolveSecretaryUser(record);
+  const populatedUserId = asDoctorSecretaryApiRecord(record.userId);
   const userId =
     typeof record.userId === "string"
       ? record.userId
-      : (user?._id ?? readString(asDoctorSecretaryApiRecord(record.userId)?._id));
+      : (user?._id ?? (populatedUserId ? readRecordId(populatedUserId) : undefined));
 
   return {
     _id: id,
@@ -150,10 +162,10 @@ export function normalizeDoctorSecretary(raw: unknown): DoctorSecretary | null {
         ? record.assignedDoctor
         : undefined,
     user,
-    fullName: user?.fullName ?? readString(record.fullName),
-    email: user?.email ?? readString(record.email),
-    phone: user?.phone ?? readString(record.phone),
-    gender: user?.gender ?? readString(record.gender),
+    fullName: readPreferredSecretaryField(user?.fullName, record.fullName),
+    email: readPreferredSecretaryField(user?.email, record.email),
+    phone: readPreferredSecretaryField(user?.phone, record.phone),
+    gender: readPreferredSecretaryField(user?.gender, record.gender),
   };
 }
 

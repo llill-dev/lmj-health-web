@@ -56,6 +56,14 @@ function asRecord(value: unknown): DoctorOrderStatusRecord | null {
     : null;
 }
 
+function readDirectStatus(
+  record: DoctorOrderStatusRecord,
+  key: string,
+): string | undefined {
+  const value = record[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
 function pickStatusString(...values: ReadonlyArray<unknown>): string | undefined {
   for (const value of values) {
     if (typeof value === 'string' && value.trim()) return value.trim();
@@ -99,7 +107,7 @@ export function extractOrderStatusFieldsFromApi(raw: unknown): {
     row.statusLabel,
     row.statusName,
     row.statusText,
-    typeof row.status === 'string' ? row.status : undefined,
+    readDirectStatus(row, 'status'),
     row.status,
   );
 

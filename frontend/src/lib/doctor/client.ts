@@ -88,6 +88,7 @@ import type {
   DoctorMedicalRecordsListResponse,
   DoctorPatientPublicProfileResponse,
   DoctorPatientFilesListResponse,
+  DoctorPatientFile,
   DoctorPatientFileDetailsResponse,
   DoctorFileDownloadUrlResponse,
   DoctorPatientFileDeleteResponse,
@@ -148,6 +149,714 @@ import type {
   OrderFavoriteMutationResponse,
   OrderFavoritesListResponse,
 } from "@/lib/doctor/orders/orderFavoritesTypes";
+
+type DoctorOrderEnvelope = {
+  order?: unknown;
+  item?: unknown;
+  data?: unknown;
+  result?: unknown;
+};
+
+type DoctorListEnvelope = {
+  items?: unknown;
+  files?: unknown;
+  templates?: unknown;
+  patients?: unknown;
+  doctors?: unknown;
+  favorites?: unknown;
+  encounters?: unknown;
+  requests?: unknown;
+  request?: unknown;
+  data?: unknown;
+  item?: unknown;
+  result?: unknown;
+  page?: unknown;
+  limit?: unknown;
+  total?: unknown;
+  results?: unknown;
+  pageInfo?: unknown;
+  freeSlots?: unknown;
+  appointments?: unknown;
+  date?: unknown;
+  doctorId?: unknown;
+  duration?: unknown;
+  gap?: unknown;
+  totalFreeSlots?: unknown;
+  totalBooked?: unknown;
+};
+
+function asDoctorOrderEnvelope(value: unknown): DoctorOrderEnvelope | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as DoctorOrderEnvelope)
+    : null;
+}
+
+function asDoctorListEnvelope(value: unknown): DoctorListEnvelope | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as DoctorListEnvelope)
+    : null;
+}
+
+function readDoctorNestedEnvelope(value: unknown): DoctorListEnvelope | null {
+  const record = asDoctorListEnvelope(value);
+  return (
+    asDoctorListEnvelope(record?.data) ??
+    asDoctorListEnvelope(record?.item) ??
+    asDoctorListEnvelope(record?.result) ??
+    null
+  );
+}
+
+function isDoctorRecordArray(value: unknown): value is Record<string, unknown>[] {
+  return (
+    Array.isArray(value) &&
+    value.every((item) => item && typeof item === "object" && !Array.isArray(item))
+  );
+}
+
+function isDoctorRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function readDoctorNamedValue(
+  value: unknown,
+  key: string,
+): unknown {
+  return isDoctorRecord(value) ? value[key] : undefined;
+}
+
+function readDoctorNumber(value: unknown): number | undefined {
+  return typeof value === "number" ? value : undefined;
+}
+
+function readDoctorPatientFilesArray(value: unknown): DoctorPatientFile[] | null {
+  return isDoctorRecordArray(value) ? (value as DoctorPatientFile[]) : null;
+}
+
+function readDoctorLibraryItemsArray(
+  value: unknown,
+): NonNullable<DoctorLibraryListResponse["items"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<DoctorLibraryListResponse["items"]>)
+    : null;
+}
+
+function readDoctorTemplatesArray(
+  value: unknown,
+): NonNullable<DoctorTemplatesListResponse["templates"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<DoctorTemplatesListResponse["templates"]>)
+    : null;
+}
+
+function readDoctorListPageInfo(value: unknown) {
+  return asDoctorListEnvelope(value);
+}
+
+function readDoctorPaging(
+  response: DoctorListEnvelope,
+  fallbackLength: number,
+): Pick<
+  DoctorPatientsListResponse,
+  "page" | "limit" | "total" | "results"
+> {
+  const nested = readDoctorNestedEnvelope(response);
+  const pageInfo = readDoctorListPageInfo(response.pageInfo);
+
+  return {
+    page:
+      readDoctorNumber(response.page) ??
+      readDoctorNumber(nested?.page) ??
+      readDoctorNumber(pageInfo?.page) ??
+      1,
+    limit:
+      readDoctorNumber(response.limit) ??
+      readDoctorNumber(nested?.limit) ??
+      readDoctorNumber(pageInfo?.limit) ??
+      fallbackLength,
+    total:
+      readDoctorNumber(response.total) ??
+      readDoctorNumber(nested?.total) ??
+      readDoctorNumber(pageInfo?.total) ??
+      fallbackLength,
+    results:
+      readDoctorNumber(response.results) ??
+      readDoctorNumber(nested?.results) ??
+      readDoctorNumber(pageInfo?.results) ??
+      fallbackLength,
+  };
+}
+
+function readDoctorCollectionValue<T>(
+  value: unknown,
+  fieldNames: string[],
+  readArray: (value: unknown) => T[] | null,
+): T[] | null {
+  const record = asDoctorListEnvelope(value);
+  if (!record) return null;
+
+  for (const fieldName of fieldNames) {
+    const items = readArray(readDoctorNamedValue(record, fieldName));
+    if (items) return items;
+  }
+
+  return (
+    readArray(record.items) ??
+    readDoctorCollectionValue(record.data, fieldNames, readArray) ??
+    readDoctorCollectionValue(record.result, fieldNames, readArray)
+  );
+}
+
+function readDoctorDetailValue<T>(
+  value: unknown,
+  fieldNames: string[],
+  readDirect: (value: unknown) => T | null,
+): T | null {
+  const record = asDoctorListEnvelope(value);
+  if (!record) return null;
+
+  for (const fieldName of fieldNames) {
+    const direct = readDirect(readDoctorNamedValue(record, fieldName));
+    if (direct) return direct;
+  }
+
+  return (
+    readDirect(record.item) ??
+    readDirect(record.data) ??
+    readDoctorDetailValue(record.data, fieldNames, readDirect) ??
+    readDirect(record.result) ??
+    readDoctorDetailValue(record.result, fieldNames, readDirect)
+  );
+}
+
+function withDoctorDetail<TResponse extends object, TValue>(
+  response: TResponse,
+  key: keyof TResponse,
+  value: TValue | null | undefined,
+): TResponse {
+  return value ? { ...response, [key]: value } : response;
+}
+
+function withDoctorList<TResponse extends object, TKey extends keyof TResponse, TValue>(
+  response: TResponse,
+  key: TKey,
+  value: TValue,
+): TResponse {
+  return { ...response, [key]: value };
+}
+
+function withDoctorDetails<TResponse extends object>(
+  response: TResponse,
+  patch: Partial<TResponse>,
+): TResponse {
+  return {
+    ...response,
+    ...patch,
+  };
+}
+
+function withDoctorResolvedDetail<
+  TResponse extends object,
+  TKey extends keyof TResponse,
+  TValue,
+>(
+  response: TResponse,
+  key: TKey,
+  value: TValue | null | undefined,
+  fallback: TResponse[TKey],
+): TResponse {
+  return withDoctorDetails(response, {
+    [key]: value ?? fallback,
+  } as Partial<TResponse>);
+}
+
+function readDoctorString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function readDoctorArray<T>(value: unknown): T[] | null {
+  return Array.isArray(value) ? (value as T[]) : null;
+}
+
+function readDoctorFreeSlotsArray(
+  value: unknown,
+): DoctorAllSlotsResponse["freeSlots"] | null {
+  return readDoctorArray<DoctorAllSlotsResponse["freeSlots"][number]>(value);
+}
+
+function readDoctorBookedAppointmentsArray(
+  value: unknown,
+): DoctorAllSlotsResponse["appointments"] | null {
+  return readDoctorArray<DoctorAllSlotsResponse["appointments"][number]>(value);
+}
+
+function readDoctorPreferredArray<T>(
+  value: T[] | undefined,
+  fallback: T[] | null,
+): T[] | undefined {
+  return Array.isArray(value) && value.length > 0 ? value : fallback ?? value;
+}
+
+function readDoctorListOrEmpty<T>(
+  value: T[] | null,
+): T[] {
+  return value ?? [];
+}
+
+function withDoctorPaging<TResponse extends DoctorListEnvelope>(
+  response: TResponse,
+  fallbackLength: number,
+): TResponse &
+  Pick<DoctorPatientsListResponse, "page" | "limit" | "total" | "results"> {
+  return {
+    ...response,
+    ...readDoctorPaging(response, fallbackLength),
+  };
+}
+
+function readDoctorFilesList(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["files"],
+    readDoctorPatientFilesArray,
+  );
+}
+
+function readDoctorLibraryItems(value: unknown) {
+  return readDoctorCollectionValue(value, [], readDoctorLibraryItemsArray);
+}
+
+function readDoctorTemplates(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["templates"],
+    readDoctorTemplatesArray,
+  );
+}
+
+function readDoctorPatientsArray(
+  value: unknown,
+): NonNullable<DoctorPatientsListResponse["patients"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<DoctorPatientsListResponse["patients"]>)
+    : null;
+}
+
+function readInternalDirectoryDoctorsArray(
+  value: unknown,
+): NonNullable<InternalDirectoryListResponse["doctors"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<InternalDirectoryListResponse["doctors"]>)
+    : null;
+}
+
+function readOrderFavoritesArray(
+  value: unknown,
+): NonNullable<OrderFavoritesListResponse["favorites"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<OrderFavoritesListResponse["favorites"]>)
+    : null;
+}
+
+function readDoctorPatients(value: unknown) {
+  return readDoctorCollectionValue(value, ["patients"], readDoctorPatientsArray);
+}
+
+function readInternalDirectoryDoctors(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["doctors"],
+    readInternalDirectoryDoctorsArray,
+  );
+}
+
+function readOrderFavorites(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["favorites"],
+    readOrderFavoritesArray,
+  );
+}
+
+function readDoctorEncountersArray(
+  value: unknown,
+): NonNullable<DoctorPatientEncountersListResponse["encounters"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<DoctorPatientEncountersListResponse["encounters"]>)
+    : null;
+}
+
+function readDoctorAccessRequestsArray(
+  value: unknown,
+): NonNullable<DoctorAccessRequestsListResponse["requests"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<DoctorAccessRequestsListResponse["requests"]>)
+    : null;
+}
+
+function readDoctorAccessRequestRecord(
+  value: unknown,
+): DoctorAccessRequestDetailsResponse["request"] | null {
+  return isDoctorRecord(value)
+    ? (value as DoctorAccessRequestDetailsResponse["request"])
+    : null;
+}
+
+function readDoctorEncounters(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["encounters"],
+    readDoctorEncountersArray,
+  );
+}
+
+function readDoctorAccessRequests(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["requests"],
+    readDoctorAccessRequestsArray,
+  );
+}
+
+function readDoctorAccessRequestDetails(value: unknown) {
+  return readDoctorDetailValue(
+    value,
+    ["request"],
+    readDoctorAccessRequestRecord,
+  );
+}
+
+function readDoctorPatientProfileRecord(
+  value: unknown,
+): DoctorPatientFullProfileResponse["patient"] | null {
+  if (!isDoctorRecord(value)) return null;
+  return value as DoctorPatientFullProfileResponse["patient"];
+}
+
+function readDoctorMedicalRecordRecord(
+  value: unknown,
+): DoctorMedicalRecordDetailsResponse["record"] | null {
+  if (!isDoctorRecord(value)) return null;
+  return value as DoctorMedicalRecordDetailsResponse["record"];
+}
+
+function readDoctorEncounterRecord(
+  value: unknown,
+): DoctorEncounterDetailsResponse["encounter"] | null {
+  if (!isDoctorRecord(value)) return null;
+  return value as DoctorEncounterDetailsResponse["encounter"];
+}
+
+function readDoctorAppointmentRecord(
+  value: unknown,
+): DoctorAppointmentDetailsResponse["appointment"] | null {
+  if (!isDoctorRecord(value)) return null;
+  return value as DoctorAppointmentDetailsResponse["appointment"];
+}
+
+function readDoctorAppointmentFilesArray(
+  value: unknown,
+): NonNullable<DoctorAppointmentDetailsResponse["files"]> | null {
+  return isDoctorRecordArray(value)
+    ? (value as NonNullable<DoctorAppointmentDetailsResponse["files"]>)
+    : null;
+}
+
+function readDoctorPatientFileRecord(
+  value: unknown,
+): DoctorPatientFileDetailsResponse["file"] | null {
+  if (!isDoctorRecord(value)) return null;
+  return value as DoctorPatientFileDetailsResponse["file"];
+}
+
+function readDoctorMedicalRecordsArray(
+  value: unknown,
+): DoctorMedicalRecordsListResponse["records"] | null {
+  return isDoctorRecordArray(value)
+    ? (value as DoctorMedicalRecordsListResponse["records"])
+    : null;
+}
+
+function readDoctorPatientPublicProfile(value: unknown) {
+  return readDoctorDetailValue(
+    value,
+    ["patient"],
+    readDoctorPatientProfileRecord,
+  );
+}
+
+function readDoctorMedicalRecords(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["records"],
+    readDoctorMedicalRecordsArray,
+  );
+}
+
+function readDoctorMedicalRecordDetails(value: unknown) {
+  return readDoctorDetailValue(
+    value,
+    ["record"],
+    readDoctorMedicalRecordRecord,
+  );
+}
+
+function readDoctorEncounterDetails(value: unknown) {
+  return readDoctorDetailValue(
+    value,
+    ["encounter"],
+    readDoctorEncounterRecord,
+  );
+}
+
+function readDoctorAppointmentDetails(value: unknown) {
+  return readDoctorDetailValue(
+    value,
+    ["appointment"],
+    readDoctorAppointmentRecord,
+  );
+}
+
+function readDoctorAppointmentFiles(value: unknown) {
+  return readDoctorCollectionValue(
+    value,
+    ["files"],
+    readDoctorAppointmentFilesArray,
+  );
+}
+
+function readDoctorPatientFileDetails(value: unknown) {
+  return readDoctorDetailValue(
+    value,
+    ["file"],
+    readDoctorPatientFileRecord,
+  );
+}
+
+function normalizeDoctorPatientFilesListResponse(
+  response: DoctorPatientFilesListResponse,
+): DoctorPatientFilesListResponse {
+  const files = readDoctorListOrEmpty(readDoctorFilesList(response));
+  const paging = readDoctorPaging(response, files.length);
+
+  return {
+    ...response,
+    items: files,
+    files,
+    ...paging,
+  };
+}
+
+function normalizeDoctorLibraryRecentResponse(
+  response: DoctorLibraryRecentResponse,
+): DoctorLibraryRecentResponse {
+  return withDoctorList(
+    response,
+    "items",
+    readDoctorListOrEmpty(readDoctorLibraryItems(response)),
+  );
+}
+
+function normalizeDoctorLibraryListResponse(
+  response: DoctorLibraryListResponse,
+): DoctorLibraryListResponse {
+  const items = readDoctorListOrEmpty(readDoctorLibraryItems(response));
+  return withDoctorList(withDoctorPaging(response, items.length), "items", items);
+}
+
+function normalizeDoctorTemplatesListResponse(
+  response: DoctorTemplatesListResponse,
+): DoctorTemplatesListResponse {
+  const templates = readDoctorListOrEmpty(readDoctorTemplates(response));
+  return withDoctorList(
+    withDoctorPaging(response, templates.length),
+    "templates",
+    templates,
+  );
+}
+
+function normalizeDoctorPatientsListResponse(
+  response: DoctorPatientsListResponse,
+): DoctorPatientsListResponse {
+  const patients = readDoctorListOrEmpty(readDoctorPatients(response));
+  return withDoctorList(
+    withDoctorPaging(response, patients.length),
+    "patients",
+    patients,
+  );
+}
+
+function normalizeInternalDirectoryListResponse(
+  response: InternalDirectoryListResponse,
+): InternalDirectoryListResponse {
+  const doctors = readDoctorListOrEmpty(readInternalDirectoryDoctors(response));
+  return withDoctorList(
+    withDoctorPaging(response, doctors.length),
+    "doctors",
+    doctors,
+  );
+}
+
+function normalizeOrderFavoritesListResponse(
+  response: OrderFavoritesListResponse,
+): OrderFavoritesListResponse {
+  const favorites = readDoctorListOrEmpty(readOrderFavorites(response));
+  return withDoctorList(
+    withDoctorPaging(response, favorites.length),
+    "favorites",
+    favorites,
+  );
+}
+
+function normalizeDoctorEncountersListResponse(
+  response: DoctorPatientEncountersListResponse,
+): DoctorPatientEncountersListResponse {
+  const encounters = readDoctorListOrEmpty(readDoctorEncounters(response));
+  return withDoctorList(
+    withDoctorPaging(response, encounters.length),
+    "encounters",
+    encounters,
+  );
+}
+
+function normalizeDoctorAccessRequestsListResponse(
+  response: DoctorAccessRequestsListResponse,
+): DoctorAccessRequestsListResponse {
+  const requests = readDoctorListOrEmpty(readDoctorAccessRequests(response));
+  return withDoctorList(
+    withDoctorPaging(response, requests.length),
+    "requests",
+    requests,
+  );
+}
+
+function normalizeDoctorAccessRequestDetailsResponse(
+  response: DoctorAccessRequestDetailsResponse,
+): DoctorAccessRequestDetailsResponse {
+  const request = readDoctorAccessRequestDetails(response);
+  return withDoctorDetail(response, "request", request);
+}
+
+function normalizeDoctorSlotsResponse(
+  response: DoctorAllSlotsResponse,
+): DoctorAllSlotsResponse {
+  const nested = readDoctorNestedEnvelope(response);
+
+  if (!nested) {
+    return response;
+  }
+
+  const nestedFreeSlots = readDoctorFreeSlotsArray(nested.freeSlots);
+  const nestedAppointments = readDoctorBookedAppointmentsArray(nested.appointments);
+
+  return {
+    ...response,
+    date: readDoctorString(response.date) ?? String(nested.date ?? ""),
+    doctorId:
+      readDoctorString(response.doctorId) ?? String(nested.doctorId ?? ""),
+    duration:
+      readDoctorNumber(response.duration) ??
+      readDoctorNumber(nested.duration) ??
+      response.duration,
+    gap:
+      readDoctorNumber(response.gap) ??
+      readDoctorNumber(nested.gap) ??
+      response.gap,
+    freeSlots: readDoctorPreferredArray(response.freeSlots, nestedFreeSlots),
+    totalFreeSlots:
+      readDoctorNumber(response.totalFreeSlots) ??
+      readDoctorNumber(nested.totalFreeSlots) ??
+      response.totalFreeSlots,
+    appointments: readDoctorPreferredArray(
+      response.appointments,
+      nestedAppointments,
+    ),
+    totalBooked:
+      readDoctorNumber(response.totalBooked) ??
+      readDoctorNumber(nested.totalBooked) ??
+      response.totalBooked,
+  };
+}
+
+function normalizeDoctorPublicPatientProfileResponse(
+  response: DoctorPatientPublicProfileResponse,
+): DoctorPatientPublicProfileResponse {
+  const patient = readDoctorPatientPublicProfile(response);
+  return withDoctorDetail(response, "patient", patient);
+}
+
+function normalizeDoctorMedicalRecordsListResponse(
+  response: DoctorMedicalRecordsListResponse,
+): DoctorMedicalRecordsListResponse {
+  const records = readDoctorListOrEmpty(readDoctorMedicalRecords(response));
+  return withDoctorList(response, "records", records);
+}
+
+function normalizeDoctorMedicalRecordDetailsResponse(
+  response: DoctorMedicalRecordDetailsResponse,
+): DoctorMedicalRecordDetailsResponse {
+  const record = readDoctorMedicalRecordDetails(response);
+  return withDoctorDetail(response, "record", record);
+}
+
+function normalizeDoctorEncounterDetailsResponse(
+  response: DoctorEncounterDetailsResponse,
+): DoctorEncounterDetailsResponse {
+  const encounter = readDoctorEncounterDetails(response);
+  return withDoctorDetail(response, "encounter", encounter);
+}
+
+function normalizeDoctorAppointmentDetailsResponse(
+  response: DoctorAppointmentDetailsResponse,
+): DoctorAppointmentDetailsResponse {
+  const appointment = readDoctorAppointmentDetails(response);
+  const files = readDoctorAppointmentFiles(response);
+
+  return withDoctorResolvedDetail(
+    withDoctorResolvedDetail(
+      response,
+      "appointment",
+      appointment,
+      response.appointment,
+    ),
+    "files",
+    files,
+    response.files,
+  );
+}
+
+function normalizeDoctorPatientFileDetailsResponse(
+  response: DoctorPatientFileDetailsResponse,
+): DoctorPatientFileDetailsResponse {
+  const file = readDoctorPatientFileDetails(response);
+  return withDoctorDetail(response, "file", file);
+}
+
+function unwrapDoctorOrderPayload(payload: unknown) {
+  const record = asDoctorOrderEnvelope(payload);
+  if (!record) return null;
+
+  if (record.order) {
+    return normalizeDoctorOrderFromApi(record.order);
+  }
+  if (record.item) {
+    return normalizeDoctorOrderFromApi(record.item);
+  }
+  if (record.data) {
+    const nested =
+      unwrapDoctorOrderPayload(record.data) ??
+      normalizeDoctorOrderFromApi(record.data);
+    if (nested) return nested;
+  }
+  if (record.result) {
+    const nested =
+      unwrapDoctorOrderPayload(record.result) ??
+      normalizeDoctorOrderFromApi(record.result);
+    if (nested) return nested;
+  }
+
+  return normalizeDoctorOrderFromApi(record);
+}
 
 function buildPatientsListQuery(params: DoctorPatientsListParams): string {
   const qs = new URLSearchParams();
@@ -537,7 +1246,7 @@ export const doctorAppointmentsApi = {
     return get<DoctorAppointmentDetailsResponse>(
       doctorEndpoints.appointments.details(appointmentId),
       { locale: "ar" },
-    );
+    ).then(normalizeDoctorAppointmentDetailsResponse);
   },
   book: async (body: DoctorBookAppointmentBody) => {
     return post<DoctorAppointmentMutationResponse>(
@@ -837,9 +1546,9 @@ const doctorSlotsApi = {
 
     const endpoint = `${doctorEndpoints.schedule.slots(actualDoctorId)}?${qs.toString()}`;
 
-    // Cast to DoctorAllSlotsResponse as it's the most comprehensive type
-    // that includes optional fields from all response types
-    return get<DoctorAllSlotsResponse>(endpoint, { locale: "ar" });
+    return get<DoctorAllSlotsResponse>(endpoint, { locale: "ar" }).then(
+      normalizeDoctorSlotsResponse,
+    );
   },
 };
 
@@ -849,7 +1558,9 @@ export const doctorApi = {
       const query = buildPatientsListQuery(params);
       const base = doctorEndpoints.patients.list;
       const endpoint = query ? `${base}?${query}` : base;
-      return get<DoctorPatientsListResponse>(endpoint, { locale: "ar" });
+      return get<DoctorPatientsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeDoctorPatientsListResponse,
+      );
     },
     createTemporary: (body: CreateTemporaryPatientBody) =>
       post<CreateTemporaryPatientResponse>(
@@ -863,7 +1574,7 @@ export const doctorApi = {
       get<DoctorPatientPublicProfileResponse>(
         doctorEndpoints.patients.publicProfile(patientId),
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorPublicPatientProfileResponse),
     getFullProfileResult: (doctorId: string, patientId: string) =>
       apiRequestResult<DoctorPatientFullProfileResponse>(
         doctorEndpoints.patients.fullProfile(doctorId, patientId),
@@ -893,7 +1604,7 @@ export const doctorApi = {
       get<DoctorMedicalRecordsListResponse>(
         doctorEndpoints.patients.medicalRecords(doctorId, patientId),
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorMedicalRecordsListResponse),
     getMedicalRecord: (doctorId: string, patientId: string, recordId: string) =>
       get<DoctorMedicalRecordDetailsResponse>(
         doctorEndpoints.patients.medicalRecordById(
@@ -902,7 +1613,7 @@ export const doctorApi = {
           recordId,
         ),
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorMedicalRecordDetailsResponse),
     createMedicalRecord: (
       doctorId: string,
       patientId: string,
@@ -912,7 +1623,7 @@ export const doctorApi = {
         doctorEndpoints.patients.medicalRecords(doctorId, patientId),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorMedicalRecordDetailsResponse),
     updateMedicalRecord: (
       doctorId: string,
       patientId: string,
@@ -927,7 +1638,7 @@ export const doctorApi = {
         ),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorMedicalRecordDetailsResponse),
     addPatientMedication: (
       doctorId: string,
       patientId: string,
@@ -948,7 +1659,7 @@ export const doctorApi = {
       const endpoint = query ? `${base}?${query}` : base;
       return get<DoctorPatientEncountersListResponse>(endpoint, {
         locale: "ar",
-      });
+      }).then(normalizeDoctorEncountersListResponse);
     },
     createEncounter: (
       doctorId: string,
@@ -959,7 +1670,7 @@ export const doctorApi = {
         doctorEndpoints.patients.encounters(doctorId, patientId),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorEncounterDetailsResponse),
     getEncounter: (doctorId: string, patientId: string, encounterId: string) =>
       get<DoctorEncounterDetailsResponse>(
         doctorEndpoints.patients.encounterById(
@@ -968,7 +1679,7 @@ export const doctorApi = {
           encounterId,
         ),
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorEncounterDetailsResponse),
     updateEncounter: (
       doctorId: string,
       patientId: string,
@@ -983,7 +1694,7 @@ export const doctorApi = {
         ),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorEncounterDetailsResponse),
     closeEncounter: (
       doctorId: string,
       patientId: string,
@@ -1444,12 +2155,12 @@ export const doctorApi = {
       get<DoctorPatientFilesListResponse>(
         doctorEndpoints.patients.files.list(patientId),
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorPatientFilesListResponse),
     getFile: (patientId: string, fileId: string) =>
       get<DoctorPatientFileDetailsResponse>(
         doctorEndpoints.patients.files.detail(patientId, fileId),
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorPatientFileDetailsResponse),
     getFileDownloadUrl: (doctorId: string, patientId: string, fileId: string) =>
       get<DoctorFileDownloadUrlResponse>(
         doctorEndpoints.patients.files.doctorDownloadUrl(
@@ -1506,7 +2217,7 @@ export const doctorApi = {
       const endpoint = query ? `${base}?${query}` : base;
       return get<DoctorPatientEncountersListResponse>(endpoint, {
         locale: "ar",
-      });
+      }).then(normalizeDoctorEncountersListResponse);
     },
   },
   accessRequests: {
@@ -1516,13 +2227,13 @@ export const doctorApi = {
       const endpoint = query ? `${base}?${query}` : base;
       return get<DoctorAccessRequestsListResponse>(endpoint, {
         locale: "ar",
-      });
+      }).then(normalizeDoctorAccessRequestsListResponse);
     },
     getById: (requestId: string) =>
       get<DoctorAccessRequestDetailsResponse>(
         doctorEndpoints.accessRequests.details(requestId),
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorAccessRequestDetailsResponse),
   },
   appointments: doctorAppointmentsApi,
   schedule: doctorScheduleApi,
@@ -1536,9 +2247,12 @@ export const doctorApi = {
       const response = await get<DoctorOrdersListResponse>(endpoint, {
         locale: "ar",
       });
+      const normalizedOrders = normalizeDoctorOrdersListResponse(response);
+      const results = readDoctorNumber(response.results) ?? normalizedOrders.length;
       return {
         ...response,
-        orders: normalizeDoctorOrdersListResponse(response),
+        results,
+        orders: normalizedOrders,
       };
     },
     getById: async (orderId: string) => {
@@ -1546,7 +2260,7 @@ export const doctorApi = {
         doctorEndpoints.orders.byId(orderId),
         { locale: "ar" },
       );
-      const order = normalizeDoctorOrderFromApi(response.order);
+      const order = unwrapDoctorOrderPayload(response);
       if (!order) {
         throw new Error("errors.orders.notFound");
       }
@@ -1608,7 +2322,9 @@ export const doctorApi = {
       const path = query
         ? `${doctorEndpoints.orderFavorites.list}?${query}`
         : doctorEndpoints.orderFavorites.list;
-      return get<OrderFavoritesListResponse>(path, { locale: "ar" });
+      return get<OrderFavoritesListResponse>(path, { locale: "ar" }).then(
+        normalizeOrderFavoritesListResponse,
+      );
     },
     create: (body: CreateOrderFavoriteBody) =>
       post<OrderFavoriteMutationResponse>(
@@ -1629,7 +2345,7 @@ export const doctorApi = {
       get<DoctorLibraryRecentResponse>(
         `${doctorEndpoints.library.recent}?limit=${limit}`,
         { locale: "ar" },
-      ),
+      ).then(normalizeDoctorLibraryRecentResponse),
     list: (
       params: DoctorLibraryListParams = {},
     ) => {
@@ -1644,7 +2360,9 @@ export const doctorApi = {
       const path = query
         ? `${doctorEndpoints.library.items}?${query}`
         : doctorEndpoints.library.items;
-      return get<DoctorLibraryListResponse>(path, { locale: "ar" });
+      return get<DoctorLibraryListResponse>(path, { locale: "ar" }).then(
+        normalizeDoctorLibraryListResponse,
+      );
     },
     create: (body: CreateDoctorLibraryItemBody) =>
       post<DoctorLibraryItemMutationResponse>(
@@ -1684,7 +2402,9 @@ export const doctorApi = {
       const path = query
         ? `${doctorEndpoints.templates.list}?${query}`
         : doctorEndpoints.templates.list;
-      return get<DoctorTemplatesListResponse>(path, { locale: "ar" });
+      return get<DoctorTemplatesListResponse>(path, { locale: "ar" }).then(
+        normalizeDoctorTemplatesListResponse,
+      );
     },
     create: (body: CreateDoctorTemplateBody) =>
       post<DoctorTemplateMutationResponse>(
@@ -1734,7 +2454,9 @@ export const doctorApi = {
         ? `${doctorEndpoints.internalDirectory}?${query}`
         : doctorEndpoints.internalDirectory;
 
-      return get<InternalDirectoryListResponse>(path, { locale: "ar" });
+      return get<InternalDirectoryListResponse>(path, { locale: "ar" }).then(
+        normalizeInternalDirectoryListResponse,
+      );
     },
   },
 } as const;

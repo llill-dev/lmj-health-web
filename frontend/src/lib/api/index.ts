@@ -62,8 +62,8 @@ function noApiContent<T>(): T {
   return undefined!;
 }
 
-function valueOrNoContent<T>(value: unknown, hasContent: boolean): T {
-  return hasContent ? (value as T) : noApiContent<T>();
+function valueOrNoContent<T>(value: T, hasContent: boolean): T {
+  return hasContent ? value : noApiContent<T>();
 }
 
 function parseApiJsonText(raw: string): ApiBodyRecord {
@@ -497,7 +497,7 @@ export async function apiRequest<T = unknown>(
       throw err;
     }
 
-    return valueOrNoContent<T>(body, Object.keys(body).length > 0);
+    return valueOrNoContent<T>(body as T, Object.keys(body).length > 0);
   };
 
   try {
@@ -575,7 +575,7 @@ export async function apiMultipart<T = unknown>(
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const parsed = parseApiJsonText(xhr.responseText);
-            resolve(valueOrNoContent<T>(parsed, Object.keys(parsed).length > 0));
+            resolve(valueOrNoContent<T>(parsed as T, Object.keys(parsed).length > 0));
           } catch {
             resolve(noApiContent<T>());
           }

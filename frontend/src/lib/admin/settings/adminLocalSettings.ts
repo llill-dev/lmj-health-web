@@ -46,8 +46,10 @@ function asAdminLocalSettingsRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
-function parseAdminLocalSettingsRaw(raw: string): unknown {
-  return JSON.parse(raw);
+function parseAdminLocalSettingsRaw(
+  raw: string,
+): AdminLocalSettingsInput | undefined {
+  return asAdminLocalSettingsRecord(JSON.parse(raw));
 }
 
 function isAdminLocalSettingsInput(value: unknown): value is AdminLocalSettingsInput {
@@ -60,7 +62,7 @@ export function loadAdminLocalSettings(): AdminLocalSettings {
   try {
     const raw = window.localStorage.getItem(ADMIN_LOCAL_SETTINGS_KEY);
     if (!raw) return DEFAULT_ADMIN_LOCAL_SETTINGS;
-    const parsedRaw = asAdminLocalSettingsRecord(parseAdminLocalSettingsRaw(raw));
+    const parsedRaw = parseAdminLocalSettingsRaw(raw);
     const parsed = isAdminLocalSettingsInput(parsedRaw) ? parsedRaw : {};
     return {
       general: {

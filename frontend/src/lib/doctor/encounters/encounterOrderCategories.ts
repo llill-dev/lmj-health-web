@@ -8,6 +8,11 @@ function readEncounterUpdatedAt(order: EncounterOrder): string | undefined {
   return typeof candidate.updatedAt === 'string' ? candidate.updatedAt : undefined;
 }
 
+function readEncounterOrderTimestamp(order: EncounterOrder): number {
+  const value = readEncounterUpdatedAt(order) ?? order.createdAt;
+  return value ? new Date(value).getTime() : 0;
+}
+
 export type EncounterOrderCategoryKey =
   | 'lab'
   | 'radiology'
@@ -93,8 +98,8 @@ export function isFinalizedEncounterOrder(order: EncounterOrder) {
 
 export function sortEncounterOrdersByRecent(orders: EncounterOrder[]) {
   return [...orders].sort((a, b) => {
-    const aTime = new Date(readEncounterUpdatedAt(a) ?? a.createdAt ?? 0).getTime();
-    const bTime = new Date(readEncounterUpdatedAt(b) ?? b.createdAt ?? 0).getTime();
+    const aTime = readEncounterOrderTimestamp(a);
+    const bTime = readEncounterOrderTimestamp(b);
     return bTime - aTime;
   });
 }

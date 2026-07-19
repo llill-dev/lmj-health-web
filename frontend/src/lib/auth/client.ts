@@ -36,6 +36,17 @@ function readAuthBodyString(
   return typeof value === "string" ? value : undefined;
 }
 
+function readFirstAuthBodyString(
+  body: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = readAuthBodyString(body, key);
+    if (value) return value;
+  }
+  return undefined;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Error normaliser
 // Reads the structured ApiError (status + messageKey + body) produced by
@@ -46,8 +57,7 @@ const handleAuthError = (error: unknown): AuthError => {
   if (error instanceof ApiError) {
     const { status, messageKey, body } = error;
     const backendMessage =
-      readAuthBodyString(body, "message") ||
-      readAuthBodyString(body, "error") ||
+      readFirstAuthBodyString(body, ["message", "error"]) ||
       error.message;
 
     let code: AuthError["code"] = "UNKNOWN";

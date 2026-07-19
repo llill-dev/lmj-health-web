@@ -26,6 +26,19 @@ function asPrescriptionValidationErrorRecord(
     : null;
 }
 
+function readPrescriptionValidationString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function readPrescriptionValidationLeaf(value: unknown): string {
+  if (Array.isArray(value)) {
+    return readPrescriptionValidationString(value[value.length - 1]) ?? '';
+  }
+
+  const path = readPrescriptionValidationString(value);
+  return path?.replace(/[[\]/]+/g, '.').split('.').filter(Boolean).at(-1) ?? path ?? '';
+}
+
 function collectStructuredFieldTexts(
   body: PrescriptionValidationErrorRecord,
 ): Map<string, string> {
@@ -53,20 +66,18 @@ function collectStructuredFieldTexts(
         push('_root', item);
         continue;
       }
+
       const row = asPrescriptionValidationErrorRecord(item);
       if (!row) continue;
+
       const pathVal =
         row.path ?? row.param ?? row.field ?? row.property ?? row.propertyName;
-      let leaf = '';
-      if (Array.isArray(pathVal)) {
-        leaf = String(pathVal[pathVal.length - 1] ?? '');
-      } else if (typeof pathVal === 'string') {
-        leaf = pathVal.split(/[.[\]/]/).filter(Boolean).at(-1) ?? pathVal;
-      }
+      const leaf = readPrescriptionValidationLeaf(pathVal);
       const msg =
-        (typeof row.message === 'string' && row.message.trim()) ||
-        (typeof row.msg === 'string' && row.msg.trim()) ||
+        readPrescriptionValidationString(row.message) ||
+        readPrescriptionValidationString(row.msg) ||
         '';
+
       push(leaf || '_root', msg);
     }
     return out;
@@ -78,7 +89,10 @@ function collectStructuredFieldTexts(
       else if (Array.isArray(value)) {
         push(
           key,
-          value.filter((entry) => typeof entry === 'string').join('، '),
+          value
+            .map((entry) => readPrescriptionValidationString(entry))
+            .filter((entry): entry is string => Boolean(entry))
+            .join('، '),
         );
       }
     }

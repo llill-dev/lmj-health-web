@@ -73,6 +73,14 @@ function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+function readFirstNonEmptyString(values: Array<string | null | undefined>): string | undefined {
+  for (const value of values) {
+    const normalized = readString(value);
+    if (normalized) return normalized;
+  }
+  return undefined;
+}
+
 function readNestedString(
   record: PlatformContentApiRecord,
   keys: string[],
@@ -98,16 +106,94 @@ function readMediaUrl(value: unknown): string | undefined {
   ]);
 }
 
+function readFirstMediaUrl(record: PlatformContentApiRecord, keys: string[]): string | undefined {
+  for (const key of keys) {
+    const url = readMediaUrl(record[key]);
+    if (url) return url;
+  }
+  return undefined;
+}
+
+function readContentRows(value: unknown): PlatformContentApiRecord[] {
+  return Array.isArray(value)
+    ? value.filter(
+        (row): row is PlatformContentApiRecord =>
+          !!row && typeof row === 'object' && !Array.isArray(row),
+      )
+    : [];
+}
+
+function readFirstContentRows(
+  ...values: unknown[]
+): PlatformContentApiRecord[] {
+  for (const value of values) {
+    const rows = readContentRows(value);
+    if (rows.length) return rows;
+  }
+  return [];
+}
+
+function readFirstStringField(
+  record: PlatformContentApiRecord,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = readString(record[key]);
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function readContentTextMeta(
+  record: PlatformContentApiRecord,
+): Pick<PlatformContentDetails, 'language' | 'summary' | 'publishedAt'> {
+  return {
+    language: readFirstStringField(record, ['language']),
+    summary: readFirstStringField(record, ['summary']),
+    publishedAt: readFirstStringField(record, ['publishedAt']),
+  };
+}
+
+function readBlockStringField(
+  record: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = readString(record[key]);
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function readSourceTitle(record: PlatformContentApiRecord): string | undefined {
+  return readFirstStringField(record, ['title', 'label', 'name', 'sourceTitle']);
+}
+
+function readSourceUrl(record: PlatformContentApiRecord): string | undefined {
+  return readFirstStringField(record, ['url', 'href', 'sourceUrl', 'sourceLink']);
+}
+
+function readPrimaryContentRecord(
+  data: PlatformContentApiRecord,
+): PlatformContentApiRecord | null {
+  return (
+    asPlatformRecord(data.contentItem) ??
+    asPlatformRecord(data.item) ??
+    asPlatformRecord(data.content)
+  );
+}
+
 function extractCoverImageFromBlocks(blocks: AdminContentBlock[]): string | undefined {
   for (const block of blocks) {
     const record: PlatformBlockWithMedia = block;
-    const image =
-      readMediaUrl(record.coverImage) ||
-      readMediaUrl(record.imageUrl) ||
-      readMediaUrl(record.image) ||
-      readMediaUrl(record.media) ||
-      readMediaUrl(record.thumbnail) ||
-      readMediaUrl(record.poster);
+    const image = readFirstMediaUrl(record, [
+      'coverImage',
+      'imageUrl',
+      'image',
+      'media',
+      'thumbnail',
+      'poster',
+    ]);
     if (image) return image;
     if (Array.isArray(record.images)) {
       for (const item of record.images) {
@@ -126,7 +212,7 @@ function extractSourceNameFromBlocks(blocks: AdminContentBlock[]): string | unde
       if (title) return title;
     }
     const record: PlatformBlockWithSource = block;
-    const sourceName = readString(record.sourceName) || readString(record.source);
+    const sourceName = readBlockStringField(record, ['sourceName', 'source']);
     if (sourceName) return sourceName;
   }
   return undefined;
@@ -138,35 +224,39 @@ function extractSourcesFromBlocks(
   const sources = blocks
     .flatMap((block) => {
       if (block.type === 'linkCard') {
-        return [
-          {
-            title: readString(block.title),
-            url: readString(block.url),
-          },
-        ];
+        const source = toSourceItem(readString(block.title), readString(block.url));
+        return source ? [source] : [];
       }
 
       const record: PlatformBlockWithSourceLink = block;
-      const url =
-        readString(record.sourceUrl) ||
-        readString(record.url) ||
-        readString(record.sourceLink) ||
-        readString(record.href);
-      if (!url) return [];
-
-      return [
-        {
-          title:
-            readString(record.sourceTitle) ||
-            readString(record.title) ||
-            readString(record.label),
-          url,
-        },
-      ];
+      const source = toSourceItem(
+        readBlockStringField(record, ['sourceTitle', 'title', 'label']),
+        readBlockStringField(record, ['sourceUrl', 'url', 'sourceLink', 'href']),
+      );
+      return source ? [source] : [];
     })
     .filter((entry) => entry.url);
 
   return sources.length ? sources : undefined;
+}
+
+function toSourceItem(
+  title: string | undefined,
+  url: string | undefined,
+): PlatformSourceItem | null {
+  return url ? { title, url } : null;
+}
+
+function readSourceItems(value: unknown): PlatformSourceItem[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value
+    .map((entry) => {
+      const record = asPlatformSourceItem(entry);
+      if (!record) return null;
+      return toSourceItem(readSourceTitle(record), readSourceUrl(record));
+    })
+    .filter((entry): entry is PlatformSourceItem => entry != null);
+  return items.length ? items : undefined;
 }
 
 function normalizeContentItem(
@@ -182,42 +272,24 @@ function normalizeContentItem(
     type: String(raw.type ?? ''),
     title: String(raw.title ?? ''),
     slug: String(raw.slug ?? ''),
-    language: typeof raw.language === 'string' ? raw.language : undefined,
-    summary: typeof raw.summary === 'string' ? raw.summary : undefined,
+    ...readContentTextMeta(raw),
     pageVersion: readNullableString(raw.pageVersion),
-    publishedAt:
-      typeof raw.publishedAt === 'string' ? raw.publishedAt : undefined,
     lastReviewedAt:
       typeof raw.lastReviewedAt === 'string' ? raw.lastReviewedAt : null,
     coverImage:
-      readMediaUrl(raw.coverImage) ??
-      readMediaUrl(raw.image) ??
-      readMediaUrl(raw.imageUrl) ??
-      readMediaUrl(raw.thumbnail) ??
-      readMediaUrl(raw.media) ??
+      readFirstMediaUrl(raw, [
+        'coverImage',
+        'image',
+        'imageUrl',
+        'thumbnail',
+        'media',
+      ]) ??
       extractCoverImageFromBlocks(contentBlocks),
     sourceName:
-      readString(raw.sourceName) ??
-      readString(raw.source) ??
-      readString(raw.publisher) ??
+      readFirstStringField(raw, ['sourceName', 'source', 'publisher']) ??
       extractSourceNameFromBlocks(contentBlocks),
-    sources: Array.isArray(raw.sources)
-      ? raw.sources
-          .filter((entry): entry is PlatformContentApiRecord => Boolean(asPlatformSourceItem(entry)))
-          .map((entry) => {
-            const record = asPlatformSourceItem(entry) ?? {};
-            return {
-              title:
-                readString(record.title) ??
-                readString(record.label) ??
-                readString(record.name),
-              url:
-                readString(record.url) ??
-                readString(record.href) ??
-                readString(record.sourceUrl),
-            };
-          })
-      : extractSourcesFromBlocks(contentBlocks),
+    sources:
+      readSourceItems(raw.sources) ?? extractSourcesFromBlocks(contentBlocks),
     contentBlocks,
   };
 }
@@ -231,13 +303,7 @@ export function normalizePlatformContentListResponse(
 export function normalizePlatformContentItems(
   data: PlatformContentApiRecord,
 ): PlatformContentListItem[] {
-  const rowsValue = data.items ?? data.contentItems ?? data.content ?? [];
-  const rows = Array.isArray(rowsValue)
-    ? rowsValue.filter(
-        (row): row is PlatformContentApiRecord =>
-          !!row && typeof row === 'object' && !Array.isArray(row),
-      )
-    : [];
+  const rows = readFirstContentRows(data.items, data.contentItems, data.content);
 
   return rows
     .map((row) => {
@@ -248,21 +314,18 @@ export function normalizePlatformContentItems(
         type: String(row.type ?? ''),
         title: String(row.title ?? ''),
         slug: String(row.slug ?? ''),
-        language: typeof row.language === 'string' ? row.language : undefined,
-        summary: typeof row.summary === 'string' ? row.summary : undefined,
+        ...readContentTextMeta(row),
         pageVersion: readNullableString(row.pageVersion),
-        publishedAt:
-          typeof row.publishedAt === 'string' ? row.publishedAt : undefined,
         coverImage:
-          readMediaUrl(row.coverImage) ??
-          readMediaUrl(row.image) ??
-          readMediaUrl(row.imageUrl) ??
-          readMediaUrl(row.thumbnail) ??
+          readFirstMediaUrl(row, [
+            'coverImage',
+            'image',
+            'imageUrl',
+            'thumbnail',
+          ]) ??
           extractCoverImageFromBlocks(contentBlocks),
         sourceName:
-          readString(row.sourceName) ??
-          readString(row.source) ??
-          readString(row.publisher) ??
+          readFirstStringField(row, ['sourceName', 'source', 'publisher']) ??
           extractSourceNameFromBlocks(contentBlocks),
         viewCount:
           typeof row.viewCount === 'number'
@@ -278,10 +341,7 @@ export function normalizePlatformContentItems(
 export function normalizePlatformContentDetailsResponse(
   data: PlatformContentApiRecord,
 ): PlatformContentDetails | null {
-  const raw =
-    asPlatformRecord(data.contentItem) ??
-    asPlatformRecord(data.item) ??
-    asPlatformRecord(data.content);
+  const raw = readPrimaryContentRecord(data);
   return normalizeContentItem(raw);
 }
 
@@ -395,17 +455,19 @@ export function mapContentToLegalDocument(
   content: PlatformContentDetails,
   fallbackSectionTitle?: string,
 ): PlatformLegalDocument {
+  const bodyText = contentBlocksToPlainText(content.contentBlocks);
   const body =
-    contentBlocksToPlainText(content.contentBlocks) ||
-    content.summary ||
-    'المحتوى غير متوفر حالياً.';
+    readFirstNonEmptyString([
+      bodyText,
+      content.summary,
+    ]) ?? 'المحتوى غير متوفر حالياً.';
 
   const lastUpdated = formatContentDate(
     content.lastReviewedAt ?? content.publishedAt,
   );
 
   return {
-    id: content.slug || content.id,
+    id: readFirstNonEmptyString([content.slug, content.id]) ?? content.id,
     title: content.title,
     sectionTitle: fallbackSectionTitle ?? content.title,
     body,

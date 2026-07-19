@@ -132,15 +132,35 @@ function normalizeCatalogListItems(
 ) {
   if (!data) return [];
   const nested = data.data;
-  if (data.items?.length) return data.items;
-  if (nested?.items?.length) return nested.items;
+  const directItems = Array.isArray(data.items) ? data.items : [];
+  const nestedItems =
+    nested && typeof nested === 'object' && Array.isArray(nested.items)
+      ? nested.items
+      : [];
+  if (directItems.length) return directItems;
+  if (nestedItems.length) return nestedItems;
   if (category === 'lab') {
-    return data.labTests ?? nested?.labTests ?? [];
+    const directLabTests = Array.isArray(data.labTests) ? data.labTests : [];
+    const nestedLabTests =
+      nested && typeof nested === 'object' && Array.isArray(nested.labTests)
+        ? nested.labTests
+        : [];
+    return directLabTests.length ? directLabTests : nestedLabTests;
   }
   if (category === 'radiology') {
-    return data.imaging ?? nested?.imaging ?? [];
+    const directImaging = Array.isArray(data.imaging) ? data.imaging : [];
+    const nestedImaging =
+      nested && typeof nested === 'object' && Array.isArray(nested.imaging)
+        ? nested.imaging
+        : [];
+    return directImaging.length ? directImaging : nestedImaging;
   }
-  return data.procedures ?? nested?.procedures ?? [];
+  const directProcedures = Array.isArray(data.procedures) ? data.procedures : [];
+  const nestedProcedures =
+    nested && typeof nested === 'object' && Array.isArray(nested.procedures)
+      ? nested.procedures
+      : [];
+  return directProcedures.length ? directProcedures : nestedProcedures;
 }
 
 function pickFirstCatalogItemId(

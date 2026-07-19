@@ -11,6 +11,22 @@ function asDoctorProfileSuccessRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readDoctorProfileRedirectTo(
+  record: { flow?: unknown; redirectTo?: unknown },
+): string | undefined {
+  const value = record.redirectTo;
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
+function parseDoctorProfileSuccessState(
+  raw: string,
+): DoctorProfileSuccessNavState | null {
+  const parsed = JSON.parse(raw);
+  return isDoctorProfileSuccessNavState(parsed)
+    ? normalizeDoctorProfileSuccessState(parsed)
+    : null;
+}
+
 function isDoctorProfileSuccessNavState(
   value: unknown,
 ): value is DoctorProfileSuccessNavState {
@@ -19,8 +35,7 @@ function isDoctorProfileSuccessNavState(
   if (!record) return false;
   return (
     record.flow === 'personal_updated' &&
-    (record.redirectTo === undefined ||
-      (typeof record.redirectTo === 'string' && record.redirectTo.trim().length > 0))
+    (record.redirectTo === undefined || Boolean(readDoctorProfileRedirectTo(record)))
   );
 }
 
@@ -47,9 +62,12 @@ export function peekDoctorProfileSuccessNavState(): DoctorProfileSuccessNavState
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!isDoctorProfileSuccessNavState(parsed)) return null;
-    return normalizeDoctorProfileSuccessState(parsed);
+    const state = parseDoctorProfileSuccessState(raw);
+    if (!state) {
+      sessionStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return state;
   } catch {
     return null;
   }

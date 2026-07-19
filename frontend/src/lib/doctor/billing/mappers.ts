@@ -32,6 +32,14 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   insurance: 'تأمين',
 };
 
+function readArrayOrEmpty<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function readInvoiceItems(value: ApiBillingInvoice['items']): NonNullable<ApiBillingInvoice['items']> {
+  return readArrayOrEmpty(value);
+}
+
 function formatIsoDate(value?: string | null): string {
   return formatBillingDate(value);
 }
@@ -111,13 +119,13 @@ export function mapApiInvoiceToClinicInvoice(
     paid: invoice.grossPaid ?? invoice.netPaid ?? 0,
     discountPercent: invoice.discountPercent ?? 0,
     taxPercent,
-    items: (invoice.items ?? []).map((item, index) => ({
+    items: readInvoiceItems(invoice.items).map((item, index) => ({
       id: item.id ?? `item-${index}`,
       name: item.serviceNameSnapshot ?? item.description ?? 'خدمة',
       quantity: item.quantity ?? 1,
       unitPrice: item.unitPrice ?? 0,
     })),
-    payments: (invoice.payments ?? []).map(mapApiPaymentToClinicPayment),
+    payments: readArrayOrEmpty(invoice.payments).map(mapApiPaymentToClinicPayment),
     currency: invoice.currency,
     rawId: invoice.id,
     remaining: invoice.remaining,
@@ -194,7 +202,7 @@ export function mapDashboardTrendsToWeeklyOverview(
   dashboard: ApiBillingDashboard,
 ): WeeklyOverviewPoint[] {
   const buckets = dashboard.trends?.buckets ?? [];
-  return buckets.map((bucket) => {
+  return readArrayOrEmpty(buckets).map((bucket) => {
     const summary = bucket.summaryByCurrency?.[0] ?? bucket.summary ?? {};
     return {
       week: bucket.label ?? bucket.key ?? '—',
@@ -209,7 +217,7 @@ export function mapReportTrendsToMonthlyFinance(
   report: ApiBillingReport,
 ): MonthlyFinancePoint[] {
   const buckets = report.trends?.buckets ?? [];
-  return buckets.map((bucket) => {
+  return readArrayOrEmpty(buckets).map((bucket) => {
     const summary = bucket.summaryByCurrency?.[0] ?? bucket.summary ?? {};
     return {
       month: bucket.label ?? bucket.key ?? '—',
@@ -228,7 +236,7 @@ export function mapExpensesByCategory(
     report.charts?.expensesByCategory ??
     [];
 
-  return rows.map((row, index) => ({
+  return readArrayOrEmpty(rows).map((row, index) => ({
     category: guessExpenseCategory(row.label),
     label: row.label ?? 'أخرى',
     value: row.amount ?? 0,
@@ -240,7 +248,7 @@ export function mapRecentActivitiesFromReport(
   report: ApiBillingReport,
   currency = 'USD',
 ): RecentActivity[] {
-  const payments = (report.tables?.payments ?? []).slice(0, 5).map((payment) => ({
+  const payments = readArrayOrEmpty(report.tables?.payments).slice(0, 5).map((payment) => ({
     id: `pay-${payment.id}`,
     title: `دفعة - ${payment.invoiceNumber ?? payment.invoiceId ?? ''}`,
     timeLabel: formatRelativeTime(payment.paidAt),
@@ -249,7 +257,7 @@ export function mapRecentActivitiesFromReport(
     currency,
   }));
 
-  const expenses = (report.tables?.expenses ?? []).slice(0, 3).map((expense) => ({
+  const expenses = readArrayOrEmpty(report.tables?.expenses).slice(0, 3).map((expense) => ({
     id: `exp-${expense.id}`,
     title: expense.description ?? expense.category ?? 'مصروف',
     timeLabel: formatRelativeTime(expense.expenseDate),

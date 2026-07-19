@@ -16,13 +16,24 @@ type AdminDoctorOffboardSource =
   | DoctorLike['user']
   | DoctorLike;
 
+function readStoredIdString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function parseStoredStringIds(raw: string): string[] | null {
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) return null;
+  return parsed
+    .map((id) => readStoredIdString(id))
+    .filter((id): id is string => Boolean(id));
+}
+
 function readStoredIds(key: string): Set<string> {
   try {
     const raw = sessionStorage.getItem(key);
     if (!raw) return new Set();
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return new Set();
-    return new Set(parsed.filter((id): id is string => typeof id === 'string'));
+    const parsed = parseStoredStringIds(raw);
+    return new Set(parsed ?? []);
   } catch {
     return new Set();
   }

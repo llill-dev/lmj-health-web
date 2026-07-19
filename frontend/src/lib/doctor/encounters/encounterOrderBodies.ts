@@ -17,16 +17,24 @@ function asEncounterOrderCreateRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readEncounterOrderRecordString(
+  record: { _id?: unknown; id?: unknown } | undefined,
+  key: '_id' | 'id',
+): string | undefined {
+  const value = record?.[key];
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
 export function resolveEncounterOrderIdFromCreateResponse(
   response: EncounterOrderResponse,
 ): string {
   const order = asEncounterOrderCreateRecord(response.order);
   const root = asEncounterOrderCreateRecord(response);
   const id =
-    (typeof order?._id === 'string' ? order._id.trim() : undefined) ??
-    (typeof order?.id === 'string' ? order.id.trim() : undefined) ??
+    readEncounterOrderRecordString(order, '_id') ??
+    readEncounterOrderRecordString(order, 'id') ??
     response.orderId?.trim() ??
-    (typeof root?._id === 'string' ? root._id.trim() : undefined);
+    readEncounterOrderRecordString(root, '_id');
   if (!id || id === 'undefined') throw new Error('missing_order');
   return id;
 }
@@ -195,6 +203,14 @@ function asValidationErrorRow(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readValidationRowString(
+  row: { path?: unknown; msg?: unknown; value?: unknown } | undefined,
+  key: 'path' | 'msg',
+): string | undefined {
+  const value = row?.[key];
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
 function formatValidationErrors(error: ApiError): string | null {
   const errors = error.body.errors;
   if (!Array.isArray(errors) || errors.length === 0) return null;
@@ -202,8 +218,8 @@ function formatValidationErrors(error: ApiError): string | null {
   const hint = errors
     .map((entry) => {
       const row = asValidationErrorRow(entry);
-      const path = typeof row?.path === 'string' ? row.path.trim() : undefined;
-      const msg = typeof row?.msg === 'string' ? row.msg.trim() : undefined;
+      const path = readValidationRowString(row, 'path');
+      const msg = readValidationRowString(row, 'msg');
       if (path === 'patientId') {
         return 'معرّف المريض (patientId) مطلوب أو غير صالح';
       }

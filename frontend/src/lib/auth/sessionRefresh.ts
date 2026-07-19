@@ -12,8 +12,15 @@ import { useAuthStore } from "@/store/authStore";
 
 let refreshInFlight: Promise<boolean> | null = null;
 
+function asRefreshTokenRecord(value: RefreshTokenResponse): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as unknown as Record<string, unknown>)
+    : null;
+}
+
 function applyRefreshedTokens(data: RefreshTokenResponse): boolean {
-  const pair = normalizeTokenPair(data as unknown as Record<string, unknown>);
+  const record = asRefreshTokenRecord(data);
+  const pair = record ? normalizeTokenPair(record) : null;
   if (!pair) return false;
 
   const stored = readStoredAuthSession();

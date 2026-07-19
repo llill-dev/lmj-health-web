@@ -18,6 +18,7 @@ import type {
   PlatformContentLanguage,
   PlatformContentListItem,
   PlatformContentListEnvelope,
+  PlatformContentApiRecord,
 } from '@/lib/platform/types';
 
 export type PlatformContentListParams = {
@@ -26,6 +27,97 @@ export type PlatformContentListParams = {
   page?: number;
   limit?: number;
 };
+
+type ServiceTypesEnvelope = ServiceTypesListResponse & {
+  items?: ServiceType[];
+  results?: ServiceType[];
+  data?: ServiceTypesListResponse | { serviceTypes?: ServiceType[]; items?: ServiceType[] };
+};
+
+function asPlatformRecord(value: unknown): PlatformContentApiRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as PlatformContentApiRecord)
+    : null;
+}
+
+function readNestedPlatformRecord(value: unknown): PlatformContentApiRecord | null {
+  const record = asPlatformRecord(value);
+  return asPlatformRecord(record?.data) ?? null;
+}
+
+function readPlatformField(
+  value: unknown,
+  key: string,
+): unknown {
+  return asPlatformRecord(value)?.[key];
+}
+
+function readServiceTypes(value: unknown): ServiceType[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter(
+    (entry): entry is ServiceType =>
+      !!entry && typeof entry === 'object' && !Array.isArray(entry),
+  );
+}
+
+function readFirstServiceTypes(sources: unknown[]): ServiceType[] | undefined {
+  for (const source of sources) {
+    const items = readServiceTypes(source);
+    if (items?.length) return items;
+  }
+  return undefined;
+}
+
+function normalizeServiceTypesResponse(response: ServiceTypesEnvelope): ServiceType[] {
+  const record = asPlatformRecord(response) ?? {};
+  const nested = readNestedPlatformRecord(record);
+  return (
+    readFirstServiceTypes([
+      readPlatformField(response, 'serviceTypes'),
+      readPlatformField(record, 'items'),
+      readPlatformField(record, 'results'),
+      readPlatformField(nested, 'serviceTypes'),
+      readPlatformField(nested, 'items'),
+    ]) ?? []
+  );
+}
+
+async function readPlatformListResult<TEnvelope>(
+  path: string,
+  locale: PlatformContentLanguage,
+  normalize: (data: TEnvelope) => PlatformContentListItem[],
+): Promise<PlatformContentListItem[]> {
+  const result = await apiRequestResult<TEnvelope>(path, {
+    locale,
+    expectedStatuses: [404],
+  });
+  if (!result.ok) return [];
+  return normalize(result.data);
+}
+
+async function readPlatformDetailResult<TEnvelope>(
+  path: string,
+  locale: PlatformContentLanguage,
+  normalize: (data: TEnvelope) => PlatformContentDetails | null,
+): Promise<PlatformContentDetails | null> {
+  const result = await apiRequestResult<TEnvelope>(path, {
+    locale,
+    expectedStatuses: [404],
+  });
+  if (!result.ok) return null;
+  return normalize(result.data);
+}
+
+async function readPlatformServiceTypesResult(
+  locale: PlatformContentLanguage,
+): Promise<ServiceType[]> {
+  const result = await apiRequestResult<ServiceTypesEnvelope>(
+    platformEndpoints.serviceTypes,
+    { locale, expectedStatuses: [404] },
+  );
+  if (!result.ok) return [];
+  return normalizeServiceTypesResponse(result.data);
+}
 
 function buildContentListUrl(params: PlatformContentListParams = {}) {
   const qs = new URLSearchParams();
@@ -52,32 +144,27 @@ export const platformApi = {
       params: PlatformContentListParams = {},
     ): Promise<PlatformContentListItem[]> => {
       const locale = params.language ?? 'ar';
-      const result = await apiRequestResult<PlatformContentListEnvelope>(
+      return readPlatformListResult<PlatformContentListEnvelope>(
         buildContentListUrl(params),
-        { locale, expectedStatuses: [404] },
+        locale,
+        normalizePlatformContentItems,
       );
-
-      if (!result.ok) return [];
-      return normalizePlatformContentItems(result.data);
     },
 
     listSettingsPages: (params: PlatformContentListParams = {}) =>
-      platformApi.content
-        .listSettingsPagesSafe({ ...params, type: 'SETTINGS_PAGE' })
-        .then(
-        (items) => items ?? [],
-      ),
+      platformApi.content.listSettingsPagesSafe({
+        ...params,
+        type: 'SETTINGS_PAGE',
+      }),
 
     /** Returns [] on 404/empty — does not throw. */
     listSettingsPagesSafe: async (params: PlatformContentListParams = {}) => {
       const locale = params.language ?? 'ar';
-      const result = await apiRequestResult<PlatformContentListEnvelope>(
+      return readPlatformListResult<PlatformContentListEnvelope>(
         buildContentListUrl({ ...params, type: 'SETTINGS_PAGE' }),
-        { locale, expectedStatuses: [404] },
+        locale,
+        normalizePlatformContentListResponse,
       );
-
-      if (!result.ok) return [];
-      return normalizePlatformContentListResponse(result.data);
     },
 
     search: async (
@@ -87,33 +174,26 @@ export const platformApi = {
       if (!q) return [];
 
       const locale = params.language ?? 'ar';
-      const result = await apiRequestResult<PlatformContentSearchResponse>(
+      return readPlatformListResult<PlatformContentSearchResponse>(
         buildContentSearchUrl({ ...params, q }),
-        { locale, expectedStatuses: [404] },
+        locale,
+        normalizePlatformContentItems,
       );
-
-      if (!result.ok) return [];
-      return normalizePlatformContentItems(result.data);
     },
 
     getBySlug: (slug: string, language: PlatformContentLanguage = 'ar') =>
-      platformApi.content.getBySlugSafe(slug, language).then(
-        (item) => item,
-      ),
+      platformApi.content.getBySlugSafe(slug, language),
 
     /** Returns null on 404 — does not throw. */
     getBySlugSafe: async (
       slug: string,
       language: PlatformContentLanguage = 'ar',
-    ): Promise<PlatformContentDetails | null> => {
-      const result = await apiRequestResult<PlatformContentDetailsEnvelope>(
+    ): Promise<PlatformContentDetails | null> =>
+      readPlatformDetailResult<PlatformContentDetailsEnvelope>(
         `${platformEndpoints.content.bySlug(slug)}?language=${language}`,
-        { locale: language, expectedStatuses: [404] },
-      );
-
-      if (!result.ok) return null;
-      return normalizePlatformContentDetailsResponse(result.data);
-    },
+        language,
+        normalizePlatformContentDetailsResponse,
+      ),
   },
 
   complaints: {
@@ -126,14 +206,8 @@ export const platformApi = {
 
   serviceTypes: {
     list: async (language: PlatformContentLanguage = 'ar') => {
-      const result = await apiRequestResult<ServiceTypesListResponse>(
-        platformEndpoints.serviceTypes,
-        { locale: language, expectedStatuses: [404] },
-      );
-
-      if (!result.ok) return [];
-
-      return (result.data.serviceTypes ?? [])
+      const serviceTypes = await readPlatformServiceTypesResult(language);
+      return serviceTypes
         .filter((service: ServiceType) => service.isActive !== false)
         .map((service: ServiceType) => ({
           id: service._id,

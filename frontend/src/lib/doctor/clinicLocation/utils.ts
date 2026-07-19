@@ -27,6 +27,12 @@ const LOCATION_CHANGE_FIELDS = new Set([
   'locationCountry',
 ]);
 
+function readChangeItems(
+  request: DoctorProfileChangeRequest,
+): DoctorProfileChangeItem[] {
+  return Array.isArray(request.items) ? request.items : [];
+}
+
 export function formatCoordinate(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return '';
   return value.toFixed(6);
@@ -67,10 +73,11 @@ export function buildClinicLocationFormValues(
 export function hasPendingLocationChangeRequest(
   requests: DoctorProfileChangeRequest[] | undefined,
 ): boolean {
-  return (requests ?? []).some(
+  const safeRequests = Array.isArray(requests) ? requests : [];
+  return safeRequests.some(
     (request) =>
       request.status === 'pending' &&
-      (request.items ?? []).some((item) =>
+      readChangeItems(request).some((item) =>
         LOCATION_CHANGE_FIELDS.has(item.field),
       ),
   );

@@ -136,15 +136,26 @@ function asPersistedUserRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readPersistedUserString(
+  record: { userId?: unknown; role?: unknown },
+  key: 'userId' | 'role',
+): string | undefined {
+  const value = record[key];
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
+function parsePersistedUser(raw: string): PersistedUser | null {
+  const parsed = JSON.parse(raw);
+  return isPersistedUser(parsed) ? parsed : null;
+}
+
 function isPersistedUser(value: unknown): value is PersistedUser {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const record = asPersistedUserRecord(value);
   if (!record) return false;
   return (
-    typeof record.userId === 'string' &&
-    record.userId.trim().length > 0 &&
-    typeof record.role === 'string' &&
-    record.role.trim().length > 0
+    Boolean(readPersistedUserString(record, 'userId')) &&
+    Boolean(readPersistedUserString(record, 'role'))
   );
 }
 
@@ -152,9 +163,7 @@ export function readAuthUser(): PersistedUser | null {
   const raw = getCookie(COOKIE_NAMES.USER);
   if (!raw) return null;
   try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!isPersistedUser(parsed)) return null;
-    return parsed;
+    return parsePersistedUser(raw);
   } catch {
     return null;
   }

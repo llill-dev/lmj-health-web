@@ -47,6 +47,9 @@ export type DoctorProfileResponse = {
     doctorId?: string | null;
   };
   doctor?: DoctorProfileRecord;
+  data?: unknown;
+  item?: unknown;
+  result?: unknown;
 };
 
 export type DoctorProfilePatchInput = {
@@ -85,9 +88,47 @@ function appendConsultationTypes(
   }
 }
 
+function asDoctorProfileEnvelope(value: unknown): DoctorProfileResponse | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as DoctorProfileResponse)
+    : null;
+}
+
+function isDoctorProfileRecord(value: unknown): value is DoctorProfileRecord {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function readDoctorProfileDirectRecord(
+  value: unknown,
+): DoctorProfileRecord | null {
+  return isDoctorProfileRecord(value) ? value : null;
+}
+
+function readDoctorProfileRecord(value: unknown): DoctorProfileRecord | null {
+  const record = asDoctorProfileEnvelope(value);
+  if (!record) return null;
+
+  return (
+    readDoctorProfileDirectRecord(record.doctor) ??
+    readDoctorProfileDirectRecord(record.item) ??
+    readDoctorProfileDirectRecord(record.data) ??
+    readDoctorProfileRecord(record.data) ??
+    readDoctorProfileRecord(record.result)
+  );
+}
+
+function normalizeDoctorProfileResponse(
+  response: DoctorProfileResponse,
+): DoctorProfileResponse {
+  const doctor = readDoctorProfileRecord(response);
+  return doctor ? { ...response, doctor } : response;
+}
+
 export const doctorProfileApi = {
   getProfile: () =>
-    get<DoctorProfileResponse>(doctorEndpoints.me.profile, { locale: 'ar' }),
+    get<DoctorProfileResponse>(doctorEndpoints.me.profile, { locale: 'ar' }).then(
+      normalizeDoctorProfileResponse,
+    ),
 
   patchProfile: (input: DoctorProfilePatchInput) => {
     const form = new FormData();
@@ -109,6 +150,6 @@ export const doctorProfileApi = {
     }
     return patch<DoctorProfileResponse>(doctorEndpoints.me.profile, form, {
       locale: 'ar',
-    });
+    }).then(normalizeDoctorProfileResponse);
   },
 };

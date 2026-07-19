@@ -14,14 +14,26 @@ function asClaimAccountPendingRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readClaimAccountPendingString(
+  record: { channel?: unknown; destination?: unknown },
+  key: 'destination',
+): string | undefined {
+  const value = record[key];
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
+function parseClaimAccountPending(raw: string): ClaimAccountPending | null {
+  const parsed = JSON.parse(raw);
+  return isClaimAccountPending(parsed) ? parsed : null;
+}
+
 function isClaimAccountPending(value: unknown): value is ClaimAccountPending {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const record = asClaimAccountPendingRecord(value);
   if (!record) return false;
   return (
     (record.channel === 'email' || record.channel === 'whatsapp') &&
-    typeof record.destination === 'string' &&
-    record.destination.trim().length > 0
+    Boolean(readClaimAccountPendingString(record, 'destination'))
   );
 }
 
@@ -37,9 +49,7 @@ export function peekClaimAccountPending(): ClaimAccountPending | null {
   try {
     const raw = sessionStorage.getItem(PENDING_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!isClaimAccountPending(parsed)) return null;
-    return parsed;
+    return parseClaimAccountPending(raw);
   } catch {
     return null;
   }

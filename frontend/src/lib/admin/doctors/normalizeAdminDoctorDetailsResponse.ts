@@ -125,17 +125,29 @@ export function normalizeAdminDoctorDetailsResponse(
   pendingVerificationRequestId?: string;
 } {
   const root = asRecord(res) ?? {};
-  const payload = asRecord(root.data) ?? root;
+  const payload =
+    asRecord(root.data) ??
+    asRecord(root.item) ??
+    asRecord(root.result) ??
+    root;
 
-  const doctorCandidate = payload.doctor ?? root.doctor;
+  const doctorCandidate =
+    payload.doctor ??
+    payload.data ??
+    payload.item ??
+    root.doctor;
   const doctor = asAdminDoctorDetailsDoctor(doctorCandidate);
 
   const verificationRequest = asVerificationRequestSummary(
-    payload.verificationRequest ?? root.verificationRequest,
+    payload.verificationRequest ??
+      payload.request ??
+      payload.verification ??
+      root.verificationRequest,
   );
 
   const pendingVerificationRequestId = [
     payload.pendingVerificationRequestId,
+    payload.pendingRequestId,
     root.pendingVerificationRequestId,
     doctor?.pendingVerificationRequestId,
   ].find((x): x is string => typeof x === 'string');

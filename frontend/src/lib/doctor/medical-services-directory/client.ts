@@ -5,13 +5,54 @@ import type {
   FacilitiesSuggestParams,
   FacilitiesSuggestResponse,
   FacilityTypesResponse,
+  FacilityTypeOption,
   SuggestFacilityRecord,
 } from '@/lib/doctor/medical-services-directory/api-types';
 
 function asDirectoryObjectIdLike(value: unknown): DirectoryObjectIdLike | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value
+    ? (value as DirectoryObjectIdLike)
     : null;
+}
+
+function readDirectoryNestedRecord(
+  value: unknown,
+): DirectoryObjectIdLike | null {
+  const record = asDirectoryObjectIdLike(value);
+  return record
+    ? (asDirectoryObjectIdLike(
+        (record as DirectoryObjectIdLike & { data?: unknown }).data,
+      ) ?? null)
+    : null;
+}
+
+function readDirectoryField(
+  value: unknown,
+  key: string,
+): unknown {
+  return asDirectoryObjectIdLike(value)?.[key];
+}
+
+function readFirstDirectoryArray<T>(
+  sources: unknown[],
+  mapEntry: (value: unknown) => T | null,
+): T[] | undefined {
+  for (const source of sources) {
+    const items = readDirectoryArray(source, mapEntry);
+    if (items) return items;
+  }
+  return undefined;
+}
+
+function readDirectoryArray<T>(
+  value: unknown,
+  mapEntry: (value: unknown) => T | null,
+): T[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value
+    .map(mapEntry)
+    .filter((entry): entry is T => entry != null);
+  return items.length > 0 ? items : undefined;
 }
 
 function stringifyRecordId(value: unknown): string | undefined {
@@ -28,6 +69,37 @@ function stringifyRecordId(value: unknown): string | undefined {
   return undefined;
 }
 
+function readString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function readNumber(value: unknown): number | undefined {
+  return typeof value === 'number' ? value : undefined;
+}
+
+function asSuggestFacilityRecord(value: unknown): SuggestFacilityRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as SuggestFacilityRecord)
+    : null;
+}
+
+function readSuggestFacilities(value: unknown): SuggestFacilityRecord[] | undefined {
+  return readDirectoryArray(value, (entry) => {
+    const record = asSuggestFacilityRecord(entry);
+    return record ? normalizeSuggestFacility(record) : null;
+  });
+}
+
+function asFacilityTypeOption(value: unknown): FacilityTypeOption | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as FacilityTypeOption)
+    : null;
+}
+
+function readFacilityTypes(value: unknown): FacilityTypeOption[] | undefined {
+  return readDirectoryArray(value, asFacilityTypeOption);
+}
+
 function normalizeSuggestFacility(
   facility: SuggestFacilityRecord,
 ): SuggestFacilityRecord {
@@ -42,9 +114,51 @@ function normalizeSuggestFacility(
 function normalizeSuggestResponse(
   response: FacilitiesSuggestResponse,
 ): FacilitiesSuggestResponse {
+  const record = asDirectoryObjectIdLike(response);
+  const nested = readDirectoryNestedRecord(record);
+  const facilities = readFirstDirectoryArray(
+    [
+      response.facilities,
+      readDirectoryField(record, 'items'),
+      readDirectoryField(record, 'results'),
+      readDirectoryField(nested, 'facilities'),
+      readDirectoryField(nested, 'items'),
+    ],
+    (entry) => {
+      const facility = asSuggestFacilityRecord(entry);
+      return facility ? normalizeSuggestFacility(facility) : null;
+    },
+  ) ?? [];
+
   return {
     ...response,
-    facilities: (response.facilities ?? []).map(normalizeSuggestFacility),
+    results:
+      readNumber(response.results) ??
+      readNumber(readDirectoryField(record, 'results')) ??
+      readNumber(readDirectoryField(nested, 'results')) ??
+      facilities.length,
+    facilities,
+  };
+}
+
+function normalizeFacilityTypesResponse(
+  response: FacilityTypesResponse,
+): FacilityTypesResponse {
+  const record = asDirectoryObjectIdLike(response);
+  const nested = readDirectoryNestedRecord(record);
+
+  return {
+    ...response,
+    types: readFirstDirectoryArray(
+      [
+        response.types,
+        readDirectoryField(record, 'items'),
+        readDirectoryField(record, 'types'),
+        readDirectoryField(nested, 'types'),
+        readDirectoryField(nested, 'items'),
+      ],
+      asFacilityTypeOption,
+    ) ?? [],
   };
 }
 
@@ -74,5 +188,5 @@ export const medicalServicesDirectoryApi = {
   listTypes: () =>
     get<FacilityTypesResponse>(doctorEndpoints.facilities.types, {
       locale: 'ar',
-    }),
+    }).then(normalizeFacilityTypesResponse),
 };

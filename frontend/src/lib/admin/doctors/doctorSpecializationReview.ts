@@ -21,6 +21,14 @@ function asDoctorSpecializationReviewRecord(
     : {};
 }
 
+function readLookupLabels(value: AdminLookupRecord): string[] {
+  const labelAr = resolveLookupText(value.text, "ar")?.trim().toLowerCase();
+  const labelEn = resolveLookupSecondaryText(value.text, "ar")
+    ?.trim()
+    .toLowerCase();
+  return [labelAr, labelEn].filter((label): label is string => Boolean(label));
+}
+
 export type DoctorSpecializationReviewState = {
   displayLabel: string;
   mode: DoctorSpecializationReviewMode;
@@ -167,11 +175,7 @@ export function findDoctorSpecializationLookupId(
   // If no key match, try matching by Arabic or English text
   const textMatch = lookups.find((row) => {
     if (!row.isActive) return false;
-    const labelAr =
-      resolveLookupText(row.text, "ar")?.trim().toLowerCase() || "";
-    const labelEn =
-      resolveLookupSecondaryText(row.text, "ar")?.trim().toLowerCase() || "";
-    return labelAr === normalized || labelEn === normalized;
+    return readLookupLabels(row).includes(normalized);
   });
 
   return textMatch?._id ?? null;

@@ -19,8 +19,10 @@ function asJwtPayloadRecord(value: unknown): { exp?: unknown } | undefined {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
-function parseJwtPayload(raw: string): unknown {
-  return JSON.parse(raw);
+function parseJwtPayload(
+  raw: string,
+): { exp?: unknown } | undefined {
+  return asJwtPayloadRecord(JSON.parse(raw));
 }
 
 function normalizeEndpoint(endpoint: string): string {
@@ -42,7 +44,7 @@ export function getJwtExpiryUnix(token: string): number | null {
   try {
     const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
     const padded = payload.padEnd(payload.length + ((4 - (payload.length % 4)) % 4), '=');
-    const json = asJwtPayloadRecord(parseJwtPayload(atob(padded)));
+    const json = parseJwtPayload(atob(padded));
     if (!json) return null;
     return typeof json.exp === 'number' ? json.exp : null;
   } catch {

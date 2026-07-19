@@ -3,6 +3,7 @@ import { adminEndpoints } from '@/lib/admin/endpoints';
 import type {
   ServiceProvider,
   ServiceProvidersListResponse,
+  ServiceType,
 } from '@/lib/admin/types';
 import { platformApi } from '@/lib/platform/client';
 import { mergeServiceProviders } from '@/lib/doctor/medical-services-directory/mappers';
@@ -64,9 +65,68 @@ type ServiceProviderDetailsResponse = {
 };
 
 type MedicalServicesCatalogFailure = Error | unknown;
+type ServiceProvidersListEnvelope = Partial<ServiceProvidersListResponse> & {
+  providers?: ServiceProvider[];
+  results?: ServiceProvider[];
+  data?:
+    | Partial<ServiceProvidersListResponse>
+    | {
+        items?: ServiceProvider[];
+        providers?: ServiceProvider[];
+        results?: ServiceProvider[];
+        nextCursor?: string | null;
+      };
+};
 
 function isServiceProviderLike(value: unknown): value is ServiceProvider {
   return !!value && typeof value === 'object' && 'serviceType' in value;
+}
+
+function asServiceProvidersListEnvelope(
+  value: unknown,
+): ServiceProvidersListEnvelope | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as ServiceProvidersListEnvelope)
+    : null;
+}
+
+function readProviders(value: unknown): ServiceProvider[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isServiceProviderLike);
+}
+
+function readFirstProviders(
+  sources: unknown[],
+): ServiceProvider[] {
+  for (const source of sources) {
+    const providers = readProviders(source);
+    if (providers.length > 0) return providers;
+  }
+  return [];
+}
+
+function normalizeServiceProvidersPage(
+  response: ServiceProvidersListResponse | ServiceProvidersListEnvelope,
+): { items: ServiceProvider[]; nextCursor: string | null } {
+  const record = asServiceProvidersListEnvelope(response) ?? {};
+  const nested = asServiceProvidersListEnvelope(record.data);
+  const items = readFirstProviders([
+    record.items,
+    record.providers,
+    record.results,
+    nested?.items,
+    nested?.providers,
+    nested?.results,
+  ]);
+
+  const nextCursor =
+    typeof record.nextCursor === 'string'
+      ? record.nextCursor
+      : typeof nested?.nextCursor === 'string'
+        ? nested.nextCursor
+        : null;
+
+  return { items, nextCursor };
 }
 
 function isServiceProviderDetailsNested(
@@ -97,16 +157,29 @@ async function fetchAllProvidersForType(typeSlug: string) {
 
   do {
     const response = await fetchProvidersPage(typeSlug, cursor ?? undefined);
-    collected.push(...(response.items ?? []));
-    cursor = response.nextCursor;
+    const page = normalizeServiceProvidersPage(response);
+    collected.push(...page.items);
+    cursor = page.nextCursor;
     safety += 1;
   } while (cursor && safety < 10);
 
   return collected;
 }
 
+function normalizeDirectoryServiceTypes(
+  serviceTypes: Awaited<ReturnType<typeof platformApi.serviceTypes.list>>,
+): Array<Pick<ServiceType, 'slug'> & { name: string; description?: string }> {
+  return serviceTypes.map((serviceType) => ({
+    slug: serviceType.slug,
+    name: serviceType.name,
+    description: serviceType.description,
+  }));
+}
+
 async function fetchDirectoryServiceTypes() {
-  const serviceTypes = await platformApi.serviceTypes.list('ar');
+  const serviceTypes = normalizeDirectoryServiceTypes(
+    await platformApi.serviceTypes.list('ar'),
+  );
   const labelsBySlug: Record<string, string> = {};
   const grouped: Record<MedicalServiceCategory, string[]> = {
     clinics: [],

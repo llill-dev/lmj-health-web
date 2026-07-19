@@ -23,6 +23,20 @@ function asSignupSuccessLocationRecord(
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function readSignupSuccessRedirectTo(
+  record: { flow?: unknown; redirectTo?: unknown },
+): string | undefined {
+  const value = record.redirectTo;
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
+function parseSignupSuccessLocationState(
+  raw: string,
+): SignupSuccessLocationState | null {
+  const parsed = JSON.parse(raw);
+  return isSignupSuccessLocationState(parsed) ? parsed : null;
+}
+
 function isSignupSuccessLocationState(
   value: unknown,
 ): value is SignupSuccessLocationState {
@@ -32,8 +46,7 @@ function isSignupSuccessLocationState(
   if (record.flow === 'pending_doctor') return true;
   return (
     record.flow === 'session_ready' &&
-    typeof record.redirectTo === 'string' &&
-    record.redirectTo.trim().length > 0
+    Boolean(readSignupSuccessRedirectTo(record))
   );
 }
 
@@ -51,9 +64,7 @@ export function peekSignupSuccessNavState(): SignupSuccessLocationState | null {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!isSignupSuccessLocationState(parsed)) return null;
-    return parsed;
+    return parseSignupSuccessLocationState(raw);
   } catch {
     return null;
   }

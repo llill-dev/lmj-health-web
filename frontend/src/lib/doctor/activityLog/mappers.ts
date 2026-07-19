@@ -58,6 +58,12 @@ function readDetailString(
   return undefined;
 }
 
+function readActivityLogRecords(
+  records: DoctorActivityLogRecord[] | undefined,
+): DoctorActivityLogRecord[] {
+  return Array.isArray(records) ? records : [];
+}
+
 function formatActivityDateParts(iso: string): {
   dateLabel: string;
   timeLabel: string;
@@ -228,5 +234,5 @@ export function mapDoctorActivityLogItem(
 export function mapDoctorActivityLogItems(
   records: DoctorActivityLogRecord[] | undefined,
 ): DoctorActivityLogItem[] {
-  return (records ?? []).map(mapDoctorActivityLogItem);
+  return readActivityLogRecords(records).map(mapDoctorActivityLogItem);
 }

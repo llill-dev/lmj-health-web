@@ -26,6 +26,14 @@ function asDoctorDocumentErrorPayload(
     : null;
 }
 
+function readDoctorDocumentErrorString(
+  payload: DoctorDocumentErrorPayload,
+  key: 'messageKey' | 'message',
+): string | null {
+  const value = payload[key];
+  return typeof value === 'string' ? value : null;
+}
+
 export async function generateDoctorDocumentPdf(
   body: GenerateDoctorDocumentBody,
 ): Promise<Blob> {
@@ -52,10 +60,9 @@ export async function generateDoctorDocumentPdf(
 
     try {
       errorBody = asDoctorDocumentErrorPayload(await res.json()) ?? {};
-      messageKey =
-        typeof errorBody.messageKey === 'string' ? errorBody.messageKey : null;
+      messageKey = readDoctorDocumentErrorString(errorBody, 'messageKey');
       message =
-        (typeof errorBody.message === 'string' && errorBody.message.trim()) || message;
+        readDoctorDocumentErrorString(errorBody, 'message')?.trim() || message;
     } catch {
       // body غير JSON
     }

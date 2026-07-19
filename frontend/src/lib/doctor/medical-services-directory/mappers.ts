@@ -79,6 +79,15 @@ function readStringArray(value: unknown): string[] {
   return single ? [single] : [];
 }
 
+function readFacilityAttributeLabels(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value
+        .filter((entry): entry is string => typeof entry === 'string')
+        .map(formatFacilityAttributeLabel)
+        .filter(Boolean)
+    : [];
+}
+
 function pickFirstText(
   record: DirectoryRecord,
   keys: string[],
@@ -164,9 +173,7 @@ export function mapSuggestFacilityToDirectoryItem(
     fallbackCategory ??
     'clinics';
 
-  const attributes = (facility.attributes ?? [])
-    .map(formatFacilityAttributeLabel)
-    .filter(Boolean);
+  const attributes = readFacilityAttributeLabels(facility.attributes);
 
   const description =
     facility.description?.trim() ||

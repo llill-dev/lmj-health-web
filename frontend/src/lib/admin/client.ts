@@ -102,6 +102,25 @@ type VerificationRequestEnvelope =
   | null
   | undefined;
 
+type AdminListEnvelope = AdminApiRecord & {
+  doctors?: unknown;
+  patients?: unknown;
+  appointments?: unknown;
+  complaints?: unknown;
+  secretaries?: unknown;
+  auditLogs?: unknown;
+  items?: unknown;
+  content?: unknown;
+  contentItems?: unknown;
+  data?: unknown;
+  result?: unknown;
+  page?: unknown;
+  limit?: unknown;
+  total?: unknown;
+  results?: unknown;
+  pageInfo?: unknown;
+};
+
 function asAdminRecord(value: unknown): AdminApiRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as AdminApiRecord)
@@ -110,6 +129,682 @@ function asAdminRecord(value: unknown): AdminApiRecord | null {
 
 function readAdminNumber(value: unknown): number | undefined {
   return typeof value === "number" ? value : undefined;
+}
+
+function asAdminListEnvelope(value: unknown): AdminListEnvelope | null {
+  const record = asAdminRecord(value);
+  return record ? { ...record } : null;
+}
+
+function isAdminRecordArray(value: unknown): value is AdminApiRecord[] {
+  return (
+    Array.isArray(value) &&
+    value.every((entry) => entry && typeof entry === "object" && !Array.isArray(entry))
+  );
+}
+
+function readAdminNamedValue(
+  value: unknown,
+  key: string,
+): unknown {
+  return asAdminRecord(value)?.[key];
+}
+
+function mapAdminRecordArray<T>(
+  value: unknown,
+  mapRecord: (record: AdminApiRecord) => T | null,
+): T[] | undefined {
+  if (!isAdminRecordArray(value)) return undefined;
+  const items = value
+    .map(mapRecord)
+    .filter((item): item is T => item != null);
+  return items.length > 0 ? items : undefined;
+}
+
+function readAdminDoctorRecord(
+  record: AdminApiRecord,
+): AdminDoctorsListResponse["doctors"][number] {
+  return record as AdminDoctorsListResponse["doctors"][number];
+}
+
+function readAdminPatientRecord(
+  record: AdminApiRecord,
+): AdminPatientsListResponse["patients"][number] {
+  return record as AdminPatientsListResponse["patients"][number];
+}
+
+function readAdminAppointmentRecord(
+  record: AdminApiRecord,
+): AdminAppointmentsListResponse["appointments"][number] {
+  return record as AdminAppointmentsListResponse["appointments"][number];
+}
+
+function readAdminComplaintRecord(
+  record: AdminApiRecord,
+): AdminComplaintsListResponse["complaints"][number] {
+  return record as AdminComplaintsListResponse["complaints"][number];
+}
+
+function readAdminSecretaryRecord(
+  record: AdminApiRecord,
+): AdminSecretariesListResponse["secretaries"][number] {
+  return record as AdminSecretariesListResponse["secretaries"][number];
+}
+
+function readAuditLogRecord(
+  record: AdminApiRecord,
+): AuditLogsListResponse["auditLogs"][number] {
+  return record as AuditLogsListResponse["auditLogs"][number];
+}
+
+function readAdminContentItemRecord(
+  record: AdminApiRecord,
+): NonNullable<AdminContentListResponse["items"]>[number] {
+  return record as NonNullable<AdminContentListResponse["items"]>[number];
+}
+
+function readAdminPatientFileRecord(
+  record: AdminApiRecord,
+): AdminPatientFilesListResponse["items"][number] {
+  return record as AdminPatientFilesListResponse["items"][number];
+}
+
+function readAdminAccessRequestRecord(
+  record: AdminApiRecord,
+): NonNullable<AdminAccessRequestsListResponse["requests"]>[number] {
+  return record as NonNullable<AdminAccessRequestsListResponse["requests"]>[number];
+}
+
+function readAdminUserRecord(
+  record: AdminApiRecord,
+): AdminUsersListResponse["users"][number] {
+  return record as AdminUsersListResponse["users"][number];
+}
+
+function readAdminRestoreRequestRecord(
+  record: AdminApiRecord,
+): NonNullable<AdminDoctorRestoreRequestsListResponse["restoreRequests"]>[number] {
+  return record as NonNullable<AdminDoctorRestoreRequestsListResponse["restoreRequests"]>[number];
+}
+
+function readAdminAccessRequestDetailsRecord(
+  value: unknown,
+): NonNullable<AdminAccessRequestDetailsResponse["request"]> | undefined {
+  const record = asAdminRecord(value);
+  return record as NonNullable<AdminAccessRequestDetailsResponse["request"]> | undefined;
+}
+
+function readAdminDoctorsFromArray(
+  value: unknown,
+): AdminDoctorsListResponse["doctors"] | undefined {
+  return mapAdminRecordArray(value, readAdminDoctorRecord);
+}
+
+function readAdminPatientsFromArray(
+  value: unknown,
+): AdminPatientsListResponse["patients"] | undefined {
+  return mapAdminRecordArray(value, readAdminPatientRecord);
+}
+
+function readAdminAppointmentsFromArray(
+  value: unknown,
+): AdminAppointmentsListResponse["appointments"] | undefined {
+  return mapAdminRecordArray(value, readAdminAppointmentRecord);
+}
+
+function readAdminComplaintsFromArray(
+  value: unknown,
+): AdminComplaintsListResponse["complaints"] | undefined {
+  return mapAdminRecordArray(value, readAdminComplaintRecord);
+}
+
+function readAdminSecretariesFromArray(
+  value: unknown,
+): AdminSecretariesListResponse["secretaries"] | undefined {
+  return mapAdminRecordArray(value, readAdminSecretaryRecord);
+}
+
+function readAuditLogsFromArray(
+  value: unknown,
+): AuditLogsListResponse["auditLogs"] | undefined {
+  return mapAdminRecordArray(value, readAuditLogRecord);
+}
+
+function readAdminContentItemsFromArray(
+  value: unknown,
+): NonNullable<AdminContentListResponse["items"]> | undefined {
+  return mapAdminRecordArray(value, readAdminContentItemRecord);
+}
+
+function readAdminPatientFilesFromArray(
+  value: unknown,
+): AdminPatientFilesListResponse["items"] | undefined {
+  return mapAdminRecordArray(value, readAdminPatientFileRecord);
+}
+
+function readAdminAccessRequestsFromArray(
+  value: unknown,
+): NonNullable<AdminAccessRequestsListResponse["requests"]> | undefined {
+  return mapAdminRecordArray(value, readAdminAccessRequestRecord);
+}
+
+function readAdminUsersFromArray(
+  value: unknown,
+): AdminUsersListResponse["users"] | undefined {
+  return mapAdminRecordArray(value, readAdminUserRecord);
+}
+
+function readRestoreRequestsFromArray(
+  value: unknown,
+): NonNullable<AdminDoctorRestoreRequestsListResponse["restoreRequests"]> | undefined {
+  return mapAdminRecordArray(value, readAdminRestoreRequestRecord);
+}
+
+function readMedicalOrderCatalogItems(
+  value: unknown,
+): MedicalOrderCatalogItem[] | undefined {
+  return readAdminMappedArray(value, (entry) => {
+    const record = asAdminRecord(entry);
+    if (!record) return null;
+    const id = record._id ?? record.id;
+    const label = record.label ?? record.name ?? record.title;
+    if (id == null || label == null) return null;
+    return { _id: String(id), label: String(label) };
+  });
+}
+
+function readAdminMappedArray<T>(
+  value: unknown,
+  mapEntry: (value: unknown) => T | null,
+): T[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value
+    .map(mapEntry)
+    .filter((item): item is T => item != null);
+  return items.length > 0 ? items : undefined;
+}
+
+function readAdminListPageInfo(value: unknown): AdminApiRecord | undefined {
+  return asAdminRecord(value) ?? undefined;
+}
+
+function readAdminNestedEnvelope(value: unknown): AdminListEnvelope | undefined {
+  const record = asAdminListEnvelope(value);
+  return (
+    asAdminListEnvelope(record?.data) ??
+    asAdminListEnvelope(record?.result) ??
+    readAdminListPageInfo(record?.pageInfo)
+  );
+}
+
+function readAdminCollectionValue<T>(
+  value: unknown,
+  fieldNames: string[],
+  readArray: (value: unknown) => T[] | undefined,
+): T[] | undefined {
+  const record = asAdminListEnvelope(value);
+  if (!record) return undefined;
+
+  for (const fieldName of fieldNames) {
+    const items = readArray(readAdminNamedValue(record, fieldName));
+    if (items) return items;
+  }
+
+  return (
+    readArray(record.items) ??
+    readAdminCollectionValue(record.data, fieldNames, readArray) ??
+    readAdminCollectionValue(record.result, fieldNames, readArray)
+  );
+}
+
+function readAdminDoctors(value: unknown): AdminDoctorsListResponse["doctors"] | undefined {
+  return readAdminCollectionValue(value, ["doctors"], readAdminDoctorsFromArray);
+}
+
+function readAdminPatients(value: unknown): AdminPatientsListResponse["patients"] | undefined {
+  return readAdminCollectionValue(value, ["patients"], readAdminPatientsFromArray);
+}
+
+function readAdminAppointments(
+  value: unknown,
+): AdminAppointmentsListResponse["appointments"] | undefined {
+  return readAdminCollectionValue(
+    value,
+    ["appointments"],
+    readAdminAppointmentsFromArray,
+  );
+}
+
+function readAdminComplaints(
+  value: unknown,
+): AdminComplaintsListResponse["complaints"] | undefined {
+  return readAdminCollectionValue(
+    value,
+    ["complaints"],
+    readAdminComplaintsFromArray,
+  );
+}
+
+function readAdminSecretaries(
+  value: unknown,
+): AdminSecretariesListResponse["secretaries"] | undefined {
+  return readAdminCollectionValue(
+    value,
+    ["secretaries"],
+    readAdminSecretariesFromArray,
+  );
+}
+
+function readAuditLogs(value: unknown): AuditLogsListResponse["auditLogs"] | undefined {
+  return readAdminCollectionValue(value, ["auditLogs"], readAuditLogsFromArray);
+}
+
+function readAdminContentItems(
+  value: unknown,
+): NonNullable<AdminContentListResponse["items"]> | undefined {
+  return readAdminCollectionValue(
+    value,
+    ["content", "contentItems"],
+    readAdminContentItemsFromArray,
+  );
+}
+
+function readAdminPatientFiles(
+  value: unknown,
+): AdminPatientFilesListResponse["items"] | undefined {
+  return readAdminCollectionValue(value, [], readAdminPatientFilesFromArray);
+}
+
+function readAdminAccessRequests(
+  value: unknown,
+): NonNullable<AdminAccessRequestsListResponse["requests"]> | undefined {
+  return readAdminCollectionValue(
+    value,
+    ["requests", "accessRequests"],
+    readAdminAccessRequestsFromArray,
+  );
+}
+
+function readAdminAccessRequest(
+  value: unknown,
+): NonNullable<AdminAccessRequestDetailsResponse["request"]> | undefined {
+  const record = asAdminListEnvelope(value);
+  if (!record) return undefined;
+
+  const direct =
+    readAdminAccessRequestDetailsRecord(readAdminNamedValue(record, "request")) ??
+    readAdminAccessRequestDetailsRecord(readAdminNamedValue(record, "accessRequest")) ??
+    readAdminAccessRequestDetailsRecord(record.item);
+  if (direct) {
+    return direct;
+  }
+
+  const nestedData = readAdminAccessRequestDetailsRecord(record.data);
+  if (nestedData) {
+    return readAdminAccessRequest(nestedData) ?? nestedData;
+  }
+
+  const nestedResult = readAdminAccessRequestDetailsRecord(record.result);
+  if (nestedResult) {
+    return readAdminAccessRequest(nestedResult) ?? nestedResult;
+  }
+
+  return undefined;
+}
+
+function readAdminUsers(
+  value: unknown,
+): AdminUsersListResponse["users"] | undefined {
+  return readAdminCollectionValue(value, ["users"], readAdminUsersFromArray);
+}
+
+function readRestoreRequests(
+  value: unknown,
+): NonNullable<AdminDoctorRestoreRequestsListResponse["restoreRequests"]> | undefined {
+  return (
+    readAdminCollectionValue(
+      value,
+      ["restoreRequests"],
+      readRestoreRequestsFromArray,
+    ) ??
+    readRestoreRequestsFromArray(asAdminListEnvelope(value)?.results)
+  );
+}
+
+function normalizeAdminPatientFilesListResponse(
+  response: AdminPatientFilesListResponse,
+): AdminPatientFilesListResponse {
+  const items = readAdminListOrEmpty(readAdminPatientFiles(response));
+  const pageInfo = readAdminListPageInfo(response.pageInfo);
+
+  return withAdminCollections(response, {
+    items,
+    pageInfo: buildAdminPageInfo(pageInfo, items.length) ?? response.pageInfo,
+  });
+}
+
+function normalizeAdminAccessRequestsListResponse(
+  response: AdminAccessRequestsListResponse,
+): AdminAccessRequestsListResponse {
+  const requests = readAdminListOrEmpty(readAdminAccessRequests(response));
+  return withAdminCollections(withAdminPaging(response, requests.length), {
+    requests,
+    accessRequests: requests,
+    items: requests,
+  });
+}
+
+function normalizeAdminAccessRequestDetailsResponse(
+  response: AdminAccessRequestDetailsResponse,
+): AdminAccessRequestDetailsResponse {
+  const request = readAdminAccessRequest(response);
+
+  return request
+    ? withAdminCollections(response, {
+        request,
+        accessRequest: request,
+        item: request,
+        data: request,
+      })
+    : response;
+}
+
+function normalizeVerificationRequestsListResponse(
+  response: VerificationRequestsListResponse,
+): VerificationRequestsListResponse {
+  const requests = verificationRequestsFromListEnvelope(response);
+  return withAdminCollections(withAdminPaging(response, requests.length), {
+    requests,
+  });
+}
+
+function normalizeAdminUsersListResponse(
+  response: AdminUsersListResponse,
+): AdminUsersListResponse {
+  const users = readAdminListOrEmpty(readAdminUsers(response));
+  return withAdminCollections(withAdminPaging(response, users.length), {
+    users,
+  });
+}
+
+function normalizeAdminDoctorRestoreRequestsListResponse(
+  response: AdminDoctorRestoreRequestsListResponse,
+): AdminDoctorRestoreRequestsListResponse {
+  const restoreRequests = readAdminListOrEmpty(readRestoreRequests(response));
+  return withAdminCollections(
+    withAdminPaging(response, restoreRequests.length),
+    {
+      restoreRequests,
+      items: restoreRequests,
+    },
+  );
+}
+
+function readPagedNumbers(
+  response: AdminApiRecord,
+  fallbackLength: number,
+): Pick<
+  AdminDoctorsListResponse,
+  "page" | "limit" | "total" | "results"
+> {
+  const nested = readAdminNestedEnvelope(response);
+
+  return {
+    page: readAdminNumber(response.page) ?? readAdminNumber(nested?.page) ?? 1,
+    limit:
+      readAdminNumber(response.limit) ??
+      readAdminNumber(nested?.limit) ??
+      fallbackLength,
+    total:
+      readAdminNumber(response.total) ??
+      readAdminNumber(nested?.total) ??
+      fallbackLength,
+    results:
+      readAdminNumber(response.results) ??
+      readAdminNumber(nested?.results) ??
+      fallbackLength,
+  };
+}
+
+function withAdminPaging<TResponse extends AdminApiRecord>(
+  response: TResponse,
+  fallbackLength: number,
+): TResponse &
+  Pick<AdminDoctorsListResponse, "page" | "limit" | "total" | "results"> {
+  return {
+    ...response,
+    ...readPagedNumbers(response, fallbackLength),
+  };
+}
+
+function withAdminCollection<
+  TResponse extends AdminApiRecord,
+  TKey extends keyof TResponse,
+  TValue,
+>(response: TResponse, key: TKey, value: TValue): TResponse {
+  return {
+    ...response,
+    [key]: value,
+  };
+}
+
+function withAdminCollections<TResponse extends AdminApiRecord>(
+  response: TResponse,
+  patch: Partial<TResponse>,
+): TResponse {
+  return {
+    ...response,
+    ...patch,
+  };
+}
+
+function buildAdminPageInfo(
+  pageInfo: AdminApiRecord | undefined,
+  fallbackLength: number,
+): AdminPatientFilesListResponse["pageInfo"] {
+  if (!pageInfo) return undefined;
+  return {
+    page: readAdminNumber(pageInfo.page) ?? 1,
+    limit: readAdminNumber(pageInfo.limit) ?? fallbackLength,
+    total: readAdminNumber(pageInfo.total) ?? fallbackLength,
+  };
+}
+
+function readAdminMessageFields(
+  body: AdminApiRecord,
+): Pick<FacilitiesListResponse, "message" | "messageKey"> {
+  return {
+    message: typeof body.message === "string" ? body.message : undefined,
+    messageKey: typeof body.messageKey === "string" ? body.messageKey : undefined,
+  };
+}
+
+function readAdminListOrEmpty<T>(value: T[] | undefined): T[] {
+  return value ?? [];
+}
+
+function buildAdminPagedListResponse<TResponse extends AdminApiRecord>(
+  response: TResponse,
+  fallbackLength: number,
+  patch: Partial<TResponse>,
+): TResponse {
+  return withAdminCollections(withAdminPaging(response, fallbackLength), patch);
+}
+
+function normalizeAdminDoctorsListResponse(
+  response: AdminDoctorsListResponse,
+): AdminDoctorsListResponse {
+  const doctors = readAdminListOrEmpty(readAdminDoctors(response));
+  return withAdminCollection(
+    withAdminPaging(response, doctors.length),
+    "doctors",
+    doctors,
+  );
+}
+
+function normalizeAdminPatientsListResponse(
+  response: AdminPatientsListResponse,
+): AdminPatientsListResponse {
+  const patients = readAdminListOrEmpty(readAdminPatients(response));
+  return withAdminCollection(
+    withAdminPaging(response, patients.length),
+    "patients",
+    patients,
+  );
+}
+
+function normalizeAdminAppointmentsListResponse(
+  response: AdminAppointmentsListResponse,
+): AdminAppointmentsListResponse {
+  const appointments = readAdminListOrEmpty(readAdminAppointments(response));
+  return withAdminCollection(
+    withAdminPaging(response, appointments.length),
+    "appointments",
+    appointments,
+  );
+}
+
+function normalizeAdminComplaintsListResponse(
+  response: AdminComplaintsListResponse,
+): AdminComplaintsListResponse {
+  const complaints = readAdminListOrEmpty(readAdminComplaints(response));
+  return withAdminCollection(
+    withAdminPaging(response, complaints.length),
+    "complaints",
+    complaints,
+  );
+}
+
+function normalizeAdminSecretariesListResponse(
+  response: AdminSecretariesListResponse,
+): AdminSecretariesListResponse {
+  const secretaries = readAdminListOrEmpty(readAdminSecretaries(response));
+  return withAdminCollection(
+    withAdminPaging(response, secretaries.length),
+    "secretaries",
+    secretaries,
+  );
+}
+
+function normalizeAuditLogsListResponse(
+  response: AuditLogsListResponse,
+): AuditLogsListResponse {
+  const auditLogs = readAdminListOrEmpty(readAuditLogs(response));
+  return withAdminCollection(
+    withAdminPaging(response, auditLogs.length),
+    "auditLogs",
+    auditLogs,
+  );
+}
+
+function normalizeAdminContentListResponse(
+  response: AdminContentListResponse,
+): AdminContentListResponse {
+  const items = readAdminListOrEmpty(readAdminContentItems(response));
+  return buildAdminPagedListResponse(response, items.length, {
+    items,
+    content: items,
+    contentItems: items,
+  });
+}
+
+function buildFacilitiesListResponse(
+  body: AdminApiRecord,
+  facilities: NonNullable<FacilitiesListResponse["facilities"]>,
+  nested?: AdminApiRecord | null,
+): FacilitiesListResponse {
+  const items = readAdminFirstCollection(
+    [body.items, nested?.items],
+    readFacilityArray,
+  );
+  const paging = readPagedNumbers(
+    {
+      ...body,
+      page: body.page ?? nested?.page,
+      limit: body.limit ?? nested?.limit,
+      total: body.total ?? nested?.total,
+      results: body.results ?? nested?.results,
+    },
+    facilities.length,
+  );
+  return {
+    ...readAdminMessageFields(body),
+    ...paging,
+    facilities,
+    ...(items ? { items } : {}),
+    ...(nested ? { data: nested } : {}),
+  };
+}
+
+function readFacilitySummary(
+  value: unknown,
+): FacilityResponse["facility"] | undefined {
+  const record = asAdminRecord(value);
+  if (!record || typeof (record.id ?? record._id) !== "string") return undefined;
+  return record as FacilityResponse["facility"];
+}
+
+function readFacilityRecordById(
+  value: unknown,
+) : FacilityResponse["facility"] | undefined {
+  const record = asAdminRecord(value);
+  return record && typeof (record.id ?? record._id) === "string"
+    ? (record as FacilityResponse["facility"])
+    : undefined;
+}
+
+function readFacilityDoctorsFacility(
+  value: unknown,
+): FacilityDoctorsListResponse["facility"] | undefined {
+  const record = readFacilityRecordById(value);
+  return record && typeof record.id === "string"
+    ? (record as FacilityDoctorsListResponse["facility"])
+    : undefined;
+}
+
+function readFacilityListItem(
+  value: unknown,
+): FacilitiesListResponse["facilities"][number] | null {
+  return (readFacilityRecordById(value) as FacilitiesListResponse["facilities"][number] | undefined) ?? null;
+}
+
+function readFacilityDoctorListItem(
+  value: unknown,
+): FacilityDoctorsListResponse["doctors"][number] | null {
+  return (asAdminRecord(value) as FacilityDoctorsListResponse["doctors"][number] | null);
+}
+
+function buildFacilityDoctorsListResponse(
+  body: AdminApiRecord,
+  doctors: NonNullable<FacilityDoctorsListResponse["doctors"]>,
+  nested?: AdminApiRecord | null,
+): FacilityDoctorsListResponse {
+  const items = readAdminFirstCollection(
+    [body.items, nested?.items],
+    readFacilityDoctorArray,
+  );
+  const paging = readPagedNumbers(
+    {
+      ...body,
+      page: body.page ?? nested?.page,
+      limit: body.limit ?? nested?.limit,
+      total: body.total ?? nested?.total,
+      results: body.results ?? nested?.results,
+    },
+    doctors.length,
+  );
+  return {
+    ...readAdminMessageFields(body),
+    facility: readAdminPrimaryRecord(
+      { facility: body.facility, data: nested },
+      ["facility"],
+      readFacilityRecordById,
+    ) as FacilityDoctorsListResponse["facility"] | undefined,
+    ...paging,
+    doctors,
+    ...(items ? { items } : {}),
+    ...(nested ? { data: nested } : {}),
+  };
 }
 
 function isVerificationRequestSummary(
@@ -128,29 +823,23 @@ function isVerificationRequestSummary(
 function readFacilityArray(
   value: unknown,
 ): FacilitiesListResponse["facilities"] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter(
-    (entry): entry is FacilitiesListResponse["facilities"][number] =>
-      entry != null,
-  );
+  return readAdminMappedArray(value, readFacilityListItem);
 }
 
 function readFacilityDoctorArray(
   value: unknown,
 ): FacilityDoctorsListResponse["doctors"] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter(
-    (entry): entry is FacilityDoctorsListResponse["doctors"][number] =>
-      entry != null,
-  );
+  return readAdminMappedArray(value, readFacilityDoctorListItem);
 }
 
 function readVerificationRequestArray(
   value: unknown,
 ): VerificationRequestSummary[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  const items = value.filter(isVerificationRequestSummary);
-  return items.length > 0 ? items : undefined;
+  return readAdminMappedArray(value, (entry) =>
+    isVerificationRequestSummary(entry as VerificationRequestEnvelope)
+      ? (entry as VerificationRequestSummary)
+      : null,
+  );
 }
 
 function readVerificationRequestEnvelopeChildren(
@@ -158,11 +847,42 @@ function readVerificationRequestEnvelopeChildren(
 ): VerificationRequestSummary[] | undefined {
   const envelope = asAdminRecord(value);
   if (!envelope) return undefined;
+  return readAdminFirstCollection(
+    [envelope.requests, envelope.items, envelope.data, envelope.results],
+    readVerificationRequestArray,
+  );
+}
+
+function readAdminFirstCollection<T>(
+  sources: unknown[],
+  readCollection: (value: unknown) => T[] | undefined,
+): T[] | undefined {
+  for (const source of sources) {
+    const items = readCollection(source);
+    if (items) return items;
+  }
+  return undefined;
+}
+
+function readAdminPrimaryRecord<TRecord>(
+  value: unknown,
+  fieldNames: string[],
+  readRecord: (value: unknown) => TRecord | undefined,
+): TRecord | undefined {
+  const record = asAdminRecord(value);
+  if (!record) return undefined;
+
+  for (const fieldName of fieldNames) {
+    const item = readRecord(readAdminNamedValue(record, fieldName));
+    if (item) return item;
+  }
+
   return (
-    readVerificationRequestArray(envelope.requests) ??
-    readVerificationRequestArray(envelope.items) ??
-    readVerificationRequestArray(envelope.data) ??
-    readVerificationRequestArray(envelope.results)
+    readRecord(record.item) ??
+    readRecord(record.data) ??
+    readAdminPrimaryRecord(record.data, fieldNames, readRecord) ??
+    readRecord(record.result) ??
+    readAdminPrimaryRecord(record.result, fieldNames, readRecord)
   );
 }
 
@@ -170,18 +890,21 @@ function normalizeMedicalOrderCatalogList(
   raw: AdminMedicalOrderCatalogListResponse | AdminApiRecord,
 ): MedicalOrderCatalogItem[] {
   const body = asAdminRecord(raw) ?? {};
-  const candidates = body.items ?? body.catalog ?? body.results ?? body.data;
-  if (!Array.isArray(candidates)) return [];
-  return candidates
-    .map((x) => {
-      const r = asAdminRecord(x);
-      if (!r) return null;
-      const id = r._id ?? r.id;
-      const label = r.label ?? r.name ?? r.title;
-      if (id == null || label == null) return null;
-      return { _id: String(id), label: String(label) };
-    })
-    .filter((x): x is MedicalOrderCatalogItem => x != null);
+  const nested = asAdminRecord(body.data);
+  return readAdminListOrEmpty(
+    readAdminFirstCollection(
+      [
+        body.items,
+        body.catalog,
+        body.results,
+        body.data,
+        nested?.items,
+        nested?.catalog,
+        nested?.results,
+      ],
+      readMedicalOrderCatalogItems,
+    ),
+  );
 }
 
 function normalizeFacilitiesListResponse(
@@ -190,47 +913,26 @@ function normalizeFacilitiesListResponse(
   const body = asAdminRecord(raw) ?? {};
   const nested = asAdminRecord(body.data);
 
-  const facilities =
-    readFacilityArray(body.facilities) ??
-    readFacilityArray(body.items) ??
-    readFacilityArray(nested?.facilities) ??
-    readFacilityArray(nested?.items) ??
-    [];
+  const facilities = readAdminListOrEmpty(
+    readAdminFirstCollection(
+      [body.facilities, body.items, nested?.facilities, nested?.items],
+      readFacilityArray,
+    ),
+  );
 
-  return {
-    ...(body as FacilitiesListResponse),
-    page: readAdminNumber(body.page) ?? readAdminNumber(nested?.page) ?? 1,
-    limit:
-      readAdminNumber(body.limit) ??
-      readAdminNumber(nested?.limit) ??
-      facilities.length,
-    total:
-      readAdminNumber(body.total) ??
-      readAdminNumber(nested?.total) ??
-      facilities.length,
-    results:
-      readAdminNumber(body.results) ??
-      readAdminNumber(nested?.results) ??
-      facilities.length,
-    facilities,
-  };
+  return buildFacilitiesListResponse(body, facilities, nested);
 }
 
 function normalizeFacilityResponse(raw: FacilityResponse): FacilityResponse {
-  const directFacility = asAdminRecord(raw.facility);
-  const nestedData = asAdminRecord(raw.data) ?? undefined;
-  const nestedFacility =
-    nestedData?.facility && typeof nestedData.facility === "object"
-      ? asAdminRecord(nestedData.facility) ?? undefined
-      : nestedData && ("id" in nestedData || "_id" in nestedData)
-        ? nestedData
-        : undefined;
+  const facility = readAdminPrimaryRecord(
+    raw,
+    ["facility"],
+    readFacilitySummary,
+  ) as FacilityResponse["facility"] | undefined;
 
   return {
     ...raw,
-    facility:
-      (directFacility as FacilityResponse["facility"]) ??
-      (nestedFacility as FacilityResponse["facility"]),
+    facility,
   };
 }
 
@@ -240,34 +942,14 @@ function normalizeFacilityDoctorsListResponse(
   const body = asAdminRecord(raw) ?? {};
   const nested = asAdminRecord(body.data);
 
-  const doctors =
-    readFacilityDoctorArray(body.doctors) ??
-    readFacilityDoctorArray(body.items) ??
-    readFacilityDoctorArray(nested?.doctors) ??
-    readFacilityDoctorArray(nested?.items) ??
-    [];
+  const doctors = readAdminListOrEmpty(
+    readAdminFirstCollection(
+      [body.doctors, body.items, nested?.doctors, nested?.items],
+      readFacilityDoctorArray,
+    ),
+  );
 
-  return {
-    ...(body as FacilityDoctorsListResponse),
-    facility:
-      (asAdminRecord(body.facility) as FacilityDoctorsListResponse["facility"]) ??
-      (asAdminRecord(nested?.facility) as FacilityDoctorsListResponse["facility"]) ??
-      undefined,
-    page: readAdminNumber(body.page) ?? readAdminNumber(nested?.page) ?? 1,
-    limit:
-      readAdminNumber(body.limit) ??
-      readAdminNumber(nested?.limit) ??
-      doctors.length,
-    total:
-      readAdminNumber(body.total) ??
-      readAdminNumber(nested?.total) ??
-      doctors.length,
-    results:
-      readAdminNumber(body.results) ??
-      readAdminNumber(nested?.results) ??
-      doctors.length,
-    doctors,
-  };
+  return buildFacilityDoctorsListResponse(body, doctors, nested);
 }
 
 export function verificationRequestsFromListEnvelope(
@@ -279,18 +961,16 @@ export function verificationRequestsFromListEnvelope(
 ): VerificationRequestSummary[] {
   if (!raw || typeof raw !== "object") return [];
   const o = asAdminRecord(raw) ?? {};
-  const direct =
-    readVerificationRequestArray(o.requests) ??
-    readVerificationRequestArray(o.data) ??
-    readVerificationRequestArray(o.items) ??
-    readVerificationRequestArray(o.results);
+  const direct = readAdminFirstCollection(
+    [o.requests, o.data, o.items, o.results],
+    readVerificationRequestArray,
+  );
   if (direct) return direct;
 
-  const nested =
-    readVerificationRequestEnvelopeChildren(o.requests) ??
-    readVerificationRequestEnvelopeChildren(o.data) ??
-    readVerificationRequestEnvelopeChildren(o.items) ??
-    readVerificationRequestEnvelopeChildren(o.results);
+  const nested = readAdminFirstCollection(
+    [o.requests, o.data, o.items, o.results],
+    readVerificationRequestEnvelopeChildren,
+  );
   if (nested) return nested;
 
   return [];
@@ -330,7 +1010,9 @@ export const adminApi = {
         ? `${adminEndpoints.doctors.list}?${qs.toString()}`
         : adminEndpoints.doctors.list;
 
-      return get<AdminDoctorsListResponse>(endpoint, { locale: "ar" });
+      return get<AdminDoctorsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminDoctorsListResponse,
+      );
     },
     getById: (doctorId: string) =>
       get<AdminDoctorDetailsResponse>(
@@ -380,7 +1062,9 @@ export const adminApi = {
         ? `${adminEndpoints.patients.list}?${qs.toString()}`
         : adminEndpoints.patients.list;
 
-      return get<AdminPatientsListResponse>(endpoint, { locale: "ar" });
+      return get<AdminPatientsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminPatientsListResponse,
+      );
     },
     getById: (patientId: string) =>
       get<AdminPatientDetailsResponse>(
@@ -419,7 +1103,9 @@ export const adminApi = {
         const base = adminEndpoints.patients.files.list(patientId);
         const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
 
-        return get<AdminPatientFilesListResponse>(endpoint, { locale: "ar" });
+        return get<AdminPatientFilesListResponse>(endpoint, { locale: "ar" }).then(
+          normalizeAdminPatientFilesListResponse,
+        );
       },
       getDownloadUrl: (patientId: string, fileId: string) =>
         get<AdminPatientFileDownloadUrlResponse>(
@@ -441,7 +1127,9 @@ export const adminApi = {
         ? `${adminEndpoints.appointments.list}?${qs.toString()}`
         : adminEndpoints.appointments.list;
 
-      return get<AdminAppointmentsListResponse>(endpoint, { locale: "ar" });
+        return get<AdminAppointmentsListResponse>(endpoint, { locale: "ar" }).then(
+          normalizeAdminAppointmentsListResponse,
+        );
     },
     getDetails: (appointmentId: string) =>
       get<AppointmentDetailsResponse>(
@@ -466,12 +1154,14 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.accessRequests.list}?${qs.toString()}`
         : adminEndpoints.accessRequests.list;
-      return get<AdminAccessRequestsListResponse>(endpoint, { locale: "ar" });
+      return get<AdminAccessRequestsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminAccessRequestsListResponse,
+      );
     },
     getById: (requestId: string) =>
       get<AdminAccessRequestDetailsResponse>(adminEndpoints.accessRequests.details(requestId), {
         locale: "ar",
-      }),
+      }).then(normalizeAdminAccessRequestDetailsResponse),
   },
   complaints: {
     list: (params: AdminComplaintsListParams = {}) => {
@@ -487,7 +1177,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.complaints.list}?${qs.toString()}`
         : adminEndpoints.complaints.list;
-      return get<AdminComplaintsListResponse>(endpoint, { locale: "ar" });
+      return get<AdminComplaintsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminComplaintsListResponse,
+      );
     },
     getById: (complaintId: string) =>
       get<AdminComplaintDetailsResponse>(
@@ -511,7 +1203,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.verificationRequests.list}?${qs.toString()}`
         : adminEndpoints.verificationRequests.list;
-      return get<VerificationRequestsListResponse>(endpoint, { locale: "ar" });
+      return get<VerificationRequestsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeVerificationRequestsListResponse,
+      );
     },
     review: (requestId: string, body: VerificationRequestReviewBody) =>
       patch<VerificationRequestReviewResponse>(
@@ -529,7 +1223,9 @@ export const adminApi = {
   },
   users: {
     list: () =>
-      get<AdminUsersListResponse>(adminEndpoints.users.list, { locale: "ar" }),
+      get<AdminUsersListResponse>(adminEndpoints.users.list, { locale: "ar" }).then(
+        normalizeAdminUsersListResponse,
+      ),
     create: (body: CreateAdminUserBody) =>
       post<CreateAdminUserResponse>(adminEndpoints.users.create, body, {
         locale: "ar",
@@ -566,7 +1262,7 @@ export const adminApi = {
         : adminEndpoints.users.doctorRestoreRequests;
       return get<AdminDoctorRestoreRequestsListResponse>(endpoint, {
         locale: "ar",
-      });
+      }).then(normalizeAdminDoctorRestoreRequestsListResponse);
     },
     reviewRestoreRequest: (
       userId: string,
@@ -591,7 +1287,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.secretaries.list}?${qs.toString()}`
         : adminEndpoints.secretaries.list;
-      return get<AdminSecretariesListResponse>(endpoint, { locale: "ar" });
+      return get<AdminSecretariesListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminSecretariesListResponse,
+      );
     },
   },
   auditLogs: {
@@ -616,7 +1314,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.auditLogs.list}?${qs.toString()}`
         : adminEndpoints.auditLogs.list;
-      return get<AuditLogsListResponse>(endpoint, { locale: "ar" });
+      return get<AuditLogsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAuditLogsListResponse,
+      );
     },
   },
   content: {
@@ -630,7 +1330,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.content.list}?${qs.toString()}`
         : adminEndpoints.content.list;
-      return get<AdminContentListResponse>(endpoint, { locale: "ar" });
+      return get<AdminContentListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminContentListResponse,
+      );
     },
     listMine: (params: AdminContentListParams = {}) => {
       const qs = new URLSearchParams();
@@ -642,7 +1344,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.content.mine}?${qs.toString()}`
         : adminEndpoints.content.mine;
-      return get<AdminContentListResponse>(endpoint, { locale: "ar" });
+      return get<AdminContentListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminContentListResponse,
+      );
     },
     getById: (id: string) =>
       get<AdminContentDetailsResponse>(adminEndpoints.content.details(id), {

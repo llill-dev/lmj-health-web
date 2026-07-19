@@ -1,6 +1,12 @@
 import { doctorApi } from '@/lib/doctor/client';
 import type { EncounterPrescriptionRecord } from '@/lib/doctor/prescriptions/prescriptionTypes';
 
+function readEncounterPrescriptionsList(
+  value: { prescriptions?: EncounterPrescriptionRecord[] } | null | undefined,
+): EncounterPrescriptionRecord[] {
+  return Array.isArray(value?.prescriptions) ? value.prescriptions : [];
+}
+
 function readPrescriptionUpdatedAt(
   value: EncounterPrescriptionRecord,
 ): string | undefined {
@@ -8,6 +14,13 @@ function readPrescriptionUpdatedAt(
   if (!record || typeof record !== 'object' || Array.isArray(record)) return undefined;
   const candidate: { updatedAt?: unknown } = record;
   return typeof candidate.updatedAt === 'string' ? candidate.updatedAt : undefined;
+}
+
+function readPrescriptionTimestamp(
+  prescription: EncounterPrescriptionRecord,
+): number {
+  const value = prescription.finalizedAt ?? readPrescriptionUpdatedAt(prescription);
+  return value ? new Date(value).getTime() : 0;
 }
 
 function isFinalizedPrescription(rx: EncounterPrescriptionRecord) {
@@ -18,8 +31,8 @@ function sortByRecent(
   prescriptions: EncounterPrescriptionRecord[],
 ): EncounterPrescriptionRecord[] {
   return [...prescriptions].sort((a, b) => {
-    const aTime = new Date(a.finalizedAt ?? readPrescriptionUpdatedAt(a) ?? 0).getTime();
-    const bTime = new Date(b.finalizedAt ?? readPrescriptionUpdatedAt(b) ?? 0).getTime();
+    const aTime = readPrescriptionTimestamp(a);
+    const bTime = readPrescriptionTimestamp(b);
     return bTime - aTime;
   });
 }
@@ -69,7 +82,7 @@ export async function loadEncounterPrescriptionForWorkspace(
     { limit: 50, page: 1 },
   );
 
-  const all = list.prescriptions ?? [];
+  const all = readEncounterPrescriptionsList(list);
   const draft = all.find((rx) => !isFinalizedPrescription(rx));
 
   if (draft?._id) {
@@ -119,7 +132,7 @@ export async function loadEncounterPrescriptionForPreview(
     { limit: 50, page: 1 },
   );
 
-  const all = list.prescriptions ?? [];
+  const all = readEncounterPrescriptionsList(list);
   const draft = all.find((rx) => !isFinalizedPrescription(rx));
   const target = draft ?? sortByRecent(all)[0];
   if (!target?._id) return null;
@@ -145,7 +158,7 @@ export async function loadEncounterPrescriptionsForSummary(
     { limit: 100, page: 1 },
   );
 
-  const prescriptions = list.prescriptions ?? [];
+  const prescriptions = readEncounterPrescriptionsList(list);
   if (prescriptions.length === 0) return [];
 
   const full = await Promise.all(

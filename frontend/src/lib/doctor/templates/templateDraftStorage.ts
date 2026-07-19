@@ -58,8 +58,14 @@ function asTemplateApplication(
     : null;
 }
 
-function parseTemplateDraftRaw(raw: string): unknown {
-  return JSON.parse(raw);
+function parseTemplateDraftRaw(
+  raw: string,
+): TemplateDraftStorageRecord | null {
+  return asObjectRecord(JSON.parse(raw));
+}
+
+function readTemplateDraftString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 function isValidTemplateType(value: unknown): value is DoctorTemplateType {
@@ -72,13 +78,8 @@ function isValidTemplateType(value: unknown): value is DoctorTemplateType {
 function resolveApplicationFromApplyResponse(
   response: DoctorTemplateApplyResponse,
 ): DoctorTemplateApplication | null {
-  if (
-    response.application &&
-    typeof response.application === 'object' &&
-    !Array.isArray(response.application)
-  ) {
-    return response.application;
-  }
+  const direct = asTemplateApplication(response.application);
+  if (direct) return direct;
 
   const payload = response.template?.payload;
   const payloadRecord = asObjectRecord(payload);
@@ -118,34 +119,35 @@ export function storeDoctorTemplateDraft(
 }
 
 function parseStoredDraft(raw: string): StoredDoctorTemplateDraft | null {
-  let parsed: unknown;
+  let parsed: TemplateDraftStorageRecord | null;
   try {
     parsed = parseTemplateDraftRaw(raw);
   } catch {
     return null;
   }
 
-  const record = asObjectRecord(parsed);
+  const record = parsed;
   if (!record) return null;
 
-  if (!record.templateId || typeof record.templateId !== 'string') return null;
+  const templateId = readTemplateDraftString(record.templateId);
+  if (!templateId) return null;
   if (!isValidTemplateType(record.type)) return null;
   const application = asTemplateApplication(record.application);
   if (!application) return null;
 
-  if (record.storedAt) {
-    const storedAtMs = new Date(String(record.storedAt)).getTime();
+  const storedAt = readTemplateDraftString(record.storedAt);
+  if (storedAt) {
+    const storedAtMs = new Date(storedAt).getTime();
     if (Number.isNaN(storedAtMs)) return null;
     if (Date.now() - storedAtMs > DRAFT_MAX_AGE_MS) return null;
   }
 
   return {
-    templateId: record.templateId,
+    templateId,
     type: record.type,
-    name: typeof record.name === 'string' && record.name.trim() ? record.name.trim() : 'قالب',
+    name: readTemplateDraftString(record.name) ?? 'قالب',
     application,
-    storedAt:
-      typeof record.storedAt === 'string' ? record.storedAt : new Date().toISOString(),
+    storedAt: storedAt ?? new Date().toISOString(),
   };
 }
 
