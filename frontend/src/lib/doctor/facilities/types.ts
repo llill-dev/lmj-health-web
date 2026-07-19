@@ -8,6 +8,7 @@ export type DoctorFacility = {
   facilityType: FacilityType;
   description?: string;
   city: string;
+  country?: string;
   address: string;
   phone: string;
   status: DoctorFacilityStatus;
@@ -21,7 +22,7 @@ export type DoctorFacilityFormValues = {
   facilityType: FacilityType;
   description?: string;
   city: string;
-  country?: string;
+  country: string;
   address: string;
   phone: string;
   attributes?: string[];

@@ -236,6 +236,21 @@ export function FacilityFormDialog({
                     </DoctorProfileFormField>
 
                     <DoctorProfileFormField
+                      label="الدولة"
+                      required
+                      error={errors.country?.message}
+                    >
+                      <input
+                        {...register('country')}
+                        placeholder="أدخل الدولة"
+                        className={profileFieldClass(
+                          cn(profileInputClass, 'text-start placeholder:text-start'),
+                          Boolean(errors.country),
+                        )}
+                      />
+                    </DoctorProfileFormField>
+
+                    <DoctorProfileFormField
                       label="العنوان"
                       required
                       error={errors.address?.message}

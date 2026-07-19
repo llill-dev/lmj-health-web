@@ -28,11 +28,11 @@ export type DoctorFacilityMutationBody = {
   city: string;
   facilityType: FacilityType;
   kind: FacilityType;
-  country?: string;
-  address?: string;
-  phone?: string;
-  description?: string;
-  attributes?: string[];
+  country: string;
+  address: string;
+  phone: string;
+  description: string;
+  attributes: string[];
 };
 
 export type DoctorFacilityAssignBody = {

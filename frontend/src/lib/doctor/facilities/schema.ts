@@ -30,6 +30,7 @@ export const doctorFacilityFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   city: z.string().trim().min(2, 'المدينة مطلوبة'),
+  country: z.string().trim().min(2, 'الدولة مطلوبة'),
   address: z.string().trim().min(3, 'العنوان التفصيلي مطلوب'),
   phone: z
     .string()
@@ -52,6 +53,7 @@ export const EMPTY_DOCTOR_FACILITY_FORM: DoctorFacilityFormSchemaValues = {
   facilityType: 'clinic',
   description: '',
   city: '',
+  country: 'سوريا',
   address: '',
   phone: '',
   attributes: [],

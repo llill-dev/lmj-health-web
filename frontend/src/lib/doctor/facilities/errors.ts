@@ -20,6 +20,14 @@ function asDoctorFacilityValidationErrorRecord(
     : null;
 }
 
+function readDoctorFacilityValidationString(
+  record: DoctorFacilityValidationErrorRecord,
+  key: 'path' | 'msg',
+): string {
+  const value = record[key];
+  return typeof value === 'string' ? value.trim() : '';
+}
+
 const FIELD_LABELS: Record<string, string> = {
   name: 'اسم المنشأة',
   city: 'المدينة',
@@ -105,10 +113,9 @@ function formatValidationErrors(body: DoctorFacilityValidationErrorRecord): stri
 
   const parts = errors.slice(0, 4).map((entry) => {
     const item = asDoctorFacilityValidationErrorRecord(entry) ?? {};
-    const path = typeof item.path === 'string' ? item.path : '';
+    const path = readDoctorFacilityValidationString(item, 'path');
     const field = FIELD_LABELS[path] ?? path ?? 'حقل';
-    const detail =
-      (typeof item.msg === 'string' ? item.msg.trim() : '') || 'قيمة غير صالحة';
+    const detail = readDoctorFacilityValidationString(item, 'msg') || 'قيمة غير صالحة';
     return `${field}: ${detail}`;
   });
 

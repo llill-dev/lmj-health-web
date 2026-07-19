@@ -32,6 +32,14 @@ function asDoctorFacilityRecord(value: unknown): DoctorFacilityRecord | null {
     : null;
 }
 
+function readDoctorFacilityNestedRecord(
+  value: unknown,
+  key: string,
+): DoctorFacilityRecord | null {
+  const record = asDoctorFacilityRecord(value);
+  return record && key in record ? asDoctorFacilityRecord(record[key]) : null;
+}
+
 function resolveFacilityType(value: unknown): FacilityType {
   if (typeof value !== "string") return "clinic";
   const normalized = value.trim();
@@ -41,6 +49,12 @@ function resolveFacilityType(value: unknown): FacilityType {
 function optionalTrim(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+}
+
+function readFacilityAttributes(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
 function normalizeFacilityPhone(phone: string): string {
@@ -58,7 +72,7 @@ function normalizeFacilityPhone(phone: string): string {
 function sanitizeFacilityAttributes(
   attributes: string[] | undefined,
 ): string[] {
-  return (attributes ?? []).filter(
+  return readFacilityAttributes(attributes).filter(
     (item) =>
       !item.startsWith(WORK_HOURS_FROM_PREFIX) &&
       !item.startsWith(WORK_HOURS_TO_PREFIX),
@@ -76,24 +90,17 @@ export function parseDoctorFacilityRecordFromResponse(
 ): DoctorFacilityRecord | null {
   const payload = response;
   const doctorRecord = payload.doctor;
-  if (payload.facility && typeof payload.facility === "object") {
-    return payload.facility;
-  }
+  const directFacility = asDoctorFacilityRecord(payload.facility);
+  if (directFacility) return directFacility;
 
-  if (doctorRecord?.facility && typeof doctorRecord.facility === "object") {
-    return doctorRecord.facility;
-  }
+  const doctorFacility = readDoctorFacilityNestedRecord(doctorRecord, "facility");
+  if (doctorFacility) return doctorFacility;
 
   const data = payload.data;
   const record = asDoctorFacilityRecord(data);
   if (record) {
-    if (
-      "facility" in record &&
-      record.facility &&
-      typeof record.facility === "object"
-    ) {
-      return asDoctorFacilityRecord(record.facility);
-    }
+    const nestedFacility = readDoctorFacilityNestedRecord(record, "facility");
+    if (nestedFacility) return nestedFacility;
     if (record.name?.trim() && record.city?.trim()) {
       return record;
     }
@@ -129,6 +136,7 @@ export function mapSuggestRecordToLinkedDoctorFacility(
     facilityType: resolveFacilityType(record.facilityType),
     description: record.description?.trim() || undefined,
     city,
+    country: record.country?.trim() || undefined,
     address: record.address?.trim() || "—",
     phone: record.phone?.trim() || "—",
     status: mapApiFacilityStatus(record.status),
@@ -152,6 +160,7 @@ export function mapApiFacilityToDoctorFacility(
     facilityType: resolveFacilityType(record.facilityType),
     description: record.description?.trim() || undefined,
     city,
+    country: record.country?.trim() || undefined,
     address: record.address?.trim() || "—",
     phone: record.phone?.trim() || "—",
     status: mapApiFacilityStatus(record.status),
@@ -173,15 +182,15 @@ export function formValuesToMutationBody(
     facilityType: values.facilityType,
     kind: values.facilityType,
     city: values.city.trim(),
-    country: optionalTrim(values.country),
-    address: optionalTrim(values.address),
-    phone: optionalTrim(normalizeFacilityPhone(values.phone)),
-    description: optionalTrim(values.description),
+    country: values.country.trim(),
+    address: values.address.trim(),
+    phone: normalizeFacilityPhone(values.phone),
+    description: optionalTrim(values.description) ?? "بلا وصف",
     attributes,
   };
 }
 
-/** Strip undefined keys before POST/PUT — matches Swagger optional fields. */
+/** Build the exact Swagger POST/PUT body; the backend validates these keys. */
 export function serializeDoctorFacilityMutationBody(
   body: DoctorFacilityMutationBody,
 ): DoctorFacilityMutationBody {
@@ -190,15 +199,12 @@ export function serializeDoctorFacilityMutationBody(
     city: body.city,
     facilityType: body.facilityType,
     kind: body.kind,
+    country: body.country,
+    address: body.address,
+    phone: body.phone,
+    description: body.description,
+    attributes: readFacilityAttributes(body.attributes),
   };
-
-  if (body.country) next.country = body.country;
-  if (body.address) next.address = body.address;
-  if (body.phone) next.phone = body.phone;
-  if (body.description) next.description = body.description;
-  // Always send attributes as an array (Swagger ["string"]); the create path
-  // crashes (500 errors.unknown) when the field is absent.
-  next.attributes = body.attributes ?? [];
 
   return next;
 }
@@ -211,8 +217,9 @@ export function doctorFacilityToFormValues(
     facilityType: facility.facilityType,
     description: facility.description ?? "",
     city: facility.city,
+    country: facility.country ?? "سوريا",
     address: facility.address === "—" ? "" : facility.address,
     phone: facility.phone === "—" ? "" : facility.phone,
-    attributes: facility.attributes ?? [],
+    attributes: readFacilityAttributes(facility.attributes),
   };
 }

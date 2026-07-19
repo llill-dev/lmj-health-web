@@ -20,8 +20,23 @@ function asStoredLinkedFacilityRecord(
     : null;
 }
 
-function parseStoredLinkedFacility(raw: string): unknown {
-  return JSON.parse(raw);
+function parseStoredLinkedFacility(
+  raw: string,
+): StoredLinkedFacilityRecord | null {
+  return asStoredLinkedFacilityRecord(JSON.parse(raw));
+}
+
+function readStoredLinkedFacilityString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function hasStoredLinkedFacilityShape(value: unknown): value is DoctorFacility {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const record = value as Partial<DoctorFacility>;
+  return Boolean(
+    readStoredLinkedFacilityString(record.id) &&
+    readStoredLinkedFacilityString(record.name),
+  );
 }
 
 function canUseSessionStorage(): boolean {
@@ -43,9 +58,9 @@ export function readLinkedDoctorFacility(): DoctorFacility | null {
   if (!raw) return null;
 
   try {
-    const parsed = asStoredLinkedFacilityRecord(parseStoredLinkedFacility(raw));
+    const parsed = parseStoredLinkedFacility(raw);
     const facility = parsed?.facility;
-    if (!facility?.id || !facility.name) return null;
+    if (!hasStoredLinkedFacilityShape(facility)) return null;
     return { ...facility, isOwned: false };
   } catch {
     sessionStorage.removeItem(STORAGE_KEY);
