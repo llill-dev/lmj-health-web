@@ -227,6 +227,7 @@ export default function UpsertServiceTypeDialog({
           className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/45 backdrop-blur-[2px] px-4 py-8"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="service-type-dialog-title"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -252,7 +253,10 @@ export default function UpsertServiceTypeDialog({
                 <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
                   <Layers className="h-5 w-5" />
                 </div>
-                <h2 className="font-cairo text-[18px] font-extrabold text-[#101828]">
+                <h2
+                  id="service-type-dialog-title"
+                  className="font-cairo text-[18px] font-extrabold text-[#101828]"
+                >
                   {isEdit ? "تعديل نوع الخدمة" : "إضافة نوع خدمة"}
                 </h2>
               </div>
@@ -322,6 +326,7 @@ export default function UpsertServiceTypeDialog({
                   >
                     <input
                       {...register("nameAr")}
+                      aria-label="الاسم (عربي)"
                       className={adminFieldClass(
                         adminInputClass,
                         Boolean(errors.nameAr),
@@ -336,6 +341,7 @@ export default function UpsertServiceTypeDialog({
                   >
                     <input
                       {...register("nameEn")}
+                      aria-label="الاسم (English)"
                       className={adminFieldClass(
                         adminInputClass,
                         Boolean(errors.nameEn),
@@ -352,6 +358,7 @@ export default function UpsertServiceTypeDialog({
                 >
                   <input
                     {...register("slug")}
+                    aria-label="Slug"
                     className={adminFieldClass(
                       adminInputClass,
                       Boolean(errors.slug),
@@ -373,6 +380,7 @@ export default function UpsertServiceTypeDialog({
                   >
                     <textarea
                       {...register("descAr")}
+                      aria-label="وصف (عربي)"
                       rows={2}
                       className={adminTextareaClass}
                       placeholder="اختياري"
@@ -384,6 +392,7 @@ export default function UpsertServiceTypeDialog({
                   >
                     <textarea
                       {...register("descEn")}
+                      aria-label="وصف (English)"
                       rows={2}
                       className={adminTextareaClass}
                       dir="ltr"
@@ -452,6 +461,7 @@ export default function UpsertServiceTypeDialog({
                           >
                             <input
                               {...register(`fields.${index}.key` as const)}
+                              aria-label={`key حقل ${index + 1}`}
                               className={adminFieldClass(
                                 adminInputClass,
                                 Boolean(errors.fields?.[index]?.key),
@@ -486,6 +496,7 @@ export default function UpsertServiceTypeDialog({
                           >
                             <input
                               {...register(`fields.${index}.labelAr` as const)}
+                              aria-label={`تسمية عربية لحقل ${index + 1}`}
                               className={adminFieldClass(
                                 adminInputClass,
                                 Boolean(errors.fields?.[index]?.labelAr),
@@ -499,6 +510,7 @@ export default function UpsertServiceTypeDialog({
                           >
                             <input
                               {...register(`fields.${index}.labelEn` as const)}
+                              aria-label={`تسمية إنجليزية لحقل ${index + 1}`}
                               className={adminFieldClass(
                                 adminInputClass,
                                 Boolean(errors.fields?.[index]?.labelEn),

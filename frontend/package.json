@@ -12,7 +12,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:run": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint eslint.config.mjs postcss.config.js tailwind.config.js --max-warnings=0",
     "lint:watch": "eslint eslint.config.mjs postcss.config.js tailwind.config.js --ext .ts,.tsx src --watch",
     "typecheck": "tsc --noEmit",
@@ -45,7 +47,8 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -54,11 +57,12 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "jsdom": "^26.1.0",
+    "msw": "^2.15.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.14",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5",
     "vite": "^5.4.8",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.7"
   }
 }

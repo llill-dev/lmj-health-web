@@ -28,16 +28,15 @@ export const adminEndpoints = {
   },
   patients: {
     list: "/api/admin/patients",
-    details: (patientId: string) => `/api/admin/patients/${patientId}`,
     activate: (patientId: string) =>
       `/api/admin/patients/${patientId}/activate`,
     suspend: (patientId: string) => `/api/admin/patients/${patientId}/suspend`,
     unsuspend: (patientId: string) =>
       `/api/admin/patients/${patientId}/unsuspend`,
     files: {
-      list: (patientId: string) => `/api/admin/patients/${patientId}/files`,
+      list: (patientId: string) => `/api/patients/${patientId}/files`,
       download: (patientId: string, fileId: string) =>
-        `/api/admin/patients/${patientId}/files/${fileId}/download`,
+        `/api/patients/${patientId}/files/${fileId}/download`,
     },
   },
   appointments: {

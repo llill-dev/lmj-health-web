@@ -24,6 +24,10 @@ import { resolveLoginErrorMessageAr } from "@/lib/auth/loginErrorMessages";
 
 type LoginMethod = "phone" | "email";
 
+function countPhoneDigits(value: string): number {
+  return value.replace(/\D/g, "").length;
+}
+
 const loginSchema = z
   .object({
     method: z.enum(["phone", "email"]),
@@ -43,6 +47,15 @@ const loginSchema = z
     }
 
     if (val.method === "phone") {
+      if (countPhoneDigits(val.identifier) < 10) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["identifier"],
+          message: "رقم الهاتف يجب أن يحتوي على 10 أرقام على الأقل",
+        });
+        return;
+      }
+
       if (!isValidAuthPhoneIdentifier(val.identifier)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

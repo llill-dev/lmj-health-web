@@ -1066,13 +1066,35 @@ export const adminApi = {
         normalizeAdminPatientsListResponse,
       );
     },
-    getById: (patientId: string) =>
-      get<AdminPatientDetailsResponse>(
-        adminEndpoints.patients.details(patientId),
-        {
-          locale: "ar",
-        },
-      ),
+    getById: async (patientId: string): Promise<AdminPatientDetailsResponse> => {
+      const response = await adminApi.patients.list({
+        search: patientId,
+        includeDeleted: true,
+        page: 1,
+        limit: 100,
+      });
+      const patient =
+        response.patients.find(
+          (item) => item._id === patientId || item.publicId === patientId,
+        ) ?? null;
+      if (!patient) {
+        throw new ApiError(
+          404,
+          "errors.notFound",
+          {
+            status: 404,
+            messageKey: "errors.notFound",
+            message: "Patient was not found.",
+          },
+          "Patient was not found.",
+        );
+      }
+      return {
+        messageKey: response.messageKey,
+        message: response.message,
+        patient,
+      };
+    },
     activate: (patientId: string) =>
       patch<AdminPatientAccountActionResponse>(
         adminEndpoints.patients.activate(patientId),
