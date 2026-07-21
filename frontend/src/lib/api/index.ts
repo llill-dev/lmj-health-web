@@ -549,7 +549,7 @@ export async function apiMultipart<T = unknown>(
     omitAuth = false,
     ...rest
   } = options;
-  const token =
+  let token =
     omitAuth === true
       ? ""
       : providedToken !== undefined
@@ -558,42 +558,48 @@ export async function apiMultipart<T = unknown>(
 
   const url = `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
-  ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
+  token = await ensureAccessTokenLive(endpoint, locale, token, omitAuth === true);
 
-  if (onProgress) {
+  const hadBearerToken = Boolean(token);
+
+  const parseXhrResponse = (xhr: XMLHttpRequest): T => {
+    try {
+      const parsed = parseApiJsonText(xhr.responseText);
+      return valueOrNoContent<T>(parsed as T, Object.keys(parsed).length > 0);
+    } catch {
+      return noApiContent<T>();
+    }
+  };
+
+  const uploadWithXhr = (bearerToken: string): Promise<T> => {
     const xhr = new XMLHttpRequest();
     xhr.open(rest.method || "POST", url);
-    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    if (bearerToken) {
+      xhr.setRequestHeader("Authorization", `Bearer ${bearerToken}`);
+    }
     xhr.setRequestHeader("x-lang", locale);
 
     xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress((e.loaded / e.total) * 100);
+      if (e.lengthComputable) onProgress?.((e.loaded / e.total) * 100);
     };
 
     return new Promise<T>((resolve, reject) => {
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const parsed = parseApiJsonText(xhr.responseText);
-            resolve(valueOrNoContent<T>(parsed as T, Object.keys(parsed).length > 0));
-          } catch {
-            resolve(noApiContent<T>());
-          }
-        } else {
-          if (xhr.status === 401) {
-            maybeHandleUnauthorizedSession(endpoint, locale, Boolean(token));
-          }
-          reject(
-            new ApiError(
-              xhr.status,
-              null,
-              {},
-              locale === "ar"
-                ? "تعذّر رفع الملف. تحقق من الاتصال والملف والصلاحيات."
-                : "Upload failed. Check your connection, file, and permissions.",
-            ),
-          );
+          resolve(parseXhrResponse(xhr));
+          return;
         }
+
+        reject(
+          new ApiError(
+            xhr.status,
+            null,
+            {},
+            locale === "ar"
+              ? "تعذّر رفع الملف. تحقق من الاتصال والملف والصلاحيات."
+              : "Upload failed. Check your connection, file, and permissions.",
+          ),
+        );
       };
       xhr.onerror = () =>
         reject(
@@ -605,6 +611,40 @@ export async function apiMultipart<T = unknown>(
         );
       xhr.send(formData);
     });
+  };
+
+  if (onProgress) {
+    try {
+      return await uploadWithXhr(token);
+    } catch (error) {
+      if (
+        error instanceof ApiError
+        && error.status === 401
+        && hadBearerToken
+        && !isSessionExpiry401Exempt(endpoint)
+      ) {
+        const recovered = await tryRecoverUnauthorizedSession(
+          endpoint,
+          locale,
+          hadBearerToken,
+        );
+        if (recovered) {
+          const nextToken =
+            providedToken !== undefined && omitAuth !== true
+              ? providedToken
+              : useAuthStore.getState().accessToken || "";
+          if (nextToken) {
+            return uploadWithXhr(nextToken);
+          }
+        }
+      }
+
+      if (error instanceof ApiError && error.status === 401) {
+        maybeHandleUnauthorizedSession(endpoint, locale, hadBearerToken);
+      }
+
+      throw error;
+    }
   }
 
   return apiRequest<T>(endpoint, {

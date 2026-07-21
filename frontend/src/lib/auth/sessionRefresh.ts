@@ -82,7 +82,7 @@ export async function refreshAccessToken(): Promise<boolean> {
 export function isRefreshTokenExpired(refreshExpiresAt: string | null): boolean {
   if (!refreshExpiresAt) return false;
   const expiresMs = Date.parse(refreshExpiresAt);
-  if (Number.isNaN(expiresMs)) return false;
+  if (Number.isNaN(expiresMs)) return true;
   return expiresMs <= Date.now() + 5000;
 }
 
