@@ -48,7 +48,7 @@ describe('LoginForm', () => {
     mockAuthState.login = vi.fn();
 
     vi.spyOn(useAuthStore, 'getState').mockImplementation(
-      () => mockAuthState as ReturnType<typeof useAuthStore.getState>,
+      () => mockAuthState as unknown as ReturnType<typeof useAuthStore.getState>,
     );
   });
 
