@@ -3,6 +3,11 @@ import { get, post } from "@/lib/api";
 import { authApi } from "@/lib/auth/client";
 import { buildDeletionSessionFromLogin } from "@/lib/auth/accountDeletionSession";
 import {
+  ensureRegisteredDeviceForSession,
+  unregisterDeviceForSession,
+} from "@/lib/devices/lifecycle";
+import { clearPushDeviceSyncRecord } from "@/lib/devices/storage";
+import {
   clearAuthSession,
   persistAuthSession,
   readStoredAuthSession,
@@ -321,18 +326,49 @@ let state: AuthState = {
   }) => {
     const accessToken = state.accessToken;
     const scope = options?.scope ?? "all";
+    const currentUserId = state.user?.id ?? null;
 
     if (accessToken && !options?.skipRemoteRevoke) {
-      try {
-        if (scope === "current") {
-          await authApi.logout(accessToken);
-        } else {
-          await authApi.logoutAll(accessToken);
+      let deviceUnregistered = false;
+
+      if (scope === "current" && currentUserId) {
+        try {
+          deviceUnregistered = await unregisterDeviceForSession({
+            accessToken,
+            userId: currentUserId,
+          });
+        } catch (err) {
+          clearPushDeviceSyncRecord();
+          console.warn("Device unregister failed before logout:", err);
         }
-      } catch (err) {
-        console.warn("Logout API failed — continuing local logout:", err);
+      }
+
+      const result =
+        scope === "current"
+          ? await authApi.logout(accessToken)
+          : await authApi.logoutAll(accessToken);
+
+      if ("error" in result) {
+        if (scope === "current" && deviceUnregistered && currentUserId) {
+          clearPushDeviceSyncRecord();
+          try {
+            await ensureRegisteredDeviceForSession({
+              accessToken,
+              userId: currentUserId,
+            });
+          } catch (registrationError) {
+            console.warn(
+              "Device re-registration failed after logout failure:",
+              registrationError,
+            );
+          }
+        }
+
+        throw new AuthFlowError(result.error);
       }
     }
+
+    clearPushDeviceSyncRecord();
 
     setState({
       user: null,

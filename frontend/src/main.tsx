@@ -7,6 +7,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import "@/styles/globals.css";
 import "@/styles/skeleton-animations.css";
 import App from "@/App";
+import DeviceRegistrationBridge from "@/components/app/DeviceRegistrationBridge";
 import { warnIfProductionUiOnlyMisconfigured } from "@/lib/env/uiOnlyMode";
 import { MotionProvider } from "@/motion";
 import { ToastProvider } from "@/components/ui/ToastProvider";
@@ -22,6 +23,7 @@ createRoot(document.getElementById("root")!).render(
         <MotionProvider>
           <ToastProvider>
             <NetworkStatusToasts />
+            <DeviceRegistrationBridge />
             <BrowserRouter>
               <App />
             </BrowserRouter>

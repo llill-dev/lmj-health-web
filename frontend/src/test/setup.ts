@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import { resetAuthHandlers } from '@/test/handlers/auth';
+import { resetDeviceHandlers } from '@/test/handlers/devices';
 import { resetServiceTypeHandlers } from '@/test/handlers/serviceTypes';
 import { server } from '@/test/server';
 import { useAuthStore } from '@/store/authStore';
@@ -13,6 +14,7 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   resetAuthHandlers();
+  resetDeviceHandlers();
   resetServiceTypeHandlers();
   server.resetHandlers();
   document.cookie = '';
