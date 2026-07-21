@@ -95,6 +95,8 @@ export type SecretarySidebarItemId =
   | "profile"
   | "notifications";
 
+export type DataEntrySidebarItemId = "dashboard";
+
 export const sidebarItems: Array<{
   id: string;
   path: SidebarItemId;
@@ -468,5 +470,20 @@ export const secretarySidebarItems: Array<{
     path: "notifications",
     label: "الإشعارات",
     icon: Bell,
+  },
+];
+
+export const dataEntrySidebarItems: Array<{
+  id: string;
+  path: DataEntrySidebarItemId;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  badge?: number;
+}> = [
+  {
+    id: "dashboard",
+    path: "dashboard",
+    label: "لوحة مدخل البيانات",
+    icon: LayoutGrid,
   },
 ];

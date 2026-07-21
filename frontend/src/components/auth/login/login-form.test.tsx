@@ -77,9 +77,10 @@ describe('LoginForm', () => {
 
     await user.click(screen.getByRole('button', { name: 'رقم الهاتف' }));
 
-    expect(screen.getByPlaceholderText('+963912345678')).toBeInTheDocument();
+    const phoneInput = await screen.findByPlaceholderText('+963912345678');
+    expect(phoneInput).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText('+963912345678'), '091234');
+    await user.type(phoneInput, '091234');
     await user.type(screen.getByPlaceholderText('password123'), 'secret1');
     await user.click(screen.getByRole('button', { name: 'تسجيل الدخول' }));
 
@@ -189,7 +190,6 @@ describe('LoginForm', () => {
     await user.click(screen.getByRole('button', { name: 'تسجيل الدخول' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(errorMessage);
-    expect(await screen.findByText(errorMessage)).toBeInTheDocument();
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

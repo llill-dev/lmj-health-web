@@ -3,6 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import DoctorLayout from "@/layout";
 import AdminLayout from "@/layouts/AdminLayout";
+import DataEntryLayout from "@/layouts/DataEntryLayout";
 import SecretaryLayout from "@/layouts/SecretaryLayout";
 import { PageTransition } from "@/motion";
 import ProtectedRoute, {
@@ -22,6 +23,7 @@ import {
   SecretaryRouteFallback,
 } from "@/routes/RouteFallbacks";
 import * as AdminPages from "@/routes/lazy-pages/admin-pages";
+import * as DataEntryPages from "@/routes/lazy-pages/data-entry-pages";
 import * as DoctorPages from "@/routes/lazy-pages/doctor-pages";
 import * as MiscPages from "@/routes/lazy-pages/misc-pages";
 import * as PublicPages from "@/routes/lazy-pages/public-pages";
@@ -534,6 +536,20 @@ export default function App() {
         </Route>
 
         <Route path="/secretaries" element={<LegacySecretariesRedirect />} />
+
+        <Route element={<ProtectedRoute allowedRoles={["data-entry"]} />}>
+          <Route path="/data-entry" element={<DataEntryLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route
+              path="dashboard"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <DataEntryPages.DataEntryDashboardPage />
+                </Suspense>
+              }
+            />
+          </Route>
+        </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["secretary"]} />}>
           <Route path="/secretary" element={<SecretaryLayout />}>

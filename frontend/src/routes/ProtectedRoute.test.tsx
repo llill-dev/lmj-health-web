@@ -100,6 +100,23 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByText('لوحة الطبيب')).toBeInTheDocument();
   });
+
+  it('renders the protected content for the data-entry role', () => {
+    mockStoreState.accessToken = 'token';
+    mockStoreState.user = { role: 'data-entry' };
+
+    renderProtectedRoute(
+      <Route
+        path="/data-entry/dashboard"
+        element={<ProtectedRoute allowedRoles={['data-entry']} />}
+      >
+        <Route index element={<div>لوحة مدخل البيانات</div>} />
+      </Route>,
+      { route: '/data-entry/dashboard' },
+    );
+
+    expect(screen.getByText('لوحة مدخل البيانات')).toBeInTheDocument();
+  });
 });
 
 describe('GuestRoute', () => {
@@ -135,5 +152,23 @@ describe('RootRedirect', () => {
     );
 
     expect(screen.getByText('أهلاً بك')).toBeInTheDocument();
+  });
+
+  it('redirects authenticated data-entry users to the canonical dashboard root', () => {
+    mockStoreState.accessToken = 'token';
+    mockStoreState.user = { role: 'data-entry' };
+
+    renderProtectedRoute(
+      <>
+        <Route path="/" element={<RootRedirect />} />
+        <Route
+          path="/data-entry/dashboard"
+          element={<div>لوحة مدخل البيانات</div>}
+        />
+      </>,
+      { route: '/' },
+    );
+
+    expect(screen.getByText('لوحة مدخل البيانات')).toBeInTheDocument();
   });
 });

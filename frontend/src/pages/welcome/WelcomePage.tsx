@@ -73,7 +73,7 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          <div className='flex h-[235px] w-[345px] flex-col items-center justify-center rounded-[6px] border-[1.82px] border-white border-t-[1.82px] bg-[#FFFFFFCC] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]'>
+          <div className='flex h-[300px] w-[345px] flex-col items-center justify-center rounded-[6px] border-[1.82px] border-white border-t-[1.82px] bg-[#FFFFFFCC] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]'>
             <h1 className='bg-[#101828] bg-clip-text text-center text-[24px] font-bold leading-[32px] text-transparent'>
               مرحبًا بك في عالم الصحة
             </h1>

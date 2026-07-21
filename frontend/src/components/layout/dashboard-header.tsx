@@ -30,9 +30,10 @@ interface DashboardHeaderProps {
   title?: string;
   subtitle?: string;
   onMenuClick?: () => void;
-  role: "doctor" | "secretary";
+  role: "doctor" | "secretary" | "data-entry";
   showMessages?: boolean;
   showUnreadBadge?: boolean;
+  showNotifications?: boolean;
 }
 
 export default function DashboardHeader({
@@ -42,6 +43,7 @@ export default function DashboardHeader({
   role,
   showMessages = true,
   showUnreadBadge = true,
+  showNotifications = true,
 }: DashboardHeaderProps) {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
@@ -53,12 +55,22 @@ export default function DashboardHeader({
     if (subtitleProp?.trim()) return subtitleProp.trim();
     const n = user?.name?.trim();
     if (n) return n;
-    return role === "doctor" ? "ضيفاً كريماً" : "السكرتير";
+    return role === "doctor"
+      ? "ضيفاً كريماً"
+      : role === "secretary"
+        ? "السكرتير"
+        : "مدخل البيانات";
   }, [subtitleProp, user?.name, role]);
 
   const titledDisplay = useMemo(() => {
     if (subtitleProp?.trim()) return displayName;
-    if (displayName === "ضيفاً كريماً" || displayName === "السكرتير") return displayName;
+    if (
+      displayName === "ضيفاً كريماً"
+      || displayName === "السكرتير"
+      || displayName === "مدخل البيانات"
+    ) {
+      return displayName;
+    }
     if (role === "doctor" && !/^د\.?\s/u.test(displayName)) {
       return `د. ${displayName}`;
     }
@@ -83,14 +95,25 @@ export default function DashboardHeader({
       : null;
 
   const handleNotificationsClick = () => {
-    navigate(role === "doctor" ? "/doctor/notification" : "/secretary/notifications");
+    navigate(
+      role === "doctor"
+        ? "/doctor/notification"
+        : role === "secretary"
+          ? "/secretary/notifications"
+          : "/data-entry/dashboard",
+    );
   };
 
   const handleMessagesClick = () => {
     navigate("/doctor/messages");
   };
 
-  const roleSubtitle = role === "doctor" ? "نظرة عامة على نشاط عيادتك" : "إدارة المواعيد والمرضى";
+  const roleSubtitle =
+    role === "doctor"
+      ? "نظرة عامة على نشاط عيادتك"
+      : role === "secretary"
+        ? "إدارة المواعيد والمرضى"
+        : "متابعة مهام الإدخال الأساسية";
 
   return (
     <header
@@ -165,27 +188,29 @@ export default function DashboardHeader({
             </div>
 
             <div className="flex shrink-0 items-center gap-2 border-r border-[#e2e8f0]/80 pr-2 sm:gap-2.5 sm:pr-4">
-              <button
-                type="button"
-                onClick={handleNotificationsClick}
-                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]"
-                aria-label="الإشعارات"
-                title="الإشعارات"
-              >
-                <Bell className="h-[17px] w-[17px]" strokeWidth={2.25} />
-                {showUnreadBadge && unreadAwaiting ? (
-                  <span className="absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100">
-                    <Loader2
-                      className="h-3 w-3 animate-spin text-gray-500"
-                      aria-hidden
-                    />
-                  </span>
-                ) : showUnreadBadge && unreadBadge ? (
-                  <span className="absolute -left-1 -top-1 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-cairo text-[10px] font-bold text-white shadow-md">
-                    {unreadBadge}
-                  </span>
-                ) : null}
-              </button>
+              {showNotifications ? (
+                <button
+                  type="button"
+                  onClick={handleNotificationsClick}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]"
+                  aria-label="الإشعارات"
+                  title="الإشعارات"
+                >
+                  <Bell className="h-[17px] w-[17px]" strokeWidth={2.25} />
+                  {showUnreadBadge && unreadAwaiting ? (
+                    <span className="absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100">
+                      <Loader2
+                        className="h-3 w-3 animate-spin text-gray-500"
+                        aria-hidden
+                      />
+                    </span>
+                  ) : showUnreadBadge && unreadBadge ? (
+                    <span className="absolute -left-1 -top-1 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-cairo text-[10px] font-bold text-white shadow-md">
+                      {unreadBadge}
+                    </span>
+                  ) : null}
+                </button>
+              ) : null}
               {showMessages && role === "doctor" && (
                 <button
                   type="button"

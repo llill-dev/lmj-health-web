@@ -21,6 +21,10 @@ function renderAuthApp(route = '/login') {
         element={<div>لوحة الطبيب</div>}
       />
       <Route
+        path="/data-entry/dashboard"
+        element={<div>لوحة مدخل البيانات</div>}
+      />
+      <Route
         path="/doctor/patients"
         element={<div>صفحة المرضى</div>}
       />
@@ -86,6 +90,21 @@ describe('Authentication integration', () => {
     expect(session.accessToken).toBe('access-token-1');
     expect(session.refreshToken).toBe('refresh-token-1');
     expect(session.user?.role).toBe('doctor');
+  });
+
+  it('redirects data-entry users to the canonical data-entry dashboard after login', async () => {
+    mockLoginSuccess({ role: 'data_entry' });
+
+    renderAuthApp();
+
+    const { user } = await fillLoginForm({
+      identifier: 'operator@example.com',
+      password: 'secret1',
+    });
+    await user.click(screen.getByRole('button', { name: 'تسجيل الدخول' }));
+
+    expect(await screen.findByText('لوحة مدخل البيانات')).toBeInTheDocument();
+    expect(readStoredAuthSession().user?.role).toBe('data_entry');
   });
 
   it('shows an authentication error and keeps the user on the login page when credentials are invalid', async () => {

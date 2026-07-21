@@ -30,7 +30,7 @@ export function getRoleRoot(role: AppRole): string {
     case 'secretary':
       return '/secretary';
     case 'data-entry':
-      return '/data-entry';
+      return '/data-entry/dashboard';
     default:
       return '/welcome';
   }

@@ -6,9 +6,11 @@ import { type ComponentType, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   adminSidebarItems,
+  dataEntrySidebarItems,
   sidebarItems,
   secretarySidebarItems,
   type AdminSidebarItemId,
+  type DataEntrySidebarItemId,
   type SecretarySidebarItemId,
   type SidebarItemId,
 } from "@/constant/sidebar-items";
@@ -36,8 +38,12 @@ export default function Sidebar({
   profilePhotoUrl,
   items,
 }: {
-  active?: SidebarItemId | AdminSidebarItemId | SecretarySidebarItemId;
-  role?: "doctor" | "admin" | "secretary";
+  active?:
+    | SidebarItemId
+    | AdminSidebarItemId
+    | SecretarySidebarItemId
+    | DataEntrySidebarItemId;
+  role?: "doctor" | "admin" | "secretary" | "data-entry";
   collapsed?: boolean;
   mobileOpen?: boolean;
   onToggleCollapse?: () => void;
@@ -52,6 +58,7 @@ export default function Sidebar({
     if (items?.length) return items;
     if (role === "admin") return adminSidebarItems;
     if (role === "secretary") return secretarySidebarItems;
+    if (role === "data-entry") return dataEntrySidebarItems;
     return sidebarItems;
   }, [items, role]);
 
@@ -65,6 +72,8 @@ export default function Sidebar({
       ? adminBranding.appDescription.trim() || "بوابة الإدارة"
       : role === "secretary"
         ? "بوابة السكرتير"
+        : role === "data-entry"
+          ? "بوابة إدخال البيانات"
         : "بوابة الطبيب";
 
   const basePath =
@@ -72,16 +81,29 @@ export default function Sidebar({
       ? "/admin"
       : role === "secretary"
         ? "/secretary"
+        : role === "data-entry"
+          ? "/data-entry"
         : "/doctor";
   const displayName =
-    profileName?.trim() || (role === "secretary" ? "السكرتير" : "الطبيب");
+    profileName?.trim()
+    || (role === "secretary"
+      ? "السكرتير"
+      : role === "data-entry"
+        ? "مدخل البيانات"
+        : "الطبيب");
   const displayEmail = profileEmail?.trim() || "—";
   const displayInitial =
-    displayName.charAt(0).toUpperCase() || (role === "secretary" ? "س" : "د");
+    displayName.charAt(0).toUpperCase()
+    || (role === "secretary" ? "س" : role === "data-entry" ? "ب" : "د");
 
   const resolvedActive =
     (active as
-      | (SidebarItemId | AdminSidebarItemId | SecretarySidebarItemId)
+      | (
+          | SidebarItemId
+          | AdminSidebarItemId
+          | SecretarySidebarItemId
+          | DataEntrySidebarItemId
+        )
       | undefined) ?? (role === "admin" ? "overview" : "dashboard");
 
   const desktopWidthClass = collapsed ? "lg:w-[88px]" : "lg:w-[320px]";
@@ -217,6 +239,8 @@ export default function Sidebar({
                       <div className="mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
                         {role === "admin"
                           ? "admin@lmjhealth.com"
+                          : role === "data-entry" && displayEmail === "—"
+                            ? "data-entry@lmjhealth.com"
                           : displayEmail}
                       </div>
                     </div>
