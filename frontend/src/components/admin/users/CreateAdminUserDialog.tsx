@@ -314,7 +314,6 @@ export default function CreateAdminUserDialog({
                     error={errors.password?.message}
                   >
                     <div className="relative">
-                      <Lock className="absolute left-10 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                       <input
                         {...register("password")}
                         type={showPassword ? "text" : "password"}

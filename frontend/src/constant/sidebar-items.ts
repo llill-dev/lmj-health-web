@@ -95,7 +95,11 @@ export type SecretarySidebarItemId =
   | "profile"
   | "notifications";
 
-export type DataEntrySidebarItemId = "dashboard";
+export type DataEntrySidebarItemId =
+  | "dashboard"
+  | "medical-content"
+  | "content-templates"
+  | "medical-orders";
 
 export const sidebarItems: Array<{
   id: string;
@@ -485,5 +489,23 @@ export const dataEntrySidebarItems: Array<{
     path: "dashboard",
     label: "لوحة مدخل البيانات",
     icon: LayoutGrid,
+  },
+  {
+    id: "medical-content",
+    path: "medical-content",
+    label: "المحتوى الطبي",
+    icon: BookOpen,
+  },
+  {
+    id: "content-templates",
+    path: "content-templates",
+    label: "قوالب المحتوى",
+    icon: Layers,
+  },
+  {
+    id: "medical-orders",
+    path: "medical-orders",
+    label: "الطلبات الطبية",
+    icon: ClipboardList,
   },
 ];

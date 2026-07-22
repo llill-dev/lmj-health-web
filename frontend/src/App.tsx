@@ -548,6 +548,30 @@ export default function App() {
                 </Suspense>
               }
             />
+            <Route
+              path="medical-content"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <DataEntryPages.DataEntryMedicalContentPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="content-templates"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <DataEntryPages.DataEntryContentTemplatesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="medical-orders"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <DataEntryPages.DataEntryMedicalOrdersPage />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
 

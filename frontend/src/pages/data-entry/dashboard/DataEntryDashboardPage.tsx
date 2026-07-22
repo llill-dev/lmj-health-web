@@ -1,29 +1,71 @@
-import { ClipboardList, LayoutGrid, ShieldCheck } from "lucide-react";
+import {
+  BookOpen,
+  ClipboardList,
+  Layers,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useMemo } from "react";
 import PageDashboardOverview from "@/components/shared/dashboard/page-dashboard-overview";
+import { useAdminMyContentList } from "@/hooks/admin/content/useAdminContent";
+import { useAdminContentTemplates } from "@/hooks/admin/content-templates/useAdminContentTemplates";
+import { useAdminMedicalOrderCatalog } from "@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog";
 
 const capabilityCards = [
   {
-    title: "وصول آمن وموجّه",
+    title: "إدارة المحتوى الطبي",
     description:
-      "تم تفعيل مسار مستقل لدور مدخل البيانات مع حماية مخصصة تمنع الوصول إلى مسارات الأطباء أو الإدارة.",
-    icon: ShieldCheck,
+      "إنشاء وتعديل ومتابعة المحتوى الطبي الخاص بك مع إرسال العناصر إلى المراجعة من نفس اللوحة.",
+    icon: BookOpen,
+    href: "/data-entry/medical-content",
   },
   {
-    title: "واجهة جاهزة للتوسعة",
+    title: "مرجع قوالب المحتوى",
     description:
-      "هذه اللوحة هي نقطة الانطلاق الرسمية لإضافة الشاشات التشغيلية المعتمدة من الـ API بدون مسارات ميتة.",
-    icon: LayoutGrid,
+      "عرض القوالب الجاهزة وحقولها لتسريع إدخال بيانات متسق مع المعايير المعتمدة.",
+    icon: Layers,
+    href: "/data-entry/content-templates",
   },
   {
-    title: "سير عمل واضح",
+    title: "كتالوج الطلبات الطبية",
     description:
-      "تم تثبيت تسجيل الدخول، إعادة التوجيه، والتنقل الأساسي حتى تصبح إضافة صفحات الإدخال الفعلية آمنة وسهلة.",
+      "إدارة عناصر المختبر والتصوير والإجراءات بسرعة مع تصفية مرنة وسير عمل واضح.",
     icon: ClipboardList,
+    href: "/data-entry/medical-orders",
   },
 ];
 
 export default function DataEntryDashboardPage() {
+  const myContentQuery = useAdminMyContentList({ page: 1, limit: 100 });
+  const templatesQuery = useAdminContentTemplates({ page: 1, limit: 1 });
+  const labQuery = useAdminMedicalOrderCatalog("lab");
+  const imagingQuery = useAdminMedicalOrderCatalog("imaging");
+  const procedureQuery = useAdminMedicalOrderCatalog("procedure");
+
+  const contentItemsCount = useMemo(() => {
+    if (!myContentQuery.data) return 0;
+    const raw =
+      myContentQuery.data.items ??
+      myContentQuery.data.content ??
+      myContentQuery.data.contentItems ??
+      [];
+    return raw.length;
+  }, [myContentQuery.data]);
+
+  const medicalOrdersCount = useMemo(() => {
+    const lab = labQuery.data?.items?.length ?? 0;
+    const imaging = imagingQuery.data?.items?.length ?? 0;
+    const procedure = procedureQuery.data?.items?.length ?? 0;
+    return lab + imaging + procedure;
+  }, [imagingQuery.data?.items, labQuery.data?.items, procedureQuery.data?.items]);
+
+  const isLoadingKpis =
+    myContentQuery.isAwaitingData ||
+    templatesQuery.isAwaitingData ||
+    labQuery.isAwaitingData ||
+    imagingQuery.isAwaitingData ||
+    procedureQuery.isAwaitingData;
+
   return (
     <>
       <Helmet>
@@ -35,27 +77,29 @@ export default function DataEntryDashboardPage() {
           variant="admin"
           surface="mint"
           title="لوحة مدخل البيانات"
-          subtitle="منطقة عمل مهيأة للمهام التشغيلية الأساسية مع مسار دخول آمن وواضح."
+          subtitle="منطقة تشغيل يومية لإدارة المحتوى والقوالب والطلبات الطبية ضمن هوية LMJ Health."
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
           kpiColumns={3}
           kpis={[
             {
-              key: "auth",
-              icon: <ShieldCheck className="h-5 w-5 shrink-0" />,
-              value: "جاهز",
-              label: "المصادقة والحماية",
+              key: "my-content",
+              icon: <BookOpen className="h-5 w-5 shrink-0" />,
+              value: isLoadingKpis ? "…" : contentItemsCount.toLocaleString("ar-SA"),
+              label: "عناصري الطبية",
             },
             {
-              key: "routing",
-              icon: <LayoutGrid className="h-5 w-5 shrink-0" />,
-              value: "نشط",
-              label: "المسار الرئيسي",
+              key: "templates",
+              icon: <Layers className="h-5 w-5 shrink-0" />,
+              value: isLoadingKpis
+                ? "…"
+                : (templatesQuery.total ?? 0).toLocaleString("ar-SA"),
+              label: "قوالب متاحة",
             },
             {
-              key: "foundation",
+              key: "orders",
               icon: <ClipboardList className="h-5 w-5 shrink-0" />,
-              value: "مهيأ",
-              label: "أساس التوسعة القادمة",
+              value: isLoadingKpis ? "…" : medicalOrdersCount.toLocaleString("ar-SA"),
+              label: "عناصر كتالوج",
             },
           ]}
         />
@@ -64,8 +108,9 @@ export default function DataEntryDashboardPage() {
           {capabilityCards.map((card) => {
             const Icon = card.icon;
             return (
-              <article
+              <Link
                 key={card.title}
+                to={card.href}
                 className="rounded-[18px] border border-[#E6EEF5] bg-white px-5 py-5 text-right shadow-[0_14px_30px_rgba(15,23,42,0.06)]"
               >
                 <div className="flex items-center justify-start gap-3">
@@ -79,19 +124,19 @@ export default function DataEntryDashboardPage() {
                 <p className="mt-4 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
                   {card.description}
                 </p>
-              </article>
+              </Link>
             );
           })}
         </section>
 
         <section className="mt-5 rounded-[18px] border border-dashed border-[#BFE3E1] bg-[#F7FFFE] px-6 py-6 text-right">
           <h2 className="font-cairo text-[15px] font-extrabold text-primary">
-            ملاحظات هذه النسخة
+            ملاحظات تشغيلية
           </h2>
           <p className="mt-3 font-cairo text-[13px] font-semibold leading-7 text-[#4B5563]">
-            تم إطلاق لوحة تشغيلية أولى لدور مدخل البيانات بدون اختراع تدفقات غير
-            موثقة. أي شاشة إدخال إضافية يجب أن تُربط فقط بعد التحقق من endpoints
-            المعتمدة لهذا الدور في الـ API.
+            تم بناء هذه الواجهة على endpoints المعتمدة لدور مدخل البيانات فقط،
+            مع الحفاظ على نفس أسلوب التصميم والكتابة في الموقع لضمان تجربة
+            متناسقة وواضحة.
           </p>
         </section>
       </div>
