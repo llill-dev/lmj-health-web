@@ -99,44 +99,6 @@ export default function SignUpStep3Professional({
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
             المعلومات المهنية
           </h2>
-          <button
-            type='button'
-            onClick={() => {
-              const fromCatalog = hasSpecialtyCatalog;
-              setSpecialtyInputMode(fromCatalog ? 'catalog' : 'manual');
-              setValue('specialtySource', fromCatalog ? 'catalog' : 'manual', {
-                shouldDirty: true,
-              });
-              const firstSpecialty =
-                specialties.length > 0 ? specialties[0] : undefined;
-              setValue(
-                'specialty',
-                fromCatalog && firstSpecialty
-                  ? firstSpecialty.value
-                  : 'طب الأسنان التجريبي',
-                { shouldDirty: true },
-              );
-              setValue('licenseNumber', 'DAM-2024-1001', { shouldDirty: true });
-              setValue(
-                'qualification',
-                'دكتوراه في طب الأسنان — جامعة دمشق',
-                { shouldDirty: true },
-              );
-              setValue(
-                'clinicAddress',
-                'دمشق، المزة، شارع العيادات، مبنى 5',
-                { shouldDirty: true },
-              );
-              setValue(
-                'bio',
-                'طبيب أسنان بخبرة سريرية في التركيبات والتقويم؛ أهتم بمتابعة الحالات بعناية.',
-                { shouldDirty: true },
-              );
-            }}
-            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
-          >
-            ملء البيانات
-          </button>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
           بياناتك الطبية والمهنية

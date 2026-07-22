@@ -26,7 +26,7 @@ export default function SignUpStep4Additional({
   onNext: (values: Step4AdditionalValues) => void;
   defaultValues?: Partial<Step4AdditionalValues>;
 }) {
-  const { register, handleSubmit, setValue } = useForm<Step4AdditionalValues>({
+  const { register, handleSubmit } = useForm<Step4AdditionalValues>({
     resolver: zodResolver(step4AdditionalSchema),
     defaultValues: {
       city: defaultValues?.city ?? '',
@@ -47,16 +47,6 @@ export default function SignUpStep4Additional({
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
             الإعدادات الإضافية
           </h2>
-          <button
-            type='button'
-            onClick={() => {
-              setValue('city', 'دمشق', { shouldDirty: true });
-              setValue('country', 'سوريا', { shouldDirty: true });
-            }}
-            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
-          >
-            ملء البيانات
-          </button>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
           حقول المدينة والدولة اختيارية؛ إذا تُركت الحقول فارغة فلن يُرسَل ذلك

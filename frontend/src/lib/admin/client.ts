@@ -234,6 +234,34 @@ function readAdminAccessRequestDetailsRecord(
   return record as NonNullable<AdminAccessRequestDetailsResponse["request"]> | undefined;
 }
 
+function readVerificationRequestRecord(
+  value: unknown,
+): VerificationRequestSummary | undefined {
+  const record = asAdminRecord(value);
+  return isVerificationRequestSummary(record) ? record : undefined;
+}
+
+function readAdminContentDetailsItemRecord(
+  value: unknown,
+): AdminContentDetailsResponse["item"] | undefined {
+  const record = asAdminRecord(value);
+  return record ? (record as AdminContentDetailsResponse["item"]) : undefined;
+}
+
+function readAdminContentTemplateRecord(
+  value: unknown,
+): AdminContentTemplateMutationResponse["item"] | undefined {
+  const record = asAdminRecord(value);
+  return record ? (record as AdminContentTemplateMutationResponse["item"]) : undefined;
+}
+
+function readAdminLookupRecordDetails(
+  value: unknown,
+): AdminLookupMutationResponse["lookup"] | undefined {
+  const record = asAdminRecord(value);
+  return record ? (record as AdminLookupMutationResponse["lookup"]) : undefined;
+}
+
 function readAdminDoctorsFromArray(
   value: unknown,
 ): AdminDoctorsListResponse["doctors"] | undefined {
@@ -690,6 +718,42 @@ function normalizeVerificationRequestsListResponse(
   });
 }
 
+function normalizeVerificationRequestDetailsResponse(
+  response: VerificationRequestDetailsResponse,
+): VerificationRequestDetailsResponse {
+  const request =
+    readVerificationRequestRecord(response.request) ??
+    readVerificationRequestRecord(response.verificationRequest) ??
+    readVerificationRequestRecord(response.item) ??
+    readVerificationRequestRecord(response.data);
+
+  return request
+    ? {
+        ...response,
+        request,
+        verificationRequest: request,
+        item: request,
+        data: request,
+      }
+    : response;
+}
+
+function normalizeVerificationRequestReviewResponse(
+  response: VerificationRequestReviewResponse,
+): VerificationRequestReviewResponse {
+  const request =
+    readVerificationRequestRecord(response.request) ??
+    readVerificationRequestRecord(response.verificationRequest);
+
+  return request
+    ? {
+        ...response,
+        request,
+        verificationRequest: request,
+      }
+    : response;
+}
+
 function normalizeAdminUsersListResponse(
   response: AdminUsersListResponse,
 ): AdminUsersListResponse {
@@ -710,6 +774,376 @@ function normalizeAdminDoctorRestoreRequestsListResponse(
       items: restoreRequests,
     },
   );
+}
+
+function readAdminContentTemplates(
+  value: unknown,
+): NonNullable<AdminContentTemplatesListResponse["items"]> | undefined {
+  const record = asAdminListEnvelope(value);
+  if (!record) return undefined;
+
+  return (
+    mapAdminRecordArray(
+      record.items,
+      (entry) => entry as NonNullable<AdminContentTemplatesListResponse["items"]>[number],
+    ) ??
+    mapAdminRecordArray(
+      readAdminNamedValue(record, "templates"),
+      (entry) => entry as NonNullable<AdminContentTemplatesListResponse["items"]>[number],
+    ) ??
+    mapAdminRecordArray(
+      readAdminNamedValue(record, "contentTemplates"),
+      (entry) => entry as NonNullable<AdminContentTemplatesListResponse["items"]>[number],
+    ) ??
+    readAdminContentTemplates(record.data) ??
+    readAdminContentTemplates(record.result)
+  );
+}
+
+function readAdminNewsItems(
+  value: unknown,
+): NonNullable<AdminNewsPendingListResponse["items"]> | undefined {
+  const record = asAdminListEnvelope(value);
+  if (!record) return undefined;
+
+  return (
+    mapAdminRecordArray(
+      record.items,
+      (entry) => entry as NonNullable<AdminNewsPendingListResponse["items"]>[number],
+    ) ??
+    mapAdminRecordArray(
+      readAdminNamedValue(record, "content"),
+      (entry) => entry as NonNullable<AdminNewsPendingListResponse["items"]>[number],
+    ) ??
+    readAdminNewsItems(record.data) ??
+    readAdminNewsItems(record.result)
+  );
+}
+
+function readAdminLookups(
+  value: unknown,
+): AdminLookupsListResponse["lookups"] | undefined {
+  const record = asAdminListEnvelope(value);
+  if (!record) return undefined;
+
+  return (
+    mapAdminRecordArray(
+      readAdminNamedValue(record, "lookups"),
+      (entry) => entry as AdminLookupsListResponse["lookups"][number],
+    ) ??
+    mapAdminRecordArray(
+      record.items,
+      (entry) => entry as AdminLookupsListResponse["lookups"][number],
+    ) ??
+    readAdminLookups(record.data) ??
+    readAdminLookups(record.result)
+  );
+}
+
+function normalizeAdminContentTemplatesListResponse(
+  response: AdminContentTemplatesListResponse,
+): AdminContentTemplatesListResponse {
+  const items = readAdminListOrEmpty(readAdminContentTemplates(response));
+  return withAdminCollections(withAdminPaging(response, items.length), {
+    items,
+    templates: items,
+    contentTemplates: items,
+  });
+}
+
+function normalizeAdminNewsPendingListResponse(
+  response: AdminNewsPendingListResponse,
+): AdminNewsPendingListResponse {
+  const items = readAdminListOrEmpty(readAdminNewsItems(response));
+  const paging = withAdminPaging(response, items.length);
+  return {
+    ...paging,
+    items,
+    content: items,
+  };
+}
+
+function normalizeAdminLookupsListResponse(
+  response: AdminLookupsListResponse,
+): AdminLookupsListResponse {
+  const lookups = readAdminListOrEmpty(readAdminLookups(response));
+  return withAdminCollections(response, {
+    lookups,
+    results:
+      typeof response.results === "number" ? response.results : lookups.length,
+  });
+}
+
+function normalizeAdminContentDetailsResponse(
+  response: AdminContentDetailsResponse,
+): AdminContentDetailsResponse {
+  const item =
+    readAdminContentDetailsItemRecord(response.item) ??
+    readAdminContentDetailsItemRecord(response.content) ??
+    readAdminContentDetailsItemRecord(response.contentItem) ??
+    readAdminContentDetailsItemRecord(response.data);
+
+  return item
+    ? { ...response, item, content: item, contentItem: item, data: item }
+    : response;
+}
+
+function normalizeAdminContentMutationResponse(
+  response: AdminContentMutationResponse,
+): AdminContentMutationResponse {
+  const item =
+    readAdminContentDetailsItemRecord(response.item) ??
+    readAdminContentDetailsItemRecord(response.content) ??
+    readAdminContentDetailsItemRecord(response.contentItem) ??
+    readAdminContentDetailsItemRecord(response.data);
+
+  return item
+    ? { ...response, item, content: item, contentItem: item, data: item }
+    : response;
+}
+
+function normalizeAdminContentReviewActionResponse(
+  response: AdminContentReviewActionResponse,
+): AdminContentReviewActionResponse {
+  const item =
+    readAdminContentDetailsItemRecord(response.item) ??
+    readAdminContentDetailsItemRecord(response.content) ??
+    readAdminContentDetailsItemRecord(response.contentItem) ??
+    readAdminContentDetailsItemRecord(response.data);
+
+  return item
+    ? { ...response, item, content: item, contentItem: item, data: item }
+    : response;
+}
+
+function normalizeAdminContentTemplateMutationResponse(
+  response: AdminContentTemplateMutationResponse,
+): AdminContentTemplateMutationResponse {
+  const item =
+    readAdminContentTemplateRecord(response.item) ??
+    readAdminContentTemplateRecord(response.template);
+
+  return item ? { ...response, item, template: item } : response;
+}
+
+function normalizeAdminContentTemplateDisableResponse(
+  response: AdminContentTemplateDisableResponse,
+): AdminContentTemplateDisableResponse {
+  const item =
+    readAdminContentTemplateRecord(response.item) ??
+    readAdminContentTemplateRecord(response.template);
+
+  return item ? { ...response, item, template: item } : response;
+}
+
+function normalizeAdminLookupMutationResponse(
+  response: AdminLookupMutationResponse,
+): AdminLookupMutationResponse {
+  const lookup =
+    readAdminLookupRecordDetails(response.lookup) ??
+    readAdminLookupRecordDetails(response.lookups?.[0]);
+
+  return lookup
+    ? {
+        ...response,
+        lookup,
+        lookups: response.lookups ?? [lookup],
+      }
+    : response;
+}
+
+function normalizeCreateAdminUserResponse(
+  response: CreateAdminUserResponse,
+): CreateAdminUserResponse {
+  const user =
+    (asAdminRecord(response.user) as CreateAdminUserResponse["user"] | null) ??
+    (asAdminRecord((response as AdminApiRecord).data) as CreateAdminUserResponse["user"] | null) ??
+    (asAdminRecord((response as AdminApiRecord).item) as CreateAdminUserResponse["user"] | null);
+
+  return user ? { ...response, user } : response;
+}
+
+function normalizeAdminPatientAccountActionResponse(
+  response: AdminPatientAccountActionResponse,
+): AdminPatientAccountActionResponse {
+  const record = asAdminRecord(response);
+  const nested = readAdminNestedEnvelope(response);
+
+  return {
+    ...response,
+    patientId:
+      readAdminString(record?.patientId) ??
+      readAdminString(nested?.patientId) ??
+      response.patientId,
+    userId:
+      readAdminString(record?.userId) ??
+      readAdminString(nested?.userId) ??
+      response.userId,
+    accountStatus:
+      readAdminString(record?.accountStatus) ??
+      readAdminString(nested?.accountStatus) ??
+      response.accountStatus,
+  };
+}
+
+function normalizeAppointmentCancelResponse(
+  response: AppointmentCancelResponse,
+): AppointmentCancelResponse {
+  const record = asAdminRecord(response);
+  const nested = readAdminNestedEnvelope(response);
+
+  return {
+    ...response,
+    appointmentId:
+      readAdminString(record?.appointmentId) ??
+      readAdminString(nested?.appointmentId) ??
+      response.appointmentId,
+    status:
+      readAdminString(record?.status) ??
+      readAdminString(nested?.status) ??
+      response.status,
+  };
+}
+
+function normalizeComplaintStatusUpdateResponse(
+  response: ComplaintStatusUpdateResponse,
+): ComplaintStatusUpdateResponse {
+  const complaint =
+    readAdminComplaintRecord(asAdminRecord(response.complaint) ?? {}) ??
+    readAdminComplaintRecord(asAdminRecord((response as AdminApiRecord).item) ?? {}) ??
+    readAdminComplaintRecord(asAdminRecord((response as AdminApiRecord).data) ?? {});
+
+  return complaint ? { ...response, complaint } : response;
+}
+
+function normalizeAdminUserOffboardResponse(
+  response: AdminUserOffboardResponse,
+): AdminUserOffboardResponse {
+  const record = asAdminRecord(response);
+  const nested = readAdminNestedEnvelope(response);
+
+  return {
+    ...response,
+    userId:
+      readAdminString(record?.userId) ??
+      readAdminString(nested?.userId) ??
+      response.userId,
+    role:
+      readAdminString(record?.role) ??
+      readAdminString(nested?.role) ??
+      response.role,
+  };
+}
+
+function normalizeAdminUserReboardResponse(
+  response: AdminUserReboardResponse,
+): AdminUserReboardResponse {
+  const record = asAdminRecord(response);
+  const nested = readAdminNestedEnvelope(response);
+
+  return {
+    ...response,
+    userId:
+      readAdminString(record?.userId) ??
+      readAdminString(nested?.userId) ??
+      response.userId,
+    role:
+      readAdminString(record?.role) ??
+      readAdminString(nested?.role) ??
+      response.role,
+  };
+}
+
+function normalizeAdminDoctorRestoreRequestReviewResponse(
+  response: AdminDoctorRestoreRequestReviewResponse,
+): AdminDoctorRestoreRequestReviewResponse {
+  const restoreRequest =
+    (asAdminRecord(response.restoreRequest) as AdminDoctorRestoreRequestReviewResponse["restoreRequest"] | null) ??
+    (asAdminRecord((response as AdminApiRecord).data) as AdminDoctorRestoreRequestReviewResponse["restoreRequest"] | null);
+
+  return restoreRequest ? { ...response, restoreRequest } : response;
+}
+
+function normalizeAdminNewsIngestResponse(
+  response: AdminNewsIngestResponse,
+): AdminNewsIngestResponse {
+  const data =
+    asAdminRecord(response.data) ??
+    asAdminRecord((response as AdminApiRecord).result) ??
+    asAdminRecord((response as AdminApiRecord).item);
+
+  return data ? { ...response, data } : response;
+}
+
+function normalizeAdminMedicalOrderCatalogMutationResponse(
+  response: AdminMedicalOrderCatalogMutationResponse,
+): AdminMedicalOrderCatalogMutationResponse {
+  const item =
+    readMedicalOrderCatalogItem(response.item) ??
+    readMedicalOrderCatalogItem((response as AdminApiRecord).data) ??
+    readMedicalOrderCatalogItem((response as AdminApiRecord).result);
+
+  return item ? { ...response, item } : response;
+}
+
+function normalizeServiceProviderCreateResponse(
+  response: ServiceProviderCreateResponse,
+): ServiceProviderCreateResponse {
+  return response;
+}
+
+function normalizeServiceProviderUpdateResponse(
+  response: ServiceProviderUpdateResponse,
+): ServiceProviderUpdateResponse {
+  return response;
+}
+
+function normalizeServiceProviderStatusUpdateResponse(
+  response: ServiceProviderStatusUpdateResponse,
+): ServiceProviderStatusUpdateResponse {
+  return response;
+}
+
+function normalizeFacilityMutationResponse<
+  TResponse extends FacilityResponse | FacilityCreateResponse | FacilityUpdateResponse,
+>(response: TResponse): TResponse {
+  const normalized = normalizeFacilityResponse(response as FacilityResponse);
+  return { ...response, facility: normalized.facility } as TResponse;
+}
+
+function normalizeFacilityStatusMutationResponse(
+  response: FacilityStatusMutationResponse,
+): FacilityStatusMutationResponse {
+  const normalized = normalizeFacilityResponse(response);
+  return { ...response, facility: normalized.facility };
+}
+
+function normalizeFacilityDeleteResponse(
+  response: FacilityDeleteResponse,
+): FacilityDeleteResponse {
+  const facility =
+    readFacilitySummary(response.facility) ??
+    readFacilitySummary((response as AdminApiRecord).item) ??
+    readFacilitySummary((response as AdminApiRecord).data);
+
+  return facility ? { ...response, facility } : response;
+}
+
+function normalizeAdminLookupDeleteResponse(
+  response: AdminLookupDeleteResponse,
+): AdminLookupDeleteResponse {
+  const lookup =
+    readAdminLookupRecordDetails(response.lookup) ??
+    readAdminLookupRecordDetails((response as AdminApiRecord).item) ??
+    readAdminLookupRecordDetails((response as AdminApiRecord).data);
+
+  return lookup ? { ...response, lookup } : response;
+}
+
+function normalizeDoctorProfileChangeRequestReviewResponse(
+  response: DoctorProfileChangeRequestReviewResponse,
+): DoctorProfileChangeRequestReviewResponse {
+  return response;
 }
 
 function readPagedNumbers(
@@ -1272,19 +1706,19 @@ export const adminApi = {
         adminEndpoints.patients.activate(patientId),
         undefined,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminPatientAccountActionResponse),
     suspend: (patientId: string, reason?: string) =>
       patch<AdminPatientAccountActionResponse>(
         adminEndpoints.patients.suspend(patientId),
         reason ? { reason } : undefined,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminPatientAccountActionResponse),
     unsuspend: (patientId: string) =>
       patch<AdminPatientAccountActionResponse>(
         adminEndpoints.patients.unsuspend(patientId),
         undefined,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminPatientAccountActionResponse),
     files: {
       list: (patientId: string, params: AdminPatientFilesListParams = {}) => {
         const qs = new URLSearchParams();
@@ -1337,7 +1771,7 @@ export const adminApi = {
         adminEndpoints.appointments.cancel(appointmentId),
         { reason },
         { locale: "ar" },
-      ),
+      ).then(normalizeAppointmentCancelResponse),
   },
   accessRequests: {
     list: (params: { page?: number; limit?: number; status?: string } = {}) => {
@@ -1385,7 +1819,7 @@ export const adminApi = {
         adminEndpoints.complaints.updateStatus(complaintId),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeComplaintStatusUpdateResponse),
   },
   verificationRequests: {
     list: (params: VerificationRequestsListParams = {}) => {
@@ -1408,12 +1842,12 @@ export const adminApi = {
         {
           locale: "ar",
         },
-      ),
+      ).then(normalizeVerificationRequestReviewResponse),
     getById: (requestId: string) =>
       get<VerificationRequestDetailsResponse>(
         adminEndpoints.verificationRequests.details(requestId),
         { locale: "ar" },
-      ),
+      ).then(normalizeVerificationRequestDetailsResponse),
   },
   users: {
     list: () =>
@@ -1423,19 +1857,19 @@ export const adminApi = {
     create: (body: CreateAdminUserBody) =>
       post<CreateAdminUserResponse>(adminEndpoints.users.create, body, {
         locale: "ar",
-      }),
+      }).then(normalizeCreateAdminUserResponse),
     offboard: (userId: string, reason?: string) =>
       post<AdminUserOffboardResponse>(
         adminEndpoints.users.offboard(userId),
         { reason },
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminUserOffboardResponse),
     reboard: (userId: string) =>
       post<AdminUserReboardResponse>(
         adminEndpoints.users.reboard(userId),
         {},
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminUserReboardResponse),
     doctorRestoreRequests: (params: {
       status?: string;
       search?: string;
@@ -1469,7 +1903,7 @@ export const adminApi = {
         adminEndpoints.users.reviewRestoreRequest(userId),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminDoctorRestoreRequestReviewResponse),
   },
   secretaries: {
     list: (params: AdminSecretariesListParams = {}) => {
@@ -1545,17 +1979,17 @@ export const adminApi = {
     getById: (id: string) =>
       get<AdminContentDetailsResponse>(adminEndpoints.content.details(id), {
         locale: "ar",
-      }),
+      }).then(normalizeAdminContentDetailsResponse),
     create: (body: CreateAdminContentBody) =>
       post<AdminContentMutationResponse>(adminEndpoints.content.create, body, {
         locale: "ar",
-      }),
+      }).then(normalizeAdminContentMutationResponse),
     update: (id: string, body: UpdateAdminContentBody) =>
       patch<AdminContentMutationResponse>(
         adminEndpoints.content.update(id),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminContentMutationResponse),
     submitReview: (id: string, reviewNotes?: string) =>
       post<AdminContentReviewActionResponse>(
         adminEndpoints.content.submitReview(id),
@@ -1566,25 +2000,25 @@ export const adminApi = {
         {
         locale: "ar",
       },
-      ),
+      ).then(normalizeAdminContentReviewActionResponse),
     approve: (id: string) =>
       post<AdminContentReviewActionResponse>(adminEndpoints.content.approve(id), undefined, {
         locale: "ar",
-      }),
+      }).then(normalizeAdminContentReviewActionResponse),
     reject: (id: string, rejectionReason: string) =>
       post<AdminContentReviewActionResponse>(
         adminEndpoints.content.reject(id),
         rejectionReason ? { rejectionReason } : undefined,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminContentReviewActionResponse),
     publish: (id: string) =>
       post<AdminContentReviewActionResponse>(adminEndpoints.content.publish(id), undefined, {
         locale: "ar",
-      }),
+      }).then(normalizeAdminContentReviewActionResponse),
     archive: (id: string) =>
       post<AdminContentReviewActionResponse>(adminEndpoints.content.archive(id), undefined, {
         locale: "ar",
-      }),
+      }).then(normalizeAdminContentReviewActionResponse),
   },
   contentTemplates: {
     list: (params: AdminContentTemplatesListParams = {}) => {
@@ -1599,34 +2033,34 @@ export const adminApi = {
         : adminEndpoints.contentTemplates.list;
       return get<AdminContentTemplatesListResponse>(endpoint, {
         locale: "ar",
-      });
+      }).then(normalizeAdminContentTemplatesListResponse);
     },
     create: (body: CreateAdminContentTemplateBody) =>
       post<AdminContentTemplateMutationResponse>(
         adminEndpoints.contentTemplates.create,
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminContentTemplateMutationResponse),
     update: (id: string, body: UpdateAdminContentTemplateBody) =>
       patch<AdminContentTemplateMutationResponse>(
         adminEndpoints.contentTemplates.update(id),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminContentTemplateMutationResponse),
     disable: (id: string, force = false) => {
       const endpoint = force
         ? `${adminEndpoints.contentTemplates.disable(id)}?force=true`
         : adminEndpoints.contentTemplates.disable(id);
       return post<AdminContentTemplateDisableResponse>(endpoint, undefined, {
         locale: "ar",
-      });
+      }).then(normalizeAdminContentTemplateDisableResponse);
     },
   },
   news: {
     ingest: (body: AdminNewsIngestBody) =>
       post<AdminNewsIngestResponse>(adminEndpoints.news.ingest, body, {
         locale: "ar",
-      }),
+      }).then(normalizeAdminNewsIngestResponse),
     pending: (params: AdminNewsPendingListParams = {}) => {
       const qs = new URLSearchParams();
       if (params.page) qs.set("page", String(params.page));
@@ -1638,7 +2072,9 @@ export const adminApi = {
       const endpoint = qs.toString()
         ? `${adminEndpoints.news.pending}?${qs.toString()}`
         : adminEndpoints.news.pending;
-      return get<AdminNewsPendingListResponse>(endpoint, { locale: "ar" });
+      return get<AdminNewsPendingListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminNewsPendingListResponse,
+      );
     },
   },
   medicalOrderCatalog: {
@@ -1676,7 +2112,7 @@ export const adminApi = {
         adminEndpoints.orderCatalog.collection(body.kind),
         buildMedicalOrderCreatePayload(body),
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminMedicalOrderCatalogMutationResponse),
     getById: (kind: MedicalOrderCatalogKind, id: string) =>
       get<AdminMedicalOrderCatalogDetailsResponse | AdminApiRecord>(
         adminEndpoints.orderCatalog.item(kind, id),
@@ -1704,7 +2140,7 @@ export const adminApi = {
         adminEndpoints.orderCatalog.item(kind, id),
         buildMedicalOrderUpdatePayload(body),
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminMedicalOrderCatalogMutationResponse),
     remove: (kind: MedicalOrderCatalogKind, id: string) =>
       unsupportedApiOperation(
         `DELETE ${adminEndpoints.orderCatalog.item(kind, id)} is not documented in API-3.`,
@@ -1717,22 +2153,24 @@ export const adminApi = {
       if (params.includeInactive === true) qs.set("includeInactive", "true");
       if (params.langOnly === true) qs.set("langOnly", "true");
       const endpoint = `${adminEndpoints.lookups.list}?${qs.toString()}`;
-      return get<AdminLookupsListResponse>(endpoint, { locale: "ar" });
+      return get<AdminLookupsListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeAdminLookupsListResponse,
+      );
     },
     create: (body: AdminLookupCreateBody) =>
       post<AdminLookupMutationResponse>(adminEndpoints.lookups.list, body, {
         locale: "ar",
-      }),
+      }).then(normalizeAdminLookupMutationResponse),
     patch: (id: string, body: AdminLookupPatchBody) =>
       patch<AdminLookupMutationResponse>(
         adminEndpoints.lookups.detail(id),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeAdminLookupMutationResponse),
     remove: (id: string) =>
       del<AdminLookupDeleteResponse>(adminEndpoints.lookups.detail(id), {
         locale: "ar",
-      }),
+      }).then(normalizeAdminLookupDeleteResponse),
   },
   serviceProviders: {
     create: (body: CreateProviderBody) =>
@@ -1740,7 +2178,7 @@ export const adminApi = {
         adminEndpoints.serviceProviders.create,
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeServiceProviderCreateResponse),
     update: (
       id: string,
       body: UpdateProviderBody & {
@@ -1754,7 +2192,7 @@ export const adminApi = {
         adminEndpoints.serviceProviders.update(id),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeServiceProviderUpdateResponse),
     updateStatus: (
       id: string,
       body: {
@@ -1765,7 +2203,7 @@ export const adminApi = {
         adminEndpoints.serviceProviders.updateStatus(id),
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeServiceProviderStatusUpdateResponse),
   },
   facilities: {
     list: (params: FacilitiesListParams = {}) => {
@@ -1820,25 +2258,25 @@ export const adminApi = {
         adminEndpoints.facilities.updateStatus(id),
         { status },
         { locale: "ar" },
-      ),
+      ).then(normalizeFacilityStatusMutationResponse),
     remove: (id: string) =>
       del<FacilityDeleteResponse>(
         adminEndpoints.facilities.delete(id),
         { locale: "ar" },
-      ),
+      ).then(normalizeFacilityDeleteResponse),
     create: (body: CreateFacilityBody) =>
       post<FacilityCreateResponse>(
         adminEndpoints.facilities.create,
         body,
         { locale: "ar" },
-      ),
+      ).then(normalizeFacilityMutationResponse),
     update: (
       id: string,
       body: UpdateFacilityBody,
     ) =>
       put<FacilityUpdateResponse>(adminEndpoints.facilities.update(id), body, {
         locale: "ar",
-      }),
+      }).then(normalizeFacilityMutationResponse),
   },
   doctorProfileChangeRequests: {
     review: (
@@ -1854,6 +2292,6 @@ export const adminApi = {
         {
           locale: "ar",
         },
-      ),
+      ).then(normalizeDoctorProfileChangeRequestReviewResponse),
   },
 };

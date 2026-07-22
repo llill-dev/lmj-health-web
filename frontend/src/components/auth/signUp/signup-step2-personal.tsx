@@ -65,17 +65,6 @@ export default function SignUpStep2Personal({
           <h2 className='font-cairo text-[26px] font-extrabold text-[#101828]'>
             المعلومات الشخصية
           </h2>
-          <button
-            type='button'
-            onClick={() => {
-              setValue('gender', 'male', { shouldDirty: true });
-              setValue('birthDate', '1990-01-01', { shouldDirty: true });
-              setValue('address', 'دمشق - المزة', { shouldDirty: true });
-            }}
-            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
-          >
-            ملء البيانات
-          </button>
         </div>
         <p className='mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]'>
           بياناتك الشخصية الأساسية

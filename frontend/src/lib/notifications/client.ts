@@ -54,6 +54,75 @@ export type NotificationsReadAllResponse = ApiSuccessEnvelope & {
   updated?: number;
 };
 
+type NotificationsEnvelope = {
+  notifications?: unknown;
+  items?: unknown;
+  results?: unknown;
+  data?: unknown;
+  result?: unknown;
+  page?: unknown;
+  limit?: unknown;
+  total?: unknown;
+};
+
+function asNotificationsEnvelope(value: unknown): NotificationsEnvelope | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as NotificationsEnvelope)
+    : null;
+}
+
+function isNotificationItemArray(value: unknown): value is NotificationItem[] {
+  return (
+    Array.isArray(value) &&
+    value.every((item) => item && typeof item === "object" && !Array.isArray(item))
+  );
+}
+
+function readNotificationItems(value: unknown): NotificationItem[] | undefined {
+  const record = asNotificationsEnvelope(value);
+  if (!record) return undefined;
+
+  return (
+    (isNotificationItemArray(record.notifications) ? record.notifications : undefined) ??
+    (isNotificationItemArray(record.items) ? record.items : undefined) ??
+    (isNotificationItemArray(record.results) ? record.results : undefined) ??
+    readNotificationItems(record.data) ??
+    readNotificationItems(record.result)
+  );
+}
+
+function normalizeNotificationsListResponse(
+  response: NotificationsListResponse,
+): NotificationsListResponse {
+  const record = asNotificationsEnvelope(response);
+  const nested =
+    asNotificationsEnvelope(record?.data) ?? asNotificationsEnvelope(record?.result);
+  const notifications = readNotificationItems(response) ?? [];
+
+  return {
+    ...response,
+    notifications,
+    page:
+      typeof response.page === "number"
+        ? response.page
+        : typeof nested?.page === "number"
+          ? nested.page
+          : response.page,
+    limit:
+      typeof response.limit === "number"
+        ? response.limit
+        : typeof nested?.limit === "number"
+          ? nested.limit
+          : response.limit,
+    total:
+      typeof response.total === "number"
+        ? response.total
+        : typeof nested?.total === "number"
+          ? nested.total
+          : response.total,
+  };
+}
+
 export const notificationsApi = {
   list: (params: NotificationsListParams = {}) => {
     const qs = new URLSearchParams();
@@ -64,7 +133,7 @@ export const notificationsApi = {
     return get<NotificationsListResponse>(
       suffix ? `/api/notifications?${suffix}` : "/api/notifications",
       { locale: "ar" },
-    );
+    ).then(normalizeNotificationsListResponse);
   },
 
   /** PATCH /notifications/read-all — API-3.pdf */

@@ -100,22 +100,6 @@ export default function SignUpStep1Account({
           <h2 className='font-cairo text-[22px] font-extrabold text-[#101828]'>
             معلومات الحساب
           </h2>
-          <button
-            type='button'
-            onClick={() => {
-              const demoStamp = Date.now().toString();
-              setValue('fullName', 'د. محمد أحمد', { shouldDirty: true });
-              setValue('email', `doctor+${demoStamp}@example.com`, { shouldDirty: true });
-              setValue('password', 'Password123', { shouldDirty: true });
-              setValue('confirmPassword', 'Password123', { shouldDirty: true });
-              setValue('phoneDialCode', '+963', { shouldDirty: true });
-              setValue('phoneLocal', `9${demoStamp.slice(-8)}`, { shouldDirty: true });
-              setValue('channel', 'whatsapp', { shouldDirty: true });
-            }}
-            className='rounded-full border border-primary/35 bg-[#EFFFFD] px-3 py-1 font-cairo text-[12px] font-bold text-primary'
-          >
-            ملء البيانات
-          </button>
         </div>
         <p className='mt-1 font-cairo text-[13px] font-semibold text-[#667085]'>
           أدخل بياناتك الأساسية لإنشاء حساب
