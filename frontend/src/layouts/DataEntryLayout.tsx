@@ -6,7 +6,6 @@ import Sidebar from "@/components/layout/sidebar";
 import LogoutConfirmDialog, {
   type LogoutScope,
 } from "@/components/auth/logout-confirm-dialog";
-import { PlatformFooter, PlatformSupportProvider } from "@/components/platform";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
   dataEntrySidebarItems,
@@ -78,57 +77,54 @@ export default function DataEntryLayout() {
     )?.path ?? "dashboard";
 
   return (
-    <PlatformSupportProvider>
-      <div className="h-dvh overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]">
-        <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
-          <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
-            <div className="sticky top-0 z-40">
-              <DashboardHeader
-                role="data-entry"
-                title={headerTitle}
-                onMenuClick={() => setIsMobileSidebarOpen(true)}
-                showMessages={false}
-                showUnreadBadge={false}
-                showNotifications={false}
-              />
-            </div>
+    <div className="h-dvh overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]">
+      <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
+        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+          <div className="sticky top-0 z-40">
+            <DashboardHeader
+              role="data-entry"
+              title={headerTitle}
+              onMenuClick={() => setIsMobileSidebarOpen(true)}
+              showMessages={false}
+              showUnreadBadge={false}
+              showNotifications={false}
+            />
+          </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto bg-transparent py-5 scrollbar-hide sm:py-6 lg:py-8">
-              <MotionProvider>
-                <AnimatePresence mode="wait">
-                  <PageTransition key={pathname}>
-                    <div className="mx-auto w-full max-w-[1420px] px-4 sm:px-6 lg:px-12">
-                      <Suspense fallback={<DoctorRouteFallback />}>
-                        <Outlet />
-                      </Suspense>
-                      <PlatformFooter />
-                    </div>
-                  </PageTransition>
-                </AnimatePresence>
-              </MotionProvider>
-            </div>
-          </main>
+          <div className="min-h-0 flex-1 overflow-y-auto bg-transparent py-5 scrollbar-hide sm:py-6 lg:py-8">
+            <MotionProvider>
+              <AnimatePresence mode="wait">
+                <PageTransition key={pathname}>
+                  <div className="mx-auto w-full max-w-[1420px] px-4 sm:px-6 lg:px-12">
+                    <Suspense fallback={<DoctorRouteFallback />}>
+                      <Outlet />
+                    </Suspense>
+                  </div>
+                </PageTransition>
+              </AnimatePresence>
+            </MotionProvider>
+          </div>
+        </main>
 
-          <Sidebar
-            role="data-entry"
-            active={active}
-            collapsed={isSidebarCollapsed}
-            mobileOpen={isMobileSidebarOpen}
-            onToggleCollapse={() => setIsSidebarCollapsed((value) => !value)}
-            onCloseMobile={() => setIsMobileSidebarOpen(false)}
-            onLogout={() => setLogoutConfirmOpen(true)}
-            profileName={profileName}
-            profileEmail={profileEmail}
-          />
-        </div>
-
-        <LogoutConfirmDialog
-          open={logoutConfirmOpen}
-          onOpenChange={setLogoutConfirmOpen}
-          confirmDisabled={loggingOut}
-          onConfirm={performLogout}
+        <Sidebar
+          role="data-entry"
+          active={active}
+          collapsed={isSidebarCollapsed}
+          mobileOpen={isMobileSidebarOpen}
+          onToggleCollapse={() => setIsSidebarCollapsed((value) => !value)}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          onLogout={() => setLogoutConfirmOpen(true)}
+          profileName={profileName}
+          profileEmail={profileEmail}
         />
       </div>
-    </PlatformSupportProvider>
+
+      <LogoutConfirmDialog
+        open={logoutConfirmOpen}
+        onOpenChange={setLogoutConfirmOpen}
+        confirmDisabled={loggingOut}
+        onConfirm={performLogout}
+      />
+    </div>
   );
 }

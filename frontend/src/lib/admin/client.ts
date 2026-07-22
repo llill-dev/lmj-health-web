@@ -313,6 +313,70 @@ function readMedicalOrderCatalogItems(
   });
 }
 
+function readLocalizedText(value: unknown): string | undefined {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return (
+      readLocalizedText(record.ar) ??
+      readLocalizedText(record.en) ??
+      readLocalizedText(record.name) ??
+      readLocalizedText(record.title) ??
+      readLocalizedText(record.value)
+    );
+  }
+  return undefined;
+}
+
+function buildMedicalOrderCode(label: string): string {
+  const normalized = label
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return normalized || "ITEM";
+}
+
+function medicalOrderCategoryByKind(kind: MedicalOrderCatalogKind): string {
+  if (kind === "lab") return "LAB";
+  if (kind === "imaging") return "IMAGING";
+  if (kind === "procedure") return "PROCEDURE";
+  return "REFERRAL";
+}
+
+function buildMedicalOrderCreatePayload(body: AdminMedicalOrderCatalogUpsertBody) {
+  const labelText = readLocalizedText(body.label) ?? "";
+  const fallbackLabel = labelText || "Order item";
+  const code = buildMedicalOrderCode(fallbackLabel);
+
+  return {
+    code,
+    shortCode: code.slice(0, 20),
+    nameAr: fallbackLabel,
+    nameEn: fallbackLabel,
+    category: medicalOrderCategoryByKind(body.kind),
+    ...(typeof body.isActive === "boolean" ? { isActive: body.isActive } : {}),
+    ...(typeof body.isVisible === "boolean" ? { isVisible: body.isVisible } : {}),
+  };
+}
+
+function buildMedicalOrderUpdatePayload(
+  body: Partial<Pick<AdminMedicalOrderCatalogUpsertBody, "label" | "isActive" | "isVisible">>,
+) {
+  const payload: Record<string, unknown> = {};
+  const labelText = readLocalizedText(body.label);
+  if (labelText) {
+    payload.nameAr = labelText;
+    payload.nameEn = labelText;
+  }
+  if (typeof body.isActive === "boolean") payload.isActive = body.isActive;
+  if (typeof body.isVisible === "boolean") payload.isVisible = body.isVisible;
+  return payload;
+}
+
 function readAdminMappedArray<T>(
   value: unknown,
   mapEntry: (value: unknown) => T | null,
@@ -1494,15 +1558,7 @@ export const adminApi = {
     create: (body: AdminMedicalOrderCatalogUpsertBody) =>
       post<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.collection(body.kind),
-        {
-          label: body.label,
-          ...(typeof body.isActive === "boolean"
-            ? { isActive: body.isActive }
-            : {}),
-          ...(typeof body.isVisible === "boolean"
-            ? { isVisible: body.isVisible }
-            : {}),
-        },
+        buildMedicalOrderCreatePayload(body),
         { locale: "ar" },
       ),
     getById: (kind: MedicalOrderCatalogKind, id: string) =>
@@ -1522,7 +1578,7 @@ export const adminApi = {
     ) =>
       patch<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.item(kind, id),
-        body,
+        buildMedicalOrderUpdatePayload(body),
         { locale: "ar" },
       ),
     remove: (kind: MedicalOrderCatalogKind, id: string) =>

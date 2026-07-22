@@ -26,6 +26,17 @@ const ACTIVE_FILTERS: { value: ActiveFilter; label: string }[] = [
   { value: "disabled", label: "معطّل" },
 ];
 
+function toDisplayText(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    const localized = obj.ar ?? obj.en ?? obj.title ?? obj.name ?? obj.value;
+    if (typeof localized === "string") return localized;
+  }
+  return "";
+}
+
 function parentTypeLabel(t?: string | Record<string, unknown>): string {
   if (!t) return "—";
   if (typeof t === "string") {
@@ -180,6 +191,8 @@ export default function DataEntryContentTemplatesPage() {
             ) : (
               templates.map((template) => {
                 const active = isTemplateActive(template);
+                const templateName = toDisplayText(template.name);
+                const templateSlug = toDisplayText(template.slug);
                 return (
                   <article
                     key={template._id}
@@ -187,7 +200,7 @@ export default function DataEntryContentTemplatesPage() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-cairo text-[14px] font-black text-[#111827]">
-                        {template.name ?? "بدون اسم"}
+                        {templateName || "بدون اسم"}
                       </h3>
                       <span className="inline-flex h-[22px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#475467]">
                         {parentTypeLabel(template.parentType)}
@@ -209,8 +222,8 @@ export default function DataEntryContentTemplatesPage() {
                         {(template.fields?.length ?? 0).toLocaleString("ar-SA")}{" "}
                         حقل
                       </span>
-                      {template.slug ? (
-                        <span dir="ltr">{template.slug}</span>
+                      {templateSlug ? (
+                        <span dir="ltr">{templateSlug}</span>
                       ) : null}
                     </div>
                   </article>
