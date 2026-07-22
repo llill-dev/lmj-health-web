@@ -25,6 +25,7 @@ import {
   useAdminMyContentList,
   useSubmitContentReview,
 } from "@/hooks/admin/content/useAdminContent";
+import StyledSelect from "@/components/ui/styled-select";
 import type {
   AdminContentStatus,
   AdminContentType,
@@ -181,43 +182,31 @@ export default function DataEntryMedicalContentPage() {
               placeholder="ابحث بالعنوان أو الوصف أو slug"
               className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
             />
-            <select
+            <StyledSelect
               value={status}
-              onChange={(event) =>
-                setStatus(event.target.value as "all" | AdminContentStatus)
-              }
-              className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
-            >
-              {STATUS_FILTERS.map((filter) => (
-                <option key={filter.value} value={filter.value}>
-                  {filter.label}
-                </option>
-              ))}
-            </select>
-            <select
+              onChange={(value) => setStatus(value as "all" | AdminContentStatus)}
+              options={STATUS_FILTERS}
+              listboxAriaLabel="حالة المحتوى"
+              triggerClassName="h-10 rounded-[10px]"
+            />
+            <StyledSelect
               value={type}
-              onChange={(event) =>
-                setType(event.target.value as "all" | AdminContentType)
-              }
-              className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
-            >
-              {TYPE_FILTERS.map((filter) => (
-                <option key={filter.value} value={filter.value}>
-                  {filter.label}
-                </option>
-              ))}
-            </select>
-            <select
+              onChange={(value) => setType(value as "all" | AdminContentType)}
+              options={TYPE_FILTERS}
+              listboxAriaLabel="نوع المحتوى"
+              triggerClassName="h-10 rounded-[10px]"
+            />
+            <StyledSelect
               value={language}
-              onChange={(event) =>
-                setLanguage(event.target.value as "all" | "ar" | "en")
-              }
-              className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
-            >
-              <option value="all">كل اللغات</option>
-              <option value="ar">العربية</option>
-              <option value="en">English</option>
-            </select>
+              onChange={(value) => setLanguage(value as "all" | "ar" | "en")}
+              options={[
+                { value: "all", label: "كل اللغات" },
+                { value: "ar", label: "العربية" },
+                { value: "en", label: "English" },
+              ]}
+              listboxAriaLabel="لغة المحتوى"
+              triggerClassName="h-10 rounded-[10px]"
+            />
           </div>
         </section>
 

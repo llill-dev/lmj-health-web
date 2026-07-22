@@ -1,4 +1,5 @@
 import {
+  Building2,
   BookOpen,
   ClipboardList,
   Layers,
@@ -32,6 +33,13 @@ const capabilityCards = [
       "إدارة عناصر المختبر والتصوير والإجراءات بسرعة مع تصفية مرنة وسير عمل واضح.",
     icon: ClipboardList,
     href: "/data-entry/medical-orders",
+  },
+  {
+    title: "مزودو الخدمة",
+    description:
+      "إضافة وتعديل مزوّدي الخدمات حسب نوع الخدمة مع نموذج ديناميكي مطابق للنوع.",
+    icon: Building2,
+    href: "/data-entry/service-providers",
   },
 ];
 
@@ -104,7 +112,7 @@ export default function DataEntryDashboardPage() {
           ]}
         />
 
-        <section className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
           {capabilityCards.map((card) => {
             const Icon = card.icon;
             return (

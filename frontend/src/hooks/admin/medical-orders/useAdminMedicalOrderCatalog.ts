@@ -7,28 +7,32 @@ import { adminApi } from '@/lib/admin/client';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import type {
   AdminMedicalOrderCatalogDetailsResponse,
+  AdminMedicalOrderCatalogListParams,
   AdminMedicalOrderCatalogUpsertBody,
   MedicalOrderCatalogKind,
 } from '@/lib/admin/types';
 
 export const MEDICAL_ORDER_CATALOG_KEYS = {
   all: ['admin', 'medical-order-catalog'] as const,
-  list: (kind: MedicalOrderCatalogKind) =>
-    [...MEDICAL_ORDER_CATALOG_KEYS.all, 'list', kind] as const,
+  list: (params: AdminMedicalOrderCatalogListParams) =>
+    [...MEDICAL_ORDER_CATALOG_KEYS.all, 'list', params] as const,
 };
 
 export function useAdminMedicalOrderCatalog(
   kind: MedicalOrderCatalogKind,
-  search?: string,
+  params: Omit<AdminMedicalOrderCatalogListParams, "type"> = {},
 ) {
-  const trimmedSearch = search?.trim() ?? '';
+  const queryParams: AdminMedicalOrderCatalogListParams = {
+    type: kind,
+    ...params,
+    search: params.search?.trim() || undefined,
+    q: params.q?.trim() || undefined,
+    category: params.category?.trim() || undefined,
+    sort: params.sort?.trim() || undefined,
+  };
   const query = useQuery({
-    queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.list(kind), trimmedSearch],
-    queryFn: () =>
-      adminApi.medicalOrderCatalog.list({
-        type: kind,
-        ...(trimmedSearch ? { search: trimmedSearch } : {}),
-      }),
+    queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(queryParams),
+    queryFn: () => adminApi.medicalOrderCatalog.list(queryParams),
     staleTime: 30_000,
   });
 
@@ -65,9 +69,9 @@ export function useCreateMedicalOrderCatalogItem() {
   return useMutation({
     mutationFn: (body: AdminMedicalOrderCatalogUpsertBody) =>
       adminApi.medicalOrderCatalog.create(body),
-    onSuccess: (_, v) => {
+    onSuccess: () => {
       void qc.invalidateQueries({
-        queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(v.kind),
+        queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, "list"],
       });
     },
   });
@@ -78,20 +82,13 @@ export function useUpdateMedicalOrderCatalogItem(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (vars: {
-      id: string;
-      label: string;
-      isActive?: boolean;
-      isVisible?: boolean;
-    }) =>
+    mutationFn: (vars: { id: string; body: Partial<AdminMedicalOrderCatalogUpsertBody> }) =>
       adminApi.medicalOrderCatalog.update(kind, vars.id, {
-        label: vars.label,
-        isActive: vars.isActive,
-        isVisible: vars.isVisible,
+        ...vars.body,
       }),
     onSuccess: () => {
       void qc.invalidateQueries({
-        queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
+        queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, "list"],
       });
     },
   });
@@ -105,7 +102,7 @@ export function useDeleteMedicalOrderCatalogItem(
     mutationFn: (id: string) => adminApi.medicalOrderCatalog.remove(kind, id),
     onSuccess: () => {
       void qc.invalidateQueries({
-        queryKey: MEDICAL_ORDER_CATALOG_KEYS.list(kind),
+        queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, "list"],
       });
     },
   });

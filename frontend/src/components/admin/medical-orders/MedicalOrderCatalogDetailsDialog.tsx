@@ -28,6 +28,70 @@ export default function MedicalOrderCatalogDetailsDialog({
     open ? itemId : null,
   );
 
+  const detailRows =
+    item == null
+      ? []
+      : [
+          { label: "Code", value: item.code },
+          { label: "Short Code", value: item.shortCode },
+          { label: "الاسم العربي", value: item.nameAr },
+          { label: "الاسم الإنجليزي", value: item.nameEn },
+          { label: "Category", value: item.category },
+          { label: "Priority", value: item.priorityLevel },
+          {
+            label: "Sort Order",
+            value: typeof item.sortOrder === "number" ? String(item.sortOrder) : undefined,
+          },
+          {
+            label: "Synonyms",
+            value: item.synonyms?.length ? item.synonyms.join("، ") : undefined,
+          },
+        ].filter((row) => Boolean(row.value?.trim?.() ?? row.value));
+
+  const kindSpecificRows =
+    item == null
+      ? []
+      : [
+          ...(kind === "lab"
+            ? [
+                { label: "LOINC", value: item.loincCode },
+                { label: "نوع العينة", value: item.sampleType },
+                { label: "نوع النتيجة", value: item.resultType },
+                {
+                  label: "يتطلب صيام",
+                  value:
+                    typeof item.fastingRequired === "boolean"
+                      ? item.fastingRequired
+                        ? "نعم"
+                        : "لا"
+                      : undefined,
+                },
+              ]
+            : []),
+          ...(kind === "imaging"
+            ? [
+                { label: "Modality", value: item.modality },
+                { label: "منطقة الجسم", value: item.bodyArea },
+                {
+                  label: "يدعم المادة الظليلة",
+                  value:
+                    typeof item.supportsContrast === "boolean"
+                      ? item.supportsContrast
+                        ? "نعم"
+                        : "لا"
+                      : undefined,
+                },
+              ]
+            : []),
+          ...(kind === "procedure"
+            ? [
+                { label: "التحضير الافتراضي", value: item.defaultPreparation },
+                { label: "تعليمات ما بعد الإجراء", value: item.defaultAftercare },
+              ]
+            : []),
+          { label: "ملاحظات", value: item.notes },
+        ].filter((row) => Boolean(row.value?.trim?.() ?? row.value));
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -101,6 +165,42 @@ export default function MedicalOrderCatalogDetailsDialog({
                     {item._id}
                   </div>
                 </div>
+
+                {detailRows.length > 0 ? (
+                  <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                    {detailRows.map((row) => (
+                      <div
+                        key={row.label}
+                        className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-right'
+                      >
+                        <div className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
+                          {row.label}
+                        </div>
+                        <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#111827]'>
+                          {row.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {kindSpecificRows.length > 0 ? (
+                  <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                    {kindSpecificRows.map((row) => (
+                      <div
+                        key={row.label}
+                        className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-right'
+                      >
+                        <div className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
+                          {row.label}
+                        </div>
+                        <div className='mt-1 font-cairo text-[13px] font-extrabold text-[#111827]'>
+                          {row.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </>
             )}
           </div>

@@ -66,6 +66,9 @@ export default function DataEntryLayout() {
     if (pathname.startsWith("/data-entry/medical-orders")) {
       return "كتالوج الطلبات الطبية";
     }
+    if (pathname.startsWith("/data-entry/service-providers")) {
+      return "مزودو الخدمة";
+    }
     return "لوحة إدخال البيانات";
   }, [pathname]);
 

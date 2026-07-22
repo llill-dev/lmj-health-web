@@ -921,13 +921,43 @@ export type MedicalOrderCatalogKind =
 export type MedicalOrderCatalogItem = {
   _id: string;
   label: string;
+  code?: string;
+  shortCode?: string;
+  nameAr?: string;
+  nameEn?: string;
+  category?: string;
+  synonyms?: string[];
+  priorityLevel?: "low" | "normal" | "high" | "critical" | string;
+  sortOrder?: number;
   isActive?: boolean;
   isVisible?: boolean;
+  // LAB
+  loincCode?: string;
+  sampleType?: string;
+  fastingRequired?: boolean;
+  resultType?: string;
+  // IMAGING
+  modality?: string;
+  bodyArea?: string;
+  supportsContrast?: boolean;
+  // PROCEDURE
+  defaultPreparation?: string;
+  defaultAftercare?: string;
+  // COMMON
+  notes?: string;
 };
 
 export type AdminMedicalOrderCatalogListParams = {
   type: MedicalOrderCatalogKind;
   search?: string;
+  q?: string;
+  category?: string;
+  priorityLevel?: "low" | "normal" | "high" | "critical" | string;
+  isActive?: boolean;
+  isVisible?: boolean;
+  page?: number;
+  limit?: number;
+  sort?: string;
 };
 
 export type AdminMedicalOrderCatalogListResponse = ApiSuccessEnvelope & {
@@ -936,9 +966,31 @@ export type AdminMedicalOrderCatalogListResponse = ApiSuccessEnvelope & {
 
 export type AdminMedicalOrderCatalogUpsertBody = {
   kind: MedicalOrderCatalogKind;
-  label: string;
+  label?: string;
+  code?: string;
+  shortCode?: string;
+  nameAr?: string;
+  nameEn?: string;
+  category?: string;
+  synonyms?: string[];
+  priorityLevel?: "low" | "normal" | "high" | "critical" | string;
+  sortOrder?: number;
   isActive?: boolean;
   isVisible?: boolean;
+  // LAB
+  loincCode?: string;
+  sampleType?: string;
+  fastingRequired?: boolean;
+  resultType?: string;
+  // IMAGING
+  modality?: string;
+  bodyArea?: string;
+  supportsContrast?: boolean;
+  // PROCEDURE
+  defaultPreparation?: string;
+  defaultAftercare?: string;
+  // COMMON
+  notes?: string;
 };
 
 export type AdminMedicalOrderCatalogMutationResponse = ApiSuccessEnvelope & {

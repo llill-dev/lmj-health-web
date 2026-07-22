@@ -303,14 +303,73 @@ function readRestoreRequestsFromArray(
 function readMedicalOrderCatalogItems(
   value: unknown,
 ): MedicalOrderCatalogItem[] | undefined {
-  return readAdminMappedArray(value, (entry) => {
-    const record = asAdminRecord(entry);
-    if (!record) return null;
-    const id = record._id ?? record.id;
-    const label = record.label ?? record.name ?? record.title;
-    if (id == null || label == null) return null;
-    return { _id: String(id), label: String(label) };
-  });
+  return readAdminMappedArray(value, readMedicalOrderCatalogItem);
+}
+
+function readMedicalOrderCatalogItem(entry: unknown): MedicalOrderCatalogItem | null {
+  const record = asAdminRecord(entry);
+  if (!record) return null;
+
+  const id = record._id ?? record.id;
+  if (id == null) return null;
+
+  const label =
+    readLocalizedText(record.label) ??
+    readLocalizedText(record.nameAr) ??
+    readLocalizedText(record.nameEn) ??
+    readLocalizedText(record.name) ??
+    readLocalizedText(record.title);
+
+  const parseBool = (value: unknown): boolean | undefined => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") {
+      if (value.toLowerCase() === "true") return true;
+      if (value.toLowerCase() === "false") return false;
+    }
+    return undefined;
+  };
+
+  const parseNumber = (value: unknown): number | undefined => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : undefined;
+    }
+    return undefined;
+  };
+
+  const parseStringArray = (value: unknown): string[] | undefined => {
+    if (!Array.isArray(value)) return undefined;
+    const values = value
+      .map((item) => readLocalizedText(item))
+      .filter((item): item is string => Boolean(item));
+    return values.length > 0 ? values : undefined;
+  };
+
+  return {
+    _id: String(id),
+    label: label ?? "—",
+    code: readLocalizedText(record.code),
+    shortCode: readLocalizedText(record.shortCode),
+    nameAr: readLocalizedText(record.nameAr),
+    nameEn: readLocalizedText(record.nameEn),
+    category: readLocalizedText(record.category),
+    synonyms: parseStringArray(record.synonyms),
+    priorityLevel: readLocalizedText(record.priorityLevel),
+    sortOrder: parseNumber(record.sortOrder),
+    isActive: parseBool(record.isActive),
+    isVisible: parseBool(record.isVisible),
+    loincCode: readLocalizedText(record.loincCode),
+    sampleType: readLocalizedText(record.sampleType),
+    fastingRequired: parseBool(record.fastingRequired),
+    resultType: readLocalizedText(record.resultType),
+    modality: readLocalizedText(record.modality),
+    bodyArea: readLocalizedText(record.bodyArea),
+    supportsContrast: parseBool(record.supportsContrast),
+    defaultPreparation: readLocalizedText(record.defaultPreparation),
+    defaultAftercare: readLocalizedText(record.defaultAftercare),
+    notes: readLocalizedText(record.notes),
+  };
 }
 
 function readLocalizedText(value: unknown): string | undefined {
@@ -348,32 +407,81 @@ function medicalOrderCategoryByKind(kind: MedicalOrderCatalogKind): string {
 }
 
 function buildMedicalOrderCreatePayload(body: AdminMedicalOrderCatalogUpsertBody) {
-  const labelText = readLocalizedText(body.label) ?? "";
-  const fallbackLabel = labelText || "Order item";
-  const code = buildMedicalOrderCode(fallbackLabel);
+  const labelText = readLocalizedText(body.label);
+  const nameAr = readLocalizedText(body.nameAr) ?? labelText ?? "Order item";
+  const nameEn = readLocalizedText(body.nameEn) ?? labelText ?? nameAr;
+  const code = readLocalizedText(body.code) ?? buildMedicalOrderCode(nameEn || nameAr);
+  const shortCode = readLocalizedText(body.shortCode) ?? code.slice(0, 20);
+  const category = readLocalizedText(body.category) ?? medicalOrderCategoryByKind(body.kind);
 
   return {
     code,
-    shortCode: code.slice(0, 20),
-    nameAr: fallbackLabel,
-    nameEn: fallbackLabel,
-    category: medicalOrderCategoryByKind(body.kind),
+    shortCode,
+    nameAr,
+    nameEn,
+    category,
+    ...(Array.isArray(body.synonyms) && body.synonyms.length > 0
+      ? { synonyms: body.synonyms.map((value) => value.trim()).filter(Boolean) }
+      : {}),
+    ...(body.priorityLevel ? { priorityLevel: body.priorityLevel } : {}),
+    ...(typeof body.sortOrder === "number" ? { sortOrder: body.sortOrder } : {}),
     ...(typeof body.isActive === "boolean" ? { isActive: body.isActive } : {}),
     ...(typeof body.isVisible === "boolean" ? { isVisible: body.isVisible } : {}),
+    ...(body.loincCode ? { loincCode: body.loincCode } : {}),
+    ...(body.sampleType ? { sampleType: body.sampleType } : {}),
+    ...(typeof body.fastingRequired === "boolean"
+      ? { fastingRequired: body.fastingRequired }
+      : {}),
+    ...(body.resultType ? { resultType: body.resultType } : {}),
+    ...(body.modality ? { modality: body.modality } : {}),
+    ...(body.bodyArea ? { bodyArea: body.bodyArea } : {}),
+    ...(typeof body.supportsContrast === "boolean"
+      ? { supportsContrast: body.supportsContrast }
+      : {}),
+    ...(body.defaultPreparation ? { defaultPreparation: body.defaultPreparation } : {}),
+    ...(body.defaultAftercare ? { defaultAftercare: body.defaultAftercare } : {}),
+    ...(body.notes ? { notes: body.notes } : {}),
   };
 }
 
-function buildMedicalOrderUpdatePayload(
-  body: Partial<Pick<AdminMedicalOrderCatalogUpsertBody, "label" | "isActive" | "isVisible">>,
-) {
+function buildMedicalOrderUpdatePayload(body: Partial<AdminMedicalOrderCatalogUpsertBody>) {
   const payload: Record<string, unknown> = {};
   const labelText = readLocalizedText(body.label);
+  const nameAr = readLocalizedText(body.nameAr);
+  const nameEn = readLocalizedText(body.nameEn);
+  const code = readLocalizedText(body.code);
+  const shortCode = readLocalizedText(body.shortCode);
+  const category = readLocalizedText(body.category);
   if (labelText) {
     payload.nameAr = labelText;
     payload.nameEn = labelText;
   }
+  if (nameAr) payload.nameAr = nameAr;
+  if (nameEn) payload.nameEn = nameEn;
+  if (code) payload.code = code;
+  if (shortCode) payload.shortCode = shortCode;
+  if (category) payload.category = category;
+  if (Array.isArray(body.synonyms)) {
+    payload.synonyms = body.synonyms.map((value) => value.trim()).filter(Boolean);
+  }
+  if (body.priorityLevel) payload.priorityLevel = body.priorityLevel;
+  if (typeof body.sortOrder === "number") payload.sortOrder = body.sortOrder;
   if (typeof body.isActive === "boolean") payload.isActive = body.isActive;
   if (typeof body.isVisible === "boolean") payload.isVisible = body.isVisible;
+  if (body.loincCode) payload.loincCode = body.loincCode;
+  if (body.sampleType) payload.sampleType = body.sampleType;
+  if (typeof body.fastingRequired === "boolean") {
+    payload.fastingRequired = body.fastingRequired;
+  }
+  if (body.resultType) payload.resultType = body.resultType;
+  if (body.modality) payload.modality = body.modality;
+  if (body.bodyArea) payload.bodyArea = body.bodyArea;
+  if (typeof body.supportsContrast === "boolean") {
+    payload.supportsContrast = body.supportsContrast;
+  }
+  if (body.defaultPreparation) payload.defaultPreparation = body.defaultPreparation;
+  if (body.defaultAftercare) payload.defaultAftercare = body.defaultAftercare;
+  if (body.notes) payload.notes = body.notes;
   return payload;
 }
 
@@ -1537,6 +1645,14 @@ export const adminApi = {
     list: async (params: AdminMedicalOrderCatalogListParams) => {
       const qs = new URLSearchParams();
       if (params.search?.trim()) qs.set("search", params.search.trim());
+      if (params.q?.trim()) qs.set("q", params.q.trim());
+      if (params.category?.trim()) qs.set("category", params.category.trim());
+      if (params.priorityLevel?.trim()) qs.set("priorityLevel", params.priorityLevel.trim());
+      if (typeof params.isActive === "boolean") qs.set("isActive", String(params.isActive));
+      if (typeof params.isVisible === "boolean") qs.set("isVisible", String(params.isVisible));
+      if (typeof params.page === "number" && params.page > 0) qs.set("page", String(params.page));
+      if (typeof params.limit === "number" && params.limit > 0) qs.set("limit", String(params.limit));
+      if (params.sort?.trim()) qs.set("sort", params.sort.trim());
       const base = adminEndpoints.orderCatalog.collection(params.type);
       const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
       try {
@@ -1562,19 +1678,27 @@ export const adminApi = {
         { locale: "ar" },
       ),
     getById: (kind: MedicalOrderCatalogKind, id: string) =>
-      get<AdminMedicalOrderCatalogDetailsResponse>(
+      get<AdminMedicalOrderCatalogDetailsResponse | AdminApiRecord>(
         adminEndpoints.orderCatalog.item(kind, id),
         { locale: "ar" },
-      ),
+      ).then((raw) => {
+        const body = asAdminRecord(raw) ?? {};
+        const nested = asAdminRecord(body.data);
+        const item =
+          readMedicalOrderCatalogItem(body.item) ??
+          readMedicalOrderCatalogItem(body.data) ??
+          readMedicalOrderCatalogItem(nested?.item) ??
+          readMedicalOrderCatalogItem(body.result) ??
+          null;
+        return {
+          ...(asAdminRecord(raw) ?? {}),
+          item,
+        } as AdminMedicalOrderCatalogDetailsResponse;
+      }),
     update: (
       kind: MedicalOrderCatalogKind,
       id: string,
-      body: Partial<
-        Pick<
-          AdminMedicalOrderCatalogUpsertBody,
-          "label" | "isActive" | "isVisible"
-        >
-      >,
+      body: Partial<AdminMedicalOrderCatalogUpsertBody>,
     ) =>
       patch<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.item(kind, id),

@@ -212,6 +212,23 @@ function normalizeFacilityDoctorsResponse(
   };
 }
 
+function normalizeServiceTypesResponse(
+  response: ServiceTypesListResponse & {
+    items?: ServiceTypesListResponse["serviceTypes"];
+    data?: { serviceTypes?: ServiceTypesListResponse["serviceTypes"]; items?: ServiceTypesListResponse["serviceTypes"] };
+  },
+): ServiceTypesListResponse {
+  return {
+    ...response,
+    serviceTypes:
+      response.serviceTypes ??
+      response.items ??
+      response.data?.serviceTypes ??
+      response.data?.items ??
+      [],
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Facilities
 // ─────────────────────────────────────────────────────────────────────────────
@@ -354,7 +371,23 @@ export function useServiceTypesList(active?: boolean) {
       get<ServiceTypesListResponse>(
         `${adminEndpoints.serviceTypes.list}${qs}`,
         { locale: "ar" },
-      ),
+      ).then((response) => normalizeServiceTypesResponse(response)),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+  };
+}
+
+export function useServiceTypesPublicList() {
+  const query = useQuery({
+    queryKey: [...SERVICES_KEYS.serviceTypes(), "public"],
+    queryFn: () =>
+      get<ServiceTypesListResponse>(adminEndpoints.serviceTypes.listPublic, {
+        locale: "ar",
+      }).then((response) => normalizeServiceTypesResponse(response)),
     staleTime: 5 * 60 * 1000,
   });
 

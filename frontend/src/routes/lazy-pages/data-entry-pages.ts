@@ -16,3 +16,8 @@ export const DataEntryContentTemplatesPage = lazy(
 export const DataEntryMedicalOrdersPage = lazy(
   () => import("@/pages/data-entry/medical-orders/DataEntryMedicalOrdersPage"),
 );
+
+export const DataEntryServiceProvidersPage = lazy(
+  () =>
+    import("@/pages/data-entry/service-providers/DataEntryServiceProvidersPage"),
+);

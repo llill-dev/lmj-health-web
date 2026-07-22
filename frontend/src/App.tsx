@@ -572,6 +572,14 @@ export default function App() {
                 </Suspense>
               }
             />
+            <Route
+              path="service-providers"
+              element={
+                <Suspense fallback={<SecretaryRouteFallback />}>
+                  <DataEntryPages.DataEntryServiceProvidersPage />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
 

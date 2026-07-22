@@ -23,11 +23,14 @@ import { ConfirmActionDialog } from "@/components/admin/dialogs";
 import { ClipboardList, Trash2 } from "lucide-react";
 import { Pagination } from "@/components/admin/services/Pagination";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+import StyledSelect from "@/components/ui/styled-select";
 
 export default function AdminMedicalOrdersPage() {
   const [kind, setKind] = useState<MedicalOrderCatalogKind>("lab");
   const [search, setSearch] = useState("");
-  const [showVisibleOnly, setShowVisibleOnly] = useState(false);
+  const [category, setCategory] = useState("");
+  const [priorityLevel, setPriorityLevel] = useState("");
+  const [visibility, setVisibility] = useState<"" | "visible" | "hidden">("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -41,8 +44,15 @@ export default function AdminMedicalOrdersPage() {
     useState<MedicalOrderCatalogItem | null>(null);
 
   const [debouncedSearch] = useDebounce(search, 300);
+  const [debouncedCategory] = useDebounce(category, 350);
   const { data, isAwaitingData, isError, error, refetch } =
-    useAdminMedicalOrderCatalog(kind, debouncedSearch);
+    useAdminMedicalOrderCatalog(kind, {
+      search: debouncedSearch,
+      category: debouncedCategory || undefined,
+      priorityLevel: priorityLevel || undefined,
+      isVisible:
+        visibility === "visible" ? true : visibility === "hidden" ? false : undefined,
+    });
   const deleteMut = useDeleteMedicalOrderCatalogItem(kind);
 
   useEffect(() => {
@@ -55,11 +65,32 @@ export default function AdminMedicalOrdersPage() {
     const items = data?.items ?? [];
     const q = search.trim().toLowerCase();
     return items.filter((i) => {
-      if (showVisibleOnly && i.isVisible === false) return false;
+      if (priorityLevel && (i.priorityLevel ?? "").toLowerCase() !== priorityLevel) {
+        return false;
+      }
+      if (visibility === "visible" && i.isVisible === false) return false;
+      if (visibility === "hidden" && i.isVisible !== false) return false;
+      if (category.trim()) {
+        const cat = (i.category ?? "").toLowerCase();
+        if (!cat.includes(category.trim().toLowerCase())) return false;
+      }
       if (!q) return true;
-      return i.label.toLowerCase().includes(q);
+      const aggregate = [
+        i.label,
+        i.code,
+        i.shortCode,
+        i.nameAr,
+        i.nameEn,
+        i.category,
+        i.modality,
+        i.bodyArea,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return aggregate.includes(q);
     });
-  }, [data?.items, search, showVisibleOnly]);
+  }, [category, data?.items, priorityLevel, search, visibility]);
 
   const totalPages = Math.max(
     1,
@@ -125,16 +156,26 @@ export default function AdminMedicalOrdersPage() {
           <div className="order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center">
             <MedicalOrderCategoryTabs active={kind} onChange={setKind} />
           </div>
-          <div className="order-2 w-full md:order-1 md:w-auto md:min-w-[16rem] md:max-w-md md:shrink-0 md:flex md:items-center">
+          <div className="order-2 w-full md:order-1 md:flex-1">
             <MedicalOrderCatalogToolbar
               search={search}
               onSearchChange={(value) => {
                 setSearch(value);
                 setPage(1);
               }}
-              showVisibleOnly={showVisibleOnly}
-              onShowVisibleOnlyChange={(value) => {
-                setShowVisibleOnly(value);
+              category={category}
+              onCategoryChange={(value) => {
+                setCategory(value);
+                setPage(1);
+              }}
+              priorityLevel={priorityLevel}
+              onPriorityLevelChange={(value) => {
+                setPriorityLevel(value);
+                setPage(1);
+              }}
+              visibility={visibility}
+              onVisibilityChange={(value) => {
+                setVisibility(value);
                 setPage(1);
               }}
             />
@@ -189,20 +230,21 @@ export default function AdminMedicalOrdersPage() {
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-3">
-                <select
-                  value={String(pageSize)}
-                  onChange={(event) => {
-                    setPageSize(Number(event.target.value) || 10);
-                    setPage(1);
-                  }}
-                  className="h-[36px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827]"
-                >
-                  {[10, 20, 50].map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
+                <div className="w-[108px]">
+                  <StyledSelect
+                    value={String(pageSize)}
+                    onChange={(value) => {
+                      setPageSize(Number(value) || 10);
+                      setPage(1);
+                    }}
+                    options={[10, 20, 50].map((value) => ({
+                      value: String(value),
+                      label: String(value),
+                    }))}
+                    listboxAriaLabel="عدد العناصر في الصفحة"
+                    triggerClassName="h-[36px] rounded-[10px]"
+                  />
+                </div>
 
                 <Pagination
                   page={currentPage}

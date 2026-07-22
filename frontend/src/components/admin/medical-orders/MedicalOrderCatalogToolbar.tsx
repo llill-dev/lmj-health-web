@@ -1,22 +1,31 @@
-import { Search, Eye, EyeOff } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
+import StyledSelect from "@/components/ui/styled-select";
 
 type Props = {
   search: string;
   onSearchChange: (value: string) => void;
-  showVisibleOnly: boolean;
-  onShowVisibleOnlyChange: (value: boolean) => void;
+  category: string;
+  onCategoryChange: (value: string) => void;
+  priorityLevel: string;
+  onPriorityLevelChange: (value: string) => void;
+  visibility: "" | "visible" | "hidden";
+  onVisibilityChange: (value: "" | "visible" | "hidden") => void;
 };
 
 /** حقل بحث + فلتر الظهور — زر «إضافة» يُعرض بجانب العنوان في الصفحة. */
 export default function MedicalOrderCatalogToolbar({
   search,
   onSearchChange,
-  showVisibleOnly,
-  onShowVisibleOnlyChange,
+  category,
+  onCategoryChange,
+  priorityLevel,
+  onPriorityLevelChange,
+  visibility,
+  onVisibilityChange,
 }: Props) {
   return (
-    <div className="flex items-center gap-2 min-w-0 w-full">
-      <div className="relative flex-1 min-w-0">
+    <div className="grid w-full min-w-0 gap-2 md:grid-cols-2 xl:grid-cols-4">
+      <div className="relative min-w-0 md:col-span-2 xl:col-span-1">
         <Search
           className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
           aria-hidden
@@ -31,23 +40,44 @@ export default function MedicalOrderCatalogToolbar({
           aria-label="بحث في كتالوج الطلبات"
         />
       </div>
-      <button
-        type="button"
-        onClick={() => onShowVisibleOnlyChange(!showVisibleOnly)}
-        className={`flex h-[44px] shrink-0 items-center gap-2 rounded-[12px] border px-4 font-cairo text-[12px] font-extrabold transition-colors ${
-          showVisibleOnly
-            ? "border-[#1D4ED8] bg-[#EFF6FF] text-[#1D4ED8]"
-            : "border-[#E5E7EB] bg-white text-[#344054] hover:bg-[#F9FAFB]"
-        }`}
-        aria-label={showVisibleOnly ? "عرض الكل" : "عرض الظاهر فقط"}
-      >
-        {showVisibleOnly ? (
-          <Eye className="h-4 w-4" />
-        ) : (
-          <EyeOff className="h-4 w-4" />
-        )}
-        {showVisibleOnly ? "الظاهر فقط" : "الكل"}
-      </button>
+      <div className="relative">
+        <SlidersHorizontal
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+          aria-hidden
+        />
+        <input
+          type="text"
+          value={category}
+          onChange={(event) => onCategoryChange(event.target.value)}
+          placeholder="الفئة (category)"
+          className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white py-2 pe-10 ps-4 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20"
+          aria-label="فلتر الفئة"
+        />
+      </div>
+      <StyledSelect
+        value={priorityLevel}
+        onChange={onPriorityLevelChange}
+        options={[
+          { value: "", label: "كل مستويات الأولوية" },
+          { value: "critical", label: "حرج" },
+          { value: "high", label: "مرتفع" },
+          { value: "normal", label: "عادي" },
+          { value: "low", label: "منخفض" },
+        ]}
+        listboxAriaLabel="فلتر مستوى الأولوية"
+        triggerClassName="h-[44px] rounded-[12px]"
+      />
+      <StyledSelect
+        value={visibility}
+        onChange={(value) => onVisibilityChange(value as "" | "visible" | "hidden")}
+        options={[
+          { value: "", label: "الكل" },
+          { value: "visible", label: "ظاهر للأطباء" },
+          { value: "hidden", label: "مخفي عن الأطباء" },
+        ]}
+        listboxAriaLabel="فلتر الظهور للأطباء"
+        triggerClassName="h-[44px] rounded-[12px]"
+      />
     </div>
   );
 }

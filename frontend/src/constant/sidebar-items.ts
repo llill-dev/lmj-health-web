@@ -99,7 +99,8 @@ export type DataEntrySidebarItemId =
   | "dashboard"
   | "medical-content"
   | "content-templates"
-  | "medical-orders";
+  | "medical-orders"
+  | "service-providers";
 
 export const sidebarItems: Array<{
   id: string;
@@ -507,5 +508,11 @@ export const dataEntrySidebarItems: Array<{
     path: "medical-orders",
     label: "الطلبات الطبية",
     icon: ClipboardList,
+  },
+  {
+    id: "service-providers",
+    path: "service-providers",
+    label: "مزودو الخدمة",
+    icon: Tags,
   },
 ];
