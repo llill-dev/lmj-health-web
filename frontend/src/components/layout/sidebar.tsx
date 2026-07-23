@@ -15,6 +15,7 @@ import {
   type SidebarItemId,
 } from "@/constant/sidebar-items";
 import { useAdminBrandingForSidebar } from "@/contexts/AdminAppSettingsContext";
+import { useI18n } from "@/i18n/provider";
 
 type SidebarNavItem = {
   id: string;
@@ -24,6 +25,17 @@ type SidebarNavItem = {
   badge?: number;
   href?: string;
 };
+
+function localizedSidebarLabel(
+  itemId: string,
+  fallbackLabel: string,
+  locale: "ar" | "en",
+  t: (key: string, fallback?: string) => string,
+): string {
+  // Keep existing Arabic-first labels in Arabic mode.
+  if (locale === "ar") return fallbackLabel;
+  return t(`sidebar.item.${itemId}`, fallbackLabel);
+}
 
 export default function Sidebar({
   active,
@@ -54,6 +66,7 @@ export default function Sidebar({
   profilePhotoUrl?: string | null;
   items?: SidebarNavItem[];
 }) {
+  const { locale, dir, t } = useI18n();
   const navItems = useMemo(() => {
     if (items?.length) return items;
     if (role === "admin") return adminSidebarItems;
@@ -69,12 +82,12 @@ export default function Sidebar({
       : "LMJ HEALTH";
   const brandSubtitle =
     role === "admin"
-      ? adminBranding.appDescription.trim() || "بوابة الإدارة"
+      ? adminBranding.appDescription.trim() || t("sidebar.brand.adminPortal")
       : role === "secretary"
-        ? "بوابة السكرتير"
+        ? t("sidebar.brand.secretaryPortal")
         : role === "data-entry"
-          ? "بوابة إدخال البيانات"
-        : "بوابة الطبيب";
+          ? t("sidebar.brand.dataEntryPortal")
+          : t("sidebar.brand.doctorPortal");
 
   const basePath =
     role === "admin"
@@ -87,14 +100,12 @@ export default function Sidebar({
   const displayName =
     profileName?.trim()
     || (role === "secretary"
-      ? "السكرتير"
+      ? t("sidebar.role.secretary")
       : role === "data-entry"
-        ? "مدخل البيانات"
-        : "الطبيب");
+        ? t("sidebar.role.data-entry")
+        : t("sidebar.role.doctor"));
   const displayEmail = profileEmail?.trim() || "—";
-  const displayInitial =
-    displayName.charAt(0).toUpperCase()
-    || (role === "secretary" ? "س" : role === "data-entry" ? "ب" : "د");
+  const displayInitial = displayName.charAt(0).toUpperCase() || "L";
 
   const resolvedActive =
     (active as
@@ -107,6 +118,9 @@ export default function Sidebar({
       | undefined) ?? (role === "admin" ? "overview" : "dashboard");
 
   const desktopWidthClass = collapsed ? "lg:w-[88px]" : "lg:w-[320px]";
+  const desktopOrderClass = "lg:order-first";
+  const mobileAnchorClass = locale === "ar" ? "right-0" : "left-0";
+  const mobileClosedTransform = locale === "ar" ? "translate-x-full" : "-translate-x-full";
   const expanded = !collapsed || mobileOpen;
 
   return (
@@ -114,21 +128,21 @@ export default function Sidebar({
       <div
         className={`fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[1px] transition-opacity duration-300 lg:hidden ${
           mobileOpen
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={onCloseMobile}
         aria-hidden={!mobileOpen}
       />
 
       <aside
-        dir="rtl"
-        lang="ar"
-        className={`fixed inset-y-0 right-0 z-50 flex h-dvh w-[min(20rem,calc(100vw-1rem))] max-w-full shrink-0 flex-col overflow-hidden border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] shadow-[0_18px_48px_rgba(15,23,42,0.18)] transition-[transform,width] duration-300 ease-in-out will-change-[transform,width] lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 lg:shadow-none ${desktopWidthClass} ${
-          mobileOpen ? "translate-x-0" : "translate-x-full"
+        dir={dir}
+        lang={locale}
+        className={`fixed inset-y-0 ${mobileAnchorClass} z-50 flex h-dvh w-[min(20rem,calc(100vw-1rem))] max-w-full shrink-0 flex-col overflow-hidden border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] shadow-[0_18px_48px_rgba(15,23,42,0.18)] transition-[transform,width] duration-300 ease-in-out will-change-[transform,width] lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 lg:shadow-none ${desktopWidthClass} ${desktopOrderClass} ${
+          mobileOpen ? "translate-x-0" : mobileClosedTransform
         }`}
       >
-        <div className="flex h-full min-h-0 flex-col">
+        <div className="flex flex-col h-full min-h-0">
           <div
             className={
               collapsed
@@ -136,8 +150,8 @@ export default function Sidebar({
                 : "border-b-[1.82px] border-b-[#E5E7EB] px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5 lg:px-[24px] lg:pb-[24px] lg:pt-[24px]"
             }
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2">
+            <div className="flex justify-between items-start">
+              <div className="flex gap-2 items-center">
                 <AnimatePresence initial={false}>
                   {expanded ? (
                     <motion.div
@@ -146,23 +160,23 @@ export default function Sidebar({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 12 }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="flex items-center gap-2"
+                      className="flex gap-2 items-center"
                     >
                       <div className="mt-0.5 flex h-[44px] w-[44px] shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-primary shadow-[0_14px_30px_rgba(15,143,139,0.30)]">
                         {role === "admin" && adminBranding.logo.dataUrl ? (
                           <img
                             src={adminBranding.logo.dataUrl}
                             alt=""
-                            className="h-full w-full object-cover"
+                            className="object-cover w-full h-full"
                           />
                         ) : (
                           <Stethoscope
-                            className="h-6 w-6 text-white"
+                            className="w-6 h-6 text-white"
                             aria-hidden
                           />
                         )}
                       </div>
-                      <div className="flex min-w-0 flex-col items-center text-center">
+                      <div className="flex flex-col items-center min-w-0 text-center">
                         <div className="max-w-[200px] truncate font-cairo text-[18px] font-extrabold leading-[20px] text-[#111827]">
                           {brandTitle}
                         </div>
@@ -178,23 +192,25 @@ export default function Sidebar({
                 </AnimatePresence>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex gap-2 items-center">
                 <button
                   type="button"
                   onClick={onCloseMobile}
                   className="mt-1 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] lg:hidden"
-                  aria-label="إغلاق القائمة"
+                  aria-label={t("common.closeSidebar")}
                 >
-                  <X className="h-5 w-5" />
+                  <X className="w-5 h-5" />
                 </button>
                 <button
                   type="button"
                   onClick={onToggleCollapse}
                   className="mt-1 hidden h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] lg:flex"
-                  aria-label={collapsed ? "فتح القائمة" : "طي القائمة"}
+                  aria-label={
+                    collapsed ? t("common.expandSidebar") : t("common.collapseSidebar")
+                  }
                 >
                   <ChevronsRight
-                    className={collapsed ? "h-5 w-5 rotate-180" : "h-5 w-5"}
+                    className={collapsed ? "w-5 h-5 rotate-180" : "w-5 h-5"}
                   />
                 </button>
               </div>
@@ -210,37 +226,37 @@ export default function Sidebar({
                   transition={{ duration: 0.22, ease: "easeOut" }}
                   className="overflow-hidden rounded-[6px] border border-[#BFEDEC] bg-[#F2FFFE] px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.06)]"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex gap-3 items-center">
                     <div className="flex h-[46px] w-[46px] items-center justify-center overflow-hidden rounded-[6px] bg-primary text-white shadow-[0_12px_25px_rgba(15,143,139,0.30)]">
                       {role === "admin" && adminBranding.logo.dataUrl ? (
                         <img
                           src={adminBranding.logo.dataUrl}
                           alt=""
-                          className="h-full w-full object-cover"
+                          className="object-cover w-full h-full"
                         />
                       ) : role === "doctor" && profilePhotoUrl ? (
                         <img
                           src={profilePhotoUrl}
                           alt={displayName}
-                          className="h-full w-full object-cover"
+                          className="object-cover w-full h-full"
                         />
                       ) : (
                         <span className="font-cairo text-[18px] font-extrabold leading-none">
                           {role === "admin"
-                            ? adminBranding.appName.trim().charAt(0) || "م"
+                            ? adminBranding.appName.trim().charAt(0) || "A"
                             : displayInitial}
                         </span>
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]">
-                        {role === "admin" ? "المشرف" : displayName}
+                        {role === "admin" ? t("sidebar.role.admin") : displayName}
                       </div>
                       <div className="mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
                         {role === "admin"
-                          ? "admin@lmjhealth.com"
+                          ? t("sidebar.admin.emailDefault")
                           : role === "data-entry" && displayEmail === "—"
-                            ? "data-entry@lmjhealth.com"
+                            ? t("sidebar.dataEntry.emailDefault")
                           : displayEmail}
                       </div>
                     </div>
@@ -284,8 +300,8 @@ export default function Sidebar({
                     <div
                       className={
                         collapsed
-                          ? "flex items-center gap-3"
-                          : "flex items-center gap-3"
+                          ? "flex gap-3 items-center"
+                          : "flex gap-3 items-center"
                       }
                     >
                       <Icon
@@ -303,7 +319,7 @@ export default function Sidebar({
                               : "font-cairo text-[16px] font-bold leading-[24px] text-[#4A5565]"
                           }
                         >
-                          {item.label}
+                          {localizedSidebarLabel(item.id, item.label, locale, t)}
                         </span>
                       ) : null}
                     </div>
@@ -319,7 +335,7 @@ export default function Sidebar({
                         {item.badge}
                       </div>
                     ) : expanded ? (
-                      <span className="ms-auto w-6" />
+                      <span className="w-6 ms-auto" />
                     ) : null}
                   </Link>
                 );
@@ -343,8 +359,8 @@ export default function Sidebar({
                   : "flex w-full items-center justify-start gap-2 font-cairo text-[14px] font-extrabold text-[#E11D48] hover:text-[#BE123C]"
               }
             >
-              <LogOut className="h-4 w-4" />
-              {expanded ? "تسجيل الخروج" : null}
+              <LogOut className="w-4 h-4" />
+              {expanded ? t("common.logout") : null}
             </button>
           </div>
         </div>

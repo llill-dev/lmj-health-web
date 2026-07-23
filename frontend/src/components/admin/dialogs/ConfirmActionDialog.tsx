@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import type { ToastVariant } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 
 export type ConfirmSuccessToast = {
   message: string;
@@ -19,7 +20,7 @@ export default function ConfirmActionDialog({
   confirmLabel,
   onConfirm,
   confirmDisabled,
-  cancelLabel = "إلغاء",
+  cancelLabel,
   variant = "primary",
   icon,
   successToast,
@@ -38,6 +39,7 @@ export default function ConfirmActionDialog({
   successToast?: ConfirmSuccessToast;
 }) {
   const { toast } = useToast();
+  const { locale, dir, t } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -78,8 +80,8 @@ export default function ConfirmActionDialog({
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             onMouseDown={(e) => e.stopPropagation()}
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <div
               className={
@@ -94,7 +96,7 @@ export default function ConfirmActionDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#F2F4F7]"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -128,7 +130,7 @@ export default function ConfirmActionDialog({
                   onClick={() => onOpenChange(false)}
                   className="h-[40px] rounded-[10px] border border-[#E4E7EC] bg-white px-8 font-cairo text-[14px] font-extrabold text-[#344054] transition hover:bg-[#F9FAFB]"
                 >
-                  {cancelLabel}
+                  {cancelLabel || t("common.cancel")}
                 </button>
 
                 <button

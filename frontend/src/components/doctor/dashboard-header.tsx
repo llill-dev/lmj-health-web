@@ -5,13 +5,15 @@ import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDoctorUnreadNotificationCount } from "@/hooks/doctor/notifications/useDoctorNotifications";
 import { useAuthStore } from "@/store/authStore";
+import { useI18n } from "@/i18n/provider";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
-const greetingWord = (): string => {
+const greetingWord = (t: (key: string, fallback?: string) => string): string => {
   const h = new Date().getHours();
-  if (h >= 5 && h < 12) return "صباح الخير";
-  if (h >= 12 && h < 17) return "طاب يومك";
-  if (h >= 17 && h < 23) return "مساء الخير";
-  return "أهلاً بك";
+  if (h >= 5 && h < 12) return t("doctor.greeting.morning");
+  if (h >= 12 && h < 17) return t("doctor.greeting.noon");
+  if (h >= 17 && h < 23) return t("doctor.greeting.evening");
+  return t("doctor.greeting.default");
 };
 
 const initialsFromName = (name: string): string => {
@@ -27,7 +29,7 @@ const initialsFromName = (name: string): string => {
 };
 
 export default function DashboardHeader({
-  title = "لوحة الطبيب",
+  title,
   subtitle: subtitleProp,
   onMenuClick,
 }: {
@@ -35,8 +37,11 @@ export default function DashboardHeader({
   subtitle?: string;
   onMenuClick?: () => void;
 }) {
+  const { locale, t } = useI18n();
+  const dir = locale === "ar" ? "rtl" : "ltr";
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const effectiveTitle = title ?? t("doctor.dashboard.title");
 
   const { data: unreadTotal, isAwaitingData: unreadAwaiting } =
     useDoctorUnreadNotificationCount();
@@ -45,17 +50,17 @@ export default function DashboardHeader({
     if (subtitleProp?.trim()) return subtitleProp.trim();
     const n = user?.name?.trim();
     if (n) return n;
-    return "ضيفاً كريماً";
-  }, [subtitleProp, user?.name]);
+    return t("doctor.dashboard.guest");
+  }, [subtitleProp, user?.name, t]);
 
   const titledDisplay = useMemo(() => {
     if (subtitleProp?.trim()) return displayName;
-    if (displayName === "ضيفاً كريماً") return displayName;
+    if (displayName === t("doctor.dashboard.guest")) return displayName;
     if (user?.role === "doctor" && !/^د\.?\s/u.test(displayName)) {
-      return `د. ${displayName}`;
+      return `${t("doctor.badge")} ${displayName}`;
     }
     return displayName;
-  }, [displayName, subtitleProp, user?.role]);
+  }, [displayName, subtitleProp, user?.role, t]);
 
   const initials = useMemo(
     () =>
@@ -65,7 +70,7 @@ export default function DashboardHeader({
     [subtitleProp, user?.name],
   );
 
-  const greeting = greetingWord();
+  const greeting = greetingWord(t);
 
   const unreadBadge =
     typeof unreadTotal === "number" && unreadTotal > 0
@@ -80,8 +85,8 @@ export default function DashboardHeader({
 
   return (
     <header
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="w-full px-4 pb-3 pt-3 sm:px-6 lg:px-12"
     >
       <div className="mx-auto max-w-[1420px]">
@@ -108,7 +113,7 @@ export default function DashboardHeader({
               type="button"
               onClick={onMenuClick}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
-              aria-label="فتح القائمة"
+              aria-label={t("common.openMenu")}
             >
               <Menu className="h-[18px] w-[18px]" strokeWidth={2.25} />
             </button>
@@ -121,7 +126,7 @@ export default function DashboardHeader({
                 <span
                   className="absolute -bottom-px -left-px h-3 w-3 rounded-full border-2 border-white bg-emerald-400 shadow-sm"
                   aria-hidden
-                  title="متصل"
+                  title={t("common.connected")}
                 />
               </div>
 
@@ -135,7 +140,7 @@ export default function DashboardHeader({
                       className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                       aria-hidden
                     />
-                    {title}
+                    {effectiveTitle}
                   </span>
                 </div>
                 <p className="line-clamp-1 font-cairo text-[11px] font-semibold leading-snug text-[#64748b] sm:text-[12px]">
@@ -144,7 +149,7 @@ export default function DashboardHeader({
                     ·
                   </span>
                   <span className="text-[#94a3b8]">
-                    نظرة عامة على نشاط عيادتك
+                    {t("doctor.dashboard.subtitle")}
                   </span>
                 </p>
               </div>
@@ -155,8 +160,8 @@ export default function DashboardHeader({
                 type="button"
                 onClick={handleNotificationsClick}
                 className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]"
-                aria-label="الإشعارات"
-                title="الإشعارات"
+                aria-label={t("header.notifications")}
+                title={t("header.notifications")}
               >
                 <Bell className="h-[17px] w-[17px]" strokeWidth={2.25} />
                 {unreadAwaiting ? (
@@ -175,13 +180,14 @@ export default function DashboardHeader({
               <button
                 type="button"
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]"
-                aria-label="الرسائل"
+                aria-label={t("header.messages")}
               >
                 <MessageCircle
                   className="h-[17px] w-[17px]"
                   strokeWidth={2.25}
                 />
               </button>
+              <LanguageSwitcher compact className="ms-1" />
             </div>
           </div>
 

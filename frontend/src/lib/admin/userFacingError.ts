@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/api";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 /** بادئات قديمة أو من مصادر أخرى لا نريد إظهارها للمشرف */
 const RE_AR_STATUS = /^خطأ\s*\d+\s*:\s*/u;
@@ -42,9 +43,13 @@ function extractValidationErrors(err: ApiError): string[] {
  */
 export function userFacingErrorMessage(
   err: unknown,
-  fallback = "تعذّر إكمال العملية.",
+  fallback?: string,
 ): string {
-  if (err == null) return fallback;
+  const locale = getCurrentLocale();
+  const fallbackMessage =
+    fallback
+    || (locale === "ar" ? "تعذّر إكمال العملية." : "Could not complete the operation.");
+  if (err == null) return fallbackMessage;
 
   // Handle 422 validation errors with field-specific messages
   if (err instanceof ApiError && err.status === 422) {
@@ -56,15 +61,15 @@ export function userFacingErrorMessage(
 
   if (typeof err === "string") {
     const u = stripHttpStatusFromMessage(err);
-    return u || fallback;
+    return u || fallbackMessage;
   }
   if (err instanceof ApiError) {
     const u = stripHttpStatusFromMessage(err.message);
-    return u || fallback;
+    return u || fallbackMessage;
   }
   if (err instanceof Error) {
     const u = stripHttpStatusFromMessage(err.message);
-    return u || fallback;
+    return u || fallbackMessage;
   }
-  return fallback;
+  return fallbackMessage;
 }

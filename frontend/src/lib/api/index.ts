@@ -9,6 +9,8 @@ import {
   ensureFreshAccessToken,
   refreshAccessToken,
 } from "@/lib/auth/sessionRefresh";
+import { localizeApiMessageKey } from "@/i18n/apiMessageKeys";
+import { getCurrentLocale } from "@/i18n/runtime";
 
 function normalizeApiOrigin(value: string | undefined): string {
   const trimmed = value?.trim() ?? "";
@@ -203,7 +205,7 @@ function userFacingHttpErrorMessage(
 /** أعطال fetch / TLS / إلغاء الطلب — رسائل جاهزة للعرض على الواجهة. */
 export function transportFailureUserMessage(
   error: unknown,
-  locale: "ar" | "en" = "ar",
+  locale: "ar" | "en" = getCurrentLocale(),
 ): string {
   if (locale === "en") {
     if (error instanceof DOMException && error.name === "AbortError")
@@ -255,7 +257,7 @@ export function transportFailureUserMessage(
 /** رسالة موحّدة لواجهة المستخدم بعد فشل طلب: ApiError أو فشل نقل الشبكة. */
 export function getUserFacingRequestErrorMessage(
   error: unknown,
-  locale: "ar" | "en" = "ar",
+  locale: "ar" | "en" = getCurrentLocale(),
 ): string {
   if (error instanceof ApiError) {
     // Handle validation errors with field-specific messages
@@ -312,6 +314,14 @@ export type ApiOptions = RequestInit & {
   onProgress?: (progress: number) => void;
   locale?: "ar" | "en";
 };
+
+function resolveApiLocale(preferred?: "ar" | "en"): "ar" | "en" {
+  const active = getCurrentLocale();
+  if (preferred === "en") return "en";
+  // Legacy code passes locale: "ar" by default; sync it with active UI language.
+  if (preferred === "ar") return active;
+  return active;
+}
 
 export type ApiResult<T, E = Error> =
   | { ok: true; data: T }
@@ -389,9 +399,10 @@ export async function apiRequest<T = unknown>(
     headers,
     signal,
     onError,
-    locale = "ar",
+    locale: preferredLocale,
     ...rest
   } = options;
+  const locale = resolveApiLocale(preferredLocale);
 
   const url = `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
@@ -484,13 +495,16 @@ export async function apiRequest<T = unknown>(
         res.statusText;
 
       const messageKey = readBodyString(body, "messageKey") ?? null;
+      const localizedMessageByKey = localizeApiMessageKey(messageKey, locale);
 
-      const displayMsg = userFacingHttpErrorMessage(
-        res.status,
-        typeof backendMsg === "string" ? backendMsg : String(backendMsg ?? ""),
-        res.statusText,
-        locale,
-      );
+      const displayMsg =
+        localizedMessageByKey ??
+        userFacingHttpErrorMessage(
+          res.status,
+          typeof backendMsg === "string" ? backendMsg : String(backendMsg ?? ""),
+          res.statusText,
+          locale,
+        );
 
       const err = new ApiError(res.status, messageKey, body, displayMsg);
       onError?.(err);
@@ -544,11 +558,12 @@ export async function apiMultipart<T = unknown>(
 
   const {
     onProgress,
-    locale = "ar",
+    locale: preferredLocale,
     token: providedToken,
     omitAuth = false,
     ...rest
   } = options;
+  const locale = resolveApiLocale(preferredLocale);
   let token =
     omitAuth === true
       ? ""

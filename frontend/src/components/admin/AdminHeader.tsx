@@ -14,11 +14,12 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { getAdminPageMeta } from '@/constant/adminPageMeta';
 import { useAdminUnreadNotificationCount } from '@/hooks/admin/notifications/useAdminNotifications';
 import { useAuthStore } from '@/store/authStore';
+import { useI18n } from '@/i18n/provider';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 
 type Props = {
   title?: string;
   subtitle?: string;
-  searchPlaceholder?: string;
   onMenuClick?: () => void;
   onLogoutClick: () => void;
   loggingOut?: boolean;
@@ -27,27 +28,41 @@ type Props = {
 export default function AdminHeader({
   title: titleOverride,
   subtitle: subtitleOverride,
-  searchPlaceholder = 'بحث سريع… اضغط إدخال للانتقال إلى المرضى',
   onMenuClick,
   onLogoutClick,
   loggingOut = false,
 }: Props) {
+  const { locale, t } = useI18n();
+  const dir = locale === 'ar' ? 'rtl' : 'ltr';
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
-
   const { data: unreadTotal, isAwaitingData: unreadAwaiting } =
     useAdminUnreadNotificationCount();
 
   const { title, subtitle } = useMemo(() => {
     const m = getAdminPageMeta(location.pathname);
+    const topSegment = location.pathname
+      .replace(/^\/admin\/?/, '')
+      .split('/')
+      .filter(Boolean)[0];
+    const localTitle =
+      topSegment === 'overview' || topSegment === 'dashboard' || !topSegment
+        ? t('admin.meta.overview.title', m.title)
+        : t(`sidebar.item.${topSegment}`, m.title);
+    const localSubtitle =
+      topSegment === 'overview' || topSegment === 'dashboard' || !topSegment
+        ? t('admin.meta.overview.subtitle', m.subtitle)
+        : t('admin.meta.dataManagement.subtitle', m.subtitle);
     return {
-      title: titleOverride ?? m.title,
-      subtitle: subtitleOverride ?? m.subtitle,
+      title: titleOverride ?? localTitle,
+      subtitle: subtitleOverride ?? localSubtitle,
     };
-  }, [location.pathname, titleOverride, subtitleOverride]);
+  }, [location.pathname, titleOverride, subtitleOverride, t]);
 
-  const displayName = user?.name?.trim() || user?.email || 'مدير النظام';
-  const displayLine2 = user?.email && user?.name ? user.email : 'متصل';
+  const displayName =
+    user?.name?.trim() || user?.email || t('header.defaultAdminName');
+  const displayLine2 =
+    user?.email && user?.name ? user.email : t('header.connected');
 
   const unreadBadge =
     typeof unreadTotal === 'number' && unreadTotal > 0
@@ -58,8 +73,8 @@ export default function AdminHeader({
 
   return (
     <header
-      dir='rtl'
-      lang='ar'
+      dir={dir}
+      lang={locale}
       className='flex min-h-[90px] w-full flex-wrap items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:px-6'
     >
       <section className='flex min-w-0 items-start gap-3'>
@@ -67,7 +82,7 @@ export default function AdminHeader({
           type='button'
           onClick={onMenuClick}
           className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 lg:hidden'
-          aria-label='فتح القائمة'
+          aria-label={t('common.openSidebar')}
         >
           <Menu className='h-5 w-5' aria-hidden />
         </button>
@@ -85,8 +100,8 @@ export default function AdminHeader({
         <Link
           to='/admin/complaints'
           className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50'
-          aria-label='الشكاوى والدعم'
-          title='الشكاوى والدعم'
+          aria-label={t('header.adminSupport')}
+          title={t('header.adminSupport')}
         >
           <HelpCircle className='h-5 w-5 text-gray-600' aria-hidden />
         </Link>
@@ -100,8 +115,8 @@ export default function AdminHeader({
                 : 'border-gray-200 bg-white hover:bg-gray-50'
             }`
           }
-          aria-label='الإشعارات'
-          title='الإشعارات'
+          aria-label={t('header.notifications')}
+          title={t('header.notifications')}
         >
           <Bell className='h-5 w-5 text-gray-600' aria-hidden />
           {unreadAwaiting ? (
@@ -121,8 +136,8 @@ export default function AdminHeader({
         <Link
           to='/admin/settings'
           className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50'
-          aria-label='الإعدادات'
-          title='الإعدادات'
+          aria-label={t('header.settings')}
+          title={t('header.settings')}
         >
           <Settings className='h-5 w-5 text-gray-600' aria-hidden />
         </Link>
@@ -132,7 +147,7 @@ export default function AdminHeader({
         <Link
           to='/admin/settings'
           className='hidden max-w-[200px] min-w-0 items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-gray-50 sm:flex'
-          title='الإعدادات والملف'
+          title={t('header.settingsProfile')}
         >
           <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100'>
             <User className='h-4 w-4 text-blue-600' aria-hidden />
@@ -150,8 +165,8 @@ export default function AdminHeader({
           disabled={loggingOut}
           onClick={onLogoutClick}
           className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60'
-          aria-label='تسجيل الخروج'
-          title='تسجيل الخروج'
+          aria-label={t('common.logout')}
+          title={t('common.logout')}
         >
           {loggingOut ? (
             <Loader2 className='h-5 w-5 animate-spin text-gray-500' aria-hidden />
@@ -159,6 +174,7 @@ export default function AdminHeader({
             <LogOut className='h-5 w-5 text-gray-600' aria-hidden />
           )}
         </button>
+        <LanguageSwitcher compact />
       </div>
     </header>
   );

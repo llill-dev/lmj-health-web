@@ -13,6 +13,7 @@ import { MotionProvider } from "@/motion";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { NetworkStatusToasts } from "@/components/ui/NetworkStatusToasts";
 import { queryClient } from "@/lib/queryClient";
+import { I18nProvider } from "@/i18n/provider";
 
 warnIfProductionUiOnlyMisconfigured();
 
@@ -20,15 +21,17 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <MotionProvider>
-          <ToastProvider>
-            <NetworkStatusToasts />
-            <DeviceRegistrationBridge />
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </ToastProvider>
-        </MotionProvider>
+        <I18nProvider>
+          <MotionProvider>
+            <ToastProvider>
+              <NetworkStatusToasts />
+              <DeviceRegistrationBridge />
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </ToastProvider>
+          </MotionProvider>
+        </I18nProvider>
       </QueryClientProvider>
     </HelmetProvider>
   </StrictMode>,

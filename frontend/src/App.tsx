@@ -30,6 +30,7 @@ import * as PublicPages from "@/routes/lazy-pages/public-pages";
 import * as SecretaryPages from "@/routes/lazy-pages/secretary-pages";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import type { SecretaryPermissionKey } from "@/lib/secretary/permissions";
+import { useI18n } from "@/i18n/provider";
 
 function PublicPagesLayout() {
   const location = useLocation();
@@ -61,8 +62,10 @@ function SecretaryPermissionRoute({
 }
 
 export default function App() {
+  const { locale, dir } = useI18n();
+
   return (
-    <div className="font-cairo">
+    <div className="font-cairo" lang={locale} dir={dir}>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
 

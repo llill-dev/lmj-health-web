@@ -2,14 +2,16 @@ import { Helmet } from 'react-helmet-async';
 import LoginForm from '@/components/auth/login/login-form';
 import { useNavigate } from 'react-router-dom';
 import AuthBackground from '@/components/auth/AuthBackground';
+import { useI18n } from '@/i18n/provider';
 
 export default function LoginPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   return (
     <>
       <Helmet>
-        <title>Login • LMJ Health</title>
+        <title>{t('auth.page.login.title')}</title>
       </Helmet>
 
       <AuthBackground>
