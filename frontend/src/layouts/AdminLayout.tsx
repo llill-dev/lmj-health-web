@@ -17,11 +17,13 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { AnimatePresence } from 'framer-motion';
 import { MotionProvider, PageTransition } from '@/motion';
 import { AdminRouteFallback } from '@/routes/RouteFallbacks';
+import { useI18n } from '@/i18n/provider';
 
 export default function AdminLayout({ children }: { children?: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useI18n();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -33,14 +35,14 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
       setLoggingOut(true);
       try {
         await useAuthStore.getState().logout({ scope });
-        toast('نراك في زيارة قادمة.', {
-          title: 'تم تسجيل الخروج',
+        toast(t('logout.toast.success.body'), {
+          title: t('logout.toast.success.title'),
           variant: 'success',
         });
         navigate('/login', { replace: true });
       } catch {
-        toast('تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.', {
-          title: 'فشل تسجيل الخروج',
+        toast(t('logout.toast.error.body'), {
+          title: t('logout.toast.error.title'),
           variant: 'error',
         });
         throw new Error('logout_failed');
@@ -48,7 +50,7 @@ export default function AdminLayout({ children }: { children?: ReactNode }) {
         setLoggingOut(false);
       }
     },
-    [navigate, toast],
+    [navigate, t, toast],
   );
 
   const pathname = location.pathname;

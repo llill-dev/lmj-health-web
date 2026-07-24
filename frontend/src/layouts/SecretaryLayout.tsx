@@ -14,11 +14,13 @@ import { SecretaryRouteFallback } from "@/routes/RouteFallbacks";
 import { useAuthStore } from "@/store/authStore";
 import MotionProvider from "@/motion/MotionProvider";
 import PageTransition from "@/motion/PageTransition";
+import { useI18n } from "@/i18n/provider";
 
 export default function SecretaryLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { locale, dir, t } = useI18n();
 
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -27,7 +29,7 @@ export default function SecretaryLayout() {
   const secretaryPermissions = useSecretaryPermissions();
 
   const authUser = readAuthUser();
-  const secretaryName = authUser?.fullName?.trim() || "السكرتير";
+  const secretaryName = authUser?.fullName?.trim() || t("sidebar.role.secretary");
   const secretaryEmail = authUser?.email?.trim() || "";
   const permissionsReady =
     !secretaryPermissions.isLoading && !secretaryPermissions.isPending;
@@ -45,21 +47,21 @@ export default function SecretaryLayout() {
     setLoggingOut(true);
     try {
       await useAuthStore.getState().logout();
-      toast("نراك في زيارة قادمة.", {
-        title: "تم تسجيل الخروج",
+      toast(t("logout.toast.success.body"), {
+        title: t("logout.toast.success.title"),
         variant: "success",
       });
       navigate("/login", { replace: true });
     } catch {
-      toast("تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.", {
-        title: "فشل تسجيل الخروج",
+      toast(t("logout.toast.error.body"), {
+        title: t("logout.toast.error.title"),
         variant: "error",
       });
       throw new Error("logout_failed");
     } finally {
       setLoggingOut(false);
     }
-  }, [navigate, toast]);
+  }, [navigate, t, toast]);
 
   const pathname = location.pathname;
 
@@ -91,8 +93,8 @@ export default function SecretaryLayout() {
 
   return (
     <div
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="h-dvh overflow-hidden bg-white scrollbar-hide"
     >
       <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
@@ -135,10 +137,11 @@ export default function SecretaryLayout() {
       <ConfirmActionDialog
         open={logoutConfirmOpen}
         onOpenChange={setLogoutConfirmOpen}
-        title="تأكيد تسجيل الخروج"
-        description="سيتم إنهاء جلستك الحالية وإعادتك إلى صفحة تسجيل الدخول. إذا كنت لا تزال بحاجة إلى العمل، اختر إلغاء."
-        confirmLabel={loggingOut ? "جاري تسجيل الخروج…" : "تسجيل الخروج"}
+        title={t("logout.title")}
+        description={t("logout.secretary.description")}
+        confirmLabel={loggingOut ? t("logout.pending") : t("common.logout")}
         confirmDisabled={loggingOut}
+        cancelLabel={t("common.cancel")}
         onConfirm={performLogout}
       />
     </div>

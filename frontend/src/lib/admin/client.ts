@@ -131,6 +131,10 @@ function readAdminNumber(value: unknown): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
+function readAdminString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
 function asAdminListEnvelope(value: unknown): AdminListEnvelope | null {
   const record = asAdminRecord(value);
   return record ? { ...record } : null;
@@ -991,17 +995,41 @@ function normalizeAppointmentCancelResponse(
 ): AppointmentCancelResponse {
   const record = asAdminRecord(response);
   const nested = readAdminNestedEnvelope(response);
+  const appointmentRecord =
+    asAdminRecord(record?.appointment) ??
+    asAdminRecord(nested?.appointment) ??
+    asAdminRecord(asAdminRecord(record?.data)?.appointment) ??
+    asAdminRecord(asAdminRecord(nested?.data)?.appointment);
+  const appointmentId =
+    readAdminString(appointmentRecord?._id) ??
+    readAdminString(appointmentRecord?.id) ??
+    response.appointment?._id;
+  const appointmentStatus =
+    (readAdminString(appointmentRecord?.status) as
+      | AppointmentCancelResponse["appointment"]["status"]
+      | undefined) ??
+    response.appointment?.status;
+
+  if (!appointmentId || !appointmentStatus) {
+    return response;
+  }
 
   return {
     ...response,
-    appointmentId:
-      readAdminString(record?.appointmentId) ??
-      readAdminString(nested?.appointmentId) ??
-      response.appointmentId,
-    status:
-      readAdminString(record?.status) ??
-      readAdminString(nested?.status) ??
-      response.status,
+    appointment: {
+      ...response.appointment,
+      _id: appointmentId,
+      status: appointmentStatus,
+      cancelledAt:
+        readAdminString(appointmentRecord?.cancelledAt) ??
+        response.appointment?.cancelledAt,
+      cancelledBy:
+        readAdminString(appointmentRecord?.cancelledBy) ??
+        response.appointment?.cancelledBy,
+      cancelReason:
+        readAdminString(appointmentRecord?.cancelReason) ??
+        response.appointment?.cancelReason,
+    },
   };
 }
 

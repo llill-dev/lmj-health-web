@@ -2,6 +2,7 @@ import { memo, useMemo, useState } from "react";
 import { Search, Clock, Phone, ChevronRight, Calendar } from "lucide-react";
 import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
+import { useI18n } from "@/i18n/provider";
 
 function patientInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -11,26 +12,27 @@ function patientInitials(name: string): string {
   return name.slice(0, 2).toUpperCase() || "م";
 }
 
-function priorityPresentation(priority: string): {
+function priorityPresentation(priority: string, locale: "ar" | "en"): {
   label: string;
   className: string;
 } {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   if (priority === "high") {
     return {
-      label: "عالية",
+      label: tr("عالية", "High"),
       className: "bg-[#FEE2E2] text-[#B42318]",
     };
   }
 
   if (priority === "medium") {
     return {
-      label: "متوسطة",
+      label: tr("متوسطة", "Medium"),
       className: "bg-[#FFF2E8] text-[#FF6A00]",
     };
   }
 
   return {
-    label: "منخفضة",
+    label: tr("منخفضة", "Low"),
     className: "bg-[#EAFBF0] text-[#22C55E]",
   };
 }
@@ -57,17 +59,20 @@ function SurfaceSection({
 function WaitlistSearchInput({
   value,
   onChange,
+  locale,
 }: {
   value: string;
   onChange: (value: string) => void;
+  locale: "ar" | "en";
 }) {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="relative min-w-0">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="ابحث بالاسم أو رقم الهاتف…"
-        aria-label="بحث في قائمة الانتظار"
+        placeholder={tr("ابحث بالاسم أو رقم الهاتف…", "Search by name or phone number…")}
+        aria-label={tr("بحث في قائمة الانتظار", "Search waitlist")}
         className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
       <div className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
@@ -87,8 +92,10 @@ const WaitlistRow = memo<{
     priority: string;
   };
   onBookAppointment?: (patientId: string) => void;
-}>(function WaitlistRow({ patient, onBookAppointment }) {
-  const priority = priorityPresentation(patient.priority);
+  locale: "ar" | "en";
+}>(function WaitlistRow({ patient, onBookAppointment, locale }) {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const priority = priorityPresentation(patient.priority, locale);
 
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
@@ -133,7 +140,7 @@ const WaitlistRow = memo<{
             onClick={() => onBookAppointment(patient.id)}
             className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
           >
-            حجز موعد
+            {tr("حجز موعد", "Book appointment")}
             <ChevronRight className="h-4 w-4" />
           </button>
         ) : null}
@@ -143,6 +150,9 @@ const WaitlistRow = memo<{
 });
 
 export default function SecretaryWaitlistPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
   const [searchInput, setSearchInput] = useState("");
   const waitlistQuery = useDoctorWaitlist({
@@ -158,7 +168,7 @@ export default function SecretaryWaitlistPage() {
           (request.patient &&
           typeof request.patient === "object" &&
           request.patient.userId?.fullName) ||
-          "مريض",
+          tr("مريض", "Patient"),
         patientId:
           (request.patient &&
           typeof request.patient === "object" &&
@@ -176,11 +186,11 @@ export default function SecretaryWaitlistPage() {
                 (Date.now() - new Date(request.createdAt).getTime()) /
                   (1000 * 60),
               ),
-            )} دقيقة`
+            )} ${tr("دقيقة", "min")}`
           : "—",
         priority: request.urgencyLevel || "low",
       })),
-    [waitlistQuery.requests],
+    [tr, waitlistQuery.requests],
   );
 
   const searchedPatients = useMemo(() => {
@@ -195,46 +205,46 @@ export default function SecretaryWaitlistPage() {
   }, [waitlistPatients, searchInput]);
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title="قائمة الانتظار">
+    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+      <SurfaceSection title={tr("قائمة الانتظار", "Waitlist")}>
         <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
           <div className="text-right">
             <h2 className="font-cairo text-[23px] font-black text-[#243044]">
-              قائمة الانتظار
+              {tr("قائمة الانتظار", "Waitlist")}
             </h2>
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {waitlistPatients.length} مريض
-              {searchInput ? " مطابق للبحث" : ""}
+              {waitlistPatients.length.toLocaleString(numberLocale)} {tr("مريض", "patients")}
+              {searchInput ? tr(" مطابق للبحث", " matching search") : ""}
             </p>
           </div>
         </div>
 
         <div className="px-4 py-5 sm:px-5 sm:py-6">
-          <WaitlistSearchInput value={searchInput} onChange={setSearchInput} />
+          <WaitlistSearchInput value={searchInput} onChange={setSearchInput} locale={locale} />
         </div>
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
           <div className="grid grid-cols-12 gap-4 text-right font-cairo text-[14px] font-bold text-[#A1AAB9]">
-            <div className="col-span-4">المريض</div>
-            <div className="col-span-3">رقم الهاتف</div>
-            <div className="col-span-2">وقت الانتظار</div>
-            <div className="col-span-2">الأولوية</div>
-            <div className="col-span-1">الإجراءات</div>
+            <div className="col-span-4">{tr("المريض", "Patient")}</div>
+            <div className="col-span-3">{tr("رقم الهاتف", "Phone number")}</div>
+            <div className="col-span-2">{tr("وقت الانتظار", "Wait time")}</div>
+            <div className="col-span-2">{tr("الأولوية", "Priority")}</div>
+            <div className="col-span-1">{tr("الإجراءات", "Actions")}</div>
           </div>
         </div>
 
         {waitlistQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              جاري تحميل قائمة الانتظار...
+              {tr("جاري تحميل قائمة الانتظار...", "Loading waitlist...")}
             </p>
           </div>
         ) : searchedPatients.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
-                ? "لا توجد نتائج مطابقة لبحثك."
-                : "قائمة الانتظار فارغة حالياً."}
+                ? tr("لا توجد نتائج مطابقة لبحثك.", "No results match your search.")
+                : tr("قائمة الانتظار فارغة حالياً.", "Waitlist is currently empty.")}
             </p>
           </div>
         ) : (
@@ -243,6 +253,7 @@ export default function SecretaryWaitlistPage() {
               <WaitlistRow
                 key={patient.id}
                 patient={patient}
+                locale={locale}
                 onBookAppointment={hasPermission("waitlist:book") ? () => {} : undefined}
               />
             ))}

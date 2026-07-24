@@ -11,12 +11,13 @@ import { useDoctorPatientFiles, useDoctorPatients } from "@/hooks/doctor/patient
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 import { doctorApi } from "@/lib/doctor/client";
 import { triggerBrowserFileDownload, triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
+import { useI18n } from "@/i18n/provider";
 
-function formatIsoDate(value?: string | null): string {
+function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ar-SA");
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
 function patientInitials(name: string): string {
@@ -89,7 +90,9 @@ const PatientFileRow = memo<{
   };
   onView: (fileId: string) => void;
   onDownload: (fileId: string) => void;
-}>(function PatientFileRow({ file, onView, onDownload }) {
+  locale: "ar" | "en";
+}>(function PatientFileRow({ file, onView, onDownload, locale }) {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
       <div className="flex items-center gap-4 lg:col-span-4">
@@ -115,7 +118,7 @@ const PatientFileRow = memo<{
 
       <div className="flex items-center gap-2 font-cairo text-[16px] font-bold text-[#243044] lg:col-span-3">
         <Calendar className="h-4 w-4 text-[#98A2B3]" />
-        {formatIsoDate(file.date)}
+        {formatIsoDate(file.date, locale)}
       </div>
 
       <div className="flex items-center gap-2 lg:col-span-2">
@@ -123,7 +126,7 @@ const PatientFileRow = memo<{
           type="button"
           onClick={() => onView(file.id)}
           className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary text-white transition hover:bg-[#0A7A77]"
-          title="عرض"
+          title={tr("عرض", "View")}
         >
           <Eye className="h-4 w-4" />
         </button>
@@ -131,7 +134,7 @@ const PatientFileRow = memo<{
           type="button"
           onClick={() => onDownload(file.id)}
           className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#1F2937] transition hover:bg-[#F8FAFC]"
-          title="تحميل"
+          title={tr("تحميل", "Download")}
         >
           <Download className="h-4 w-4" />
         </button>
@@ -141,6 +144,8 @@ const PatientFileRow = memo<{
 });
 
 export default function SecretaryPatientFilesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [searchInput, setSearchInput] = useState("");
   const [patientId, setPatientId] = useState("");
   const { toast } = useToast();
@@ -159,14 +164,14 @@ export default function SecretaryPatientFilesPage() {
       (filesQuery.files ?? []).map((file) => ({
         id: file.id || file._id || "",
         patientName:
-          patientDirectory.get(patientId)?.user?.fullName || "مريض",
+          patientDirectory.get(patientId)?.user?.fullName || tr("مريض", "Patient"),
         patientId:
           patientDirectory.get(patientId)?.publicId || patientId || "—",
-        fileType: file.mimeType || file.originalName || "ملف",
+        fileType: file.mimeType || file.originalName || tr("ملف", "File"),
         date: file.createdAt || "",
-        filename: file.originalName || "ملف",
+        filename: file.originalName || tr("ملف", "File"),
       })),
-    [filesQuery.files, patientDirectory, patientId],
+    [filesQuery.files, patientDirectory, patientId, tr],
   );
 
   async function resolveDownloadUrl(fileId: string) {
@@ -185,8 +190,8 @@ export default function SecretaryPatientFilesPage() {
       if (!url) throw new Error("missing_url");
       await triggerBrowserFileDownload(url, filename);
     } catch {
-      toast("تعذر تنزيل الملف الآن. حاول مرة أخرى.", {
-        title: "فشل التنزيل",
+      toast(tr("تعذر تنزيل الملف الآن. حاول مرة أخرى.", "Could not download file now. Please try again."), {
+        title: tr("فشل التنزيل", "Download failed"),
         variant: "error",
       });
     }
@@ -198,8 +203,8 @@ export default function SecretaryPatientFilesPage() {
       if (!url) throw new Error("missing_url");
       await triggerBrowserFileDownloadAndOpen(url, filename);
     } catch {
-      toast("تعذر فتح الملف الآن. حاول مرة أخرى.", {
-        title: "فشل الفتح",
+      toast(tr("تعذر فتح الملف الآن. حاول مرة أخرى.", "Could not open file now. Please try again."), {
+        title: tr("فشل الفتح", "Open failed"),
         variant: "error",
       });
     }
@@ -217,9 +222,9 @@ export default function SecretaryPatientFilesPage() {
   }, [files, searchInput]);
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
       <SurfaceSection
-        title="ملفات المرضى"
+        title={tr("ملفات المرضى", "Patient files")}
         count={files.length}
         searchMatch={!!searchInput}
       >
@@ -229,10 +234,10 @@ export default function SecretaryPatientFilesPage() {
             onChange={(event) => setPatientId(event.target.value)}
             className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none focus:border-primary"
           >
-            <option value="">اختر مريضاً لعرض ملفاته</option>
+            <option value="">{tr("اختر مريضاً لعرض ملفاته", "Choose a patient to view files")}</option>
             {(patientsQuery.patients ?? []).map((patient) => (
               <option key={patient._id} value={patient._id}>
-                {patient.user?.fullName || "مريض"} - {patient.publicId || patient._id}
+                {patient.user?.fullName || tr("مريض", "Patient")} - {patient.publicId || patient._id}
               </option>
             ))}
           </select>
@@ -243,31 +248,31 @@ export default function SecretaryPatientFilesPage() {
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
           <div className="grid grid-cols-12 gap-4 text-right font-cairo text-[14px] font-bold text-[#A1AAB9]">
-            <div className="col-span-4">المريض</div>
-            <div className="col-span-3">نوع الملف</div>
-            <div className="col-span-3">التاريخ</div>
-            <div className="col-span-2">الإجراءات</div>
+            <div className="col-span-4">{tr("المريض", "Patient")}</div>
+            <div className="col-span-3">{tr("نوع الملف", "File type")}</div>
+            <div className="col-span-3">{tr("التاريخ", "Date")}</div>
+            <div className="col-span-2">{tr("الإجراءات", "Actions")}</div>
           </div>
         </div>
 
         {!patientId ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              اختر مريضاً أولاً لعرض الملفات.
+              {tr("اختر مريضاً أولاً لعرض الملفات.", "Choose a patient first to view files.")}
             </p>
           </div>
         ) : filesQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              جاري تحميل الملفات...
+              {tr("جاري تحميل الملفات...", "Loading files...")}
             </p>
           </div>
         ) : searchedFiles.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
-                ? "لا توجد نتائج مطابقة لبحثك."
-                : "لا يوجد ملفات للمرضى."}
+                ? tr("لا توجد نتائج مطابقة لبحثك.", "No results match your search.")
+                : tr("لا يوجد ملفات للمرضى.", "No patient files found.")}
             </p>
           </div>
         ) : (
@@ -276,6 +281,7 @@ export default function SecretaryPatientFilesPage() {
               <PatientFileRow
                 key={file.id}
                 file={file}
+                locale={locale}
                 onView={(fileId) => handleView(fileId, file.filename)}
                 onDownload={(fileId) => handleDownload(fileId, file.filename)}
               />

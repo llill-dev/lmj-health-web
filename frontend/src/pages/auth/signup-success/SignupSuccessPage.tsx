@@ -9,6 +9,7 @@ import {
   peekSignupSuccessNavState,
   type SignupSuccessLocationState,
 } from '@/lib/auth/signupSuccessNavState';
+import { useI18n } from '@/i18n/provider';
 
 /** إعادة تصدير النوع للشفرات التي تستورد من هذا الملف تقليدياً. */
 export type { SignupSuccessLocationState };
@@ -32,6 +33,7 @@ function resolveSignupSuccessState(
 }
 
 export default function SignupSuccessPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const [state, setState] = useState<SignupSuccessLocationState | null>(null);
@@ -93,20 +95,23 @@ export default function SignupSuccessPage() {
     return (
       <>
         <Helmet>
-          <title>Signup Success • LMJ Health</title>
+          <title>{t('auth.page.signupSuccess.title')}</title>
         </Helmet>
         <AuthBackground>
           <SignupSuccess
-            title={state.title ?? 'تم تأكيد رمز التسجيل'}
+            title={state.title ?? t('auth.signupSuccess.pending.title')}
             message={
               state.message ??
-              'تم التحقق من الرمز وفق الخادم. حساب الطبيب قيد موافقة الإدارة قبل تفعيله بالكامل في المنصة؛ يمكنك لاحقاً تسجيل الدخول عند التفعيل.'
+              t('auth.signupSuccess.pending.message')
             }
-            continueLabel='تسجيل الدخول'
+            continueLabel={t('auth.signupSuccess.pending.continue')}
             onContinue={() => navigate('/login', { replace: true })}
           />
           <p className='mx-auto mt-4 max-w-[520px] text-center font-cairo text-[12px] font-semibold text-[#667085]'>
-            سيتم تحويلك تلقائياً إلى تسجيل الدخول خلال {REDIRECT_SECONDS} ثوانٍ…
+            {t('auth.signupSuccess.pending.autoRedirect', `You will be redirected in ${REDIRECT_SECONDS} seconds…`).replace(
+              '{seconds}',
+              String(REDIRECT_SECONDS),
+            )}
           </p>
         </AuthBackground>
       </>
@@ -116,20 +121,23 @@ export default function SignupSuccessPage() {
   return (
     <>
       <Helmet>
-        <title>Signup Success • LMJ Health</title>
+        <title>{t('auth.page.signupSuccess.title')}</title>
       </Helmet>
       <AuthBackground>
         <SignupSuccess
-          title={state.title ?? "اكتمل التحقق"}
+          title={state.title ?? t("auth.signupSuccess.ready.title")}
           message={
             state.message ??
-            "تم إنشاء الحساب بنجاح؛ يُرجى الأنتظار حتى يتم التحقق من حسابك من قبل الأدمن   ."
+            t("auth.signupSuccess.ready.message")
           }
-          continueLabel="الذهاب للصفحة الرئيسية"
+          continueLabel={t("auth.signupSuccess.ready.continue")}
           onContinue={() => navigate(state.redirectTo, { replace: true })}
         />
         <p className="mx-auto mt-4 max-w-[520px] text-center font-cairo text-[12px] font-semibold text-[#667085]">
-          سيتم تحويلك تلقائياً خلال {secondsLeft} ثانية…
+          {t('auth.signupSuccess.ready.autoRedirect', 'Redirecting in {seconds} seconds…').replace(
+            '{seconds}',
+            String(secondsLeft),
+          )}
         </p>
       </AuthBackground>
     </>

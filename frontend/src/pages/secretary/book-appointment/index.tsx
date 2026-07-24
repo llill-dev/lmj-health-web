@@ -6,8 +6,11 @@ import { useAvailableAppointmentTypes } from "@/hooks/doctor/appointments/useApp
 import { useBookDoctorAppointmentApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
+import { useI18n } from "@/i18n/provider";
 
 export default function SecretaryBookAppointmentPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
@@ -20,9 +23,9 @@ export default function SecretaryBookAppointmentPage() {
     () =>
       (patientsQuery.patients ?? []).map((patient) => ({
         id: patient._id,
-        name: patient.user?.fullName || "مريض",
+        name: patient.user?.fullName || tr("مريض", "Patient"),
       })),
-    [patientsQuery.patients],
+    [patientsQuery.patients, tr],
   );
 
   async function handleBook(values: {
@@ -43,21 +46,21 @@ export default function SecretaryBookAppointmentPage() {
         appointmentTypeId: values.appointmentTypeId || undefined,
         notes: values.notes?.trim() || undefined,
       });
-      toast("تم حجز الموعد بنجاح.", {
-        title: "تم الحجز",
+      toast(tr("تم حجز الموعد بنجاح.", "Appointment booked successfully."), {
+        title: tr("تم الحجز", "Booked"),
         variant: "success",
       });
       navigate("/secretary/appointments");
     } catch {
-      toast("تعذر حجز الموعد. تحقق من البيانات ثم أعد المحاولة.", {
-        title: "فشل الحجز",
+      toast(tr("تعذر حجز الموعد. تحقق من البيانات ثم أعد المحاولة.", "Could not book appointment. Please verify data and try again."), {
+        title: tr("فشل الحجز", "Booking failed"),
         variant: "error",
       });
     }
   }
 
   return (
-    <div dir="rtl" lang="ar" className="pb-6 sm:pb-8">
+    <div dir={dir} lang={locale} className="pb-6 sm:pb-8">
       <BookAppointmentDialog
         open
         onOpenChange={(open) => {

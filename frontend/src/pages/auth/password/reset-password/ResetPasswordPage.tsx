@@ -9,8 +9,10 @@ import {
 } from '@/lib/auth/passwordResetNavState';
 import { useAuthStore } from '@/store/authStore';
 import { ApiError } from '@/lib/api';
+import { useI18n } from '@/i18n/provider';
 
 export default function ResetPasswordPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const tokenState = peekPasswordResetToken();
@@ -22,7 +24,7 @@ export default function ResetPasswordPage() {
   return (
     <>
       <Helmet>
-        <title>Reset Password • LMJ Health</title>
+        <title>{t('auth.page.resetPassword.title')}</title>
       </Helmet>
 
       <NewPassword
@@ -41,9 +43,9 @@ export default function ResetPasswordPage() {
             const message =
               error instanceof ApiError
                 ? error.message
-                : 'لا يوجد أي تطابق مع البيانات المدخلة. يرجى التحقق من المعلومات وإعادة المحاولة.';
+                : t('auth.resetPassword.error.fallback');
             toast(message, {
-              title: 'تعذّر التحديث',
+              title: t('auth.resetPassword.error.title'),
               variant: 'error',
               durationMs: 4800,
             });

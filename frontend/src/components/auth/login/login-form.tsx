@@ -10,7 +10,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthFlowError, useAuthStore } from "@/store/authStore";
 import { useToast } from "@/components/ui/ToastProvider";
-import { SIGNUP_EMAIL_INVALID_MESSAGE_AR } from "@/components/auth/signUp/signup-schemas";
 import { persistClaimAccountPending } from "@/lib/auth/claimAccountNavState";
 import {
   sanitizePostLoginNextPath,
@@ -20,7 +19,7 @@ import {
   isValidAuthPhoneIdentifier,
   normalizeAuthPhoneIdentifier,
 } from "@/lib/phone/normalizeAuthPhone";
-import { resolveLoginErrorMessageAr } from "@/lib/auth/loginErrorMessages";
+import { useI18n } from "@/i18n/provider";
 
 type LoginMethod = "phone" | "email";
 
@@ -28,46 +27,52 @@ function countPhoneDigits(value: string): number {
   return value.replace(/\D/g, "").length;
 }
 
-const loginSchema = z
-  .object({
-    method: z.enum(["phone", "email"]),
-    identifier: z.string().min(1, "هذا الحقل مطلوب"),
-    password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-  })
-  .superRefine((val, ctx) => {
-    if (val.method === "email") {
-      const res = z.string().email().safeParse(val.identifier);
-      if (!res.success) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["identifier"],
-          message: SIGNUP_EMAIL_INVALID_MESSAGE_AR,
-        });
-      }
-    }
-
-    if (val.method === "phone") {
-      if (countPhoneDigits(val.identifier) < 10) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["identifier"],
-          message: "رقم الهاتف يجب أن يحتوي على 10 أرقام على الأقل",
-        });
-        return;
+function createLoginSchema(t: (key: string, fallback?: string) => string) {
+  return z
+    .object({
+      method: z.enum(["phone", "email"]),
+      identifier: z.string().min(1, t("auth.validation.required", "This field is required")),
+      password: z
+        .string()
+        .min(6, t("auth.validation.passwordMin6", "Password must be at least 6 characters")),
+    })
+    .superRefine((val, ctx) => {
+      if (val.method === "email") {
+        const res = z.string().email().safeParse(val.identifier);
+        if (!res.success) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["identifier"],
+            message: t("auth.validation.emailInvalid", "Please enter a valid email address"),
+          });
+        }
       }
 
-      if (!isValidAuthPhoneIdentifier(val.identifier)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["identifier"],
-          message:
-            "أدخل رقم هاتف صحيح بصيغة دولية مثل +963912345678 أو 009639912345678",
-        });
-      }
-    }
-  });
+      if (val.method === "phone") {
+        if (countPhoneDigits(val.identifier) < 10) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["identifier"],
+            message: t("auth.validation.phoneMin10", "Phone number must contain at least 10 digits"),
+          });
+          return;
+        }
 
-type LoginValues = z.infer<typeof loginSchema>;
+        if (!isValidAuthPhoneIdentifier(val.identifier)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["identifier"],
+            message: t(
+              "auth.validation.phoneE164",
+              "Enter a valid international phone number like +963912345678",
+            ),
+          });
+        }
+      }
+    });
+}
+
+type LoginValues = z.infer<ReturnType<typeof createLoginSchema>>;
 
 export default function LoginForm({
   onBack,
@@ -80,6 +85,7 @@ export default function LoginForm({
   onForgotPassword: () => void;
   onOtpLogin: () => void;
 }) {
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -96,7 +102,7 @@ export default function LoginForm({
     clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(t)),
     defaultValues: {
       method: "email",
       identifier: "",
@@ -106,11 +112,15 @@ export default function LoginForm({
   });
 
   const methodLabel = useMemo(() => {
-    return method === "phone" ? "رقم الهاتف" : "البريد الإلكتروني";
-  }, [method]);
+    return method === "phone"
+      ? t("auth.login.method.phone", "Phone")
+      : t("auth.login.method.email", "Email");
+  }, [method, t]);
 
   const methodPlaceholder = useMemo(() => {
-    return method === "phone" ? "+963912345678" : "example@email.com";
+    return method === "phone"
+      ? t("auth.login.placeholder.phone", "+963912345678")
+      : t("auth.login.placeholder.email", "example@email.com");
   }, [method]);
 
   const MethodIcon = method === "phone" ? Phone : Mail;
@@ -144,23 +154,23 @@ export default function LoginForm({
           recoverUntil: loginData.recoverUntil ?? null,
         })
       ) {
-        toast("حسابك في فترة استرجاع. يمكنك إلغاء طلب الحذف الآن.", {
-          title: "طلب حذف نشط",
+        toast(t("auth.login.recoveryActive.body"), {
+          title: t("auth.login.recoveryActive.title"),
           variant: "info",
           durationMs: 5200,
         });
         return;
       }
 
-      const LOGIN_SUCCESS_AR: Record<string, string> = {
-        admin: "تم تسجيل الدخول بنجاح. مرحباً بك في لوحة إدارة LMJ Health.",
-        doctor: "تم تسجيل الدخول بنجاح. مرحباً بك في LMJ Health.",
-        secretary: "تم تسجيل الدخول بنجاح. مرحباً بك.",
-        patient: "تم تسجيل الدخول بنجاح. مرحباً بك.",
-        "data-entry": "تم تسجيل الدخول بنجاح. مرحباً بك.",
+      const LOGIN_SUCCESS_BY_ROLE: Record<string, string> = {
+        admin: t("auth.login.success.admin"),
+        doctor: t("auth.login.success.doctor"),
+        secretary: t("auth.login.success.secretary"),
+        patient: t("auth.login.success.patient"),
+        "data-entry": t("auth.login.success.dataEntry"),
       };
-      toast(LOGIN_SUCCESS_AR[userRole] ?? "تم تسجيل الدخول بنجاح. مرحباً بك.", {
-        title: "مرحباً",
+      toast(LOGIN_SUCCESS_BY_ROLE[userRole] ?? t("auth.login.success.default"), {
+        title: t("auth.login.success.title"),
         variant: "success",
         durationMs: 3800,
       });
@@ -183,17 +193,51 @@ export default function LoginForm({
       navigate(roleRoot[userRole] ?? "/welcome", { replace: true });
     } catch (error: unknown) {
       const code = error instanceof AuthFlowError ? error.code : "UNKNOWN";
-      const message = resolveLoginErrorMessageAr(code, values.method);
+      const loginErrorByMethod: Record<
+        "phone" | "email",
+        Record<string, string>
+      > = {
+        phone: {
+          INVALID_CREDENTIALS: t("auth.login.error.phone.invalidCredentials"),
+          NOT_VERIFIED: t("auth.login.error.phone.notVerified"),
+          INACTIVE: t("auth.login.error.common.inactive"),
+          PENDING_APPROVAL: t("auth.login.error.common.pendingApproval"),
+          NOT_ALLOWED: t("auth.login.error.common.notAllowed"),
+          TEMPORARY: t("auth.login.error.common.temporary"),
+          LOCKED: t("auth.login.error.common.locked"),
+          DELETED: t("auth.login.error.phone.deleted"),
+          DELETION_RECOVERY: t("auth.login.error.common.deletionRecovery"),
+          NETWORK_ERROR: t("auth.login.error.common.network"),
+          UNKNOWN: t("auth.login.error.common.unknown"),
+        },
+        email: {
+          INVALID_CREDENTIALS: t("auth.login.error.email.invalidCredentials"),
+          NOT_VERIFIED: t("auth.login.error.email.notVerified"),
+          INACTIVE: t("auth.login.error.common.inactive"),
+          PENDING_APPROVAL: t("auth.login.error.common.pendingApproval"),
+          NOT_ALLOWED: t("auth.login.error.common.notAllowed"),
+          TEMPORARY: t("auth.login.error.common.temporary"),
+          LOCKED: t("auth.login.error.common.locked"),
+          DELETED: t("auth.login.error.email.deleted"),
+          DELETION_RECOVERY: t("auth.login.error.common.deletionRecovery"),
+          NETWORK_ERROR: t("auth.login.error.common.network"),
+          UNKNOWN: t("auth.login.error.common.unknown"),
+        },
+      };
+      const normalized = String(code).trim().toUpperCase();
+      const message =
+        loginErrorByMethod[values.method][normalized]
+        ?? loginErrorByMethod.email.UNKNOWN;
       setLoginError(message);
       toast(message, {
-        title: "تعذّر تسجيل الدخول",
+        title: t("auth.login.error.title"),
         variant: "error",
         durationMs: 5600,
       });
 
       if (code === "DELETED") {
-        toast("حسابك موقوف من قبل الإدارة.", {
-          title: "حساب موقوف",
+        toast(t("auth.login.error.accountBlocked.body"), {
+          title: t("auth.login.error.accountBlocked.title"),
           variant: "info",
           durationMs: 5200,
         });
@@ -215,9 +259,9 @@ export default function LoginForm({
               : null;
 
         toast(
-          "تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.",
+          t("auth.login.error.deletionRecoveryExpired"),
           {
-            title: "تعذّر تسجيل الدخول",
+            title: t("auth.login.error.title"),
             variant: "error",
             durationMs: 5200,
           },
@@ -260,15 +304,15 @@ export default function LoginForm({
           loading="eager"
         />
       </div>
-      <div dir="rtl" lang="ar" className="relative mb-8 w-full max-w-[448px]">
+      <div dir={dir} lang={locale} className="relative mb-8 w-full max-w-[448px]">
         <div className="relative z-10 h-[4px] w-full max-w-[448px] bg-gradient-to-b from-[#0F8F8B] via-[#65BFEC] to-[#0F8F8B]" />
         <div className="z-10 rounded-[6px] bg-[#FFFFFFF2] px-7 py-8 shadow-[0_28px_80px_rgba(0,0,0,0.22)]">
           <div className="text-start">
             <h1 className="font-cairo text-[16px] font-bold leading-[32px] text-[#1F2937]">
-              تسجيل الدخول
+              {t("auth.login.title")}
             </h1>
             <p className="mt-2 font-cairo text-[16px] font-medium leading-[24px] text-[#6B7280]">
-              مرحبا بعودتك، سجل دخولك لمتابعة مواعيدك وبياناتك الصحية بأمان
+              {t("auth.login.subtitle")}
             </p>
           </div>
 
@@ -302,7 +346,7 @@ export default function LoginForm({
                         : "relative z-10 flex-1 rounded-[6px] font-cairo text-[14px] font-bold text-[#667085]"
                     }
                   >
-                    رقم الهاتف
+                    {t("auth.login.method.phone")}
                   </button>
                 </div>
 
@@ -333,7 +377,7 @@ export default function LoginForm({
                         : "relative z-10 flex-1 rounded-[6px] font-cairo text-[14px] font-bold text-[#667085]"
                     }
                   >
-                    البريد الإلكتروني
+                    {t("auth.login.method.email")}
                   </button>
                 </div>
               </div>
@@ -387,7 +431,7 @@ export default function LoginForm({
                 </div>
                 <div>
                   <label className="mt-5 mb-1 block text-right font-cairo text-[14px] font-bold text-[#101828]">
-                    كلمة المرور
+                    {t("auth.login.passwordLabel")}
                   </label>
                   <div className=" flex h-[35px] bg-[#F3F3F5] max-w-[330px] items-center rounded-[8px] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
                     <button
@@ -395,9 +439,15 @@ export default function LoginForm({
                       onClick={() => setShowPassword((v) => !v)}
                       className="flex items-center justify-center text-[#B5B7BA] transition-colors hover:text-primary focus:outline-none"
                       aria-label={
-                        showPassword ? "Show password" : "Hide password"
+                        showPassword
+                          ? t("auth.common.hidePassword", "Hide password")
+                          : t("auth.common.showPassword", "Show password")
                       }
-                      title={showPassword ? "Show password" : "Hide password"}
+                      title={
+                        showPassword
+                          ? t("auth.common.hidePassword", "Hide password")
+                          : t("auth.common.showPassword", "Show password")
+                      }
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -408,7 +458,7 @@ export default function LoginForm({
                     <input
                       dir="ltr"
                       type={showPassword ? "text" : "password"}
-                      placeholder="password123"
+                      placeholder={t("auth.login.placeholder.password", "password123")}
                       {...register("password")}
                       className="h-full w-full bg-[#F3F3F5] font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium"
                     />
@@ -424,7 +474,7 @@ export default function LoginForm({
                   disabled={isSubmitting}
                   className="mt-6 flex h-[36px] w-full max-w-[330px] items-center justify-center rounded-[8px] bg-primary text-[14px] text-white shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60"
                 >
-                  {isSubmitting ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
+                  {isSubmitting ? t("auth.login.pending") : t("auth.login.submit")}
                 </button>
 
                 {loginError && (
@@ -443,26 +493,26 @@ export default function LoginForm({
                   className="transition-colors hover:text-[#14B3AE]"
                   onClick={onForgotPassword}
                 >
-                  نسيت كلمة المرور
+                  {t("auth.login.forgotPassword")}
                 </button>
                 <button
                   type="button"
                   className="transition-colors hover:text-[#14B3AE]"
                   onClick={onOtpLogin}
                 >
-                  تسجيل دخول برمز OTP
+                  {t("auth.login.otpLogin")}
                 </button>
               </div>
             </div>
 
             <div className="mt-10 text-center font-cairo text-[13px] text-[#667085]">
-              ليس لديك حساب؟{" "}
+              {t("auth.login.noAccount")}{" "}
               <button
                 type="button"
                 onClick={onSignUp}
                 className="ps-2 text-primary transition-colors hover:text-[#14B3AE]"
               >
-                إنشاء حساب جديد
+                {t("auth.login.createAccount")}
               </button>
             </div>
           </form>

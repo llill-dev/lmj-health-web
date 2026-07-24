@@ -7,8 +7,10 @@ import {
   persistPasswordResetToken,
 } from '@/lib/auth/passwordResetNavState';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 
 export default function ResetPasswordVerifyPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const pending = peekPasswordResetPending();
@@ -20,7 +22,7 @@ export default function ResetPasswordVerifyPage() {
   return (
     <>
       <Helmet>
-        <title>Verify Reset OTP • LMJ Health</title>
+        <title>{t('auth.page.verifyResetOtp.title')}</title>
       </Helmet>
 
       <ResetPasswordVerifyForm
@@ -53,8 +55,8 @@ export default function ResetPasswordVerifyPage() {
             phone: response.phone ?? pending.phone,
           });
 
-          toast('تم التحقق من الرمز. يمكنك الآن تعيين كلمة مرور جديدة.', {
-            title: 'تم التحقق',
+          toast(t('auth.resetVerify.success.body'), {
+            title: t('auth.resetVerify.success.title'),
             variant: 'success',
             durationMs: 3600,
           });

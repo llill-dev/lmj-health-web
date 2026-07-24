@@ -56,6 +56,7 @@ import type {
   EncounterOrderPreviewResponse,
   EncounterOrderResponse,
   ImagingOrderItemBody,
+  OrderCatalogItem,
   OrderCatalogListResponse,
   UpdateEncounterOrderBody,
   UpdateImagingOrderBody,
@@ -160,6 +161,9 @@ type DoctorOrderEnvelope = {
 
 type DoctorListEnvelope = {
   items?: unknown;
+  labTests?: unknown;
+  imaging?: unknown;
+  procedures?: unknown;
   files?: unknown;
   templates?: unknown;
   patients?: unknown;
@@ -399,7 +403,7 @@ function readDoctorPreferredArray<T>(
 }
 
 function readDoctorListOrEmpty<T>(
-  value: T[] | null,
+  value: T[] | null | undefined,
 ): T[] {
   return value ?? [];
 }
@@ -659,7 +663,11 @@ function readDoctorAppointmentTypesArray(
 }
 
 function readDoctorScheduleRecord(value: unknown): DoctorScheduleResponse | null {
-  return isDoctorRecord(value) ? (value as DoctorScheduleResponse) : null;
+  if (!isDoctorRecord(value)) return null;
+  if (!Array.isArray(readDoctorNamedValue(value, "availableTimes"))) return null;
+  if (!Array.isArray(readDoctorNamedValue(value, "exceptions"))) return null;
+  if (!isDoctorRecord(readDoctorNamedValue(value, "slotSettings"))) return null;
+  return value as DoctorScheduleResponse;
 }
 
 function readDoctorAppointments(value: unknown) {
@@ -708,10 +716,31 @@ function readEncounterOrderArray(
 
 function readOrderCatalogItemArray(
   value: unknown,
-): OrderCatalogListResponse["items"] | null {
-  return isDoctorRecordArray(value)
-    ? (value as OrderCatalogListResponse["items"])
-    : null;
+): OrderCatalogItem[] | null {
+  if (!isDoctorRecordArray(value)) return null;
+
+  const items = value
+    .map((record): OrderCatalogItem | null => {
+      const itemId =
+        readDoctorString(record._id) ?? readDoctorString(record.id);
+      if (!itemId) return null;
+
+      return {
+        _id: itemId,
+        title: readDoctorString(record.title),
+        name: readDoctorString(record.name),
+        label: readDoctorString(record.label),
+        category: readDoctorString(record.category),
+        section: readDoctorString(record.section),
+        isFavorited:
+          typeof record.isFavorited === "boolean"
+            ? record.isFavorited
+            : undefined,
+      };
+    })
+    .filter((item): item is OrderCatalogItem => item != null);
+
+  return items.length > 0 ? items : null;
 }
 
 function readEncounterDocumentArray(
@@ -1491,13 +1520,18 @@ function normalizeDoctorPatientFileDeleteResponse(
 ): DoctorPatientFileDeleteResponse {
   const record = asDoctorListEnvelope(response);
   const nested = readDoctorNestedEnvelope(response);
+  const recordSuccess = readDoctorNamedValue(record, "success");
+  const nestedSuccess = readDoctorNamedValue(nested, "success");
+  const normalizedSuccess =
+    typeof recordSuccess === "boolean"
+      ? recordSuccess
+      : typeof nestedSuccess === "boolean"
+        ? nestedSuccess
+        : undefined;
 
-  return withDoctorDetails(response, {
-    fileId:
-      readDoctorString(readDoctorNamedValue(record, "fileId")) ??
-      readDoctorString(readDoctorNamedValue(nested, "fileId")) ??
-      response.fileId,
-  });
+  return normalizedSuccess == null
+    ? response
+    : withDoctorDetails(response, { success: normalizedSuccess });
 }
 
 function normalizeDoctorAppointmentTypeMutationResponse(

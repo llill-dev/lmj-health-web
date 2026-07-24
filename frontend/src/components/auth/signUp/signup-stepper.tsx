@@ -1,8 +1,10 @@
 'use client';
 
 import { Check } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export default function SignUpStepper({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
+  const { t } = useI18n();
   const progressWidth =
     step === 1
       ? 'w-[20%]'
@@ -40,7 +42,9 @@ export default function SignUpStepper({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
             <span className={step > 1 ? circleDone : step === 1 ? circleActive : circleTodo}>
               {step > 1 ? <Check className="h-4 w-4" /> : 1}
             </span>
-            <span className={step >= 1 ? labelActive : labelTodo}>الحساب</span>
+            <span className={step >= 1 ? labelActive : labelTodo}>
+              {t('auth.signup.step.account')}
+            </span>
           </div>
           <div className={bar(1)} />
         </div>
@@ -51,7 +55,9 @@ export default function SignUpStepper({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
             <span className={step > 2 ? circleDone : step === 2 ? circleActive : circleTodo}>
               {step > 2 ? <Check className="h-4 w-4" /> : 2}
             </span>
-            <span className={step >= 2 ? labelActive : labelTodo}>الشخصية</span>
+            <span className={step >= 2 ? labelActive : labelTodo}>
+              {t('auth.signup.step.personal')}
+            </span>
           </div>
           <div className={bar(2)} />
         </div>
@@ -62,7 +68,9 @@ export default function SignUpStepper({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
             <span className={step > 3 ? circleDone : step === 3 ? circleActive : circleTodo}>
               {step > 3 ? <Check className="h-4 w-4" /> : 3}
             </span>
-            <span className={step >= 3 ? labelActive : labelTodo}>المهنية</span>
+            <span className={step >= 3 ? labelActive : labelTodo}>
+              {t('auth.signup.step.professional')}
+            </span>
           </div>
           <div className={bar(3)} />
         </div>
@@ -73,7 +81,9 @@ export default function SignUpStepper({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
             <span className={step > 4 ? circleDone : step === 4 ? circleActive : circleTodo}>
               {step > 4 ? <Check className="h-4 w-4" /> : 4}
             </span>
-            <span className={step >= 4 ? labelActive : labelTodo}>الإضافية</span>
+            <span className={step >= 4 ? labelActive : labelTodo}>
+              {t('auth.signup.step.additional')}
+            </span>
           </div>
           <div className={bar(4)} />
         </div>
@@ -81,7 +91,9 @@ export default function SignUpStepper({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
         {/* 5 */}
         <div className="flex min-w-0 flex-col items-center gap-1.5">
           <span className={step === 5 ? circleActive : circleTodo}>{5}</span>
-          <span className={step === 5 ? labelActive : labelTodo}>القانونية</span>
+          <span className={step === 5 ? labelActive : labelTodo}>
+            {t('auth.signup.step.legal')}
+          </span>
         </div>
       </div>
     </>

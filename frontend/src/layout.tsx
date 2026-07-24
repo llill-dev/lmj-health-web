@@ -21,6 +21,7 @@ import { useDoctorProfile } from '@/hooks';
 import { MotionProvider, PageTransition } from '@/motion';
 import { DoctorRouteFallback } from '@/routes/RouteFallbacks';
 import { useAuthStore } from '@/store/authStore';
+import { useI18n } from '@/i18n/provider';
 
 export default function ProtectedLayout({
   children,
@@ -30,6 +31,7 @@ export default function ProtectedLayout({
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useI18n();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -43,9 +45,9 @@ export default function ProtectedLayout({
   const doctorName = useMemo(() => {
     const fullName =
       profileUser?.fullName?.trim() || authUser?.fullName?.trim();
-    if (!fullName) return 'الطبيب';
-    return /^د\.?\s/u.test(fullName) ? fullName : `د. ${fullName}`;
-  }, [authUser?.fullName, profileUser?.fullName]);
+    if (!fullName) return t('sidebar.role.doctor');
+    return /^د\.?\s/u.test(fullName) ? fullName : `${t('doctor.badge')} ${fullName}`;
+  }, [authUser?.fullName, profileUser?.fullName, t]);
   const doctorEmail =
     profileUser?.email?.trim() || authUser?.email?.trim() || '';
   const doctorPhotoUrl =
@@ -56,14 +58,14 @@ export default function ProtectedLayout({
       setLoggingOut(true);
       try {
         await useAuthStore.getState().logout({ scope });
-        toast('نراك في زيارة قادمة.', {
-          title: 'تم تسجيل الخروج',
+        toast(t('logout.toast.success.body'), {
+          title: t('logout.toast.success.title'),
           variant: 'success',
         });
         navigate('/login', { replace: true });
       } catch {
-        toast('تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.', {
-          title: 'فشل تسجيل الخروج',
+        toast(t('logout.toast.error.body'), {
+          title: t('logout.toast.error.title'),
           variant: 'error',
         });
         throw new Error('logout_failed');
@@ -71,7 +73,7 @@ export default function ProtectedLayout({
         setLoggingOut(false);
       }
     },
-    [navigate, toast],
+    [navigate, t, toast],
   );
 
   const pathname = location.pathname;

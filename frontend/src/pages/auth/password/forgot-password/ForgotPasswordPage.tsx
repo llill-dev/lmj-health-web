@@ -6,15 +6,17 @@ import { persistPasswordResetPending } from '@/lib/auth/passwordResetNavState';
 import { useToast } from '@/components/ui/ToastProvider';
 import { ApiError } from '@/lib/api';
 import { normalizeAuthPhoneIdentifier } from '@/lib/phone/normalizeAuthPhone';
+import { useI18n } from '@/i18n/provider';
 
 export default function ForgotPasswordPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   return (
     <>
       <Helmet>
-        <title>Forgot Password • LMJ Health</title>
+        <title>{t('auth.page.forgotPassword.title')}</title>
       </Helmet>
 
       <ForgotPasswordRequest
@@ -40,8 +42,8 @@ export default function ForgotPasswordPage() {
               fullName: response.fullName,
             });
 
-            toast('تم إرسال رمز إعادة تعيين كلمة المرور.', {
-              title: 'تحقّق من بريدك/هاتفك',
+            toast(t('auth.forgotPassword.otpSent.body'), {
+              title: t('auth.forgotPassword.otpSent.title'),
               variant: 'success',
               durationMs: 3800,
             });
@@ -51,7 +53,7 @@ export default function ForgotPasswordPage() {
             const message =
               error instanceof ApiError
                 ? error.message
-                : 'تعذّر إرسال رمز إعادة التعيين. حاول مجدداً.';
+                : t('auth.forgotPassword.error.sendFailed');
             throw new Error(message);
           }
         }}

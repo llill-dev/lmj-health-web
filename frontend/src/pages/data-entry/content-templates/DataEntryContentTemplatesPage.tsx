@@ -8,23 +8,10 @@ import type {
   AdminContentTemplateParentType,
 } from "@/lib/admin/types";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
-type ParentFilter = "الكل" | AdminContentTemplateParentType;
+type ParentFilter = "all" | AdminContentTemplateParentType;
 type ActiveFilter = "all" | "active" | "disabled";
-
-const PARENT_FILTERS: { value: ParentFilter; label: string }[] = [
-  { value: "الكل", label: "الكل" },
-  { value: "CONDITION", label: "الحالات الطبية" },
-  { value: "SYMPTOM", label: "الأعراض" },
-  { value: "GENERAL_ADVICE", label: "نصائح عامة" },
-  { value: "MEDICATION", label: "الأدوية" },
-];
-
-const ACTIVE_FILTERS: { value: ActiveFilter; label: string }[] = [
-  { value: "all", label: "الكل" },
-  { value: "active", label: "مفعّل" },
-  { value: "disabled", label: "معطّل" },
-];
 
 function toDisplayText(value: unknown): string {
   if (typeof value === "string") return value;
@@ -37,13 +24,17 @@ function toDisplayText(value: unknown): string {
   return "";
 }
 
-function parentTypeLabel(t?: string | Record<string, unknown>): string {
+function parentTypeLabel(
+  t?: string | Record<string, unknown>,
+  translate?: (key: string, fallback?: string) => string,
+): string {
   if (!t) return "—";
   if (typeof t === "string") {
-    if (t === "CONDITION") return "الحالات الطبية";
-    if (t === "SYMPTOM") return "الأعراض";
-    if (t === "GENERAL_ADVICE") return "نصائح عامة";
-    if (t === "MEDICATION") return "الأدوية";
+    if (t === "CONDITION") return translate?.("content.type.condition", t) ?? t;
+    if (t === "SYMPTOM") return translate?.("content.type.symptom", t) ?? t;
+    if (t === "GENERAL_ADVICE")
+      return translate?.("content.type.generalAdvice", t) ?? t;
+    if (t === "MEDICATION") return translate?.("content.type.medication", t) ?? t;
     return t;
   }
   const value =
@@ -58,12 +49,25 @@ function isTemplateActive(t: AdminContentTemplate): boolean {
 }
 
 export default function DataEntryContentTemplatesPage() {
-  const [parentFilter, setParentFilter] = useState<ParentFilter>("الكل");
+  const { locale, dir, t } = useI18n();
+  const PARENT_FILTERS: { value: ParentFilter; label: string }[] = [
+    { value: "all", label: t("common.all") },
+    { value: "CONDITION", label: t("content.type.condition") },
+    { value: "SYMPTOM", label: t("content.type.symptom") },
+    { value: "GENERAL_ADVICE", label: t("content.type.generalAdvice") },
+    { value: "MEDICATION", label: t("content.type.medication") },
+  ];
+  const ACTIVE_FILTERS: { value: ActiveFilter; label: string }[] = [
+    { value: "all", label: t("common.all") },
+    { value: "active", label: t("common.active") },
+    { value: "disabled", label: t("common.disabled") },
+  ];
+  const [parentFilter, setParentFilter] = useState<ParentFilter>("all");
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
 
   const listParams = useMemo(
     () => ({
-      ...(parentFilter !== "الكل" ? { parentType: parentFilter } : {}),
+      ...(parentFilter !== "all" ? { parentType: parentFilter } : {}),
       ...(activeFilter === "active"
         ? { active: true }
         : activeFilter === "disabled"
@@ -85,15 +89,15 @@ export default function DataEntryContentTemplatesPage() {
   return (
     <>
       <Helmet>
-        <title>قوالب المحتوى • Data Entry • LMJ Health</title>
+        <title>{t("dataEntry.page.contentTemplates.title")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="قوالب المحتوى المتاحة"
-          subtitle="مرجع سريع لحقول القوالب التي يستخدمها فريق إدخال البيانات"
+          title={t("dataEntry.contentTemplates.hero.title")}
+          subtitle={t("dataEntry.contentTemplates.hero.subtitle")}
           headerIcon={<Layers className="h-8 w-8 text-white" />}
           kpiColumns={3}
           kpis={[
@@ -101,26 +105,26 @@ export default function DataEntryContentTemplatesPage() {
               key: "total",
               icon: <Layers className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : templates.length,
-              label: "إجمالي القوالب",
+              label: t("dataEntry.contentTemplates.kpi.total"),
             },
             {
               key: "active",
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : activeCount,
-              label: "مفعّلة",
+              label: t("dataEntry.contentTemplates.kpi.active"),
             },
             {
               key: "disabled",
               icon: <XCircle className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : disabledCount,
-              label: "معطّلة",
+              label: t("dataEntry.contentTemplates.kpi.disabled"),
             },
           ]}
         />
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            النوع الأب
+            {t("dataEntry.contentTemplates.filters.parentType")}
           </div>
           <div className="mt-1.5 flex flex-wrap gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
             {PARENT_FILTERS.map((f) => (
@@ -141,7 +145,7 @@ export default function DataEntryContentTemplatesPage() {
           </div>
 
           <div className="mt-4 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            الحالة
+            {t("dataEntry.contentTemplates.filters.status")}
           </div>
           <div className="mt-1.5 flex flex-wrap gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
             {ACTIVE_FILTERS.map((f) => (
@@ -166,7 +170,7 @@ export default function DataEntryContentTemplatesPage() {
           <div className="flex items-center gap-2 border-b border-[#EEF2F6] px-6 py-4">
             <Layers className="h-4 w-4 text-primary" />
             <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-              قائمة القوالب
+                {t("dataEntry.contentTemplates.list.title")}
             </div>
           </div>
 
@@ -182,11 +186,11 @@ export default function DataEntryContentTemplatesPage() {
               </div>
             ) : query.isError ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
-                تعذر تحميل قوالب المحتوى حالياً.
+                {t("dataEntry.contentTemplates.list.error")}
               </div>
             ) : templates.length === 0 ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                لا توجد قوالب مطابقة للفلاتر الحالية.
+                {t("dataEntry.contentTemplates.list.empty")}
               </div>
             ) : (
               templates.map((template) => {
@@ -203,7 +207,7 @@ export default function DataEntryContentTemplatesPage() {
                         {templateName || "بدون اسم"}
                       </h3>
                       <span className="inline-flex h-[22px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#475467]">
-                        {parentTypeLabel(template.parentType)}
+                        {parentTypeLabel(template.parentType, t)}
                       </span>
                       <span
                         className={cn(
@@ -213,14 +217,14 @@ export default function DataEntryContentTemplatesPage() {
                             : "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
                         )}
                       >
-                        {active ? "مفعّل" : "معطّل"}
+                        {active ? t("common.active") : t("common.disabled")}
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-5 font-cairo text-[11px] font-bold text-[#98A2B3]">
                       <span className="inline-flex items-center gap-1">
                         <FileText className="h-4 w-4" />
-                        {(template.fields?.length ?? 0).toLocaleString("ar-SA")}{" "}
-                        حقل
+                        {(template.fields?.length ?? 0).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}{" "}
+                        {t("dataEntry.contentTemplates.fieldsCount")}
                       </span>
                       {templateSlug ? (
                         <span dir="ltr">{templateSlug}</span>

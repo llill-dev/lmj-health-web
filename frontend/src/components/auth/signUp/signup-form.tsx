@@ -33,6 +33,7 @@ import {
   type Step3ProfessionalValues,
   type Step4AdditionalValues,
 } from "./signup-schemas";
+import { useI18n } from "@/i18n/provider";
 
 export default function SignUpForm({
   onBack,
@@ -45,6 +46,7 @@ export default function SignUpForm({
   onVerify: () => void;
   onSuccess: () => void;
 }) {
+  const { t, locale, dir } = useI18n();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,7 +105,7 @@ export default function SignUpForm({
       const msg = formatSignupApiError(e);
       setSubmitError(msg);
       toast(msg.replace(/\s+/g, " ").trim().slice(0, 280), {
-        title: "تعذّر المتابعة",
+        title: t("auth.signup.error.continueTitle"),
         variant: "error",
         durationMs: 5200,
       });
@@ -192,9 +194,9 @@ export default function SignUpForm({
         });
 
         toast(
-          "تم إرسال طلب التسجيل. أدخل رمز التحقق الوارد على بريدك أو واتساب.",
+          t("auth.signup.verifySent.body"),
           {
-            title: "تحقّق من الحساب",
+            title: t("auth.signup.verifySent.title"),
             variant: "success",
             durationMs: 4500,
           },
@@ -243,9 +245,9 @@ export default function SignUpForm({
           (general ?? formatSignupApiError(e))
             ?.replace(/\s+/g, " ")
             .trim()
-            .slice(0, 280) ?? "تعذّر إكمال التسجيل";
+            .slice(0, 280) ?? t("auth.signup.error.submitFallback");
         toast(toastBody, {
-          title: "تعذّر إنشاء الحساب",
+          title: t("auth.signup.error.submitTitle"),
           variant: "error",
           durationMs: 6000,
         });
@@ -294,10 +296,10 @@ export default function SignUpForm({
       </div>
       {step !== 5 ? (
         <h1 className="relative z-[1] mb-[20px] text-[#4A5565] text-[16px] font-bold">
-          تسجيل حساب طبيب جديد
+          {t("auth.signup.header")}
         </h1>
       ) : null}
-      <div dir="rtl" lang="ar" className="relative z-[1]">
+      <div dir={dir} lang={locale} className="relative z-[1]">
         <div className="relative w-fit">
           <div
             className={`w-[672px] top-[212px] rounded-[6px] pb-12 mb-8 pt-8 px-8 gap-8 bg-white shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] ${
@@ -388,13 +390,13 @@ export default function SignUpForm({
 
           {step === 1 && (
             <div className="pt-2 text-center font-cairo text-[14px] font-semibold text-[#6A7282]">
-              لديك حساب بالفعل؟
+              {t("auth.signup.haveAccount")}
               <button
                 type="button"
                 onClick={onLogin}
                 className="ps-2 font-bold text-[#FFFFFF] py-4 transition-colors hover:text-[#14B3AE]"
               >
-                تسجيل الدخول
+                {t("auth.signup.login")}
               </button>
             </div>
           )}

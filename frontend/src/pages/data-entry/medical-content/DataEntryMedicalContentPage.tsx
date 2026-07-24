@@ -33,25 +33,7 @@ import type {
 } from "@/lib/admin/types";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
-
-const STATUS_FILTERS: Array<{ value: "all" | AdminContentStatus; label: string }> =
-  [
-    { value: "all", label: "الكل" },
-    { value: "DRAFT", label: "مسودة" },
-    { value: "IN_REVIEW", label: "قيد المراجعة" },
-    { value: "PUBLISHED", label: "منشور" },
-    { value: "ARCHIVED", label: "مؤرشف" },
-  ];
-
-const TYPE_FILTERS: Array<{ value: "all" | AdminContentType; label: string }> = [
-  { value: "all", label: "كل الأنواع" },
-  { value: "CONDITION", label: "الحالات الطبية" },
-  { value: "SYMPTOM", label: "الأعراض" },
-  { value: "GENERAL_ADVICE", label: "نصائح عامة" },
-  { value: "MEDICATION", label: "الأدوية" },
-  { value: "NEWS", label: "الأخبار" },
-  { value: "SETTINGS_PAGE", label: "صفحات الإعدادات" },
-];
+import { useI18n } from "@/i18n/provider";
 
 function toDisplayText(value: unknown): string {
   if (typeof value === "string") return value;
@@ -66,6 +48,23 @@ function toDisplayText(value: unknown): string {
 
 export default function DataEntryMedicalContentPage() {
   const { toast } = useToast();
+  const { locale, dir, t } = useI18n();
+  const STATUS_FILTERS: Array<{ value: "all" | AdminContentStatus; label: string }> = [
+    { value: "all", label: t("common.all") },
+    { value: "DRAFT", label: t("content.status.draft") },
+    { value: "IN_REVIEW", label: t("content.status.inReview") },
+    { value: "PUBLISHED", label: t("content.status.published") },
+    { value: "ARCHIVED", label: t("content.status.archived") },
+  ];
+  const TYPE_FILTERS: Array<{ value: "all" | AdminContentType; label: string }> = [
+    { value: "all", label: t("content.type.all") },
+    { value: "CONDITION", label: t("content.type.condition") },
+    { value: "SYMPTOM", label: t("content.type.symptom") },
+    { value: "GENERAL_ADVICE", label: t("content.type.generalAdvice") },
+    { value: "MEDICATION", label: t("content.type.medication") },
+    { value: "NEWS", label: t("content.type.news") },
+    { value: "SETTINGS_PAGE", label: t("content.type.settingsPage") },
+  ];
 
   const [status, setStatus] = useState<"all" | AdminContentStatus>("all");
   const [type, setType] = useState<"all" | AdminContentType>("all");
@@ -119,17 +118,17 @@ export default function DataEntryMedicalContentPage() {
   async function handleSubmitReview(id: string) {
     try {
       await submitReview.mutateAsync({ id });
-      toast("تم إرسال العنصر إلى المراجعة بنجاح.", {
-        title: "تم الإرسال",
+      toast(t("dataEntry.medicalContent.toast.reviewSuccess.body"), {
+        title: t("dataEntry.medicalContent.toast.reviewSuccess.title"),
         variant: "success",
       });
     } catch (error) {
       toast(
         userFacingErrorMessage(
           error,
-          "تعذر إرسال العنصر للمراجعة. تحقق من البيانات ثم حاول مرة أخرى.",
+          t("dataEntry.medicalContent.toast.reviewFailed.body"),
         ),
-        { title: "تعذر الإرسال", variant: "error" },
+        { title: t("dataEntry.medicalContent.toast.reviewFailed.title"), variant: "error" },
       );
     }
   }
@@ -137,17 +136,17 @@ export default function DataEntryMedicalContentPage() {
   return (
     <>
       <Helmet>
-        <title>المحتوى الطبي • Data Entry • LMJ Health</title>
+        <title>{t("dataEntry.page.medicalContent.title")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-5">
+      <div dir={dir} lang={locale} className="space-y-5">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="محتواي الطبي"
-          subtitle="إدارة عناصر المحتوى التي ينشئها فريق إدخال البيانات"
+          title={t("dataEntry.medicalContent.hero.title")}
+          subtitle={t("dataEntry.medicalContent.hero.subtitle")}
           headerIcon={<BookOpen className="h-8 w-8 text-white" />}
-          actionLabel="إضافة عنصر جديد"
+          actionLabel={t("dataEntry.medicalContent.hero.addAction")}
           actionIcon={<Plus className="h-4 w-4" />}
           onActionClick={() => setCreateOpen(true)}
           actionDisabled={query.isAwaitingData}
@@ -157,19 +156,19 @@ export default function DataEntryMedicalContentPage() {
               key: "total",
               icon: <SquarePen className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : filteredItems.length,
-              label: "عناصري",
+              label: t("dataEntry.medicalContent.kpi.myItems"),
             },
             {
               key: "draft",
               icon: <FileCheck2 className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : draftCount,
-              label: "مسودات",
+              label: t("dataEntry.medicalContent.kpi.drafts"),
             },
             {
               key: "review",
               icon: <Clock3 className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : reviewCount,
-              label: "قيد المراجعة",
+              label: t("dataEntry.medicalContent.kpi.inReview"),
             },
           ]}
         />
@@ -179,32 +178,32 @@ export default function DataEntryMedicalContentPage() {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="ابحث بالعنوان أو الوصف أو slug"
+              placeholder={t("dataEntry.medicalContent.filters.searchPlaceholder")}
               className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
             />
             <StyledSelect
               value={status}
               onChange={(value) => setStatus(value as "all" | AdminContentStatus)}
               options={STATUS_FILTERS}
-              listboxAriaLabel="حالة المحتوى"
+              listboxAriaLabel={t("dataEntry.medicalContent.filters.status")}
               triggerClassName="h-10 rounded-[10px]"
             />
             <StyledSelect
               value={type}
               onChange={(value) => setType(value as "all" | AdminContentType)}
               options={TYPE_FILTERS}
-              listboxAriaLabel="نوع المحتوى"
+              listboxAriaLabel={t("dataEntry.medicalContent.filters.type")}
               triggerClassName="h-10 rounded-[10px]"
             />
             <StyledSelect
               value={language}
               onChange={(value) => setLanguage(value as "all" | "ar" | "en")}
               options={[
-                { value: "all", label: "كل اللغات" },
-                { value: "ar", label: "العربية" },
-                { value: "en", label: "English" },
+                { value: "all", label: t("content.language.all") },
+                { value: "ar", label: t("language.ar") },
+                { value: "en", label: t("language.en") },
               ]}
-              listboxAriaLabel="لغة المحتوى"
+              listboxAriaLabel={t("dataEntry.medicalContent.filters.language")}
               triggerClassName="h-10 rounded-[10px]"
             />
           </div>
@@ -213,17 +212,17 @@ export default function DataEntryMedicalContentPage() {
         {query.isError ? (
           <section className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4 text-right">
             <p className="font-cairo text-[13px] font-extrabold text-[#B42318]">
-              تعذر تحميل المحتوى.
+              {t("dataEntry.medicalContent.error.loadTitle")}
             </p>
             <p className="mt-1 font-cairo text-[12px] font-semibold text-[#B42318]">
-              {userFacingErrorMessage(query.error, "أعد المحاولة بعد قليل.")}
+              {userFacingErrorMessage(query.error, t("dataEntry.medicalContent.error.loadBody"))}
             </p>
           </section>
         ) : null}
 
         <section className="overflow-hidden rounded-[12px] border border-[#E6EEF5] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="border-b border-[#EEF2F6] px-5 py-4 font-cairo text-[14px] font-extrabold text-[#111827]">
-            قائمة المحتوى
+            {t("dataEntry.medicalContent.list.title")}
           </div>
 
           {query.isAwaitingData ? (
@@ -237,7 +236,7 @@ export default function DataEntryMedicalContentPage() {
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="px-5 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              لا توجد عناصر مطابقة للفلاتر الحالية.
+              {t("dataEntry.medicalContent.list.empty")}
             </div>
           ) : (
             <div className="divide-y divide-[#EEF2F6]">
@@ -264,10 +263,10 @@ export default function DataEntryMedicalContentPage() {
                         {contentStatusLabel(item.status)}
                       </span>
                       <span className="rounded-[8px] bg-[#F9FAFB] px-2 py-1 text-[#667085]">
-                        {item.language === "en" ? "English" : "العربية"}
+                        {item.language === "en" ? t("language.en") : t("language.ar")}
                       </span>
                       <span className="text-[#98A2B3]">
-                        آخر تحديث: {formatContentDate(item.updatedAt)}
+                        {t("dataEntry.medicalContent.lastUpdated")}: {formatContentDate(item.updatedAt)}
                       </span>
                     </div>
                   </div>
@@ -279,7 +278,7 @@ export default function DataEntryMedicalContentPage() {
                       className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[12px] font-extrabold text-[#344054]"
                     >
                       <Eye className="h-4 w-4" />
-                      عرض
+                      {t("dataEntry.medicalContent.actions.view")}
                     </button>
                     <button
                       type="button"
@@ -287,7 +286,7 @@ export default function DataEntryMedicalContentPage() {
                       className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[12px] font-extrabold text-primary"
                     >
                       <Pencil className="h-4 w-4" />
-                      تعديل
+                      {t("dataEntry.medicalContent.actions.edit")}
                     </button>
                     {item.status !== "IN_REVIEW" ? (
                       <button
@@ -297,7 +296,7 @@ export default function DataEntryMedicalContentPage() {
                         className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#BFE3E1] bg-[#F7FFFE] px-3 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-60"
                       >
                         <Send className="h-4 w-4" />
-                        إرسال للمراجعة
+                        {t("dataEntry.medicalContent.actions.submitReview")}
                       </button>
                     ) : null}
                   </div>

@@ -4,12 +4,13 @@ import { Link } from "react-router-dom";
 import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import type { DoctorAppointmentStatus } from "@/lib/doctor/types";
+import { useI18n } from "@/i18n/provider";
 
-function formatIsoDate(value?: string | null): string {
+function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ar-SA");
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
 function patientInitials(name: string): string {
@@ -20,33 +21,37 @@ function patientInitials(name: string): string {
   return name.slice(0, 2).toUpperCase() || "م";
 }
 
-function appointmentStatusPresentation(status: string): {
+function appointmentStatusPresentation(
+  status: string,
+  locale: "ar" | "en",
+): {
   label: string;
   className: string;
 } {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   if (status === "completed") {
     return {
-      label: "مكتمل",
+      label: tr("مكتمل", "Completed"),
       className: "bg-[#EAFBF0] text-[#22C55E]",
     };
   }
 
   if (status === "postponed") {
     return {
-      label: "مؤجل",
+      label: tr("مؤجل", "Postponed"),
       className: "bg-[#FFF2E8] text-[#FF6A00]",
     };
   }
 
   if (status === "cancelled") {
     return {
-      label: "ملغي",
+      label: tr("ملغي", "Cancelled"),
       className: "bg-[#FEE2E2] text-[#B42318]",
     };
   }
 
   return {
-    label: "مجدول",
+    label: tr("مجدول", "Scheduled"),
     className: "bg-[#DDF4F1] text-primary",
   };
 }
@@ -73,17 +78,20 @@ function SurfaceSection({
 function AppointmentsSearchInput({
   value,
   onChange,
+  locale,
 }: {
   value: string;
   onChange: (value: string) => void;
+  locale: "ar" | "en";
 }) {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="relative min-w-0">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="ابحث بالاسم، التاريخ، أو الحالة…"
-        aria-label="بحث عن موعد"
+        placeholder={tr("ابحث بالاسم، التاريخ، أو الحالة…", "Search by name, date, or status…")}
+        aria-label={tr("بحث عن موعد", "Search appointment")}
         className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
       <div className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
@@ -103,8 +111,10 @@ const AppointmentTableRow = memo<{
     status: string;
   };
   onOpen: (appointmentId: string) => void;
-}>(function AppointmentTableRow({ appointment, onOpen }) {
-  const status = appointmentStatusPresentation(appointment.status);
+  locale: "ar" | "en";
+}>(function AppointmentTableRow({ appointment, onOpen, locale }) {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const status = appointmentStatusPresentation(appointment.status, locale);
 
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
@@ -126,7 +136,7 @@ const AppointmentTableRow = memo<{
 
       <div className="flex items-center gap-2 font-cairo text-[16px] font-bold text-[#243044] lg:col-span-3">
         <Calendar className="h-4 w-4 text-[#98A2B3]" />
-        {formatIsoDate(appointment.date)}
+        {formatIsoDate(appointment.date, locale)}
       </div>
 
       <div className="flex items-center gap-2 font-cairo text-[16px] font-bold text-[#243044] lg:col-span-2">
@@ -148,7 +158,7 @@ const AppointmentTableRow = memo<{
           onClick={() => onOpen(appointment.id)}
           className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
         >
-          عرض
+          {tr("عرض", "View")}
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -157,6 +167,9 @@ const AppointmentTableRow = memo<{
 });
 
 export default function SecretaryAppointmentsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
   const [searchInput, setSearchInput] = useState("");
   const [filter, setFilter] = useState<
@@ -178,24 +191,24 @@ export default function SecretaryAppointmentsPage() {
     () =>
       (appointmentsQuery.appointments ?? []).map((row) => ({
         id: row._id,
-        patientName: row.patient?.userId?.fullName || "مريض",
+        patientName: row.patient?.userId?.fullName || tr("مريض", "Patient"),
         patientId: row.patient?.publicId || row.patient?._id || "—",
         date: row.date || row.startDateTime || "",
         time: row.startTime || "—",
         status: row.status === "rescheduled" ? "postponed" : row.status,
       })),
-    [appointmentsQuery.appointments],
+    [appointmentsQuery.appointments, tr],
   );
 
   const filterTabs = useMemo(
     () => [
-      { key: "all" as const, label: "الكل" },
-      { key: "scheduled" as const, label: "مجدول" },
-      { key: "completed" as const, label: "مكتمل" },
-      { key: "postponed" as const, label: "مؤجل" },
-      { key: "cancelled" as const, label: "ملغي" },
+      { key: "all" as const, label: tr("الكل", "All") },
+      { key: "scheduled" as const, label: tr("مجدول", "Scheduled") },
+      { key: "completed" as const, label: tr("مكتمل", "Completed") },
+      { key: "postponed" as const, label: tr("مؤجل", "Postponed") },
+      { key: "cancelled" as const, label: tr("ملغي", "Cancelled") },
     ],
-    [],
+    [tr],
   );
 
   const filteredAppointments = useMemo(() => {
@@ -215,16 +228,16 @@ export default function SecretaryAppointmentsPage() {
   }, [filteredAppointments, searchInput]);
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title="المواعيد">
+    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+      <SurfaceSection title={tr("المواعيد", "Appointments")}>
         <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
           <div className="text-right">
             <h2 className="font-cairo text-[23px] font-black text-[#243044]">
-              المواعيد
+              {tr("المواعيد", "Appointments")}
             </h2>
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {appointmentsQuery.total || appointments.length} موعد
-              {searchInput ? " مطابق للبحث" : ""}
+              {(appointmentsQuery.total || appointments.length).toLocaleString(numberLocale)} {tr("موعد", "appointments")}
+              {searchInput ? tr(" مطابق للبحث", " matching search") : ""}
             </p>
           </div>
 
@@ -235,7 +248,7 @@ export default function SecretaryAppointmentsPage() {
                 className="flex h-[42px] items-center gap-2 rounded-[10px] bg-primary px-5 font-cairo text-[15px] font-black text-white shadow-[0_10px_20px_rgba(15,143,139,0.30)] transition-colors hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4" />
-                حجز موعد جديد
+                {tr("حجز موعد جديد", "Book new appointment")}
               </Link>
             </div>
           ) : null}
@@ -245,6 +258,7 @@ export default function SecretaryAppointmentsPage() {
           <AppointmentsSearchInput
             value={searchInput}
             onChange={setSearchInput}
+            locale={locale}
           />
         </div>
 
@@ -267,26 +281,26 @@ export default function SecretaryAppointmentsPage() {
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
           <div className="grid grid-cols-12 gap-4 text-right font-cairo text-[14px] font-bold text-[#A1AAB9]">
-            <div className="col-span-4">المريض</div>
-            <div className="col-span-3">التاريخ</div>
-            <div className="col-span-2">الوقت</div>
-            <div className="col-span-2">الحالة</div>
-            <div className="col-span-1">الإجراءات</div>
+            <div className="col-span-4">{tr("المريض", "Patient")}</div>
+            <div className="col-span-3">{tr("التاريخ", "Date")}</div>
+            <div className="col-span-2">{tr("الوقت", "Time")}</div>
+            <div className="col-span-2">{tr("الحالة", "Status")}</div>
+            <div className="col-span-1">{tr("الإجراءات", "Actions")}</div>
           </div>
         </div>
 
         {appointmentsQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              جاري تحميل المواعيد...
+              {tr("جاري تحميل المواعيد...", "Loading appointments...")}
             </p>
           </div>
         ) : searchedAppointments.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {searchInput
-                ? "لا توجد نتائج مطابقة لبحثك."
-                : "لا يوجد مواعيد في هذه الفئة."}
+                ? tr("لا توجد نتائج مطابقة لبحثك.", "No results match your search.")
+                : tr("لا يوجد مواعيد في هذه الفئة.", "No appointments in this category.")}
             </p>
           </div>
         ) : (
@@ -295,6 +309,7 @@ export default function SecretaryAppointmentsPage() {
               <AppointmentTableRow
                 key={appointment.id}
                 appointment={appointment}
+                locale={locale}
                 onOpen={() => {}}
               />
             ))}

@@ -17,6 +17,7 @@ import { useDoctorWaitlist } from "@/hooks/doctor/waitlist/useDoctorWaitlist";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { Link } from "react-router-dom";
+import { useI18n } from "@/i18n/provider";
 
 type KpiCard = {
   key: string;
@@ -122,6 +123,9 @@ function QuickActionCard({
 }
 
 export default function SecretaryDashboardPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
   const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 4 });
   const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
@@ -138,9 +142,9 @@ export default function SecretaryDashboardPage() {
   const kpis: KpiCard[] = [
     {
       key: "today",
-      label: "مواعيد اليوم",
+      label: tr("مواعيد اليوم", "Today's appointments"),
       value: appointmentsQuery.total ?? 0,
-      delta: `${appointmentsQuery.total ?? 0} مجدول`,
+      delta: `${(appointmentsQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("مجدول", "scheduled")}`,
       icon: Calendar,
       accent: "#129A98",
       soft: "#E9F7F6",
@@ -148,9 +152,9 @@ export default function SecretaryDashboardPage() {
     },
     {
       key: "patients",
-      label: "المرضى",
+      label: tr("المرضى", "Patients"),
       value: patientsQuery.total ?? 0,
-      delta: `${patientsQuery.total ?? 0} مريض`,
+      delta: `${(patientsQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("مريض", "patients")}`,
       icon: Users,
       accent: "#2D74F5",
       soft: "#EAF1FF",
@@ -158,9 +162,9 @@ export default function SecretaryDashboardPage() {
     },
     {
       key: "waitlist",
-      label: "قائمة الانتظار",
+      label: tr("قائمة الانتظار", "Waitlist"),
       value: waitlistQuery.total ?? 0,
-      delta: `${waitlistQuery.total ?? 0} طلب`,
+      delta: `${(waitlistQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("طلب", "requests")}`,
       icon: Check,
       accent: "#22C55E",
       soft: "#EAFBF0",
@@ -168,9 +172,9 @@ export default function SecretaryDashboardPage() {
     },
     {
       key: "available",
-      label: "الأوقات المتاحة",
+      label: tr("الأوقات المتاحة", "Available slots"),
       value: appointmentsQuery.total ?? 0,
-      delta: `${appointmentsQuery.total ?? 0} موعد`,
+      delta: `${(appointmentsQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("موعد", "appointments")}`,
       icon: Clock,
       accent: "#FF6A00",
       soft: "#FFF2E8",
@@ -181,28 +185,28 @@ export default function SecretaryDashboardPage() {
   const todayAppointments = (appointmentsQuery.appointments ?? []).map((appointment) => ({
     id: appointment._id || appointment.startDateTime || appointment.date || "",
     time: appointment.startTime || "—",
-    patientName: appointment.patient?.userId?.fullName || "مريض",
+    patientName: appointment.patient?.userId?.fullName || tr("مريض", "Patient"),
     status: appointment.status === "rescheduled" ? "postponed" : appointment.status,
   }));
 
   const quickActions = [
     {
       icon: Search,
-      label: "بحث عن مريض",
+      label: tr("بحث عن مريض", "Search patient"),
       variant: "default" as const,
       href: "/secretary/patients",
       visible: canViewPatients,
     },
     {
       icon: UserPlus,
-      label: "إضافة مريض مؤقت",
+      label: tr("إضافة مريض مؤقت", "Add temporary patient"),
       variant: "default" as const,
       href: "/secretary/create-temporary-patient",
       visible: canCreateTemporaryPatient,
     },
     {
       icon: Plus,
-      label: "حجز موعد جديد",
+      label: tr("حجز موعد جديد", "Book new appointment"),
       variant: "primary" as const,
       href: "/secretary/book-appointment",
       visible: canBookAppointment,
@@ -212,21 +216,21 @@ export default function SecretaryDashboardPage() {
   const secondaryStats = [
     {
       key: "rating",
-      label: "التقييم",
+      label: tr("التقييم", "Rating"),
       value: rating != null ? `${rating.toFixed(1)}/5` : "—",
       icon: TrendingUp,
       iconClass: "bg-[#ECFDF3] text-[#22C55E]",
     },
     {
       key: "attendance",
-      label: "نسبة الحضور",
+      label: tr("نسبة الحضور", "Attendance rate"),
       value: "—",
       icon: Activity,
       iconClass: "bg-[#F4EBFF] text-[#A855F7]",
     },
     {
       key: "records",
-      label: "السجلات الطبية",
+      label: tr("السجلات الطبية", "Medical records"),
       value: "—",
       icon: FileText,
       iconClass: "bg-[#EAF1FF] text-[#3B82F6]",
@@ -234,7 +238,7 @@ export default function SecretaryDashboardPage() {
   ];
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
       <section className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 xl:gap-8">
         {kpis
           .filter((card) => {
@@ -270,7 +274,7 @@ export default function SecretaryDashboardPage() {
       </section>
 
       {canViewAppointments ? (
-        <SurfaceSection title="مواعيد اليوم">
+        <SurfaceSection title={tr("مواعيد اليوم", "Today's appointments")}>
         <div className="space-y-4 px-4 py-5 sm:px-5 sm:py-6">
           {todayAppointments.length > 0 ? (
             todayAppointments.map((row, index) => (
@@ -289,7 +293,7 @@ export default function SecretaryDashboardPage() {
                       {row.patientName}
                     </div>
                     <div className="font-cairo text-[14px] font-medium lowercase text-[#98A2B3]">
-                      عيادة
+                      {tr("عيادة", "Clinic")}
                     </div>
                   </div>
                 </div>
@@ -307,21 +311,21 @@ export default function SecretaryDashboardPage() {
                     }`}
                   >
                     {row.status === "completed"
-                      ? "مكتمل"
+                      ? tr("مكتمل", "Completed")
                       : row.status === "postponed"
-                        ? "مؤجل"
-                        : "مجدول"}
+                        ? tr("مؤجل", "Postponed")
+                        : tr("مجدول", "Scheduled")}
                   </div>
                 </div>
               </article>
             ))
           ) : appointmentsQuery.isAwaitingData ? (
             <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
-              جاري تحميل مواعيد اليوم...
+              {tr("جاري تحميل مواعيد اليوم...", "Loading today's appointments...")}
             </div>
           ) : (
             <div className="flex min-h-[250px] items-center justify-center rounded-[18px] border border-dashed border-[#D8E2EE] bg-[#FBFDFE] px-6 text-center font-cairo text-[15px] font-semibold leading-7 text-[#8A94A6]">
-              لا توجد مواعيد مجدولة لهذا اليوم بعد.
+              {tr("لا توجد مواعيد مجدولة لهذا اليوم بعد.", "No appointments scheduled for today yet.")}
             </div>
           )}
         </div>

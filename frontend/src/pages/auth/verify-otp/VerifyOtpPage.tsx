@@ -13,6 +13,7 @@ import {
   type SignupSuccessLocationState,
 } from "@/lib/auth/signupSuccessNavState";
 import type { VerifySignupOtpResponse } from "@/lib/auth/types";
+import { useI18n } from "@/i18n/provider";
 
 function hasTokenPair(
   value: VerifySignupOtpResponse,
@@ -107,6 +108,7 @@ function persistVerifiedSession(
 }
 
 function VerifyOtpContent() {
+  const { t } = useI18n();
   const { toast } = useToast();
   const navigate = useNavigate();
   /** عند النجاح نوقف بوابة التوجيه لتجنّب الإرسال إلى /signup قبل navigate(). */
@@ -123,8 +125,8 @@ function VerifyOtpContent() {
       return <Navigate to="/signup" replace />;
     }
     return (
-      <div className="min-h-[280px]" aria-busy aria-label="جاري إكمال التحقق">
-        <span className="sr-only">جاري إكمال التحقق…</span>
+      <div className="min-h-[280px]" aria-busy aria-label={t("auth.verifyOtp.completing")}>
+        <span className="sr-only">{t("auth.verifyOtp.completing")}</span>
       </div>
     );
   }
@@ -177,8 +179,8 @@ function VerifyOtpContent() {
             response.role === "data_entry" ? "data-entry" : response.role
           ) as AppRole;
 
-          toast("تم تأكيد رمز التسجيل. يمكنك المتابعة إلى لوحة التحكم.", {
-            title: "تم التحقق",
+          toast(t("auth.verifyOtp.success.body"), {
+            title: t("auth.verifyOtp.success.title"),
             variant: "success",
             durationMs: 3800,
           });
@@ -186,7 +188,7 @@ function VerifyOtpContent() {
           const successState = {
             flow: "session_ready" as const,
             redirectTo: getRoleRoot(role),
-            title: "اكتمل التحقق",
+            title: t("auth.verifyOtp.success.completedTitle"),
             message: response.message,
           };
           persistSignupSuccessNavState(successState);
@@ -200,14 +202,14 @@ function VerifyOtpContent() {
 
         const pendingState: SignupSuccessLocationState = {
           flow: "pending_doctor",
-          title: "تم تأكيد رمز التسجيل",
+          title: t("auth.verifyOtp.pending.title"),
           message: response.message,
         };
 
         toast(
-          "تم تأكيد الرمز. حساب الطبيب في انتظار موافقة الإدارة قبل الدخول الكامل.",
+          t("auth.verifyOtp.pending.body"),
           {
-            title: "في انتظار الموافقة",
+            title: t("auth.verifyOtp.pending.badge"),
             variant: "info",
             durationMs: 4500,
           },
@@ -222,10 +224,11 @@ function VerifyOtpContent() {
 }
 
 export default function VerifyOtpPage() {
+  const { t } = useI18n();
   return (
     <>
       <Helmet>
-        <title>Verify OTP • LMJ Health</title>
+        <title>{t("auth.page.verifyOtp.title")}</title>
       </Helmet>
       <AuthBackground>
         <VerifyOtpContent />

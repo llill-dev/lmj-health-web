@@ -1,20 +1,27 @@
 'use client';
+import { useI18n } from '@/i18n/provider';
 
 export default function SignupSuccess({
   onContinue,
-  title = 'أهلاً وسهلاً بك في LMJ HEALTH',
-  message = 'تم إنشاء الحساب بنجاح؛ يُرجى الأنتظار حتى يتم التحقق من حسابك من قبل الأدمن   .',
-  continueLabel = 'الذهاب للصفحة الرئيسية',
+  title,
+  message,
+  continueLabel,
 }: {
   onContinue?: () => void;
   title?: string;
   message?: string;
   continueLabel?: string;
 }) {
+  const { locale, dir, t } = useI18n();
+  const resolvedTitle = title ?? t('auth.signupSuccess.default.title');
+  const resolvedMessage = message ?? t('auth.signupSuccess.default.message');
+  const resolvedContinueLabel =
+    continueLabel ?? t('auth.signupSuccess.default.continue');
+
   return (
     <section
-      dir='rtl'
-      lang='ar'
+      dir={dir}
+      lang={locale}
       className='relative mx-auto flex min-h-[520px] w-full items-center justify-center'
     >
       <div className='relative w-full'>
@@ -51,13 +58,13 @@ export default function SignupSuccess({
           </div>
 
           <div className='mt-16 font-cairo text-[16px] font-bold leading-[24px] text-[#1F2937]'>
-            {title}
+            {resolvedTitle}
           </div>
           <div className='mt-1 font-cairo text-[13px] font-semibold leading-[20px] text-[#667085]'>
-            {message}
+            {resolvedMessage}
           </div>
           <div className='mt-8 inline-flex h-[40px] items-center justify-center rounded-[8px] bg-primary px-6 font-cairo text-[13px] font-bold text-white shadow-[0_18px_40px_rgba(15,143,139,0.25)] transition-colors group-hover:bg-[#14B3AE]'>
-            {continueLabel}
+            {resolvedContinueLabel}
           </div>
         </button>
       </div>

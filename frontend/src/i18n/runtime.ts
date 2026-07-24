@@ -9,6 +9,17 @@ function isLocale(value: unknown): value is AppLocale {
 }
 
 function detectBrowserLocale(): AppLocale {
+  if (typeof navigator === "undefined") return "ar";
+
+  const candidates = [
+    navigator.language,
+    ...(Array.isArray(navigator.languages) ? navigator.languages : []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.toLowerCase());
+
+  if (candidates.some((value) => value.startsWith("ar"))) return "ar";
+  if (candidates.some((value) => value.startsWith("en"))) return "en";
   return "ar";
 }
 

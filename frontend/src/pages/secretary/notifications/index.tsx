@@ -1,12 +1,13 @@
 import { Bell, Clock, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { useDoctorNotificationsPage } from "@/hooks/doctor/notifications/useDoctorNotifications";
 import { notificationItemId } from "@/lib/notifications/client";
+import { useI18n } from "@/i18n/provider";
 
-function formatRelativeDate(value?: string): string {
+function formatRelativeDate(value: string | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("ar-SA");
+  return date.toLocaleString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
 function SurfaceSection({
@@ -97,6 +98,9 @@ function NotificationCard({
 }
 
 export default function SecretaryNotificationsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const notificationsQuery = useDoctorNotificationsPage(false, 1, 100);
   type UiNotification = {
     id: string;
@@ -109,25 +113,25 @@ export default function SecretaryNotificationsPage() {
   const notifications: UiNotification[] = (notificationsQuery.listQuery.data?.notifications ?? []).map(
     (item): UiNotification => ({
       id: notificationItemId(item) || `${item.title || "notice"}-${item.createdAt || "time"}`,
-      title: item.title || "إشعار",
-      message: item.body || "لا توجد تفاصيل إضافية.",
-      time: formatRelativeDate(item.createdAt),
+      title: item.title || tr("إشعار", "Notification"),
+      message: item.body || tr("لا توجد تفاصيل إضافية.", "No additional details."),
+      time: formatRelativeDate(item.createdAt, locale),
       type: item.type === "warning" ? "warning" : "info",
       isRead: Boolean(item.isRead ?? item.read ?? item.is_read),
     }),
   );
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title="الإشعارات">
+    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+      <SurfaceSection title={tr("الإشعارات", "Notifications")}>
         <div className="px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
           <div className="mb-6 flex items-center justify-between">
             <div className="text-right">
               <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
-                الإشعارات
+                {tr("الإشعارات", "Notifications")}
               </h3>
               <p className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                {notifications.length} إشعار
+                {notifications.length.toLocaleString(numberLocale)} {tr("إشعار", "notifications")}
               </p>
             </div>
             <button
@@ -135,14 +139,14 @@ export default function SecretaryNotificationsPage() {
               onClick={() => notificationsQuery.markAllReadMutation.mutate()}
               className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]"
             >
-              تحديد الكل كمقروء
+              {tr("تحديد الكل كمقروء", "Mark all as read")}
             </button>
           </div>
 
           {notificationsQuery.listQuery.isLoading ? (
             <div className="flex min-h-[300px] items-center justify-center py-12">
               <p className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                جاري تحميل الإشعارات...
+                {tr("جاري تحميل الإشعارات...", "Loading notifications...")}
               </p>
             </div>
           ) : notifications.length === 0 ? (
@@ -152,10 +156,10 @@ export default function SecretaryNotificationsPage() {
               </div>
               <div className="text-center">
                 <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
-                  لا توجد إشعارات
+                  {tr("لا توجد إشعارات", "No notifications")}
                 </h3>
                 <p className="mt-2 font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                  سيتم عرض الإشعارات الجديدة هنا
+                  {tr("سيتم عرض الإشعارات الجديدة هنا", "New notifications will appear here")}
                 </p>
               </div>
             </div>
