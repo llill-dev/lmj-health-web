@@ -32,39 +32,46 @@ import OffboardDialog from "@/components/admin/secretaries/dialogs/OffboardDialo
 import { resolveDoctorSpecializationReviewState } from "@/lib/admin/doctors/doctorSpecializationReview";
 import { resolveDoctorSpecialtyLookupCategory } from "@/lib/admin/doctors/doctorSpecialtyLookupCategory";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { useI18n } from "@/i18n/provider";
 
 function requestStillOpen(status: string | undefined): boolean {
   const x = status?.toString().toLowerCase().trim() ?? "";
   return x !== "approved" && x !== "rejected";
 }
 
-function formatGender(g?: string) {
+function formatGender(
+  g: string | undefined,
+  tr: (ar: string, en: string) => string,
+) {
   if (!g) return "—";
   const x = g.toLowerCase();
-  if (x === "male" || x === "m") return "ذكر";
-  if (x === "female" || x === "f") return "أنثى";
+  if (x === "male" || x === "m") return tr("ذكر", "Male");
+  if (x === "female" || x === "f") return tr("أنثى", "Female");
   return g;
 }
 
-function formatConsultationTypes(types?: string[]) {
+function formatConsultationTypes(
+  types: string[] | undefined,
+  tr: (ar: string, en: string) => string,
+) {
   if (!types?.length) return "—";
   const map: Record<string, string> = {
-    online: "عبر الإنترنت",
-    offline: "في العيادة",
+    online: tr("عبر الإنترنت", "Online"),
+    offline: tr("في العيادة", "In clinic"),
   };
-  return types.map((t) => String(map[t] ?? t)).join(" ، ");
+  return types.map((t) => String(map[t] ?? t)).join(tr(" ، ", ", "));
 }
 
-function formatMoney(n?: number) {
+function formatMoney(n: number | undefined, locale: string) {
   if (n === undefined || n === null || Number.isNaN(Number(n))) return "—";
-  return Number(n).toLocaleString("ar-SY");
+  return Number(n).toLocaleString(locale === "ar" ? "ar-SY" : "en-US");
 }
 
-function formatDateAr(iso?: string) {
+function formatDateLocalized(iso: string | undefined, locale: string) {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("ar-SY", {
+  return d.toLocaleDateString(locale === "ar" ? "ar-SY" : "en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -89,17 +96,20 @@ function coordsToLatLng(d: AdminDoctorDetailsDoctor) {
   return { lat: String(lat), lng: String(lng) };
 }
 
-const ANALYTICS_RANGE_OPTIONS: Array<{
-  value: AdminDoctorAnalyticsRange;
-  label: string;
-}> = [
-  { value: "day", label: "يومي" },
-  { value: "week", label: "أسبوعي" },
-  { value: "month", label: "شهري" },
-  { value: "year", label: "سنوي" },
-];
-
 export default function AdminDoctorDetailsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+
+  const ANALYTICS_RANGE_OPTIONS: Array<{
+    value: AdminDoctorAnalyticsRange;
+    label: string;
+  }> = [
+    { value: "day", label: tr("يومي", "Daily") },
+    { value: "week", label: tr("أسبوعي", "Weekly") },
+    { value: "month", label: tr("شهري", "Monthly") },
+    { value: "year", label: tr("سنوي", "Yearly") },
+  ];
+
   const { doctorId } = useParams();
   const queryClient = useQueryClient();
   const {
@@ -260,27 +270,27 @@ export default function AdminDoctorDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>تفاصيل الطبيب • LMJ Health</title>
+        <title>{tr("تفاصيل الطبيب", "Doctor details")} • LMJ Health</title>
       </Helmet>
 
       <div
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="-mx-3 -mt-6 mb-0 min-h-[calc(100vh-5.5rem)] px-3 py-6 font-cairo sm:-mx-6 sm:-mt-8 sm:px-6 sm:py-8 md:px-8 lg:px-12"
       >
         <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6 sm:gap-8">
           {isAwaitingData ? (
             <div className="rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-10 text-center font-cairo text-sm font-semibold text-[#667085] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              جاري تحميل بيانات الطبيب...
+              {tr("جاري تحميل بيانات الطبيب...", "Loading doctor details…")}
             </div>
           ) : error ? (
             <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-8 text-center font-cairo text-sm font-semibold text-red-800">
-              فشل تحميل بيانات الطبيب
+              {tr("فشل تحميل بيانات الطبيب", "Failed to load doctor details")}
             </div>
           ) : doctor ? (
             <>
               <section>
-                <SectionTitle>المعلومات الشخصية</SectionTitle>
+                <SectionTitle>{tr("المعلومات الشخصية", "Personal information")}</SectionTitle>
                 <div className="rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]">
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-[15px]">
                     <div className="mx-auto shrink-0 rounded-[10px] text-primary md:mx-0">
@@ -299,30 +309,30 @@ export default function AdminDoctorDetailsPage() {
                     <div className="flex flex-col flex-1 gap-5 min-w-0 sm:flex-row sm:gap-6 md:gap-8">
                       <div className="flex flex-col flex-1 gap-4 min-w-0">
                         <FieldBlock
-                          label="الاسم"
+                          label={tr("الاسم", "Name")}
                           value={doctor.user?.fullName ?? "—"}
                         />
                         <FieldBlock
-                          label="رقم الهاتف"
+                          label={tr("رقم الهاتف", "Phone")}
                           value={phoneDisplay}
                           valueDir="ltr"
                         />
                         <FieldBlock
-                          label="الايميل"
+                          label={tr("الايميل", "Email")}
                           value={doctor.user?.email ?? "—"}
                         />
                       </div>
                       <div className="flex flex-col flex-1 gap-4 min-w-0">
                         <FieldBlock
-                          label="تاريخ الميلاد"
-                          value={formatDateAr(doctor.user?.dateOfBirth)}
+                          label={tr("تاريخ الميلاد", "Date of birth")}
+                          value={formatDateLocalized(doctor.user?.dateOfBirth, locale)}
                         />
                         <FieldBlock
-                          label="الجنس"
-                          value={formatGender(doctor.user?.gender)}
+                          label={tr("الجنس", "Gender")}
+                          value={formatGender(doctor.user?.gender, tr)}
                         />
                         <FieldBlock
-                          label="العنوان"
+                          label={tr("العنوان", "Address")}
                           value={buildAddress(doctor)}
                         />
                       </div>
@@ -332,7 +342,7 @@ export default function AdminDoctorDetailsPage() {
               </section>
 
               <section>
-                <SectionTitle>المعلومات المهنية</SectionTitle>
+                <SectionTitle>{tr("المعلومات المهنية", "Professional information")}</SectionTitle>
                 <div className="rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]">
                   <DoctorSpecializationReviewBanner
                     state={specializationState}
@@ -340,48 +350,49 @@ export default function AdminDoctorDetailsPage() {
                   <div className="mt-4 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 md:gap-10">
                     <div className="flex flex-col gap-4">
                       <FieldBlock
-                        label="التخصص المعروض"
+                        label={tr("التخصص المعروض", "Displayed specialization")}
                         value={specializationState.displayLabel}
                       />
                       <FieldBlock
-                        label="حالة التخصص"
+                        label={tr("حالة التخصص", "Specialization status")}
                         value={specializationState.statusLabel}
                       />
                       {specializationState.specializationKey ? (
                         <FieldBlock
-                          label="رمز التخصص"
+                          label={tr("رمز التخصص", "Specialization key")}
                           value={specializationState.specializationKey}
                         />
                       ) : null}
                       {specializationState.customSpecializationText ? (
                         <FieldBlock
-                          label="التخصص المُدخل يدوياً"
+                          label={tr("التخصص المُدخل يدوياً", "Custom specialization")}
                           value={specializationState.customSpecializationText}
                         />
                       ) : null}
                       <FieldBlock
-                        label="رقم الترخيص"
+                        label={tr("رقم الترخيص", "License number")}
                         value={doctor.medicalLicenseNumber ?? "—"}
                       />
                       <FieldBlock
-                        label="التعليم"
+                        label={tr("التعليم", "Education")}
                         value={doctor.education ?? "—"}
                       />
                     </div>
                     <div className="flex flex-col gap-4">
                       <FieldBlock
-                        label="نبذة عن الطبيب"
+                        label={tr("نبذة عن الطبيب", "Doctor bio")}
                         value={doctor.bio ?? "—"}
                       />
                       <FieldBlock
-                        label="أنواع الاستشارة"
+                        label={tr("أنواع الاستشارة", "Consultation types")}
                         value={formatConsultationTypes(
                           doctor.consultationTypes as string[] | undefined,
+                          tr,
                         )}
                       />
                       <FieldBlock
-                        label="رسوم الاستشارة"
-                        value={formatMoney(doctor.consultationFee)}
+                        label={tr("رسوم الاستشارة", "Consultation fee")}
+                        value={formatMoney(doctor.consultationFee, locale)}
                       />
                     </div>
                   </div>
@@ -390,18 +401,21 @@ export default function AdminDoctorDetailsPage() {
 
               <section className="flex flex-col gap-4">
                 <div className="flex flex-col gap-3 rounded-[6px] border border-[#F3F4F6] bg-white p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                  <div className="text-right">
+                  <div className="text-start">
                     <h2 className="font-cairo text-base font-bold text-primary sm:text-lg">
-                      نطاق التحليلات
+                      {tr("نطاق التحليلات", "Analytics range")}
                     </h2>
                     <p className="mt-1 font-cairo text-sm text-[#667085]">
-                      اختر الفترة لعرض ملخص الأداء والتشخيصات.
+                      {tr(
+                        "اختر الفترة لعرض ملخص الأداء والتشخيصات.",
+                        "Choose a period to view performance and diagnosis summaries.",
+                      )}
                     </p>
                   </div>
                   <div
                     className="flex flex-wrap justify-end gap-2"
                     role="group"
-                    aria-label="اختيار نطاق التحليلات"
+                    aria-label={tr("اختيار نطاق التحليلات", "Select analytics range")}
                   >
                     {ANALYTICS_RANGE_OPTIONS.map((option) => {
                       const active = analyticsRange === option.value;
@@ -438,9 +452,10 @@ export default function AdminDoctorDetailsPage() {
                 <div className="flex flex-col items-center gap-3 pb-6 pt-2">
                   {specializationState.needsAdminResolve ? (
                     <p className="max-w-lg text-center font-cairo text-[12px] font-semibold text-[#92400E]">
-                      هذا الطبيب لديه تخصص مخصص معلّق. عند «قبول» يجب اختيار
-                      تخصصاً مُداراً من القائمة أو إنشاء تخصص جديد في نافذة
-                      التأكيد.
+                      {tr(
+                        "هذا الطبيب لديه تخصص مخصص معلّق. عند «قبول» يجب اختيار تخصصاً مُداراً من القائمة أو إنشاء تخصص جديد في نافذة التأكيد.",
+                        "This doctor has a pending custom specialization. On “Approve”, select a managed specialization from the list or create a new one in the confirmation dialog.",
+                      )}
                     </p>
                   ) : null}
                   {verificationRequestId ? (
@@ -462,8 +477,8 @@ export default function AdminDoctorDetailsPage() {
                             strokeWidth={2.25}
                             aria-hidden
                           />
-                          <span dir="rtl" className="leading-none">
-                            قبول
+                          <span dir={dir} className="leading-none">
+                            {tr("قبول", "Approve")}
                           </span>
                         </span>
                       </button>
@@ -484,8 +499,8 @@ export default function AdminDoctorDetailsPage() {
                             strokeWidth={2.25}
                             aria-hidden
                           />
-                          <span dir="rtl" className="leading-none">
-                            رفض
+                          <span dir={dir} className="leading-none">
+                            {tr("رفض", "Reject")}
                           </span>
                         </span>
                       </button>
@@ -507,8 +522,8 @@ export default function AdminDoctorDetailsPage() {
                               strokeWidth={2.25}
                               aria-hidden
                             />
-                            <span dir="rtl" className="leading-none">
-                              الموقع
+                            <span dir={dir} className="leading-none">
+                              {tr("الموقع", "Location")}
                             </span>
                           </span>
                         </button>
@@ -516,8 +531,10 @@ export default function AdminDoctorDetailsPage() {
                     </div>
                   ) : (
                     <p className="max-w-md text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                      تعذّر العثور على طلب التحقق المرتبط بهذا الطبيب. جرّب
-                      إعادة التحميل أو راجع طلبات التحقق من لوحة الإدارة.
+                      {tr(
+                        "تعذّر العثور على طلب التحقق المرتبط بهذا الطبيب. جرّب إعادة التحميل أو راجع طلبات التحقق من لوحة الإدارة.",
+                        "Unable to find a verification request linked to this doctor. Try reloading or review verification requests from admin.",
+                      )}
                     </p>
                   )}
                 </div>
@@ -525,7 +542,7 @@ export default function AdminDoctorDetailsPage() {
 
               {isOffboarded ? (
                 <section className="rounded-[10px] border border-[#FECACA] bg-[#FFF5F5] px-4 py-5 sm:px-6">
-                  <SectionTitle>إدارة الحساب</SectionTitle>
+                  <SectionTitle>{tr("إدارة الحساب", "Account management")}</SectionTitle>
                   <div className="flex items-start gap-3 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4">
                     <UserX
                       className="mt-0.5 h-5 w-5 shrink-0 text-[#991B1B]"
@@ -533,21 +550,25 @@ export default function AdminDoctorDetailsPage() {
                     />
                     <div>
                       <p className="font-cairo text-[14px] font-extrabold text-[#991B1B]">
-                        الحساب موقوف
+                        {tr("الحساب موقوف", "Account is offboarded")}
                       </p>
                       <p className="mt-1 font-cairo text-[13px] font-semibold leading-relaxed text-[#7F1D1D]">
-                        تم إيقاف وصول هذا الطبيب إلى المنصة. لا يظهر في البحث
-                        للمرضى ولا يمكن إعادة إيقافه.
+                        {tr(
+                          "تم إيقاف وصول هذا الطبيب إلى المنصة. لا يظهر في البحث للمرضى ولا يمكن إعادة إيقافه.",
+                          "This doctor no longer has platform access. They are hidden from patient search and cannot be offboarded again.",
+                        )}
                       </p>
                     </div>
                   </div>
                 </section>
               ) : offboardUserId ? (
                 <section className="rounded-[10px] border border-[#FECACA] bg-[#FFF5F5] px-4 py-5 sm:px-6">
-                  <SectionTitle>إدارة الحساب</SectionTitle>
+                  <SectionTitle>{tr("إدارة الحساب", "Account management")}</SectionTitle>
                   <p className="mb-4 font-cairo text-[13px] font-semibold leading-relaxed text-[#7F1D1D]">
-                    إيقاف الحساب يُستخدم للحسابات المكرّرة أو التجريبية. يُخفى
-                    الطبيب من البحث وتُلغى مواعيده المستقبلية.
+                    {tr(
+                      "إيقاف الحساب يُستخدم للحسابات المكرّرة أو التجريبية. يُخفى الطبيب من البحث وتُلغى مواعيده المستقبلية.",
+                      "Offboarding is for duplicate or testing accounts. The doctor is hidden from search and future appointments are canceled.",
+                    )}
                   </p>
                   <button
                     type="button"
@@ -555,7 +576,7 @@ export default function AdminDoctorDetailsPage() {
                     className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#DC2626] px-6 font-cairo text-[14px] font-extrabold text-white transition hover:bg-[#B91C1C]"
                   >
                     <UserX className="h-5 w-5 shrink-0" aria-hidden />
-                    إيقاف حساب الطبيب
+                    {tr("إيقاف حساب الطبيب", "Offboard doctor account")}
                   </button>
                 </section>
               ) : null}
@@ -577,7 +598,7 @@ export default function AdminDoctorDetailsPage() {
             </>
           ) : (
             <div className="rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-8 text-center font-cairo text-sm font-semibold text-[#667085] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              لا توجد بيانات.
+              {tr("لا توجد بيانات.", "No data available.")}
             </div>
           )}
         </div>
