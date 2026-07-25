@@ -24,8 +24,23 @@ import { ClipboardList, Trash2 } from "lucide-react";
 import { Pagination } from "@/components/admin/services/Pagination";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import StyledSelect from "@/components/ui/styled-select";
+import { useI18n } from "@/i18n/provider";
+
+function kindLabel(
+  kind: MedicalOrderCatalogKind,
+  tr: (ar: string, en: string) => string,
+) {
+  if (kind === "lab") return tr("مختبر", "Lab");
+  if (kind === "imaging") return tr("تصوير", "Imaging");
+  if (kind === "procedure") return tr("إجراء", "Procedure");
+  return tr("تحويل", "Referral");
+}
 
 export default function AdminMedicalOrdersPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+
   const [kind, setKind] = useState<MedicalOrderCatalogKind>("lab");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -51,7 +66,11 @@ export default function AdminMedicalOrdersPage() {
       category: debouncedCategory || undefined,
       priorityLevel: priorityLevel || undefined,
       isVisible:
-        visibility === "visible" ? true : visibility === "hidden" ? false : undefined,
+        visibility === "visible"
+          ? true
+          : visibility === "hidden"
+            ? false
+            : undefined,
     });
   const deleteMut = useDeleteMedicalOrderCatalogItem(kind);
 
@@ -65,7 +84,10 @@ export default function AdminMedicalOrdersPage() {
     const items = data?.items ?? [];
     const q = search.trim().toLowerCase();
     return items.filter((i) => {
-      if (priorityLevel && (i.priorityLevel ?? "").toLowerCase() !== priorityLevel) {
+      if (
+        priorityLevel &&
+        (i.priorityLevel ?? "").toLowerCase() !== priorityLevel
+      ) {
         return false;
       }
       if (visibility === "visible" && i.isVisible === false) return false;
@@ -129,17 +151,22 @@ export default function AdminMedicalOrdersPage() {
   return (
     <>
       <Helmet>
-        <title>كتالوج الطلبات الطبية • LMJ Health</title>
+        <title>
+          {tr("كتالوج الطلبات الطبية", "Medical orders catalog")} • LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-5">
+      <div dir={dir} lang={locale} className="space-y-5">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="كتالوج الطلبات الطبية"
-          subtitle="إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض"
+          title={tr("كتالوج الطلبات الطبية", "Medical orders catalog")}
+          subtitle={tr(
+            "إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض",
+            "Manage medical orders doctors request from patients",
+          )}
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
-          actionLabel="إضافة نوع جديد"
+          actionLabel={tr("إضافة نوع جديد", "Add new item")}
           actionDisabled={isAwaitingData}
           onActionClick={openAdd}
           kpis={[
@@ -147,7 +174,7 @@ export default function AdminMedicalOrdersPage() {
               key: "items",
               icon: <ClipboardList className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : filteredItems.length,
-              label: "عناصر معروضة",
+              label: tr("عناصر معروضة", "Visible items"),
             },
           ]}
         />
@@ -183,14 +210,17 @@ export default function AdminMedicalOrdersPage() {
         </div>
 
         {isError && (
-          <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-right">
+          <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-start">
             <p className="font-cairo text-[13px] font-bold text-red-800">
-              تعذر تحميل الكتالوج.
+              {tr("تعذر تحميل الكتالوج.", "Failed to load the catalog.")}
             </p>
             <p className="mt-1 font-cairo text-[12px] font-semibold text-red-700">
               {userFacingErrorMessage(
                 error,
-                "تحقق من الاتصال أو من واجهة الـ API.",
+                tr(
+                  "تحقق من الاتصال أو من واجهة الـ API.",
+                  "Check your connection or the API.",
+                ),
               )}
             </p>
             <button
@@ -198,7 +228,7 @@ export default function AdminMedicalOrdersPage() {
               onClick={() => void refetch()}
               className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline"
             >
-              إعادة المحاولة
+              {tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         )}
@@ -224,9 +254,10 @@ export default function AdminMedicalOrdersPage() {
           <section className="rounded-[10px] border border-[#E5E7EB] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.08)]">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                عرض {rangeStart.toLocaleString("ar-SA")}–
-                {rangeEnd.toLocaleString("ar-SA")} من{" "}
-                {filteredItems.length.toLocaleString("ar-SA")} عنصر
+                {tr(
+                  `عرض ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} من ${filteredItems.length.toLocaleString(numberLocale)} عنصر`,
+                  `Showing ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} of ${filteredItems.length.toLocaleString(numberLocale)} items`,
+                )}
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-3">
@@ -241,7 +272,10 @@ export default function AdminMedicalOrdersPage() {
                       value: String(value),
                       label: String(value),
                     }))}
-                    listboxAriaLabel="عدد العناصر في الصفحة"
+                    listboxAriaLabel={tr(
+                      "عدد العناصر في الصفحة",
+                      "Items per page",
+                    )}
                     triggerClassName="h-[36px] rounded-[10px]"
                   />
                 </div>
@@ -262,38 +296,39 @@ export default function AdminMedicalOrdersPage() {
             if (!open) setDeleteTarget(null);
           }}
           variant="destructive"
-          title="حذف بند من الكتالوج؟"
+          title={tr(
+            "حذف بند من الكتالوج؟",
+            "Delete catalog item?",
+          )}
           icon={<Trash2 className="w-6 h-6" strokeWidth={2} aria-hidden />}
           description={
             deleteTarget ? (
               <>
-                سيتم حذف «
+                {tr("سيتم حذف «", "“")}
                 <span className="font-extrabold text-[#344054]">
                   {deleteTarget.label}
                 </span>
-                » نهائياً من فئة{" "}
-                {kind === "lab"
-                  ? "مختبر"
-                  : kind === "imaging"
-                    ? "تصوير"
-                    : kind === "procedure"
-                      ? "إجراء"
-                      : "تحويل"}
-                . لا يمكن التراجع عن الحذف من الواجهة.
+                {tr(
+                  `» نهائياً من فئة ${kindLabel(kind, tr)}. لا يمكن التراجع عن الحذف من الواجهة.`,
+                  `” will be permanently deleted from ${kindLabel(kind, tr)}. This cannot be undone from the UI.`,
+                )}
               </>
             ) : (
               "—"
             )
           }
-          confirmLabel="حذف"
+          confirmLabel={tr("حذف", "Delete")}
           confirmDisabled={deleteMut.isPending}
           onConfirm={async () => {
             if (!deleteTarget) return;
             await deleteMut.mutateAsync(deleteTarget._id);
           }}
           successToast={{
-            title: "تم الحذف",
-            message: "حُذف بند الكتالوج من القائمة.",
+            title: tr("تم الحذف", "Deleted"),
+            message: tr(
+              "حُذف بند الكتالوج من القائمة.",
+              "Catalog item removed from the list.",
+            ),
             variant: "success",
           }}
         />

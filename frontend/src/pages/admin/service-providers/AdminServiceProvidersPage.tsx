@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   Loader2,
   RefreshCw,
-  Plus,
   Edit3,
   Power,
 } from "lucide-react";
@@ -21,6 +20,7 @@ import {
 } from "@/hooks/admin/services/useAdminServices";
 import type { ServiceProvider } from "@/lib/admin/types";
 import { resolveLabel } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 function resolveProviderSlug(provider: ServiceProvider): string {
   if (typeof provider.serviceType === "string") return provider.serviceType;
@@ -40,23 +40,24 @@ function resolveProviderLabel(provider: ServiceProvider): string {
   return provider._id;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  active: "نشط",
-  inactive: "معطّل",
-  draft: "مسودة",
-};
-
 export default function AdminServiceProvidersPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedSlug = searchParams.get("type") ?? "";
   const [cursor, setCursor] = useState<string | undefined>(undefined);
 
-  // Dialog states
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] =
     useState<ServiceProvider | null>(null);
+
+  const statusLabels: Record<string, string> = {
+    active: tr("نشط", "Active"),
+    inactive: tr("معطّل", "Inactive"),
+    draft: tr("مسودة", "Draft"),
+  };
 
   const typesQuery = useServiceTypesList();
   const providersQuery = useServiceProvidersList(selectedSlug, cursor);
@@ -68,15 +69,15 @@ export default function AdminServiceProvidersPage() {
     () =>
       serviceTypes.map((type) => ({
         value: type.slug,
-        label: resolveLabel(type.name, "ar") || type.slug,
+        label: resolveLabel(type.name, locale) || type.slug,
       })),
-    [serviceTypes],
+    [serviceTypes, locale],
   );
 
   const selectedTypeName = useMemo(() => {
     const match = serviceTypes.find((type) => type.slug === selectedSlug);
-    return match ? resolveLabel(match.name, "ar") : selectedSlug;
-  }, [selectedSlug, serviceTypes]);
+    return match ? resolveLabel(match.name, locale) : selectedSlug;
+  }, [selectedSlug, serviceTypes, locale]);
 
   const openEdit = useCallback((provider: ServiceProvider) => {
     setSelectedProvider(provider);
@@ -91,29 +92,37 @@ export default function AdminServiceProvidersPage() {
   return (
     <>
       <Helmet>
-        <title>مزودو الخدمة • LMJ Health</title>
+        <title>
+          {tr("مزودو الخدمة", "Service providers")} • LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <Link
           to="/admin/service-types"
           className="mb-5 inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary"
         >
           <ChevronLeft className="h-4 w-4" />
-          العودة إلى أنواع الخدمات
+          {tr("العودة إلى أنواع الخدمات", "Back to service types")}
         </Link>
 
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="مزودو الخدمة"
+          title={tr("مزودو الخدمة", "Service providers")}
           subtitle={
             selectedSlug
-              ? `نوع الخدمة: ${selectedTypeName}`
-              : "اختر نوع خدمة لعرض المزودين"
+              ? tr(
+                  `نوع الخدمة: ${selectedTypeName}`,
+                  `Service type: ${selectedTypeName}`,
+                )
+              : tr(
+                  "اختر نوع خدمة لعرض المزودين",
+                  "Select a service type to view providers",
+                )
           }
           headerIcon={<Building2 className="h-8 w-8 text-white" />}
-          actionLabel="إضافة مزود"
+          actionLabel={tr("إضافة مزود", "Add provider")}
           onActionClick={() => setCreateOpen(true)}
         />
 
@@ -121,7 +130,7 @@ export default function AdminServiceProvidersPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-6">
               <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
-                نوع الخدمة
+                {tr("نوع الخدمة", "Service type")}
               </div>
               <StyledSelect
                 value={selectedSlug}
@@ -134,10 +143,13 @@ export default function AdminServiceProvidersPage() {
                   }
                 }}
                 options={[
-                  { value: "", label: "اختر نوع الخدمة…" },
+                  {
+                    value: "",
+                    label: tr("اختر نوع الخدمة…", "Select a service type…"),
+                  },
                   ...typeOptions,
                 ]}
-                listboxAriaLabel="نوع الخدمة"
+                listboxAriaLabel={tr("نوع الخدمة", "Service type")}
               />
             </div>
             <div className="flex justify-start lg:col-span-6">
@@ -150,7 +162,7 @@ export default function AdminServiceProvidersPage() {
                 <RefreshCw
                   className={`h-4 w-4 ${providersQuery.isFetching ? "animate-spin" : ""}`}
                 />
-                تحديث
+                {tr("تحديث", "Refresh")}
               </button>
             </div>
           </div>
@@ -159,7 +171,10 @@ export default function AdminServiceProvidersPage() {
         <section className="mt-4 space-y-3">
           {!selectedSlug ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              اختر نوع خدمة من القائمة أعلاه.
+              {tr(
+                "اختر نوع خدمة من القائمة أعلاه.",
+                "Select a service type from the list above.",
+              )}
             </div>
           ) : providersQuery.isLoading ? (
             <div className="flex items-center justify-center py-16">
@@ -167,7 +182,10 @@ export default function AdminServiceProvidersPage() {
             </div>
           ) : providers.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              لا يوجد مزودون منشورون لهذا النوع حاليًا.
+              {tr(
+                "لا يوجد مزودون منشورون لهذا النوع حاليًا.",
+                "No published providers for this type yet.",
+              )}
             </div>
           ) : (
             providers.map((provider) => (
@@ -176,33 +194,35 @@ export default function AdminServiceProvidersPage() {
                 className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="text-right">
+                  <div className="text-start">
                     <div className="font-cairo text-[14px] font-black text-[#111827]">
                       {resolveProviderLabel(provider)}
                     </div>
                     <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
                       {resolveProviderSlug(provider) || "—"} ·{" "}
-                      {STATUS_LABELS[provider.status] ?? provider.status ?? "—"}
+                      {statusLabels[provider.status] ??
+                        provider.status ??
+                        "—"}
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => openEdit(provider)}
-                      title="تعديل البيانات"
+                      title={tr("تعديل البيانات", "Edit details")}
                       className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
                     >
                       <Edit3 className="h-3.5 w-3.5" />
-                      تعديل
+                      {tr("تعديل", "Edit")}
                     </button>
                     <button
                       type="button"
                       onClick={() => openStatus(provider)}
-                      title="تغيير الحالة"
+                      title={tr("تغيير الحالة", "Change status")}
                       className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-[#FDE68A] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#D97706] transition hover:bg-[#FFFBEB]"
                     >
                       <Power className="h-3.5 w-3.5" />
-                      الحالة
+                      {tr("الحالة", "Status")}
                     </button>
                   </div>
                 </div>
@@ -219,13 +239,12 @@ export default function AdminServiceProvidersPage() {
                 }
                 className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-primary"
               >
-                تحميل المزيد
+                {tr("تحميل المزيد", "Load more")}
               </button>
             </div>
           ) : null}
         </section>
 
-        {/* Create Provider Dialog */}
         <CreateServiceProviderDialog
           open={createOpen}
           onOpenChange={setCreateOpen}
@@ -233,7 +252,6 @@ export default function AdminServiceProvidersPage() {
           onSuccess={() => providersQuery.refetch()}
         />
 
-        {/* Edit Provider Dialog */}
         <EditServiceProviderDialog
           open={editOpen}
           onOpenChange={setEditOpen}
@@ -241,7 +259,6 @@ export default function AdminServiceProvidersPage() {
           onSuccess={() => providersQuery.refetch()}
         />
 
-        {/* Update Status Dialog */}
         {selectedProvider && (
           <UpdateProviderStatusDialog
             open={statusOpen}

@@ -16,12 +16,7 @@ import {
   type RestoreRequest,
   useAdminDoctorRestoreRequests,
 } from "@/hooks/admin/users/useAdminDoctorRestoreRequests";
-
-const STATUS_LABELS: Record<RestoreRequest["status"], string> = {
-  pending: "قيد المراجعة",
-  approved: "مقبول",
-  rejected: "مرفوض",
-};
+import { useI18n } from "@/i18n/provider";
 
 const STATUS_STYLES: Record<RestoreRequest["status"], string> = {
   pending: "border-[#FCD34D] bg-[#FFFBEB] text-[#92400E]",
@@ -29,54 +24,76 @@ const STATUS_STYLES: Record<RestoreRequest["status"], string> = {
   rejected: "border-[#FECACA] bg-[#FEF2F2] text-[#991B1B]",
 };
 
-function formatDate(value?: string) {
-  if (!value) return "غير محدد";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "غير محدد";
-  return date.toLocaleDateString("ar-SA", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export default function AdminDoctorRestoreRequestsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+
+  const statusLabels: Record<RestoreRequest["status"], string> = {
+    pending: tr("قيد المراجعة", "Pending review"),
+    approved: tr("مقبول", "Approved"),
+    rejected: tr("مرفوض", "Rejected"),
+  };
+
   const [selectedRequest, setSelectedRequest] = useState<RestoreRequest | null>(
     null,
   );
   const { requests, isAwaitingData, isError, refetch } =
     useAdminDoctorRestoreRequests({ limit: 50 });
 
-  const pendingCount = requests.filter((item) => item.status === "pending").length;
+  const pendingCount = requests.filter((item) => item.status === "pending")
+    .length;
   const reviewedCount = requests.length - pendingCount;
+
+  function formatDate(value?: string) {
+    if (!value) return tr("غير محدد", "Not set");
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return tr("غير محدد", "Not set");
+    return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
 
   return (
     <>
       <Helmet>
-        <title>طلبات استعادة حساب الأطباء • LMJ Health</title>
+        <title>
+          {tr(
+            "طلبات استعادة حساب الأطباء",
+            "Doctor account restore requests",
+          )}{" "}
+          • LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-5">
+      <div dir={dir} lang={locale} className="space-y-5">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="طلبات استعادة حساب الأطباء"
-          subtitle="مراجعة طلبات الأطباء الذين انتهت فترة الاسترجاع التلقائي لحساباتهم"
+          title={tr(
+            "طلبات استعادة حساب الأطباء",
+            "Doctor account restore requests",
+          )}
+          subtitle={tr(
+            "مراجعة طلبات الأطباء الذين انتهت فترة الاسترجاع التلقائي لحساباتهم",
+            "Review requests from doctors whose automatic restore window has ended",
+          )}
           headerIcon={<ShieldCheck className="h-8 w-8 text-white" />}
           kpis={[
             {
               key: "pending",
               icon: <Clock className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "..." : pendingCount,
-              label: "طلبات قيد المراجعة",
+              label: tr("طلبات قيد المراجعة", "Pending requests"),
             },
             {
               key: "reviewed",
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "..." : reviewedCount,
-              label: "طلبات تمت مراجعتها",
+              label: tr("طلبات تمت مراجعتها", "Reviewed requests"),
             },
           ]}
         />
@@ -85,7 +102,10 @@ export default function AdminDoctorRestoreRequestsPage() {
           <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <AlertCircle className="h-7 w-7 text-[#DC2626]" />
             <div className="font-cairo text-[14px] font-extrabold text-[#991B1B]">
-              تعذر تحميل طلبات الاستعادة
+              {tr(
+                "تعذر تحميل طلبات الاستعادة",
+                "Failed to load restore requests",
+              )}
             </div>
             <button
               type="button"
@@ -93,14 +113,17 @@ export default function AdminDoctorRestoreRequestsPage() {
               className="inline-flex items-center gap-2 rounded-[8px] border border-[#FECACA] bg-white px-5 py-2 font-cairo text-[12px] font-extrabold text-[#DC2626]"
             >
               <RefreshCw className="h-4 w-4" />
-              إعادة المحاولة
+              {tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         ) : null}
 
         {!isError && isAwaitingData ? (
           <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-6 py-10 text-center font-cairo text-[13px] font-bold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-            جار تحميل طلبات الاستعادة...
+            {tr(
+              "جار تحميل طلبات الاستعادة...",
+              "Loading restore requests…",
+            )}
           </div>
         ) : null}
 
@@ -108,10 +131,16 @@ export default function AdminDoctorRestoreRequestsPage() {
           <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <ShieldCheck className="mx-auto h-8 w-8 text-[#98A2B3]" />
             <div className="mt-3 font-cairo text-[15px] font-extrabold text-[#111827]">
-              لا توجد طلبات استعادة حالياً
+              {tr(
+                "لا توجد طلبات استعادة حالياً",
+                "No restore requests right now",
+              )}
             </div>
             <div className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#667085]">
-              ستظهر هنا طلبات الأطباء بعد انتهاء فترة الاسترجاع التلقائي وتأكيد رمز OTP.
+              {tr(
+                "ستظهر هنا طلبات الأطباء بعد انتهاء فترة الاسترجاع التلقائي وتأكيد رمز OTP.",
+                "Doctor requests appear here after the automatic restore window ends and OTP is confirmed.",
+              )}
             </div>
           </div>
         ) : null}
@@ -137,25 +166,41 @@ export default function AdminDoctorRestoreRequestsPage() {
                         {request.doctorName}
                       </div>
                       <div className="mt-1 font-cairo text-[12px] font-bold text-[#667085]">
-                        {request.doctorEmail || request.doctorPhone || request.doctorId}
+                        {request.doctorEmail ||
+                          request.doctorPhone ||
+                          request.doctorId}
                       </div>
                     </div>
                     <span
                       className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 font-cairo text-[11px] font-extrabold ${STATUS_STYLES[request.status]}`}
                     >
                       <StatusIcon className="h-3.5 w-3.5" />
-                      {STATUS_LABELS[request.status]}
+                      {statusLabels[request.status]}
                     </span>
                   </div>
 
                   <div className="mt-4 space-y-2 font-cairo text-[12px] font-semibold text-[#475467]">
-                    <div>تاريخ الطلب: {formatDate(request.requestedAt)}</div>
+                    <div>
+                      {tr("تاريخ الطلب:", "Requested:")}{" "}
+                      {formatDate(request.requestedAt)}
+                    </div>
                     {request.specialization ? (
-                      <div>الاختصاص: {request.specialization}</div>
+                      <div>
+                        {tr("الاختصاص:", "Specialization:")}{" "}
+                        {request.specialization}
+                      </div>
                     ) : null}
-                    {request.reason ? <div>سبب الاستعادة: {request.reason}</div> : null}
+                    {request.reason ? (
+                      <div>
+                        {tr("سبب الاستعادة:", "Restore reason:")}{" "}
+                        {request.reason}
+                      </div>
+                    ) : null}
                     {request.deletionReason ? (
-                      <div>سبب الحذف: {request.deletionReason}</div>
+                      <div>
+                        {tr("سبب الحذف:", "Deletion reason:")}{" "}
+                        {request.deletionReason}
+                      </div>
                     ) : null}
                   </div>
 
@@ -167,7 +212,7 @@ export default function AdminDoctorRestoreRequestsPage() {
                         className="inline-flex h-10 items-center gap-2 rounded-[8px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90"
                       >
                         <ShieldCheck className="h-4 w-4" />
-                        مراجعة الطلب
+                        {tr("مراجعة الطلب", "Review request")}
                       </button>
                     </div>
                   ) : null}

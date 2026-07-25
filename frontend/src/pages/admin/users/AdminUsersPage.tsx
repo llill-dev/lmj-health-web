@@ -20,22 +20,26 @@ import StyledSelect from "@/components/ui/styled-select";
 import { useAdminUsers } from "@/hooks/admin/users/useAdminUsers";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type { AdminUserSummary } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 type UserStatusFilter = "all" | "active" | "inactive";
 
-function formatUserCreatedAt(value?: string) {
+function formatUserCreatedAt(value: string | undefined, locale: string) {
   if (!value) return "?";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "?";
-  return parsed.toLocaleDateString("ar-SA", {
+  return parsed.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
 }
 
-function userStatusLabel(user: AdminUserSummary) {
-  return user.isActive === false ? "موقوف" : "نشط";
+function userStatusLabel(
+  user: AdminUserSummary,
+  tr: (ar: string, en: string) => string,
+) {
+  return user.isActive === false ? tr("موقوف", "Inactive") : tr("نشط", "Active");
 }
 
 function userStatusTone(user: AdminUserSummary) {
@@ -45,6 +49,10 @@ function userStatusTone(user: AdminUserSummary) {
 }
 
 export default function AdminUsersPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<UserStatusFilter>("all");
   const [page, setPage] = useState(1);
@@ -95,24 +103,29 @@ export default function AdminUsersPage() {
   return (
     <>
       <Helmet>
-        <title>مستخدمو الإدارة • LMJ Health</title>
+        <title>
+          {tr("مستخدمو الإدارة", "Admin users")} • LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-5">
+      <div dir={dir} lang={locale} className="space-y-5">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="مستخدمو الإدارة"
-          subtitle="إدارة حسابات الفريق الداخلي. إيقاف وتفعيل الحسابات غير متاحين حالياً."
+          title={tr("مستخدمو الإدارة", "Admin users")}
+          subtitle={tr(
+            "إدارة حسابات الفريق الداخلي. إيقاف وتفعيل الحسابات غير متاحين حالياً.",
+            "Manage internal team accounts. Deactivate and activate are not available yet.",
+          )}
           headerIcon={<UserCog className="h-8 w-8 text-white" />}
-          actionLabel="إنشاء مستخدم"
+          actionLabel={tr("إنشاء مستخدم", "Create user")}
           onActionClick={() => setCreateOpen(true)}
           kpis={[
             {
               key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : users.length,
-              label: "إجمالي الحسابات",
+              label: tr("إجمالي الحسابات", "Total accounts"),
             },
             {
               key: "active",
@@ -120,7 +133,7 @@ export default function AdminUsersPage() {
               value: isAwaitingData
                 ? "—"
                 : users.filter((user) => user.isActive !== false).length,
-              label: "حسابات نشطة",
+              label: tr("حسابات نشطة", "Active accounts"),
             },
           ]}
         />
@@ -134,10 +147,13 @@ export default function AdminUsersPage() {
                   setQuery(event.target.value);
                   setPage(1);
                 }}
-                placeholder="ابحث بالاسم أو البريد أو الهاتف أو الدور..."
-                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
+                placeholder={tr(
+                  "ابحث بالاسم أو البريد أو الهاتف أو الدور...",
+                  "Search by name, email, phone, or role…",
+                )}
+                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
               />
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+              <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
             </div>
 
             <StyledSelect
@@ -147,11 +163,17 @@ export default function AdminUsersPage() {
                 setPage(1);
               }}
               options={[
-                { value: "all", label: "كل الحالات" },
-                { value: "active", label: "الحسابات النشطة" },
-                { value: "inactive", label: "الحسابات الموقوفة" },
+                { value: "all", label: tr("كل الحالات", "All statuses") },
+                {
+                  value: "active",
+                  label: tr("الحسابات النشطة", "Active accounts"),
+                },
+                {
+                  value: "inactive",
+                  label: tr("الحسابات الموقوفة", "Inactive accounts"),
+                },
               ]}
-              placeholder="كل الحالات"
+              placeholder={tr("كل الحالات", "All statuses")}
               size="sm"
               tone="muted"
             />
@@ -168,7 +190,7 @@ export default function AdminUsersPage() {
           <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <AlertCircle className="h-7 w-7 text-[#DC2626]" />
             <div className="font-cairo text-[14px] font-extrabold text-[#991B1B]">
-              تعذّر تحميل الحسابات
+              {tr("تعذّر تحميل الحسابات", "Failed to load accounts")}
             </div>
             <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
               {userFacingErrorMessage(error)}
@@ -178,12 +200,15 @@ export default function AdminUsersPage() {
               onClick={() => void refetch()}
               className="rounded-[8px] border border-[#FECACA] bg-white px-5 py-2 font-cairo text-[12px] font-extrabold text-[#DC2626]"
             >
-              إعادة المحاولة
+              {tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-            لا توجد حسابات مطابقة للبحث الحالي.
+            {tr(
+              "لا توجد حسابات مطابقة للبحث الحالي.",
+              "No accounts match the current search.",
+            )}
           </div>
         ) : (
           <section className="space-y-4">
@@ -193,12 +218,12 @@ export default function AdminUsersPage() {
                 className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_12px_24px_rgba(0,0,0,0.06)]"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="min-w-0 text-right">
-                    <div className="flex flex-wrap items-center justify-end gap-3">
+                  <div className="min-w-0 text-start">
+                    <div className="flex flex-wrap items-center justify-start gap-3">
                       <div
                         className={`inline-flex h-[24px] items-center rounded-[999px] border px-3 font-cairo text-[11px] font-extrabold ${userStatusTone(user)}`}
                       >
-                        {userStatusLabel(user)}
+                        {userStatusLabel(user, tr)}
                       </div>
                       <h2 className="font-cairo text-[16px] font-black text-[#111827]">
                         {user.fullName}
@@ -211,25 +236,31 @@ export default function AdminUsersPage() {
 
                   <div className="flex items-center justify-end gap-2">
                     <span className="inline-flex h-9 items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]">
-                      إيقاف/تفعيل الحساب غير متاح حالياً
+                      {tr(
+                        "إيقاف/تفعيل الحساب غير متاح حالياً",
+                        "Deactivate/activate is not available yet",
+                      )}
                     </span>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
+                <div className="mt-4 flex flex-wrap items-center justify-start gap-x-5 gap-y-2">
                   <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                    <span>أُنشئ في {formatUserCreatedAt(user.createdAt)}</span>
                     <Users className="h-4 w-4 text-primary" />
+                    <span>
+                      {tr("أُنشئ في", "Created on")}{" "}
+                      {formatUserCreatedAt(user.createdAt, locale)}
+                    </span>
                   </div>
                   {user.email ? (
                     <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                      <span>{user.email}</span>
                       <Mail className="h-4 w-4 text-primary" />
+                      <span>{user.email}</span>
                     </div>
                   ) : null}
                   {user.phone || user.phoneNumber ? (
                     <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
-                      <span>{user.phone ?? user.phoneNumber}</span>
                       <Phone className="h-4 w-4 text-primary" />
+                      <span>{user.phone ?? user.phoneNumber}</span>
                     </div>
                   ) : null}
                 </div>
@@ -244,7 +275,10 @@ export default function AdminUsersPage() {
             totalPages={totalPages}
             pageSize={pageSize}
             pageSizeOptions={[10, 20, 50]}
-            summaryLabel={`عرض ${rangeStart.toLocaleString("ar-SA")}–${rangeEnd.toLocaleString("ar-SA")} من ${filteredUsers.length.toLocaleString("ar-SA")} حساب`}
+            summaryLabel={tr(
+              `عرض ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} من ${filteredUsers.length.toLocaleString(numberLocale)} حساب`,
+              `Showing ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} of ${filteredUsers.length.toLocaleString(numberLocale)} accounts`,
+            )}
             onPageChange={setPage}
             onPageSizeChange={(size) => {
               setPageSize(size);

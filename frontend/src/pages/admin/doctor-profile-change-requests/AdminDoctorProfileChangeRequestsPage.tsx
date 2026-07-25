@@ -1,9 +1,15 @@
-import { Helmet } from 'react-helmet-async';
-import { FileText, Check, XCircle, RefreshCw, Loader2, Filter, User } from 'lucide-react';
-import { useState, useCallback } from 'react';
-import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
-import ReviewProfileChangeDialog from '@/components/admin/doctor-profile-change-requests/dialogs/ReviewProfileChangeDialog';
-import StyledSelect from '@/components/ui/styled-select';
+import { Helmet } from "react-helmet-async";
+import {
+  FileText,
+  RefreshCw,
+  Loader2,
+  User,
+} from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
+import ReviewProfileChangeDialog from "@/components/admin/doctor-profile-change-requests/dialogs/ReviewProfileChangeDialog";
+import StyledSelect from "@/components/ui/styled-select";
+import { useI18n } from "@/i18n/provider";
 
 interface ProfileChangeRequest {
   _id: string;
@@ -29,30 +35,32 @@ interface ProfileChangeRequest {
   createdAt?: string;
 }
 
-const STATUS_OPTIONS = [
-  { value: '', label: 'الكل' },
-  { value: 'pending', label: 'قيد الانتظار' },
-  { value: 'approved', label: 'موافق عليه' },
-  { value: 'denied', label: 'مرفوض' },
-];
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'قيد الانتظار',
-  approved: 'موافق عليه',
-  denied: 'مرفوض',
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]',
-  approved: 'bg-[#F0FDF4] border-[#BBF7D0] text-[#166534]',
-  denied: 'bg-[#FEF2F2] border-[#FECACA] text-[#991B1B]',
-};
-
 export default function AdminDoctorProfileChangeRequestsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
+
+  const statusOptions = useMemo(
+    () => [
+      { value: "", label: tr("الكل", "All") },
+      { value: "pending", label: tr("قيد الانتظار", "Pending") },
+      { value: "approved", label: tr("موافق عليه", "Approved") },
+      { value: "denied", label: tr("مرفوض", "Denied") },
+    ],
+    [locale],
+  );
+
+  const statusLabels: Record<string, string> = {
+    pending: tr("قيد الانتظار", "Pending"),
+    approved: tr("موافق عليه", "Approved"),
+    denied: tr("مرفوض", "Denied"),
+  };
+
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<ProfileChangeRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] =
+    useState<ProfileChangeRequest | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
   const [requests, setRequests] = useState<ProfileChangeRequest[]>([]);
 
   const openReview = useCallback((request: ProfileChangeRequest) => {
@@ -68,33 +76,45 @@ export default function AdminDoctorProfileChangeRequestsPage() {
     }, 1000);
   };
 
-  const pendingCount = requests.filter((r) => r.status === 'pending').length;
+  const pendingCount = requests.filter((r) => r.status === "pending").length;
 
   return (
     <>
       <Helmet>
-        <title>طلبات تغيير بيانات الأطباء • LMJ Health</title>
+        <title>
+          {tr(
+            "طلبات تغيير بيانات الأطباء",
+            "Doctor profile change requests",
+          )}{" "}
+          • LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="طلبات تغيير بيانات الأطباء"
-          subtitle="مراجعة طلبات تغيير البيانات الشخصية للأطباء"
+          title={tr(
+            "طلبات تغيير بيانات الأطباء",
+            "Doctor profile change requests",
+          )}
+          subtitle={tr(
+            "مراجعة طلبات تغيير البيانات الشخصية للأطباء",
+            "Review doctor personal profile change requests",
+          )}
           headerIcon={<FileText className="h-8 w-8 text-white" />}
           kpis={[
             {
-              key: 'pending',
+              key: "pending",
               icon: <FileText className="h-5 w-5 shrink-0" />,
-              value: pendingCount.toLocaleString('ar-EG'),
-              label: 'طلبات قيد الانتظار',
+              value: pendingCount.toLocaleString(numberLocale),
+              label: tr("طلبات قيد الانتظار", "Pending requests"),
             },
             {
-              key: 'total',
+              key: "total",
               icon: <User className="h-5 w-5 shrink-0" />,
-              value: requests.length.toLocaleString('ar-EG'),
-              label: 'إجمالي الطلبات',
+              value: requests.length.toLocaleString(numberLocale),
+              label: tr("إجمالي الطلبات", "Total requests"),
             },
           ]}
         />
@@ -103,13 +123,13 @@ export default function AdminDoctorProfileChangeRequestsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-4">
               <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
-                تصفية حسب الحالة
+                {tr("تصفية حسب الحالة", "Filter by status")}
               </div>
               <StyledSelect
                 value={statusFilter}
                 onChange={setStatusFilter}
-                options={STATUS_OPTIONS}
-                placeholder="اختر الحالة"
+                options={statusOptions}
+                placeholder={tr("اختر الحالة", "Select status")}
                 size="sm"
                 tone="muted"
               />
@@ -121,8 +141,10 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                 disabled={isLoading}
                 className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
               >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                تحديث
+                <RefreshCw
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+                {tr("تحديث", "Refresh")}
               </button>
             </div>
           </div>
@@ -135,7 +157,10 @@ export default function AdminDoctorProfileChangeRequestsPage() {
             </div>
           ) : requests.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              لا توجد طلبات تغيير بيانات حالياً.
+              {tr(
+                "لا توجد طلبات تغيير بيانات حالياً.",
+                "No profile change requests right now.",
+              )}
             </div>
           ) : (
             requests
@@ -153,35 +178,40 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                         </div>
                         <div className="min-w-0">
                           <div className="font-cairo text-[16px] font-black leading-[22px] text-[#111827]">
-                            {request.doctor?.userId?.fullName || request.doctor?._id}
+                            {request.doctor?.userId?.fullName ||
+                              request.doctor?._id}
                           </div>
                           <div className="mt-0.5 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                            {request.doctor?.specialization || '—'} ·{' '}
-                            {request.doctor?.medicalLicenseNumber || '—'}
+                            {request.doctor?.specialization || "—"} ·{" "}
+                            {request.doctor?.medicalLicenseNumber || "—"}
                           </div>
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-4 items-center mt-3">
                         <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                          طلب بواسطة: {request.requestedBy?.fullName || '—'}
+                          {tr("طلب بواسطة:", "Requested by:")}{" "}
+                          {request.requestedBy?.fullName || "—"}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                          عدد التغييرات: {request.items?.length || 0}
+                          {tr("عدد التغييرات:", "Changes:")}{" "}
+                          {request.items?.length || 0}
                         </div>
                         <div className="inline-flex items-center rounded-[6px] border px-2 py-1 font-cairo text-[11px] font-bold">
-                          {STATUS_LABELS[request.status || ''] || request.status || '—'}
+                          {statusLabels[request.status || ""] ||
+                            request.status ||
+                            "—"}
                         </div>
                       </div>
                     </div>
-                    {request.status === 'pending' && (
+                    {request.status === "pending" && (
                       <button
                         type="button"
                         onClick={() => openReview(request)}
-                        title="مراجعة الطلب"
+                        title={tr("مراجعة الطلب", "Review request")}
                         className="inline-flex h-[34px] items-center gap-1.5 rounded-[8px] border border-primary bg-primary px-3 font-cairo text-[11px] font-extrabold text-white transition hover:bg-primary/90"
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        مراجعة
+                        {tr("مراجعة", "Review")}
                       </button>
                     )}
                   </div>
@@ -190,7 +220,6 @@ export default function AdminDoctorProfileChangeRequestsPage() {
           )}
         </section>
 
-        {/* Review Dialog */}
         <ReviewProfileChangeDialog
           open={reviewOpen}
           onOpenChange={setReviewOpen}
