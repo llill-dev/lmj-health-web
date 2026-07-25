@@ -20,9 +20,13 @@ import {
 } from "@/hooks/admin/content/useAdminContent";
 import type { AdminContentDetailsItem } from "@/lib/admin/types";
 import { formatContentDate, type LangFilter } from "@/components/admin/medical-content/contentListUtils";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminMedicalNewsQueuePage() {
   const { toast } = useToast();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const [langFilter, setLangFilter] = useState<LangFilter>("الكل");
   const [sourceUrl, setSourceUrl] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -63,10 +67,16 @@ export default function AdminMedicalNewsQueuePage() {
     const normalizedSourceUrl = ingestSourceUrl.trim();
     const normalizedTitle = ingestTitle.trim();
     if (!normalizedSourceUrl || !normalizedTitle) {
-      toast("أدخل رابط المصدر والعنوان على الأقل.", {
-        title: "بيانات ناقصة",
-        variant: "error",
-      });
+      toast(
+        tr(
+          "أدخل رابط المصدر والعنوان على الأقل.",
+          "Enter at least the source URL and title.",
+        ),
+        {
+          title: tr("بيانات ناقصة", "Missing data"),
+          variant: "error",
+        },
+      );
       return;
     }
 
@@ -82,10 +92,16 @@ export default function AdminMedicalNewsQueuePage() {
       ],
     });
 
-    toast("تمت إضافة الخبر إلى طابور الأخبار المعلّقة.", {
-      title: "تمت الإضافة",
-      variant: "success",
-    });
+    toast(
+      tr(
+        "تمت إضافة الخبر إلى طابور الأخبار المعلّقة.",
+        "News item was added to the pending queue.",
+      ),
+      {
+        title: tr("تمت الإضافة", "Added"),
+        variant: "success",
+      },
+    );
     setIngestOpen(false);
     setIngestSourceUrl("");
     setIngestTitle("");
@@ -103,37 +119,44 @@ export default function AdminMedicalNewsQueuePage() {
   return (
     <>
       <Helmet>
-        <title>طابور الأخبار الطبية • LMJ Health</title>
+        <title>
+          {tr("طابور الأخبار الطبية", "Medical news queue")} • LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="طابور الأخبار الطبية"
-          subtitle="إدارة الأخبار المعلّقة القادمة من ingest قبل إدخالها في دورة التحرير والمراجعة"
+          title={tr("طابور الأخبار الطبية", "Medical news queue")}
+          subtitle={tr(
+            "إدارة الأخبار المعلّقة القادمة من ingest قبل إدخالها في دورة التحرير والمراجعة",
+            "Manage pending ingest news before editorial review",
+          )}
           headerIcon={<Newspaper className="h-8 w-8 text-white" />}
-          actionLabel="إضافة خبر إلى الطابور"
+          actionLabel={tr("إضافة خبر إلى الطابور", "Add news to queue")}
           onActionClick={() => setIngestOpen(true)}
           kpiColumns={3}
           kpis={[
             {
               key: "pending",
               icon: <Newspaper className="h-5 w-5 shrink-0" />,
-              value: pendingNewsQuery.isAwaitingData ? "…" : pendingTotal.toLocaleString("ar-SA"),
-              label: "إجمالي المعلّق",
+              value: pendingNewsQuery.isAwaitingData
+                ? "…"
+                : pendingTotal.toLocaleString(numberLocale),
+              label: tr("إجمالي المعلّق", "Total pending"),
             },
             {
               key: "visible",
               icon: <Eye className="h-5 w-5 shrink-0" />,
               value: pendingNewsQuery.isAwaitingData ? "…" : visibleItems.length,
-              label: "المعروض الآن",
+              label: tr("المعروض الآن", "Currently shown"),
             },
             {
               key: "language",
               icon: <LinkIcon className="h-5 w-5 shrink-0" />,
               value: langFilter === "الكل" ? "AR/EN" : langFilter.toUpperCase(),
-              label: "نطاق اللغة",
+              label: tr("نطاق اللغة", "Language scope"),
             },
           ]}
         />
@@ -142,15 +165,18 @@ export default function AdminMedicalNewsQueuePage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex-1">
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                فلاتر الطابور
+                {tr("فلاتر الطابور", "Queue filters")}
               </div>
               <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-                ابحث حسب رابط المصدر أو الفترة الزمنية أو اللغة.
+                {tr(
+                  "ابحث حسب رابط المصدر أو الفترة الزمنية أو اللغة.",
+                  "Filter by source URL, date range, or language.",
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-4 lg:min-w-[920px]">
-              <label className="flex flex-col gap-1 text-right">
+              <label className="flex flex-col gap-1 text-start">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
                   Source URL
                 </span>
@@ -165,9 +191,9 @@ export default function AdminMedicalNewsQueuePage() {
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
                 />
               </label>
-              <label className="flex flex-col gap-1 text-right">
+              <label className="flex flex-col gap-1 text-start">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  من تاريخ
+                  {tr("من تاريخ", "From date")}
                 </span>
                 <input
                   type="date"
@@ -179,9 +205,9 @@ export default function AdminMedicalNewsQueuePage() {
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
                 />
               </label>
-              <label className="flex flex-col gap-1 text-right">
+              <label className="flex flex-col gap-1 text-start">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  إلى تاريخ
+                  {tr("إلى تاريخ", "To date")}
                 </span>
                 <input
                   type="date"
@@ -193,9 +219,9 @@ export default function AdminMedicalNewsQueuePage() {
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
                 />
               </label>
-              <div className="flex flex-col gap-1 text-right">
+              <div className="flex flex-col gap-1 text-start">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  اللغة
+                  {tr("اللغة", "Language")}
                 </span>
                 <LanguageModeToggle
                   value={langFilter}
@@ -218,7 +244,7 @@ export default function AdminMedicalNewsQueuePage() {
               <RefreshCw
                 className={`h-4 w-4 ${pendingNewsQuery.isFetching ? "animate-spin" : ""}`}
               />
-              تحديث
+              {tr("تحديث", "Refresh")}
             </button>
           </div>
         </section>
@@ -226,15 +252,24 @@ export default function AdminMedicalNewsQueuePage() {
         <section className="mt-5 space-y-3">
           {pendingNewsQuery.isAwaitingData ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              جاري تحميل الأخبار المعلّقة...
+              {tr(
+                "جاري تحميل الأخبار المعلّقة...",
+                "Loading pending news...",
+              )}
             </div>
           ) : pendingNewsQuery.isError ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-              تعذر تحميل طابور الأخبار.
+              {tr(
+                "تعذر تحميل طابور الأخبار.",
+                "Failed to load news queue.",
+              )}
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              لا توجد عناصر مطابقة في الطابور الحالي.
+              {tr(
+                "لا توجد عناصر مطابقة في الطابور الحالي.",
+                "No matching items in the current queue.",
+              )}
             </div>
           ) : (
             visibleItems.map((item) => (
@@ -254,7 +289,7 @@ export default function AdminMedicalNewsQueuePage() {
                     </div>
                   ) : null}
 
-                  <div className="min-w-0 flex-1 text-right">
+                    <div className="min-w-0 flex-1 text-start">
                     <div className="flex flex-wrap items-center justify-start gap-2">
                       <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#B54708]">
                         pending
@@ -269,20 +304,35 @@ export default function AdminMedicalNewsQueuePage() {
                     </div>
                     {item.originalTitle && item.originalTitle !== item.title ? (
                       <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                        العنوان الأصلي: {item.originalTitle}
+                        {tr("العنوان الأصلي:", "Original title:")}{" "}
+                        {item.originalTitle}
                       </div>
                     ) : null}
                     <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
-                      {item.summary ?? item.aiSummary ?? "لا يوجد ملخص."}
+                      {item.summary ??
+                        item.aiSummary ??
+                        tr("لا يوجد ملخص.", "No summary.")}
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center justify-start gap-4 font-cairo text-[11px] font-bold text-[#667085]">
-                      {item.sourceName ? <span>المصدر: {item.sourceName}</span> : null}
-                      <span>آخر تحديث: {formatContentDate(item.updatedAt ?? item.createdAt)}</span>
-                      {item.publishedAt ? (
-                        <span>نُشر أصلًا: {formatContentDate(item.publishedAt)}</span>
+                      {item.sourceName ? (
+                        <span>
+                          {tr("المصدر:", "Source:")} {item.sourceName}
+                        </span>
                       ) : null}
-                      {item.pageVersion ? <span>pageVersion: {item.pageVersion}</span> : null}
+                      <span>
+                        {tr("آخر تحديث:", "Last updated:")}{" "}
+                        {formatContentDate(item.updatedAt ?? item.createdAt)}
+                      </span>
+                      {item.publishedAt ? (
+                        <span>
+                          {tr("نُشر أصلًا:", "Originally published:")}{" "}
+                          {formatContentDate(item.publishedAt)}
+                        </span>
+                      ) : null}
+                      {item.pageVersion ? (
+                        <span>pageVersion: {item.pageVersion}</span>
+                      ) : null}
                     </div>
 
                     {item.sources?.[0]?.url ? (
@@ -308,7 +358,7 @@ export default function AdminMedicalNewsQueuePage() {
                         className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BFDBFE] px-3 font-cairo text-[12px] font-extrabold text-[#1D4ED8]"
                       >
                         <Eye className="h-4 w-4" />
-                        معاينة
+                        {tr("معاينة", "Preview")}
                       </button>
                     ) : null}
                     <button
@@ -317,7 +367,7 @@ export default function AdminMedicalNewsQueuePage() {
                       className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BBF7D0] px-3 font-cairo text-[12px] font-extrabold text-[#15803D]"
                     >
                       <Plus className="h-4 w-4" />
-                      ingest جديد
+                      {tr("ingest جديد", "New ingest")}
                     </button>
                   </div>
                 </div>
@@ -329,10 +379,13 @@ export default function AdminMedicalNewsQueuePage() {
         {!pendingNewsQuery.isAwaitingData && !pendingNewsQuery.isError && pendingTotal > 0 ? (
           <section className="mt-4">
             <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
-              <div className="text-right font-cairo text-[12px] font-semibold text-[#667085]">
-                عرض {rangeStart.toLocaleString("ar-SA")}–{rangeEnd.toLocaleString("ar-SA")} من{" "}
-                {pendingTotal.toLocaleString("ar-SA")} خبر · صفحة{" "}
-                {currentPage.toLocaleString("ar-SA")} / {totalPages.toLocaleString("ar-SA")}
+              <div className="text-start font-cairo text-[12px] font-semibold text-[#667085]">
+                {tr("عرض", "Showing")}{" "}
+                {rangeStart.toLocaleString(numberLocale)}–
+                {rangeEnd.toLocaleString(numberLocale)} {tr("من", "of")}{" "}
+                {pendingTotal.toLocaleString(numberLocale)} {tr("خبر", "news")}{" "}
+                · {tr("صفحة", "Page")} {currentPage.toLocaleString(numberLocale)}{" "}
+                / {totalPages.toLocaleString(numberLocale)}
               </div>
               <div className="flex items-center justify-end gap-2">
                 <button
@@ -344,7 +397,7 @@ export default function AdminMedicalNewsQueuePage() {
                   className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronRight className="h-4 w-4" />
-                  السابق
+                  {tr("السابق", "Previous")}
                 </button>
                 <button
                   type="button"
@@ -354,7 +407,7 @@ export default function AdminMedicalNewsQueuePage() {
                   disabled={!canNext || pendingNewsQuery.isFetching}
                   className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#EAECF0] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  التالي
+                  {tr("التالي", "Next")}
                   <ChevronLeft className="h-4 w-4" />
                 </button>
               </div>
@@ -377,9 +430,9 @@ export default function AdminMedicalNewsQueuePage() {
             if (!ingestNewsMutation.isPending) setIngestOpen(open);
           }}
           variant="primary"
-          title="إضافة خبر إلى طابور ingest"
+          title={tr("إضافة خبر إلى طابور ingest", "Add news to ingest queue")}
           description={
-            <div className="grid grid-cols-1 gap-3 text-right">
+            <div className="grid grid-cols-1 gap-3 text-start">
               <label className="flex flex-col gap-1">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
                   Source URL
@@ -394,31 +447,31 @@ export default function AdminMedicalNewsQueuePage() {
               </label>
               <label className="flex flex-col gap-1">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  العنوان
+                  {tr("العنوان", "Title")}
                 </span>
                 <input
                   value={ingestTitle}
                   onChange={(e) => setIngestTitle(e.target.value)}
-                  placeholder="عنوان الخبر"
+                  placeholder={tr("عنوان الخبر", "News title")}
                   className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
                 />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  الملخص
+                  {tr("الملخص", "Summary")}
                 </span>
                 <textarea
                   value={ingestSummary}
                   onChange={(e) => setIngestSummary(e.target.value)}
                   rows={3}
-                  placeholder="ملخص مختصر اختياري"
+                  placeholder={tr("ملخص مختصر اختياري", "Optional short summary")}
                   className="rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-2 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
                 />
               </label>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label className="flex flex-col gap-1">
                   <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                    اللغة
+                    {tr("اللغة", "Language")}
                   </span>
                   <select
                     value={ingestLanguage}
@@ -433,7 +486,7 @@ export default function AdminMedicalNewsQueuePage() {
                 </label>
                 <label className="flex flex-col gap-1">
                   <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                    تاريخ النشر
+                    {tr("تاريخ النشر", "Publish date")}
                   </span>
                   <input
                     type="datetime-local"
@@ -445,7 +498,11 @@ export default function AdminMedicalNewsQueuePage() {
               </div>
             </div>
           }
-          confirmLabel={ingestNewsMutation.isPending ? "جارٍ الإدخال..." : "إرسال إلى الطابور"}
+          confirmLabel={
+            ingestNewsMutation.isPending
+              ? tr("جارٍ الإدخال...", "Submitting...")
+              : tr("إرسال إلى الطابور", "Send to queue")
+          }
           confirmDisabled={ingestNewsMutation.isPending}
           onConfirm={submitNewsIngest}
         />

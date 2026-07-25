@@ -24,9 +24,13 @@ import {
   STATUS_COLOR,
   STATUS_LABEL,
 } from '@/components/admin/analytics/analyticsUtils';
+import { useI18n } from '@/i18n/provider';
 
 /* ─── page ──────────────────────────────────────────────────── */
 export default function AdminAnalyticsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
   const { stats, isAwaitingData: statsAwaiting, refetch } = useAdminPlatformStats();
   const doctorsQuery = useTopApprovedDoctors(8);
   const appointmentsQuery = useRecentAppointments(6);
@@ -34,20 +38,20 @@ export default function AdminAnalyticsPage() {
   return (
     <>
       <Helmet>
-        <title>التحليلات • LMJ Health</title>
+        <title>{tr('التحليلات', 'Analytics')} • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant='admin'
           surface='mint'
-          title='التحليلات والإحصائيات'
-          subtitle='إحصائيات حقيقية من قاعدة البيانات'
+          title={tr('التحليلات والإحصائيات', 'Analytics and statistics')}
+          subtitle={tr(
+            'إحصائيات حقيقية من قاعدة البيانات',
+            'Live statistics from the database',
+          )}
           headerIcon={<BarChart3 className='h-8 w-8 text-white' />}
-          actionLabel='تحديث'
+          actionLabel={tr('تحديث', 'Refresh')}
           actionIcon={<RefreshCw className='h-4 w-4' />}
           onActionClick={() => void refetch()}
           kpiColumns={4}
@@ -56,25 +60,25 @@ export default function AdminAnalyticsPage() {
               key: 'patients',
               icon: <Users className='h-5 w-5 shrink-0' />,
               value: statsAwaiting ? '—' : stats.totalPatients,
-              label: 'إجمالي المرضى',
+              label: tr('إجمالي المرضى', 'Total patients'),
             },
             {
               key: 'approved',
               icon: <UserCheck className='h-5 w-5 shrink-0' />,
               value: statsAwaiting ? '—' : stats.approvedDoctors,
-              label: 'أطباء معتمدون',
+              label: tr('أطباء معتمدون', 'Approved doctors'),
             },
             {
               key: 'appointments',
               icon: <CalendarDays className='h-5 w-5 shrink-0' />,
               value: statsAwaiting ? '—' : stats.totalAppointments,
-              label: 'إجمالي المواعيد',
+              label: tr('إجمالي المواعيد', 'Total appointments'),
             },
             {
               key: 'doctors',
               icon: <Stethoscope className='h-5 w-5 shrink-0' />,
               value: statsAwaiting ? '—' : stats.totalDoctors,
-              label: 'إجمالي الأطباء',
+              label: tr('إجمالي الأطباء', 'Total doctors'),
             },
           ]}
         />
@@ -86,12 +90,14 @@ export default function AdminAnalyticsPage() {
               <Clock className='h-5 w-5 text-[#D97706]' />
             </div>
             <div>
-              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>طلبات التحقق المعلقة</div>
+              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>
+                {tr('طلبات التحقق المعلقة', 'Pending verifications')}
+              </div>
               {statsAwaiting ? (
                 <div className='mt-1 h-5 w-12 animate-pulse rounded bg-[#EEF2F6]' />
               ) : (
                 <div className='mt-0.5 font-cairo text-[20px] font-black text-[#111827]'>
-                  {stats.pendingVerifications.toLocaleString('ar-EG')}
+                  {stats.pendingVerifications.toLocaleString(numberLocale)}
                 </div>
               )}
             </div>
@@ -102,13 +108,15 @@ export default function AdminAnalyticsPage() {
               <CheckCircle2 className='h-5 w-5 text-[#16A34A]' />
             </div>
             <div>
-              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>نسبة الاعتماد</div>
+              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>
+                {tr('نسبة الاعتماد', 'Approval rate')}
+              </div>
               {statsAwaiting ? (
                 <div className='mt-1 h-5 w-12 animate-pulse rounded bg-[#EEF2F6]' />
               ) : (
                 <div className='mt-0.5 font-cairo text-[20px] font-black text-[#16A34A]'>
                   {stats.totalDoctors > 0
-                    ? `${Math.round((stats.approvedDoctors / stats.totalDoctors) * 100)}٪`
+                    ? `${Math.round((stats.approvedDoctors / stats.totalDoctors) * 100)}${tr('٪', '%')}`
                     : '—'}
                 </div>
               )}
@@ -120,12 +128,14 @@ export default function AdminAnalyticsPage() {
               <Activity className='h-5 w-5 text-[#7C3AED]' />
             </div>
             <div>
-              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>السكرتارية الكلي</div>
+              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>
+                {tr('السكرتارية الكلي', 'Total secretaries')}
+              </div>
               {statsAwaiting ? (
                 <div className='mt-1 h-5 w-12 animate-pulse rounded bg-[#EEF2F6]' />
               ) : (
                 <div className='mt-0.5 font-cairo text-[20px] font-black text-[#111827]'>
-                  {stats.totalSecretaries.toLocaleString('ar-EG')}
+                  {stats.totalSecretaries.toLocaleString(numberLocale)}
                 </div>
               )}
             </div>
@@ -140,11 +150,12 @@ export default function AdminAnalyticsPage() {
             <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
               <div className='inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]'>
                 <UserCheck className='h-4 w-4 text-primary' />
-                الأطباء المعتمدون
+                {tr('الأطباء المعتمدون', 'Approved doctors')}
               </div>
               {doctorsQuery.data && (
                 <span className='rounded-full bg-[#E7FBFA] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary'>
-                  {doctorsQuery.data.total.toLocaleString('ar-EG')} طبيب
+                  {doctorsQuery.data.total.toLocaleString(numberLocale)}{' '}
+                  {tr('طبيب', 'doctors')}
                 </span>
               )}
             </div>
@@ -153,16 +164,20 @@ export default function AdminAnalyticsPage() {
               <table className='w-full border-collapse'>
                 <thead>
                   <tr className='bg-[#F9FAFB]'>
-                    {['الطبيب', 'التخصص', 'المدينة', 'رسوم الاستشارة', 'نوع الاستشارة'].map(
-                      (h) => (
-                        <th
-                          key={h}
-                          className='whitespace-nowrap px-4 py-3.5 text-right font-cairo text-[11px] font-extrabold text-[#667085]'
-                        >
-                          {h}
-                        </th>
-                      ),
-                    )}
+                    {[
+                      tr('الطبيب', 'Doctor'),
+                      tr('التخصص', 'Specialty'),
+                      tr('المدينة', 'City'),
+                      tr('رسوم الاستشارة', 'Consultation fee'),
+                      tr('نوع الاستشارة', 'Consultation type'),
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className='whitespace-nowrap px-4 py-3.5 text-start font-cairo text-[11px] font-extrabold text-[#667085]'
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-[#EEF2F6]'>
@@ -182,7 +197,9 @@ export default function AdminAnalyticsPage() {
                             >
                               <div className='flex flex-col items-center gap-2 text-[#667085]'>
                                 <AlertCircle className='h-5 w-5 text-[#F87171]' />
-                                <span className='font-cairo text-[12px]'>تعذّر تحميل البيانات</span>
+                                <span className='font-cairo text-[12px]'>
+                                  {tr('تعذّر تحميل البيانات', 'Failed to load data')}
+                                </span>
                               </div>
                             </td>
                           </tr>
@@ -194,7 +211,10 @@ export default function AdminAnalyticsPage() {
                                 colSpan={5}
                                 className='px-4 py-10 text-center font-cairo text-[12px] font-bold text-[#98A2B3]'
                               >
-                                لا يوجد أطباء معتمدون بعد
+                                {tr(
+                                  'لا يوجد أطباء معتمدون بعد',
+                                  'No approved doctors yet',
+                                )}
                               </td>
                             </tr>
                           )
@@ -208,7 +228,7 @@ export default function AdminAnalyticsPage() {
                                 <td className='px-4 py-3.5'>
                                   <div className='flex items-center gap-2.5'>
                                     <div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 font-cairo text-[11px] font-black text-primary'>
-                                      {d.user?.fullName?.charAt(0) ?? 'د'}
+                                      {d.user?.fullName?.charAt(0) ?? tr('د', 'D')}
                                     </div>
                                     <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                                       {d.user?.fullName ?? '—'}
@@ -223,7 +243,7 @@ export default function AdminAnalyticsPage() {
                                 </td>
                                 <td className='px-4 py-3.5 font-cairo text-[12px] font-extrabold text-[#111827]'>
                                   {d.consultationFee != null
-                                    ? `${d.consultationFee.toLocaleString('ar-EG')} ل.س`
+                                    ? `${d.consultationFee.toLocaleString(numberLocale)} ${tr('ل.س', 'SYP')}`
                                     : '—'}
                                 </td>
                                 <td className='px-4 py-3.5'>
@@ -240,7 +260,9 @@ export default function AdminAnalyticsPage() {
                                               : 'bg-[#F0FDF4] text-[#16A34A]'
                                           }`}
                                         >
-                                          {t === 'online' ? 'أونلاين' : 'حضوري'}
+                                          {t === 'online'
+                                            ? tr('أونلاين', 'Online')
+                                            : tr('حضوري', 'In-person')}
                                         </span>
                                       ))
                                     )}
@@ -261,27 +283,27 @@ export default function AdminAnalyticsPage() {
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
               <div className='mb-4 inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
                 <BarChart3 className='h-4 w-4 text-primary' />
-                توزيع حالة الأطباء
+                {tr('توزيع حالة الأطباء', 'Doctor status distribution')}
               </div>
 
               <div className='space-y-3'>
                 {[
                   {
-                    label: 'معتمدون',
+                    label: tr('معتمدون', 'Approved'),
                     value: stats.approvedDoctors,
                     total: stats.totalDoctors,
                     bar: 'bg-[#22C55E]',
                     text: 'text-[#16A34A]',
                   },
                   {
-                    label: 'قيد المراجعة',
+                    label: tr('قيد المراجعة', 'Pending review'),
                     value: stats.pendingDoctors,
                     total: stats.totalDoctors,
                     bar: 'bg-[#F59E0B]',
                     text: 'text-[#D97706]',
                   },
                   {
-                    label: 'مرفوضون',
+                    label: tr('مرفوضون', 'Rejected'),
                     value:
                       stats.totalDoctors - stats.approvedDoctors - stats.pendingDoctors,
                     total: stats.totalDoctors,
@@ -297,7 +319,9 @@ export default function AdminAnalyticsPage() {
                           {label}
                         </div>
                         <div className={`font-cairo text-[11px] font-extrabold ${text}`}>
-                          {statsAwaiting ? '—' : `${value.toLocaleString('ar-EG')} (${pct}٪)`}
+                          {statsAwaiting
+                            ? '—'
+                            : `${value.toLocaleString(numberLocale)} (${pct}${tr('٪', '%')})`}
                         </div>
                       </div>
                       <div className='mt-1.5 h-[8px] w-full rounded-full bg-[#EEF2F6]'>
@@ -318,25 +342,25 @@ export default function AdminAnalyticsPage() {
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
               <div className='mb-4 inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
                 <Users className='h-4 w-4 text-primary' />
-                نمو المستخدمين
+                {tr('نمو المستخدمين', 'User growth')}
               </div>
 
               <div className='space-y-3'>
                 {[
                   {
-                    label: 'المرضى الكلي',
+                    label: tr('المرضى الكلي', 'Total patients'),
                     value: stats.totalPatients,
                     bg: 'bg-[#E7FBFA]',
                     text: 'text-primary',
                   },
                   {
-                    label: 'الأطباء الكلي',
+                    label: tr('الأطباء الكلي', 'Total doctors'),
                     value: stats.totalDoctors,
                     bg: 'bg-[#ECFDF3]',
                     text: 'text-[#16A34A]',
                   },
                   {
-                    label: 'السكرتارية الكلي',
+                    label: tr('السكرتارية الكلي', 'Total secretaries'),
                     value: stats.totalSecretaries,
                     bg: 'bg-[#EFF6FF]',
                     text: 'text-[#2563EB]',
@@ -353,7 +377,7 @@ export default function AdminAnalyticsPage() {
                       <div className='h-4 w-10 animate-pulse rounded bg-[#EEF2F6]' />
                     ) : (
                       <div className={`font-cairo text-[14px] font-black ${text}`}>
-                        {value.toLocaleString('ar-EG')}
+                        {value.toLocaleString(numberLocale)}
                       </div>
                     )}
                   </div>
@@ -368,11 +392,13 @@ export default function AdminAnalyticsPage() {
           <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
             <div className='inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]'>
               <CalendarDays className='h-4 w-4 text-primary' />
-              آخر المواعيد
+              {tr('آخر المواعيد', 'Recent appointments')}
             </div>
             {appointmentsQuery.data && (
               <span className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
-                إجمالي {appointmentsQuery.data.total.toLocaleString('ar-EG')} موعد
+                {tr('إجمالي', 'Total')}{' '}
+                {appointmentsQuery.data.total.toLocaleString(numberLocale)}{' '}
+                {tr('موعد', 'appointments')}
               </span>
             )}
           </div>
@@ -381,10 +407,15 @@ export default function AdminAnalyticsPage() {
             <table className='w-full border-collapse'>
               <thead>
                 <tr className='bg-[#F9FAFB]'>
-                  {['الطبيب', 'المريض', 'التاريخ', 'الحالة'].map((h) => (
+                  {[
+                    tr('الطبيب', 'Doctor'),
+                    tr('المريض', 'Patient'),
+                    tr('التاريخ', 'Date'),
+                    tr('الحالة', 'Status'),
+                  ].map((h) => (
                     <th
                       key={h}
-                      className='whitespace-nowrap px-4 py-3.5 text-right font-cairo text-[11px] font-extrabold text-[#667085]'
+                      className='whitespace-nowrap px-4 py-3.5 text-start font-cairo text-[11px] font-extrabold text-[#667085]'
                     >
                       {h}
                     </th>
@@ -408,7 +439,9 @@ export default function AdminAnalyticsPage() {
                           >
                             <div className='flex flex-col items-center gap-2 text-[#667085]'>
                               <AlertCircle className='h-5 w-5 text-[#F87171]' />
-                              <span className='font-cairo text-[12px]'>تعذّر تحميل البيانات</span>
+                              <span className='font-cairo text-[12px]'>
+                                {tr('تعذّر تحميل البيانات', 'Failed to load data')}
+                              </span>
                             </div>
                           </td>
                         </tr>
@@ -420,7 +453,10 @@ export default function AdminAnalyticsPage() {
                               colSpan={4}
                               className='px-4 py-10 text-center font-cairo text-[12px] font-bold text-[#98A2B3]'
                             >
-                              لا توجد مواعيد حتى الآن
+                              {tr(
+                                'لا توجد مواعيد حتى الآن',
+                                'No appointments yet',
+                              )}
                             </td>
                           </tr>
                         )

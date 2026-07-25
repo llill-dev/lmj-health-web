@@ -29,12 +29,15 @@ import type {
   ComplaintAttachmentRef,
   ComplaintLifecycleStatus,
 } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 export default function AdminComplaintDetailsPage() {
   const { complaintId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const [nextStatus, setNextStatus] = useState<ComplaintLifecycleStatus | ''>(
     '',
   );
@@ -162,21 +165,17 @@ export default function AdminComplaintDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>تفاصيل الشكوى • LMJ Health</title>
+        <title>{tr('تفاصيل الشكوى', 'Complaint details')} • LMJ Health</title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-        className='text-right'
-      >
+      <div dir={dir} lang={locale} className='text-start'>
         <button
           type='button'
           onClick={() => navigate('/admin/complaints')}
           className='mb-5 inline-flex items-center gap-1 font-cairo text-[13px] font-bold text-primary hover:underline'
         >
           <ChevronRight className='w-4 h-4' />
-          العودة إلى الشكاوي
+          {tr('العودة إلى الشكاوي', 'Back to complaints')}
         </button>
 
         {detailAwaiting ? (
@@ -185,16 +184,17 @@ export default function AdminComplaintDetailsPage() {
           </div>
         ) : detailQuery.isError || !c ? (
           <div className='px-4 py-6 text-sm font-semibold text-red-800 bg-red-50 rounded-xl border border-red-200 font-cairo'>
-            {detailErrorMessage ?? '????? ????? ??????.'}
+            {detailErrorMessage ??
+              tr('تعذر تحميل الشكوى.', 'Failed to load complaint.')}
           </div>
         ) : (
           <div className='flex flex-col gap-8'>
             <div>
               <h1 className='font-cairo text-[20px] font-black text-[#111827] md:text-[22px]'>
-                إدارة الشكاوي
+                {tr('إدارة الشكاوي', 'Complaints management')}
               </h1>
               <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                الحالة: {statusLabelAr(c.status)}
+                {tr('الحالة:', 'Status:')} {statusLabelAr(c.status)}
               </p>
             </div>
 

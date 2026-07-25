@@ -34,9 +34,12 @@ import {
 } from "@/components/admin/complaints/complaintsListUtils";
 import { ComplaintCardSkeleton } from "@/components/admin/skeletons/ComplaintCardSkeleton";
 import { Pagination } from "@/components/admin/services/Pagination";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminComplaintsPage() {
   const navigate = useNavigate();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [page, setPage] = useState(1);
   const [limit] = useState(15);
   const [searchInput, setSearchInput] = useState("");
@@ -150,7 +153,10 @@ export default function AdminComplaintsPage() {
 
   const complaints = listQuery.data?.complaints ?? [];
   const listErrorMessage = listQuery.isError
-    ? complaintUserFacingError(listQuery.error, "????? ????? ????? ???????.")
+    ? complaintUserFacingError(
+        listQuery.error,
+        tr("تعذر تحميل قائمة الشكاوى.", "Failed to load complaints list."),
+      )
     : null;
   const totalList = listQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalList / Math.max(limit, 1)));
@@ -164,15 +170,18 @@ export default function AdminComplaintsPage() {
   return (
     <>
       <Helmet>
-        <title>الشكاوي • LMJ Health</title>
+        <title>{tr("الشكاوي", "Complaints")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="text-right">
+      <div dir={dir} lang={locale} className="text-start">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="الشكاوي"
-          subtitle="متابعة شكاوى المرضى ومعالجة طلبات الدعم"
+          title={tr("الشكاوي", "Complaints")}
+          subtitle={tr(
+            "متابعة شكاوى المرضى ومعالجة طلبات الدعم",
+            "Track patient complaints and support requests",
+          )}
           headerIcon={<MessageSquare className="h-8 w-8 text-white" />}
           kpiColumns={3}
           kpis={[
@@ -180,19 +189,19 @@ export default function AdminComplaintsPage() {
               key: "total",
               icon: <MessageSquare className="h-5 w-5 shrink-0" />,
               value: countsAwaiting ? "—" : stats.total,
-              label: "إجمالي الشكاوي",
+              label: tr("إجمالي الشكاوي", "Total complaints"),
             },
             {
               key: "review",
               icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
               value: countsAwaiting ? "—" : stats.review,
-              label: "قيد المراجعة",
+              label: tr("قيد المراجعة", "Under review"),
             },
             {
               key: "closed",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: countsAwaiting ? "—" : stats.closed,
-              label: "مغلقة",
+              label: tr("مغلقة", "Closed"),
             },
           ]}
         />
@@ -208,7 +217,10 @@ export default function AdminComplaintsPage() {
               <AlertTriangle className="h-5 w-5" strokeWidth={2.25} />
             </div>
             <p className="min-w-0 pt-0.5 font-cairo text-[14px] font-bold leading-relaxed text-[#9A3412]">
-              يوجد شكوى جديدة (حالة مقدّمة) مقدمة من المريض{" "}
+              {tr(
+                "يوجد شكوى جديدة (حالة مقدّمة) مقدمة من المريض",
+                "There is a new complaint (submitted) from patient",
+              )}{" "}
               <span className="font-black text-[#7C2D12]">{bannerName}</span>.
             </p>
           </motion.section>
@@ -225,7 +237,10 @@ export default function AdminComplaintsPage() {
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="بحث (اسم، بريد، موضوع، النص...)"
+              placeholder={tr(
+                "بحث (اسم، بريد، موضوع، النص...)",
+                "Search (name, email, subject, text...)",
+              )}
               className="h-11 w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] py-2.5 pl-3 pr-11 font-cairo text-[13px] font-medium text-[#111827] placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
             <Search className="pointer-events-none absolute right-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#94A3B8]" />
@@ -234,7 +249,7 @@ export default function AdminComplaintsPage() {
             <span className="inline-flex items-center gap-1.5 text-[#64748B]">
               <SlidersHorizontal className="h-4 w-4" />
               <span className="font-cairo text-[12px] font-extrabold">
-                تصفية
+                {tr("تصفية", "Filter")}
               </span>
             </span>
             <StyledSelect
@@ -246,14 +261,23 @@ export default function AdminComplaintsPage() {
                 setStatusFilter(v as "all" | ComplaintLifecycleStatus)
               }
               options={[
-                { value: "all", label: "الحالة — الكل" },
-                { value: "submitted", label: "مقدّمة" },
-                { value: "under_review", label: "قيد المراجعة" },
-                { value: "in_progress", label: "قيد المعالجة" },
-                { value: "resolved", label: "تم الحل" },
-                { value: "closed", label: "مغلقة" },
+                { value: "all", label: tr("الحالة — الكل", "Status — all") },
+                { value: "submitted", label: tr("مقدّمة", "Submitted") },
+                {
+                  value: "under_review",
+                  label: tr("قيد المراجعة", "Under review"),
+                },
+                {
+                  value: "in_progress",
+                  label: tr("قيد المعالجة", "In progress"),
+                },
+                { value: "resolved", label: tr("تم الحل", "Resolved") },
+                { value: "closed", label: tr("مغلقة", "Closed") },
               ]}
-              listboxAriaLabel="تصفية حالة الشكوى"
+              listboxAriaLabel={tr(
+                "تصفية حالة الشكوى",
+                "Filter complaint status",
+              )}
             />
             <StyledSelect
               className="h-10 min-w-[180px]"
@@ -262,20 +286,27 @@ export default function AdminComplaintsPage() {
               value={typeFilter}
               onChange={(v) => setTypeFilter(v as "all" | ComplaintType)}
               options={[
-                { value: "all", label: "نوع الشكوى — الكل" },
+                {
+                  value: "all",
+                  label: tr("نوع الشكوى — الكل", "Complaint type — all"),
+                },
                 ...COMPLAINT_TYPES.map((t) => ({
                   value: t,
                   label: complaintTypeAr(t),
                 })),
               ]}
-              listboxAriaLabel="تصفية نوع الشكوى"
+              listboxAriaLabel={tr("تصفية نوع الشكوى", "Filter complaint type")}
             />
           </div>
         </motion.div>
 
         {listQuery.isError ? (
           <p className="mt-8 text-center font-cairo text-sm font-semibold text-red-600">
-            {listErrorMessage ?? "????? ????? ????? ???????."}
+            {listErrorMessage ??
+              tr(
+                "تعذر تحميل قائمة الشكاوى.",
+                "Failed to load complaints list.",
+              )}
           </p>
         ) : listAwaiting ? (
           <motion.ul
@@ -306,7 +337,7 @@ export default function AdminComplaintsPage() {
                     whileHover={{ scale: 1.005 }}
                     whileTap={{ scale: 0.998 }}
                     transition={{ duration: 0.2 }}
-                    className="flex w-full cursor-pointer items-stretch gap-0 overflow-hidden rounded-xl border border-[#E8ECF2] bg-white text-right shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_14px_36px_rgba(15,23,42,0.09)]"
+                    className="flex w-full cursor-pointer items-stretch gap-0 overflow-hidden rounded-xl border border-[#E8ECF2] bg-white text-start shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_14px_36px_rgba(15,23,42,0.09)]"
                   >
                     <div className="flex min-w-0 flex-1 flex-col gap-2 px-5 py-4">
                       <div className="flex items-start justify-between gap-3">
@@ -314,12 +345,12 @@ export default function AdminComplaintsPage() {
                           <div className="flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-[6px] bg-primary text-white">
                             <Stethoscope className="h-6 w-6" />
                           </div>
-                          <div className="min-w-0 text-right">
+                          <div className="min-w-0 text-start">
                             <div className="font-cairo text-[17px] font-black text-[#0F172A]">
                               {c.contactSnapshot?.fullName ?? "—"}
                             </div>
                             <div className="mt-1 font-cairo text-[18px] font-semibold leading-[22px] text-primary">
-                              نوع الشكوى:{" "}
+                              {tr("نوع الشكوى:", "Complaint type:")}{" "}
                               <span className="text-[#1F2937]">
                                 {complaintTypeAr(c.type)}
                               </span>
@@ -357,7 +388,7 @@ export default function AdminComplaintsPage() {
 
             {complaints.length === 0 ? (
               <p className="mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]">
-                لا توجد شكاوٍ مطابقة.
+                {tr("لا توجد شكاوٍ مطابقة.", "No matching complaints.")}
               </p>
             ) : null}
 
