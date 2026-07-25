@@ -19,8 +19,12 @@ import { isAwaitingInitialQueryDataWithPlaceholder } from "@/lib/query/queryUi";
 import StyledSelect from "@/components/ui/styled-select";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import { Pagination } from "@/components/admin/services/Pagination";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminVerificationRequestsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SY" : "en-US";
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"approve" | "reject" | "map">(
@@ -82,12 +86,14 @@ export default function AdminVerificationRequestsPage() {
       d.getFullYear() === now.getFullYear() &&
       d.getMonth() === now.getMonth() &&
       d.getDate() === now.getDate();
-    const time = d.toLocaleTimeString("ar-SY", {
+    const time = d.toLocaleTimeString(numberLocale, {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-    return sameDay ? `اليوم ${time}` : d.toLocaleDateString("ar-SY");
+    return sameDay
+      ? tr(`اليوم ${time}`, `Today ${time}`)
+      : d.toLocaleDateString(numberLocale);
   }
 
   const locationRequests = useMemo(() => {
@@ -114,10 +120,10 @@ export default function AdminVerificationRequestsPage() {
         requestedAt: formatRequestedAt(request.createdAt),
         status:
           request.status === "pending"
-            ? "معلق"
+            ? tr("معلق", "Pending")
             : request.status === "approved"
-              ? "مقبول"
-              : "مرفوض",
+              ? tr("مقبول", "Approved")
+              : tr("مرفوض", "Rejected"),
         lat,
         lng,
         doctorProfile: (request.doctor ?? null) as Record<
@@ -138,34 +144,37 @@ export default function AdminVerificationRequestsPage() {
   return (
     <>
       <Helmet>
-        <title>طلبات التحقق • LMJ Health</title>
+        <title>{tr("طلبات التحقق", "Verification requests")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="طلبات التحقق"
-          subtitle="مراجعة طلبات التحقق من موقع العيادة وتخصص الأطباء"
+          title={tr("طلبات التحقق", "Verification requests")}
+          subtitle={tr(
+            "مراجعة طلبات التحقق من موقع العيادة وتخصص الأطباء",
+            "Review clinic location and doctor specialization verification requests",
+          )}
           headerIcon={<Stethoscope className="h-8 w-8 text-white" />}
           kpis={[
             {
               key: "pending",
               icon: <AlertCircle className="h-5 w-5 shrink-0" />,
               value: verificationAwaiting ? "—" : total,
-              label: "طلبات في القائمة",
+              label: tr("طلبات في القائمة", "Requests in list"),
             },
             {
               key: "page",
               icon: <Clock className="h-5 w-5 shrink-0" />,
               value: verificationAwaiting ? "—" : locationRequests.length,
-              label: "معروضة الآن",
+              label: tr("معروضة الآن", "Shown now"),
             },
             {
               key: "pages",
               icon: <Filter className="h-5 w-5 shrink-0" />,
               value: verificationAwaiting ? "—" : totalPages,
-              label: "عدد الصفحات",
+              label: tr("عدد الصفحات", "Total pages"),
             },
           ]}
         />
@@ -175,16 +184,16 @@ export default function AdminVerificationRequestsPage() {
             <div className="inline-flex items-center gap-2 text-[#475467]">
               <Filter className="h-4 w-4" />
               <span className="font-cairo text-[12px] font-extrabold">
-                تصفية الطلبات
+                {tr("تصفية الطلبات", "Filter requests")}
               </span>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
               {(
                 [
-                  { id: "all", label: "الكل" },
-                  { id: "pending", label: "معلق" },
-                  { id: "approved", label: "مقبول" },
-                  { id: "rejected", label: "مرفوض" },
+                  { id: "all", label: tr("الكل", "All") },
+                  { id: "pending", label: tr("معلق", "Pending") },
+                  { id: "approved", label: tr("مقبول", "Approved") },
+                  { id: "rejected", label: tr("مرفوض", "Rejected") },
                 ] as const
               ).map((option) => {
                 const active = statusFilter === option.id;
@@ -217,15 +226,15 @@ export default function AdminVerificationRequestsPage() {
                   setDoctorIdFilter(value);
                   setPage(1);
                 }}
-                placeholder="كل الأطباء"
+                placeholder={tr("كل الأطباء", "All doctors")}
                 options={[
-                  { value: "", label: "كل الأطباء" },
+                  { value: "", label: tr("كل الأطباء", "All doctors") },
                   ...doctorOptions.map((doctor) => ({
                     value: doctor._id,
                     label: `${doctor.user?.fullName ?? doctor._id}${doctor.specialization ? ` — ${doctor.specialization}` : ""}`,
                   })),
                 ]}
-                listboxAriaLabel="تصفية حسب الطبيب"
+                listboxAriaLabel={tr("تصفية حسب الطبيب", "Filter by doctor")}
               />
               <StyledSelect
                 className="min-w-[4.5rem]"
@@ -238,9 +247,12 @@ export default function AdminVerificationRequestsPage() {
                 }}
                 options={[10, 20, 50, 100].map((v) => ({
                   value: String(v),
-                  label: `${v} / صفحة`,
+                  label: tr(`${v} / صفحة`, `${v} / page`),
                 }))}
-                listboxAriaLabel="عدد العناصر في الصفحة"
+                listboxAriaLabel={tr(
+                  "عدد العناصر في الصفحة",
+                  "Items per page",
+                )}
               />
             </div>
           </div>
@@ -255,11 +267,17 @@ export default function AdminVerificationRequestsPage() {
             />
           ) : verificationQuery.error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-              تعذّر تحميل طلبات التحقق من الخادم.
+              {tr(
+                "تعذّر تحميل طلبات التحقق من الخادم.",
+                "Failed to load verification requests from server.",
+              )}
             </div>
           ) : locationRequests.length === 0 ? (
             <div className="rounded-[12px] border border-[#D1E9FF] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              لا توجد طلبات تحقق معلّقة حاليًا.
+              {tr(
+                "لا توجد طلبات تحقق معلّقة حاليًا.",
+                "No pending verification requests right now.",
+              )}
             </div>
           ) : (
             <div className="space-y-3">
@@ -278,11 +296,11 @@ export default function AdminVerificationRequestsPage() {
                           setDialogOpen(true);
                         }}
                         className="flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white"
-                        aria-label="عرض الخريطة"
+                        aria-label={tr("عرض الخريطة", "Open map")}
                       >
                         <Stethoscope className="h-6 w-6" />
                       </button>
-                      <div className="text-right">
+                      <div className="text-start">
                         <div className="font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]">
                           {r.doctor}
                         </div>
@@ -307,7 +325,10 @@ export default function AdminVerificationRequestsPage() {
                   </div>
                   <button
                     type="button"
-                    aria-label="فتح صفحة تفاصيل طلب التحقق"
+                    aria-label={tr(
+                      "فتح صفحة تفاصيل طلب التحقق",
+                      "Open verification request details page",
+                    )}
                     onClick={() => {
                       navigate(
                         `/admin/verification-requests/${encodeURIComponent(r.id)}`,
@@ -326,8 +347,11 @@ export default function AdminVerificationRequestsPage() {
         {!verificationAwaiting && total > 0 ? (
           <section className="mt-4">
             <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
-              <div className="text-right font-cairo text-[12px] font-semibold text-[#667085]">
-                إجمالي {total} طلب
+              <div className="text-start font-cairo text-[12px] font-semibold text-[#667085]">
+                {tr(
+                  `إجمالي ${total.toLocaleString(numberLocale)} طلب`,
+                  `Total ${total.toLocaleString(numberLocale)} requests`,
+                )}
               </div>
               <Pagination
                 page={page}

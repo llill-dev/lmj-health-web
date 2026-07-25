@@ -6,7 +6,6 @@ import {
   BadgeCheck,
   BookOpen,
   ChevronLeft,
-  ChevronRight,
   FileBadge2,
   MapPinned,
   Stethoscope,
@@ -23,8 +22,12 @@ import {
 } from "@/components/admin/verification-requests/verificationRequestDetailsUtils";
 import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminVerificationRequestDetailsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+
   const navigate = useNavigate();
   const { requestId } = useParams();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -70,7 +73,7 @@ export default function AdminVerificationRequestDetailsPage() {
         specialty: "—",
         address: "—",
         requestedAt: "—",
-        status: "معلق",
+        status: tr("معلق", "Pending"),
         lat: "—",
         lng: "—",
         changeRows: buildChangeRows(null),
@@ -103,10 +106,10 @@ export default function AdminVerificationRequestDetailsPage() {
       requestedAt: formatRequestedAt(request.createdAt),
       status:
         request.status === "pending"
-          ? "معلق"
+          ? tr("معلق", "Pending")
           : request.status === "approved"
-            ? "مقبول"
-            : "مرفوض",
+            ? tr("مقبول", "Approved")
+            : tr("مرفوض", "Rejected"),
       lat,
       lng,
       changeRows: buildChangeRows({
@@ -134,14 +137,16 @@ export default function AdminVerificationRequestDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>تفاصيل طلب التحقق • LMJ Health</title>
+        <title>
+          {tr("تفاصيل طلب التحقق", "Verification request details")} • LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <div className="my-8 flex items-center justify-between">
-          <div className="text-right">
+          <div className="text-start">
             <div className="font-cairo text-[28px] font-black leading-[34px] text-[#1F2937]">
-              تفاصيل طلب التحقق
+              {tr("تفاصيل طلب التحقق", "Verification request details")}
             </div>
           </div>
           <button
@@ -149,18 +154,18 @@ export default function AdminVerificationRequestDetailsPage() {
             onClick={() => navigate("/admin/verification-requests")}
             className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054]"
           >
-            رجوع
+            {tr("رجوع", "Back")}
             <ChevronLeft className="h-4 w-4" />
           </button>
         </div>
 
         {requestAwaiting ? (
           <div className="rounded-[10px] border border-[#D1E9E6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-            جارِ تحميل تفاصيل الطلب...
+            {tr("جارِ تحميل تفاصيل الطلب...", "Loading request details…")}
           </div>
         ) : requestQuery.error ? (
           <div className="rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-            تعذر تحميل تفاصيل الطلب.
+            {tr("تعذر تحميل تفاصيل الطلب.", "Failed to load request details.")}
           </div>
         ) : (
           <section className="rounded-[10px] border border-[#B9D8D6] bg-white px-6 py-5 shadow-[0_6px_14px_rgba(16,24,40,0.05)]">
@@ -174,11 +179,11 @@ export default function AdminVerificationRequestDetailsPage() {
                       setDialogOpen(true);
                     }}
                     className="flex h-[58px] w-[58px] items-center justify-center rounded-[6px] bg-[#129692] text-white"
-                    aria-label="عرض الخريطة"
+                    aria-label={tr("عرض الخريطة", "Open map")}
                   >
                     <Stethoscope className="h-6 w-6" />
                   </button>
-                  <div className="text-right">
+                  <div className="text-start">
                     <div className="mb-2">
                       <div className="font-cairo text-[20px] font-bold leading-[28px] text-[#1F2937]">
                         {cardData.doctor}
@@ -208,22 +213,25 @@ export default function AdminVerificationRequestDetailsPage() {
 
             <div className="mt-3 border-t border-[#B9D8D6] pt-2" />
 
-            <div className="my-6 text-right font-cairo text-[20px] font-semibold leading-[20px] text-[#000000]">
-              طلب الدكتور {cardData.doctor} تعديل الحقول التالية:
+            <div className="my-6 text-start font-cairo text-[20px] font-semibold leading-[20px] text-[#000000]">
+              {tr(
+                `طلب الدكتور ${cardData.doctor} تعديل الحقول التالية:`,
+                `Dr. ${cardData.doctor} requested changes for the following fields:`,
+              )}
             </div>
 
             <div className="mt-3 overflow-hidden rounded-[6px] border border-[#0F8F89]">
-              <table className="w-full border-collapse text-right">
+              <table className="w-full border-collapse text-start">
                 <thead>
                   <tr className="bg-[#F8FAFA]">
                     <th className="w-1/3 border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]">
-                      طلب التعديل
+                      {tr("طلب التعديل", "Requested change")}
                     </th>
                     <th className="w-1/3 border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]">
-                      قبل التعديل
+                      {tr("قبل التعديل", "Before")}
                     </th>
                     <th className="w-1/3 border border-[#0F8F89] px-4 py-3 font-cairo text-[16px] font-extrabold text-[#0F8F89]">
-                      بعد التعديل
+                      {tr("بعد التعديل", "After")}
                     </th>
                   </tr>
                 </thead>
@@ -248,7 +256,10 @@ export default function AdminVerificationRequestDetailsPage() {
                         colSpan={3}
                         className="border border-[#0F8F89] px-4 py-6 text-center font-cairo text-[14px] font-semibold text-[#6B7280]"
                       >
-                        لا توجد حقول تعديل مرسلة من الخادم لهذا الطلب.
+                        {tr(
+                          "لا توجد حقول تعديل مرسلة من الخادم لهذا الطلب.",
+                          "No changed fields were sent by the server for this request.",
+                        )}
                       </td>
                     </tr>
                   )}
@@ -258,8 +269,10 @@ export default function AdminVerificationRequestDetailsPage() {
 
             {specializationState.needsAdminResolve ? (
               <p className="mt-4 text-center font-cairo text-[12px] font-semibold text-[#92400E]">
-                عند «قبول التعديلات» يجب اختيار تخصص مُدار من القائمة أو إنشاء
-                تخصص جديد في نافذة التأكيد.
+                {tr(
+                  "عند «قبول التعديلات» يجب اختيار تخصص مُدار من القائمة أو إنشاء تخصص جديد في نافذة التأكيد.",
+                  "When choosing “Approve changes”, select a managed specialization from the list or create a new one in the confirmation dialog.",
+                )}
               </p>
             ) : null}
 
@@ -277,7 +290,7 @@ export default function AdminVerificationRequestDetailsPage() {
                 className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#129692] px-5 font-cairo text-[16px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-55"
               >
                 <MapPinned className="h-4 w-4" />
-                الملف الشخصي
+                {tr("الملف الشخصي", "Profile")}
               </button>
               <button
                 type="button"
@@ -288,7 +301,7 @@ export default function AdminVerificationRequestDetailsPage() {
                 className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#16A34A] px-5 font-cairo text-[16px] font-bold text-white"
               >
                 <BookOpen className="h-4 w-4" />
-                قبول التعديلات
+                {tr("قبول التعديلات", "Approve changes")}
               </button>
               <button
                 type="button"
@@ -299,7 +312,7 @@ export default function AdminVerificationRequestDetailsPage() {
                 className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#EF4444] px-5 font-cairo text-[16px] font-bold text-white"
               >
                 <FileBadge2 className="h-4 w-4" />
-                رفض التعديلات
+                {tr("رفض التعديلات", "Reject changes")}
               </button>
             </div>
           </section>

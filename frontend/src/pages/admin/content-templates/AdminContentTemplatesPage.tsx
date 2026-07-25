@@ -28,31 +28,21 @@ import type {
   AdminContentTemplateParentType,
 } from "@/lib/admin/types";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
-type ParentFilter = "الكل" | AdminContentTemplateParentType;
+type ParentFilter = "all" | AdminContentTemplateParentType;
 type ActiveFilter = "all" | "active" | "disabled";
 
-const PARENT_FILTERS: { value: ParentFilter; label: string }[] = [
-  { value: "الكل", label: "الكل" },
-  { value: "CONDITION", label: "الحالات الطبية" },
-  { value: "SYMPTOM", label: "الأعراض" },
-  { value: "GENERAL_ADVICE", label: "نصائح عامة" },
-  { value: "MEDICATION", label: "الأدوية" },
-];
-
-const ACTIVE_FILTERS: { value: ActiveFilter; label: string }[] = [
-  { value: "all", label: "الكل" },
-  { value: "active", label: "مفعّل" },
-  { value: "disabled", label: "معطّل" },
-];
-
-function parentTypeLabel(t?: string | Record<string, unknown>): string {
+function parentTypeLabel(
+  t: string | Record<string, unknown> | undefined,
+  tr: (ar: string, en: string) => string,
+): string {
   if (!t) return "—";
   if (typeof t === "string") {
-    if (t === "CONDITION") return "الحالات الطبية";
-    if (t === "SYMPTOM") return "الأعراض";
-    if (t === "GENERAL_ADVICE") return "نصائح عامة";
-    if (t === "MEDICATION") return "الأدوية";
+    if (t === "CONDITION") return tr("الحالات الطبية", "Conditions");
+    if (t === "SYMPTOM") return tr("الأعراض", "Symptoms");
+    if (t === "GENERAL_ADVICE") return tr("نصائح عامة", "General advice");
+    if (t === "MEDICATION") return tr("الأدوية", "Medications");
     return t;
   }
   // If t is an object, try to extract the value
@@ -71,7 +61,25 @@ function isTemplateActive(t: AdminContentTemplate): boolean {
 }
 
 export default function AdminContentTemplatesPage() {
-  const [parentFilter, setParentFilter] = useState<ParentFilter>("الكل");
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+
+  const parentFilters: { value: ParentFilter; label: string }[] = [
+    { value: "all", label: tr("الكل", "All") },
+    { value: "CONDITION", label: tr("الحالات الطبية", "Conditions") },
+    { value: "SYMPTOM", label: tr("الأعراض", "Symptoms") },
+    { value: "GENERAL_ADVICE", label: tr("نصائح عامة", "General advice") },
+    { value: "MEDICATION", label: tr("الأدوية", "Medications") },
+  ];
+
+  const activeFilters: { value: ActiveFilter; label: string }[] = [
+    { value: "all", label: tr("الكل", "All") },
+    { value: "active", label: tr("مفعّل", "Active") },
+    { value: "disabled", label: tr("معطّل", "Disabled") },
+  ];
+
+  const [parentFilter, setParentFilter] = useState<ParentFilter>("all");
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AdminContentTemplate | null>(null);
@@ -82,7 +90,7 @@ export default function AdminContentTemplatesPage() {
 
   const listParams = useMemo(
     () => ({
-      ...(parentFilter !== "الكل" ? { parentType: parentFilter } : {}),
+      ...(parentFilter !== "all" ? { parentType: parentFilter } : {}),
       ...(activeFilter === "active"
         ? { active: true }
         : activeFilter === "disabled"
@@ -104,8 +112,11 @@ export default function AdminContentTemplatesPage() {
 
   const disableSuccessToast: ConfirmSuccessToast | undefined = disableTarget
     ? {
-        title: "تم التعطيل",
-        message: `عُطّل القالب «${parentTypeLabel(disableTarget.name) ?? "—"}».`,
+        title: tr("تم التعطيل", "Disabled"),
+        message: tr(
+          `عُطّل القالب «${parentTypeLabel(disableTarget.name, tr) ?? "—"}».`,
+          `Template "${parentTypeLabel(disableTarget.name, tr) ?? "—"}" has been disabled.`,
+        ),
         variant: "success",
       }
     : undefined;
@@ -129,17 +140,23 @@ export default function AdminContentTemplatesPage() {
   return (
     <>
       <Helmet>
-        <title>قوالب البيانات — المحتوى الطبي • LMJ Health</title>
+        <title>
+          {tr("قوالب البيانات — المحتوى الطبي", "Data templates — medical content")} •
+          LMJ Health
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="قوالب بيانات المحتوى"
-          subtitle="عرّف الحقول الوصفية لكل نوع محتوى (حالة، عرَض، نصيحة، دواء)"
+          title={tr("قوالب بيانات المحتوى", "Content data templates")}
+          subtitle={tr(
+            "عرّف الحقول الوصفية لكل نوع محتوى (حالة، عرَض، نصيحة، دواء)",
+            "Define metadata fields for each content type (condition, symptom, advice, medication)",
+          )}
           headerIcon={<Layers className="h-8 w-8 text-white" />}
-          actionLabel="إضافة قالب جديد"
+          actionLabel={tr("إضافة قالب جديد", "Add new template")}
           onActionClick={openCreate}
           kpiColumns={3}
           kpis={[
@@ -147,29 +164,29 @@ export default function AdminContentTemplatesPage() {
               key: "total",
               icon: <Layers className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : templates.length,
-              label: "إجمالي القوالب",
+              label: tr("إجمالي القوالب", "Total templates"),
             },
             {
               key: "active",
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : activeCount,
-              label: "مفعّلة",
+              label: tr("مفعّلة", "Active"),
             },
             {
               key: "disabled",
               icon: <XCircle className="h-5 w-5 shrink-0" />,
               value: query.isAwaitingData ? "…" : disabledCount,
-              label: "معطّلة",
+              label: tr("معطّلة", "Disabled"),
             },
           ]}
         />
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            النوع الأب
+            {tr("النوع الأب", "Parent type")}
           </div>
           <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
-            {PARENT_FILTERS.map((f) => (
+            {parentFilters.map((f) => (
               <button
                 key={f.value}
                 type="button"
@@ -187,10 +204,10 @@ export default function AdminContentTemplatesPage() {
           </div>
 
           <div className="mt-4 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            الحالة
+            {tr("الحالة", "Status")}
           </div>
           <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
-            {ACTIVE_FILTERS.map((f) => (
+            {activeFilters.map((f) => (
               <button
                 key={f.value}
                 type="button"
@@ -213,10 +230,13 @@ export default function AdminContentTemplatesPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Layers className="h-4 w-4 text-primary" />
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                قوالب البيانات
+                {tr("قوالب البيانات", "Data templates")}
               </div>
               <span className="rounded-full bg-[#F3F4F6] px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-[#667085]">
-                {templates.length.toLocaleString("ar-SA")} قالب
+                {tr(
+                  `${templates.length.toLocaleString(numberLocale)} قالب`,
+                  `${templates.length.toLocaleString(numberLocale)} templates`,
+                )}
               </span>
             </div>
           </div>
@@ -229,11 +249,14 @@ export default function AdminContentTemplatesPage() {
               />
             ) : query.isError ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
-                تعذّر تحميل قوالب البيانات.
+                {tr("تعذّر تحميل قوالب البيانات.", "Failed to load data templates.")}
               </div>
             ) : templates.length === 0 ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                لا توجد قوالب مطابقة للفلاتر الحالية.
+                {tr(
+                  "لا توجد قوالب مطابقة للفلاتر الحالية.",
+                  "No templates match the current filters.",
+                )}
               </div>
             ) : (
               templates.map((t) => {
@@ -243,13 +266,13 @@ export default function AdminContentTemplatesPage() {
                     key={t._id}
                     className="flex flex-col justify-between gap-3 px-6 py-5 sm:flex-row sm:items-center"
                   >
-                    <div className="min-w-0 flex-1 text-right">
+                    <div className="min-w-0 flex-1 text-start">
                       <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3">
                         <div className="min-w-0 font-cairo text-[14px] font-black text-[#111827]">
-                          {parentTypeLabel(t.name) ?? "—"}
+                          {parentTypeLabel(t.name, tr) ?? "—"}
                         </div>
                         <span className="inline-flex h-[22px] items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#475467]">
-                          {parentTypeLabel(t.parentType)}
+                          {parentTypeLabel(t.parentType, tr)}
                         </span>
                         <span
                           className={cn(
@@ -259,19 +282,27 @@ export default function AdminContentTemplatesPage() {
                               : "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
                           )}
                         >
-                          {active ? "مفعّل" : "معطّل"}
+                          {active
+                            ? tr("مفعّل", "Active")
+                            : tr("معطّل", "Disabled")}
                         </span>
                       </div>
 
                       <div className="mt-2 flex flex-wrap items-center justify-start gap-6 font-cairo text-[11px] font-bold text-[#98A2B3]">
                         <div className="inline-flex items-center gap-2">
                           <FileText className="h-4 w-4" />
-                          {(t.fields?.length ?? 0).toLocaleString("ar-SA")} حقل
+                          {tr(
+                            `${(t.fields?.length ?? 0).toLocaleString(numberLocale)} حقل`,
+                            `${(t.fields?.length ?? 0).toLocaleString(numberLocale)} fields`,
+                          )}
                         </div>
                         {typeof t.schemaVersion === "number" ? (
                           <div className="inline-flex items-center gap-2">
                             <Layers className="h-4 w-4" />
-                            إصدار المخطط: {t.schemaVersion}
+                            {tr(
+                              `إصدار المخطط: ${t.schemaVersion}`,
+                              `Schema version: ${t.schemaVersion}`,
+                            )}
                           </div>
                         ) : null}
                         {t.slug ? (
@@ -291,11 +322,11 @@ export default function AdminContentTemplatesPage() {
                         type="button"
                         onClick={() => openEdit(t)}
                         className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#0F8F8B]"
-                        aria-label="تعديل"
+                        aria-label={tr("تعديل", "Edit")}
                       >
                         <Pencil className="h-4 w-4" />
                         <span className="font-cairo text-[11px] font-extrabold">
-                          تعديل
+                          {tr("تعديل", "Edit")}
                         </span>
                       </button>
                       {active ? (
@@ -303,11 +334,11 @@ export default function AdminContentTemplatesPage() {
                           type="button"
                           onClick={() => openDisable(t)}
                           className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] px-3 text-[#EF4444]"
-                          aria-label="تعطيل"
+                          aria-label={tr("تعطيل", "Disable")}
                         >
                           <Ban className="h-4 w-4" />
                           <span className="font-cairo text-[11px] font-extrabold">
-                            تعطيل
+                            {tr("تعطيل", "Disable")}
                           </span>
                         </button>
                       ) : null}
@@ -341,29 +372,39 @@ export default function AdminContentTemplatesPage() {
           }
         }}
         variant="destructive"
-        title="تأكيد تعطيل القالب"
+        title={tr("تأكيد تعطيل القالب", "Confirm template disable")}
         icon={<Ban className="h-6 w-6" strokeWidth={2} aria-hidden />}
         description={
           referencedCount !== null ? (
             <>
-              هذا القالب مرتبط بـ{" "}
+              {tr("هذا القالب مرتبط بـ", "This template is linked to")}{" "}
               <span className="font-extrabold text-[#344054]">
-                {referencedCount.toLocaleString("ar-SA")}
+                {referencedCount.toLocaleString(numberLocale)}
               </span>{" "}
-              عنصر محتوى في حالة مسودة أو مراجعة. التعطيل الإجباري سيتجاوز هذا
-              الارتباط.
+              {tr(
+                "عنصر محتوى في حالة مسودة أو مراجعة. التعطيل الإجباري سيتجاوز هذا الارتباط.",
+                "content items in draft or review state. Force disable will override this dependency.",
+              )}
             </>
           ) : (
             <>
-              القالب: «
+              {tr("القالب:", "Template:")} «
               <span className="font-extrabold text-[#344054]">
-                {parentTypeLabel(disableTarget?.name) ?? "—"}
+                {parentTypeLabel(disableTarget?.name, tr) ?? "—"}
               </span>
-              ». لن يكون متاحاً لإنشاء محتوى جديد بعد التعطيل.
+              ».{" "}
+              {tr(
+                "لن يكون متاحاً لإنشاء محتوى جديد بعد التعطيل.",
+                "It will not be available for creating new content after disabling.",
+              )}
             </>
           )
         }
-        confirmLabel={referencedCount !== null ? "تعطيل إجباري" : "تعطيل"}
+        confirmLabel={
+          referencedCount !== null
+            ? tr("تعطيل إجباري", "Force disable")
+            : tr("تعطيل", "Disable")
+        }
         confirmDisabled={disableMut.isPending}
         onConfirm={async () => {
           if (!disableTarget) return;

@@ -27,10 +27,15 @@ import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
 import { Pagination } from "@/components/admin/services/Pagination";
+import { useI18n } from "@/i18n/provider";
 
 type ServiceTypeStatusFilter = "all" | "active" | "inactive";
 
 export default function AdminServiceTypesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+
   const { toast } = useToast();
   const { data, isAwaitingData, isError, error, refetch } =
     useServiceTypesList();
@@ -66,7 +71,7 @@ export default function AdminServiceTypesPage() {
         typeof serviceType.name === "string"
           ? { en: serviceType.name, ar: serviceType.name }
           : serviceType.name,
-        "ar",
+        locale,
       );
 
       return [title, serviceType.slug]
@@ -119,7 +124,7 @@ export default function AdminServiceTypesPage() {
       typeof confirmTarget.name === "string"
         ? { en: confirmTarget.name, ar: confirmTarget.name }
         : confirmTarget.name,
-      "ar",
+      locale,
     );
     await updateMut.mutateAsync({
       id: confirmTarget._id,
@@ -127,13 +132,27 @@ export default function AdminServiceTypesPage() {
     });
     if (next) {
       toast(
-        `تم تفعيل نوع الخدمة «${label}». سيظهر في القوائم المرتبطة عند اكتمال المزامنة.`,
-        { title: "تم التفعيل", variant: "success", durationMs: 3800 },
+        tr(
+          `تم تفعيل نوع الخدمة «${label}». سيظهر في القوائم المرتبطة عند اكتمال المزامنة.`,
+          `Service type "${label}" is now active and appears in related lists after sync completes.`,
+        ),
+        {
+          title: tr("تم التفعيل", "Activated"),
+          variant: "success",
+          durationMs: 3800,
+        },
       );
     } else {
       toast(
-        `عُطّل نوع الخدمة «${label}». لن يُقترح للمستخدمين حتى تُعيد تفعيله.`,
-        { title: "تم التعطيل", variant: "info", durationMs: 4000 },
+        tr(
+          `عُطّل نوع الخدمة «${label}». لن يُقترح للمستخدمين حتى تُعيد تفعيله.`,
+          `Service type "${label}" is disabled and will not be suggested until reactivated.`,
+        ),
+        {
+          title: tr("تم التعطيل", "Disabled"),
+          variant: "info",
+          durationMs: 4000,
+        },
       );
     }
     setConfirmOpen(false);
@@ -143,24 +162,27 @@ export default function AdminServiceTypesPage() {
   return (
     <>
       <Helmet>
-        <title>أنواع الخدمات • LMJ Health</title>
+        <title>{tr("أنواع الخدمات", "Service types")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="أنواع الخدمات"
-          subtitle="إدارة أنواع الخدمات والـ schema الديناميكي"
+          title={tr("أنواع الخدمات", "Service types")}
+          subtitle={tr(
+            "إدارة أنواع الخدمات والـ schema الديناميكي",
+            "Manage service types and dynamic schema",
+          )}
           headerIcon={<Settings className="h-8 w-8 text-white" />}
-          actionLabel="إضافة نوع خدمة"
+          actionLabel={tr("إضافة نوع خدمة", "Add service type")}
           onActionClick={openCreate}
           kpis={[
             {
               key: "total",
               icon: <Settings className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : filteredServiceTypes.length,
-              label: "أنواع مسجّلة",
+              label: tr("أنواع مسجّلة", "Registered types"),
             },
           ]}
         />
@@ -174,10 +196,13 @@ export default function AdminServiceTypesPage() {
                   setSearch(event.target.value);
                   setPage(1);
                 }}
-                placeholder="ابحث باسم النوع أو الـ slug..."
-                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
+                placeholder={tr(
+                  "ابحث باسم النوع أو الـ slug...",
+                  "Search by type name or slug…",
+                )}
+                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
               />
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+              <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
             </div>
 
             <select
@@ -186,11 +211,15 @@ export default function AdminServiceTypesPage() {
                 setStatusFilter(event.target.value as ServiceTypeStatusFilter);
                 setPage(1);
               }}
-              className="h-[44px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary"
+              className="h-[44px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary"
             >
-              <option value="all">كل الحالات</option>
-              <option value="active">الأنواع النشطة</option>
-              <option value="inactive">الأنواع المعطلة</option>
+              <option value="all">{tr("كل الحالات", "All statuses")}</option>
+              <option value="active">
+                {tr("الأنواع النشطة", "Active types")}
+              </option>
+              <option value="inactive">
+                {tr("الأنواع المعطلة", "Inactive types")}
+              </option>
             </select>
           </div>
         </section>
@@ -204,9 +233,9 @@ export default function AdminServiceTypesPage() {
         )}
 
         {isError && (
-          <div className="mt-6 rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-right">
+          <div className="mt-6 rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-start">
             <p className="font-cairo text-[13px] font-bold text-red-800">
-              تعذر تحميل الأنواع.
+              {tr("تعذر تحميل الأنواع.", "Failed to load service types.")}
             </p>
             <p className="mt-1 font-cairo text-[12px] text-red-700">
               {userFacingErrorMessage(error, "—")}
@@ -216,7 +245,7 @@ export default function AdminServiceTypesPage() {
               onClick={() => void refetch()}
               className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline"
             >
-              إعادة المحاولة
+              {tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         )}
@@ -225,7 +254,10 @@ export default function AdminServiceTypesPage() {
           <section className="mt-6 overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
             {filteredServiceTypes.length === 0 ? (
               <p className="px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                لا توجد أنواع خدمات بعد. استخدم «إضافة نوع خدمة».
+                {tr(
+                  "لا توجد أنواع خدمات بعد. استخدم «إضافة نوع خدمة».",
+                  "No service types yet. Use “Add service type”.",
+                )}
               </p>
             ) : (
               <div className="divide-y divide-[#EEF2F6]">
@@ -234,7 +266,7 @@ export default function AdminServiceTypesPage() {
                     typeof s.name === "string"
                       ? { en: s.name, ar: s.name }
                       : s.name,
-                    "ar",
+                    locale,
                   );
                   const nFields = s.fields?.length ?? 0;
                   return (
@@ -242,13 +274,13 @@ export default function AdminServiceTypesPage() {
                       key={s._id}
                       className="flex flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-6"
                     >
-                      <div className="min-w-0 flex-1 text-right">
+                      <div className="min-w-0 flex-1 text-start">
                         <div className="flex items-start gap-2 sm:items-center">
                           <button
                             type="button"
                             onClick={() => openEdit(s)}
                             className="mt-0.5 flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[6px] bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.25)] transition hover:brightness-105"
-                            aria-label="الحقول"
+                            aria-label={tr("الحقول", "Fields")}
                           >
                             <Settings className="h-5 w-5" />
                           </button>
@@ -261,7 +293,7 @@ export default function AdminServiceTypesPage() {
                                 {s.slug}
                               </span>
                               <span className="mx-2">•</span>
-                              {nFields} حقل
+                              {tr(`${nFields} حقل`, `${nFields} fields`)}
                               <span className="mx-2">•</span>v
                               {s.schemaVersion ?? "—"}
                             </div>
@@ -278,13 +310,13 @@ export default function AdminServiceTypesPage() {
                           className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-[#CFFAFE] bg-white px-3 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#ECFEFF]"
                         >
                           <Building2 className="h-4 w-4" />
-                          المزودون
+                          {tr("المزودون", "Providers")}
                         </Link>
                         <button
                           type="button"
                           onClick={() => openEdit(s)}
                           className="flex h-9 w-9 items-center justify-center rounded-[10px] text-primary transition hover:bg-[#E7FBFA]"
-                          aria-label="تعديل"
+                          aria-label={tr("تعديل", "Edit")}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
@@ -300,11 +332,11 @@ export default function AdminServiceTypesPage() {
                         {s.isActive ? (
                           <span className="ms-1 inline-flex h-[24px] items-center gap-1.5 rounded-[10px] bg-[#DCFCE7] px-3 font-cairo text-[12px] font-extrabold text-[#16A34A]">
                             <Check className="h-4 w-4" />
-                            نشط
+                            {tr("نشط", "Active")}
                           </span>
                         ) : (
                           <span className="ms-1 inline-flex h-[24px] items-center gap-1.5 rounded-[10px] bg-[#F3F4F6] px-3 font-cairo text-[12px] font-extrabold text-[#6B7280]">
-                            معطّل
+                            {tr("معطّل", "Inactive")}
                           </span>
                         )}
                       </div>
@@ -320,11 +352,10 @@ export default function AdminServiceTypesPage() {
           <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                عرض {rangeStart.toLocaleString("ar-SA")}–
-                {rangeEnd.toLocaleString("ar-SA")} من{" "}
-                {filteredServiceTypes.length.toLocaleString("ar-SA")} نوع · صفحة{" "}
-                {currentPage.toLocaleString("ar-SA")} /{" "}
-                {totalPages.toLocaleString("ar-SA")}
+                {tr(
+                  `عرض ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} من ${filteredServiceTypes.length.toLocaleString(numberLocale)} نوع · صفحة ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                  `Showing ${rangeStart.toLocaleString(numberLocale)}–${rangeEnd.toLocaleString(numberLocale)} of ${filteredServiceTypes.length.toLocaleString(numberLocale)} types · page ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                )}
               </div>
 
               <Pagination
