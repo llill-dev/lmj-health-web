@@ -13,11 +13,14 @@ import type { AdminDoctorApprovalStatus } from "@/lib/admin/types";
 import { phoneComparisonKey } from "@/lib/phone/formatPhoneForDisplay";
 import { isAdminDoctorOffboarded } from "@/lib/admin/doctors/isAdminDoctorOffboarded";
 import { DoctorCardSkeleton } from "@/components/admin/skeletons/DoctorCardSkeleton";
+import { useI18n } from "@/i18n/provider";
 
 const TEAL = "#108B8B";
 
 export default function AdminDoctorsPage() {
   const navigate = useNavigate();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [searchParams] = useSearchParams();
   const specializationParam = searchParams.get("specialization") ?? "";
 
@@ -99,51 +102,54 @@ export default function AdminDoctorsPage() {
       ...(offboardedCount > 0
         ? [
             {
-              title: "موقوف",
+              title: tr("موقوف", "Offboarded"),
               value: offboardedCount,
               icon: UserX,
             },
           ]
         : []),
       {
-        title: "مرفوض",
+        title: tr("مرفوض", "Rejected"),
         value: rejectedCount,
         icon: Ban,
       },
       {
-        title: "معلّق",
+        title: tr("معلّق", "Pending"),
         value: pendingCount,
         icon: Clock,
       },
       {
-        title: "مقبول",
+        title: tr("مقبول", "Approved"),
         value: approvedCount,
         icon: CheckCircle2,
       },
       {
-        title: "إجمالي الأطباء",
+        title: tr("إجمالي الأطباء", "Total doctors"),
         value: total,
         icon: Stethoscope,
       },
     ];
-  }, [doctors, total]);
+  }, [doctors, total, locale]);
 
   return (
     <>
       <Helmet>
-        <title>إدارة الأطباء • LMJ Health</title>
+        <title>{tr("إدارة الأطباء", "Doctors")} • LMJ Health</title>
       </Helmet>
 
       <div
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="mx-auto w-full max-w-[1600px] px-3 pb-6 sm:px-4 md:px-6"
       >
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="إدارة الأطباء"
-          subtitle="عرض ومتابعة بيانات الأطباء. إيقاف وتفعيل الحسابات غير متاحين حالياً لأن مسارات هذا التدفق غير موثقة في swagger_api.md"
+          title={tr("إدارة الأطباء", "Doctors management")}
+          subtitle={tr(
+            "عرض ومتابعة بيانات الأطباء. إيقاف وتفعيل الحسابات غير متاحين حالياً لأن مسارات هذا التدفق غير موثقة في swagger_api.md",
+            "View and monitor doctor records. Offboard/reboard flows are currently unavailable because those routes are not documented in swagger_api.md",
+          )}
           headerIcon={<Stethoscope className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={stats.map((c) => {
@@ -158,17 +164,17 @@ export default function AdminDoctorsPage() {
         />
 
         <AdminSearchFiltersBar
-          queryPlaceholder="ابحث عن طبيب..."
-          specialtyPlaceholder="الاختصاص"
+          queryPlaceholder={tr("ابحث عن طبيب...", "Search for a doctor...")}
+          specialtyPlaceholder={tr("الاختصاص", "Specialty")}
           specialtyOptions={[
-            { label: "طب الأطفال", value: "pediatrics" },
-            { label: "طب الأسرة", value: "family" },
+            { label: tr("طب الأطفال", "Pediatrics"), value: "pediatrics" },
+            { label: tr("طب الأسرة", "Family medicine"), value: "family" },
           ]}
-          statusPlaceholder="الحالة"
+          statusPlaceholder={tr("الحالة", "Status")}
           statusOptions={[
-            { label: "مقبول", value: "approved" },
-            { label: "معلّق", value: "pending" },
-            { label: "مرفوض", value: "rejected" },
+            { label: tr("مقبول", "Approved"), value: "approved" },
+            { label: tr("معلّق", "Pending"), value: "pending" },
+            { label: tr("مرفوض", "Rejected"), value: "rejected" },
           ]}
           filtersLeading={
             <div className="flex w-full min-w-0 flex-wrap content-stretch items-center gap-2 sm:gap-3">
@@ -181,8 +187,8 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                placeholder="المدينة"
-                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4"
+                placeholder={tr("المدينة", "City")}
+                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4"
               />
               <input
                 value={filters.country}
@@ -193,8 +199,8 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                placeholder="الدولة"
-                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4"
+                placeholder={tr("الدولة", "Country")}
+                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3] sm:min-w-[120px] sm:flex-none sm:w-[140px] sm:px-4"
               />
               <input
                 type="date"
@@ -206,7 +212,7 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-2 text-right font-cairo text-[12px] font-bold text-[#111827] sm:w-[150px] sm:flex-none sm:px-4"
+                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-2 text-start font-cairo text-[12px] font-bold text-[#111827] sm:w-[150px] sm:flex-none sm:px-4"
               />
               <input
                 type="date"
@@ -218,7 +224,7 @@ export default function AdminDoctorsPage() {
                     page: 1,
                   }))
                 }
-                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-2 text-right font-cairo text-[12px] font-bold text-[#111827] sm:w-[150px] sm:flex-none sm:px-4"
+                className="h-[42px] min-w-0 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white px-2 text-start font-cairo text-[12px] font-bold text-[#111827] sm:w-[150px] sm:flex-none sm:px-4"
               />
             </div>
           }
@@ -242,7 +248,7 @@ export default function AdminDoctorsPage() {
                 aria-hidden
               />
               <div className="truncate font-cairo text-sm font-black text-[#1F2937] sm:text-[16px]">
-                قائمة الأطباء ({results})
+                {tr("قائمة الأطباء", "Doctors list")} ({results})
               </div>
             </div>
           </div>
@@ -256,11 +262,14 @@ export default function AdminDoctorsPage() {
               </>
             ) : error ? (
               <div className="rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-                فشل تحميل قائمة الأطباء
+                {tr("فشل تحميل قائمة الأطباء", "Failed to load doctors list")}
               </div>
             ) : doctors.length === 0 ? (
               <div className="rounded-[10px] border border-[#E8ECEF] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                لا يوجد أطباء مطابقون لخيارات البحث.
+                {tr(
+                  "لا يوجد أطباء مطابقون لخيارات البحث.",
+                  "No doctors match the current filters.",
+                )}
               </div>
             ) : (
               doctors.map((d) => {
@@ -285,8 +294,8 @@ export default function AdminDoctorsPage() {
         </section>
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <div className="text-center font-cairo text-[11px] font-semibold text-[#667085] sm:text-right sm:text-[12px]">
-            الصفحة {filters.page} من {totalPages}
+          <div className="text-center font-cairo text-[11px] font-semibold text-[#667085] sm:text-start sm:text-[12px]">
+            {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-3">
@@ -304,11 +313,23 @@ export default function AdminDoctorsPage() {
                 }));
               }}
               options={[
-                { value: "20", label: "20 / صفحة" },
-                { value: "50", label: "50 / صفحة" },
-                { value: "100", label: "100 / صفحة" },
+                {
+                  value: "20",
+                  label: tr("20 / صفحة", "20 / page"),
+                },
+                {
+                  value: "50",
+                  label: tr("50 / صفحة", "50 / page"),
+                },
+                {
+                  value: "100",
+                  label: tr("100 / صفحة", "100 / page"),
+                },
               ]}
-              listboxAriaLabel="عدد النتائج في الصفحة"
+              listboxAriaLabel={tr(
+                "عدد النتائج في الصفحة",
+                "Results per page",
+              )}
             />
 
             <button
@@ -326,7 +347,7 @@ export default function AdminDoctorsPage() {
                   : "h-[38px] flex-1 rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] sm:flex-none"
               }
             >
-              السابق
+              {tr("السابق", "Previous")}
             </button>
             <button
               type="button"
@@ -343,7 +364,7 @@ export default function AdminDoctorsPage() {
                   : "h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15,143,139,0.25)] sm:flex-none"
               }
             >
-              التالي
+              {tr("التالي", "Next")}
             </button>
           </div>
         </div>

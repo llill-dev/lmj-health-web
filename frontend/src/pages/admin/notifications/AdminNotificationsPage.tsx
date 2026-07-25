@@ -11,9 +11,12 @@ import { useAdminNotificationsPage } from "@/hooks/admin/notifications/useAdminN
 import { ConfirmActionDialog } from "@/components/admin/dialogs";
 import { useToast } from "@/components/ui/ToastProvider";
 import { Pagination } from "@/components/admin/services/Pagination";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminNotificationsPage() {
   const { toast } = useToast();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [filter, setFilter] = useState<NotificationFilterTab>("all");
   const [page, setPage] = useState(1);
   const [markAllOpen, setMarkAllOpen] = useState(false);
@@ -49,13 +52,20 @@ export default function AdminNotificationsPage() {
       markOneReadMutation.mutate(id, {
         onSuccess: () => {
           toast(
-            `تُعامل «${row.title}» كمقروء. يبقى السجل في القائمة للمرجعية.`,
-            { title: "تمييز كمقروء", variant: "success", durationMs: 3600 },
+            tr(
+              `تُعامل «${row.title}» كمقروء. يبقى السجل في القائمة للمرجعية.`,
+              `"${row.title}" is marked as read. The record stays in the list for reference.`,
+            ),
+            {
+              title: tr("تمييز كمقروء", "Marked as read"),
+              variant: "success",
+              durationMs: 3600,
+            },
           );
         },
       });
     },
-    [rows, markOneReadMutation, toast],
+    [rows, markOneReadMutation, toast, locale],
   );
 
   const handleMarkAll = useCallback(() => {
@@ -83,10 +93,10 @@ export default function AdminNotificationsPage() {
   return (
     <>
       <Helmet>
-        <title>الإشعارات • LMJ Health</title>
+        <title>{tr("الإشعارات", "Notifications")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-6">
+      <div dir={dir} lang={locale} className="space-y-6">
         <AdminNotificationsHeading
           newCount={unreadTotal}
           onBroadcastClick={() => setBroadcastOpen(true)}
@@ -107,15 +117,15 @@ export default function AdminNotificationsPage() {
         {listQuery.isError ? (
           <div
             role="alert"
-            className="rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-right font-cairo text-[13px] font-semibold text-red-800"
+            className="rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-start font-cairo text-[13px] font-semibold text-red-800"
           >
-            تعذر تحميل الإشعارات.
+            {tr("تعذر تحميل الإشعارات.", "Failed to load notifications.")}
             <button
               type="button"
               onClick={() => listQuery.refetch()}
               className="me-2 underline decoration-red-800 underline-offset-2"
             >
-              إعادة المحاولة
+              {tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         ) : (
@@ -131,19 +141,28 @@ export default function AdminNotificationsPage() {
               open={markAllOpen}
               onOpenChange={setMarkAllOpen}
               variant="primary"
-              title="تأكيد تعليم كل الإشعارات كمقروء؟"
+              title={tr(
+                "تأكيد تعليم كل الإشعارات كمقروء؟",
+                "Mark all notifications as read?",
+              )}
               icon={
                 <CheckCheck className="h-6 w-6" strokeWidth={2} aria-hidden />
               }
-              description="سيتم وضع علامة مقروء على جميع إشعاراتك غير المقروءة في النظام. يمكنك التراجع فقط بإدخال بيانات جديدة — لا يسترجع الزر حالة «غير مقروء» تلقائياً."
-              confirmLabel="تعليم الكل كمقروء"
+              description={tr(
+                "سيتم وضع علامة مقروء على جميع إشعاراتك غير المقروءة في النظام. يمكنك التراجع فقط بإدخال بيانات جديدة — لا يسترجع الزر حالة «غير مقروء» تلقائياً.",
+                "All your unread notifications will be marked as read. This cannot be undone automatically — the button does not restore unread status.",
+              )}
+              confirmLabel={tr("تعليم الكل كمقروء", "Mark all as read")}
               confirmDisabled={markAllReadMutation.isPending}
               onConfirm={async () => {
                 await markAllReadMutation.mutateAsync();
               }}
               successToast={{
-                title: "تم",
-                message: "تُعامل جميع إشعاراتك كمقروءة.",
+                title: tr("تم", "Done"),
+                message: tr(
+                  "تُعامل جميع إشعاراتك كمقروءة.",
+                  "All your notifications are marked as read.",
+                ),
                 variant: "success",
               }}
             />

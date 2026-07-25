@@ -28,6 +28,7 @@ import type {
   AdminPatientsAccountStatusFilter,
 } from "@/lib/admin/types";
 import { PatientCardSkeleton } from "@/components/admin/skeletons/PatientCardSkeleton";
+import { useI18n } from "@/i18n/provider";
 
 type AdminPatientsFiltersState = {
   account_status: AdminPatientsAccountStatusFilter;
@@ -40,6 +41,8 @@ type AdminPatientsFiltersState = {
 export default function AdminPatientsPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     null,
@@ -105,13 +108,19 @@ export default function AdminPatientsPage() {
       await refetch();
       toast(
         accountActionTarget.action === "activate"
-          ? `تم تفعيل حساب المريض «${accountActionTarget.label}».`
-          : `تم رفع التعليق عن حساب «${accountActionTarget.label}».`,
+          ? tr(
+              `تم تفعيل حساب المريض «${accountActionTarget.label}».`,
+              `Patient account "${accountActionTarget.label}" was activated.`,
+            )
+          : tr(
+              `تم رفع التعليق عن حساب «${accountActionTarget.label}».`,
+              `Suspension lifted for "${accountActionTarget.label}".`,
+            ),
         {
           title:
             accountActionTarget.action === "activate"
-              ? "تم التفعيل"
-              : "تم رفع التعليق",
+              ? tr("تم التفعيل", "Activated")
+              : tr("تم رفع التعليق", "Unsuspended"),
           variant: "success",
           durationMs: 4200,
         },
@@ -125,34 +134,37 @@ export default function AdminPatientsPage() {
   return (
     <>
       <Helmet>
-        <title>إدارة المرضى • LMJ Health</title>
+        <title>{tr("إدارة المرضى", "Patients")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="patients"
           surface="mint"
-          title="إدارة المرضى"
-          subtitle="إدارة ومراقبة حسابات المرضى"
+          title={tr("إدارة المرضى", "Patients management")}
+          subtitle={tr(
+            "إدارة ومراقبة حسابات المرضى",
+            "Manage and monitor patient accounts",
+          )}
           headerIcon={<Users className="h-8 w-8 text-white" />}
           kpis={[
             {
               key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : total,
-              label: "إجمالي المرضى",
+              label: tr("إجمالي المرضى", "Total patients"),
             },
             {
               key: "page",
               icon: <Activity className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : results,
-              label: "في هذه الصفحة",
+              label: tr("في هذه الصفحة", "On this page"),
             },
             {
               key: "pages",
               icon: <Mail className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : totalPages,
-              label: "عدد الصفحات",
+              label: tr("عدد الصفحات", "Pages"),
             },
           ]}
         />
@@ -178,13 +190,13 @@ export default function AdminPatientsPage() {
                     }))
                   }
                   options={[
-                    { value: "all", label: "جميع الحالات" },
-                    { value: "active", label: "نشط" },
-                    { value: "temporary", label: "مؤقت" },
-                    { value: "suspended", label: "معلق" },
-                    { value: "locked", label: "موقوف" },
+                    { value: "all", label: tr("جميع الحالات", "All statuses") },
+                    { value: "active", label: tr("نشط", "Active") },
+                    { value: "temporary", label: tr("مؤقت", "Temporary") },
+                    { value: "suspended", label: tr("معلق", "Suspended") },
+                    { value: "locked", label: tr("موقوف", "Locked") },
                   ]}
-                  listboxAriaLabel="حالة الحساب"
+                  listboxAriaLabel={tr("حالة الحساب", "Account status")}
                 />
               </div>
 
@@ -200,14 +212,17 @@ export default function AdminPatientsPage() {
                     }))
                   }
                 />
-                إظهار المحذوفين
+                {tr("إظهار المحذوفين", "Show deleted")}
               </label>
             </div>
 
             <div className="relative flex-1">
               <input
-                placeholder="البحث بالاسم / الإيميل / الهاتف / رقم المريض..."
-                className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+                placeholder={tr(
+                  "البحث بالاسم / الإيميل / الهاتف / رقم المريض...",
+                  "Search by name / email / phone / patient ID...",
+                )}
+                className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
                 value={filters.search}
                 onChange={(e) =>
                   setFilters((prev) => ({
@@ -233,11 +248,11 @@ export default function AdminPatientsPage() {
                     : "inline-flex h-[42px] items-center justify-center rounded-[10px] border border-primary/25 bg-primary/10 px-4 font-cairo text-[12px] font-extrabold text-primary transition-colors hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 }
               >
-                مسح الفلاتر
+                {tr("مسح الفلاتر", "Clear filters")}
               </button>
 
               <div className="inline-flex h-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#667085]">
-                {results} نتيجة
+                {results} {tr("نتيجة", "results")}
               </div>
             </div>
           </div>
@@ -252,11 +267,11 @@ export default function AdminPatientsPage() {
             </>
           ) : error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-              تعذر تحميل قائمة المرضى.
+              {tr("تعذر تحميل قائمة المرضى.", "Failed to load patients list.")}
             </div>
           ) : patients.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-              لا توجد نتائج مطابقة.
+              {tr("لا توجد نتائج مطابقة.", "No matching results.")}
             </div>
           ) : (
             patients.map((p) => {
@@ -277,7 +292,7 @@ export default function AdminPatientsPage() {
                             <Users className="w-6 h-6" />
                           </div>
 
-                          <div className="text-right">
+                          <div className="text-start">
                             <div className="font-cairo text-[16px] font-black leading-[20px] text-[#111827]">
                               {p.user.fullName}
                             </div>
@@ -326,7 +341,7 @@ export default function AdminPatientsPage() {
                               className="flex h-[34px] w-[150px] bg-primary items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] font-cairo text-[12px] font-extrabold text-white"
                             >
                               <Eye className="w-4 h-4" />
-                              عرض التفاصيل
+                              {tr("عرض التفاصيل", "View details")}
                             </button>
 
                             <button
@@ -340,7 +355,7 @@ export default function AdminPatientsPage() {
                               className="flex h-[34px] w-[150px] items-center justify-center gap-2 rounded-[10px] border border-[#FB923C] bg-white font-cairo text-[12px] font-extrabold text-[#F97316] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <Ban className="w-4 h-4" />
-                              تعليق الحساب
+                              {tr("تعليق الحساب", "Suspend account")}
                             </button>
 
                             {p.user.accountStatus !== "active" && (
@@ -357,8 +372,8 @@ export default function AdminPatientsPage() {
                               >
                                 <ShieldCheck className="w-4 h-4" />
                                 {actionKind === "unsuspend"
-                                  ? "رفع التعليق"
-                                  : "تفعيل الحساب"}
+                                  ? tr("رفع التعليق", "Unsuspend")
+                                  : tr("تفعيل الحساب", "Activate account")}
                               </button>
                             )}
                           </div>
@@ -374,7 +389,7 @@ export default function AdminPatientsPage() {
 
         <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="font-cairo text-[12px] font-bold text-[#667085]">
-            الصفحة {filters.page} من {totalPages}
+            {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
           </div>
 
           <div className="flex gap-3 items-center">
@@ -394,7 +409,10 @@ export default function AdminPatientsPage() {
                   value: String(v),
                   label: String(v),
                 }))}
-                listboxAriaLabel="عدد العناصر في الصفحة"
+                listboxAriaLabel={tr(
+                  "عدد العناصر في الصفحة",
+                  "Items per page",
+                )}
               />
             </div>
 
@@ -409,7 +427,7 @@ export default function AdminPatientsPage() {
               disabled={filters.page <= 1}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              السابق
+              {tr("السابق", "Previous")}
             </button>
 
             <button
@@ -423,7 +441,7 @@ export default function AdminPatientsPage() {
               disabled={filters.page >= totalPages}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              التالي
+              {tr("التالي", "Next")}
             </button>
           </div>
         </section>
@@ -451,15 +469,21 @@ export default function AdminPatientsPage() {
         variant="primary"
         title={
           accountActionTarget?.action === "unsuspend"
-            ? "تأكيد رفع التعليق"
-            : "تأكيد تفعيل الحساب"
+            ? tr("تأكيد رفع التعليق", "Confirm unsuspend")
+            : tr("تأكيد تفعيل الحساب", "Confirm activate account")
         }
         description={
           accountActionTarget ? (
             <>
               {accountActionTarget.action === "unsuspend"
-                ? "سيتم رفع التعليق عن حساب المريض"
-                : "سيتم تفعيل حساب المريض"}{" "}
+                ? tr(
+                    "سيتم رفع التعليق عن حساب المريض",
+                    "Suspension will be lifted for patient",
+                  )
+                : tr(
+                    "سيتم تفعيل حساب المريض",
+                    "Patient account will be activated",
+                  )}{" "}
               <span className="font-extrabold text-[#344054]">
                 {accountActionTarget.label}
               </span>
@@ -471,8 +495,8 @@ export default function AdminPatientsPage() {
         }
         confirmLabel={
           accountActionTarget?.action === "unsuspend"
-            ? "رفع التعليق"
-            : "تفعيل الحساب"
+            ? tr("رفع التعليق", "Unsuspend")
+            : tr("تفعيل الحساب", "Activate account")
         }
         confirmDisabled={accountActionBusy}
         onConfirm={runAccountAction}

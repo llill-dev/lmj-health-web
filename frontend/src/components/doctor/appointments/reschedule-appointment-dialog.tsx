@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import StyledSelect from '@/components/ui/styled-select';
 import { useAvailableAppointmentTypes, useSlots } from '@/hooks/doctor';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useI18n } from '@/i18n/provider';
 
 const rescheduleSchema = z.object({
   date: z.string().min(1, 'يرجى اختيار التاريخ'),
@@ -57,6 +58,9 @@ export default function RescheduleAppointmentDialog({
   }) => void | Promise<void>;
   confirmDisabled?: boolean;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
   const {
     register,
     control,
@@ -192,8 +196,8 @@ export default function RescheduleAppointmentDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[680px] max-h-[calc(100dvh-24px)] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <div
               ref={rescheduleSelectOutletRef}
@@ -221,17 +225,17 @@ export default function RescheduleAppointmentDialog({
                   <button
                     type='button'
                     className='absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] sm:left-5 sm:top-5 lg:left-6 lg:top-6'
-                    aria-label='إغلاق'
+                    aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
                   </button>
                 </Dialog.Close>
 
-                <Dialog.Title className='text-right font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]'>
-                  إعادة جدولة الموعد
+                <Dialog.Title className='text-start font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]'>
+                  {tr('إعادة جدولة الموعد', 'Reschedule appointment')}
                 </Dialog.Title>
 
-                <div className='mt-6 text-right font-cairo text-[16px] font-extrabold text-[#101828] sm:mt-8'>
+                <div className='mt-6 text-start font-cairo text-[16px] font-extrabold text-[#101828] sm:mt-8'>
                   {patientName}
                 </div>
 
@@ -249,9 +253,9 @@ export default function RescheduleAppointmentDialog({
                 >
                   <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
                     <div>
-                      <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[14px] font-extrabold text-[#101828]'>
+                      <label className='mb-2 flex items-center gap-2 text-start font-cairo text-[14px] font-extrabold text-[#101828]'>
                         <CalendarDays className='h-4 w-4 text-primary' />
-                        التاريخ الجديد
+                        {tr('التاريخ الجديد', 'New date')}
                       </label>
                       <input
                         type='date'
@@ -259,16 +263,16 @@ export default function RescheduleAppointmentDialog({
                         className='h-[46px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none'
                       />
                       {errors.date ? (
-                        <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                        <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
                           {errors.date.message}
                         </div>
                       ) : null}
                     </div>
 
                     <div>
-                      <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[14px] font-extrabold text-[#101828]'>
+                      <label className='mb-2 flex items-center gap-2 text-start font-cairo text-[14px] font-extrabold text-[#101828]'>
                         <Clock3 className='h-4 w-4 text-primary' />
-                        الوقت المتاح
+                        {tr('الوقت المتاح', 'Available time')}
                       </label>
                       <Controller
                         name='startTime'
@@ -282,25 +286,37 @@ export default function RescheduleAppointmentDialog({
                             disabled={!selectedDate || isAwaitingSlots}
                             placeholder={
                               !selectedDate
-                                ? 'اختر التاريخ أولًا'
+                                ? tr('اختر التاريخ أولًا', 'Select a date first')
                                 : isAwaitingSlots
-                                  ? 'جارٍ تحميل الأوقات...'
+                                  ? tr(
+                                      'جارٍ تحميل الأوقات...',
+                                      'Loading times...',
+                                    )
                                   : availableTimes.length === 0
-                                    ? 'لا توجد أوقات متاحة'
-                                    : 'اختر وقتًا متاحًا'
+                                    ? tr(
+                                        'لا توجد أوقات متاحة',
+                                        'No times available',
+                                      )
+                                    : tr(
+                                        'اختر وقتًا متاحًا',
+                                        'Select an available time',
+                                      )
                             }
                             options={availableTimes.map((time) => ({
                               value: time,
                               label: time,
                             }))}
-                            listboxAriaLabel='اختيار الوقت المتاح'
+                            listboxAriaLabel={tr(
+                              'اختيار الوقت المتاح',
+                              'Select available time',
+                            )}
                             error={Boolean(errors.startTime)}
                             listboxPortalRef={rescheduleSelectOutletRef}
                           />
                         )}
                       />
                       {errors.startTime ? (
-                        <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                        <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
                           {errors.startTime.message}
                         </div>
                       ) : null}
@@ -308,9 +324,9 @@ export default function RescheduleAppointmentDialog({
                   </div>
 
                   <div>
-                    <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[14px] font-extrabold text-[#101828]'>
+                    <label className='mb-2 flex items-center gap-2 text-start font-cairo text-[14px] font-extrabold text-[#101828]'>
                       <Tag className='h-4 w-4 text-primary' />
-                      نوع الموعد
+                      {tr('نوع الموعد', 'Appointment type')}
                     </label>
                     <Controller
                       name='appointmentTypeId'
@@ -322,9 +338,18 @@ export default function RescheduleAppointmentDialog({
                           onBlur={field.onBlur}
                           name={field.name}
                           disabled={isAwaitingTypes}
-                          placeholder='الإبقاء على النوع الحالي أو اختيار نوع متاح'
+                          placeholder={tr(
+                            'الإبقاء على النوع الحالي أو اختيار نوع متاح',
+                            'Keep current type or choose another',
+                          )}
                           options={[
-                            { value: '', label: 'الإبقاء على النوع الحالي' },
+                            {
+                              value: '',
+                              label: tr(
+                                'الإبقاء على النوع الحالي',
+                                'Keep current type',
+                              ),
+                            },
                             ...appointmentTypes.map((type) => ({
                               value: type._id,
                               label:
@@ -333,7 +358,10 @@ export default function RescheduleAppointmentDialog({
                                   : type.name,
                             })),
                           ]}
-                          listboxAriaLabel='اختيار نوع الموعد'
+                          listboxAriaLabel={tr(
+                            'اختيار نوع الموعد',
+                            'Select appointment type',
+                          )}
                           listboxPortalRef={rescheduleSelectOutletRef}
                         />
                       )}
@@ -341,7 +369,7 @@ export default function RescheduleAppointmentDialog({
                   </div>
 
                   {slotsError ? (
-                    <div className='rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-right'>
+                    <div className='rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-start'>
                       <div className='flex items-start gap-2 font-cairo text-[12px] font-bold text-[#B42318]'>
                         <AlertCircle className='mt-0.5 h-4 w-4 shrink-0' />
                         <span>{getUserFacingRequestErrorMessage(slotsError)}</span>
@@ -350,25 +378,28 @@ export default function RescheduleAppointmentDialog({
                   ) : null}
 
                   {selectedDate && isAwaitingSlots ? (
-                    <div className='rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#667085]'>
+                    <div className='rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-start font-cairo text-[12px] font-bold text-[#667085]'>
                       <span className='inline-flex items-center gap-2'>
                         <Loader2 className='h-4 w-4 animate-spin text-primary' />
-                        جارٍ تحميل الأوقات المتاحة لهذا اليوم...
+                        {tr(
+                          'جارٍ تحميل الأوقات المتاحة لهذا اليوم...',
+                          'Loading available times for this day...',
+                        )}
                       </span>
                     </div>
                   ) : null}
 
                   <div>
-                    <label className='mb-2 block text-right font-cairo text-[14px] font-extrabold text-[#101828]'>
-                      سبب إعادة الجدولة
+                    <label className='mb-2 block text-start font-cairo text-[14px] font-extrabold text-[#101828]'>
+                      {tr('سبب إعادة الجدولة', 'Reschedule reason')}
                     </label>
                     <textarea
                       {...register('reason')}
-                      placeholder='اختياري...'
+                      placeholder={tr('اختياري...', 'Optional...')}
                       className='min-h-[110px] w-full resize-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3]'
                     />
                     {errors.reason ? (
-                      <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                      <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
                         {errors.reason.message}
                       </div>
                     ) : null}
@@ -380,7 +411,7 @@ export default function RescheduleAppointmentDialog({
                         type='button'
                         className='h-[46px] w-full rounded-[10px] border border-[#D0D5DD] bg-white font-cairo text-[14px] font-extrabold text-[#344054]'
                       >
-                        إلغاء
+                        {tr('إلغاء', 'Cancel')}
                       </button>
                     </Dialog.Close>
 
@@ -389,7 +420,7 @@ export default function RescheduleAppointmentDialog({
                       disabled={confirmDisabled || isSubmitting || !selectedDate || availableTimes.length === 0}
                       className='h-[46px] w-full rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15,143,139,0.25)] disabled:opacity-60'
                     >
-                      حفظ الموعد الجديد
+                      {tr('حفظ الموعد الجديد', 'Save new appointment')}
                     </button>
                   </div>
                 </form>

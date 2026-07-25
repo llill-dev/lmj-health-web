@@ -55,11 +55,14 @@ import {
   DashboardComplaintCardSkeleton,
   DashboardContentCardSkeleton,
 } from "@/components/admin/skeletons/DashboardSkeletons";
+import { useI18n } from "@/i18n/provider";
 
 const TEAL = "#0F8F8B";
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const archiveContent = useArchiveContent();
   const [archiveTarget, setArchiveTarget] = useState<AdminContentItem | null>(
     null,
@@ -141,7 +144,7 @@ export default function AdminDashboardPage() {
   const secondaryCards = useMemo(
     () => [
       {
-        title: "إشعارات غير مقروءة",
+        title: tr("إشعارات غير مقروءة", "Unread notifications"),
         value: formatKpi(
           unreadNotifications.data,
           unreadNotifications.isAwaitingData,
@@ -152,7 +155,7 @@ export default function AdminDashboardPage() {
         iconColor: "text-[#EF4444]",
       },
       {
-        title: "محتوى منشور",
+        title: tr("محتوى منشور", "Published content"),
         value: formatKpi(contentCounts.published, contentCounts.isAwaitingData),
         icon: FileText,
         tone: "border-[#CFFAFE] bg-white text-[#111827]",
@@ -160,7 +163,7 @@ export default function AdminDashboardPage() {
         iconColor: "text-primary",
       },
       {
-        title: "طلبات تحقق معلّقة",
+        title: tr("طلبات تحقق معلّقة", "Pending verifications"),
         value: formatKpi(stats.pendingVerifications, statsAwaiting),
         icon: ClipboardList,
         tone: "border-[#CFFAFE] bg-white text-[#111827]",
@@ -176,21 +179,25 @@ export default function AdminDashboardPage() {
       contentCounts.isAwaitingData,
       stats.pendingVerifications,
       statsAwaiting,
+      locale,
     ],
   );
 
   return (
     <>
       <Helmet>
-        <title>Admin Dashboard • LMJ Health</title>
+        <title>{tr("لوحة المشرف", "Admin Dashboard")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="min-h-full text-[#111827]">
+      <div dir={dir} lang={locale} className="min-h-full text-[#111827]">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="لوحة التحكم الرئيسية"
-          subtitle="نظرة عامة شاملة على النظام وإدارة النشاط"
+          title={tr("لوحة التحكم الرئيسية", "Main dashboard")}
+          subtitle={tr(
+            "نظرة عامة شاملة على النظام وإدارة النشاط",
+            "System overview and activity management",
+          )}
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={[
@@ -201,25 +208,25 @@ export default function AdminDashboardPage() {
                 pendingAccessQuery.data?.total,
                 mainKpisAwaiting,
               ),
-              label: "طلبات الوصول المعلّقة",
+              label: tr("طلبات الوصول المعلّقة", "Pending access requests"),
             },
             {
               key: "appointments",
               icon: <CalendarDays className="h-5 w-5 shrink-0" />,
               value: formatKpi(stats.totalAppointments, mainKpisAwaiting),
-              label: "إجمالي المواعيد",
+              label: tr("إجمالي المواعيد", "Total appointments"),
             },
             {
               key: "doctors",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: formatKpi(stats.totalDoctors, mainKpisAwaiting),
-              label: "إجمالي الأطباء",
+              label: tr("إجمالي الأطباء", "Total doctors"),
             },
             {
               key: "patients",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: formatKpi(stats.totalPatients, mainKpisAwaiting),
-              label: "إجمالي المرضى",
+              label: tr("إجمالي المرضى", "Total patients"),
             },
           ]}
         />
@@ -230,7 +237,7 @@ export default function AdminDashboardPage() {
             className="inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]"
           >
             <UserCheck className="h-4 w-4" />
-            إدارة طلبات الوصول
+            {tr("إدارة طلبات الوصول", "Manage access requests")}
           </Link>
         </section>
 
@@ -264,16 +271,16 @@ export default function AdminDashboardPage() {
 
         <section className="mt-5 overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
           <div className="flex flex-col gap-3 border-b border-[#EEF2F6] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-right">
+            <div className="text-start">
               <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                آخر الأنشطة
+                {tr("آخر الأنشطة", "Recent activity")}
               </div>
             </div>
             <Link
               to="/admin/system-logs"
               className="inline-flex h-[34px] shrink-0 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#F0FDFC]"
             >
-              عرض سجل النظام
+              {tr("عرض سجل النظام", "View system logs")}
             </Link>
           </div>
 
@@ -286,11 +293,17 @@ export default function AdminDashboardPage() {
               </>
             ) : activityQuery.isError ? (
               <div className="px-6 py-10 text-center font-cairo text-[13px] font-semibold text-red-600">
-                تعذر تحميل سجل الأنشطة. تحقق من الصلاحيات أو الشبكة.
+                {tr(
+                  "تعذر تحميل سجل الأنشطة. تحقق من الصلاحيات أو الشبكة.",
+                  "Failed to load activity log. Check permissions or network.",
+                )}
               </div>
             ) : activityLogs.length === 0 ? (
               <div className="px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                لا توجد أحداث مسجّلة في الصفحة الحالية.
+                {tr(
+                  "لا توجد أحداث مسجّلة في الصفحة الحالية.",
+                  "No events recorded on this page.",
+                )}
               </div>
             ) : (
               activityLogs.map((log) => {
@@ -308,7 +321,7 @@ export default function AdminDashboardPage() {
                       >
                         <Icon className={`w-4 h-4 ${iconColor}`} />
                       </div>
-                      <div className="flex-1 min-w-0 text-right">
+                      <div className="flex-1 min-w-0 text-start">
                         <div className="truncate font-cairo text-[13px] font-extrabold text-[#111827]">
                           {title}
                         </div>
@@ -332,8 +345,8 @@ export default function AdminDashboardPage() {
 
         {/* آخر الشكاوي — مطابق تخطيط المرجع: شريط فيزيائي، أيقونة، شارة، تفاصيل */}
         <section className="mt-5">
-          <h2 className="mb-3 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-            آخر الشكاوي
+          <h2 className="mb-3 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+            {tr("آخر الشكاوي", "Latest complaints")}
           </h2>
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {complaintsAwaiting ? (
@@ -344,11 +357,11 @@ export default function AdminDashboardPage() {
               </>
             ) : complaintsQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">
-                تعذر تحميل الشكاوى.
+                {tr("تعذر تحميل الشكاوى.", "Failed to load complaints.")}
               </div>
             ) : complaints.length === 0 ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                لا توجد شكاوى لعرضها.
+                {tr("لا توجد شكاوى لعرضها.", "No complaints to show.")}
               </div>
             ) : (
               <ul className="flex flex-col gap-3">
@@ -370,7 +383,7 @@ export default function AdminDashboardPage() {
                           >
                             <Stethoscope className="w-6 h-6 text-white sm:h-7 sm:w-7" />
                           </div>
-                          <div className="flex-1 min-w-0 text-right">
+                          <div className="flex-1 min-w-0 text-start">
                             <div className="flex flex-wrap gap-2 justify-end items-center">
                               <span
                                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-cairo text-[10px] font-extrabold ${st.className}`}
@@ -383,7 +396,7 @@ export default function AdminDashboardPage() {
                             </div>
                             <div className="mt-1.5 font-cairo text-[13px] font-semibold text-[#374151]">
                               <span className="text-[#98A2B3]">
-                                نوع الشكوى :{" "}
+                                {tr("نوع الشكوى : ", "Complaint type: ")}
                               </span>
                               {complaintTypeLabel(row.type)}
                             </div>
@@ -399,7 +412,10 @@ export default function AdminDashboardPage() {
                           to={`/admin/complaints/${row._id}`}
                           className="flex w-[52px] shrink-0 items-center justify-center text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                           style={{ backgroundColor: TEAL }}
-                          aria-label="عرض تفاصيل الشكوى"
+                          aria-label={tr(
+                            "عرض تفاصيل الشكوى",
+                            "View complaint details",
+                          )}
                         >
                           <ChevronLeft className="w-6 h-6" strokeWidth={2.5} />
                         </Link>
@@ -414,8 +430,8 @@ export default function AdminDashboardPage() {
 
         {/* آخر الأخبار / المحتوى — شارة حالة، صف بيانات، أيقونات إجراءات يسار الصف */}
         <section className="mt-5 mb-2">
-          <h2 className="mb-3 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-            آخر الأخبار
+          <h2 className="mb-3 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+            {tr("آخر الأخبار", "Latest news")}
           </h2>
           <div className="overflow-hidden rounded-[12px] border border-[#E8EDF2] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-5">
             {contentQuery.isAwaitingData ? (
@@ -426,11 +442,11 @@ export default function AdminDashboardPage() {
               </>
             ) : contentQuery.isError ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-red-600">
-                تعذر تحميل الأخبار.
+                {tr("تعذر تحميل الأخبار.", "Failed to load news.")}
               </div>
             ) : contentRows.length === 0 ? (
               <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                لا توجد عناصر لعرضها.
+                {tr("لا توجد عناصر لعرضها.", "No items to show.")}
               </div>
             ) : (
               <ul className="flex flex-col gap-3">
@@ -442,7 +458,7 @@ export default function AdminDashboardPage() {
                     <li key={item._id}>
                       <div className="rounded-[12px] border border-[#E5E7EB] bg-[#FAFBFC] px-4 py-4 sm:px-5 sm:py-5">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                          <div className="flex-1 min-w-0 text-right">
+                          <div className="flex-1 min-w-0 text-start">
                             <div className="flex flex-wrap gap-2 justify-start items-center">
                               <h3 className="max-w-full font-cairo text-[15px] font-extrabold leading-snug text-[#111827] sm:text-[16px]">
                                 {asPlainText(item.title) || "—"}
@@ -460,15 +476,17 @@ export default function AdminDashboardPage() {
                               </span>
                               <span className="inline-flex gap-1.5 items-center">
                                 <User className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
-                                الكاتب: {authorName(item.createdBy)}
+                                {tr("الكاتب: ", "Author: ")}
+                                {authorName(item.createdBy)}
                               </span>
                               <span className="inline-flex gap-1.5 items-center">
                                 <Eye className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
-                                {views} مشاهدة
+                                {views} {tr("مشاهدة", "views")}
                               </span>
                               <span className="inline-flex gap-1.5 items-center">
                                 <CalendarClock className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
-                                آخر تحديث: {formatShortDate(item.updatedAt)}
+                                {tr("آخر تحديث: ", "Last updated: ")}
+                                {formatShortDate(item.updatedAt)}
                               </span>
                             </div>
                           </div>
@@ -478,12 +496,18 @@ export default function AdminDashboardPage() {
                               disabled={!canArchive || archiveContent.isPending}
                               title={
                                 canArchive
-                                  ? "أرشفة (للمحتوى المنشور فقط)"
-                                  : "الأرشفة متاحة للعناصر ذات حالة «منشور» فقط"
+                                  ? tr(
+                                      "أرشفة (للمحتوى المنشور فقط)",
+                                      "Archive (published content only)",
+                                    )
+                                  : tr(
+                                      "الأرشفة متاحة للعناصر ذات حالة «منشور» فقط",
+                                      "Archive is available for published items only",
+                                    )
                               }
                               onClick={() => handleArchive(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#FECACA] bg-white text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
-                              aria-label="أرشفة"
+                              aria-label={tr("أرشفة", "Archive")}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -492,7 +516,7 @@ export default function AdminDashboardPage() {
                               onClick={() => handleEditContent(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#A5E3E1] bg-white text-primary transition hover:bg-[#F0FDFC]"
                               style={{ color: TEAL, borderColor: "#A5E3E1" }}
-                              aria-label="تعديل"
+                              aria-label={tr("تعديل", "Edit")}
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
@@ -500,7 +524,7 @@ export default function AdminDashboardPage() {
                               type="button"
                               onClick={() => handleViewContent(item)}
                               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#BFDBFE] bg-white text-[#2563EB] transition hover:bg-[#EFF6FF]"
-                              aria-label="عرض"
+                              aria-label={tr("عرض", "View")}
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -524,27 +548,32 @@ export default function AdminDashboardPage() {
           if (!next) setArchiveTarget(null);
         }}
         variant="destructive"
-        title="تأكيد الأرشفة"
+        title={tr("تأكيد الأرشفة", "Confirm archive")}
         icon={<Archive className="w-6 h-6" strokeWidth={2} />}
         description={
           <>
-            هل تريد أرشفة العنصر «
+            {tr("هل تريد أرشفة العنصر «", 'Archive item "')}
             <span className="font-extrabold text-[#344054]">
               {archiveTarget ? asPlainText(archiveTarget.title) || "—" : "—"}
             </span>
-            »؟ سيتم إزالته من القوائم النشطة ويمكن متابعته لاحقاً من أرشيف
-            المحتوى إن وُجد.
+            {tr(
+              "»؟ سيتم إزالته من القوائم النشطة ويمكن متابعته لاحقاً من أرشيف المحتوى إن وُجد.",
+              '"? It will be removed from active lists and can be followed later from the content archive if available.',
+            )}
           </>
         }
-        confirmLabel="أرشفة"
+        confirmLabel={tr("أرشفة", "Archive")}
         confirmDisabled={archiveContent.isPending}
         onConfirm={async () => {
           if (!archiveTarget) return;
           await archiveContent.mutateAsync(archiveTarget._id);
         }}
         successToast={{
-          title: "تمت الأرشفة",
-          message: "أُرشف المحتوى ويُتاح من أرشيف المحتوى عند التوفّر.",
+          title: tr("تمت الأرشفة", "Archived"),
+          message: tr(
+            "أُرشف المحتوى ويُتاح من أرشيف المحتوى عند التوفّر.",
+            "Content was archived and is available from the content archive when present.",
+          ),
           variant: "success",
         }}
       />

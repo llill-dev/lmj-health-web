@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useI18n } from '@/i18n/provider';
 
 const notesSchema = z.object({
   medicalNotes: z.string().min(1, 'هذا الحقل مطلوب'),
@@ -19,10 +20,10 @@ export default function CancelAppointmentDialog({
   patientName,
   onConfirm,
   confirmDisabled,
-  title = 'إنهاء الموعد',
-  fieldLabel = 'الملاحظات الطبية',
-  placeholder = 'اكتب التشخيص والملاحظات الطبية هنا...',
-  confirmLabel = 'حفظ وإنهاء',
+  title: titleProp,
+  fieldLabel: fieldLabelProp,
+  placeholder: placeholderProp,
+  confirmLabel: confirmLabelProp,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,6 +35,19 @@ export default function CancelAppointmentDialog({
   placeholder?: string;
   confirmLabel?: string;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const title = titleProp ?? tr('إنهاء الموعد', 'Complete appointment');
+  const fieldLabel = fieldLabelProp ?? tr('الملاحظات الطبية', 'Medical notes');
+  const placeholder =
+    placeholderProp ??
+    tr(
+      'اكتب التشخيص والملاحظات الطبية هنا...',
+      'Enter diagnosis and medical notes here...',
+    );
+  const confirmLabel =
+    confirmLabelProp ?? tr('حفظ وإنهاء', 'Save and complete');
+
   const {
     register,
     handleSubmit,
@@ -116,8 +130,8 @@ export default function CancelAppointmentDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <motion.div
               initial={false}
@@ -143,19 +157,19 @@ export default function CancelAppointmentDialog({
                   <button
                     type='button'
                     className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
-                    aria-label='إغلاق'
+                    aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
                   </button>
                 </Dialog.Close>
 
-                <Dialog.Title className='text-right font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]'>
+                <Dialog.Title className='text-start font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]'>
                   {title}
                 </Dialog.Title>
 
-                <div className='mt-10 text-right'>
+                <div className='mt-10 text-start'>
                   <div className='font-cairo text-[14px] font-bold text-[#101828]'>
-                    المريض
+                    {tr('المريض', 'Patient')}
                   </div>
                   <div className='mt-1 font-cairo text-[16px] font-extrabold text-[#101828]'>
                     {patientName}
@@ -163,7 +177,7 @@ export default function CancelAppointmentDialog({
                 </div>
 
                 <div className='mt-7'>
-                  <div className='mb-2 text-right font-cairo text-[14px] font-extrabold text-[#101828]'>
+                  <div className='mb-2 text-start font-cairo text-[14px] font-extrabold text-[#101828]'>
                     {fieldLabel}:
                     <span className='ms-1 text-[#F04438]'>*</span>
                   </div>
@@ -181,7 +195,7 @@ export default function CancelAppointmentDialog({
                       type='button'
                       className='h-[46px] w-full rounded-[10px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438]'
                     >
-                      إلغاء
+                      {tr('إلغاء', 'Cancel')}
                     </button>
                   </Dialog.Close>
 
