@@ -63,6 +63,7 @@ import { cn } from "@/lib/utils/utils";
 import LanguageModeToggle from "@/components/admin/medical-content/LanguageModeToggle";
 import { MedicalContentRowSkeleton } from "@/components/admin/skeletons/MedicalContentRowSkeleton";
 import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
+import { useI18n } from "@/i18n/provider";
 import {
   buildVisiblePageNumbers,
   contentStatusLabel,
@@ -129,6 +130,10 @@ function countValidContentSources(item: AdminContentDetailsItem | null): number 
 }
 
 export default function AdminMedicalContentPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState("");
@@ -415,55 +420,67 @@ export default function AdminMedicalContentPage() {
       <Helmet>
         <title>
           {activeType === "NEWS"
-            ? "الأخبار الطبية — إدارة المحتوى • LMJ Health"
-            : "إدارة المحتوى الطبي • LMJ Health"}
+            ? tr(
+                "الأخبار الطبية — إدارة المحتوى • LMJ Health",
+                "Medical news — content management • LMJ Health",
+              )
+            : tr(
+                "إدارة المحتوى الطبي • LMJ Health",
+                "Medical content management • LMJ Health",
+              )}
         </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="إدارة المحتوى الطبي"
+          title={tr("إدارة المحتوى الطبي", "Medical content management")}
           subtitle={
             activeType === "NEWS"
-              ? "عرض وإدارة أخبار المنصة (مسودة → مراجعة → نشر)"
-              : "قائمة، فلاتر، ومراجعة لدورة حياة المحتوى"
+              ? tr(
+                  "عرض وإدارة أخبار المنصة (مسودة → مراجعة → نشر)",
+                  "View and manage platform news (draft → review → publish)",
+                )
+              : tr(
+                  "قائمة، فلاتر، ومراجعة لدورة حياة المحتوى",
+                  "List, filters, and review for content lifecycle",
+                )
           }
           headerIcon={<BookOpen className="h-8 w-8 text-white" />}
-          actionLabel="إضافة محتوى جديد"
+          actionLabel={tr("إضافة محتوى جديد", "Add new content")}
           onActionClick={() => setCreateOpen(true)}
           kpiColumns={5}
           kpis={[
             {
               key: "views",
               icon: <Eye className="h-5 w-5 shrink-0" />,
-              value: pageViews.toLocaleString("ar-SA"),
-              label: "مشاهدات الصفحة",
+              value: pageViews.toLocaleString(numberLocale),
+              label: tr("مشاهدات الصفحة", "Page views"),
             },
             {
               key: "draft",
               icon: <FileText className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.draft,
-              label: "مسودات",
+              label: tr("مسودات", "Drafts"),
             },
             {
               key: "review",
               icon: <Clock className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.inReview,
-              label: "قيد المراجعة",
+              label: tr("قيد المراجعة", "In review"),
             },
             {
               key: "published",
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.published,
-              label: "منشور",
+              label: tr("منشور", "Published"),
             },
             {
               key: "all",
               icon: <BookOpen className="h-5 w-5 shrink-0" />,
               value: statusCounts.isAwaitingData ? "…" : statusCounts.all,
-              label: "إجمالي النظام",
+              label: tr("إجمالي النظام", "System total"),
             },
           ]}
         />
@@ -472,12 +489,15 @@ export default function AdminMedicalContentPage() {
           <div className="flex flex-col gap-3 w-full min-w-0 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 min-w-0">
               <input
-                placeholder="بحث في العناوين والملخص (العربية/الإنجليزية)…"
+                placeholder={tr(
+                  "بحث في العناوين والملخص (العربية/الإنجليزية)…",
+                  "Search titles and summaries (Arabic/English)…",
+                )}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
+                className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
               />
-              <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+              <div className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
                 <Search className="w-5 h-5" />
               </div>
             </div>
@@ -492,14 +512,14 @@ export default function AdminMedicalContentPage() {
                     setPage(1);
                   }}
                 />
-                محتواي فقط
+                {tr("محتواي فقط", "My content only")}
               </label>
               <LanguageModeToggle value={langFilter} onChange={setLangFilter} />
             </div>
           </div>
 
           <div className="mt-5 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            نوع المحتوى
+            {tr("نوع المحتوى", "Content type")}
           </div>
           <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
             <button
@@ -512,7 +532,7 @@ export default function AdminMedicalContentPage() {
               }
             >
               <BookOpen className="w-4 h-4" />
-              الكل
+              {tr("الكل", "All")}
             </button>
             <button
               type="button"
@@ -524,7 +544,7 @@ export default function AdminMedicalContentPage() {
               }
             >
               <HeartPulse className="h-4 w-4 text-[#667085]" />
-              الحالات الطبية
+              {tr("الحالات الطبية", "Conditions")}
             </button>
             <button
               type="button"
@@ -536,7 +556,7 @@ export default function AdminMedicalContentPage() {
               }
             >
               <FileText className="h-4 w-4 text-[#667085]" />
-              الأعراض
+              {tr("الأعراض", "Symptoms")}
             </button>
             <button
               type="button"
@@ -548,7 +568,7 @@ export default function AdminMedicalContentPage() {
               }
             >
               <Stethoscope className="h-4 w-4 text-[#667085]" />
-              نصائح عامة
+              {tr("نصائح عامة", "General advice")}
             </button>
             <button
               type="button"
@@ -560,7 +580,7 @@ export default function AdminMedicalContentPage() {
               }
             >
               <Newspaper className="h-4 w-4 text-[#667085]" />
-              الأخبار
+              {tr("الأخبار", "News")}
             </button>
             <button
               type="button"
@@ -572,7 +592,7 @@ export default function AdminMedicalContentPage() {
               }
             >
               <Pill className="h-4 w-4 text-[#667085]" />
-              الأدوية
+              {tr("الأدوية", "Medications")}
             </button>
             <button
               type="button"
@@ -584,12 +604,12 @@ export default function AdminMedicalContentPage() {
               }
             >
               <Settings className="h-4 w-4 text-[#667085]" />
-              صفحات الإعدادات
+              {tr("صفحات الإعدادات", "Settings pages")}
             </button>
           </div>
 
           <div className="mt-4 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-            حالة النشر
+            {tr("حالة النشر", "Publish status")}
           </div>
           <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
             <button
@@ -601,7 +621,7 @@ export default function AdminMedicalContentPage() {
                   : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
               }
             >
-              الكل
+              {tr("الكل", "All")}
             </button>
             <button
               type="button"
@@ -612,7 +632,7 @@ export default function AdminMedicalContentPage() {
                   : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
               }
             >
-              منشور
+              {tr("منشور", "Published")}
             </button>
             <button
               type="button"
@@ -623,7 +643,7 @@ export default function AdminMedicalContentPage() {
                   : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
               }
             >
-              قيد المراجعة
+              {tr("قيد المراجعة", "In review")}
             </button>
             <button
               type="button"
@@ -634,7 +654,7 @@ export default function AdminMedicalContentPage() {
                   : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
               }
             >
-              مسودة
+              {tr("مسودة", "Draft")}
             </button>
             <button
               type="button"
@@ -645,7 +665,7 @@ export default function AdminMedicalContentPage() {
                   : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
               }
             >
-              مؤرشف
+              {tr("مؤرشف", "Archived")}
             </button>
           </div>
         </section>
@@ -655,14 +675,23 @@ export default function AdminMedicalContentPage() {
             <div className="flex flex-wrap gap-2 items-center">
               <BookOpen className="w-4 h-4 text-primary" />
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                المحتوى الطبي
+                {tr("المحتوى الطبي", "Medical content")}
               </div>
               <span className="rounded-full bg-[#F3F4F6] px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-[#667085]">
                 {query.trim()
-                  ? `${filteredItems.length} مطابقة محلية`
-                  : `${serverTotal.toLocaleString("ar-SA")} سجل (السيرفر)`}
+                  ? tr(
+                      `${filteredItems.length.toLocaleString(numberLocale)} مطابقة محلية`,
+                      `${filteredItems.length.toLocaleString(numberLocale)} local matches`,
+                    )
+                  : tr(
+                      `${serverTotal.toLocaleString(numberLocale)} سجل (السيرفر)`,
+                      `${serverTotal.toLocaleString(numberLocale)} records (server)`,
+                    )}
                 {showPaginationBar && totalPages > 0
-                  ? ` · صفحة ${page} / ${totalPages}`
+                  ? tr(
+                      ` · صفحة ${page.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                      ` · page ${page.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                    )
                   : ""}
               </span>
             </div>
@@ -676,7 +705,10 @@ export default function AdminMedicalContentPage() {
               />
             ) : contentQuery.isError ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
-                تعذّر تحميل المحتوى الطبي.
+                {tr(
+                  "تعذّر تحميل المحتوى الطبي.",
+                  "Failed to load medical content.",
+                )}
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
