@@ -1,8 +1,8 @@
-import { memo } from "react";
 import { Calendar, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 import { get } from "@/lib/api";
+import { useI18n } from "@/i18n/provider";
 
 function SurfaceSection({
   title,
@@ -26,13 +26,18 @@ function SurfaceSection({
 function ScheduleDayCard({
   day,
   timeRange,
-  isAvailable,
   isHoliday,
+  holidayLabel,
+  closedLabel,
+  availableLabel,
 }: {
   day: string;
   timeRange: string;
   isAvailable: boolean;
   isHoliday?: boolean;
+  holidayLabel: string;
+  closedLabel: string;
+  availableLabel: string;
 }) {
   return (
     <div className="flex items-center justify-between gap-4 rounded-[16px] bg-[#F8FAFC] px-4 py-4 sm:px-6 sm:py-5">
@@ -55,7 +60,7 @@ function ScheduleDayCard({
             {day}
           </div>
           <div className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
-            {isHoliday ? "عطلة" : timeRange}
+            {isHoliday ? holidayLabel : timeRange}
           </div>
         </div>
       </div>
@@ -66,17 +71,20 @@ function ScheduleDayCard({
             : "bg-[#EAFBF0] text-[#22C55E]"
         }`}
       >
-        {isHoliday ? "مغلق" : "متاح"}
+        {isHoliday ? closedLabel : availableLabel}
       </span>
     </div>
   );
 }
 
 export default function SecretaryDoctorSchedulePage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const doctorId = assignedDoctorQuery.data?.doctor?._id ?? "";
   const doctorName =
-    assignedDoctorQuery.data?.doctor?.userId?.fullName || "الطبيب المسؤول";
+    assignedDoctorQuery.data?.doctor?.userId?.fullName ||
+    tr("الطبيب المسؤول", "Assigned doctor");
   const scheduleQuery = useQuery({
     queryKey: ["secretary", "doctor-schedule", doctorId],
     enabled: Boolean(doctorId),
@@ -91,13 +99,13 @@ export default function SecretaryDoctorSchedulePage() {
   });
 
   const dayLabels: Record<string, string> = {
-    Sunday: "الأحد",
-    Monday: "الاثنين",
-    Tuesday: "الثلاثاء",
-    Wednesday: "الأربعاء",
-    Thursday: "الخميس",
-    Friday: "الجمعة",
-    Saturday: "السبت",
+    Sunday: tr("الأحد", "Sunday"),
+    Monday: tr("الاثنين", "Monday"),
+    Tuesday: tr("الثلاثاء", "Tuesday"),
+    Wednesday: tr("الأربعاء", "Wednesday"),
+    Thursday: tr("الخميس", "Thursday"),
+    Friday: tr("الجمعة", "Friday"),
+    Saturday: tr("السبت", "Saturday"),
   };
 
   const scheduleDays = Object.entries(dayLabels).map(([key, label]) => {
@@ -117,12 +125,12 @@ export default function SecretaryDoctorSchedulePage() {
   });
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
-      <SurfaceSection title="جدول عمل الطبيب">
+    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+      <SurfaceSection title={tr("جدول عمل الطبيب", "Doctor work schedule")}>
         <div className="px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
           <div className="mb-6 text-right">
             <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
-              جدول الأسبوع الحالي
+              {tr("جدول الأسبوع الحالي", "Current week schedule")}
             </h3>
             <p className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
               {doctorName}
@@ -131,7 +139,7 @@ export default function SecretaryDoctorSchedulePage() {
 
           {scheduleQuery.isLoading ? (
             <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
-              جاري تحميل جدول الطبيب...
+              {tr("جاري تحميل جدول الطبيب...", "Loading doctor schedule...")}
             </div>
           ) : (
             <div className="space-y-3">
@@ -142,6 +150,9 @@ export default function SecretaryDoctorSchedulePage() {
                   timeRange={schedule.timeRange}
                   isAvailable={schedule.isAvailable}
                   isHoliday={schedule.isHoliday}
+                  holidayLabel={tr("عطلة", "Holiday")}
+                  closedLabel={tr("مغلق", "Closed")}
+                  availableLabel={tr("متاح", "Available")}
                 />
               ))}
             </div>

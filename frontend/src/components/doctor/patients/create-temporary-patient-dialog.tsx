@@ -16,6 +16,7 @@ import {
 } from '@/components/auth/signUp/signup-schemas';
 import { cn } from '@/lib/utils/utils';
 import { resolveCreateTemporaryPatientServerFeedback } from '@/lib/doctor/patients/temporaryPatientFormErrors';
+import { useI18n } from '@/i18n/provider';
 
 const TEMP_PATIENT_PHONE_DIAL_CODES = SIGNUP_PHONE_DIAL_OPTIONS.map(
   (option) => option.value,
@@ -96,6 +97,8 @@ export default function CreateTemporaryPatientDialog({
   onSubmit: (values: Values) => void | Promise<void>;
   busy?: boolean;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const dialListboxOutletRef = useRef<HTMLDivElement | null>(null);
 
@@ -160,8 +163,8 @@ export default function CreateTemporaryPatientDialog({
                 scale: open ? 1 : 0.98,
               }}
               className='pointer-events-auto relative box-border w-full max-w-[min(96vw,920px)] shrink-0 origin-center overflow-visible rounded-[22px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFFFE] via-white to-[#F8FAFC] shadow-[0_24px_64px_-12px_rgba(15,23,42,0.22),0_0_1px_rgba(15,143,139,0.08)] outline-none'
-              dir='rtl'
-              lang='ar'
+              dir={dir}
+              lang={locale}
             >
               <div
                 ref={dialListboxOutletRef}
@@ -179,7 +182,7 @@ export default function CreateTemporaryPatientDialog({
                     <button
                       type='button'
                       className='absolute left-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]'
-                      aria-label='إغلاق'
+                      aria-label={tr('إغلاق', 'Close')}
                     >
                       <X className='w-5 h-5' strokeWidth={2.25} />
                     </button>
@@ -195,10 +198,13 @@ export default function CreateTemporaryPatientDialog({
                     </div>
                     <div className='flex-1 min-w-0 ps-2'>
                       <Dialog.Title className='font-cairo text-[clamp(1.15rem,2.8vw,1.45rem)] font-black tracking-tight text-[#101828]'>
-                        إضافة مريض مؤقت
+                        {tr('إضافة مريض مؤقت', 'Add temporary patient')}
                       </Dialog.Title>
                       <p className='mt-1.5 font-cairo text-[12.5px] font-semibold leading-relaxed text-[#667085]'>
-                        أنشئ سجلاً مؤقتاً واربطه بحسابك لمواصلة الزيارات والتواصل.
+                        {tr(
+                          'أنشئ سجلاً مؤقتاً واربطه بحسابك لمواصلة الزيارات والتواصل.',
+                          'Create a temporary record and link it to continue visits and communication.',
+                        )}
                       </p>
                     </div>
                   </div>
@@ -226,7 +232,10 @@ export default function CreateTemporaryPatientDialog({
                         const fb =
                           resolveCreateTemporaryPatientServerFeedback(err);
                         toast(fb.toastMessage, {
-                          title: 'تعذّر إنشاء المريض المؤقت',
+                          title: tr(
+                            'تعذّر إنشاء المريض المؤقت',
+                            'Could not create temporary patient',
+                          ),
                           variant: 'error',
                           durationMs: Math.min(
                             10500,
@@ -259,13 +268,13 @@ export default function CreateTemporaryPatientDialog({
                   <div className='grid grid-cols-1 items-start gap-5 md:grid-cols-2 md:gap-6'>
                   <section className='rounded-[18px] border border-[#E6F7F6] bg-white/95 p-4 shadow-[0_10px_32px_rgba(15,143,139,0.07)]'>
                     <p className='mb-3 text-right font-cairo text-[12px] font-black tracking-wide text-primary'>
-                      خطوة ١ — الهوية
+                      {tr('خطوة ١ — الهوية', 'Step 1 — Identity')}
                     </p>
                     <label
                       htmlFor='temp-patient-fullname'
                       className='mb-2 flex items-center justify-start gap-2 font-cairo text-[13px] font-extrabold text-[#344054]'
                     >
-                      الاسم الكامل
+                      {tr('الاسم الكامل', 'Full name')}
                     </label>
                     <div className='relative'>
                       <UserRound
@@ -275,7 +284,10 @@ export default function CreateTemporaryPatientDialog({
                       <input
                         id='temp-patient-fullname'
                         autoComplete='name'
-                        placeholder='مثال: سارة عبد الله العلي'
+                        placeholder={tr(
+                          'مثال: سارة عبد الله العلي',
+                          'Example: Sara Abdullah Ali',
+                        )}
                         {...register('fullName')}
                         className={cn(
                           inputBaseClass,
@@ -293,7 +305,7 @@ export default function CreateTemporaryPatientDialog({
 
                   <section className='rounded-[18px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFBFC] to-white p-4 shadow-[0_8px_28px_rgba(15,23,42,0.05)]'>
                     <p className='mb-3 text-right font-cairo text-[12px] font-black tracking-wide text-[#475467]'>
-                      خطوة ٢ — التواصل
+                      {tr('خطوة ٢ — التواصل', 'Step 2 — Contact')}
                     </p>
 
                     <div className='grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4'>
@@ -302,7 +314,7 @@ export default function CreateTemporaryPatientDialog({
                           htmlFor='temp-patient-email'
                           className='mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]'
                         >
-                          البريد الإلكتروني
+                          {tr('البريد الإلكتروني', 'Email')}
                         </label>
                         <div className='relative'>
                           <Mail
@@ -336,7 +348,7 @@ export default function CreateTemporaryPatientDialog({
                           htmlFor='temp-patient-phone-local'
                           className='mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]'
                         >
-                          رقم الهاتف
+                          {tr('رقم الهاتف', 'Phone number')}
                         </label>
                         <div
                           className={cn(
@@ -365,7 +377,10 @@ export default function CreateTemporaryPatientDialog({
                                     name={field.name}
                                     size='sm'
                                     tone='muted'
-                                    listboxAriaLabel='رمز الاتصال'
+                                    listboxAriaLabel={tr(
+                                      'رمز الاتصال',
+                                      'Dial code',
+                                    )}
                                     listboxPortalRef={dialListboxOutletRef}
                                   />
                                 )}
@@ -396,10 +411,13 @@ export default function CreateTemporaryPatientDialog({
 
                         <p className='mt-1.5 flex flex-wrap items-center justify-start gap-x-2 text-right font-cairo text-[10.5px] font-semibold leading-snug text-[#667085]'>
                           <span className='inline-flex items-center rounded-lg bg-[#EFF8FF] px-2 py-0.5 text-[10px] font-extrabold text-[#175CD3]'>
-                            بدون الصفر الأول
+                            {tr('بدون الصفر الأول', 'Without leading zero')}
                           </span>
                           <span>
-                            يُرسل للخادم بصيغة دولية مثل{' '}
+                            {tr(
+                              'يُرسل للخادم بصيغة دولية مثل',
+                              'Sent to the server in international format like',
+                            )}{' '}
                             <span dir='ltr' className='font-mono text-[#344054]'>
                               +963912345678
                             </span>
@@ -428,14 +446,14 @@ export default function CreateTemporaryPatientDialog({
                       {(busy || isSubmitting) && (
                         <Loader2 className='w-5 h-5 animate-spin shrink-0' aria-hidden />
                       )}
-                      حفظ وربط بالعيادة
+                      {tr('حفظ وربط بالعيادة', 'Save and link to clinic')}
                     </button>
                     <Dialog.Close asChild>
                       <button
                         type='button'
                         className='inline-flex h-[52px] min-h-[52px] flex-1 items-center justify-center rounded-xl border-2 border-[#E4E7EC] bg-white font-cairo text-[14px] font-extrabold text-[#344054] shadow-sm transition-colors hover:border-[#D0D5DD] hover:bg-[#F9FAFB]'
                       >
-                        إلغاء
+                        {tr('إلغاء', 'Cancel')}
                       </button>
                     </Dialog.Close>
                   </div>

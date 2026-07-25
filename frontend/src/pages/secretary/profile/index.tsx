@@ -1,4 +1,3 @@
-import { memo } from "react";
 import {
   Mail,
   Calendar,
@@ -14,6 +13,7 @@ import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { SECRETARY_PERMISSION_LABELS } from "@/lib/doctor/secretaries/permissionsUi";
+import { useI18n } from "@/i18n/provider";
 
 function SurfaceSection({
   title,
@@ -108,35 +108,60 @@ function PermissionBadge({ permission }: { permission: string }) {
 }
 
 export default function SecretaryProfilePage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const authUser = readAuthUser();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 1 });
   const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
   const secretaryPermissions = useSecretaryPermissions();
-  const secretaryName = authUser?.fullName?.trim() || "السكرتير";
+  const secretaryName = authUser?.fullName?.trim() || tr("السكرتير", "Secretary");
   const secretaryEmail = authUser?.email?.trim() || "—";
   const secretaryPhone = authUser?.phone?.trim() || "—";
   const assignedDoctor = assignedDoctorQuery.data?.doctor;
+  const initial =
+    secretaryName.trim().charAt(0).toUpperCase() || tr("س", "S");
 
   const contactInfo = [
-    { label: "البريد الإلكتروني", value: secretaryEmail, icon: Mail },
-    { label: "رقم الهاتف", value: secretaryPhone, icon: Phone },
-    { label: "العنوان", value: "—", icon: MapPin },
+    { label: tr("البريد الإلكتروني", "Email"), value: secretaryEmail, icon: Mail },
+    { label: tr("رقم الهاتف", "Phone number"), value: secretaryPhone, icon: Phone },
+    { label: tr("العنوان", "Address"), value: "—", icon: MapPin },
   ];
 
   const doctorInfo = [
     {
-      label: "الاسم",
-      value: assignedDoctor?.user?.fullName || assignedDoctor?.userId?.fullName || "—",
+      label: tr("الاسم", "Name"),
+      value:
+        assignedDoctor?.user?.fullName ||
+        assignedDoctor?.userId?.fullName ||
+        "—",
     },
-    { label: "التخصص", value: assignedDoctor?.specialization || "—" },
-    { label: "التقييم", value: `${assignedDoctor?.averageRating ?? "—"}` },
+    {
+      label: tr("التخصص", "Specialty"),
+      value: assignedDoctor?.specialization || "—",
+    },
+    {
+      label: tr("التقييم", "Rating"),
+      value: `${assignedDoctor?.averageRating ?? "—"}`,
+    },
   ];
 
   const stats = [
-    { label: "معدل الحضور", value: "98%", icon: Calendar },
-    { label: "المواعيد", value: appointmentsQuery.total ?? 0, icon: Briefcase },
-    { label: "المرضى", value: patientsQuery.total ?? 0, icon: UserRound },
+    {
+      label: tr("معدل الحضور", "Attendance rate"),
+      value: "98%",
+      icon: Calendar,
+    },
+    {
+      label: tr("المواعيد", "Appointments"),
+      value: appointmentsQuery.total ?? 0,
+      icon: Briefcase,
+    },
+    {
+      label: tr("المرضى", "Patients"),
+      value: patientsQuery.total ?? 0,
+      icon: UserRound,
+    },
   ];
 
   const permissions = secretaryPermissions.permissions.map(
@@ -144,25 +169,25 @@ export default function SecretaryProfilePage() {
   );
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-5 pb-8 sm:pb-10">
-      <SurfaceSection title="المعلومات الشخصية" icon={UserRound}>
+    <div dir={dir} lang={locale} className="space-y-5 pb-8 sm:pb-10">
+      <SurfaceSection title={tr("المعلومات الشخصية", "Personal information")} icon={UserRound}>
         <div className="px-4 py-5 sm:px-5 sm:py-6">
           <div className="flex items-center gap-4 rounded-[18px] bg-[#F8FAFC] p-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#0f766e] via-[#0f8f8b] to-[#14b8a6] font-cairo text-[24px] font-black text-white shadow-[0_12px_28px_rgba(15,143,139,0.32)]">
-              س
+              {initial}
             </div>
             <div className="flex-1">
               <div className="font-cairo text-[24px] font-black text-[#243044]">
                 {secretaryName}
               </div>
               <div className="mt-1 font-cairo text-[16px] font-semibold text-[#98A2B3]">
-                سكرتير
+                {tr("سكرتير", "Secretary")}
               </div>
             </div>
             <div className="text-right">
               <div className="inline-flex items-center rounded-[8px] bg-[#ECFDF3] px-3 py-1.5 font-cairo text-[13px] font-black text-[#16A34A]">
                 <ShieldCheck className="ml-2 h-4 w-4" />
-                نشط
+                {tr("نشط", "Active")}
               </div>
             </div>
           </div>
@@ -178,7 +203,7 @@ export default function SecretaryProfilePage() {
         ))}
       </SurfaceSection>
 
-      <SurfaceSection title="الطبيب المسؤول" icon={Briefcase}>
+      <SurfaceSection title={tr("الطبيب المسؤول", "Assigned doctor")} icon={Briefcase}>
         {doctorInfo.map((info, index) => (
           <InfoRow key={index} label={info.label} value={info.value} />
         ))}
@@ -195,23 +220,34 @@ export default function SecretaryProfilePage() {
         ))}
       </div>
 
-      <SurfaceSection title="الصلاحيات" icon={ShieldCheck}>
+      <SurfaceSection title={tr("الصلاحيات", "Permissions")} icon={ShieldCheck}>
         <div className="flex flex-wrap gap-3 px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
-          {permissions.length > 0 ? permissions.map((permission) => (
-            <PermissionBadge key={permission} permission={permission} />
-          )) : (
+          {permissions.length > 0 ? (
+            permissions.map((permission) => (
+              <PermissionBadge key={permission} permission={permission} />
+            ))
+          ) : (
             <span className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
-              لا توجد صلاحيات مخصصة حالياً.
+              {tr(
+                "لا توجد صلاحيات مخصصة حالياً.",
+                "No custom permissions assigned yet.",
+              )}
             </span>
           )}
         </div>
       </SurfaceSection>
 
-      <SurfaceSection title="معلومات الحساب">
+      <SurfaceSection title={tr("معلومات الحساب", "Account information")}>
         <div className="px-4 py-5 sm:px-5 sm:py-6">
           <div className="grid gap-4 sm:grid-cols-2">
-            <InfoRow label="آخر تسجيل دخول" value="2024-01-15 09:30" />
-            <InfoRow label="تاريخ التسجيل" value="2023-06-01" />
+            <InfoRow
+              label={tr("آخر تسجيل دخول", "Last login")}
+              value="2024-01-15 09:30"
+            />
+            <InfoRow
+              label={tr("تاريخ التسجيل", "Registration date")}
+              value="2023-06-01"
+            />
           </div>
         </div>
       </SurfaceSection>

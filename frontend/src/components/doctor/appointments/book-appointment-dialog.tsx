@@ -16,6 +16,7 @@ import { useAvailableAppointmentTypes } from "@/hooks/doctor";
 import { useSlots } from "@/hooks";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import StyledSelect from "@/components/ui/styled-select";
+import { useI18n } from "@/i18n/provider";
 
 export type BookAppointmentValues = {
   patientId: string;
@@ -70,6 +71,8 @@ export default function BookAppointmentDialog({
   onSubmit: (values: BookAppointmentValues) => Promise<void>;
   doctorId?: string;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const bookSelectOutletRef = useRef<HTMLDivElement>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
@@ -207,8 +210,8 @@ export default function BookAppointmentDialog({
                 mass: 0.9,
               }}
               className="pointer-events-auto flex w-[720px] max-h-[calc(100vh-56px)] max-w-[calc(100vw-28px)] flex-col overflow-visible rounded-[28px] border border-white/60 bg-white shadow-[0_30px_90px_rgba(2,6,23,0.28)] outline-none"
-              dir="rtl"
-              lang="ar"
+              dir={dir}
+              lang={locale}
               style={{ transformOrigin: "center top" }}
             >
                   <div
@@ -223,11 +226,13 @@ export default function BookAppointmentDialog({
 
                     <div className="relative max-w-[520px] pr-12 text-right lg:max-w-none lg:pr-0">
                       <Dialog.Title className="font-cairo text-[24px] font-black leading-[30px]">
-                        حجز موعد جديد
+                        {tr("حجز موعد جديد", "Book new appointment")}
                       </Dialog.Title>
                       <p className="mt-2 font-cairo text-[13px] font-semibold leading-6 text-white/85">
-                        اختر المريض والتاريخ والوقت المناسب، ثم أكد الحجز ليتم إنشاء
-                        الموعد مباشرة في جدول الطبيب.
+                        {tr(
+                          "اختر المريض والتاريخ والوقت المناسب، ثم أكد الحجز ليتم إنشاء الموعد مباشرة في جدول الطبيب.",
+                          "Choose the patient, date, and time, then confirm to create the appointment on the doctor's schedule.",
+                        )}
                       </p>
                     </div>
 
@@ -235,7 +240,7 @@ export default function BookAppointmentDialog({
                       <button
                         type="button"
                         className="flex absolute top-5 left-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105"
-                        aria-label="إغلاق"
+                        aria-label={tr("إغلاق", "Close")}
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -276,7 +281,7 @@ export default function BookAppointmentDialog({
                           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#DC2626]" />
                           <div>
                             <div className="font-cairo text-[13px] font-extrabold text-[#991B1B]">
-                              تعذر إتمام الحجز
+                              {tr("تعذر إتمام الحجز", "Could not complete booking")}
                             </div>
                             <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#B42318]">
                               {submitError}
@@ -287,7 +292,7 @@ export default function BookAppointmentDialog({
 
                       <div>
                         <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                          اختر المريض
+                          {tr("اختر المريض", "Select patient")}
                         </div>
                         <Controller
                           name="patientId"
@@ -302,10 +307,16 @@ export default function BookAppointmentDialog({
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
-                              placeholder="اختر..."
+                              placeholder={tr("اختر...", "Select...")}
                               error={Boolean(errors.patientId)}
-                              emptyTriggerLabel="لا يوجد مرضى في القائمة"
-                              emptyState="لا يوجد مرضى متاحين للاختيار."
+                              emptyTriggerLabel={tr(
+                                "لا يوجد مرضى في القائمة",
+                                "No patients in the list",
+                              )}
+                              emptyState={tr(
+                                "لا يوجد مرضى متاحين للاختيار.",
+                                "No patients available to select.",
+                              )}
                             />
                           )}
                         />
@@ -319,7 +330,7 @@ export default function BookAppointmentDialog({
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                            التاريخ
+                            {tr("التاريخ", "Date")}
                           </div>
                           <input
                             type="date"
@@ -341,13 +352,13 @@ export default function BookAppointmentDialog({
                         <div>
                           <div className="flex gap-3 justify-between items-center mb-2">
                             <div className="text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                              الوقت المتاح
+                              {tr("الوقت المتاح", "Available time")}
                             </div>
                             {selectedDate ? (
                               <div className="font-cairo text-[11px] font-bold text-[#667085]">
                                 {isAwaitingSlots
-                                  ? "جارٍ تحميل الفترات..."
-                                  : `${totalFreeSlots} فترات متاحة`}
+                                  ? tr("جارٍ تحميل الفترات...", "Loading slots...")
+                                  : `${totalFreeSlots} ${tr("فترات متاحة", "available slots")}`}
                               </div>
                             ) : null}
                           </div>
@@ -361,8 +372,10 @@ export default function BookAppointmentDialog({
                               } bg-white p-3`}
                             >
                               <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                                اختر التاريخ أولاً حتى تظهر لك المواعيد المتاحة
-                                فقط.
+                                {tr(
+                                  "اختر التاريخ أولاً حتى تظهر لك المواعيد المتاحة فقط.",
+                                  "Select a date first to see available appointments only.",
+                                )}
                               </div>
                             </div>
                           ) : isAwaitingSlots ? (
@@ -374,7 +387,10 @@ export default function BookAppointmentDialog({
                               } bg-white p-3`}
                             >
                               <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
-                                جارٍ تحميل الأوقات المتاحة...
+                                {tr(
+                                  "جارٍ تحميل الأوقات المتاحة...",
+                                  "Loading available times...",
+                                )}
                               </div>
                             </div>
                           ) : slotsError ? (
@@ -386,7 +402,10 @@ export default function BookAppointmentDialog({
                               } bg-white p-3`}
                             >
                               <div className="rounded-[12px] bg-[#FEF2F2] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#B42318]">
-                                تعذر تحميل الأوقات المتاحة لهذا التاريخ.
+                                {tr(
+                                  "تعذر تحميل الأوقات المتاحة لهذا التاريخ.",
+                                  "Could not load available times for this date.",
+                                )}
                               </div>
                             </div>
                           ) : availableTimes.length === 0 ? (
@@ -398,8 +417,10 @@ export default function BookAppointmentDialog({
                               } bg-white p-3`}
                             >
                               <div className="rounded-[12px] bg-[#FFF7ED] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#C2410C]">
-                                لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً
-                                آخر.
+                                {tr(
+                                  "لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً آخر.",
+                                  "No available times on this date. Choose another date.",
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -417,14 +438,28 @@ export default function BookAppointmentDialog({
                                   value={field.value}
                                   onChange={field.onChange}
                                   onBlur={field.onBlur}
-                                  placeholder="اختر وقتاً متاحاً..."
+                                  placeholder={tr(
+                                    "اختر وقتاً متاحاً...",
+                                    "Select an available time...",
+                                  )}
                                   error={Boolean(errors.time || !isSelectedTimeAvailable)}
                                   dropdownResetKey={selectedDate}
-                                  listboxAriaLabel="الأوقات المتاحة"
-                                  chevronAriaLabelClose="فتح قائمة الأوقات المتاحة"
-                                  chevronAriaLabelOpen="إغلاق قائمة الأوقات المتاحة"
+                                  listboxAriaLabel={tr(
+                                    "الأوقات المتاحة",
+                                    "Available times",
+                                  )}
+                                  chevronAriaLabelClose={tr(
+                                    "فتح قائمة الأوقات المتاحة",
+                                    "Open available times list",
+                                  )}
+                                  chevronAriaLabelOpen={tr(
+                                    "إغلاق قائمة الأوقات المتاحة",
+                                    "Close available times list",
+                                  )}
                                   renderOptionTrailing={(_, isSelected) =>
-                                    isSelected ? "محدد" : "متاح"
+                                    isSelected
+                                      ? tr("محدد", "Selected")
+                                      : tr("متاح", "Available")
                                   }
                                 />
                               )}
@@ -437,12 +472,17 @@ export default function BookAppointmentDialog({
                             </div>
                           ) : !isSelectedTimeAvailable ? (
                             <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
-                              الوقت المحدد لم يعد متاحاً. اختر وقتاً من الأوقات
-                              المتاحة.
+                              {tr(
+                                "الوقت المحدد لم يعد متاحاً. اختر وقتاً من الأوقات المتاحة.",
+                                "Selected time is no longer available. Choose another available time.",
+                              )}
                             </div>
                           ) : (
                             <div className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                              تظهر لك فقط الأوقات المتاحة حسب جدول الطبيب.
+                              {tr(
+                                "تظهر لك فقط الأوقات المتاحة حسب جدول الطبيب.",
+                                "Only available times from the doctor's schedule are shown.",
+                              )}
                             </div>
                           )}
                         </div>
@@ -450,7 +490,7 @@ export default function BookAppointmentDialog({
 
                       <div>
                         <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                          نوع الاستشارة
+                          {tr("نوع الاستشارة", "Consultation type")}
                         </div>
                         <Controller
                           name="consultationType"
@@ -459,14 +499,23 @@ export default function BookAppointmentDialog({
                             <StyledSelect
                               listboxPortalRef={bookSelectOutletRef}
                               options={[
-                                { value: "clinic", label: "حضوري" },
-                                { value: "video", label: "أونلاين" },
+                                {
+                                  value: "clinic",
+                                  label: tr("حضوري", "In clinic"),
+                                },
+                                {
+                                  value: "video",
+                                  label: tr("أونلاين", "Online"),
+                                },
                               ]}
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
                               error={Boolean(errors.consultationType)}
-                              listboxAriaLabel="نوع الاستشارة"
+                              listboxAriaLabel={tr(
+                                "نوع الاستشارة",
+                                "Consultation type",
+                              )}
                             />
                           )}
                         />
@@ -475,7 +524,7 @@ export default function BookAppointmentDialog({
                       {appointmentTypes.length > 0 ? (
                         <div>
                           <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                            نوع الموعد
+                            {tr("نوع الموعد", "Appointment type")}
                           </div>
                           <Controller
                             name="appointmentTypeId"
@@ -484,7 +533,13 @@ export default function BookAppointmentDialog({
                               <StyledSelect
                                 listboxPortalRef={bookSelectOutletRef}
                                 options={[
-                                  { value: "", label: "بدون تحديد نوع" },
+                                  {
+                                    value: "",
+                                    label: tr(
+                                      "بدون تحديد نوع",
+                                      "No type selected",
+                                    ),
+                                  },
                                   ...appointmentTypes.map((type) => ({
                                     value: type._id,
                                     label:
@@ -498,8 +553,14 @@ export default function BookAppointmentDialog({
                                 onChange={field.onChange}
                                 onBlur={field.onBlur}
                                 disabled={isAwaitingTypes}
-                                placeholder="بدون تحديد نوع"
-                                listboxAriaLabel="نوع الموعد"
+                                placeholder={tr(
+                                  "بدون تحديد نوع",
+                                  "No type selected",
+                                )}
+                                listboxAriaLabel={tr(
+                                  "نوع الموعد",
+                                  "Appointment type",
+                                )}
                               />
                             )}
                           />
@@ -508,11 +569,14 @@ export default function BookAppointmentDialog({
 
                       <div>
                         <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                          ملاحظات
+                          {tr("ملاحظات", "Notes")}
                         </div>
                         <textarea
                           {...register("notes")}
-                          placeholder="أضف ملاحظات داخلية للطبيب أو السكرتيرة..."
+                          placeholder={tr(
+                            "أضف ملاحظات داخلية للطبيب أو السكرتيرة...",
+                            "Add internal notes for the doctor or secretary...",
+                          )}
                           className={`min-h-[104px] w-full resize-none rounded-[16px] border-[1.82px] ${
                             errors.notes
                               ? "border-[#F04438]"
@@ -536,7 +600,7 @@ export default function BookAppointmentDialog({
                       <div className="rounded-[21px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,255,255,0.65))] px-4 py-5 sm:px-5">
                         <div className="mb-4 flex items-center gap-3">
                           <div className="text-right font-cairo text-[13px] font-black text-[#0f766e]">
-                            ملخص الحجز
+                            {tr("ملخص الحجز", "Booking summary")}
                           </div>
                           <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/28 to-primary/10" />
                         </div>
@@ -544,19 +608,20 @@ export default function BookAppointmentDialog({
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                           <div className="rounded-2xl border border-white/70 bg-white/85 px-4 py-3.5 shadow-[0_14px_32px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5">
                             <div className="flex items-center justify-end gap-2 font-cairo text-[11px] font-bold text-[#667085]">
-                              <span>المريض</span>
+                              <span>{tr("المريض", "Patient")}</span>
                               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#0f8f8b18,#14b8a612)]">
                                 <UserRound className="h-3.5 w-3.5 text-primary" />
                               </span>
                             </div>
                             <div className="mt-2 truncate font-cairo text-[14px] font-extrabold text-[#111827]">
-                              {selectedPatient?.name ?? "غير محدد"}
+                              {selectedPatient?.name ??
+                                tr("غير محدد", "Not specified")}
                             </div>
                           </div>
 
                           <div className="rounded-2xl border border-white/70 bg-white/85 px-4 py-3.5 shadow-[0_14px_32px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5">
                             <div className="flex items-center justify-end gap-2 font-cairo text-[11px] font-bold text-[#667085]">
-                              <span>التاريخ</span>
+                              <span>{tr("التاريخ", "Date")}</span>
                               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#0f8f8b18,#14b8a612)]">
                                 <CalendarDays className="h-3.5 w-3.5 text-primary" />
                               </span>
@@ -568,7 +633,7 @@ export default function BookAppointmentDialog({
 
                           <div className="rounded-2xl border border-white/70 bg-white/85 px-4 py-3.5 shadow-[0_14px_32px_rgba(15,23,42,0.06)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5">
                             <div className="flex items-center justify-end gap-2 font-cairo text-[11px] font-bold text-[#667085]">
-                              <span>الوقت</span>
+                              <span>{tr("الوقت", "Time")}</span>
                               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#0f8f8b18,#14b8a612)]">
                                 <Clock3 className="h-3.5 w-3.5 text-primary" />
                               </span>
@@ -587,7 +652,7 @@ export default function BookAppointmentDialog({
                           type="button"
                           className="h-[50px] w-full rounded-[16px] border border-[#D0D5DD] bg-[#F9FAFB] font-cairo text-[14px] font-extrabold text-[#344054] transition hover:bg-[#F2F4F7]"
                         >
-                          إلغاء
+                          {tr("إلغاء", "Cancel")}
                         </button>
                       </Dialog.Close>
 
@@ -596,7 +661,9 @@ export default function BookAppointmentDialog({
                         disabled={isSubmitting}
                         className="h-[50px] w-full rounded-[16px] bg-[linear-gradient(135deg,#0f8f8b_0%,#14b8a6_100%)] font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.28)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isSubmitting ? "جارٍ إنشاء الموعد..." : "تأكيد الحجز"}
+                        {isSubmitting
+                          ? tr("جارٍ إنشاء الموعد...", "Creating appointment...")
+                          : tr("تأكيد الحجز", "Confirm booking")}
                       </button>
                     </div>
                   </form>
