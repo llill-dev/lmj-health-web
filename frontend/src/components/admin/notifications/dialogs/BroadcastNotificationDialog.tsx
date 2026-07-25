@@ -1,6 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Send, Users, Bell } from "lucide-react";
+import { X, Send, Users, TriangleAlert } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
@@ -42,6 +42,7 @@ export default function BroadcastNotificationDialog({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const broadcastSupported = false;
 
   const [formData, setFormData] = useState({
     group: "all",
@@ -111,17 +112,17 @@ export default function BroadcastNotificationDialog({
 
     if (!validateForm()) return;
 
+    if (!broadcastSupported) {
+      toast("إرسال البث العام غير متاح حالياً حتى يكتمل ربطه مع الخادم.", {
+        title: "غير مدعوم حالياً",
+        variant: "error",
+        durationMs: 4200,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.notifications.broadcast({
-      //   group: formData.group,
-      //   type: formData.type,
-      //   title: formData.title,
-      //   body: formData.body,
-      //   data: formData.data || undefined,
-      // });
-
       toast("تم إرسال الإشعار بنجاح", {
         title: "تم الإرسال",
         variant: "success",
@@ -138,7 +139,7 @@ export default function BroadcastNotificationDialog({
       setErrors({});
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
+    } catch {
       toast("حدث خطأ أثناء إرسال الإشعار. يرجى المحاولة مرة أخرى.", {
         title: "فشلت العملية",
         variant: "error",
@@ -194,7 +195,16 @@ export default function BroadcastNotificationDialog({
                 onSubmit={handleSubmit}
                 className="mt-10 max-h-[calc(92vh-220px)] overflow-y-auto space-y-6 pl-3 pr-2"
               >
-                {/* Group */}
+                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] p-3">
+                  <div className="flex items-start gap-2">
+                    <TriangleAlert className="mt-0.5 h-4 w-4 text-[#DC2626]" />
+                    <div className="font-cairo text-[11px] font-semibold leading-relaxed text-[#991B1B]">
+                      تم تعطيل الإرسال مؤقتاً لأن هذا الإجراء غير مربوط بالخادم
+                      بشكل موثوق بعد.
+                    </div>
+                  </div>
+                </div>
+
                 <AdminFormField
                   label="المجموعة المستهدفة"
                   required
@@ -216,7 +226,6 @@ export default function BroadcastNotificationDialog({
                   />
                 </AdminFormField>
 
-                {/* Type */}
                 <AdminFormField
                   label="نوع الإشعار"
                   required
@@ -239,7 +248,6 @@ export default function BroadcastNotificationDialog({
                   />
                 </AdminFormField>
 
-                {/* Title */}
                 <AdminFormField
                   label="عنوان الإشعار"
                   required
@@ -263,19 +271,18 @@ export default function BroadcastNotificationDialog({
                       Boolean(errors.title),
                     )}
                   />
-                  <div className="flex justify-between mt-1">
+                  <div className="mt-1 flex justify-between">
                     {errors.title && (
                       <p className="font-cairo text-[11px] font-semibold text-[#DC2626]">
                         {errors.title}
                       </p>
                     )}
-                    <p className="font-cairo text-[11px] font-semibold text-[#98A2B3] mr-auto">
+                    <p className="mr-auto font-cairo text-[11px] font-semibold text-[#98A2B3]">
                       {formData.title.length}/100
                     </p>
                   </div>
                 </AdminFormField>
 
-                {/* Body */}
                 <AdminFormField
                   label="محتوى الإشعار"
                   required
@@ -296,19 +303,18 @@ export default function BroadcastNotificationDialog({
                     maxLength={500}
                     className={adminTextareaClass}
                   />
-                  <div className="flex justify-between mt-1">
+                  <div className="mt-1 flex justify-between">
                     {errors.body && (
                       <p className="font-cairo text-[11px] font-semibold text-[#DC2626]">
                         {errors.body}
                       </p>
                     )}
-                    <p className="font-cairo text-[11px] font-semibold text-[#98A2B3] mr-auto">
+                    <p className="mr-auto font-cairo text-[11px] font-semibold text-[#98A2B3]">
                       {formData.body.length}/500
                     </p>
                   </div>
                 </AdminFormField>
 
-                {/* Data (Optional) */}
                 <AdminFormField label="بيانات إضافية (اختياري)">
                   <textarea
                     value={formData.data}
@@ -327,18 +333,16 @@ export default function BroadcastNotificationDialog({
                   </p>
                 </AdminFormField>
 
-                {/* Info Box */}
-                <div className="rounded-[8px] bg-[#F0FDF4] border border-[#BBF7D0] p-3">
+                <div className="rounded-[8px] border border-[#BBF7D0] bg-[#F0FDF4] p-3">
                   <div className="flex items-start gap-2">
-                    <Users className="h-4 w-4 text-[#16A34A] mt-0.5" />
-                    <div className="font-cairo text-[11px] font-semibold text-[#14532D] leading-relaxed">
+                    <Users className="mt-0.5 h-4 w-4 text-[#16A34A]" />
+                    <div className="font-cairo text-[11px] font-semibold leading-relaxed text-[#14532D]">
                       سيتم إرسال هذا الإشعار إلى جميع المستخدمين في المجموعة
                       المحددة. تأكد من صحة المحتوى قبل الإرسال.
                     </div>
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
@@ -349,7 +353,7 @@ export default function BroadcastNotificationDialog({
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !broadcastSupported}
                     className="flex-1 h-[44px] items-center justify-center gap-2 rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSubmitting ? (

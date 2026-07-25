@@ -1,6 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, User, Phone, Shield, Edit3, Save } from "lucide-react";
+import { X, Save, TriangleAlert } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
@@ -25,15 +25,6 @@ const PERMISSION_OPTIONS = [
   { value: "billing", label: "الفواتير والدفع" },
   { value: "reports", label: "التقارير" },
 ];
-
-interface Secretary {
-  _id: string;
-  fullName: string;
-  email: string;
-  phone?: string;
-  gender?: string;
-  permissions?: string[];
-}
 
 interface AdminSecretarySummary {
   _id: string;
@@ -62,6 +53,7 @@ export default function EditSecretaryDialog({
 }: EditSecretaryDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const updateSecretarySupported = false;
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -127,16 +119,17 @@ export default function EditSecretaryDialog({
 
     if (!secretary || !validateForm()) return;
 
+    if (!updateSecretarySupported) {
+      toast("تعديل بيانات السكرتير غير متاح حالياً حتى يكتمل ربطه مع الخادم.", {
+        title: "غير مدعوم حالياً",
+        variant: "error",
+        durationMs: 4200,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.secretaries.update(secretary._id, {
-      //   fullName: formData.fullName,
-      //   phone: formData.phone,
-      //   gender: formData.gender,
-      //   permissions: formData.permissions.join(','),
-      // });
-
       toast("تم تحديث بيانات السكرتير بنجاح", {
         title: "تم التحديث",
         variant: "success",
@@ -145,7 +138,7 @@ export default function EditSecretaryDialog({
 
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
+    } catch {
       toast("حدث خطأ أثناء تحديث البيانات. يرجى المحاولة مرة أخرى.", {
         title: "فشلت العملية",
         variant: "error",
@@ -220,6 +213,16 @@ export default function EditSecretaryDialog({
             <form dir="rtl" onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
+                  <div className="rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] p-3">
+                    <div className="flex items-start gap-2">
+                      <TriangleAlert className="mt-0.5 h-4 w-4 text-[#DC2626]" />
+                      <div className="font-cairo text-[11px] font-semibold leading-relaxed text-[#991B1B]">
+                        تم تعطيل تعديل السكرتير مؤقتاً لأن هذا النموذج غير مربوط
+                        بالخادم بشكل موثوق بعد.
+                      </div>
+                    </div>
+                  </div>
+
                   <AdminFormField
                     label="البريد الإلكتروني"
                     hint="لا يمكن التعديل"
@@ -340,7 +343,7 @@ export default function EditSecretaryDialog({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !updateSecretarySupported}
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" aria-hidden />

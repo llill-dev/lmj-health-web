@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { readAuthUser } from "@/lib/cookies";
 import { get } from "@/lib/api";
-import { ASSIGNABLE_SECRETARY_PERMISSIONS } from "@/lib/doctor/secretaries/permissionsUi";
 import {
   canAccessSecretaryItem,
   hasSecretaryPermission,
@@ -71,8 +70,7 @@ export function useSecretaryPermissions() {
     const nested = query.data?.secretary?.permissions ?? [];
     const merged = [...direct, ...nested];
     const unique = [...new Set(merged)];
-    // Backend secretary "me" payload may omit permissions; do not over-restrict UI in that case.
-    return unique.length > 0 ? unique : [...ASSIGNABLE_SECRETARY_PERMISSIONS];
+    return unique.length > 0 ? unique : [];
   }, [query.data?.permissions, query.data?.secretary?.permissions]);
 
   return {

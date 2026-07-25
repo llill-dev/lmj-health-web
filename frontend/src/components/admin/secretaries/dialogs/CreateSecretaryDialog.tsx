@@ -1,15 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  X,
-  User,
-  Mail,
-  Phone,
-  Lock,
-  Shield,
-  UserPlus,
-  Save,
-} from "lucide-react";
+import { X, Save, TriangleAlert } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
@@ -48,6 +39,7 @@ export default function CreateSecretaryDialog({
 }: CreateSecretaryDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const createSecretarySupported = false;
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -115,18 +107,17 @@ export default function CreateSecretaryDialog({
 
     if (!validateForm()) return;
 
+    if (!createSecretarySupported) {
+      toast("إنشاء السكرتير غير متاح حالياً حتى يكتمل ربطه مع الخادم.", {
+        title: "غير مدعوم حالياً",
+        variant: "error",
+        durationMs: 4200,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // await adminApi.secretaries.create({
-      //   fullName: formData.fullName,
-      //   email: formData.email,
-      //   password: formData.password,
-      //   phone: formData.phone,
-      //   gender: formData.gender,
-      //   permissions: formData.permissions.join(','),
-      // });
-
       toast("تم إنشاء حساب السكرتير بنجاح", {
         title: "تم الإنشاء",
         variant: "success",
@@ -144,7 +135,7 @@ export default function CreateSecretaryDialog({
       setErrors({});
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
+    } catch {
       toast("حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.", {
         title: "فشلت العملية",
         variant: "error",
@@ -219,6 +210,16 @@ export default function CreateSecretaryDialog({
             <form dir="rtl" onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
+                  <div className="rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] p-3">
+                    <div className="flex items-start gap-2">
+                      <TriangleAlert className="mt-0.5 h-4 w-4 text-[#DC2626]" />
+                      <div className="font-cairo text-[11px] font-semibold leading-relaxed text-[#991B1B]">
+                        تم تعطيل إنشاء السكرتير مؤقتاً لأن هذا النموذج غير مربوط
+                        بالخادم بشكل موثوق بعد.
+                      </div>
+                    </div>
+                  </div>
+
                   <AdminFormField
                     label="الاسم الكامل"
                     required
@@ -381,7 +382,7 @@ export default function CreateSecretaryDialog({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !createSecretarySupported}
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" aria-hidden />
