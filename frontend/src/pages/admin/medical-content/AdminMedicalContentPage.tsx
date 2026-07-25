@@ -356,10 +356,16 @@ export default function AdminMedicalContentPage() {
     if (!rejectTarget) return;
     try {
       await rejectMutation.mutateAsync({ id: rejectTarget._id, reason });
-      toast("تم رفض المحتوى ويُرسل الملاحظة إلى الفريق عند اكتمال الربط.", {
-        title: "تم",
-        variant: "success",
-      });
+      toast(
+        tr(
+          "تم رفض المحتوى ويُرسل الملاحظة إلى الفريق عند اكتمال الربط.",
+          "Content was rejected and the note will be sent to the team when integration is completed.",
+        ),
+        {
+          title: tr("تم", "Done"),
+          variant: "success",
+        },
+      );
       setRejectOpen(false);
       setRejectTarget(null);
     } catch {
@@ -378,10 +384,16 @@ export default function AdminMedicalContentPage() {
     const sourceUrl = ingestSourceUrl.trim();
     const title = ingestTitle.trim();
     if (!sourceUrl || !title) {
-      toast("أدخل رابط المصدر والعنوان على الأقل.", {
-        title: "بيانات ناقصة",
-        variant: "error",
-      });
+      toast(
+        tr(
+          "أدخل رابط المصدر والعنوان على الأقل.",
+          "Provide source URL and title at minimum.",
+        ),
+        {
+          title: tr("بيانات ناقصة", "Missing data"),
+          variant: "error",
+        },
+      );
       return;
     }
 
@@ -397,10 +409,16 @@ export default function AdminMedicalContentPage() {
       ],
     });
 
-    toast("تمت إضافة الخبر إلى طابور الأخبار المعلّقة.", {
-      title: "تمت الإضافة",
-      variant: "success",
-    });
+    toast(
+      tr(
+        "تمت إضافة الخبر إلى طابور الأخبار المعلّقة.",
+        "News item added to pending news queue.",
+      ),
+      {
+        title: tr("تمت الإضافة", "Added"),
+        variant: "success",
+      },
+    );
     setIngestOpen(false);
     setIngestSourceUrl("");
     setIngestTitle("");
@@ -712,7 +730,10 @@ export default function AdminMedicalContentPage() {
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                لا توجد عناصر مطابقة للفلاتر الحالية.
+                {tr(
+                  "لا توجد عناصر مطابقة للفلاتر الحالية.",
+                  "No items match current filters.",
+                )}
               </div>
             ) : (
               filteredItems.map((it) => (
@@ -720,7 +741,7 @@ export default function AdminMedicalContentPage() {
                   key={it._id}
                   className="flex flex-col gap-3 justify-between px-6 py-5 sm:flex-row sm:items-center"
                 >
-                  <div className="flex-1 min-w-0 text-right">
+                  <div className="flex-1 min-w-0 text-start">
                     <div className="flex flex-wrap gap-2 justify-start items-center sm:gap-3">
                       <div className="min-w-0 font-cairo text-[14px] font-black text-[#111827]">
                         {it.title ?? "—"}
@@ -741,10 +762,10 @@ export default function AdminMedicalContentPage() {
                             title={lk.label}
                           >
                             {lk.code === "ar"
-                              ? "ع"
+                              ? tr("ع", "AR")
                               : lk.code === "en"
                                 ? "EN"
-                                : "؟"}
+                                : tr("؟", "?")}
                           </span>
                         );
                       })()}
@@ -762,7 +783,7 @@ export default function AdminMedicalContentPage() {
                       </div>
                       <div className="inline-flex gap-2 items-center">
                         <ClipboardCheck className="w-4 h-4" />
-                        الكاتب:{" "}
+                        {tr("الكاتب:", "Author:")}{" "}
                         {typeof it.createdBy === "object"
                           ? (it.createdBy?.fullName ?? "—")
                           : (it.createdBy ?? "—")}
@@ -770,13 +791,14 @@ export default function AdminMedicalContentPage() {
                       <div className="inline-flex gap-2 items-center">
                         <Eye className="w-4 h-4" />
                         {Number(it.viewCount ?? it.views ?? 0).toLocaleString(
-                          "ar-SA",
+                          numberLocale,
                         )}{" "}
-                        مشاهدة
+                        {tr("مشاهدة", "views")}
                       </div>
                       <div className="inline-flex gap-2 items-center">
                         <Clock className="w-4 h-4" />
-                        آخر تحديث: {formatContentDate(it.updatedAt)}
+                        {tr("آخر تحديث:", "Last update:")}{" "}
+                        {formatContentDate(it.updatedAt)}
                       </div>
                     </div>
                   </div>
@@ -793,11 +815,11 @@ export default function AdminMedicalContentPage() {
                           })
                         }
                         className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] disabled:opacity-50"
-                        aria-label="إرسال للمراجعة"
+                        aria-label={tr("إرسال للمراجعة", "Send for review")}
                       >
                         <ClipboardCheck className="w-4 h-4" />
                         <span className="font-cairo text-[11px] font-extrabold">
-                          إرسال للمراجعة
+                          {tr("إرسال للمراجعة", "Send for review")}
                         </span>
                       </button>
                     ) : null}
@@ -815,11 +837,11 @@ export default function AdminMedicalContentPage() {
                             })
                           }
                           className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50"
-                          aria-label="موافقة"
+                          aria-label={tr("موافقة", "Approve")}
                         >
                           <Check className="w-4 h-4" />
                           <span className="font-cairo text-[11px] font-extrabold">
-                            موافقة
+                            {tr("موافقة", "Approve")}
                           </span>
                         </button>
                         <button
@@ -830,11 +852,11 @@ export default function AdminMedicalContentPage() {
                             setRejectOpen(true);
                           }}
                           className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] px-3 text-[#EF4444] disabled:opacity-50"
-                          aria-label="رفض"
+                          aria-label={tr("رفض", "Reject")}
                         >
                           <X className="w-4 h-4" />
                           <span className="font-cairo text-[11px] font-extrabold">
-                            رفض
+                            {tr("رفض", "Reject")}
                           </span>
                         </button>
                       </>
@@ -852,11 +874,11 @@ export default function AdminMedicalContentPage() {
                           })
                         }
                         className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] px-3 text-[#1D4ED8] disabled:opacity-50"
-                        aria-label="أرشفة"
+                        aria-label={tr("أرشفة", "Archive")}
                       >
                         <Archive className="w-4 h-4" />
                         <span className="font-cairo text-[11px] font-extrabold">
-                          أرشفة
+                          {tr("أرشفة", "Archive")}
                         </span>
                       </button>
                     ) : null}
@@ -873,11 +895,11 @@ export default function AdminMedicalContentPage() {
                           })
                         }
                         className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] px-3 text-[#0891B2] disabled:opacity-50"
-                        aria-label="نشر"
+                        aria-label={tr("نشر", "Publish")}
                       >
                         <ShieldCheck className="w-4 h-4" />
                         <span className="font-cairo text-[11px] font-extrabold">
-                          نشر
+                          {tr("نشر", "Publish")}
                         </span>
                       </button>
                     ) : null}
@@ -889,7 +911,7 @@ export default function AdminMedicalContentPage() {
                         setEditOpen(true);
                       }}
                       className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#0F8F8B]"
-                      aria-label="تعديل"
+                      aria-label={tr("تعديل", "Edit")}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
@@ -900,7 +922,7 @@ export default function AdminMedicalContentPage() {
                         setViewOpen(true);
                       }}
                       className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB]"
-                      aria-label="عرض"
+                      aria-label={tr("عرض", "View")}
                     >
                       <Eye className="w-4 h-4" />
                     </button>
@@ -915,20 +937,23 @@ export default function AdminMedicalContentPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
                   <span className="text-[#101828]">
-                    عرض{" "}
+                    {tr("عرض", "Showing")}{" "}
                     <span className="font-extrabold tabular-nums">
-                      {paginationRange.start.toLocaleString("ar-SA")}–
-                      {paginationRange.end.toLocaleString("ar-SA")}
+                      {paginationRange.start.toLocaleString(numberLocale)}–
+                      {paginationRange.end.toLocaleString(numberLocale)}
                     </span>
                   </span>
-                  <span> من </span>
+                  <span> {tr("من", "of")} </span>
                   <span className="font-extrabold text-[#101828] tabular-nums">
-                    {serverTotal.toLocaleString("ar-SA")}
+                    {serverTotal.toLocaleString(numberLocale)}
                   </span>
-                  <span> سجلاً</span>
+                  <span>{tr(" سجلاً", " records")}</span>
                   {query.trim() ? (
                     <span className="mt-1 block text-[11px] font-bold text-primary/80">
-                      التصفية النصية تطبّق على الصفحة الحالية فقط
+                      {tr(
+                        "التصفية النصية تطبّق على الصفحة الحالية فقط",
+                        "Text filter applies to current page only",
+                      )}
                     </span>
                   ) : null}
                 </div>
@@ -937,14 +962,14 @@ export default function AdminMedicalContentPage() {
                   <div
                     className="flex flex-wrap gap-1 justify-center items-center min-w-0 sm:justify-end"
                     role="navigation"
-                    aria-label="تصفح الصفحات"
+                      aria-label={tr("تصفح الصفحات", "Browse pages")}
                   >
                     <button
                       type="button"
                       disabled={page <= 1}
                       onClick={() => setPage(1)}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                      aria-label="الصفحة الأولى"
+                      aria-label={tr("الصفحة الأولى", "First page")}
                     >
                       <ChevronsRight className="w-4 h-4" />
                     </button>
@@ -953,7 +978,7 @@ export default function AdminMedicalContentPage() {
                       disabled={page <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                      aria-label="الصفحة السابقة"
+                      aria-label={tr("الصفحة السابقة", "Previous page")}
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -990,10 +1015,10 @@ export default function AdminMedicalContentPage() {
                               ? "border-primary bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.25)]"
                               : "border-[#E5E7EB] bg-white text-[#344054] hover:border-primary/30 hover:bg-[#F0FDFA]",
                           )}
-                          aria-label={`الصفحة ${n}`}
+                          aria-label={tr(`الصفحة ${n}`, `Page ${n}`)}
                           aria-current={n === page ? "page" : undefined}
                         >
-                          {n.toLocaleString("ar-SA")}
+                          {n.toLocaleString(numberLocale)}
                         </button>
                       ))}
 
@@ -1013,9 +1038,9 @@ export default function AdminMedicalContentPage() {
                             type="button"
                             onClick={() => setPage(totalPages)}
                             className="min-w-[2.25rem] rounded-[10px] border border-[#E5E7EB] bg-white px-2 py-1.5 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:border-primary/30 hover:bg-[#F0FDFA]"
-                            aria-label="الصفحة الأخيرة"
+                            aria-label={tr("الصفحة الأخيرة", "Last page")}
                           >
-                            {totalPages.toLocaleString("ar-SA")}
+                            {totalPages.toLocaleString(numberLocale)}
                           </button>
                         </>
                       ) : null}
@@ -1028,7 +1053,7 @@ export default function AdminMedicalContentPage() {
                         setPage((p) => Math.min(totalPages, p + 1))
                       }
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                      aria-label="الصفحة التالية"
+                      aria-label={tr("الصفحة التالية", "Next page")}
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
@@ -1037,14 +1062,17 @@ export default function AdminMedicalContentPage() {
                       disabled={page >= totalPages}
                       onClick={() => setPage(totalPages)}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
-                      aria-label="الصفحة الأخيرة"
+                      aria-label={tr("الصفحة الأخيرة", "Last page")}
                     >
                       <ChevronsLeft className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
                   <div className="font-cairo text-[11px] font-bold text-[#98A2B3]">
-                    كامل النتائج في صفحة واحدة
+                    {tr(
+                      "كامل النتائج في صفحة واحدة",
+                      "All results fit on one page",
+                    )}
                   </div>
                 )}
               </div>
@@ -1082,12 +1110,15 @@ export default function AdminMedicalContentPage() {
           !actionConfirm
             ? "—"
             : actionConfirm.kind === "submitReview"
-              ? "تأكيد إرسال المحتوى للمراجعة"
+              ? tr(
+                  "تأكيد إرسال المحتوى للمراجعة",
+                  "Confirm sending content for review",
+                )
               : actionConfirm.kind === "approve"
-                ? "تأكيد موافقة المحتوى"
+                ? tr("تأكيد موافقة المحتوى", "Confirm approving content")
                 : actionConfirm.kind === "publish"
-                  ? "تأكيد نشر المحتوى"
-                  : "تأكيد أرشفة المحتوى"
+                  ? tr("تأكيد نشر المحتوى", "Confirm publishing content")
+                  : tr("تأكيد أرشفة المحتوى", "Confirm archiving content")
         }
         icon={
           actionConfirm ? (
@@ -1105,11 +1136,15 @@ export default function AdminMedicalContentPage() {
         description={
           actionConfirm ? (
             <>
-              العنوان: «
+              {tr("العنوان:", "Title:")} «
               <span className="font-extrabold text-[#344054]">
                 {actionConfirm.title}
               </span>
-              ». سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.
+              ».{" "}
+              {tr(
+                "سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.",
+                "The action runs on the server and cannot be undone locally.",
+              )}
             </>
           ) : (
             "—"
@@ -1119,12 +1154,12 @@ export default function AdminMedicalContentPage() {
           !actionConfirm
             ? "—"
             : actionConfirm.kind === "submitReview"
-              ? "إرسال"
+              ? tr("إرسال", "Send")
               : actionConfirm.kind === "approve"
-                ? "موافقة"
+                ? tr("موافقة", "Approve")
                 : actionConfirm.kind === "publish"
-                  ? "نشر"
-                  : "أرشفة"
+                  ? tr("نشر", "Publish")
+                  : tr("أرشفة", "Archive")
         }
         confirmDisabled={actionBusy}
         onConfirm={async () => {
@@ -1137,17 +1172,26 @@ export default function AdminMedicalContentPage() {
             const validSources = countValidContentSources(details);
             if (validSources === 0) {
               setActionConfirm(null);
-              toast("أضف مصدراً واحداً على الأقل قبل إرسال المحتوى للمراجعة.", {
-                title: "المصادر مطلوبة",
-                variant: "error",
-              });
+              toast(
+                tr(
+                  "أضف مصدراً واحداً على الأقل قبل إرسال المحتوى للمراجعة.",
+                  "Add at least one source before sending content for review.",
+                ),
+                {
+                  title: tr("المصادر مطلوبة", "Sources required"),
+                  variant: "error",
+                },
+              );
               setEditingContentId(id);
               setEditOpen(true);
               throw new Error("sources_required");
             }
             await submitReviewMutation.mutateAsync({
               id,
-              reviewNotes: "تم إرسال المحتوى للمراجعة من لوحة الإدارة.",
+              reviewNotes: tr(
+                "تم إرسال المحتوى للمراجعة من لوحة الإدارة.",
+                "Content sent for review from admin panel.",
+              ),
             });
             setActiveStatus("الكل");
             setPage(1);
