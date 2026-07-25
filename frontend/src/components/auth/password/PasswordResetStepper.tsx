@@ -1,24 +1,31 @@
 import { Check, Lock, Mail, Shield } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export type PasswordResetStep = 1 | 2 | 3 | 4;
-
-const STEPS = [
-  { id: 1 as const, label: 'البريد', Icon: Mail },
-  { id: 2 as const, label: 'التحقق', Icon: Shield },
-  { id: 3 as const, label: 'كلمة المرور', Icon: Lock },
-  { id: 4 as const, label: 'تم', Icon: Check },
-];
 
 export default function PasswordResetStepper({
   step,
 }: {
   step: PasswordResetStep;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
+  const STEPS = [
+    { id: 1 as const, label: tr('البريد', 'Email'), Icon: Mail },
+    { id: 2 as const, label: tr('التحقق', 'Verify'), Icon: Shield },
+    { id: 3 as const, label: tr('كلمة المرور', 'Password'), Icon: Lock },
+    { id: 4 as const, label: tr('تم', 'Done'), Icon: Check },
+  ];
+
   return (
     <div
       className='mt-6'
-      dir='rtl'
-      aria-label='مراحل إعادة تعيين كلمة المرور'
+      dir={dir}
+      aria-label={tr(
+        'مراحل إعادة تعيين كلمة المرور',
+        'Password reset steps',
+      )}
     >
       <div className='flex items-start justify-between gap-1'>
         {STEPS.map(({ id, label, Icon }, index) => {
@@ -26,9 +33,10 @@ export default function PasswordResetStepper({
           const isActive = step === id;
           const isUpcoming = step < id;
 
-          const circleClass = isDone || isActive
-            ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.28)]'
-            : 'border-2 border-[#D0D5DD] bg-white text-[#98A2B3]';
+          const circleClass =
+            isDone || isActive
+              ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.28)]'
+              : 'border-2 border-[#D0D5DD] bg-white text-[#98A2B3]';
 
           const labelClass =
             isDone || isActive
@@ -43,10 +51,7 @@ export default function PasswordResetStepper({
               : '';
 
           return (
-            <div
-              key={id}
-              className='flex min-w-0 flex-1 items-center'
-            >
+            <div key={id} className='flex min-w-0 flex-1 items-center'>
               <div className='flex min-w-0 flex-1 flex-col items-center gap-2'>
                 <span
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${circleClass}`}

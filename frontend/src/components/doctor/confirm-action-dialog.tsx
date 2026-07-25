@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 export default function ConfirmActionDialog({
   open,
@@ -21,6 +22,9 @@ export default function ConfirmActionDialog({
   onConfirm: () => void | Promise<void>;
   confirmDisabled?: boolean;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
   useEffect(() => {
     if (!open) return;
 
@@ -41,15 +45,9 @@ export default function ConfirmActionDialog({
   }, [open]);
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={onOpenChange}
-    >
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay
-          forceMount
-          asChild
-        >
+        <Dialog.Overlay forceMount asChild>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
@@ -72,10 +70,7 @@ export default function ConfirmActionDialog({
           />
         </Dialog.Overlay>
 
-        <Dialog.Content
-          forceMount
-          asChild
-        >
+        <Dialog.Content forceMount asChild>
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
@@ -94,8 +89,8 @@ export default function ConfirmActionDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[460px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <motion.div
               initial={false}
@@ -121,7 +116,7 @@ export default function ConfirmActionDialog({
                   <button
                     type='button'
                     className='absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
-                    aria-label='إغلاق'
+                    aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
                   </button>
@@ -141,7 +136,7 @@ export default function ConfirmActionDialog({
                       type='button'
                       className='h-[40px] rounded-[10px] border border-[#F04438] bg-white px-8 font-cairo text-[14px] font-extrabold text-[#F04438]'
                     >
-                      إلغاء
+                      {tr('إلغاء', 'Cancel')}
                     </button>
                   </Dialog.Close>
 
@@ -153,7 +148,7 @@ export default function ConfirmActionDialog({
                         await onConfirm();
                         onOpenChange(false);
                       } catch {
-                        /* خطأ الطلب؛ نُبقي الحوار مفتوحاً */
+                        /* keep dialog open on error */
                       }
                     }}
                     className='h-[40px] rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] px-8 font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.22)] disabled:opacity-60'

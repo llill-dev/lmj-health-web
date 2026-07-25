@@ -11,6 +11,7 @@ import {
   formatVerifyFlowError,
 } from "@/lib/auth/signupMessaging";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 
 const verifyAccountSchema = z.object({
   code: z.string().regex(new RegExp("^\\d{6}$"), VERIFY_CODE_SCHEMA_HINT_AR),
@@ -29,6 +30,9 @@ export default function VerifyAccount({
   onVerify?: (code: string) => void | Promise<void>;
   onResend?: () => void | Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+
   const {
     handleSubmit,
     setValue,
@@ -104,7 +108,7 @@ export default function VerifyAccount({
       const formatted = formatVerifyFlowError(error);
       setFlowError(formatted);
       toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
-        title: "تعذّر التحقق",
+        title: tr("تعذّر التحقق", "Verification failed"),
         variant: "error",
         durationMs: 4800,
       });
@@ -116,7 +120,7 @@ export default function VerifyAccount({
   const inlineError = errors.code?.message ?? flowError;
 
   return (
-    <section className="flex flex-col items-center mx-auto">
+    <section dir={dir} lang={locale} className="mx-auto flex flex-col items-center">
       <div className="my-[50px]">
         <img
           src="/images/syr-health-logo.png"
@@ -128,12 +132,12 @@ export default function VerifyAccount({
         />
       </div>
       <h1 className="my-6 text-center text-[28px] font-bold leading-tight text-[#1F2937]">
-        تحقّق من حسابك
+        {tr("تحقّق من حسابك", "Verify your account")}
       </h1>
-      <div lang="ar" className="relative">
+      <div className="relative">
         <div className="relative w-fit">
           <div className="pointer-events-none absolute -right-[100px] -top-[170px] z-10">
-            <div className="relative w-44 h-44">
+            <div className="relative h-44 w-44">
               <div className="absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]" />
               <div className="absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-500/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]" />
             </div>
@@ -143,7 +147,10 @@ export default function VerifyAccount({
             <form onSubmit={handleSubmit(submitOtp)}>
               <div className="text-center">
                 <p className="font-cairo text-[15px] font-semibold leading-[24px] text-[#374151]">
-                  أدخل الرمز المكوّن من ٦ أرقام الذي وصل إلى
+                  {tr(
+                    "أدخل الرمز المكوّن من ٦ أرقام الذي وصل إلى",
+                    "Enter the 6-digit code sent to",
+                  )}
                 </p>
                 <p className="mt-2 font-cairo text-[16px] font-bold leading-snug text-[#101828]">
                   {destination}
@@ -182,23 +189,28 @@ export default function VerifyAccount({
                   disabled={isVerifying}
                   className="flex h-[43.98px] w-[341.22px] items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px] text-[#FFFFFF] shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60"
                 >
-                  <CircleCheck className="w-4 h-4 shrink-0" />
-                  {isVerifying ? "جاري التحقق…" : "تأكيد"}
+                  <CircleCheck className="h-4 w-4 shrink-0" />
+                  {isVerifying
+                    ? tr("جاري التحقق…", "Verifying…")
+                    : tr("تأكيد", "Confirm")}
                 </button>
               </div>
 
-              <div className="flex flex-col gap-3 items-center mt-8 text-center">
+              <div className="mt-8 flex flex-col items-center gap-3 text-center">
                 <button
                   type="button"
                   onClick={onBack}
                   className="font-cairo text-[14px] font-semibold text-[#6B7280] transition-colors hover:text-primary"
                 >
-                  رجوع
+                  {tr("رجوع", "Back")}
                 </button>
                 <div className="font-cairo text-[13px] font-semibold text-[#9CA3AF]">
                   {secondsLeft > 0 ? (
                     <span>
-                      لم تستلم الرمز؟ يمكن الإرسال مجدداً خلال {secondsLeft} ث
+                      {tr(
+                        `لم تستلم الرمز؟ يمكن الإرسال مجدداً خلال ${secondsLeft} ث`,
+                        `Didn't get the code? Resend in ${secondsLeft}s`,
+                      )}
                     </span>
                   ) : (
                     <button
@@ -211,26 +223,40 @@ export default function VerifyAccount({
                           await onResend();
                           setFlowError(null);
                           setSecondsLeft(60);
-                          toast("تم إرسال رمز تحقّق جديد.", {
-                            title: "أُعيد الإرسال",
-                            variant: "success",
-                            durationMs: 3200,
-                          });
+                          toast(
+                            tr(
+                              "تم إرسال رمز تحقّق جديد.",
+                              "A new verification code was sent.",
+                            ),
+                            {
+                              title: tr("أُعيد الإرسال", "Code resent"),
+                              variant: "success",
+                              durationMs: 3200,
+                            },
+                          );
                         } catch (error) {
                           const formatted = formatVerifyFlowError(error);
                           setFlowError(formatted);
-                          toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
-                            title: "تعذّر إعادة الإرسال",
-                            variant: "error",
-                            durationMs: 4800,
-                          });
+                          toast(
+                            formatted.replace(/\s+/g, " ").trim().slice(0, 220),
+                            {
+                              title: tr(
+                                "تعذّر إعادة الإرسال",
+                                "Resend failed",
+                              ),
+                              variant: "error",
+                              durationMs: 4800,
+                            },
+                          );
                         } finally {
                           setIsResending(false);
                         }
                       }}
                       className="text-primary transition-colors hover:text-[#14B3AE] disabled:opacity-60"
                     >
-                      {isResending ? "جاري الإرسال…" : "إعادة إرسال الرمز"}
+                      {isResending
+                        ? tr("جاري الإرسال…", "Sending…")
+                        : tr("إعادة إرسال الرمز", "Resend code")}
                     </button>
                   )}
                 </div>

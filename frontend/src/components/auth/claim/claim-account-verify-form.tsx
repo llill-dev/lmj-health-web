@@ -11,6 +11,7 @@ import {
   formatVerifyFlowError,
 } from '@/lib/auth/signupMessaging';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 
 const claimVerifySchema = z
   .object({
@@ -36,6 +37,9 @@ export default function ClaimAccountVerifyForm({
   onSubmit: (values: ClaimVerifyValues) => void | Promise<void>;
   onResend?: () => void | Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
   const {
     register,
     handleSubmit,
@@ -116,7 +120,7 @@ export default function ClaimAccountVerifyForm({
       const formatted = formatVerifyFlowError(error);
       setFlowError(formatted);
       toast(formatted.replace(/\s+/g, ' ').trim().slice(0, 220), {
-        title: 'تعذّر تفعيل الحساب',
+        title: tr('تعذّر تفعيل الحساب', 'Account activation failed'),
         variant: 'error',
         durationMs: 4800,
       });
@@ -132,7 +136,7 @@ export default function ClaimAccountVerifyForm({
     flowError;
 
   return (
-    <section className="mx-auto flex flex-col items-center">
+    <section dir={dir} lang={locale} className="mx-auto flex flex-col items-center">
       <div className="my-[50px]">
         <img
           src="/images/syr-health-logo.png"
@@ -145,10 +149,10 @@ export default function ClaimAccountVerifyForm({
       </div>
 
       <h1 className="my-4 text-center font-cairo text-[28px] font-bold leading-tight text-[#1F2937]">
-        تفعيل حسابك
+        {tr('تفعيل حسابك', 'Activate your account')}
       </h1>
 
-      <div lang="ar" className="relative">
+      <div className="relative">
         <div className="relative w-fit">
           <div className="pointer-events-none absolute -right-[100px] -top-[170px] z-10">
             <div className="relative h-44 w-44">
@@ -161,13 +165,16 @@ export default function ClaimAccountVerifyForm({
             <form onSubmit={handleSubmit(submitForm)}>
               <div className="text-center">
                 <p className="font-cairo text-[15px] font-semibold leading-[24px] text-[#374151]">
-                  أدخل الرمز المرسل إلى
+                  {tr('أدخل الرمز المرسل إلى', 'Enter the code sent to')}
                 </p>
                 <p className="mt-2 font-cairo text-[16px] font-bold leading-snug text-[#101828]">
                   {destination}
                 </p>
                 <p className="mt-3 font-cairo text-[13px] font-semibold text-[#6B7280]">
-                  ثم عيّن كلمة مرور جديدة لتفعيل حسابك.
+                  {tr(
+                    'ثم عيّن كلمة مرور جديدة لتفعيل حسابك.',
+                    'Then set a new password to activate your account.',
+                  )}
                 </p>
               </div>
 
@@ -192,8 +199,8 @@ export default function ClaimAccountVerifyForm({
 
               <div className="mt-6 space-y-4">
                 <div>
-                  <label className="block text-right font-cairo text-[14px] font-bold text-[#1F2937]">
-                    كلمة المرور
+                  <label className="block text-start font-cairo text-[14px] font-bold text-[#1F2937]">
+                    {tr('كلمة المرور', 'Password')}
                   </label>
                   <div className="mt-2 flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] px-[12px] py-[4px]">
                     <input
@@ -208,7 +215,9 @@ export default function ClaimAccountVerifyForm({
                         onClick={() => setShowPassword((v) => !v)}
                         className="shrink-0 text-[#98A2B3] hover:text-[#667085]"
                         aria-label={
-                          showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'
+                          showPassword
+                            ? tr('إخفاء كلمة المرور', 'Hide password')
+                            : tr('إظهار كلمة المرور', 'Show password')
                         }
                       >
                         {showPassword ? (
@@ -222,8 +231,8 @@ export default function ClaimAccountVerifyForm({
                 </div>
 
                 <div>
-                  <label className="block text-right font-cairo text-[14px] font-bold text-[#1F2937]">
-                    تأكيد كلمة المرور
+                  <label className="block text-start font-cairo text-[14px] font-bold text-[#1F2937]">
+                    {tr('تأكيد كلمة المرور', 'Confirm password')}
                   </label>
                   <div className="mt-2 flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] px-[12px] py-[4px]">
                     <input
@@ -239,8 +248,8 @@ export default function ClaimAccountVerifyForm({
                         className="shrink-0 text-[#98A2B3] hover:text-[#667085]"
                         aria-label={
                           showConfirmPassword
-                            ? 'إخفاء كلمة المرور'
-                            : 'إظهار كلمة المرور'
+                            ? tr('إخفاء كلمة المرور', 'Hide password')
+                            : tr('إظهار كلمة المرور', 'Show password')
                         }
                       >
                         {showConfirmPassword ? (
@@ -268,7 +277,9 @@ export default function ClaimAccountVerifyForm({
                   className="flex h-[43.98px] w-full items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px] text-white shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60"
                 >
                   <CircleCheck className="h-4 w-4 shrink-0" />
-                  {isSubmitting ? 'جاري التفعيل…' : 'تفعيل الحساب'}
+                  {isSubmitting
+                    ? tr('جاري التفعيل…', 'Activating…')
+                    : tr('تفعيل الحساب', 'Activate account')}
                 </button>
               </div>
 
@@ -278,12 +289,15 @@ export default function ClaimAccountVerifyForm({
                   onClick={onBack}
                   className="font-cairo text-[14px] font-semibold text-[#6B7280] transition-colors hover:text-primary"
                 >
-                  رجوع
+                  {tr('رجوع', 'Back')}
                 </button>
                 <div className="font-cairo text-[13px] font-semibold text-[#9CA3AF]">
                   {secondsLeft > 0 ? (
                     <span>
-                      لم تستلم الرمز؟ يمكن الإرسال مجدداً خلال {secondsLeft} ث
+                      {tr(
+                        `لم تستلم الرمز؟ يمكن الإرسال مجدداً خلال ${secondsLeft} ث`,
+                        `Didn't get the code? Resend in ${secondsLeft}s`,
+                      )}
                     </span>
                   ) : (
                     <button
@@ -296,18 +310,27 @@ export default function ClaimAccountVerifyForm({
                           await onResend();
                           setFlowError(null);
                           setSecondsLeft(60);
-                          toast('تم إرسال رمز تحقّق جديد.', {
-                            title: 'أُعيد الإرسال',
-                            variant: 'success',
-                            durationMs: 3200,
-                          });
+                          toast(
+                            tr(
+                              'تم إرسال رمز تحقّق جديد.',
+                              'A new verification code was sent.',
+                            ),
+                            {
+                              title: tr('أُعيد الإرسال', 'Code resent'),
+                              variant: 'success',
+                              durationMs: 3200,
+                            },
+                          );
                         } catch (error) {
                           const formatted = formatVerifyFlowError(error);
                           setFlowError(formatted);
                           toast(
                             formatted.replace(/\s+/g, ' ').trim().slice(0, 220),
                             {
-                              title: 'تعذّر إعادة الإرسال',
+                              title: tr(
+                                'تعذّر إعادة الإرسال',
+                                'Resend failed',
+                              ),
                               variant: 'error',
                               durationMs: 4800,
                             },
@@ -318,7 +341,9 @@ export default function ClaimAccountVerifyForm({
                       }}
                       className="text-primary transition-colors hover:text-[#14B3AE] disabled:opacity-60"
                     >
-                      {isResending ? 'جاري الإرسال…' : 'إعادة إرسال الرمز'}
+                      {isResending
+                        ? tr('جاري الإرسال…', 'Sending…')
+                        : tr('إعادة إرسال الرمز', 'Resend code')}
                     </button>
                   )}
                 </div>

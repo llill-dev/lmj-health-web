@@ -34,6 +34,7 @@ import {
   DashboardPatientsTable,
 } from "@/components/doctor/dashboard/dashboard-patients-section";
 import { DoctorDashboardSkeleton } from "@/components/doctor/shared/skeletons";
+import { useI18n } from "@/i18n/provider";
 
 type KpiCard = {
   key: string;
@@ -103,6 +104,8 @@ function SurfaceSection({
 }
 
 export default function HomeDoctor() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [selectedDate] = useState(new Date().toISOString().split("T")[0]);
   const patientsSearch = useDashboardPatientsSearch();
 
@@ -152,9 +155,9 @@ export default function HomeDoctor() {
     () => [
       {
         key: "today",
-        label: "مواعيد اليوم",
+        label: tr("مواعيد اليوم", "Today's appointments"),
         value: snapshot?.counts?.appointments ?? stats?.todayAppointments ?? 0,
-        delta: `${snapshot?.counts?.appointments ?? 0} مجدول`,
+        delta: `${snapshot?.counts?.appointments ?? 0} ${tr("مجدول", "scheduled")}`,
         icon: Calendar,
         accent: "#129A98",
         soft: "#E9F7F6",
@@ -162,9 +165,9 @@ export default function HomeDoctor() {
       },
       {
         key: "consultations",
-        label: "استشارات تحتاج متابعة",
+        label: tr("استشارات تحتاج متابعة", "Consultations needing follow-up"),
         value: snapshot?.counts?.consultations ?? 0,
-        delta: `${snapshot?.counts?.consultations ?? 0} نشطة`,
+        delta: `${snapshot?.counts?.consultations ?? 0} ${tr("نشطة", "active")}`,
         icon: Users,
         accent: "#2D74F5",
         soft: "#EAF1FF",
@@ -172,9 +175,9 @@ export default function HomeDoctor() {
       },
       {
         key: "waitlist",
-        label: "قائمة الانتظار",
+        label: tr("قائمة الانتظار", "Waitlist"),
         value: snapshot?.counts?.waitlist ?? 0,
-        delta: `${snapshot?.counts?.waitlist ?? 0} طلب`,
+        delta: `${snapshot?.counts?.waitlist ?? 0} ${tr("طلب", "requests")}`,
         icon: Check,
         accent: "#22C55E",
         soft: "#EAFBF0",
@@ -182,9 +185,9 @@ export default function HomeDoctor() {
       },
       {
         key: "access",
-        label: "طلبات وصول معلّقة",
+        label: tr("طلبات وصول معلّقة", "Pending access requests"),
         value: snapshot?.pendingAccessRequestAlert?.count ?? 0,
-        delta: `${snapshot?.pendingAccessRequestAlert?.count ?? 0} جديد`,
+        delta: `${snapshot?.pendingAccessRequestAlert?.count ?? 0} ${tr("جديد", "new")}`,
         icon: Clock,
         accent: "#FF6A00",
         soft: "#FFF2E8",
@@ -197,6 +200,7 @@ export default function HomeDoctor() {
       snapshot?.counts?.waitlist,
       snapshot?.pendingAccessRequestAlert?.count,
       stats?.todayAppointments,
+      locale,
     ],
   );
 
@@ -204,11 +208,13 @@ export default function HomeDoctor() {
     () =>
       appointments.slice(0, 2).map((row) => ({
         time: row.startTime ?? "—",
-        name: row.patient?.userId?.fullName ?? "مريض",
+        name: row.patient?.userId?.fullName ?? tr("مريض", "Patient"),
         mode: "clinic",
-        initial: (row.patient?.userId?.fullName ?? "مريض").charAt(0),
+        initial: (
+          row.patient?.userId?.fullName ?? tr("مريض", "Patient")
+        ).charAt(0),
       })),
-    [appointments],
+    [appointments, locale],
   );
 
   const ratingValue =
@@ -227,17 +233,25 @@ export default function HomeDoctor() {
       statsError ?? appointmentsError ?? snapshotError,
     );
     return (
-      <div className="flex h-[400px] items-center justify-center">
+      <div
+        dir={dir}
+        lang={locale}
+        className="flex h-[400px] items-center justify-center"
+      >
         <div className="text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
           <p className="mt-2 font-cairo text-[14px] font-semibold text-red-600">
-            {message || "فشل تحميل بيانات لوحة التحكم"}
+            {message ||
+              tr(
+                "فشل تحميل بيانات لوحة التحكم",
+                "Failed to load dashboard data",
+              )}
           </p>
           <button
             onClick={() => refetch()}
             className="mt-3 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[13px] font-extrabold text-white hover:bg-primary/90"
           >
-            إعادة المحاولة
+            {tr("إعادة المحاولة", "Retry")}
           </button>
         </div>
       </div>
@@ -245,7 +259,7 @@ export default function HomeDoctor() {
   }
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
+    <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
       <section className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 xl:gap-8">
         {kpis.map((card) => (
           <KpiStatCard
@@ -279,7 +293,7 @@ export default function HomeDoctor() {
 
       <section className="grid gap-6 xl:grid-cols-2">
         <DiagnosisAnalyticsSection />
-        <SurfaceSection title="مواعيد اليوم">
+        <SurfaceSection title={tr("مواعيد اليوم", "Today's appointments")}>
           <div className="space-y-4 px-4 py-5 sm:px-5 sm:py-6">
             {todayRows.length > 0 ? (
               todayRows.map((row) => (
@@ -307,14 +321,17 @@ export default function HomeDoctor() {
                       {row.time}
                     </div>
                     <div className="mt-2 inline-flex rounded-[8px] bg-[#DDF4F1] px-3 py-1 font-cairo text-[13px] font-black text-primary">
-                      مجدول
+                      {tr("مجدول", "Scheduled")}
                     </div>
                   </div>
                 </article>
               ))
             ) : (
               <div className="flex min-h-[250px] items-center justify-center rounded-[18px] border border-dashed border-[#D8E2EE] bg-[#FBFDFE] px-6 text-center font-cairo text-[15px] font-semibold leading-7 text-[#8A94A6]">
-                لا توجد مواعيد مجدولة لهذا اليوم بعد.
+                {tr(
+                  "لا توجد مواعيد مجدولة لهذا اليوم بعد.",
+                  "No appointments scheduled for today yet.",
+                )}
               </div>
             )}
           </div>
@@ -328,21 +345,21 @@ export default function HomeDoctor() {
         {[
           {
             key: "rating",
-            label: "التقييم",
+            label: tr("التقييم", "Rating"),
             value: ratingValue,
             icon: TrendingUp,
             iconClass: "bg-[#ECFDF3] text-[#22C55E]",
           },
           {
             key: "attendance",
-            label: "نسبة الحضور",
+            label: tr("نسبة الحضور", "Attendance rate"),
             value: attendanceValue,
             icon: Activity,
             iconClass: "bg-[#F4EBFF] text-[#A855F7]",
           },
           {
             key: "records",
-            label: "السجلات الطبية",
+            label: tr("السجلات الطبية", "Medical records"),
             value: `${stats?.totalMedicalRecords ?? 0}`,
             icon: FileText,
             iconClass: "bg-[#EAF1FF] text-[#3B82F6]",
