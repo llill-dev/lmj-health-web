@@ -13,6 +13,7 @@ import { Activity, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import { PAGE_SIZE } from "@/components/admin/system-logs/auditLogConstants";
 import { useAdminAuditLogs } from "@/hooks/admin/audit/useAdminAuditLogs";
 import type { AuditLogCategory, AuditLogOutcome } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 const EMPTY_ADVANCED: AuditAdvancedFilters = {
   actorUserId: "",
@@ -26,6 +27,10 @@ const EMPTY_ADVANCED: AuditAdvancedFilters = {
 };
 
 export default function AdminSystemLogsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<AuditLogCategory | "">("");
   const [outcome, setOutcome] = useState<AuditLogOutcome | "">("");
@@ -116,41 +121,46 @@ export default function AdminSystemLogsPage() {
   return (
     <>
       <Helmet>
-        <title>سجلات النظام • LMJ Health</title>
+        <title>{tr("سجلات النظام", "System logs")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="سجلات النظام"
-          subtitle="مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي"
+          title={tr("سجلات النظام", "System logs")}
+          subtitle={tr(
+            "مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي",
+            "Review all system activity and events in near real time",
+          )}
           headerIcon={<Activity className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={[
             {
               key: "total",
               icon: <Activity className="h-5 w-5 shrink-0" />,
-              value: isAwaitingData ? "—" : total.toLocaleString("ar-SA"),
-              label: "إجمالي السجلات",
+              value: isAwaitingData
+                ? "—"
+                : total.toLocaleString(numberLocale),
+              label: tr("إجمالي السجلات", "Total records"),
             },
             {
               key: "fail",
               icon: <ShieldAlert className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : failCount,
-              label: "إجراءات فاشلة",
+              label: tr("إجراءات فاشلة", "Failed actions"),
             },
             {
               key: "deny",
               icon: <Shield className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : denyCount,
-              label: "محاولات مرفوضة",
+              label: tr("محاولات مرفوضة", "Denied attempts"),
             },
             {
               key: "phi",
               icon: <ShieldCheck className="h-5 w-5 shrink-0" />,
               value: isAwaitingData ? "—" : phiCount,
-              label: "وصول للبيانات الطبية",
+              label: tr("وصول للبيانات الطبية", "PHI access"),
             },
           ]}
         />

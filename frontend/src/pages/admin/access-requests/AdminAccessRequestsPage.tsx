@@ -22,25 +22,30 @@ import { useAdminAccessRequests } from "@/hooks/admin/access-requests/useAdminAc
 import { useAdminAccessRequestDetails } from "@/hooks/admin/access-requests/useAdminAccessRequests";
 import AccessRequestDetailsDialog from "@/components/admin/access-requests/AccessRequestDetailsDialog";
 import AccessRequestCardSkeleton from "@/components/admin/access-requests/AccessRequestCardSkeleton";
+import { useI18n } from "@/i18n/provider";
 
 type RequestStatus = "pending" | "approved" | "rejected" | "all";
 
-const statusLabels: Record<RequestStatus, string> = {
-  pending: "معلّقة",
-  approved: "مقبولة",
-  rejected: "مرفوضة",
-  all: "كل الحالات",
-};
-
-const statusColors: Record<RequestStatus, string> = {
-  pending: "bg-[#FEF3C7] text-[#B45309]",
-  approved: "bg-[#ECFDF3] text-[#16A34A]",
-  rejected: "bg-[#FEF2F2] text-[#B42318]",
-  all: "bg-[#F3F4F6] text-[#374151]",
-};
-
 export default function AdminAccessRequestsPage() {
   const navigate = useNavigate();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const dateLocale = locale === "ar" ? "ar-SY" : "en-US";
+
+  const statusLabels: Record<RequestStatus, string> = {
+    pending: tr("معلّقة", "Pending"),
+    approved: tr("مقبولة", "Approved"),
+    rejected: tr("مرفوضة", "Rejected"),
+    all: tr("كل الحالات", "All statuses"),
+  };
+
+  const statusColors: Record<RequestStatus, string> = {
+    pending: "bg-[#FEF3C7] text-[#B45309]",
+    approved: "bg-[#ECFDF3] text-[#16A34A]",
+    rejected: "bg-[#FEF2F2] text-[#B42318]",
+    all: "bg-[#F3F4F6] text-[#374151]",
+  };
+
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
     null,
   );
@@ -106,7 +111,7 @@ export default function AdminAccessRequestsPage() {
   const stats = useMemo(
     () => [
       {
-        title: "طلبات معلّقة",
+        title: tr("طلبات معلّقة", "Pending requests"),
         value: String(statusCounts.pending),
         icon: Clock,
         tone: {
@@ -118,7 +123,7 @@ export default function AdminAccessRequestsPage() {
         },
       },
       {
-        title: "طلبات مقبولة",
+        title: tr("طلبات مقبولة", "Approved requests"),
         value: String(statusCounts.approved),
         icon: CheckCircle,
         tone: {
@@ -130,7 +135,7 @@ export default function AdminAccessRequestsPage() {
         },
       },
       {
-        title: "طلبات مرفوضة",
+        title: tr("طلبات مرفوضة", "Rejected requests"),
         value: String(statusCounts.rejected),
         icon: XCircle,
         tone: {
@@ -142,7 +147,7 @@ export default function AdminAccessRequestsPage() {
         },
       },
       {
-        title: "إجمالي الطلبات",
+        title: tr("إجمالي الطلبات", "Total requests"),
         value: String(total),
         icon: UserCheck,
         tone: {
@@ -154,7 +159,7 @@ export default function AdminAccessRequestsPage() {
         },
       },
     ],
-    [statusCounts.pending, statusCounts.approved, statusCounts.rejected, total],
+    [statusCounts.pending, statusCounts.approved, statusCounts.rejected, total, locale],
   );
 
   const handleViewDetails = useCallback((requestId: string) => {
@@ -165,15 +170,18 @@ export default function AdminAccessRequestsPage() {
   return (
     <>
       <Helmet>
-        <title>إدارة طلبات الوصول • LMJ Health</title>
+        <title>{tr("إدارة طلبات الوصول", "Access requests")} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="min-h-full text-[#111827]">
+      <div dir={dir} lang={locale} className="min-h-full text-[#111827]">
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title="إدارة طلبات الوصول"
-          subtitle="مراجعة وإدارة طلبات الوصول إلى بيانات المرضى"
+          title={tr("إدارة طلبات الوصول", "Access requests")}
+          subtitle={tr(
+            "مراجعة وإدارة طلبات الوصول إلى بيانات المرضى",
+            "Review and manage patient data access requests",
+          )}
           headerIcon={<UserCheck className="h-8 w-8 text-white" />}
           kpiColumns={4}
           kpis={stats.map((s) => {
@@ -193,8 +201,11 @@ export default function AdminAccessRequestsPage() {
             <div className="flex flex-1 items-center gap-3">
               <div className="relative flex-1">
                 <input
-                  placeholder="بحث بالطبيب أو المريض..."
-                  className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
+                  placeholder={tr(
+                    "بحث بالطبيب أو المريض...",
+                    "Search by doctor or patient...",
+                  )}
+                  className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
                   value={filters.search}
                   onChange={(e) =>
                     setFilters((prev) => ({
@@ -222,12 +233,12 @@ export default function AdminAccessRequestsPage() {
                     }))
                   }
                   options={[
-                    { value: "pending", label: "معلّقة" },
-                    { value: "approved", label: "مقبولة" },
-                    { value: "rejected", label: "مرفوضة" },
-                    { value: "all", label: "كل الحالات" },
+                    { value: "pending", label: statusLabels.pending },
+                    { value: "approved", label: statusLabels.approved },
+                    { value: "rejected", label: statusLabels.rejected },
+                    { value: "all", label: statusLabels.all },
                   ]}
-                  listboxAriaLabel="حالة الطلب"
+                  listboxAriaLabel={tr("حالة الطلب", "Request status")}
                 />
               </div>
             </div>
@@ -239,10 +250,10 @@ export default function AdminAccessRequestsPage() {
                 className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]"
               >
                 <RefreshCw className="h-4 w-4" />
-                تحديث
+                {tr("تحديث", "Refresh")}
               </button>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                {total} نتيجة
+                {total} {tr("نتيجة", "results")}
               </div>
             </div>
           </div>
@@ -258,11 +269,17 @@ export default function AdminAccessRequestsPage() {
             </>
           ) : error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              تعذّر تحميل طلبات الوصول.
+              {tr(
+                "تعذّر تحميل طلبات الوصول.",
+                "Failed to load access requests.",
+              )}
             </div>
           ) : filteredRequests.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              لا توجد طلبات وصول مطابقة.
+              {tr(
+                "لا توجد طلبات وصول مطابقة.",
+                "No matching access requests.",
+              )}
             </div>
           ) : (
             filteredRequests.map((request: any) => (
@@ -290,7 +307,8 @@ export default function AdminAccessRequestsPage() {
                           </span>
                         </div>
                         <div className="mt-2 font-cairo text-[12px] font-bold text-[#98A2B3]">
-                          طلب الوصول: {request._id || request.id}
+                          {tr("طلب الوصول:", "Access request:")}{" "}
+                          {request._id || request.id}
                         </div>
                       </div>
                       <button
@@ -301,7 +319,7 @@ export default function AdminAccessRequestsPage() {
                         className="inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-extrabold text-[#4B5563] hover:bg-[#E5E7EB]"
                       >
                         <Eye className="h-4 w-4" />
-                        عرض التفاصيل
+                        {tr("عرض التفاصيل", "View details")}
                       </button>
                     </div>
 
@@ -310,7 +328,7 @@ export default function AdminAccessRequestsPage() {
                         <User className="h-4 w-4 text-primary" />
                         <div className="flex-1 min-w-0">
                           <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                            المريض
+                            {tr("المريض", "Patient")}
                           </div>
                           <div className="font-cairo text-[11px] font-bold text-[#111827] truncate">
                             {request.patient?.fullName ||
@@ -323,12 +341,12 @@ export default function AdminAccessRequestsPage() {
                         <Calendar className="h-4 w-4 text-primary" />
                         <div className="flex-1 min-w-0">
                           <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                            تاريخ الطلب
+                            {tr("تاريخ الطلب", "Request date")}
                           </div>
                           <div className="font-cairo text-[11px] font-bold text-[#111827] truncate">
                             {request.createdAt
                               ? new Date(request.createdAt).toLocaleDateString(
-                                  "ar-SY",
+                                  dateLocale,
                                 )
                               : "—"}
                           </div>
@@ -338,7 +356,7 @@ export default function AdminAccessRequestsPage() {
                         <Mail className="h-4 w-4 text-primary" />
                         <div className="flex-1 min-w-0">
                           <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                            البريد الإلكتروني
+                            {tr("البريد الإلكتروني", "Email")}
                           </div>
                           <div className="font-cairo text-[11px] font-bold text-[#111827] truncate">
                             {request.doctor?.email ||
@@ -351,7 +369,7 @@ export default function AdminAccessRequestsPage() {
                         <Phone className="h-4 w-4 text-primary" />
                         <div className="flex-1 min-w-0">
                           <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                            الهاتف
+                            {tr("الهاتف", "Phone")}
                           </div>
                           <div className="font-cairo text-[11px] font-bold text-[#111827] truncate">
                             {request.doctor?.phone ||
@@ -371,7 +389,7 @@ export default function AdminAccessRequestsPage() {
         {/* Pagination */}
         <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="font-cairo text-[12px] font-bold text-[#667085]">
-            الصفحة {filters.page} من {totalPages}
+            {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
           </div>
 
           <div className="flex items-center gap-3">
@@ -391,7 +409,10 @@ export default function AdminAccessRequestsPage() {
                   value: String(v),
                   label: String(v),
                 }))}
-                listboxAriaLabel="عدد العناصر في الصفحة"
+                listboxAriaLabel={tr(
+                  "عدد العناصر في الصفحة",
+                  "Items per page",
+                )}
               />
             </div>
 
@@ -406,7 +427,7 @@ export default function AdminAccessRequestsPage() {
               disabled={filters.page <= 1}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              السابق
+              {tr("السابق", "Previous")}
             </button>
 
             <button
@@ -420,7 +441,7 @@ export default function AdminAccessRequestsPage() {
               disabled={filters.page >= totalPages}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              التالي
+              {tr("التالي", "Next")}
             </button>
           </div>
         </section>

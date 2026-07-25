@@ -19,12 +19,15 @@ import {
   PERM_LABEL,
 } from '@/components/admin/secretaries/secretaryPermissions';
 import type { AdminSecretarySummary } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 /* ─── page ──────────────────────────────────────────────────── */
 export default function AdminSecretaryDetailsPage() {
   const { secretaryId } = useParams<{ secretaryId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
 
   /* Try state first, then fallback to fetching list */
   const locationSecretary = (location.state as { secretary?: AdminSecretarySummary })?.secretary;
@@ -44,14 +47,11 @@ export default function AdminSecretaryDetailsPage() {
         <title>
           {secretary?.user?.fullName
             ? `${secretary.user.fullName} • LMJ Health`
-            : 'ملف السكرتير • LMJ Health'}
+            : `${tr('ملف السكرتير', 'Secretary profile')} • LMJ Health`}
         </title>
       </Helmet>
 
-      <div
-        dir='rtl'
-        lang='ar'
-      >
+      <div dir={dir} lang={locale}>
         {/* breadcrumb */}
         <button
           type='button'
@@ -59,7 +59,7 @@ export default function AdminSecretaryDetailsPage() {
           className='mb-5 inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary'
         >
           <ArrowRight className='h-4 w-4' />
-          العودة إلى قائمة السكرتارية
+          {tr('العودة إلى قائمة السكرتارية', 'Back to secretaries list')}
         </button>
 
         {/* header */}
@@ -80,7 +80,8 @@ export default function AdminSecretaryDetailsPage() {
                     {secretary?.user?.fullName ?? '—'}
                   </div>
                   <div className='mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]'>
-                    حساب سكرتير • المعرّف: {secretaryId}
+                    {tr('حساب سكرتير • المعرّف:', 'Secretary account • ID:')}{' '}
+                    {secretaryId}
                   </div>
                 </>
               )}
@@ -98,7 +99,7 @@ export default function AdminSecretaryDetailsPage() {
               className='h-9 rounded-[10px] border border-primary bg-white px-4 font-cairo text-[12px] font-extrabold text-primary hover:bg-[#E7FBFA]'
             >
               <CalendarDays className='me-1.5 inline h-4 w-4' />
-              المواعيد
+              {tr('المواعيد', 'Appointments')}
             </button>
             <button
               type='button'
@@ -110,7 +111,7 @@ export default function AdminSecretaryDetailsPage() {
               }
               className='h-9 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white hover:bg-primary/90'
             >
-              إدارة المواعيد
+              {tr('إدارة المواعيد', 'Manage appointments')}
             </button>
             {userId && (
               <button
@@ -119,7 +120,7 @@ export default function AdminSecretaryDetailsPage() {
                 className='flex h-9 items-center gap-1.5 rounded-[10px] border border-[#FECACA] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#DC2626] hover:bg-[#FEF2F2]'
               >
                 <UserMinus className='h-4 w-4' />
-                إيقاف الحساب
+                {tr('إيقاف الحساب', 'Offboard account')}
               </button>
             )}
           </div>
@@ -134,14 +135,16 @@ export default function AdminSecretaryDetailsPage() {
             {/* contact info */}
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
               <h3 className='mb-4 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                معلومات التواصل
+                {tr('معلومات التواصل', 'Contact information')}
               </h3>
               <div className='space-y-3'>
                 {secretary?.user?.email && (
                   <div className='flex items-center justify-between rounded-[8px] bg-[#F9FAFB] px-4 py-3'>
                     <div className='flex items-center gap-2 text-[#667085]'>
                       <Mail className='h-4 w-4 text-primary' />
-                      <span className='font-cairo text-[12px] font-bold'>البريد الإلكتروني</span>
+                      <span className='font-cairo text-[12px] font-bold'>
+                        {tr('البريد الإلكتروني', 'Email')}
+                      </span>
                     </div>
                     <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                       {secretary.user.email}
@@ -152,7 +155,9 @@ export default function AdminSecretaryDetailsPage() {
                   <div className='flex items-center justify-between rounded-[8px] bg-[#F9FAFB] px-4 py-3'>
                     <div className='flex items-center gap-2 text-[#667085]'>
                       <Phone className='h-4 w-4 text-primary' />
-                      <span className='font-cairo text-[12px] font-bold'>رقم الهاتف</span>
+                      <span className='font-cairo text-[12px] font-bold'>
+                        {tr('رقم الهاتف', 'Phone')}
+                      </span>
                     </div>
                     <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                       {secretary.user.phone}
@@ -161,15 +166,19 @@ export default function AdminSecretaryDetailsPage() {
                 )}
                 {secretary?.user?.gender && (
                   <div className='flex items-center justify-between rounded-[8px] bg-[#F9FAFB] px-4 py-3'>
-                    <span className='font-cairo text-[12px] font-bold text-[#667085]'>الجنس</span>
+                    <span className='font-cairo text-[12px] font-bold text-[#667085]'>
+                      {tr('الجنس', 'Gender')}
+                    </span>
                     <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
-                      {secretary.user.gender === 'Female' ? 'أنثى' : 'ذكر'}
+                      {secretary.user.gender === 'Female'
+                        ? tr('أنثى', 'Female')
+                        : tr('ذكر', 'Male')}
                     </span>
                   </div>
                 )}
                 {!secretary?.user?.email && !secretary?.user?.phone && !isAwaitingData && (
                   <div className='font-cairo text-[12px] text-[#98A2B3]'>
-                    لا توجد بيانات تواصل
+                    {tr('لا توجد بيانات تواصل', 'No contact details')}
                   </div>
                 )}
               </div>
@@ -178,7 +187,7 @@ export default function AdminSecretaryDetailsPage() {
             {/* assigned doctor */}
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
               <h3 className='mb-4 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                الطبيب المسؤول
+                {tr('الطبيب المسؤول', 'Assigned doctor')}
               </h3>
               {secretary?.doctor ? (
                 <div className='rounded-[10px] border border-[#BFEDEC] bg-[#E7FBFA] p-4'>
@@ -206,13 +215,15 @@ export default function AdminSecretaryDetailsPage() {
                       }`}
                     >
                       <CheckCircle2 className='h-3 w-3' />
-                      {secretary.doctor.approvalStatus === 'approved' ? 'معتمد' : 'غير معتمد'}
+                      {secretary.doctor.approvalStatus === 'approved'
+                        ? tr('معتمد', 'Approved')
+                        : tr('غير معتمد', 'Not approved')}
                     </span>
                   </div>
                 </div>
               ) : (
                 <div className='rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-5 text-center font-cairo text-[12px] text-[#98A2B3]'>
-                  غير مرتبط بطبيب
+                  {tr('غير مرتبط بطبيب', 'Not linked to a doctor')}
                 </div>
               )}
             </div>
@@ -222,10 +233,10 @@ export default function AdminSecretaryDetailsPage() {
           <div className='xl:col-span-2 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='mb-5 flex items-center justify-between'>
               <h3 className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                الصلاحيات الممنوحة
+                {tr('الصلاحيات الممنوحة', 'Granted permissions')}
               </h3>
               <span className='rounded-full bg-[#E7FBFA] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary'>
-                {perms.length} صلاحية
+                {perms.length} {tr('صلاحية', 'permissions')}
               </span>
             </div>
 
@@ -233,7 +244,7 @@ export default function AdminSecretaryDetailsPage() {
               <div className='flex flex-col items-center gap-2 py-10 text-center'>
                 <Settings className='h-8 w-8 text-[#D0D5DD]' />
                 <span className='font-cairo text-[13px] font-bold text-[#98A2B3]'>
-                  لا توجد صلاحيات مضافة
+                  {tr('لا توجد صلاحيات مضافة', 'No permissions added')}
                 </span>
               </div>
             ) : (
@@ -282,7 +293,9 @@ export default function AdminSecretaryDetailsPage() {
         open={offboardOpen}
         onOpenChange={setOffboardOpen}
         targetUserId={userId}
-        targetLabel={secretary?.user?.fullName ?? 'هذا الحساب'}
+        targetLabel={
+          secretary?.user?.fullName ?? tr('هذا الحساب', 'this account')
+        }
         onSuccess={() => navigate('/admin/secretaries')}
       />
     </>
