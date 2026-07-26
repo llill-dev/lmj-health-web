@@ -13,6 +13,7 @@ type Props = {
   onEdit: (item: MedicalOrderCatalogItem) => void;
   onDelete: (item: MedicalOrderCatalogItem) => void;
   isBusy?: boolean;
+  deleteUnsupported?: boolean;
 };
 
 export default function MedicalOrderCatalogCard({
@@ -22,6 +23,7 @@ export default function MedicalOrderCatalogCard({
   onEdit,
   onDelete,
   isBusy,
+  deleteUnsupported,
 }: Props) {
   const title =
     MEDICAL_ORDER_TAB_META.find((t) => t.kind === kind)?.label ?? '';
@@ -52,6 +54,7 @@ export default function MedicalOrderCatalogCard({
               onEdit={onEdit}
               onDelete={onDelete}
               deleteDisabled={isBusy}
+              deleteUnsupported={deleteUnsupported}
             />
           ))
         )}

@@ -7,6 +7,7 @@ type Props = {
   onEdit: (item: MedicalOrderCatalogItem) => void;
   onDelete: (item: MedicalOrderCatalogItem) => void;
   deleteDisabled?: boolean;
+  deleteUnsupported?: boolean;
 };
 
 export default function MedicalOrderCatalogRow({
@@ -15,6 +16,7 @@ export default function MedicalOrderCatalogRow({
   onEdit,
   onDelete,
   deleteDisabled,
+  deleteUnsupported,
 }: Props) {
   const active = item.isActive !== false;
   const visible = item.isVisible !== false;
@@ -66,8 +68,9 @@ export default function MedicalOrderCatalogRow({
         <button
           type='button'
           onClick={() => onDelete(item)}
-          disabled={deleteDisabled}
+          disabled={deleteDisabled || deleteUnsupported}
           className='flex h-8 w-8 items-center justify-center rounded-[8px] text-[#EF4444] transition-colors hover:bg-red-50 disabled:pointer-events-none disabled:opacity-40'
+          title={deleteUnsupported ? 'الحذف غير مدعوم حالياً' : undefined}
           aria-label={`حذف ${item.label}`}
         >
           <Trash2 className='w-4 h-4' />

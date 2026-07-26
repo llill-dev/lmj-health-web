@@ -7,5 +7,8 @@ export { default as MedicalOrderCategoryTabs } from './MedicalOrderCategoryTabs'
 export { default as UpsertMedicalOrderItemDialog } from './UpsertMedicalOrderItemDialog';
 export {
   MEDICAL_ORDER_TAB_META,
+  SUPPORTED_MEDICAL_ORDER_TAB_META,
+  medicalOrderCatalogDeleteSupported,
   medicalOrderCatalogHeaderIcon,
+  medicalOrderCatalogKindSupported,
 } from './constants';

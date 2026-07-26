@@ -25,6 +25,10 @@ import { Pagination } from "@/components/admin/services/Pagination";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import StyledSelect from "@/components/ui/styled-select";
 import { useI18n } from "@/i18n/provider";
+import {
+  medicalOrderCatalogDeleteSupported,
+  medicalOrderCatalogKindSupported,
+} from "@/components/admin/medical-orders";
 
 function kindLabel(
   kind: MedicalOrderCatalogKind,
@@ -73,6 +77,7 @@ export default function AdminMedicalOrdersPage() {
             : undefined,
     });
   const deleteMut = useDeleteMedicalOrderCatalogItem(kind);
+  const deleteSupported = medicalOrderCatalogDeleteSupported();
 
   useEffect(() => {
     setEditTarget(null);
@@ -131,11 +136,13 @@ export default function AdminMedicalOrdersPage() {
       : Math.min(currentPage * pageSize, filteredItems.length);
 
   function openAdd() {
+    if (!medicalOrderCatalogKindSupported(kind)) return;
     setEditTarget(null);
     setDialogOpen(true);
   }
 
   function openEdit(item: MedicalOrderCatalogItem) {
+    if (!medicalOrderCatalogKindSupported(kind)) return;
     setEditTarget(item);
     setDialogOpen(true);
   }
@@ -145,6 +152,7 @@ export default function AdminMedicalOrdersPage() {
   }
 
   function openDeleteConfirm(item: MedicalOrderCatalogItem) {
+    if (!deleteSupported) return;
     setDeleteTarget(item);
   }
 
@@ -167,7 +175,7 @@ export default function AdminMedicalOrdersPage() {
           )}
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
           actionLabel={tr("إضافة نوع جديد", "Add new item")}
-          actionDisabled={isAwaitingData}
+          actionDisabled={isAwaitingData || !medicalOrderCatalogKindSupported(kind)}
           onActionClick={openAdd}
           kpis={[
             {
@@ -209,6 +217,34 @@ export default function AdminMedicalOrdersPage() {
           </div>
         </div>
 
+        {!medicalOrderCatalogKindSupported(kind) && (
+          <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-start">
+            <p className="font-cairo text-[13px] font-bold text-amber-900">
+              {tr("قسم التحويلات غير مدعوم حالياً من الواجهة.", "Referral catalog is currently unsupported in the UI.")}
+            </p>
+            <p className="mt-1 font-cairo text-[12px] font-semibold text-amber-800">
+              {tr(
+                "تم إخفاء هذا المسار من التبويبات النشطة لمنع الوصول إلى تكامل غير صحيح.",
+                "This route is kept out of active tabs to avoid an invalid integration path.",
+              )}
+            </p>
+          </div>
+        )}
+
+        {!deleteSupported && (
+          <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-start">
+            <p className="font-cairo text-[13px] font-bold text-amber-900">
+              {tr("حذف عناصر الكتالوج غير مدعوم حالياً.", "Catalog item deletion is currently unsupported.")}
+            </p>
+            <p className="mt-1 font-cairo text-[12px] font-semibold text-amber-800">
+              {tr(
+                "تم تعطيل زر الحذف حتى يتم توفير عقد API صحيح وآمن لهذه العملية.",
+                "Delete actions stay disabled until a safe, verified API contract exists for them.",
+              )}
+            </p>
+          </div>
+        )}
+
         {isError && (
           <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-start">
             <p className="font-cairo text-[13px] font-bold text-red-800">
@@ -247,6 +283,7 @@ export default function AdminMedicalOrdersPage() {
             onEdit={openEdit}
             onDelete={openDeleteConfirm}
             isBusy={deleteMut.isPending}
+            deleteUnsupported={!deleteSupported}
           />
         )}
 
@@ -334,7 +371,7 @@ export default function AdminMedicalOrdersPage() {
         />
 
         <UpsertMedicalOrderItemDialog
-          open={dialogOpen}
+          open={dialogOpen && medicalOrderCatalogKindSupported(kind)}
           onOpenChange={setDialogOpen}
           kind={kind}
           editTarget={editTarget}

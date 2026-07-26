@@ -17,6 +17,10 @@ export const MEDICAL_ORDER_TAB_META: Array<{
   { kind: 'referral', label: 'التحويلات' },
 ];
 
+export const SUPPORTED_MEDICAL_ORDER_TAB_META = MEDICAL_ORDER_TAB_META.filter(
+  ({ kind }) => kind !== 'referral',
+);
+
 const HEADER_ICONS: Record<MedicalOrderCatalogKind, LucideIcon> = {
   lab: FlaskConical,
   imaging: ScanLine,
@@ -28,4 +32,12 @@ export function medicalOrderCatalogHeaderIcon(
   kind: MedicalOrderCatalogKind,
 ): LucideIcon {
   return HEADER_ICONS[kind];
+}
+
+export function medicalOrderCatalogDeleteSupported() {
+  return false;
+}
+
+export function medicalOrderCatalogKindSupported(kind: MedicalOrderCatalogKind) {
+  return kind !== 'referral';
 }

@@ -1,5 +1,5 @@
 import type { MedicalOrderCatalogKind } from '@/lib/admin/types';
-import { MEDICAL_ORDER_TAB_META } from './constants';
+import { SUPPORTED_MEDICAL_ORDER_TAB_META } from './constants';
 
 type Props = {
   active: MedicalOrderCatalogKind;
@@ -16,7 +16,7 @@ export default function MedicalOrderCategoryTabs({
       role='tablist'
       aria-label='فئات كتالوج الطلبات الطبية'
     >
-      {MEDICAL_ORDER_TAB_META.map(({ kind, label }) => {
+      {SUPPORTED_MEDICAL_ORDER_TAB_META.map(({ kind, label }) => {
         const isActive = kind === active;
         return (
           <button
