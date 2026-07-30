@@ -1,4 +1,4 @@
-import { get, patch } from "@/lib/api";
+import { get, patch, post } from "@/lib/api";
 import type { ApiSuccessEnvelope } from "@/lib/admin/types";
 
 /**
@@ -52,6 +52,18 @@ export type NotificationsListResponse = ApiSuccessEnvelope & {
 export type NotificationsReadAllResponse = ApiSuccessEnvelope & {
   message?: string;
   updated?: number;
+};
+
+export type BroadcastNotificationInput = {
+  group: string;
+  type: string;
+  title: string;
+  body: string;
+  data?: string;
+};
+
+export type BroadcastNotificationResponse = ApiSuccessEnvelope & {
+  notification?: NotificationItem;
 };
 
 type NotificationsEnvelope = {
@@ -151,4 +163,10 @@ export const notificationsApi = {
       {},
       { locale: "ar" },
     ),
+
+  /** POST /notifications/broadcast — API-3 index */
+  broadcast: (input: BroadcastNotificationInput) =>
+    post<BroadcastNotificationResponse>("/api/notifications/broadcast", input, {
+      locale: "ar",
+    }),
 };

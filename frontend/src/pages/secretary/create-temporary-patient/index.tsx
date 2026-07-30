@@ -3,6 +3,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import CreateTemporaryPatientDialog from "@/components/doctor/patients/create-temporary-patient-dialog";
 import { useCreateTemporaryDoctorPatient } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useI18n } from "@/i18n/provider";
+import { getCreateTemporaryPatientErrorMessage } from "@/lib/doctor/writeFlowErrors";
 
 export default function SecretaryCreateTemporaryPatientPage() {
   const { locale, dir } = useI18n();
@@ -26,8 +27,8 @@ export default function SecretaryCreateTemporaryPatientPage() {
         variant: "success",
       });
       navigate("/secretary/patients");
-    } catch {
-      toast(tr("تعذر إنشاء المريض المؤقت. تحقق من البيانات وحاول مجدداً.", "Could not create temporary patient. Verify data and try again."), {
+    } catch (error) {
+      toast(getCreateTemporaryPatientErrorMessage(error, locale), {
         title: tr("فشل الحفظ", "Save failed"),
         variant: "error",
       });

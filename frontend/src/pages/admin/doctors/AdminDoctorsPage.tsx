@@ -1,7 +1,12 @@
-"use client";
-
 import { Helmet } from "react-helmet-async";
-import { Ban, CheckCircle2, Clock, Stethoscope, UserX } from "lucide-react";
+import {
+  Ban,
+  CheckCircle2,
+  Clock,
+  RefreshCw,
+  Stethoscope,
+  UserX,
+} from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import AdminSearchFiltersBar from "@/components/admin/AdminSearchFiltersBar";
 import DoctorListCard from "@/components/admin/doctors/DoctorListCard";
@@ -14,6 +19,7 @@ import { phoneComparisonKey } from "@/lib/phone/formatPhoneForDisplay";
 import { isAdminDoctorOffboarded } from "@/lib/admin/doctors/isAdminDoctorOffboarded";
 import { DoctorCardSkeleton } from "@/components/admin/skeletons/DoctorCardSkeleton";
 import { useI18n } from "@/i18n/provider";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 
 const TEAL = "#108B8B";
 
@@ -54,7 +60,15 @@ export default function AdminDoctorsPage() {
     );
   }, [specializationParam]);
 
-  const { doctors, total, results, isAwaitingData, error } = useAdminDoctors({
+  const {
+    doctors,
+    total,
+    results,
+    isAwaitingData,
+    isRefetching,
+    error,
+    refetch,
+  } = useAdminDoctors({
     search: filters.search || undefined,
     specialization: filters.specialization || undefined,
     status: filters.status || undefined,
@@ -130,6 +144,16 @@ export default function AdminDoctorsPage() {
       },
     ];
   }, [doctors, total, locale]);
+
+  const hasActiveFilters = Boolean(
+    filters.search ||
+      filters.specialization ||
+      filters.status ||
+      filters.city ||
+      filters.country ||
+      filters.from ||
+      filters.to,
+  );
 
   return (
     <>
@@ -248,12 +272,28 @@ export default function AdminDoctorsPage() {
                 aria-hidden
               />
               <div className="truncate font-cairo text-sm font-black text-[#1F2937] sm:text-[16px]">
-                {tr("قائمة الأطباء", "Doctors list")} ({results})
+                {tr("قائمة الأطباء", "Doctors list")} ({isAwaitingData ? "—" : results})
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isRefetching}
+              className="inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+              {isRefetching
+                ? tr("جارٍ التحديث...", "Refreshing...")
+                : tr("تحديث", "Refresh")}
+            </button>
           </div>
 
           <div className="space-y-3 p-3 sm:space-y-4 sm:p-5">
+            {isRefetching && !isAwaitingData ? (
+              <div className="rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-4 py-3 font-cairo text-[12px] font-bold text-[#047857]">
+                {tr("جارٍ تحديث قائمة الأطباء...", "Refreshing doctors list...")}
+              </div>
+            ) : null}
             {isAwaitingData ? (
               <>
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -261,15 +301,30 @@ export default function AdminDoctorsPage() {
                 ))}
               </>
             ) : error ? (
-              <div className="rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-                {tr("فشل تحميل قائمة الأطباء", "Failed to load doctors list")}
+              <div className="rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center">
+                <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
+                  {userFacingErrorMessage(
+                    error,
+                    tr("فشل تحميل قائمة الأطباء", "Failed to load doctors list"),
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void refetch()}
+                  className="mt-3 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  {tr("إعادة المحاولة", "Retry")}
+                </button>
               </div>
             ) : doctors.length === 0 ? (
               <div className="rounded-[10px] border border-[#E8ECEF] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                {tr(
-                  "لا يوجد أطباء مطابقون لخيارات البحث.",
-                  "No doctors match the current filters.",
-                )}
+                {hasActiveFilters
+                  ? tr(
+                      "لا يوجد أطباء مطابقون لخيارات البحث الحالية.",
+                      "No doctors match the current filters.",
+                    )
+                  : tr("لا يوجد أطباء حالياً.", "No doctors yet.")}
               </div>
             ) : (
               doctors.map((d) => {

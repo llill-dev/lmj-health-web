@@ -8,11 +8,11 @@ import {
   peekPasswordResetToken,
 } from '@/lib/auth/passwordResetNavState';
 import { useAuthStore } from '@/store/authStore';
-import { ApiError } from '@/lib/api';
 import { useI18n } from '@/i18n/provider';
+import { getResetPasswordErrorMessage } from '@/lib/auth/authFlowErrors';
 
 export default function ResetPasswordPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const tokenState = peekPasswordResetToken();
@@ -41,9 +41,8 @@ export default function ResetPasswordPage() {
             navigate('/reset-password/success', { replace: true });
           } catch (error) {
             const message =
-              error instanceof ApiError
-                ? error.message
-                : t('auth.resetPassword.error.fallback');
+              getResetPasswordErrorMessage(error, locale) ||
+              t('auth.resetPassword.error.fallback');
             toast(message, {
               title: t('auth.resetPassword.error.title'),
               variant: 'error',

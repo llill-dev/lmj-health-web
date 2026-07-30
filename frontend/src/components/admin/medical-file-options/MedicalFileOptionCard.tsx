@@ -19,7 +19,7 @@ type MedicalFileOptionCardProps = {
   title: string;
   items: MedicalFileOptionItem[];
   icon: LucideIcon;
-  addLabel: string;
+  addLabel?: string;
   tone: MedicalFileOptionCardTone;
   variant?: 'rows' | 'chips';
   onRemove?: (id: string) => void;
@@ -102,15 +102,16 @@ export function MedicalFileOptionCard({
           </div>
         )}
 
-        <button
-          type='button'
-          onClick={onAdd}
-          disabled={!onAdd}
-          className={`mt-4 inline-flex h-[36px] w-full items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[12px] font-extrabold ${tone.addText} disabled:opacity-50`}
-        >
-          <Plus className='h-4 w-4' />
-          {addLabel}
-        </button>
+        {onAdd ? (
+          <button
+            type='button'
+            onClick={onAdd}
+            className={`mt-4 inline-flex h-[36px] w-full items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] font-cairo text-[12px] font-extrabold ${tone.addText}`}
+          >
+            <Plus className='h-4 w-4' />
+            {addLabel ?? 'إضافة'}
+          </button>
+        ) : null}
       </div>
     </div>
   );

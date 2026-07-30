@@ -27,24 +27,20 @@ import { resolveLookupText } from '@/lib/admin/lookups/lookupUtils';
 import type { AdminLookupCategory, AdminLookupRecord } from '@/lib/admin/types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
-type CategoryUiKey =
-  | 'الأمراض المزمنة'
-  | 'أنواع الحساسية'
-  | 'فصائل الدم';
+type AddCategoryUiKey = 'الأمراض المزمنة' | 'أنواع الحساسية';
 
-const CATEGORY_UI_TO_API: Record<CategoryUiKey, AdminLookupCategory> = {
+const ADD_CATEGORY_UI_TO_API: Record<AddCategoryUiKey, AdminLookupCategory> = {
   'الأمراض المزمنة': 'MEDICAL_CONDITION',
   'أنواع الحساسية': 'ALLERGY',
-  'فصائل الدم': 'BLOOD_TYPE',
 };
 
-const CATEGORY_API_TO_UI: Record<AdminLookupCategoryDoc, CategoryUiKey> = {
+const ADD_CATEGORY_API_TO_UI: Record<
+  'MEDICAL_CONDITION' | 'ALLERGY',
+  AddCategoryUiKey
+> = {
   MEDICAL_CONDITION: 'الأمراض المزمنة',
   ALLERGY: 'أنواع الحساسية',
-  BLOOD_TYPE: 'فصائل الدم',
 };
-
-type AdminLookupCategoryDoc = 'MEDICAL_CONDITION' | 'ALLERGY' | 'BLOOD_TYPE';
 
 type LookupCardItem = MedicalFileOptionItem & {
   category: AdminLookupCategory;
@@ -106,7 +102,7 @@ export default function AdminMedicalFileOptionsPage() {
   );
 
   const [selectedCategory, setSelectedCategory] =
-    useState<CategoryUiKey>('الأمراض المزمنة');
+    useState<AddCategoryUiKey>('الأمراض المزمنة');
   const [newOption, setNewOption] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<LookupCardItem | null>(null);
   const [editTarget, setEditTarget] = useState<LookupCardItem | null>(null);
@@ -121,6 +117,8 @@ export default function AdminMedicalFileOptionsPage() {
     category: AdminLookupCategory,
     label: string,
   ) {
+    if (category === 'BLOOD_TYPE') return;
+
     const trimmed = label.trim();
     if (!trimmed) {
       toast('أدخل اسم الخيار أولًا.', { variant: 'error' });
@@ -146,7 +144,7 @@ export default function AdminMedicalFileOptionsPage() {
   }
 
   async function handleBottomAdd() {
-    const category = CATEGORY_UI_TO_API[selectedCategory];
+    const category = ADD_CATEGORY_UI_TO_API[selectedCategory];
     await createLookupOption(category, newOption);
   }
 
@@ -196,8 +194,9 @@ export default function AdminMedicalFileOptionsPage() {
   }
 
   function openQuickAdd(category: AdminLookupCategory) {
+    if (category !== 'MEDICAL_CONDITION' && category !== 'ALLERGY') return;
     setQuickAddCategory(category);
-    setSelectedCategory(CATEGORY_API_TO_UI[category as AdminLookupCategoryDoc]);
+    setSelectedCategory(ADD_CATEGORY_API_TO_UI[category]);
     setNewOption('');
   }
 
@@ -323,9 +322,7 @@ export default function AdminMedicalFileOptionsPage() {
               title='فصائل الدم'
               items={bloodTypes}
               icon={Droplets}
-              addLabel='إضافة فصيلة'
               variant='chips'
-              onAdd={() => openQuickAdd('BLOOD_TYPE')}
               tone={{
                 border: 'border-[#FCA5A5]',
                 headerBg: 'bg-[#FFF1F2]',
@@ -380,11 +377,10 @@ export default function AdminMedicalFileOptionsPage() {
                 </div>
                 <StyledSelect
                   value={selectedCategory}
-                  onChange={(v) => setSelectedCategory(v as CategoryUiKey)}
+                  onChange={(v) => setSelectedCategory(v as AddCategoryUiKey)}
                   options={[
                     { value: 'الأمراض المزمنة', label: 'الأمراض المزمنة' },
                     { value: 'أنواع الحساسية', label: 'أنواع الحساسية' },
-                    { value: 'فصائل الدم', label: 'فصائل الدم' },
                   ]}
                   listboxAriaLabel='فئة الخيار'
                 />
@@ -394,8 +390,10 @@ export default function AdminMedicalFileOptionsPage() {
             {quickAddCategory ? (
               <p className='mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]'>
                 إضافة سريعة لفئة{' '}
-                {CATEGORY_API_TO_UI[quickAddCategory as AdminLookupCategoryDoc]} —
-                اكتب الاسم واضغط إضافة.
+                {quickAddCategory === 'MEDICAL_CONDITION'
+                  ? 'الأمراض المزمنة'
+                  : 'أنواع الحساسية'}{' '}
+                — اكتب الاسم واضغط إضافة.
               </p>
             ) : null}
           </div>

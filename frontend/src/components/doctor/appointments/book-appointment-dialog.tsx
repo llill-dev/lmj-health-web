@@ -64,12 +64,14 @@ export default function BookAppointmentDialog({
   patients,
   onSubmit,
   doctorId,
+  submitDisabledReason,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patients: { id: string; name: string }[];
   onSubmit: (values: BookAppointmentValues) => Promise<void>;
   doctorId?: string;
+  submitDisabledReason?: string | null;
 }) {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
@@ -285,6 +287,24 @@ export default function BookAppointmentDialog({
                             </div>
                             <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#B42318]">
                               {submitError}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : null}
+
+                      {submitDisabledReason ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-start gap-3 rounded-[18px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-4 text-right"
+                        >
+                          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#B54708]" />
+                          <div>
+                            <div className="font-cairo text-[13px] font-extrabold text-[#93370D]">
+                              {tr("الحجز غير جاهز بعد", "Booking is not ready yet")}
+                            </div>
+                            <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#B54708]">
+                              {submitDisabledReason}
                             </div>
                           </div>
                         </motion.div>
@@ -658,10 +678,12 @@ export default function BookAppointmentDialog({
 
                       <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || Boolean(submitDisabledReason)}
                         className="h-[50px] w-full rounded-[16px] bg-[linear-gradient(135deg,#0f8f8b_0%,#14b8a6_100%)] font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.28)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isSubmitting
+                        {submitDisabledReason
+                          ? tr("أكمل المتطلبات أولاً", "Complete prerequisites first")
+                          : isSubmitting
                           ? tr("جارٍ إنشاء الموعد...", "Creating appointment...")
                           : tr("تأكيد الحجز", "Confirm booking")}
                       </button>

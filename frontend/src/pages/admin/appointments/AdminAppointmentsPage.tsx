@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   Search,
+  RefreshCw,
   User,
   Eye,
   AlertCircle,
@@ -22,6 +23,7 @@ import {
   type UiAppointmentCard,
 } from "@/components/admin/appointments/appointmentListUtils";
 import { useAdminAppointments } from "@/hooks/admin/appointments/useAdminAppointments";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type { AppointmentStatus } from "@/lib/admin/types";
 import { useI18n } from "@/i18n/provider";
 
@@ -48,7 +50,7 @@ export default function AdminAppointmentsPage() {
     search: "",
   });
 
-  const { appointments, results, total, isAwaitingData, error } =
+  const { appointments, results, total, isAwaitingData, isRefetching, error, refetch } =
     useAdminAppointments({
       page: filters.page,
       limit: filters.limit,
@@ -132,6 +134,8 @@ export default function AdminAppointmentsPage() {
       );
     });
   }, [appointments, filters.search]);
+  const hasActiveFilters =
+    filters.status !== "" || filters.date !== "" || filters.search.trim() !== "";
 
   const uiAppointments = useMemo(() => {
     return filteredAppointments.map<UiAppointmentCard>((a) => {
@@ -171,7 +175,7 @@ export default function AdminAppointmentsPage() {
   const stats = [
     {
       title: tr("ملغية", "Cancelled"),
-      value: String(statusCounts.cancelled),
+      value: isAwaitingData ? "—" : String(statusCounts.cancelled),
       icon: Ban,
       tone: {
         border: "border-[#FECACA]",
@@ -183,7 +187,7 @@ export default function AdminAppointmentsPage() {
     },
     {
       title: tr("عدم حضور", "No-show"),
-      value: String(statusCounts["no-show"]),
+      value: isAwaitingData ? "—" : String(statusCounts["no-show"]),
       icon: AlertCircle,
       tone: {
         border: "border-[#E5E7EB]",
@@ -195,7 +199,7 @@ export default function AdminAppointmentsPage() {
     },
     {
       title: tr("مكتملة", "Completed"),
-      value: String(statusCounts.completed),
+      value: isAwaitingData ? "—" : String(statusCounts.completed),
       icon: CheckCircle2,
       tone: {
         border: "border-[#BBF7D0]",
@@ -207,7 +211,10 @@ export default function AdminAppointmentsPage() {
     },
     {
       title: tr("مجدولة", "Scheduled"),
-      value: String(statusCounts.scheduled + statusCounts.rescheduled),
+      value:
+        isAwaitingData
+          ? "—"
+          : String(statusCounts.scheduled + statusCounts.rescheduled),
       icon: Clock,
       tone: {
         border: "border-[#99F6E4]",
@@ -258,6 +265,7 @@ export default function AdminAppointmentsPage() {
                 className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
                 value={filters.search}
                 onChange={handleSearchChange}
+                disabled={isAwaitingData}
               />
               <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
                 <Search className="h-5 w-5" />
@@ -271,6 +279,7 @@ export default function AdminAppointmentsPage() {
                   tone="muted"
                   value={filters.status}
                   onChange={handleStatusChange}
+                  disabled={isAwaitingData}
                   options={[
                     { value: "", label: tr("كل الحالات", "All statuses") },
                     { value: "scheduled", label: tr("مجدولة", "Scheduled") },
@@ -290,7 +299,8 @@ export default function AdminAppointmentsPage() {
                 type="date"
                 value={filters.date}
                 onChange={handleDateChange}
-                className="h-[42px] w-[170px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-start font-cairo text-[12px] font-bold text-[#111827]"
+                disabled={isAwaitingData}
+                className="h-[42px] w-[170px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-start font-cairo text-[12px] font-bold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
 
@@ -298,13 +308,20 @@ export default function AdminAppointmentsPage() {
               <button
                 type="button"
                 onClick={() => setConfirmResetOpen(true)}
-                className="inline-flex h-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
+                disabled={isAwaitingData}
+                className="inline-flex h-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {tr("إعادة تعيين", "Reset")}
               </button>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                {results} {tr("نتيجة", "results")}
+                {isAwaitingData ? "—" : results} {tr("نتيجة", "results")}
               </div>
+              {isRefetching ? (
+                <div className="inline-flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
+                  {tr("يتم تحديث النتائج", "Refreshing results")}
+                </div>
+              ) : null}
             </div>
           </div>
         </section>
@@ -318,11 +335,34 @@ export default function AdminAppointmentsPage() {
             </>
           ) : error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              {tr("تعذّر تحميل المواعيد.", "Failed to load appointments.")}
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-start">
+                  {userFacingErrorMessage(
+                    error,
+                    tr("تعذّر تحميل المواعيد.", "Failed to load appointments."),
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void refetch()}
+                  disabled={isRefetching}
+                  className="inline-flex h-[32px] shrink-0 items-center justify-center rounded-[10px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {tr("إعادة المحاولة", "Retry")}
+                </button>
+              </div>
             </div>
           ) : uiAppointments.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              {tr("لا توجد مواعيد مطابقة.", "No matching appointments.")}
+              {hasActiveFilters
+                ? tr(
+                    "لا توجد مواعيد مطابقة للبحث أو الفلاتر الحالية.",
+                    "No appointments match the current search or filters.",
+                  )
+                : tr(
+                    "لا توجد مواعيد متاحة حالياً.",
+                    "No appointments are available right now.",
+                  )}
             </div>
           ) : (
             uiAppointments.map((a) => (
@@ -414,6 +454,7 @@ export default function AdminAppointmentsPage() {
                 tone="emphasis"
                 value={String(filters.limit)}
                 onChange={(v) => handleLimitChange(Number(v))}
+                disabled={isAwaitingData}
                 options={[10, 20, 50, 100].map((v) => ({
                   value: String(v),
                   label: String(v),

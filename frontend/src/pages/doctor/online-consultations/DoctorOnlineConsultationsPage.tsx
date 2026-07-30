@@ -30,6 +30,7 @@ import {
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { readAuthUser } from '@/lib/cookies';
+import { getConsultationMutationErrorMessage } from '@/lib/doctor/writeFlowErrors';
 import ConsultationAttachmentList, {
   type ConsultationAttachmentItem,
 } from '@/components/doctor/consultations/consultation-attachment-list';
@@ -331,7 +332,7 @@ export default function DoctorOnlineConsultationsPage() {
       });
       setCloseOpen(false);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getConsultationMutationErrorMessage(error, 'close'), {
         title: 'تعذّر إغلاق الاستشارة',
         variant: 'error',
       });
@@ -352,7 +353,7 @@ export default function DoctorOnlineConsultationsPage() {
       });
       setDismissOpen(false);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getConsultationMutationErrorMessage(error, 'dismiss'), {
         title: 'تعذّر رفض الاستشارة',
         variant: 'error',
       });
@@ -375,7 +376,7 @@ export default function DoctorOnlineConsultationsPage() {
           setPendingAttachments([]);
         },
         onError: (error) => {
-          toast(getUserFacingRequestErrorMessage(error), {
+          toast(getConsultationMutationErrorMessage(error, 'send-message'), {
             title: 'تعذّر إرسال الرد',
             variant: 'error',
           });

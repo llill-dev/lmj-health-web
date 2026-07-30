@@ -583,7 +583,7 @@ export type DoctorAppointmentMutationResponse = {
 };
 
 export type DoctorCancelAppointmentBody = {
-  reason: string;
+  reason?: string;
 };
 
 export type DoctorRescheduleAppointmentBody = {
@@ -594,11 +594,11 @@ export type DoctorRescheduleAppointmentBody = {
 };
 
 export type DoctorCompleteAppointmentBody = {
-  notes: string;
+  notes?: string;
 };
 
 export type DoctorNoShowAppointmentBody = {
-  reason: string;
+  reason?: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

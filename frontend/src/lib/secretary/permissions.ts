@@ -1,5 +1,8 @@
 import type { SecretarySidebarItemId } from "@/constant/sidebar-items";
-import type { AssignableSecretaryPermission } from "@/lib/doctor/secretaries/permissionsUi";
+import {
+  ASSIGNABLE_SECRETARY_PERMISSIONS,
+  type AssignableSecretaryPermission,
+} from "@/lib/doctor/secretaries/permissionsUi";
 
 export type SecretaryPermissionKey = AssignableSecretaryPermission;
 
@@ -25,6 +28,14 @@ export function hasSecretaryPermission(
   permission: SecretaryPermissionKey,
 ) {
   return Boolean(permissions?.includes(permission));
+}
+
+export function isSecretaryPermissionKey(
+  permission: string,
+): permission is SecretaryPermissionKey {
+  return (
+    ASSIGNABLE_SECRETARY_PERMISSIONS as readonly string[]
+  ).includes(permission);
 }
 
 export function canAccessSecretaryItem(

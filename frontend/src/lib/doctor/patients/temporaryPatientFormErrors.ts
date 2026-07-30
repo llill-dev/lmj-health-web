@@ -1,4 +1,5 @@
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
+import { getCreateTemporaryPatientErrorMessage } from "@/lib/doctor/writeFlowErrors";
 
 export type TemporaryPatientFormField =
   | "fullName"
@@ -163,7 +164,7 @@ export function resolveCreateTemporaryPatientServerFeedback(
   /** رسالة عامة تحت عنوان النموذج إذا لم يُوزَّع أي خطأ على حقل */
   rootBanner: string | null;
 } {
-  const toastMessage = getUserFacingRequestErrorMessage(error);
+  const toastMessage = getCreateTemporaryPatientErrorMessage(error);
   const fields: TemporaryPatientServerFieldMessages = {};
 
   const mk =

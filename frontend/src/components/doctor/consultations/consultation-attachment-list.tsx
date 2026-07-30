@@ -30,16 +30,24 @@ export default function ConsultationAttachmentList({
 
   if (!attachments.length) return null;
 
-  const handleOpen = async (attachment: ConsultationAttachmentItem) => {
+  const handleAttachmentAction = async (
+    attachment: ConsultationAttachmentItem,
+    mode: 'open' | 'download',
+  ) => {
     const key =
       attachment.fileId ?? attachment.ref ?? attachment.fileName ?? 'attachment';
     if (!doctorId || !patientId) return;
     setLoadingRef(key);
     try {
-      await openConsultationAttachmentDownload(doctorId, patientId, attachment);
+      await openConsultationAttachmentDownload(
+        doctorId,
+        patientId,
+        attachment,
+        mode,
+      );
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر فتح المرفق',
+        title: mode === 'download' ? 'تعذّر تنزيل المرفق' : 'تعذّر فتح المرفق',
         variant: 'error',
       });
     } finally {
@@ -87,7 +95,9 @@ export default function ConsultationAttachmentList({
                   <button
                     type="button"
                     disabled={!doctorId || !patientId || isLoading}
-                    onClick={() => void handleOpen(attachment)}
+                    onClick={() =>
+                      void handleAttachmentAction(attachment, 'open')
+                    }
                     className={cn(
                       'inline-flex h-[30px] items-center gap-1.5 rounded-[6px] border border-[#D1E9FF] bg-white px-3 font-cairo text-[11px] font-extrabold text-primary disabled:opacity-60',
                     )}
@@ -102,7 +112,9 @@ export default function ConsultationAttachmentList({
                   <button
                     type="button"
                     disabled={!doctorId || !patientId || isLoading}
-                    onClick={() => void handleOpen(attachment)}
+                    onClick={() =>
+                      void handleAttachmentAction(attachment, 'download')
+                    }
                     className={cn(
                       'inline-flex h-[30px] items-center gap-1.5 rounded-[6px] border border-[#E2E8F0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#475467] disabled:opacity-60',
                     )}
@@ -140,7 +152,7 @@ export default function ConsultationAttachmentList({
               key={key}
               type="button"
               disabled={!doctorId || !patientId || loadingRef === key}
-              onClick={() => void handleOpen(attachment)}
+              onClick={() => void handleAttachmentAction(attachment, 'open')}
               className="inline-flex h-[28px] max-w-full items-center gap-2 rounded-[6px] border border-[#D1E9FF] bg-[#EFF8FF] px-3 font-cairo text-[11px] font-extrabold text-primary disabled:opacity-60"
             >
               {loadingRef === key ? (

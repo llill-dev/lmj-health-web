@@ -139,6 +139,7 @@ export const adminEndpoints = {
     updateStatus: (id: string) => `/api/service-providers/${id}/status`,
   },
   doctorProfileChangeRequests: {
+    list: "/api/doctors/profile-change-requests",
     review: (requestId: string) =>
       `/api/doctors/profile-change-requests/${requestId}`,
   },

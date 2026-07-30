@@ -4,12 +4,12 @@ import ForgotPasswordRequest from '@/components/auth/password/forgot-password-re
 import { authApi } from '@/lib/auth/client';
 import { persistPasswordResetPending } from '@/lib/auth/passwordResetNavState';
 import { useToast } from '@/components/ui/ToastProvider';
-import { ApiError } from '@/lib/api';
 import { normalizeAuthPhoneIdentifier } from '@/lib/phone/normalizeAuthPhone';
 import { useI18n } from '@/i18n/provider';
+import { getForgotPasswordRequestErrorMessage } from '@/lib/auth/authFlowErrors';
 
 export default function ForgotPasswordPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -50,11 +50,12 @@ export default function ForgotPasswordPage() {
 
             navigate('/reset-password/verify', { replace: true });
           } catch (error) {
-            const message =
-              error instanceof ApiError
-                ? error.message
-                : t('auth.forgotPassword.error.sendFailed');
-            throw new Error(message);
+            throw new Error(
+              getForgotPasswordRequestErrorMessage(
+                error,
+                locale,
+              ) || t('auth.forgotPassword.error.sendFailed'),
+            );
           }
         }}
       />

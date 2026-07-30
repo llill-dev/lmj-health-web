@@ -5,6 +5,7 @@ import { X, UserPlus, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { adminApi } from "@/lib/admin/client";
+import { getAdminReboardErrorMessage } from "@/lib/admin/adminWriteFlowErrors";
 
 interface ReboardDialogProps {
   open: boolean;
@@ -37,10 +38,8 @@ export default function ReboardDialog({
 
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
-      const message =
-        error?.message || "حدث خطأ أثناء تفعيل الحساب. يرجى المحاولة مرة أخرى.";
-      toast(message, {
+    } catch (error) {
+      toast(getAdminReboardErrorMessage(error), {
         title: "فشلت العملية",
         variant: "error",
         durationMs: 4200,

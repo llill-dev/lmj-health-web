@@ -10,12 +10,12 @@ import { DoctorSpecializationReviewBanner } from "@/components/admin/verificatio
 import { useAdminLookups } from "@/hooks/admin/lookups/useAdminLookups";
 import { adminApi } from "@/lib/admin/client";
 import { resolveDoctorSpecialtyLookupCategory } from "@/lib/admin/doctors/doctorSpecialtyLookupCategory";
+import { getVerificationReviewErrorMessage } from "@/lib/admin/verification-requests/verificationReviewErrors";
 import {
   buildDoctorSpecializationLookupOptions,
   findDoctorSpecializationLookupId,
   resolveDoctorSpecializationReviewState,
 } from "@/lib/admin/doctors/doctorSpecializationReview";
-import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { AppCheckbox } from "@/components/ui";
 import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -417,7 +417,13 @@ export default function ReviewVerificationRequestDialog({
                       );
                       await onReviewed?.();
                     } catch (e: unknown) {
-                      setError(userFacingErrorMessage(e, "فشل تنفيذ العملية"));
+                      setError(
+                        getVerificationReviewErrorMessage(
+                          e,
+                          mode === "approve" ? "approve" : "reject",
+                          "ar",
+                        ),
+                      );
                     }
                   })}
                 >

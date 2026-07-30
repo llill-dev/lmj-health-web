@@ -44,6 +44,12 @@ import { readAuthUser } from "@/lib/cookies";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { doctorAppointmentsApi } from "@/lib/doctor/client";
+import {
+  getAppointmentBookingErrorMessage,
+  getAppointmentFileMutationErrorMessage,
+  getAppointmentStatusMutationErrorMessage,
+  getAppointmentWriteErrorMessage,
+} from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import { useNavigate } from "react-router-dom";
 
@@ -305,9 +311,9 @@ export default function DoctorAppointmentsPage() {
           appointmentId,
           fileId,
         );
-        if (response.url) {
-          window.open(response.url, "_blank", "noopener,noreferrer");
-        }
+        const fileUrl = response.url ?? response.downloadUrl;
+        if (!fileUrl) throw new Error("missing download url");
+        window.open(fileUrl, "_blank", "noopener,noreferrer");
       } catch (error) {
         toast(getUserFacingRequestErrorMessage(error), {
           title: "تعذر فتح الملف",
@@ -328,12 +334,12 @@ export default function DoctorAppointmentsPage() {
           doctorAppointmentsApi.getFileDownloadUrl(appointmentId, fileId),
           doctorAppointmentsApi.getFile(appointmentId, fileId),
         ]);
-        if (downloadResponse.url) {
-          triggerBrowserFileDownload(
-            downloadResponse.url,
-            fileResponse.file?.originalName ?? "appointment-file",
-          );
-        }
+        const fileUrl = downloadResponse.url ?? downloadResponse.downloadUrl;
+        if (!fileUrl) throw new Error("missing download url");
+        await triggerBrowserFileDownload(
+          fileUrl,
+          fileResponse.file?.originalName ?? "appointment-file",
+        );
       } catch (error) {
         toast(getUserFacingRequestErrorMessage(error), {
           title: "تعذر تحميل الملف",
@@ -370,7 +376,7 @@ export default function DoctorAppointmentsPage() {
           durationMs: 4200,
         });
       } catch (error) {
-        toast(getUserFacingRequestErrorMessage(error), {
+        toast(getAppointmentFileMutationErrorMessage(error, "unlink"), {
           title: "تعذّر فك ربط الملف",
           variant: "error",
           durationMs: 4800,
@@ -403,7 +409,7 @@ export default function DoctorAppointmentsPage() {
           durationMs: 4200,
         });
       } catch (error) {
-        toast(getUserFacingRequestErrorMessage(error), {
+        toast(getAppointmentFileMutationErrorMessage(error, "upload"), {
           title: "تعذر رفع الملف",
           variant: "error",
         });
@@ -450,6 +456,7 @@ export default function DoctorAppointmentsPage() {
       <input
         id="doctor-appointment-file-upload"
         type="file"
+        accept=".jpg,.jpeg,.png,.pdf,application/pdf,image/jpeg,image/png"
         className="hidden"
         onChange={handleAppointmentFileUpload}
       />
@@ -532,7 +539,7 @@ export default function DoctorAppointmentsPage() {
                 durationMs: 4200,
               });
             } catch (error) {
-              toast(getUserFacingRequestErrorMessage(error), {
+              toast(getAppointmentBookingErrorMessage(error), {
                 title: "فشل حجز الموعد",
                 variant: "error",
                 durationMs: 5200,
@@ -583,6 +590,7 @@ export default function DoctorAppointmentsPage() {
           }}
           targetName={cancelTarget?.patientName ?? ""}
           confirmDisabled={cancelMutation.isPending}
+          confirmLabel="تأكيد إلغاء الموعد"
           successToast={{
             title: "تم إلغاء الموعد",
             message: "تم إلغاء الموعد وحفظ السبب بنجاح.",
@@ -591,19 +599,16 @@ export default function DoctorAppointmentsPage() {
           onConfirm={async (reason) => {
             if (!cancelTarget) return;
             try {
-              await cancelMutation.mutateAsync({
-                id: cancelTarget.id,
-                body: { reason },
-              });
+                await cancelMutation.mutateAsync({
+                  id: cancelTarget.id,
+                  body: { reason: reason || undefined },
+                });
             } catch (error) {
-              toast(
-                error instanceof Error ? error.message : "تعذّر إلغاء الموعد.",
-                {
-                  title: "خطأ",
-                  variant: "error",
-                  durationMs: 4800,
-                },
-              );
+              toast(getAppointmentWriteErrorMessage(error, "cancel"), {
+                title: "خطأ",
+                variant: "error",
+                durationMs: 4800,
+              });
               throw error;
             }
           }}
@@ -617,6 +622,7 @@ export default function DoctorAppointmentsPage() {
           }}
           patientName={completeTarget?.patientName ?? ""}
           confirmDisabled={completeMutation.isPending}
+          maxLength={2000}
           title="إنهاء الموعد"
           fieldLabel="ملاحظات الإنهاء"
           placeholder="اكتب ملاحظات الطبيب التي يجب إرسالها مع إنهاء الموعد..."
@@ -624,24 +630,21 @@ export default function DoctorAppointmentsPage() {
           onConfirm={async (medicalNotes) => {
             if (!completeTarget) return;
             try {
-              await completeMutation.mutateAsync({
-                id: completeTarget.id,
-                body: { notes: medicalNotes },
-              });
+                await completeMutation.mutateAsync({
+                  id: completeTarget.id,
+                  body: { notes: medicalNotes || undefined },
+                });
               toast("تم إنهاء الموعد وتسجيل الملاحظات بنجاح.", {
                 title: "تم الإنهاء",
                 variant: "success",
                 durationMs: 4200,
               });
             } catch (error) {
-              toast(
-                error instanceof Error ? error.message : "تعذّر إنهاء الموعد.",
-                {
-                  title: "خطأ",
-                  variant: "error",
-                  durationMs: 4800,
-                },
-              );
+              toast(getAppointmentStatusMutationErrorMessage(error, "complete"), {
+                title: "خطأ",
+                variant: "error",
+                durationMs: 4800,
+              });
               throw error;
             }
           }}
@@ -655,6 +658,7 @@ export default function DoctorAppointmentsPage() {
           }}
           patientName={noShowTarget?.patientName ?? ""}
           confirmDisabled={noShowMutation.isPending}
+          maxLength={1000}
           title="تسجيل عدم حضور"
           fieldLabel="سبب عدم الحضور"
           placeholder="اكتب سبب تسجيل الموعد كعدم حضور..."
@@ -662,26 +666,21 @@ export default function DoctorAppointmentsPage() {
           onConfirm={async (reason) => {
             if (!noShowTarget) return;
             try {
-              await noShowMutation.mutateAsync({
-                id: noShowTarget.id,
-                body: { reason },
-              });
+                await noShowMutation.mutateAsync({
+                  id: noShowTarget.id,
+                  body: { reason: reason || undefined },
+                });
               toast("تم تسجيل عدم حضور المريض لهذا الموعد.", {
                 title: "تم التسجيل",
                 variant: "success",
                 durationMs: 4200,
               });
             } catch (error) {
-              toast(
-                error instanceof Error
-                  ? error.message
-                  : "تعذّر تسجيل عدم الحضور.",
-                {
-                  title: "خطأ",
-                  variant: "error",
-                  durationMs: 4800,
-                },
-              );
+              toast(getAppointmentStatusMutationErrorMessage(error, "no-show"), {
+                title: "خطأ",
+                variant: "error",
+                durationMs: 4800,
+              });
               throw error;
             }
           }}
@@ -717,16 +716,11 @@ export default function DoctorAppointmentsPage() {
                 durationMs: 4200,
               });
             } catch (error) {
-              toast(
-                error instanceof Error
-                  ? error.message
-                  : "تعذّر إعادة جدولة الموعد.",
-                {
-                  title: "خطأ",
-                  variant: "error",
-                  durationMs: 4800,
-                },
-              );
+              toast(getAppointmentWriteErrorMessage(error, "reschedule"), {
+                title: "خطأ",
+                variant: "error",
+                durationMs: 4800,
+              });
               throw error;
             }
           }}

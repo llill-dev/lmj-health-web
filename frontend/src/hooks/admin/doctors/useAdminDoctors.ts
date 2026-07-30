@@ -21,6 +21,7 @@ export function useAdminDoctors(params: AdminDoctorsListParams) {
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
     isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isRefetching: query.isRefetching,
     error: query.error,
     refetch: query.refetch,
   };

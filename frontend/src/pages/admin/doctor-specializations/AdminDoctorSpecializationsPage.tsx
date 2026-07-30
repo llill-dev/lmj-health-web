@@ -110,6 +110,7 @@ export default function AdminDoctorSpecializationsPage() {
   const inactiveCount = lookups.filter((x) => !x.isActive).length;
 
   const busy = isAwaitingData;
+  const hasActiveFilters = deferredSearch.length > 0 || includeInactive || !langOnly;
 
   function openCreate() {
     setEditTarget(null);
@@ -234,6 +235,13 @@ export default function AdminDoctorSpecializationsPage() {
           </Link>
         </div>
 
+        {retryingLookups && !busy ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" aria-hidden />
+            {tr("جارٍ تحديث الكتالوج...", "Refreshing catalog...")}
+          </div>
+        ) : null}
+
         <div className="mt-6 flex flex-col gap-3 rounded-[14px] border border-[#E8ECEF] bg-white p-4 shadow-[0_14px_34px_rgba(15,23,42,0.06)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <label className="relative flex min-w-[200px] flex-1 items-center">
             <Search
@@ -284,14 +292,27 @@ export default function AdminDoctorSpecializationsPage() {
             <p className="font-cairo text-[13px] font-bold text-[#B42318]">
               {apiErrMsg}
             </p>
+            <button
+              type="button"
+              onClick={() => void retryLookups()}
+              className="mt-4 inline-flex h-[40px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden />
+              {tr("إعادة المحاولة", "Retry")}
+            </button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="mt-8 rounded-[14px] border border-dashed border-[#E5E7EB] bg-[#FAFBFC] px-6 py-16 text-center">
             <p className="font-cairo text-[14px] font-bold text-[#475467]">
-              {tr(
-                "لا توجد عناصر مطابقة للبحث أو الكتالوج فارغ.",
-                "No items match the search, or the catalog is empty.",
-              )}
+              {hasActiveFilters
+                ? tr(
+                    "لا توجد عناصر مطابقة للبحث أو الفلاتر الحالية.",
+                    "No items match the current search or filters.",
+                  )
+                : tr(
+                    "الكتالوج فارغ حالياً.",
+                    "The catalog is currently empty.",
+                  )}
             </p>
             <button
               type="button"

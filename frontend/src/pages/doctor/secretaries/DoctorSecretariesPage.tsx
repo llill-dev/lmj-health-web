@@ -27,6 +27,7 @@ import {
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { getSecretaryId } from "@/lib/doctor/secretaries/formUtils";
 import { isSecretaryActive } from "@/lib/doctor/secretaries/permissionsUi";
+import { getDoctorSecretaryMutationErrorMessage } from "@/lib/doctor/writeFlowErrors";
 import type {
   DoctorSecretaryCreateFormValues,
   DoctorSecretaryEditFormValues,
@@ -130,7 +131,10 @@ export default function DoctorSecretariesPage() {
       });
       setCreateOpen(false);
     } catch (error) {
-      const errorMessage = getUserFacingRequestErrorMessage(error);
+      const errorMessage = getDoctorSecretaryMutationErrorMessage(
+        error,
+        "create",
+      );
       toast(errorMessage, {
         title: "تعذّر إنشاء السكرتير",
         variant: "error",
@@ -162,7 +166,7 @@ export default function DoctorSecretariesPage() {
       });
       setEditTarget(null);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getDoctorSecretaryMutationErrorMessage(error, "update"), {
         title: "تعذّر الحفظ",
         variant: "error",
       });
@@ -180,7 +184,7 @@ export default function DoctorSecretariesPage() {
       });
       setUnassignTarget(null);
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getDoctorSecretaryMutationErrorMessage(error, "unassign"), {
         title: "تعذّر الإلغاء",
         variant: "error",
       });

@@ -14,7 +14,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { useAdminSecretariesList } from "@/hooks/admin/secretaries/useAdminSecretaries";
+import {
+  ADMIN_SECRETARY_BLOCKER_MESSAGE,
+  ADMIN_SECRETARY_BLOCKER_TITLE,
+  ADMIN_SECRETARY_WRITE_SUPPORTED,
+  useAdminSecretariesList,
+} from "@/hooks/admin/secretaries/useAdminSecretaries";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import CreateSecretaryDialog from "@/components/admin/secretaries/dialogs/CreateSecretaryDialog";
 import EditSecretaryDialog from "@/components/admin/secretaries/dialogs/EditSecretaryDialog";
@@ -26,9 +31,11 @@ import StyledSelect from "@/components/ui/styled-select";
 import type { AdminSecretarySummary } from "@/lib/admin/types";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import { useI18n } from "@/i18n/provider";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function AdminSecretariesPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
@@ -74,9 +81,31 @@ export default function AdminSecretariesPage() {
     !isAwaitingData && !isError && data && data.total > 0;
 
   const openEdit = useCallback((s: AdminSecretarySummary) => {
+    if (!ADMIN_SECRETARY_WRITE_SUPPORTED) {
+      toast(tr(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, ADMIN_SECRETARY_BLOCKER_MESSAGE.en), {
+        title: tr(ADMIN_SECRETARY_BLOCKER_TITLE.ar, ADMIN_SECRETARY_BLOCKER_TITLE.en),
+        variant: "error",
+        durationMs: 4200,
+      });
+      return;
+    }
+
     setEditTarget(s);
     setEditOpen(true);
-  }, []);
+  }, [toast, tr]);
+
+  const openCreate = useCallback(() => {
+    if (!ADMIN_SECRETARY_WRITE_SUPPORTED) {
+      toast(tr(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, ADMIN_SECRETARY_BLOCKER_MESSAGE.en), {
+        title: tr(ADMIN_SECRETARY_BLOCKER_TITLE.ar, ADMIN_SECRETARY_BLOCKER_TITLE.en),
+        variant: "error",
+        durationMs: 4200,
+      });
+      return;
+    }
+
+    setCreateOpen(true);
+  }, [toast, tr]);
 
   const handleSearchChange = (val: string) => {
     setSearchInput(val);
@@ -95,12 +124,12 @@ export default function AdminSecretariesPage() {
           surface="mint"
           title={tr("إدارة السكرتارية", "Secretaries management")}
           subtitle={tr(
-            "مراقبة وإدارة حسابات السكرتيرين المرتبطين بالأطباء. إيقاف الحساب غير متاح حالياً لأن هذا التدفق غير موثق في swagger_api.md",
-            "Monitor secretary accounts linked to doctors. Offboarding is currently unavailable because that flow is not documented in swagger_api.md",
+            "مراقبة حسابات السكرتيرين المرتبطين بالأطباء. تدعم لوحة الإدارة حالياً الاستعراض فقط، بينما يبقى الإنشاء والتعديل محجوبين لغياب Admin endpoints معتمدة لهذه العمليات.",
+            "Monitor secretary accounts linked to doctors. The Admin area currently supports listing only, while create and edit remain blocked because approved Admin endpoints for these actions are missing.",
           )}
           headerIcon={<Users className="h-8 w-8 text-white" />}
           actionLabel={tr("إنشاء سكرتير", "Create secretary")}
-          onActionClick={() => setCreateOpen(true)}
+          onActionClick={openCreate}
           kpis={[
             {
               key: "total",
@@ -168,6 +197,15 @@ export default function AdminSecretariesPage() {
               )}
             </p>
           ) : null}
+        </div>
+
+        <div className="mt-5 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-4">
+          <div className="font-cairo text-[12px] font-extrabold text-[#991B1B]">
+            {tr(
+              ADMIN_SECRETARY_BLOCKER_MESSAGE.ar,
+              ADMIN_SECRETARY_BLOCKER_MESSAGE.en,
+            )}
+          </div>
         </div>
 
         <section className="mt-5 space-y-4">

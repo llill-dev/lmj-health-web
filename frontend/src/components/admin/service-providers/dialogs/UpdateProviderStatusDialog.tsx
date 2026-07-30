@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
+import { getAdminServiceProviderMutationErrorMessage } from "@/lib/admin/adminWriteFlowErrors";
 import { AdminFormField } from "@/components/admin/form-field";
 
 const STATUS_OPTIONS = [
@@ -72,7 +73,7 @@ export default function UpdateProviderStatusDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast("حدث خطأ أثناء تحديث الحالة. يرجى المحاولة مرة أخرى.", {
+      toast(getAdminServiceProviderMutationErrorMessage(error, "status"), {
         title: "فشلت العملية",
         variant: "error",
         durationMs: 4200,

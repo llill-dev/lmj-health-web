@@ -10,35 +10,14 @@ import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard
 import ReviewProfileChangeDialog from "@/components/admin/doctor-profile-change-requests/dialogs/ReviewProfileChangeDialog";
 import StyledSelect from "@/components/ui/styled-select";
 import { useI18n } from "@/i18n/provider";
-
-interface ProfileChangeRequest {
-  _id: string;
-  status?: string;
-  items?: Array<{
-    field: string;
-    oldValue?: any;
-    newValue?: any;
-  }>;
-  doctor?: {
-    _id: string;
-    specialization?: string;
-    medicalLicenseNumber?: string;
-    userId?: {
-      fullName?: string;
-    };
-  };
-  requestedBy?: {
-    _id: string;
-    fullName?: string;
-    email?: string;
-  };
-  createdAt?: string;
-}
+import { useAdminDoctorProfileChangeRequests, type AdminDoctorProfileChangeRequest } from "@/hooks/admin/doctors/useAdminDoctorProfileChangeRequests";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 
 export default function AdminDoctorProfileChangeRequestsPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
+  const dateLocale = locale === "ar" ? "ar-EG" : "en-US";
 
   const statusOptions = useMemo(
     () => [
@@ -55,28 +34,57 @@ export default function AdminDoctorProfileChangeRequestsPage() {
     approved: tr("موافق عليه", "Approved"),
     denied: tr("مرفوض", "Denied"),
   };
+  const fieldLabels: Record<string, string> = {
+    specialization: tr("التخصص", "Specialization"),
+    medicalLicenseNumber: tr("رقم الترخيص الطبي", "Medical license number"),
+    education: tr("التعليم", "Education"),
+    clinicAddress: tr("عنوان العيادة", "Clinic address"),
+    locationCity: tr("المدينة", "City"),
+    locationCountry: tr("الدولة", "Country"),
+    bio: tr("السيرة الذاتية", "Bio"),
+    consultationFee: tr("رسوم الاستشارة", "Consultation fee"),
+    clinicLat: tr("خط عرض العيادة", "Clinic latitude"),
+    clinicLng: tr("خط طول العيادة", "Clinic longitude"),
+  };
 
   const [reviewOpen, setReviewOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] =
-    useState<ProfileChangeRequest | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+    useState<AdminDoctorProfileChangeRequest | null>(null);
   const [statusFilter, setStatusFilter] = useState("");
-  const [requests, setRequests] = useState<ProfileChangeRequest[]>([]);
+  const { requests, isAwaitingData, isError, error, refetch, isRefetching } =
+    useAdminDoctorProfileChangeRequests({
+      status: statusFilter || undefined,
+    });
 
-  const openReview = useCallback((request: ProfileChangeRequest) => {
+  const openReview = useCallback((request: AdminDoctorProfileChangeRequest) => {
     setSelectedRequest(request);
     setReviewOpen(true);
   }, []);
 
   const handleRefresh = () => {
-    setIsLoading(true);
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    void refetch();
   };
 
   const pendingCount = requests.filter((r) => r.status === "pending").length;
+  const activeStatusLabel =
+    statusLabels[statusFilter] ??
+    statusOptions.find((option) => option.value === statusFilter)?.label;
+  const formatDate = (value?: string) => {
+    if (!value) return "—";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "—";
+    return new Intl.DateTimeFormat(dateLocale, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(parsed);
+  };
+
+  const statusToneClassName: Record<AdminDoctorProfileChangeRequest["status"], string> = {
+    pending: "border-amber-200 bg-amber-50 text-amber-700",
+    approved: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    denied: "border-red-200 bg-red-50 text-red-700",
+  };
 
   return (
     <>
@@ -107,13 +115,17 @@ export default function AdminDoctorProfileChangeRequestsPage() {
             {
               key: "pending",
               icon: <FileText className="h-5 w-5 shrink-0" />,
-              value: pendingCount.toLocaleString(numberLocale),
+              value: isAwaitingData
+                ? "—"
+                : pendingCount.toLocaleString(numberLocale),
               label: tr("طلبات قيد الانتظار", "Pending requests"),
             },
             {
               key: "total",
               icon: <User className="h-5 w-5 shrink-0" />,
-              value: requests.length.toLocaleString(numberLocale),
+              value: isAwaitingData
+                ? "—"
+                : requests.length.toLocaleString(numberLocale),
               label: tr("إجمالي الطلبات", "Total requests"),
             },
           ]}
@@ -138,11 +150,11 @@ export default function AdminDoctorProfileChangeRequestsPage() {
               <button
                 type="button"
                 onClick={handleRefresh}
-                disabled={isLoading}
+                disabled={isRefetching}
                 className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
                 />
                 {tr("تحديث", "Refresh")}
               </button>
@@ -151,21 +163,49 @@ export default function AdminDoctorProfileChangeRequestsPage() {
         </section>
 
         <section className="mt-4 space-y-3">
-          {isLoading ? (
+          {isError ? (
+            <div className="rounded-[12px] border border-red-200 bg-red-50 px-6 py-6 text-start">
+              <p className="font-cairo text-[13px] font-bold text-red-800">
+                {tr(
+                  "تعذر تحميل طلبات تغيير البيانات.",
+                  "Failed to load profile change requests.",
+                )}
+              </p>
+              <p className="mt-1 font-cairo text-[12px] font-semibold text-red-700">
+                {userFacingErrorMessage(
+                  error,
+                  tr(
+                    "تحقق من الاتصال أو من واجهة الـ API.",
+                    "Check your connection or the API.",
+                  ),
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className="mt-3 font-cairo text-[12px] font-extrabold text-primary underline"
+              >
+                {tr("إعادة المحاولة", "Retry")}
+              </button>
+            </div>
+          ) : isAwaitingData ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : requests.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {tr(
-                "لا توجد طلبات تغيير بيانات حالياً.",
-                "No profile change requests right now.",
-              )}
+              {statusFilter
+                ? tr(
+                    `لا توجد طلبات بالحالة ${activeStatusLabel ?? "المحددة"}.`,
+                    `No profile change requests with status ${activeStatusLabel ?? "selected"}.`,
+                  )
+                : tr(
+                    "لا توجد طلبات تغيير بيانات حالياً.",
+                    "No profile change requests right now.",
+                  )}
             </div>
           ) : (
-            requests
-              .filter((r) => !statusFilter || r.status === statusFilter)
-              .map((request) => (
+            requests.map((request) => (
                 <div
                   key={request._id}
                   className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
@@ -192,16 +232,49 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                           {tr("طلب بواسطة:", "Requested by:")}{" "}
                           {request.requestedBy?.fullName || "—"}
                         </div>
+                        {request.requestedBy?.email ? (
+                          <div className="font-cairo text-[12px] font-bold text-[#667085]">
+                            {tr("البريد:", "Email:")} {request.requestedBy.email}
+                          </div>
+                        ) : null}
                         <div className="font-cairo text-[12px] font-bold text-[#667085]">
                           {tr("عدد التغييرات:", "Changes:")}{" "}
                           {request.items?.length || 0}
                         </div>
-                        <div className="inline-flex items-center rounded-[6px] border px-2 py-1 font-cairo text-[11px] font-bold">
+                        <div className="font-cairo text-[12px] font-bold text-[#667085]">
+                          {tr("تاريخ الطلب:", "Requested on:")}{" "}
+                          {formatDate(request.createdAt)}
+                        </div>
+                        <div
+                          className={`inline-flex items-center rounded-[999px] border px-2.5 py-1 font-cairo text-[11px] font-bold ${
+                            statusToneClassName[request.status]
+                          }`}
+                        >
                           {statusLabels[request.status || ""] ||
                             request.status ||
                             "—"}
                         </div>
                       </div>
+                      {request.items.length > 0 ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {request.items.slice(0, 4).map((item, index) => (
+                            <span
+                              key={`${request._id}-${item.field}-${index}`}
+                              className="inline-flex items-center rounded-[999px] bg-[#F4F7FB] px-2.5 py-1 font-cairo text-[11px] font-bold text-[#475467]"
+                            >
+                              {fieldLabels[item.field] || item.field}
+                            </span>
+                          ))}
+                          {request.items.length > 4 ? (
+                            <span className="inline-flex items-center rounded-[999px] bg-[#EEF2FF] px-2.5 py-1 font-cairo text-[11px] font-bold text-primary">
+                              {tr(
+                                `+${request.items.length - 4} المزيد`,
+                                `+${request.items.length - 4} more`,
+                              )}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                     {request.status === "pending" && (
                       <button
@@ -225,7 +298,7 @@ export default function AdminDoctorProfileChangeRequestsPage() {
           onOpenChange={setReviewOpen}
           request={selectedRequest}
           onSuccess={() => {
-            // TODO: Refetch requests
+            void refetch();
           }}
         />
       </div>

@@ -21,6 +21,18 @@ export function complaintUserFacingError(
   fallback = 'تعذّر إكمال العملية الخاصة بالشكوى.',
 ): string {
   if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return 'انتهت صلاحية جلسة المشرف. سجّل الدخول من جديد ثم أعد محاولة تنفيذ الإجراء على الشكوى.';
+    }
+    if (error.status === 403) {
+      return 'ليست لديك صلاحية للوصول إلى هذه الشكوى أو تعديل حالتها حالياً.';
+    }
+    if (error.status === 404) {
+      return 'لم يتم العثور على الشكوى المطلوبة، أو لم تعد متاحة لهذا الإجراء.';
+    }
+    if (error.status === 422) {
+      return 'تعذر حفظ تحديث الشكوى لأن الحالة الجديدة أو رد الإدارة لا يطابقان متطلبات الخادم.';
+    }
     const mapped = complaintMessageKeyToArabic(error.messageKey);
     if (mapped) return mapped;
   }

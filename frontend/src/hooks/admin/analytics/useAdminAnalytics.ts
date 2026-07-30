@@ -60,6 +60,14 @@ export function useAdminPlatformStats() {
     { data: allDoctors.data, isError: allDoctors.isError },
     { data: appointments.data, isError: appointments.isError },
   ]);
+  const isRefetching =
+    patients.isRefetching ||
+    allDoctors.isRefetching ||
+    approvedDoctors.isRefetching ||
+    pendingDoctors.isRefetching ||
+    appointments.isRefetching ||
+    secretaries.isRefetching ||
+    pendingVerifications.isRefetching;
   const isError =
     patients.isError || allDoctors.isError || appointments.isError;
 
@@ -74,6 +82,7 @@ export function useAdminPlatformStats() {
       pendingVerifications: pendingVerifications.data?.total ?? 0,
     },
     isAwaitingData,
+    isRefetching,
     isError,
     refetch: () => {
       patients.refetch();

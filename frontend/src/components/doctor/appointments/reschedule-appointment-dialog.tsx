@@ -12,10 +12,16 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useI18n } from '@/i18n/provider';
 
 const rescheduleSchema = z.object({
-  date: z.string().min(1, 'يرجى اختيار التاريخ'),
-  startTime: z.string().min(1, 'يرجى اختيار الوقت'),
+  date: z
+    .string()
+    .min(1, 'يرجى اختيار التاريخ')
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ غير صحيحة'),
+  startTime: z
+    .string()
+    .min(1, 'يرجى اختيار الوقت')
+    .regex(/^\d{2}:\d{2}$/, 'صيغة الوقت غير صحيحة'),
   appointmentTypeId: z.string().optional(),
-  reason: z.string().max(500, 'الحد الأقصى 500 حرف').optional(),
+  reason: z.string().max(300, 'الحد الأقصى 300 حرف').optional(),
 });
 
 type RescheduleFormValues = z.infer<typeof rescheduleSchema>;
@@ -260,6 +266,7 @@ export default function RescheduleAppointmentDialog({
                       <input
                         type='date'
                         {...register('date')}
+                        min={today}
                         className='h-[46px] w-full rounded-[12px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none'
                       />
                       {errors.date ? (

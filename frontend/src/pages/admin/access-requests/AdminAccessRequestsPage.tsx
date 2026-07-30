@@ -23,6 +23,7 @@ import { useAdminAccessRequestDetails } from "@/hooks/admin/access-requests/useA
 import AccessRequestDetailsDialog from "@/components/admin/access-requests/AccessRequestDetailsDialog";
 import AccessRequestCardSkeleton from "@/components/admin/access-requests/AccessRequestCardSkeleton";
 import { useI18n } from "@/i18n/provider";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 
 type RequestStatus = "pending" | "approved" | "rejected" | "all";
 
@@ -62,7 +63,7 @@ export default function AdminAccessRequestsPage() {
     search: "",
   });
 
-  const { requests, total, isAwaitingData, error, refetch } =
+  const { requests, total, isAwaitingData, isRefetching, error, refetch } =
     useAdminAccessRequests({
       page: filters.page,
       limit: filters.limit,
@@ -112,7 +113,7 @@ export default function AdminAccessRequestsPage() {
     () => [
       {
         title: tr("طلبات معلّقة", "Pending requests"),
-        value: String(statusCounts.pending),
+        value: isAwaitingData ? "—" : String(statusCounts.pending),
         icon: Clock,
         tone: {
           border: "border-[#FDE68A]",
@@ -124,7 +125,7 @@ export default function AdminAccessRequestsPage() {
       },
       {
         title: tr("طلبات مقبولة", "Approved requests"),
-        value: String(statusCounts.approved),
+        value: isAwaitingData ? "—" : String(statusCounts.approved),
         icon: CheckCircle,
         tone: {
           border: "border-[#BBF7D0]",
@@ -136,7 +137,7 @@ export default function AdminAccessRequestsPage() {
       },
       {
         title: tr("طلبات مرفوضة", "Rejected requests"),
-        value: String(statusCounts.rejected),
+        value: isAwaitingData ? "—" : String(statusCounts.rejected),
         icon: XCircle,
         tone: {
           border: "border-[#FECACA]",
@@ -148,7 +149,7 @@ export default function AdminAccessRequestsPage() {
       },
       {
         title: tr("إجمالي الطلبات", "Total requests"),
-        value: String(total),
+        value: isAwaitingData ? "—" : String(total),
         icon: UserCheck,
         tone: {
           border: "border-[#CFFAFE]",
@@ -159,7 +160,14 @@ export default function AdminAccessRequestsPage() {
         },
       },
     ],
-    [statusCounts.pending, statusCounts.approved, statusCounts.rejected, total, locale],
+    [
+      statusCounts.pending,
+      statusCounts.approved,
+      statusCounts.rejected,
+      total,
+      isAwaitingData,
+      locale,
+    ],
   );
 
   const handleViewDetails = useCallback((requestId: string) => {
@@ -207,6 +215,7 @@ export default function AdminAccessRequestsPage() {
                   )}
                   className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
                   value={filters.search}
+                  disabled={isAwaitingData}
                   onChange={(e) =>
                     setFilters((prev) => ({
                       ...prev,
@@ -225,6 +234,7 @@ export default function AdminAccessRequestsPage() {
                   size="sm"
                   tone="muted"
                   value={filters.status}
+                  disabled={isAwaitingData}
                   onChange={(v) =>
                     setFilters((prev) => ({
                       ...prev,
@@ -247,13 +257,16 @@ export default function AdminAccessRequestsPage() {
               <button
                 type="button"
                 onClick={() => refetch()}
+                disabled={isRefetching}
                 className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]"
               >
-                <RefreshCw className="h-4 w-4" />
-                {tr("تحديث", "Refresh")}
+                <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+                {isRefetching
+                  ? tr("جارٍ التحديث...", "Refreshing...")
+                  : tr("تحديث", "Refresh")}
               </button>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
-                {total} {tr("نتيجة", "results")}
+                {isAwaitingData ? "—" : total} {tr("نتيجة", "results")}
               </div>
             </div>
           </div>
@@ -268,18 +281,36 @@ export default function AdminAccessRequestsPage() {
               <AccessRequestCardSkeleton />
             </>
           ) : error ? (
-            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              {tr(
-                "تعذّر تحميل طلبات الوصول.",
-                "Failed to load access requests.",
-              )}
+            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+              <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
+                {userFacingErrorMessage(
+                  error,
+                  tr(
+                    "تعذّر تحميل طلبات الوصول.",
+                    "Failed to load access requests.",
+                  ),
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="mt-3 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {tr("إعادة المحاولة", "Retry")}
+              </button>
             </div>
           ) : filteredRequests.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              {tr(
-                "لا توجد طلبات وصول مطابقة.",
-                "No matching access requests.",
-              )}
+              {filters.search || filters.status !== "all"
+                ? tr(
+                    "لا توجد طلبات وصول مطابقة للبحث أو الحالة المحددة.",
+                    "No access requests match the current search or status.",
+                  )
+                : tr(
+                    "لا توجد طلبات وصول حتى الآن.",
+                    "No access requests yet.",
+                  )}
             </div>
           ) : (
             filteredRequests.map((request: any) => (
@@ -398,6 +429,7 @@ export default function AdminAccessRequestsPage() {
                 size="xs"
                 tone="emphasis"
                 value={String(filters.limit)}
+                disabled={isAwaitingData}
                 onChange={(v) =>
                   setFilters((prev) => ({
                     ...prev,

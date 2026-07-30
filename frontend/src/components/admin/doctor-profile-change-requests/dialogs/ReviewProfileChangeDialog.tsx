@@ -1,10 +1,11 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Check, XCircle, FileText, User, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { X, FileText, User, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import {
   AdminFormField,
   adminTextareaClass,
@@ -55,6 +56,8 @@ const FIELD_LABELS: Record<string, string> = {
   medicalLicenseNumber: "رقم الترخيص الطبي",
   education: "التعليم",
   clinicAddress: "عنوان العيادة",
+  locationCity: "المدينة",
+  locationCountry: "الدولة",
   bio: "السيرة الذاتية",
   consultationFee: "رسوم الاستشارة",
   clinicLat: "خط عرض العيادة",
@@ -71,6 +74,11 @@ export default function ReviewProfileChangeDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [decision, setDecision] = useState("");
   const [adminNote, setAdminNote] = useState("");
+
+  useEffect(() => {
+    setDecision("");
+    setAdminNote("");
+  }, [open, request?._id]);
 
   if (!request) return null;
 
@@ -117,11 +125,17 @@ export default function ReviewProfileChangeDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast("حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.", {
+      toast(
+        userFacingErrorMessage(
+          error,
+          "حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.",
+        ),
+        {
         title: "فشلت العملية",
         variant: "error",
         durationMs: 4200,
-      });
+        },
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -144,7 +158,7 @@ export default function ReviewProfileChangeDialog({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) onOpenChange(false);
+            if (!isSubmitting && e.target === e.currentTarget) onOpenChange(false);
           }}
         >
           <motion.div
@@ -172,6 +186,7 @@ export default function ReviewProfileChangeDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#667085] transition hover:bg-[#F9FAFB]"
               >
                 <X className="h-4 w-4" />
@@ -265,6 +280,7 @@ export default function ReviewProfileChangeDialog({
                   placeholder="اختر القرار"
                   size="sm"
                   tone="muted"
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -276,6 +292,7 @@ export default function ReviewProfileChangeDialog({
                 <textarea
                   value={adminNote}
                   onChange={(e) => setAdminNote(e.target.value)}
+                  disabled={isSubmitting}
                   placeholder={
                     decision === "denied"
                       ? "أدخل سبب الرفض..."
@@ -302,7 +319,8 @@ export default function ReviewProfileChangeDialog({
                 <button
                   type="button"
                   onClick={() => onOpenChange(false)}
-                  className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
+                  disabled={isSubmitting}
+                  className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   إلغاء
                 </button>

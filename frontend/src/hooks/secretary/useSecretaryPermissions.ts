@@ -5,6 +5,7 @@ import { get } from "@/lib/api";
 import {
   canAccessSecretaryItem,
   hasSecretaryPermission,
+  isSecretaryPermissionKey,
   type SecretaryPermissionKey,
 } from "@/lib/secretary/permissions";
 import type { SecretarySidebarItemId } from "@/constant/sidebar-items";
@@ -70,7 +71,15 @@ export function useSecretaryPermissions() {
     const nested = query.data?.secretary?.permissions ?? [];
     const merged = [...direct, ...nested];
     const unique = [...new Set(merged)];
-    return unique.length > 0 ? unique : [];
+    return unique.filter(isSecretaryPermissionKey);
+  }, [query.data?.permissions, query.data?.secretary?.permissions]);
+
+  const unsupportedPermissions = useMemo(() => {
+    const direct = query.data?.permissions ?? [];
+    const nested = query.data?.secretary?.permissions ?? [];
+    const merged = [...direct, ...nested];
+    const unique = [...new Set(merged)];
+    return unique.filter((permission) => !isSecretaryPermissionKey(permission));
   }, [query.data?.permissions, query.data?.secretary?.permissions]);
 
   return {
@@ -82,6 +91,7 @@ export function useSecretaryPermissions() {
       query.data?.id ??
       primarySecretaryIdentifier,
     permissions,
+    unsupportedPermissions,
     hasPermission: (permission: SecretaryPermissionKey) =>
       hasSecretaryPermission(permissions, permission),
     canAccessItem: (item: SecretarySidebarItemId) =>

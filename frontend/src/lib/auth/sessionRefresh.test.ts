@@ -56,6 +56,9 @@ describe('sessionRefresh', () => {
         phone: '+963912345678',
         actorIds: { doctorId: 'doctor-1' },
         patientPublicId: null,
+        accountDeletionStatus: 'pending',
+        deletionRequestedAt: '2026-07-20T00:00:00.000Z',
+        deletionRecoverUntil: '2026-08-20T00:00:00.000Z',
       },
     });
 
@@ -84,6 +87,9 @@ describe('sessionRefresh', () => {
       expect.objectContaining({
         userId: 'user-1',
         role: 'doctor',
+        accountDeletionStatus: 'pending',
+        deletionRequestedAt: '2026-07-20T00:00:00.000Z',
+        deletionRecoverUntil: '2026-08-20T00:00:00.000Z',
       }),
     );
     expect(setAuthStateMock).toHaveBeenCalledWith(

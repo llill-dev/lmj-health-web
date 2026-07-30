@@ -174,6 +174,39 @@ describe('api refresh retry', () => {
     expect(runSessionExpiredFlowMock).toHaveBeenCalledWith('ar', 'invalidated');
   });
 
+  it('retries with the refreshed store token after a 401 even when the original request used an explicit token', async () => {
+    const fetchMock = vi.mocked(fetch);
+    refreshAccessTokenMock.mockImplementation(async () => {
+      authState.accessToken = 'new-access';
+      return true;
+    });
+
+    fetchMock
+      .mockResolvedValueOnce(
+        new MockResponse(401, {
+          message: 'unauthorized',
+          messageKey: 'errors.auth.sessionExpired',
+        }) as unknown as Response,
+      )
+      .mockResolvedValueOnce(
+        new MockResponse(200, { ok: true }) as unknown as Response,
+      );
+
+    const { apiRequest } = await import('@/lib/api');
+
+    await expect(
+      apiRequest('/api/secure/example', { token: 'stale-explicit-token' }),
+    ).resolves.toEqual({ ok: true });
+
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(
+      (fetchMock.mock.calls[1]?.[1] as RequestInit).headers,
+    ).toMatchObject({
+      Authorization: 'Bearer [REDACTED:Bearer token]',
+    });
+  });
+
   it('retries a multipart upload once with the refreshed token when the first upload returns 401', async () => {
     refreshAccessTokenMock.mockImplementation(async () => {
       authState.accessToken = 'new-access';

@@ -29,10 +29,19 @@ You write code that reads like it was authored by a disciplined engineering team
 
 ---
 
+# Backend Contract
+
+For any backend-related task:
+
+- Read `docs/openapi.json` before writing code.
+- Never invent endpoints.
+- Never assume request or response payloads.
+- Follow the OpenAPI specification exactly.
+
 # Loading UX Standards
 
 Use loading states that are clear, localized, and proportional to the action.
-
+Avoid unnecessary loading spinners when cached data is available.
 ## Preferred patterns
 
 - Keep last good data visible during background refresh.
@@ -57,7 +66,7 @@ Prefer simple loading copy for small/local views.
 
 # React Query / Data Fetching Standards
 
-React Query may be used when it already exists in the surrounding code or when the project pattern expects it.
+Prefer TanStack Query when the project already uses it.  when it already exists in the surrounding code or when the project pattern expects it.
 
 ## Allowed
 
@@ -130,7 +139,8 @@ If bundle size or initial load is a concern, consider:
   - route guards
   - layouts
 
-- Validate API contracts against the canonical API reference before wiring endpoints.
+- Validate API contracts against `docs/openapi.json` before wiring endpoints.
+- Use https://app.syrhealth.com/api/docs#/ only for additional clarification when needed.
 - Keep domain logic out of JSX when it becomes complex.
 - Prefer typed helper functions for mapping API responses.
 - Keep components readable and focused.
@@ -187,7 +197,7 @@ Before marking work complete:
 5. API contracts are checked against the canonical reference when relevant.
 6. No unrelated refactors or broad formatting changes were introduced.
 7. Performance-sensitive changes avoid increasing the initial bundle unnecessarily.
-8. A short manual validation command is provided if terminal execution is not explicitly allowed.
+8. If validation is requested, provide the appropriate validation command without executing it.
 
 ---
 

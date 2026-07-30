@@ -2,9 +2,18 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Save, TriangleAlert } from "lucide-react";
 import { useState, useEffect } from "react";
+import {
+  ADMIN_SECRETARY_BLOCKER_MESSAGE,
+  ADMIN_SECRETARY_BLOCKER_TITLE,
+  ADMIN_SECRETARY_WRITE_SUPPORTED,
+} from "@/hooks/admin/secretaries/useAdminSecretaries";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { AppCheckbox } from "@/components/ui";
+import {
+  ASSIGNABLE_SECRETARY_PERMISSIONS,
+  SECRETARY_PERMISSION_LABELS,
+} from "@/lib/doctor/secretaries/permissionsUi";
 import {
   AdminFormField,
   adminFieldClass,
@@ -17,14 +26,10 @@ const GENDER_OPTIONS = [
   { value: "Female", label: "أنثى" },
 ];
 
-const PERMISSION_OPTIONS = [
-  { value: "appointments", label: "إدارة المواعيد" },
-  { value: "patients", label: "إدارة المرضى" },
-  { value: "prescriptions", label: "إدارة الوصفات" },
-  { value: "medical_records", label: "السجلات الطبية" },
-  { value: "billing", label: "الفواتير والدفع" },
-  { value: "reports", label: "التقارير" },
-];
+const PERMISSION_OPTIONS = ASSIGNABLE_SECRETARY_PERMISSIONS.map((value) => ({
+  value,
+  label: SECRETARY_PERMISSION_LABELS[value] ?? value,
+}));
 
 interface CreateSecretaryDialogProps {
   open: boolean;
@@ -39,7 +44,7 @@ export default function CreateSecretaryDialog({
 }: CreateSecretaryDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const createSecretarySupported = false;
+  const writeBlocked = !ADMIN_SECRETARY_WRITE_SUPPORTED;
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -107,9 +112,9 @@ export default function CreateSecretaryDialog({
 
     if (!validateForm()) return;
 
-    if (!createSecretarySupported) {
-      toast("إنشاء السكرتير غير متاح حالياً حتى يكتمل ربطه مع الخادم.", {
-        title: "غير مدعوم حالياً",
+    if (!ADMIN_SECRETARY_WRITE_SUPPORTED) {
+      toast(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, {
+        title: ADMIN_SECRETARY_BLOCKER_TITLE.ar,
         variant: "error",
         durationMs: 4200,
       });
@@ -214,8 +219,7 @@ export default function CreateSecretaryDialog({
                     <div className="flex items-start gap-2">
                       <TriangleAlert className="mt-0.5 h-4 w-4 text-[#DC2626]" />
                       <div className="font-cairo text-[11px] font-semibold leading-relaxed text-[#991B1B]">
-                        تم تعطيل إنشاء السكرتير مؤقتاً لأن هذا النموذج غير مربوط
-                        بالخادم بشكل موثوق بعد.
+                        {ADMIN_SECRETARY_BLOCKER_MESSAGE.ar}
                       </div>
                     </div>
                   </div>
@@ -228,6 +232,7 @@ export default function CreateSecretaryDialog({
                     <input
                       type="text"
                       value={formData.fullName}
+                      disabled={writeBlocked}
                       onChange={(e) => {
                         setFormData((prev) => ({
                           ...prev,
@@ -255,6 +260,7 @@ export default function CreateSecretaryDialog({
                     <input
                       type="email"
                       value={formData.email}
+                      disabled={writeBlocked}
                       onChange={(e) => {
                         setFormData((prev) => ({
                           ...prev,
@@ -282,6 +288,7 @@ export default function CreateSecretaryDialog({
                     <input
                       type="password"
                       value={formData.password}
+                      disabled={writeBlocked}
                       onChange={(e) => {
                         setFormData((prev) => ({
                           ...prev,
@@ -309,6 +316,7 @@ export default function CreateSecretaryDialog({
                     <input
                       type="tel"
                       value={formData.phone}
+                      disabled={writeBlocked}
                       onChange={(e) => {
                         setFormData((prev) => ({
                           ...prev,
@@ -331,6 +339,7 @@ export default function CreateSecretaryDialog({
                   <AdminFormField label="الجنس" required>
                     <StyledSelect
                       value={formData.gender}
+                      disabled={writeBlocked}
                       onChange={(value) =>
                         setFormData((prev) => ({ ...prev, gender: value }))
                       }
@@ -356,6 +365,7 @@ export default function CreateSecretaryDialog({
                         >
                           <AppCheckbox
                             size="sm"
+                            disabled={writeBlocked}
                             checked={formData.permissions.includes(
                               option.value,
                             )}
@@ -382,11 +392,15 @@ export default function CreateSecretaryDialog({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !createSecretarySupported}
+                  disabled={isSubmitting || writeBlocked}
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" aria-hidden />
-                  {isSubmitting ? "جارٍ الإنشاء…" : "إنشاء الحساب"}
+                  {isSubmitting
+                    ? "جارٍ الإنشاء…"
+                    : writeBlocked
+                      ? "غير متاح حالياً"
+                      : "إنشاء الحساب"}
                 </button>
               </div>
             </form>

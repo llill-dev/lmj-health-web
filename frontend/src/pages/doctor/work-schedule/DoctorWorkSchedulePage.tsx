@@ -40,6 +40,7 @@ import ScheduleConflictDialog, {
 import SlotsPreview from '@/components/doctor/work-schedule/slots-preview';
 import StyledSelect from '@/components/ui/styled-select';
 import type { ScheduleDayKey, ScheduleTimeSlot } from '@/lib/doctor/types';
+import { getWorkScheduleMutationErrorMessage } from '@/lib/doctor/writeFlowErrors';
 
 const DAY_LABELS: Record<ScheduleDayKey, string> = {
   Sunday: 'الأحد',
@@ -110,8 +111,7 @@ export default function DoctorWorkSchedulePage() {
         durationMs: 4000,
       });
     } catch (err: any) {
-      const errorMessage =
-        err?.message || 'حدث خطأ أثناء إضافة يوم العمل';
+      const errorMessage = getWorkScheduleMutationErrorMessage(err, 'add-day');
       toast(errorMessage, {
         variant: 'error',
         title: 'فشلت العملية',
@@ -155,8 +155,10 @@ export default function DoctorWorkSchedulePage() {
         return;
       }
 
-      const errorMessage =
-        err?.message || 'حدث خطأ أثناء تحديث يوم العمل';
+      const errorMessage = getWorkScheduleMutationErrorMessage(
+        err,
+        'update-day',
+      );
       toast(errorMessage, {
         variant: 'error',
         title: 'فشلت العملية',
@@ -203,8 +205,10 @@ export default function DoctorWorkSchedulePage() {
         return;
       }
 
-      const errorMessage =
-        err?.message || 'حدث خطأ أثناء حذف يوم العمل';
+      const errorMessage = getWorkScheduleMutationErrorMessage(
+        err,
+        'delete-day',
+      );
       toast(errorMessage, {
         variant: 'error',
         title: 'فشلت العملية',
@@ -226,8 +230,10 @@ export default function DoctorWorkSchedulePage() {
         durationMs: 4000,
       });
     } catch (err: any) {
-      const errorMessage =
-        err?.message || 'حدث خطأ أثناء حفظ الإعدادات';
+      const errorMessage = getWorkScheduleMutationErrorMessage(
+        err,
+        'update-settings',
+      );
       toast(errorMessage, {
         variant: 'error',
         title: 'فشلت العملية',
@@ -251,8 +257,10 @@ export default function DoctorWorkSchedulePage() {
         durationMs: 4000,
       });
     } catch (err: any) {
-      const errorMessage =
-        err?.message || 'حدث خطأ أثناء إضافة الاستثناء';
+      const errorMessage = getWorkScheduleMutationErrorMessage(
+        err,
+        'add-exception',
+      );
       toast(errorMessage, {
         variant: 'error',
         title: 'فشلت العملية',
@@ -279,8 +287,10 @@ export default function DoctorWorkSchedulePage() {
       });
       setExceptionToDelete(null);
     } catch (err: any) {
-      const errorMessage =
-        err?.message || 'حدث خطأ أثناء حذف الاستثناء';
+      const errorMessage = getWorkScheduleMutationErrorMessage(
+        err,
+        'delete-exception',
+      );
       toast(errorMessage, {
         variant: 'error',
         title: 'فشلت العملية',

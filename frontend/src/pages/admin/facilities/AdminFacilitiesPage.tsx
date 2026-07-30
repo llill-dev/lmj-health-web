@@ -25,6 +25,7 @@ import ChangeFacilityStatusDialog from "@/components/admin/facilities/dialogs/Ch
 import DeleteFacilityDialog from "@/components/admin/facilities/dialogs/DeleteFacilityDialog";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type {
   FacilitySummary,
   FacilityStatus,
@@ -101,6 +102,9 @@ export default function AdminFacilitiesPage() {
   const {
     data: facilitiesData,
     isLoading,
+    isFetching,
+    isError,
+    error,
     refetch,
   } = useQuery({
     queryKey: ["admin", "facilities", filters],
@@ -218,7 +222,9 @@ export default function AdminFacilitiesPage() {
               {
                 key: "total",
                 icon: <Building2 className="h-5 w-5 shrink-0" />,
-                value: totalFacilities.toLocaleString(numberLocale),
+                value: isLoading
+                  ? "—"
+                  : totalFacilities.toLocaleString(numberLocale),
                 label: tr("إجمالي المنشآت", "Total facilities"),
               },
             ]}
@@ -233,12 +239,20 @@ export default function AdminFacilitiesPage() {
               <div className="mt-1 font-cairo text-[11px] font-bold text-[#98A2B3]">
                 {hasActiveFilters
                   ? tr(
-                      `عرض ${facilities.length.toLocaleString(numberLocale)} من أصل ${totalFacilities.toLocaleString(numberLocale)} منشأة`,
-                      `Showing ${facilities.length.toLocaleString(numberLocale)} of ${totalFacilities.toLocaleString(numberLocale)} facilities`,
+                      isLoading
+                        ? "جارٍ تحميل النتائج..."
+                        : `عرض ${facilities.length.toLocaleString(numberLocale)} من أصل ${totalFacilities.toLocaleString(numberLocale)} منشأة`,
+                      isLoading
+                        ? "Loading results..."
+                        : `Showing ${facilities.length.toLocaleString(numberLocale)} of ${totalFacilities.toLocaleString(numberLocale)} facilities`,
                     )
                   : tr(
-                      `إجمالي النتائج: ${totalFacilities.toLocaleString(numberLocale)}`,
-                      `Total results: ${totalFacilities.toLocaleString(numberLocale)}`,
+                      isLoading
+                        ? "جارٍ تحميل النتائج..."
+                        : `إجمالي النتائج: ${totalFacilities.toLocaleString(numberLocale)}`,
+                      isLoading
+                        ? "Loading results..."
+                        : `Total results: ${totalFacilities.toLocaleString(numberLocale)}`,
                     )}
               </div>
             </div>
@@ -259,9 +273,11 @@ export default function AdminFacilitiesPage() {
                 className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
                 />
-                {tr("تحديث", "Refresh")}
+                {isFetching
+                  ? tr("جارٍ التحديث...", "Refreshing...")
+                  : tr("تحديث", "Refresh")}
               </button>
             </div>
           </div>
@@ -354,9 +370,34 @@ export default function AdminFacilitiesPage() {
         </section>
 
         <section className="mt-4 space-y-3">
+          {isFetching && !isLoading ? (
+            <div className="rounded-[12px] border border-[#D1FAE5] bg-[#ECFDF5] px-4 py-3 font-cairo text-[12px] font-bold text-[#047857]">
+              {tr("جارٍ تحديث قائمة المنشآت...", "Refreshing facilities list...")}
+            </div>
+          ) : null}
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : isError ? (
+            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center">
+              <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
+                {userFacingErrorMessage(
+                  error,
+                  tr(
+                    "تعذّر تحميل قائمة المنشآت الطبية.",
+                    "Failed to load facilities list.",
+                  ),
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                className="mt-3 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {tr("إعادة المحاولة", "Retry")}
+              </button>
             </div>
           ) : facilities.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">

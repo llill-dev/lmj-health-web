@@ -1748,21 +1748,6 @@ export const adminApi = {
         { locale: "ar" },
       ).then(normalizeAdminPatientAccountActionResponse),
     files: {
-      list: (patientId: string, params: AdminPatientFilesListParams = {}) => {
-        const qs = new URLSearchParams();
-        if (params.page) qs.set("page", String(params.page));
-        if (params.limit) qs.set("limit", String(params.limit));
-        if (typeof params.archived === "boolean")
-          qs.set("archived", String(params.archived));
-        if (params.search) qs.set("search", params.search);
-
-        const base = adminEndpoints.patients.files.list(patientId);
-        const endpoint = qs.toString() ? `${base}?${qs.toString()}` : base;
-
-        return get<AdminPatientFilesListResponse>(endpoint, { locale: "ar" }).then(
-          normalizeAdminPatientFilesListResponse,
-        );
-      },
       getDownloadUrl: (patientId: string, fileId: string) =>
         get<AdminPatientFileDownloadUrlResponse>(
           `${adminEndpoints.patients.files.download(patientId, fileId)}?mode=url`,
@@ -2307,6 +2292,21 @@ export const adminApi = {
       }).then(normalizeFacilityMutationResponse),
   },
   doctorProfileChangeRequests: {
+    list: (params?: { status?: string }) => {
+      const search = new URLSearchParams();
+      if (params?.status) search.set("status", params.status);
+      const qs = search.toString();
+      return get<{
+        requests?: unknown[];
+        results?: unknown[];
+        page?: number;
+        limit?: number;
+        total?: number;
+      }>(
+        `${adminEndpoints.doctorProfileChangeRequests.list}${qs ? `?${qs}` : ""}`,
+        { locale: "ar" },
+      );
+    },
     review: (
       requestId: string,
       body: {

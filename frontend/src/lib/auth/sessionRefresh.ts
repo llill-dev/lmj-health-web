@@ -35,6 +35,9 @@ function applyRefreshedTokens(data: RefreshTokenResponse): boolean {
     phone: user.phone,
     actorIds: user.actorIds,
     patientPublicId: user.patientPublicId,
+    accountDeletionStatus: user.accountDeletionStatus,
+    deletionRequestedAt: user.deletionRequestedAt,
+    deletionRecoverUntil: user.deletionRecoverUntil,
   });
 
   useAuthStore.setState({

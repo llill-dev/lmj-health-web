@@ -167,6 +167,7 @@ export default function SecretaryProfilePage() {
   const permissions = secretaryPermissions.permissions.map(
     (permission) => SECRETARY_PERMISSION_LABELS[permission] ?? permission,
   );
+  const unsupportedPermissions = secretaryPermissions.unsupportedPermissions;
 
   return (
     <div dir={dir} lang={locale} className="space-y-5 pb-8 sm:pb-10">
@@ -235,6 +236,16 @@ export default function SecretaryProfilePage() {
             </span>
           )}
         </div>
+        {unsupportedPermissions.length > 0 ? (
+          <div className="border-t border-[#EEF2F6] px-4 py-4 sm:px-6 lg:px-8">
+            <span className="font-cairo text-[13px] font-semibold text-[#B54708]">
+              {tr(
+                "توجد صلاحيات غير مدعومة حالياً في واجهة السكرتير، وتحتاج مراجعة من الإدارة.",
+                "Some assigned permissions are not currently supported in the secretary UI and need admin review.",
+              )}
+            </span>
+          </div>
+        ) : null}
       </SurfaceSection>
 
       <SurfaceSection title={tr("معلومات الحساب", "Account information")}>

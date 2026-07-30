@@ -14,13 +14,18 @@ import {
 import { normalizeTokenPair } from '@/lib/auth/session';
 import { useAuthStore } from '@/store/authStore';
 import { useToast } from '@/components/ui/ToastProvider';
-import { ApiError } from '@/lib/api';
 import { getRoleRoot, type AppRole } from '@/routes/ProtectedRoute';
 import { normalizeAuthPhoneIdentifier } from '@/lib/phone/normalizeAuthPhone';
+import { useI18n } from '@/i18n/provider';
+import {
+  getClaimAccountRequestErrorMessage,
+  getClaimAccountVerifyErrorMessage,
+} from '@/lib/auth/authFlowErrors';
 
 type ClaimStep = 'request' | 'verify';
 
 export default function ClaimAccountPage() {
+  const { locale } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const initialPending = peekClaimAccountPending();
@@ -55,17 +60,21 @@ export default function ClaimAccountPage() {
       setPending(nextPending);
       setStep('verify');
 
-      toast('تم إرسال رمز تفعيل الحساب.', {
-        title: 'تحقّق من بريدك/هاتفك',
-        variant: 'success',
-        durationMs: 3800,
-      });
+      toast(
+        locale === 'ar'
+          ? 'تم إرسال رمز تفعيل الحساب.'
+          : 'The account activation code was sent.',
+        {
+          title:
+            locale === 'ar'
+              ? 'تحقق من بريدك أو هاتفك'
+              : 'Check your email or phone',
+          variant: 'success',
+          durationMs: 3800,
+        },
+      );
     } catch (error) {
-      const message =
-        error instanceof ApiError
-          ? error.message
-          : 'تعذّر إرسال رمز التفعيل. حاول مجدداً.';
-      throw new Error(message);
+      throw new Error(getClaimAccountRequestErrorMessage(error, locale));
     }
   };
 
@@ -79,9 +88,15 @@ export default function ClaimAccountPage() {
         {step === 'request' || !pending ? (
           <ForgotPasswordRequest
             variant='plain'
-            title="تفعيل حسابك"
-            subtitle="حسابك موجود لكنه غير مفعّل بعد. أدخل بياناتك لاستلام رمز التفعيل وتعيين كلمة مرور."
-            submitLabel="إرسال رمز التفعيل"
+            title={locale === 'ar' ? 'تفعيل حسابك' : 'Activate your account'}
+            subtitle={
+              locale === 'ar'
+                ? 'حسابك موجود لكنه غير مفعّل بعد. أدخل بياناتك لاستلام رمز التفعيل وتعيين كلمة مرور.'
+                : 'Your account exists but is not activated yet. Enter your details to receive the activation code and set your password.'
+            }
+            submitLabel={
+              locale === 'ar' ? 'إرسال رمز التفعيل' : 'Send activation code'
+            }
             defaultMethod={
               initialPending?.channel === 'whatsapp' ? 'phone' : 'email'
             }
@@ -104,74 +119,91 @@ export default function ClaimAccountPage() {
                       phone: pending.phone!,
                     });
 
-              await authApi.requestClaimAccount(body);
+              try {
+                await authApi.requestClaimAccount(body);
+              } catch (error) {
+                throw new Error(getClaimAccountRequestErrorMessage(error, locale));
+              }
             }}
             onSubmit={async (values) => {
-              const body =
-                pending.channel === 'email'
-                  ? {
-                      channel: 'email' as const,
-                      email: pending.email!,
-                      otp: values.code,
-                      password: values.password,
-                      clientType: 'web' as const,
-                    }
-                  : {
-                      channel: 'whatsapp' as const,
-                      phone: pending.phone!,
-                      otp: values.code,
-                      password: values.password,
-                      clientType: 'web' as const,
-                    };
+              try {
+                const body =
+                  pending.channel === 'email'
+                    ? {
+                        channel: 'email' as const,
+                        email: pending.email!,
+                        otp: values.code,
+                        password: values.password,
+                        clientType: 'web' as const,
+                      }
+                    : {
+                        channel: 'whatsapp' as const,
+                        phone: pending.phone!,
+                        otp: values.code,
+                        password: values.password,
+                        clientType: 'web' as const,
+                      };
 
-              const raw = (await authApi.verifyClaimAccount(body)) as Record<
-                string,
-                unknown
-              >;
+                const raw = (await authApi.verifyClaimAccount(body)) as Record<
+                  string,
+                  unknown
+                >;
 
-              const pair = normalizeTokenPair(raw);
-              if (!pair || raw.userId == null) {
-                throw new Error('استجابة غير متوقعة من الخادم.');
+                const pair = normalizeTokenPair(raw);
+                if (!pair || raw.userId == null) {
+                  throw new Error(
+                    locale === 'ar'
+                      ? 'استجابة غير متوقعة من الخادم. حاول مرة أخرى.'
+                      : 'Unexpected server response. Please try again.',
+                  );
+                }
+
+                useAuthStore.getState().applySession(pair, {
+                  userId:
+                    typeof raw.userId === 'string'
+                      ? raw.userId
+                      : String(raw.userId),
+                  role: 'patient',
+                  fullName:
+                    typeof raw.fullName === 'string'
+                      ? raw.fullName
+                      : pending.fullName ?? '',
+                  email:
+                    typeof raw.email === 'string'
+                      ? raw.email
+                      : pending.email ?? '',
+                  phone:
+                    typeof raw.phone === 'string'
+                      ? raw.phone
+                      : pending.phone ?? '',
+                  actorIds:
+                    typeof raw.actorIds === 'object' && raw.actorIds !== null
+                      ? (raw.actorIds as Record<string, string | null>)
+                      : {},
+                  patientPublicId:
+                    typeof raw.patientPublicId === 'string'
+                      ? raw.patientPublicId
+                      : null,
+                  accountStatus: 'active',
+                });
+
+                clearClaimAccountPending();
+
+                toast(
+                  locale === 'ar'
+                    ? 'تم تفعيل حسابك بنجاح.'
+                    : 'Your account has been activated successfully.',
+                  {
+                    title: locale === 'ar' ? 'تم التفعيل' : 'Activated',
+                    variant: 'success',
+                    durationMs: 4200,
+                  },
+                );
+
+                navigate(getRoleRoot('patient' as AppRole), { replace: true });
+              } catch (error) {
+                throw new Error(getClaimAccountVerifyErrorMessage(error, locale));
               }
-
-              useAuthStore.getState().applySession(pair, {
-                userId:
-                  typeof raw.userId === 'string'
-                    ? raw.userId
-                    : String(raw.userId),
-                role: 'patient',
-                fullName:
-                  typeof raw.fullName === 'string'
-                    ? raw.fullName
-                    : pending.fullName ?? '',
-                email:
-                  typeof raw.email === 'string'
-                    ? raw.email
-                    : pending.email ?? '',
-                phone:
-                  typeof raw.phone === 'string'
-                    ? raw.phone
-                    : pending.phone ?? '',
-                actorIds:
-                  typeof raw.actorIds === 'object' && raw.actorIds !== null
-                    ? (raw.actorIds as Record<string, string | null>)
-                    : {},
-                patientPublicId:
-                  typeof raw.patientPublicId === 'string'
-                    ? raw.patientPublicId
-                    : null,
-                accountStatus: 'active',
-              });
-
-              clearClaimAccountPending();
-
-              toast('تم تفعيل حسابك بنجاح. مرحباً بك.', {
-                title: 'تم التفعيل',
-                variant: 'success',
-                durationMs: 4200,
-              });
-
-              navigate(getRoleRoot('patient' as AppRole), { replace: true });
             }}
           />
         )}

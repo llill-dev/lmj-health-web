@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { resolveLabel } from "@/lib/admin/types";
 import { adminApi } from "@/lib/admin/client";
+import { getAdminServiceProviderMutationErrorMessage } from "@/lib/admin/adminWriteFlowErrors";
 import {
   AdminFormField,
   adminFieldClass,
@@ -153,7 +154,7 @@ export default function CreateServiceProviderDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast("حدث خطأ أثناء إنشاء مزود الخدمة. يرجى المحاولة مرة أخرى.", {
+      toast(getAdminServiceProviderMutationErrorMessage(error, "create"), {
         title: "فشلت العملية",
         variant: "error",
         durationMs: 4200,

@@ -50,6 +50,10 @@ import {
   getPatientStateInfo,
   getStateMessage,
 } from "@/lib/doctor/patients/patient-states";
+import {
+  getDoctorAccessRequestErrorMessage,
+  getPatientFileMutationErrorMessage,
+} from "@/lib/doctor/writeFlowErrors";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import type { FullProfileData, PatientDetailsTab } from "@/components/doctor/patients/patient-details";
 import {
@@ -454,7 +458,7 @@ export default function DoctorPatientDetailsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getDoctorAccessRequestErrorMessage(error), {
         title: "تعذّر إرسال طلب الوصول",
         variant: "error",
       });
@@ -470,9 +474,9 @@ export default function DoctorPatientDetailsPage() {
         patientId,
         fileId,
       );
-      if (response.url) {
-        window.open(response.url, "_blank", "noopener,noreferrer");
-      }
+      const fileUrl = response.url ?? response.downloadUrl;
+      if (!fileUrl) throw new Error("missing download url");
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: "تعذّر فتح الملف",
@@ -491,12 +495,12 @@ export default function DoctorPatientDetailsPage() {
         doctorApi.patients.getFileDownloadUrl(doctorId, patientId, fileId),
         doctorApi.patients.getFile(patientId, fileId),
       ]);
-      if (downloadResponse.url) {
-        triggerBrowserFileDownload(
-          downloadResponse.url,
-          fileResponse.file?.originalName ?? "patient-file",
-        );
-      }
+      const fileUrl = downloadResponse.url ?? downloadResponse.downloadUrl;
+      if (!fileUrl) throw new Error("missing download url");
+      await triggerBrowserFileDownload(
+        fileUrl,
+        fileResponse.file?.originalName ?? "patient-file",
+      );
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: "تعذّر تحميل الملف",
@@ -517,7 +521,7 @@ export default function DoctorPatientDetailsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileMutationErrorMessage(error, "delete"), {
         title: "تعذّر حذف الملف",
         variant: "error",
       });
@@ -537,7 +541,7 @@ export default function DoctorPatientDetailsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileMutationErrorMessage(error, "upload"), {
         title: "تعذّر رفع الملف",
         variant: "error",
       });

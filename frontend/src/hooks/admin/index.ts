@@ -11,7 +11,6 @@ export * from '@/hooks/admin/lookups/useAdminLookupMutations';
 export * from '@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog';
 export * from '@/hooks/admin/notifications/useAdminNotifications';
 export * from '@/hooks/admin/patients/useAdminPatient';
-export * from '@/hooks/admin/patients/useAdminPatientFiles';
 export * from '@/hooks/admin/patients/useAdminPatients';
 export * from '@/hooks/admin/secretaries/useAdminSecretaries';
 export * from '@/hooks/admin/services/useAdminServices';

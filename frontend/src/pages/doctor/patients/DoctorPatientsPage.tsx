@@ -46,6 +46,11 @@ import {
   determinePatientState,
   type PatientRelationshipState,
 } from "@/lib/doctor/patients/patient-states";
+import {
+  getCreateTemporaryPatientErrorMessage,
+  getDoctorAccessRequestErrorMessage,
+  getPatientFileMutationErrorMessage,
+} from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import { useNavigate } from "react-router-dom";
 
@@ -530,9 +535,9 @@ export default function DoctorPatientsPage() {
         patientId,
         fileId,
       );
-      if (response.url) {
-        window.open(response.url, "_blank", "noopener,noreferrer");
-      }
+      const fileUrl = response.url ?? response.downloadUrl;
+      if (!fileUrl) throw new Error("missing download url");
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: "تعذر فتح الملف",
@@ -551,12 +556,12 @@ export default function DoctorPatientsPage() {
         doctorApi.patients.getFileDownloadUrl(doctorId, patientId, fileId),
         doctorApi.patients.getFile(patientId, fileId),
       ]);
-      if (downloadResponse.url) {
-        triggerBrowserFileDownload(
-          downloadResponse.url,
-          fileResponse.file?.originalName ?? "patient-file",
-        );
-      }
+      const fileUrl = downloadResponse.url ?? downloadResponse.downloadUrl;
+      if (!fileUrl) throw new Error("missing download url");
+      await triggerBrowserFileDownload(
+        fileUrl,
+        fileResponse.file?.originalName ?? "patient-file",
+      );
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: "تعذر تحميل الملف",
@@ -577,7 +582,7 @@ export default function DoctorPatientsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileMutationErrorMessage(error, "delete"), {
         title: "تعذر حذف الملف",
         variant: "error",
       });
@@ -597,7 +602,7 @@ export default function DoctorPatientsPage() {
         variant: "success",
       });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileMutationErrorMessage(error, "upload"), {
         title: "تعذر رفع الملف",
         variant: "error",
       });
@@ -666,11 +671,19 @@ export default function DoctorPatientsPage() {
           onOpenChange={setTempPatientOpen}
           busy={createTempMutation.isPending}
           onSubmit={async (values) => {
-            const response = await createTempMutation.mutateAsync(values);
-            toast(response.message ?? "تم إنشاء وربط المريض المؤقت.", {
-              title: "نجاح",
-              variant: "success",
-            });
+            try {
+              const response = await createTempMutation.mutateAsync(values);
+              toast(response.message ?? "تم إنشاء وربط المريض المؤقت.", {
+                title: "نجاح",
+                variant: "success",
+              });
+            } catch (error) {
+              toast(getCreateTemporaryPatientErrorMessage(error), {
+                title: "تعذّر إنشاء المريض المؤقت",
+                variant: "error",
+              });
+              throw error;
+            }
           }}
         />
         </Suspense>
@@ -1127,15 +1140,10 @@ export default function DoctorPatientsPage() {
                       durationMs: 4000,
                     });
                   } catch (error) {
-                    toast(
-                      error instanceof Error
-                        ? error.message
-                        : "تعذر إنشاء طلب الوصول.",
-                      {
-                        title: "خطأ",
-                        variant: "error",
-                      },
-                    );
+                    toast(getDoctorAccessRequestErrorMessage(error), {
+                      title: "تعذّر إرسال طلب الوصول",
+                      variant: "error",
+                    });
                   }
                 }}
               />

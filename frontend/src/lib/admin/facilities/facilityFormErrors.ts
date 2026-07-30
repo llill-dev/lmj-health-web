@@ -141,6 +141,33 @@ export function resolveAdminFacilityFormFeedback(
   const issues = readValidationIssueArray(error.body.errors);
   const fields = mapValidationIssues(issues);
 
+  if (error.status === 401) {
+    return {
+      fields: {},
+      rootBanner: 'انتهت صلاحية جلسة المشرف. سجّل الدخول من جديد ثم أعد المحاولة.',
+      toastTitle: actionLabel,
+      toastMessage: 'انتهت صلاحية جلسة المشرف. سجّل الدخول من جديد ثم أعد محاولة تنفيذ التعديل على المنشأة.',
+    };
+  }
+
+  if (error.status === 403) {
+    return {
+      fields: {},
+      rootBanner: 'ليست لديك صلاحية إدارة هذه المنشأة أو تعديل حالتها حالياً.',
+      toastTitle: actionLabel,
+      toastMessage: 'هذا الحساب لا يملك صلاحية إنشاء المنشأة أو تعديلها أو حذفها أو تغيير حالتها حالياً.',
+    };
+  }
+
+  if (error.status === 404) {
+    return {
+      fields: {},
+      rootBanner: 'تعذر العثور على المنشأة المطلوبة، أو لم تعد متاحة لهذا الإجراء.',
+      toastTitle: actionLabel,
+      toastMessage: 'تعذر العثور على المنشأة المطلوبة، أو لم تعد متاحة لهذا التعديل أو الحذف أو تغيير الحالة.',
+    };
+  }
+
   if (error.messageKey === 'errors.validationFailed' || error.status === 422) {
     const summary =
       summarizeFieldErrors(fields) ??

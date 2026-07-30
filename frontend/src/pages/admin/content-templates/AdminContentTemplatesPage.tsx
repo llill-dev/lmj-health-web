@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import {
+  AlertCircle,
   LayoutGrid,
   Pencil,
   Plus,
@@ -23,6 +24,7 @@ import {
   useDisableAdminContentTemplate,
 } from "@/hooks/admin/content-templates/useAdminContentTemplates";
 import { ApiError } from "@/lib/api";
+import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type {
   AdminContentTemplate,
   AdminContentTemplateParentType,
@@ -109,6 +111,7 @@ export default function AdminContentTemplatesPage() {
     [templates],
   );
   const disabledCount = templates.length - activeCount;
+  const hasActiveFilters = parentFilter !== "all" || activeFilter !== "all";
 
   const disableSuccessToast: ConfirmSuccessToast | undefined = disableTarget
     ? {
@@ -233,11 +236,18 @@ export default function AdminContentTemplatesPage() {
                 {tr("قوالب البيانات", "Data templates")}
               </div>
               <span className="rounded-full bg-[#F3F4F6] px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-[#667085]">
-                {tr(
-                  `${templates.length.toLocaleString(numberLocale)} قالب`,
-                  `${templates.length.toLocaleString(numberLocale)} templates`,
-                )}
+                {query.isAwaitingData
+                  ? tr("جارٍ التحميل...", "Loading...")
+                  : tr(
+                      `${templates.length.toLocaleString(numberLocale)} قالب`,
+                      `${templates.length.toLocaleString(numberLocale)} templates`,
+                    )}
               </span>
+              {query.isRefetching ? (
+                <span className="rounded-full border border-[#D0D5DD] bg-white px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-[#667085]">
+                  {tr("يتم التحديث...", "Refreshing...")}
+                </span>
+              ) : null}
             </div>
           </div>
 
@@ -248,15 +258,43 @@ export default function AdminContentTemplatesPage() {
                 SkeletonComponent={ContentTemplateRowSkeleton}
               />
             ) : query.isError ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
-                {tr("تعذّر تحميل قوالب البيانات.", "Failed to load data templates.")}
+              <div className="px-6 py-6">
+                <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 text-start">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#B42318]" />
+                      <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
+                        {userFacingErrorMessage(
+                          query.error,
+                          tr(
+                            "تعذّر تحميل قوالب البيانات.",
+                            "Failed to load data templates.",
+                          ),
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void query.refetch()}
+                      disabled={query.isRefetching}
+                      className="inline-flex h-[32px] shrink-0 items-center justify-center rounded-[10px] border border-[#FECACA] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {tr("إعادة المحاولة", "Retry")}
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : templates.length === 0 ? (
               <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr(
-                  "لا توجد قوالب مطابقة للفلاتر الحالية.",
-                  "No templates match the current filters.",
-                )}
+                {hasActiveFilters
+                  ? tr(
+                      "لا توجد قوالب مطابقة للفلاتر الحالية.",
+                      "No templates match the current filters.",
+                    )
+                  : tr(
+                      "لا توجد قوالب بيانات حتى الآن.",
+                      "No data templates have been created yet.",
+                    )}
               </div>
             ) : (
               templates.map((t) => {

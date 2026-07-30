@@ -8,6 +8,7 @@ import type { ServiceProvider } from "@/lib/admin/types";
 import { resolveLabel } from "@/lib/admin/types";
 import { adminApi } from "@/lib/admin/client";
 import type { ProviderStatus } from "@/lib/admin/types";
+import { getAdminServiceProviderMutationErrorMessage } from "@/lib/admin/adminWriteFlowErrors";
 import {
   AdminFormField,
   adminFieldClass,
@@ -144,7 +145,7 @@ export default function EditServiceProviderDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast("حدث خطأ أثناء تحديث البيانات. يرجى المحاولة مرة أخرى.", {
+      toast(getAdminServiceProviderMutationErrorMessage(error, "update"), {
         title: "فشلت العملية",
         variant: "error",
         durationMs: 4200,

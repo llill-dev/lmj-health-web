@@ -63,6 +63,7 @@ import {
 } from '@/hooks/doctor/appointments/useAppointmentTypes';
 
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { getAppointmentTypeMutationErrorMessage } from '@/lib/doctor/writeFlowErrors';
 
 import type { AppointmentType } from '@/lib/doctor/types';
 
@@ -268,7 +269,9 @@ export default function DoctorAppointmentTypesPage() {
 
     } catch (error) {
 
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getAppointmentTypeMutationErrorMessage(error, 'create'), {
+        variant: 'error',
+      });
 
     }
 
@@ -306,7 +309,9 @@ export default function DoctorAppointmentTypesPage() {
 
     } catch (error) {
 
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getAppointmentTypeMutationErrorMessage(error, 'update'), {
+        variant: 'error',
+      });
 
     }
 
@@ -328,7 +333,9 @@ export default function DoctorAppointmentTypesPage() {
 
     } catch (error) {
 
-      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+      toast(getAppointmentTypeMutationErrorMessage(error, 'delete'), {
+        variant: 'error',
+      });
 
     }
 

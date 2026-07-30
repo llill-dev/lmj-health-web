@@ -17,6 +17,7 @@ export function useAdminAccessRequests(params: { page?: number; limit?: number; 
     page: query.data?.page ?? params.page ?? 1,
     limit: query.data?.limit ?? params.limit ?? 10,
     isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isRefetching: query.isRefetching,
     error: query.error,
     refetch: query.refetch,
   };

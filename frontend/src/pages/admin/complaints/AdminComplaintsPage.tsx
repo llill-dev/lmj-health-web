@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   ChevronLeft,
   MessageSquare,
+  RefreshCw,
   Search,
   SlidersHorizontal,
   Stethoscope,
@@ -162,6 +163,8 @@ export default function AdminComplaintsPage() {
   const totalPages = Math.max(1, Math.ceil(totalList / Math.max(limit, 1)));
   const canPrev = page > 1;
   const canNext = page < totalPages;
+  const hasActiveFilters =
+    debouncedSearch.length > 0 || statusFilter !== "all" || typeFilter !== "all";
 
   const bannerName =
     submittedPreview.data?.complaints?.[0]?.contactSnapshot?.fullName;
@@ -236,6 +239,7 @@ export default function AdminComplaintsPage() {
             <input
               type="search"
               value={searchInput}
+              disabled={listAwaiting}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder={tr(
                 "بحث (اسم، بريد، موضوع، النص...)",
@@ -257,6 +261,7 @@ export default function AdminComplaintsPage() {
               size="sm"
               tone="muted"
               value={statusFilter}
+              disabled={listAwaiting}
               onChange={(v) =>
                 setStatusFilter(v as "all" | ComplaintLifecycleStatus)
               }
@@ -284,6 +289,7 @@ export default function AdminComplaintsPage() {
               size="sm"
               tone="muted"
               value={typeFilter}
+              disabled={listAwaiting}
               onChange={(v) => setTypeFilter(v as "all" | ComplaintType)}
               options={[
                 {
@@ -300,14 +306,31 @@ export default function AdminComplaintsPage() {
           </div>
         </motion.div>
 
+        {listQuery.isRefetching && !listAwaiting ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث النتائج...", "Refreshing results...")}
+          </div>
+        ) : null}
+
         {listQuery.isError ? (
-          <p className="mt-8 text-center font-cairo text-sm font-semibold text-red-600">
-            {listErrorMessage ??
-              tr(
-                "تعذر تحميل قائمة الشكاوى.",
-                "Failed to load complaints list.",
-              )}
-          </p>
+          <div className="mt-8 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-5 py-4 text-center shadow-[0_8px_24px_rgba(127,29,29,0.08)]">
+            <p className="font-cairo text-sm font-semibold text-red-600">
+              {listErrorMessage ??
+                tr(
+                  "تعذر تحميل قائمة الشكاوى.",
+                  "Failed to load complaints list.",
+                )}
+            </p>
+            <button
+              type="button"
+              onClick={() => void listQuery.refetch()}
+              className="mt-3 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]"
+            >
+              <RefreshCw className="h-4 w-4" />
+              {tr("إعادة المحاولة", "Retry")}
+            </button>
+          </div>
         ) : listAwaiting ? (
           <motion.ul
             variants={staggerContainer(0.07, 0.06)}
@@ -388,7 +411,12 @@ export default function AdminComplaintsPage() {
 
             {complaints.length === 0 ? (
               <p className="mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]">
-                {tr("لا توجد شكاوٍ مطابقة.", "No matching complaints.")}
+                {hasActiveFilters
+                  ? tr(
+                      "لا توجد شكاوى مطابقة للفلاتر أو البحث الحالي.",
+                      "No complaints match the current filters or search.",
+                    )
+                  : tr("لا توجد شكاوى حتى الآن.", "No complaints yet.")}
               </p>
             ) : null}
 

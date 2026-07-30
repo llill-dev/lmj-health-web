@@ -13,7 +13,7 @@ import {
 } from "@/components/admin/form-field";
 
 const cancelAppointmentSchema = z.object({
-  reason: z.string().min(1, "هذا الحقل مطلوب"),
+  reason: z.string().max(300, "سبب الإلغاء يجب ألا يتجاوز 300 حرف."),
 });
 
 type CancelAppointmentFormValues = z.infer<typeof cancelAppointmentSchema>;
@@ -24,6 +24,7 @@ export default function CancelAppointmentDialog({
   targetName,
   onConfirm,
   confirmDisabled,
+  confirmLabel,
   successToast,
 }: {
   open: boolean;
@@ -31,6 +32,7 @@ export default function CancelAppointmentDialog({
   targetName: string;
   onConfirm: (reason: string) => void | Promise<void>;
   confirmDisabled?: boolean;
+  confirmLabel?: string;
   successToast?: { title?: string; message: string; variant?: ToastVariant };
 }) {
   const { toast } = useToast();
@@ -76,7 +78,7 @@ export default function CancelAppointmentDialog({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
+            if (e.target === e.currentTarget && !isSubmitting) {
               onOpenChange(false);
               reset({ reason: "" });
             }
@@ -95,11 +97,12 @@ export default function CancelAppointmentDialog({
             <div className="relative px-8 pt-7">
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={() => {
                   onOpenChange(false);
                   reset({ reason: "" });
                 }}
-                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label="إغلاق"
               >
                 <X className="h-5 w-5" />
@@ -121,7 +124,6 @@ export default function CancelAppointmentDialog({
               <div className="mt-7">
                 <AdminFormField
                   label="سبب الإلغاء"
-                  required
                   error={errors.reason?.message}
                 >
                   <textarea
@@ -136,11 +138,12 @@ export default function CancelAppointmentDialog({
               <div className="mt-8 grid grid-cols-2 gap-4 pb-7">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => {
                     onOpenChange(false);
                     reset({ reason: "" });
                   }}
-                  className="h-[46px] w-full rounded-[10px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438]"
+                  className="h-[46px] w-full rounded-[10px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   إلغاء
                 </button>
@@ -161,12 +164,12 @@ export default function CancelAppointmentDialog({
                       onOpenChange(false);
                       reset({ reason: "" });
                     } catch {
-                      /* فشل — يبقى الحوار مفتوحاً */
+                      /* keep open on failure */
                     }
                   })}
                   className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)] disabled:opacity-60"
                 >
-                  <span>حفظ وإنهاء</span>
+                  <span>{confirmLabel ?? "تأكيد الإلغاء"}</span>
                   <Check className="h-5 w-5" />
                 </button>
               </div>

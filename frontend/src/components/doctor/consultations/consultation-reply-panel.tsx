@@ -14,10 +14,10 @@ import {
   X,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { ConsultationClinicalAction } from '@/lib/consultations/consultationEncounter';
 import type { PendingConsultationAttachment } from '@/lib/consultations/types';
 import { doctorApi } from '@/lib/doctor/client';
+import { getPatientFileMutationErrorMessage } from '@/lib/doctor/writeFlowErrors';
 import { useDoctorPatientFiles } from '@/hooks/doctor/patients/useDoctorPatients';
 
 const CLINICAL_ACTIONS: Array<{
@@ -115,7 +115,7 @@ export default function ConsultationReplyPanel({
       });
       toast('تم إرفاق الملف.', { title: 'رفع الملف', variant: 'success' });
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileMutationErrorMessage(error, 'upload'), {
         title: 'تعذّر رفع الملف',
         variant: 'error',
       });

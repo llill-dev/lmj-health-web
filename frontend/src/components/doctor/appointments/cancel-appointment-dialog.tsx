@@ -2,17 +2,15 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import { Check, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useI18n } from '@/i18n/provider';
 
-const notesSchema = z.object({
-  medicalNotes: z.string().min(1, 'هذا الحقل مطلوب'),
-});
-
-type NotesFormValues = z.infer<typeof notesSchema>;
+type NotesFormValues = {
+  medicalNotes: string;
+};
 
 export default function CancelAppointmentDialog({
   open,
@@ -24,6 +22,7 @@ export default function CancelAppointmentDialog({
   fieldLabel: fieldLabelProp,
   placeholder: placeholderProp,
   confirmLabel: confirmLabelProp,
+  maxLength = 2000,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,6 +33,7 @@ export default function CancelAppointmentDialog({
   fieldLabel?: string;
   placeholder?: string;
   confirmLabel?: string;
+  maxLength?: number;
 }) {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
@@ -47,12 +47,25 @@ export default function CancelAppointmentDialog({
     );
   const confirmLabel =
     confirmLabelProp ?? tr('حفظ وإنهاء', 'Save and complete');
+  const notesSchema = useMemo(
+    () =>
+      z.object({
+        medicalNotes: z.string().max(
+          maxLength,
+          tr(
+            `الحد الأقصى ${maxLength} حرف`,
+            `Maximum ${maxLength} characters`,
+          ),
+        ),
+      }),
+    [maxLength, tr],
+  );
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<NotesFormValues>({
     resolver: zodResolver(notesSchema),
     defaultValues: {
@@ -83,6 +96,7 @@ export default function CancelAppointmentDialog({
     <Dialog.Root
       open={open}
       onOpenChange={(next) => {
+        if (!next && isSubmitting) return;
         onOpenChange(next);
         if (!next) reset({ medicalNotes: '' });
       }}
@@ -156,7 +170,8 @@ export default function CancelAppointmentDialog({
                 <Dialog.Close asChild>
                   <button
                     type='button'
-                    className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
+                    disabled={isSubmitting}
+                    className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60'
                     aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
@@ -178,22 +193,28 @@ export default function CancelAppointmentDialog({
 
                 <div className='mt-7'>
                   <div className='mb-2 text-start font-cairo text-[14px] font-extrabold text-[#101828]'>
-                    {fieldLabel}:
-                    <span className='ms-1 text-[#F04438]'>*</span>
+                    {fieldLabel}
                   </div>
                   <textarea
                     {...register('medicalNotes')}
+                    maxLength={maxLength}
+                    disabled={isSubmitting}
                     placeholder={placeholder}
-                    className='min-h-[120px] w-full resize-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
-                    required
+                    className='min-h-[120px] w-full resize-none rounded-[12px] border border-[#D0D5DD] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] disabled:cursor-not-allowed disabled:opacity-60'
                   />
+                  {errors.medicalNotes ? (
+                    <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
+                      {errors.medicalNotes.message}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className='mt-8 grid grid-cols-2 gap-4 pb-7'>
                   <Dialog.Close asChild>
                     <button
                       type='button'
-                      className='h-[46px] w-full rounded-[10px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438]'
+                      disabled={isSubmitting}
+                      className='h-[46px] w-full rounded-[10px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438] disabled:cursor-not-allowed disabled:opacity-60'
                     >
                       {tr('إلغاء', 'Cancel')}
                     </button>

@@ -31,7 +31,12 @@ export default function AdminAnalyticsPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
-  const { stats, isAwaitingData: statsAwaiting, refetch } = useAdminPlatformStats();
+  const {
+    stats,
+    isAwaitingData: statsAwaiting,
+    isRefetching: statsRefetching,
+    refetch,
+  } = useAdminPlatformStats();
   const doctorsQuery = useTopApprovedDoctors(8);
   const appointmentsQuery = useRecentAppointments(6);
 
@@ -51,8 +56,12 @@ export default function AdminAnalyticsPage() {
             'Live statistics from the database',
           )}
           headerIcon={<BarChart3 className='h-8 w-8 text-white' />}
-          actionLabel={tr('تحديث', 'Refresh')}
-          actionIcon={<RefreshCw className='h-4 w-4' />}
+          actionLabel={
+            statsRefetching ? tr('جارٍ التحديث...', 'Refreshing...') : tr('تحديث', 'Refresh')
+          }
+          actionIcon={
+            <RefreshCw className={`h-4 w-4 ${statsRefetching ? 'animate-spin' : ''}`} />
+          }
           onActionClick={() => void refetch()}
           kpiColumns={4}
           kpis={[
@@ -82,6 +91,13 @@ export default function AdminAnalyticsPage() {
             },
           ]}
         />
+
+        {statsRefetching && !statsAwaiting ? (
+          <div className='mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]'>
+            <RefreshCw className='h-4 w-4 animate-spin' />
+            {tr('جارٍ تحديث الإحصائيات...', 'Refreshing analytics...')}
+          </div>
+        ) : null}
 
         {/* ── secondary metrics ── */}
         <section className='mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3'>
@@ -200,6 +216,14 @@ export default function AdminAnalyticsPage() {
                                 <span className='font-cairo text-[12px]'>
                                   {tr('تعذّر تحميل البيانات', 'Failed to load data')}
                                 </span>
+                                <button
+                                  type='button'
+                                  onClick={() => void doctorsQuery.refetch()}
+                                  className='mt-1 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[11px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]'
+                                >
+                                  <RefreshCw className='h-3.5 w-3.5' />
+                                  {tr('إعادة المحاولة', 'Retry')}
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -389,19 +413,28 @@ export default function AdminAnalyticsPage() {
 
         {/* ── recent appointments ── */}
         <section className='mt-6 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-          <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
-            <div className='inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]'>
-              <CalendarDays className='h-4 w-4 text-primary' />
-              {tr('آخر المواعيد', 'Recent appointments')}
+            <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
+              <div className='inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]'>
+                <CalendarDays className='h-4 w-4 text-primary' />
+                {tr('آخر المواعيد', 'Recent appointments')}
+              </div>
+              {appointmentsQuery.data && (
+                <span className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+                  {tr('إجمالي', 'Total')}{' '}
+                  {appointmentsQuery.data.total.toLocaleString(numberLocale)}{' '}
+                  {tr('موعد', 'appointments')}
+                </span>
+              )}
             </div>
-            {appointmentsQuery.data && (
-              <span className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
-                {tr('إجمالي', 'Total')}{' '}
-                {appointmentsQuery.data.total.toLocaleString(numberLocale)}{' '}
-                {tr('موعد', 'appointments')}
-              </span>
-            )}
-          </div>
+
+          {appointmentsQuery.isRefetching && !appointmentsQuery.isAwaitingData ? (
+            <div className='border-b border-[#EEF2F6] px-6 py-3 font-cairo text-[12px] font-bold text-[#047857]'>
+              <div className='inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2'>
+                <RefreshCw className='h-4 w-4 animate-spin' />
+                {tr('جارٍ تحديث المواعيد...', 'Refreshing appointments...')}
+              </div>
+            </div>
+          ) : null}
 
           <div className='overflow-x-auto'>
             <table className='w-full border-collapse'>
@@ -442,6 +475,14 @@ export default function AdminAnalyticsPage() {
                               <span className='font-cairo text-[12px]'>
                                 {tr('تعذّر تحميل البيانات', 'Failed to load data')}
                               </span>
+                              <button
+                                type='button'
+                                onClick={() => void appointmentsQuery.refetch()}
+                                className='mt-1 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[11px] font-extrabold text-[#B42318] hover:bg-[#FFF5F5]'
+                              >
+                                <RefreshCw className='h-3.5 w-3.5' />
+                                {tr('إعادة المحاولة', 'Retry')}
+                              </button>
                             </div>
                           </td>
                         </tr>
