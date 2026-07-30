@@ -103,6 +103,14 @@ export default function BroadcastNotificationDialog({
       newErrors.body = "المحتوى يجب أن يكون أقل من 500 حرف";
     }
 
+    if (formData.data.trim()) {
+      try {
+        JSON.parse(formData.data);
+      } catch {
+        newErrors.data = "البيانات الإضافية يجب أن تكون بصيغة JSON صحيحة";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -114,10 +122,12 @@ export default function BroadcastNotificationDialog({
 
     setIsSubmitting(true);
     try {
-      toast("خاصية البث غير متاحة حالياً. يرجى التواصل مع الدعم الفني.", {
-        title: "خاصية غير متوفرة",
-        variant: "error",
-        durationMs: 4200,
+      await notificationsApi.broadcast({
+        group: formData.group,
+        type: formData.type,
+        title: formData.title.trim(),
+        body: formData.body.trim(),
+        data: formData.data.trim() || undefined,
       });
 
       toast("تم إرسال الإشعار بنجاح", {
@@ -125,9 +135,17 @@ export default function BroadcastNotificationDialog({
         variant: "success",
         durationMs: 4200,
       });
-      // Temporarily disable broadcast functionality as per audit.
-      // Re-enable when backend API is confirmed and integrated.
-      return;
+
+      setFormData({
+        group: "all",
+        type: "info",
+        title: "",
+        body: "",
+        data: "",
+      });
+      setErrors({});
+      onOpenChange(false);
+      onSuccess?.();
     } catch {
       toast("حدث خطأ أثناء إرسال الإشعار. يرجى المحاولة مرة أخرى.", {
         title: "فشلت العملية",
@@ -312,11 +330,18 @@ export default function BroadcastNotificationDialog({
                         ...prev,
                         data: e.target.value,
                       }));
+                      if (errors.data)
+                        setErrors((prev) => ({ ...prev, data: "" }));
                     }}
                     placeholder="بيانات إضافية بصيغة JSON (اختياري)"
                     rows={2}
                     className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[11px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none font-mono"
                   />
+                  {errors.data && (
+                    <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">
+                      {errors.data}
+                    </p>
+                  )}
                   <p className="mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]">
                     يمكنك إضافة بيانات إضافية بصيغة JSON
                   </p>

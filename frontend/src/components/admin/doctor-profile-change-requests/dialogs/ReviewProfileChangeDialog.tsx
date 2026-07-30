@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
+import type { AdminDoctorProfileChangeRequest } from "@/hooks/admin/doctors/useAdminDoctorProfileChangeRequests";
 import {
   AdminFormField,
   adminTextareaClass,
@@ -16,38 +17,10 @@ const DECISION_OPTIONS = [
   { value: "denied", label: "رفض" },
 ];
 
-interface ProfileChangeRequest {
-  _id: string;
-  status?: string;
-  items?: Array<{
-    field: string;
-    oldValue?: any;
-    newValue?: any;
-  }>;
-  doctor?: {
-    _id: string;
-    specialization?: string;
-    medicalLicenseNumber?: string;
-    education?: string;
-    clinicAddress?: string;
-    bio?: string;
-    consultationFee?: number;
-    userId?: {
-      fullName?: string;
-    };
-  };
-  requestedBy?: {
-    _id: string;
-    fullName?: string;
-    email?: string;
-  };
-  createdAt?: string;
-}
-
 interface ReviewProfileChangeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  request: ProfileChangeRequest | null;
+  request: AdminDoctorProfileChangeRequest | null;
   onSuccess?: () => void;
 }
 

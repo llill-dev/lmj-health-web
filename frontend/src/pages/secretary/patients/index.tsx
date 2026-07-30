@@ -36,7 +36,6 @@ function accountStatusPresentation(
 
   if (status === "temporary" || patient.isTemporary) {
     return {
-      label: "مؤقت",
       label: tr("مؤقت", "Temporary"),
       className: "bg-[#FFF7ED] text-[#C2410C]",
     };

@@ -141,7 +141,6 @@ export default function SecretaryLayout() {
         description={t("logout.secretary.description")}
         confirmLabel={loggingOut ? t("logout.pending") : t("common.logout")}
         confirmDisabled={loggingOut}
-        cancelLabel={t("common.cancel")}
         onConfirm={performLogout}
       />
     </div>

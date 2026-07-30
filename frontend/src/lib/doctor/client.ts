@@ -664,10 +664,20 @@ function readDoctorAppointmentTypesArray(
 
 function readDoctorScheduleRecord(value: unknown): DoctorScheduleResponse | null {
   if (!isDoctorRecord(value)) return null;
-  if (!Array.isArray(readDoctorNamedValue(value, "availableTimes"))) return null;
-  if (!Array.isArray(readDoctorNamedValue(value, "exceptions"))) return null;
-  if (!isDoctorRecord(readDoctorNamedValue(value, "slotSettings"))) return null;
-  return value as DoctorScheduleResponse;
+  const availableTimes = readDoctorNamedValue(value, "availableTimes");
+  const exceptions = readDoctorNamedValue(value, "exceptions");
+  const slotSettings = readDoctorNamedValue(value, "slotSettings");
+
+  if (!Array.isArray(availableTimes)) return null;
+  if (!Array.isArray(exceptions)) return null;
+  if (!isDoctorRecord(slotSettings)) return null;
+
+  return {
+    ...value,
+    availableTimes: availableTimes as DoctorScheduleResponse["availableTimes"],
+    exceptions: exceptions as DoctorScheduleResponse["exceptions"],
+    slotSettings: slotSettings as DoctorScheduleResponse["slotSettings"],
+  };
 }
 
 function readDoctorAppointments(value: unknown) {
@@ -1304,7 +1314,9 @@ function normalizeEncounterOrderFinalizeResponse(
 function normalizeOrderCatalogListResponse(
   response: OrderCatalogListResponse,
 ): OrderCatalogListResponse {
-  const items = readDoctorListOrEmpty(readEncounterOrderCatalogItems(response));
+  const items: OrderCatalogItem[] = readDoctorListOrEmpty(
+    readEncounterOrderCatalogItems(response),
+  );
   return {
     ...response,
     ...withDoctorPaging(response, items.length),

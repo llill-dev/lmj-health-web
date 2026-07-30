@@ -9,6 +9,7 @@ import type {
   AdminDoctorsListParams,
   AdminDoctorsListResponse,
   AdminPatientAccountActionResponse,
+  PatientAccountStatus,
   AdminPatientFilesListParams,
   AdminPatientFilesListResponse,
   AdminPatientFileDownloadUrlResponse,
@@ -133,6 +134,15 @@ function readAdminNumber(value: unknown): number | undefined {
 
 function readAdminString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+function isPatientAccountStatus(value: unknown): value is PatientAccountStatus {
+  return (
+    value === "active" ||
+    value === "temporary" ||
+    value === "suspended" ||
+    value === "locked"
+  );
 }
 
 function asAdminListEnvelope(value: unknown): AdminListEnvelope | null {
@@ -984,8 +994,12 @@ function normalizeAdminPatientAccountActionResponse(
       readAdminString(nested?.userId) ??
       response.userId,
     accountStatus:
-      readAdminString(record?.accountStatus) ??
-      readAdminString(nested?.accountStatus) ??
+      (isPatientAccountStatus(record?.accountStatus)
+        ? record.accountStatus
+        : undefined) ??
+      (isPatientAccountStatus(nested?.accountStatus)
+        ? nested.accountStatus
+        : undefined) ??
       response.accountStatus,
   };
 }

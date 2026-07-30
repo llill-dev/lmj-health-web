@@ -12,15 +12,14 @@ import { MedicalOrderCardSkeleton } from "@/components/admin/skeletons/MedicalOr
 import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import {
   useAdminMedicalOrderCatalog,
-  useDeleteMedicalOrderCatalogItem,
+  ADMIN_MEDICAL_ORDER_DELETE_SUPPORTED,
 } from "@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog";
 import type {
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,
 } from "@/lib/admin/types";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
-import { ConfirmActionDialog } from "@/components/admin/dialogs";
-import { ClipboardList, Trash2 } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { Pagination } from "@/components/admin/services/Pagination";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import StyledSelect from "@/components/ui/styled-select";
@@ -59,8 +58,6 @@ export default function AdminMedicalOrdersPage() {
   const [editTarget, setEditTarget] = useState<MedicalOrderCatalogItem | null>(
     null,
   );
-  const [deleteTarget, setDeleteTarget] =
-    useState<MedicalOrderCatalogItem | null>(null);
 
   const [debouncedSearch] = useDebounce(search, 300);
   const [debouncedCategory] = useDebounce(category, 350);
@@ -76,8 +73,9 @@ export default function AdminMedicalOrdersPage() {
             ? false
             : undefined,
     });
-  const deleteMut = useDeleteMedicalOrderCatalogItem(kind);
-  const deleteSupported = medicalOrderCatalogDeleteSupported();
+  const deleteSupported =
+    medicalOrderCatalogDeleteSupported() &&
+    ADMIN_MEDICAL_ORDER_DELETE_SUPPORTED;
 
   useEffect(() => {
     setEditTarget(null);
@@ -152,8 +150,7 @@ export default function AdminMedicalOrdersPage() {
   }
 
   function openDeleteConfirm(item: MedicalOrderCatalogItem) {
-    if (!deleteSupported) return;
-    setDeleteTarget(item);
+    void item;
   }
 
   return (
@@ -282,7 +279,7 @@ export default function AdminMedicalOrdersPage() {
             onView={openView}
             onEdit={openEdit}
             onDelete={openDeleteConfirm}
-            isBusy={deleteMut.isPending}
+            isBusy={false}
             deleteUnsupported={!deleteSupported}
           />
         )}
@@ -326,49 +323,6 @@ export default function AdminMedicalOrdersPage() {
             </div>
           </section>
         ) : null}
-
-        <ConfirmActionDialog
-          open={deleteTarget !== null}
-          onOpenChange={(open) => {
-            if (!open) setDeleteTarget(null);
-          }}
-          variant="destructive"
-          title={tr(
-            "حذف بند من الكتالوج؟",
-            "Delete catalog item?",
-          )}
-          icon={<Trash2 className="w-6 h-6" strokeWidth={2} aria-hidden />}
-          description={
-            deleteTarget ? (
-              <>
-                {tr("سيتم حذف «", "“")}
-                <span className="font-extrabold text-[#344054]">
-                  {deleteTarget.label}
-                </span>
-                {tr(
-                  `» نهائياً من فئة ${kindLabel(kind, tr)}. لا يمكن التراجع عن الحذف من الواجهة.`,
-                  `” will be permanently deleted from ${kindLabel(kind, tr)}. This cannot be undone from the UI.`,
-                )}
-              </>
-            ) : (
-              "—"
-            )
-          }
-          confirmLabel={tr("حذف", "Delete")}
-          confirmDisabled={deleteMut.isPending}
-          onConfirm={async () => {
-            if (!deleteTarget) return;
-            await deleteMut.mutateAsync(deleteTarget._id);
-          }}
-          successToast={{
-            title: tr("تم الحذف", "Deleted"),
-            message: tr(
-              "حُذف بند الكتالوج من القائمة.",
-              "Catalog item removed from the list.",
-            ),
-            variant: "success",
-          }}
-        />
 
         <UpsertMedicalOrderItemDialog
           open={dialogOpen && medicalOrderCatalogKindSupported(kind)}

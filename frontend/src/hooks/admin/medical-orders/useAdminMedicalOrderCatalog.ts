@@ -18,6 +18,8 @@ export const MEDICAL_ORDER_CATALOG_KEYS = {
     [...MEDICAL_ORDER_CATALOG_KEYS.all, 'list', params] as const,
 };
 
+export const ADMIN_MEDICAL_ORDER_DELETE_SUPPORTED = false;
+
 export function useAdminMedicalOrderCatalog(
   kind: MedicalOrderCatalogKind,
   params: Omit<AdminMedicalOrderCatalogListParams, "type"> = {},
@@ -86,20 +88,6 @@ export function useUpdateMedicalOrderCatalogItem(
       adminApi.medicalOrderCatalog.update(kind, vars.id, {
         ...vars.body,
       }),
-    onSuccess: () => {
-      void qc.invalidateQueries({
-        queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, "list"],
-      });
-    },
-  });
-}
-
-export function useDeleteMedicalOrderCatalogItem(
-  kind: MedicalOrderCatalogKind,
-) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => adminApi.medicalOrderCatalog.remove(kind, id),
     onSuccess: () => {
       void qc.invalidateQueries({
         queryKey: [...MEDICAL_ORDER_CATALOG_KEYS.all, "list"],
