@@ -234,6 +234,23 @@ function readDoctorNumber(value: unknown): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
+function readDoctorScheduleSlotSettings(
+  value: unknown,
+): DoctorScheduleResponse["slotSettings"] | null {
+  if (!isDoctorRecord(value)) return null;
+
+  const duration = readDoctorNumber(value.duration);
+  const gap = readDoctorNumber(value.gap);
+
+  if (duration == null || gap == null) return null;
+
+  return {
+    ...value,
+    duration,
+    gap,
+  };
+}
+
 function readDoctorPatientFilesArray(value: unknown): DoctorPatientFile[] | null {
   return isDoctorRecordArray(value) ? (value as DoctorPatientFile[]) : null;
 }
@@ -666,17 +683,19 @@ function readDoctorScheduleRecord(value: unknown): DoctorScheduleResponse | null
   if (!isDoctorRecord(value)) return null;
   const availableTimes = readDoctorNamedValue(value, "availableTimes");
   const exceptions = readDoctorNamedValue(value, "exceptions");
-  const slotSettings = readDoctorNamedValue(value, "slotSettings");
+  const slotSettings = readDoctorScheduleSlotSettings(
+    readDoctorNamedValue(value, "slotSettings"),
+  );
 
   if (!Array.isArray(availableTimes)) return null;
   if (!Array.isArray(exceptions)) return null;
-  if (!isDoctorRecord(slotSettings)) return null;
+  if (!slotSettings) return null;
 
   return {
     ...value,
     availableTimes: availableTimes as DoctorScheduleResponse["availableTimes"],
     exceptions: exceptions as DoctorScheduleResponse["exceptions"],
-    slotSettings: slotSettings as DoctorScheduleResponse["slotSettings"],
+    slotSettings,
   };
 }
 
