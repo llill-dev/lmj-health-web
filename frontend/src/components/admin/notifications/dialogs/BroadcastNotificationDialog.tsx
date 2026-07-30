@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { notificationsApi } from "@/lib/notifications/client";
+import { getBroadcastNotificationErrorMessage } from "@/lib/admin/notifications/broadcastNotificationErrors";
 import {
   AdminFormField,
   adminFieldClass,
@@ -44,15 +45,23 @@ export default function BroadcastNotificationDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const [formData, setFormData] = useState({
+  const createInitialFormData = () => ({
     group: "all",
     type: "info",
     title: "",
     body: "",
     data: "",
   });
+  const [formData, setFormData] = useState(createInitialFormData);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!open && !isSubmitting) {
+      setFormData(createInitialFormData());
+      setErrors({});
+    }
+  }, [open, isSubmitting]);
 
   useEffect(() => {
     if (!open) return;
@@ -136,18 +145,12 @@ export default function BroadcastNotificationDialog({
         durationMs: 4200,
       });
 
-      setFormData({
-        group: "all",
-        type: "info",
-        title: "",
-        body: "",
-        data: "",
-      });
+      setFormData(createInitialFormData());
       setErrors({});
       onOpenChange(false);
       onSuccess?.();
-    } catch {
-      toast("حدث خطأ أثناء إرسال الإشعار. يرجى المحاولة مرة أخرى.", {
+    } catch (error) {
+      toast(getBroadcastNotificationErrorMessage(error, "ar"), {
         title: "فشلت العملية",
         variant: "error",
         durationMs: 4200,
@@ -187,8 +190,11 @@ export default function BroadcastNotificationDialog({
             <div className="relative px-8 pb-7 pt-7">
               <button
                 type="button"
-                onClick={() => onOpenChange(false)}
-                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                onClick={() => {
+                  if (!isSubmitting) onOpenChange(false);
+                }}
+                disabled={isSubmitting}
+                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="إغلاق"
               >
                 <X className="h-5 w-5" />
@@ -360,8 +366,11 @@ export default function BroadcastNotificationDialog({
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => onOpenChange(false)}
-                    className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB]"
+                    onClick={() => {
+                      if (!isSubmitting) onOpenChange(false);
+                    }}
+                    disabled={isSubmitting}
+                    className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     إلغاء
                   </button>
