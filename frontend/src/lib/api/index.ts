@@ -138,6 +138,24 @@ function shouldReplaceArabicBackendMessage(
   );
 }
 
+function pickPreferredBackendErrorMessage(
+  status: number,
+  candidates: Array<string | undefined>,
+): string {
+  let fallback = "";
+
+  for (const candidate of candidates) {
+    const trimmed = candidate?.trim() ?? "";
+    if (!trimmed) continue;
+    if (!fallback) fallback = trimmed;
+    if (!shouldReplaceArabicBackendMessage(status, trimmed)) {
+      return trimmed;
+    }
+  }
+
+  return fallback;
+}
+
 /**
  * رسائل واجهة المستخدم المركّزة على العربية: نفضّل نصاً مفيداً من الخادم؛
  * وإذا كان عاماً أو HTML أو إنجليزياً خاماً نستخدم شرحاً عربياً بحسب الرمز HTTP.
@@ -483,13 +501,14 @@ export async function apiRequest<T = unknown>(
         maybeHandleUnauthorizedSession(endpoint, locale, hadBearerToken);
       }
 
-      const backendMsg =
-        readBodyString(body, "message") ||
-        readBodyString(body, "detail") ||
-        readBodyString(body, "title") ||
-        readBodyString(body, "error") ||
-        rawText ||
-        res.statusText;
+      const backendMsg = pickPreferredBackendErrorMessage(res.status, [
+        readBodyString(body, "message"),
+        readBodyString(body, "detail"),
+        readBodyString(body, "title"),
+        readBodyString(body, "error"),
+        rawText,
+        res.statusText,
+      ]);
 
       const messageKey = readBodyString(body, "messageKey") ?? null;
       const localizedMessageByKey = localizeApiMessageKey(messageKey, locale);
