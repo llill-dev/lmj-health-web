@@ -5,6 +5,7 @@ import {
   Eye,
   Mail,
   Phone,
+  RefreshCw,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -70,7 +71,7 @@ export default function AdminPatientsPage() {
     ...defaultFilters,
   });
 
-  const { patients, results, total, isAwaitingData, error, refetch } =
+  const { patients, results, total, isAwaitingData, isRefetching, error, refetch } =
     useAdminPatients({
       account_status: filters.account_status,
       search: filters.search || undefined,
@@ -254,9 +255,28 @@ export default function AdminPatientsPage() {
               <div className="inline-flex h-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#667085]">
                 {results} {tr("نتيجة", "results")}
               </div>
+
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                disabled={isRefetching}
+                className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+                {isRefetching
+                  ? tr("جارٍ التحديث...", "Refreshing...")
+                  : tr("تحديث", "Refresh")}
+              </button>
             </div>
           </div>
         </section>
+
+        {isRefetching && !isAwaitingData ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث قائمة المرضى...", "Refreshing patients list...")}
+          </div>
+        ) : null}
 
         <section className="mt-5 space-y-5">
           {isAwaitingData ? (
@@ -267,7 +287,22 @@ export default function AdminPatientsPage() {
             </>
           ) : error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-              {tr("تعذر تحميل قائمة المرضى.", "Failed to load patients list.")}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  {tr("تعذر تحميل قائمة المرضى.", "Failed to load patients list.")}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void refetch()}
+                  disabled={isRefetching}
+                  className="inline-flex h-[34px] items-center justify-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[11px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+                  {isRefetching
+                    ? tr("جارٍ إعادة المحاولة...", "Retrying...")
+                    : tr("إعادة المحاولة", "Retry")}
+                </button>
+              </div>
             </div>
           ) : patients.length === 0 ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
