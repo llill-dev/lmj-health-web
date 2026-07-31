@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
@@ -102,6 +102,33 @@ export default function DoctorActivityLogPage() {
           period={period}
           onPeriodChange={handlePeriodChange}
         />
+
+        {activityQuery.isRefetching ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            جارٍ تحديث سجل النشاطات...
+          </div>
+        ) : null}
+
+        {activityQuery.isError && activityQuery.data ? (
+          <div
+            role="alert"
+            className="mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-start"
+          >
+            <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
+              {errorMessage ?? "تعذّر تحديث سجل النشاطات. ما زالت آخر البيانات المتاحة معروضة."}
+            </div>
+            <button
+              type="button"
+              onClick={() => void retryActivity()}
+              disabled={retryingActivity}
+              className="mt-3 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${retryingActivity ? "animate-spin" : ""}`} />
+              {retryingActivity ? "جارٍ إعادة المحاولة..." : "إعادة المحاولة"}
+            </button>
+          </div>
+        ) : null}
 
         <ActivityLogList items={activityQuery.items} />
 

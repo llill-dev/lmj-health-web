@@ -62,6 +62,11 @@ export default function AdminMedicalNewsQueuePage() {
   const rangeStart = pendingTotal === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const rangeEnd = pendingTotal === 0 ? 0 : Math.min(currentPage * pageSize, pendingTotal);
   const visibleItems = useMemo(() => pendingItems, [pendingItems]);
+  const hasActiveFilters =
+    langFilter !== "الكل" ||
+    sourceUrl.trim() !== "" ||
+    dateFrom !== "" ||
+    dateTo !== "";
 
   async function submitNewsIngest() {
     const normalizedSourceUrl = ingestSourceUrl.trim();
@@ -249,6 +254,13 @@ export default function AdminMedicalNewsQueuePage() {
           </div>
         </section>
 
+        {pendingNewsQuery.isRefetching && !pendingNewsQuery.isAwaitingData ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث طابور الأخبار...", "Refreshing news queue...")}
+          </div>
+        ) : null}
+
         <section className="mt-5 space-y-3">
           {pendingNewsQuery.isAwaitingData ? (
             <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
@@ -258,18 +270,38 @@ export default function AdminMedicalNewsQueuePage() {
               )}
             </div>
           ) : pendingNewsQuery.isError ? (
-            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-              {tr(
-                "تعذر تحميل طابور الأخبار.",
-                "Failed to load news queue.",
-              )}
+            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-8 text-center">
+              <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
+                {tr(
+                  "تعذر تحميل طابور الأخبار.",
+                  "Failed to load news queue.",
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => void pendingNewsQuery.refetch()}
+                disabled={pendingNewsQuery.isRefetching}
+                className="mt-4 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:bg-[#FFF5F5] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${pendingNewsQuery.isRefetching ? "animate-spin" : ""}`}
+                />
+                {pendingNewsQuery.isRefetching
+                  ? tr("جارٍ إعادة المحاولة...", "Retrying...")
+                  : tr("إعادة المحاولة", "Retry")}
+              </button>
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {tr(
-                "لا توجد عناصر مطابقة في الطابور الحالي.",
-                "No matching items in the current queue.",
-              )}
+              {hasActiveFilters
+                ? tr(
+                    "لا توجد عناصر مطابقة للفلاتر الحالية في طابور الأخبار.",
+                    "No news items match the current filters.",
+                  )
+                : tr(
+                    "لا توجد عناصر معلّقة حالياً في طابور الأخبار.",
+                    "There are no pending news items right now.",
+                  )}
             </div>
           ) : (
             visibleItems.map((item) => (
