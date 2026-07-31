@@ -112,9 +112,18 @@ export default function SecretaryProfilePage() {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const authUser = readAuthUser();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
-  const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 1 });
-  const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
   const secretaryPermissions = useSecretaryPermissions();
+  const canViewAppointments =
+    secretaryPermissions.hasPermission("appointments:view");
+  const canViewPatients = secretaryPermissions.hasPermission("patients:view");
+  const appointmentsQuery = useDoctorAppointmentsApi(
+    { page: 1, limit: 1 },
+    canViewAppointments,
+  );
+  const patientsQuery = useDoctorPatients(
+    { page: 1, limit: 1 },
+    canViewPatients,
+  );
   const secretaryName = authUser?.fullName?.trim() || tr("السكرتير", "Secretary");
   const secretaryEmail = authUser?.email?.trim() || "—";
   const secretaryPhone = authUser?.phone?.trim() || "—";
@@ -154,12 +163,12 @@ export default function SecretaryProfilePage() {
     },
     {
       label: tr("المواعيد", "Appointments"),
-      value: appointmentsQuery.total ?? 0,
+      value: canViewAppointments ? appointmentsQuery.total ?? 0 : "—",
       icon: Briefcase,
     },
     {
       label: tr("المرضى", "Patients"),
-      value: patientsQuery.total ?? 0,
+      value: canViewPatients ? patientsQuery.total ?? 0 : "—",
       icon: UserRound,
     },
   ];
@@ -205,9 +214,44 @@ export default function SecretaryProfilePage() {
       </SurfaceSection>
 
       <SurfaceSection title={tr("الطبيب المسؤول", "Assigned doctor")} icon={Briefcase}>
-        {doctorInfo.map((info, index) => (
-          <InfoRow key={index} label={info.label} value={info.value} />
-        ))}
+        {assignedDoctorQuery.isLoading ? (
+          <div className="px-4 py-6 text-center font-cairo text-[14px] font-semibold text-[#667085] sm:px-6 lg:px-8">
+            {tr("جاري تحميل الطبيب المسؤول...", "Loading assigned doctor...")}
+          </div>
+        ) : assignedDoctorQuery.isError || !assignedDoctor ? (
+          <div className="space-y-4 px-4 py-6 text-center sm:px-6 lg:px-8">
+            <div className="font-cairo text-[15px] font-bold text-[#243044]">
+              {tr(
+                "تعذر تحميل بيانات الطبيب المسؤول.",
+                "Assigned doctor details are unavailable.",
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => assignedDoctorQuery.refetch()}
+              disabled={assignedDoctorQuery.isRefetching}
+              className="inline-flex items-center justify-center rounded-[12px] bg-primary px-4 py-2 font-cairo text-[14px] font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {assignedDoctorQuery.isRefetching
+                ? tr("جاري إعادة المحاولة...", "Retrying...")
+                : tr("إعادة المحاولة", "Retry")}
+            </button>
+          </div>
+        ) : (
+          <>
+            {doctorInfo.map((info, index) => (
+              <InfoRow key={index} label={info.label} value={info.value} />
+            ))}
+            {assignedDoctorQuery.isRefetching ? (
+              <div className="border-t border-[#EEF2F6] px-4 py-4 text-center font-cairo text-[13px] font-semibold text-[#667085] sm:px-6 lg:px-8">
+                {tr(
+                  "جاري تحديث بيانات الطبيب المسؤول...",
+                  "Refreshing assigned doctor details...",
+                )}
+              </div>
+            ) : null}
+          </>
+        )}
       </SurfaceSection>
 
       <div className="grid gap-4 sm:grid-cols-3">

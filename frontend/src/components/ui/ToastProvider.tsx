@@ -12,6 +12,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Info, AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { registerQueryErrorToastSink } from "@/lib/queryErrorHandling";
 import { registerSessionExpiryToastSink } from "@/lib/session/sessionExpiryFlow";
 
 export type ToastVariant = "success" | "error" | "info" | "warning";
@@ -82,7 +83,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     registerSessionExpiryToastSink((message, opts) => {
       toast(message, opts);
     });
-    return () => registerSessionExpiryToastSink(null);
+    registerQueryErrorToastSink((message, opts) => {
+      toast(message, opts);
+    });
+    return () => {
+      registerSessionExpiryToastSink(null);
+      registerQueryErrorToastSink(null);
+    };
   }, [toast]);
 
   return (

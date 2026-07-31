@@ -3,8 +3,8 @@
 import { Download, Eye, FileText, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
-import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { openConsultationAttachmentDownload } from '@/lib/consultations/downloadAttachment';
+import { getPatientFileAccessErrorMessage } from '@/lib/doctor/writeFlowErrors';
 import type { ConsultationAttachmentFile } from '@/lib/consultations/types';
 import { cn } from '@/lib/utils/utils';
 
@@ -46,7 +46,7 @@ export default function ConsultationAttachmentList({
         mode,
       );
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileAccessErrorMessage(error, mode), {
         title: mode === 'download' ? 'تعذّر تنزيل المرفق' : 'تعذّر فتح المرفق',
         variant: 'error',
       });

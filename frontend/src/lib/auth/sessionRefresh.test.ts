@@ -4,6 +4,7 @@ const postMock = vi.fn();
 const persistAuthSessionMock = vi.fn();
 const readStoredAuthSessionMock = vi.fn();
 const setAuthStateMock = vi.fn();
+const clearAuthSessionMock = vi.fn();
 
 vi.mock('@/lib/api', () => ({
   ApiError: class ApiError extends Error {
@@ -24,6 +25,7 @@ vi.mock('@/lib/auth/session', async () => {
 
   return {
     ...actual,
+    clearAuthSession: () => clearAuthSessionMock(),
     persistAuthSession: (...args: unknown[]) => persistAuthSessionMock(...args),
     readStoredAuthSession: () => readStoredAuthSessionMock(),
   };
@@ -41,6 +43,7 @@ describe('sessionRefresh', () => {
     persistAuthSessionMock.mockReset();
     readStoredAuthSessionMock.mockReset();
     setAuthStateMock.mockReset();
+    clearAuthSessionMock.mockReset();
   });
 
   it('stores the rotated access and refresh tokens after a successful refresh', async () => {
@@ -144,5 +147,35 @@ describe('sessionRefresh', () => {
     const { isRefreshTokenExpired } = await import('@/lib/auth/sessionRefresh');
 
     expect(isRefreshTokenExpired('not-a-date')).toBe(true);
+  });
+
+  it('clears the local session when refresh succeeds but the stored user payload is missing', async () => {
+    readStoredAuthSessionMock.mockReturnValue({
+      accessToken: 'old-access',
+      refreshToken: 'old-refresh',
+      refreshExpiresAt: '2030-01-01T00:00:00.000Z',
+      user: null,
+    });
+
+    postMock.mockResolvedValue({
+      message: 'refreshed',
+      accessToken: 'new-access',
+      refreshToken: 'new-refresh',
+      refreshExpiresAt: '2031-01-01T00:00:00.000Z',
+    });
+
+    const { refreshAccessToken } = await import('@/lib/auth/sessionRefresh');
+
+    await expect(refreshAccessToken()).resolves.toBe(false);
+
+    expect(clearAuthSessionMock).toHaveBeenCalledTimes(1);
+    expect(setAuthStateMock).toHaveBeenCalledWith({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      refreshExpiresAt: null,
+      isAuthenticated: false,
+    });
+    expect(persistAuthSessionMock).not.toHaveBeenCalled();
   });
 });

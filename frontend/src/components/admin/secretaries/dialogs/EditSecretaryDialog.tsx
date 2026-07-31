@@ -122,9 +122,9 @@ export default function EditSecretaryDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!secretary || !validateForm()) return;
+    if (!secretary) return;
 
-    if (!ADMIN_SECRETARY_WRITE_SUPPORTED) {
+    if (writeBlocked) {
       toast(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, {
         title: ADMIN_SECRETARY_BLOCKER_TITLE.ar,
         variant: "error",
@@ -133,25 +133,7 @@ export default function EditSecretaryDialog({
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      toast("تم تحديث بيانات السكرتير بنجاح", {
-        title: "تم التحديث",
-        variant: "success",
-        durationMs: 4200,
-      });
-
-      onOpenChange(false);
-      onSuccess?.();
-    } catch {
-      toast("حدث خطأ أثناء تحديث البيانات. يرجى المحاولة مرة أخرى.", {
-        title: "فشلت العملية",
-        variant: "error",
-        durationMs: 4200,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (!validateForm()) return;
   };
 
   const togglePermission = (permission: string) => {

@@ -38,6 +38,9 @@ export default function ChangeFacilityStatusDialog({
   const mutation = useMutation({
     mutationFn: (status: string) =>
       adminApi.facilities.updateStatus(facilityId!, status),
+    meta: {
+      skipGlobalError: true,
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "facilities"] });
       queryClient.invalidateQueries({

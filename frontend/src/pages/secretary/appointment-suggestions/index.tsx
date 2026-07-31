@@ -6,9 +6,12 @@ import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissio
 export default function SecretaryAppointmentSuggestionsPage() {
   const { hasPermission } = useSecretaryPermissions();
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const suggestionsQuery = useWaitlistSuggestions({ date }, Boolean(date));
-  const suggestions = suggestionsQuery.data?.freeSlots ?? [];
   const canBookFromWaitlist = hasPermission("waitlist:book");
+  const suggestionsQuery = useWaitlistSuggestions(
+    { date },
+    canBookFromWaitlist && Boolean(date),
+  );
+  const suggestions = suggestionsQuery.data?.freeSlots ?? [];
 
   return (
     <div className="space-y-6">
@@ -19,6 +22,7 @@ export default function SecretaryAppointmentSuggestionsPage() {
           </h1>
           <p className="font-cairo text-sm font-medium text-[#64748b] mt-1">
             اقتراحات مواعيد للمرضى
+            {suggestionsQuery.isRefetching ? " • جاري تحديث البيانات" : ""}
           </p>
         </div>
       </div>
@@ -41,9 +45,27 @@ export default function SecretaryAppointmentSuggestionsPage() {
           </h3>
         </div>
         <div className="space-y-3">
-          {suggestionsQuery.isLoading ? (
+          {!canBookFromWaitlist ? (
+            <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
+              ليست لديك صلاحية عرض اقتراحات المواعيد.
+            </div>
+          ) : suggestionsQuery.isLoading ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
               جاري تحميل الاقتراحات...
+            </div>
+          ) : suggestionsQuery.isError ? (
+            <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">
+              <p>تعذر تحميل اقتراحات المواعيد حالياً.</p>
+              <button
+                type="button"
+                onClick={() => void suggestionsQuery.refetch()}
+                disabled={suggestionsQuery.isRefetching}
+                className="mt-3 rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 font-cairo text-xs font-bold text-[#0f172a] transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {suggestionsQuery.isRefetching
+                  ? "جاري إعادة المحاولة..."
+                  : "إعادة المحاولة"}
+              </button>
             </div>
           ) : suggestions.length === 0 ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center font-cairo text-sm font-semibold text-[#64748b]">

@@ -23,10 +23,8 @@ export default function MedicalOrderCatalogDetailsDialog({
   kind,
   itemId,
 }: Props) {
-  const { item, isAwaitingData, isError } = useAdminMedicalOrderCatalogItem(
-    kind,
-    open ? itemId : null,
-  );
+  const { item, isAwaitingData, isError, refetch, isRefetching } =
+    useAdminMedicalOrderCatalogItem(kind, open ? itemId : null);
 
   const detailRows =
     item == null
@@ -125,7 +123,15 @@ export default function MedicalOrderCatalogDetailsDialog({
               </div>
             ) : isError || !item ? (
               <div className='rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-6 text-center font-cairo text-[12px] font-semibold text-[#B42318]'>
-                تعذر تحميل تفاصيل البند.
+                <p>تعذر تحميل تفاصيل البند.</p>
+                <button
+                  type='button'
+                  onClick={() => void refetch()}
+                  disabled={isRefetching}
+                  className='mt-3 font-cairo text-[12px] font-extrabold text-[#B42318] underline disabled:opacity-60'
+                >
+                  {isRefetching ? 'جاري إعادة المحاولة…' : 'إعادة المحاولة'}
+                </button>
               </div>
             ) : (
               <>

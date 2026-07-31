@@ -15,8 +15,15 @@ export default function SecretaryBookAppointmentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
-  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
   const doctorId = assignedDoctorQuery.data?.doctor?._id ?? "";
+  const canLoadBookingPatients =
+    !assignedDoctorQuery.isLoading &&
+    !assignedDoctorQuery.isError &&
+    Boolean(doctorId);
+  const patientsQuery = useDoctorPatients(
+    { page: 1, limit: 100 },
+    canLoadBookingPatients,
+  );
   useAvailableAppointmentTypes(doctorId);
   const bookAppointment = useBookDoctorAppointmentApi();
   const bookingBlockMessage = useMemo(() => {
@@ -74,7 +81,6 @@ export default function SecretaryBookAppointmentPage() {
     patientId: string;
     date: string;
     time: string;
-    consultationType: "clinic" | "video";
     appointmentTypeId?: string;
     notes?: string;
   }) {

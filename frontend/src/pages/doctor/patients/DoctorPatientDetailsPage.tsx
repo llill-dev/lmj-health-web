@@ -52,6 +52,7 @@ import {
 } from "@/lib/doctor/patients/patient-states";
 import {
   getDoctorAccessRequestErrorMessage,
+  getPatientFileAccessErrorMessage,
   getPatientFileMutationErrorMessage,
 } from "@/lib/doctor/writeFlowErrors";
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
@@ -478,7 +479,7 @@ export default function DoctorPatientDetailsPage() {
       if (!fileUrl) throw new Error("missing download url");
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileAccessErrorMessage(error, "open"), {
         title: "تعذّر فتح الملف",
         variant: "error",
       });
@@ -502,7 +503,7 @@ export default function DoctorPatientDetailsPage() {
         fileResponse.file?.originalName ?? "patient-file",
       );
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileAccessErrorMessage(error, "download"), {
         title: "تعذّر تحميل الملف",
         variant: "error",
       });

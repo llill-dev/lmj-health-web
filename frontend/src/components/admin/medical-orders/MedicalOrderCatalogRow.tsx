@@ -65,16 +65,17 @@ export default function MedicalOrderCatalogRow({
         >
           <Edit className='w-4 h-4' />
         </button>
-        <button
-          type='button'
-          onClick={() => onDelete(item)}
-          disabled={deleteDisabled || deleteUnsupported}
-          className='flex h-8 w-8 items-center justify-center rounded-[8px] text-[#EF4444] transition-colors hover:bg-red-50 disabled:pointer-events-none disabled:opacity-40'
-          title={deleteUnsupported ? 'الحذف غير مدعوم حالياً' : undefined}
-          aria-label={`حذف ${item.label}`}
-        >
-          <Trash2 className='w-4 h-4' />
-        </button>
+        {!deleteUnsupported ? (
+          <button
+            type='button'
+            onClick={() => onDelete(item)}
+            disabled={deleteDisabled}
+            className='flex h-8 w-8 items-center justify-center rounded-[8px] text-[#EF4444] transition-colors hover:bg-red-50 disabled:pointer-events-none disabled:opacity-40'
+            aria-label={`حذف ${item.label}`}
+          >
+            <Trash2 className='w-4 h-4' />
+          </button>
+        ) : null}
       </div>
     </div>
   );

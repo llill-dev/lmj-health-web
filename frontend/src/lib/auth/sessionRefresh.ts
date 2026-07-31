@@ -2,6 +2,7 @@ import { post } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { authEndpoints } from "@/lib/auth/endpoints";
 import {
+  clearAuthSession,
   normalizeTokenPair,
   persistAuthSession,
   readStoredAuthSession,
@@ -25,7 +26,17 @@ function applyRefreshedTokens(data: RefreshTokenResponse): boolean {
 
   const stored = readStoredAuthSession();
   const user = stored.user;
-  if (!user) return false;
+  if (!user) {
+    clearAuthSession();
+    useAuthStore.setState({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      refreshExpiresAt: null,
+      isAuthenticated: false,
+    });
+    return false;
+  }
 
   persistAuthSession(pair, {
     userId: user.userId,

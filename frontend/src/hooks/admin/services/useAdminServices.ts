@@ -266,6 +266,9 @@ export function useFacilityById(id: string, enabled = true) {
 export function useCreateFacility() {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateFacilityBody) =>
       post<FacilityResponse>(
         adminEndpoints.facilities.create,
@@ -283,6 +286,9 @@ export function useCreateFacility() {
 export function useUpdateFacility(id: string) {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: UpdateFacilityBody) =>
       put<FacilityResponse>(
         adminEndpoints.facilities.update(id),
@@ -301,6 +307,9 @@ export function useUpdateFacility(id: string) {
 export function useFacilityAction(id: string) {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: FacilityActionBody) =>
       patch<FacilityResponse>(adminEndpoints.facilities.action(id), body, {
         locale: "ar",
@@ -315,6 +324,9 @@ export function useFacilityAction(id: string) {
 export function useUpdateFacilityStatus() {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminApi.facilities.updateStatus(id, status),
     onSuccess: (_data, { id }) => {
@@ -327,6 +339,9 @@ export function useUpdateFacilityStatus() {
 export function useDeleteFacility() {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (id: string) => adminApi.facilities.remove(id),
     onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.allFacilities });
@@ -400,6 +415,9 @@ export function useServiceTypesPublicList() {
 export function useCreateServiceType() {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateServiceTypeBody) =>
       post<ServiceTypeResponse>(adminEndpoints.serviceTypes.create, body, {
         locale: "ar",
@@ -413,6 +431,9 @@ export function useCreateServiceType() {
 export function useUpdateServiceType(id: string) {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: UpdateServiceTypeBody) =>
       put<ServiceTypeResponse>(adminEndpoints.serviceTypes.update(id), body, {
         locale: "ar",
@@ -427,6 +448,9 @@ export function useUpdateServiceType(id: string) {
 export function useMutateServiceType() {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({ id, body }: { id: string; body: UpdateServiceTypeBody }) =>
       put<ServiceTypeResponse>(adminEndpoints.serviceTypes.update(id), body, {
         locale: "ar",
@@ -460,6 +484,9 @@ export function useServiceProvidersList(typeSlug?: string, cursor?: string) {
 export function useCreateProvider() {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateProviderBody) =>
       adminApi.serviceProviders.create(body),
     onSuccess: () => {
@@ -471,6 +498,9 @@ export function useCreateProvider() {
 export function useUpdateProvider(id: string) {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: UpdateProviderBody) =>
       adminApi.serviceProviders.update(id, body),
     onSuccess: () => {
@@ -482,6 +512,9 @@ export function useUpdateProvider(id: string) {
 export function useUpdateProviderStatus() {
   const qc = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminApi.serviceProviders.updateStatus(id, { status }),
     onSuccess: () => {

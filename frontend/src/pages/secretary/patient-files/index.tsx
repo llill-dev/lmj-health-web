@@ -9,7 +9,9 @@ import {
 import { useToast } from "@/components/ui/ToastProvider";
 import { useDoctorPatientFiles, useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
+import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { doctorApi } from "@/lib/doctor/client";
+import { getPatientFileAccessErrorMessage } from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload, triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
 import { useI18n } from "@/i18n/provider";
 
@@ -91,7 +93,8 @@ const PatientFileRow = memo<{
   onView: (fileId: string) => void;
   onDownload: (fileId: string) => void;
   locale: "ar" | "en";
-}>(function PatientFileRow({ file, onView, onDownload, locale }) {
+  disabled?: boolean;
+}>(function PatientFileRow({ file, onView, onDownload, locale, disabled }) {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
@@ -125,7 +128,8 @@ const PatientFileRow = memo<{
         <button
           type="button"
           onClick={() => onView(file.id)}
-          className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary text-white transition hover:bg-[#0A7A77]"
+          disabled={disabled}
+          className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary text-white transition hover:bg-[#0A7A77] disabled:cursor-not-allowed disabled:opacity-60"
           title={tr("عرض", "View")}
         >
           <Eye className="h-4 w-4" />
@@ -133,7 +137,8 @@ const PatientFileRow = memo<{
         <button
           type="button"
           onClick={() => onDownload(file.id)}
-          className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#1F2937] transition hover:bg-[#F8FAFC]"
+          disabled={disabled}
+          className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#1F2937] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
           title={tr("تحميل", "Download")}
         >
           <Download className="h-4 w-4" />
@@ -150,9 +155,45 @@ export default function SecretaryPatientFilesPage() {
   const [patientId, setPatientId] = useState("");
   const { toast } = useToast();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
+  const { hasPermission } = useSecretaryPermissions();
+  const canViewFiles = hasPermission("patients:files:view");
   const doctorId = assignedDoctorQuery.data?.doctor?._id ?? "";
-  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
-  const filesQuery = useDoctorPatientFiles(patientId, Boolean(patientId));
+  const canLoadPatientFiles = canViewFiles && Boolean(doctorId);
+  const patientsQuery = useDoctorPatients(
+    { page: 1, limit: 100 },
+    canLoadPatientFiles,
+  );
+  const filesQuery = useDoctorPatientFiles(
+    patientId,
+    canLoadPatientFiles && Boolean(patientId),
+  );
+  const fileActionsDisabledReason = useMemo(() => {
+    if (!canViewFiles) {
+      return tr(
+        "هذا الحساب لا يملك صلاحية الوصول إلى ملفات المرضى حالياً.",
+        "This account is not allowed to access patient files right now.",
+      );
+    }
+    if (assignedDoctorQuery.isLoading) {
+      return tr(
+        "جاري تحميل الطبيب المسؤول قبل إتاحة فتح الملفات وتنزيلها.",
+        "Loading the assigned doctor before file actions become available.",
+      );
+    }
+    if (assignedDoctorQuery.isError) {
+      return tr(
+        "تعذر تحميل الطبيب المسؤول، لذلك تم تعطيل فتح الملفات وتنزيلها مؤقتاً.",
+        "Could not load the assigned doctor, so file open and download actions are temporarily disabled.",
+      );
+    }
+    if (!doctorId) {
+      return tr(
+        "لا يمكن فتح ملفات المرضى أو تنزيلها قبل ربط السكرتير بطبيب مسؤول.",
+        "Patient files cannot be opened or downloaded until the secretary is linked to an assigned doctor.",
+      );
+    }
+    return null;
+  }, [assignedDoctorQuery.isError, assignedDoctorQuery.isLoading, canViewFiles, doctorId, tr]);
 
   const patientDirectory = useMemo(
     () =>
@@ -175,7 +216,7 @@ export default function SecretaryPatientFilesPage() {
   );
 
   async function resolveDownloadUrl(fileId: string) {
-    if (!doctorId || !patientId || !fileId) return null;
+    if (!doctorId || !patientId || !fileId || !canViewFiles) return null;
     const response = await doctorApi.patients.getFileDownloadUrl(
       doctorId,
       patientId,
@@ -189,8 +230,8 @@ export default function SecretaryPatientFilesPage() {
       const url = await resolveDownloadUrl(fileId);
       if (!url) throw new Error("missing_url");
       await triggerBrowserFileDownload(url, filename);
-    } catch {
-      toast(tr("تعذر تنزيل الملف الآن. حاول مرة أخرى.", "Could not download file now. Please try again."), {
+    } catch (error) {
+      toast(getPatientFileAccessErrorMessage(error, "download", locale), {
         title: tr("فشل التنزيل", "Download failed"),
         variant: "error",
       });
@@ -202,8 +243,8 @@ export default function SecretaryPatientFilesPage() {
       const url = await resolveDownloadUrl(fileId);
       if (!url) throw new Error("missing_url");
       await triggerBrowserFileDownloadAndOpen(url, filename);
-    } catch {
-      toast(tr("تعذر فتح الملف الآن. حاول مرة أخرى.", "Could not open file now. Please try again."), {
+    } catch (error) {
+      toast(getPatientFileAccessErrorMessage(error, "open", locale), {
         title: tr("فشل الفتح", "Open failed"),
         variant: "error",
       });
@@ -232,6 +273,11 @@ export default function SecretaryPatientFilesPage() {
           <select
             value={patientId}
             onChange={(event) => setPatientId(event.target.value)}
+            disabled={
+              !canLoadPatientFiles ||
+              patientsQuery.isAwaitingData ||
+              patientsQuery.isRefetching
+            }
             className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none focus:border-primary"
           >
             <option value="">{tr("اختر مريضاً لعرض ملفاته", "Choose a patient to view files")}</option>
@@ -255,7 +301,38 @@ export default function SecretaryPatientFilesPage() {
           </div>
         </div>
 
-        {!patientId ? (
+        {!canLoadPatientFiles ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="max-w-[560px] font-cairo text-[15px] font-semibold text-[#64748B]">
+              {fileActionsDisabledReason}
+            </p>
+          </div>
+        ) : patientsQuery.isAwaitingData ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr("جاري تحميل قائمة المرضى...", "Loading patients...")}
+            </p>
+          </div>
+        ) : patientsQuery.isError ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="max-w-[560px] font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr(
+                "تعذر تحميل قائمة المرضى المرتبطة بالطبيب المسؤول، لذلك لا يمكن عرض الملفات حالياً.",
+                "Could not load the assigned doctor's patient list, so files cannot be shown right now.",
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={() => void patientsQuery.refetch()}
+              disabled={patientsQuery.isRefetching}
+              className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {patientsQuery.isRefetching
+                ? tr("جاري إعادة المحاولة...", "Retrying...")
+                : tr("إعادة المحاولة", "Retry")}
+            </button>
+          </div>
+        ) : !patientId ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {tr("اختر مريضاً أولاً لعرض الملفات.", "Choose a patient first to view files.")}
@@ -267,6 +344,25 @@ export default function SecretaryPatientFilesPage() {
               {tr("جاري تحميل الملفات...", "Loading files...")}
             </p>
           </div>
+        ) : filesQuery.isError ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="max-w-[560px] font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr(
+                "تعذر تحميل ملفات المريض حالياً. أعد المحاولة لمتابعة العرض أو التنزيل.",
+                "Could not load the patient files right now. Retry to continue viewing or downloading.",
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={() => void filesQuery.refetch()}
+              disabled={filesQuery.isRefetching}
+              className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {filesQuery.isRefetching
+                ? tr("جاري إعادة المحاولة...", "Retrying...")
+                : tr("إعادة المحاولة", "Retry")}
+            </button>
+          </div>
         ) : searchedFiles.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
@@ -274,6 +370,11 @@ export default function SecretaryPatientFilesPage() {
                 ? tr("لا توجد نتائج مطابقة لبحثك.", "No results match your search.")
                 : tr("لا يوجد ملفات للمرضى.", "No patient files found.")}
             </p>
+            {fileActionsDisabledReason ? (
+              <p className="max-w-[520px] font-cairo text-[13px] font-semibold text-[#98A2B3]">
+                {fileActionsDisabledReason}
+              </p>
+            ) : null}
           </div>
         ) : (
           <>
@@ -284,6 +385,7 @@ export default function SecretaryPatientFilesPage() {
                 locale={locale}
                 onView={(fileId) => handleView(fileId, file.filename)}
                 onDownload={(fileId) => handleDownload(fileId, file.filename)}
+                disabled={Boolean(fileActionsDisabledReason)}
               />
             ))}
           </>

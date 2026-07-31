@@ -34,6 +34,9 @@ export function useDoctorSecretaries() {
 export function useCreateDoctorSecretary() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateDoctorSecretaryBody) =>
       doctorSecretariesApi.create(body),
     onSuccess: () => {
@@ -47,6 +50,9 @@ export function useCreateDoctorSecretary() {
 export function useUpdateDoctorSecretary() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: {
       secretaryId: string;
       body: UpdateDoctorSecretaryBody;
@@ -62,6 +68,9 @@ export function useUpdateDoctorSecretary() {
 export function useUnassignDoctorSecretary() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (secretaryId: string) =>
       doctorSecretariesApi.unassign(secretaryId),
     onSuccess: () => {

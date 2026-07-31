@@ -230,4 +230,29 @@ describe('api refresh retry', () => {
     expect(xhrRequests[0]?.Authorization).toBe('Bearer old-access');
     expect(xhrRequests[1]?.Authorization).toBe('Bearer new-access');
   });
+
+  it('retries a multipart upload with the refreshed store token even when the original upload used an explicit token', async () => {
+    refreshAccessTokenMock.mockImplementation(async () => {
+      authState.accessToken = 'new-access';
+      return true;
+    });
+
+    xhrPlans = [
+      { status: 401, responseText: JSON.stringify({ message: 'unauthorized' }) },
+      { status: 200, responseText: JSON.stringify({ uploaded: true }) },
+    ];
+
+    const { apiMultipart } = await import('@/lib/api');
+
+    const result = await apiMultipart('/api/secure/upload', new FormData(), {
+      token: 'stale-explicit-token',
+      onProgress: vi.fn(),
+    });
+
+    expect(result).toEqual({ uploaded: true });
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(xhrRequests).toHaveLength(2);
+    expect(xhrRequests[0]?.Authorization).toBe('Bearer stale-explicit-token');
+    expect(xhrRequests[1]?.Authorization).toBe('Bearer new-access');
+  });
 });

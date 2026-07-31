@@ -61,7 +61,7 @@ export default function AdminMedicalOrdersPage() {
 
   const [debouncedSearch] = useDebounce(search, 300);
   const [debouncedCategory] = useDebounce(category, 350);
-  const { data, isAwaitingData, isError, error, refetch } =
+  const { data, isAwaitingData, isError, error, refetch, isRefetching } =
     useAdminMedicalOrderCatalog(kind, {
       search: debouncedSearch,
       category: debouncedCategory || undefined,
@@ -259,12 +259,21 @@ export default function AdminMedicalOrdersPage() {
             <button
               type="button"
               onClick={() => void refetch()}
-              className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline"
+              disabled={isRefetching}
+              className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {tr("إعادة المحاولة", "Retry")}
+              {isRefetching ? tr("جارٍ إعادة المحاولة…", "Retrying...") : tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         )}
+
+        {!isAwaitingData && !isError && isRefetching ? (
+          <div className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-3 text-start">
+            <p className="font-cairo text-[12px] font-semibold text-[#667085]">
+              {tr("جارٍ تحديث بيانات الكتالوج…", "Refreshing catalog data...")}
+            </p>
+          </div>
+        ) : null}
 
         {isAwaitingData ? (
           <SkeletonList

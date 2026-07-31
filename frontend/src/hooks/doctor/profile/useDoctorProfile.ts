@@ -22,6 +22,9 @@ export function useDoctorProfile() {
 export function useUpdateDoctorProfile() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: DoctorProfilePatchInput) =>
       doctorProfileApi.patchProfile(input),
     onSuccess: (data) => {
@@ -46,6 +49,9 @@ export function useDoctorProfileChangeRequests(status?: string) {
 export function useSubmitDoctorProfileChangeRequest() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: DoctorProfileChangeRequestInput) =>
       doctorProfileChangeRequestsApi.submit(input),
     onSuccess: () => {

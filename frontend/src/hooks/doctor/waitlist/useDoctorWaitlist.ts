@@ -31,10 +31,14 @@ export function resolveWaitlistPatientPublicId(request: WaitlistRequest): string
   return '—';
 }
 
-export function useDoctorWaitlist(params: WaitlistListParams) {
+export function useDoctorWaitlist(
+  params: WaitlistListParams,
+  enabled = true,
+) {
   const query = useQuery({
     queryKey: waitlistQueryKeys.list(params),
     queryFn: () => waitlistApi.list(params),
+    enabled,
     staleTime: 30_000,
   });
 
@@ -48,7 +52,9 @@ export function useDoctorWaitlist(params: WaitlistListParams) {
     total,
     totalPages,
     page: query.data?.page ?? params.page ?? 1,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
+    isRefetching: query.isRefetching,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,

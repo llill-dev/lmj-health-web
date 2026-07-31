@@ -46,6 +46,7 @@ import { useRetryAction } from "@/lib/query/useRetryAction";
 import { doctorAppointmentsApi } from "@/lib/doctor/client";
 import {
   getAppointmentBookingErrorMessage,
+  getAppointmentFileAccessErrorMessage,
   getAppointmentFileMutationErrorMessage,
   getAppointmentStatusMutationErrorMessage,
   getAppointmentWriteErrorMessage,
@@ -315,7 +316,7 @@ export default function DoctorAppointmentsPage() {
         if (!fileUrl) throw new Error("missing download url");
         window.open(fileUrl, "_blank", "noopener,noreferrer");
       } catch (error) {
-        toast(getUserFacingRequestErrorMessage(error), {
+        toast(getAppointmentFileAccessErrorMessage(error, "open"), {
           title: "تعذر فتح الملف",
           variant: "error",
         });
@@ -341,7 +342,7 @@ export default function DoctorAppointmentsPage() {
           fileResponse.file?.originalName ?? "appointment-file",
         );
       } catch (error) {
-        toast(getUserFacingRequestErrorMessage(error), {
+        toast(getAppointmentFileAccessErrorMessage(error, "download"), {
           title: "تعذر تحميل الملف",
           variant: "error",
         });
@@ -704,7 +705,7 @@ export default function DoctorAppointmentsPage() {
           doctorId={readAuthUser()?.actorIds?.doctorId}
           confirmDisabled={rescheduleMutation.isPending}
           onConfirm={async (values) => {
-            if (!rescheduleTarget) return;
+            if (!rescheduleTarget) return false;
             try {
               await rescheduleMutation.mutateAsync({
                 id: rescheduleTarget.id,
@@ -721,7 +722,8 @@ export default function DoctorAppointmentsPage() {
                 variant: "error",
                 durationMs: 4800,
               });
-              throw error;
+              return true;
+              return false;
             }
           }}
         />

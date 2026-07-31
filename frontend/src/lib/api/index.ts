@@ -485,13 +485,13 @@ export async function apiRequest<T = unknown>(
           locale,
           hadBearerToken,
         );
-          if (recovered) {
-            const nextToken = useAuthStore.getState().accessToken || "";
-            if (nextToken) {
-              config.headers = {
-                ...(asStringHeaderRecord(config.headers) ?? {}),
-                Authorization: `Bearer ${nextToken}`,
-              };
+        if (recovered) {
+          const nextToken = useAuthStore.getState().accessToken || "";
+          if (nextToken) {
+            config.headers = {
+              ...(asStringHeaderRecord(config.headers) ?? {}),
+              Authorization: `Bearer ${nextToken}`,
+            };
             return execute(true);
           }
         }
@@ -660,10 +660,7 @@ export async function apiMultipart<T = unknown>(
           hadBearerToken,
         );
         if (recovered) {
-          const nextToken =
-            providedToken !== undefined && omitAuth !== true
-              ? providedToken
-              : useAuthStore.getState().accessToken || "";
+          const nextToken = useAuthStore.getState().accessToken || "";
           if (nextToken) {
             return uploadWithXhr(nextToken);
           }

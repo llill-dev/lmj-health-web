@@ -3,6 +3,8 @@ import {
   BookOpen,
   ClipboardList,
   Layers,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -68,12 +70,35 @@ export default function DataEntryDashboardPage() {
     return lab + imaging + procedure;
   }, [imagingQuery.data?.items, labQuery.data?.items, procedureQuery.data?.items]);
 
+  const hasBlockingError =
+    myContentQuery.isError ||
+    templatesQuery.isError ||
+    labQuery.isError ||
+    imagingQuery.isError ||
+    procedureQuery.isError;
+
   const isLoadingKpis =
     myContentQuery.isAwaitingData ||
     templatesQuery.isAwaitingData ||
     labQuery.isAwaitingData ||
     imagingQuery.isAwaitingData ||
     procedureQuery.isAwaitingData;
+
+  const isRefetchingKpis =
+    !isLoadingKpis &&
+    (myContentQuery.isRefetching ||
+      templatesQuery.isRefetching ||
+      labQuery.isRefetching ||
+      imagingQuery.isRefetching ||
+      procedureQuery.isRefetching);
+
+  const retryAll = () => {
+    void myContentQuery.refetch();
+    void templatesQuery.refetch();
+    void labQuery.refetch();
+    void imagingQuery.refetch();
+    void procedureQuery.refetch();
+  };
 
   return (
     <>
@@ -112,6 +137,37 @@ export default function DataEntryDashboardPage() {
             },
           ]}
         />
+
+        {isRefetchingKpis ? (
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#BFE3E1] bg-[#F7FFFE] px-4 py-2 font-cairo text-[12px] font-bold text-primary">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {locale === "ar" ? "جاري تحديث بيانات اللوحة..." : "Refreshing dashboard data..."}
+          </div>
+        ) : null}
+
+        {hasBlockingError ? (
+          <section className="mt-5 rounded-[18px] border border-[#FECACA] bg-[#FFF7F7] px-5 py-5 text-right">
+            <h2 className="font-cairo text-[15px] font-extrabold text-[#B42318]">
+              {locale === "ar"
+                ? "تعذّر تحميل بعض بيانات لوحة الإدخال"
+                : "Some data-entry dashboard data could not be loaded"}
+            </h2>
+            <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#7A271A]">
+              {locale === "ar"
+                ? "أعد المحاولة لتحميل المحتوى والقوالب وكتالوج الأوامر الطبية بشكل صحيح."
+                : "Retry to reload content, templates, and medical-order catalog data."}
+            </p>
+            <button
+              type="button"
+              onClick={retryAll}
+              disabled={isRefetchingKpis}
+              className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 py-2 font-cairo text-[13px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefetchingKpis ? "animate-spin" : ""}`} />
+              {locale === "ar" ? "إعادة المحاولة" : "Retry"}
+            </button>
+          </section>
+        ) : null}
 
         <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
           {capabilityCards.map((card) => {

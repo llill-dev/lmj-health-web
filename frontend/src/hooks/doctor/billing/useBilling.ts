@@ -313,6 +313,9 @@ function invalidateBilling(queryClient: ReturnType<typeof useQueryClient>) {
 export function useCreateBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingInvoiceBody) =>
       billingApi.invoices.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -322,6 +325,9 @@ export function useCreateBillingInvoice() {
 export function useCreateBillingPayment() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingPaymentBody) =>
       billingApi.payments.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -331,6 +337,9 @@ export function useCreateBillingPayment() {
 export function useUpdateBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: {
       invoiceId: string;
       body: UpdateBillingInvoiceBody;
@@ -359,6 +368,9 @@ export function useBillingInvoicePrefill(appointmentId: string | null) {
 export function useCancelBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: { invoiceId: string; reason?: string }) =>
       billingApi.invoices.cancel(input.invoiceId, {
         reason: input.reason,
@@ -370,6 +382,9 @@ export function useCancelBillingInvoice() {
 export function useIssueBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: { invoiceId: string; dueAt?: string }) =>
       billingApi.invoices.issue(input.invoiceId, input.dueAt ? { dueAt: input.dueAt } : undefined),
     onSuccess: () => invalidateBilling(queryClient),
@@ -379,6 +394,9 @@ export function useIssueBillingInvoice() {
 export function useCreateBillingRefund() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingRefundBody) =>
       billingApi.refunds.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -388,6 +406,9 @@ export function useCreateBillingRefund() {
 export function useCreateBillingExpense() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingExpenseBody) =>
       billingApi.expenses.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -396,6 +417,9 @@ export function useCreateBillingExpense() {
 
 export function useExportBillingReportPdf() {
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (params: BillingQueryParams) =>
       billingApi.reports.exportPdf(params),
   });
@@ -404,6 +428,9 @@ export function useExportBillingReportPdf() {
 export function useUpdateBillingSettings() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: Partial<ApiBillingSettings>) =>
       billingApi.settings.update(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -438,6 +465,9 @@ export function useBillingServices(params: {
 export function useCreateBillingService() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: import('@/lib/doctor/billing/apiTypes').CreateBillingServiceBody) =>
       billingApi.services.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -447,6 +477,9 @@ export function useCreateBillingService() {
 export function useUpdateBillingService() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: {
       serviceId: string;
       body: import('@/lib/doctor/billing/apiTypes').UpdateBillingServiceBody;
@@ -458,6 +491,9 @@ export function useUpdateBillingService() {
 export function useDeleteBillingService() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (serviceId: string) => billingApi.services.delete(serviceId),
     onSuccess: () => invalidateBilling(queryClient),
   });

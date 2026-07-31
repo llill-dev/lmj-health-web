@@ -442,10 +442,21 @@ function buildMedicalOrderCode(label: string): string {
 }
 
 function medicalOrderCategoryByKind(kind: MedicalOrderCatalogKind): string {
+  assertAdminMedicalOrderCatalogKindSupported(kind);
   if (kind === "lab") return "LAB";
   if (kind === "imaging") return "IMAGING";
   if (kind === "procedure") return "PROCEDURE";
   return "REFERRAL";
+}
+
+function assertAdminMedicalOrderCatalogKindSupported(
+  kind: MedicalOrderCatalogKind,
+) {
+  if (kind === "referral") {
+    throw new Error(
+      "Admin medical order referrals are not documented in docs/openapi.json.",
+    );
+  }
 }
 
 function buildMedicalOrderCreatePayload(body: AdminMedicalOrderCatalogUpsertBody) {
@@ -2106,6 +2117,7 @@ export const adminApi = {
   },
   medicalOrderCatalog: {
     list: async (params: AdminMedicalOrderCatalogListParams) => {
+      assertAdminMedicalOrderCatalogKindSupported(params.type);
       const qs = new URLSearchParams();
       if (params.search?.trim()) qs.set("search", params.search.trim());
       if (params.q?.trim()) qs.set("q", params.q.trim());
@@ -2135,12 +2147,14 @@ export const adminApi = {
       }
     },
     create: (body: AdminMedicalOrderCatalogUpsertBody) =>
+      (assertAdminMedicalOrderCatalogKindSupported(body.kind),
       post<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.collection(body.kind),
         buildMedicalOrderCreatePayload(body),
         { locale: "ar" },
-      ).then(normalizeAdminMedicalOrderCatalogMutationResponse),
+      ).then(normalizeAdminMedicalOrderCatalogMutationResponse)),
     getById: (kind: MedicalOrderCatalogKind, id: string) =>
+      (assertAdminMedicalOrderCatalogKindSupported(kind),
       get<AdminMedicalOrderCatalogDetailsResponse | AdminApiRecord>(
         adminEndpoints.orderCatalog.item(kind, id),
         { locale: "ar" },
@@ -2157,17 +2171,18 @@ export const adminApi = {
           ...(asAdminRecord(raw) ?? {}),
           item,
         } as AdminMedicalOrderCatalogDetailsResponse;
-      }),
+      })),
     update: (
       kind: MedicalOrderCatalogKind,
       id: string,
       body: Partial<AdminMedicalOrderCatalogUpsertBody>,
     ) =>
+      (assertAdminMedicalOrderCatalogKindSupported(kind),
       patch<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.item(kind, id),
         buildMedicalOrderUpdatePayload(body),
         { locale: "ar" },
-      ).then(normalizeAdminMedicalOrderCatalogMutationResponse),
+      ).then(normalizeAdminMedicalOrderCatalogMutationResponse)),
     remove: (kind: MedicalOrderCatalogKind, id: string) =>
       unsupportedApiOperation(
         `DELETE ${adminEndpoints.orderCatalog.item(kind, id)} is not documented in API-3.`,

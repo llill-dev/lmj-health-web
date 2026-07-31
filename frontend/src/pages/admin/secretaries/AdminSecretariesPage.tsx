@@ -129,6 +129,7 @@ export default function AdminSecretariesPage() {
           )}
           headerIcon={<Users className="h-8 w-8 text-white" />}
           actionLabel={tr("إنشاء سكرتير", "Create secretary")}
+          actionDisabled={!ADMIN_SECRETARY_WRITE_SUPPORTED}
           onActionClick={openCreate}
           kpis={[
             {
@@ -277,7 +278,8 @@ export default function AdminSecretariesPage() {
                           type="button"
                           onClick={() => openEdit(s)}
                           title={tr("تعديل البيانات", "Edit details")}
-                          className="flex h-8 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
+                          disabled={!ADMIN_SECRETARY_WRITE_SUPPORTED}
+                          className="flex h-8 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4] disabled:cursor-not-allowed disabled:border-[#E5E7EB] disabled:bg-[#F9FAFB] disabled:text-[#98A2B3]"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                           {tr("تعديل", "Edit")}

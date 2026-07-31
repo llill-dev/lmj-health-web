@@ -134,12 +134,48 @@ export default function SecretaryDoctorSchedulePage() {
             </h3>
             <p className="mt-1 font-cairo text-[14px] font-semibold text-[#98A2B3]">
               {doctorName}
+              {scheduleQuery.isRefetching
+                ? tr(" • جاري تحديث البيانات", " • Refreshing data")
+                : ""}
             </p>
           </div>
 
-          {scheduleQuery.isLoading ? (
+          {assignedDoctorQuery.isLoading ? (
+            <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              {tr(
+                "جاري تحميل بيانات الطبيب المسؤول...",
+                "Loading assigned doctor...",
+              )}
+            </div>
+          ) : assignedDoctorQuery.isError || !doctorId ? (
+            <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              {tr(
+                "تعذر تحميل الطبيب المسؤول حالياً، لذلك لا يمكن عرض الجدول.",
+                "Assigned doctor could not be loaded, so the schedule cannot be shown right now.",
+              )}
+            </div>
+          ) : scheduleQuery.isLoading ? (
             <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
               {tr("جاري تحميل جدول الطبيب...", "Loading doctor schedule...")}
+            </div>
+          ) : scheduleQuery.isError ? (
+            <div className="py-8 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
+              <p>
+                {tr(
+                  "تعذر تحميل جدول الطبيب حالياً.",
+                  "Could not load the doctor schedule right now.",
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => void scheduleQuery.refetch()}
+                disabled={scheduleQuery.isRefetching}
+                className="mt-3 rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {scheduleQuery.isRefetching
+                  ? tr("جاري إعادة المحاولة...", "Retrying...")
+                  : tr("إعادة المحاولة", "Retry")}
+              </button>
             </div>
           ) : (
             <div className="space-y-3">

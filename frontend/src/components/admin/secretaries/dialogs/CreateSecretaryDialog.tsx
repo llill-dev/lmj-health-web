@@ -110,9 +110,7 @@ export default function CreateSecretaryDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
-    if (!ADMIN_SECRETARY_WRITE_SUPPORTED) {
+    if (writeBlocked) {
       toast(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, {
         title: ADMIN_SECRETARY_BLOCKER_TITLE.ar,
         variant: "error",
@@ -121,34 +119,7 @@ export default function CreateSecretaryDialog({
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      toast("تم إنشاء حساب السكرتير بنجاح", {
-        title: "تم الإنشاء",
-        variant: "success",
-        durationMs: 4200,
-      });
-
-      setFormData({
-        fullName: "",
-        email: "",
-        password: "",
-        phone: "",
-        gender: "Male",
-        permissions: [],
-      });
-      setErrors({});
-      onOpenChange(false);
-      onSuccess?.();
-    } catch {
-      toast("حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.", {
-        title: "فشلت العملية",
-        variant: "error",
-        durationMs: 4200,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (!validateForm()) return;
   };
 
   const togglePermission = (permission: string) => {

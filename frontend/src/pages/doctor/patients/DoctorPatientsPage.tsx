@@ -49,6 +49,7 @@ import {
 import {
   getCreateTemporaryPatientErrorMessage,
   getDoctorAccessRequestErrorMessage,
+  getPatientFileAccessErrorMessage,
   getPatientFileMutationErrorMessage,
 } from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
@@ -539,7 +540,7 @@ export default function DoctorPatientsPage() {
       if (!fileUrl) throw new Error("missing download url");
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileAccessErrorMessage(error, "open"), {
         title: "تعذر فتح الملف",
         variant: "error",
       });
@@ -563,7 +564,7 @@ export default function DoctorPatientsPage() {
         fileResponse.file?.originalName ?? "patient-file",
       );
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileAccessErrorMessage(error, "download"), {
         title: "تعذر تحميل الملف",
         variant: "error",
       });
