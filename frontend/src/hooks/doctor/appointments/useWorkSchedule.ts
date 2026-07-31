@@ -52,6 +52,9 @@ export function useUpdateSchedule() {
   const doctorId = getDoctorId();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: async (payload: any) => {
       // Convert UI format to API format
       // UI sends: { settings: {appointmentDuration, breakStart, breakEnd}, weekly: {sunday: {enabled, from, to}}, exceptions: [{id, title, date}] }
@@ -121,6 +124,9 @@ export function useUpdateScheduleSettings() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (payload: DoctorUpdateScheduleSettingsBody) => doctorApi.schedule.updateSettings(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorScheduleQueryKeys.all });
@@ -141,6 +147,9 @@ export function useAddScheduleDay() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (payload: DoctorAddDayBody) => doctorApi.schedule.addDay(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorScheduleQueryKeys.all });
@@ -161,6 +170,9 @@ export function useUpdateScheduleDay() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({ day, slots }: { day: ScheduleDayKey; slots: ScheduleTimeSlot[] }) => 
       doctorApi.schedule.updateDay(day, { slots }),
     onSuccess: () => {
@@ -182,6 +194,9 @@ export function useDeleteScheduleDay() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (day: ScheduleDayKey) => doctorApi.schedule.deleteDay(day),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorScheduleQueryKeys.all });
@@ -202,6 +217,9 @@ export function useAddScheduleException() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (payload: DoctorAddExceptionBody) => doctorApi.schedule.addException(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorScheduleQueryKeys.all });
@@ -222,6 +240,9 @@ export function useUpdateScheduleExceptions() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (payload: DoctorUpdateExceptionsBody) => doctorApi.schedule.updateExceptions(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorScheduleQueryKeys.all });
@@ -242,6 +263,9 @@ export function useDeleteScheduleException() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (exceptionId: string) => doctorApi.schedule.deleteException(exceptionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorScheduleQueryKeys.all });

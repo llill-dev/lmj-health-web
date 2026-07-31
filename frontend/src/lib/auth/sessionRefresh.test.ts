@@ -39,6 +39,7 @@ vi.mock('@/store/authStore', () => ({
 
 describe('sessionRefresh', () => {
   beforeEach(() => {
+    vi.resetModules();
     postMock.mockReset();
     persistAuthSessionMock.mockReset();
     readStoredAuthSessionMock.mockReset();

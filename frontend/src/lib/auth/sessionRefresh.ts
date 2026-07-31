@@ -19,6 +19,16 @@ function asRefreshTokenRecord(value: RefreshTokenResponse): Record<string, unkno
     : null;
 }
 
+function isUnauthorizedRefreshError(error: unknown): boolean {
+  if (error instanceof ApiError) return error.status === 401;
+  return (
+    !!error
+    && typeof error === "object"
+    && "status" in error
+    && (error as { status?: unknown }).status === 401
+  );
+}
+
 function applyRefreshedTokens(data: RefreshTokenResponse): boolean {
   const record = asRefreshTokenRecord(data);
   const pair = record ? normalizeTokenPair(record) : null;
@@ -81,7 +91,7 @@ export async function refreshAccessToken(): Promise<boolean> {
 
       return applyRefreshedTokens(data);
     } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
+      if (isUnauthorizedRefreshError(error)) {
         return false;
       }
       throw error;

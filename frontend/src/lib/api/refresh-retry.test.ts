@@ -108,7 +108,8 @@ class MockXMLHttpRequest {
 }
 
 describe('api refresh retry', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    vi.resetModules();
     authState.accessToken = 'old-access';
     refreshAccessTokenMock.mockReset();
     ensureFreshAccessTokenMock.mockReset();
@@ -124,6 +125,9 @@ describe('api refresh retry', () => {
 
     vi.stubGlobal('fetch', vi.fn());
     vi.stubGlobal('XMLHttpRequest', MockXMLHttpRequest as unknown as typeof XMLHttpRequest);
+
+    const { setCurrentLocale } = await import('@/i18n/runtime');
+    setCurrentLocale('ar');
   });
 
   it('retries a protected fetch request once after refresh succeeds', async () => {
@@ -203,7 +207,7 @@ describe('api refresh retry', () => {
     expect(
       (fetchMock.mock.calls[1]?.[1] as RequestInit).headers,
     ).toMatchObject({
-      Authorization: 'Bearer [REDACTED:Bearer token]',
+      Authorization: 'Bearer new-access',
     });
   });
 

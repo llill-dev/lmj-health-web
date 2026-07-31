@@ -146,8 +146,8 @@ export default function SecretaryDashboardPage() {
     canViewWaitlist,
   );
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
-  const assignedDoctor = assignedDoctorQuery.data?.doctor;
-  const rating = assignedDoctorQuery.data?.doctor?.averageRating;
+  const assignedDoctor = assignedDoctorQuery.assignedDoctor;
+  const rating = assignedDoctorQuery.assignedDoctor?.averageRating;
 
   if (assignedDoctorQuery.isLoading) {
     return (

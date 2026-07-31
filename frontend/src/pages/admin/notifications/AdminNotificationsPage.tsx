@@ -114,6 +114,12 @@ export default function AdminNotificationsPage() {
           />
         </div>
 
+        {!isAwaitingData && listQuery.isRefetching ? (
+          <div className="inline-flex items-center gap-2 rounded-[10px] border border-[#D5E8E6] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-primary">
+            جاري تحديث الإشعارات...
+          </div>
+        ) : null}
+
         {listQuery.isError ? (
           <div
             role="alert"
@@ -123,9 +129,12 @@ export default function AdminNotificationsPage() {
             <button
               type="button"
               onClick={() => listQuery.refetch()}
-              className="me-2 underline decoration-red-800 underline-offset-2"
+              disabled={listQuery.isRefetching}
+              className="me-2 underline decoration-red-800 underline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {tr("إعادة المحاولة", "Retry")}
+              {listQuery.isRefetching
+                ? tr("جارٍ إعادة المحاولة...", "Retrying...")
+                : tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         ) : (

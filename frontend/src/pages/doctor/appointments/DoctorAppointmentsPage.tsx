@@ -12,7 +12,7 @@ import {
   WifiOff,
   XCircle,
 } from "lucide-react";
-import { useCallback, useMemo, useState, type ChangeEvent } from "react";
+import { useCallback, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Helmet } from "react-helmet-async";
 import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -170,6 +170,7 @@ export default function DoctorAppointmentsPage() {
   const [appointmentFileActionKey, setAppointmentFileActionKey] = useState<
     string | null
   >(null);
+  const appointmentFileActionKeyRef = useRef<string | null>(null);
   const [unlinkFileConfirmOpen, setUnlinkFileConfirmOpen] = useState(false);
   const [unlinkFileTarget, setUnlinkFileTarget] = useState<{
     fileId: string;
@@ -304,9 +305,21 @@ export default function DoctorAppointmentsPage() {
     [listQuery.error],
   );
 
+  const beginAppointmentFileAction = useCallback((actionKey: string) => {
+    if (appointmentFileActionKeyRef.current) return false;
+    appointmentFileActionKeyRef.current = actionKey;
+    setAppointmentFileActionKey(actionKey);
+    return true;
+  }, []);
+
+  const finishAppointmentFileAction = useCallback(() => {
+    appointmentFileActionKeyRef.current = null;
+    setAppointmentFileActionKey(null);
+  }, []);
+
   const handleAppointmentFileOpen = useCallback(
     async (appointmentId: string, fileId: string) => {
-      setAppointmentFileActionKey(fileId);
+      if (!beginAppointmentFileAction(fileId)) return;
       try {
         const response = await doctorAppointmentsApi.getFileDownloadUrl(
           appointmentId,
@@ -321,15 +334,15 @@ export default function DoctorAppointmentsPage() {
           variant: "error",
         });
       } finally {
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, toast],
   );
 
   const handleAppointmentFileDownload = useCallback(
     async (appointmentId: string, fileId: string) => {
-      setAppointmentFileActionKey(fileId);
+      if (!beginAppointmentFileAction(fileId)) return;
       try {
         const [downloadResponse, fileResponse] = await Promise.all([
           doctorAppointmentsApi.getFileDownloadUrl(appointmentId, fileId),
@@ -347,10 +360,10 @@ export default function DoctorAppointmentsPage() {
           variant: "error",
         });
       } finally {
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, toast],
   );
 
   const handleRequestUnlinkAppointmentFile = useCallback(
@@ -367,7 +380,7 @@ export default function DoctorAppointmentsPage() {
   /** تنفيذ فك الربط بعد التأكيد — يعرض نظام التوست داخلياً */
   const handleAppointmentFileUnlinkConfirmed = useCallback(
     async (fileId: string) => {
-      setAppointmentFileActionKey(fileId);
+      if (!beginAppointmentFileAction(fileId)) return;
       try {
         const response =
           await unlinkAppointmentFileMutation.mutateAsync(fileId);
@@ -384,10 +397,10 @@ export default function DoctorAppointmentsPage() {
         });
         throw error;
       } finally {
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [unlinkAppointmentFileMutation, toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, unlinkAppointmentFileMutation, toast],
   );
 
   const resetUnlinkDialog = useCallback((open: boolean) => {
@@ -399,7 +412,10 @@ export default function DoctorAppointmentsPage() {
     async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file || !expandedAppointmentId) return;
-      setAppointmentFileActionKey("upload");
+      if (!beginAppointmentFileAction("upload")) {
+        event.target.value = "";
+        return;
+      }
       try {
         const response = await uploadAppointmentFileMutation.mutateAsync({
           file,
@@ -416,10 +432,10 @@ export default function DoctorAppointmentsPage() {
         });
       } finally {
         event.target.value = "";
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [expandedAppointmentId, uploadAppointmentFileMutation, toast],
+    [beginAppointmentFileAction, expandedAppointmentId, finishAppointmentFileAction, uploadAppointmentFileMutation, toast],
   );
 
   const handleBookingAction = useCallback(() => {

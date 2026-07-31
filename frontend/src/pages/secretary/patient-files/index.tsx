@@ -157,7 +157,7 @@ export default function SecretaryPatientFilesPage() {
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const { hasPermission } = useSecretaryPermissions();
   const canViewFiles = hasPermission("patients:files:view");
-  const doctorId = assignedDoctorQuery.data?.doctor?._id ?? "";
+  const doctorId = assignedDoctorQuery.assignedDoctor?._id ?? "";
   const canLoadPatientFiles = canViewFiles && Boolean(doctorId);
   const patientsQuery = useDoctorPatients(
     { page: 1, limit: 100 },
@@ -180,6 +180,18 @@ export default function SecretaryPatientFilesPage() {
         "Loading the assigned doctor before file actions become available.",
       );
     }
+    if (assignedDoctorQuery.isForbidden) {
+      return tr(
+        "الباك أعاد 403 على الطبيب المسؤول، لذلك لا يمكن فتح ملفات المرضى أو تنزيلها بهذه الصلاحية.",
+        "The backend returned 403 for the assigned doctor, so patient files cannot be opened or downloaded with this permission set.",
+      );
+    }
+    if (assignedDoctorQuery.isUnassigned) {
+      return tr(
+        "الباك أعاد 404 على الطبيب المسؤول، لذلك لا يوجد طبيب مرتبط حالياً للوصول إلى ملفات المرضى.",
+        "The backend returned 404 for the assigned doctor, so no linked doctor is currently available for patient file access.",
+      );
+    }
     if (assignedDoctorQuery.isError) {
       return tr(
         "تعذر تحميل الطبيب المسؤول، لذلك تم تعطيل فتح الملفات وتنزيلها مؤقتاً.",
@@ -193,7 +205,7 @@ export default function SecretaryPatientFilesPage() {
       );
     }
     return null;
-  }, [assignedDoctorQuery.isError, assignedDoctorQuery.isLoading, canViewFiles, doctorId, tr]);
+  }, [assignedDoctorQuery.isError, assignedDoctorQuery.isForbidden, assignedDoctorQuery.isLoading, assignedDoctorQuery.isUnassigned, canViewFiles, doctorId, tr]);
 
   const patientDirectory = useMemo(
     () =>

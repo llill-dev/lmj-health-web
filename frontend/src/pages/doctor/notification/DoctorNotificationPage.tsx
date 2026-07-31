@@ -73,6 +73,10 @@ export default function DoctorNotificationPage() {
     typeof markOneReadMutation.variables === 'string'
       ? markOneReadMutation.variables
       : null;
+  const isInitialLoading = isAwaitingInitialQueryData(
+    listQuery.data,
+    listQuery.isError,
+  );
 
   return (
     <>
@@ -131,11 +135,25 @@ export default function DoctorNotificationPage() {
         </section>
 
         <section className='mt-5 space-y-4'>
-          {isAwaitingInitialQueryData(listQuery.data, listQuery.isError) ? (
+          {!isInitialLoading && listQuery.isRefetching ? (
+            <div className='inline-flex items-center gap-2 rounded-[10px] border border-[#D5E8E6] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-primary'>
+              <Loader2 className='h-4 w-4 animate-spin' />
+              جاري تحديث الإشعارات...
+            </div>
+          ) : null}
+          {isInitialLoading ? (
             <DoctorNotificationListSkeleton rows={6} />
           ) : listQuery.isError ? (
             <div className='rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>
-              تعذّر تحميل الإشعارات. حاول تحديث الصفحة.
+              <p>تعذّر تحميل الإشعارات. حاول تحديث الصفحة.</p>
+              <button
+                type='button'
+                onClick={() => void listQuery.refetch()}
+                disabled={listQuery.isRefetching}
+                className='mt-3 rounded-[8px] border border-[#FCA5A5] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60'
+              >
+                {listQuery.isRefetching ? 'جارٍ إعادة المحاولة...' : 'إعادة المحاولة'}
+              </button>
             </div>
           ) : items.length === 0 ? (
             <div className='rounded-[14px] border border-[#E5E7EB] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>

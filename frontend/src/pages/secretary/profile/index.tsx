@@ -127,7 +127,7 @@ export default function SecretaryProfilePage() {
   const secretaryName = authUser?.fullName?.trim() || tr("السكرتير", "Secretary");
   const secretaryEmail = authUser?.email?.trim() || "—";
   const secretaryPhone = authUser?.phone?.trim() || "—";
-  const assignedDoctor = assignedDoctorQuery.data?.doctor;
+  const assignedDoctor = assignedDoctorQuery.assignedDoctor;
   const initial =
     secretaryName.trim().charAt(0).toUpperCase() || tr("س", "S");
 
@@ -158,7 +158,7 @@ export default function SecretaryProfilePage() {
   const stats = [
     {
       label: tr("معدل الحضور", "Attendance rate"),
-      value: "98%",
+      value: tr("Needs backend contract", "Needs backend contract"),
       icon: Calendar,
     },
     {
@@ -297,11 +297,11 @@ export default function SecretaryProfilePage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <InfoRow
               label={tr("آخر تسجيل دخول", "Last login")}
-              value="2024-01-15 09:30"
+              value={tr("Needs backend contract", "Needs backend contract")}
             />
             <InfoRow
               label={tr("تاريخ التسجيل", "Registration date")}
-              value="2023-06-01"
+              value={tr("Needs backend contract", "Needs backend contract")}
             />
           </div>
         </div>

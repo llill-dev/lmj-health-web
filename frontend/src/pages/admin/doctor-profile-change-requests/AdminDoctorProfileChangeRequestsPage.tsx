@@ -163,6 +163,14 @@ export default function AdminDoctorProfileChangeRequestsPage() {
         </section>
 
         <section className="mt-4 space-y-3">
+          {!isAwaitingData && !isError && isRefetching ? (
+            <div className="inline-flex items-center gap-2 rounded-[10px] border border-[#D5E8E6] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-primary">
+              {tr(
+                "جارٍ تحديث طلبات تغيير البيانات...",
+                "Refreshing profile change requests...",
+              )}
+            </div>
+          ) : null}
           {isError ? (
             <div className="rounded-[12px] border border-red-200 bg-red-50 px-6 py-6 text-start">
               <p className="font-cairo text-[13px] font-bold text-red-800">
@@ -183,9 +191,12 @@ export default function AdminDoctorProfileChangeRequestsPage() {
               <button
                 type="button"
                 onClick={handleRefresh}
-                className="mt-3 font-cairo text-[12px] font-extrabold text-primary underline"
+                disabled={isRefetching}
+                className="mt-3 font-cairo text-[12px] font-extrabold text-primary underline disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {tr("إعادة المحاولة", "Retry")}
+                {isRefetching
+                  ? tr("جارٍ إعادة المحاولة...", "Retrying...")
+                  : tr("إعادة المحاولة", "Retry")}
               </button>
             </div>
           ) : isAwaitingData ? (
