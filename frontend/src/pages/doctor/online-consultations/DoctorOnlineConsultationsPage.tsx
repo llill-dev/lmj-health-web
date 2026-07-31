@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  RefreshCw,
   Search,
   Shield,
   User,
@@ -393,6 +394,9 @@ export default function DoctorOnlineConsultationsPage() {
     setSelectedMessageId(null);
   };
 
+  const isRefreshingConsultations =
+    !listAwaitingData && (listQuery.isRefetching || overviewQuery.isRefetching);
+
   return (
     <>
       <Helmet>
@@ -451,13 +455,42 @@ export default function DoctorOnlineConsultationsPage() {
           </div>
         </section>
 
+        {isRefreshingConsultations ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            جارٍ تحديث الاستشارات...
+          </div>
+        ) : null}
+
         {listAwaitingData ? (
           <div className="mt-6">
             <DoctorExpandableCardSkeleton count={4} expanded />
           </div>
         ) : listQuery.isError ? (
-          <div className="mt-6 rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-            تعذّر تحميل الاستشارات. حاول تحديث الصفحة.
+          <div className="mt-6 rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center">
+            <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
+              تعذّر تحميل الاستشارات. حاول إعادة المحاولة.
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                void listQuery.refetch();
+                void overviewQuery.refetch();
+              }}
+              disabled={listQuery.isRefetching || overviewQuery.isRefetching}
+              className="mt-4 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:bg-[#FFF5F5] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${
+                  listQuery.isRefetching || overviewQuery.isRefetching
+                    ? 'animate-spin'
+                    : ''
+                }`}
+              />
+              {listQuery.isRefetching || overviewQuery.isRefetching
+                ? 'جارٍ إعادة المحاولة...'
+                : 'إعادة المحاولة'}
+            </button>
           </div>
         ) : (
           <ConsultationsListPanel

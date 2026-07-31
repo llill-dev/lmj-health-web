@@ -35,6 +35,7 @@ export default function AdminAnalyticsPage() {
     stats,
     isAwaitingData: statsAwaiting,
     isRefetching: statsRefetching,
+    isError: statsError,
     refetch,
   } = useAdminPlatformStats();
   const doctorsQuery = useTopApprovedDoctors(8);
@@ -96,6 +97,32 @@ export default function AdminAnalyticsPage() {
           <div className='mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]'>
             <RefreshCw className='h-4 w-4 animate-spin' />
             {tr('جارٍ تحديث الإحصائيات...', 'Refreshing analytics...')}
+          </div>
+        ) : null}
+
+        {statsError && !statsAwaiting ? (
+          <div
+            role='alert'
+            className='mt-4 flex flex-wrap items-center gap-3 rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-start'
+          >
+            <div className='inline-flex items-center gap-2 font-cairo text-[13px] font-bold text-red-800'>
+              <AlertCircle className='h-4 w-4' />
+              {tr(
+                'تعذر تحميل بعض إحصائيات المنصة. يمكنك إعادة المحاولة دون مغادرة الصفحة.',
+                'Some platform analytics failed to load. You can retry without leaving the page.',
+              )}
+            </div>
+            <button
+              type='button'
+              onClick={() => void refetch()}
+              disabled={statsRefetching}
+              className='inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:bg-[#FFF5F5] disabled:cursor-not-allowed disabled:opacity-60'
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${statsRefetching ? 'animate-spin' : ''}`} />
+              {statsRefetching
+                ? tr('جارٍ إعادة المحاولة...', 'Retrying...')
+                : tr('إعادة المحاولة', 'Retry')}
+            </button>
           </div>
         ) : null}
 
