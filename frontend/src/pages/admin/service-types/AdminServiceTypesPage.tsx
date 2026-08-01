@@ -37,7 +37,7 @@ export default function AdminServiceTypesPage() {
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
 
   const { toast } = useToast();
-  const { data, isAwaitingData, isError, error, refetch } =
+  const { data, isAwaitingData, isRefetching, isError, error, refetch } =
     useServiceTypesList();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
@@ -83,6 +83,8 @@ export default function AdminServiceTypesPage() {
     1,
     Math.ceil(filteredServiceTypes.length / Math.max(pageSize, 1)),
   );
+  const hasActiveFilters =
+    search.trim() !== "" || statusFilter !== "all";
   const currentPage = Math.min(page, totalPages);
   const visibleServiceTypes = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -188,7 +190,7 @@ export default function AdminServiceTypesPage() {
         />
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]">
             <div className="relative">
               <input
                 value={search}
@@ -221,8 +223,27 @@ export default function AdminServiceTypesPage() {
                 {tr("الأنواع المعطلة", "Inactive types")}
               </option>
             </select>
+
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isRefetching}
+              className="inline-flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Loader2 className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+              {isRefetching
+                ? tr("جارٍ التحديث...", "Refreshing...")
+                : tr("تحديث", "Refresh")}
+            </button>
           </div>
         </section>
+
+        {isRefetching && !isAwaitingData ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث أنواع الخدمات...", "Refreshing service types...")}
+          </div>
+        ) : null}
 
         {isAwaitingData && (
           <SkeletonList
@@ -254,10 +275,15 @@ export default function AdminServiceTypesPage() {
           <section className="mt-6 overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
             {filteredServiceTypes.length === 0 ? (
               <p className="px-6 py-12 text-center font-cairo text-[14px] font-semibold text-[#98A2B3]">
-                {tr(
-                  "لا توجد أنواع خدمات بعد. استخدم «إضافة نوع خدمة».",
-                  "No service types yet. Use “Add service type”.",
-                )}
+                {hasActiveFilters
+                  ? tr(
+                      "لا توجد أنواع خدمات مطابقة للفلاتر أو البحث الحالي.",
+                      "No service types match the current filters or search.",
+                    )
+                  : tr(
+                      "لا توجد أنواع خدمات بعد. استخدم «إضافة نوع خدمة».",
+                      "No service types yet. Use “Add service type”.",
+                    )}
               </p>
             ) : (
               <div className="divide-y divide-[#EEF2F6]">
