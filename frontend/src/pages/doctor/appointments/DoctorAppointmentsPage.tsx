@@ -122,6 +122,13 @@ function filterLocalSearch<
   });
 }
 
+function isFutureAppointmentSlot(date?: string, startTime?: string): boolean {
+  if (!date || !startTime) return false;
+  const slotDateTime = new Date(`${date}T${startTime}:00`);
+  if (Number.isNaN(slotDateTime.getTime())) return false;
+  return slotDateTime > new Date();
+}
+
 export default function DoctorAppointmentsPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -1069,6 +1076,19 @@ export default function DoctorAppointmentsPage() {
                         setRescheduleOpen(true);
                       }}
                       onNoShow={() => {
+                        if (
+                          isFutureAppointmentSlot(
+                            appointment.date,
+                            appointment.startTime,
+                          )
+                        ) {
+                          toast("لا يمكن تسجيل عدم حضور لموعد مستقبلي.", {
+                            title: "إجراء غير متاح",
+                            variant: "warning",
+                            durationMs: 4200,
+                          });
+                          return;
+                        }
                         setNoShowTarget({
                           id: appointment._id,
                           patientName:

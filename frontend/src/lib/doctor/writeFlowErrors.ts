@@ -351,6 +351,14 @@ export function getAppointmentStatusMutationErrorMessage(
   locale: SupportedLocale = "ar",
 ): string {
   if (error instanceof ApiError) {
+    if (error.status === 400 && action === "no-show") {
+      return tr(
+        locale,
+        "لا يمكن تسجيل عدم حضور لموعد مستقبلي. انتظر حتى موعد الزيارة أو استخدم إعادة الجدولة إذا تغيّر الموعد.",
+        "A future appointment cannot be marked as no-show. Wait until the visit time or use reschedule if the appointment changed.",
+      );
+    }
+
     if (error.status === 401) {
       return tr(
         locale,
