@@ -30,6 +30,7 @@ import { useRetryAction } from "@/lib/query/useRetryAction";
 import { formatBillingAmount } from "@/lib/doctor/billing/format";
 import { triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 const MONTHS = [
   { value: "all", label: "السنة كاملة" },
@@ -49,7 +50,8 @@ const MONTHS = [
 
 export default function DoctorClinicFinancialReportsPage() {
   const { toast } = useToast();
-  const settingsQuery = useBillingSettings();
+  const { canExportReports, canViewSettings, isSecretary } = useBillingAccess();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState<string>("all");
 
@@ -207,15 +209,21 @@ export default function DoctorClinicFinancialReportsPage() {
             تصدير التقرير
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              disabled={exportPdf.isPending}
-              onClick={() => void handleExportPdf()}
-              className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
-            >
-              <FileText className="h-4 w-4" aria-hidden />
-              {exportPdf.isPending ? "جاري التصدير..." : "PDF"}
-            </button>
+            {canExportReports ? (
+              <button
+                type="button"
+                disabled={exportPdf.isPending}
+                onClick={() => void handleExportPdf()}
+                className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
+              >
+                <FileText className="h-4 w-4" aria-hidden />
+                {exportPdf.isPending ? "جاري التصدير..." : "PDF"}
+              </button>
+            ) : (
+              <div className="inline-flex h-[52px] items-center justify-center rounded-[12px] bg-[#F2F4F7] px-4 font-cairo text-[13px] font-bold text-[#667085]">
+                التصدير غير متاح ضمن صلاحياتك الحالية
+              </div>
+            )}
             <button
               type="button"
               disabled

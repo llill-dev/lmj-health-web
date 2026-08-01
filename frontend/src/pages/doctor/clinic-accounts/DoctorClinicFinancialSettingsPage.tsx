@@ -33,6 +33,7 @@ import {
 } from '@/lib/doctor/billing/settingsUi';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { cn } from '@/lib/utils/utils';
+import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
 
 function sectionCardClassName() {
   return 'rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm';
@@ -40,6 +41,7 @@ function sectionCardClassName() {
 
 export default function DoctorClinicFinancialSettingsPage() {
   const { toast } = useToast();
+  const { canManageSettings } = useBillingAccess();
   const settingsQuery = useBillingSettings();
   const updateSettings = useUpdateBillingSettings();
   const { retry: retrySettings, retrying: retryingSettings } = useRetryAction(
@@ -171,6 +173,13 @@ export default function DoctorClinicFinancialSettingsPage() {
           <DoctorInlineDetailsSkeleton rows={6} />
         ) : (
           <div className="space-y-5">
+            {!canManageSettings ? (
+              <div className="rounded-[16px] border border-[#D0D5DD] bg-[#F8FAFC] p-4 text-right">
+                <p className="font-cairo text-[13px] font-semibold text-[#667085]">
+                  يمكنك مراجعة الإعدادات المالية فقط. تعديلها يتطلب صلاحية إدارة الإعدادات.
+                </p>
+              </div>
+            ) : null}
             <section className={sectionCardClassName()}>
               <div className="mb-4 flex items-center gap-2 text-start">
                 <DollarSign className="h-5 w-5 text-primary" aria-hidden />
@@ -298,25 +307,29 @@ export default function DoctorClinicFinancialSettingsPage() {
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleMyHealthSync}
-                className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
-              >
-                <RefreshCw className="h-4 w-4" aria-hidden />
-                مزامنة الآن
-              </button>
+              {canManageSettings ? (
+                <button
+                  type="button"
+                  onClick={handleMyHealthSync}
+                  className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
+                >
+                  <RefreshCw className="h-4 w-4" aria-hidden />
+                  مزامنة الآن
+                </button>
+              ) : null}
             </section>
 
-            <button
-              type="button"
-              disabled={updateSettings.isPending}
-              onClick={() => void handleSave()}
-              className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] disabled:opacity-60"
-            >
-              <Save className="h-4 w-4" aria-hidden />
-              {updateSettings.isPending ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
-            </button>
+            {canManageSettings ? (
+              <button
+                type="button"
+                disabled={updateSettings.isPending}
+                onClick={() => void handleSave()}
+                className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] disabled:opacity-60"
+              >
+                <Save className="h-4 w-4" aria-hidden />
+                {updateSettings.isPending ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
+              </button>
+            ) : null}
           </div>
         )}
       </div>

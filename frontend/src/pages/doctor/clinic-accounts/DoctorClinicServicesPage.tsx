@@ -22,9 +22,11 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import type { ApiBillingService } from '@/lib/doctor/billing/apiTypes';
 import { useRetryAction } from '@/lib/query/useRetryAction';
+import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
 
 export default function DoctorClinicServicesPage() {
   const { toast } = useToast();
+  const { canManageServices } = useBillingAccess();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -117,13 +119,15 @@ export default function DoctorClinicServicesPage() {
               إدارة خدمات الفوترة المرتبطة بأنواع المواعيد.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="h-11 rounded-[10px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white"
-          >
-            خدمة جديدة
-          </button>
+          {canManageServices ? (
+            <button
+              type="button"
+              onClick={openCreate}
+              className="h-11 rounded-[10px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white"
+            >
+              خدمة جديدة
+            </button>
+          ) : null}
         </header>
 
         <ClinicAccountsSearchRow
@@ -132,6 +136,11 @@ export default function DoctorClinicServicesPage() {
           placeholder="بحث عن خدمة..."
           onClear={() => setSearch('')}
         />
+        {!canManageServices ? (
+          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+            هذه الصفحة في وضع العرض فقط حسب صلاحيات حسابك.
+          </p>
+        ) : null}
 
         <section className="mt-6 rounded-[12px] border border-[#EEF2F6] bg-white p-5">
           {list.isAwaitingData && !list.services.length ? (
@@ -151,9 +160,9 @@ export default function DoctorClinicServicesPage() {
                   ? 'جرّب تعديل كلمات البحث لعرض النتائج'
                   : 'أضف خدمات العيادة الطبية التي تقدمها للمرضى مع الأسعار والمدة الزمنية'
               }
-              actionLabel="إضافة خدمة"
-              onAction={openCreate}
-              actionIcon={<Plus className="h-4 w-4" />}
+              actionLabel={canManageServices ? "إضافة خدمة" : undefined}
+              onAction={canManageServices ? openCreate : undefined}
+              actionIcon={canManageServices ? <Plus className="h-4 w-4" /> : undefined}
             />
           ) : (
             <div className="overflow-x-auto">
@@ -164,7 +173,9 @@ export default function DoctorClinicServicesPage() {
                     <th className="px-3 py-3">السعر</th>
                     <th className="px-3 py-3">المدة</th>
                     <th className="px-3 py-3">الحالة</th>
-                    <th className="px-3 py-3">إجراءات</th>
+                    {canManageServices ? (
+                      <th className="px-3 py-3">إجراءات</th>
+                    ) : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -184,24 +195,26 @@ export default function DoctorClinicServicesPage() {
                       <td className="px-3 py-4">
                         {service.isActive !== false ? 'نشط' : 'غير نشط'}
                       </td>
-                      <td className="px-3 py-4">
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openEdit(service)}
-                            className="rounded-[6px] border border-primary px-3 py-1 text-[11px] font-extrabold text-primary"
-                          >
-                            تعديل
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleDelete(service)}
-                            className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
-                          >
-                            حذف
-                          </button>
-                        </div>
-                      </td>
+                      {canManageServices ? (
+                        <td className="px-3 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => openEdit(service)}
+                              className="rounded-[6px] border border-primary px-3 py-1 text-[11px] font-extrabold text-primary"
+                            >
+                              تعديل
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDelete(service)}
+                              className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
+                            >
+                              حذف
+                            </button>
+                          </div>
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
@@ -212,7 +225,7 @@ export default function DoctorClinicServicesPage() {
       </div>
 
       <ClinicAccountsModalShell
-        open={dialogOpen}
+        open={dialogOpen && canManageServices}
         onClose={() => setDialogOpen(false)}
         title={editTarget ? 'تعديل خدمة' : 'خدمة جديدة'}
         maxWidthClass="max-w-[520px]"

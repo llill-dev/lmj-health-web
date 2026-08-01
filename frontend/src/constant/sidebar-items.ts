@@ -90,6 +90,7 @@ export type SecretarySidebarItemId =
   | "patient-files"
   | "doctors-directory"
   | "appointments"
+  | "accounts"
   | "appointment-suggestions"
   | "waitlist"
   | "profile"
@@ -451,6 +452,12 @@ export const secretarySidebarItems: Array<{
     path: "appointments",
     label: "المواعيد",
     icon: CalendarDays,
+  },
+  {
+    id: "accounts",
+    path: "accounts",
+    label: "الحسابات",
+    icon: Wallet,
   },
   {
     id: "appointment-suggestions",

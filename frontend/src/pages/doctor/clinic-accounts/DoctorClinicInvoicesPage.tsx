@@ -29,6 +29,7 @@ import type {
   ClinicInvoice,
   InvoiceStatus,
 } from "@/lib/doctor/clinicAccounts/types";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 type InvoiceFilter = "all" | InvoiceStatus;
 
@@ -50,6 +51,8 @@ function pickStatusCount(
 
 export default function DoctorClinicInvoicesPage() {
   const navigate = useNavigate();
+  const { basePath, canManageInvoices, canViewSettings, isSecretary } =
+    useBillingAccess();
   const [filter, setFilter] = useState<InvoiceFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -57,7 +60,7 @@ export default function DoctorClinicInvoicesPage() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const settingsQuery = useBillingSettings();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const dashboardQuery = useBillingDashboard("month", settingsQuery.currency);
   const listQuery = useBillingInvoices({
     uiStatus: filter,
@@ -116,9 +119,13 @@ export default function DoctorClinicInvoicesPage() {
               <span className="text-primary/90"> — إجمالي الفواتير</span>
             </span>
           }
-          actionLabel="فاتورة جديدة"
-          actionIcon={<Plus className="h-4 w-4" />}
-          onActionClick={() => navigate("/doctor/accounts/invoices/new")}
+          actionLabel={canManageInvoices ? "فاتورة جديدة" : undefined}
+          actionIcon={canManageInvoices ? <Plus className="h-4 w-4" /> : undefined}
+          onActionClick={
+            canManageInvoices
+              ? () => navigate(`${basePath}/invoices/new`)
+              : undefined
+          }
           kpis={[
             {
               key: "paid",
@@ -191,9 +198,13 @@ export default function DoctorClinicInvoicesPage() {
                 ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
                 : 'أنشئ فواتير للمرضى وتتبع المدفوعات والمبالغ المستحقة'
             }
-            actionLabel="فاتورة جديدة"
-            onAction={() => navigate('/doctor/accounts/invoices/new')}
-            actionIcon={<Plus className="h-4 w-4" />}
+            actionLabel={canManageInvoices ? "فاتورة جديدة" : undefined}
+            onAction={
+              canManageInvoices
+                ? () => navigate(`${basePath}/invoices/new`)
+                : undefined
+            }
+            actionIcon={canManageInvoices ? <Plus className="h-4 w-4" /> : undefined}
           />
         ) : (
           <div className="space-y-3">

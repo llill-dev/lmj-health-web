@@ -1,24 +1,47 @@
 'use client';
 
 import { NavLink } from 'react-router-dom';
+import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
 import { cn } from '@/lib/utils/utils';
 
-const LINKS = [
-  { to: '/doctor/accounts', label: 'لوحة الحسابات', end: true },
-  { to: '/doctor/accounts/invoices', label: 'الفواتير', end: false },
-  { to: '/doctor/accounts/services', label: 'الخدمات', end: false },
-  { to: '/doctor/accounts/expenses', label: 'المصاريف', end: false },
-  { to: '/doctor/accounts/reports', label: 'التقارير', end: false },
-  { to: '/doctor/accounts/settings', label: 'الإعدادات', end: false },
-] as const;
-
 export function ClinicAccountsSubNav() {
+  const {
+    basePath,
+    canViewDashboard,
+    canViewInvoices,
+    canViewServices,
+    canViewExpenses,
+    canViewReports,
+    canViewSettings,
+  } = useBillingAccess();
+
+  const links = [
+    canViewDashboard
+      ? { to: basePath, label: 'لوحة الحسابات', end: true }
+      : null,
+    canViewInvoices
+      ? { to: `${basePath}/invoices`, label: 'الفواتير', end: false }
+      : null,
+    canViewServices
+      ? { to: `${basePath}/services`, label: 'الخدمات', end: false }
+      : null,
+    canViewExpenses
+      ? { to: `${basePath}/expenses`, label: 'المصاريف', end: false }
+      : null,
+    canViewReports
+      ? { to: `${basePath}/reports`, label: 'التقارير', end: false }
+      : null,
+    canViewSettings
+      ? { to: `${basePath}/settings`, label: 'الإعدادات', end: false }
+      : null,
+  ].filter(Boolean) as Array<{ to: string; label: string; end: boolean }>;
+
   return (
     <nav
       className="mb-6 grid grid-cols-2 gap-2 rounded-[12px] border border-[#EEF2F6] bg-white p-2 shadow-sm sm:grid-cols-3 lg:grid-cols-6"
       aria-label="تنقل الحسابات"
     >
-      {LINKS.map((link) => (
+      {links.map((link) => (
         <NavLink
           key={link.to}
           to={link.to}

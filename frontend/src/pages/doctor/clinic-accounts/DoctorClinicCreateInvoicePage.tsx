@@ -21,6 +21,7 @@ import { useDoctorPatients } from '@/hooks/doctor';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import { BILLING_DISCOUNT_PRESET_OPTIONS } from '@/lib/doctor/billing/settingsUi';
+import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
 
 type LineItem = {
   id: string;
@@ -31,10 +32,11 @@ type LineItem = {
 
 export default function DoctorClinicCreateInvoicePage() {
   const navigate = useNavigate();
+  const { basePath, canViewSettings, isSecretary } = useBillingAccess();
   const [searchParams] = useSearchParams();
   const appointmentId = searchParams.get('appointmentId');
   const { toast } = useToast();
-  const settingsQuery = useBillingSettings();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const prefillQuery = useBillingInvoicePrefill(appointmentId);
   const createInvoice = useCreateBillingInvoice();
   const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
@@ -162,7 +164,7 @@ export default function DoctorClinicCreateInvoicePage() {
           variant: 'success',
         },
       );
-      navigate('/doctor/accounts/invoices');
+      navigate(`${basePath}/invoices`);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
         title: 'تعذّر إنشاء الفاتورة',
@@ -366,7 +368,7 @@ export default function DoctorClinicCreateInvoicePage() {
           </div>
 
           <Link
-            to="/doctor/accounts/invoices"
+            to={`${basePath}/invoices`}
             className="inline-block font-cairo text-[13px] font-extrabold text-[#667085]"
           >
             الرجوع إلى الفواتير ←

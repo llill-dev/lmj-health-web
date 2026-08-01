@@ -30,6 +30,7 @@ import * as PublicPages from "@/routes/lazy-pages/public-pages";
 import * as SecretaryPages from "@/routes/lazy-pages/secretary-pages";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import type { SecretaryPermissionKey } from "@/lib/secretary/permissions";
+import { getSecretaryBillingEntryPath } from "@/lib/secretary/permissions";
 import { useI18n } from "@/i18n/provider";
 
 function PublicPagesLayout() {
@@ -50,14 +51,28 @@ function PublicPagesLayout() {
 
 function SecretaryPermissionRoute({
   required,
+  redirectTo,
 }: {
   required: SecretaryPermissionKey[];
+  redirectTo?: string;
 }) {
-  const { hasPermission, isLoading } = useSecretaryPermissions();
+  const { hasPermission, isLoading, permissions } = useSecretaryPermissions();
   if (required.length === 0) return <Outlet />;
   if (isLoading) return <SecretaryRouteFallback />;
   const allowed = required.every((permission) => hasPermission(permission));
-  if (!allowed) return <Navigate to="/secretary/dashboard" replace />;
+  if (!allowed) {
+    const fallbackPath =
+      redirectTo ??
+      (required.some((permission) => permission.startsWith("billing:"))
+        ? getSecretaryBillingEntryPath(permissions)
+        : "/secretary/dashboard");
+    return (
+      <Navigate
+        to={fallbackPath}
+        replace
+      />
+    );
+  }
   return <Outlet />;
 }
 
@@ -698,6 +713,126 @@ export default function App() {
                 element={
                   <Suspense fallback={<SecretaryRouteFallback />}>
                     <SecretaryPages.SecretaryAppointmentsPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts"
+              element={
+                <SecretaryPermissionRoute required={["billing:dashboard:view"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicAccountsPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/invoices"
+              element={
+                <SecretaryPermissionRoute required={["billing:invoices:view"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicInvoicesPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/invoices/new"
+              element={
+                <SecretaryPermissionRoute required={["billing:invoices:manage"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicCreateInvoicePage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/services"
+              element={
+                <SecretaryPermissionRoute required={["billing:services:view"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicServicesPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/expenses"
+              element={
+                <SecretaryPermissionRoute required={["billing:expenses:view"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicExpensesPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/payments/new"
+              element={
+                <SecretaryPermissionRoute required={["billing:payments:manage"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicAddPaymentPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/reports"
+              element={
+                <SecretaryPermissionRoute required={["billing:reports:view"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicFinancialReportsPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/settings"
+              element={
+                <SecretaryPermissionRoute required={["billing:settings:view"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicFinancialSettingsPage />
                   </Suspense>
                 }
               />

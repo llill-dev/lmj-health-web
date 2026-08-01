@@ -40,10 +40,19 @@ import {
   formatBillingNumber,
 } from "@/lib/doctor/billing/format";
 import type { AccountsPeriod } from "@/lib/doctor/clinicAccounts/types";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 export default function DoctorClinicAccountsPage() {
+  const {
+    basePath,
+    canManagePayments,
+    canManageExpenses,
+    canManageInvoices,
+    canViewSettings,
+    isSecretary,
+  } = useBillingAccess();
   const [period, setPeriod] = useState<AccountsPeriod>("month");
   const [search, setSearch] = useState("");
   const [overduePage, setOverduePage] = useState(1);
@@ -51,7 +60,7 @@ export default function DoctorClinicAccountsPage() {
   const [outstandingPage, setOutstandingPage] = useState(1);
   const [outstandingLimit, setOutstandingLimit] = useState(10);
 
-  const settingsQuery = useBillingSettings();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const currency = settingsQuery.currency;
 
   const dashboardQuery = useBillingDashboard(period, currency);
@@ -229,28 +238,39 @@ export default function DoctorClinicAccountsPage() {
               إجراءات سريعة
             </h2>
             <div className="space-y-3">
-              <Link
-                to="/doctor/accounts/invoices"
-                className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
-              >
-                <Plus className="w-4 h-4" aria-hidden />
-                إضافة دفعة على فاتورة
-              </Link>
-              <Link
-                to="/doctor/accounts/expenses"
-                className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
-              >
-                <Plus className="w-4 h-4" aria-hidden />
-                إضافة مصروف
-              </Link>
-              <Link
-                to="/doctor/accounts/invoices/new"
-                className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
-              >
-                <Plus className="w-4 h-4" aria-hidden />
-                إنشاء فاتورة
-              </Link>
+              {canManagePayments ? (
+                <Link
+                  to={`${basePath}/invoices`}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
+                >
+                  <Plus className="w-4 h-4" aria-hidden />
+                  إضافة دفعة على فاتورة
+                </Link>
+              ) : null}
+              {canManageExpenses ? (
+                <Link
+                  to={`${basePath}/expenses`}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
+                >
+                  <Plus className="w-4 h-4" aria-hidden />
+                  إضافة مصروف
+                </Link>
+              ) : null}
+              {canManageInvoices ? (
+                <Link
+                  to={`${basePath}/invoices/new`}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
+                >
+                  <Plus className="w-4 h-4" aria-hidden />
+                  إنشاء فاتورة
+                </Link>
+              ) : null}
             </div>
+            {!canManagePayments && !canManageExpenses && !canManageInvoices ? (
+              <p className="mt-4 text-center font-cairo text-[13px] font-semibold text-[#667085]">
+                لديك صلاحية عرض البيانات المالية فقط بدون تنفيذ إجراءات إدارة.
+              </p>
+            ) : null}
           </div>
         </section>
 
@@ -373,7 +393,7 @@ export default function DoctorClinicAccountsPage() {
               النشاطات الأخيرة
             </h2>
             <Link
-              to="/doctor/accounts/invoices"
+              to={`${basePath}/invoices`}
               className="inline-flex shrink-0 items-center gap-2 font-cairo text-[12px] font-extrabold text-primary"
             >
               <Receipt className="w-4 h-4" aria-hidden />

@@ -50,6 +50,7 @@ function normalizePermissionsPayload(raw: unknown): SecretaryPermissionsPayload 
 
 export function useSecretaryPermissions() {
   const authUser = readAuthUser();
+  const isSecretary = authUser?.role === "secretary";
   const primarySecretaryIdentifier =
     authUser?.actorIds?.secretaryId?.trim() || authUser?.userId?.trim() || "";
 
@@ -60,7 +61,7 @@ export function useSecretaryPermissions() {
       const response = await get<unknown>("/api/secretaries/me/doctor");
       return normalizePermissionsPayload(response);
     },
-    enabled: Boolean(primarySecretaryIdentifier),
+    enabled: isSecretary && Boolean(primarySecretaryIdentifier),
     staleTime: 60_000,
     retry: false,
     refetchOnWindowFocus: true,

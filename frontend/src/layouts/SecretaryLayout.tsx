@@ -10,6 +10,7 @@ import {
 } from "@/constant/sidebar-items";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { readAuthUser } from "@/lib/cookies";
+import { getSecretaryBillingEntryPath as resolveSecretaryBillingEntryPath } from "@/lib/secretary/permissions";
 import { SecretaryRouteFallback } from "@/routes/RouteFallbacks";
 import { useAuthStore } from "@/store/authStore";
 import MotionProvider from "@/motion/MotionProvider";
@@ -33,13 +34,24 @@ export default function SecretaryLayout() {
   const secretaryEmail = authUser?.email?.trim() || "";
   const permissionsReady =
     !secretaryPermissions.isLoading && !secretaryPermissions.isPending;
-  const visibleSidebarItems = useMemo(
+  const visibleSidebarItems: Array<
+    (typeof secretarySidebarItems)[number] & { href?: string }
+  > = useMemo(
     () =>
       !permissionsReady
         ? []
-        : secretarySidebarItems.filter((item) =>
-            secretaryPermissions.canAccessItem(item.path),
-          ),
+        : secretarySidebarItems
+            .filter((item) => secretaryPermissions.canAccessItem(item.path))
+            .map((item) =>
+              item.path === "accounts"
+                ? {
+                    ...item,
+                    href: resolveSecretaryBillingEntryPath(
+                      secretaryPermissions.permissions,
+                    ),
+                  }
+                : item,
+            ),
     [permissionsReady, secretaryPermissions.permissions],
   );
 
@@ -74,11 +86,12 @@ export default function SecretaryLayout() {
 
   useEffect(() => {
     if (!permissionsReady) return;
-    const firstPath = visibleSidebarItems[0]?.path ?? "dashboard";
+    const firstItem = visibleSidebarItems[0];
+    const firstPath = firstItem?.href ?? `/secretary/${firstItem?.path ?? "dashboard"}`;
     const currentSegment = pathname.split("/")[2] as SecretarySidebarItemId | undefined;
     if (!currentSegment) return;
     if (secretaryPermissions.canAccessItem(currentSegment)) return;
-    navigate(`/secretary/${firstPath}`, { replace: true });
+    navigate(firstPath, { replace: true });
   }, [
     navigate,
     pathname,

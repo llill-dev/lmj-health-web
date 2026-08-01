@@ -34,6 +34,7 @@ import {
 import { EXPENSE_CATEGORY_LABELS } from "@/lib/doctor/clinicAccounts/labels";
 import type { ExpenseCategory } from "@/lib/doctor/clinicAccounts/types";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 type ExpenseFilter = "all" | ExpenseCategory;
 
@@ -64,6 +65,7 @@ function findCategoryCount(
 
 export default function DoctorClinicExpensesPage() {
   const { toast } = useToast();
+  const { canManageExpenses, canViewSettings, isSecretary } = useBillingAccess();
   const [filter, setFilter] = useState<ExpenseFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -74,7 +76,7 @@ export default function DoctorClinicExpensesPage() {
   const [category, setCategory] = useState<ExpenseCategory>("rent");
   const [date, setDate] = useState("");
 
-  const settingsQuery = useBillingSettings();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const dashboardQuery = useBillingDashboard("month", settingsQuery.currency);
   const expensesQuery = useBillingExpenses({
     page,
@@ -172,9 +174,9 @@ export default function DoctorClinicExpensesPage() {
               <span className="text-primary/90"> — إجمالي المصاريف</span>
             </span>
           }
-          actionLabel="مصروف جديد"
-          actionIcon={<Plus className="h-4 w-4" />}
-          onActionClick={() => setDialogOpen(true)}
+          actionLabel={canManageExpenses ? "مصروف جديد" : undefined}
+          actionIcon={canManageExpenses ? <Plus className="h-4 w-4" /> : undefined}
+          onActionClick={canManageExpenses ? () => setDialogOpen(true) : undefined}
           kpis={[
             {
               key: "rent",
@@ -223,6 +225,11 @@ export default function DoctorClinicExpensesPage() {
             <ClinicAccountsSearchCount count={expensesQuery.total} label="مصروف" />
           }
         />
+        {!canManageExpenses ? (
+          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+            يمكنك عرض المصاريف فقط، بينما إضافة مصروف جديد تتطلب صلاحية إدارة.
+          </p>
+        ) : null}
 
         {expensesQuery.isAwaitingData ? (
           <DoctorTableSkeleton rows={5} columns={1} />
@@ -237,9 +244,9 @@ export default function DoctorClinicExpensesPage() {
           <ClinicAccountsEmptyState
             title="لا توجد مصاريف مطابقة"
             subtitle="جرّب تغيير البحث أو الفئة، أو أضف مصروفًا جديدًا لبدء السجل المالي."
-            actionLabel="إضافة مصروف"
-            onAction={() => setDialogOpen(true)}
-            actionIcon={<Plus className="w-4 h-4" aria-hidden />}
+            actionLabel={canManageExpenses ? "إضافة مصروف" : undefined}
+            onAction={canManageExpenses ? () => setDialogOpen(true) : undefined}
+            actionIcon={canManageExpenses ? <Plus className="w-4 h-4" aria-hidden /> : undefined}
           />
         ) : (
           <div className="space-y-3">
@@ -270,7 +277,7 @@ export default function DoctorClinicExpensesPage() {
         ) : null}
 
         <ClinicAccountsModalShell
-          open={dialogOpen}
+          open={dialogOpen && canManageExpenses}
           onClose={() => setDialogOpen(false)}
           title="إضافة مصروف"
           maxWidthClass="max-w-[560px]"

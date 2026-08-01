@@ -23,6 +23,7 @@ import { formatBillingAmount } from "@/lib/doctor/billing/format";
 import { calcInvoiceTotals } from "@/lib/doctor/clinicAccounts/invoiceTotals";
 import { useToast } from "@/components/ui/ToastProvider";
 import { cn } from "@/lib/utils/utils";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 const METHOD_LABELS: Record<string, string> = {
   cash: "نقدي",
@@ -41,11 +42,12 @@ import { useRetryAction } from "@/lib/query/useRetryAction";
 
 export default function DoctorClinicAddPaymentPage() {
   const navigate = useNavigate();
+  const { basePath, canViewSettings, isSecretary } = useBillingAccess();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const invoiceParam = searchParams.get("invoice") ?? "";
 
-  const settingsQuery = useBillingSettings();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const invoiceQuery = useResolvedBillingInvoice(invoiceParam);
   const createPayment = useCreateBillingPayment();
   const { retry: retryInvoice, retrying: retryingInvoice } = useRetryAction(() =>
@@ -138,7 +140,7 @@ export default function DoctorClinicAddPaymentPage() {
         title: "تم الحفظ",
         variant: "success",
       });
-      navigate("/doctor/accounts/invoices");
+      navigate(`${basePath}/invoices`);
     } catch (error) {
       const { title, message } = getBillingPaymentErrorToast(error);
       toast(message, {
@@ -171,7 +173,7 @@ export default function DoctorClinicAddPaymentPage() {
           <DoctorListErrorState
             title="فاتورة غير محددة"
             brief="افتح هذه الصفحة من تفاصيل فاتورة (زر «إضافة دفعة») أو من قائمة الفواتير."
-            onRetry={() => navigate("/doctor/accounts/invoices")}
+            onRetry={() => navigate(`${basePath}/invoices`)}
           />
         ) : invoiceQuery.isAwaitingData ? (
           <DoctorInlineDetailsSkeleton rows={4} />
@@ -322,7 +324,7 @@ export default function DoctorClinicAddPaymentPage() {
               </button>
 
               <Link
-                to="/doctor/accounts/invoices"
+                to={`${basePath}/invoices`}
                 className="inline-block font-cairo text-[13px] font-extrabold text-[#667085]"
               >
                 الرجوع إلى الفواتير ←
