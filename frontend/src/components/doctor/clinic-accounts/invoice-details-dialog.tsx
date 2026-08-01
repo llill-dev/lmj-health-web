@@ -12,6 +12,7 @@ import { InvoiceRefundDialog } from "@/components/doctor/clinic-accounts/invoice
 import { InvoiceStatusBadge } from "@/components/doctor/clinic-accounts/invoice-status-badge";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useCancelBillingInvoice, useIssueBillingInvoice } from "@/hooks/doctor/billing";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils/utils";
 
@@ -36,6 +37,12 @@ export function InvoiceDetailsDialog({
   onInvoiceUpdated?: () => void;
 }) {
   const { toast } = useToast();
+  const {
+    basePath,
+    canManageInvoices,
+    canManagePayments,
+    canManageRefunds,
+  } = useBillingAccess();
   const cancelInvoice = useCancelBillingInvoice();
   const issueInvoice = useIssueBillingInvoice();
   const [editOpen, setEditOpen] = useState(false);
@@ -43,15 +50,18 @@ export function InvoiceDetailsDialog({
   const [cancelBusy, setCancelBusy] = useState(false);
   const [issueBusy, setIssueBusy] = useState(false);
 
-  const canEdit = invoice?.apiStatus === "draft";
-  const canIssue = Boolean(invoice?.rawId && invoice.apiStatus === "draft");
+  const canEdit = canManageInvoices && invoice?.apiStatus === "draft";
+  const canIssue = Boolean(
+    canManageInvoices && invoice?.rawId && invoice.apiStatus === "draft",
+  );
   const canCancel =
+    canManageInvoices &&
     invoice?.rawId &&
     invoice.apiStatus !== "cancelled" &&
     invoice.apiStatus !== "paid";
   const canRefund = useMemo(
-    () => (invoice ? hasRefundablePayments(invoice) : false),
-    [invoice],
+    () => Boolean(canManageRefunds && invoice ? hasRefundablePayments(invoice) : false),
+    [canManageRefunds, invoice],
   );
 
   if (!invoice) return null;
@@ -258,14 +268,16 @@ export function InvoiceDetailsDialog({
               <h3 className="font-cairo text-[14px] font-extrabold text-[#111827]">
                 الدفعات
               </h3>
-              <Link
-                to={`/doctor/accounts/payments/new?invoice=${encodeURIComponent(invoice.rawId ?? invoice.id)}`}
-                onClick={onClose}
-                className="inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-primary px-4 py-2 font-cairo text-[12px] font-extrabold text-white"
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                إضافة دفعة
-              </Link>
+              {canManagePayments ? (
+                <Link
+                  to={`${basePath}/payments/new?invoice=${encodeURIComponent(invoice.rawId ?? invoice.id)}`}
+                  onClick={onClose}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-primary px-4 py-2 font-cairo text-[12px] font-extrabold text-white"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                  إضافة دفعة
+                </Link>
+              ) : null}
             </div>
             {invoice.payments.length ? (
               <div className="space-y-2">
@@ -324,39 +336,45 @@ export function InvoiceDetailsDialog({
                 {issueBusy ? 'جارٍ الإصدار...' : 'إصدار الفاتورة'}
               </button>
             ) : null}
-            <button
-              type="button"
-              onClick={handleEditClick}
-              className={cn(
-                "inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]",
-                !canEdit && "opacity-60",
-              )}
-            >
-              <Pencil className="h-4 w-4" aria-hidden />
-              تعديل
-            </button>
-            <button
-              type="button"
-              onClick={handleRefundClick}
-              className={cn(
-                "inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white transition hover:bg-primary/90",
-                !canRefund && "opacity-60",
-              )}
-            >
-              <Receipt className="w-4 h-4" aria-hidden />
-              استرجاع
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleCancelClick()}
-              disabled={cancelBusy || !canCancel}
-              className={cn(
-                "col-span-2 inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] font-cairo text-[14px] font-extrabold text-[#B42318] transition hover:bg-[#FEE4E2] disabled:opacity-60",
-              )}
-            >
-              <XCircle className="h-4 w-4" aria-hidden />
-              {cancelBusy ? "جارٍ الإلغاء..." : "إلغاء الفاتورة"}
-            </button>
+            {canManageInvoices ? (
+              <button
+                type="button"
+                onClick={handleEditClick}
+                className={cn(
+                  "inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]",
+                  !canEdit && "opacity-60",
+                )}
+              >
+                <Pencil className="h-4 w-4" aria-hidden />
+                تعديل
+              </button>
+            ) : null}
+            {canManageRefunds ? (
+              <button
+                type="button"
+                onClick={handleRefundClick}
+                className={cn(
+                  "inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white transition hover:bg-primary/90",
+                  !canRefund && "opacity-60",
+                )}
+              >
+                <Receipt className="w-4 h-4" aria-hidden />
+                استرجاع
+              </button>
+            ) : null}
+            {canManageInvoices ? (
+              <button
+                type="button"
+                onClick={() => void handleCancelClick()}
+                disabled={cancelBusy || !canCancel}
+                className={cn(
+                  "col-span-2 inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] font-cairo text-[14px] font-extrabold text-[#B42318] transition hover:bg-[#FEE4E2] disabled:opacity-60",
+                )}
+              >
+                <XCircle className="h-4 w-4" aria-hidden />
+                {cancelBusy ? "جارٍ الإلغاء..." : "إلغاء الفاتورة"}
+              </button>
+            ) : null}
           </div>
           {!canEdit ? (
             <p className="text-center font-cairo text-[11px] font-semibold text-[#98A2B3]">
@@ -390,9 +408,12 @@ export function RecentActivityList({
 }) {
   return (
     <div className="space-y-3">
-      {activities.map((activity) => (
+      {activities.map((activity, index) => (
         <div
-          key={activity.id}
+          key={
+            activity.id ||
+            `${activity.type}-${activity.title}-${activity.timeLabel}-${activity.amount}-${index}`
+          }
           className="flex items-center justify-between gap-3 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-3"
         >
           <div className="flex gap-3 items-center text-right">

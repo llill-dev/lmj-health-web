@@ -37,10 +37,11 @@ import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 const STALE_MS = 1000 * 30;
 
-export function useBillingSettings() {
+export function useBillingSettings(enabled = true) {
   const query = useQuery({
     queryKey: billingQueryKeys.settings(),
     queryFn: () => billingApi.settings.get(),
+    enabled,
     staleTime: STALE_MS * 4,
   });
 
@@ -50,7 +51,8 @@ export function useBillingSettings() {
     supportedCurrencies: query.data?.supportedCurrencies ?? [],
     currency:
       query.data?.settings?.currency ?? query.data?.defaultCurrency ?? "USD",
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 

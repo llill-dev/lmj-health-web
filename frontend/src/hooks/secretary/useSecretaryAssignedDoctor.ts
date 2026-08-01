@@ -32,23 +32,23 @@ export function useSecretaryAssignedDoctor() {
         },
       );
 
-      if (result.ok) {
+      if (result.ok === false) {
+        const handledError = result.error;
+
         return {
-          state: "ready" as const,
-          data: result.data,
-          error: null,
+          state:
+            handledError instanceof ApiError && handledError.status === 403
+              ? ("forbidden" as const)
+              : ("unassigned" as const),
+          data: null,
+          error: handledError,
         };
       }
 
-      const handledError = result.error;
-
       return {
-        state:
-          handledError instanceof ApiError && handledError.status === 403
-            ? ("forbidden" as const)
-            : ("unassigned" as const),
-        data: null,
-        error: handledError,
+        state: "ready" as const,
+        data: result.data,
+        error: null,
       };
     },
     staleTime: 60_000,
