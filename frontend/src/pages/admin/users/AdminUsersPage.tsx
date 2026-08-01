@@ -6,6 +6,7 @@ import {
   AlertCircle,
   Mail,
   Phone,
+  RefreshCw,
   Search,
   ShieldPlus,
   UserCog,
@@ -59,7 +60,7 @@ export default function AdminUsersPage() {
   const [pageSize, setPageSize] = useState(10);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { users, isAwaitingData, isError, error, refetch } = useAdminUsers();
+  const { users, isAwaitingData, isRefetching, isError, error, refetch } = useAdminUsers();
 
   const filteredUsers = useMemo(() => {
     const text = query.trim().toLowerCase();
@@ -99,6 +100,7 @@ export default function AdminUsersPage() {
     filteredUsers.length === 0
       ? 0
       : Math.min(currentPage * pageSize, filteredUsers.length);
+  const hasActiveFilters = query.trim() !== "" || statusFilter !== "all";
 
   return (
     <>
@@ -139,7 +141,7 @@ export default function AdminUsersPage() {
         />
 
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]">
             <div className="relative">
               <input
                 value={query}
@@ -177,8 +179,27 @@ export default function AdminUsersPage() {
               size="sm"
               tone="muted"
             />
+
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isRefetching}
+              className="inline-flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+              {isRefetching
+                ? tr("جارٍ التحديث...", "Refreshing...")
+                : tr("تحديث", "Refresh")}
+            </button>
           </div>
         </section>
+
+        {isRefetching && !isAwaitingData ? (
+          <div className="inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث حسابات الإدارة...", "Refreshing admin users...")}
+          </div>
+        ) : null}
 
         {isAwaitingData ? (
           <SkeletonList
@@ -205,10 +226,15 @@ export default function AdminUsersPage() {
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-            {tr(
-              "لا توجد حسابات مطابقة للبحث الحالي.",
-              "No accounts match the current search.",
-            )}
+            {hasActiveFilters
+              ? tr(
+                  "لا توجد حسابات مطابقة للبحث أو الفلترة الحالية.",
+                  "No accounts match the current search or filters.",
+                )
+              : tr(
+                  "لا توجد حسابات إدارة مسجلة حالياً.",
+                  "There are no admin user accounts yet.",
+                )}
           </div>
         ) : (
           <section className="space-y-4">
