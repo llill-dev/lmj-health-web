@@ -37,7 +37,7 @@ export default function AdminDoctorRestoreRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState<RestoreRequest | null>(
     null,
   );
-  const { requests, isAwaitingData, isError, refetch } =
+  const { requests, isAwaitingData, isRefetching, isError, refetch } =
     useAdminDoctorRestoreRequests({ limit: 50 });
 
   const pendingCount = requests.filter((item) => item.status === "pending")
@@ -124,6 +124,13 @@ export default function AdminDoctorRestoreRequestsPage() {
               "جار تحميل طلبات الاستعادة...",
               "Loading restore requests…",
             )}
+          </div>
+        ) : null}
+
+        {!isError && !isAwaitingData && isRefetching ? (
+          <div className="flex items-center justify-center gap-2 rounded-[12px] border border-[#D1FAE5] bg-[#ECFDF5] px-6 py-3 text-center font-cairo text-[12px] font-extrabold text-[#047857] shadow-[0_12px_24px_rgba(0,0,0,0.04)]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث طلبات الاستعادة...", "Refreshing restore requests...")}
           </div>
         ) : null}
 

@@ -47,6 +47,7 @@ export function useAdminDoctorRestoreRequests(
   return {
     requests: query.data || [],
     isAwaitingData: query.isLoading,
+    isRefetching: query.isFetching && !query.isLoading,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
