@@ -47,6 +47,7 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50];
 export default function DoctorClinicAccountsPage() {
   const {
     basePath,
+    canViewReports,
     canManagePayments,
     canManageExpenses,
     canManageInvoices,
@@ -82,11 +83,14 @@ export default function DoctorClinicAccountsPage() {
     page: outstandingPage,
     limit: outstandingLimit,
   });
-  const reportsQuery = useBillingReports({
-    year: new Date().getFullYear(),
-    month: "all",
-    currency,
-  });
+  const reportsQuery = useBillingReports(
+    {
+      year: new Date().getFullYear(),
+      month: "all",
+      currency,
+    },
+    !isSecretary || canViewReports,
+  );
   const { retry: retryDashboard, retrying: retryingDashboard } = useRetryAction(
     () =>
       Promise.all([
@@ -400,7 +404,13 @@ export default function DoctorClinicAccountsPage() {
               عرض كل الفواتير
             </Link>
           </div>
-          <RecentActivityList activities={reportsQuery.recentActivities} />
+          {canViewReports ? (
+            <RecentActivityList activities={reportsQuery.recentActivities} />
+          ) : (
+            <p className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
+              لا تظهر النشاطات المالية الأخيرة ضمن هذه الصفحة إلا عند منح صلاحية عرض التقارير المالية.
+            </p>
+          )}
         </section>
       </div>
     </>

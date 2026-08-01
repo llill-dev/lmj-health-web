@@ -65,7 +65,12 @@ function findCategoryCount(
 
 export default function DoctorClinicExpensesPage() {
   const { toast } = useToast();
-  const { canManageExpenses, canViewSettings, isSecretary } = useBillingAccess();
+  const {
+    canManageExpenses,
+    canViewDashboard,
+    canViewSettings,
+    isSecretary,
+  } = useBillingAccess();
   const [filter, setFilter] = useState<ExpenseFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -77,7 +82,11 @@ export default function DoctorClinicExpensesPage() {
   const [date, setDate] = useState("");
 
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
-  const dashboardQuery = useBillingDashboard("month", settingsQuery.currency);
+  const dashboardQuery = useBillingDashboard(
+    "month",
+    settingsQuery.currency,
+    !isSecretary || canViewDashboard,
+  );
   const expensesQuery = useBillingExpenses({
     page,
     limit,
@@ -166,10 +175,12 @@ export default function DoctorClinicExpensesPage() {
               <span className="font-extrabold text-primary">
                 {dashboardQuery.isAwaitingData
                   ? "—"
-                  : formatBillingAmount(
-                      dashboardQuery.summary?.expenses ?? 0,
-                      currency,
-                    )}
+                  : !isSecretary || canViewDashboard
+                    ? formatBillingAmount(
+                        dashboardQuery.summary?.expenses ?? 0,
+                        currency,
+                      )
+                    : "—"}
               </span>
               <span className="text-primary/90"> — إجمالي المصاريف</span>
             </span>
@@ -181,25 +192,45 @@ export default function DoctorClinicExpensesPage() {
             {
               key: "rent",
               icon: <Home className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.rent,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.rent
+                  : "—",
               label: "إيجار",
             },
             {
               key: "services",
               icon: <Zap className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.services,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.services
+                  : "—",
               label: "خدمات",
             },
             {
               key: "salaries",
               icon: <Users className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.salaries,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.salaries
+                  : "—",
               label: "رواتب",
             },
             {
               key: "materials",
               icon: <Box className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.materials,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.materials
+                  : "—",
               label: "مواد",
             },
           ]}

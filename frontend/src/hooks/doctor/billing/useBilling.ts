@@ -56,7 +56,11 @@ export function useBillingSettings(enabled = true) {
   };
 }
 
-export function useBillingDashboard(period: AccountsPeriod, currency?: string) {
+export function useBillingDashboard(
+  period: AccountsPeriod,
+  currency?: string,
+  enabled = true,
+) {
   const params = {
     ...resolveBillingDashboardPeriodParams(period),
     ...(currency ? { currency } : {}),
@@ -65,6 +69,7 @@ export function useBillingDashboard(period: AccountsPeriod, currency?: string) {
   const query = useQuery({
     queryKey: billingQueryKeys.dashboard(params),
     queryFn: () => billingApi.dashboard(params),
+    enabled,
     staleTime: STALE_MS,
   });
 
@@ -82,7 +87,8 @@ export function useBillingDashboard(period: AccountsPeriod, currency?: string) {
       : [],
     overdueCount: dashboard?.overdueSummary?.count ?? 0,
     outstandingCount: dashboard?.outstandingSummary?.count ?? 0,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -276,7 +282,7 @@ export function useBillingReports(input: {
   year: number;
   month?: number | "all";
   currency?: string;
-}) {
+}, enabled = true) {
   const params: BillingQueryParams = {
     ...resolveBillingReportPeriodParams(input),
     ...(input.currency ? { currency: input.currency } : {}),
@@ -285,6 +291,7 @@ export function useBillingReports(input: {
   const query = useQuery({
     queryKey: billingQueryKeys.reports(params),
     queryFn: () => billingApi.reports.get(params),
+    enabled,
     staleTime: STALE_MS,
   });
 
@@ -304,7 +311,8 @@ export function useBillingReports(input: {
         )
       : [],
     summary: report?.summary ?? null,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 

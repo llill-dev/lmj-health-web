@@ -51,7 +51,13 @@ function pickStatusCount(
 
 export default function DoctorClinicInvoicesPage() {
   const navigate = useNavigate();
-  const { basePath, canManageInvoices, canViewSettings, isSecretary } =
+  const {
+    basePath,
+    canManageInvoices,
+    canViewDashboard,
+    canViewSettings,
+    isSecretary,
+  } =
     useBillingAccess();
   const [filter, setFilter] = useState<InvoiceFilter>("all");
   const [search, setSearch] = useState("");
@@ -61,7 +67,11 @@ export default function DoctorClinicInvoicesPage() {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
-  const dashboardQuery = useBillingDashboard("month", settingsQuery.currency);
+  const dashboardQuery = useBillingDashboard(
+    "month",
+    settingsQuery.currency,
+    !isSecretary || canViewDashboard,
+  );
   const listQuery = useBillingInvoices({
     uiStatus: filter,
     search,
@@ -130,19 +140,34 @@ export default function DoctorClinicInvoicesPage() {
             {
               key: "paid",
               icon: <CheckCircle className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.paid,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.paid
+                  : "—",
               label: "مدفوعة",
             },
             {
               key: "unpaid",
               icon: <FileText className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.unpaid,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.unpaid
+                  : "—",
               label: "غير مدفوعة",
             },
             {
               key: "overdue",
               icon: <Clock className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.overdue,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.overdue
+                  : "—",
               label: "متأخرة",
             },
           ]}
