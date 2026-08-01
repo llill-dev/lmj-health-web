@@ -454,7 +454,7 @@ function assertAdminMedicalOrderCatalogKindSupported(
 ) {
   if (kind === "referral") {
     throw new Error(
-      "Admin medical order referrals are not documented in docs/openapi.json.",
+      "Admin medical order referrals are not documented in docs/...",
     );
   }
 }

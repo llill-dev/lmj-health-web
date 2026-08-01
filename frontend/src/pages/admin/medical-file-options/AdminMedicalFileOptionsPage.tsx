@@ -6,6 +6,7 @@ import {
   Heart,
   Loader2,
   Plus,
+  RefreshCw,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
@@ -112,6 +113,25 @@ export default function AdminMedicalFileOptionsPage() {
 
   const isBusy =
     createLookup.isPending || removeLookup.isPending || patchLookup.isPending;
+  const isAwaitingAnyData =
+    chronicQuery.isAwaitingData ||
+    allergyQuery.isAwaitingData ||
+    bloodQuery.isAwaitingData;
+  const isRefetchingAnyData =
+    !isAwaitingAnyData &&
+    (chronicQuery.isRefetching ||
+      allergyQuery.isRefetching ||
+      bloodQuery.isRefetching);
+  const loadError =
+    chronicQuery.error || allergyQuery.error || bloodQuery.error || null;
+  const hasLookupItems =
+    chronicDiseases.length > 0 || allergies.length > 0 || bloodTypes.length > 0;
+
+  function refetchAll() {
+    void chronicQuery.refetch();
+    void allergyQuery.refetch();
+    void bloodQuery.refetch();
+  }
 
   async function createLookupOption(
     category: AdminLookupCategory,
@@ -269,70 +289,120 @@ export default function AdminMedicalFileOptionsPage() {
               />
               عرض الخيارات المعطلة
             </label>
+            <button
+              type='button'
+              onClick={refetchAll}
+              disabled={isRefetchingAnyData}
+              className='mr-2 inline-flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] disabled:cursor-not-allowed disabled:opacity-60'
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isRefetchingAnyData ? 'animate-spin' : ''}`}
+              />
+              {isRefetchingAnyData ? 'جارٍ التحديث...' : 'تحديث'}
+            </button>
           </div>
 
-          <div className='mt-2 grid grid-cols-1 gap-6 lg:grid-cols-3'>
-            <MedicalFileOptionCard
-              title='الأمراض المزمنة'
-              items={chronicDiseases}
-              icon={Heart}
-              addLabel='إضافة مرض'
-              onAdd={() => openQuickAdd('MEDICAL_CONDITION')}
-              onEdit={buildEditHandler(chronicDiseases)}
-              onRemove={(id) => {
-                const row = chronicDiseases.find((item) => item.id === id);
-                if (!row) return;
-                setDeleteTarget(row);
-              }}
-              editingId={patchLookup.isPending ? editTarget?.id ?? null : null}
-              removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
-              tone={{
-                border: 'border-[#16C5C0]',
-                headerBg: 'bg-[#E7FBFA]',
-                titleText: 'text-primary',
-                itemBg: 'bg-[#EFF6FF]',
-                itemText: 'text-[#667085]',
-                addText: 'text-primary',
-              }}
-            />
-            <MedicalFileOptionCard
-              title='أنواع الحساسية'
-              items={allergies}
-              icon={AlertTriangle}
-              addLabel='إضافة حساسية'
-              onAdd={() => openQuickAdd('ALLERGY')}
-              onEdit={buildEditHandler(allergies)}
-              onRemove={(id) => {
-                const row = allergies.find((item) => item.id === id);
-                if (!row) return;
-                setDeleteTarget(row);
-              }}
-              editingId={patchLookup.isPending ? editTarget?.id ?? null : null}
-              removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
-              tone={{
-                border: 'border-[#F59E0B]',
-                headerBg: 'bg-[#FFF7ED]',
-                titleText: 'text-[#F97316]',
-                itemBg: 'bg-[#FFF7ED]',
-                itemText: 'text-[#667085]',
-                addText: 'text-[#F97316]',
-              }}
-            />
-            <MedicalFileOptionCard
-              title='فصائل الدم'
-              items={bloodTypes}
-              icon={Droplets}
-              variant='chips'
-              tone={{
-                border: 'border-[#FCA5A5]',
-                headerBg: 'bg-[#FFF1F2]',
-                titleText: 'text-[#EF4444]',
-                itemBg: 'bg-[#FFE4E6]',
-                itemText: 'text-[#EF4444]',
-                addText: 'text-[#EF4444]',
-              }}
-            />
-          </div>
+          {isRefetchingAnyData ? (
+            <div className='mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]'>
+              <RefreshCw className='h-4 w-4 animate-spin' />
+              جارٍ تحديث خيارات الملف الطبي...
+            </div>
+          ) : null}
+
+          {loadError ? (
+            <div className='mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 text-right shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
+              <div className='font-cairo text-[13px] font-semibold text-[#B42318]'>
+                {userFacingErrorMessage(
+                  loadError,
+                  'تعذر تحميل خيارات الملف الطبي.',
+                )}
+              </div>
+              <button
+                type='button'
+                onClick={refetchAll}
+                disabled={isRefetchingAnyData}
+                className='mt-3 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60'
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isRefetchingAnyData ? 'animate-spin' : ''}`}
+                />
+                {isRefetchingAnyData ? 'جارٍ إعادة المحاولة...' : 'إعادة المحاولة'}
+              </button>
+            </div>
+          ) : null}
+
+          {isAwaitingAnyData ? (
+            <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
+              جاري تحميل خيارات الملف الطبي...
+            </div>
+          ) : !loadError && !hasLookupItems ? (
+            <div className='mt-4 rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
+              لا توجد خيارات مسجلة حالياً في الملف الطبي.
+            </div>
+          ) : !loadError ? (
+            <div className='mt-2 grid grid-cols-1 gap-6 lg:grid-cols-3'>
+              <MedicalFileOptionCard
+                title='الأمراض المزمنة'
+                items={chronicDiseases}
+                icon={Heart}
+                addLabel='إضافة مرض'
+                onAdd={() => openQuickAdd('MEDICAL_CONDITION')}
+                onEdit={buildEditHandler(chronicDiseases)}
+                onRemove={(id) => {
+                  const row = chronicDiseases.find((item) => item.id === id);
+                  if (!row) return;
+                  setDeleteTarget(row);
+                }}
+                editingId={patchLookup.isPending ? editTarget?.id ?? null : null}
+                removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
+                tone={{
+                  border: 'border-[#16C5C0]',
+                  headerBg: 'bg-[#E7FBFA]',
+                  titleText: 'text-primary',
+                  itemBg: 'bg-[#EFF6FF]',
+                  itemText: 'text-[#667085]',
+                  addText: 'text-primary',
+                }}
+              />
+              <MedicalFileOptionCard
+                title='أنواع الحساسية'
+                items={allergies}
+                icon={AlertTriangle}
+                addLabel='إضافة حساسية'
+                onAdd={() => openQuickAdd('ALLERGY')}
+                onEdit={buildEditHandler(allergies)}
+                onRemove={(id) => {
+                  const row = allergies.find((item) => item.id === id);
+                  if (!row) return;
+                  setDeleteTarget(row);
+                }}
+                editingId={patchLookup.isPending ? editTarget?.id ?? null : null}
+                removingId={removeLookup.isPending ? deleteTarget?.id ?? null : null}
+                tone={{
+                  border: 'border-[#F59E0B]',
+                  headerBg: 'bg-[#FFF7ED]',
+                  titleText: 'text-[#F97316]',
+                  itemBg: 'bg-[#FFF7ED]',
+                  itemText: 'text-[#667085]',
+                  addText: 'text-[#F97316]',
+                }}
+              />
+              <MedicalFileOptionCard
+                title='فصائل الدم'
+                items={bloodTypes}
+                icon={Droplets}
+                variant='chips'
+                tone={{
+                  border: 'border-[#FCA5A5]',
+                  headerBg: 'bg-[#FFF1F2]',
+                  titleText: 'text-[#EF4444]',
+                  itemBg: 'bg-[#FFE4E6]',
+                  itemText: 'text-[#EF4444]',
+                  addText: 'text-[#EF4444]',
+                }}
+              />
+            </div>
+          ) : null}
 
           <div className='mt-6 rounded-[10px] bg-white px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.18)]'>
             <div className='flex items-center justify-start gap-2'>

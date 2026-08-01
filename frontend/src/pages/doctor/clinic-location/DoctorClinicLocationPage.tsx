@@ -293,6 +293,13 @@ export default function DoctorClinicLocationPage() {
               الطلب قبل موافقة الإدارة.
             </div>
           ) : null}
+
+          {profileQuery.isRefetching ? (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              جارٍ تحديث بيانات موقع العيادة...
+            </div>
+          ) : null}
         </section>
 
         <section className="mt-5 rounded-[6px] border border-[#EEF2F6] bg-white p-4 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:p-5">
