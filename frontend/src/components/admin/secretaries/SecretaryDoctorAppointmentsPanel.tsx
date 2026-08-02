@@ -14,6 +14,7 @@ import CancelAppointmentDialog from '@/components/admin/appointments/dialogs/Can
 import AdminAppointmentDetailsDialog from '@/components/admin/appointments/dialogs/AdminAppointmentDetailsDialog';
 import {
   formatDateLabel,
+  formatPatientLabel,
   statusLabel,
   statusPill,
   type UiAppointmentCard,
@@ -86,8 +87,7 @@ export function SecretaryDoctorAppointmentsPanel({
         doctorName,
         doctorSpecialization: a.doctor?.specialization,
         dateLabel: formatDateLabel(a),
-        patientLabel:
-          a.patient?.userId?.fullName ?? a.patient?.publicId ?? '—',
+        patientLabel: formatPatientLabel(a.patient),
         time: a.startTime ?? '—',
       }));
   }, [doctorName, filters.search, scopedAppointments]);

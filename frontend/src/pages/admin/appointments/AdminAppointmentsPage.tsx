@@ -6,6 +6,7 @@ import {
   Clock,
   Search,
   RefreshCw,
+  Stethoscope,
   User,
   Eye,
   AlertCircle,
@@ -18,6 +19,7 @@ import AdminAppointmentDetailsDialog from "@/components/admin/appointments/dialo
 import AppointmentCardSkeleton from "@/components/admin/appointments/AppointmentCardSkeleton";
 import {
   formatDateLabel,
+  formatPatientLabel,
   statusLabel,
   statusPill,
   type UiAppointmentCard,
@@ -140,8 +142,6 @@ export default function AdminAppointmentsPage() {
   const uiAppointments = useMemo(() => {
     return filteredAppointments.map<UiAppointmentCard>((a) => {
       const doctorName = a.doctor?.userId?.fullName ?? "—";
-      const patientLabel =
-        a.patient?.userId?.fullName ?? a.patient?.publicId ?? "—";
 
       return {
         id: a._id,
@@ -151,7 +151,7 @@ export default function AdminAppointmentsPage() {
         doctorName,
         doctorSpecialization: a.doctor?.specialization,
         dateLabel: formatDateLabel(a),
-        patientLabel,
+        patientLabel: formatPatientLabel(a.patient),
         time: a.startTime ?? "—",
       };
     });
@@ -398,7 +398,8 @@ export default function AdminAppointmentsPage() {
                           <div className="flex flex-col items-start gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4 text-primary" />
-                              {a.patientLabel}
+                              <span>{tr("المريض:", "Patient:")}</span>
+                              <span className="text-[#111827]">{a.patientLabel}</span>
                             </div>
                           </div>
                           <div className="mt-2 flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
@@ -410,9 +411,19 @@ export default function AdminAppointmentsPage() {
                         <div className="text-start">
                           <div className="flex flex-col items-start gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                             <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-primary" />
-                              {a.doctorName}
+                              <Stethoscope className="h-4 w-4 text-primary" />
+                              <span>{tr("الطبيب:", "Doctor:")}</span>
+                              <span className="text-[#111827]">{a.doctorName}</span>
                             </div>
+                            {a.doctorSpecialization ? (
+                              <div className="flex items-center gap-2">
+                                <CalendarDays className="h-4 w-4 text-primary" />
+                                <span>{tr("التخصص:", "Specialization:")}</span>
+                                <span className="text-[#111827]">
+                                  {a.doctorSpecialization}
+                                </span>
+                              </div>
+                            ) : null}
                           </div>
                           <div className="mt-2 flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
                             <CalendarDays className="h-4 w-4 text-primary" />

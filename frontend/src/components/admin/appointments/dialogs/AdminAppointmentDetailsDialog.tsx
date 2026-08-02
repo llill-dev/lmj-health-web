@@ -17,6 +17,7 @@ import {
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
+import { formatPatientLabel } from "@/components/admin/appointments/appointmentListUtils";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 export default function AdminAppointmentDetailsDialog({
@@ -185,9 +186,7 @@ export default function AdminAppointmentDetailsDialog({
                         </div>
                       </div>
                       <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
-                        {appointment.patient?.userId?.fullName ??
-                          appointment.patient?.publicId ??
-                          "—"}
+                        {formatPatientLabel(appointment.patient)}
                       </div>
                     </div>
 

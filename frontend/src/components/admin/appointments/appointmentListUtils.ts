@@ -36,3 +36,15 @@ export function formatDateLabel(a: AppointmentSummary) {
   if (Number.isNaN(d.getTime())) return String(iso);
   return d.toISOString().slice(0, 10);
 }
+
+export function formatPatientLabel(
+  patient: AppointmentSummary['patient'] | null | undefined,
+) {
+  const fullName = patient?.userId?.fullName?.trim();
+  const publicId = patient?.publicId?.trim();
+
+  if (fullName && publicId) return `${fullName} (${publicId})`;
+  if (fullName) return fullName;
+  if (publicId) return publicId;
+  return '—';
+}
