@@ -6,7 +6,11 @@ import DashboardHeader from "@/components/layout/dashboard-header";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import DoctorInboxToastBridge from "@/components/doctor/DoctorInboxToastBridge";
 import { useToast } from "@/components/ui/ToastProvider";
-import { sidebarItems, type SidebarItemId } from "@/constant/sidebar-items";
+import {
+  getSectionBackNavigation,
+  sidebarItems,
+  type SidebarItemId,
+} from "@/constant/sidebar-items";
 import { readAuthUser } from "@/lib/cookies";
 import { DoctorRouteFallback } from "@/routes/RouteFallbacks";
 import { useAuthStore } from "@/store/authStore";
@@ -57,6 +61,11 @@ export default function DoctorLayout() {
         pathname.startsWith(`/doctor/${item.path}/`),
     )?.path ?? "dashboard";
 
+  const backLink = useMemo(
+    () => getSectionBackNavigation(pathname, "/doctor", sidebarItems),
+    [pathname],
+  );
+
   return (
     <div className="h-dvh overflow-hidden bg-white scrollbar-hide">
       <DoctorInboxToastBridge />
@@ -66,6 +75,7 @@ export default function DoctorLayout() {
             <DashboardHeader
               role="doctor"
               onMenuClick={() => setIsMobileSidebarOpen(true)}
+              backLink={backLink}
             />
           </div>
 

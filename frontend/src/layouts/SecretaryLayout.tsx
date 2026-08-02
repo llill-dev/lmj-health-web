@@ -5,6 +5,7 @@ import DashboardHeader from "@/components/layout/dashboard-header";
 import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
+  getSectionBackNavigation,
   secretarySidebarItems,
   type SecretarySidebarItemId,
 } from "@/constant/sidebar-items";
@@ -84,6 +85,12 @@ export default function SecretaryLayout() {
         pathname.startsWith(`/secretary/${item.path}/`),
     )?.path ?? "dashboard";
 
+  const backLink = useMemo(
+    () =>
+      getSectionBackNavigation(pathname, "/secretary", visibleSidebarItems),
+    [pathname, visibleSidebarItems],
+  );
+
   useEffect(() => {
     if (!permissionsReady) return;
     const firstItem = visibleSidebarItems[0];
@@ -130,6 +137,7 @@ export default function SecretaryLayout() {
               onMenuClick={() => setIsMobileSidebarOpen(true)}
               showMessages={false}
               showUnreadBadge={false}
+              backLink={backLink}
             />
           </div>
 

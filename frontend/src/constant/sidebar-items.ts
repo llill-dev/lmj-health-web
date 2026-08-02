@@ -523,3 +523,35 @@ export const dataEntrySidebarItems: Array<{
     icon: Tags,
   },
 ];
+
+type DashboardBackNavItem = {
+  path: string;
+  label: string;
+};
+
+export function getSectionBackNavigation(
+  pathname: string,
+  basePath: string,
+  items: readonly DashboardBackNavItem[],
+): {
+  href: string;
+  label: string;
+} | null {
+  if (!pathname.startsWith(basePath)) return null;
+
+  const segs = pathname
+    .replace(new RegExp(`^${basePath.replace('/', '\\/')}/?`), "")
+    .split("/")
+    .filter(Boolean);
+
+  if (segs.length < 2) return null;
+
+  const section = segs[0];
+  const item = items.find((entry) => entry.path === section);
+  if (!item) return null;
+
+  return {
+    href: `${basePath}/${item.path}`,
+    label: item.label,
+  };
+}
