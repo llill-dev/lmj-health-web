@@ -4,6 +4,8 @@ import {
   ArrowRight,
   CalendarDays,
   CheckCircle2,
+  Eye,
+  Lock,
   Mail,
   Phone,
   Settings,
@@ -88,7 +90,11 @@ export default function AdminSecretaryDetailsPage() {
             </div>
           </div>
 
-          <div className='flex gap-2'>
+          <div className='flex flex-wrap gap-2'>
+            <span className='inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#667085]'>
+              <Eye className='h-4 w-4' />
+              {tr('عرض فقط', 'Read only')}
+            </span>
             <button
               type='button'
               onClick={() =>
@@ -123,6 +129,23 @@ export default function AdminSecretaryDetailsPage() {
                 {tr('إيقاف الحساب', 'Offboard account')}
               </button>
             )}
+          </div>
+        </div>
+
+        <div className='mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-4'>
+          <div className='flex items-start gap-3'>
+            <Lock className='mt-0.5 h-4 w-4 shrink-0 text-[#B42318]' />
+            <div>
+              <div className='font-cairo text-[12px] font-extrabold text-[#991B1B]'>
+                {tr('صلاحيات السكرتيرة معروضة للمراجعة فقط', 'Secretary permissions are shown for review only')}
+              </div>
+              <div className='mt-1 font-cairo text-[11px] font-bold leading-6 text-[#B42318]'>
+                {tr(
+                  'لا تسمح لوحة الإدارة حالياً بتعديل صلاحيات السكرتيرة أو بياناتها من هذه الواجهة، لذلك يتم عرض المعلومات هنا بشكل read-only لتفادي أي التباس.',
+                  'The admin area does not currently support editing secretary permissions or profile data from this screen, so the information is presented as read-only to avoid misleading actions.',
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
