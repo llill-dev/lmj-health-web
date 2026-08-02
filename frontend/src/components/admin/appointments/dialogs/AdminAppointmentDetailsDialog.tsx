@@ -185,8 +185,11 @@ export default function AdminAppointmentDetailsDialog({
                           المريض
                         </div>
                       </div>
-                      <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
-                        {formatPatientLabel(appointment.patient)}
+                      <div className="mt-3 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085]">
+                        <span>المريض:</span>
+                        <span className="text-[#111827]">
+                          {formatPatientLabel(appointment.patient)}
+                        </span>
                       </div>
                     </div>
 
@@ -197,12 +200,18 @@ export default function AdminAppointmentDetailsDialog({
                           الطبيب
                         </div>
                       </div>
-                      <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
-                        {appointment.doctor?.userId?.fullName ?? "—"}
+                      <div className="mt-3 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085]">
+                        <span>الطبيب:</span>
+                        <span className="text-[#111827]">
+                          {appointment.doctor?.userId?.fullName ?? "—"}
+                        </span>
                       </div>
                       {appointment.doctor?.specialization ? (
-                        <div className="mt-2 font-cairo text-[12px] font-semibold text-[#667085]">
-                          {appointment.doctor.specialization}
+                        <div className="mt-2 flex items-center gap-2 font-cairo text-[12px] font-semibold text-[#667085]">
+                          <span>التخصص:</span>
+                          <span className="text-[#111827]">
+                            {appointment.doctor.specialization}
+                          </span>
                         </div>
                       ) : null}
                     </div>
