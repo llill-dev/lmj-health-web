@@ -3,7 +3,9 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Sidebar from "@/components/layout/sidebar";
 import DashboardHeader from "@/components/layout/dashboard-header";
-import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
+import LogoutConfirmDialog, {
+  type LogoutScope,
+} from "@/components/auth/logout-confirm-dialog";
 import DoctorInboxToastBridge from "@/components/doctor/DoctorInboxToastBridge";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
@@ -14,11 +16,13 @@ import {
 import { readAuthUser } from "@/lib/cookies";
 import { DoctorRouteFallback } from "@/routes/RouteFallbacks";
 import { useAuthStore } from "@/store/authStore";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useI18n();
 
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -32,25 +36,25 @@ export default function DoctorLayout() {
   }, [authUser?.fullName]);
   const doctorEmail = authUser?.email?.trim() || "";
 
-  const performLogout = useCallback(async () => {
+  const performLogout = useCallback(async (scope: LogoutScope) => {
     setLoggingOut(true);
     try {
-      await useAuthStore.getState().logout();
-      toast("نراك في زيارة قادمة.", {
-        title: "تم تسجيل الخروج",
+      await useAuthStore.getState().logout({ scope });
+      toast(t("logout.toast.success.body"), {
+        title: t("logout.toast.success.title"),
         variant: "success",
       });
       navigate("/login", { replace: true });
     } catch {
-      toast("تعذّر إتمام تسجيل الخروج الآن. حاول مرة أخرى.", {
-        title: "فشل تسجيل الخروج",
+      toast(t("logout.toast.error.body"), {
+        title: t("logout.toast.error.title"),
         variant: "error",
       });
       throw new Error("logout_failed");
     } finally {
       setLoggingOut(false);
     }
-  }, [navigate, toast]);
+  }, [navigate, t, toast]);
 
   const pathname = location.pathname;
 
@@ -97,12 +101,9 @@ export default function DoctorLayout() {
         />
       </div>
 
-      <ConfirmActionDialog
+      <LogoutConfirmDialog
         open={logoutConfirmOpen}
         onOpenChange={setLogoutConfirmOpen}
-        title="تأكيد تسجيل الخروج"
-        description="سيتم إنهاء جلستك الحالية وإعادتك إلى صفحة تسجيل الدخول. إذا كنت لا تزال بحاجة إلى العمل، اختر إلغاء."
-        confirmLabel={loggingOut ? "جاري تسجيل الخروج…" : "تسجيل الخروج"}
         confirmDisabled={loggingOut}
         onConfirm={performLogout}
       />

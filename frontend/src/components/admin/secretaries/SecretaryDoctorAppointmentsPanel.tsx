@@ -6,6 +6,7 @@ import {
   Clock,
   Eye,
   Search,
+  Stethoscope,
   User,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -198,6 +199,10 @@ export function SecretaryDoctorAppointmentsPanel({
                   <div className='flex flex-wrap items-center justify-between gap-3'>
                     <div className='text-right'>
                       <div className='flex items-center justify-start gap-2'>
+                        <User className='h-4 w-4 text-primary' />
+                        <span className='font-cairo text-[12px] font-bold text-[#667085]'>
+                          المريض:
+                        </span>
                         <span className='font-cairo text-[14px] font-black text-[#111827]'>
                           {a.patientLabel}
                         </span>
@@ -218,9 +223,19 @@ export function SecretaryDoctorAppointmentsPanel({
                           {a.time}
                         </span>
                         <span className='inline-flex items-center gap-1.5'>
-                          <User className='h-4 w-4 text-primary' />
-                          {a.doctorName}
+                          <Stethoscope className='h-4 w-4 text-primary' />
+                          <span>الطبيب:</span>
+                          <span className='text-[#111827]'>{a.doctorName}</span>
                         </span>
+                        {a.doctorSpecialization ? (
+                          <span className='inline-flex items-center gap-1.5'>
+                            <CalendarDays className='h-4 w-4 text-primary' />
+                            <span>التخصص:</span>
+                            <span className='text-[#111827]'>
+                              {a.doctorSpecialization}
+                            </span>
+                          </span>
+                        ) : null}
                       </div>
                     </div>
 

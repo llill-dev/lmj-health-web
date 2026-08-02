@@ -2,7 +2,9 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/layout/sidebar";
 import DashboardHeader from "@/components/layout/dashboard-header";
-import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
+import LogoutConfirmDialog, {
+  type LogoutScope,
+} from "@/components/auth/logout-confirm-dialog";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
   getSectionBackNavigation,
@@ -56,10 +58,10 @@ export default function SecretaryLayout() {
     [permissionsReady, secretaryPermissions.permissions],
   );
 
-  const performLogout = useCallback(async () => {
+  const performLogout = useCallback(async (scope: LogoutScope) => {
     setLoggingOut(true);
     try {
-      await useAuthStore.getState().logout();
+      await useAuthStore.getState().logout({ scope });
       toast(t("logout.toast.success.body"), {
         title: t("logout.toast.success.title"),
         variant: "success",
@@ -155,12 +157,9 @@ export default function SecretaryLayout() {
         </main>
       </div>
 
-      <ConfirmActionDialog
+      <LogoutConfirmDialog
         open={logoutConfirmOpen}
         onOpenChange={setLogoutConfirmOpen}
-        title={t("logout.title")}
-        description={t("logout.secretary.description")}
-        confirmLabel={loggingOut ? t("logout.pending") : t("common.logout")}
         confirmDisabled={loggingOut}
         onConfirm={performLogout}
       />
