@@ -1,7 +1,9 @@
 ## Highest Priority Rule
 
-For every backend-related task, ALWAYS read `docs/openapi.json` before writing or modifying any code.
-Never implement an endpoint without verifying its contract in `docs/openapi.json`.
+For every backend-related task, ALWAYS read
+docs/**/*` before writing or modifying any code.
+Never implement an endpoint without verifying its contract in
+docs/**/*`.
 
 # LMJ Health Project Instructions
 
@@ -65,8 +67,8 @@ Inspect only the files required for the current task.
 For every frontend task involving backend integration, use ONLY these references.
 
 ## Primary Reference
+docs/**/*
 
-docs/openapi.json
 
 ## Secondary Reference
 
@@ -90,7 +92,7 @@ Before implementing any feature:
 
 1. Read the relevant endpoint from:
 
-   docs/openapi.json
+   docs/**/*
 
 2. Understand completely:
 
@@ -115,7 +117,8 @@ Before implementing any feature:
 
 https://app.syrhealth.com/api/docs#/
 
-4. Treat docs/openapi.json as the canonical backend contract.
+4. Trea
+docs/**/* as the canonical backend contract.
 
 ---
 
@@ -139,7 +142,8 @@ Never invent missing APIs.
 
 Never assume undocumented behavior.
 
-If the frontend conflicts with docs/openapi.json,
+If the frontend conflicts wit
+docs/**/*,
 the OpenAPI specification always wins.
 
 ---
@@ -365,7 +369,8 @@ Preserve existing layouts.
 
 Implementation is complete only if:
 
-- API matches docs/openapi.json
+- API matche
+docs/**/*
 - UI follows project patterns
 - Loading states are correct
 - Errors are localized

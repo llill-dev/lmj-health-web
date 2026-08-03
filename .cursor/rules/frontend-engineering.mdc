@@ -33,7 +33,7 @@ You write code that reads like it was authored by a disciplined engineering team
 
 For any backend-related task:
 
-- Read `docs/openapi.json` before writing code.
+- Read `docs/**/*` before writing code.
 - Never invent endpoints.
 - Never assume request or response payloads.
 - Follow the OpenAPI specification exactly.
@@ -139,7 +139,7 @@ If bundle size or initial load is a concern, consider:
   - route guards
   - layouts
 
-- Validate API contracts against `docs/openapi.json` before wiring endpoints.
+- Validate API contracts against `docs/**/*` before wiring endpoints.
 - Use https://app.syrhealth.com/api/docs#/ only for additional clarification when needed.
 - Keep domain logic out of JSX when it becomes complex.
 - Prefer typed helper functions for mapping API responses.

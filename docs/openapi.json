@@ -155,7 +155,7 @@
           "Access Requests"
         ],
         "summary": "List",
-        "description": "List\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, admin.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: query: status, doctorId, patientId, from, to, page, limit.\n\nSource route file: src/routes/accessRequest.js.",
+        "description": "List\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, admin.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nAdmin responses expose flattened doctor and patient summaries. Those admin-only summaries include fullName, email, phone, photoUrl, and role-specific identifiers; patient and doctor callers do not receive those contact fields.\n\nValidation: query: status, doctorId, patientId, from, to, page, limit.\n\nSource route file: src/routes/accessRequest.js.",
         "operationId": "get_api_access_requests",
         "security": [
           {
@@ -236,7 +236,14 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/SuccessEnvelope"
+            "description": "Role-scoped paged access-request list. Admin callers receive flattened doctor and patient summaries with administrative contact details; patient and doctor callers retain the narrower safe metadata shape.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAccessRequestListResponse"
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -385,7 +392,7 @@
           "Access Requests"
         ],
         "summary": "Summary",
-        "description": "Summary\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, admin.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: id.\n\nSource route file: src/routes/accessRequest.js.",
+        "description": "Summary\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, admin.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nAdmin responses expose flattened doctor and patient summaries. Those admin-only summaries include fullName, email, phone, photoUrl, and role-specific identifiers; patient and doctor callers do not receive those contact fields.\n\nValidation: params: id.\n\nSource route file: src/routes/accessRequest.js.",
         "operationId": "get_api_access_requests_id",
         "security": [
           {
@@ -407,7 +414,14 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/SuccessEnvelope"
+            "description": "Safe access-request metadata. Admin callers receive flattened doctor and patient summaries with administrative contact details; patient and doctor callers retain the narrower safe metadata shape.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAccessRequestDetailsResponse"
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1196,7 +1210,7 @@
           "Admin Content"
         ],
         "summary": "Admin Create Content Template",
-        "description": "Admin Create Content Template\n\nRequires a bearer access token.\n\nAllowed roles: admin.\n\nValidation: body: name, slug, parentType, isActive, uiHints, fields.\n\nSource route file: src/routes/adminContent.js.",
+        "description": "Admin Create Content Template\n\nRequires a bearer access token.\n\nAllowed roles: admin.\n\nEach fields[].key is required, unique within the template, and must match ^[A-Za-z][A-Za-z0-9_]*$. Use a technical ASCII key such as scientificNumber; put the Arabic or English display text in fields[].label.\n\nValidation: body: name, slug, parentType, isActive, uiHints, fields.\n\nSource route file: src/routes/adminContent.js.",
         "operationId": "post_api_admin_content_templates",
         "security": [
           {
@@ -1209,46 +1223,11 @@
           }
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true,
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "slug": {
-                    "type": "string"
-                  },
-                  "parentType": {
-                    "type": "string",
-                    "enum": [
-                      "CONDITION",
-                      "SYMPTOM",
-                      "MEDICATION",
-                      "GENERAL_ADVICE"
-                    ]
-                  },
-                  "isActive": {
-                    "type": "boolean"
-                  },
-                  "uiHints": {
-                    "type": "string"
-                  },
-                  "fields": {
-                    "type": "string"
-                  }
-                }
-              },
-              "example": {
-                "name": "string",
-                "slug": "string",
-                "parentType": "CONDITION",
-                "isActive": true,
-                "uiHints": "string",
-                "fields": "string"
+                "$ref": "#/components/schemas/ContentTemplateCreateRequest"
               }
             }
           }
@@ -1294,7 +1273,7 @@
           "Admin Content"
         ],
         "summary": "Admin Update Content Template",
-        "description": "Admin Update Content Template\n\nRequires a bearer access token.\n\nAllowed roles: admin.\n\nValidation: params: id; body: name, slug, parentType, isActive, uiHints, fields.\n\nSource route file: src/routes/adminContent.js.",
+        "description": "Admin Update Content Template\n\nRequires a bearer access token.\n\nAllowed roles: admin.\n\nWhen fields are provided, each fields[].key is required, unique within the template, and must match ^[A-Za-z][A-Za-z0-9_]*$. Use a technical ASCII key such as scientificNumber; put the Arabic or English display text in fields[].label.\n\nValidation: params: id; body: name, slug, parentType, isActive, uiHints, fields.\n\nSource route file: src/routes/adminContent.js.",
         "operationId": "patch_api_admin_content_templates_id",
         "security": [
           {
@@ -1319,42 +1298,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": true,
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "slug": {
-                    "type": "string"
-                  },
-                  "parentType": {
-                    "type": "string",
-                    "enum": [
-                      "CONDITION",
-                      "SYMPTOM",
-                      "MEDICATION",
-                      "GENERAL_ADVICE"
-                    ]
-                  },
-                  "isActive": {
-                    "type": "boolean"
-                  },
-                  "uiHints": {
-                    "type": "string"
-                  },
-                  "fields": {
-                    "type": "string"
-                  }
-                }
-              },
-              "example": {
-                "name": "string",
-                "slug": "string",
-                "parentType": "CONDITION",
-                "isActive": true,
-                "uiHints": "string",
-                "fields": "string"
+                "$ref": "#/components/schemas/ContentTemplateUpdateRequest"
               }
             }
           }
@@ -3644,7 +3588,6 @@
             "schema": {
               "type": "string",
               "enum": [
-                "BLOOD_TYPE",
                 "ALLERGY",
                 "MEDICAL_CONDITION",
                 "DOCTOR_SPECIALIZATION"
@@ -3727,7 +3670,6 @@
                   "category": {
                     "type": "string",
                     "enum": [
-                      "BLOOD_TYPE",
                       "ALLERGY",
                       "MEDICAL_CONDITION",
                       "DOCTOR_SPECIALIZATION"
@@ -3753,7 +3695,7 @@
                 ]
               },
               "example": {
-                "category": "BLOOD_TYPE",
+                "category": "ALLERGY",
                 "key": "string",
                 "text": "string",
                 "order": 1,
@@ -6411,7 +6353,7 @@
           "Appointments"
         ],
         "summary": "View Appointments",
-        "description": "View Appointments\n\nRequires a bearer access token.\n\nAllowed roles: admin, doctor, secretary, patient.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nDoctors see appointments scoped by Appointment.doctor, so patient-booked appointments are visible to the assigned doctor after booking. Response appointment objects include nullable encounter summaries as encounter. Linked encounter summaries contain only _id, status, origin, startedAt, and closedAt; encounter notes are intentionally omitted.\n\nValidation: query: page, limit, status, date, dateFrom, dateTo.\n\nSource route file: src/routes/appointment.js.",
+        "description": "View Appointments\n\nRequires a bearer access token.\n\nAllowed roles: admin, doctor, secretary, patient.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nDoctors see appointments scoped by Appointment.doctor, so patient-booked appointments are visible to the assigned doctor after booking. Admin, doctor, and secretary list responses populate patient.userId.fullName alongside publicId for display. Response appointment objects include nullable encounter summaries as encounter. Linked encounter summaries contain only _id, status, origin, startedAt, and closedAt; encounter notes are intentionally omitted.\n\nValidation: query: page, limit, status, date, dateFrom, dateTo.\n\nSource route file: src/routes/appointment.js.",
         "operationId": "get_api_appointments",
         "security": [
           {
@@ -6486,7 +6428,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Paged appointment list. Each appointment includes nullable compact encounter summary without encounter notes.",
+            "description": "Paged appointment list. Admin, doctor, and secretary appointment items include patient publicId and patient.userId.fullName. Each appointment includes a nullable compact encounter summary without encounter notes.",
             "content": {
               "application/json": {
                 "schema": {
@@ -25863,7 +25805,7 @@
           "Meta"
         ],
         "summary": "Get Health Profile Options",
-        "description": "Get Health Profile Options\n\nRequires a bearer access token.\n\nAllowed roles: doctor, patient, secretary, data_entry.\n\nValidation: no explicit express-validator fields.\n\nSource route file: src/routes/meta.js.",
+        "description": "Get Health Profile Options\n\nRequires a bearer access token.\n\nAllowed roles: admin, doctor, patient, secretary, data_entry.\n\nValidation: no explicit express-validator fields.\n\nSource route file: src/routes/meta.js.",
         "operationId": "get_api_meta_health_profile_options",
         "security": [
           {
@@ -25896,6 +25838,7 @@
           }
         },
         "x-roles": [
+          "admin",
           "doctor",
           "patient",
           "secretary",
@@ -29068,17 +29011,19 @@
                     "type": "string"
                   },
                   "bloodType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "A+",
+                      "A-",
+                      "B+",
+                      "B-",
+                      "AB+",
+                      "AB-",
+                      "O+",
+                      "O-"
+                    ]
                   }
                 }
-              },
-              "example": {
-                "heightCm": 1,
-                "weightKg": 1,
-                "measurementUnit": "metric",
-                "allergies": "string",
-                "medicalConditions": "string",
-                "bloodType": "string"
               }
             }
           }
@@ -30034,7 +29979,7 @@
           "Patient Files"
         ],
         "summary": "List Patient Files",
-        "description": "List Patient Files\n\nRequires a bearer access token.\n\nAllowed roles: admin, patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId; query: page, limit, archived, search, category, subcategory, mimeCategory, clinicalContext, sourceModule, uploadedByRole, visibilityScope, appointmentId, tags, serviceDateFrom, serviceDateTo, sortBy, sortOrder.\n\nSource route file: src/routes/patientFiles.js.",
+        "description": "List Patient Files\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId; query: page, limit, archived, search, category, subcategory, mimeCategory, clinicalContext, sourceModule, uploadedByRole, visibilityScope, appointmentId, tags, serviceDateFrom, serviceDateTo, sortBy, sortOrder.\n\nSource route file: src/routes/patientFiles.js.",
         "operationId": "get_api_patients_patientId_files",
         "security": [
           {
@@ -30287,7 +30232,6 @@
           }
         },
         "x-roles": [
-          "admin",
           "patient",
           "doctor",
           "secretary"
@@ -30308,7 +30252,7 @@
           "Patient Files"
         ],
         "summary": "Get Patient File",
-        "description": "Get Patient File\n\nRequires a bearer access token.\n\nAllowed roles: admin, patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId, fileId.\n\nSource route file: src/routes/patientFiles.js.",
+        "description": "Get Patient File\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId, fileId.\n\nSource route file: src/routes/patientFiles.js.",
         "operationId": "get_api_patients_patientId_files_fileId",
         "security": [
           {
@@ -30357,7 +30301,6 @@
           }
         },
         "x-roles": [
-          "admin",
           "patient",
           "doctor",
           "secretary"
@@ -30376,7 +30319,7 @@
           "Patient Files"
         ],
         "summary": "Delete Patient File",
-        "description": "Delete Patient File\n\nRequires a bearer access token.\n\nAllowed roles: admin, patient, doctor, secretary.\n\nValidation: params: patientId, fileId.\n\nSource route file: src/routes/patientFiles.js.",
+        "description": "Delete Patient File\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, secretary.\n\nValidation: params: patientId, fileId.\n\nSource route file: src/routes/patientFiles.js.",
         "operationId": "delete_api_patients_patientId_files_fileId",
         "security": [
           {
@@ -30425,7 +30368,6 @@
           }
         },
         "x-roles": [
-          "admin",
           "patient",
           "doctor",
           "secretary"
@@ -30446,7 +30388,7 @@
           "Patient Files"
         ],
         "summary": "Download Patient File",
-        "description": "Download Patient File\n\nRequires a bearer access token.\n\nAllowed roles: admin, patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId, fileId; query: mode.\n\nSource route file: src/routes/patientFiles.js.",
+        "description": "Download Patient File\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId, fileId; query: mode.\n\nSource route file: src/routes/patientFiles.js.",
         "operationId": "get_api_patients_patientId_files_fileId_download",
         "security": [
           {
@@ -30507,7 +30449,6 @@
           }
         },
         "x-roles": [
-          "admin",
           "patient",
           "doctor",
           "secretary"
@@ -30528,7 +30469,7 @@
           "Patient Files"
         ],
         "summary": "Download Patient File",
-        "description": "Download Patient File\n\nRequires a bearer access token.\n\nAllowed roles: admin, patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId; query: ref, mode.\n\nSource route file: src/routes/patientFiles.js.",
+        "description": "Download Patient File\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: params: patientId; query: ref, mode.\n\nSource route file: src/routes/patientFiles.js.",
         "operationId": "get_api_patients_patientId_files_download",
         "security": [
           {
@@ -30589,7 +30530,6 @@
           }
         },
         "x-roles": [
-          "admin",
           "patient",
           "doctor",
           "secretary"
@@ -30610,7 +30550,7 @@
           "Patient Files"
         ],
         "summary": "Upload And Attach Patient File",
-        "description": "Upload And Attach Patient File\n\nRequires a bearer access token.\n\nAllowed roles: admin, patient, doctor, secretary.\n\nConsumes multipart/form-data for file upload.\n\nValidation: params: patientId.\n\nSource route file: src/routes/patientFiles.js.",
+        "description": "Upload And Attach Patient File\n\nRequires a bearer access token.\n\nAllowed roles: patient, doctor, secretary.\n\nConsumes multipart/form-data for file upload.\n\nValidation: params: patientId.\n\nSource route file: src/routes/patientFiles.js.",
         "operationId": "post_api_patients_patientId_files_upload",
         "security": [
           {
@@ -30669,7 +30609,6 @@
           }
         },
         "x-roles": [
-          "admin",
           "patient",
           "doctor",
           "secretary"
@@ -31048,7 +30987,7 @@
           "Secretaries"
         ],
         "summary": "Get Assigned Doctor For Secretary",
-        "description": "Get Assigned Doctor For Secretary\n\nRequires a bearer access token.\n\nAllowed roles: secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nValidation: no explicit express-validator fields.\n\nSource route file: src/routes/secretary.js.",
+        "description": "Get Assigned Doctor For Secretary\n\nRequires a bearer access token.\n\nAllowed roles: secretary.\n\nAdditional account-state, ownership, assignment, or delegated-access guards may apply before the controller runs.\n\nThe secretary.permissions array is the authoritative delegated-permission set for the authenticated secretary. An empty array means the secretary has no delegated permissions and clients must not replace it with default permissions.\n\nValidation: no explicit express-validator fields.\n\nSource route file: src/routes/secretary.js.",
         "operationId": "get_api_secretaries_me_doctor",
         "security": [
           {
@@ -31062,7 +31001,14 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/SuccessEnvelope"
+            "description": "The authenticated secretary profile, its exact delegated permissions, and the assigned approved doctor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretaryAssignedDoctorResponse"
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -31093,6 +31039,110 @@
       }
     },
     "/api/service-providers": {
+      "get": {
+        "tags": [
+          "Service Providers"
+        ],
+        "summary": "List Managed Providers",
+        "description": "List Managed Providers\n\nRequires a bearer access token.\n\nAllowed roles: admin, data_entry.\n\nValidation: query: serviceType, status, q, page, limit.\n\nSource route file: src/routes/serviceProvider.js.",
+        "operationId": "get_api_service_providers",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XLang"
+          },
+          {
+            "name": "serviceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "active",
+                "inactive"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrative provider list. Includes draft and inactive records and the complete dynamic data payload within the caller scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedServiceProviderListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        },
+        "x-roles": [
+          "admin",
+          "data_entry"
+        ],
+        "x-source-route": "src/routes/serviceProvider.js",
+        "x-controller": "listManagedProviders",
+        "x-middlewares": [
+          "default",
+          "middleware",
+          "listManagedProviders"
+        ]
+      },
       "post": {
         "tags": [
           "Service Providers"
@@ -31201,6 +31251,70 @@
       }
     },
     "/api/service-providers/{id}": {
+      "get": {
+        "tags": [
+          "Service Providers"
+        ],
+        "summary": "Get Managed Provider",
+        "description": "Get Managed Provider\n\nRequires a bearer access token.\n\nAllowed roles: admin, data_entry.\n\nValidation: params: id.\n\nSource route file: src/routes/serviceProvider.js.",
+        "operationId": "get_api_service_providers_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XLang"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrative provider detail with complete dynamic data and its service-type schema.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedServiceProviderDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        },
+        "x-roles": [
+          "admin",
+          "data_entry"
+        ],
+        "x-source-route": "src/routes/serviceProvider.js",
+        "x-controller": "getManagedProvider",
+        "x-middlewares": [
+          "default",
+          "middleware",
+          "getManagedProvider"
+        ]
+      },
       "put": {
         "tags": [
           "Service Providers"
@@ -33145,6 +33259,435 @@
           }
         }
       },
+      "LocalizedInput": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "en": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ar": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "minProperties": 1
+          }
+        ]
+      },
+      "ContentTemplateField": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+            "example": "scientificNumber",
+            "description": "Technical key. Arabic display text belongs in label, not key."
+          },
+          "label": {
+            "$ref": "#/components/schemas/LocalizedInput"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "array",
+              "object"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "enum": {
+            "type": "array",
+            "items": {}
+          },
+          "min": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "regex": {
+            "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type"
+        ]
+      },
+      "ContentTemplateCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedInput"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Optional. The backend normalizes this to a lowercase URL slug."
+          },
+          "parentType": {
+            "type": "string",
+            "enum": [
+              "CONDITION",
+              "SYMPTOM",
+              "MEDICATION",
+              "GENERAL_ADVICE"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentTemplateField"
+            }
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "uiHints": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "name",
+          "parentType"
+        ]
+      },
+      "ContentTemplateUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedInput"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Optional. The backend normalizes this to a lowercase URL slug."
+          },
+          "parentType": {
+            "type": "string",
+            "enum": [
+              "CONDITION",
+              "SYMPTOM",
+              "MEDICATION",
+              "GENERAL_ADVICE"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentTemplateField"
+            }
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "uiHints": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "AdminAccessRequestDoctorSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "userId": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fullName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "specialization": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "email": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phone": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "photoUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "AdminAccessRequestPatientSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "userId": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "publicId": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fullName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "email": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phone": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "photoUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "AdminAccessRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              "expired"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "example": "PROFILE"
+          },
+          "reason": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requestedItems": {
+            "type": "array",
+            "items": {}
+          },
+          "doctor": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminAccessRequestDoctorSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "patient": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminAccessRequestPatientSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "AdminAccessRequestListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuccessEnvelope"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "page": {
+                "type": "integer"
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "results": {
+                "type": "integer"
+              },
+              "requests": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AdminAccessRequest"
+                }
+              }
+            },
+            "required": [
+              "page",
+              "limit",
+              "total",
+              "results",
+              "requests"
+            ]
+          }
+        ]
+      },
+      "AdminAccessRequestDetailsResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuccessEnvelope"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "request": {
+                "$ref": "#/components/schemas/AdminAccessRequest"
+              }
+            },
+            "required": [
+              "request"
+            ]
+          }
+        ]
+      },
       "UserRole": {
         "type": "string",
         "enum": [
@@ -33302,6 +33845,219 @@
               },
               "pagination": {
                 "$ref": "#/components/schemas/Pagination"
+              }
+            }
+          }
+        ]
+      },
+      "ManagedServiceTypeSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/LocalizedString"
+              }
+            ]
+          },
+          "slug": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "schemaVersion",
+          "isActive"
+        ]
+      },
+      "ManagedServiceProvider": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "serviceType": {
+            "$ref": "#/components/schemas/ManagedServiceTypeSummary"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "country": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "data": {
+            "type": "object",
+            "description": "Complete schema-driven provider data, including fields not public in the catalog.",
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "inactive"
+            ]
+          },
+          "schemaVersionAtWrite": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "createdBy": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedBy": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approvedBy": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approvedAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "serviceType",
+          "aliases",
+          "data",
+          "status",
+          "schemaVersionAtWrite"
+        ]
+      },
+      "ManagedServiceProviderListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuccessEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "results": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "providers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ManagedServiceProvider"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ManagedServiceProviderDetailResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuccessEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "$ref": "#/components/schemas/ManagedServiceProvider"
+              },
+              "serviceType": {
+                "type": "object",
+                "description": "Full localized service-type definition, including dynamic field metadata.",
+                "additionalProperties": true
               }
             }
           }
@@ -34269,6 +35025,38 @@
           "patientId": {
             "$ref": "#/components/schemas/ObjectId"
           },
+          "patient": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "_id": {
+                    "$ref": "#/components/schemas/ObjectId"
+                  },
+                  "publicId": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "_id": {
+                        "$ref": "#/components/schemas/ObjectId"
+                      },
+                      "fullName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              }
+            ],
+            "description": "Admin, doctor, and secretary list responses include publicId and userId.fullName."
+          },
           "date": {
             "type": "string",
             "format": "date"
@@ -34876,6 +35664,166 @@
             }
           }
         ]
+      },
+      "SecretaryPermission": {
+        "type": "string",
+        "enum": [
+          "appointments:book",
+          "appointments:view",
+          "appointments:edit",
+          "appointments:cancel",
+          "waitlist:create",
+          "waitlist:view",
+          "waitlist:manage",
+          "waitlist:book",
+          "patients:view",
+          "patients:edit",
+          "patients:temporary:create",
+          "patients:files:view",
+          "patients:files:upload",
+          "schedule:view",
+          "billing:dashboard:view",
+          "billing:invoices:view",
+          "billing:invoices:manage",
+          "billing:payments:view",
+          "billing:payments:manage",
+          "billing:refunds:view",
+          "billing:refunds:manage",
+          "billing:expenses:view",
+          "billing:expenses:manage",
+          "billing:reports:view",
+          "billing:reports:export",
+          "billing:settings:view",
+          "billing:settings:manage",
+          "billing:services:view",
+          "billing:services:manage"
+        ]
+      },
+      "SecretarySelfSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "_id",
+          "permissions",
+          "assignedDoctor"
+        ],
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "permissions": {
+            "type": "array",
+            "description": "Exact permissions delegated to the authenticated secretary.",
+            "items": {
+              "$ref": "#/components/schemas/SecretaryPermission"
+            }
+          },
+          "assignedDoctor": {
+            "$ref": "#/components/schemas/ObjectId"
+          }
+        }
+      },
+      "SecretaryAssignedDoctorUserSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "_id"
+        ],
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "SecretaryAssignedDoctorSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "_id",
+          "consultationTypes",
+          "averageRating",
+          "totalReviews",
+          "isApproved",
+          "user"
+        ],
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "specialization": {
+            "type": "string"
+          },
+          "medicalLicenseNumber": {
+            "type": "string"
+          },
+          "locationCity": {
+            "type": "string"
+          },
+          "locationCountry": {
+            "type": "string"
+          },
+          "consultationTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "consultationFee": {
+            "type": "number"
+          },
+          "averageRating": {
+            "type": "number"
+          },
+          "totalReviews": {
+            "type": "integer"
+          },
+          "approvalStatus": {
+            "type": "string"
+          },
+          "isApproved": {
+            "type": "boolean"
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SecretaryAssignedDoctorUserSummary"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "SecretaryAssignedDoctorResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "secretary",
+          "doctor"
+        ],
+        "properties": {
+          "secretary": {
+            "$ref": "#/components/schemas/SecretarySelfSummary"
+          },
+          "doctor": {
+            "$ref": "#/components/schemas/SecretaryAssignedDoctorSummary"
+          }
+        }
       },
       "PdfGenerationRequest": {
         "type": "object",
