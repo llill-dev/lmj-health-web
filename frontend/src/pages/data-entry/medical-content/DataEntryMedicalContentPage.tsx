@@ -9,6 +9,9 @@ import {
   SquarePen,
   FileCheck2,
   Clock3,
+  FilterX,
+  UserRound,
+  Workflow,
 } from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import {
@@ -44,6 +47,42 @@ function toDisplayText(value: unknown): string {
     if (typeof localized === "string") return localized;
   }
   return "";
+}
+
+function toActorName(
+  value: string | { _id?: string; fullName?: string; email?: string } | undefined,
+): string {
+  if (typeof value === "string") return value || "—";
+  if (!value) return "—";
+  return value.fullName?.trim() || value.email?.trim() || value._id?.trim() || "—";
+}
+
+function contentWorkflowHint(
+  status: AdminContentStatus,
+  t: (key: string, fallback?: string) => string,
+): string {
+  if (status === "DRAFT") {
+    return t(
+      "dataEntry.medicalContent.workflow.draft",
+      "مسودة قابلة للتعديل ولم تُرسل للمراجعة بعد.",
+    );
+  }
+  if (status === "IN_REVIEW") {
+    return t(
+      "dataEntry.medicalContent.workflow.inReview",
+      "أُرسلت للمراجعة وتنتظر قرار الإدارة.",
+    );
+  }
+  if (status === "PUBLISHED") {
+    return t(
+      "dataEntry.medicalContent.workflow.published",
+      "محتوى منشور ومرئي للمستخدمين حسب القنوات المعتمدة.",
+    );
+  }
+  return t(
+    "dataEntry.medicalContent.workflow.archived",
+    "محتوى مؤرشف للاحتفاظ المرجعي وليس للعمل اليومي.",
+  );
 }
 
 export default function DataEntryMedicalContentPage() {
@@ -207,6 +246,30 @@ export default function DataEntryMedicalContentPage() {
               triggerClassName="h-10 rounded-[10px]"
             />
           </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-4 py-3">
+            <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#475467]">
+              <Workflow className="h-4 w-4 text-primary" />
+              {t(
+                "dataEntry.medicalContent.workflow.caption",
+                "دورة العمل: مسودة ← قيد المراجعة ← منشور / مؤرشف",
+              )}
+            </div>
+            {(status !== "all" || type !== "all" || language !== "all" || search.trim()) ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setStatus("all");
+                  setType("all");
+                  setLanguage("all");
+                  setSearch("");
+                }}
+                className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054]"
+              >
+                <FilterX className="h-4 w-4" />
+                {t("common.clearFilters", "مسح الفلاتر")}
+              </button>
+            ) : null}
+          </div>
         </section>
 
         {query.isError ? (
@@ -235,8 +298,19 @@ export default function DataEntryMedicalContentPage() {
               ))}
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="px-5 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {t("dataEntry.medicalContent.list.empty")}
+            <div className="px-5 py-10 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                {t("dataEntry.medicalContent.list.empty")}
+              </p>
+              <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                {t(
+                  "dataEntry.medicalContent.list.emptyHint",
+                  "جرّب تغيير الفلاتر أو أنشئ محتوى جديدًا للبدء.",
+                )}
+              </p>
             </div>
           ) : (
             <div className="divide-y divide-[#EEF2F6]">
@@ -265,9 +339,28 @@ export default function DataEntryMedicalContentPage() {
                       <span className="rounded-[8px] bg-[#F9FAFB] px-2 py-1 text-[#667085]">
                         {item.language === "en" ? t("language.en") : t("language.ar")}
                       </span>
+                      <span className="rounded-[8px] bg-[#EEF6FF] px-2 py-1 text-[#1D4ED8]">
+                        {contentWorkflowHint(item.status, t)}
+                      </span>
                       <span className="text-[#98A2B3]">
                         {t("dataEntry.medicalContent.lastUpdated")}: {formatContentDate(item.updatedAt)}
                       </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-bold text-[#667085]">
+                      <span className="inline-flex items-center gap-1 rounded-[8px] bg-[#F8FAFC] px-2 py-1">
+                        <UserRound className="h-3.5 w-3.5 text-primary" />
+                        {t("dataEntry.medicalContent.createdBy", "المنشئ")}:
+                        {" "}
+                        {toActorName(item.createdBy)}
+                      </span>
+                      {item.reviewedBy ? (
+                        <span className="inline-flex items-center gap-1 rounded-[8px] bg-[#F8FAFC] px-2 py-1">
+                          <UserRound className="h-3.5 w-3.5 text-[#16A34A]" />
+                          {t("dataEntry.medicalContent.reviewedBy", "راجع المحتوى")}:
+                          {" "}
+                          {toActorName(item.reviewedBy)}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
@@ -292,13 +385,20 @@ export default function DataEntryMedicalContentPage() {
                       <button
                         type="button"
                         onClick={() => void handleSubmitReview(item._id)}
-                        disabled={submitReview.isPending}
+                        disabled={submitReview.isPending || item.status !== "DRAFT"}
                         className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#BFE3E1] bg-[#F7FFFE] px-3 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-60"
                       >
                         <Send className="h-4 w-4" />
                         {t("dataEntry.medicalContent.actions.submitReview")}
                       </button>
-                    ) : null}
+                    ) : (
+                      <span className="inline-flex h-9 items-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[12px] font-extrabold text-[#667085]">
+                        {t(
+                          "dataEntry.medicalContent.actions.alreadyInReview",
+                          "قيد المراجعة حاليًا",
+                        )}
+                      </span>
+                    )}
                   </div>
                 </article>
                 );

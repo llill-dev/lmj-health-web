@@ -15,30 +15,36 @@ vi.mock("@/store/authStore", () => ({
     selector({ user: { name: "أحمد علي" } }),
 }));
 
-vi.mock("@/i18n/provider", () => ({
-  useI18n: () => ({
-    dir: "rtl",
-    locale: "ar",
-    t: (key: string, fallback?: string) => {
-      const messages: Record<string, string> = {
-        "dashboard.title.default": "لوحة التحكم",
-        "doctor.dashboard.guest": "الطبيب",
-        "secretary.dashboard.defaultName": "السكرتارية",
-        "dataEntry.dashboard.defaultName": "مدخل البيانات",
-        "doctor.badge": "د.",
-        "doctor.dashboard.subtitle": "متابعة المرضى والمواعيد",
-        "secretary.dashboard.subtitle": "إدارة الحجوزات والمرضى",
-        "dataEntry.dashboard.subtitle": "إدارة المحتوى الطبي",
-        "common.openMenu": "فتح القائمة",
-        "common.connected": "متصل",
-        "header.notifications": "الإشعارات",
-        "header.messages": "الرسائل",
-        "header.backToSection": "العودة إلى {section}",
-      };
-      return messages[key] ?? fallback ?? key;
-    },
-  }),
-}));
+vi.mock("@/i18n/provider", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/i18n/provider")>();
+
+  return {
+    ...actual,
+    useI18n: () => ({
+      dir: "rtl",
+      locale: "ar",
+      t: (key: string, fallback?: string) => {
+        const messages: Record<string, string> = {
+          "dashboard.title.default": "لوحة التحكم",
+          "doctor.dashboard.guest": "الطبيب",
+          "secretary.dashboard.defaultName": "السكرتارية",
+          "dataEntry.dashboard.defaultName": "مدخل البيانات",
+          "doctor.badge": "د.",
+          "doctor.dashboard.subtitle": "متابعة المرضى والمواعيد",
+          "secretary.dashboard.subtitle": "إدارة الحجوزات والمرضى",
+          "dataEntry.dashboard.subtitle": "إدارة المحتوى الطبي",
+          "common.openMenu": "فتح القائمة",
+          "common.connected": "متصل",
+          "header.notifications": "الإشعارات",
+          "header.messages": "الرسائل",
+          "header.backToSection": "العودة إلى {section}",
+        };
+        return messages[key] ?? fallback ?? key;
+      },
+    }),
+  };
+});
 
 vi.mock("@/components/ui/language-switcher", () => ({
   default: () => <div>language-switcher</div>,
