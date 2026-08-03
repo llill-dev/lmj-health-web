@@ -35,9 +35,23 @@ import { useI18n } from "@/i18n/provider";
 type ParentFilter = "all" | AdminContentTemplateParentType;
 type ActiveFilter = "all" | "active" | "disabled";
 
+function resolveLocalizedText(
+  value: string | Record<string, unknown> | undefined,
+  locale: "ar" | "en",
+): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+
+  const localized =
+    (locale === "ar" ? value.ar : value.en) ?? value.en ?? value.ar;
+
+  return typeof localized === "string" ? localized : "";
+}
+
 function parentTypeLabel(
   t: string | Record<string, unknown> | undefined,
   tr: (ar: string, en: string) => string,
+  locale: "ar" | "en",
 ): string {
   if (!t) return "—";
   if (typeof t === "string") {
@@ -47,15 +61,8 @@ function parentTypeLabel(
     if (t === "MEDICATION") return tr("الأدوية", "Medications");
     return t;
   }
-  // If t is an object, try to extract the value
-  if (typeof t === "object" && t !== null) {
-    const value =
-      (t as Record<string, unknown>).en ??
-      (t as Record<string, unknown>).ar ??
-      JSON.stringify(t);
-    return String(value);
-  }
-  return "—";
+
+  return resolveLocalizedText(t, locale) || "—";
 }
 
 function isTemplateActive(t: AdminContentTemplate): boolean {
@@ -117,8 +124,8 @@ export default function AdminContentTemplatesPage() {
     ? {
         title: tr("تم التعطيل", "Disabled"),
         message: tr(
-          `عُطّل القالب «${parentTypeLabel(disableTarget.name, tr) ?? "—"}».`,
-          `Template "${parentTypeLabel(disableTarget.name, tr) ?? "—"}" has been disabled.`,
+          `عُطّل القالب «${parentTypeLabel(disableTarget.name, tr, locale) ?? "—"}».`,
+          `Template "${parentTypeLabel(disableTarget.name, tr, locale) ?? "—"}" has been disabled.`,
         ),
         variant: "success",
       }
@@ -307,10 +314,10 @@ export default function AdminContentTemplatesPage() {
                     <div className="min-w-0 flex-1 text-start">
                       <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3">
                         <div className="min-w-0 font-cairo text-[14px] font-black text-[#111827]">
-                          {parentTypeLabel(t.name, tr) ?? "—"}
+                          {parentTypeLabel(t.name, tr, locale) ?? "—"}
                         </div>
                         <span className="inline-flex h-[22px] items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#475467]">
-                          {parentTypeLabel(t.parentType, tr)}
+                          {parentTypeLabel(t.parentType, tr, locale)}
                         </span>
                         <span
                           className={cn(
@@ -428,7 +435,7 @@ export default function AdminContentTemplatesPage() {
             <>
               {tr("القالب:", "Template:")} «
               <span className="font-extrabold text-[#344054]">
-                {parentTypeLabel(disableTarget?.name, tr) ?? "—"}
+                {parentTypeLabel(disableTarget?.name, tr, locale) ?? "—"}
               </span>
               ».{" "}
               {tr(

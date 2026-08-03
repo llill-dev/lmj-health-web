@@ -32,7 +32,7 @@ const fieldSchema = z.object({
       /^[a-zA-Z][a-zA-Z0-9_]*$/,
       "المفتاح: حروف لاتينية وأرقام وشرطة سفلية",
     ),
-  label: z.string().optional(),
+  label: z.string().min(1, "تسمية الحقل مطلوبة"),
   type: z.enum(["text", "textarea", "number", "date", "boolean", "select"]),
   required: z.boolean(),
 });
@@ -46,7 +46,7 @@ const formSchema = z.object({
       message: "المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات",
     }),
   parentType: z.enum(["CONDITION", "SYMPTOM", "GENERAL_ADVICE", "MEDICATION"]),
-  fields: z.array(fieldSchema),
+  fields: z.array(fieldSchema).min(1, "أضف حقلاً واحداً على الأقل"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -178,7 +178,7 @@ export default function ContentTemplateFormDialog({
       parentType: v.parentType,
       fields: v.fields.map((f) => ({
         key: f.key.trim(),
-        label: f.label?.trim() || undefined,
+        label: f.label.trim(),
         type: f.type,
         required: f.required,
       })),
@@ -370,7 +370,11 @@ export default function ContentTemplateFormDialog({
                                 />
                               </AdminFormField>
 
-                              <AdminFormField label="التسمية (اختياري)">
+                              <AdminFormField
+                                label="التسمية"
+                                required
+                                error={errors.fields?.[index]?.label?.message}
+                              >
                                 <input
                                   {...register(
                                     `fields.${index}.label` as const,
@@ -381,7 +385,7 @@ export default function ContentTemplateFormDialog({
                                       adminInputClass,
                                       "text-start placeholder:text-start",
                                     ),
-                                    false,
+                                    Boolean(errors.fields?.[index]?.label),
                                   )}
                                 />
                               </AdminFormField>
@@ -432,6 +436,11 @@ export default function ContentTemplateFormDialog({
                         ))}
                       </div>
                     )}
+                    {typeof errors.fields?.message === "string" ? (
+                      <p className="mt-3 text-right font-cairo text-[12px] font-bold text-red-600">
+                        {errors.fields.message}
+                      </p>
+                    ) : null}
                   </div>
 
                   {activeMut.isError ? (
