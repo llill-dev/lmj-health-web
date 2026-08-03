@@ -176,7 +176,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "هذه الشاشة توضح الحقول والبنية المعتمدة للقوالب حتى يستخدمها فريق مدخل البيانات بشكل صحيح، دون تعديل مباشر على القوالب من هنا.",
     "dataEntry.contentTemplates.reference.badge": "مرجع فقط",
     "dataEntry.contentTemplates.fieldsCount": "حقل",
-    "dataEntry.page.serviceProviders.title": "مزودو الخدمة • LMJ Health",
+    "dataEntry.page.serviceProviders.title": "مزودو الخدمة • مدخل البيانات • LMJ Health",
     "dataEntry.serviceProviders.hero.title": "مزودو الخدمة",
     "dataEntry.serviceProviders.hero.selectedTypePrefix": "نوع الخدمة",
     "dataEntry.serviceProviders.hero.selectTypeHint": "اختر نوع خدمة لعرض المزودين",
@@ -504,7 +504,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "This page explains the approved template fields and structure so the data entry team can use them correctly without editing templates here.",
     "dataEntry.contentTemplates.reference.badge": "Reference only",
     "dataEntry.contentTemplates.fieldsCount": "field",
-    "dataEntry.page.serviceProviders.title": "Service Providers • LMJ Health",
+    "dataEntry.page.serviceProviders.title": "Service Providers • Data Entry • LMJ Health",
     "dataEntry.serviceProviders.hero.title": "Service Providers",
     "dataEntry.serviceProviders.hero.selectedTypePrefix": "Service type",
     "dataEntry.serviceProviders.hero.selectTypeHint":

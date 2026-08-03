@@ -29,6 +29,10 @@ import {
   medicalOrderCatalogKindSupported,
 } from "@/components/admin/medical-orders";
 
+type AdminMedicalOrdersPageProps = {
+  roleVariant?: "admin" | "data-entry";
+};
+
 function kindLabel(
   kind: MedicalOrderCatalogKind,
   tr: (ar: string, en: string) => string,
@@ -39,10 +43,13 @@ function kindLabel(
   return tr("تحويل", "Referral");
 }
 
-export default function AdminMedicalOrdersPage() {
+export default function AdminMedicalOrdersPage({
+  roleVariant = "admin",
+}: AdminMedicalOrdersPageProps) {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+  const isDataEntry = roleVariant === "data-entry";
 
   const [kind, setKind] = useState<MedicalOrderCatalogKind>("lab");
   const [search, setSearch] = useState("");
@@ -157,7 +164,13 @@ export default function AdminMedicalOrdersPage() {
     <>
       <Helmet>
         <title>
-          {tr("كتالوج الطلبات الطبية", "Medical orders catalog")} • LMJ Health
+          {isDataEntry
+            ? tr(
+                "كتالوج الطلبات الطبية • مدخل البيانات",
+                "Medical orders catalog • Data Entry",
+              )
+            : tr("كتالوج الطلبات الطبية", "Medical orders catalog")}{" "}
+          • LMJ Health
         </title>
       </Helmet>
 
@@ -165,13 +178,28 @@ export default function AdminMedicalOrdersPage() {
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("كتالوج الطلبات الطبية", "Medical orders catalog")}
-          subtitle={tr(
-            "إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض",
-            "Manage medical orders doctors request from patients",
-          )}
+          title={
+            isDataEntry
+              ? tr("كتالوج الطلبات الطبية", "Medical orders catalog")
+              : tr("كتالوج الطلبات الطبية", "Medical orders catalog")
+          }
+          subtitle={
+            isDataEntry
+              ? tr(
+                  "إدارة عناصر الكتالوج التي يستخدمها فريق مدخل البيانات مع نفس القيود المدعومة من الواجهة.",
+                  "Manage catalog items used by the data entry team within the same supported UI constraints.",
+                )
+              : tr(
+                  "إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض",
+                  "Manage medical orders doctors request from patients",
+                )
+          }
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة نوع جديد", "Add new item")}
+          actionLabel={
+            isDataEntry
+              ? tr("إضافة عنصر جديد", "Add new item")
+              : tr("إضافة نوع جديد", "Add new item")
+          }
           actionDisabled={isAwaitingData || !medicalOrderCatalogKindSupported(kind)}
           onActionClick={openAdd}
           kpis={[
@@ -183,6 +211,23 @@ export default function AdminMedicalOrdersPage() {
             },
           ]}
         />
+
+        {isDataEntry ? (
+          <div className="rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3 text-start">
+            <p className="font-cairo text-[13px] font-bold text-[#0F766E]">
+              {tr(
+                "تعمل هذه الشاشة ضمن صلاحيات مدخل البيانات فقط.",
+                "This screen runs within the data entry role scope only.",
+              )}
+            </p>
+            <p className="mt-1 font-cairo text-[12px] font-semibold text-[#0F766E]">
+              {tr(
+                "ستظهر فقط الإجراءات المدعومة فعليًا من الواجهة والعقد الحالي، مع إخفاء أي مسارات غير مكتملة أو غير آمنة.",
+                "Only actions supported by the current UI and verified contract are shown, while incomplete or unsafe paths stay hidden.",
+              )}
+            </p>
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-3 items-stretch md:flex-row md:items-center md:justify-between">
           <div className="order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center">
