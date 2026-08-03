@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Activity, ShieldAlert } from 'lucide-react';
+import { Activity, RotateCcw, SearchX, ShieldAlert } from 'lucide-react';
 import { AuditLogDetailsDialog } from '@/components/admin/system-logs/AuditLogDetailsDialog';
 import { AuditLogRow } from '@/components/admin/system-logs/AuditLogRow';
 import { AuditLogSkeletonRow } from '@/components/admin/system-logs/AuditLogSkeletonRow';
@@ -11,11 +11,17 @@ export function AdminAuditLogTable({
   isError,
   error,
   logs,
+  hasActiveFilters,
+  onResetFilters,
+  onRetry,
 }: {
   isAwaitingData: boolean;
   isError: boolean;
   error: unknown;
   logs: AuditLogItem[];
+  hasActiveFilters: boolean;
+  onResetFilters: () => void;
+  onRetry: () => void;
 }) {
   const [detailLog, setDetailLog] = useState<AuditLogItem | null>(null);
 
@@ -56,16 +62,36 @@ export function AdminAuditLogTable({
           <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
             {userFacingErrorMessage(error, 'خطأ في الاتصال بالخادم')}
           </div>
+          <button
+            type='button'
+            onClick={onRetry}
+            className='mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#FECACA] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318]'
+          >
+            <RotateCcw className='h-4 w-4' />
+            إعادة المحاولة
+          </button>
         </div>
       )}
 
       {!isAwaitingData && !isError && logs.length === 0 && (
         <div className='px-6 py-16 text-center'>
-          <Activity className='mx-auto mb-3 h-10 w-10 text-[#E5E7EB]' />
+          <SearchX className='mx-auto mb-3 h-10 w-10 text-[#D0D5DD]' />
           <div className='font-cairo text-[14px] font-black text-[#667085]'>لا توجد سجلات مطابقة</div>
           <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-            جرّب تغيير معايير البحث أو التصفية
+            {hasActiveFilters
+              ? 'جرّب تغيير الفلاتر أو امسحها لعرض نتائج أوسع.'
+              : 'لا توجد سجلات لعرضها ضمن النطاق الحالي.'}
           </div>
+          {hasActiveFilters ? (
+            <button
+              type='button'
+              onClick={onResetFilters}
+              className='mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]'
+            >
+              <RotateCcw className='h-4 w-4' />
+              مسح الفلاتر
+            </button>
+          ) : null}
         </div>
       )}
 

@@ -9,7 +9,7 @@ import { AdminAuditLogPagination } from "@/components/admin/system-logs/AdminAud
 import { AdminAuditLogPrivacyNote } from "@/components/admin/system-logs/AdminAuditLogPrivacyNote";
 import { AdminAuditLogTable } from "@/components/admin/system-logs/AdminAuditLogTable";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
-import { Activity, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Activity, FilterX, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import { PAGE_SIZE } from "@/components/admin/system-logs/auditLogConstants";
 import { useAdminAuditLogs } from "@/hooks/admin/audit/useAdminAuditLogs";
 import type { AuditLogCategory, AuditLogOutcome } from "@/lib/admin/types";
@@ -205,11 +205,44 @@ export default function AdminSystemLogsPage() {
           onReset={resetFilters}
         />
 
+        {!isAwaitingData && !isError ? (
+          <section className="mt-4 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="font-cairo text-[12px] font-bold text-[#475467]">
+                {hasActiveFilters
+                  ? tr(
+                      `تم تطبيق الفلاتر الحالية ويجري عرض ${total.toLocaleString(numberLocale)} سجل مطابق.`,
+                      `Current filters are applied and ${total.toLocaleString(numberLocale)} matching records are shown.`,
+                    )
+                  : tr(
+                      `يتم عرض جميع السجلات المطابقة ضمن الصفحة الحالية وعددها ${total.toLocaleString(numberLocale)}.`,
+                      `All matching records for the current page scope are shown: ${total.toLocaleString(numberLocale)}.`,
+                    )}
+              </div>
+              {hasActiveFilters ? (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="inline-flex h-9 items-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054] md:self-auto"
+                >
+                  <FilterX className="h-4 w-4" />
+                  {tr("مسح كل الفلاتر", "Clear all filters")}
+                </button>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
         <AdminAuditLogTable
           isAwaitingData={isAwaitingData}
           isError={isError}
           error={error}
           logs={logs}
+          hasActiveFilters={hasActiveFilters}
+          onResetFilters={resetFilters}
+          onRetry={() => {
+            void refetch();
+          }}
         />
 
         {!isAwaitingData && !isError && (
