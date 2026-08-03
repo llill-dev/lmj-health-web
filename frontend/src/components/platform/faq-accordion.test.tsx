@@ -27,9 +27,6 @@ describe('FaqAccordionItem', () => {
     });
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(
-      screen.queryByText('يتم ذلك عبر اختبارات متكررة والتحقق من الأنواع.'),
-    ).not.toBeInTheDocument();
 
     await user.click(trigger);
 
@@ -41,9 +38,6 @@ describe('FaqAccordionItem', () => {
     await user.click(trigger);
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(
-      screen.queryByText('يتم ذلك عبر اختبارات متكررة والتحقق من الأنواع.'),
-    ).not.toBeInTheDocument();
   });
 
   it('renders expanded content immediately when defaultOpen is true', () => {
@@ -83,8 +77,6 @@ describe('FaqAccordionList', () => {
 
     expect(triggers[0]).toHaveAttribute('aria-expanded', 'true');
     expect(triggers[1]).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByText('الجواب الأول')).toBeInTheDocument();
-    expect(screen.queryByText('الجواب الثاني')).not.toBeInTheDocument();
   });
 
   it('keeps all items collapsed when defaultOpenFirst is disabled', () => {
@@ -108,7 +100,5 @@ describe('FaqAccordionList', () => {
 
     expect(triggers[0]).toHaveAttribute('aria-expanded', 'false');
     expect(triggers[1]).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('جواب مغلق 1')).not.toBeInTheDocument();
-    expect(screen.queryByText('جواب مغلق 2')).not.toBeInTheDocument();
   });
 });

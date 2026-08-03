@@ -7,8 +7,11 @@ import {
   BookOpen,
   ChevronLeft,
   FileBadge2,
+  FileSearch,
   MapPinned,
   Stethoscope,
+  User,
+  ShieldCheck,
 } from "lucide-react";
 import { DoctorSpecializationReviewBanner } from "@/components/admin/verification-requests/DoctorSpecializationReviewBanner";
 import ReviewVerificationRequestDialog from "@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog";
@@ -100,10 +103,13 @@ export default function AdminVerificationRequestDetailsPage() {
     return {
       id: request._id,
       doctorId: request.doctor?._id ?? "",
+      requestType: tr("تحقق الطبيب", "Doctor verification"),
       doctor: doctorName,
       specialty: request.doctor?.specialization || "—",
       address: addressParts.length > 0 ? addressParts.join("، ") : "—",
       requestedAt: formatRequestedAt(request.createdAt),
+      adminNote: request.adminNote?.trim() || "—",
+      requestedBy: request.requestedBy?.fullName || "—",
       status:
         request.status === "pending"
           ? tr("معلق", "Pending")
@@ -209,6 +215,55 @@ export default function AdminVerificationRequestDetailsPage() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <FileSearch className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("نوع الطلب", "Request type")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {cardData.requestType}
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <ShieldCheck className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("الإجراء المتاح", "Available action")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {cardData.status === tr("معلق", "Pending")
+                    ? tr("قبول أو رفض الطلب", "Approve or reject request")
+                    : tr("تمت المراجعة", "Already reviewed")}
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <User className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("مقدم الطلب", "Requested by")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {cardData.requestedBy}
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <FileBadge2 className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("ملاحظة المراجعة", "Review note")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {cardData.adminNote}
+                </div>
+              </div>
+            </div>
+
             <DoctorSpecializationReviewBanner state={specializationState} />
 
             <div className="mt-3 border-t border-[#B9D8D6] pt-2" />
@@ -295,9 +350,11 @@ export default function AdminVerificationRequestDetailsPage() {
               <button
                 type="button"
                 onClick={() => {
+                  if (cardData.status !== tr("معلق", "Pending")) return;
                   setDialogMode("approve");
                   setDialogOpen(true);
                 }}
+                disabled={cardData.status !== tr("معلق", "Pending")}
                 className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#16A34A] px-5 font-cairo text-[16px] font-bold text-white"
               >
                 <BookOpen className="h-4 w-4" />
@@ -306,9 +363,11 @@ export default function AdminVerificationRequestDetailsPage() {
               <button
                 type="button"
                 onClick={() => {
+                  if (cardData.status !== tr("معلق", "Pending")) return;
                   setDialogMode("reject");
                   setDialogOpen(true);
                 }}
+                disabled={cardData.status !== tr("معلق", "Pending")}
                 className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#EF4444] px-5 font-cairo text-[16px] font-bold text-white"
               >
                 <FileBadge2 className="h-4 w-4" />

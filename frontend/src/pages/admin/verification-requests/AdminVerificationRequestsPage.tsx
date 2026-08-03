@@ -5,6 +5,8 @@ import {
   Stethoscope,
   Clock,
   Filter,
+  BadgeCheck,
+  FileSearch,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -114,10 +116,12 @@ export default function AdminVerificationRequestsPage() {
 
       return {
         id: request._id,
+        requestType: tr("تحقق الطبيب", "Doctor verification"),
         doctor: doctorName,
         specialty: request.doctor?.specialization || "—",
         address,
         requestedAt: formatRequestedAt(request.createdAt),
+        statusKey: request.status,
         status:
           request.status === "pending"
             ? tr("معلق", "Pending")
@@ -301,6 +305,10 @@ export default function AdminVerificationRequestsPage() {
                         <Stethoscope className="h-6 w-6" />
                       </button>
                       <div className="text-start">
+                        <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-[#D5E8E6] bg-white px-2 py-0.5 font-cairo text-[10px] font-extrabold text-primary">
+                          <FileSearch className="h-3 w-3" />
+                          {r.requestType}
+                        </div>
                         <div className="font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]">
                           {r.doctor}
                         </div>
@@ -314,8 +322,16 @@ export default function AdminVerificationRequestsPage() {
                     </div>
 
                     <div className="mt-2 flex flex-col items-end justify-between h-full">
-                      <div className="inline-flex h-[22px] items-center gap-1 rounded-full bg-[#129692] px-2.5 font-cairo text-[11px] font-bold text-white">
-                        <Clock className="h-3 w-3" />
+                      <div
+                        className={`inline-flex h-[22px] items-center gap-1 rounded-full px-2.5 font-cairo text-[11px] font-bold text-white ${
+                          r.statusKey === "pending"
+                            ? "bg-[#F59E0B]"
+                            : r.statusKey === "approved"
+                              ? "bg-[#129692]"
+                              : "bg-[#EF4444]"
+                        }`}
+                      >
+                        <BadgeCheck className="h-3 w-3" />
                         {r.status}
                       </div>
                       <div className="font-cairo text-[12px] font-semibold leading-[20px] text-[#A0A7B0]">

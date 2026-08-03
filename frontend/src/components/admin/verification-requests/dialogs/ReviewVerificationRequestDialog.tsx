@@ -243,9 +243,9 @@ export default function ReviewVerificationRequestDialog({
 
     setDone("تم قبول الطلب بنجاح");
     toast(
-      `تم قبول طلب التحقق للطبيب «${doctorName}». يمكنه الآن استكمال المسار وفق سياسات المنصة.`,
+      `تم قبول طلب التحقق للطبيب «${doctorName}» وتحديث حالته إلى «مقبول». يمكن متابعة ملف الطبيب أو انتظار الخطوة التالية من مسار المنصة.`,
       {
-        title: "تم قبول الطبيب",
+        title: "تم قبول طلب التحقق",
         variant: "success",
         durationMs: 4200,
       },
@@ -408,7 +408,7 @@ export default function ReviewVerificationRequestDialog({
                       });
                       setDone("تم رفض الطلب");
                       toast(
-                        `تم رفض طلب التحقق للطبيب «${doctorName}». أُبلغ الفريق أو الطبيب وفق آلية الإشعارات.`,
+                        `تم رفض طلب التحقق للطبيب «${doctorName}» وتحديث حالته إلى «مرفوض».`,
                         {
                           title: "تم الرفض",
                           variant: "info",
@@ -519,11 +519,11 @@ export default function ReviewVerificationRequestDialog({
                           />
                           {lookupsQuery.isError ? (
                             <p className="mt-2 font-cairo text-[11px] font-semibold text-[#B45309]">
-                              تعذّر تحميل قائمة التخصصات. يمكنك إنشاء تخصص جديد
-                              أو إعادة فتح النافذة.
-                            </p>
-                          ) : null}
-                        </div>
+                          تعذّر تحميل قائمة التخصصات. يمكنك إنشاء تخصص جديد
+                              أو إعادة فتح نافذة المراجعة.
+                          </p>
+                        ) : null}
+                      </div>
                       )}
                     </div>
                   ) : null}
@@ -576,7 +576,7 @@ export default function ReviewVerificationRequestDialog({
                           {...register("verifyLocation")}
                         />
                         <span className="font-cairo text-[12px] font-bold text-[#111827]">
-                          verifyLocation=true
+                          تأكيد موقع العيادة
                         </span>
                       </label>
                     </div>

@@ -12,8 +12,10 @@ type PushDeviceSyncRecord = {
 type Listener = () => void;
 
 const listeners = new Set<Listener>();
+let deviceStoreVersion = 0;
 
 function notifyDeviceListeners() {
+  deviceStoreVersion += 1;
   listeners.forEach((listener) => listener());
 }
 
@@ -77,6 +79,11 @@ export function readPushDeviceSyncRecord(): PushDeviceSyncRecord | null {
   return parsed;
 }
 
+function readPushDeviceSyncSnapshot(): string {
+  if (typeof window === 'undefined') return '';
+  return window.localStorage.getItem(PUSH_DEVICE_SYNC_KEY) ?? '';
+}
+
 export function writePushDeviceSyncRecord(record: PushDeviceSyncRecord | null): void {
   if (typeof window === 'undefined') return;
   if (!record) {
@@ -102,5 +109,22 @@ export function usePushDeviceToken(): string | null {
     subscribePushDeviceStore,
     readPushDeviceToken,
     readPushDeviceToken,
+  );
+}
+
+export function usePushDeviceSyncRecord(): PushDeviceSyncRecord | null {
+  const snapshot = useSyncExternalStore(
+    subscribePushDeviceStore,
+    readPushDeviceSyncSnapshot,
+    readPushDeviceSyncSnapshot,
+  );
+  return safeParseJson<PushDeviceSyncRecord>(snapshot);
+}
+
+export function usePushDeviceStoreVersion(): number {
+  return useSyncExternalStore(
+    subscribePushDeviceStore,
+    () => deviceStoreVersion,
+    () => deviceStoreVersion,
   );
 }

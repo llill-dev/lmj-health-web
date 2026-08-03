@@ -37,6 +37,33 @@ const FIELD_LABELS: Record<string, string> = {
   clinicLng: "خط طول العيادة",
 };
 
+function renderValue(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => renderValue(item)).join("، ");
+  }
+  if (typeof value === "object") {
+    const localized = value as { ar?: unknown; en?: unknown; label?: unknown };
+    if (typeof localized.ar === "string" && localized.ar.trim()) {
+      return localized.ar;
+    }
+    if (typeof localized.en === "string" && localized.en.trim()) {
+      return localized.en;
+    }
+    if (typeof localized.label === "string" && localized.label.trim()) {
+      return localized.label;
+    }
+  }
+  return "—";
+}
+
 export default function ReviewProfileChangeDialog({
   open,
   onOpenChange,
@@ -85,8 +112,8 @@ export default function ReviewProfileChangeDialog({
 
       const message =
         decision === "approved"
-          ? "تمت الموافقة على طلب تغيير البيانات"
-          : "تم رفض طلب تغيير البيانات";
+          ? `تمت الموافقة على طلب تغيير بيانات الطبيب «${request.doctor?.userId?.fullName || request.doctor?._id || "—"}» وتحديث حالته إلى «موافق عليه».`
+          : `تم رفض طلب تغيير بيانات الطبيب «${request.doctor?.userId?.fullName || request.doctor?._id || "—"}» وتحديث حالته إلى «مرفوض».`;
       toast(message, {
         title: decision === "approved" ? "تمت الموافقة" : "تم الرفض",
         variant: "success",
@@ -112,12 +139,6 @@ export default function ReviewProfileChangeDialog({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const renderValue = (value: any) => {
-    if (value === null || value === undefined) return "—";
-    if (typeof value === "object") return JSON.stringify(value);
-    return String(value);
   };
 
   return (

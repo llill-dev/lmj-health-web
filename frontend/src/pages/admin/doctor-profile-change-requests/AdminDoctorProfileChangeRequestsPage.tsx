@@ -4,6 +4,7 @@ import {
   RefreshCw,
   Loader2,
   User,
+  ShieldCheck,
 } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
@@ -228,6 +229,9 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                           <User className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
+                          <div className="mb-1 inline-flex items-center rounded-[999px] border border-[#D5E8E6] bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-primary">
+                            {tr("طلب تغيير بيانات الطبيب", "Doctor profile change")}
+                          </div>
                           <div className="font-cairo text-[16px] font-black leading-[22px] text-[#111827]">
                             {request.doctor?.userId?.fullName ||
                               request.doctor?._id}
@@ -264,6 +268,12 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                           {statusLabels[request.status || ""] ||
                             request.status ||
                             "—"}
+                        </div>
+                        <div className="inline-flex items-center gap-1 rounded-[999px] border border-[#E5E7EB] bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[11px] font-bold text-[#475467]">
+                          <ShieldCheck className="h-3.5 w-3.5" />
+                          {request.status === "pending"
+                            ? tr("الإجراء: مراجعة", "Action: review")
+                            : tr("الإجراء: تم التنفيذ", "Action: completed")}
                         </div>
                       </div>
                       {request.items.length > 0 ? (

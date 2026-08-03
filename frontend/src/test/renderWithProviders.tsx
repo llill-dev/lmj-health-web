@@ -4,6 +4,7 @@ import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter } from 'react-router-dom';
 import { ToastProvider } from '@/components/ui/ToastProvider';
+import { I18nProvider } from '@/i18n/provider';
 import { createTestQueryClient } from '@/test/testQueryClient';
 
 type ProviderOptions = {
@@ -30,13 +31,15 @@ function TestProviders({
   );
 
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          {content}
-        </ToastProvider>
-      </QueryClientProvider>
-    </HelmetProvider>
+    <I18nProvider>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            {content}
+          </ToastProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </I18nProvider>
   );
 }
 
