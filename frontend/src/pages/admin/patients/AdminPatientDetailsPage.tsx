@@ -325,6 +325,22 @@ export default function AdminPatientDetailsPage() {
               </div>
             </section>
 
+            <section className='mt-5 rounded-[14px] border border-[#D5E8E6] bg-[#F8FFFE] px-6 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+              <div className='flex items-start gap-3 text-right'>
+                <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary'>
+                  <Info className='h-5 w-5' />
+                </div>
+                <div>
+                  <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                    صلاحيات الإدارة في هذه الشاشة للقراءة والمتابعة فقط
+                  </div>
+                  <div className='mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
+                    تعرض هذه الصفحة بيانات المريض، المواعيد، وسجل النشاط المرتبط به للمراجعة الإدارية. لا تُستخدم هذه الواجهة كمسار لرفع أو حذف ملفات المريض الحساسة من حساب الإدارة.
+                  </div>
+                </div>
+              </div>
+            </section>
+
             <section className='mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4'>
               <div className='rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
                 <div className='font-cairo text-[11px] font-bold text-[#667085]'>مواعيد قادمة</div>

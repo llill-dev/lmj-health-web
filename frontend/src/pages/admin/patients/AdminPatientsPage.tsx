@@ -3,6 +3,7 @@ import {
   Activity,
   Ban,
   Eye,
+  Info,
   Mail,
   Phone,
   RefreshCw,
@@ -271,6 +272,28 @@ export default function AdminPatientsPage() {
           </div>
         </section>
 
+        <section className="mt-4 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+          <div className="flex items-start gap-3 text-right">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Info className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                {tr(
+                  "صلاحيات الإدارة هنا تركز على المتابعة وحالة الحساب",
+                  "Admin actions here focus on monitoring and account status",
+                )}
+              </div>
+              <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
+                {tr(
+                  "يمكن من هذه الصفحة عرض التفاصيل، تعليق الحساب، أو إعادة التفعيل عند الحاجة. أما إدارة ملف المريض الطبي والملفات الحساسة فليست جزءًا من هذه القائمة.",
+                  "From this page, admins can open details, suspend accounts, or reactivate them when needed. Medical record management and sensitive patient files are intentionally outside this list view.",
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {isRefetching && !isAwaitingData ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -305,8 +328,24 @@ export default function AdminPatientsPage() {
               </div>
             </div>
           ) : patients.length === 0 ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-              {tr("لا توجد نتائج مطابقة.", "No matching results.")}
+            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                {tr("لا توجد نتائج مطابقة.", "No matching results.")}
+              </div>
+              <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                {hasActiveFilters
+                  ? tr(
+                      "جرّب مسح الفلاتر أو توسيع البحث لعرض مرضى أكثر.",
+                      "Try clearing filters or broadening the search to show more patients.",
+                    )
+                  : tr(
+                      "لا توجد بيانات مرضى ظاهرة ضمن النطاق الحالي.",
+                      "No patient data is visible within the current scope.",
+                    )}
+              </div>
             </div>
           ) : (
             patients.map((p) => {
