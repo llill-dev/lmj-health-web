@@ -72,6 +72,7 @@ export default function AdminVerificationRequestDetailsPage() {
       return {
         id: requestId ?? "",
         doctorId: "",
+        statusKey: "pending" as const,
         doctor: "—",
         specialty: "—",
         address: "—",
@@ -103,6 +104,7 @@ export default function AdminVerificationRequestDetailsPage() {
     return {
       id: request._id,
       doctorId: request.doctor?._id ?? "",
+      statusKey: request.status,
       requestType: tr("تحقق الطبيب", "Doctor verification"),
       doctor: doctorName,
       specialty: request.doctor?.specialization || "—",
@@ -139,6 +141,7 @@ export default function AdminVerificationRequestDetailsPage() {
       ),
     [requestQuery.data?.doctor, lookupsQuery.data?.lookups],
   );
+  const isPendingRequest = cardData.statusKey === "pending";
 
   return (
     <>
@@ -235,7 +238,7 @@ export default function AdminVerificationRequestDetailsPage() {
                   </div>
                 </div>
                 <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
-                  {cardData.status === tr("معلق", "Pending")
+                  {isPendingRequest
                     ? tr("قبول أو رفض الطلب", "Approve or reject request")
                     : tr("تمت المراجعة", "Already reviewed")}
                 </div>
@@ -347,32 +350,32 @@ export default function AdminVerificationRequestDetailsPage() {
                 <MapPinned className="h-4 w-4" />
                 {tr("الملف الشخصي", "Profile")}
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (cardData.status !== tr("معلق", "Pending")) return;
-                  setDialogMode("approve");
-                  setDialogOpen(true);
-                }}
-                disabled={cardData.status !== tr("معلق", "Pending")}
-                className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#16A34A] px-5 font-cairo text-[16px] font-bold text-white"
-              >
-                <BookOpen className="h-4 w-4" />
-                {tr("قبول التعديلات", "Approve changes")}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (cardData.status !== tr("معلق", "Pending")) return;
-                  setDialogMode("reject");
-                  setDialogOpen(true);
-                }}
-                disabled={cardData.status !== tr("معلق", "Pending")}
-                className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#EF4444] px-5 font-cairo text-[16px] font-bold text-white"
-              >
-                <FileBadge2 className="h-4 w-4" />
-                {tr("رفض التعديلات", "Reject changes")}
-              </button>
+              {isPendingRequest ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDialogMode("approve");
+                      setDialogOpen(true);
+                    }}
+                    className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#16A34A] px-5 font-cairo text-[16px] font-bold text-white"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    {tr("قبول التعديلات", "Approve changes")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDialogMode("reject");
+                      setDialogOpen(true);
+                    }}
+                    className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#EF4444] px-5 font-cairo text-[16px] font-bold text-white"
+                  >
+                    <FileBadge2 className="h-4 w-4" />
+                    {tr("رفض التعديلات", "Reject changes")}
+                  </button>
+                </>
+              ) : null}
             </div>
           </section>
         )}
