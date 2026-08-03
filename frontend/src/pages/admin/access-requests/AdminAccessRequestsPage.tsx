@@ -12,6 +12,8 @@ import {
   XCircle,
   Eye,
   Filter,
+  AlertCircle,
+  FilterX,
   RefreshCw,
 } from "lucide-react";
 import { useMemo, useState, useCallback } from "react";
@@ -26,6 +28,15 @@ import { useI18n } from "@/i18n/provider";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 
 type RequestStatus = "pending" | "approved" | "rejected" | "all";
+
+function hasMissingAccessRequestIdentity(request: any) {
+  const doctorName = request.doctor?.fullName || request.doctorName;
+  const doctorEmail = request.doctor?.email || request.doctorEmail;
+  const patientName = request.patient?.fullName || request.patientName;
+  const patientId = request.patient?.publicId || request.patientId;
+
+  return !doctorName || !doctorEmail || !patientName || !patientId;
+}
 
 export default function AdminAccessRequestsPage() {
   const navigate = useNavigate();
@@ -254,6 +265,23 @@ export default function AdminAccessRequestsPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              {(filters.search || filters.status !== "all") ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      status: "all",
+                      search: "",
+                      page: 1,
+                    }))
+                  }
+                  className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] hover:bg-[#F9FAFB]"
+                >
+                  <FilterX className="h-4 w-4" />
+                  {tr("مسح الفلاتر", "Clear filters")}
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => refetch()}
@@ -301,16 +329,32 @@ export default function AdminAccessRequestsPage() {
               </button>
             </div>
           ) : filteredRequests.length === 0 ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-              {filters.search || filters.status !== "all"
-                ? tr(
-                    "لا توجد طلبات وصول مطابقة للبحث أو الحالة المحددة.",
-                    "No access requests match the current search or status.",
-                  )
-                : tr(
-                    "لا توجد طلبات وصول حتى الآن.",
-                    "No access requests yet.",
-                  )}
+            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                <UserCheck className="h-5 w-5" />
+              </div>
+              <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                {filters.search || filters.status !== "all"
+                  ? tr(
+                      "لا توجد طلبات وصول مطابقة للبحث أو الحالة المحددة.",
+                      "No access requests match the current search or status.",
+                    )
+                  : tr(
+                      "لا توجد طلبات وصول حتى الآن.",
+                      "No access requests yet.",
+                    )}
+              </div>
+              <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                {filters.search || filters.status !== "all"
+                  ? tr(
+                      "جرّب توسيع البحث أو مسح الفلاتر لعرض طلبات أكثر.",
+                      "Try broadening the search or clearing filters to show more requests.",
+                    )
+                  : tr(
+                      "ستظهر هنا الطلبات فور وصولها من الأطباء مع بيانات المريض المرتبطة بها.",
+                      "Requests will appear here once they are submitted with their linked patient data.",
+                    )}
+              </div>
             </div>
           ) : (
             filteredRequests.map((request: any) => (
@@ -410,6 +454,20 @@ export default function AdminAccessRequestsPage() {
                         </div>
                       </div>
                     </div>
+
+                    {hasMissingAccessRequestIdentity(request) ? (
+                      <div className="rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#D97706]" />
+                          <div className="font-cairo text-[11px] font-bold leading-5 text-[#92400E]">
+                            {tr(
+                              "بعض بيانات الطبيب أو المريض غير مكتملة في الاستجابة الحالية. يمكنك فتح التفاصيل لرؤية القيم المتاحة ومراجعة الطلب دون افتراض حقول مفقودة.",
+                              "Some doctor or patient fields are missing in the current response. Open details to review the available values without assuming missing fields.",
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>

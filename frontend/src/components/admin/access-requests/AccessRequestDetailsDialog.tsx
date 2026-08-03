@@ -14,6 +14,15 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 
+function hasMissingAccessRequestIdentity(request: any) {
+  const doctorName = request.doctor?.fullName || request.doctorName;
+  const doctorEmail = request.doctor?.email || request.doctorEmail;
+  const patientName = request.patient?.fullName || request.patientName;
+  const patientId = request.patient?.publicId || request.patientId;
+
+  return !doctorName || !doctorEmail || !patientName || !patientId;
+}
+
 interface AccessRequestDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -117,6 +126,20 @@ export default function AccessRequestDetailsDialog({
                 </div>
               ) : (
                 <div className="space-y-5">
+                  {hasMissingAccessRequestIdentity(request) ? (
+                    <div className="rounded-[12px] border border-[#FDE68A] bg-[#FFFBEB] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-[#D97706]" />
+                        <div className="font-cairo text-[12px] font-bold text-[#92400E]">
+                          بعض البيانات غير مكتملة
+                        </div>
+                      </div>
+                      <div className="font-cairo text-[11px] font-semibold leading-5 text-[#B45309]">
+                        الاستجابة الحالية لا تحتوي على جميع حقول الطبيب أو المريض المتوقعة. يتم عرض القيم المتوفرة فقط لتجنّب إظهار معلومات غير مؤكدة.
+                      </div>
+                    </div>
+                  ) : null}
+
                   {/* Status Badge */}
                   <div className="flex items-center justify-between">
                     <div className="font-cairo text-[12px] font-semibold text-[#98A2B3]">

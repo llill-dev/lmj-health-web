@@ -96,6 +96,14 @@ function readSourceText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function actorLabel(
+  value: AdminContentItem["createdBy"] | AdminContentItem["reviewedBy"],
+): string {
+  if (typeof value === "string") return value.trim() || "—";
+  if (!value) return "—";
+  return value.fullName?.trim() || value.email?.trim() || value._id?.trim() || "—";
+}
+
 function countValidContentSources(item: AdminContentDetailsItem | null): number {
   if (!item) return 0;
 
@@ -127,6 +135,40 @@ function countValidContentSources(item: AdminContentDetailsItem | null): number 
     : 0;
 
   return blockSources;
+}
+
+function quickSourceCount(item: AdminContentItem): number | null {
+  const record = item as AdminContentItem & {
+    sources?: unknown[];
+    contentBlocks?: unknown[];
+  };
+
+  if (Array.isArray(record.sources)) {
+    return record.sources.filter((source) => {
+      const sourceRecord = source as Record<string, unknown>;
+      return Boolean(
+        readSourceText(sourceRecord.url) ||
+          readSourceText(sourceRecord.href) ||
+          readSourceText(sourceRecord.sourceUrl) ||
+          readSourceText(sourceRecord.link),
+      );
+    }).length;
+  }
+
+  if (Array.isArray(record.contentBlocks)) {
+    return record.contentBlocks.filter((block) => {
+      const blockRecord = block as Record<string, unknown>;
+      return Boolean(
+        readSourceText(blockRecord.url) ||
+          readSourceText(blockRecord.href) ||
+          readSourceText(blockRecord.sourceUrl) ||
+          readSourceText(blockRecord.sourceLink) ||
+          readSourceText(blockRecord.link),
+      );
+    }).length;
+  }
+
+  return null;
 }
 
 export default function AdminMedicalContentPage() {
@@ -539,6 +581,20 @@ export default function AdminMedicalContentPage() {
           <div className="mt-5 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
             {tr("نوع المحتوى", "Content type")}
           </div>
+          <div className="mt-3 rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3">
+            <div className="font-cairo text-[12px] font-extrabold text-[#0F766E]">
+              {tr(
+                "دورة العمل المعتمدة: مسودة ← قيد المراجعة ← منشور ← مؤرشف",
+                "Approved workflow: Draft → In review → Published → Archived",
+              )}
+            </div>
+            <div className="mt-1 font-cairo text-[11px] font-semibold text-[#5B7B79]">
+              {tr(
+                "تحقق من المنشئ، المراجع، وحالة العنصر قبل تنفيذ القبول أو النشر أو الأرشفة.",
+                "Check the creator, reviewer, and item state before approving, publishing, or archiving.",
+              )}
+            </div>
+          </div>
           <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
             <button
               type="button"
@@ -722,18 +778,65 @@ export default function AdminMedicalContentPage() {
                 SkeletonComponent={MedicalContentRowSkeleton}
               />
             ) : contentQuery.isError ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
-                {tr(
-                  "تعذّر تحميل المحتوى الطبي.",
-                  "Failed to load medical content.",
-                )}
+              <div className="px-6 py-10 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#FEF2F2] text-[#B42318]">
+                  <X className="h-5 w-5" />
+                </div>
+                <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#B42318]">
+                  {tr(
+                    "تعذّر تحميل المحتوى الطبي.",
+                    "Failed to load medical content.",
+                  )}
+                </p>
+                <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                  {tr(
+                    "تحقق من الفلاتر أو الاتصال ثم أعد المحاولة.",
+                    "Check filters or connection, then try again.",
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void contentQuery.refetch();
+                  }}
+                  className="mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#FECACA] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318]"
+                >
+                  <Clock className="h-4 w-4" />
+                  {tr("إعادة المحاولة", "Retry")}
+                </button>
               </div>
             ) : filteredItems.length === 0 ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr(
-                  "لا توجد عناصر مطابقة للفلاتر الحالية.",
-                  "No items match current filters.",
-                )}
+              <div className="px-6 py-10 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                  <Search className="h-5 w-5" />
+                </div>
+                <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                  {tr(
+                    "لا توجد عناصر مطابقة للفلاتر الحالية.",
+                    "No items match current filters.",
+                  )}
+                </p>
+                <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                  {tr(
+                    "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",
+                    "Adjust search criteria or clear filters to see broader results.",
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setShowMineOnly(false);
+                    setActiveStatus("الكل");
+                    setLangFilter("الكل");
+                    setTypeFilter("الكل");
+                    setPage(1);
+                  }}
+                  className="mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]"
+                >
+                  <X className="h-4 w-4" />
+                  {tr("مسح الفلاتر", "Clear filters")}
+                </button>
               </div>
             ) : (
               filteredItems.map((it) => (
@@ -783,10 +886,11 @@ export default function AdminMedicalContentPage() {
                       </div>
                       <div className="inline-flex gap-2 items-center">
                         <ClipboardCheck className="w-4 h-4" />
-                        {tr("الكاتب:", "Author:")}{" "}
-                        {typeof it.createdBy === "object"
-                          ? (it.createdBy?.fullName ?? "—")
-                          : (it.createdBy ?? "—")}
+                        {tr("المنشئ:", "Created by:")} {actorLabel(it.createdBy)}
+                      </div>
+                      <div className="inline-flex gap-2 items-center">
+                        <ShieldCheck className="w-4 h-4" />
+                        {tr("المراجع:", "Reviewed by:")} {actorLabel(it.reviewedBy)}
                       </div>
                       <div className="inline-flex gap-2 items-center">
                         <Eye className="w-4 h-4" />
@@ -799,6 +903,39 @@ export default function AdminMedicalContentPage() {
                         <Clock className="w-4 h-4" />
                         {tr("آخر تحديث:", "Last update:")}{" "}
                         {formatContentDate(it.updatedAt)}
+                      </div>
+                      <div className="inline-flex gap-2 items-center rounded-[8px] bg-[#F8FAFC] px-2 py-1 text-[#667085]">
+                        {it.status === "DRAFT"
+                          ? tr("التالي: إرسال للمراجعة", "Next: send for review")
+                          : it.status === "IN_REVIEW"
+                            ? tr("التالي: موافقة أو رفض", "Next: approve or reject")
+                            : it.status === "PUBLISHED"
+                              ? tr("التالي: أرشفة عند الحاجة", "Next: archive if needed")
+                              : tr("العنصر مؤرشف للمرجع", "Item archived for reference")}
+                      </div>
+                      <div
+                        className={cn(
+                          "inline-flex gap-2 items-center rounded-[8px] px-2 py-1",
+                          quickSourceCount(it) === 0
+                            ? "bg-[#FFF7ED] text-[#C2410C]"
+                            : "bg-[#F8FAFC] text-[#667085]",
+                        )}
+                      >
+                        <LinkIcon className="w-4 h-4" />
+                        {quickSourceCount(it) === null
+                          ? tr(
+                              "تحقق من المصادر داخل التفاصيل",
+                              "Check sources in details",
+                            )
+                          : quickSourceCount(it) === 0
+                            ? tr(
+                                "لا توجد مصادر مرفقة بعد",
+                                "No sources attached yet",
+                              )
+                            : tr(
+                                `${quickSourceCount(it)} مصدر/مصادر`,
+                                `${quickSourceCount(it)} source(s)`,
+                              )}
                       </div>
                     </div>
                   </div>

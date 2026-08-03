@@ -31,7 +31,7 @@ export function notifyGlobalQueryError(
   queryErrorToastSink(
     opts?.message ?? getUserFacingRequestErrorMessage(error),
     {
-      title: opts?.title ?? "تعذّر إكمال العملية",
+      title: opts?.title ?? "تعذّر التنفيذ",
       variant: "error",
       durationMs: 4200,
     },
