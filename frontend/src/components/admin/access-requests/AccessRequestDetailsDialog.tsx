@@ -11,6 +11,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { useEffect } from "react";
 
@@ -157,6 +158,35 @@ export default function AccessRequestDetailsDialog({
                     </span>
                   </div>
 
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <div className="font-cairo text-[11px] font-bold text-[#667085]">
+                          نوع الطلب
+                        </div>
+                      </div>
+                      <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
+                        طلب وصول لبيانات مريض
+                      </div>
+                    </div>
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        <div className="font-cairo text-[11px] font-bold text-[#667085]">
+                          الإجراء الحالي
+                        </div>
+                      </div>
+                      <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
+                        {request.status === "pending"
+                          ? "مراجعة القرار من قبل الإدارة"
+                          : request.status === "approved"
+                            ? "تم قبول الطلب"
+                            : "تم رفض الطلب"}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Doctor Info */}
                   <div className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] p-4">
                     <div className="mb-3 flex items-center gap-2">
@@ -279,6 +309,16 @@ export default function AccessRequestDetailsDialog({
                         </div>
                       </div>
                     )}
+                    {request.reviewedAt ? (
+                      <div className="mt-3">
+                        <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
+                          تاريخ المراجعة
+                        </div>
+                        <div className="font-cairo text-[12px] font-bold text-[#111827]">
+                          {new Date(request.reviewedAt).toLocaleString("ar-SY")}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* Notes */}
