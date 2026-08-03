@@ -20,6 +20,7 @@ import {
 import StyledSelect from "@/components/ui/styled-select";
 import { normalizeItemLanguage } from "@/components/admin/medical-content/contentListUtils";
 import { cn } from "@/lib/utils/utils";
+import { optionalLatinSlugSchema } from "@/lib/forms/slugValidation";
 import type {
   AdminContentDetailsItem,
   AdminContentDetailsResponse,
@@ -39,12 +40,7 @@ const formSchema = z
     title: z.string().min(1, "عنوان المحتوى مطلوب"),
     summary: z.string().optional(),
     language: z.enum(["ar", "en"]),
-    slug: z
-      .string()
-      .optional()
-      .refine((s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s), {
-        message: "المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات",
-      }),
+    slug: optionalLatinSlugSchema(),
     pageVersion: z.string().optional(),
   })
   .superRefine((value, ctx) => {

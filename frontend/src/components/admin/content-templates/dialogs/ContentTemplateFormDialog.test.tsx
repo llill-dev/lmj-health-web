@@ -109,6 +109,35 @@ describe("ContentTemplateFormDialog", () => {
     expect(createMutateAsync).not.toHaveBeenCalled();
   });
 
+  it("rejects arabic slug input before submitting", async () => {
+    renderWithProviders(
+      <ContentTemplateFormDialog open onOpenChange={vi.fn()} />,
+    );
+
+    await userEvent.type(
+      screen.getByPlaceholderText("اسم واضح للقالب"),
+      "قالب متابعة",
+    );
+    await userEvent.type(screen.getByPlaceholderText("my-template"), "قالب-متابعة");
+    await userEvent.click(screen.getByRole("button", { name: "إضافة حقل" }));
+    await userEvent.type(screen.getByPlaceholderText("fieldKey"), "followUp");
+    await userEvent.type(
+      screen.getByPlaceholderText("تسمية ظاهرة للحقل"),
+      "ملاحظات المتابعة",
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "حفظ القالب" }),
+    );
+
+    expect(
+      await screen.findByText(
+        "المعرّف يجب أن يحتوي على أحرف لاتينية صغيرة وأرقام وشرطات فقط",
+      ),
+    ).toBeInTheDocument();
+    expect(createMutateAsync).not.toHaveBeenCalled();
+  });
+
   it("submits a trimmed payload when the form is valid", async () => {
     renderWithProviders(
       <ContentTemplateFormDialog open onOpenChange={vi.fn()} />,

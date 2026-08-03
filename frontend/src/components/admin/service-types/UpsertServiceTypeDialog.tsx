@@ -20,6 +20,7 @@ import {
   adminInputClass,
   adminTextareaClass,
 } from "@/components/admin/form-field";
+import { requiredLatinSlugSchema } from "@/lib/forms/slugValidation";
 
 /**
  * Script checks for bilingual service-type fields (API-3 accepts any string per locale object;
@@ -57,10 +58,7 @@ const formSchema = z.object({
     .string()
     .min(1, "مطلوب")
     .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
-  slug: z
-    .string()
-    .min(1, "مطلوب")
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "للاتيني الصغير، أرقام، شرطة"),
+  slug: requiredLatinSlugSchema("مطلوب"),
   descEn: z
     .string()
     .optional()
@@ -357,17 +355,17 @@ export default function UpsertServiceTypeDialog({
                   required
                   error={errors.slug?.message}
                 >
-                  <input
-                    {...register("slug")}
-                    aria-label="Slug"
-                    className={adminFieldClass(
-                      adminInputClass,
-                      Boolean(errors.slug),
-                    )}
-                    dir="ltr"
-                    disabled={isEdit}
-                    placeholder="lab"
-                  />
+                    <input
+                      {...register("slug")}
+                      aria-label="Slug"
+                      className={adminFieldClass(
+                        adminInputClass,
+                        Boolean(errors.slug),
+                      )}
+                      dir="ltr"
+                      disabled={isEdit}
+                      placeholder="lab"
+                    />
                   {isEdit && (
                     <p className="mt-1 text-right font-cairo text-[11px] text-[#98A2B3]">
                       لا يُنصح بتغيير الـ slug بعد الربط.

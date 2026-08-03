@@ -14,6 +14,7 @@ import {
   useMutateServiceType,
 } from '@/hooks/admin/services/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { requiredLatinSlugSchema } from '@/lib/forms/slugValidation';
 import { resolveLabel } from '@/lib/admin/types';
 import type {
   CreateServiceTypeBody,
@@ -49,11 +50,7 @@ const fieldSchema = z.object({
 const schema = z.object({
   nameAr: z.string().trim().min(2, 'الاسم بالعربية مطلوب'),
   nameEn: z.string().trim().min(2, 'الاسم بالإنجليزية مطلوب'),
-  slug: z
-    .string()
-    .trim()
-    .min(2, 'المعرّف مطلوب')
-    .regex(/^[a-z0-9_-]+$/, 'أحرف صغيرة وأرقام و«-» أو «_» فقط'),
+  slug: requiredLatinSlugSchema('المعرّف مطلوب'),
   descriptionAr: z.string().trim().optional(),
   descriptionEn: z.string().trim().optional(),
   isActive: z.boolean(),

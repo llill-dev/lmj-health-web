@@ -16,6 +16,7 @@ import {
 } from "@/components/admin/form-field";
 import StyledSelect from "@/components/ui/styled-select";
 import { cn } from "@/lib/utils/utils";
+import { optionalLatinSlugSchema } from "@/lib/forms/slugValidation";
 import type { AdminContentBlock, AdminContentType } from "@/lib/admin/types";
 
 const DRAFT_CONTENT_BLOCKS: AdminContentBlock[] = [
@@ -91,12 +92,7 @@ const formSchema = z
     title: z.string().min(1, "عنوان المحتوى مطلوب"),
     summary: z.string().optional(),
     language: z.enum(["ar", "en"]),
-    slug: z
-      .string()
-      .optional()
-      .refine((s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s), {
-        message: "المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات",
-      }),
+    slug: optionalLatinSlugSchema(),
     sourceTitle: z.string().optional(),
     sourceUrl: z
       .string()

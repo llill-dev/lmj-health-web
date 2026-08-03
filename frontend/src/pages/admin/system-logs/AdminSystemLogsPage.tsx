@@ -86,7 +86,8 @@ export default function AdminSystemLogsPage() {
 
   const bumpPage = useCallback(() => setPage(1), []);
 
-  const { data, isAwaitingData, isError, error } = useAdminAuditLogs(params);
+  const { data, isAwaitingData, isError, error, refetch } =
+    useAdminAuditLogs(params);
 
   const logs = data?.auditLogs ?? [];
   const total = data?.total ?? 0;

@@ -18,6 +18,7 @@ import {
 } from "@/components/admin/form-field";
 import StyledSelect from "@/components/ui/styled-select";
 import { cn } from "@/lib/utils/utils";
+import { optionalLatinSlugSchema } from "@/lib/forms/slugValidation";
 import type {
   AdminContentTemplate,
   AdminContentTemplateParentType,
@@ -39,12 +40,7 @@ const fieldSchema = z.object({
 
 const formSchema = z.object({
   name: z.string().min(1, "اسم القالب مطلوب"),
-  slug: z
-    .string()
-    .optional()
-    .refine((s) => !s || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s), {
-      message: "المعرّف: أحرف لاتينية صغيرة وأرقام وشرطات",
-    }),
+  slug: optionalLatinSlugSchema(),
   parentType: z.enum(["CONDITION", "SYMPTOM", "GENERAL_ADVICE", "MEDICATION"]),
   fields: z.array(fieldSchema).min(1, "أضف حقلاً واحداً على الأقل"),
 });
