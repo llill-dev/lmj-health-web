@@ -20,7 +20,6 @@ import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryDataWithPlaceholder } from "@/lib/query/queryUi";
 import StyledSelect from "@/components/ui/styled-select";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
-import { Pagination } from "@/components/admin/services/Pagination";
 import { useI18n } from "@/i18n/provider";
 
 export default function AdminVerificationRequestsPage() {
@@ -363,25 +362,74 @@ export default function AdminVerificationRequestsPage() {
                 ))}
               </div>
 
-              <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#F2F4F7] pt-6 sm:flex-row">
-                <p className="font-cairo text-[12px] font-semibold text-[#667085]">
-                  {tr("عرض", "Showing")}{" "}
-                  <span className="tabular-nums font-bold text-[#111827]">
-                    {total === 0 ? 0 : (currentPage - 1) * currentLimit + 1}–
-                    {(currentPage - 1) * currentLimit + locationRequests.length}
-                  </span>{" "}
-                  {tr("من", "of")}{" "}
-                  <span className="font-bold text-[#111827]">
-                    {total.toLocaleString(numberLocale)}
-                  </span>{" "}
-                  {tr("طلباً مطابقاً", "matching requests")}
-                </p>
+              <div className="mt-4 flex flex-col gap-3 border-t border-[#F2F4F7] pt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="text-center font-cairo text-[11px] font-semibold text-[#667085] sm:text-start sm:text-[12px]">
+                  {tr("الصفحة", "Page")} {currentPage} {tr("من", "of")}{" "}
+                  {totalPages}
+                </div>
 
-                <Pagination
-                  page={currentPage}
-                  totalPages={totalPages}
-                  onPage={setPage}
-                />
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-3">
+                  <StyledSelect
+                    className="w-full min-w-[110px] sm:w-[120px]"
+                    size="sm"
+                    tone="muted"
+                    value={String(limit)}
+                    onChange={(v) => {
+                      const nextLimit = Number(v) || 10;
+                      setLimit(nextLimit);
+                      setPage(1);
+                    }}
+                    options={[
+                      {
+                        value: "10",
+                        label: tr("10 / صفحة", "10 / page"),
+                      },
+                      {
+                        value: "20",
+                        label: tr("20 / صفحة", "20 / page"),
+                      },
+                      {
+                        value: "50",
+                        label: tr("50 / صفحة", "50 / page"),
+                      },
+                      {
+                        value: "100",
+                        label: tr("100 / صفحة", "100 / page"),
+                      },
+                    ]}
+                    listboxAriaLabel={tr(
+                      "عدد النتائج في الصفحة",
+                      "Results per page",
+                    )}
+                  />
+
+                  <button
+                    type="button"
+                    disabled={verificationAwaiting || currentPage <= 1}
+                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                    className={
+                      verificationAwaiting || currentPage <= 1
+                        ? "h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none"
+                        : "h-[38px] flex-1 rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] sm:flex-none"
+                    }
+                  >
+                    {tr("السابق", "Previous")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={verificationAwaiting || currentPage >= totalPages}
+                    onClick={() =>
+                      setPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    className={
+                      verificationAwaiting || currentPage >= totalPages
+                        ? "h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none"
+                        : "h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15,143,139,0.25)] sm:flex-none"
+                    }
+                  >
+                    {tr("التالي", "Next")}
+                  </button>
+                </div>
               </div>
             </>
           )}
