@@ -129,7 +129,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.dashboard.notes.title": "ملاحظات تشغيلية",
     "dataEntry.dashboard.notes.body":
       "تم بناء هذه الواجهة على endpoints المعتمدة لدور مدخل البيانات فقط، مع الحفاظ على نفس أسلوب التصميم والكتابة في الموقع لضمان تجربة متناسقة وواضحة.",
-    "dataEntry.page.medicalContent.title": "المحتوى الطبي • Data Entry • LMJ Health",
+    "dataEntry.page.medicalContent.title": "المحتوى الطبي • مدخل البيانات • LMJ Health",
     "dataEntry.medicalContent.hero.title": "محتواي الطبي",
     "dataEntry.medicalContent.hero.subtitle":
       "إدارة عناصر المحتوى التي ينشئها فريق إدخال البيانات",
@@ -156,7 +156,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.medicalContent.toast.reviewFailed.title": "تعذر الإرسال",
     "dataEntry.medicalContent.toast.reviewFailed.body":
       "تعذر إرسال العنصر للمراجعة. تحقق من البيانات ثم حاول مرة أخرى.",
-    "dataEntry.page.contentTemplates.title": "قوالب المحتوى • Data Entry • LMJ Health",
+    "dataEntry.page.contentTemplates.title": "قوالب المحتوى • مدخل البيانات • LMJ Health",
     "dataEntry.contentTemplates.hero.title": "قوالب المحتوى المتاحة",
     "dataEntry.contentTemplates.hero.subtitle":
       "مرجع سريع لحقول القوالب التي يستخدمها فريق إدخال البيانات",
@@ -169,6 +169,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.contentTemplates.list.error": "تعذر تحميل قوالب المحتوى حالياً.",
     "dataEntry.contentTemplates.list.empty":
       "لا توجد قوالب مطابقة للفلاتر الحالية.",
+    "dataEntry.contentTemplates.list.emptyHint":
+      "جرّب تغيير الفلاتر لعرض القوالب المعتمدة المرتبطة بهذا النوع أو الحالة.",
+    "dataEntry.contentTemplates.reference.title": "مرجع قوالب المحتوى للقراءة فقط",
+    "dataEntry.contentTemplates.reference.body":
+      "هذه الشاشة توضح الحقول والبنية المعتمدة للقوالب حتى يستخدمها فريق مدخل البيانات بشكل صحيح، دون تعديل مباشر على القوالب من هنا.",
+    "dataEntry.contentTemplates.reference.badge": "مرجع فقط",
     "dataEntry.contentTemplates.fieldsCount": "حقل",
     "dataEntry.page.serviceProviders.title": "مزودو الخدمة • LMJ Health",
     "dataEntry.serviceProviders.hero.title": "مزودو الخدمة",
@@ -182,6 +188,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.serviceProviders.empty.selectType": "اختر نوع خدمة من القائمة أعلاه.",
     "dataEntry.serviceProviders.empty.noProviders":
       "لا يوجد مزودون منشورون لهذا النوع حاليًا.",
+    "dataEntry.serviceProviders.empty.noProvidersHint":
+      "يمكنك إضافة مزود جديد لهذا النوع أو تبديل نوع الخدمة من الأعلى.",
+    "dataEntry.serviceProviders.scope.title":
+      "إدارة مزودي الخدمة ضمن النوع المحدد فقط",
+    "dataEntry.serviceProviders.scope.body":
+      "اختر نوع الخدمة أولاً، ثم أضف أو عدّل المزودين المرتبطين به فقط لتجنب الخلط بين المزود والنوع والخدمة نفسها.",
     "dataEntry.serviceProviders.actions.edit": "تعديل",
     "content.status.draft": "مسودة",
     "content.status.inReview": "قيد المراجعة",
@@ -484,6 +496,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Could not load content templates right now.",
     "dataEntry.contentTemplates.list.empty":
       "No templates match the current filters.",
+    "dataEntry.contentTemplates.list.emptyHint":
+      "Try changing filters to reveal templates linked to this parent type or status.",
+    "dataEntry.contentTemplates.reference.title":
+      "Read-only content templates reference",
+    "dataEntry.contentTemplates.reference.body":
+      "This page explains the approved template fields and structure so the data entry team can use them correctly without editing templates here.",
+    "dataEntry.contentTemplates.reference.badge": "Reference only",
     "dataEntry.contentTemplates.fieldsCount": "field",
     "dataEntry.page.serviceProviders.title": "Service Providers • LMJ Health",
     "dataEntry.serviceProviders.hero.title": "Service Providers",
@@ -499,6 +518,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Choose a service type from the list above.",
     "dataEntry.serviceProviders.empty.noProviders":
       "No published providers for this type yet.",
+    "dataEntry.serviceProviders.empty.noProvidersHint":
+      "You can add a new provider for this type or switch the service type above.",
+    "dataEntry.serviceProviders.scope.title":
+      "Manage providers within the selected type only",
+    "dataEntry.serviceProviders.scope.body":
+      "Choose the service type first, then add or edit only the providers linked to it to avoid mixing provider, type, and service roles.",
     "dataEntry.serviceProviders.actions.edit": "Edit",
     "content.status.draft": "Draft",
     "content.status.inReview": "In review",

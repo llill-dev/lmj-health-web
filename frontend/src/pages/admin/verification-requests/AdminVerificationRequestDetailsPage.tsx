@@ -215,7 +215,7 @@ export default function AdminVerificationRequestDetailsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4 my-4">
               <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
                 <div className="flex items-center gap-2 text-primary">
                   <FileSearch className="h-4 w-4" />

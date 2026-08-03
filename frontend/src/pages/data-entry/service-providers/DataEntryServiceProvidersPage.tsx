@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Building2, Edit3, Loader2, Plus, RefreshCw } from "lucide-react";
+import { Building2, Edit3, Loader2, Plus, RefreshCw, Info, FilterX } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
@@ -101,6 +101,22 @@ export default function DataEntryServiceProvidersPage() {
           onActionClick={() => setCreateOpen(true)}
         />
 
+        <section className="rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-6 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+          <div className="flex items-start gap-3 text-right">
+            <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Info className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                {t("dataEntry.serviceProviders.scope.title")}
+              </p>
+              <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                {t("dataEntry.serviceProviders.scope.body")}
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-6">
@@ -125,17 +141,32 @@ export default function DataEntryServiceProvidersPage() {
               />
             </div>
             <div className="flex justify-start lg:col-span-6">
-              <button
-                type="button"
-                onClick={() => void providersQuery.refetch()}
-                disabled={!selectedSlug || providersQuery.isFetching}
-                className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${providersQuery.isFetching ? "animate-spin" : ""}`}
-                />
-                {t("common.refresh")}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void providersQuery.refetch()}
+                  disabled={!selectedSlug || providersQuery.isFetching}
+                  className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${providersQuery.isFetching ? "animate-spin" : ""}`}
+                  />
+                  {t("common.refresh")}
+                </button>
+                {selectedSlug ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCursor(undefined);
+                      setSearchParams({});
+                    }}
+                    className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]"
+                  >
+                    <FilterX className="h-4 w-4" />
+                    {t("common.clearFilters", "مسح الفلاتر")}
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
         </section>
@@ -156,8 +187,16 @@ export default function DataEntryServiceProvidersPage() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : providers.length === 0 ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {t("dataEntry.serviceProviders.empty.noProviders")}
+            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                <Building2 className="h-5 w-5" />
+              </div>
+              <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                {t("dataEntry.serviceProviders.empty.noProviders")}
+              </p>
+              <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                {t("dataEntry.serviceProviders.empty.noProvidersHint")}
+              </p>
             </div>
           ) : (
             providers.map((provider) => (
