@@ -369,6 +369,10 @@ export default function AdminAccessRequestsPage() {
                   <div className="flex-1 space-y-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#D5E8E6] bg-[#F8FFFE] px-3 py-1 font-cairo text-[10px] font-extrabold text-primary">
+                          <FileText className="h-3.5 w-3.5" />
+                          {tr("طلب وصول لبيانات مريض", "Patient data access request")}
+                        </div>
                         <div className="flex items-center gap-3">
                           <div className="font-cairo text-[14px] font-black text-[#111827]">
                             {request.doctor?.fullName ||
@@ -455,6 +459,29 @@ export default function AdminAccessRequestsPage() {
                       </div>
                     </div>
 
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center rounded-[999px] bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-bold text-[#475467]">
+                        {request.status === "pending"
+                          ? tr(
+                              "الإجراء المتاح: مراجعة القرار من التفاصيل",
+                              "Available action: review decision in details",
+                            )
+                          : request.status === "approved"
+                            ? tr(
+                                "الحالة النهائية: تم قبول الطلب",
+                                "Final state: request approved",
+                              )
+                            : tr(
+                                "الحالة النهائية: تم رفض الطلب",
+                                "Final state: request rejected",
+                              )}
+                      </span>
+                      <span className="inline-flex items-center rounded-[999px] bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-bold text-[#667085]">
+                        {tr("الجهة الطالبة:", "Requester:")}{" "}
+                        {request.doctor?.fullName || request.doctorName || "—"}
+                      </span>
+                    </div>
+
                     {hasMissingAccessRequestIdentity(request) ? (
                       <div className="rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3">
                         <div className="flex items-start gap-2">
@@ -476,65 +503,67 @@ export default function AdminAccessRequestsPage() {
         </section>
 
         {/* Pagination */}
-        <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="font-cairo text-[12px] font-bold text-[#667085]">
-            {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-[128px] shrink-0">
-              <StyledSelect
-                size="xs"
-                tone="emphasis"
-                value={String(filters.limit)}
-                disabled={isAwaitingData}
-                onChange={(v) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    limit: Number(v),
-                    page: 1,
-                  }))
-                }
-                options={[10, 20, 50, 100].map((v) => ({
-                  value: String(v),
-                  label: String(v),
-                }))}
-                listboxAriaLabel={tr(
-                  "عدد العناصر في الصفحة",
-                  "Items per page",
-                )}
-              />
+        {!isAwaitingData && !error && filteredRequests.length > 0 ? (
+          <section className="mt-5 flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+            <div className="font-cairo text-[12px] font-bold text-[#667085]">
+              {tr("الصفحة", "Page")} {filters.page} {tr("من", "of")} {totalPages}
             </div>
 
-            <button
-              type="button"
-              onClick={() =>
-                setFilters((prev) => ({
-                  ...prev,
-                  page: Math.max(1, prev.page - 1),
-                }))
-              }
-              disabled={filters.page <= 1}
-              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {tr("السابق", "Previous")}
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="w-[128px] shrink-0">
+                <StyledSelect
+                  size="xs"
+                  tone="emphasis"
+                  value={String(filters.limit)}
+                  disabled={isAwaitingData}
+                  onChange={(v) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      limit: Number(v),
+                      page: 1,
+                    }))
+                  }
+                  options={[10, 20, 50, 100].map((v) => ({
+                    value: String(v),
+                    label: String(v),
+                  }))}
+                  listboxAriaLabel={tr(
+                    "عدد العناصر في الصفحة",
+                    "Items per page",
+                  )}
+                />
+              </div>
 
-            <button
-              type="button"
-              onClick={() =>
-                setFilters((prev) => ({
-                  ...prev,
-                  page: Math.min(totalPages, prev.page + 1),
-                }))
-              }
-              disabled={filters.page >= totalPages}
-              className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {tr("التالي", "Next")}
-            </button>
-          </div>
-        </section>
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    page: Math.max(1, prev.page - 1),
+                  }))
+                }
+                disabled={filters.page <= 1}
+                className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {tr("السابق", "Previous")}
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    page: Math.min(totalPages, prev.page + 1),
+                  }))
+                }
+                disabled={filters.page >= totalPages}
+                className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {tr("التالي", "Next")}
+              </button>
+            </div>
+          </section>
+        ) : null}
       </div>
 
       <AccessRequestDetailsDialog
