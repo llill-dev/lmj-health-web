@@ -9,7 +9,7 @@ import {
   FileSearch,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReviewVerificationRequestDialog from "@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog";
@@ -142,8 +142,12 @@ export default function AdminVerificationRequestsPage() {
   const currentPage = verificationQuery.data?.page ?? page;
   const currentLimit = verificationQuery.data?.limit ?? limit;
   const totalPages = Math.max(1, Math.ceil(total / Math.max(currentLimit, 1)));
-  const canPrev = currentPage > 1;
-  const canNext = currentPage < totalPages;
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   return (
     <>
@@ -284,99 +288,104 @@ export default function AdminVerificationRequestsPage() {
               )}
             </div>
           ) : (
-            <div className="space-y-3">
-              {locationRequests.map((r) => (
-                <article
-                  key={r.id}
-                  className="min-h-[122px] flex justify-between  overflow-hidden rounded-[8px] border border-[#B9D8D6] bg-[#F8FAFA]"
-                >
-                  <div className="px-4 py-3 flex items-center justify-between flex-1">
-                    <div className="flex items-start justify-start gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelected(r);
-                          setDialogMode("map");
-                          setDialogOpen(true);
-                        }}
-                        className="flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white"
-                        aria-label={tr("عرض الخريطة", "Open map")}
-                      >
-                        <Stethoscope className="h-6 w-6" />
-                      </button>
-                      <div className="text-start">
-                        <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-[#D5E8E6] bg-white px-2 py-0.5 font-cairo text-[10px] font-extrabold text-primary">
-                          <FileSearch className="h-3 w-3" />
-                          {r.requestType}
-                        </div>
-                        <div className="font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]">
-                          {r.doctor}
-                        </div>
-                        <div className="mt-1 font-cairo text-[12px] font-bold leading-[22px] text-[#1F2937]">
-                          {r.specialty}
-                        </div>
-                        <div className="mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#4B5563]">
-                          {r.address}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-2 flex flex-col items-end justify-between h-full">
-                      <div
-                        className={`inline-flex h-[22px] items-center gap-1 rounded-full px-2.5 font-cairo text-[11px] font-bold text-white ${
-                          r.statusKey === "pending"
-                            ? "bg-[#F59E0B]"
-                            : r.statusKey === "approved"
-                              ? "bg-[#129692]"
-                              : "bg-[#EF4444]"
-                        }`}
-                      >
-                        <BadgeCheck className="h-3 w-3" />
-                        {r.status}
-                      </div>
-                      <div className="font-cairo text-[12px] font-semibold leading-[20px] text-[#A0A7B0]">
-                        {r.requestedAt}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label={tr(
-                      "فتح صفحة تفاصيل طلب التحقق",
-                      "Open verification request details page",
-                    )}
-                    onClick={() => {
-                      navigate(
-                        `/admin/verification-requests/${encodeURIComponent(r.id)}`,
-                      );
-                    }}
-                    className="flex w-[58px] self-stretch items-center justify-center bg-[#129692] text-white transition hover:bg-[#0F8885]"
+            <>
+              <div className="space-y-3">
+                {locationRequests.map((r) => (
+                  <article
+                    key={r.id}
+                    className="min-h-[122px] flex justify-between  overflow-hidden rounded-[8px] border border-[#B9D8D6] bg-[#F8FAFA]"
                   >
-                    <ChevronLeft className="h-6 w-6" />
-                  </button>
-                </article>
-              ))}
-            </div>
+                    <div className="px-4 py-3 flex items-center justify-between flex-1">
+                      <div className="flex items-start justify-start gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelected(r);
+                            setDialogMode("map");
+                            setDialogOpen(true);
+                          }}
+                          className="flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white"
+                          aria-label={tr("عرض الخريطة", "Open map")}
+                        >
+                          <Stethoscope className="h-6 w-6" />
+                        </button>
+                        <div className="text-start">
+                          <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-[#D5E8E6] bg-white px-2 py-0.5 font-cairo text-[10px] font-extrabold text-primary">
+                            <FileSearch className="h-3 w-3" />
+                            {r.requestType}
+                          </div>
+                          <div className="font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]">
+                            {r.doctor}
+                          </div>
+                          <div className="mt-1 font-cairo text-[12px] font-bold leading-[22px] text-[#1F2937]">
+                            {r.specialty}
+                          </div>
+                          <div className="mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#4B5563]">
+                            {r.address}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 flex flex-col items-end justify-between h-full">
+                        <div
+                          className={`inline-flex h-[22px] items-center gap-1 rounded-full px-2.5 font-cairo text-[11px] font-bold text-white ${
+                            r.statusKey === "pending"
+                              ? "bg-[#F59E0B]"
+                              : r.statusKey === "approved"
+                                ? "bg-[#129692]"
+                                : "bg-[#EF4444]"
+                          }`}
+                        >
+                          <BadgeCheck className="h-3 w-3" />
+                          {r.status}
+                        </div>
+                        <div className="font-cairo text-[12px] font-semibold leading-[20px] text-[#A0A7B0]">
+                          {r.requestedAt}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label={tr(
+                        "فتح صفحة تفاصيل طلب التحقق",
+                        "Open verification request details page",
+                      )}
+                      onClick={() => {
+                        navigate(
+                          `/admin/verification-requests/${encodeURIComponent(r.id)}`,
+                        );
+                      }}
+                      className="flex w-[58px] self-stretch items-center justify-center bg-[#129692] text-white transition hover:bg-[#0F8885]"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                  </article>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#F2F4F7] pt-6 sm:flex-row">
+                <p className="font-cairo text-[12px] font-semibold text-[#667085]">
+                  {tr("عرض", "Showing")}{" "}
+                  <span className="tabular-nums font-bold text-[#111827]">
+                    {total === 0 ? 0 : (currentPage - 1) * currentLimit + 1}–
+                    {(currentPage - 1) * currentLimit + locationRequests.length}
+                  </span>{" "}
+                  {tr("من", "of")}{" "}
+                  <span className="font-bold text-[#111827]">
+                    {total.toLocaleString(numberLocale)}
+                  </span>{" "}
+                  {tr("طلباً مطابقاً", "matching requests")}
+                </p>
+
+                <Pagination
+                  page={currentPage}
+                  totalPages={totalPages}
+                  onPage={setPage}
+                />
+              </div>
+            </>
           )}
         </section>
-
-        {!verificationAwaiting && total > 0 ? (
-          <section className="mt-4">
-            <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
-              <div className="text-start font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr(
-                  `إجمالي ${total.toLocaleString(numberLocale)} طلب`,
-                  `Total ${total.toLocaleString(numberLocale)} requests`,
-                )}
-              </div>
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                onPage={setPage}
-              />
-            </div>
-          </section>
-        ) : null}
 
         <ReviewVerificationRequestDialog
           open={dialogOpen}
