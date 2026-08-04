@@ -166,6 +166,15 @@ export default function AdminMedicalNewsQueuePage() {
           ]}
         />
 
+        <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-6 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
+          <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
+            {tr(
+              "هذه الشاشة تمثّل مرحلة ما قبل التحرير. العناصر هنا ما تزال في طابور الانتظار قبل دخولها دورة المراجعة التحريرية والنشر، كما أن زر الإضافة يرسل الخبر إلى الطابور فقط ولا ينشره مباشرة.",
+              "This screen represents the pre-editorial stage. Items here are still waiting in the queue before entering editorial review and publishing, and the add action sends news to the queue only rather than publishing it directly.",
+            )}
+          </div>
+        </section>
+
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex-1">
