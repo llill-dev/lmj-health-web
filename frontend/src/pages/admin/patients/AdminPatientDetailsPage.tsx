@@ -191,7 +191,7 @@ export default function AdminPatientDetailsPage() {
           </div>
           <button
             type='button'
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/admin/patients')}
             className='inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] hover:bg-[#F9FAFB]'
           >
             → رجوع للقائمة
@@ -221,7 +221,7 @@ export default function AdminPatientDetailsPage() {
             </div>
             <button
               type='button'
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/admin/patients')}
               className='mt-4 inline-flex h-[34px] items-center gap-2 rounded-[10px] bg-[#D97706] px-4 font-cairo text-[12px] font-extrabold text-white'
             >
               العودة لقائمة المرضى

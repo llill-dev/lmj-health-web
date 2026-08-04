@@ -163,7 +163,7 @@ export default function AdminVerificationRequestDetailsPage() {
             onClick={() => navigate("/admin/verification-requests")}
             className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054]"
           >
-            {tr("رجوع", "Back")}
+            {tr("العودة إلى قائمة طلبات التحقق", "Back to verification requests")}
             <ChevronLeft className="h-4 w-4" />
           </button>
         </div>
