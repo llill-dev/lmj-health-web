@@ -132,6 +132,15 @@ export default function AdminDoctorProfileChangeRequestsPage() {
           ]}
         />
 
+        <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-6 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
+          <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
+            {tr(
+              "هذه الصفحة مخصّصة لطلبات تعديل بيانات الطبيب بعد إنشاء الحساب، وليست لطلبات التحقق الأولي. تقوم الإدارة هنا بمراجعة الحقول المتغيّرة فقط ثم قبول التعديلات أو رفضها.",
+              "This page is for doctor profile change requests after account creation, not for initial verification requests. Admin reviews only the changed fields here, then approves or rejects the updates.",
+            )}
+          </div>
+        </section>
+
         <section className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-4">

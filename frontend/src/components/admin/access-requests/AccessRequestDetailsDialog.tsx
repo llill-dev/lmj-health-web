@@ -187,6 +187,16 @@ export default function AccessRequestDetailsDialog({
                     </div>
                   </div>
 
+                  <div className="rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] p-4">
+                    <div className="font-cairo text-[12px] font-semibold leading-6 text-[#215A57]">
+                      {request.status === "pending"
+                        ? "هذه النافذة مخصّصة لمراجعة طلب الوصول قبل اعتماد القرار النهائي، مع عرض القيم المتوفرة فقط إذا كانت بعض الحقول ناقصة من الاستجابة."
+                        : request.status === "approved"
+                          ? "تم قبول هذا الطلب سابقًا، لذلك تُعرض النافذة الآن كمرجع لبيانات الطلب والحالة النهائية دون إجراءات إضافية."
+                          : "تم رفض هذا الطلب سابقًا، لذلك تُستخدم النافذة الآن لمراجعة سبب الطلب والبيانات المرتبطة به فقط."}
+                    </div>
+                  </div>
+
                   {/* Doctor Info */}
                   <div className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] p-4">
                     <div className="mb-3 flex items-center gap-2">

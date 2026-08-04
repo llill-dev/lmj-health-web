@@ -229,6 +229,45 @@ export default function AdminPatientDetailsPage() {
           </div>
         ) : (
           <>
+            <section className='mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4'>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  نوع السجل
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  ملف مريض
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  حالة الحساب
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {accountStatusLabel[patient.user.accountStatus]}
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  نطاق الشاشة
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  مراجعة إدارية للبيانات والمواعيد
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  الإجراء الحالي
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {patient.user.accountStatus === 'active'
+                    ? 'متابعة السجل فقط'
+                    : patient.user.accountStatus === 'suspended'
+                      ? 'رفع التعليق أو إعادة التفعيل'
+                      : 'إعادة تفعيل الحساب عند الحاجة'}
+                </div>
+              </div>
+            </section>
+
             <section className='mt-6 rounded-[14px] border border-[#EEF2F6] bg-white px-6 py-6 shadow-[0_16px_32px_rgba(0,0,0,0.06)]'>
               <div className='flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between'>
                 <div className='flex items-start gap-4'>

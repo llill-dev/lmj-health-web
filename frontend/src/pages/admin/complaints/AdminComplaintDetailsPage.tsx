@@ -237,6 +237,25 @@ export default function AdminComplaintDetailsPage() {
               </div>
             </div>
 
+            <div className='rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-4 sm:px-5'>
+              <p className='font-cairo text-[13px] font-semibold leading-6 text-[#215A57]'>
+                {c.status === 'closed'
+                  ? tr(
+                      'أُغلقت هذه الشكوى بالفعل، لذلك تُستخدم الصفحة الآن للمتابعة المرجعية وقراءة السجل والردود السابقة فقط.',
+                      'This complaint is already closed, so the page is now used for reference, including status history and previous responses only.',
+                    )
+                  : c.status === 'resolved'
+                    ? tr(
+                        'تم حل الشكوى وتنتظر هذه الصفحة المراجعة النهائية قبل الإغلاق الكامل عند الحاجة.',
+                        'This complaint is resolved and the page now supports final review before full closure if needed.',
+                      )
+                    : tr(
+                        'تُستخدم هذه الصفحة لمراجعة الشكوى ومرفقاتها ثم تحديث حالتها وفق مرحلة المعالجة الحالية.',
+                        'Use this page to review the complaint and its attachments, then update its status according to the current handling stage.',
+                      )}
+              </p>
+            </div>
+
             {/* بطاقة رئيسية — مطابقة هيكل الصورة */}
             <article className='overflow-hidden rounded-[10px] border-[1.5px] border-[#E8ECF2] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.06)]'>
               <div className='p-6 sm:p-8'>
