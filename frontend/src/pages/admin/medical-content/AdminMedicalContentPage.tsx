@@ -545,6 +545,16 @@ export default function AdminMedicalContentPage() {
           ]}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <LinkIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الصفحة تجمع بين إنشاء المحتوى، مراجعته، ونقله بين مراحل الدورة المعتمدة. استخدم بطاقات القائمة لفرز الحالة بسرعة، لكن نفّذ القبول أو الرفض أو النشر فقط بعد مراجعة المصادر واللغة والمنشئ من تفاصيل العنصر نفسه.",
+              "This page combines content creation, review, and movement across the approved lifecycle. Use the list cards to triage status quickly, but only approve, reject, or publish after reviewing sources, language, and creator context from the item’s own details.",
+            )}
+          </div>
+        </div>
+
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="flex flex-col gap-3 w-full min-w-0 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 min-w-0">

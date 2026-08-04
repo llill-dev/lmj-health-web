@@ -9,7 +9,14 @@ import { AdminAuditLogPagination } from "@/components/admin/system-logs/AdminAud
 import { AdminAuditLogPrivacyNote } from "@/components/admin/system-logs/AdminAuditLogPrivacyNote";
 import { AdminAuditLogTable } from "@/components/admin/system-logs/AdminAuditLogTable";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
-import { Activity, FilterX, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import {
+  Activity,
+  AlertCircle,
+  FilterX,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+} from "lucide-react";
 import { PAGE_SIZE } from "@/components/admin/system-logs/auditLogConstants";
 import { useAdminAuditLogs } from "@/hooks/admin/audit/useAdminAuditLogs";
 import type { AuditLogCategory, AuditLogOutcome } from "@/lib/admin/types";
@@ -165,6 +172,16 @@ export default function AdminSystemLogsPage() {
             },
           ]}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الصفحة مخصّصة للمراجعة التدقيقية والبحث في السجل فقط. السجلات هنا مرجعية وغير قابلة للتعديل، ويجب استخدام الشاشات الأصلية المرتبطة بكل كيان عند الحاجة إلى تنفيذ إجراء فعلي أو تصحيح البيانات.",
+              "This page is for audit review and log search only. The records here are reference-only and cannot be edited, so use the original entity pages whenever a real action or data correction is needed.",
+            )}
+          </div>
+        </div>
 
         <AdminAuditLogFilters
           search={search}

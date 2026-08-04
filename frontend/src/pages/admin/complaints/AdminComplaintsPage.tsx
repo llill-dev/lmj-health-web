@@ -229,6 +229,16 @@ export default function AdminComplaintsPage() {
           ]}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه القائمة مخصّصة لالتقاط الشكاوى الجديدة وفرزها حسب الحالة والنوع ثم فتح السجل الكامل. تحديث مسار الشكوى الفعلي ومراجعة المرفقات أو الإغلاق النهائي يتم من صفحة تفاصيل الشكوى نفسها.",
+              "This list is for spotting new complaints, filtering them by status and type, and opening the full record. The actual complaint workflow update, attachment review, and final closure happen from the complaint details page itself.",
+            )}
+          </div>
+        </div>
+
         {showNewBanner && bannerName ? (
           <motion.section
             initial={{ opacity: 0, y: 10 }}

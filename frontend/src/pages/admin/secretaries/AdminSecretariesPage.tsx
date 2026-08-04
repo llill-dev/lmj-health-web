@@ -115,6 +115,16 @@ export default function AdminSecretariesPage() {
           ]}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه القائمة مخصّصة لمراجعة السكرتيرين المرتبطين بالأطباء والتنقل إلى ملفاتهم أو صفحات مواعيدهم فقط. إنشاء السكرتير أو تعديل صلاحياته أو إيقافه ما يزال خارج هذا المسار حتى تتوفر endpoints إدارية معتمدة له.",
+              "This list is for reviewing secretaries linked to doctors and navigating to their profiles or appointment pages only. Creating a secretary, changing permissions, or offboarding them remains outside this flow until approved admin endpoints exist for it.",
+            )}
+          </div>
+        </div>
+
         <div className="mt-5 flex items-center justify-between gap-16 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="relative flex-1">
             <input

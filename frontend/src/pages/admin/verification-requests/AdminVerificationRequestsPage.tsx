@@ -186,6 +186,16 @@ export default function AdminVerificationRequestsPage() {
           ]}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه القائمة مخصّصة لفرز طلبات التحقق والانتقال إلى صفحة التفاصيل أو الخريطة عند الحاجة. قرار القبول أو الرفض النهائي يتم من شاشة المراجعة المرتبطة بكل طلب، وليس من بطاقة القائمة نفسها.",
+              "This list is for triaging verification requests and opening the related details or map when needed. The final approve or reject decision is made from each request’s review flow, not directly from the list card itself.",
+            )}
+          </div>
+        </div>
+
         <section className="mt-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="inline-flex items-center gap-2 text-[#475467]">

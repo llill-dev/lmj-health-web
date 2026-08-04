@@ -19,7 +19,7 @@ import type {
   MedicalOrderCatalogKind,
 } from "@/lib/admin/types";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
-import { ClipboardList } from "lucide-react";
+import { AlertCircle, ClipboardList } from "lucide-react";
 import { Pagination } from "@/components/admin/services/Pagination";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import StyledSelect from "@/components/ui/styled-select";
@@ -211,6 +211,21 @@ export default function AdminMedicalOrdersPage({
             },
           ]}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {isDataEntry
+              ? tr(
+                  "هذه الشاشة مخصّصة لإدارة عناصر كتالوج الطلبات الطبية المرجعية ضمن الصلاحيات المتاحة لمدخل البيانات. ما يظهر هنا يخص تعريف العنصر وفهرسته فقط، وليس تنفيذ طلب طبي على مريض بعينه.",
+                  "This page is for managing reference medical-order catalog items within the data entry role’s supported permissions. What appears here is only the item definition and cataloging, not the execution of a medical order for a specific patient.",
+                )
+              : tr(
+                  "هذه الشاشة مخصّصة لإدارة كتالوج الطلبات الطبية المرجعية فقط. الإضافة أو التعديل هنا يغيّر العناصر المتاحة للأطباء لاحقًا، لكنه لا ينشئ طلبًا طبيًا فعليًا داخل ملف مريض محدد.",
+                  "This page is for managing the reference medical-order catalog only. Additions or edits here change the items available to doctors later, but do not create an actual medical order inside a specific patient record.",
+                )}
+          </div>
+        </div>
 
         {isDataEntry ? (
           <div className="rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3 text-start">

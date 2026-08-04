@@ -290,6 +290,12 @@ export default function AdminPatientsPage() {
                   "From this page, admins can open details, suspend accounts, or reactivate them when needed. Medical record management and sensitive patient files are intentionally outside this list view.",
                 )}
               </div>
+              <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
+                {tr(
+                  "تُستخدم البطاقات هنا كمدخل إلى السجل الإداري المختصر للمريض وحالة الحساب فقط، بينما تبقى أي مراجعة أوسع للبيانات أو النشاط داخل صفحة التفاصيل الخاصة به.",
+                  "The cards here act only as an entry point to the patient’s short admin record and account state, while any broader review of data or activity stays inside the patient details page.",
+                )}
+              </div>
             </div>
           </div>
         </section>

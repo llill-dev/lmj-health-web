@@ -214,6 +214,16 @@ export default function AdminAccessRequestsPage() {
           })}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الصفحة لفرز طلبات الوصول ومراجعة اكتمال البيانات قبل فتح التفاصيل. القرار النهائي بالموافقة أو الرفض يتم من نافذة التفاصيل حتى يبقى الطلب وسياقه ومبرراته في مكان واحد.",
+              "This page is for triaging access requests and checking data completeness before opening details. The final approve or reject decision is handled from the details dialog so the request, its context, and justification stay in one place.",
+            )}
+          </div>
+        </div>
+
         {/* Filters Section */}
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
