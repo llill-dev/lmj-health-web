@@ -1,8 +1,8 @@
 import { Helmet } from "react-helmet-async";
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ban, CheckCircle2, MapPin, UserX } from "lucide-react";
+import { Ban, CheckCircle2, ChevronRight, MapPin, UserX } from "lucide-react";
 import { useAdminDoctor } from "@/hooks/admin/doctors/useAdminDoctor";
 import { useAdminLookups } from "@/hooks/admin/lookups/useAdminLookups";
 import {
@@ -99,6 +99,7 @@ function coordsToLatLng(d: AdminDoctorDetailsDoctor) {
 export default function AdminDoctorDetailsPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const navigate = useNavigate();
 
   const ANALYTICS_RANGE_OPTIONS: Array<{
     value: AdminDoctorAnalyticsRange;
@@ -279,6 +280,15 @@ export default function AdminDoctorDetailsPage() {
         className="-mx-3 -mt-6 mb-0 min-h-[calc(100vh-5.5rem)] px-3 py-6 font-cairo sm:-mx-6 sm:-mt-8 sm:px-6 sm:py-8 md:px-8 lg:px-12"
       >
         <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6 sm:gap-8">
+          <button
+            type="button"
+            onClick={() => navigate("/admin/doctors")}
+            className="inline-flex items-center gap-1 self-start font-cairo text-[13px] font-bold text-primary hover:underline"
+          >
+            <ChevronRight className="h-4 w-4" />
+            {tr("العودة إلى قائمة الأطباء", "Back to doctors")}
+          </button>
+
           {isAwaitingData ? (
             <div className="rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-10 text-center font-cairo text-sm font-semibold text-[#667085] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
               {tr("جاري تحميل بيانات الطبيب...", "Loading doctor details…")}
@@ -289,6 +299,64 @@ export default function AdminDoctorDetailsPage() {
             </div>
           ) : doctor ? (
             <>
+              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                  <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+                    {tr("نوع السجل", "Record type")}
+                  </div>
+                  <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                    {tr("ملف طبيب", "Doctor profile")}
+                  </div>
+                </div>
+                <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                  <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+                    {tr("حالة الطبيب", "Doctor status")}
+                  </div>
+                  <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                    {doctor.approvalStatus === "pending"
+                      ? tr("بانتظار المراجعة", "Pending review")
+                      : doctor.approvalStatus === "approved"
+                        ? tr("مقبول", "Approved")
+                        : doctor.approvalStatus === "rejected"
+                          ? tr("مرفوض", "Rejected")
+                          : doctor.approvalStatus ?? "—"}
+                  </div>
+                </div>
+                <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                  <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+                    {tr("طلب التحقق", "Verification request")}
+                  </div>
+                  <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                    {verificationRequestId
+                      ? tr("موجود ومربوط بهذا الطبيب", "Linked to this doctor")
+                      : tr("غير متاح حالياً", "Not currently available")}
+                  </div>
+                </div>
+                <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                  <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+                    {tr("الإجراء الحالي", "Current action")}
+                  </div>
+                  <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                    {isOffboarded
+                      ? tr("الحساب موقوف للقراءة والمتابعة فقط", "Account is offboarded for review only")
+                      : doctor.approvalStatus === "pending"
+                        ? verificationRequestId
+                          ? tr("قبول أو رفض طلب التحقق", "Approve or reject the verification request")
+                          : tr("مراجعة طلبات التحقق المرتبطة", "Review linked verification requests")
+                        : tr("مراجعة الملف والتحليلات", "Review profile and analytics")}
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-4 sm:px-5">
+                <p className="font-cairo text-[13px] font-semibold leading-6 text-[#215A57]">
+                  {tr(
+                    "هذه الصفحة مخصّصة لمراجعة ملف الطبيب وطلب التحقق المرتبط به من مكان واحد. استخدم أزرار القبول أو الرفض فقط عندما تكون حالة الطبيب بانتظار المراجعة، بينما تبقى بقية البيانات مرجعية للمراجعة والتحقق.",
+                    "This page combines doctor profile review with the linked verification request. Use approve or reject only while the doctor is pending review; the remaining information is reference context for validation.",
+                  )}
+                </p>
+              </section>
+
               <section>
                 <SectionTitle>{tr("المعلومات الشخصية", "Personal information")}</SectionTitle>
                 <div className="rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-[#FFFFFF] p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6 md:min-h-[12rem]">
