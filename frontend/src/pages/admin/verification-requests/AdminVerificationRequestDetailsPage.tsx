@@ -267,6 +267,20 @@ export default function AdminVerificationRequestDetailsPage() {
               </div>
             </div>
 
+            <div className="rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-4">
+              <p className="font-cairo text-[13px] font-semibold leading-6 text-[#215A57]">
+                {isPendingRequest
+                  ? tr(
+                      "هذه الصفحة مخصّصة لمراجعة طلب التحقق قبل اتخاذ القرار. يمكنك من هنا فحص بيانات الطبيب، مراجعة الحقول المتغيرة، ثم قبول الطلب أو رفضه.",
+                      "This page is used to review the verification request before making a decision. From here you can inspect the doctor data, review the changed fields, then approve or reject the request.",
+                    )
+                  : tr(
+                      "تمت مراجعة هذا الطلب سابقًا، لذلك تُعرض هذه الصفحة الآن كمرجع للحالة النهائية والبيانات التي كانت ضمن طلب التحقق.",
+                      "This request has already been reviewed, so this page now serves as a reference for the final status and the data included in the verification request.",
+                    )}
+              </p>
+            </div>
+
             <DoctorSpecializationReviewBanner state={specializationState} />
 
             <div className="mt-3 border-t border-[#B9D8D6] pt-2" />
