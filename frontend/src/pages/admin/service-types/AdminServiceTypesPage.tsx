@@ -189,6 +189,15 @@ export default function AdminServiceTypesPage() {
           ]}
         />
 
+        <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
+          <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
+            {tr(
+              "نوع الخدمة يعرّف الاسم والـ slug والحقول الديناميكية فقط. بعد حفظ النوع يمكنك فتح قائمة مزوّديه، بينما تبقى إدارة المنشآت والخدمات الفعلية في شاشاتها المنفصلة.",
+              "A service type defines only the name, slug, and dynamic fields. After saving the type, you can open its providers list, while facilities and actual services stay managed in their separate screens.",
+            )}
+          </div>
+        </section>
+
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]">
             <div className="relative">
