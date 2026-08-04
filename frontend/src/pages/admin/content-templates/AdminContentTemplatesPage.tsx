@@ -191,6 +191,16 @@ export default function AdminContentTemplatesPage() {
           ]}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الشاشة مخصّصة لتعريف شكل الحقول المرجعية التي سيستخدمها المحتوى الطبي لاحقًا، وليست لإدارة المقالات أو الأخبار نفسها. تعطيل القالب يمنع استخدامه في إنشاء محتوى جديد، لكنه لا يحذف العناصر المنشأة سابقًا.",
+              "This page is for defining the reference field schema used later by medical content, not for managing the articles or news items themselves. Disabling a template prevents new content from using it, but does not delete content already created from it.",
+            )}
+          </div>
+        </div>
+
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="font-cairo text-[11px] font-extrabold text-[#98A2B3]">
             {tr("النوع الأب", "Parent type")}

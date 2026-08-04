@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  AlertCircle,
   CalendarDays,
   Users,
   Stethoscope,
@@ -230,6 +231,16 @@ export default function AdminDashboardPage() {
             },
           ]}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه اللوحة نقطة متابعة سريعة للحالة العامة فقط. البطاقات والأقسام هنا تعطي مؤشرات مختصرة وروابط انتقال، بينما تتم المراجعة التفصيلية واتخاذ الإجراء الفعلي من صفحات الطلبات والسجلات والمحتوى المرتبطة.",
+              "This dashboard is a quick overview point for the system’s overall state only. The cards and sections here provide short signals and navigation links, while detailed review and real actions are handled in the related request, log, and content pages.",
+            )}
+          </div>
+        </div>
 
         <section className="mt-5 flex justify-end">
           <Link

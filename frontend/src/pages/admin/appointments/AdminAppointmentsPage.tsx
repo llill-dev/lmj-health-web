@@ -254,6 +254,16 @@ export default function AdminAppointmentsPage() {
           })}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الشاشة مخصّصة لمتابعة سجل المواعيد والبحث فيه وفتح التفاصيل المرجعية لكل موعد. الفلاتر هنا تغيّر العرض فقط، ولا تنفّذ تعديلًا مباشرًا على بيانات الموعد من قائمة البطاقات.",
+              "This page is for monitoring the appointment record, searching it, and opening each appointment’s reference details. The filters here only change the view and do not directly modify appointment data from the cards list.",
+            )}
+          </div>
+        </div>
+
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1">
