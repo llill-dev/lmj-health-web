@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
-import { CloudUpload, Settings } from "lucide-react";
+import { AlertCircle, CloudUpload, Settings } from "lucide-react";
 import { get } from "@/lib/api";
 import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
@@ -240,6 +240,16 @@ export default function AdminSettingsPage() {
               },
             ]}
           />
+
+          <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+            <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+              {tr(
+                "هذه الشاشة مخصّصة للإعدادات المحلية الظاهرة في لوحة الإدارة فقط. اسم المنصة واللغة والشعار هنا تُحفظ محليًا مؤقتًا، وليست بديلاً عن إعدادات backend العامة عند توفرها.",
+                "This page is for local admin-facing settings only. The platform name, language, and logo here are saved locally for now and do not replace backend-managed global settings when available.",
+              )}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <SettingsSectionCard

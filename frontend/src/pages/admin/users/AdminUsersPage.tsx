@@ -140,6 +140,16 @@ export default function AdminUsersPage() {
           ]}
         />
 
+        <div className="flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الشاشة مخصّصة لمراجعة حسابات الفريق الداخلي وإنشاء الحسابات الجديدة فقط. إيقاف الحسابات أو تعديل حالتها غير مدعوم حاليًا من هذا المسار، لذلك تبقى البطاقات هنا مرجعية مع بيانات التواصل والدور.",
+              "This page is for reviewing internal team accounts and creating new ones only. Account deactivation or status changes are not supported from this flow right now, so the cards remain reference-oriented with role and contact details.",
+            )}
+          </div>
+        </div>
+
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]">
             <div className="relative">

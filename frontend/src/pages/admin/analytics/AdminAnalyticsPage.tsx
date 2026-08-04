@@ -93,6 +93,16 @@ export default function AdminAnalyticsPage() {
           ]}
         />
 
+        <div className='mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start'>
+          <AlertCircle className='mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]' />
+          <div className='font-cairo text-[12px] font-bold leading-6 text-[#175CD3]'>
+            {tr(
+              'هذه الصفحة للقراءة التحليلية واتخاذ القرار فقط. الأرقام هنا تجمع مؤشرات من النظام ولا تُستخدم لتنفيذ إجراءات إدارية مباشرة؛ لأي مراجعة تشغيلية استخدم صفحات الطلبات أو السجلات أو التفاصيل المرتبطة.',
+              'This page is for analytical read-only review and decision support. The metrics here aggregate system signals and are not used for direct admin actions; use request, log, or related detail pages for operational review.',
+            )}
+          </div>
+        </div>
+
         {statsRefetching && !statsAwaiting ? (
           <div className='mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]'>
             <RefreshCw className='h-4 w-4 animate-spin' />
