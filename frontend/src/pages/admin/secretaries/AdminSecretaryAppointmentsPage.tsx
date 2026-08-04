@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, CalendarDays } from 'lucide-react';
+import { ArrowRight, CalendarDays, Eye } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { SecretaryDoctorAppointmentsPanel } from '@/components/admin/secretaries/SecretaryDoctorAppointmentsPanel';
@@ -42,6 +42,25 @@ export default function AdminSecretaryAppointmentsPage() {
           }
           headerIcon={<CalendarDays className='h-8 w-8 text-white' />}
         />
+
+        <section className='mt-5 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+          <div className='flex items-start gap-3 text-right'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary'>
+              <Eye className='h-5 w-5' />
+            </div>
+            <div>
+              <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                {tr('هذه شاشة عرض فقط', 'This is a view-only screen')}
+              </div>
+              <div className='mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
+                {tr(
+                  'تُستخدم هذه الصفحة لمراجعة مواعيد الطبيب المرتبطة بالسكرتير بشكل واضح، دون تنفيذ إجراءات إدارة مباشرة من هذا المسار.',
+                  'Use this page to review the doctor appointments linked to the secretary without running direct management actions from this route.',
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
 
         <SecretaryDoctorAppointmentsPanel
           assignedDoctorId={assignedDoctorId}

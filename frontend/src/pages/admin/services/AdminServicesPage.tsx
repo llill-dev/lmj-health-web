@@ -222,6 +222,14 @@ export default function AdminServicesPage() {
           onAction={handleAddNew}
         />
 
+        <section className='mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]'>
+          <div className='font-cairo text-[13px] font-extrabold text-[#0F766E]'>
+            {isFacilityTab
+              ? 'هذه الشاشة مخصّصة لإدارة المنشآت نفسها. أنواع الخدمات تُدار من تبويبها المستقل، ومزوّدو الخدمة يُراجعون من داخل كل نوع خدمة.'
+              : 'هذا التبويب يعرّف نوع الخدمة وحقوله. بعد حفظ النوع يمكنك فتح قائمة مزوّدي الخدمة المرتبطين به من شاشة أنواع الخدمات.'}
+          </div>
+        </section>
+
         <AdminServicesToolbar
           tabs={ADMIN_SERVICES_TABS}
           searchInput={searchInput}

@@ -174,7 +174,10 @@ export default function AdminRestoreRequestDetailsPage() {
           className="inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary"
         >
           <ChevronLeft className="h-4 w-4" />
-          {tr("العودة إلى قائمة الطلبات", "Back to requests list")}
+          {tr(
+            "العودة إلى قائمة طلبات استعادة الحساب",
+            "Back to restore requests",
+          )}
         </button>
 
         <AdminDashboardOverview

@@ -210,6 +210,33 @@ export default function AdminComplaintDetailsPage() {
               </div>
             </div>
 
+            <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3'>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  {tr('نوع الطلب', 'Request type')}
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {tr('شكوى مستخدم', 'User complaint')}
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  {tr('نوع الشكوى', 'Complaint type')}
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {complaintTypeAr(c.type)}
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  {tr('الإجراء الحالي', 'Current action')}
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {nextActionLabel(c.status).replace('الإجراء التالي: ', '')}
+                </div>
+              </div>
+            </div>
+
             {/* بطاقة رئيسية — مطابقة هيكل الصورة */}
             <article className='overflow-hidden rounded-[10px] border-[1.5px] border-[#E8ECF2] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.06)]'>
               <div className='p-6 sm:p-8'>
