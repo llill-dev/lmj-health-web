@@ -321,6 +321,14 @@ export default function UpsertServiceTypeDialog({
 
             <form onSubmit={onSubmit}>
               <div className='max-h-[calc(100svh-220px)] overflow-y-auto px-6 py-5'>
+                <div className='mb-5 rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-3 text-right'>
+                  <div className='font-cairo text-[12px] font-extrabold leading-6 text-[#0F766E]'>
+                    {isEdit
+                      ? 'أنت تعدّل نوع خدمة مرجعيًا على مستوى النظام. أي تغيير في الاسم أو الـ slug أو الحقول الديناميكية سيؤثر على المزوّدين والنماذج المرتبطة بهذا النوع.'
+                      : 'أنت تنشئ نوع خدمة مرجعيًا جديدًا. استخدم هذا النموذج لتعريف الاسم والـ slug والحقول المطلوبة فقط، ثم أضف المزوّدين لاحقًا من شاشة مزوّدي الخدمة.'}
+                  </div>
+                </div>
+
                 <div className='grid grid-cols-2 gap-x-4 gap-y-4'>
                   <Field label='الاسم (عربي)' error={errors.nameAr?.message} required>
                     <input {...register('nameAr')} placeholder='مثال: تحاليل مخبرية' className={inputClass} />
@@ -339,7 +347,7 @@ export default function UpsertServiceTypeDialog({
                     label='المعرّف (slug)'
                     error={errors.slug?.message}
                     required
-                    hint='مفتاح إنجليزي ثابت يُستخدم في الـ API.'
+                    hint='مفتاح إنجليزي ثابت يُستخدم في الـ API والربط بين النوع ومزوّديه؛ لا تستخدم العربية أو مسافات.'
                   >
                     <input
                       {...register('slug')}
@@ -414,7 +422,7 @@ export default function UpsertServiceTypeDialog({
 
                   {fields.length === 0 ? (
                     <p className='mt-3 rounded-[8px] border border-dashed border-[#D0D5DD] bg-[#FAFBFC] px-3 py-4 text-center font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                      لا توجد حقول بعد. أضف حقلاً لتعريف بنية بيانات هذا النوع.
+                      لا توجد حقول بعد. أضف حقلاً لتعريف البنية المرجعية لهذا النوع قبل استخدامه مع المزوّدين أو النماذج المرتبطة.
                     </p>
                   ) : (
                     <div className='mt-3 space-y-3'>
