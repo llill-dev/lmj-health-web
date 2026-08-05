@@ -234,7 +234,7 @@ export default function AdminDashboardPage() {
 
         <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
-          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+          <div className="font-cairo text-sm font-semibold leading-6 text-[#175CD3]">
             {tr(
               "هذه اللوحة نقطة متابعة سريعة للحالة العامة فقط. البطاقات والأقسام هنا تعطي مؤشرات مختصرة وروابط انتقال، بينما تتم المراجعة التفصيلية واتخاذ الإجراء الفعلي من صفحات الطلبات والسجلات والمحتوى المرتبطة.",
               "This dashboard is a quick overview point for the system’s overall state only. The cards and sections here provide short signals and navigation links, while detailed review and real actions are handled in the related request, log, and content pages.",
@@ -265,7 +265,7 @@ export default function AdminDashboardPage() {
                     <div className="font-cairo text-[26px] font-extrabold leading-[26px]">
                       {c.value}
                     </div>
-                    <div className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                    <div className="mt-2 font-cairo text-sm font-semibold text-[#98A2B3]">
                       {c.title}
                     </div>
                   </div>

@@ -95,7 +95,7 @@ export default function AdminAnalyticsPage() {
 
         <div className='mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start'>
           <AlertCircle className='mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]' />
-          <div className='font-cairo text-[12px] font-bold leading-6 text-[#175CD3]'>
+          <div className='font-cairo text-sm font-semibold leading-6 text-[#175CD3]'>
             {tr(
               'هذه الصفحة للقراءة التحليلية واتخاذ القرار فقط. الأرقام هنا تجمع مؤشرات من النظام ولا تُستخدم لتنفيذ إجراءات إدارية مباشرة؛ لأي مراجعة تشغيلية استخدم صفحات الطلبات أو السجلات أو التفاصيل المرتبطة.',
               'This page is for analytical read-only review and decision support. The metrics here aggregate system signals and are not used for direct admin actions; use request, log, or related detail pages for operational review.',
@@ -104,7 +104,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {statsRefetching && !statsAwaiting ? (
-          <div className='mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]'>
+            <div className='mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-sm font-semibold text-[#047857]'>
             <RefreshCw className='h-4 w-4 animate-spin' />
             {tr('جارٍ تحديث الإحصائيات...', 'Refreshing analytics...')}
           </div>
@@ -143,7 +143,7 @@ export default function AdminAnalyticsPage() {
               <Clock className='h-5 w-5 text-[#D97706]' />
             </div>
             <div>
-              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>
+              <div className='font-cairo text-[12px] font-extrabold text-[#667085]'>
                 {tr('طلبات التحقق المعلقة', 'Pending verifications')}
               </div>
               {statsAwaiting ? (
@@ -161,7 +161,7 @@ export default function AdminAnalyticsPage() {
               <CheckCircle2 className='h-5 w-5 text-[#16A34A]' />
             </div>
             <div>
-              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>
+              <div className='font-cairo text-[12px] font-extrabold text-[#667085]'>
                 {tr('نسبة الاعتماد', 'Approval rate')}
               </div>
               {statsAwaiting ? (
@@ -181,7 +181,7 @@ export default function AdminAnalyticsPage() {
               <Activity className='h-5 w-5 text-[#7C3AED]' />
             </div>
             <div>
-              <div className='font-cairo text-[11px] font-extrabold text-[#667085]'>
+              <div className='font-cairo text-[12px] font-extrabold text-[#667085]'>
                 {tr('السكرتارية الكلي', 'Total secretaries')}
               </div>
               {statsAwaiting ? (

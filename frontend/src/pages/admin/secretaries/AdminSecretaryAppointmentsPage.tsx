@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, CalendarDays, Eye } from 'lucide-react';
+import { ArrowRight, CalendarDays, Eye, Stethoscope } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { SecretaryDoctorAppointmentsPanel } from '@/components/admin/secretaries/SecretaryDoctorAppointmentsPanel';
@@ -58,6 +58,38 @@ export default function AdminSecretaryAppointmentsPage() {
                   'Use this page to review the doctor appointments linked to the secretary without running direct management actions from this route.',
                 )}
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className='mt-4 grid grid-cols-1 gap-3 md:grid-cols-3'>
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+              {tr('الطبيب المرتبط', 'Linked doctor')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Stethoscope className='h-4 w-4 text-primary' />
+              {doctorName || tr('غير محدد', 'Not set')}
+            </div>
+          </div>
+
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+              {tr('نطاق الصفحة', 'Page scope')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Eye className='h-4 w-4 text-primary' />
+              {tr('عرض المواعيد فقط', 'Appointment review only')}
+            </div>
+          </div>
+
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+              {tr('الإجراء الحالي', 'Current action')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <CalendarDays className='h-4 w-4 text-primary' />
+              {tr('مراجعة الجدول المرتبط', 'Review linked schedule')}
             </div>
           </div>
         </section>

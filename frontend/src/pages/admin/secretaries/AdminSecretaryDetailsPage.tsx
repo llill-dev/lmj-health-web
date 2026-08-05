@@ -139,7 +139,7 @@ export default function AdminSecretaryDetailsPage() {
               <div className='font-cairo text-sm font-extrabold text-[#991B1B]'>
                 {tr('صلاحيات السكرتيرة معروضة للمراجعة فقط', 'Secretary permissions are shown for review only')}
               </div>
-              <div className='mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#B42318]'>
+              <div className='mt-1 font-cairo text-sm font-semibold leading-6 text-[#B42318]'>
                 {tr(
                   'لا تسمح لوحة الإدارة حالياً بتعديل صلاحيات السكرتيرة أو بياناتها من هذه الواجهة، لذلك يتم عرض المعلومات هنا بشكل read-only لتفادي أي التباس.',
                   'The admin area does not currently support editing secretary permissions or profile data from this screen, so the information is presented as read-only to avoid misleading actions.',
@@ -151,7 +151,7 @@ export default function AdminSecretaryDetailsPage() {
 
         <div className='mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4'>
           <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
               {tr('نوع السجل', 'Record type')}
             </div>
             <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
@@ -161,7 +161,7 @@ export default function AdminSecretaryDetailsPage() {
           </div>
 
           <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
               {tr('الطبيب المرتبط', 'Linked doctor')}
             </div>
             <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
@@ -172,7 +172,7 @@ export default function AdminSecretaryDetailsPage() {
           </div>
 
           <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
               {tr('نطاق الصفحة', 'Page scope')}
             </div>
             <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
@@ -182,7 +182,7 @@ export default function AdminSecretaryDetailsPage() {
           </div>
 
           <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
               {tr('الإجراء الإداري الحالي', 'Current admin action')}
             </div>
             <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
