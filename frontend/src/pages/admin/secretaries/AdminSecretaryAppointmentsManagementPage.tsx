@@ -52,10 +52,10 @@ export default function AdminSecretaryAppointmentsManagementPage() {
               <Settings className='h-5 w-5' />
             </div>
             <div>
-              <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <div className='font-cairo text-sm font-extrabold text-[#111827]'>
                 {tr('هذه شاشة إدارة المواعيد', 'This is the appointment management screen')}
               </div>
-              <div className='mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
+              <div className='mt-1 font-cairo text-[13px] font-semibold leading-6 text-[#667085]'>
                 {tr(
                   'يتم استخدام هذا المسار فقط عندما تحتاج الإدارة إلى تنفيذ إجراءات تنظيمية مباشرة على مواعيد الطبيب المرتبطة بالسكرتير.',
                   'Use this route only when the admin needs to perform direct operational actions on the doctor appointments linked to the secretary.',

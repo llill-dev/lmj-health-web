@@ -210,6 +210,11 @@ export default function CreateServiceProviderDialog({
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   إنشاء مزود خدمة جديد
                 </h2>
+                <p className="mt-2 max-w-[560px] font-cairo text-[12px] font-bold leading-6 text-[#667085]">
+                  أنشئ هنا سجل مزوّد الخدمة نفسه وربطه بنوع خدمة واحد. الحقول
+                  الأساسية الظاهرة في الكروت والقوائم تؤخذ من هذا النموذج، أما
+                  حقل JSON فهو فقط لبيانات إضافية لا تظهر مباشرة للمستخدم.
+                </p>
               </div>
             </div>
 
@@ -219,6 +224,7 @@ export default function CreateServiceProviderDialog({
                   <AdminFormField
                     label="نوع الخدمة"
                     required
+                    hint="اختر التصنيف المرجعي الذي سيظهر هذا المزوّد تحته داخل الإدارة."
                     error={errors.serviceType}
                   >
                     <StyledSelect
@@ -323,7 +329,7 @@ export default function CreateServiceProviderDialog({
 
                   <AdminFormField
                     label="بيانات إضافية"
-                    hint="بيانات إضافية بصيغة JSON (اختياري)"
+                    hint="اختياري: حقول تقنية أو تكاملية بصيغة JSON. لا تكرر هنا الاسم أو المدينة أو البلد."
                   >
                     <textarea
                       value={formData.data}
@@ -345,7 +351,10 @@ export default function CreateServiceProviderDialog({
                     />
                   </AdminFormField>
 
-                  <AdminFormField label="الأسماء البديلة">
+                  <AdminFormField
+                    label="الأسماء البديلة"
+                    hint="تُستخدم لتوسيع البحث أو حفظ صيغ كتابة مختلفة لنفس المزوّد."
+                  >
                     <div className="flex gap-2 items-center">
                       <input
                         value={newAlias}
@@ -404,7 +413,11 @@ export default function CreateServiceProviderDialog({
                     )}
                   </AdminFormField>
 
-                  <AdminFormField label="الحالة" required>
+                  <AdminFormField
+                    label="الحالة"
+                    required
+                    hint="مسودة للمراجعة الداخلية، نشط للظهور والاستخدام، معطّل لإخفائه دون حذف السجل."
+                  >
                     <StyledSelect
                       value={formData.status}
                       onChange={(value) =>

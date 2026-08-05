@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
 
         <div className="flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
-          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+          <div className="font-cairo text-sm font-semibold leading-6 text-[#175CD3]">
             {tr(
               "هذه الشاشة مخصّصة لمراجعة حسابات الفريق الداخلي وإنشاء الحسابات الجديدة فقط. إيقاف الحسابات أو تعديل حالتها غير مدعوم حاليًا من هذا المسار، لذلك تبقى البطاقات هنا مرجعية مع بيانات التواصل والدور.",
               "This page is for reviewing internal team accounts and creating new ones only. Account deactivation or status changes are not supported from this flow right now, so the cards remain reference-oriented with role and contact details.",
@@ -163,7 +163,7 @@ export default function AdminUsersPage() {
                   "ابحث بالاسم أو البريد أو الهاتف أو الدور...",
                   "Search by name, email, phone, or role…",
                 )}
-                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
+                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
               />
               <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
             </div>
@@ -194,7 +194,7 @@ export default function AdminUsersPage() {
               type="button"
               onClick={() => void refetch()}
               disabled={isRefetching}
-              className="inline-flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-sm font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
               {isRefetching
@@ -223,7 +223,7 @@ export default function AdminUsersPage() {
             <div className="font-cairo text-[14px] font-extrabold text-[#991B1B]">
               {tr("تعذّر تحميل الحسابات", "Failed to load accounts")}
             </div>
-            <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
+            <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
               {userFacingErrorMessage(error)}
             </div>
             <button

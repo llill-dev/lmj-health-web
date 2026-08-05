@@ -201,13 +201,21 @@ export default function EditServiceProviderDialog({
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   تعديل بيانات مزود الخدمة
                 </h2>
+                <p className="mt-2 max-w-[560px] font-cairo text-[12px] font-bold leading-6 text-[#667085]">
+                  هذه النافذة تعدّل سجل مزوّد الخدمة الحالي فقط. نوع الخدمة
+                  المرجعي ثابت هنا، وأي تعديل على الاسم أو الحالة سينعكس على
+                  القوائم والكروت المرتبطة بهذا المزوّد.
+                </p>
               </div>
             </div>
 
             <form dir="rtl" onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
-                  <AdminFormField label="نوع الخدمة" hint="لا يمكن التعديل">
+                  <AdminFormField
+                    label="نوع الخدمة"
+                    hint="مرجع ثابت لهذا المزوّد. إذا كان الربط نفسه خاطئًا فأنشئ مزوّدًا صحيحًا أو عدّل الربط من المسار المخصص له."
+                  >
                     <input
                       type="text"
                       value={
@@ -308,7 +316,7 @@ export default function EditServiceProviderDialog({
 
                   <AdminFormField
                     label="بيانات إضافية"
-                    hint="بيانات إضافية بصيغة JSON (اختياري)"
+                    hint="اختياري: حقول تقنية أو تكاملية بصيغة JSON. لا تكرر هنا الاسم أو المدينة أو البلد."
                   >
                     <textarea
                       value={formData.data}
@@ -330,7 +338,10 @@ export default function EditServiceProviderDialog({
                     />
                   </AdminFormField>
 
-                  <AdminFormField label="الأسماء البديلة">
+                  <AdminFormField
+                    label="الأسماء البديلة"
+                    hint="تفيد في البحث وصيغ التسمية المختلفة دون تغيير الاسم الرئيسي للمزوّد."
+                  >
                     <div className="flex gap-2 items-center">
                       <input
                         value={newAlias}
@@ -389,7 +400,11 @@ export default function EditServiceProviderDialog({
                     )}
                   </AdminFormField>
 
-                  <AdminFormField label="الحالة" required>
+                  <AdminFormField
+                    label="الحالة"
+                    required
+                    hint="تغيير الحالة هنا يؤثر على ظهور المزوّد وإتاحته، لكنه لا يغيّر نوع الخدمة نفسه."
+                  >
                     <StyledSelect
                       value={formData.status}
                       onChange={(value) =>
