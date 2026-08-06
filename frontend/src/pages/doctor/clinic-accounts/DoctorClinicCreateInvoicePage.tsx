@@ -22,6 +22,7 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import { BILLING_DISCOUNT_PRESET_OPTIONS } from '@/lib/doctor/billing/settingsUi';
 import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
+import { useI18n } from '@/i18n/provider';
 
 type LineItem = {
   id: string;
@@ -31,6 +32,8 @@ type LineItem = {
 };
 
 export default function DoctorClinicCreateInvoicePage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { basePath, canViewSettings, isSecretary } = useBillingAccess();
   const [searchParams] = useSearchParams();
@@ -176,13 +179,18 @@ export default function DoctorClinicCreateInvoicePage() {
   return (
     <>
       <Helmet>
-        <title>إنشاء فاتورة • LMJ Health</title>
+        <title>
+          {tr('إنشاء فاتورة • LMJ Health', 'Create Invoice • LMJ Health')}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="إنشاء فاتورة"
-          subtitle="إصدار فاتورة جديدة للمريض"
+          title={tr('إنشاء فاتورة', 'Create invoice')}
+          subtitle={tr(
+            'إصدار فاتورة جديدة للمريض',
+            'Issue a new invoice for the patient',
+          )}
           icon={<BookOpen className="w-7 h-7 text-white sm:h-8 sm:w-8" />}
         />
 

@@ -18,6 +18,7 @@ import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-s
 import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
 import { readAuthUser } from '@/lib/cookies';
+import { useI18n } from '@/i18n/provider';
 
 const EMPTY: ManualValues = {
   name: '',
@@ -33,6 +34,7 @@ export default function DoctorEncounterOrderManualPage({
 }: {
   category: CatalogOrderCategory;
 }) {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -67,7 +69,7 @@ export default function DoctorEncounterOrderManualPage({
         <title>إدخال يدوي • {config.title} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <RadiologyPageHeader
           patientName={patientName}
           statusLabel={resolveRadiologyStatusLabel(workspace.order)}

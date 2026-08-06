@@ -818,6 +818,14 @@ export default function CreateAdminContentDialog({
                         </div>
                       ))}
                     </div>
+                    {selectedType !== "SETTINGS_PAGE" ? (
+                      <div className="mt-3 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-right font-cairo text-[12px] font-bold text-amber-700">
+                        قبل إرسال المسودة للمراجعة: أضف مصدرًا موثوقًا وحدد إصدار
+                        التنبيه الطبي من شاشة التعديل.
+                        {(selectedType === "CONDITION" || selectedType === "SYMPTOM") &&
+                        " هذا النوع يتطلب أيضًا تفعيل Seek Help Block."}
+                      </div>
+                    ) : null}
                   </div>
 
                   {createMut.isError ? (

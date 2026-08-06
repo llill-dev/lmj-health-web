@@ -81,6 +81,7 @@ import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownlo
 import { countPatientAppointments } from "@/lib/doctor/dashboard/countPatientAppointments";
 import { resolvePatientOrderCategory } from "@/lib/doctor/encounters/encounterOrderCategories";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 function formatIsoDate(value?: string | null): string {
   if (!value) return "لا توجد زيارات";
@@ -146,6 +147,8 @@ function getPatientAccessErrorMessage(error: unknown): string {
 }
 
 export default function DoctorPatientDetailsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { patientId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -798,7 +801,9 @@ export default function DoctorPatientDetailsPage() {
         onChange={handleUploadFile}
       />
       <Helmet>
-        <title>تفاصيل المريض • LMJ Health</title>
+        <title>
+          {tr("تفاصيل المريض • LMJ Health", "Patient Details • LMJ Health")}
+        </title>
         <style>{`
           @media print {
             @page { margin: 2cm; }
@@ -810,24 +815,30 @@ export default function DoctorPatientDetailsPage() {
         `}</style>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-6">
+      <div dir={dir} lang={locale} className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="text-right">
             <div className="font-cairo text-[26px] font-black leading-[34px] text-[#111827]">
-              ملف المريض
+              {tr("ملف المريض", "Patient file")}
             </div>
             <div className="mt-1 font-cairo text-[13px] font-semibold leading-relaxed text-[#64748b]">
               {patientError && patientId ? (
                 <>
-                  لتصعيد المشكلة مع الدعم يُستخدَم معرّف النظام:{" "}
+                  {tr(
+                    "لتصعيد المشكلة مع الدعم يُستخدَم معرّف النظام: ",
+                    "For support escalation use system ID: ",
+                  )}
                   <span className="rounded-md bg-[#F1F5F9] px-1.5 py-0.5 font-mono text-[11px] font-medium text-[#334155]">
                     {patientId}
                   </span>
                 </>
               ) : patient ? (
-                "عرض البيانات المعتمدة والسجل الصحي وفق صلاحياتك كطبيب."
+                tr(
+                  "عرض البيانات المعتمدة والسجل الصحي وفق صلاحياتك كطبيب.",
+                  "View approved data and health record based on your doctor permissions.",
+                )
               ) : patientId ? (
-                "جارٍ تحميل تفاصيل الملف…"
+                tr("جارٍ تحميل تفاصيل الملف…", "Loading file details…")
               ) : (
                 "—"
               )}
@@ -982,7 +993,7 @@ export default function DoctorPatientDetailsPage() {
 
         {patientError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل ملف المريض"
+            title={tr("تعذّر تحميل ملف المريض", "Failed to load patient file")}
             brief={getPatientAccessErrorMessage(patientError)}
             detail={getPatientAccessErrorMessage(patientError)}
             retrying={retryingPatientProfile}

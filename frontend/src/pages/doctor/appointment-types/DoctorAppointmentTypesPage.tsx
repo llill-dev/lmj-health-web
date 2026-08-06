@@ -656,7 +656,7 @@ export default function DoctorAppointmentTypesPage() {
           if (!open) setDeleteTarget(null);
         }}
 
-        title="حذف نوع الموعد"
+        title={tr('حذف نوع الموعد', 'Delete appointment type')}
 
         description={`هل تريد حذف "${deleteTarget?.name ?? ''}"؟`}
 

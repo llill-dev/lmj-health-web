@@ -35,6 +35,7 @@ import { EXPENSE_CATEGORY_LABELS } from "@/lib/doctor/clinicAccounts/labels";
 import type { ExpenseCategory } from "@/lib/doctor/clinicAccounts/types";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
+import { useI18n } from "@/i18n/provider";
 
 type ExpenseFilter = "all" | ExpenseCategory;
 
@@ -64,6 +65,8 @@ function findCategoryCount(
 }
 
 export default function DoctorClinicExpensesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const {
     canManageExpenses,
@@ -152,7 +155,7 @@ export default function DoctorClinicExpensesPage() {
       setPage(1);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: "تعذّر الحفظ",
+        title: tr("تعذّر الحفظ", "Save failed"),
         variant: "error",
       });
     }
@@ -161,15 +164,15 @@ export default function DoctorClinicExpensesPage() {
   return (
     <>
       <Helmet>
-        <title>المصاريف • LMJ Health</title>
+        <title>{tr("المصاريف • LMJ Health", "Expenses • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
           headerIcon={<Receipt className="h-8 w-8 text-white" />}
-          title="المصاريف"
+          title={tr("المصاريف", "Expenses")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
@@ -182,10 +185,14 @@ export default function DoctorClinicExpensesPage() {
                       )
                     : "—"}
               </span>
-              <span className="text-primary/90"> — إجمالي المصاريف</span>
+              <span className="text-primary/90">
+                {tr(" — إجمالي المصاريف", " — total expenses")}
+              </span>
             </span>
           }
-          actionLabel={canManageExpenses ? "مصروف جديد" : undefined}
+          actionLabel={
+            canManageExpenses ? tr("مصروف جديد", "New expense") : undefined
+          }
           actionIcon={canManageExpenses ? <Plus className="h-4 w-4" /> : undefined}
           onActionClick={canManageExpenses ? () => setDialogOpen(true) : undefined}
           kpis={[
@@ -266,15 +273,18 @@ export default function DoctorClinicExpensesPage() {
           <DoctorTableSkeleton rows={5} columns={1} />
         ) : expensesQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل المصاريف"
+            title={tr("تعذّر تحميل المصاريف", "Failed to load expenses")}
             brief={getUserFacingRequestErrorMessage(expensesQuery.error)}
             retrying={retryingExpenses}
             onRetry={() => void retryExpenses()}
           />
         ) : expensesQuery.expenses.length === 0 ? (
           <ClinicAccountsEmptyState
-            title="لا توجد مصاريف مطابقة"
-            subtitle="جرّب تغيير البحث أو الفئة، أو أضف مصروفًا جديدًا لبدء السجل المالي."
+            title={tr("لا توجد مصاريف مطابقة", "No matching expenses")}
+            subtitle={tr(
+              "جرّب تغيير البحث أو الفئة، أو أضف مصروفًا جديدًا لبدء السجل المالي.",
+              "Try changing search or category, or add a new expense to start the financial log.",
+            )}
             actionLabel={canManageExpenses ? "إضافة مصروف" : undefined}
             onAction={canManageExpenses ? () => setDialogOpen(true) : undefined}
             actionIcon={canManageExpenses ? <Plus className="w-4 h-4" aria-hidden /> : undefined}
@@ -310,7 +320,7 @@ export default function DoctorClinicExpensesPage() {
         <ClinicAccountsModalShell
           open={dialogOpen && canManageExpenses}
           onClose={() => setDialogOpen(false)}
-          title="إضافة مصروف"
+          title={tr("إضافة مصروف", "Add expense")}
           maxWidthClass="max-w-[560px]"
         >
           <div className="space-y-4">

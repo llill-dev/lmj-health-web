@@ -54,6 +54,7 @@ import {
 } from '@/components/doctor/shared/skeletons';
 
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 
 import {
 
@@ -119,6 +120,8 @@ const TEMPLATE_TYPE_LABELS: Record<DoctorTemplateType, string> = {
 
 export default function DoctorClinicalLibraryPage() {
 
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
 
   const [section, setSection] = useState<ClinicalLibrarySection>('library');
@@ -466,13 +469,15 @@ export default function DoctorClinicalLibraryPage() {
 
       <Helmet>
 
-        <title>المكتبة السريرية • LMJ Health</title>
+        <title>
+          {tr('المكتبة السريرية • LMJ Health', 'Clinical Library • LMJ Health')}
+        </title>
 
       </Helmet>
 
 
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
 
         <DoctorDashboardOverview
 
@@ -482,7 +487,7 @@ export default function DoctorClinicalLibraryPage() {
 
           kpiColumns={4}
 
-          title="المكتبة السريرية والقوالب"
+          title={tr('المكتبة السريرية والقوالب', 'Clinical library & templates')}
 
           headerIcon={<BookOpen className="h-8 w-8 text-white" />}
 
@@ -504,7 +509,10 @@ export default function DoctorClinicalLibraryPage() {
 
                 {' '}
 
-                — اختصارات الأدوية والتحاليل والقوالب القابلة لإعادة الاستخدام
+                {tr(
+                  '— اختصارات الأدوية والتحاليل والقوالب القابلة لإعادة الاستخدام',
+                  '— reusable medicine, lab, and template shortcuts',
+                )}
 
               </span>
 
@@ -512,7 +520,11 @@ export default function DoctorClinicalLibraryPage() {
 
           }
 
-          actionLabel={section === 'library' ? 'إضافة للمكتبة' : 'قالب جديد'}
+          actionLabel={
+            section === 'library'
+              ? tr('إضافة للمكتبة', 'Add to library')
+              : tr('قالب جديد', 'New template')
+          }
 
           actionIcon={<Plus className="h-4 w-4" />}
 
@@ -544,7 +556,7 @@ export default function DoctorClinicalLibraryPage() {
 
                 : libraryStatsQuery.total,
 
-              label: 'عناصر المكتبة',
+              label: tr('عناصر المكتبة', 'Library items'),
 
             },
 
@@ -560,7 +572,7 @@ export default function DoctorClinicalLibraryPage() {
 
                 : templatesStatsQuery.total,
 
-              label: 'القوالب',
+              label: tr('القوالب', 'Templates'),
 
             },
 
@@ -576,7 +588,7 @@ export default function DoctorClinicalLibraryPage() {
 
                 : favoriteStatsQuery.total,
 
-              label: 'المفضلة',
+              label: tr('المفضلة', 'Favorites'),
 
             },
 
@@ -592,7 +604,7 @@ export default function DoctorClinicalLibraryPage() {
 
                 : medicationStatsQuery.total,
 
-              label: 'اختصارات الأدوية',
+              label: tr('اختصارات الأدوية', 'Medication shortcuts'),
 
             },
 

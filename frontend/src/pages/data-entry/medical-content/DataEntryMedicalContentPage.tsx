@@ -39,9 +39,15 @@ import type {
   AdminContentStatus,
   AdminContentListParams,
 } from "@/lib/admin/types";
+import { adminApi } from "@/lib/admin/client";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useI18n } from "@/i18n/provider";
+import {
+  extractMedicalContentDetails,
+  getReviewReadinessIssueCodes,
+  type ReviewReadinessIssueCode,
+} from "@/components/admin/medical-content/dialogs/medicalContentDialogHelpers";
 
 function toDisplayText(value: unknown): string {
   if (typeof value === "string") return value;
@@ -82,6 +88,30 @@ function contentWorkflowHint(
     "dataEntry.medicalContent.workflow.other",
     "هذه الحالة لا تُعرض ضمن مسار (محتواي) الحالي.",
   );
+}
+
+function getBlockingMessages(
+  t: (key: string, fallback?: string) => string,
+  issueCodes: ReviewReadinessIssueCode[],
+): string[] {
+  return issueCodes.map((code) => {
+    if (code === "sources_required") {
+      return t(
+        "dataEntry.medicalContent.reviewChecklist.sources",
+        "Add at least one trusted source.",
+      );
+    }
+    if (code === "disclaimer_required") {
+      return t(
+        "dataEntry.medicalContent.reviewChecklist.disclaimer",
+        "Set the disclaimer version.",
+      );
+    }
+    return t(
+      "dataEntry.medicalContent.reviewChecklist.seekHelp",
+      "Enable Seek Help Block for condition/symptom content.",
+    );
+  });
 }
 
 export default function DataEntryMedicalContentPage() {
@@ -159,6 +189,27 @@ export default function DataEntryMedicalContentPage() {
 
   async function handleSubmitReview(id: string) {
     try {
+      const details = extractMedicalContentDetails(await adminApi.content.getById(id));
+      const issueCodes = getReviewReadinessIssueCodes(details);
+      if (issueCodes.length > 0) {
+        const messages = getBlockingMessages(t, issueCodes);
+        toast(
+          t(
+            "dataEntry.medicalContent.toast.reviewChecklist.body",
+            `Cannot send for review before completing:\n- ${messages.join("\n- ")}`,
+          ),
+          {
+            title: t(
+              "dataEntry.medicalContent.toast.reviewChecklist.title",
+              "Governance requirements missing",
+            ),
+            variant: "error",
+          },
+        );
+        setEditingId(id);
+        return;
+      }
+
       await submitReview.mutateAsync({ id });
       toast(t("dataEntry.medicalContent.toast.reviewSuccess.body"), {
         title: t("dataEntry.medicalContent.toast.reviewSuccess.title"),

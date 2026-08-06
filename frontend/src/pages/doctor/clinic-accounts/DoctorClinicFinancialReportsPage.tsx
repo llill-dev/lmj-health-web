@@ -31,6 +31,7 @@ import { formatBillingAmount } from "@/lib/doctor/billing/format";
 import { triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
+import { useI18n } from "@/i18n/provider";
 
 const MONTHS = [
   { value: "all", label: "السنة كاملة" },
@@ -49,6 +50,8 @@ const MONTHS = [
 ];
 
 export default function DoctorClinicFinancialReportsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const { canExportReports, canViewSettings, isSecretary } = useBillingAccess();
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
@@ -112,13 +115,18 @@ export default function DoctorClinicFinancialReportsPage() {
   return (
     <>
       <Helmet>
-        <title>التقارير المالية • LMJ Health</title>
+        <title>
+          {tr("التقارير المالية • LMJ Health", "Financial Reports • LMJ Health")}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="التقارير المالية"
-          subtitle="التقارير الشاملة للدخل والمصاريف والربح"
+          title={tr("التقارير المالية", "Financial reports")}
+          subtitle={tr(
+            "التقارير الشاملة للدخل والمصاريف والربح",
+            "Comprehensive income, expense, and profit reports",
+          )}
           icon={<BarChart3 className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -151,7 +159,10 @@ export default function DoctorClinicFinancialReportsPage() {
 
         {reportsQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل التقرير المالي"
+            title={tr(
+              "تعذّر تحميل التقرير المالي",
+              "Failed to load financial report",
+            )}
             brief={getUserFacingRequestErrorMessage(reportsQuery.error)}
             retrying={retryingReports}
             onRetry={() => void retryReports()}
@@ -228,7 +239,10 @@ export default function DoctorClinicFinancialReportsPage() {
               type="button"
               disabled
               className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-[#E5E7EB] font-cairo text-[14px] font-extrabold text-[#98A2B3]"
-              title="Excel غير مدعوم في API-3 حالياً"
+              title={tr(
+                "Excel غير مدعوم في API-3 حالياً",
+                "Excel is not supported in API-3 yet",
+              )}
             >
               <FileSpreadsheet className="h-4 w-4" aria-hidden />
               Excel (قريباً)

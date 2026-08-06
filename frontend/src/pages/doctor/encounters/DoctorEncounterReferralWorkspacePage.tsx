@@ -5,8 +5,10 @@ import { REFERRAL_WORKSPACE_CONFIG, ReferralWorkspaceShell } from '@/components/
 import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterReferralWorkspace } from '@/hooks/doctor/encounters/useEncounterReferralWorkspace';
 import { readAuthUser } from '@/lib/cookies';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorEncounterReferralWorkspacePage() {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -43,7 +45,7 @@ export default function DoctorEncounterReferralWorkspacePage() {
         <title>{REFERRAL_WORKSPACE_CONFIG.title} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <ReferralWorkspaceShell
           patientId={patientId}
           encounterId={encounterId}

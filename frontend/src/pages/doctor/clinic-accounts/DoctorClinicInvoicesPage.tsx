@@ -25,6 +25,7 @@ import {
 } from "@/hooks/doctor/billing";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 import type {
   ClinicInvoice,
   InvoiceStatus,
@@ -50,6 +51,8 @@ function pickStatusCount(
 }
 
 export default function DoctorClinicInvoicesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const navigate = useNavigate();
   const {
     basePath,
@@ -111,25 +114,29 @@ export default function DoctorClinicInvoicesPage() {
   return (
     <>
       <Helmet>
-        <title>الفواتير • LMJ Health</title>
+        <title>{tr("الفواتير • LMJ Health", "Invoices • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
           kpiColumns={3}
           headerIcon={<BookOpen className="h-8 w-8 text-white" />}
-          title="الفواتير"
+          title={tr("الفواتير", "Invoices")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
                 {listQuery.isAwaitingData ? "—" : listQuery.total}
               </span>
-              <span className="text-primary/90"> — إجمالي الفواتير</span>
+              <span className="text-primary/90">
+                {tr(" — إجمالي الفواتير", " — total invoices")}
+              </span>
             </span>
           }
-          actionLabel={canManageInvoices ? "فاتورة جديدة" : undefined}
+          actionLabel={
+            canManageInvoices ? tr("فاتورة جديدة", "New invoice") : undefined
+          }
           actionIcon={canManageInvoices ? <Plus className="h-4 w-4" /> : undefined}
           onActionClick={
             canManageInvoices
@@ -146,7 +153,7 @@ export default function DoctorClinicInvoicesPage() {
                     ? "—"
                     : stats.paid
                   : "—",
-              label: "مدفوعة",
+              label: tr("مدفوعة", "Paid"),
             },
             {
               key: "unpaid",
@@ -157,7 +164,7 @@ export default function DoctorClinicInvoicesPage() {
                     ? "—"
                     : stats.unpaid
                   : "—",
-              label: "غير مدفوعة",
+              label: tr("غير مدفوعة", "Unpaid"),
             },
             {
               key: "overdue",
@@ -168,7 +175,7 @@ export default function DoctorClinicInvoicesPage() {
                     ? "—"
                     : stats.overdue
                   : "—",
-              label: "متأخرة",
+              label: tr("متأخرة", "Overdue"),
             },
           ]}
         />
@@ -203,7 +210,7 @@ export default function DoctorClinicInvoicesPage() {
           <DoctorTableSkeleton rows={6} columns={1} />
         ) : listQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الفواتير"
+            title={tr("تعذّر تحميل الفواتير", "Failed to load invoices")}
             brief={getUserFacingRequestErrorMessage(listQuery.error)}
             retrying={retryingList}
             onRetry={() => void retryList()}

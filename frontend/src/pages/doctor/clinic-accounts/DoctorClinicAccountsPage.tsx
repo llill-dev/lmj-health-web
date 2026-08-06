@@ -35,6 +35,7 @@ import {
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { isAwaitingAnyInitialQueryData } from "@/lib/query/queryUi";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 import {
   formatBillingAmount,
   formatBillingNumber,
@@ -45,6 +46,8 @@ import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 export default function DoctorClinicAccountsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const {
     basePath,
     canViewReports,
@@ -147,13 +150,13 @@ export default function DoctorClinicAccountsPage() {
   return (
     <>
       <Helmet>
-        <title>الحسابات • LMJ Health</title>
+        <title>{tr("الحسابات • LMJ Health", "Accounts • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="الحسابات"
-          subtitle="إدارة حسابات العيادة"
+          title={tr("الحسابات", "Accounts")}
+          subtitle={tr("إدارة حسابات العيادة", "Manage clinic accounts")}
           icon={<Wallet className="w-7 h-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -166,11 +169,11 @@ export default function DoctorClinicAccountsPage() {
             setOverduePage(1);
             setOutstandingPage(1);
           }}
-          placeholder="بحث..."
+          placeholder={tr("بحث...", "Search...")}
           trailing={
             <ClinicAccountsSearchCount
               count={overdueQuery.total}
-              label="فاتورة متأخرة"
+              label={tr("فاتورة متأخرة", "overdue invoices")}
             />
           }
         />
@@ -181,7 +184,7 @@ export default function DoctorClinicAccountsPage() {
 
         {isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الحسابات"
+            title={tr("تعذّر تحميل الحسابات", "Failed to load accounts")}
             brief={getUserFacingRequestErrorMessage(pageError)}
             retrying={retryingDashboard}
             onRetry={() => void retryDashboard()}

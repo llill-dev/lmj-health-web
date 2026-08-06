@@ -22,8 +22,10 @@ import {
   generateDoctorDocumentPdf,
   openPdfBlobInNewTab,
 } from '@/lib/doctor/orders/doctorOrderDocuments';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorPrescriptionPreviewPage() {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -86,7 +88,7 @@ export default function DoctorPrescriptionPreviewPage() {
         </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <PrescriptionPreviewBanner
           patientName={preview.previewVm?.patientName}
           statusLabel={preview.previewVm?.statusLabel}

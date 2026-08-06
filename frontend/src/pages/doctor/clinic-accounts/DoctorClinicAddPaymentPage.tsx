@@ -39,8 +39,11 @@ import {
   isBillingDateInputAfterToday,
 } from "@/lib/doctor/billing/dateInput";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorClinicAddPaymentPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const navigate = useNavigate();
   const { basePath, canViewSettings, isSecretary } = useBillingAccess();
   const { toast } = useToast();
@@ -157,13 +160,18 @@ export default function DoctorClinicAddPaymentPage() {
   return (
     <>
       <Helmet>
-        <title>إضافة دفعة • LMJ Health</title>
+        <title>
+          {tr("إضافة دفعة • LMJ Health", "Add Payment • LMJ Health")}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="إضافة دفعة"
-          subtitle="تسجيل دفعة جديدة على الفاتورة"
+          title={tr("إضافة دفعة", "Add payment")}
+          subtitle={tr(
+            "تسجيل دفعة جديدة على الفاتورة",
+            "Record a new payment on the invoice",
+          )}
           icon={<CreditCard className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -171,7 +179,7 @@ export default function DoctorClinicAddPaymentPage() {
 
         {!invoiceParam ? (
           <DoctorListErrorState
-            title="فاتورة غير محددة"
+            title={tr("فاتورة غير محددة", "Invoice not specified")}
             brief="افتح هذه الصفحة من تفاصيل فاتورة (زر «إضافة دفعة») أو من قائمة الفواتير."
             onRetry={() => navigate(`${basePath}/invoices`)}
           />
@@ -179,7 +187,10 @@ export default function DoctorClinicAddPaymentPage() {
           <DoctorInlineDetailsSkeleton rows={4} />
         ) : invoiceQuery.isError || !invoice || !totals ? (
           <DoctorListErrorState
-            title={loadErrorToast?.title ?? "تعذّر تحميل الفاتورة"}
+            title={
+              loadErrorToast?.title ??
+              tr("تعذّر تحميل الفاتورة", "Failed to load invoice")
+            }
             brief={loadErrorToast?.message ?? "تعذّر تحميل بيانات الفاتورة."}
             retrying={retryingInvoice}
             onRetry={() => void retryInvoice()}

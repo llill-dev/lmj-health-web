@@ -22,8 +22,10 @@ import {
   generateDoctorOrderDocumentPdf,
   openPdfBlobInNewTab,
 } from '@/lib/doctor/orders/doctorOrderDocuments';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorRadiologyPreviewPage() {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -84,7 +86,7 @@ export default function DoctorRadiologyPreviewPage() {
         <title>معاينة طلب الأشعة • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <RadiologyPreviewBanner
           patientName={preview.previewVm?.patientName}
           statusLabel={preview.previewVm?.statusLabel}

@@ -275,6 +275,35 @@ export default function EditAdminContentDialog({
         })
         .filter((item) => item.title || item.url)
     : [];
+  const governanceChecklist = useMemo(
+    () => [
+      {
+        key: "sources",
+        label: "إضافة مصدر موثوق واحد على الأقل قبل الإرسال للمراجعة",
+        done: selectedType === "SETTINGS_PAGE" || previewSources.length > 0,
+      },
+      {
+        key: "disclaimerVersion",
+        label: "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+        done:
+          selectedType === "SETTINGS_PAGE" ||
+          Boolean(previewDisclaimerVersion?.trim()),
+      },
+      {
+        key: "seekHelp",
+        label: "تفعيل Seek Help Block لأن النوع حالة/عرض",
+        done:
+          (selectedType !== "CONDITION" && selectedType !== "SYMPTOM") ||
+          previewRequiresSeekHelpBlock === true,
+      },
+    ],
+    [
+      previewDisclaimerVersion,
+      previewRequiresSeekHelpBlock,
+      previewSources.length,
+      selectedType,
+    ],
+  );
   const fallbackTemplateData = useMemo(
     () =>
       isDynamicRecord(details?.dataValue)
@@ -286,6 +315,85 @@ export default function EditAdminContentDialog({
     if (!previewDataJson?.trim()) return fallbackTemplateData;
     return parseTemplateRecordInput(previewDataJson, fallbackTemplateData);
   }, [fallbackTemplateData, previewDataJson]);
+  const previewWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    const isEnglish = selectedLanguage === "en";
+
+    if (previewDataResult.error) {
+      warnings.push(
+        isEnglish
+          ? "Dynamic data JSON is invalid and will not be reflected accurately."
+          : "JSON الخاص بالبيانات الديناميكية غير صالح ولن ينعكس بدقة في المعاينة.",
+      );
+    }
+
+    if (previewSourcesResult.error) {
+      warnings.push(
+        isEnglish
+          ? "Sources JSON is invalid, so source references may be missing in preview."
+          : "JSON الخاص بالمصادر غير صالح، لذلك قد تغيب بعض المراجع من المعاينة.",
+      );
+    }
+
+    if (selectedType !== "SETTINGS_PAGE" && previewBlocks.length === 0) {
+      warnings.push(
+        isEnglish
+          ? "No meaningful content blocks are currently available."
+          : "لا توجد بلوكات محتوى فعليّة متاحة حاليًا.",
+      );
+    }
+
+    if (selectedType !== "SETTINGS_PAGE" && previewSources.length === 0) {
+      warnings.push(
+        isEnglish
+          ? "No source references are currently attached."
+          : "لا توجد مراجع مصادر مرفقة حاليًا.",
+      );
+    }
+
+    if (selectedType !== "SETTINGS_PAGE" && !previewDisclaimerVersion?.trim()) {
+      warnings.push(
+        isEnglish
+          ? "Disclaimer version is missing."
+          : "إصدار التنبيه الطبي غير مضاف.",
+      );
+    }
+
+    if (
+      (selectedType === "CONDITION" || selectedType === "SYMPTOM") &&
+      !previewRequiresSeekHelpBlock
+    ) {
+      warnings.push(
+        isEnglish
+          ? "Seek Help block requirement is not enabled."
+          : "متطلب Seek Help Block غير مفعّل.",
+      );
+    }
+
+    if (
+      selectedType === "NEWS" &&
+      (!previewNewsSourceUrl?.trim() || !previewNewsPublishedAt?.trim())
+    ) {
+      warnings.push(
+        isEnglish
+          ? "News source URL and publish date should be completed."
+          : "يجب استكمال رابط مصدر الخبر وتاريخ النشر.",
+      );
+    }
+
+    return warnings;
+  }, [
+    previewBlocks.length,
+    previewDataResult.error,
+    previewDisclaimerVersion,
+    previewNewsPublishedAt,
+    previewNewsSourceUrl,
+    previewRequiresSeekHelpBlock,
+    previewSources.length,
+    previewSourcesResult.error,
+    selectedLanguage,
+    selectedType,
+  ]);
 
   useEffect(() => {
     if (!open || !details) return;
@@ -723,10 +831,10 @@ export default function EditAdminContentDialog({
                       ) : null}
 
                       <AdminFormField
-                        label="البيانات الديناميكية (JSON)"
+                        label="البيانات الديناميكية (JSON متقدم)"
                         hint={
                           selectedTemplate?.fields?.length
-                            ? "يبقى هذا الحقل متاحًا للتوافق مع البيانات القديمة أو الحقول غير المغطاة بالقالب."
+                            ? "حقل متقدم للتوافق مع بيانات قديمة أو حالات لا تغطيها الحقول المنظمة."
                             : "مثال: structured template data القادمة من القالب."
                         }
                         error={errors.dataJson?.message}
@@ -759,6 +867,26 @@ export default function EditAdminContentDialog({
                     <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-white p-4">
                       <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
                         التصنيف والحوكمة
+                      </div>
+                      <div className="rounded-[12px] border border-[#E4E7EC] bg-[#FCFCFD] p-3">
+                        <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
+                          متطلبات الجاهزية قبل المراجعة
+                        </div>
+                        <div className="space-y-2">
+                          {governanceChecklist.map((item) => (
+                            <div
+                              key={item.key}
+                              className={cn(
+                                "rounded-[10px] px-3 py-2 text-right font-cairo text-[12px] font-bold",
+                                item.done
+                                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                                  : "border border-amber-200 bg-amber-50 text-amber-700",
+                              )}
+                            >
+                              {item.done ? "مكتمل" : "بحاجة لاستكمال"}: {item.label}
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -797,7 +925,7 @@ export default function EditAdminContentDialog({
                       </div>
 
                       <AdminFormField
-                        label="المصادر (JSON)"
+                        label="المصادر (JSON متقدم)"
                         hint='مثال: [{"title":"WHO","url":"https://..."}]'
                         error={errors.sourcesJson?.message}
                       >
@@ -927,6 +1055,7 @@ export default function EditAdminContentDialog({
 
                       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                         <MedicalContentGovernancePanel
+                          contentType={selectedType}
                           disclaimerVersion={previewDisclaimerVersion?.trim() || undefined}
                           requiresSeekHelpBlock={previewRequiresSeekHelpBlock}
                           isFeatured={previewIsFeatured}
@@ -947,16 +1076,11 @@ export default function EditAdminContentDialog({
                         />
 
                         <div className="space-y-3">
-                          {previewSourcesResult.error ? (
-                            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
-                              تعذّر قراءة JSON الخاص بالمصادر، لذلك لن تظهر جميع
-                              المرجعيات في المعاينة.
-                            </div>
-                          ) : null}
                           <MedicalContentPatientPreview
                             title={previewTitle?.trim() || details.title}
                             summary={previewSummary?.trim() || details.summary}
                             coverImage={previewCoverImage?.trim() || details.coverImage}
+                            language={selectedLanguage}
                             contentBlocks={previewBlocks}
                             disclaimerVersion={
                               previewDisclaimerVersion?.trim() ||
@@ -966,7 +1090,9 @@ export default function EditAdminContentDialog({
                             riskFlags={previewRiskFlags}
                             sources={previewSources}
                             newsSourceName={previewNewsSourceName?.trim() || undefined}
+                            newsSourceUrl={previewNewsSourceUrl?.trim() || undefined}
                             newsPublishedAt={previewNewsPublishedAt?.trim() || undefined}
+                            previewWarnings={previewWarnings}
                           />
                         </div>
                       </div>

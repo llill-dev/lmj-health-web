@@ -7,6 +7,7 @@ import {
   toDisplayText,
   toPrettyJson,
 } from "./dialogs/medicalContentDialogHelpers";
+import type { AdminContentType } from "@/lib/admin/types";
 
 type SourceItem = {
   title?: string;
@@ -22,6 +23,7 @@ type NewsSummary = {
 };
 
 type Props = {
+  contentType?: AdminContentType;
   disclaimerVersion?: string;
   requiresSeekHelpBlock?: boolean;
   isFeatured?: boolean;
@@ -139,6 +141,7 @@ function DynamicDataSummary({
 }
 
 export default function MedicalContentGovernancePanel({
+  contentType,
   disclaimerVersion,
   requiresSeekHelpBlock,
   isFeatured,
@@ -152,6 +155,26 @@ export default function MedicalContentGovernancePanel({
   invalidDynamicData,
 }: Props) {
   const sourceCount = sources.filter((source) => source.title || source.url).length;
+  const requiresSeekHelpByType =
+    contentType === "CONDITION" || contentType === "SYMPTOM";
+  const hasDisclaimerVersion = Boolean(toDisplayText(disclaimerVersion).trim());
+  const governanceChecklist = [
+    {
+      key: "sources",
+      label: "إضافة مصدر واحد موثوق على الأقل",
+      done: sourceCount > 0,
+    },
+    {
+      key: "disclaimerVersion",
+      label: "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+      done: hasDisclaimerVersion,
+    },
+    {
+      key: "seekHelp",
+      label: "تفعيل Seek Help Block لأن النوع حالة/عرض",
+      done: !requiresSeekHelpByType || requiresSeekHelpBlock === true,
+    },
+  ];
   const hasNews = Boolean(
     news &&
       [
@@ -213,6 +236,27 @@ export default function MedicalContentGovernancePanel({
             </div>
             <BadgeList items={relatedContentIds} emptyLabel="لا توجد معرفات محتوى مرتبطة." />
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
+        <div className="inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
+          <ShieldCheck className="h-4 w-4 text-primary" />
+          قائمة جاهزية الحوكمة قبل المراجعة
+        </div>
+        <div className="mt-4 space-y-2">
+          {governanceChecklist.map((item) => (
+            <div
+              key={item.key}
+              className={
+                item.done
+                  ? "rounded-[10px] border border-emerald-200 bg-emerald-50 px-3 py-2 font-cairo text-[12px] font-bold text-emerald-700"
+                  : "rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 font-cairo text-[12px] font-bold text-amber-700"
+              }
+            >
+              {item.done ? "مكتمل" : "بحاجة لاستكمال"}: {item.label}
+            </div>
+          ))}
         </div>
       </div>
 

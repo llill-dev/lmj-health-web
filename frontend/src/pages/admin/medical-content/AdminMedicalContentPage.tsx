@@ -80,6 +80,11 @@ import {
   type LangFilter,
   type UiContentStatus,
 } from "@/components/admin/medical-content/contentListUtils";
+import {
+  countValidContentSources,
+  getReviewReadinessIssueCodes,
+  type ReviewReadinessIssueCode,
+} from "@/components/admin/medical-content/dialogs/medicalContentDialogHelpers";
 
 function extractContentDetails(
   payload?: AdminContentDetailsResponse | null,
@@ -104,39 +109,6 @@ function actorLabel(
   if (typeof value === "string") return value.trim() || "—";
   if (!value) return "—";
   return value.fullName?.trim() || value.email?.trim() || value._id?.trim() || "—";
-}
-
-function countValidContentSources(item: AdminContentDetailsItem | null): number {
-  if (!item) return 0;
-
-  const directSources = Array.isArray(item.sources)
-    ? item.sources.filter((source) => {
-        const record = source as Record<string, unknown>;
-        return Boolean(
-          readSourceText(record.url) ||
-            readSourceText(record.href) ||
-            readSourceText(record.sourceUrl) ||
-            readSourceText(record.link),
-        );
-      }).length
-    : 0;
-
-  if (directSources > 0) return directSources;
-
-  const blockSources = Array.isArray(item.contentBlocks)
-    ? item.contentBlocks.filter((block) => {
-        const record = block as Record<string, unknown>;
-        return Boolean(
-          readSourceText(record.url) ||
-            readSourceText(record.href) ||
-            readSourceText(record.sourceUrl) ||
-            readSourceText(record.sourceLink) ||
-            readSourceText(record.link),
-        );
-      }).length
-    : 0;
-
-  return blockSources;
 }
 
 function quickSourceCount(item: AdminContentItem): number | null {
@@ -171,6 +143,30 @@ function quickSourceCount(item: AdminContentItem): number | null {
   }
 
   return null;
+}
+
+function getSubmitReviewBlockingMessages(
+  tr: (ar: string, en: string) => string,
+  issueCodes: ReviewReadinessIssueCode[],
+): string[] {
+  return issueCodes.map((code) => {
+    if (code === "sources_required") {
+      return tr(
+        "أضف مصدرًا واحدًا موثوقًا على الأقل.",
+        "Add at least one trusted source.",
+      );
+    }
+    if (code === "disclaimer_required") {
+      return tr(
+        "حدّد إصدار التنبيه الطبي (Disclaimer Version).",
+        "Set the disclaimer version.",
+      );
+    }
+    return tr(
+      "فعّل Seek Help Block لأن النوع حالة أو عرض.",
+      "Enable Seek Help Block for condition/symptom content.",
+    );
+  });
 }
 
 export default function AdminMedicalContentPage() {
@@ -1350,22 +1346,23 @@ export default function AdminMedicalContentPage() {
             const details = extractContentDetails(
               await adminApi.content.getById(id),
             );
-            const validSources = countValidContentSources(details);
-            if (validSources === 0) {
+            const issueCodes = getReviewReadinessIssueCodes(details);
+            if (issueCodes.length > 0) {
+              const blockingMessages = getSubmitReviewBlockingMessages(tr, issueCodes);
               setActionConfirm(null);
               toast(
                 tr(
-                  "أضف مصدراً واحداً على الأقل قبل إرسال المحتوى للمراجعة.",
-                  "Add at least one source before sending content for review.",
+                  `تعذّر إرسال المحتوى للمراجعة قبل استكمال:\n- ${blockingMessages.join("\n- ")}`,
+                  `Cannot send for review before completing:\n- ${blockingMessages.join("\n- ")}`,
                 ),
                 {
-                  title: tr("المصادر مطلوبة", "Sources required"),
+                  title: tr("متطلبات الحوكمة غير مكتملة", "Governance requirements missing"),
                   variant: "error",
                 },
               );
               setEditingContentId(id);
               setEditOpen(true);
-              throw new Error("sources_required");
+              throw new Error("review_readiness_required");
             }
             await submitReviewMutation.mutateAsync({
               id,

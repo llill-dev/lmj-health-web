@@ -1,16 +1,16 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { ExternalLink, Loader2, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useAdminContentById } from "@/hooks/admin/content/useAdminContent";
 import MedicalContentGovernancePanel from "@/components/admin/medical-content/MedicalContentGovernancePanel";
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import type {
-  AdminContentBlock,
   AdminContentStatus,
   AdminContentType,
 } from "@/lib/admin/types";
 import {
   extractMedicalContentDetails,
   formatDate,
+  getReviewReadinessIssueCodes,
   toDisplayText,
   toPrettyJson,
 } from "./medicalContentDialogHelpers";
@@ -86,168 +86,6 @@ function MetaRow({
   );
 }
 
-function renderContentBlock(block: AdminContentBlock, index: number) {
-  if (!block || typeof block !== "object") return null;
-  const type = toDisplayText((block as Record<string, unknown>).type);
-
-  if (type === "heading") {
-    const levelRaw = Number((block as { level?: number }).level ?? 3);
-    const level = Math.max(1, Math.min(6, Number.isNaN(levelRaw) ? 3 : levelRaw));
-    const text = toDisplayText((block as { text?: unknown }).text);
-    const cls =
-      level <= 2
-        ? "text-[20px] font-black"
-        : level === 3
-          ? "text-[18px] font-extrabold"
-          : "text-[16px] font-bold";
-    return (
-      <h3
-        key={`block-${index}`}
-        className={`font-cairo text-[#111827] ${cls}`}
-      >
-        {text || "—"}
-      </h3>
-    );
-  }
-
-  if (type === "paragraph") {
-    const text = toDisplayText((block as { text?: unknown }).text);
-    return (
-      <p
-        key={`block-${index}`}
-        className="font-cairo text-[14px] leading-7 text-[#344054]"
-      >
-        {text || "—"}
-      </p>
-    );
-  }
-
-  if (type === "list") {
-    const ordered = Boolean((block as { ordered?: boolean }).ordered);
-    const items = Array.isArray((block as { items?: unknown[] }).items)
-      ? ((block as { items?: unknown[] }).items ?? [])
-          .map((i) => toDisplayText(i))
-          .filter(Boolean)
-      : [];
-    const ListTag = ordered ? "ol" : "ul";
-    return (
-      <ListTag
-        key={`block-${index}`}
-        className={`list-inside space-y-2 font-cairo text-[14px] text-[#344054] ${
-          ordered ? "list-decimal" : "list-disc"
-        }`}
-      >
-        {(items.length ? items : ["—"]).map((itemText, idx) => (
-          <li key={`li-${index}-${idx}`}>{itemText}</li>
-        ))}
-      </ListTag>
-    );
-  }
-
-  if (type === "callout") {
-    const variant =
-      toDisplayText((block as { variant?: unknown }).variant) || "info";
-    const title = toDisplayText((block as { title?: unknown }).title);
-    const text = toDisplayText((block as { text?: unknown }).text);
-    const tone =
-      variant === "danger"
-        ? "border-[#FECACA] bg-[#FEF2F2] text-[#B42318]"
-        : variant === "warn"
-          ? "border-[#FEDF89] bg-[#FFFAEB] text-[#B54708]"
-          : "border-[#B2DDFF] bg-[#EFF8FF] text-[#175CD3]";
-    return (
-      <div
-        key={`block-${index}`}
-        className={`rounded-[12px] border px-4 py-3 ${tone}`}
-      >
-        {title ? (
-          <div className="font-cairo text-[13px] font-extrabold">{title}</div>
-        ) : null}
-        <div className="mt-1 font-cairo text-[13px] leading-6">{text || "—"}</div>
-      </div>
-    );
-  }
-
-  if (type === "linkCard") {
-    const title = toDisplayText((block as { title?: unknown }).title);
-    const url = toDisplayText((block as { url?: unknown }).url);
-    const description = toDisplayText(
-      (block as { description?: unknown }).description,
-    );
-    return (
-      <div
-        key={`block-${index}`}
-        className="rounded-[12px] border border-[#D0D5DD] bg-white px-4 py-3"
-      >
-        <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
-          {title || "—"}
-        </div>
-        {description ? (
-          <div className="mt-1 font-cairo text-[13px] leading-6 text-[#475467]">
-            {description}
-          </div>
-        ) : null}
-        {url ? (
-          <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 inline-flex items-center gap-1 font-cairo text-[12px] font-bold text-primary hover:underline"
-          >
-            {url}
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-        ) : null}
-      </div>
-    );
-  }
-
-  if (type === "faq") {
-    const items = Array.isArray((block as { items?: unknown[] }).items)
-      ? ((block as { items?: unknown[] }).items ?? []).filter(
-          (item) => item && typeof item === "object",
-        )
-      : [];
-    return (
-      <div key={`block-${index}`} className="space-y-3">
-        {items.length ? (
-          items.map((item, idx) => {
-            const faq = item as Record<string, unknown>;
-            return (
-              <div
-                key={`faq-${index}-${idx}`}
-                className="rounded-[12px] border border-[#EAECF0] bg-[#F9FAFB] px-4 py-3"
-              >
-                <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
-                  {toDisplayText(faq.question) || "—"}
-                </div>
-                <div className="mt-1 font-cairo text-[13px] leading-6 text-[#475467]">
-                  {toDisplayText(faq.answer) || "—"}
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="font-cairo text-[13px] text-[#667085]">—</div>
-        )}
-      </div>
-    );
-  }
-
-  if (type === "divider") {
-    return <hr key={`block-${index}`} className="border-[#EAECF0]" />;
-  }
-
-  return (
-    <div
-      key={`block-${index}`}
-      className="rounded-[10px] border border-dashed border-[#D0D5DD] bg-[#FCFCFD] px-3 py-2 font-cairo text-[12px] text-[#667085]"
-    >
-      كتلة غير مدعومة: {type || "unknown"}
-    </div>
-  );
-}
-
 export default function MedicalContentViewDialog({
   open,
   onOpenChange,
@@ -257,6 +95,19 @@ export default function MedicalContentViewDialog({
   const details = extractMedicalContentDetails(detailsQuery.data);
   const news = details?.news ?? null;
   const template = details?.template ?? null;
+  const previewLanguage = details?.language === "en" ? "en" : "ar";
+  const previewWarnings = details
+    ? getReviewReadinessIssueCodes(details).map((code) => {
+        if (previewLanguage === "en") {
+          if (code === "sources_required") return "No source references are currently attached.";
+          if (code === "disclaimer_required") return "Disclaimer version is missing.";
+          return "Seek Help block requirement is not enabled.";
+        }
+        if (code === "sources_required") return "لا توجد مراجع مصادر مرفقة حاليًا.";
+        if (code === "disclaimer_required") return "إصدار التنبيه الطبي غير مضاف.";
+        return "متطلب Seek Help Block غير مفعّل.";
+      })
+    : [];
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -375,6 +226,7 @@ export default function MedicalContentViewDialog({
                           title={details.title}
                           summary={details.summary}
                           coverImage={details.coverImage}
+                          language={previewLanguage}
                           contentBlocks={details.contentBlocks}
                           disclaimerVersion={toDisplayText(details.disclaimerVersion)}
                           requiresSeekHelpBlock={details.requiresSeekHelpBlock}
@@ -383,25 +235,10 @@ export default function MedicalContentViewDialog({
                           newsSourceName={toDisplayText(
                             news?.sourceName ?? details.sourceName,
                           )}
+                          newsSourceUrl={toDisplayText(news?.sourceUrl)}
                           newsPublishedAt={toDisplayText(news?.publishedAt)}
+                          previewWarnings={previewWarnings}
                         />
-                      </div>
-                    </div>
-
-                    <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
-                      <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                        محتوى المقال
-                      </div>
-                      <div className="mt-4 space-y-4">
-                        {(details.contentBlocks?.length
-                          ? details.contentBlocks
-                          : [
-                              {
-                                type: "paragraph",
-                                text: details.summary || "لا يوجد محتوى مفصل",
-                              } as AdminContentBlock,
-                            ]
-                        ).map((block, idx) => renderContentBlock(block, idx))}
                       </div>
                     </div>
 

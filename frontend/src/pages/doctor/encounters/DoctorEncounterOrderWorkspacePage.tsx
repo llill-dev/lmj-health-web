@@ -9,12 +9,14 @@ import {
 import { useToast } from '@/components/ui/ToastProvider';
 import { useEncounterOrderWorkspace } from '@/hooks/doctor/encounters/useEncounterOrderWorkspace';
 import { readAuthUser } from '@/lib/cookies';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorEncounterOrderWorkspacePage({
   category,
 }: {
   category: CatalogOrderCategory;
 }) {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -67,7 +69,7 @@ export default function DoctorEncounterOrderWorkspacePage({
         </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <EncounterOrderWorkspaceShell
           category={category}
           patientId={patientId}

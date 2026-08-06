@@ -293,6 +293,61 @@ export default function ContentBlockEditor<
                 </div>
               ) : null}
 
+              {blockType === "linkCard" ? (
+                <div className="space-y-4">
+                  <AdminFormField label="عنوان البطاقة">
+                    <input
+                      {...register(`contentBlocks.${index}.title` as const)}
+                      disabled={disabled}
+                      placeholder="مثال: رابط إرشادي موثوق"
+                      className={adminFieldClass(
+                        cn(adminInputClass, "text-start placeholder:text-start"),
+                        false,
+                      )}
+                    />
+                  </AdminFormField>
+                  <AdminFormField label="وصف مختصر">
+                    <textarea
+                      {...register(`contentBlocks.${index}.description` as const)}
+                      disabled={disabled}
+                      rows={3}
+                      placeholder="ملخص قصير لما سيفتحه الرابط..."
+                      className={adminFieldClass(
+                        cn(adminTextareaClass, "text-start placeholder:text-start"),
+                        false,
+                      )}
+                    />
+                  </AdminFormField>
+                  <AdminFormField label="الرابط">
+                    <input
+                      {...register(`contentBlocks.${index}.url` as const)}
+                      disabled={disabled}
+                      dir="ltr"
+                      placeholder="https://example.com"
+                      className={adminFieldClass(cn(adminInputClass), false)}
+                    />
+                  </AdminFormField>
+                </div>
+              ) : null}
+
+              {blockType === "faq" ? (
+                <AdminFormField
+                  label="الأسئلة والإجابات"
+                  hint="كل سطر بصيغة: السؤال | الإجابة"
+                >
+                  <textarea
+                    {...register(`contentBlocks.${index}.faqItemsText` as const)}
+                    disabled={disabled}
+                    rows={5}
+                    placeholder="ما الأعراض المبكرة؟ | قد تشمل..."
+                    className={adminFieldClass(
+                      cn(adminTextareaClass, "text-start placeholder:text-start"),
+                      false,
+                    )}
+                  />
+                </AdminFormField>
+              ) : null}
+
               {blockType === "divider" ? (
                 <div className="rounded-[10px] border border-dashed border-[#D0D5DD] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#667085]">
                   سيتم إدراج فاصل بصري بين أجزاء المقال.

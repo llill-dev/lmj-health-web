@@ -26,6 +26,11 @@ export type NormalizedMedicalContentDetails = AdminContentDetailsItem & {
   isFeatured?: boolean;
 };
 
+export type ReviewReadinessIssueCode =
+  | "sources_required"
+  | "disclaimer_required"
+  | "seek_help_required";
+
 export function toDisplayText(value: unknown): string {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
@@ -195,6 +200,72 @@ export function hasNewsFields(news?: JsonRecord | null): boolean {
     news.dedupeHash,
     news.importedAt,
   ].some((value) => Boolean(toDisplayText(value).trim()));
+}
+
+function readSourceText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+export function countValidContentSources(item: AdminContentDetailsItem | null): number {
+  if (!item) return 0;
+
+  const directSources = Array.isArray(item.sources)
+    ? item.sources.filter((source) => {
+        const record = source as Record<string, unknown>;
+        return Boolean(
+          readSourceText(record.url) ||
+            readSourceText(record.href) ||
+            readSourceText(record.sourceUrl) ||
+            readSourceText(record.link),
+        );
+      }).length
+    : 0;
+
+  if (directSources > 0) return directSources;
+
+  const blockSources = Array.isArray(item.contentBlocks)
+    ? item.contentBlocks.filter((block) => {
+        const record = block as Record<string, unknown>;
+        return Boolean(
+          readSourceText(record.url) ||
+            readSourceText(record.href) ||
+            readSourceText(record.sourceUrl) ||
+            readSourceText(record.sourceLink) ||
+            readSourceText(record.link),
+        );
+      }).length
+    : 0;
+
+  return blockSources;
+}
+
+export function getReviewReadinessIssueCodes(
+  item: AdminContentDetailsItem | null,
+): ReviewReadinessIssueCode[] {
+  if (!item) return ["sources_required", "disclaimer_required"];
+
+  const normalizedType = normalizeType(item.type);
+  const issues: ReviewReadinessIssueCode[] = [];
+  const sourceCount = countValidContentSources(item);
+  const disclaimerVersion = toDisplayText(item.disclaimerVersion).trim();
+  const requiresSeekHelpBlock = item.requiresSeekHelpBlock === true;
+
+  if (normalizedType !== "SETTINGS_PAGE" && sourceCount === 0) {
+    issues.push("sources_required");
+  }
+
+  if (normalizedType !== "SETTINGS_PAGE" && !disclaimerVersion) {
+    issues.push("disclaimer_required");
+  }
+
+  if (
+    (normalizedType === "CONDITION" || normalizedType === "SYMPTOM") &&
+    !requiresSeekHelpBlock
+  ) {
+    issues.push("seek_help_required");
+  }
+
+  return issues;
 }
 
 export function formatDate(value?: string) {

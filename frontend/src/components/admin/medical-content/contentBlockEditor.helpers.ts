@@ -8,6 +8,8 @@ export const CONTENT_BLOCK_TYPE_OPTIONS = [
   { value: "heading", label: "عنوان فرعي" },
   { value: "list", label: "قائمة" },
   { value: "callout", label: "تنبيه / صندوق معلومات" },
+  { value: "linkCard", label: "بطاقة رابط" },
+  { value: "faq", label: "أسئلة شائعة" },
   { value: "divider", label: "فاصل" },
 ] as const;
 
@@ -30,17 +32,31 @@ export type BlockFormValue = {
   type: SupportedBlockType;
   text?: string;
   title?: string;
+  description?: string;
+  url?: string;
   itemsText?: string;
+  faqItemsText?: string;
   level?: number;
   ordered?: boolean;
   variant?: "info" | "warn" | "danger";
 };
 
 export const contentBlockSchema = z.object({
-  type: z.enum(["paragraph", "heading", "list", "callout", "divider"]),
+  type: z.enum([
+    "paragraph",
+    "heading",
+    "list",
+    "callout",
+    "linkCard",
+    "faq",
+    "divider",
+  ]),
   text: z.string().optional(),
   title: z.string().optional(),
+  description: z.string().optional(),
+  url: z.string().optional(),
   itemsText: z.string().optional(),
+  faqItemsText: z.string().optional(),
   level: z.number().optional(),
   ordered: z.boolean().optional(),
   variant: z.enum(["info", "warn", "danger"]).optional(),
@@ -53,11 +69,34 @@ export function createEmptyBlock(
     type,
     text: "",
     title: "",
+    description: "",
+    url: "",
     itemsText: "",
+    faqItemsText: "",
     level: type === "heading" ? 2 : undefined,
     ordered: false,
     variant: type === "callout" ? "info" : undefined,
   };
+}
+
+function parseFaqItemsText(value: string | undefined): Array<{ question: string; answer: string }> {
+  if (!value?.trim()) return [];
+
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const separatorIndex = line.indexOf("|");
+      if (separatorIndex === -1) return null;
+      const question = line.slice(0, separatorIndex).trim();
+      const answer = line.slice(separatorIndex + 1).trim();
+      if (!question || !answer) return null;
+      return { question, answer };
+    })
+    .filter(
+      (item): item is { question: string; answer: string } => Boolean(item),
+    );
 }
 
 export function isMeaningfulBlock(block: BlockFormValue): boolean {
@@ -74,6 +113,16 @@ export function isMeaningfulBlock(block: BlockFormValue): boolean {
 
   if (block.type === "callout") {
     return Boolean(block.title?.trim() || block.text?.trim());
+  }
+
+  if (block.type === "linkCard") {
+    return Boolean(
+      block.title?.trim() || block.description?.trim() || block.url?.trim(),
+    );
+  }
+
+  if (block.type === "faq") {
+    return parseFaqItemsText(block.faqItemsText).length > 0;
   }
 
   return Boolean(block.text?.trim());
@@ -119,6 +168,26 @@ export function buildContentBlocks(
           : null;
       }
 
+      if (block.type === "linkCard") {
+        const title = block.title?.trim();
+        const description = block.description?.trim();
+        const url = block.url?.trim();
+
+        return title || description || url
+          ? {
+              type: "linkCard",
+              ...(title ? { title } : {}),
+              ...(description ? { description } : {}),
+              ...(url ? { url } : {}),
+            }
+          : null;
+      }
+
+      if (block.type === "faq") {
+        const items = parseFaqItemsText(block.faqItemsText);
+        return items.length ? { type: "faq", items } : null;
+      }
+
       const text = block.text?.trim();
       return text ? { type: "paragraph", text } : null;
     })
@@ -161,6 +230,34 @@ export function normalizeContentBlocksForForm(
       } satisfies BlockFormValue;
     }
 
+    if (block.type === "linkCard") {
+      return {
+        type: "linkCard",
+        title: typeof block.title === "string" ? block.title : "",
+        description:
+          typeof block.description === "string" ? block.description : "",
+        url: typeof block.url === "string" ? block.url : "",
+      } satisfies BlockFormValue;
+    }
+
+    if (block.type === "faq") {
+      const items = Array.isArray(block.items)
+        ? block.items
+            .map((item) => {
+              if (!item || typeof item !== "object") return "";
+              const question = typeof item.question === "string" ? item.question : "";
+              const answer = typeof item.answer === "string" ? item.answer : "";
+              return question || answer ? `${question} | ${answer}`.trim() : "";
+            })
+            .filter(Boolean)
+            .join("\n")
+        : "";
+      return {
+        type: "faq",
+        faqItemsText: items,
+      } satisfies BlockFormValue;
+    }
+
     if (block.type === "divider") {
       return createEmptyBlock("divider");
     }
@@ -195,6 +292,19 @@ export function getBlockValidationMessage(block: BlockFormValue): string {
 
   if (block.type === "callout" && !block.title?.trim() && !block.text?.trim()) {
     return "أدخل عنوان التنبيه أو نصه.";
+  }
+
+  if (
+    block.type === "linkCard" &&
+    !block.title?.trim() &&
+    !block.description?.trim() &&
+    !block.url?.trim()
+  ) {
+    return "أدخل عنوان البطاقة أو وصفها أو الرابط.";
+  }
+
+  if (block.type === "faq" && parseFaqItemsText(block.faqItemsText).length === 0) {
+    return "أضف سطرًا واحدًا على الأقل بصيغة: السؤال | الإجابة.";
   }
 
   return "";

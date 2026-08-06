@@ -34,12 +34,15 @@ import {
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { cn } from '@/lib/utils/utils';
 import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
+import { useI18n } from '@/i18n/provider';
 
 function sectionCardClassName() {
   return 'rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm';
 }
 
 export default function DoctorClinicFinancialSettingsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const { canManageSettings } = useBillingAccess();
   const settingsQuery = useBillingSettings();
@@ -150,13 +153,21 @@ export default function DoctorClinicFinancialSettingsPage() {
   return (
     <>
       <Helmet>
-        <title>الإعدادات المالية • LMJ Health</title>
+        <title>
+          {tr(
+            'الإعدادات المالية • LMJ Health',
+            'Financial Settings • LMJ Health',
+          )}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="الإعدادات المالية"
-          subtitle="إعدادات العملة والضريبة والخصومات وطرق الدفع"
+          title={tr('الإعدادات المالية', 'Financial settings')}
+          subtitle={tr(
+            'إعدادات العملة والضريبة والخصومات وطرق الدفع',
+            'Currency, tax, discounts, and payment method settings',
+          )}
           icon={<BookOpen className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -164,7 +175,7 @@ export default function DoctorClinicFinancialSettingsPage() {
 
         {settingsQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الإعدادات"
+            title={tr('تعذّر تحميل الإعدادات', 'Failed to load settings')}
             brief={getUserFacingRequestErrorMessage(settingsQuery.error)}
             retrying={retryingSettings}
             onRetry={() => void retrySettings()}
