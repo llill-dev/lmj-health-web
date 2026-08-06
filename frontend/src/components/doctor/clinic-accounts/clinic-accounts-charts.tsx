@@ -21,6 +21,7 @@ import type {
   WeeklyOverviewPoint,
 } from '@/lib/doctor/clinicAccounts/types';
 import { formatBillingNumber, formatUsd } from '@/lib/doctor/billing/format';
+import { useI18n } from '@/i18n/provider';
 
 const formatAxisTick = (value: number) =>
   formatBillingNumber(value, { maximumFractionDigits: 0 });
@@ -37,6 +38,9 @@ export function AccountsOverviewChart({
 }: {
   data: WeeklyOverviewPoint[];
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
   return (
     <div className="h-[280px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -58,7 +62,11 @@ export function AccountsOverviewChart({
           <Legend
             wrapperStyle={{ fontFamily: 'Cairo', fontSize: 12 }}
             formatter={(value) =>
-              value === 'income' ? 'دخل' : value === 'expenses' ? 'مصاريف' : 'أرباح'
+              value === 'income'
+                ? tr('دخل', 'Income')
+                : value === 'expenses'
+                  ? tr('مصاريف', 'Expenses')
+                  : tr('أرباح', 'Profit')
             }
           />
           <Bar dataKey="income" name="income" fill="#0F8F8B" radius={[6, 6, 0, 0]} />
@@ -71,6 +79,9 @@ export function AccountsOverviewChart({
 }
 
 export function FinancialBarChart({ data }: { data: MonthlyFinancePoint[] }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -90,8 +101,18 @@ export function FinancialBarChart({ data }: { data: MonthlyFinancePoint[] }) {
           />
           <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
           <Legend wrapperStyle={{ fontFamily: 'Cairo', fontSize: 12 }} />
-          <Bar dataKey="income" name="دخل" fill="#0F8F8B" radius={[6, 6, 0, 0]} />
-          <Bar dataKey="expenses" name="مصاريف" fill="#EF4444" radius={[6, 6, 0, 0]} />
+          <Bar
+            dataKey="income"
+            name={tr('دخل', 'Income')}
+            fill="#0F8F8B"
+            radius={[6, 6, 0, 0]}
+          />
+          <Bar
+            dataKey="expenses"
+            name={tr('مصاريف', 'Expenses')}
+            fill="#EF4444"
+            radius={[6, 6, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -99,6 +120,9 @@ export function FinancialBarChart({ data }: { data: MonthlyFinancePoint[] }) {
 }
 
 export function FinancialLineChart({ data }: { data: MonthlyFinancePoint[] }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
   return (
     <div className="h-[280px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -120,7 +144,7 @@ export function FinancialLineChart({ data }: { data: MonthlyFinancePoint[] }) {
           <Line
             type="monotone"
             dataKey="profit"
-            name="ربح"
+            name={tr('ربح', 'Profit')}
             stroke="#0F8F8B"
             strokeWidth={3}
             dot={{ r: 5, fill: '#0F8F8B' }}

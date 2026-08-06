@@ -67,8 +67,11 @@ import { MedicalContentRowSkeleton } from "@/components/admin/skeletons/MedicalC
 import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { useI18n } from "@/i18n/provider";
 import {
+  buildReleaseAcceptanceFromDetails,
+  getIncompleteAcceptanceChecks,
   getListAcceptanceScenarioChip,
   getNextWorkflowActions,
+  isApprovePublishPathReady,
   localizeAcceptanceCopy,
 } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import {
@@ -1410,10 +1413,16 @@ export default function AdminMedicalContentPage() {
                 {actionConfirm.title}
               </span>
               ».{" "}
-              {tr(
-                "سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.",
-                "The action runs on the server and cannot be undone locally.",
-              )}
+              {actionConfirm.kind === "approve" ||
+              actionConfirm.kind === "publish"
+                ? tr(
+                    "سيتم التحقق من مصفوفة قبول الإطلاق قبل التنفيذ. إن وُجدت نواقص ستُعاد إلى التحرير.",
+                    "Release acceptance will be verified before running. Missing items open the editor.",
+                  )
+                : tr(
+                    "سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.",
+                    "The action runs on the server and cannot be undone locally.",
+                  )}
             </>
           ) : (
             "—"
@@ -1473,10 +1482,49 @@ export default function AdminMedicalContentPage() {
               },
               { replace: true },
             );
-          } else if (kind === "approve") {
-            await approveMutation.mutateAsync(id);
-          } else if (kind === "publish") {
-            await publishMutation.mutateAsync(id);
+          } else if (kind === "approve" || kind === "publish") {
+            const details = extractContentDetails(
+              await adminApi.content.getById(id),
+            );
+            const snapshot = buildReleaseAcceptanceFromDetails(details, "admin");
+            if (!snapshot || !isApprovePublishPathReady(snapshot)) {
+              const incomplete = snapshot
+                ? getIncompleteAcceptanceChecks(snapshot)
+                : [];
+              const language = locale === "en" ? "en" : "ar";
+              const blockingMessages = incomplete.length
+                ? incomplete.map((item) =>
+                    localizeAcceptanceCopy(item.label, language),
+                  )
+                : [
+                    tr(
+                      "تعذّر التحقق من جاهزية الإطلاق لهذا المحتوى.",
+                      "Could not verify release acceptance readiness for this content.",
+                    ),
+                  ];
+              setActionConfirm(null);
+              toast(
+                tr(
+                  `تعذّر ${kind === "approve" ? "الموافقة" : "النشر"} قبل استكمال جاهزية الإطلاق:\n- ${blockingMessages.join("\n- ")}`,
+                  `Cannot ${kind === "approve" ? "approve" : "publish"} before release acceptance is ready:\n- ${blockingMessages.join("\n- ")}`,
+                ),
+                {
+                  title: tr(
+                    "بوابة الاعتماد غير مكتملة",
+                    "Approval gate incomplete",
+                  ),
+                  variant: "error",
+                },
+              );
+              setEditingContentId(id);
+              setEditOpen(true);
+              throw new Error("approve_publish_readiness_required");
+            }
+            if (kind === "approve") {
+              await approveMutation.mutateAsync(id);
+            } else {
+              await publishMutation.mutateAsync(id);
+            }
           } else {
             await archiveMutation.mutateAsync(id);
           }

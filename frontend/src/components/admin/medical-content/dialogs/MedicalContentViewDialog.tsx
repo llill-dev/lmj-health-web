@@ -7,6 +7,7 @@ import MedicalContentGovernancePanel, {
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import {
   buildReleaseAcceptanceFromDetails,
+  hasMeaningfulContentBlocks,
   type WorkflowActorRole,
 } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import type {
@@ -333,8 +334,7 @@ export default function MedicalContentViewDialog({
                           dynamicData={details.dataValue}
                           hasMeaningfulBlocks={
                             details.type === "SETTINGS_PAGE" ||
-                            (Array.isArray(details.contentBlocks) &&
-                              details.contentBlocks.length > 0)
+                            hasMeaningfulContentBlocks(details.contentBlocks)
                           }
                           role={workflowRole}
                           language={previewLanguage}

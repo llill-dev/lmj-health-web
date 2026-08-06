@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 export function ClinicAccountsModalShell({
   open,
@@ -19,6 +20,9 @@ export function ClinicAccountsModalShell({
   maxWidthClass?: string;
   headerPattern?: boolean;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
   useEffect(() => {
     if (!open) return;
 
@@ -83,7 +87,7 @@ export function ClinicAccountsModalShell({
                 type="button"
                 onClick={onClose}
                 className="absolute left-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] sm:left-5 sm:top-5 lg:left-6 lg:top-6"
-                aria-label="إغلاق"
+                aria-label={tr('إغلاق', 'Close')}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>

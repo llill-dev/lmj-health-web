@@ -12,14 +12,14 @@ export type AddDayFormValues = {
   slots: ScheduleTimeSlot[];
 };
 
-const DAY_OPTIONS: { value: ScheduleDayKey; label: string }[] = [
-  { value: 'Sunday', label: 'الأحد' },
-  { value: 'Monday', label: 'الإثنين' },
-  { value: 'Tuesday', label: 'الثلاثاء' },
-  { value: 'Wednesday', label: 'الأربعاء' },
-  { value: 'Thursday', label: 'الخميس' },
-  { value: 'Friday', label: 'الجمعة' },
-  { value: 'Saturday', label: 'السبت' },
+const DAY_KEYS: ScheduleDayKey[] = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
 ];
 
 export default function AddDayDialog({
@@ -34,13 +34,23 @@ export default function AddDayDialog({
   existingDays?: ScheduleDayKey[];
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const dayLabels: Record<ScheduleDayKey, string> = {
+    Sunday: tr('الأحد', 'Sunday'),
+    Monday: tr('الإثنين', 'Monday'),
+    Tuesday: tr('الثلاثاء', 'Tuesday'),
+    Wednesday: tr('الأربعاء', 'Wednesday'),
+    Thursday: tr('الخميس', 'Thursday'),
+    Friday: tr('الجمعة', 'Friday'),
+    Saturday: tr('السبت', 'Saturday'),
+  };
   const [day, setDay] = useState<ScheduleDayKey>('Sunday');
   const [slots, setSlots] = useState<ScheduleTimeSlot[]>([
     { startTime: '09:00', endTime: '12:00' },
   ]);
 
-  const availableDays = DAY_OPTIONS.filter(
-    (d) => !existingDays.includes(d.value),
+  const availableDays = DAY_KEYS.filter((d) => !existingDays.includes(d)).map(
+    (value) => ({ value, label: dayLabels[value] }),
   );
 
   // Update day to first available day when dialog opens or when available days change
@@ -166,17 +176,17 @@ export default function AddDayDialog({
                   <button
                     type='button'
                     className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]'
-                    aria-label='إغلاق'
+                    aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
                   </button>
                 </Dialog.Close>
 
                 <Dialog.Title className='text-center font-cairo text-[20px] font-extrabold leading-[26px] text-[#111827]'>
-                  إضافة يوم عمل
+                  {tr('إضافة يوم عمل', 'Add working day')}
                 </Dialog.Title>
                 <Dialog.Description className='mt-1 text-center font-cairo text-[12px] font-semibold leading-[18px] text-[#98A2B3]'>
-                  حدد اليوم وأوقات العمل
+                  {tr('حدد اليوم وأوقات العمل', 'Choose the day and working hours')}
                 </Dialog.Description>
 
                 <form
@@ -186,14 +196,17 @@ export default function AddDayDialog({
                   {availableDays.length === 0 ? (
                     <div className='rounded-[6px] border border-[#FEE4E2] bg-[#FEF3F2] p-4 text-center'>
                       <p className='font-cairo text-[13px] font-semibold text-[#F04438]'>
-                        جميع أيام الأسبوع مضافة بالفعل في الجدول
+                        {tr(
+                          'جميع أيام الأسبوع مضافة بالفعل في الجدول',
+                          'All weekdays are already in the schedule',
+                        )}
                       </p>
                     </div>
                   ) : (
                     <>
                       <div>
                         <div className='mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
-                          اليوم
+                          {tr('اليوم', 'Day')}
                         </div>
                         <StyledSelect
                           value={day}
@@ -202,16 +215,22 @@ export default function AddDayDialog({
                             value: d.value,
                             label: d.label,
                           }))}
-                          placeholder='اختر اليوم'
-                          emptyState='لا توجد أيام متاحة للإضافة.'
-                          listboxAriaLabel='اختيار يوم العمل'
+                          placeholder={tr('اختر اليوم', 'Select a day')}
+                          emptyState={tr(
+                            'لا توجد أيام متاحة للإضافة.',
+                            'No days available to add.',
+                          )}
+                          listboxAriaLabel={tr(
+                            'اختيار يوم العمل',
+                            'Select working day',
+                          )}
                         />
                       </div>
 
                       <div>
                         <div className='mb-3 flex items-center justify-between'>
                           <div className='text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
-                            أوقات العمل
+                            {tr('أوقات العمل', 'Working hours')}
                           </div>
                           <button
                             type='button'
@@ -219,7 +238,7 @@ export default function AddDayDialog({
                             className='flex h-[32px] items-center gap-2 rounded-[6px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary transition-colors hover:bg-[#F2FFFE]'
                           >
                             <Plus className='h-3.5 w-3.5' />
-                            إضافة فترة
+                            {tr('إضافة فترة', 'Add slot')}
                           </button>
                         </div>
 
@@ -235,7 +254,7 @@ export default function AddDayDialog({
                               <div className='flex flex-1 items-center gap-3'>
                                 <div className='flex-1'>
                                   <div className='mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]'>
-                                    من
+                                    {tr('من', 'From')}
                                   </div>
                                   <input
                                     type='time'
@@ -251,7 +270,7 @@ export default function AddDayDialog({
                                 </div>
                                 <div className='flex-1'>
                                   <div className='mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]'>
-                                    إلى
+                                    {tr('إلى', 'To')}
                                   </div>
                                   <input
                                     type='time'
@@ -271,7 +290,7 @@ export default function AddDayDialog({
                                   type='button'
                                   onClick={() => handleRemoveSlot(index)}
                                   className='flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[6px] bg-[#FEF3F2] text-[#F04438] transition-colors hover:bg-[#FEE4E2]'
-                                  aria-label='حذف'
+                                  aria-label={tr('حذف', 'Delete')}
                                 >
                                   <Trash2 className='h-4 w-4' />
                                 </button>
@@ -289,7 +308,9 @@ export default function AddDayDialog({
                         type='button'
                         className='h-[40px] rounded-[6px] border border-[#E5E7EB] bg-white px-6 font-cairo text-[13px] font-extrabold text-[#344054]'
                       >
-                        {availableDays.length === 0 ? 'إغلاق' : 'إلغاء'}
+                        {availableDays.length === 0
+                          ? tr('إغلاق', 'Close')
+                          : tr('إلغاء', 'Cancel')}
                       </button>
                     </Dialog.Close>
 
@@ -298,7 +319,7 @@ export default function AddDayDialog({
                         type='submit'
                         className='h-[40px] rounded-[6px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)]'
                       >
-                        إضافة اليوم
+                        {tr('إضافة اليوم', 'Add day')}
                       </button>
                     )}
                   </div>
