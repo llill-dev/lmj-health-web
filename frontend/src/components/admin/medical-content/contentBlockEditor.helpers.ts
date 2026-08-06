@@ -28,6 +28,11 @@ export const HEADING_LEVEL_OPTIONS = [
 export type SupportedBlockType =
   (typeof CONTENT_BLOCK_TYPE_OPTIONS)[number]["value"];
 
+export type FaqFormItem = {
+  question: string;
+  answer: string;
+};
+
 export type BlockFormValue = {
   type: SupportedBlockType;
   text?: string;
@@ -36,6 +41,7 @@ export type BlockFormValue = {
   url?: string;
   itemsText?: string;
   faqItemsText?: string;
+  faqItems?: FaqFormItem[];
   level?: number;
   ordered?: boolean;
   variant?: "info" | "warn" | "danger";
@@ -57,6 +63,14 @@ export const contentBlockSchema = z.object({
   url: z.string().optional(),
   itemsText: z.string().optional(),
   faqItemsText: z.string().optional(),
+  faqItems: z
+    .array(
+      z.object({
+        question: z.string(),
+        answer: z.string(),
+      }),
+    )
+    .optional(),
   level: z.number().optional(),
   ordered: z.boolean().optional(),
   variant: z.enum(["info", "warn", "danger"]).optional(),
@@ -73,13 +87,16 @@ export function createEmptyBlock(
     url: "",
     itemsText: "",
     faqItemsText: "",
+    faqItems: [],
     level: type === "heading" ? 2 : undefined,
     ordered: false,
     variant: type === "callout" ? "info" : undefined,
   };
 }
 
-function parseFaqItemsText(value: string | undefined): Array<{ question: string; answer: string }> {
+function parseFaqItemsText(
+  value: string | undefined,
+): Array<{ question: string; answer: string }> {
   if (!value?.trim()) return [];
 
   return value
@@ -97,6 +114,61 @@ function parseFaqItemsText(value: string | undefined): Array<{ question: string;
     .filter(
       (item): item is { question: string; answer: string } => Boolean(item),
     );
+}
+
+function normalizeFaqItem(value: unknown): FaqFormItem | null {
+  if (!value || typeof value !== "object") return null;
+  const entry = value as Record<string, unknown>;
+  const question = typeof entry.question === "string" ? entry.question.trim() : "";
+  const answer = typeof entry.answer === "string" ? entry.answer.trim() : "";
+  if (!question && !answer) return null;
+  return { question, answer };
+}
+
+function normalizeFaqFormItems(block: BlockFormValue): FaqFormItem[] {
+  const fromStructured = Array.isArray(block.faqItems)
+    ? block.faqItems
+        .map((item) => normalizeFaqItem(item))
+        .filter((item): item is FaqFormItem => Boolean(item))
+    : [];
+
+  if (fromStructured.length) return fromStructured;
+  return parseFaqItemsText(block.faqItemsText);
+}
+
+export function faqItemsToText(items: FaqFormItem[] | undefined): string {
+  if (!Array.isArray(items) || !items.length) return "";
+  return items
+    .map((item) => {
+      const question = item.question.trim();
+      const answer = item.answer.trim();
+      return question && answer ? `${question} | ${answer}` : "";
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
+export function getLinkCardUrlValidationMessage(url: string | undefined): string {
+  const value = url?.trim();
+  if (!value) return "";
+
+  if (value.includes(" ")) {
+    return "الرابط يجب ألا يحتوي على مسافات.";
+  }
+
+  if (value.startsWith("www.")) {
+    return "أضف البروتوكول الكامل للرابط مثل https://";
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return "استخدم رابطًا يبدأ بـ http:// أو https:// فقط.";
+    }
+    return "";
+  } catch {
+    return "صيغة الرابط غير صحيحة. مثال صحيح: https://example.com";
+  }
 }
 
 export function isMeaningfulBlock(block: BlockFormValue): boolean {
@@ -122,7 +194,7 @@ export function isMeaningfulBlock(block: BlockFormValue): boolean {
   }
 
   if (block.type === "faq") {
-    return parseFaqItemsText(block.faqItemsText).length > 0;
+    return normalizeFaqFormItems(block).length > 0;
   }
 
   return Boolean(block.text?.trim());
@@ -184,7 +256,7 @@ export function buildContentBlocks(
       }
 
       if (block.type === "faq") {
-        const items = parseFaqItemsText(block.faqItemsText);
+        const items = normalizeFaqFormItems(block);
         return items.length ? { type: "faq", items } : null;
       }
 
@@ -241,20 +313,22 @@ export function normalizeContentBlocksForForm(
     }
 
     if (block.type === "faq") {
-      const items = Array.isArray(block.items)
+      const faqItems = Array.isArray(block.items)
         ? block.items
             .map((item) => {
-              if (!item || typeof item !== "object") return "";
-              const question = typeof item.question === "string" ? item.question : "";
-              const answer = typeof item.answer === "string" ? item.answer : "";
-              return question || answer ? `${question} | ${answer}`.trim() : "";
+              if (!item || typeof item !== "object") return null;
+              const question =
+                typeof item.question === "string" ? item.question.trim() : "";
+              const answer = typeof item.answer === "string" ? item.answer.trim() : "";
+              if (!question && !answer) return null;
+              return { question, answer };
             })
-            .filter(Boolean)
-            .join("\n")
-        : "";
+            .filter((item): item is FaqFormItem => Boolean(item))
+        : [];
       return {
         type: "faq",
-        faqItemsText: items,
+        faqItems,
+        faqItemsText: faqItemsToText(faqItems),
       } satisfies BlockFormValue;
     }
 
@@ -303,8 +377,15 @@ export function getBlockValidationMessage(block: BlockFormValue): string {
     return "أدخل عنوان البطاقة أو وصفها أو الرابط.";
   }
 
-  if (block.type === "faq" && parseFaqItemsText(block.faqItemsText).length === 0) {
-    return "أضف سطرًا واحدًا على الأقل بصيغة: السؤال | الإجابة.";
+  if (
+    block.type === "linkCard" &&
+    getLinkCardUrlValidationMessage(block.url)
+  ) {
+    return getLinkCardUrlValidationMessage(block.url);
+  }
+
+  if (block.type === "faq" && normalizeFaqFormItems(block).length === 0) {
+    return "أضف سؤالًا وإجابة واحدة على الأقل.";
   }
 
   return "";

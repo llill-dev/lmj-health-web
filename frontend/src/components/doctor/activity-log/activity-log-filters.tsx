@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Search } from 'lucide-react';
-import type { ActivityLogPeriod } from '@/lib/doctor/activityLog/types';
-import { cn } from '@/lib/utils/utils';
+import { Search } from "lucide-react";
+import type { ActivityLogPeriod } from "@/lib/doctor/activityLog/types";
+import { cn } from "@/lib/utils/utils";
 
 const PERIOD_OPTIONS: Array<{ id: ActivityLogPeriod; label: string }> = [
-  { id: 'all', label: 'الكل' },
-  { id: 'today', label: 'اليوم' },
-  { id: 'week', label: 'هذا الأسبوع' },
-  { id: 'month', label: 'هذا الشهر' },
+  { id: "all", label: "الكل" },
+  { id: "today", label: "اليوم" },
+  { id: "week", label: "هذا الأسبوع" },
+  { id: "month", label: "هذا الشهر" },
 ];
 
 export function ActivityLogFilters({
@@ -44,10 +44,10 @@ export function ActivityLogFilters({
             type="button"
             onClick={() => onPeriodChange(option.id)}
             className={cn(
-              'min-h-[46px] rounded-[10px] px-3 py-2.5 font-cairo text-[12px] font-extrabold transition',
+              "min-h-[46px] rounded-[10px] px-3 py-2.5 font-cairo text-[12px] font-extrabold transition",
               period === option.id
-                ? 'bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.22)]'
-                : 'border border-[#EEF2F6] bg-white text-[#667085] hover:border-primary/30 hover:text-primary',
+                ? "bg-primary text-white shadow-[0_8px_20px_rgba(15,143,139,0.22)]"
+                : "border border-[#EEF2F6] bg-white text-[#667085] hover:border-primary/30 hover:text-primary",
             )}
           >
             {option.label}

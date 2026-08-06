@@ -21,6 +21,7 @@ import {
   adminTextareaClass,
 } from "@/components/admin/form-field";
 import { requiredLatinSlugSchema } from "@/lib/forms/slugValidation";
+import { useI18n } from "@/i18n/provider";
 
 /**
  * Script checks for bilingual service-type fields (API-3 accepts any string per locale object;
@@ -175,6 +176,7 @@ export default function UpsertServiceTypeDialog({
   editTarget,
   onSuccess,
 }: Props) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const isEdit = !!editTarget?._id;
   const createMut = useCreateServiceType();
@@ -243,8 +245,8 @@ export default function UpsertServiceTypeDialog({
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             onMouseDown={(e) => e.stopPropagation()}
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <div className="flex shrink-0 items-center justify-between border-b border-[#F2F4F7] bg-white/95 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/80">
               <div className="flex items-center gap-2">

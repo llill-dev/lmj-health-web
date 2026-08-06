@@ -24,6 +24,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Link as LinkIcon,
+  AlertTriangle,
 } from "lucide-react";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -66,14 +67,18 @@ import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { useI18n } from "@/i18n/provider";
 import {
   buildVisiblePageNumbers,
+  clampPage,
   contentStatusLabel,
   contentTypeLabel,
   formatContentDate,
+  getListReadinessSignal,
   isMineStatusFilter,
   languageKindLabel,
   normalizeContentItems,
   normalizeItemLanguage,
   PAGE_SIZE,
+  resolvePagedLimit,
+  resolvePagedPage,
   parseTypeQueryParam,
   resolvePagedTotal,
   textSearchMatch,
@@ -341,8 +346,13 @@ export default function AdminMedicalContentPage() {
   }, [itemsByType, langFilter]);
 
   const serverTotal = resolvePagedTotal(contentQuery.data, itemsByLang.length);
+  const serverLimit = resolvePagedLimit(contentQuery.data, PAGE_SIZE);
   const totalPages =
-    serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)) : 0;
+    serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / serverLimit)) : 0;
+  const currentPage =
+    totalPages > 0
+      ? clampPage(resolvePagedPage(contentQuery.data, page), totalPages)
+      : 1;
 
   const filteredItems = useMemo(() => {
     const text = query.trim();
@@ -370,14 +380,14 @@ export default function AdminMedicalContentPage() {
 
   const paginationRange = useMemo(() => {
     if (serverTotal <= 0) return { start: 0, end: 0 };
-    const start = (page - 1) * PAGE_SIZE + 1;
-    const end = Math.min(page * PAGE_SIZE, serverTotal);
+    const start = (currentPage - 1) * serverLimit + 1;
+    const end = Math.min(currentPage * serverLimit, serverTotal);
     return { start, end };
-  }, [serverTotal, page]);
+  }, [serverTotal, currentPage, serverLimit]);
 
   const visiblePageNumbers = useMemo(
-    () => buildVisiblePageNumbers(page, totalPages, 7),
-    [page, totalPages],
+    () => buildVisiblePageNumbers(currentPage, totalPages, 7),
+    [currentPage, totalPages],
   );
 
   const showPaginationBar =
@@ -390,6 +400,17 @@ export default function AdminMedicalContentPage() {
   useEffect(() => {
     setPage(1);
   }, [activeType, activeStatus, langFilter]);
+
+  useEffect(() => {
+    if (contentQuery.isAwaitingData) return;
+    if (totalPages === 0) {
+      if (page !== 1) setPage(1);
+      return;
+    }
+    if (page !== currentPage) {
+      setPage(currentPage);
+    }
+  }, [contentQuery.isAwaitingData, totalPages, page, currentPage]);
 
   useEffect(() => {
     if (showMineOnly && !isMineStatusFilter(activeStatus)) {
@@ -803,8 +824,8 @@ export default function AdminMedicalContentPage() {
                     )}
                 {showPaginationBar && totalPages > 0
                   ? tr(
-                      ` · صفحة ${page.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
-                      ` · page ${page.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                      ` · صفحة ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                      ` · page ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
                     )
                   : ""}
               </span>
@@ -851,16 +872,26 @@ export default function AdminMedicalContentPage() {
                   <Search className="h-5 w-5" />
                 </div>
                 <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
-                  {tr(
-                    "لا توجد عناصر مطابقة للفلاتر الحالية.",
-                    "No items match current filters.",
-                  )}
+                  {query.trim()
+                    ? tr(
+                        "لا توجد مطابقات ضمن الصفحة الحالية.",
+                        "No matches on the current page.",
+                      )
+                    : tr(
+                        "لا توجد عناصر مطابقة للفلاتر الحالية.",
+                        "No items match current filters.",
+                      )}
                 </p>
                 <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                  {tr(
-                    "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",
-                    "Adjust search criteria or clear filters to see broader results.",
-                  )}
+                  {query.trim()
+                    ? tr(
+                        "هذا البحث نصّي محلي داخل الصفحة فقط لأن /api/admin/content و /api/admin/content/mine لا يدعمان search.",
+                        "This text search is local to the current page because /api/admin/content and /api/admin/content/mine do not support search.",
+                      )
+                    : tr(
+                        "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",
+                        "Adjust search criteria or clear filters to see broader results.",
+                      )}
                 </p>
                 <button
                   type="button"
@@ -879,7 +910,16 @@ export default function AdminMedicalContentPage() {
                 </button>
               </div>
             ) : (
-              filteredItems.map((it) => (
+              filteredItems.map((it) => {
+                const sourceCount = quickSourceCount(it);
+                const readinessSignal = getListReadinessSignal(it, sourceCount);
+                const readinessClass =
+                  readinessSignal.tone === "warning"
+                    ? "border-[#FECACA] bg-[#FEF2F2] text-[#B42318]"
+                    : readinessSignal.tone === "success"
+                      ? "border-[#BBF7D0] bg-[#ECFDF3] text-[#027A48]"
+                      : "border-[#D1E9FF] bg-[#F5FAFF] text-[#175CD3]";
+                return (
                 <div
                   key={it._id}
                   className="flex flex-col gap-3 justify-between px-6 py-5 sm:flex-row sm:items-center"
@@ -956,26 +996,35 @@ export default function AdminMedicalContentPage() {
                       <div
                         className={cn(
                           "inline-flex gap-2 items-center rounded-[8px] px-2 py-1",
-                          quickSourceCount(it) === 0
+                          sourceCount === 0
                             ? "bg-[#FFF7ED] text-[#C2410C]"
                             : "bg-[#F8FAFC] text-[#667085]",
                         )}
                       >
                         <LinkIcon className="w-4 h-4" />
-                        {quickSourceCount(it) === null
+                        {sourceCount === null
                           ? tr(
                               "تحقق من المصادر داخل التفاصيل",
                               "Check sources in details",
                             )
-                          : quickSourceCount(it) === 0
+                          : sourceCount === 0
                             ? tr(
                                 "لا توجد مصادر مرفقة بعد",
                                 "No sources attached yet",
                               )
                             : tr(
-                                `${quickSourceCount(it)} مصدر/مصادر`,
-                                `${quickSourceCount(it)} source(s)`,
+                                `${sourceCount} مصدر/مصادر`,
+                                `${sourceCount} source(s)`,
                               )}
+                      </div>
+                      <div
+                        className={cn(
+                          "inline-flex gap-2 items-center rounded-[8px] border px-2 py-1",
+                          readinessClass,
+                        )}
+                      >
+                        <AlertTriangle className="w-4 h-4" />
+                        {tr(readinessSignal.ar, readinessSignal.en)}
                       </div>
                     </div>
                   </div>
@@ -1105,7 +1154,8 @@ export default function AdminMedicalContentPage() {
                     </button>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -1143,7 +1193,7 @@ export default function AdminMedicalContentPage() {
                   >
                     <button
                       type="button"
-                      disabled={page <= 1}
+                      disabled={currentPage <= 1}
                       onClick={() => setPage(1)}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
                       aria-label={tr("الصفحة الأولى", "First page")}
@@ -1152,7 +1202,7 @@ export default function AdminMedicalContentPage() {
                     </button>
                     <button
                       type="button"
-                      disabled={page <= 1}
+                      disabled={currentPage <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
                       aria-label={tr("الصفحة السابقة", "Previous page")}
@@ -1188,12 +1238,12 @@ export default function AdminMedicalContentPage() {
                           onClick={() => setPage(n)}
                           className={cn(
                             "min-w-[2.25rem] rounded-[10px] border px-2.5 py-1.5 font-cairo text-[12px] font-extrabold transition",
-                            n === page
+                            n === currentPage
                               ? "border-primary bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.25)]"
                               : "border-[#E5E7EB] bg-white text-[#344054] hover:border-primary/30 hover:bg-[#F0FDFA]",
                           )}
                           aria-label={tr(`الصفحة ${n}`, `Page ${n}`)}
-                          aria-current={n === page ? "page" : undefined}
+                          aria-current={n === currentPage ? "page" : undefined}
                         >
                           {n.toLocaleString(numberLocale)}
                         </button>
@@ -1225,7 +1275,7 @@ export default function AdminMedicalContentPage() {
 
                     <button
                       type="button"
-                      disabled={page >= totalPages}
+                      disabled={currentPage >= totalPages}
                       onClick={() =>
                         setPage((p) => Math.min(totalPages, p + 1))
                       }
@@ -1236,7 +1286,7 @@ export default function AdminMedicalContentPage() {
                     </button>
                     <button
                       type="button"
-                      disabled={page >= totalPages}
+                      disabled={currentPage >= totalPages}
                       onClick={() => setPage(totalPages)}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
                       aria-label={tr("الصفحة الأخيرة", "Last page")}

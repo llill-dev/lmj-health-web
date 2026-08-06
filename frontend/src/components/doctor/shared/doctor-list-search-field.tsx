@@ -1,10 +1,10 @@
-import { Search, X } from 'lucide-react';
+import { Search, X } from "lucide-react";
 
 export function DoctorListSearchField({
   value,
   onChange,
-  placeholder = 'ابحث...',
-  ariaLabel = 'بحث',
+  placeholder = "ابحث...",
+  ariaLabel = "بحث",
   onClear,
 }: {
   value: string;

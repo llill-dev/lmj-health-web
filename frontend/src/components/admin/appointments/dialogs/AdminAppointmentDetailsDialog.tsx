@@ -19,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
 import { formatPatientLabel } from "@/components/admin/appointments/appointmentListUtils";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminAppointmentDetailsDialog({
   open,
@@ -29,6 +30,7 @@ export default function AdminAppointmentDetailsDialog({
   onOpenChange: (open: boolean) => void;
   appointmentId: string | null;
 }) {
+  const { locale, dir } = useI18n();
   const enabled = open && !!appointmentId;
 
   const detailsQuery = useQuery({
@@ -70,7 +72,7 @@ export default function AdminAppointmentDetailsDialog({
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime())
       ? value
-      : parsed.toLocaleString("ar-SA");
+      : parsed.toLocaleString(locale === "ar" ? "ar-SA" : "en-US");
   }
 
   function formatBytes(value?: number | null) {
@@ -78,7 +80,8 @@ export default function AdminAppointmentDetailsDialog({
       return "—";
     }
 
-    if (value < 1024) return `${value.toLocaleString("ar-SA")} B`;
+    if (value < 1024)
+      return `${value.toLocaleString(locale === "ar" ? "ar-SA" : "en-US")} B`;
     const kb = value / 1024;
     if (kb < 1024) return `${kb.toFixed(kb >= 100 ? 0 : 1)} KB`;
     const mb = kb / 1024;
@@ -106,8 +109,8 @@ export default function AdminAppointmentDetailsDialog({
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             onMouseDown={(e) => e.stopPropagation()}
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <div className="relative px-8 pb-7 pt-7">
               <button
@@ -239,7 +242,9 @@ export default function AdminAppointmentDetailsDialog({
                       </div>
                       <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
                         {typeof appointment.priceSnapshot === "number"
-                          ? appointment.priceSnapshot.toLocaleString("ar-SA")
+                          ? appointment.priceSnapshot.toLocaleString(
+                              locale === "ar" ? "ar-SA" : "en-US",
+                            )
                           : "—"}
                       </div>
                     </div>

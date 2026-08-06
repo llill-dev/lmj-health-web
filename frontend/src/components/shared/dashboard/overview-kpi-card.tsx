@@ -1,54 +1,54 @@
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 export type OverviewKpiCardVariant =
-  | 'appointments'
-  | 'patients'
-  | 'medical-records'
-  | 'encounters'
-  | 'consultations'
-  | 'admin'
-  | 'doctor';
+  | "appointments"
+  | "patients"
+  | "medical-records"
+  | "encounters"
+  | "consultations"
+  | "admin"
+  | "doctor";
 
 export default function OverviewKpiCard({
   variant: _variant,
   icon,
   value,
   label,
-  tone = 'onDark',
+  tone = "onDark",
 }: {
   variant?: OverviewKpiCardVariant;
   icon: ReactNode;
   value: ReactNode;
   label: ReactNode;
-  tone?: 'onDark' | 'onLight';
+  tone?: "onDark" | "onLight";
 }) {
-  const onLight = tone === 'onLight';
+  const onLight = tone === "onLight";
 
   return (
     <div
       className={
         onLight
-          ? 'rounded-[6px] border-[1.82px] border-[#9EE8E0] bg-white/80 px-[18px] py-[18px] shadow-[0px_4px_12px_-2px_rgba(15,143,139,0.12)] backdrop-blur-[2px]'
-          : 'rounded-[6px] border-[1.82px] border-[#FFFFFF4D] px-[18px] py-[18px] text-[#FFFFFF33]'
+          ? "rounded-[6px] border-[1.82px] border-[#9EE8E0] bg-white/80 px-[18px] py-[18px] shadow-[0px_4px_12px_-2px_rgba(15,143,139,0.12)] backdrop-blur-[2px]"
+          : "rounded-[6px] border-[1.82px] border-[#FFFFFF4D] px-[18px] py-[18px] text-[#FFFFFF33]"
       }
     >
       <div
         className={
           onLight
-            ? 'flex justify-between text-primary'
-            : 'flex justify-between text-[#FFFFFF]'
+            ? "flex justify-between text-primary"
+            : "flex justify-between text-[#FFFFFF]"
         }
       >
         {icon}
-        <span className='font-black text-[24px] leading-[34px]'>{value}</span>
+        <span className="font-black text-[24px] leading-[34px]">{value}</span>
       </div>
       <p
         className={
           onLight
-            ? 'mt-1 text-[14px] font-semibold leading-[20px] text-primary'
-            : 'text-[14px] leading-[20px] text-[#FFFFFFE5]'
+            ? "mt-1 text-[14px] font-semibold leading-[20px] text-primary"
+            : "text-[14px] leading-[20px] text-[#FFFFFFE5]"
         }
       >
         {label}

@@ -96,10 +96,10 @@ export default function Sidebar({
         ? "/secretary"
         : role === "data-entry"
           ? "/data-entry"
-        : "/doctor";
+          : "/doctor";
   const displayName =
-    profileName?.trim()
-    || (role === "secretary"
+    profileName?.trim() ||
+    (role === "secretary"
       ? t("sidebar.role.secretary")
       : role === "data-entry"
         ? t("sidebar.role.data-entry")
@@ -120,7 +120,8 @@ export default function Sidebar({
   const desktopWidthClass = collapsed ? "lg:w-[88px]" : "lg:w-[320px]";
   const desktopOrderClass = "lg:order-first";
   const mobileAnchorClass = locale === "ar" ? "right-0" : "left-0";
-  const mobileClosedTransform = locale === "ar" ? "translate-x-full" : "-translate-x-full";
+  const mobileClosedTransform =
+    locale === "ar" ? "translate-x-full" : "-translate-x-full";
   const expanded = !collapsed || mobileOpen;
 
   return (
@@ -206,7 +207,9 @@ export default function Sidebar({
                   onClick={onToggleCollapse}
                   className="mt-1 hidden h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] lg:flex"
                   aria-label={
-                    collapsed ? t("common.expandSidebar") : t("common.collapseSidebar")
+                    collapsed
+                      ? t("common.expandSidebar")
+                      : t("common.collapseSidebar")
                   }
                 >
                   <ChevronsRight
@@ -250,14 +253,16 @@ export default function Sidebar({
                     </div>
                     <div className="flex-1">
                       <div className="text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]">
-                        {role === "admin" ? t("sidebar.role.admin") : displayName}
+                        {role === "admin"
+                          ? t("sidebar.role.admin")
+                          : displayName}
                       </div>
                       <div className="mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
                         {role === "admin"
                           ? t("sidebar.admin.emailDefault")
                           : role === "data-entry" && displayEmail === "—"
                             ? t("sidebar.dataEntry.emailDefault")
-                          : displayEmail}
+                            : displayEmail}
                       </div>
                     </div>
                   </div>
@@ -319,7 +324,12 @@ export default function Sidebar({
                               : "font-cairo text-[16px] font-bold leading-[24px] text-[#4A5565]"
                           }
                         >
-                          {localizedSidebarLabel(item.id, item.label, locale, t)}
+                          {localizedSidebarLabel(
+                            item.id,
+                            item.label,
+                            locale,
+                            t,
+                          )}
                         </span>
                       ) : null}
                     </div>

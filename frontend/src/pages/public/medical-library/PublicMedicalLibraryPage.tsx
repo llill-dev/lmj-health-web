@@ -16,22 +16,36 @@ const TYPE_LABELS: Record<string, string> = {
   SYMPTOM: "أعراض",
   MEDICATION: "أدوية",
 };
-const TYPE_OPTIONS = ["all", "NEWS", "GENERAL_ADVICE", "CONDITION", "SYMPTOM", "MEDICATION"] as const;
+const TYPE_OPTIONS = [
+  "all",
+  "NEWS",
+  "GENERAL_ADVICE",
+  "CONDITION",
+  "SYMPTOM",
+  "MEDICATION",
+] as const;
 type MedicalLibraryFilter = (typeof TYPE_OPTIONS)[number];
 const SORT_OPTIONS = ["latest", "popular"] as const;
 type MedicalLibrarySort = (typeof SORT_OPTIONS)[number];
-type MedicalLibraryItem = (typeof usePlatformMedicalLibrary extends (...args: any[]) => infer R
+type MedicalLibraryItem = typeof usePlatformMedicalLibrary extends (
+  ...args: any[]
+) => infer R
   ? R extends { items: infer T }
     ? T extends Array<infer U>
       ? U
       : never
     : never
-  : never);
+  : never;
 
-const TYPE_DESCRIPTIONS: Record<Exclude<MedicalLibraryFilter, "all">, string> = {
+const TYPE_DESCRIPTIONS: Record<
+  Exclude<MedicalLibraryFilter, "all">,
+  string
+> = {
   NEWS: "آخر الأخبار والتحديثات الطبية المنشورة من المصادر المعتمدة.",
-  GENERAL_ADVICE: "إرشادات يومية ونصائح وقائية لتحسين نمط الحياة والصحة العامة.",
-  CONDITION: "شروحات مبسطة حول الحالات المرضية والأسباب والعلامات المرتبطة بها.",
+  GENERAL_ADVICE:
+    "إرشادات يومية ونصائح وقائية لتحسين نمط الحياة والصحة العامة.",
+  CONDITION:
+    "شروحات مبسطة حول الحالات المرضية والأسباب والعلامات المرتبطة بها.",
   SYMPTOM: "محتوى يساعد على فهم الأعراض الشائعة ومتى تستدعي المتابعة الطبية.",
   MEDICATION: "مقالات ومواد توعوية مرتبطة بالأدوية والاستعمال الآمن.",
 };
@@ -219,18 +233,26 @@ export default function PublicMedicalLibraryPage() {
         <title>المكتبة الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div
+        dir="rtl"
+        lang="ar"
+        className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8"
+      >
         <section className="overflow-hidden rounded-[28px] border border-[#D9F2EF] bg-[linear-gradient(135deg,#E6F7F5_0%,#FFFFFF_60%,#F5FBFA_100%)] p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-    <div className="flex gap-2">          <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.2)]">
-                <BookOpen className="h-6 w-6" />
+              <div className="flex gap-2">
+                {" "}
+                <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.2)]">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <h1 className="font-cairo text-[28px] font-black text-[#101828] sm:text-[34px]">
+                  المكتبة الطبية
+                </h1>
               </div>
-              <h1 className="font-cairo text-[28px] font-black text-[#101828] sm:text-[34px]">
-                المكتبة الطبية
-              </h1></div>
               <p className="mt-3 font-cairo text-[14px] font-semibold leading-7 text-[#475467] sm:text-[15px]">
-                تصفح الأخبار الطبية والنصائح العامة والمحتوى الصحي المنشور ضمن المنصة.
+                تصفح الأخبار الطبية والنصائح العامة والمحتوى الصحي المنشور ضمن
+                المنصة.
               </p>
             </div>
 
@@ -262,7 +284,8 @@ export default function PublicMedicalLibraryPage() {
             const count =
               type === "all"
                 ? libraryQuery.items.length
-                : libraryQuery.items.filter((item) => item.type === type).length;
+                : libraryQuery.items.filter((item) => item.type === type)
+                    .length;
             return (
               <button
                 key={type}
@@ -274,7 +297,8 @@ export default function PublicMedicalLibraryPage() {
                     : "border-[#D9F2EF] bg-white text-primary hover:bg-[#F0FDFA]"
                 }`}
               >
-                {type === "all" ? "الكل" : TYPE_LABELS[type]} {count ? `(${count})` : ""}
+                {type === "all" ? "الكل" : TYPE_LABELS[type]}{" "}
+                {count ? `(${count})` : ""}
               </button>
             );
           })}
@@ -300,7 +324,8 @@ export default function PublicMedicalLibraryPage() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
             <div className="flex flex-wrap items-center gap-3">
               <div className="font-cairo text-[13px] font-extrabold text-[#344054]">
-                {sortedItems.length} نتيجة ضمن <span className="text-primary">{activeTypeLabel}</span>
+                {sortedItems.length} نتيجة ضمن{" "}
+                <span className="text-primary">{activeTypeLabel}</span>
               </div>
               <div className="font-cairo text-[12px] font-bold text-[#667085]">
                 {debouncedSearch.trim()
@@ -336,9 +361,18 @@ export default function PublicMedicalLibraryPage() {
               ملاحظات حول الميزة الحالية
             </h2>
             <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
-              <p>المتاح حالياً هو قراءة المحتوى الطبي المنشور وتصفح تفاصيله ومصادره.</p>
-              <p>مكتبة ملفات PDF المشتركة أو المستندات الطبية العامة غير متاحة حالياً من خلال هذا القسم.</p>
-              <p>الحجز أو طلب الخدمات الطبية يتم عبر المسارات المخصصة الأخرى وليس من داخل هذه المكتبة.</p>
+              <p>
+                المتاح حالياً هو قراءة المحتوى الطبي المنشور وتصفح تفاصيله
+                ومصادره.
+              </p>
+              <p>
+                مكتبة ملفات PDF المشتركة أو المستندات الطبية العامة غير متاحة
+                حالياً من خلال هذا القسم.
+              </p>
+              <p>
+                الحجز أو طلب الخدمات الطبية يتم عبر المسارات المخصصة الأخرى وليس
+                من داخل هذه المكتبة.
+              </p>
             </div>
           </section>
         ) : null}
@@ -490,9 +524,10 @@ export default function PublicMedicalLibraryPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {(activeType === "all" ? section.items.slice(0, 3) : section.items).map((item) =>
-                    renderLibraryCard(item, listQueryString),
-                  )}
+                  {(activeType === "all"
+                    ? section.items.slice(0, 3)
+                    : section.items
+                  ).map((item) => renderLibraryCard(item, listQueryString))}
                 </div>
               </section>
             ))}

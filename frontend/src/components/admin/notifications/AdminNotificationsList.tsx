@@ -2,6 +2,7 @@ import { Loader2 } from "lucide-react";
 import AdminNotificationCard from "./AdminNotificationCard";
 import type { AdminNotificationRow } from "./types";
 import { NotificationCardSkeleton } from "@/components/admin/skeletons/NotificationCardSkeleton";
+import { useI18n } from "@/i18n/provider";
 
 export default function AdminNotificationsList({
   items,
@@ -14,6 +15,7 @@ export default function AdminNotificationsList({
   pendingMarkId?: string | null;
   isAwaitingData?: boolean;
 }) {
+  const { locale, dir } = useI18n();
   if (isAwaitingData) {
     return (
       <ul className="space-y-4">
@@ -29,8 +31,8 @@ export default function AdminNotificationsList({
   if (items.length === 0) {
     return (
       <section
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="flex min-h-[min(420px,70vh)] flex-col items-center justify-center rounded-[14px] border border-[#EAECF0] bg-white px-6 py-12 shadow-[0_10px_28px_rgba(0,0,0,0.05)] sm:px-10 sm:py-16"
         aria-label="لا توجد إشعارات"
       >

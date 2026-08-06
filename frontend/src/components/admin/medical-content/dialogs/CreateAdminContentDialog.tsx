@@ -18,6 +18,8 @@ import {
 import StyledSelect from "@/components/ui/styled-select";
 import ContentBlockEditor from "@/components/admin/medical-content/ContentBlockEditor";
 import DynamicTemplateFieldRenderer from "@/components/admin/medical-content/DynamicTemplateFieldRenderer";
+import MedicalContentGovernancePanel from "@/components/admin/medical-content/MedicalContentGovernancePanel";
+import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import {
   buildContentBlocks,
   contentBlockSchema,
@@ -31,9 +33,18 @@ import {
 import { cn } from "@/lib/utils/utils";
 import { optionalLatinSlugSchema } from "@/lib/forms/slugValidation";
 import type {
+  AdminContentDetailsItem,
   AdminContentTemplate,
   AdminContentType,
 } from "@/lib/admin/types";
+import {
+  getReviewReadinessIssueCodes,
+  getReviewReadinessIssueMessage,
+  parseCommaSeparatedList,
+  parseJsonInput,
+  toDisplayText,
+} from "./medicalContentDialogHelpers";
+import { useI18n } from "@/i18n/provider";
 
 function normalizeTemplateData(
   data: Record<string, unknown> | undefined,
@@ -165,9 +176,18 @@ const formSchema = z
       }, "أدخل رابط مصدر خارجي صحيح يبدأ بـ http:// أو https://،  ."),
     publishedAt: z.string().optional(),
     pageVersion: z.string().optional(),
+    coverImage: z.string().optional(),
     templateId: z.string().optional(),
     templateData: z.record(z.string(), z.unknown()).default({}),
     contentBlocks: z.array(contentBlockSchema).default([createEmptyBlock()]),
+    sourcesJson: z.string().optional(),
+    tagsInput: z.string().optional(),
+    categoriesInput: z.string().optional(),
+    riskFlagsInput: z.string().optional(),
+    relatedContentIdsInput: z.string().optional(),
+    disclaimerVersion: z.string().optional(),
+    requiresSeekHelpBlock: z.boolean().default(false),
+    isFeatured: z.boolean().default(false),
   })
   .superRefine((value, ctx) => {
     if (
@@ -231,10 +251,22 @@ const EMPTY_FORM: FormValues = {
   sourceUrl: "",
   publishedAt: "",
   pageVersion: "",
+  coverImage: "",
   templateId: "",
   templateData: {},
   contentBlocks: [createEmptyBlock()],
+  sourcesJson: "[]",
+  tagsInput: "",
+  categoriesInput: "",
+  riskFlagsInput: "",
+  relatedContentIdsInput: "",
+  disclaimerVersion: "",
+  requiresSeekHelpBlock: false,
+  isFeatured: false,
 };
+
+const checkboxClass =
+  "h-4 w-4 rounded border border-[#D0D5DD] text-primary focus:ring-primary/30";
 
 type Props = {
   open: boolean;
@@ -245,6 +277,7 @@ export default function CreateAdminContentDialog({
   open,
   onOpenChange,
 }: Props) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const createMut = useCreateAdminContent();
   const submitting = createMut.isPending;
@@ -272,7 +305,18 @@ export default function CreateAdminContentDialog({
   const selectedTemplateId = watch("templateId");
   const watchedBlocks = watch("contentBlocks") ?? [];
   const watchedTemplateData = watch("templateData") ?? {};
+  const watchedCoverImage = watch("coverImage");
+  const watchedSourcesJson = watch("sourcesJson");
+  const watchedTagsInput = watch("tagsInput");
+  const watchedCategoriesInput = watch("categoriesInput");
+  const watchedRiskFlagsInput = watch("riskFlagsInput");
+  const watchedRelatedContentIdsInput = watch("relatedContentIdsInput");
+  const watchedDisclaimerVersion = watch("disclaimerVersion");
+  const watchedRequiresSeekHelpBlock = watch("requiresSeekHelpBlock");
+  const watchedIsFeatured = watch("isFeatured");
   const watchedSourceUrl = watch("sourceUrl");
+  const watchedSourceTitle = watch("sourceTitle");
+  const watchedOriginalTitle = watch("originalTitle");
   const watchedPublishedAt = watch("publishedAt");
   const templateParentType = getTemplateParentType(selectedType);
   const templateQuery = useAdminContentTemplates(
@@ -295,6 +339,82 @@ export default function CreateAdminContentDialog({
     [availableTemplates, selectedTemplateId],
   );
 
+  const previewBlocks = buildContentBlocks(watchedBlocks);
+  const previewSourcesResult = parseJsonInput(watchedSourcesJson || "", []);
+  const previewSources = Array.isArray(previewSourcesResult.value)
+    ? previewSourcesResult.value
+        .filter((item) => item && typeof item === "object")
+        .map((item) => {
+          const source = item as Record<string, unknown>;
+          return {
+            title: toDisplayText(source.title),
+            url: toDisplayText(source.url),
+          };
+        })
+        .filter((item) => item.title || item.url)
+    : [];
+  const previewTags = parseCommaSeparatedList(watchedTagsInput || "");
+  const previewCategories = parseCommaSeparatedList(watchedCategoriesInput || "");
+  const previewRiskFlags = parseCommaSeparatedList(watchedRiskFlagsInput || "");
+  const previewRelatedContentIds = parseCommaSeparatedList(
+    watchedRelatedContentIdsInput || "",
+  );
+
+  const reviewReadinessIssues = useMemo(() => {
+    const draftReadinessItem = {
+      type: selectedType,
+      disclaimerVersion: watchedDisclaimerVersion,
+      requiresSeekHelpBlock: watchedRequiresSeekHelpBlock,
+      sources: previewSources,
+      contentBlocks: previewBlocks,
+    } as AdminContentDetailsItem;
+    return getReviewReadinessIssueCodes(draftReadinessItem);
+  }, [
+    previewBlocks,
+    previewSources,
+    selectedType,
+    watchedDisclaimerVersion,
+    watchedRequiresSeekHelpBlock,
+  ]);
+  const reviewReadinessIssueSet = useMemo(
+    () => new Set(reviewReadinessIssues),
+    [reviewReadinessIssues],
+  );
+
+  const previewWarnings = useMemo(() => {
+    const warnings = reviewReadinessIssues.map((code) =>
+      getReviewReadinessIssueMessage(code, selectedLanguage),
+    );
+    const isEnglish = selectedLanguage === "en";
+
+    if (previewSourcesResult.error) {
+      warnings.push(
+        isEnglish
+          ? "Sources JSON is invalid, so source references may be missing in preview."
+          : "JSON الخاص بالمصادر غير صالح، لذلك قد تغيب بعض المراجع من المعاينة.",
+      );
+    }
+    if (
+      selectedType === "NEWS" &&
+      (!watchedSourceUrl?.trim() || !watchedPublishedAt?.trim())
+    ) {
+      warnings.push(
+        isEnglish
+          ? "News source URL and publish date should be completed."
+          : "يجب استكمال رابط مصدر الخبر وتاريخ النشر.",
+      );
+    }
+
+    return warnings;
+  }, [
+    previewSourcesResult.error,
+    reviewReadinessIssues,
+    selectedLanguage,
+    selectedType,
+    watchedPublishedAt,
+    watchedSourceUrl,
+  ]);
+
   const readinessItems = useMemo(() => {
     const items = [
       {
@@ -303,6 +423,25 @@ export default function CreateAdminContentDialog({
         done:
           selectedType === "SETTINGS_PAGE" ||
           watchedBlocks.some((block) => isMeaningfulBlock(block)),
+      },
+      {
+        key: "sources",
+        label: "إضافة مصدر موثوق واحد على الأقل",
+        done:
+          selectedType === "SETTINGS_PAGE" ||
+          !reviewReadinessIssueSet.has("sources_required"),
+      },
+      {
+        key: "disclaimerVersion",
+        label: "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+        done:
+          selectedType === "SETTINGS_PAGE" ||
+          !reviewReadinessIssueSet.has("disclaimer_required"),
+      },
+      {
+        key: "seekHelp",
+        label: "تفعيل Seek Help Block لأن النوع حالة/عرض",
+        done: !reviewReadinessIssueSet.has("seek_help_required"),
       },
       {
         key: "newsMetadata",
@@ -337,6 +476,7 @@ export default function CreateAdminContentDialog({
     return items;
   }, [
     availableTemplates.length,
+    reviewReadinessIssueSet,
     selectedTemplate,
     selectedLanguage,
     selectedTemplateId,
@@ -406,6 +546,7 @@ export default function CreateAdminContentDialog({
       }
 
       clearErrors("templateData");
+      clearErrors("sourcesJson");
       const templateValidationIssues = collectTemplateFieldValidationIssues(
         selectedTemplate,
         v.templateData,
@@ -423,6 +564,8 @@ export default function CreateAdminContentDialog({
 
       if (hasTemplateErrors) return;
 
+      const parsedSourcesResult = parseJsonInput(v.sourcesJson || "", []);
+
       const normalizedSourceUrl =
         v.type === "NEWS" ? normalizeNewsSourceUrl(v.sourceUrl ?? "") : "";
       const normalizedContentBlocks = buildContentBlocks(v.contentBlocks);
@@ -430,6 +573,33 @@ export default function CreateAdminContentDialog({
         v.templateData,
         selectedTemplate,
       );
+      const parsedSourcesInput = parsedSourcesResult.error ? [] : parsedSourcesResult.value;
+      const parsedSources = Array.isArray(parsedSourcesInput)
+        ? parsedSourcesInput
+            .filter((item) => item && typeof item === "object")
+            .map((item) => {
+              const source = item as Record<string, unknown>;
+              return {
+                title: toDisplayText(source.title).trim() || undefined,
+                url: toDisplayText(source.url).trim() || undefined,
+              };
+            })
+            .filter((item) => item.title || item.url)
+        : [];
+      const newsSource = normalizedSourceUrl
+        ? {
+            title: v.sourceTitle?.trim() || v.title.trim(),
+            url: normalizedSourceUrl,
+          }
+        : null;
+      const normalizedSources = newsSource
+        ? [
+            ...parsedSources.filter(
+              (item) => item.url !== newsSource.url || item.title !== newsSource.title,
+            ),
+            newsSource,
+          ]
+        : parsedSources;
 
       await createMut.mutateAsync({
         type: v.type,
@@ -437,19 +607,19 @@ export default function CreateAdminContentDialog({
         summary: v.summary?.trim() || undefined,
         language: v.language,
         slug: v.slug?.trim() || undefined,
+        coverImage: v.coverImage?.trim() || undefined,
         pageVersion: v.pageVersion?.trim() || undefined,
         templateId: v.templateId?.trim() || undefined,
         data: normalizedTemplateData,
         contentBlocks: normalizedContentBlocks,
-        sources:
-          v.type === "NEWS" && normalizedSourceUrl
-            ? [
-                {
-                  title: v.sourceTitle?.trim() || v.title.trim(),
-                  url: normalizedSourceUrl,
-                },
-              ]
-            : undefined,
+        tags: parseCommaSeparatedList(v.tagsInput || ""),
+        categories: parseCommaSeparatedList(v.categoriesInput || ""),
+        riskFlags: parseCommaSeparatedList(v.riskFlagsInput || ""),
+        relatedContentIds: parseCommaSeparatedList(v.relatedContentIdsInput || ""),
+        disclaimerVersion: v.disclaimerVersion?.trim() || undefined,
+        requiresSeekHelpBlock: v.requiresSeekHelpBlock,
+        isFeatured: v.isFeatured,
+        sources: normalizedSources,
         news:
           v.type === "NEWS"
             ? {
@@ -526,7 +696,7 @@ export default function CreateAdminContentDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={onSubmit}>
+            <form dir={dir} onSubmit={onSubmit}>
               <div className="max-h-[calc(92vh-240px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField label="نوع المحتوى" required>
@@ -615,6 +785,19 @@ export default function CreateAdminContentDialog({
                       />
                     </AdminFormField>
                   </div>
+
+                  <AdminFormField
+                    label="صورة الغلاف (اختياري)"
+                    hint="رابط خارجي لصورة الغلاف المستخدمة في المعاينة."
+                    error={errors.coverImage?.message}
+                  >
+                    <input
+                      {...register("coverImage")}
+                      dir="ltr"
+                      placeholder="https://example.com/image.jpg"
+                      className={adminFieldClass(cn(adminInputClass))}
+                    />
+                  </AdminFormField>
 
                   {templateParentType ? (
                     <div className="rounded-[14px] border border-[#D8E6E5] bg-[#F8FBFB] p-4">
@@ -793,6 +976,92 @@ export default function CreateAdminContentDialog({
                     />
                   </AdminFormField>
 
+                  <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-white p-4">
+                    <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
+                      التصنيف والحوكمة
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <AdminFormField label="الوسوم">
+                        <input
+                          {...register("tagsInput")}
+                          placeholder="tag-1, tag-2"
+                          className={adminFieldClass(cn(adminInputClass))}
+                        />
+                      </AdminFormField>
+
+                      <AdminFormField label="الفئات">
+                        <input
+                          {...register("categoriesInput")}
+                          placeholder="category-1, category-2"
+                          className={adminFieldClass(cn(adminInputClass))}
+                        />
+                      </AdminFormField>
+
+                      <AdminFormField label="Risk Flags">
+                        <input
+                          {...register("riskFlagsInput")}
+                          placeholder="flag-1, flag-2"
+                          className={adminFieldClass(cn(adminInputClass))}
+                        />
+                      </AdminFormField>
+
+                      <AdminFormField label="Related Content IDs">
+                        <input
+                          {...register("relatedContentIdsInput")}
+                          dir="ltr"
+                          placeholder="id-1, id-2"
+                          className={adminFieldClass(cn(adminInputClass))}
+                        />
+                      </AdminFormField>
+                    </div>
+
+                    <AdminFormField
+                      label="المصادر (JSON متقدم)"
+                      hint='مثال: [{"title":"WHO","url":"https://..."}]'
+                      error={errors.sourcesJson?.message}
+                    >
+                      <textarea
+                        {...register("sourcesJson")}
+                        dir="ltr"
+                        rows={5}
+                        className={adminFieldClass(
+                          cn(adminTextareaClass, "font-mono text-[12px]"),
+                          Boolean(errors.sourcesJson),
+                        )}
+                      />
+                    </AdminFormField>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <AdminFormField label="إصدار التنبيه">
+                        <input
+                          {...register("disclaimerVersion")}
+                          placeholder="v1 / 2026-08"
+                          className={adminFieldClass(cn(adminInputClass))}
+                        />
+                      </AdminFormField>
+
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <label className="flex items-center justify-end gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#344054]">
+                          <span>يتطلب Seek Help Block</span>
+                          <input
+                            type="checkbox"
+                            {...register("requiresSeekHelpBlock")}
+                            className={checkboxClass}
+                          />
+                        </label>
+
+                        <label className="flex items-center justify-end gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#344054]">
+                          <span>محتوى مميز</span>
+                          <input
+                            type="checkbox"
+                            {...register("isFeatured")}
+                            className={checkboxClass}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </section>
+
                   <div className="rounded-[14px] border border-[#E4E7EC] bg-[#FCFCFD] p-4">
                     <div className="text-right">
                       <h3 className="font-cairo text-[15px] font-extrabold text-primary">
@@ -818,15 +1087,60 @@ export default function CreateAdminContentDialog({
                         </div>
                       ))}
                     </div>
-                    {selectedType !== "SETTINGS_PAGE" ? (
-                      <div className="mt-3 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-right font-cairo text-[12px] font-bold text-amber-700">
-                        قبل إرسال المسودة للمراجعة: أضف مصدرًا موثوقًا وحدد إصدار
-                        التنبيه الطبي من شاشة التعديل.
-                        {(selectedType === "CONDITION" || selectedType === "SYMPTOM") &&
-                        " هذا النوع يتطلب أيضًا تفعيل Seek Help Block."}
-                      </div>
+                    {previewWarnings.length ? (
+                      <ul className="mt-3 list-disc space-y-1 ps-5 text-right font-cairo text-[12px] font-bold text-amber-700">
+                        {previewWarnings.map((warning, index) => (
+                          <li key={`create-preview-warning-${index}`}>{warning}</li>
+                        ))}
+                      </ul>
                     ) : null}
                   </div>
+
+                  <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-white p-4">
+                    <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
+                      مراجعة الحوكمة والمعاينة
+                    </div>
+                    <p className="font-cairo text-[12px] font-semibold text-[#667085]">
+                      معاينة سريعة تساعدك على التأكد من جاهزية المسودة للمراجعة دون
+                      تعطيل الحفظ كـ DRAFT.
+                    </p>
+                    <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+                      <MedicalContentGovernancePanel
+                        contentType={selectedType}
+                        disclaimerVersion={watchedDisclaimerVersion?.trim() || undefined}
+                        requiresSeekHelpBlock={watchedRequiresSeekHelpBlock}
+                        isFeatured={watchedIsFeatured}
+                        riskFlags={previewRiskFlags}
+                        tags={previewTags}
+                        categories={previewCategories}
+                        relatedContentIds={previewRelatedContentIds}
+                        sources={previewSources}
+                        dynamicData={watchedTemplateData}
+                        invalidDynamicData={false}
+                        news={{
+                          sourceName: watchedSourceTitle?.trim() || undefined,
+                          sourceUrl: watchedSourceUrl?.trim() || undefined,
+                          originalTitle: watchedOriginalTitle?.trim() || undefined,
+                          publishedAt: watchedPublishedAt?.trim() || undefined,
+                        }}
+                      />
+                      <MedicalContentPatientPreview
+                        title={watch("title")?.trim() || undefined}
+                        summary={watch("summary")?.trim() || undefined}
+                        coverImage={watchedCoverImage?.trim() || undefined}
+                        language={selectedLanguage}
+                        contentBlocks={previewBlocks}
+                        disclaimerVersion={watchedDisclaimerVersion?.trim() || undefined}
+                        requiresSeekHelpBlock={watchedRequiresSeekHelpBlock}
+                        riskFlags={previewRiskFlags}
+                        sources={previewSources}
+                        newsSourceName={watchedSourceTitle?.trim() || undefined}
+                        newsSourceUrl={watchedSourceUrl?.trim() || undefined}
+                        newsPublishedAt={watchedPublishedAt?.trim() || undefined}
+                        previewWarnings={previewWarnings}
+                      />
+                    </div>
+                  </section>
 
                   {createMut.isError ? (
                     <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600">

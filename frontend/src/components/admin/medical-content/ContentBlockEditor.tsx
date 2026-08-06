@@ -23,8 +23,11 @@ import {
   CONTENT_BLOCK_TYPE_OPTIONS,
   HEADING_LEVEL_OPTIONS,
   createEmptyBlock,
+  faqItemsToText,
   getBlockValidationMessage,
+  getLinkCardUrlValidationMessage,
   type BlockFormValue,
+  type FaqFormItem,
   type SupportedBlockType,
 } from "./contentBlockEditor.helpers";
 
@@ -93,7 +96,13 @@ export default function ContentBlockEditor<
       <div className="space-y-4">
         {fields.map((field, index) => {
           const blockType = blocks[index]?.type || "paragraph";
-          const blockError = getBlockValidationMessage(blocks[index] ?? createEmptyBlock());
+          const blockError = getBlockValidationMessage(
+            blocks[index] ?? createEmptyBlock(),
+          );
+          const linkCardUrlMessage =
+            blockType === "linkCard"
+              ? getLinkCardUrlValidationMessage(blocks[index]?.url)
+              : "";
 
           return (
             <div
@@ -324,28 +333,134 @@ export default function ContentBlockEditor<
                       disabled={disabled}
                       dir="ltr"
                       placeholder="https://example.com"
-                      className={adminFieldClass(cn(adminInputClass), false)}
+                      aria-invalid={Boolean(linkCardUrlMessage)}
+                      className={adminFieldClass(
+                        cn(adminInputClass),
+                        Boolean(linkCardUrlMessage),
+                      )}
                     />
                   </AdminFormField>
+                  {linkCardUrlMessage ? (
+                    <p className="mt-1 text-right font-cairo text-[12px] font-bold text-red-600">
+                      {linkCardUrlMessage}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#667085]">
+                      يُفضّل استخدام روابط عامة موثوقة تبدأ بـ https://
+                    </p>
+                  )}
                 </div>
               ) : null}
 
               {blockType === "faq" ? (
-                <AdminFormField
-                  label="الأسئلة والإجابات"
-                  hint="كل سطر بصيغة: السؤال | الإجابة"
-                >
-                  <textarea
-                    {...register(`contentBlocks.${index}.faqItemsText` as const)}
-                    disabled={disabled}
-                    rows={5}
-                    placeholder="ما الأعراض المبكرة؟ | قد تشمل..."
-                    className={adminFieldClass(
-                      cn(adminTextareaClass, "text-start placeholder:text-start"),
-                      false,
-                    )}
-                  />
-                </AdminFormField>
+                <Controller
+                  name={`contentBlocks.${index}.faqItems` as const}
+                  control={control}
+                  render={({ field: controlledField }) => {
+                    const faqItems =
+                      Array.isArray(controlledField.value) &&
+                      controlledField.value.length
+                        ? controlledField.value
+                        : ([{ question: "", answer: "" }] as FaqFormItem[]);
+
+                    const updateFaqItems = (nextItems: FaqFormItem[]) => {
+                      controlledField.onChange(nextItems);
+                      setValue(
+                        `contentBlocks.${index}.faqItemsText` as const,
+                        faqItemsToText(nextItems) as TFormValues[keyof TFormValues],
+                      );
+                      clearErrors("contentBlocks");
+                    };
+
+                    return (
+                      <div className="space-y-3">
+                        <AdminFormField
+                          label="الأسئلة والإجابات"
+                          hint="أضف كل سؤال مع إجابته بشكل منفصل لرفع جودة المحتوى."
+                        >
+                          <div className="space-y-3">
+                            {faqItems.map((item, faqIndex) => (
+                              <div
+                                key={`faq-item-${field.id}-${faqIndex}`}
+                                className="rounded-[12px] border border-[#E4E7EC] bg-[#F9FAFB] p-3"
+                              >
+                                <div className="mb-2 flex items-center justify-between">
+                                  <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
+                                    عنصر FAQ {faqIndex + 1}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      updateFaqItems(
+                                        faqItems.length === 1
+                                          ? [{ question: "", answer: "" }]
+                                          : faqItems.filter((_, i) => i !== faqIndex),
+                                      )
+                                    }
+                                    disabled={disabled}
+                                    className="inline-flex h-7 items-center justify-center rounded-[8px] border border-[#FECACA] px-2 font-cairo text-[11px] font-bold text-red-600 disabled:opacity-50"
+                                  >
+                                    حذف
+                                  </button>
+                                </div>
+                                <div className="space-y-2">
+                                  <input
+                                    value={item.question}
+                                    onChange={(event) =>
+                                      updateFaqItems(
+                                        faqItems.map((entry, i) =>
+                                          i === faqIndex
+                                            ? { ...entry, question: event.target.value }
+                                            : entry,
+                                        ),
+                                      )
+                                    }
+                                    disabled={disabled}
+                                    placeholder="السؤال"
+                                    className={adminFieldClass(
+                                      cn(adminInputClass, "text-start placeholder:text-start"),
+                                      false,
+                                    )}
+                                  />
+                                  <textarea
+                                    value={item.answer}
+                                    onChange={(event) =>
+                                      updateFaqItems(
+                                        faqItems.map((entry, i) =>
+                                          i === faqIndex
+                                            ? { ...entry, answer: event.target.value }
+                                            : entry,
+                                        ),
+                                      )
+                                    }
+                                    disabled={disabled}
+                                    rows={3}
+                                    placeholder="الإجابة"
+                                    className={adminFieldClass(
+                                      cn(adminTextareaClass, "text-start placeholder:text-start"),
+                                      false,
+                                    )}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </AdminFormField>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateFaqItems([...faqItems, { question: "", answer: "" }])
+                          }
+                          disabled={disabled}
+                          className="inline-flex h-9 items-center justify-center gap-2 rounded-[10px] border border-primary/20 bg-white px-3 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-50"
+                        >
+                          <Plus className="h-4 w-4" aria-hidden />
+                          إضافة سؤال
+                        </button>
+                      </div>
+                    );
+                  }}
+                />
               ) : null}
 
               {blockType === "divider" ? (

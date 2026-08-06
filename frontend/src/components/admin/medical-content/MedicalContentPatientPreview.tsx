@@ -41,6 +41,20 @@ function toLocalizedText(value: unknown, language: "ar" | "en"): string {
   return "";
 }
 
+function getSafeExternalUrl(value: unknown): string | null {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function getPreviewCopy(language: "ar" | "en") {
   if (language === "en") {
     return {
@@ -170,6 +184,7 @@ function renderContentBlock(
     const title = toLocalizedText((block as { title?: unknown }).title, language);
     const description = toLocalizedText((block as { description?: unknown }).description, language);
     const url = toLocalizedText((block as { url?: unknown }).url, language);
+    const safeUrl = getSafeExternalUrl(url);
     return (
       <div
         key={`preview-block-${index}`}
@@ -183,9 +198,9 @@ function renderContentBlock(
             {description}
           </div>
         ) : null}
-        {url ? (
+        {safeUrl ? (
           <a
-            href={url}
+            href={safeUrl}
             target="_blank"
             rel="noreferrer"
             className="mt-2 inline-flex items-center gap-1 font-cairo text-[12px] font-bold text-primary hover:underline"
@@ -193,6 +208,8 @@ function renderContentBlock(
             {url}
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
+        ) : url ? (
+          <div className="mt-2 font-cairo text-[12px] font-bold text-[#667085]">{url}</div>
         ) : null}
       </div>
     );
@@ -210,7 +227,8 @@ function renderContentBlock(
           question: toLocalizedText(faq.question, language),
           answer: toLocalizedText(faq.answer, language),
         };
-      });
+      })
+      .filter((item) => item.question || item.answer);
 
     return (
       <div key={`preview-block-${index}`} className="space-y-3">
@@ -271,6 +289,7 @@ export default function MedicalContentPatientPreview({
   const normalizedDisclaimerVersion = toLocalizedText(disclaimerVersion, language);
   const normalizedNewsSourceName = toLocalizedText(newsSourceName, language);
   const normalizedNewsSourceUrl = toLocalizedText(newsSourceUrl, language);
+  const safeNewsSourceUrl = getSafeExternalUrl(normalizedNewsSourceUrl);
 
   const blocks =
     contentBlocks && contentBlocks.length
@@ -310,15 +329,19 @@ export default function MedicalContentPatientPreview({
                 </span>
               ) : null}
               {normalizedNewsSourceUrl ? (
-                <a
-                  href={normalizedNewsSourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-primary hover:underline"
-                >
-                  {normalizedNewsSourceUrl}
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
+                safeNewsSourceUrl ? (
+                  <a
+                    href={safeNewsSourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                  >
+                    {normalizedNewsSourceUrl}
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                ) : (
+                  <span>{normalizedNewsSourceUrl}</span>
+                )
               ) : null}
               {newsPublishedAt ? (
                 <span>
@@ -399,6 +422,7 @@ export default function MedicalContentPatientPreview({
               {sources.map((source, index) => {
                 const sourceTitle = toLocalizedText(source.title, language);
                 const sourceUrl = toLocalizedText(source.url, language);
+                const safeSourceUrl = getSafeExternalUrl(sourceUrl);
                 return (
                   <div
                     key={`${sourceTitle || sourceUrl || "preview-source"}-${index}`}
@@ -408,15 +432,21 @@ export default function MedicalContentPatientPreview({
                       {sourceTitle || copy.sourceFallback}
                     </div>
                     {sourceUrl ? (
-                      <a
-                        href={sourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-1 inline-flex items-center gap-1 font-cairo text-[12px] font-bold text-primary hover:underline"
-                      >
-                        {sourceUrl}
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
+                      safeSourceUrl ? (
+                        <a
+                          href={safeSourceUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 font-cairo text-[12px] font-bold text-primary hover:underline"
+                        >
+                          {sourceUrl}
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      ) : (
+                        <div className="mt-1 font-cairo text-[12px] font-bold text-[#667085]">
+                          {sourceUrl}
+                        </div>
+                      )
                     ) : null}
                   </div>
                 );

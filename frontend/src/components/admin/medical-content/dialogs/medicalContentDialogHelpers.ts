@@ -10,6 +10,56 @@ import type {
 
 type JsonRecord = Record<string, unknown>;
 
+function tryParseJsonString(value: string): unknown | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (typeof parsed === "string") {
+      const nested = parsed.trim();
+      if ((nested.startsWith("{") && nested.endsWith("}")) || (nested.startsWith("[") && nested.endsWith("]"))) {
+        try {
+          return JSON.parse(nested);
+        } catch {
+          return parsed;
+        }
+      }
+    }
+    return parsed;
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeJsonLikeValue(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "[object Object]" || trimmed === "undefined") {
+    return undefined;
+  }
+  const parsed = tryParseJsonString(trimmed);
+  return parsed !== undefined ? parsed : value;
+}
+
+function toBooleanLike(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") {
+    if (value === 1) return true;
+    if (value === 0) return false;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true" || normalized === "1" || normalized === "yes") {
+      return true;
+    }
+    if (normalized === "false" || normalized === "0" || normalized === "no") {
+      return false;
+    }
+  }
+  return undefined;
+}
+
 export type NormalizedMedicalContentDetails = AdminContentDetailsItem & {
   rawItem: JsonRecord;
   dataValue?: unknown;
@@ -30,6 +80,29 @@ export type ReviewReadinessIssueCode =
   | "sources_required"
   | "disclaimer_required"
   | "seek_help_required";
+
+export function getReviewReadinessIssueMessage(
+  code: ReviewReadinessIssueCode,
+  language: "ar" | "en" = "ar",
+): string {
+  if (language === "en") {
+    if (code === "sources_required") {
+      return "No source references are currently attached.";
+    }
+    if (code === "disclaimer_required") {
+      return "Disclaimer version is missing.";
+    }
+    return "Seek Help block requirement is not enabled.";
+  }
+
+  if (code === "sources_required") {
+    return "لا توجد مراجع مصادر مرفقة حاليًا.";
+  }
+  if (code === "disclaimer_required") {
+    return "إصدار التنبيه الطبي غير مضاف.";
+  }
+  return "متطلب Seek Help Block غير مفعّل.";
+}
 
 export function toDisplayText(value: unknown): string {
   if (typeof value === "string") return value;
@@ -66,30 +139,60 @@ export function normalizeType(value: unknown): AdminContentType {
 }
 
 function toStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.map((item) => toDisplayText(item).trim()).filter(Boolean);
+  const normalized = normalizeJsonLikeValue(value);
+
+  if (Array.isArray(normalized)) {
+    return normalized
+      .map((item) => toDisplayText(item).trim())
+      .filter(Boolean);
+  }
+
+  if (typeof normalized === "string") {
+    return normalized
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  if (normalized && typeof normalized === "object") {
+    const single = toDisplayText(normalized).trim();
+    return single ? [single] : [];
+  }
+
+  return [];
 }
 
 function toSources(value: unknown): Array<{ title?: string; url?: string }> {
-  if (!Array.isArray(value)) return [];
-  return value
+  const normalized = normalizeJsonLikeValue(value);
+  const list = Array.isArray(normalized)
+    ? normalized
+    : normalized && typeof normalized === "object"
+      ? [normalized]
+      : [];
+
+  return list
     .filter((item) => item && typeof item === "object")
     .map((item) => {
       const source = item as JsonRecord;
       return {
-        title: toOptionalText(source.title),
-        url: toOptionalText(source.url),
+        title: toOptionalText(source.title ?? source.name ?? source.label),
+        url: toOptionalText(
+          source.url ?? source.href ?? source.sourceUrl ?? source.link,
+        ),
       };
-    });
+    })
+    .filter((source) => Boolean(source.title || source.url));
 }
 
 function toContentBlocks(value: unknown): AdminContentBlock[] {
-  return Array.isArray(value) ? (value as AdminContentBlock[]) : [];
+  const normalized = normalizeJsonLikeValue(value);
+  return Array.isArray(normalized) ? (normalized as AdminContentBlock[]) : [];
 }
 
 function toRecord(value: unknown): JsonRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as JsonRecord)
+  const normalized = normalizeJsonLikeValue(value);
+  return normalized && typeof normalized === "object" && !Array.isArray(normalized)
+    ? (normalized as JsonRecord)
     : null;
 }
 
@@ -106,6 +209,39 @@ export function extractMedicalContentDetails(
 ): NormalizedMedicalContentDetails | null {
   const item = getRawDetailsItem(payload);
   if (!item) return null;
+  const template =
+    toRecord(item.template) ??
+    toRecord(item.templateDefinition) ??
+    toRecord(item.templateMeta);
+  const dataValue =
+    normalizeJsonLikeValue(item.data) ??
+    normalizeJsonLikeValue(item.dataJson) ??
+    normalizeJsonLikeValue(item.templateData) ??
+    normalizeJsonLikeValue(item.structuredData);
+  const newsRecord = toRecord(item.news);
+  const fallbackNews: JsonRecord = {
+    sourceName: item.sourceName,
+    sourceUrl: item.sourceUrl,
+    originalTitle: item.originalTitle,
+    publishedAt: item.newsPublishedAt,
+    aiSummary: item.aiSummary,
+    dedupeHash: item.newsDedupeHash,
+    importedAt: item.newsImportedAt,
+  };
+  const hasFallbackNews = Object.values(fallbackNews).some(
+    (value) => value != null && toDisplayText(value).trim(),
+  );
+  const news = newsRecord ?? (hasFallbackNews ? fallbackNews : null);
+  const requiresSeekHelpBlock = toBooleanLike(item.requiresSeekHelpBlock);
+  const isFeatured = toBooleanLike(item.isFeatured);
+  const primaryBlocks = toContentBlocks(item.contentBlocks);
+  const contentBlocks =
+    primaryBlocks.length > 0 ? primaryBlocks : toContentBlocks(item.blocks);
+  const templateId =
+    toOptionalText(item.templateId) ??
+    toOptionalText(item.template_id) ??
+    toOptionalText(template?._id) ??
+    null;
 
   return {
     ...(item as AdminContentDetailsItem),
@@ -124,45 +260,38 @@ export function extractMedicalContentDetails(
     createdBy: item.createdBy as AdminContentDetailsItem["createdBy"],
     reviewedBy: item.reviewedBy as AdminContentDetailsItem["reviewedBy"],
     publishedAt: toOptionalText(item.publishedAt),
-    contentBlocks: toContentBlocks(item.contentBlocks),
+    contentBlocks,
     tags: toStringArray(item.tags),
     categories: toStringArray(item.categories),
     riskFlags: toStringArray(item.riskFlags),
     relatedContentIds: toStringArray(item.relatedContentIds),
-    sources: toSources(item.sources),
+    sources: toSources(item.sources ?? item.references),
     pageVersion: toOptionalText(item.pageVersion) ?? null,
     disclaimerVersion: toOptionalText(item.disclaimerVersion),
     rejectionReason: toOptionalText(item.rejectionReason) ?? null,
-    templateId: toOptionalText(item.templateId) ?? null,
+    templateId,
     sourceName: toOptionalText(item.sourceName),
     originalTitle: toOptionalText(item.originalTitle),
     aiSummary: toOptionalText(item.aiSummary),
     coverImage: toOptionalText(item.coverImage),
-    requiresSeekHelpBlock:
-      typeof item.requiresSeekHelpBlock === "boolean"
-        ? item.requiresSeekHelpBlock
-        : undefined,
-    isFeatured:
-      typeof item.isFeatured === "boolean" ? item.isFeatured : undefined,
-    dataValue: item.data,
-    template: toRecord(item.template),
-    news: toRecord(item.news),
+    requiresSeekHelpBlock,
+    isFeatured,
+    dataValue,
+    template,
+    news,
   };
 }
 
 export function toPrettyJson(value: unknown, fallback = ""): string {
-  if (value == null) return fallback;
-  if (typeof value === "string") {
-    const trimmed = value.trim();
+  const normalized = normalizeJsonLikeValue(value);
+  if (normalized == null) return fallback;
+  if (typeof normalized === "string") {
+    const trimmed = normalized.trim();
     if (!trimmed) return fallback;
-    try {
-      return JSON.stringify(JSON.parse(trimmed), null, 2);
-    } catch {
-      return value;
-    }
+    return normalized;
   }
   try {
-    return JSON.stringify(value, null, 2);
+    return JSON.stringify(normalized, null, 2);
   } catch {
     return fallback;
   }
@@ -175,8 +304,17 @@ export function parseJsonInput(
   const trimmed = value.trim();
   if (!trimmed) return { value: fallback };
 
+  if (trimmed === "[object Object]" || trimmed === "undefined") {
+    return { value: fallback };
+  }
+
   try {
-    return { value: JSON.parse(trimmed) };
+    const parsed = JSON.parse(trimmed);
+    if (typeof parsed === "string") {
+      const nested = tryParseJsonString(parsed);
+      return { value: nested !== undefined ? nested : parsed };
+    }
+    return { value: parsed };
   } catch {
     return { value: fallback, error: "صيغة JSON غير صالحة." };
   }

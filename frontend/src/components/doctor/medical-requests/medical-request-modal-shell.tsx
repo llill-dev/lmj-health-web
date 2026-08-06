@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { useEffect, type ReactNode } from 'react';
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
 
 export function MedicalRequestModalShell({
   open,
@@ -10,7 +10,7 @@ export function MedicalRequestModalShell({
   title,
   titleIcon,
   children,
-  maxWidthClass = 'max-w-[560px]',
+  maxWidthClass = "max-w-[560px]",
 }: {
   open: boolean;
   onClose: () => void;
@@ -23,16 +23,16 @@ export function MedicalRequestModalShell({
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
 
     const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', onKeyDown);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
       document.body.style.overflow = prevOverflow;
-      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [open, onClose]);
 
@@ -56,7 +56,7 @@ export function MedicalRequestModalShell({
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <button

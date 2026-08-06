@@ -1,13 +1,13 @@
-import { ChevronLeft, Pill } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { buildPrescriptionPatientSubtitle } from './map-prescription-ui';
+import { ChevronLeft, Pill } from "lucide-react";
+import { Link } from "react-router-dom";
+import { buildPrescriptionPatientSubtitle } from "./map-prescription-ui";
 
 export function PrescriptionPageHeader({
   patientName,
   patientLabel,
   fileNumber,
-  statusLabel = 'مسودة',
-  backTo = '/doctor/appointments',
+  statusLabel = "مسودة",
+  backTo = "/doctor/appointments",
 }: {
   patientName?: string;
   /** @deprecated استخدم patientName */
@@ -18,7 +18,7 @@ export function PrescriptionPageHeader({
 }) {
   const subtitle =
     buildPrescriptionPatientSubtitle(patientName ?? patientLabel) ||
-    'الوصفة الطبية';
+    "الوصفة الطبية";
 
   return (
     <section

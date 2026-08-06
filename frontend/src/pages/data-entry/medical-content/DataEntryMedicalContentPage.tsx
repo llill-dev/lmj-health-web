@@ -16,6 +16,7 @@ import {
   FilterX,
   UserRound,
   Workflow,
+  AlertTriangle,
 } from "lucide-react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import {
@@ -24,10 +25,15 @@ import {
 } from "@/components/admin/medical-content";
 import MedicalContentViewDialog from "@/components/admin/medical-content/dialogs/MedicalContentViewDialog";
 import {
+  clampPage,
   contentStatusLabel,
   contentTypeLabel,
   formatContentDate,
+  getListReadinessSignal,
+  isDataEntryWorkflowStatus,
   PAGE_SIZE,
+  resolvePagedLimit,
+  resolvePagedPage,
   resolvePagedTotal,
 } from "@/components/admin/medical-content/contentListUtils";
 import {
@@ -172,20 +178,36 @@ export default function DataEntryMedicalContentPage() {
   }, [items, normalizedSearch]);
 
   const serverTotal = resolvePagedTotal(query.data, items.length);
+  const serverLimit = resolvePagedLimit(query.data, PAGE_SIZE);
   const draftTotal = resolvePagedTotal(draftSummaryQuery.data, 0);
   const reviewTotal = resolvePagedTotal(reviewSummaryQuery.data, 0);
   const totalPages =
-    serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)) : 0;
+    serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / serverLimit)) : 0;
+  const currentPage =
+    totalPages > 0
+      ? clampPage(resolvePagedPage(query.data, page), totalPages)
+      : 1;
   const paginationRange = useMemo(() => {
     if (serverTotal <= 0) return { start: 0, end: 0 };
-    const start = (page - 1) * PAGE_SIZE + 1;
-    const end = Math.min(page * PAGE_SIZE, serverTotal);
+    const start = (currentPage - 1) * serverLimit + 1;
+    const end = Math.min(currentPage * serverLimit, serverTotal);
     return { start, end };
-  }, [page, serverTotal]);
+  }, [currentPage, serverLimit, serverTotal]);
 
   useEffect(() => {
     setPage(1);
   }, [status]);
+
+  useEffect(() => {
+    if (query.isAwaitingData) return;
+    if (totalPages === 0) {
+      if (page !== 1) setPage(1);
+      return;
+    }
+    if (page !== currentPage) {
+      setPage(currentPage);
+    }
+  }, [query.isAwaitingData, totalPages, page, currentPage]);
 
   async function handleSubmitReview(id: string) {
     try {
@@ -364,13 +386,23 @@ export default function DataEntryMedicalContentPage() {
                 <BookOpen className="h-5 w-5" />
               </div>
               <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
-                {t("dataEntry.medicalContent.list.empty")}
+                {search.trim()
+                  ? t(
+                      "dataEntry.medicalContent.list.emptySearchPage",
+                      "لا توجد مطابقات ضمن الصفحة الحالية.",
+                    )
+                  : t("dataEntry.medicalContent.list.empty")}
               </p>
               <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-                {t(
-                  "dataEntry.medicalContent.list.emptyHint",
-                  "جرّب تغيير الفلاتر أو أنشئ محتوى جديدًا للبدء.",
-                )}
+                {search.trim()
+                  ? t(
+                      "dataEntry.medicalContent.list.emptySearchPageHint",
+                      "بحث النص محلي داخل الصفحة فقط لأن /api/admin/content/mine لا يدعم search.",
+                    )
+                  : t(
+                      "dataEntry.medicalContent.list.emptyHint",
+                      "جرّب تغيير الفلاتر أو أنشئ محتوى جديدًا للبدء.",
+                    )}
               </p>
             </div>
           ) : (
@@ -378,6 +410,8 @@ export default function DataEntryMedicalContentPage() {
               {filteredItems.map((item) => {
                 const titleText = toDisplayText(item.title);
                 const summaryText = toDisplayText(item.summary);
+                const isExpectedStatus = isDataEntryWorkflowStatus(item.status);
+                const readinessSignal = getListReadinessSignal(item, null);
                 return (
                 <article
                   key={item._id}
@@ -402,6 +436,17 @@ export default function DataEntryMedicalContentPage() {
                       </span>
                       <span className="rounded-[8px] bg-[#EEF6FF] px-2 py-1 text-[#1D4ED8]">
                         {contentWorkflowHint(item.status, t)}
+                      </span>
+                      <span
+                        className={
+                          readinessSignal.tone === "warning"
+                            ? "rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-2 py-1 text-[#B42318]"
+                            : readinessSignal.tone === "success"
+                              ? "rounded-[8px] border border-[#BBF7D0] bg-[#ECFDF3] px-2 py-1 text-[#027A48]"
+                              : "rounded-[8px] border border-[#D1E9FF] bg-[#F5FAFF] px-2 py-1 text-[#175CD3]"
+                        }
+                      >
+                        {locale === "ar" ? readinessSignal.ar : readinessSignal.en}
                       </span>
                       <span className="text-[#98A2B3]">
                         {t("dataEntry.medicalContent.lastUpdated")}: {formatContentDate(item.updatedAt)}
@@ -442,22 +487,32 @@ export default function DataEntryMedicalContentPage() {
                       <Pencil className="h-4 w-4" />
                       {t("dataEntry.medicalContent.actions.edit")}
                     </button>
-                    {item.status !== "IN_REVIEW" ? (
+                    {item.status === "DRAFT" ? (
                       <button
                         type="button"
                         onClick={() => void handleSubmitReview(item._id)}
-                        disabled={submitReview.isPending || item.status !== "DRAFT"}
+                        disabled={submitReview.isPending}
                         className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#BFE3E1] bg-[#F7FFFE] px-3 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-60"
                       >
                         <Send className="h-4 w-4" />
                         {t("dataEntry.medicalContent.actions.submitReview")}
                       </button>
-                    ) : (
+                    ) : item.status === "IN_REVIEW" ? (
                       <span className="inline-flex h-9 items-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[12px] font-extrabold text-[#667085]">
                         {t(
                           "dataEntry.medicalContent.actions.alreadyInReview",
                           "قيد المراجعة حاليًا",
                         )}
+                      </span>
+                    ) : (
+                      <span className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-3 font-cairo text-[12px] font-extrabold text-[#B42318]">
+                        <AlertTriangle className="h-4 w-4" />
+                        {isExpectedStatus
+                          ? t("dataEntry.medicalContent.workflow.other")
+                          : t(
+                              "dataEntry.medicalContent.workflow.unexpectedStatus",
+                              "حالة خارج مسار data-entry: المتابعة متاحة للعرض/التعديل فقط.",
+                            )}
                       </span>
                     )}
                   </div>
@@ -487,7 +542,7 @@ export default function DataEntryMedicalContentPage() {
                 <button
                   type="button"
                   onClick={() => setPage(1)}
-                  disabled={page <= 1}
+                  disabled={currentPage <= 1}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
                   aria-label={t("common.firstPage", "First page")}
                 >
@@ -496,7 +551,7 @@ export default function DataEntryMedicalContentPage() {
                 <button
                   type="button"
                   onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  disabled={page <= 1}
+                  disabled={currentPage <= 1}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
                   aria-label={t("common.previousPage", "Previous page")}
                 >
@@ -505,7 +560,7 @@ export default function DataEntryMedicalContentPage() {
                 <span className="min-w-[96px] text-center font-cairo text-[12px] font-extrabold text-[#111827]">
                   {t(
                     "dataEntry.medicalContent.pagination.pageStatus",
-                    `Page ${page.toLocaleString(numberLocale)} of ${Math.max(totalPages, 1).toLocaleString(numberLocale)}`,
+                    `Page ${currentPage.toLocaleString(numberLocale)} of ${Math.max(totalPages, 1).toLocaleString(numberLocale)}`,
                   )}
                 </span>
                 <button
@@ -513,7 +568,7 @@ export default function DataEntryMedicalContentPage() {
                   onClick={() =>
                     setPage((current) => Math.min(Math.max(totalPages, 1), current + 1))
                   }
-                  disabled={page >= totalPages}
+                  disabled={currentPage >= totalPages}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
                   aria-label={t("common.nextPage", "Next page")}
                 >
@@ -522,7 +577,7 @@ export default function DataEntryMedicalContentPage() {
                 <button
                   type="button"
                   onClick={() => setPage(Math.max(totalPages, 1))}
-                  disabled={page >= totalPages}
+                  disabled={currentPage >= totalPages}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
                   aria-label={t("common.lastPage", "Last page")}
                 >

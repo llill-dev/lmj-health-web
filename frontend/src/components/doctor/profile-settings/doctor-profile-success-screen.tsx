@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Activity, Check, Heart, Pill } from 'lucide-react';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Activity, Check, Heart, Pill } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const REDIRECT_SECONDS = 4;
 
@@ -15,7 +15,7 @@ function FloatingIcon({
 }) {
   return (
     <div
-      className={`pointer-events-none absolute flex h-10 w-10 items-center justify-center rounded-[10px] bg-white/10 text-white/70 ${className ?? ''}`}
+      className={`pointer-events-none absolute flex h-10 w-10 items-center justify-center rounded-[10px] bg-white/10 text-white/70 ${className ?? ""}`}
       aria-hidden
     >
       {children}
@@ -24,9 +24,9 @@ function FloatingIcon({
 }
 
 export default function DoctorProfileSuccessScreen({
-  title = 'تم تعديل بياناتك الشخصية بنجاح',
-  subtitle = 'شكراً لك ♡',
-  redirectTo = '/doctor/dashboard',
+  title = "تم تعديل بياناتك الشخصية بنجاح",
+  subtitle = "شكراً لك ♡",
+  redirectTo = "/doctor/dashboard",
   redirectSeconds = REDIRECT_SECONDS,
 }: {
   title?: string;
@@ -69,7 +69,11 @@ export default function DoctorProfileSuccessScreen({
       <div className="relative z-10 text-center">
         <div className="mx-auto flex h-[100px] w-[100px] items-center justify-center rounded-full border-[6px] border-white/30 bg-white/10">
           <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white">
-            <Check className="h-9 w-9 text-primary" strokeWidth={3} aria-hidden />
+            <Check
+              className="h-9 w-9 text-primary"
+              strokeWidth={3}
+              aria-hidden
+            />
           </div>
         </div>
 

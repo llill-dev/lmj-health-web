@@ -1,15 +1,19 @@
-import { FileText, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { FileText, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useI18n } from "@/i18n/provider";
 
 export function PrescriptionsHubPageHeader({
-  addHref = '/doctor/encounters',
+  addHref = "/doctor/encounters",
 }: {
   addHref?: string;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+
   return (
     <section
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="relative mb-6 overflow-hidden rounded-[6px] px-4 py-6 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)] sm:px-6 sm:py-7 lg:px-8 lg:py-8"
     >
       <div
@@ -31,10 +35,10 @@ export function PrescriptionsHubPageHeader({
           </div>
           <div className="min-w-0">
             <h1 className="font-cairo text-[26px] font-black leading-[32px] text-primary sm:text-[30px] sm:leading-[36px]">
-              الوصفات الطبية
+              {tr("الوصفات الطبية", "Prescriptions")}
             </h1>
             <p className="mt-1 font-cairo text-[14px] font-bold leading-[22px] text-primary/90 sm:text-[16px]">
-              توثيق الوصفات
+              {tr("توثيق الوصفات", "Prescription documentation")}
             </p>
           </div>
         </div>
@@ -44,7 +48,9 @@ export function PrescriptionsHubPageHeader({
           className="inline-flex h-[48px] w-full min-w-0 shrink-0 items-center justify-between gap-3 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)] transition hover:border-primary/30 hover:bg-[#F0FDFA] sm:w-auto sm:min-w-[168px]"
         >
           <Plus className="h-4 w-4 shrink-0" aria-hidden />
-          <span className="whitespace-nowrap">إضافة وصفة جديدة</span>
+          <span className="whitespace-nowrap">
+            {tr("إضافة وصفة جديدة", "Add new prescription")}
+          </span>
         </Link>
       </div>
     </section>

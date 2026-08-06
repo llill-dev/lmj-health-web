@@ -14,6 +14,7 @@ import {
   toDisplayText,
   toPrettyJson,
 } from "./medicalContentDialogHelpers";
+import { useI18n } from "@/i18n/provider";
 
 type Props = {
   open: boolean;
@@ -91,6 +92,7 @@ export default function MedicalContentViewDialog({
   onOpenChange,
   contentId,
 }: Props) {
+  const { locale, dir } = useI18n();
   const detailsQuery = useAdminContentById(open ? contentId : null);
   const details = extractMedicalContentDetails(detailsQuery.data);
   const news = details?.news ?? null;
@@ -115,8 +117,8 @@ export default function MedicalContentViewDialog({
         <Dialog.Overlay className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-[2px]" />
         <Dialog.Content
           className="fixed left-1/2 top-1/2 z-[9999] w-[1080px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none"
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
         >
           <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">
             <div>

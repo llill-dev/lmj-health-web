@@ -32,6 +32,7 @@ import {
   serializeLocalizedLabel,
   type SchemaFieldType,
 } from "./contentTemplateFormDialog.helpers";
+import { useI18n } from "@/i18n/provider";
 
 const fieldSchema = z.object({
   key: z
@@ -117,6 +118,7 @@ export default function ContentTemplateFormDialog({
   onOpenChange,
   template,
 }: Props) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const isEdit = Boolean(template?._id);
   const createMut = useCreateAdminContentTemplate();
@@ -249,7 +251,7 @@ export default function ContentTemplateFormDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={onSubmit}>
+            <form dir={dir} onSubmit={onSubmit}>
               <div className="max-h-[calc(92vh-240px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

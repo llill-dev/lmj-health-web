@@ -1,5 +1,6 @@
 import type { LangFilter } from "./contentListUtils";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 export default function LanguageModeToggle({
   value,
@@ -8,6 +9,7 @@ export default function LanguageModeToggle({
   value: LangFilter;
   onChange: (v: LangFilter) => void;
 }) {
+  const { dir } = useI18n();
   const inBinary = value === "ar" || value === "en";
   return (
     <div className="flex flex-wrap gap-2 justify-end items-center w-full min-w-0 sm:ms-auto sm:w-auto">
@@ -29,7 +31,7 @@ export default function LanguageModeToggle({
         </button>
         <div
           className="relative h-9 w-[11.25rem] max-w-full shrink-0 overflow-hidden rounded-full bg-primary p-0.5 shadow-[0_8px_22px_rgba(15,143,139,0.3)]"
-          dir="rtl"
+          dir={dir}
           role="group"
           aria-label="تبديل لغة العرض: العربية أو English"
         >

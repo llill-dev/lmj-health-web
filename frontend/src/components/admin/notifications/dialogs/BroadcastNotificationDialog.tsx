@@ -12,6 +12,7 @@ import {
   adminInputClass,
   adminTextareaClass,
 } from "@/components/admin/form-field";
+import { useI18n } from "@/i18n/provider";
 
 const GROUP_OPTIONS = [
   { value: "all", label: "جميع المستخدمين" },
@@ -41,6 +42,7 @@ export default function BroadcastNotificationDialog({
   onOpenChange,
   onSuccess,
 }: BroadcastNotificationDialogProps) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -150,7 +152,7 @@ export default function BroadcastNotificationDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast(getBroadcastNotificationErrorMessage(error, "ar"), {
+      toast(getBroadcastNotificationErrorMessage(error, locale), {
         title: "فشلت العملية",
         variant: "error",
         durationMs: 4200,
@@ -183,9 +185,9 @@ export default function BroadcastNotificationDialog({
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             onMouseDown={(e) => e.stopPropagation()}
-            dir="rtl"
-            lang="ar"
-            style={{ direction: "rtl" }}
+            dir={dir}
+            lang={locale}
+            style={{ direction: dir }}
           >
             <div className="relative px-8 pb-7 pt-7">
               <button

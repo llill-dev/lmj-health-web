@@ -46,6 +46,32 @@ export function resolvePagedTotal(
   return fallbackCount;
 }
 
+function toPositiveInt(value: unknown): number | null {
+  const parsed = typeof value === 'number' ? value : Number(value ?? NaN);
+  if (!Number.isFinite(parsed)) return null;
+  const rounded = Math.floor(parsed);
+  return rounded > 0 ? rounded : null;
+}
+
+export function resolvePagedPage(
+  payload: { page?: unknown } | null | undefined,
+  fallbackPage = 1,
+): number {
+  return toPositiveInt(payload?.page) ?? Math.max(1, Math.floor(fallbackPage));
+}
+
+export function resolvePagedLimit(
+  payload: { limit?: unknown } | null | undefined,
+  fallbackLimit = PAGE_SIZE,
+): number {
+  return toPositiveInt(payload?.limit) ?? Math.max(1, Math.floor(fallbackLimit));
+}
+
+export function clampPage(page: number, totalPages: number): number {
+  if (totalPages <= 0) return 1;
+  return Math.min(Math.max(1, Math.floor(page)), Math.floor(totalPages));
+}
+
 const ADMIN_CONTENT_TYPE_VALUES: AdminContentType[] = [
   'CONDITION',
   'SYMPTOM',
@@ -250,6 +276,65 @@ export function contentStatusLabel(s: AdminContentStatus) {
   if (s === 'IN_REVIEW') return 'قيد المراجعة';
   if (s === 'ARCHIVED') return 'مؤرشف';
   return 'مسودة';
+}
+
+export type ReadinessSignalTone = 'info' | 'success' | 'warning';
+
+export function getListReadinessSignal(
+  item: AdminContentItem,
+  sourceCount: number | null,
+): {
+  tone: ReadinessSignalTone;
+  ar: string;
+  en: string;
+} {
+  if (item.status === 'DRAFT') {
+    if (sourceCount === 0) {
+      return {
+        tone: 'warning',
+        ar: 'جاهزية المراجعة منخفضة: لا توجد مصادر مرتبطة بعد.',
+        en: 'Low review readiness: no sources are attached yet.',
+      };
+    }
+    if (sourceCount && sourceCount > 0) {
+      return {
+        tone: 'info',
+        ar: 'المصادر موجودة. راجع التفاصيل لاستكمال متطلبات الحوكمة قبل الإرسال.',
+        en: 'Sources are present. Check details to complete governance requirements before submit.',
+      };
+    }
+    return {
+      tone: 'info',
+      ar: 'جاهزية المراجعة تحتاج تحققًا من التفاصيل.',
+      en: 'Review readiness needs verification from details.',
+    };
+  }
+
+  if (item.status === 'IN_REVIEW') {
+    return {
+      tone: 'info',
+      ar: 'المراجعة جارية: قرارات القبول/الرفض/النشر ضمن صلاحيات الإدارة فقط.',
+      en: 'In review: approve/reject/publish decisions are admin-only.',
+    };
+  }
+
+  if (item.status === 'PUBLISHED') {
+    return {
+      tone: 'success',
+      ar: 'محتوى منشور. استخدم الأرشفة عند الحاجة دون تعطيل الاستعراض.',
+      en: 'Content is published. Archive when needed without affecting browsing.',
+    };
+  }
+
+  return {
+    tone: 'info',
+    ar: 'المحتوى مؤرشف للرجوع فقط.',
+    en: 'Content is archived for reference.',
+  };
+}
+
+export function isDataEntryWorkflowStatus(status: AdminContentStatus): boolean {
+  return status === 'DRAFT' || status === 'IN_REVIEW';
 }
 
 export function contentTypeLabel(t?: AdminContentType) {

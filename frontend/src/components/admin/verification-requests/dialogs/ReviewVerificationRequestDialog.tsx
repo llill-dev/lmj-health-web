@@ -19,6 +19,7 @@ import {
 import { AppCheckbox } from "@/components/ui";
 import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 
 const approveSchema = z.object({
   adminNote: z.string().trim().min(1, "هذا الحقل مطلوب"),
@@ -62,6 +63,7 @@ export default function ReviewVerificationRequestDialog({
   lng?: string;
   mode: Mode;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
@@ -303,8 +305,8 @@ export default function ReviewVerificationRequestDialog({
               },
             }}
             className="fixed left-1/2 top-1/2 z-[10000] max-h-[90vh] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <div className="relative px-8 pb-7 pt-7">
               <Dialog.Close asChild>
@@ -421,7 +423,7 @@ export default function ReviewVerificationRequestDialog({
                         getVerificationReviewErrorMessage(
                           e,
                           mode === "approve" ? "approve" : "reject",
-                          "ar",
+                          locale,
                         ),
                       );
                     }

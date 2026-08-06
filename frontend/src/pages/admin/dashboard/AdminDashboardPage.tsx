@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
     queryFn: () =>
       get<{ total?: number }>(
         "/api/access-requests?status=pending&page=1&limit=1",
-        { locale: "ar" },
+        { locale },
       ),
     staleTime: 30_000,
   });

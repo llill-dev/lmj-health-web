@@ -185,6 +185,25 @@ export default function MedicalContentGovernancePanel({
         news.aiSummary,
       ].some((value) => Boolean(toDisplayText(value).trim())),
   );
+  const newsSourceUrl = toDisplayText(news?.sourceUrl).trim();
+  const newsPublishedAt = toDisplayText(news?.publishedAt).trim();
+  const newsChecklist =
+    contentType === "NEWS"
+      ? [
+          {
+            key: "newsSourceUrl",
+            label: "وجود رابط المصدر للخبر (news.sourceUrl)",
+            done: newsSourceUrl.length > 0,
+          },
+          {
+            key: "newsPublishedAt",
+            label: "تحديد تاريخ نشر الخبر الأصلي (news.publishedAt)",
+            done: newsPublishedAt.length > 0,
+          },
+        ]
+      : [];
+  const readinessChecklist = [...governanceChecklist, ...newsChecklist];
+  const missingChecklistItems = readinessChecklist.filter((item) => !item.done);
 
   return (
     <div className="space-y-5">
@@ -244,8 +263,23 @@ export default function MedicalContentGovernancePanel({
           <ShieldCheck className="h-4 w-4 text-primary" />
           قائمة جاهزية الحوكمة قبل المراجعة
         </div>
+        <div
+          className={
+            missingChecklistItems.length
+              ? "mt-3 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 font-cairo text-[12px] font-bold text-amber-700"
+              : "mt-3 rounded-[10px] border border-emerald-200 bg-emerald-50 px-3 py-2 font-cairo text-[12px] font-bold text-emerald-700"
+          }
+        >
+          {missingChecklistItems.length
+            ? `تحذير جاهزية: ${missingChecklistItems.length} متطلبات غير مكتملة قبل إرسال المراجعة.`
+            : "جاهز للمراجعة: تم استكمال مؤشرات الحوكمة الأساسية."}
+        </div>
+        <div className="mt-2 rounded-[10px] border border-[#D1E9FF] bg-[#F5FAFF] px-3 py-2 font-cairo text-[12px] font-bold text-[#175CD3]">
+          هذه إشارات تنبيهية فقط ولا تمنع عرض أو تصفح السجل. الإيقاف يتم عند محاولة
+          "إرسال للمراجعة" فقط.
+        </div>
         <div className="mt-4 space-y-2">
-          {governanceChecklist.map((item) => (
+          {readinessChecklist.map((item) => (
             <div
               key={item.key}
               className={

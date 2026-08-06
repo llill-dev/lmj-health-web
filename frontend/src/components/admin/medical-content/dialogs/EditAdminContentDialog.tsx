@@ -29,6 +29,7 @@ import {
 } from "@/components/admin/medical-content/dynamicTemplateFieldRenderer.helpers";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 import {
   AdminFormField,
   adminFieldClass,
@@ -144,6 +145,7 @@ export default function EditAdminContentDialog({
   onOpenChange,
   contentId,
 }: Props) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const detailsQuery = useAdminContentById(open ? contentId : null);
   const details = extractMedicalContentDetails(detailsQuery.data);
@@ -400,6 +402,11 @@ export default function EditAdminContentDialog({
 
     const lang = normalizeItemLanguage(details.language);
     const news = details.news ?? null;
+    const fallbackTemplateId =
+      toDisplayText(details.templateId) ||
+      (details.template && typeof details.template === "object"
+        ? toDisplayText((details.template as Record<string, unknown>)._id)
+        : "");
 
     reset({
       type: details.type ?? "GENERAL_ADVICE",
@@ -408,7 +415,7 @@ export default function EditAdminContentDialog({
       language: lang === "en" ? "en" : "ar",
       slug: toDisplayText(details.slug),
       pageVersion: toDisplayText(details.pageVersion),
-      templateId: toDisplayText(details.templateId),
+      templateId: fallbackTemplateId,
       coverImage: toDisplayText(details.coverImage),
       dataJson: toPrettyJson(details.dataValue),
       contentBlocks: normalizeContentBlocksForForm(details.contentBlocks),
@@ -603,7 +610,7 @@ export default function EditAdminContentDialog({
                 </div>
               </div>
             ) : (
-              <form dir="rtl" onSubmit={onSubmit}>
+              <form dir={dir} onSubmit={onSubmit}>
                 <div className="max-h-[calc(94vh-240px)] overflow-y-auto px-8 py-6">
                   <div className="space-y-6">
                     <section className="space-y-5">

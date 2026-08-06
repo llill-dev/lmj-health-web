@@ -11,6 +11,7 @@ import {
   AdminFormField,
   adminTextareaClass,
 } from "@/components/admin/form-field";
+import { useI18n } from "@/i18n/provider";
 
 const cancelAppointmentSchema = z.object({
   reason: z.string().max(300, "سبب الإلغاء يجب ألا يتجاوز 300 حرف."),
@@ -35,6 +36,7 @@ export default function CancelAppointmentDialog({
   confirmLabel?: string;
   successToast?: { title?: string; message: string; variant?: ToastVariant };
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const {
     register,
@@ -91,8 +93,8 @@ export default function CancelAppointmentDialog({
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             onMouseDown={(e) => e.stopPropagation()}
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <div className="relative px-8 pt-7">
               <button

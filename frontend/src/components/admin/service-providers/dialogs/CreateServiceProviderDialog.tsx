@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Building2, MapPin, Plus, Tag, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 import StyledSelect from "@/components/ui/styled-select";
 import { resolveLabel } from "@/lib/admin/types";
 import { adminApi } from "@/lib/admin/client";
@@ -38,6 +39,7 @@ export default function CreateServiceProviderDialog({
   serviceTypes,
   onSuccess,
 }: CreateServiceProviderDialogProps) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -218,7 +220,7 @@ export default function CreateServiceProviderDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={handleSubmit}>
+            <form dir={dir} onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField

@@ -1,4 +1,5 @@
 import { ChevronDown, Loader2, WifiOff } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 type DoctorListErrorStateProps = {
   title: string;
@@ -15,14 +16,18 @@ export default function DoctorListErrorState({
   brief,
   detail,
   showTechnicalDetail = false,
-  retryLabel = "إعادة المحاولة",
+  retryLabel,
   retrying = false,
   onRetry,
 }: DoctorListErrorStateProps) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const resolvedRetryLabel = retryLabel ?? tr("إعادة المحاولة", "Retry");
+
   return (
     <div
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       role="alert"
       className="flex min-h-[360px] items-center justify-center px-3 py-10 sm:px-4"
     >
@@ -47,7 +52,7 @@ export default function DoctorListErrorState({
         {showTechnicalDetail && detail ? (
           <details className="group mt-5 rounded-2xl border border-[#EAECF0] bg-white/75 px-4 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[2px]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-cairo text-[12px] font-extrabold text-[#344054] transition-colors hover:text-[#101828] [&::-webkit-details-marker]:hidden">
-              <span>تفاصيل إضافية</span>
+              <span>{tr("تفاصيل إضافية", "Additional details")}</span>
               <ChevronDown
                 className="h-4 w-4 shrink-0 text-[#98A2B3] transition-transform duration-200 group-open:rotate-180"
                 aria-hidden
@@ -67,7 +72,7 @@ export default function DoctorListErrorState({
           {retrying ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           ) : null}
-          {retryLabel}
+          {resolvedRetryLabel}
         </button>
       </div>
     </div>
