@@ -28,6 +28,7 @@ import {
   contentTypeLabel,
   formatContentDate,
   PAGE_SIZE,
+  resolvePagedTotal,
 } from "@/components/admin/medical-content/contentListUtils";
 import {
   useAdminMyContentList,
@@ -77,15 +78,9 @@ function contentWorkflowHint(
       "أُرسلت للمراجعة وتنتظر قرار الإدارة.",
     );
   }
-  if (status === "PUBLISHED") {
-    return t(
-      "dataEntry.medicalContent.workflow.published",
-      "محتوى منشور ومرئي للمستخدمين حسب القنوات المعتمدة.",
-    );
-  }
   return t(
-    "dataEntry.medicalContent.workflow.archived",
-    "محتوى مؤرشف للاحتفاظ المرجعي وليس للعمل اليومي.",
+    "dataEntry.medicalContent.workflow.other",
+    "هذه الحالة لا تُعرض ضمن مسار (محتواي) الحالي.",
   );
 }
 
@@ -146,7 +141,9 @@ export default function DataEntryMedicalContentPage() {
     });
   }, [items, normalizedSearch]);
 
-  const serverTotal = query.data?.total ?? 0;
+  const serverTotal = resolvePagedTotal(query.data, items.length);
+  const draftTotal = resolvePagedTotal(draftSummaryQuery.data, 0);
+  const reviewTotal = resolvePagedTotal(reviewSummaryQuery.data, 0);
   const totalPages =
     serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)) : 0;
   const paginationRange = useMemo(() => {
@@ -208,7 +205,7 @@ export default function DataEntryMedicalContentPage() {
               icon: <FileCheck2 className="h-5 w-5 shrink-0" />,
               value: draftSummaryQuery.isAwaitingData
                 ? "…"
-                : (draftSummaryQuery.data?.total ?? 0).toLocaleString(numberLocale),
+                : draftTotal.toLocaleString(numberLocale),
               label: t("dataEntry.medicalContent.kpi.drafts"),
             },
             {
@@ -216,7 +213,7 @@ export default function DataEntryMedicalContentPage() {
               icon: <Clock3 className="h-5 w-5 shrink-0" />,
               value: reviewSummaryQuery.isAwaitingData
                 ? "…"
-                : (reviewSummaryQuery.data?.total ?? 0).toLocaleString(numberLocale),
+                : reviewTotal.toLocaleString(numberLocale),
               label: t("dataEntry.medicalContent.kpi.inReview"),
             },
           ]}
@@ -252,7 +249,7 @@ export default function DataEntryMedicalContentPage() {
               <Workflow className="h-4 w-4 text-primary" />
               {t(
                 "dataEntry.medicalContent.workflow.caption",
-                "دورة العمل: مسودة ← قيد المراجعة ← منشور / مؤرشف",
+                "دورة العمل في محتواي: مسودة ← قيد المراجعة",
               )}
             </div>
             {(status !== "all" || search.trim()) ? (

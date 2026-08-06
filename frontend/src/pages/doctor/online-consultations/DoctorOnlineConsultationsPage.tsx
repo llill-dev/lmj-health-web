@@ -28,6 +28,7 @@ import {
   useSendConsultationMessage,
   useUpdateConsultationStatus,
 } from '@/hooks';
+import { useI18n } from '@/i18n/provider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { readAuthUser } from '@/lib/cookies';
@@ -92,6 +93,8 @@ function tabForTicketStatus(status?: string): ConsultationStatusTab {
 }
 
 export default function DoctorOnlineConsultationsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const ticketFromUrl = searchParams.get('ticket')?.trim() ?? '';
@@ -400,34 +403,42 @@ export default function DoctorOnlineConsultationsPage() {
   return (
     <>
       <Helmet>
-        <title>Online Consultations • LMJ Health</title>
+        <title>
+          {tr(
+            'الاستشارات • LMJ Health',
+            'Online Consultations • LMJ Health',
+          )}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="consultations"
           surface="mint"
-          title="الاستشارات"
-          subtitle="الاستشارات المرسلة إليك من المرضى"
+          title={tr('الاستشارات', 'Consultations')}
+          subtitle={tr(
+            'الاستشارات المرسلة إليك من المرضى',
+            'Consultations sent to you by patients',
+          )}
           headerIcon={<Shield className="h-8 w-8 text-white" aria-hidden />}
           kpis={[
             {
               key: 'active',
               icon: <Activity className="h-5 w-5 shrink-0" aria-hidden />,
               value: overviewStats.loading ? '—' : overviewStats.active,
-              label: 'نشط',
+              label: tr('نشط', 'Active'),
             },
             {
               key: 'closed',
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden />,
               value: overviewStats.loading ? '—' : overviewStats.closed,
-              label: 'مغلق',
+              label: tr('مغلق', 'Closed'),
             },
             {
               key: 'new',
               icon: <Clock className="h-5 w-5 shrink-0" aria-hidden />,
               value: overviewStats.loading ? '—' : overviewStats.new,
-              label: 'جديد',
+              label: tr('جديد', 'New'),
             },
           ]}
         />
@@ -437,7 +448,7 @@ export default function DoctorOnlineConsultationsPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="ابحث في الطلبات..."
+              placeholder={tr('ابحث في الطلبات...', 'Search requests...')}
               className="h-[40px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-11 pe-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3]"
             />
             <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">

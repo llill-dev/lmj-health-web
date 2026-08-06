@@ -22,8 +22,11 @@ import {
   useDoctorSelfRating,
 } from "@/hooks";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorProfileSettingsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const navigate = useNavigate();
   const profileQuery = useDoctorProfile();
   const snapshotQuery = useDoctorHomeSnapshot();
@@ -64,10 +67,12 @@ export default function DoctorProfileSettingsPage() {
   return (
     <>
       <Helmet>
-        <title>الملف الشخصي • LMJ Health</title>
+        <title>
+          {tr("الملف الشخصي • LMJ Health", "Profile • LMJ Health")}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="space-y-5 pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="space-y-5 pb-8 sm:pb-10">
         <DoctorProfileHeroCard
           fullName={user?.fullName}
           specialization={doctor.specialization}
@@ -80,34 +85,36 @@ export default function DoctorProfileSettingsPage() {
             {
               key: "consultations",
               value: consultationsCount,
-              label: "استشارة",
+              label: tr("استشارة", "Consultation"),
             },
             {
               key: "experience",
               value: experienceYears ?? "—",
-              label: "سنة خبرة",
+              label: tr("سنة خبرة", "Years experience"),
             },
             {
               key: "rating",
               value: ratingValue,
-              label: "التقييم",
+              label: tr("التقييم", "Rating"),
             },
           ]}
         />
 
         <DoctorProfileInfoBanner>
-          لتعديل معلوماتك استخدم أزرار «تعديل المعلومات الشخصية» أو «تعديل
-          المعلومات المهنية» أدناه. التعديلات المهنية تخضع لمراجعة الإدارة.
+          {tr(
+            "لتعديل معلوماتك استخدم أزرار «تعديل المعلومات الشخصية» أو «تعديل المعلومات المهنية» أدناه. التعديلات المهنية تخضع لمراجعة الإدارة.",
+            "To update your details use “Edit personal info” or “Edit professional info” below. Professional edits require admin review.",
+          )}
         </DoctorProfileInfoBanner>
 
         <DoctorProfileSectionCard
-          title="المعلومات الشخصية"
+          title={tr("المعلومات الشخصية", "Personal information")}
           icon={UserRound}
           fields={fieldRows.personal}
         />
 
         <DoctorProfileSectionCard
-          title="المعلومات المهنية"
+          title={tr("المعلومات المهنية", "Professional information")}
           icon={Briefcase}
           fields={fieldRows.professional}
         />
@@ -122,7 +129,7 @@ export default function DoctorProfileSettingsPage() {
             }
             className="flex h-[48px] w-full items-center justify-center rounded-[8px] border-[1.5px] border-primary bg-white font-cairo text-[14px] font-extrabold text-primary shadow-[0px_6px_16px_-4px_rgba(15,143,139,0.2)] transition hover:bg-[#F0FAFA]"
           >
-            تعديل المعلومات الشخصية
+            {tr("تعديل المعلومات الشخصية", "Edit personal info")}
           </button>
           <button
             type="button"
@@ -133,7 +140,7 @@ export default function DoctorProfileSettingsPage() {
             }
             className="flex h-[48px] w-full items-center justify-center rounded-[8px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_18px_30px_rgba(15,143,139,0.25)] transition hover:bg-[#0A7A77]"
           >
-            تعديل المعلومات المهنية
+            {tr("تعديل المعلومات المهنية", "Edit professional info")}
           </button>
         </div>
 

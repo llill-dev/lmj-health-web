@@ -68,11 +68,11 @@ import { getAppointmentTypeMutationErrorMessage } from '@/lib/doctor/writeFlowEr
 import type { AppointmentType } from '@/lib/doctor/types';
 
 import { useRetryAction } from '@/lib/query/useRetryAction';
-
-
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorAppointmentTypesPage() {
-
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
 
   const listQuery = useAppointmentTypes();
@@ -349,13 +349,15 @@ export default function DoctorAppointmentTypesPage() {
 
       <Helmet>
 
-        <title>أنواع المواعيد • LMJ Health</title>
+        <title>
+          {tr('أنواع المواعيد • LMJ Health', 'Appointment Types • LMJ Health')}
+        </title>
 
       </Helmet>
 
 
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
 
         <DoctorDashboardOverview
 
@@ -365,7 +367,7 @@ export default function DoctorAppointmentTypesPage() {
 
           kpiColumns={4}
 
-          title="أنواع المواعيد"
+          title={tr('أنواع المواعيد', 'Appointment Types')}
 
           headerIcon={<Tags className="h-8 w-8 text-white" />}
 
@@ -383,7 +385,10 @@ export default function DoctorAppointmentTypesPage() {
 
                 {' '}
 
-                — إدارة أنواع المواعيد والأسعار المعروضة للمرضى
+                {tr(
+                  '— إدارة أنواع المواعيد والأسعار المعروضة للمرضى',
+                  '— manage appointment types and patient-facing prices',
+                )}
 
               </span>
 
@@ -391,7 +396,7 @@ export default function DoctorAppointmentTypesPage() {
 
           }
 
-          actionLabel="نوع جديد"
+          actionLabel={tr('نوع جديد', 'New type')}
 
           actionIcon={<Plus className="h-4 w-4" />}
 
@@ -407,7 +412,7 @@ export default function DoctorAppointmentTypesPage() {
 
               value: statsLoading ? '—' : typeStats.total,
 
-              label: 'إجمالي الأنواع',
+              label: tr('إجمالي الأنواع', 'Total types'),
 
             },
 
@@ -419,7 +424,7 @@ export default function DoctorAppointmentTypesPage() {
 
               value: statsLoading ? '—' : typeStats.active,
 
-              label: 'أنواع نشطة',
+              label: tr('أنواع نشطة', 'Active types'),
 
             },
 
@@ -431,7 +436,7 @@ export default function DoctorAppointmentTypesPage() {
 
               value: statsLoading ? '—' : typeStats.visible,
 
-              label: 'السعر مرئي',
+              label: tr('السعر مرئي', 'Price visible'),
 
             },
 
@@ -443,7 +448,7 @@ export default function DoctorAppointmentTypesPage() {
 
               value: statsLoading ? '—' : typeStats.priced,
 
-              label: 'بسعر محدد',
+              label: tr('بسعر محدد', 'Priced'),
 
             },
 
@@ -490,7 +495,10 @@ export default function DoctorAppointmentTypesPage() {
 
               <DoctorListErrorState
 
-                title="تعذّر تحميل أنواع المواعيد"
+                title={tr(
+                  'تعذّر تحميل أنواع المواعيد',
+                  'Failed to load appointment types',
+                )}
 
                 brief={getUserFacingRequestErrorMessage(listQuery.error)}
 
@@ -510,9 +518,29 @@ export default function DoctorAppointmentTypesPage() {
 
                 imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
 
-                title={isFilteredEmpty ? "لا توجد أنواع تطابق البحث أو الفلتر الحالي" : "لا توجد أنواع مواعيد بعد"}
+                title={
+                  isFilteredEmpty
+                    ? tr(
+                        'لا توجد أنواع تطابق البحث أو الفلتر الحالي',
+                        'No types match the current search or filter',
+                      )
+                    : tr(
+                        'لا توجد أنواع مواعيد بعد',
+                        'No appointment types yet',
+                      )
+                }
 
-                subtitle={isFilteredEmpty ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج" : "أنشئ أنواع المواعيد والأسعار المعروضة للمرضى عند الحجز"}
+                subtitle={
+                  isFilteredEmpty
+                    ? tr(
+                        'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج',
+                        'Try adjusting search terms or resetting filters',
+                      )
+                    : tr(
+                        'أنشئ أنواع المواعيد والأسعار المعروضة للمرضى عند الحجز',
+                        'Create appointment types and prices shown to patients when booking',
+                      )
+                }
 
                 actionLabel="نوع جديد"
 

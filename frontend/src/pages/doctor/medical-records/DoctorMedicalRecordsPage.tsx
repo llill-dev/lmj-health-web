@@ -29,24 +29,30 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { generateDoctorDocumentPdf, openPdfBlobInNewTab } from "@/lib/doctor/orders/doctorOrderDocuments";
+import { useI18n } from "@/i18n/provider";
 
-function formatArabicDate(value?: string | null) {
-  if (!value) return "غير محدد";
+function formatLocaleDate(value: string | null | undefined, locale: string) {
+  if (!value) return locale === "ar" ? "غير محدد" : "Not set";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ar-SA");
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
 function mapRecordToDetails(
   record: NonNullable<ReturnType<typeof useDoctorMedicalRecord>["record"]>,
   patientName: string,
+  locale: string,
 ): MedicalRecordDetails {
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return {
     id: record._id,
     patientName,
-    date: formatArabicDate(record.date || record.createdAt),
-    diagnosisSubtitle: record.diagnosis || record.title || "بدون تشخيص",
-    symptoms: record.title ? [record.title] : ["لا توجد أعراض موثقة"],
+    date: formatLocaleDate(record.date || record.createdAt, locale),
+    diagnosisSubtitle:
+      record.diagnosis || record.title || tr("بدون تشخيص", "No diagnosis"),
+    symptoms: record.title
+      ? [record.title]
+      : [tr("لا توجد أعراض موثقة", "No documented symptoms")],
     vitals: [],
     medicinesCount: record.prescriptions?.length ?? 0,
     prescriptions: (record.prescriptions ?? []).map((item) => ({
@@ -56,15 +62,22 @@ function mapRecordToDetails(
       frequency: "—",
       notes: "",
     })),
-    followUpDate: record.followUpRequired ? "تحتاج متابعة" : "لا توجد متابعة",
+    followUpDate: record.followUpRequired
+      ? tr("تحتاج متابعة", "Follow-up needed")
+      : tr("لا توجد متابعة", "No follow-up"),
     additionalNotes:
       record.attachments && record.attachments.length > 0
-        ? `المرفقات: ${record.attachments.join("، ")}`
-        : "لا توجد ملاحظات إضافية.",
+        ? tr(
+            `المرفقات: ${record.attachments.join("، ")}`,
+            `Attachments: ${record.attachments.join(", ")}`,
+          )
+        : tr("لا توجد ملاحظات إضافية.", "No additional notes."),
   };
 }
 
 export default function DoctorMedicalRecordsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? "";
   const [search, setSearch] = useState("");
@@ -124,9 +137,10 @@ export default function DoctorMedicalRecordsPage() {
       mapRecordToDetails(
         recordDetailsQuery.record,
         selectedPatient.user.fullName,
+        locale,
       ),
     );
-  }, [recordDetailsQuery.record, selectedPatient]);
+  }, [recordDetailsQuery.record, selectedPatient, locale]);
 
   const openDetails = (row: MedicalRecordRowVm) => {
     setDetailsRecord(null);
@@ -143,8 +157,8 @@ export default function DoctorMedicalRecordsPage() {
 
   const handleDownloadPdf = async (row: MedicalRecordRowVm) => {
     try {
-      toast("جارٍ إنشاء ملف PDF...", {
-        title: "تحميل التقرير",
+      toast(tr("جارٍ إنشاء ملف PDF...", "Generating PDF..."), {
+        title: tr("تحميل التقرير", "Download report"),
         variant: "info",
       });
       const blob = await generateDoctorDocumentPdf({
@@ -153,13 +167,13 @@ export default function DoctorMedicalRecordsPage() {
       });
       const filename = `medical-record-${row.systemId}-${row.id.slice(-6)}.pdf`;
       openPdfBlobInNewTab(blob, filename);
-      toast("تم إنشاء ملف PDF بنجاح", {
-        title: "نجح التحميل",
+      toast(tr("تم إنشاء ملف PDF بنجاح", "PDF created successfully"), {
+        title: tr("نجح التحميل", "Download succeeded"),
         variant: "success",
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: "فشل إنشاء ملف PDF",
+        title: tr("فشل إنشاء ملف PDF", "Failed to create PDF"),
         variant: "error",
       });
     }
@@ -168,10 +182,12 @@ export default function DoctorMedicalRecordsPage() {
   return (
     <>
       <Helmet>
-        <title>السجلات الطبية • LMJ Health</title>
+        <title>
+          {tr("السجلات الطبية • LMJ Health", "Medical Records • LMJ Health")}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <MedicalRecordDetailsDialog
           open={detailsOpen}
           onOpenChange={(open) => {
@@ -188,42 +204,44 @@ export default function DoctorMedicalRecordsPage() {
           variant="medical-records"
           surface="mint"
           kpiColumns={4}
-          title="السجلات الطبية"
+          title={tr("السجلات الطبية", "Medical Records")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
                 {list.isAwaitingData ? "—" : list.stats.totalRecords}
               </span>
-              <span className="text-primary/90"> — إجمالي السجلات</span>
+              <span className="text-primary/90">
+                {tr(" — إجمالي السجلات", " — total records")}
+              </span>
             </span>
           }
           mode={mode === "edit" ? "create" : mode}
-          actionLabel="إضافة سجل جديد"
+          actionLabel={tr("إضافة سجل جديد", "Add new record")}
           onActionClick={() => setMode("create")}
           kpis={[
             {
               key: "totalRecords",
               icon: <Files className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.totalRecords,
-              label: "إجمالي السجلات",
+              label: tr("إجمالي السجلات", "Total records"),
             },
             {
               key: "prescriptions",
               icon: <FileText className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.prescriptions,
-              label: "الوصفات المسجلة",
+              label: tr("الوصفات المسجلة", "Prescriptions"),
             },
             {
               key: "needsFollowUp",
               icon: <Activity className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.needsFollowUp,
-              label: "تحتاج متابعة",
+              label: tr("تحتاج متابعة", "Needs follow-up"),
             },
             {
               key: "active",
               icon: <CheckCircle className="h-5 w-5 shrink-0" />,
               value: list.isAwaitingData ? "—" : list.stats.active,
-              label: "سجلات نشطة",
+              label: tr("سجلات نشطة", "Active records"),
             },
           ]}
           overlay={
@@ -232,7 +250,7 @@ export default function DoctorMedicalRecordsPage() {
                 type="button"
                 onClick={() => setMode("list")}
                 className="absolute left-4 top-4 flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:left-[24px] sm:top-[24px]"
-                aria-label="إغلاق"
+                aria-label={tr("إغلاق", "Close")}
               >
                 <X className="h-5 w-5 text-[#0F8F8B]" />
               </motion.button>

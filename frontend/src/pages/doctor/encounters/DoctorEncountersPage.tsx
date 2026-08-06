@@ -38,6 +38,7 @@ import {
 } from "@/lib/doctor/encounters/createEncounterFormErrors";
 import { readAuthUser } from "@/lib/cookies";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 
 const DEFAULT_FILTERS: EncountersFiltersState = {
   search: "",
@@ -48,32 +49,43 @@ const DEFAULT_FILTERS: EncountersFiltersState = {
   status: "all",
 };
 
-function getEmptyStateCopy(status: MedicalVisitStatusFilter): {
+function getEmptyStateCopy(
+  status: MedicalVisitStatusFilter,
+  tr: (ar: string, en: string) => string,
+): {
   title: string;
   subtitle: string;
 } {
   if (status === "open") {
     return {
-      title: "لا توجد زيارات نشطة حاليًا",
-      subtitle:
+      title: tr("لا توجد زيارات نشطة حاليًا", "No active encounters right now"),
+      subtitle: tr(
         "ابدأ زيارة طبية جديدة لمتابعة المريض، إضافة الوصفات والتحاليل، وربط الموعد إن وجد.",
+        "Start a new medical encounter to follow the patient, add prescriptions/labs, and link an appointment if available.",
+      ),
     };
   }
   if (status === "closed") {
     return {
-      title: "لا توجد زيارات مغلقة",
-      subtitle:
+      title: tr("لا توجد زيارات مغلقة", "No closed encounters"),
+      subtitle: tr(
         "عند إغلاق الزيارات الطبية ستظهر هنا مع سجلها الكامل. يمكنك بدء زيارة جديدة في أي وقت.",
+        "Closed medical encounters will appear here with their full history. You can start a new encounter anytime.",
+      ),
     };
   }
   return {
-    title: "لا توجد زيارات لعرضها",
-    subtitle:
+    title: tr("لا توجد زيارات لعرضها", "No encounters to show"),
+    subtitle: tr(
       "أنشئ زيارة طبية جديدة لبدء التوثيق السريري للمريض، من الموعد أو مباشرة من العيادة.",
+      "Create a new medical encounter to start clinical documentation from an appointment or directly in clinic.",
+    ),
   };
 }
 
 export default function DoctorEncountersPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -121,8 +133,8 @@ export default function DoctorEncountersPage() {
   );
 
   const emptyCopy = useMemo(
-    () => getEmptyStateCopy(filters.status),
-    [filters.status],
+    () => getEmptyStateCopy(filters.status, tr),
+    [filters.status, locale],
   );
 
   const openCreateEncounterDialog = (patientId?: string) => {
@@ -215,17 +227,17 @@ export default function DoctorEncountersPage() {
   return (
     <>
       <Helmet>
-        <title>الزيارات الطبية • LMJ Health</title>
+        <title>{tr("الزيارات الطبية • LMJ Health", "Encounters • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full">
+      <div dir={dir} lang={locale} className="w-full">
         <DoctorDashboardOverview
           variant="encounters"
           surface="mint"
-          title="الزيارات الطبية"
-          subtitle="جميع زياراتك"
+          title={tr("الزيارات الطبية", "Medical Encounters")}
+          subtitle={tr("جميع زياراتك", "All your encounters")}
           headerIcon={<ClipboardList className="h-8 w-8 text-white" aria-hidden />}
-          actionLabel="زيارة جديدة"
+          actionLabel={tr("زيارة جديدة", "New encounter")}
           actionIcon={<Plus className="h-4 w-4" aria-hidden />}
           onActionClick={() => openCreateEncounterDialog()}
           kpis={[
@@ -233,19 +245,19 @@ export default function DoctorEncountersPage() {
               key: "all",
               icon: <ClipboardList className="h-5 w-5 shrink-0" />,
               value: displayStats.total,
-              label: "الكل",
+              label: tr("الكل", "All"),
             },
             {
               key: "open",
               icon: <Stethoscope className="h-5 w-5 shrink-0" />,
               value: displayStats.active,
-              label: "نشطة",
+              label: tr("نشطة", "Active"),
             },
             {
               key: "closed",
               icon: <ClipboardList className="h-5 w-5 shrink-0" />,
               value: displayStats.closed,
-              label: "مغلقة",
+              label: tr("مغلقة", "Closed"),
             },
           ]}
         />

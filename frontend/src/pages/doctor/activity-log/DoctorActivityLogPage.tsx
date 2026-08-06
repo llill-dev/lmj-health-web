@@ -15,8 +15,11 @@ import { useDoctorActivityLog } from "@/hooks";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import type { ActivityLogPeriod } from "@/lib/doctor/activityLog/types";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorActivityLogPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [period, setPeriod] = useState<ActivityLogPeriod>("all");
@@ -53,16 +56,16 @@ export default function DoctorActivityLogPage() {
     return (
       <>
         <Helmet>
-          <title>سجل النشاطات • LMJ Health</title>
+          <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
         </Helmet>
         <div
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
           className="flex min-h-[360px] items-center justify-center"
         >
           <div className="flex items-center gap-3 font-cairo text-[14px] font-semibold text-[#667085]">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            جارٍ تحميل سجل النشاطات…
+            {tr("جارٍ تحميل سجل النشاطات…", "Loading activity log…")}
           </div>
         </div>
       </>
@@ -73,12 +76,16 @@ export default function DoctorActivityLogPage() {
     return (
       <>
         <Helmet>
-          <title>سجل النشاطات • LMJ Health</title>
+          <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
         </Helmet>
         <DoctorListErrorState
-          title="تعذّر تحميل سجل النشاطات"
+          title={tr("تعذّر تحميل سجل النشاطات", "Could not load activity log")}
           brief={
-            errorMessage ?? "حدث خطأ أثناء جلب السجل من الخادم. حاول مرة أخرى."
+            errorMessage ??
+            tr(
+              "حدث خطأ أثناء جلب السجل من الخادم. حاول مرة أخرى.",
+              "An error occurred while fetching the log from the server. Please try again.",
+            )
           }
           onRetry={() => void retryActivity()}
           retrying={retryingActivity}
@@ -90,10 +97,10 @@ export default function DoctorActivityLogPage() {
   return (
     <>
       <Helmet>
-        <title>سجل النشاطات • LMJ Health</title>
+        <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ActivityLogBanner />
         <ActivityLogInfoAlert />
         <ActivityLogFilters
@@ -106,7 +113,7 @@ export default function DoctorActivityLogPage() {
         {activityQuery.isRefetching ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            جارٍ تحديث سجل النشاطات...
+            {tr("جارٍ تحديث سجل النشاطات...", "Refreshing activity log...")}
           </div>
         ) : null}
 

@@ -486,6 +486,128 @@ function readLocalizedText(value: unknown): string | undefined {
   return undefined;
 }
 
+function tryParseJson(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+function normalizePossiblyJsonValue(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (
+    trimmed.startsWith("{") ||
+    trimmed.startsWith("[") ||
+    trimmed === "null" ||
+    trimmed === "true" ||
+    trimmed === "false"
+  ) {
+    return tryParseJson(trimmed);
+  }
+  return value;
+}
+
+function normalizeStringArrayInput(value: unknown): string[] | undefined {
+  const normalized = normalizePossiblyJsonValue(value);
+  if (normalized == null) return undefined;
+
+  if (Array.isArray(normalized)) {
+    const items = normalized
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        if (typeof item === "number" || typeof item === "boolean") return String(item);
+        if (item && typeof item === "object") {
+          const record = item as AdminApiRecord;
+          return (
+            readLocalizedText(record._id) ??
+            readLocalizedText(record.id) ??
+            readLocalizedText(record.value) ??
+            readLocalizedText(record.slug) ??
+            readLocalizedText(record.key) ??
+            readLocalizedText(record.name) ??
+            readLocalizedText(record.title)
+          );
+        }
+        return undefined;
+      })
+      .filter((item): item is string => Boolean(item && item.length > 0));
+    return items.length > 0 ? items : [];
+  }
+
+  if (typeof normalized === "string") {
+    const items = normalized
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return items.length > 0 ? items : [];
+  }
+
+  if (typeof normalized === "number" || typeof normalized === "boolean") {
+    return [String(normalized)];
+  }
+
+  if (typeof normalized === "object") {
+    const record = normalized as AdminApiRecord;
+    const single =
+      readLocalizedText(record._id) ??
+      readLocalizedText(record.id) ??
+      readLocalizedText(record.value) ??
+      readLocalizedText(record.slug) ??
+      readLocalizedText(record.key) ??
+      readLocalizedText(record.name) ??
+      readLocalizedText(record.title);
+    return single ? [single] : undefined;
+  }
+
+  return undefined;
+}
+
+function normalizeSourcesInput(value: unknown): CreateAdminContentBody["sources"] | undefined {
+  const normalized = normalizePossiblyJsonValue(value);
+  if (!Array.isArray(normalized)) return undefined;
+
+  const sources = normalized
+    .map((entry) => {
+      const record = asAdminRecord(entry);
+      if (!record) {
+        const text = readLocalizedText(entry);
+        if (!text) return null;
+        return { title: text };
+      }
+      const title = readLocalizedText(record.title) ?? readLocalizedText(record.sourceName);
+      const url = readLocalizedText(record.url) ?? readLocalizedText(record.sourceUrl);
+      return title || url ? { ...(title ? { title } : {}), ...(url ? { url } : {}) } : null;
+    })
+    .filter(
+      (item): item is NonNullable<CreateAdminContentBody["sources"]>[number] => item != null,
+    );
+
+  return sources.length > 0 ? sources : [];
+}
+
+function normalizeTemplateIdValue(value: unknown): string | null | undefined {
+  if (value === null) return null;
+  const normalized = normalizePossiblyJsonValue(value);
+  if (normalized == null) return undefined;
+  if (typeof normalized === "string") {
+    const trimmed = normalized.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof normalized === "object") {
+    const record = normalized as AdminApiRecord;
+    return (
+      readLocalizedText(record._id) ??
+      readLocalizedText(record.id) ??
+      readLocalizedText(record.value) ??
+      readLocalizedText(record.templateId)
+    );
+  }
+  return undefined;
+}
+
 function buildAdminContentNewsPayload(
   body: Pick<
     CreateAdminContentBody,
@@ -497,9 +619,10 @@ function buildAdminContentNewsPayload(
     | "aiSummary"
   >,
 ) {
+  const rawNews = normalizePossiblyJsonValue(body.news);
   const news =
-    body.news && typeof body.news === "object" && !Array.isArray(body.news)
-      ? { ...body.news }
+    rawNews && typeof rawNews === "object" && !Array.isArray(rawNews)
+      ? { ...(rawNews as Record<string, unknown>) }
       : {};
 
   const sourceName = readLocalizedText(news.sourceName) ?? readLocalizedText(body.sourceName);
@@ -525,6 +648,7 @@ function buildAdminContentNewsPayload(
   }
 
   return {
+    ...news,
     ...(sourceName ? { sourceName } : {}),
     ...(sourceUrl ? { sourceUrl } : {}),
     ...(originalTitle ? { originalTitle } : {}),
@@ -550,6 +674,59 @@ function buildAdminContentPayload(body: CreateAdminContentBody | UpdateAdminCont
   delete payload.originalTitle;
   delete payload.publishedAt;
   delete payload.aiSummary;
+
+  if ("templateId" in payload) {
+    const templateId = normalizeTemplateIdValue(payload.templateId);
+    if (templateId === undefined) {
+      delete payload.templateId;
+    } else {
+      payload.templateId = templateId;
+    }
+  }
+
+  if ("data" in payload) {
+    const data = normalizePossiblyJsonValue(payload.data);
+    if (data === undefined) {
+      delete payload.data;
+    } else {
+      payload.data = data;
+    }
+  }
+
+  if ("contentBlocks" in payload) {
+    const contentBlocks = normalizePossiblyJsonValue(payload.contentBlocks);
+    if (contentBlocks === undefined) {
+      delete payload.contentBlocks;
+    } else {
+      payload.contentBlocks = contentBlocks;
+    }
+  }
+
+  if ("sources" in payload) {
+    const sources = normalizeSourcesInput(payload.sources);
+    if (sources === undefined) {
+      delete payload.sources;
+    } else {
+      payload.sources = sources;
+    }
+  }
+
+  const stringArrayFields = [
+    "tags",
+    "categories",
+    "riskFlags",
+    "relatedContentIds",
+  ] as const;
+
+  for (const field of stringArrayFields) {
+    if (!(field in payload)) continue;
+    const normalized = normalizeStringArrayInput(payload[field]);
+    if (normalized === undefined) {
+      delete payload[field];
+    } else {
+      payload[field] = normalized;
+    }
+  }
 
   return payload;
 }

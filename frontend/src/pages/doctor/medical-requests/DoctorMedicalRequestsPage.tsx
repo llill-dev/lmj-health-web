@@ -31,8 +31,11 @@ import {
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import type { DoctorOrderCategory } from '@/lib/doctor/orders/doctorOrderTypes';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorMedicalRequestsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [tab, setTab] = useState<Exclude<DoctorOrderCategory, 'all'>>('lab');
@@ -95,7 +98,13 @@ export default function DoctorMedicalRequestsPage() {
     if (!activeVm?.raw) return;
     const path = resolveMedicalRequestReorderPath(activeVm.raw);
     if (!path) {
-      toast('تعذّر تحديد مسار إعادة الطلب لهذا المريض.', { variant: 'error' });
+      toast(
+        tr(
+          'تعذّر تحديد مسار إعادة الطلب لهذا المريض.',
+          'Could not resolve reorder path for this patient.',
+        ),
+        { variant: 'error' },
+      );
       return;
     }
     setDetailsOpen(false);
@@ -109,7 +118,9 @@ export default function DoctorMedicalRequestsPage() {
         orderId: activeVm.id,
         statusCode,
       });
-      toast('تم تحديث حالة الطلب.', { variant: 'success' });
+      toast(tr('تم تحديث حالة الطلب.', 'Request status updated.'), {
+        variant: 'success',
+      });
       setStatusOpen(false);
       await detailsQuery.refetch();
     } catch (error) {
@@ -131,7 +142,7 @@ export default function DoctorMedicalRequestsPage() {
           isFinal: input.isFinal,
         },
       });
-      toast('تمت إضافة النتيجة.', { variant: 'success' });
+      toast(tr('تمت إضافة النتيجة.', 'Result added.'), { variant: 'success' });
       setUploadResultOpen(false);
       await detailsQuery.refetch();
     } catch (error) {
@@ -142,10 +153,12 @@ export default function DoctorMedicalRequestsPage() {
   return (
     <>
       <Helmet>
-        <title>الطلبات الطبية • LMJ Health</title>
+        <title>
+          {tr('الطلبات الطبية • LMJ Health', 'Medical Requests • LMJ Health')}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <MedicalRequestsPageHeader />
 
         <div className="mb-6">
@@ -162,7 +175,10 @@ export default function DoctorMedicalRequestsPage() {
 
         {list.isDemo ? (
           <p className="mb-4 rounded-[10px] border border-[#FEF3C7] bg-[#FFFBEB] px-4 py-2 text-right font-cairo text-[12px] font-semibold text-[#92400E]">
-            وضع الواجهة فقط (VITE_UI_ONLY) مفعّل — بيانات تجريبية محلية.
+            {tr(
+              'وضع الواجهة فقط (VITE_UI_ONLY) مفعّل — بيانات تجريبية محلية.',
+              'UI-only mode (VITE_UI_ONLY) is enabled — local demo data.',
+            )}
           </p>
         ) : null}
 
@@ -182,7 +198,10 @@ export default function DoctorMedicalRequestsPage() {
               </div>
             ) : list.isError ? (
               <DoctorListErrorState
-                title="تعذّر تحميل الطلبات الطبية"
+                title={tr(
+                  'تعذّر تحميل الطلبات الطبية',
+                  'Failed to load medical requests',
+                )}
                 brief={getUserFacingRequestErrorMessage(list.error)}
                 retrying={retryingList}
                 onRetry={() => void retryList()}

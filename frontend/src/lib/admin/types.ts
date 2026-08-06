@@ -1150,6 +1150,11 @@ export type AdminNewsItem = {
   title: string;
   summary?: string;
   language?: "ar" | "en" | string;
+  sourceName?: string;
+  originalTitle?: string;
+  aiSummary?: string;
+  coverImage?: string;
+  rawPayload?: unknown;
 };
 
 export type AdminNewsIngestBody = {

@@ -36,10 +36,13 @@ import type { SuggestFacilityRecord } from "@/lib/doctor/medical-services-direct
 import type { DoctorFacility } from "@/lib/doctor/facilities/types";
 import { DEFAULT_FACILITY_TYPE_OPTIONS } from "@/lib/doctor/facilities/types";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 
 const PAGE_SIZE = 10;
 
 export default function DoctorFacilitiesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const { facility, facilityQuery, saveMutation, isAwaitingData } =
     useDoctorFacility();
@@ -206,16 +209,16 @@ export default function DoctorFacilitiesPage() {
     return (
       <>
         <Helmet>
-          <title>المنشآت • LMJ Health</title>
+          <title>{tr("المنشآت • LMJ Health", "Facilities • LMJ Health")}</title>
         </Helmet>
         <div
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
           className="flex min-h-[360px] items-center justify-center"
         >
           <div className="flex items-center gap-3 font-cairo text-[14px] font-semibold text-[#667085]">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            جاري تحميل المنشآت...
+            {tr("جاري تحميل المنشآت...", "Loading facilities...")}
           </div>
         </div>
       </>
@@ -226,10 +229,10 @@ export default function DoctorFacilitiesPage() {
     return (
       <>
         <Helmet>
-          <title>المنشآت • LMJ Health</title>
+          <title>{tr("المنشآت • LMJ Health", "Facilities • LMJ Health")}</title>
         </Helmet>
         <DoctorListErrorState
-          title="تعذّر تحميل المنشآت"
+          title={tr("تعذّر تحميل المنشآت", "Failed to load facilities")}
           brief={getUserFacingRequestErrorMessage(facilityQuery.error)}
           onRetry={() => void retryFacility()}
           retrying={retryingFacility}
@@ -241,12 +244,12 @@ export default function DoctorFacilitiesPage() {
   return (
     <>
       <Helmet>
-        <title>المنشآت • LMJ Health</title>
+        <title>{tr("المنشآت • LMJ Health", "Facilities • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="المنشآت"
+          title={tr("المنشآت", "Facilities")}
           icon={<Building2 className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
           action={
             <div className="flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -258,7 +261,7 @@ export default function DoctorFacilitiesPage() {
                   className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-primary/30 bg-[#E6F4F3] px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/50 hover:bg-[#DDF0EF] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Link2 className="h-4 w-4" aria-hidden />
-                  ربط منشأة موجودة
+                  {tr("ربط منشأة موجودة", "Link existing facility")}
                 </button>
               ) : null}
               <button
@@ -268,7 +271,7 @@ export default function DoctorFacilitiesPage() {
                 className="inline-flex h-[44px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition hover:border-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" aria-hidden />
-                إضافة منشأة
+                {tr("إضافة منشأة", "Add facility")}
               </button>
             </div>
           }
@@ -277,10 +280,13 @@ export default function DoctorFacilitiesPage() {
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
-          placeholder="ابحث عن منشأة..."
+          placeholder={tr("ابحث عن منشأة...", "Search facilities...")}
           onValueChangeExtra={() => setPage(1)}
           trailing={
-            <ClinicAccountsSearchCount count={filtered.length} label="منشأة" />
+            <ClinicAccountsSearchCount
+              count={filtered.length}
+              label={tr("منشأة", "facility")}
+            />
           }
         />
 
