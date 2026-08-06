@@ -26,6 +26,7 @@ import {
 } from "@/components/admin/form-field";
 import { cn } from "@/lib/utils/utils";
 import type { FacilitySummary } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 const FACILITY_TYPE_OPTIONS = [
   { value: "hospital", label: "مستشفى" },
@@ -77,6 +78,7 @@ export default function EditFacilityDialog({
   doctors,
   onSuccess,
 }: EditFacilityDialogProps) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -277,7 +279,7 @@ export default function EditFacilityDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={handleSubmit}>
+            <form dir={dir} onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   {rootError ? (

@@ -22,6 +22,7 @@ import { useCreateAdminUser } from "@/hooks/admin/users/useAdminUsers";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import type { CreateAdminUserBody } from "@/lib/admin/types";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 import {
   PHONE_DIAL_CODE_OPTIONS,
   type PhoneDialCode,
@@ -105,6 +106,7 @@ export default function CreateAdminUserDialog({
   open,
   onOpenChange,
 }: CreateAdminUserDialogProps) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const createMutation = useCreateAdminUser();
   const [showPassword, setShowPassword] = useState(false);
@@ -221,7 +223,7 @@ export default function CreateAdminUserDialog({
             </div>
 
             {/* Form */}
-            <form dir="rtl" onSubmit={handleSubmit(onSubmit)}>
+            <form dir={dir} onSubmit={handleSubmit(onSubmit)}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   {/* Full Name */}

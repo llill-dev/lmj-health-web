@@ -9,6 +9,7 @@ import {
   AdminFormField,
   adminTextareaClass,
 } from "@/components/admin/form-field";
+import { useI18n } from "@/i18n/provider";
 
 const schema = z.object({
   reason: z
@@ -34,6 +35,7 @@ export default function ContentRejectDialog({
   onConfirm,
   isPending,
 }: Props) {
+  const { dir } = useI18n();
   const {
     register,
     handleSubmit,
@@ -118,7 +120,7 @@ export default function ContentRejectDialog({
             </div>
 
             <form
-              dir="rtl"
+              dir={dir}
               onSubmit={handleSubmit(async (v) => {
                 await onConfirm(v.reason.trim());
               })}

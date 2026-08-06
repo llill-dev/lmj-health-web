@@ -8,6 +8,7 @@ import {
   ADMIN_SECRETARY_WRITE_SUPPORTED,
 } from "@/hooks/admin/secretaries/useAdminSecretaries";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 import StyledSelect from "@/components/ui/styled-select";
 import { AppCheckbox } from "@/components/ui";
 import {
@@ -42,6 +43,7 @@ export default function CreateSecretaryDialog({
   onOpenChange,
   onSuccess,
 }: CreateSecretaryDialogProps) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const writeBlocked = !ADMIN_SECRETARY_WRITE_SUPPORTED;
@@ -183,7 +185,7 @@ export default function CreateSecretaryDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={handleSubmit}>
+            <form dir={dir} onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <div className="rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] p-3">
