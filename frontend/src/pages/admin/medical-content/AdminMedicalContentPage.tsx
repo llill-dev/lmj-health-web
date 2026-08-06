@@ -1356,6 +1356,7 @@ export default function AdminMedicalContentPage() {
           if (!next) setViewingContentId(null);
         }}
         contentId={viewingContentId}
+        workflowRole="admin"
       />
 
       <EditAdminContentDialog
@@ -1365,6 +1366,7 @@ export default function AdminMedicalContentPage() {
           if (!next) setEditingContentId(null);
         }}
         contentId={editingContentId}
+        workflowRole="admin"
       />
 
       <ConfirmActionDialog
@@ -1496,6 +1498,7 @@ export default function AdminMedicalContentPage() {
       <CreateAdminContentDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
+        workflowRole="admin"
       />
     </>
   );

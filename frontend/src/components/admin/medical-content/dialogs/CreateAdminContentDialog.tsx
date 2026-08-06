@@ -21,7 +21,7 @@ import DynamicTemplateFieldRenderer from "@/components/admin/medical-content/Dyn
 import MedicalContentGovernancePanel, {
   ReleaseAcceptanceSection,
 } from "@/components/admin/medical-content/MedicalContentGovernancePanel";
-import { buildReleaseAcceptanceSnapshot } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
+import { buildReleaseAcceptanceSnapshot, type WorkflowActorRole } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import {
   buildContentBlocks,
@@ -260,11 +260,14 @@ const checkboxClass =
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** OpenAPI workflow actor for acceptance next-actions. */
+  workflowRole?: WorkflowActorRole;
 };
 
 export default function CreateAdminContentDialog({
   open,
   onOpenChange,
+  workflowRole = "admin",
 }: Props) {
   const { dir } = useI18n();
   const { toast } = useToast();
@@ -497,7 +500,7 @@ export default function CreateAdminContentDialog({
           watchedBlocks.some((block) => isMeaningfulBlock(block)),
         newsSourceUrl: watchedSourceUrl,
         newsPublishedAt: watchedPublishedAt,
-        role: "admin",
+        role: workflowRole,
       }),
     [
       previewSources.length,
@@ -507,6 +510,7 @@ export default function CreateAdminContentDialog({
       watchedPublishedAt,
       watchedRequiresSeekHelpBlock,
       watchedSourceUrl,
+      workflowRole,
     ],
   );
 
@@ -1172,7 +1176,7 @@ export default function CreateAdminContentDialog({
                           selectedType === "SETTINGS_PAGE" ||
                           watchedBlocks.some((block) => isMeaningfulBlock(block))
                         }
-                        role="admin"
+                        role={workflowRole}
                         language={selectedLanguage === "en" ? "en" : "ar"}
                         showAcceptanceMatrix={false}
                         news={{

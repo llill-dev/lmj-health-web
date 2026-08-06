@@ -118,21 +118,29 @@ export function ReleaseAcceptanceSection({
           </div>
         ))}
       </div>
-      {showNextActions && snapshot.nextActions.length ? (
+      {showNextActions ? (
         <div className="mt-3 space-y-1.5">
           <div className="font-cairo text-[11px] font-extrabold text-[#667085]">
             {language === "en" ? "Next allowed actions" : "الإجراءات التالية المسموحة"}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {snapshot.nextActions.map((action) => (
-              <span
-                key={action.action}
-                className="inline-flex items-center rounded-[999px] border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 font-cairo text-[11px] font-bold text-[#475467]"
-              >
-                {localizeAcceptanceCopy(action.label, language)}
-              </span>
-            ))}
-          </div>
+          {snapshot.nextActions.length ? (
+            <div className="flex flex-wrap gap-2">
+              {snapshot.nextActions.map((action) => (
+                <span
+                  key={action.action}
+                  className="inline-flex items-center rounded-[999px] border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 font-cairo text-[11px] font-bold text-[#475467]"
+                >
+                  {localizeAcceptanceCopy(action.label, language)}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F9FAFB] px-3 py-2 font-cairo text-[11px] font-semibold text-[#667085]">
+              {language === "en"
+                ? "No workflow actions available for this role at the current status (e.g. data entry waits while content is in review)."
+                : "لا إجراءات متاحة لهذا الدور في الحالة الحالية (مثل انتظار data entry أثناء المراجعة)."}
+            </div>
+          )}
         </div>
       ) : null}
     </div>

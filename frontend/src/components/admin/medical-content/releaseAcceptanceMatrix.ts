@@ -157,10 +157,16 @@ export function getNextWorkflowActions(
       {
         action: "submit-review" as const,
         roles: ["admin", "data_entry"] as WorkflowActorRole[],
-        label: {
-          ar: "إرسال للمراجعة (admin / data_entry)",
-          en: "Submit for review (admin / data_entry)",
-        },
+        label:
+          role === "data_entry"
+            ? {
+                ar: "إرسال للمراجعة (data_entry)",
+                en: "Submit for review (data_entry)",
+              }
+            : {
+                ar: "إرسال للمراجعة (admin / data_entry)",
+                en: "Submit for review (admin / data_entry)",
+              },
       },
     ].filter((cue) => cue.roles.includes(role));
   }

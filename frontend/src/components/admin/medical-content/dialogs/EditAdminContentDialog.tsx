@@ -16,7 +16,7 @@ import DynamicTemplateFieldRenderer from "@/components/admin/medical-content/Dyn
 import MedicalContentGovernancePanel, {
   ReleaseAcceptanceSection,
 } from "@/components/admin/medical-content/MedicalContentGovernancePanel";
-import { buildReleaseAcceptanceSnapshot } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
+import { buildReleaseAcceptanceSnapshot, type WorkflowActorRole } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import {
   buildContentBlocks,
@@ -132,6 +132,8 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contentId: string | null;
+  /** OpenAPI workflow actor for acceptance next-actions. */
+  workflowRole?: WorkflowActorRole;
 };
 
 const checkboxClass =
@@ -149,6 +151,7 @@ export default function EditAdminContentDialog({
   open,
   onOpenChange,
   contentId,
+  workflowRole = "admin",
 }: Props) {
   const { dir } = useI18n();
   const { toast } = useToast();
@@ -328,7 +331,7 @@ export default function EditAdminContentDialog({
           watchedBlocks.some((block) => isMeaningfulBlock(block)),
         newsSourceUrl: previewNewsSourceUrl,
         newsPublishedAt: previewNewsPublishedAt,
-        role: "admin",
+        role: workflowRole,
       }),
     [
       details?.status,
@@ -339,6 +342,7 @@ export default function EditAdminContentDialog({
       previewSources.length,
       selectedType,
       watchedBlocks,
+      workflowRole,
     ],
   );
   const fallbackTemplateData = useMemo(
@@ -1143,7 +1147,7 @@ export default function EditAdminContentDialog({
                             selectedType === "SETTINGS_PAGE" ||
                             watchedBlocks.some((block) => isMeaningfulBlock(block))
                           }
-                          role="admin"
+                          role={workflowRole}
                           language={selectedLanguage === "en" ? "en" : "ar"}
                           showAcceptanceMatrix={false}
                           news={{

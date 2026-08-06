@@ -463,6 +463,7 @@ export default function AdminMedicalNewsQueuePage() {
             if (!next) setViewingContentId(null);
           }}
           contentId={viewingContentId}
+          workflowRole="admin"
         />
 
         <ConfirmActionDialog

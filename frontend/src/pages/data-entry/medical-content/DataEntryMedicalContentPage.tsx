@@ -626,7 +626,11 @@ export default function DataEntryMedicalContentPage() {
         ) : null}
       </div>
 
-      <CreateAdminContentDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <CreateAdminContentDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        workflowRole="data_entry"
+      />
 
       <EditAdminContentDialog
         open={editingId !== null}
@@ -634,6 +638,7 @@ export default function DataEntryMedicalContentPage() {
           if (!open) setEditingId(null);
         }}
         contentId={editingId}
+        workflowRole="data_entry"
       />
 
       <MedicalContentViewDialog
@@ -642,6 +647,7 @@ export default function DataEntryMedicalContentPage() {
           if (!open) setViewingId(null);
         }}
         contentId={viewingId}
+        workflowRole="data_entry"
       />
     </>
   );

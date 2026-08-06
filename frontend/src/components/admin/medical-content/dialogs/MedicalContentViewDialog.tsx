@@ -7,6 +7,7 @@ import MedicalContentGovernancePanel, {
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import {
   buildReleaseAcceptanceFromDetails,
+  type WorkflowActorRole,
 } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import type {
   AdminContentStatus,
@@ -26,6 +27,8 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contentId: string | null;
+  /** OpenAPI workflow actor for acceptance next-actions. */
+  workflowRole?: WorkflowActorRole;
 };
 
 function typeLabel(t: AdminContentType) {
@@ -97,6 +100,7 @@ export default function MedicalContentViewDialog({
   open,
   onOpenChange,
   contentId,
+  workflowRole = "admin",
 }: Props) {
   const { locale, dir } = useI18n();
   const detailsQuery = useAdminContentById(open ? contentId : null);
@@ -105,8 +109,8 @@ export default function MedicalContentViewDialog({
   const template = details?.template ?? null;
   const previewLanguage = details?.language === "en" ? "en" : "ar";
   const acceptanceSnapshot = useMemo(
-    () => buildReleaseAcceptanceFromDetails(details, "admin"),
-    [details],
+    () => buildReleaseAcceptanceFromDetails(details, workflowRole),
+    [details, workflowRole],
   );
   const previewWarnings = details
     ? getReviewReadinessIssueCodes(details).map((code) => {
@@ -332,7 +336,7 @@ export default function MedicalContentViewDialog({
                             (Array.isArray(details.contentBlocks) &&
                               details.contentBlocks.length > 0)
                           }
-                          role="admin"
+                          role={workflowRole}
                           language={previewLanguage}
                           showAcceptanceMatrix={false}
                           news={{
