@@ -8,6 +8,7 @@ import {
   profileInputClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import { useWaitlistSuggestions } from '@/hooks/doctor/waitlist/useDoctorWaitlist';
+import { useI18n } from '@/i18n/provider';
 
 function formatLocalDate(date: Date) {
   const year = date.getFullYear();
@@ -23,6 +24,7 @@ export default function WaitlistSuggestionsDialog({
   open: boolean;
   onClose: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const today = formatLocalDate(new Date());
 
   const maxDate = (() => {
@@ -75,7 +77,7 @@ export default function WaitlistSuggestionsDialog({
       maxWidthClass="max-w-[560px]"
       headerPattern
     >
-      <div dir="rtl" lang="ar" className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           اعرض الأوقات المتاحة في جدولك لمساعدتك على تنظيم المواعيد وخدمة
           مرضى قائمة الانتظار بسرعة.

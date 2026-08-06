@@ -7,7 +7,14 @@ import {
   toDisplayText,
   toPrettyJson,
 } from "./dialogs/medicalContentDialogHelpers";
-import type { AdminContentType } from "@/lib/admin/types";
+import type { AdminContentStatus, AdminContentType } from "@/lib/admin/types";
+import {
+  acceptanceStatusLabel,
+  buildReleaseAcceptanceSnapshot,
+  localizeAcceptanceCopy,
+  type ReleaseAcceptanceSnapshot,
+  type WorkflowActorRole,
+} from "./releaseAcceptanceMatrix";
 
 type SourceItem = {
   title?: string;
@@ -24,6 +31,7 @@ type NewsSummary = {
 
 type Props = {
   contentType?: AdminContentType;
+  status?: AdminContentStatus;
   disclaimerVersion?: string;
   requiresSeekHelpBlock?: boolean;
   isFeatured?: boolean;
@@ -35,7 +43,101 @@ type Props = {
   news?: NewsSummary | null;
   dynamicData?: unknown;
   invalidDynamicData?: boolean;
+  hasMeaningfulBlocks?: boolean;
+  role?: WorkflowActorRole;
+  language?: "ar" | "en";
+  showAcceptanceMatrix?: boolean;
 };
+
+function checkToneClass(status: ReleaseAcceptanceSnapshot["checks"][number]["status"]) {
+  if (status === "pass") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  }
+  if (status === "fail") {
+    return "border-[#FECACA] bg-[#FEF2F2] text-[#B42318]";
+  }
+  if (status === "warn") {
+    return "border-amber-200 bg-amber-50 text-amber-700";
+  }
+  return "border-[#E4E7EC] bg-[#F9FAFB] text-[#667085]";
+}
+
+export function ReleaseAcceptanceSection({
+  snapshot,
+  language = "ar",
+  compact = false,
+  showNextActions = true,
+}: {
+  snapshot: ReleaseAcceptanceSnapshot;
+  language?: "ar" | "en";
+  compact?: boolean;
+  showNextActions?: boolean;
+}) {
+  const title =
+    language === "en" ? "Release acceptance" : "جاهزية الإطلاق";
+  const scenario = localizeAcceptanceCopy(snapshot.scenarioLabel, language);
+  const browsingNote = localizeAcceptanceCopy(snapshot.browsingNote, language);
+  const visibleChecks = compact
+    ? snapshot.checks.filter((item) => item.status !== "na").slice(0, 4)
+    : snapshot.checks;
+
+  return (
+    <div
+      className={
+        compact
+          ? "rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] p-3"
+          : "rounded-[14px] border border-[#E4E7EC] bg-white p-4"
+      }
+    >
+      <div className="inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
+        <ShieldCheck className="h-4 w-4 text-primary" />
+        {title}
+      </div>
+      <div className="mt-2 font-cairo text-[12px] font-bold text-[#475467]">
+        <span className="font-mono text-[11px] text-[#175CD3]">{snapshot.scenarioKey}</span>
+        {" · "}
+        {scenario}
+      </div>
+      <div
+        className={`mt-2 rounded-[10px] border px-3 py-2 font-cairo text-[12px] font-bold ${checkToneClass(snapshot.overall)}`}
+      >
+        {acceptanceStatusLabel(snapshot.overall, language)}
+        {language === "en" ? " · overall" : " · الإجمالي"}
+      </div>
+      <div className="mt-2 rounded-[10px] border border-[#D1E9FF] bg-white/70 px-3 py-2 font-cairo text-[11px] font-semibold text-[#175CD3]">
+        {browsingNote}
+      </div>
+      <div className={compact ? "mt-3 space-y-1.5" : "mt-4 space-y-2"}>
+        {visibleChecks.map((item) => (
+          <div
+            key={item.key}
+            className={`rounded-[10px] border px-3 py-2 font-cairo text-[12px] font-bold ${checkToneClass(item.status)}`}
+          >
+            {acceptanceStatusLabel(item.status, language)}:{" "}
+            {localizeAcceptanceCopy(item.label, language)}
+          </div>
+        ))}
+      </div>
+      {showNextActions && snapshot.nextActions.length ? (
+        <div className="mt-3 space-y-1.5">
+          <div className="font-cairo text-[11px] font-extrabold text-[#667085]">
+            {language === "en" ? "Next allowed actions" : "الإجراءات التالية المسموحة"}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {snapshot.nextActions.map((action) => (
+              <span
+                key={action.action}
+                className="inline-flex items-center rounded-[999px] border border-[#D0D5DD] bg-[#F9FAFB] px-3 py-1 font-cairo text-[11px] font-bold text-[#475467]"
+              >
+                {localizeAcceptanceCopy(action.label, language)}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function BadgeList({
   items,
@@ -142,6 +244,7 @@ function DynamicDataSummary({
 
 export default function MedicalContentGovernancePanel({
   contentType,
+  status = "DRAFT",
   disclaimerVersion,
   requiresSeekHelpBlock,
   isFeatured,
@@ -153,6 +256,10 @@ export default function MedicalContentGovernancePanel({
   news,
   dynamicData,
   invalidDynamicData,
+  hasMeaningfulBlocks,
+  role = "admin",
+  language = "ar",
+  showAcceptanceMatrix = true,
 }: Props) {
   const sourceCount = sources.filter((source) => source.title || source.url).length;
   const requiresSeekHelpByType =
@@ -162,12 +269,12 @@ export default function MedicalContentGovernancePanel({
     {
       key: "sources",
       label: "إضافة مصدر واحد موثوق على الأقل",
-      done: sourceCount > 0,
+      done: contentType === "SETTINGS_PAGE" || sourceCount > 0,
     },
     {
       key: "disclaimerVersion",
       label: "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
-      done: hasDisclaimerVersion,
+      done: contentType === "SETTINGS_PAGE" || hasDisclaimerVersion,
     },
     {
       key: "seekHelp",
@@ -204,9 +311,32 @@ export default function MedicalContentGovernancePanel({
       : [];
   const readinessChecklist = [...governanceChecklist, ...newsChecklist];
   const missingChecklistItems = readinessChecklist.filter((item) => !item.done);
+  const acceptanceSnapshot =
+    showAcceptanceMatrix && contentType
+      ? buildReleaseAcceptanceSnapshot({
+          type: contentType,
+          status,
+          sourceCount,
+          disclaimerVersion,
+          requiresSeekHelpBlock,
+          hasMeaningfulBlocks:
+            hasMeaningfulBlocks ??
+            (contentType === "SETTINGS_PAGE" ? true : undefined),
+          newsSourceUrl,
+          newsPublishedAt,
+          role,
+        })
+      : null;
 
   return (
     <div className="space-y-5">
+      {acceptanceSnapshot ? (
+        <ReleaseAcceptanceSection
+          snapshot={acceptanceSnapshot}
+          language={language}
+          showNextActions={role === "admin" || status === "DRAFT" || status === "IN_REVIEW"}
+        />
+      ) : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="rounded-[14px] border border-[#D0D5DD] bg-[#F8FAFC] p-4">
           <div className="inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">

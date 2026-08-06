@@ -9,6 +9,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import type { ReferralFormState } from '@/lib/doctor/referrals/referralFormSchema';
 import type { ReferralFormFieldMessages } from '@/lib/doctor/referrals/referralFormSchema';
+import { useI18n } from '@/i18n/provider';
 
 const PRIORITY_OPTIONS: Array<{
   value: ReferralFormState['priority'];
@@ -30,6 +31,7 @@ export function ReferralCreateForm({
   disabled?: boolean;
   fieldErrors?: ReferralFormFieldMessages;
 }) {
+  const { dir } = useI18n();
   const set = (patch: Partial<ReferralFormState>) =>
     onChange({ ...value, ...patch });
 
@@ -140,7 +142,7 @@ export function ReferralCreateForm({
           </DoctorProfileFormField>
         </div>
 
-        <div dir="rtl" className="text-start">
+        <div dir={dir} className="text-start">
           <p className="mb-2 font-cairo text-[12px] font-extrabold text-[#344054]">
             درجة الأهمية
           </p>
@@ -208,7 +210,7 @@ export function ReferralCreateForm({
       </section>
 
       <div
-        dir="rtl"
+        dir={dir}
         className="rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3"
       >
         <div className="flex w-full items-start justify-start gap-2 text-start">

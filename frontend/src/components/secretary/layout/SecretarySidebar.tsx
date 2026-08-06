@@ -8,6 +8,7 @@ import {
   secretarySidebarItems,
   type SecretarySidebarItemId,
 } from "@/constant/sidebar-items";
+import { useI18n } from "@/i18n/provider";
 
 interface SecretarySidebarProps {
   active: SecretarySidebarItemId;
@@ -26,7 +27,9 @@ export default function SecretarySidebar({
   profileName,
   profileEmail,
 }: SecretarySidebarProps) {
-  const secretaryInitial = profileName.charAt(0).toUpperCase() || "س";
+  const { locale, dir } = useI18n();
+  const secretaryInitial =
+    profileName.charAt(0).toUpperCase() || (locale === "ar" ? "س" : "S");
 
   const resolvedActive = active ?? "dashboard";
 
@@ -43,10 +46,12 @@ export default function SecretarySidebar({
       />
 
       <aside
-        dir="rtl"
-        lang="ar"
-        className={`fixed inset-y-0 right-0 z-50 flex h-dvh w-[min(20rem,calc(100vw-1rem))] max-w-full shrink-0 flex-col overflow-hidden border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] shadow-[0_18px_48px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-in-out will-change-transform lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 lg:shadow-none lg:w-[320px] ${
-          mobileOpen ? "translate-x-0" : "translate-x-full"
+        dir={dir}
+        lang={locale}
+        className={`fixed inset-y-0 start-0 z-50 flex h-dvh w-[min(20rem,calc(100vw-1rem))] max-w-full shrink-0 flex-col overflow-hidden border-[1.82px] border-[#E5E7EB] bg-[#FFFFFF] shadow-[0_18px_48px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-in-out will-change-transform lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 lg:shadow-none lg:w-[320px] ${
+          mobileOpen
+            ? "translate-x-0"
+            : "ltr:-translate-x-full rtl:translate-x-full"
         }`}
       >
         <div className="flex h-full min-h-0 flex-col">

@@ -20,6 +20,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-schemas';
 import { useDoctorProfileConfirm } from '@/components/doctor/profile-settings/use-doctor-profile-confirm';
 import type { DoctorProfileRecord } from '@/lib/doctor/profile/profileClient';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorProfileProfessionalForm({
   doctor,
@@ -32,6 +33,7 @@ export default function DoctorProfileProfessionalForm({
   onSubmit: (values: DoctorProfessionalEditForm) => Promise<void>;
   onNoChanges?: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const user = doctor.user;
   const {
@@ -91,7 +93,7 @@ export default function DoctorProfileProfessionalForm({
   };
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-5">
+    <div dir={dir} lang={locale} className="space-y-5">
       <DoctorProfileHeroCard
         fullName={user?.fullName}
         specialization={doctor.specialization}

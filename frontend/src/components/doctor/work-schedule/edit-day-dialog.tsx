@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { X, Plus, Trash2, Clock, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ScheduleDayKey, ScheduleTimeSlot } from "@/lib/doctor/types";
+import { useI18n } from "@/i18n/provider";
 
 export type EditDayFormValues = {
   day: ScheduleDayKey;
@@ -33,6 +34,7 @@ export default function EditDayDialog({
   initialDay: ScheduleDayKey;
   initialSlots: ScheduleTimeSlot[];
 }) {
+  const { locale, dir } = useI18n();
   const [slots, setSlots] = useState<ScheduleTimeSlot[]>(initialSlots);
   const [errors, setErrors] = useState<{
     [key: number]: { startTime?: string; endTime?: string };
@@ -238,8 +240,8 @@ export default function EditDayDialog({
               },
             }}
             className="fixed left-1/2 top-1/2 z-[10000] w-[580px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <motion.div
               initial={false}

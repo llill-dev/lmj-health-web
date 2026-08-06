@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Save, X } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +13,10 @@ import {
 import { useAdminContentTemplates } from "@/hooks/admin/content-templates/useAdminContentTemplates";
 import ContentBlockEditor from "@/components/admin/medical-content/ContentBlockEditor";
 import DynamicTemplateFieldRenderer from "@/components/admin/medical-content/DynamicTemplateFieldRenderer";
-import MedicalContentGovernancePanel from "@/components/admin/medical-content/MedicalContentGovernancePanel";
+import MedicalContentGovernancePanel, {
+  ReleaseAcceptanceSection,
+} from "@/components/admin/medical-content/MedicalContentGovernancePanel";
+import { buildReleaseAcceptanceSnapshot } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import {
   buildContentBlocks,
@@ -46,6 +49,8 @@ import type {
 } from "@/lib/admin/types";
 import {
   extractMedicalContentDetails,
+  getNewsDraftGuidanceMessages,
+  getNewsTypeSwitchSafetyMessage,
   hasNewsFields,
   parseCommaSeparatedList,
   parseJsonInput,
@@ -214,6 +219,10 @@ export default function EditAdminContentDialog({
   const previewNewsOriginalTitle = watch("newsOriginalTitle");
   const previewNewsPublishedAt = watch("newsPublishedAt");
   const previewNewsAiSummary = watch("newsAiSummary");
+  const previousTypeRef = useRef<AdminContentType | undefined>(undefined);
+  const [typeSwitchSafetyMessage, setTypeSwitchSafetyMessage] = useState<string | null>(
+    null,
+  );
   const templateParentType = getTemplateParentType(selectedType);
   const templateQuery = useAdminContentTemplates(
     templateParentType ? { parentType: templateParentType, active: true } : {},
@@ -306,6 +315,32 @@ export default function EditAdminContentDialog({
       selectedType,
     ],
   );
+  const releaseAcceptance = useMemo(
+    () =>
+      buildReleaseAcceptanceSnapshot({
+        type: selectedType,
+        status: details?.status ?? "DRAFT",
+        sourceCount: previewSources.length,
+        disclaimerVersion: previewDisclaimerVersion,
+        requiresSeekHelpBlock: previewRequiresSeekHelpBlock,
+        hasMeaningfulBlocks:
+          selectedType === "SETTINGS_PAGE" ||
+          watchedBlocks.some((block) => isMeaningfulBlock(block)),
+        newsSourceUrl: previewNewsSourceUrl,
+        newsPublishedAt: previewNewsPublishedAt,
+        role: "admin",
+      }),
+    [
+      details?.status,
+      previewDisclaimerVersion,
+      previewNewsPublishedAt,
+      previewNewsSourceUrl,
+      previewRequiresSeekHelpBlock,
+      previewSources.length,
+      selectedType,
+      watchedBlocks,
+    ],
+  );
   const fallbackTemplateData = useMemo(
     () =>
       isDynamicRecord(details?.dataValue)
@@ -372,16 +407,16 @@ export default function EditAdminContentDialog({
       );
     }
 
-    if (
-      selectedType === "NEWS" &&
-      (!previewNewsSourceUrl?.trim() || !previewNewsPublishedAt?.trim())
-    ) {
-      warnings.push(
-        isEnglish
-          ? "News source URL and publish date should be completed."
-          : "يجب استكمال رابط مصدر الخبر وتاريخ النشر.",
-      );
-    }
+    warnings.push(
+      ...getNewsDraftGuidanceMessages({
+        isNewsType: selectedType === "NEWS",
+        language: selectedLanguage,
+        sourceUrl: previewNewsSourceUrl,
+        publishedAt: previewNewsPublishedAt,
+        title: previewTitle,
+        summary: previewSummary,
+      }),
+    );
 
     return warnings;
   }, [
@@ -391,8 +426,10 @@ export default function EditAdminContentDialog({
     previewNewsPublishedAt,
     previewNewsSourceUrl,
     previewRequiresSeekHelpBlock,
+    previewSummary,
     previewSources.length,
     previewSourcesResult.error,
+    previewTitle,
     selectedLanguage,
     selectedType,
   ]);
@@ -437,7 +474,23 @@ export default function EditAdminContentDialog({
       newsDedupeHash: toDisplayText(news?.dedupeHash),
       newsImportedAt: toDisplayText(news?.importedAt),
     });
+    previousTypeRef.current = details.type as AdminContentType | undefined;
+    setTypeSwitchSafetyMessage(null);
   }, [open, details, reset]);
+
+  useEffect(() => {
+    if (!open) return;
+    const previousType = previousTypeRef.current;
+    const nextMessage = getNewsTypeSwitchSafetyMessage(
+      previousType,
+      selectedType,
+      selectedLanguage,
+    );
+    if (nextMessage) {
+      setTypeSwitchSafetyMessage(nextMessage);
+    }
+    previousTypeRef.current = selectedType;
+  }, [open, selectedLanguage, selectedType]);
 
   useEffect(() => {
     if (!open) updateMut.reset();
@@ -636,6 +689,11 @@ export default function EditAdminContentDialog({
                             )}
                           />
                         </AdminFormField>
+                        {typeSwitchSafetyMessage ? (
+                          <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-right font-cairo text-[12px] font-bold text-amber-700 sm:col-span-2">
+                            {typeSwitchSafetyMessage}
+                          </div>
+                        ) : null}
 
                         <AdminFormField
                           label="اللغة"
@@ -879,6 +937,13 @@ export default function EditAdminContentDialog({
                         <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
                           متطلبات الجاهزية قبل المراجعة
                         </div>
+                        <div className="mb-3">
+                          <ReleaseAcceptanceSection
+                            snapshot={releaseAcceptance}
+                            language={selectedLanguage === "en" ? "en" : "ar"}
+                            showNextActions
+                          />
+                        </div>
                         <div className="space-y-2">
                           {governanceChecklist.map((item) => (
                             <div
@@ -1063,6 +1128,7 @@ export default function EditAdminContentDialog({
                       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                         <MedicalContentGovernancePanel
                           contentType={selectedType}
+                          status={details.status}
                           disclaimerVersion={previewDisclaimerVersion?.trim() || undefined}
                           requiresSeekHelpBlock={previewRequiresSeekHelpBlock}
                           isFeatured={previewIsFeatured}
@@ -1073,6 +1139,13 @@ export default function EditAdminContentDialog({
                           sources={previewSources}
                           dynamicData={previewDataResult.value}
                           invalidDynamicData={Boolean(previewDataResult.error)}
+                          hasMeaningfulBlocks={
+                            selectedType === "SETTINGS_PAGE" ||
+                            watchedBlocks.some((block) => isMeaningfulBlock(block))
+                          }
+                          role="admin"
+                          language={selectedLanguage === "en" ? "en" : "ar"}
+                          showAcceptanceMatrix={false}
                           news={{
                             sourceName: previewNewsSourceName?.trim() || undefined,
                             sourceUrl: previewNewsSourceUrl?.trim() || undefined,

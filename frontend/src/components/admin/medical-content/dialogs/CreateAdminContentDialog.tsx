@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { Save, X } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +18,10 @@ import {
 import StyledSelect from "@/components/ui/styled-select";
 import ContentBlockEditor from "@/components/admin/medical-content/ContentBlockEditor";
 import DynamicTemplateFieldRenderer from "@/components/admin/medical-content/DynamicTemplateFieldRenderer";
-import MedicalContentGovernancePanel from "@/components/admin/medical-content/MedicalContentGovernancePanel";
+import MedicalContentGovernancePanel, {
+  ReleaseAcceptanceSection,
+} from "@/components/admin/medical-content/MedicalContentGovernancePanel";
+import { buildReleaseAcceptanceSnapshot } from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
 import {
   buildContentBlocks,
@@ -38,6 +41,8 @@ import type {
   AdminContentType,
 } from "@/lib/admin/types";
 import {
+  getNewsDraftGuidanceMessages,
+  getNewsTypeSwitchSafetyMessage,
   getReviewReadinessIssueCodes,
   getReviewReadinessIssueMessage,
   parseCommaSeparatedList,
@@ -201,22 +206,6 @@ const formSchema = z
       });
     }
 
-    if (value.type === "NEWS" && (!value.sourceUrl || !value.sourceUrl.trim())) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["sourceUrl"],
-        message: "رابط مصدر الخبر مطلوب",
-      });
-    }
-
-    if (value.type === "NEWS" && (!value.publishedAt || !value.publishedAt.trim())) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["publishedAt"],
-        message: "تاريخ نشر الخبر مطلوب",
-      });
-    }
-
     if (
       value.type !== "SETTINGS_PAGE" &&
       !value.contentBlocks.some((block) => isMeaningfulBlock(block))
@@ -301,6 +290,8 @@ export default function CreateAdminContentDialog({
   });
 
   const selectedType = watch("type");
+  const watchedTitle = watch("title");
+  const watchedSummary = watch("summary");
   const selectedLanguage = watch("language");
   const selectedTemplateId = watch("templateId");
   const watchedBlocks = watch("contentBlocks") ?? [];
@@ -318,6 +309,10 @@ export default function CreateAdminContentDialog({
   const watchedSourceTitle = watch("sourceTitle");
   const watchedOriginalTitle = watch("originalTitle");
   const watchedPublishedAt = watch("publishedAt");
+  const previousTypeRef = useRef<AdminContentType | undefined>(undefined);
+  const [typeSwitchSafetyMessage, setTypeSwitchSafetyMessage] = useState<string | null>(
+    null,
+  );
   const templateParentType = getTemplateParentType(selectedType);
   const templateQuery = useAdminContentTemplates(
     templateParentType ? { parentType: templateParentType, active: true } : {},
@@ -385,25 +380,24 @@ export default function CreateAdminContentDialog({
     const warnings = reviewReadinessIssues.map((code) =>
       getReviewReadinessIssueMessage(code, selectedLanguage),
     );
-    const isEnglish = selectedLanguage === "en";
 
     if (previewSourcesResult.error) {
       warnings.push(
-        isEnglish
+        selectedLanguage === "en"
           ? "Sources JSON is invalid, so source references may be missing in preview."
           : "JSON الخاص بالمصادر غير صالح، لذلك قد تغيب بعض المراجع من المعاينة.",
       );
     }
-    if (
-      selectedType === "NEWS" &&
-      (!watchedSourceUrl?.trim() || !watchedPublishedAt?.trim())
-    ) {
-      warnings.push(
-        isEnglish
-          ? "News source URL and publish date should be completed."
-          : "يجب استكمال رابط مصدر الخبر وتاريخ النشر.",
-      );
-    }
+    warnings.push(
+      ...getNewsDraftGuidanceMessages({
+        isNewsType: selectedType === "NEWS",
+        language: selectedLanguage,
+        sourceUrl: watchedSourceUrl,
+        publishedAt: watchedPublishedAt,
+        title: watchedTitle,
+        summary: watchedSummary,
+      }),
+    );
 
     return warnings;
   }, [
@@ -413,6 +407,8 @@ export default function CreateAdminContentDialog({
     selectedType,
     watchedPublishedAt,
     watchedSourceUrl,
+    watchedSummary,
+    watchedTitle,
   ]);
 
   const readinessItems = useMemo(() => {
@@ -488,12 +484,54 @@ export default function CreateAdminContentDialog({
     watchedTemplateData,
   ]);
 
+  const releaseAcceptance = useMemo(
+    () =>
+      buildReleaseAcceptanceSnapshot({
+        type: selectedType,
+        status: "DRAFT",
+        sourceCount: previewSources.length,
+        disclaimerVersion: watchedDisclaimerVersion,
+        requiresSeekHelpBlock: watchedRequiresSeekHelpBlock,
+        hasMeaningfulBlocks:
+          selectedType === "SETTINGS_PAGE" ||
+          watchedBlocks.some((block) => isMeaningfulBlock(block)),
+        newsSourceUrl: watchedSourceUrl,
+        newsPublishedAt: watchedPublishedAt,
+        role: "admin",
+      }),
+    [
+      previewSources.length,
+      selectedType,
+      watchedBlocks,
+      watchedDisclaimerVersion,
+      watchedPublishedAt,
+      watchedRequiresSeekHelpBlock,
+      watchedSourceUrl,
+    ],
+  );
+
   useEffect(() => {
     if (!open) {
       reset(EMPTY_FORM);
       createMut.reset();
+      previousTypeRef.current = undefined;
+      setTypeSwitchSafetyMessage(null);
     }
   }, [createMut, open, reset]);
+
+  useEffect(() => {
+    if (!open) return;
+    const previousType = previousTypeRef.current;
+    const nextMessage = getNewsTypeSwitchSafetyMessage(
+      previousType,
+      selectedType,
+      selectedLanguage,
+    );
+    if (nextMessage) {
+      setTypeSwitchSafetyMessage(nextMessage);
+    }
+    previousTypeRef.current = selectedType;
+  }, [open, selectedLanguage, selectedType]);
 
   useEffect(() => {
     if (!open) return;
@@ -716,6 +754,11 @@ export default function CreateAdminContentDialog({
                       )}
                     />
                   </AdminFormField>
+                  {typeSwitchSafetyMessage ? (
+                    <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-right font-cairo text-[12px] font-bold text-amber-700">
+                      {typeSwitchSafetyMessage}
+                    </div>
+                  ) : null}
 
                   <AdminFormField
                     label="العنوان"
@@ -1072,6 +1115,13 @@ export default function CreateAdminContentDialog({
                         لاحقًا.
                       </p>
                     </div>
+                    <div className="mt-4">
+                      <ReleaseAcceptanceSection
+                        snapshot={releaseAcceptance}
+                        language={selectedLanguage === "en" ? "en" : "ar"}
+                        showNextActions
+                      />
+                    </div>
                     <div className="mt-4 space-y-2">
                       {readinessItems.map((item) => (
                         <div
@@ -1107,6 +1157,7 @@ export default function CreateAdminContentDialog({
                     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                       <MedicalContentGovernancePanel
                         contentType={selectedType}
+                        status="DRAFT"
                         disclaimerVersion={watchedDisclaimerVersion?.trim() || undefined}
                         requiresSeekHelpBlock={watchedRequiresSeekHelpBlock}
                         isFeatured={watchedIsFeatured}
@@ -1117,6 +1168,13 @@ export default function CreateAdminContentDialog({
                         sources={previewSources}
                         dynamicData={watchedTemplateData}
                         invalidDynamicData={false}
+                        hasMeaningfulBlocks={
+                          selectedType === "SETTINGS_PAGE" ||
+                          watchedBlocks.some((block) => isMeaningfulBlock(block))
+                        }
+                        role="admin"
+                        language={selectedLanguage === "en" ? "en" : "ar"}
+                        showAcceptanceMatrix={false}
                         news={{
                           sourceName: watchedSourceTitle?.trim() || undefined,
                           sourceUrl: watchedSourceUrl?.trim() || undefined,

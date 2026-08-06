@@ -1,8 +1,13 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Loader2, X } from "lucide-react";
 import { useAdminContentById } from "@/hooks/admin/content/useAdminContent";
-import MedicalContentGovernancePanel from "@/components/admin/medical-content/MedicalContentGovernancePanel";
+import MedicalContentGovernancePanel, {
+  ReleaseAcceptanceSection,
+} from "@/components/admin/medical-content/MedicalContentGovernancePanel";
 import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
+import {
+  buildReleaseAcceptanceFromDetails,
+} from "@/components/admin/medical-content/releaseAcceptanceMatrix";
 import type {
   AdminContentStatus,
   AdminContentType,
@@ -15,6 +20,7 @@ import {
   toPrettyJson,
 } from "./medicalContentDialogHelpers";
 import { useI18n } from "@/i18n/provider";
+import { useMemo } from "react";
 
 type Props = {
   open: boolean;
@@ -98,6 +104,10 @@ export default function MedicalContentViewDialog({
   const news = details?.news ?? null;
   const template = details?.template ?? null;
   const previewLanguage = details?.language === "en" ? "en" : "ar";
+  const acceptanceSnapshot = useMemo(
+    () => buildReleaseAcceptanceFromDetails(details, "admin"),
+    [details],
+  );
   const previewWarnings = details
     ? getReviewReadinessIssueCodes(details).map((code) => {
         if (previewLanguage === "en") {
@@ -217,6 +227,14 @@ export default function MedicalContentViewDialog({
                   ) : null}
                 </div>
 
+                {acceptanceSnapshot ? (
+                  <ReleaseAcceptanceSection
+                    snapshot={acceptanceSnapshot}
+                    language={previewLanguage}
+                    showNextActions
+                  />
+                ) : null}
+
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                   <div className="space-y-5">
                     <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
@@ -298,15 +316,25 @@ export default function MedicalContentViewDialog({
                       </div>
                       <div className="mt-4">
                         <MedicalContentGovernancePanel
+                          contentType={details.type}
+                          status={details.status}
                           disclaimerVersion={toDisplayText(details.disclaimerVersion)}
                           requiresSeekHelpBlock={details.requiresSeekHelpBlock}
                           isFeatured={details.isFeatured}
-                          riskFlags={details.riskFlags}
-                          tags={details.tags}
-                          categories={details.categories}
-                          relatedContentIds={details.relatedContentIds}
-                          sources={details.sources}
+                          riskFlags={details.riskFlags ?? []}
+                          tags={details.tags ?? []}
+                          categories={details.categories ?? []}
+                          relatedContentIds={details.relatedContentIds ?? []}
+                          sources={details.sources ?? []}
                           dynamicData={details.dataValue}
+                          hasMeaningfulBlocks={
+                            details.type === "SETTINGS_PAGE" ||
+                            (Array.isArray(details.contentBlocks) &&
+                              details.contentBlocks.length > 0)
+                          }
+                          role="admin"
+                          language={previewLanguage}
+                          showAcceptanceMatrix={false}
                           news={{
                             sourceName: toDisplayText(
                               news?.sourceName ?? details.sourceName,

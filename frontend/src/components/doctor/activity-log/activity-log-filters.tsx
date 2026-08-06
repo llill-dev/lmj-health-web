@@ -3,6 +3,7 @@
 import { Search } from "lucide-react";
 import type { ActivityLogPeriod } from "@/lib/doctor/activityLog/types";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 const PERIOD_OPTIONS: Array<{ id: ActivityLogPeriod; label: string }> = [
   { id: "all", label: "الكل" },
@@ -22,9 +23,10 @@ export function ActivityLogFilters({
   period: ActivityLogPeriod;
   onPeriodChange: (value: ActivityLogPeriod) => void;
 }) {
+  const { dir } = useI18n();
   return (
     <div
-      dir="rtl"
+      dir={dir}
       className="mb-5 flex w-full flex-col gap-3 lg:flex-row lg:items-stretch"
     >
       <div className="relative min-w-0 flex-[1.35] lg:min-w-[240px]">

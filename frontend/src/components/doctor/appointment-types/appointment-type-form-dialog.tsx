@@ -9,6 +9,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import ToggleSwitch from '@/components/ui/toggle-switch';
 import type { AppointmentType } from '@/lib/doctor/types';
+import { useI18n } from '@/i18n/provider';
 
 export type AppointmentTypeFormValues = {
   name: string;
@@ -32,6 +33,7 @@ export function AppointmentTypeFormDialog({
   onClose: () => void;
   onSubmit: (values: AppointmentTypeFormValues) => Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
   const priceVisibleId = useId();
   const activeId = useId();
 
@@ -59,7 +61,7 @@ export function AppointmentTypeFormDialog({
       maxWidthClass="max-w-[520px]"
       headerPattern
     >
-      <div dir="rtl" lang="ar" className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           {mode === 'create'
             ? 'أنشئ نوع موعد جديداً مع تحديد السعر وإظهاره للمريض عند الحجز.'

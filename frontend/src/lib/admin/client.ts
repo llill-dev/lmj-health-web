@@ -608,6 +608,46 @@ function normalizeTemplateIdValue(value: unknown): string | null | undefined {
   return undefined;
 }
 
+function readLocalizedTextFromUnknown(value: unknown): string | undefined {
+  return readLocalizedText(normalizePossiblyJsonValue(value));
+}
+
+function normalizeNewsSourceUrl(value: unknown): string | undefined {
+  const raw = readLocalizedTextFromUnknown(value);
+  if (!raw) return undefined;
+
+  try {
+    const url = new URL(raw);
+    const hostname = url.hostname.trim().toLowerCase();
+    const isGoogleRedirect =
+      hostname.includes("google.") &&
+      (url.pathname === "/url" || url.pathname.endsWith("/url"));
+
+    if (isGoogleRedirect) {
+      const redirected =
+        url.searchParams.get("url")?.trim() || url.searchParams.get("q")?.trim();
+      if (redirected) return normalizeNewsSourceUrl(redirected);
+    }
+
+    return url.toString();
+  } catch {
+    return raw.trim() || undefined;
+  }
+}
+
+function normalizeNewsDateValue(value: unknown): string | undefined {
+  const raw = readLocalizedTextFromUnknown(value);
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+
+  const looksLikeLocalDateTime =
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?$/.test(trimmed);
+  if (!looksLikeLocalDateTime) return trimmed;
+
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? trimmed : parsed.toISOString();
+}
+
 function buildAdminContentNewsPayload(
   body: Pick<
     CreateAdminContentBody,
@@ -617,6 +657,8 @@ function buildAdminContentNewsPayload(
     | "originalTitle"
     | "publishedAt"
     | "aiSummary"
+    | "title"
+    | "summary"
   >,
 ) {
   const rawNews = normalizePossiblyJsonValue(body.news);
@@ -625,15 +667,34 @@ function buildAdminContentNewsPayload(
       ? { ...(rawNews as Record<string, unknown>) }
       : {};
 
-  const sourceName = readLocalizedText(news.sourceName) ?? readLocalizedText(body.sourceName);
-  const sourceUrl = readLocalizedText(news.sourceUrl) ?? readLocalizedText(body.sourceUrl);
+  const sourceName =
+    readLocalizedTextFromUnknown(news.sourceName) ??
+    readLocalizedTextFromUnknown(news.source) ??
+    readLocalizedTextFromUnknown(body.sourceName);
+  const sourceUrl = normalizeNewsSourceUrl(
+    news.sourceUrl ??
+      news.url ??
+      news.href ??
+      news.link ??
+      news.canonicalUrl ??
+      body.sourceUrl,
+  );
   const originalTitle =
-    readLocalizedText(news.originalTitle) ?? readLocalizedText(body.originalTitle);
-  const publishedAt =
-    readLocalizedText(news.publishedAt) ?? readLocalizedText(body.publishedAt);
-  const aiSummary = readLocalizedText(news.aiSummary) ?? readLocalizedText(body.aiSummary);
-  const dedupeHash = readLocalizedText(news.dedupeHash);
-  const importedAt = readLocalizedText(news.importedAt);
+    readLocalizedTextFromUnknown(news.originalTitle) ??
+    readLocalizedTextFromUnknown(news.title) ??
+    readLocalizedTextFromUnknown(news.headline) ??
+    readLocalizedTextFromUnknown(body.originalTitle) ??
+    readLocalizedTextFromUnknown(body.title);
+  const publishedAt = normalizeNewsDateValue(
+    news.publishedAt ?? news.publishDate ?? news.date ?? body.publishedAt,
+  );
+  const aiSummary =
+    readLocalizedTextFromUnknown(news.aiSummary) ??
+    readLocalizedTextFromUnknown(news.summary) ??
+    readLocalizedTextFromUnknown(body.aiSummary) ??
+    readLocalizedTextFromUnknown(body.summary);
+  const dedupeHash = readLocalizedTextFromUnknown(news.dedupeHash);
+  const importedAt = normalizeNewsDateValue(news.importedAt);
 
   if (
     !sourceName &&
@@ -662,10 +723,12 @@ function buildAdminContentNewsPayload(
 function buildAdminContentPayload(body: CreateAdminContentBody | UpdateAdminContentBody) {
   const news = buildAdminContentNewsPayload(body);
   const payload: Record<string, unknown> = { ...body };
+  const normalizedType = readLocalizedTextFromUnknown(payload.type);
+  const isNewsType = normalizedType === "NEWS";
 
-  if (news) {
+  if (isNewsType && news) {
     payload.news = news;
-  } else if ("news" in payload) {
+  } else if ("news" in payload || ("type" in payload && !isNewsType)) {
     payload.news = null;
   }
 

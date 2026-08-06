@@ -24,6 +24,7 @@ import type { DoctorFacility } from '@/lib/doctor/facilities/types';
 import { DEFAULT_FACILITY_TYPE_OPTIONS } from '@/lib/doctor/facilities/types';
 import { FacilityStatusBadge } from '@/components/doctor/facilities/facility-status-badge';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 function formatFacilityAttributeLabel(value: string): string {
   return value.replace(/_/g, ' ');
@@ -46,6 +47,7 @@ export function FacilityFormDialog({
   onClose: () => void;
   onSubmit: (values: DoctorFacilityFormSchemaValues) => void | Promise<void>;
 }) {
+  const { dir } = useI18n();
   const {
     control,
     register,
@@ -159,7 +161,7 @@ export function FacilityFormDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={handleSubmit(onSubmit)}>
+            <form dir={dir} onSubmit={handleSubmit(onSubmit)}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                 <DoctorProfileFormField
@@ -279,7 +281,7 @@ export function FacilityFormDialog({
                     <input
                       {...register('phone')}
                       placeholder="09xxxxxxxx"
-                      dir="rtl"
+                      dir={dir}
                       className={profileFieldClass(
                         cn(profileInputClass, 'text-start placeholder:text-start'),
                         Boolean(errors.phone),

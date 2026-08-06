@@ -20,6 +20,7 @@ import {
   usePlatformContactContent,
   usePlatformServiceTypes,
 } from '@/hooks/platform/usePlatformContent';
+import { useI18n } from '@/i18n/provider';
 
 const FALLBACK_SOCIAL = [
   { id: 'facebook', href: 'https://facebook.com/', Icon: FacebookIcon, className: 'bg-[#1877F2]' },
@@ -43,10 +44,12 @@ function socialIconForUrl(url: string) {
 }
 
 export function PlatformFooter() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { openModal } = usePlatformSupport();
-  const aboutQuery = usePlatformAboutContent('ar');
-  const contactQuery = usePlatformContactContent('ar');
-  const servicesQuery = usePlatformServiceTypes('ar');
+  const aboutQuery = usePlatformAboutContent(locale);
+  const contactQuery = usePlatformContactContent(locale);
+  const servicesQuery = usePlatformServiceTypes(locale);
 
   const socialLinks = contactQuery.channels
     .filter((channel) => channel.kind === 'social')
@@ -72,14 +75,16 @@ export function PlatformFooter() {
 
   return (
     <footer
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="mt-10 w-full overflow-hidden rounded-[12px] bg-[#108a82] text-white"
     >
       <div className="px-6 py-10 sm:px-10 sm:py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <section className="text-right">
-            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">عن المنصة</h3>
+            <h3 className="mb-4 font-cairo text-[18px] font-extrabold">
+              {tr('عن المنصة', 'About the platform')}
+            </h3>
             <p className="font-cairo text-[13px] font-semibold leading-[24px] text-white/90">
               {aboutQuery.summary}
             </p>

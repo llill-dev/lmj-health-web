@@ -14,6 +14,7 @@ import { CheckCircle2, Info, AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { registerQueryErrorToastSink } from "@/lib/queryErrorHandling";
 import { registerSessionExpiryToastSink } from "@/lib/session/sessionExpiryFlow";
+import { useI18n } from "@/i18n/provider";
 
 export type ToastVariant = "success" | "error" | "info" | "warning";
 
@@ -43,6 +44,7 @@ function uid() {
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const { locale, dir } = useI18n();
   const [items, setItems] = useState<ToastItem[]>([]);
   const timersRef = useRef<Record<string, number>>({});
 
@@ -98,8 +100,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {/* فوق نافذة التأكيد (z ~10000) — موضع start أعلى يمين في RTL */}
       <div
         className="pointer-events-none fixed start-4 top-4 z-[10090] flex w-[min(100vw-2rem,22rem)] flex-col gap-3"
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         aria-live="polite"
         aria-relevant="additions"
       >

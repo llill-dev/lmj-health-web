@@ -66,6 +66,11 @@ import { MedicalContentRowSkeleton } from "@/components/admin/skeletons/MedicalC
 import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { useI18n } from "@/i18n/provider";
 import {
+  getListAcceptanceScenarioChip,
+  getNextWorkflowActions,
+  localizeAcceptanceCopy,
+} from "@/components/admin/medical-content/releaseAcceptanceMatrix";
+import {
   buildVisiblePageNumbers,
   clampPage,
   contentStatusLabel,
@@ -645,6 +650,12 @@ export default function AdminMedicalContentPage() {
                 "Check the creator, reviewer, and item state before approving, publishing, or archiving.",
               )}
             </div>
+            <div className="mt-2 font-cairo text-[11px] font-bold text-[#0F766E]">
+              {tr(
+                "جاهزية الإطلاق (إرشادي): DRAFT→submit-review · IN_REVIEW→approve/reject/publish · PUBLISHED→archive — لا يمنع التصفح.",
+                "Release acceptance cues: DRAFT→submit-review · IN_REVIEW→approve/reject/publish · PUBLISHED→archive — browsing stays open.",
+              )}
+            </div>
           </div>
           <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
             <button
@@ -913,6 +924,14 @@ export default function AdminMedicalContentPage() {
               filteredItems.map((it) => {
                 const sourceCount = quickSourceCount(it);
                 const readinessSignal = getListReadinessSignal(it, sourceCount);
+                const acceptanceChip = getListAcceptanceScenarioChip(
+                  it.status,
+                  locale === "en" ? "en" : "ar",
+                );
+                const nextActionCues = getNextWorkflowActions(
+                  it.status,
+                  showMineOnly ? "data_entry" : "admin",
+                );
                 const readinessClass =
                   readinessSignal.tone === "warning"
                     ? "border-[#FECACA] bg-[#FEF2F2] text-[#B42318]"
@@ -1026,6 +1045,20 @@ export default function AdminMedicalContentPage() {
                         <AlertTriangle className="w-4 h-4" />
                         {tr(readinessSignal.ar, readinessSignal.en)}
                       </div>
+                      <div className="inline-flex gap-2 items-center rounded-[8px] border border-[#E4E7EC] bg-white px-2 py-1 font-cairo text-[11px] font-bold text-[#475467]">
+                        {acceptanceChip}
+                      </div>
+                      {nextActionCues.map((cue) => (
+                        <div
+                          key={`${it._id}-${cue.action}`}
+                          className="inline-flex gap-2 items-center rounded-[8px] border border-[#D0D5DD] bg-[#F9FAFB] px-2 py-1 font-cairo text-[11px] font-bold text-[#667085]"
+                        >
+                          {localizeAcceptanceCopy(
+                            cue.label,
+                            locale === "en" ? "en" : "ar",
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 items-center sm:justify-start">

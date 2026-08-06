@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
+import { useI18n } from "@/i18n/provider";
 
 export function MedicalRequestModalShell({
   open,
@@ -19,6 +20,7 @@ export function MedicalRequestModalShell({
   children: ReactNode;
   maxWidthClass?: string;
 }) {
+  const { dir } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -69,7 +71,7 @@ export function MedicalRequestModalShell({
             </button>
 
             <h2
-              dir="rtl"
+              dir={dir}
               className="flex items-center justify-start gap-2 pe-10 text-start font-cairo text-[20px] font-extrabold leading-8 text-[#111827]"
             >
               {titleIcon}

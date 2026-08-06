@@ -3,6 +3,7 @@
 import { Activity, Check, Heart, Pill } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "@/i18n/provider";
 
 const REDIRECT_SECONDS = 4;
 
@@ -34,6 +35,7 @@ export default function DoctorProfileSuccessScreen({
   redirectTo?: string;
   redirectSeconds?: number;
 }) {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,8 +47,8 @@ export default function DoctorProfileSuccessScreen({
 
   return (
     <section
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-primary px-6 py-16"
     >
       <div className="pointer-events-none absolute -right-16 -top-16 h-[220px] w-[220px] rounded-full bg-white/10" />

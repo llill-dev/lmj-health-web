@@ -4,18 +4,25 @@ import { Bell, Menu } from "lucide-react";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
+import { useI18n } from "@/i18n/provider";
 
-const greetingWord = (): string => {
+const greetingWord = (locale: string): string => {
   const h = new Date().getHours();
-  if (h >= 5 && h < 12) return "صباح الخير";
-  if (h >= 12 && h < 17) return "طاب يومك";
-  if (h >= 17 && h < 23) return "مساء الخير";
-  return "أهلاً بك";
+  if (locale === "ar") {
+    if (h >= 5 && h < 12) return "صباح الخير";
+    if (h >= 12 && h < 17) return "طاب يومك";
+    if (h >= 17 && h < 23) return "مساء الخير";
+    return "أهلاً بك";
+  }
+  if (h >= 5 && h < 12) return "Good morning";
+  if (h >= 12 && h < 17) return "Good afternoon";
+  if (h >= 17 && h < 23) return "Good evening";
+  return "Welcome";
 };
 
-const initialsFromName = (name: string): string => {
+const initialsFromName = (name: string, fallback: string): string => {
   const t = name.trim();
-  if (!t) return "س";
+  if (!t) return fallback;
   const parts = t.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     const a = parts[0]?.[0] ?? "";
@@ -32,23 +39,30 @@ interface SecretaryHeaderProps {
 
 export default function SecretaryHeader({
   onMenuClick,
-  title = "لوحة السكرتير",
+  title,
 }: SecretaryHeaderProps) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const resolvedTitle = title ?? tr("لوحة السكرتير", "Secretary dashboard");
 
   const displayName = useMemo(() => {
     const n = user?.name?.trim();
     if (n) return n;
-    return "السكرتير";
-  }, [user?.name]);
+    return tr("السكرتير", "Secretary");
+  }, [user?.name, locale]);
 
   const initials = useMemo(
-    () => initialsFromName(user?.name?.trim() ?? ""),
-    [user?.name],
+    () =>
+      initialsFromName(
+        user?.name?.trim() ?? "",
+        locale === "ar" ? "س" : "S",
+      ),
+    [user?.name, locale],
   );
 
-  const greeting = greetingWord();
+  const greeting = greetingWord(locale);
 
   const handleNotificationsClick = () => {
     navigate("/secretary/notifications");
@@ -56,8 +70,8 @@ export default function SecretaryHeader({
 
   return (
     <header
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="w-full px-4 pb-3 pt-3 sm:px-6 lg:px-12"
     >
       <div className="mx-auto max-w-[1420px]">
@@ -111,7 +125,7 @@ export default function SecretaryHeader({
                       className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                       aria-hidden
                     />
-                    {title}
+                    {resolvedTitle}
                   </span>
                 </div>
                 <p className="line-clamp-1 font-cairo text-[11px] font-semibold leading-snug text-[#64748b] sm:text-[12px]">

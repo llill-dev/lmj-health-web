@@ -37,6 +37,11 @@ import {
   resolvePagedTotal,
 } from "@/components/admin/medical-content/contentListUtils";
 import {
+  getListAcceptanceScenarioChip,
+  getNextWorkflowActions,
+  localizeAcceptanceCopy,
+} from "@/components/admin/medical-content/releaseAcceptanceMatrix";
+import {
   useAdminMyContentList,
   useSubmitContentReview,
 } from "@/hooks/admin/content/useAdminContent";
@@ -318,12 +323,22 @@ export default function DataEntryMedicalContentPage() {
             )}
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-4 py-3">
-            <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#475467]">
-              <Workflow className="h-4 w-4 text-primary" />
-              {t(
-                "dataEntry.medicalContent.workflow.caption",
-                "دورة العمل في محتواي: مسودة ← قيد المراجعة",
-              )}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#475467]">
+                <Workflow className="h-4 w-4 text-primary" />
+                {t(
+                  "dataEntry.medicalContent.workflow.caption",
+                  "دورة العمل في محتواي: مسودة ← قيد المراجعة",
+                )}
+              </div>
+              <div className="font-cairo text-[11px] font-semibold text-[#667085]">
+                {t(
+                  "dataEntry.medicalContent.acceptance.caption",
+                  locale === "en"
+                    ? "Release acceptance: DRAFT → submit-review only. IN_REVIEW waits for admin. Browsing stays open."
+                    : "جاهزية الإطلاق: المسودة → إرسال للمراجعة فقط. قيد المراجعة بانتظار الإدارة. التصفح مفتوح.",
+                )}
+              </div>
             </div>
             {(status !== "all" || search.trim()) ? (
               <button
@@ -412,6 +427,14 @@ export default function DataEntryMedicalContentPage() {
                 const summaryText = toDisplayText(item.summary);
                 const isExpectedStatus = isDataEntryWorkflowStatus(item.status);
                 const readinessSignal = getListReadinessSignal(item, null);
+                const acceptanceChip = getListAcceptanceScenarioChip(
+                  item.status,
+                  locale === "en" ? "en" : "ar",
+                );
+                const nextActionCues = getNextWorkflowActions(
+                  item.status,
+                  "data_entry",
+                );
                 return (
                 <article
                   key={item._id}
@@ -448,6 +471,20 @@ export default function DataEntryMedicalContentPage() {
                       >
                         {locale === "ar" ? readinessSignal.ar : readinessSignal.en}
                       </span>
+                      <span className="rounded-[8px] border border-[#E4E7EC] bg-white px-2 py-1 text-[#475467]">
+                        {acceptanceChip}
+                      </span>
+                      {nextActionCues.map((cue) => (
+                        <span
+                          key={`${item._id}-${cue.action}`}
+                          className="rounded-[8px] border border-[#D0D5DD] bg-[#F9FAFB] px-2 py-1 text-[#667085]"
+                        >
+                          {localizeAcceptanceCopy(
+                            cue.label,
+                            locale === "en" ? "en" : "ar",
+                          )}
+                        </span>
+                      ))}
                       <span className="text-[#98A2B3]">
                         {t("dataEntry.medicalContent.lastUpdated")}: {formatContentDate(item.updatedAt)}
                       </span>

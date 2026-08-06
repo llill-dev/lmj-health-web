@@ -22,6 +22,7 @@ import {
   resolveSupportEmail,
 } from '@/lib/platform/supportContact';
 import { useAuthStore } from '@/store/authStore';
+import { useI18n } from '@/i18n/provider';
 
 function Field({
   label,
@@ -114,10 +115,12 @@ export function ContactUsDialog({
   onClose: () => void;
   initialValues?: Partial<ContactUsFormState>;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
   const doctorProfileQuery = useDoctorProfile();
-  const contactQuery = usePlatformContactContent('ar');
+  const contactQuery = usePlatformContactContent(locale);
   const doctorProfile = doctorProfileQuery.data?.doctor;
   const doctorUser = doctorProfile?.user;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -299,13 +302,13 @@ export function ContactUsDialog({
     <PlatformModalShell
       open={open}
       onClose={onClose}
-      title="تواصل معنا"
+      title={tr('تواصل معنا', 'Contact us')}
       maxWidthClass="max-w-[620px]"
     >
       <form
         onSubmit={handleSubmit}
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="space-y-5 text-right"
       >
         <div className="flex gap-2 justify-start items-center">

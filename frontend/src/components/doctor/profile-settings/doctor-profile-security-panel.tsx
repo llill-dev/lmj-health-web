@@ -22,6 +22,7 @@ import { doctorSettingsApi } from '@/lib/doctor/settingsClient';
 import { readAuthUser } from '@/lib/cookies';
 import { useAuthStore } from '@/store/authStore';
 import { ApiError } from '@/lib/api';
+import { useI18n } from '@/i18n/provider';
 
 type PendingSecurityAction =
   | { kind: 'password'; values: DoctorPasswordChangeForm }
@@ -34,6 +35,7 @@ async function forceReLogin(navigate: ReturnType<typeof useNavigate>) {
 }
 
 export default function DoctorProfileSecurityPanel() {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -254,8 +256,8 @@ export default function DoctorProfileSecurityPanel() {
   return (
     <>
       <section
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="mt-5 overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]"
       >
         <div className="border-b border-[#EEF2F6] px-6 py-4">
@@ -306,8 +308,8 @@ export default function DoctorProfileSecurityPanel() {
       </section>
 
       <section
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="mt-5 overflow-hidden rounded-[6px] border border-[#FECACA] bg-[#FFFBFB] shadow-[0_18px_30px_rgba(0,0,0,0.06)]"
       >
         <div className="border-b border-[#FECACA] px-6 py-4">

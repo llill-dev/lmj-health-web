@@ -11,6 +11,7 @@ import type {
   UseFormReturn,
 } from 'react-hook-form';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   profileFieldClass,
@@ -84,6 +85,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
   onValidatedSubmit: (values: T) => void | Promise<void>;
   busy?: boolean;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const {
     register,
@@ -172,8 +174,8 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                 },
               }}
               className="pointer-events-auto relative w-full max-w-[min(96vw,520px)] origin-center overflow-hidden rounded-[22px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFFFE] via-white to-[#F8FAFC] shadow-[0_24px_64px_-12px_rgba(15,23,42,0.22)] outline-none"
-              dir="rtl"
-              lang="ar"
+              dir={dir}
+              lang={locale}
             >
               <div
                 aria-hidden

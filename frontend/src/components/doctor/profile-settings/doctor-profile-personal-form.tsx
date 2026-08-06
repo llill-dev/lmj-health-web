@@ -28,6 +28,7 @@ import {
   toDateInputValue,
   type ConsultationModeSelection,
 } from "@/components/doctor/profile-settings/doctor-profile-utils";
+import { useI18n } from "@/i18n/provider";
 import { cn } from "@/lib/utils/utils";
 import type { DoctorProfileRecord } from "@/lib/doctor/profile/profileClient";
 import { resolveDoctorProfilePatchFeedback } from "@/lib/doctor/profile/doctorProfilePatchErrors";
@@ -53,6 +54,7 @@ export default function DoctorProfilePersonalForm({
     photo: File | null,
   ) => Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const user = doctor.user;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -134,7 +136,7 @@ export default function DoctorProfilePersonalForm({
   };
 
   return (
-    <div dir="rtl" lang="ar" className="space-y-5">
+    <div dir={dir} lang={locale} className="space-y-5">
       <DoctorProfileHeroCard
         fullName={user?.fullName}
         specialization={doctor.specialization}

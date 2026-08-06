@@ -16,6 +16,7 @@ import type {
   DoctorSupportIdentity,
   DoctorSupportRequestType,
 } from '@/lib/doctor/support/types';
+import { useI18n } from '@/i18n/provider';
 
 const REQUEST_TYPES: Array<{ value: DoctorSupportRequestType; label: string }> = [
   { value: 'technical', label: 'مشكلة تقنية' },
@@ -43,6 +44,7 @@ export function DoctorSupportContactForm({
   supportEmail: string;
   loadingIdentity?: boolean;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<DoctorSupportContactForm>(EMPTY_FORM);
@@ -102,8 +104,8 @@ export function DoctorSupportContactForm({
   return (
     <form
       onSubmit={handleSubmit}
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="space-y-4 text-right"
     >
       <div className="rounded-[12px] border border-[#E0F2FE] bg-[#F0F9FF] px-4 py-3">

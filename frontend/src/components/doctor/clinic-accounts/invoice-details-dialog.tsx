@@ -15,6 +15,7 @@ import { useCancelBillingInvoice, useIssueBillingInvoice } from "@/hooks/doctor/
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 function hasRefundablePayments(invoice: ClinicInvoice): boolean {
   return invoice.payments.some((payment) => {
@@ -36,6 +37,7 @@ export function InvoiceDetailsDialog({
   onClose: () => void;
   onInvoiceUpdated?: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const {
     basePath,
@@ -156,7 +158,7 @@ export function InvoiceDetailsDialog({
         headerPattern
         maxWidthClass="max-w-[760px]"
       >
-        <div dir="rtl" lang="ar" className="space-y-5">
+        <div dir={dir} lang={locale} className="space-y-5">
           <div className="rounded-[12px] border border-[#EEF2F6] bg-white p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1 text-start">

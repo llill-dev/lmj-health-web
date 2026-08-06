@@ -13,6 +13,7 @@ import { getBillingInvoiceUpdateErrorToast } from '@/lib/doctor/billing/errors';
 import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import type { ClinicInvoice } from '@/lib/doctor/clinicAccounts/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 type LineItem = {
   id: string;
@@ -32,6 +33,7 @@ export function InvoiceEditDialog({
   onClose: () => void;
   onSuccess?: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const settingsQuery = useBillingSettings();
   const updateInvoice = useUpdateBillingInvoice();
@@ -165,7 +167,7 @@ export function InvoiceEditDialog({
       headerPattern
       maxWidthClass="max-w-[820px]"
     >
-      <div dir="rtl" lang="ar" className="space-y-5">
+      <div dir={dir} lang={locale} className="space-y-5">
         <div className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3 text-start">
           <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
             {invoice.id} • {invoice.patientName}

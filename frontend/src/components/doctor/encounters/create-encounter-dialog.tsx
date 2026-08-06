@@ -20,6 +20,7 @@ import {
   isValidAppointmentObjectId,
 } from "@/lib/doctor/encounters/createEncounterFormErrors";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 type CreateEncounterDialogProps = {
   open: boolean;
@@ -119,6 +120,7 @@ export function CreateEncounterDialog({
   submitting = false,
   onSubmit,
 }: CreateEncounterDialogProps) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const selectListboxOutletRef = useRef<HTMLDivElement>(null);
   const valuesRef = useRef<EncounterFormValues>(INITIAL_VALUES);
@@ -286,8 +288,8 @@ export function CreateEncounterDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[120] bg-[#101828]/55 backdrop-blur-[2px]" />
         <Dialog.Content
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
           className="fixed left-1/2 top-1/2 z-[121] flex w-[min(760px,calc(100vw-24px))] max-h-[calc(100vh-28px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[26px] border border-[#D0D5DD] bg-white shadow-[0_30px_80px_rgba(15,23,42,0.22)]"
         >
           <div

@@ -4,6 +4,7 @@ import {
   profileTextareaClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 export function PrescriptionGeneralInstructions({
   value,
@@ -16,6 +17,7 @@ export function PrescriptionGeneralInstructions({
   disabled?: boolean;
   error?: string;
 }) {
+  const { locale, dir } = useI18n();
   return (
     <section className="mb-6">
       <h2 className="mb-1 text-right font-cairo text-[14px] font-extrabold text-[#667085]">
@@ -27,8 +29,8 @@ export function PrescriptionGeneralInstructions({
         يحفظ التعليمات العامة فقط عند تعديلها.
       </p>
       <textarea
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="أضف تعليمات عامة للمريض (اختياري)..."

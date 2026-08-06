@@ -340,6 +340,66 @@ export function hasNewsFields(news?: JsonRecord | null): boolean {
   ].some((value) => Boolean(toDisplayText(value).trim()));
 }
 
+export function getNewsTypeSwitchSafetyMessage(
+  previousType: AdminContentType | undefined,
+  nextType: AdminContentType,
+  language: "ar" | "en",
+): string | null {
+  if (!previousType || previousType === nextType) return null;
+
+  const switchedToNews = previousType !== "NEWS" && nextType === "NEWS";
+  if (switchedToNews) {
+    return language === "en"
+      ? "Switched to NEWS: drafts remain permissive, but source URL and publish date should be completed before review."
+      : "تم التحويل إلى NEWS: يبقى حفظ المسودة مرنًا، لكن يُفضّل استكمال رابط المصدر وتاريخ النشر قبل المراجعة.";
+  }
+
+  const switchedFromNews = previousType === "NEWS" && nextType !== "NEWS";
+  if (switchedFromNews) {
+    return language === "en"
+      ? "Switched from NEWS: news-only metadata will be ignored on save unless you switch back to NEWS."
+      : "تم التحويل من NEWS: بيانات الخبر المخصصة لن تُرسل عند الحفظ إلا إذا أعدت النوع إلى NEWS.";
+  }
+
+  return null;
+}
+
+export function getNewsDraftGuidanceMessages(args: {
+  isNewsType: boolean;
+  language: "ar" | "en";
+  sourceUrl?: string;
+  publishedAt?: string;
+  title?: string;
+  summary?: string;
+}): string[] {
+  const { isNewsType, language, sourceUrl, publishedAt, title, summary } = args;
+  if (!isNewsType) return [];
+
+  const warnings: string[] = [];
+  const hasSourceUrl = Boolean(sourceUrl?.trim());
+  const hasPublishedAt = Boolean(publishedAt?.trim());
+  const hasTitle = Boolean(title?.trim());
+  const hasSummary = Boolean(summary?.trim());
+
+  if (!hasSourceUrl || !hasPublishedAt) {
+    warnings.push(
+      language === "en"
+        ? "Draft can still be saved, but source URL and publish date are required for stable NEWS governance."
+        : "يمكن حفظ المسودة بدون منع، لكن يُعدّ رابط المصدر وتاريخ النشر ضروريين لثبات حوكمة الأخبار.",
+    );
+  }
+
+  if (!hasTitle || !hasSummary) {
+    warnings.push(
+      language === "en"
+        ? "Keep title and summary clear (or localized) so NEWS cards and downstream ingestion remain consistent."
+        : "احرص على وضوح العنوان والملخص (أو صياغتهما محليًا) لضمان اتساق بطاقات الأخبار والتغذية اللاحقة.",
+    );
+  }
+
+  return warnings;
+}
+
 function readSourceText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -388,6 +448,7 @@ export function getReviewReadinessIssueCodes(
   const disclaimerVersion = toDisplayText(item.disclaimerVersion).trim();
   const requiresSeekHelpBlock = item.requiresSeekHelpBlock === true;
 
+  // SETTINGS_PAGE: sources + disclaimer exempt (release acceptance matrix).
   if (normalizedType !== "SETTINGS_PAGE" && sourceCount === 0) {
     issues.push("sources_required");
   }
@@ -404,6 +465,49 @@ export function getReviewReadinessIssueCodes(
   }
 
   return issues;
+}
+
+/**
+ * Snapshot input fields shared with `releaseAcceptanceMatrix`.
+ * Prefer `buildReleaseAcceptanceFromDetails` / `buildReleaseAcceptanceSnapshot`
+ * for full type × status acceptance checks (blocks, NEWS sourceUrl/publishedAt).
+ */
+export function toReleaseAcceptanceFields(item: AdminContentDetailsItem | null): {
+  type: AdminContentType;
+  status: AdminContentStatus;
+  sourceCount: number;
+  disclaimerVersion?: string;
+  requiresSeekHelpBlock: boolean;
+  newsSourceUrl?: string;
+  newsPublishedAt?: string;
+  reviewIssueCodes: ReviewReadinessIssueCode[];
+} | null {
+  if (!item) return null;
+  const type = normalizeType(item.type);
+  const status = normalizeStatus(item.status);
+  const reviewIssueCodes = getReviewReadinessIssueCodes(item);
+  const news =
+    item.news && typeof item.news === "object"
+      ? (item.news as Record<string, unknown>)
+      : null;
+
+  return {
+    type,
+    status,
+    sourceCount:
+      type === "SETTINGS_PAGE"
+        ? 0
+        : reviewIssueCodes.includes("sources_required")
+          ? 0
+          : countValidContentSources(item),
+    disclaimerVersion: toOptionalText(item.disclaimerVersion),
+    requiresSeekHelpBlock: item.requiresSeekHelpBlock === true,
+    newsSourceUrl: toOptionalText(news?.sourceUrl ?? item.sourceUrl),
+    newsPublishedAt: toOptionalText(
+      news?.publishedAt ?? (type === "NEWS" ? item.publishedAt : undefined),
+    ),
+    reviewIssueCodes,
+  };
 }
 
 export function formatDate(value?: string) {

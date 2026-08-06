@@ -3,6 +3,13 @@ import type {
   AdminContentStatus,
   AdminContentType,
 } from '@/lib/admin/types';
+import {
+  getAcceptanceScenarioKey,
+  getListAcceptanceScenarioChip,
+  getNextWorkflowActions,
+  localizeAcceptanceCopy,
+  type WorkflowActorRole,
+} from './releaseAcceptanceMatrix';
 
 export const PAGE_SIZE = 20;
 
@@ -287,50 +294,77 @@ export function getListReadinessSignal(
   tone: ReadinessSignalTone;
   ar: string;
   en: string;
+  scenarioKey: ReturnType<typeof getAcceptanceScenarioKey>;
 } {
+  const scenarioKey = getAcceptanceScenarioKey(item.status);
+
   if (item.status === 'DRAFT') {
     if (sourceCount === 0) {
       return {
         tone: 'warning',
-        ar: 'جاهزية المراجعة منخفضة: لا توجد مصادر مرتبطة بعد.',
-        en: 'Low review readiness: no sources are attached yet.',
+        scenarioKey,
+        ar: 'مسودة (draft_prep): جاهزية المراجعة منخفضة — لا توجد مصادر مرتبطة بعد.',
+        en: 'Draft (draft_prep): low review readiness — no sources attached yet.',
       };
     }
     if (sourceCount && sourceCount > 0) {
       return {
         tone: 'info',
-        ar: 'المصادر موجودة. راجع التفاصيل لاستكمال متطلبات الحوكمة قبل الإرسال.',
-        en: 'Sources are present. Check details to complete governance requirements before submit.',
+        scenarioKey,
+        ar: 'مسودة (draft_prep): المصادر موجودة. راجع مصفوفة الإطلاق قبل إرسال المراجعة.',
+        en: 'Draft (draft_prep): sources present. Check the release matrix before submit-review.',
       };
     }
     return {
       tone: 'info',
-      ar: 'جاهزية المراجعة تحتاج تحققًا من التفاصيل.',
-      en: 'Review readiness needs verification from details.',
+      scenarioKey,
+      ar: 'مسودة (draft_prep): جاهزية المراجعة تحتاج تحققًا من التفاصيل.',
+      en: 'Draft (draft_prep): review readiness needs verification from details.',
     };
   }
 
   if (item.status === 'IN_REVIEW') {
     return {
       tone: 'info',
-      ar: 'المراجعة جارية: قرارات القبول/الرفض/النشر ضمن صلاحيات الإدارة فقط.',
-      en: 'In review: approve/reject/publish decisions are admin-only.',
+      scenarioKey,
+      ar: 'قيد المراجعة (in_review_gate): الموافقة/الرفض/النشر للإدارة فقط.',
+      en: 'In review (in_review_gate): approve/reject/publish are admin-only.',
     };
   }
 
   if (item.status === 'PUBLISHED') {
     return {
       tone: 'success',
-      ar: 'محتوى منشور. استخدم الأرشفة عند الحاجة دون تعطيل الاستعراض.',
-      en: 'Content is published. Archive when needed without affecting browsing.',
+      scenarioKey,
+      ar: 'منشور (published_info): معلومات فقط — الأرشفة اختيارية دون تعطيل الاستعراض.',
+      en: 'Published (published_info): informational — archive is optional without blocking browse.',
     };
   }
 
   return {
     tone: 'info',
-    ar: 'المحتوى مؤرشف للرجوع فقط.',
-    en: 'Content is archived for reference.',
+    scenarioKey,
+    ar: 'مؤرشف (archived_info): للرجوع فقط دون إجراءات workflow نشطة.',
+    en: 'Archived (archived_info): reference only with no active workflow actions.',
   };
+}
+
+/** Next workflow action labels for a list row (role × status from OpenAPI). */
+export function getListWorkflowActionLabels(
+  status: AdminContentStatus,
+  role: WorkflowActorRole = 'admin',
+  language: 'ar' | 'en' = 'ar',
+): string[] {
+  return getNextWorkflowActions(status, role).map((cue) =>
+    localizeAcceptanceCopy(cue.label, language),
+  );
+}
+
+export function getListScenarioChip(
+  status: AdminContentStatus,
+  language: 'ar' | 'en' = 'ar',
+): string {
+  return getListAcceptanceScenarioChip(status, language);
 }
 
 export function isDataEntryWorkflowStatus(status: AdminContentStatus): boolean {

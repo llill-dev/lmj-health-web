@@ -12,6 +12,7 @@ import {
 import { useFacilitySuggestSearch } from '@/hooks/doctor/facilities/useDoctorFacility';
 import type { SuggestFacilityRecord } from '@/lib/doctor/medical-services-directory/api-types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 function facilityId(record: SuggestFacilityRecord): string | undefined {
   return record.id ?? record._id;
@@ -38,6 +39,7 @@ export default function LinkFacilityDialog({
   }) => void;
   onSuggestFacility?: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const [search, setSearch] = useState('');
   const [city, setCity] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -86,7 +88,7 @@ export default function LinkFacilityDialog({
       maxWidthClass="max-w-[640px]"
       headerPattern
     >
-      <div dir="rtl" lang="ar" className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
           ابحث عن منشأة مسجّلة في النظام واربط حسابك بها. إذا لم تجدها، استخدم
           «اقتراح منشأة» لإرسال طلب إضافتها.

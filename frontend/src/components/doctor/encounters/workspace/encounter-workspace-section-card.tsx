@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 import { ENCOUNTERS_EXPAND_TRANSITION } from '@/components/doctor/encounters/encounters-motion';
 import {
   ENCOUNTER_WORKSPACE_ADD_ICON,
@@ -32,6 +33,7 @@ export function EncounterWorkspaceSectionCard({
   onOpenSection?: () => void;
   onAddReferral?: () => void;
 }) {
+  const { dir } = useI18n();
   const theme = ENCOUNTER_WORKSPACE_SECTION_THEMES[section.key];
   const Icon = theme.icon;
   const AddIcon = ENCOUNTER_WORKSPACE_ADD_ICON;
@@ -61,7 +63,7 @@ export function EncounterWorkspaceSectionCard({
             className="flex flex-1 gap-3 justify-between items-center min-w-0 text-right"
           >
             <div
-              dir="rtl"
+              dir={dir}
               className="flex items-center justify-start gap-3 text-start"
             >
               <div
@@ -222,7 +224,7 @@ export function EncounterWorkspaceSectionCard({
         )}
       >
         <div
-          dir="rtl"
+          dir={dir}
           className="flex w-full items-center justify-start gap-2 text-start"
         >
           <span

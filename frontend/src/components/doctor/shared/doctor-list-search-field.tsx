@@ -1,4 +1,5 @@
 import { Search, X } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 export function DoctorListSearchField({
   value,
@@ -13,8 +14,9 @@ export function DoctorListSearchField({
   ariaLabel?: string;
   onClear?: () => void;
 }) {
+  const { dir } = useI18n();
   return (
-    <label className="relative block" dir="rtl">
+    <label className="relative block" dir={dir}>
       <span className="sr-only">{ariaLabel}</span>
       <input
         type="search"

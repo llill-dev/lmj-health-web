@@ -5,6 +5,7 @@ import { X, AlertCircle, Clock } from "lucide-react";
 import StyledSelect from "@/components/ui/styled-select";
 import { useEffect, useMemo, useState } from "react";
 import type { ScheduleDayKey } from "@/lib/doctor/types";
+import { useI18n } from "@/i18n/provider";
 
 export type ExceptionFormValues = {
   date: string;
@@ -32,6 +33,7 @@ export default function AddExceptionDialog({
   onSubmit,
   enabledDays = [],
 }: AddExceptionDialogProps) {
+  const { locale, dir } = useI18n();
   const [date, setDate] = useState("");
   const [exceptionType, setExceptionType] =
     useState<ExceptionFormValues["exceptionType"]>("closed");
@@ -280,8 +282,8 @@ export default function AddExceptionDialog({
               },
             }}
             className="fixed left-1/2 top-1/2 z-[10000] w-[520px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <motion.div
               initial={false}

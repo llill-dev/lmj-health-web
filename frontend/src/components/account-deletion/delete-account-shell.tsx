@@ -1,6 +1,7 @@
 import { UserX } from "lucide-react";
 import type { ReactNode } from "react";
 import { DeleteAccountStepper } from "./delete-account-stepper";
+import { useI18n } from "@/i18n/provider";
 
 export function DeleteAccountShell({
   step,
@@ -11,10 +12,12 @@ export function DeleteAccountShell({
   subtitle?: string;
   children: ReactNode;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="flex min-h-screen items-center justify-center px-4 py-10"
     >
       <div className="w-full max-w-[520px]">
@@ -25,7 +28,7 @@ export function DeleteAccountShell({
             </div>
           </div>
           <h1 className="font-cairo text-[24px] font-black text-[#111827]">
-            حذف الحساب
+            {tr("حذف الحساب", "Delete account")}
           </h1>
           {subtitle ? (
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">

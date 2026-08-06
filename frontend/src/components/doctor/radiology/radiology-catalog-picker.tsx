@@ -3,6 +3,7 @@ import { ChevronDown, Plus, Search, Star } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
 import type { OrderCatalogItem } from '@/lib/doctor/encounters/encounterOrderTypes';
 import type { RadiologyCatalogTab } from './radiology-types';
+import { useI18n } from '@/i18n/provider';
 
 const DEFAULT_TABS: { id: RadiologyCatalogTab; label: string }[] = [
   { id: 'favorites', label: 'المفضلة' },
@@ -40,6 +41,7 @@ export function RadiologyCatalogPicker({
   searchPlaceholder?: string;
   tabs?: Array<{ id: RadiologyCatalogTab; label: string }>;
 }) {
+  const { locale, dir } = useI18n();
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState<RadiologyCatalogTab>(tabs[0]?.id ?? 'favorites');
   const [search, setSearch] = useState('');
@@ -69,7 +71,7 @@ export function RadiologyCatalogPicker({
     <section className="mb-6 overflow-hidden rounded-[12px] border border-[#E4E7EC] bg-white shadow-sm">
       <button
         type="button"
-        dir="rtl"
+        dir={dir}
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-3 bg-primary px-4 py-3 text-white"
       >
@@ -87,12 +89,12 @@ export function RadiologyCatalogPicker({
 
       {open ? (
         <div className="space-y-4 px-4 py-4">
-          <label className="relative block" dir="rtl">
+          <label className="relative block" dir={dir}>
             <span className="sr-only">{searchPlaceholder}</span>
             <input
               type="search"
-              dir="rtl"
-              lang="ar"
+              dir={dir}
+              lang={locale}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={searchPlaceholder}

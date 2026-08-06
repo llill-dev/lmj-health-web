@@ -15,6 +15,7 @@ import { getBillingRefundErrorToast } from '@/lib/doctor/billing/errors';
 import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import type { ClinicInvoice, ClinicPayment } from '@/lib/doctor/clinicAccounts/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 function getRefundablePayments(invoice: ClinicInvoice): ClinicPayment[] {
   return invoice.payments.filter((payment) => {
@@ -36,6 +37,7 @@ export function InvoiceRefundDialog({
   onClose: () => void;
   onSuccess?: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const createRefund = useCreateBillingRefund();
 
@@ -147,7 +149,7 @@ export function InvoiceRefundDialog({
       headerPattern
       maxWidthClass="max-w-[640px]"
     >
-      <div dir="rtl" lang="ar" className="space-y-5">
+      <div dir={dir} lang={locale} className="space-y-5">
         <div className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3 text-start">
           <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
             {invoice.id} • {invoice.patientName}
