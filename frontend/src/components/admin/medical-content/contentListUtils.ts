@@ -15,6 +15,37 @@ export type UiContentStatus =
 
 export type LangFilter = 'الكل' | 'ar' | 'en';
 
+export const MINE_STATUS_FILTERS: readonly UiContentStatus[] = [
+  'الكل',
+  'مسودة',
+  'قيد المراجعة',
+];
+
+export function isMineStatusFilter(status: UiContentStatus): boolean {
+  return MINE_STATUS_FILTERS.includes(status);
+}
+
+export function resolvePagedTotal(
+  payload: { total?: unknown; results?: unknown } | null | undefined,
+  fallbackCount = 0,
+): number {
+  const total =
+    typeof payload?.total === 'number'
+      ? payload.total
+      : Number(payload?.total ?? NaN);
+  if (Number.isFinite(total) && total >= 0) {
+    return total;
+  }
+  const results =
+    typeof payload?.results === 'number'
+      ? payload.results
+      : Number(payload?.results ?? NaN);
+  if (Number.isFinite(results) && results >= 0) {
+    return Math.max(results, fallbackCount);
+  }
+  return fallbackCount;
+}
+
 const ADMIN_CONTENT_TYPE_VALUES: AdminContentType[] = [
   'CONDITION',
   'SYMPTOM',

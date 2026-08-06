@@ -44,6 +44,7 @@ import { readAuthUser } from "@/lib/cookies";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { doctorAppointmentsApi } from "@/lib/doctor/client";
+import { useI18n } from "@/i18n/provider";
 import {
   getAppointmentBookingErrorMessage,
   getAppointmentFileAccessErrorMessage,
@@ -130,6 +131,8 @@ function isFutureAppointmentSlot(date?: string, startTime?: string): boolean {
 }
 
 export default function DoctorAppointmentsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -485,14 +488,14 @@ export default function DoctorAppointmentsPage() {
         onChange={handleAppointmentFileUpload}
       />
       <Helmet>
-        <title>Appointments • LMJ Health</title>
+        <title>{tr("المواعيد • LMJ Health", "Appointments • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
-          title="إجمالي المواعيد"
+          title={tr("إجمالي المواعيد", "Total appointments")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
@@ -500,36 +503,36 @@ export default function DoctorAppointmentsPage() {
               </span>
               <span className="text-primary/90">
                 {" "}
-                — إجمالي المواعيد حسب الحالة
+                {tr("— إجمالي المواعيد حسب الحالة", "— total appointments by status")}
               </span>
             </span>
           }
           onActionClick={handleBookingAction}
-          actionLabel="حجز موعد لمريض"
+          actionLabel={tr("حجز موعد لمريض", "Book appointment for patient")}
           kpis={[
             {
               key: "scheduled",
               icon: <Clock className="w-5 h-5 shrink-0" />,
               value: scheduledTotal.isAwaitingData ? "—" : scheduledTotal.total,
-              label: "مجدولة",
+              label: tr("مجدولة", "Scheduled"),
             },
             {
               key: "completed",
               icon: <CheckCircle className="w-5 h-5 shrink-0" />,
               value: completedTotal.isAwaitingData ? "—" : completedTotal.total,
-              label: "مكتملة",
+              label: tr("مكتملة", "Completed"),
             },
             {
               key: "cancelled",
               icon: <XCircle className="w-5 h-5 shrink-0" />,
               value: cancelledTotal.isAwaitingData ? "—" : cancelledTotal.total,
-              label: "ملغية",
+              label: tr("ملغية", "Cancelled"),
             },
             {
               key: "no-show",
               icon: <UserX className="w-5 h-5 shrink-0" />,
               value: noShowTotal.isAwaitingData ? "—" : noShowTotal.total,
-              label: "عدم حضور",
+              label: tr("عدم حضور", "No-show"),
             },
           ]}
         />
@@ -542,11 +545,22 @@ export default function DoctorAppointmentsPage() {
           onSubmit={async (values) => {
             const doctorId = readAuthUser()?.actorIds?.doctorId;
             if (!doctorId) {
-              toast("تعذّر تحديد هوية الطبيب الحالية لهذا الحجز.", {
-                title: "خطأ",
+              toast(
+                tr(
+                  "تعذّر تحديد هوية الطبيب الحالية لهذا الحجز.",
+                  "Could not resolve the current doctor identity for this booking.",
+                ),
+                {
+                title: tr("خطأ", "Error"),
                 variant: "error",
-              });
-              throw new Error("تعذر تحديد هوية الطبيب الحالي لهذا الحجز.");
+              },
+              );
+              throw new Error(
+                tr(
+                  "تعذر تحديد هوية الطبيب الحالي لهذا الحجز.",
+                  "Could not resolve the current doctor identity for this booking.",
+                ),
+              );
             }
             try {
               await bookMutation.mutateAsync({
@@ -557,8 +571,8 @@ export default function DoctorAppointmentsPage() {
                 appointmentTypeId: values.appointmentTypeId,
                 notes: values.notes,
               });
-              toast("تم حجز الموعد بنجاح.", {
-                title: "تم الحجز",
+              toast(tr("تم حجز الموعد بنجاح.", "Appointment booked successfully."), {
+                title: tr("تم الحجز", "Booked"),
                 variant: "success",
                 durationMs: 4200,
               });
@@ -967,8 +981,8 @@ export default function DoctorAppointmentsPage() {
                 />
               ) : false ? (
                 <div
-                  dir="rtl"
-                  lang="ar"
+                  dir={dir}
+                  lang={locale}
                   role="alert"
                   className="flex min-h-[360px] items-center justify-center px-3 py-10 sm:px-4"
                 >

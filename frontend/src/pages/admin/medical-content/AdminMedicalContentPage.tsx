@@ -69,11 +69,13 @@ import {
   contentStatusLabel,
   contentTypeLabel,
   formatContentDate,
+  isMineStatusFilter,
   languageKindLabel,
   normalizeContentItems,
   normalizeItemLanguage,
   PAGE_SIZE,
   parseTypeQueryParam,
+  resolvePagedTotal,
   textSearchMatch,
   type LangFilter,
   type UiContentStatus,
@@ -278,7 +280,7 @@ export default function AdminMedicalContentPage() {
     [],
   );
 
-  const listParams = useMemo(
+  const adminListParams = useMemo(
     () => ({
       page,
       limit: PAGE_SIZE,
@@ -291,9 +293,20 @@ export default function AdminMedicalContentPage() {
     [page, activeType, activeStatus, langFilter, statusToApi],
   );
 
+  const myListParams = useMemo(
+    () => ({
+      page,
+      limit: PAGE_SIZE,
+      ...(activeStatus !== "الكل" && isMineStatusFilter(activeStatus)
+        ? { status: statusToApi[activeStatus] as AdminContentStatus }
+        : {}),
+    }),
+    [page, activeStatus, statusToApi],
+  );
+
   const contentQuery = showMineOnly
-    ? useAdminMyContentList(listParams)
-    : useAdminContentList(listParams);
+    ? useAdminMyContentList(myListParams)
+    : useAdminContentList(adminListParams);
   const statusCounts = useAdminContentStatusCounts();
   const pendingNewsQuery = useAdminPendingNews({
     page: 1,
@@ -319,14 +332,19 @@ export default function AdminMedicalContentPage() {
   );
 
   /** تصفية لغة داخل الصفحة إذا أعاد السيرفر قيماً غير متوافقة مع ar/en */
+  const itemsByType = useMemo(() => {
+    if (activeType === "الكل") return items;
+    return items.filter((it) => it.type === activeType);
+  }, [items, activeType]);
+
   const itemsByLang = useMemo(() => {
-    if (langFilter === "الكل") return items;
-    return items.filter(
+    if (langFilter === "الكل") return itemsByType;
+    return itemsByType.filter(
       (it) => normalizeItemLanguage(it.language) === langFilter,
     );
-  }, [items, langFilter]);
+  }, [itemsByType, langFilter]);
 
-  const serverTotal = contentQuery.data?.total ?? 0;
+  const serverTotal = resolvePagedTotal(contentQuery.data, itemsByLang.length);
   const totalPages =
     serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)) : 0;
 
@@ -378,8 +396,10 @@ export default function AdminMedicalContentPage() {
   }, [activeType, activeStatus, langFilter]);
 
   useEffect(() => {
-    setPage(1);
-  }, [query]);
+    if (showMineOnly && !isMineStatusFilter(activeStatus)) {
+      setActiveStatus("الكل");
+    }
+  }, [showMineOnly, activeStatus]);
 
   const statusBadge = (s: AdminContentStatus) => {
     if (s === "PUBLISHED") {
@@ -560,8 +580,8 @@ export default function AdminMedicalContentPage() {
             <div className="relative flex-1 min-w-0">
               <input
                 placeholder={tr(
-                  "بحث في العناوين والملخص (العربية/الإنجليزية)…",
-                  "Search titles and summaries (Arabic/English)…",
+                  "بحث داخل الصفحة الحالية في العناوين والملخص…",
+                  "Search within the current page titles and summaries…",
                 )}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -594,8 +614,12 @@ export default function AdminMedicalContentPage() {
           <div className="mt-3 rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3">
             <div className="font-cairo text-[12px] font-extrabold text-[#0F766E]">
               {tr(
-                "دورة العمل المعتمدة: مسودة ← قيد المراجعة ← منشور ← مؤرشف",
-                "Approved workflow: Draft → In review → Published → Archived",
+                showMineOnly
+                  ? "وضع محتواي: الفلترة المتاحة (مسودة، قيد المراجعة)."
+                  : "دورة العمل المعتمدة: مسودة ← قيد المراجعة ← منشور ← مؤرشف",
+                showMineOnly
+                  ? "My-content mode: available statuses are Draft and In review."
+                  : "Approved workflow: Draft → In review → Published → Archived",
               )}
             </div>
             <div className="mt-1 font-cairo text-[11px] font-semibold text-[#5B7B79]">
@@ -710,10 +734,11 @@ export default function AdminMedicalContentPage() {
             <button
               type="button"
               onClick={() => setActiveStatus("منشور")}
+              disabled={showMineOnly}
               className={
                 activeStatus === "منشور"
                   ? "inline-flex h-[30px] items-center justify-center rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white"
-                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
+                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-40"
               }
             >
               {tr("منشور", "Published")}
@@ -743,15 +768,24 @@ export default function AdminMedicalContentPage() {
             <button
               type="button"
               onClick={() => setActiveStatus("مؤرشف")}
+              disabled={showMineOnly}
               className={
                 activeStatus === "مؤرشف"
                   ? "inline-flex h-[30px] items-center justify-center rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white"
-                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
+                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-40"
               }
             >
               {tr("مؤرشف", "Archived")}
             </button>
           </div>
+          {showMineOnly ? (
+            <div className="mt-2 font-cairo text-[11px] font-bold text-[#98A2B3]">
+              {tr(
+                "واجهة (محتواي فقط) مرتبطة بمسار /api/admin/content/mine وتدعم فقط: الكل، مسودة، قيد المراجعة.",
+                "My-content mode is backed by /api/admin/content/mine and supports only: All, Draft, In review.",
+              )}
+            </div>
+          ) : null}
         </section>
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden">

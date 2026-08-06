@@ -18,6 +18,7 @@ export function useAdminContentList(params: AdminContentListParams = {}) {
   const query = useQuery({
     queryKey: [...CONTENT_LIST_KEY, params],
     queryFn: () => adminApi.content.list(params),
+    placeholderData: (previousData) => previousData,
     staleTime: STALE,
   });
 
@@ -31,6 +32,7 @@ export function useAdminMyContentList(params: AdminContentListParams = {}) {
   const query = useQuery({
     queryKey: [...CONTENT_LIST_KEY, 'mine', params],
     queryFn: () => adminApi.content.listMine(params),
+    placeholderData: (previousData) => previousData,
     staleTime: STALE,
   });
 

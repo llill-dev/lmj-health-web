@@ -259,7 +259,61 @@ function readAdminContentDetailsItemRecord(
   value: unknown,
 ): AdminContentDetailsResponse["item"] | undefined {
   const record = asAdminRecord(value);
-  return record ? (record as AdminContentDetailsResponse["item"]) : undefined;
+  if (!record) return undefined;
+
+  const newsRecord =
+    asAdminRecord(record.news) ??
+    asAdminRecord(readAdminNamedValue(record, "newsMeta")) ??
+    asAdminRecord(readAdminNamedValue(record, "newsItem"));
+  const templateRecord =
+    asAdminRecord(record.template) ??
+    asAdminRecord(record.contentTemplate) ??
+    asAdminRecord(record.templateDefinition);
+
+  return {
+    ...(record as AdminContentDetailsResponse["item"]),
+    ...(newsRecord
+      ? {
+          news: newsRecord as NonNullable<AdminContentDetailsResponse["item"]>["news"],
+          sourceName:
+            readAdminString(record.sourceName) ?? readAdminString(newsRecord.sourceName),
+          sourceUrl:
+            readAdminString(record.sourceUrl) ?? readAdminString(newsRecord.sourceUrl),
+          originalTitle:
+            readAdminString(record.originalTitle) ??
+            readAdminString(newsRecord.originalTitle),
+          publishedAt:
+            readAdminString(record.publishedAt) ?? readAdminString(newsRecord.publishedAt),
+          aiSummary:
+            readAdminString(record.aiSummary) ?? readAdminString(newsRecord.aiSummary),
+        }
+      : {}),
+    ...(templateRecord
+      ? {
+          template:
+            (record.template as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["template"]) ??
+            (templateRecord as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["template"]),
+          contentTemplate:
+            (record.contentTemplate as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["contentTemplate"]) ??
+            (templateRecord as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["contentTemplate"]),
+          templateDefinition:
+            (record.templateDefinition as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["templateDefinition"]) ??
+            (templateRecord as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["templateDefinition"]),
+        }
+      : {}),
+  };
 }
 
 function readAdminContentTemplateRecord(
@@ -430,6 +484,74 @@ function readLocalizedText(value: unknown): string | undefined {
     );
   }
   return undefined;
+}
+
+function buildAdminContentNewsPayload(
+  body: Pick<
+    CreateAdminContentBody,
+    | "news"
+    | "sourceName"
+    | "sourceUrl"
+    | "originalTitle"
+    | "publishedAt"
+    | "aiSummary"
+  >,
+) {
+  const news =
+    body.news && typeof body.news === "object" && !Array.isArray(body.news)
+      ? { ...body.news }
+      : {};
+
+  const sourceName = readLocalizedText(news.sourceName) ?? readLocalizedText(body.sourceName);
+  const sourceUrl = readLocalizedText(news.sourceUrl) ?? readLocalizedText(body.sourceUrl);
+  const originalTitle =
+    readLocalizedText(news.originalTitle) ?? readLocalizedText(body.originalTitle);
+  const publishedAt =
+    readLocalizedText(news.publishedAt) ?? readLocalizedText(body.publishedAt);
+  const aiSummary = readLocalizedText(news.aiSummary) ?? readLocalizedText(body.aiSummary);
+  const dedupeHash = readLocalizedText(news.dedupeHash);
+  const importedAt = readLocalizedText(news.importedAt);
+
+  if (
+    !sourceName &&
+    !sourceUrl &&
+    !originalTitle &&
+    !publishedAt &&
+    !aiSummary &&
+    !dedupeHash &&
+    !importedAt
+  ) {
+    return undefined;
+  }
+
+  return {
+    ...(sourceName ? { sourceName } : {}),
+    ...(sourceUrl ? { sourceUrl } : {}),
+    ...(originalTitle ? { originalTitle } : {}),
+    ...(publishedAt ? { publishedAt } : {}),
+    ...(aiSummary ? { aiSummary } : {}),
+    ...(dedupeHash ? { dedupeHash } : {}),
+    ...(importedAt ? { importedAt } : {}),
+  };
+}
+
+function buildAdminContentPayload(body: CreateAdminContentBody | UpdateAdminContentBody) {
+  const news = buildAdminContentNewsPayload(body);
+  const payload: Record<string, unknown> = { ...body };
+
+  if (news) {
+    payload.news = news;
+  } else if ("news" in payload) {
+    payload.news = null;
+  }
+
+  delete payload.sourceName;
+  delete payload.sourceUrl;
+  delete payload.originalTitle;
+  delete payload.publishedAt;
+  delete payload.aiSummary;
+
+  return payload;
 }
 
 function buildMedicalOrderCode(label: string): string {
@@ -2019,13 +2141,17 @@ export const adminApi = {
         locale: "ar",
       }).then(normalizeAdminContentDetailsResponse),
     create: (body: CreateAdminContentBody) =>
-      post<AdminContentMutationResponse>(adminEndpoints.content.create, body, {
-        locale: "ar",
-      }).then(normalizeAdminContentMutationResponse),
+      post<AdminContentMutationResponse>(
+        adminEndpoints.content.create,
+        buildAdminContentPayload(body),
+        {
+          locale: "ar",
+        },
+      ).then(normalizeAdminContentMutationResponse),
     update: (id: string, body: UpdateAdminContentBody) =>
       patch<AdminContentMutationResponse>(
         adminEndpoints.content.update(id),
-        body,
+        buildAdminContentPayload(body),
         { locale: "ar" },
       ).then(normalizeAdminContentMutationResponse),
     submitReview: (id: string, reviewNotes?: string) =>

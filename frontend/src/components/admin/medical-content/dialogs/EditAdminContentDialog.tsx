@@ -1,14 +1,32 @@
 "use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Save, X } from "lucide-react";
-import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useAdminContentById,
   useUpdateAdminContent,
 } from "@/hooks/admin/content/useAdminContent";
+import { useAdminContentTemplates } from "@/hooks/admin/content-templates/useAdminContentTemplates";
+import ContentBlockEditor from "@/components/admin/medical-content/ContentBlockEditor";
+import DynamicTemplateFieldRenderer from "@/components/admin/medical-content/DynamicTemplateFieldRenderer";
+import MedicalContentGovernancePanel from "@/components/admin/medical-content/MedicalContentGovernancePanel";
+import MedicalContentPatientPreview from "@/components/admin/medical-content/MedicalContentPatientPreview";
+import {
+  buildContentBlocks,
+  contentBlockSchema,
+  createEmptyBlock,
+  isMeaningfulBlock,
+  normalizeContentBlocksForForm,
+} from "@/components/admin/medical-content/contentBlockEditor.helpers";
+import {
+  collectTemplateFieldValidationIssues,
+  getTemplateParentType,
+  isDynamicRecord,
+} from "@/components/admin/medical-content/dynamicTemplateFieldRenderer.helpers";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
@@ -22,10 +40,17 @@ import { normalizeItemLanguage } from "@/components/admin/medical-content/conten
 import { cn } from "@/lib/utils/utils";
 import { optionalLatinSlugSchema } from "@/lib/forms/slugValidation";
 import type {
-  AdminContentDetailsItem,
-  AdminContentDetailsResponse,
+  AdminContentDynamicRecord,
   AdminContentType,
 } from "@/lib/admin/types";
+import {
+  extractMedicalContentDetails,
+  hasNewsFields,
+  parseCommaSeparatedList,
+  parseJsonInput,
+  toDisplayText,
+  toPrettyJson,
+} from "./medicalContentDialogHelpers";
 
 const formSchema = z
   .object({
@@ -42,6 +67,25 @@ const formSchema = z
     language: z.enum(["ar", "en"]),
     slug: optionalLatinSlugSchema(),
     pageVersion: z.string().optional(),
+    templateId: z.string().optional(),
+    coverImage: z.string().optional(),
+    dataJson: z.string().optional(),
+    contentBlocks: z.array(contentBlockSchema).default([createEmptyBlock()]),
+    sourcesJson: z.string().optional(),
+    tagsInput: z.string().optional(),
+    categoriesInput: z.string().optional(),
+    riskFlagsInput: z.string().optional(),
+    relatedContentIdsInput: z.string().optional(),
+    disclaimerVersion: z.string().optional(),
+    requiresSeekHelpBlock: z.boolean().default(false),
+    isFeatured: z.boolean().default(false),
+    newsSourceName: z.string().optional(),
+    newsSourceUrl: z.string().optional(),
+    newsOriginalTitle: z.string().optional(),
+    newsPublishedAt: z.string().optional(),
+    newsAiSummary: z.string().optional(),
+    newsDedupeHash: z.string().optional(),
+    newsImportedAt: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (
@@ -52,6 +96,17 @@ const formSchema = z
         code: z.ZodIssueCode.custom,
         path: ["pageVersion"],
         message: "إصدار الصفحة مطلوب لصفحات الإعدادات",
+      });
+    }
+
+    if (
+      value.type !== "SETTINGS_PAGE" &&
+      !value.contentBlocks.some((block) => isMeaningfulBlock(block))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["contentBlocks"],
+        message: "أضف على الأقل بلوك محتوى واحدًا فعليًا قبل حفظ التعديلات.",
       });
     }
   });
@@ -67,35 +122,22 @@ const typeOptions: { value: AdminContentType; label: string }[] = [
   { value: "SETTINGS_PAGE", label: "صفحات الإعدادات" },
 ];
 
-function toText(value: unknown): string {
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return String(value);
-  if (value && typeof value === "object") {
-    const obj = value as Record<string, unknown>;
-    const localized = obj.ar ?? obj.en ?? obj.title ?? obj.name ?? obj.value;
-    if (typeof localized === "string") return localized;
-  }
-  return "";
-}
-
-function extractDetails(
-  payload?: AdminContentDetailsResponse,
-): AdminContentDetailsItem | null {
-  if (!payload || typeof payload !== "object") return null;
-  return (
-    payload.item ??
-    payload.content ??
-    payload.contentItem ??
-    payload.data ??
-    null
-  );
-}
-
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contentId: string | null;
 };
+
+const checkboxClass =
+  "h-4 w-4 rounded border border-[#D0D5DD] text-primary focus:ring-primary/30";
+
+function parseTemplateRecordInput(
+  value: string,
+  fallback: AdminContentDynamicRecord = {},
+) {
+  const result = parseJsonInput(value, fallback);
+  return isDynamicRecord(result.value) ? result.value : fallback;
+}
 
 export default function EditAdminContentDialog({
   open,
@@ -104,7 +146,7 @@ export default function EditAdminContentDialog({
 }: Props) {
   const { toast } = useToast();
   const detailsQuery = useAdminContentById(open ? contentId : null);
-  const details = extractDetails(detailsQuery.data);
+  const details = extractMedicalContentDetails(detailsQuery.data);
   const updateMut = useUpdateAdminContent();
   const submitting = updateMut.isPending;
 
@@ -114,6 +156,9 @@ export default function EditAdminContentDialog({
     control,
     reset,
     watch,
+    setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -124,21 +169,158 @@ export default function EditAdminContentDialog({
       language: "ar",
       slug: "",
       pageVersion: "",
+      templateId: "",
+      coverImage: "",
+      dataJson: "",
+      contentBlocks: [createEmptyBlock()],
+      sourcesJson: "[]",
+      tagsInput: "",
+      categoriesInput: "",
+      riskFlagsInput: "",
+      relatedContentIdsInput: "",
+      disclaimerVersion: "",
+      requiresSeekHelpBlock: false,
+      isFeatured: false,
+      newsSourceName: "",
+      newsSourceUrl: "",
+      newsOriginalTitle: "",
+      newsPublishedAt: "",
+      newsAiSummary: "",
+      newsDedupeHash: "",
+      newsImportedAt: "",
     },
   });
 
   const selectedType = watch("type");
+  const selectedLanguage = watch("language");
+  const selectedTemplateId = watch("templateId");
+  const watchedBlocks = watch("contentBlocks") ?? [];
+  const previewTitle = watch("title");
+  const previewSummary = watch("summary");
+  const previewCoverImage = watch("coverImage");
+  const previewDataJson = watch("dataJson");
+  const previewSourcesJson = watch("sourcesJson");
+  const previewTagsInput = watch("tagsInput");
+  const previewCategoriesInput = watch("categoriesInput");
+  const previewRiskFlagsInput = watch("riskFlagsInput");
+  const previewRelatedContentIdsInput = watch("relatedContentIdsInput");
+  const previewDisclaimerVersion = watch("disclaimerVersion");
+  const previewRequiresSeekHelpBlock = watch("requiresSeekHelpBlock");
+  const previewIsFeatured = watch("isFeatured");
+  const previewNewsSourceName = watch("newsSourceName");
+  const previewNewsSourceUrl = watch("newsSourceUrl");
+  const previewNewsOriginalTitle = watch("newsOriginalTitle");
+  const previewNewsPublishedAt = watch("newsPublishedAt");
+  const previewNewsAiSummary = watch("newsAiSummary");
+  const templateParentType = getTemplateParentType(selectedType);
+  const templateQuery = useAdminContentTemplates(
+    templateParentType ? { parentType: templateParentType, active: true } : {},
+  );
+  const contentBlocksFieldArray = useFieldArray({
+    control,
+    name: "contentBlocks",
+  });
+  const availableTemplates = useMemo(
+    () =>
+      (templateQuery.templates ?? []).filter(
+        (template) =>
+          (template.isActive ?? template.active ?? true) &&
+          template.parentType === templateParentType,
+      ),
+    [templateParentType, templateQuery.templates],
+  );
+  const selectedTemplate = useMemo(() => {
+    const fromQuery = availableTemplates.find(
+      (template) => template._id === selectedTemplateId,
+    );
+    if (fromQuery) return fromQuery;
+
+    const detailTemplate = details?.template;
+    const detailTemplateId =
+      detailTemplate &&
+      typeof detailTemplate === "object" &&
+      !Array.isArray(detailTemplate)
+        ? toDisplayText((detailTemplate as Record<string, unknown>)._id)
+        : "";
+    if (
+      detailTemplate &&
+      typeof detailTemplate === "object" &&
+      !Array.isArray(detailTemplate) &&
+      (!selectedTemplateId || detailTemplateId === selectedTemplateId)
+    ) {
+      return detailTemplate as any;
+    }
+
+    return undefined;
+  }, [availableTemplates, details?.template, selectedTemplateId]);
+
+  const previewDataResult = parseJsonInput(previewDataJson || "", undefined);
+  const previewSourcesResult = parseJsonInput(previewSourcesJson || "", []);
+  const previewTags = parseCommaSeparatedList(previewTagsInput || "");
+  const previewCategories = parseCommaSeparatedList(previewCategoriesInput || "");
+  const previewRiskFlags = parseCommaSeparatedList(previewRiskFlagsInput || "");
+  const previewRelatedContentIds = parseCommaSeparatedList(
+    previewRelatedContentIdsInput || "",
+  );
+  const previewBlocks = buildContentBlocks(watchedBlocks);
+  const previewSources = Array.isArray(previewSourcesResult.value)
+    ? previewSourcesResult.value
+        .filter((item) => item && typeof item === "object")
+        .map((item) => {
+          const source = item as Record<string, unknown>;
+          return {
+            title: toDisplayText(source.title),
+            url: toDisplayText(source.url),
+          };
+        })
+        .filter((item) => item.title || item.url)
+    : [];
+  const fallbackTemplateData = useMemo(
+    () =>
+      isDynamicRecord(details?.dataValue)
+        ? (details.dataValue as AdminContentDynamicRecord)
+        : {},
+    [details?.dataValue],
+  );
+  const templateDataValue = useMemo(() => {
+    if (!previewDataJson?.trim()) return fallbackTemplateData;
+    return parseTemplateRecordInput(previewDataJson, fallbackTemplateData);
+  }, [fallbackTemplateData, previewDataJson]);
 
   useEffect(() => {
     if (!open || !details) return;
+
     const lang = normalizeItemLanguage(details.language);
+    const news = details.news ?? null;
+
     reset({
       type: details.type ?? "GENERAL_ADVICE",
-      title: toText(details.title),
-      summary: toText(details.summary),
+      title: toDisplayText(details.title),
+      summary: toDisplayText(details.summary),
       language: lang === "en" ? "en" : "ar",
-      slug: toText(details.slug),
-      pageVersion: toText(details.pageVersion),
+      slug: toDisplayText(details.slug),
+      pageVersion: toDisplayText(details.pageVersion),
+      templateId: toDisplayText(details.templateId),
+      coverImage: toDisplayText(details.coverImage),
+      dataJson: toPrettyJson(details.dataValue),
+      contentBlocks: normalizeContentBlocksForForm(details.contentBlocks),
+      sourcesJson: toPrettyJson(details.sources, "[]"),
+      tagsInput: details.tags.join(", "),
+      categoriesInput: details.categories.join(", "),
+      riskFlagsInput: details.riskFlags.join(", "),
+      relatedContentIdsInput: details.relatedContentIds.join(", "),
+      disclaimerVersion: toDisplayText(details.disclaimerVersion),
+      requiresSeekHelpBlock: Boolean(details.requiresSeekHelpBlock),
+      isFeatured: Boolean(details.isFeatured),
+      newsSourceName: toDisplayText(news?.sourceName ?? details.sourceName),
+      newsSourceUrl: toDisplayText(news?.sourceUrl),
+      newsOriginalTitle: toDisplayText(
+        news?.originalTitle ?? details.originalTitle,
+      ),
+      newsPublishedAt: toDisplayText(news?.publishedAt),
+      newsAiSummary: toDisplayText(news?.aiSummary ?? details.aiSummary),
+      newsDedupeHash: toDisplayText(news?.dedupeHash),
+      newsImportedAt: toDisplayText(news?.importedAt),
     });
   }, [open, details, reset]);
 
@@ -168,6 +350,47 @@ export default function EditAdminContentDialog({
 
   const onSubmit = handleSubmit(async (v) => {
     if (!contentId) return;
+
+    clearErrors(["dataJson", "contentBlocks", "sourcesJson"]);
+
+    const dataResult = parseJsonInput(v.dataJson || "", undefined);
+    const sourcesResult = parseJsonInput(v.sourcesJson || "", []);
+
+    if (dataResult.error) {
+      setError("dataJson", { message: dataResult.error });
+      return;
+    }
+    if (sourcesResult.error) {
+      setError("sourcesJson", { message: sourcesResult.error });
+      return;
+    }
+
+    const parsedTemplateData = isDynamicRecord(dataResult.value)
+      ? (dataResult.value as AdminContentDynamicRecord)
+      : undefined;
+    const language = v.language === "en" ? "en" : "ar";
+    const templateIssues = collectTemplateFieldValidationIssues(
+      selectedTemplate,
+      parsedTemplateData,
+      language,
+    );
+    if (templateIssues.length) {
+      setError("dataJson", {
+        message: templateIssues[0]?.message || "تحقق من بيانات القالب.",
+      });
+      return;
+    }
+
+    const news = {
+      sourceName: v.newsSourceName?.trim() || undefined,
+      sourceUrl: v.newsSourceUrl?.trim() || undefined,
+      originalTitle: v.newsOriginalTitle?.trim() || undefined,
+      publishedAt: v.newsPublishedAt?.trim() || undefined,
+      aiSummary: v.newsAiSummary?.trim() || undefined,
+      dedupeHash: v.newsDedupeHash?.trim() || undefined,
+      importedAt: v.newsImportedAt?.trim() || undefined,
+    };
+
     try {
       await updateMut.mutateAsync({
         id: contentId,
@@ -178,7 +401,22 @@ export default function EditAdminContentDialog({
           language: v.language,
           slug: v.slug?.trim() || undefined,
           pageVersion: v.pageVersion?.trim() || undefined,
-        },
+          templateId: v.templateId?.trim() || undefined,
+          coverImage: v.coverImage?.trim() || undefined,
+          data: dataResult.value,
+          contentBlocks: buildContentBlocks(v.contentBlocks),
+          sources: sourcesResult.value,
+          tags: parseCommaSeparatedList(v.tagsInput || ""),
+          categories: parseCommaSeparatedList(v.categoriesInput || ""),
+          riskFlags: parseCommaSeparatedList(v.riskFlagsInput || ""),
+          relatedContentIds: parseCommaSeparatedList(
+            v.relatedContentIdsInput || "",
+          ),
+          disclaimerVersion: v.disclaimerVersion?.trim() || undefined,
+          requiresSeekHelpBlock: v.requiresSeekHelpBlock,
+          isFeatured: v.isFeatured,
+          news: hasNewsFields(news) ? news : undefined,
+        } as Parameters<typeof updateMut.mutateAsync>[0]["body"],
       });
       toast(`تم حفظ التعديلات على «${v.title.trim()}».`, {
         title: "تم تحديث المحتوى",
@@ -209,7 +447,7 @@ export default function EditAdminContentDialog({
           }}
         >
           <motion.div
-            className="relative max-h-[min(92vh,860px)] w-full max-w-[640px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            className="relative max-h-[min(94vh,980px)] w-full max-w-[960px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
             initial={{ opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -239,7 +477,8 @@ export default function EditAdminContentDialog({
                   تعديل المحتوى الطبي
                 </h2>
                 <p className="mt-1 font-cairo text-[13px] font-semibold text-[#5B7B79]">
-                  حدّث بيانات المحتوى الأساسية ثم احفظ التعديلات.
+                  حدّث البيانات الأساسية، والحقول الديناميكية، ومحتوى المقال من
+                  نفس النافذة.
                 </p>
               </div>
             </div>
@@ -257,123 +496,481 @@ export default function EditAdminContentDialog({
               </div>
             ) : (
               <form dir="rtl" onSubmit={onSubmit}>
-                <div className="max-h-[calc(92vh-240px)] overflow-y-auto px-8 py-6">
-                  <div className="space-y-5">
-                    <AdminFormField label="نوع المحتوى" required>
-                      <Controller
-                        name="type"
-                        control={control}
-                        render={({ field }) => (
-                          <StyledSelect
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            options={typeOptions}
-                            placeholder="اختر نوع المحتوى"
-                            listboxAriaLabel="نوع المحتوى"
+                <div className="max-h-[calc(94vh-240px)] overflow-y-auto px-8 py-6">
+                  <div className="space-y-6">
+                    <section className="space-y-5">
+                      <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
+                        البيانات الأساسية
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AdminFormField label="نوع المحتوى" required>
+                          <Controller
+                            name="type"
+                            control={control}
+                            render={({ field }) => (
+                              <StyledSelect
+                                value={field.value}
+                                onChange={field.onChange}
+                                onBlur={field.onBlur}
+                                name={field.name}
+                                options={typeOptions}
+                                placeholder="اختر نوع المحتوى"
+                                listboxAriaLabel="نوع المحتوى"
+                              />
+                            )}
                           />
-                        )}
-                      />
-                    </AdminFormField>
+                        </AdminFormField>
 
-                    <AdminFormField
-                      label="العنوان"
-                      required
-                      error={errors.title?.message}
-                    >
-                      <input
-                        {...register("title")}
-                        placeholder="عنوان واضح للمحتوى"
-                        className={adminFieldClass(
-                          cn(
-                            adminInputClass,
-                            "text-start placeholder:text-start",
-                          ),
-                          Boolean(errors.title),
-                        )}
-                      />
-                    </AdminFormField>
+                        <AdminFormField
+                          label="اللغة"
+                          required
+                          error={errors.language?.message}
+                        >
+                          <Controller
+                            name="language"
+                            control={control}
+                            render={({ field }) => (
+                              <StyledSelect
+                                value={field.value}
+                                onChange={field.onChange}
+                                onBlur={field.onBlur}
+                                name={field.name}
+                                options={[
+                                  { value: "ar", label: "العربية" },
+                                  { value: "en", label: "English" },
+                                ]}
+                                placeholder="اختر اللغة"
+                                listboxAriaLabel="لغة المحتوى"
+                              />
+                            )}
+                          />
+                        </AdminFormField>
+                      </div>
 
-                    <AdminFormField
-                      label="ملخص"
-                      error={errors.summary?.message}
-                    >
-                      <textarea
-                        {...register("summary")}
-                        rows={3}
-                        placeholder="مقدمة قصيرة تصف المحتوى…"
-                        className={adminFieldClass(
-                          cn(
-                            adminTextareaClass,
-                            "text-start placeholder:text-start",
-                          ),
-                          Boolean(errors.summary),
-                        )}
-                      />
-                    </AdminFormField>
-
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <AdminFormField
-                        label="اللغة"
+                        label="العنوان"
                         required
-                        error={errors.language?.message}
-                      >
-                        <Controller
-                          name="language"
-                          control={control}
-                          render={({ field }) => (
-                            <StyledSelect
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                              options={[
-                                { value: "ar", label: "العربية" },
-                                { value: "en", label: "English" },
-                              ]}
-                              placeholder="اختر اللغة"
-                              listboxAriaLabel="لغة المحتوى"
-                            />
-                          )}
-                        />
-                      </AdminFormField>
-
-                      <AdminFormField
-                        label="Slug (اختياري)"
-                        error={errors.slug?.message}
+                        error={errors.title?.message}
                       >
                         <input
-                          {...register("slug")}
-                          dir="ltr"
-                          placeholder="my-article"
+                          {...register("title")}
+                          placeholder="عنوان واضح للمحتوى"
                           className={adminFieldClass(
-                            cn(adminInputClass),
-                            Boolean(errors.slug),
+                            cn(
+                              adminInputClass,
+                              "text-start placeholder:text-start",
+                            ),
+                            Boolean(errors.title),
                           )}
                         />
                       </AdminFormField>
-                    </div>
 
-                    <AdminFormField
-                      label="إصدار الصفحة (اختياري)"
-                      hint={
-                        selectedType === "SETTINGS_PAGE"
-                          ? "مطلوب لصفحات الإعدادات (SETTINGS_PAGE)."
-                          : "استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE."
-                      }
-                      error={errors.pageVersion?.message}
-                    >
-                      <input
-                        {...register("pageVersion")}
-                        dir="ltr"
-                        placeholder="v1"
-                        className={adminFieldClass(
-                          cn(adminInputClass),
-                          Boolean(errors.pageVersion),
-                        )}
+                      <AdminFormField
+                        label="ملخص"
+                        error={errors.summary?.message}
+                      >
+                        <textarea
+                          {...register("summary")}
+                          rows={3}
+                          placeholder="مقدمة قصيرة تصف المحتوى…"
+                          className={adminFieldClass(
+                            cn(
+                              adminTextareaClass,
+                              "text-start placeholder:text-start",
+                            ),
+                            Boolean(errors.summary),
+                          )}
+                        />
+                      </AdminFormField>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AdminFormField
+                          label="Slug (اختياري)"
+                          error={errors.slug?.message}
+                        >
+                          <input
+                            {...register("slug")}
+                            dir="ltr"
+                            placeholder="my-article"
+                            className={adminFieldClass(
+                              cn(adminInputClass),
+                              Boolean(errors.slug),
+                            )}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField
+                          label="إصدار الصفحة (اختياري)"
+                          hint={
+                            selectedType === "SETTINGS_PAGE"
+                              ? "مطلوب لصفحات الإعدادات (SETTINGS_PAGE)."
+                              : "استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE."
+                          }
+                          error={errors.pageVersion?.message}
+                        >
+                          <input
+                            {...register("pageVersion")}
+                            dir="ltr"
+                            placeholder="v1"
+                            className={adminFieldClass(
+                              cn(adminInputClass),
+                              Boolean(errors.pageVersion),
+                            )}
+                          />
+                        </AdminFormField>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AdminFormField
+                          label="القالب"
+                          hint={
+                            templateParentType
+                              ? templateQuery.isLoading
+                                ? "جارٍ تحميل القوالب المتاحة…"
+                                : availableTemplates.length > 0
+                                  ? "يمكنك تبديل القالب عند الحاجة، وسيتم تحديث الحقول الديناميكية أدناه."
+                                  : "لا توجد قوالب نشطة لهذا النوع حالياً."
+                              : "هذا النوع لا يستخدم قوالب ديناميكية حالياً."
+                          }
+                        >
+                          {templateParentType ? (
+                            <Controller
+                              name="templateId"
+                              control={control}
+                              render={({ field }) => (
+                                <StyledSelect
+                                  value={field.value}
+                                  onChange={(nextValue) => {
+                                    field.onChange(nextValue);
+                                    if (!previewDataJson?.trim()) {
+                                      setValue("dataJson", "{}", {
+                                        shouldDirty: true,
+                                      });
+                                    }
+                                  }}
+                                  onBlur={field.onBlur}
+                                  name={field.name}
+                                  options={availableTemplates.map((template) => ({
+                                    value: template._id,
+                                    label: template.name || template.slug || template._id,
+                                  }))}
+                                  placeholder={
+                                    templateQuery.isLoading
+                                      ? "جارٍ تحميل القوالب..."
+                                      : "اختر قالبًا"
+                                  }
+                                  listboxAriaLabel="القالب"
+                                />
+                              )}
+                            />
+                          ) : (
+                            <input
+                              {...register("templateId")}
+                              dir="ltr"
+                              placeholder="64f0c0000000000000000001"
+                              className={adminFieldClass(cn(adminInputClass))}
+                            />
+                          )}
+                        </AdminFormField>
+
+                        <AdminFormField label="رابط صورة الغلاف">
+                          <input
+                            {...register("coverImage")}
+                            dir="ltr"
+                            placeholder="https://..."
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+                      </div>
+                    </section>
+
+                    <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-[#FCFCFD] p-4">
+                      <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
+                        الحقول الديناميكية ومحتوى المقال
+                      </div>
+
+                      {selectedTemplate?.fields?.length ? (
+                        <div className="rounded-[14px] border border-[#D8E6E5] bg-white p-4">
+                          <div className="mb-4 text-right">
+                            <div className="font-cairo text-[14px] font-extrabold text-primary">
+                              القالب المختار والبيانات المنظمة
+                            </div>
+                            <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                              هذا المحرر يعكس الحقول المعروفة في القالب، بينما يبقى
+                              JSON الخام متاحًا كخيار احتياطي أدناه.
+                            </div>
+                          </div>
+
+                          <DynamicTemplateFieldRenderer
+                            template={selectedTemplate}
+                            value={templateDataValue}
+                            language={selectedLanguage === "en" ? "en" : "ar"}
+                            disabled={submitting}
+                            onChange={(nextValue) => {
+                              setValue(
+                                "dataJson",
+                                JSON.stringify(nextValue, null, 2),
+                                {
+                                  shouldDirty: true,
+                                  shouldValidate: false,
+                                },
+                              );
+                              clearErrors("dataJson");
+                            }}
+                          />
+                        </div>
+                      ) : null}
+
+                      <AdminFormField
+                        label="البيانات الديناميكية (JSON)"
+                        hint={
+                          selectedTemplate?.fields?.length
+                            ? "يبقى هذا الحقل متاحًا للتوافق مع البيانات القديمة أو الحقول غير المغطاة بالقالب."
+                            : "مثال: structured template data القادمة من القالب."
+                        }
+                        error={errors.dataJson?.message}
+                      >
+                        <textarea
+                          {...register("dataJson")}
+                          dir="ltr"
+                          rows={8}
+                          placeholder='{"key":"value"}'
+                          className={adminFieldClass(
+                            cn(adminTextareaClass, "font-mono text-[12px]"),
+                            Boolean(errors.dataJson),
+                          )}
+                        />
+                      </AdminFormField>
+
+                      <ContentBlockEditor
+                        control={control}
+                        register={register}
+                        setValue={setValue}
+                        clearErrors={clearErrors}
+                        fieldArray={contentBlocksFieldArray}
+                        blocks={watchedBlocks}
+                        error={errors.contentBlocks}
+                        disabled={submitting}
+                        description="حدّث ترتيب البلوكات ومحتوى المقال من هنا مع إبقاء البيانات الديناميكية منفصلة."
                       />
-                    </AdminFormField>
+                    </section>
+
+                    <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-white p-4">
+                      <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
+                        التصنيف والحوكمة
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AdminFormField label="الوسوم">
+                          <input
+                            {...register("tagsInput")}
+                            placeholder="tag-1, tag-2"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="الفئات">
+                          <input
+                            {...register("categoriesInput")}
+                            placeholder="category-1, category-2"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="Risk Flags">
+                          <input
+                            {...register("riskFlagsInput")}
+                            placeholder="flag-1, flag-2"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="Related Content IDs">
+                          <input
+                            {...register("relatedContentIdsInput")}
+                            dir="ltr"
+                            placeholder="id-1, id-2"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+                      </div>
+
+                      <AdminFormField
+                        label="المصادر (JSON)"
+                        hint='مثال: [{"title":"WHO","url":"https://..."}]'
+                        error={errors.sourcesJson?.message}
+                      >
+                        <textarea
+                          {...register("sourcesJson")}
+                          dir="ltr"
+                          rows={6}
+                          className={adminFieldClass(
+                            cn(adminTextareaClass, "font-mono text-[12px]"),
+                            Boolean(errors.sourcesJson),
+                          )}
+                        />
+                      </AdminFormField>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AdminFormField label="إصدار التنبيه">
+                          <input
+                            {...register("disclaimerVersion")}
+                            placeholder="v1 / 2026-08"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <label className="flex items-center justify-end gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#344054]">
+                            <span>يتطلب Seek Help Block</span>
+                            <input
+                              type="checkbox"
+                              {...register("requiresSeekHelpBlock")}
+                              className={checkboxClass}
+                            />
+                          </label>
+
+                          <label className="flex items-center justify-end gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#344054]">
+                            <span>محتوى مميز</span>
+                            <input
+                              type="checkbox"
+                              {...register("isFeatured")}
+                              className={checkboxClass}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-[#FCFCFD] p-4">
+                      <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
+                        بيانات الخبر
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AdminFormField label="اسم المصدر">
+                          <input
+                            {...register("newsSourceName")}
+                            placeholder="Reuters"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="رابط المصدر">
+                          <input
+                            {...register("newsSourceUrl")}
+                            dir="ltr"
+                            placeholder="https://..."
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="العنوان الأصلي">
+                          <input
+                            {...register("newsOriginalTitle")}
+                            placeholder="Original headline"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="تاريخ النشر الأصلي">
+                          <input
+                            {...register("newsPublishedAt")}
+                            dir="ltr"
+                            placeholder="2026-08-05T10:00:00.000Z"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="Dedupe Hash">
+                          <input
+                            {...register("newsDedupeHash")}
+                            dir="ltr"
+                            placeholder="hash"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+
+                        <AdminFormField label="Imported At">
+                          <input
+                            {...register("newsImportedAt")}
+                            dir="ltr"
+                            placeholder="2026-08-05T10:00:00.000Z"
+                            className={adminFieldClass(cn(adminInputClass))}
+                          />
+                        </AdminFormField>
+                      </div>
+
+                      <AdminFormField label="AI Summary">
+                        <textarea
+                          {...register("newsAiSummary")}
+                          rows={4}
+                          className={adminFieldClass(
+                            cn(
+                              adminTextareaClass,
+                              "text-start placeholder:text-start",
+                            ),
+                          )}
+                        />
+                      </AdminFormField>
+                    </section>
+
+                    <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-white p-4">
+                      <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
+                        مراجعة الحوكمة والمعاينة
+                      </div>
+                      <p className="font-cairo text-[12px] font-semibold text-[#667085]">
+                        هذه المعاينة تساعد على التأكد من وضوح المصادر وعناصر السلامة
+                        وشكل العرض قبل الحفظ.
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+                        <MedicalContentGovernancePanel
+                          disclaimerVersion={previewDisclaimerVersion?.trim() || undefined}
+                          requiresSeekHelpBlock={previewRequiresSeekHelpBlock}
+                          isFeatured={previewIsFeatured}
+                          riskFlags={previewRiskFlags}
+                          tags={previewTags}
+                          categories={previewCategories}
+                          relatedContentIds={previewRelatedContentIds}
+                          sources={previewSources}
+                          dynamicData={previewDataResult.value}
+                          invalidDynamicData={Boolean(previewDataResult.error)}
+                          news={{
+                            sourceName: previewNewsSourceName?.trim() || undefined,
+                            sourceUrl: previewNewsSourceUrl?.trim() || undefined,
+                            originalTitle: previewNewsOriginalTitle?.trim() || undefined,
+                            publishedAt: previewNewsPublishedAt?.trim() || undefined,
+                            aiSummary: previewNewsAiSummary?.trim() || undefined,
+                          }}
+                        />
+
+                        <div className="space-y-3">
+                          {previewSourcesResult.error ? (
+                            <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
+                              تعذّر قراءة JSON الخاص بالمصادر، لذلك لن تظهر جميع
+                              المرجعيات في المعاينة.
+                            </div>
+                          ) : null}
+                          <MedicalContentPatientPreview
+                            title={previewTitle?.trim() || details.title}
+                            summary={previewSummary?.trim() || details.summary}
+                            coverImage={previewCoverImage?.trim() || details.coverImage}
+                            contentBlocks={previewBlocks}
+                            disclaimerVersion={
+                              previewDisclaimerVersion?.trim() ||
+                              toDisplayText(details.disclaimerVersion)
+                            }
+                            requiresSeekHelpBlock={previewRequiresSeekHelpBlock}
+                            riskFlags={previewRiskFlags}
+                            sources={previewSources}
+                            newsSourceName={previewNewsSourceName?.trim() || undefined}
+                            newsPublishedAt={previewNewsPublishedAt?.trim() || undefined}
+                          />
+                        </div>
+                      </div>
+                    </section>
 
                     {updateMut.isError ? (
                       <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600">

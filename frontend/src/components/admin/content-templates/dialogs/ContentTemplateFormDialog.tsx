@@ -24,6 +24,14 @@ import type {
   AdminContentTemplateParentType,
   CreateAdminContentTemplateBody,
 } from "@/lib/admin/types";
+import {
+  getLocalizedTextParts,
+  getPreferredLocalizedText,
+  normalizeSchemaFieldType,
+  schemaFieldTypeOptions,
+  serializeLocalizedLabel,
+  type SchemaFieldType,
+} from "./contentTemplateFormDialog.helpers";
 
 const fieldSchema = z.object({
   key: z
@@ -33,9 +41,19 @@ const fieldSchema = z.object({
       /^[a-zA-Z][a-zA-Z0-9_]*$/,
       "المفتاح: حروف لاتينية وأرقام وشرطة سفلية",
     ),
-  label: z.string().min(1, "تسمية الحقل مطلوبة"),
-  type: z.enum(["text", "textarea", "number", "date", "boolean", "select"]),
+  labelAr: z.string(),
+  labelEn: z.string(),
+  type: z.enum(["string", "number", "boolean", "array", "object"]),
   required: z.boolean(),
+})
+.superRefine((value, ctx) => {
+  if (!value.labelAr.trim() && !value.labelEn.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "تسمية الحقل مطلوبة",
+      path: ["labelAr"],
+    });
+  }
 });
 
 const formSchema = z.object({
@@ -57,15 +75,6 @@ const parentTypeOptions: {
   { value: "MEDICATION", label: "الأدوية" },
 ];
 
-const fieldTypeOptions = [
-  { value: "text", label: "نص قصير" },
-  { value: "textarea", label: "نص طويل" },
-  { value: "number", label: "رقم" },
-  { value: "date", label: "تاريخ" },
-  { value: "boolean", label: "قيمة منطقية" },
-  { value: "select", label: "قائمة اختيار" },
-];
-
 const EMPTY_FORM: FormValues = {
   name: "",
   slug: "",
@@ -80,32 +89,16 @@ function templateToForm(template: AdminContentTemplate): FormValues {
     ? (template.parentType as AdminContentTemplateParentType)
     : "CONDITION";
   return {
-    name: template.name ?? "",
+    name: getPreferredLocalizedText(template.name),
     slug: template.slug ?? "",
     parentType: parent,
     fields: (template.fields ?? []).map((f) => {
-      const rawLabel =
-        typeof f.label === "string"
-          ? f.label
-          : (f.label?.ar ?? f.label?.en ?? "");
-      const allowed = [
-        "text",
-        "textarea",
-        "number",
-        "date",
-        "boolean",
-        "select",
-      ];
+      const label = getLocalizedTextParts(f.label);
       return {
         key: f.key ?? "",
-        label: rawLabel,
-        type: (allowed.includes(String(f.type)) ? f.type : "text") as
-          | "text"
-          | "textarea"
-          | "number"
-          | "date"
-          | "boolean"
-          | "select",
+        labelAr: label.ar,
+        labelEn: label.en,
+        type: normalizeSchemaFieldType(f.type),
         required: Boolean(f.required),
       };
     }),
@@ -174,7 +167,10 @@ export default function ContentTemplateFormDialog({
       parentType: v.parentType,
       fields: v.fields.map((f) => ({
         key: f.key.trim(),
-        label: f.label.trim(),
+        label: serializeLocalizedLabel({
+          ar: f.labelAr,
+          en: f.labelEn,
+        }) as CreateAdminContentTemplateBody["fields"][number]["label"],
         type: f.type,
         required: f.required,
       })),
@@ -326,8 +322,9 @@ export default function ContentTemplateFormDialog({
                         onClick={() =>
                           append({
                             key: "",
-                            label: "",
-                            type: "text",
+                            labelAr: "",
+                            labelEn: "",
+                            type: "string",
                             required: false,
                           })
                         }
@@ -367,13 +364,13 @@ export default function ContentTemplateFormDialog({
                               </AdminFormField>
 
                               <AdminFormField
-                                label="التسمية"
+                                label="التسمية العربية"
                                 required
-                                error={errors.fields?.[index]?.label?.message}
+                                error={errors.fields?.[index]?.labelAr?.message}
                               >
                                 <input
                                   {...register(
-                                    `fields.${index}.label` as const,
+                                    `fields.${index}.labelAr` as const,
                                   )}
                                   placeholder="تسمية ظاهرة للحقل"
                                   className={adminFieldClass(
@@ -381,7 +378,24 @@ export default function ContentTemplateFormDialog({
                                       adminInputClass,
                                       "text-start placeholder:text-start",
                                     ),
-                                    Boolean(errors.fields?.[index]?.label),
+                                    Boolean(errors.fields?.[index]?.labelAr),
+                                  )}
+                                />
+                              </AdminFormField>
+
+                              <AdminFormField
+                                label="التسمية الإنجليزية"
+                                error={errors.fields?.[index]?.labelEn?.message}
+                              >
+                                <input
+                                  {...register(
+                                    `fields.${index}.labelEn` as const,
+                                  )}
+                                  dir="ltr"
+                                  placeholder="Visible field label"
+                                  className={adminFieldClass(
+                                    cn(adminInputClass),
+                                    Boolean(errors.fields?.[index]?.labelEn),
                                   )}
                                 />
                               </AdminFormField>
@@ -399,7 +413,7 @@ export default function ContentTemplateFormDialog({
                                         onChange={field.onChange}
                                         onBlur={field.onBlur}
                                         name={field.name}
-                                        options={fieldTypeOptions}
+                                        options={schemaFieldTypeOptions}
                                         placeholder="نوع الحقل"
                                         listboxAriaLabel="نوع الحقل"
                                       />

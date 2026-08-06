@@ -853,18 +853,60 @@ export type AdminContentBlock =
   | { type: "divider" }
   | { type: string; [key: string]: unknown };
 
+export type AdminLocalizedValue = string | { ar?: string; en?: string };
+
+export type AdminContentDynamicValue =
+  | string
+  | number
+  | boolean
+  | null
+  | AdminLocalizedValue
+  | AdminContentDynamicRecord
+  | AdminContentDynamicValue[];
+
+export type AdminContentDynamicRecord = {
+  [key: string]: AdminContentDynamicValue;
+};
+
+export type AdminContentSource = {
+  title?: AdminLocalizedValue;
+  url?: string;
+};
+
+export type AdminContentNews = {
+  sourceName?: string;
+  sourceUrl?: string;
+  originalTitle?: string;
+  publishedAt?: string;
+  aiSummary?: string;
+  dedupeHash?: string;
+  importedAt?: string;
+};
+
 export type AdminContentDetailsItem = AdminContentItem & {
   contentBlocks?: AdminContentBlock[];
   tags?: string[];
-  sources?: Array<{ title?: string; url?: string }>;
+  categories?: string[];
+  riskFlags?: string[];
+  relatedContentIds?: string[];
+  sources?: AdminContentSource[];
+  news?: AdminContentNews | null;
   sourceName?: string;
+  sourceUrl?: string;
   originalTitle?: string;
+  publishedAt?: string;
   aiSummary?: string;
   coverImage?: string;
   pageVersion?: string | null;
   disclaimerVersion?: number | string;
+  requiresSeekHelpBlock?: boolean;
+  isFeatured?: boolean;
   rejectionReason?: string | null;
   templateId?: string | null;
+  data?: AdminContentDynamicRecord | AdminContentDynamicValue[] | null;
+  template?: AdminContentTemplate | null;
+  contentTemplate?: AdminContentTemplate | null;
+  templateDefinition?: AdminContentTemplate | null;
 };
 
 export type AdminContentDetailsResponse = ApiSuccessEnvelope & {
@@ -884,11 +926,26 @@ export type CreateAdminContentBody = {
   summary?: string;
   language: "ar" | "en";
   slug?: string;
+  coverImage?: string;
   pageVersion?: string | null;
+  status?: AdminContentStatus;
+  templateId?: string | null;
+  data?: AdminContentDynamicRecord | AdminContentDynamicValue[] | null;
   contentBlocks?: AdminContentBlock[];
-  sources?: Array<{ title?: string; url?: string }>;
+  tags?: string[];
+  categories?: string[];
+  riskFlags?: string[];
+  relatedContentIds?: string[];
+  isFeatured?: boolean;
+  disclaimerVersion?: number | string;
+  requiresSeekHelpBlock?: boolean;
+  sources?: AdminContentSource[];
+  news?: AdminContentNews | null;
   sourceName?: string;
   sourceUrl?: string;
+  originalTitle?: string;
+  publishedAt?: string;
+  aiSummary?: string;
 };
 
 export type UpdateAdminContentBody = Partial<CreateAdminContentBody> & {
@@ -1015,16 +1072,24 @@ export type AdminContentTemplateParentType =
 export type AdminContentTemplateFieldType =
   | "text"
   | "textarea"
-  | "number"
   | "date"
+  | "select"
+  | "string"
+  | "number"
   | "boolean"
-  | "select";
+  | "array"
+  | "object";
 
 export type AdminContentTemplateField = {
   key: string;
-  label?: string | { ar?: string; en?: string };
+  label?: AdminLocalizedValue;
   type?: AdminContentTemplateFieldType | string;
   required?: boolean;
+  enum?: unknown[];
+  min?: number;
+  max?: number;
+  regex?: string;
+  isPublic?: boolean;
 };
 
 export type AdminContentTemplate = {

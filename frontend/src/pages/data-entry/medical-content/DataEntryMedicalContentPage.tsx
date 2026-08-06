@@ -1,7 +1,11 @@
 import { Helmet } from "react-helmet-async";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Eye,
   Pencil,
   Plus,
@@ -23,6 +27,7 @@ import {
   contentStatusLabel,
   contentTypeLabel,
   formatContentDate,
+  PAGE_SIZE,
 } from "@/components/admin/medical-content/contentListUtils";
 import {
   useAdminMyContentList,
@@ -31,7 +36,6 @@ import {
 import StyledSelect from "@/components/ui/styled-select";
 import type {
   AdminContentStatus,
-  AdminContentType,
   AdminContentListParams,
 } from "@/lib/admin/types";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
@@ -88,26 +92,15 @@ function contentWorkflowHint(
 export default function DataEntryMedicalContentPage() {
   const { toast } = useToast();
   const { locale, dir, t } = useI18n();
+  const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const STATUS_FILTERS: Array<{ value: "all" | AdminContentStatus; label: string }> = [
     { value: "all", label: t("common.all") },
     { value: "DRAFT", label: t("content.status.draft") },
     { value: "IN_REVIEW", label: t("content.status.inReview") },
-    { value: "PUBLISHED", label: t("content.status.published") },
-    { value: "ARCHIVED", label: t("content.status.archived") },
-  ];
-  const TYPE_FILTERS: Array<{ value: "all" | AdminContentType; label: string }> = [
-    { value: "all", label: t("content.type.all") },
-    { value: "CONDITION", label: t("content.type.condition") },
-    { value: "SYMPTOM", label: t("content.type.symptom") },
-    { value: "GENERAL_ADVICE", label: t("content.type.generalAdvice") },
-    { value: "MEDICATION", label: t("content.type.medication") },
-    { value: "NEWS", label: t("content.type.news") },
-    { value: "SETTINGS_PAGE", label: t("content.type.settingsPage") },
   ];
 
   const [status, setStatus] = useState<"all" | AdminContentStatus>("all");
-  const [type, setType] = useState<"all" | AdminContentType>("all");
-  const [language, setLanguage] = useState<"all" | "ar" | "en">("all");
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -117,15 +110,23 @@ export default function DataEntryMedicalContentPage() {
   const params: AdminContentListParams = useMemo(
     () => ({
       ...(status !== "all" ? { status } : {}),
-      ...(type !== "all" ? { type } : {}),
-      ...(language !== "all" ? { language } : {}),
-      page: 1,
-      limit: 100,
+      page,
+      limit: PAGE_SIZE,
     }),
-    [language, status, type],
+    [page, status],
   );
 
   const query = useAdminMyContentList(params);
+  const draftSummaryQuery = useAdminMyContentList({
+    status: "DRAFT",
+    page: 1,
+    limit: 1,
+  });
+  const reviewSummaryQuery = useAdminMyContentList({
+    status: "IN_REVIEW",
+    page: 1,
+    limit: 1,
+  });
   const submitReview = useSubmitContentReview();
 
   const items = query.data?.items ?? query.data?.content ?? query.data?.contentItems ?? [];
@@ -145,14 +146,19 @@ export default function DataEntryMedicalContentPage() {
     });
   }, [items, normalizedSearch]);
 
-  const draftCount = useMemo(
-    () => items.filter((item) => item.status === "DRAFT").length,
-    [items],
-  );
-  const reviewCount = useMemo(
-    () => items.filter((item) => item.status === "IN_REVIEW").length,
-    [items],
-  );
+  const serverTotal = query.data?.total ?? 0;
+  const totalPages =
+    serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)) : 0;
+  const paginationRange = useMemo(() => {
+    if (serverTotal <= 0) return { start: 0, end: 0 };
+    const start = (page - 1) * PAGE_SIZE + 1;
+    const end = Math.min(page * PAGE_SIZE, serverTotal);
+    return { start, end };
+  }, [page, serverTotal]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [status]);
 
   async function handleSubmitReview(id: string) {
     try {
@@ -194,30 +200,37 @@ export default function DataEntryMedicalContentPage() {
             {
               key: "total",
               icon: <SquarePen className="h-5 w-5 shrink-0" />,
-              value: query.isAwaitingData ? "…" : filteredItems.length,
+              value: query.isAwaitingData ? "…" : serverTotal.toLocaleString(numberLocale),
               label: t("dataEntry.medicalContent.kpi.myItems"),
             },
             {
               key: "draft",
               icon: <FileCheck2 className="h-5 w-5 shrink-0" />,
-              value: query.isAwaitingData ? "…" : draftCount,
+              value: draftSummaryQuery.isAwaitingData
+                ? "…"
+                : (draftSummaryQuery.data?.total ?? 0).toLocaleString(numberLocale),
               label: t("dataEntry.medicalContent.kpi.drafts"),
             },
             {
               key: "review",
               icon: <Clock3 className="h-5 w-5 shrink-0" />,
-              value: query.isAwaitingData ? "…" : reviewCount,
+              value: reviewSummaryQuery.isAwaitingData
+                ? "…"
+                : (reviewSummaryQuery.data?.total ?? 0).toLocaleString(numberLocale),
               label: t("dataEntry.medicalContent.kpi.inReview"),
             },
           ]}
         />
 
         <section className="rounded-[12px] border border-[#E6EEF5] bg-white p-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder={t("dataEntry.medicalContent.filters.searchPlaceholder")}
+              placeholder={t(
+                "dataEntry.medicalContent.filters.searchPlaceholder",
+                "Search within the current page",
+              )}
               className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
             />
             <StyledSelect
@@ -227,24 +240,12 @@ export default function DataEntryMedicalContentPage() {
               listboxAriaLabel={t("dataEntry.medicalContent.filters.status")}
               triggerClassName="h-10 rounded-[10px]"
             />
-            <StyledSelect
-              value={type}
-              onChange={(value) => setType(value as "all" | AdminContentType)}
-              options={TYPE_FILTERS}
-              listboxAriaLabel={t("dataEntry.medicalContent.filters.type")}
-              triggerClassName="h-10 rounded-[10px]"
-            />
-            <StyledSelect
-              value={language}
-              onChange={(value) => setLanguage(value as "all" | "ar" | "en")}
-              options={[
-                { value: "all", label: t("content.language.all") },
-                { value: "ar", label: t("language.ar") },
-                { value: "en", label: t("language.en") },
-              ]}
-              listboxAriaLabel={t("dataEntry.medicalContent.filters.language")}
-              triggerClassName="h-10 rounded-[10px]"
-            />
+          </div>
+          <div className="mt-2 font-cairo text-[11px] font-bold text-[#667085]">
+            {t(
+              "dataEntry.medicalContent.filters.pageSearchHint",
+              "Text search applies to the current page only because this endpoint supports server pagination and status filtering, but not server-side search.",
+            )}
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-4 py-3">
             <div className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#475467]">
@@ -254,14 +255,13 @@ export default function DataEntryMedicalContentPage() {
                 "دورة العمل: مسودة ← قيد المراجعة ← منشور / مؤرشف",
               )}
             </div>
-            {(status !== "all" || type !== "all" || language !== "all" || search.trim()) ? (
+            {(status !== "all" || search.trim()) ? (
               <button
                 type="button"
                 onClick={() => {
                   setStatus("all");
-                  setType("all");
-                  setLanguage("all");
                   setSearch("");
+                  setPage(1);
                 }}
                 className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054]"
               >
@@ -285,7 +285,20 @@ export default function DataEntryMedicalContentPage() {
 
         <section className="overflow-hidden rounded-[12px] border border-[#E6EEF5] bg-white shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="border-b border-[#EEF2F6] px-5 py-4 font-cairo text-[14px] font-extrabold text-[#111827]">
-            {t("dataEntry.medicalContent.list.title")}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span>{t("dataEntry.medicalContent.list.title")}</span>
+              <span className="rounded-full bg-[#F3F4F6] px-2.5 py-0.5 text-[11px] text-[#667085]">
+                {search.trim()
+                  ? t(
+                      "dataEntry.medicalContent.list.pageMatches",
+                      `${filteredItems.length.toLocaleString(numberLocale)} matches on this page`,
+                    )
+                  : t(
+                      "dataEntry.medicalContent.list.serverTotal",
+                      `${serverTotal.toLocaleString(numberLocale)} records`,
+                    )}
+              </span>
+            </div>
           </div>
 
           {query.isAwaitingData ? (
@@ -406,6 +419,71 @@ export default function DataEntryMedicalContentPage() {
             </div>
           )}
         </section>
+        {serverTotal > 0 ? (
+          <section className="rounded-[12px] border border-[#E6EEF5] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="font-cairo text-[12px] font-semibold text-[#667085]">
+                <span className="text-[#111827]">
+                  {t("common.showing", "Showing")}{" "}
+                  <span className="font-extrabold">
+                    {paginationRange.start.toLocaleString(numberLocale)}-
+                    {paginationRange.end.toLocaleString(numberLocale)}
+                  </span>
+                </span>{" "}
+                <span>{t("common.of", "of")}</span>{" "}
+                <span className="font-extrabold text-[#111827]">
+                  {serverTotal.toLocaleString(numberLocale)}
+                </span>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(1)}
+                  disabled={page <= 1}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
+                  aria-label={t("common.firstPage", "First page")}
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page <= 1}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
+                  aria-label={t("common.previousPage", "Previous page")}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <span className="min-w-[96px] text-center font-cairo text-[12px] font-extrabold text-[#111827]">
+                  {t(
+                    "dataEntry.medicalContent.pagination.pageStatus",
+                    `Page ${page.toLocaleString(numberLocale)} of ${Math.max(totalPages, 1).toLocaleString(numberLocale)}`,
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPage((current) => Math.min(Math.max(totalPages, 1), current + 1))
+                  }
+                  disabled={page >= totalPages}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
+                  aria-label={t("common.nextPage", "Next page")}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(Math.max(totalPages, 1))}
+                  disabled={page >= totalPages}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-35"
+                  aria-label={t("common.lastPage", "Last page")}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
       </div>
 
       <CreateAdminContentDialog open={createOpen} onOpenChange={setCreateOpen} />
