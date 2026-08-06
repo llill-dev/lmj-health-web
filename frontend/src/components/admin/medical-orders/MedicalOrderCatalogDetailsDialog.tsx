@@ -2,6 +2,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Eye, X } from 'lucide-react';
 import { useAdminMedicalOrderCatalogItem } from '@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog';
 import type { MedicalOrderCatalogKind } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 const KIND_AR: Record<MedicalOrderCatalogKind, string> = {
   lab: 'مختبر',
@@ -23,6 +24,7 @@ export default function MedicalOrderCatalogDetailsDialog({
   kind,
   itemId,
 }: Props) {
+  const { locale, dir } = useI18n();
   const { item, isAwaitingData, isError, refetch, isRefetching } =
     useAdminMedicalOrderCatalogItem(kind, open ? itemId : null);
 
@@ -96,8 +98,8 @@ export default function MedicalOrderCatalogDetailsDialog({
         <Dialog.Overlay className='fixed inset-0 z-[9998] bg-black/45 backdrop-blur-[2px]' />
         <Dialog.Content
           className='fixed left-1/2 top-1/2 z-[9999] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
-          dir='rtl'
-          lang='ar'
+          dir={dir}
+          lang={locale}
         >
           <div className='flex items-center justify-between border-b border-[#F2F4F7] px-5 py-4'>
             <div className='flex items-center gap-2'>

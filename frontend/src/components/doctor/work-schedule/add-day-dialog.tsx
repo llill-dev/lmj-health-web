@@ -5,6 +5,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import StyledSelect from '@/components/ui/styled-select';
 import { useEffect, useState } from 'react';
 import type { ScheduleDayKey, ScheduleTimeSlot } from '@/lib/doctor/types';
+import { useI18n } from '@/i18n/provider';
 
 export type AddDayFormValues = {
   day: ScheduleDayKey;
@@ -32,6 +33,7 @@ export default function AddDayDialog({
   onSubmit: (values: AddDayFormValues) => void;
   existingDays?: ScheduleDayKey[];
 }) {
+  const { locale, dir } = useI18n();
   const [day, setDay] = useState<ScheduleDayKey>('Sunday');
   const [slots, setSlots] = useState<ScheduleTimeSlot[]>([
     { startTime: '09:00', endTime: '12:00' },
@@ -137,8 +139,8 @@ export default function AddDayDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[580px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <motion.div
               initial={false}

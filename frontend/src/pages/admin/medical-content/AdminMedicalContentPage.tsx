@@ -34,6 +34,7 @@ import {
   CreateAdminContentDialog,
   EditAdminContentDialog,
   ContentRejectDialog,
+  ReleaseAcceptanceCatalogPanel,
 } from "@/components/admin/medical-content";
 import {
   ConfirmActionDialog,
@@ -596,6 +597,12 @@ export default function AdminMedicalContentPage() {
             )}
           </div>
         </div>
+
+        <ReleaseAcceptanceCatalogPanel
+          language={locale === "en" ? "en" : "ar"}
+          role="admin"
+          defaultOpen={false}
+        />
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="flex flex-col gap-3 w-full min-w-0 lg:flex-row lg:items-center lg:justify-between">

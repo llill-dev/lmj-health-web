@@ -1,4 +1,5 @@
 import { CheckCheck, Clock, ListFilter, Loader2 } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export type NotificationFilterTab = 'all' | 'unread';
 
@@ -20,9 +21,10 @@ export default function AdminNotificationsToolbar({
   /** إن ظهرت بطاقات غير مقروءة في الصفحة الحالية رغم اختلاف العدد من الـ API */
   hasUnreadInView?: boolean;
 }) {
+  const { dir } = useI18n();
   return (
     <div
-      dir='rtl'
+      dir={dir}
       className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between'
     >
       <div className='flex flex-wrap items-center gap-2'>

@@ -17,6 +17,7 @@ import {
 } from '@/components/admin/medical-file-options/MedicalFileOptionCard';
 import { useToast } from '@/components/ui/ToastProvider';
 import StyledSelect from '@/components/ui/styled-select';
+import { useI18n } from '@/i18n/provider';
 import {
   useCreateLookup,
   usePatchLookup,
@@ -66,6 +67,7 @@ function mapLookupItems(records: AdminLookupRecord[]): LookupCardItem[] {
 }
 
 export default function AdminMedicalFileOptionsPage() {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const createLookup = useCreateLookup();
   const patchLookup = usePatchLookup();
@@ -239,7 +241,7 @@ export default function AdminMedicalFileOptionsPage() {
         <title>خيارات الملف الطبي • LMJ Health</title>
       </Helmet>
 
-      <div dir='rtl' lang='ar'>
+      <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant='admin'
           surface='mint'

@@ -8,6 +8,7 @@ import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-s
 import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
 import { usePlatformMedicalLibrary } from "@/hooks/platform";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
+import { useI18n } from "@/i18n/provider";
 
 const TYPE_LABELS: Record<string, string> = {
   NEWS: "أخبار طبية",
@@ -114,6 +115,7 @@ function renderLibraryCard(item: MedicalLibraryItem, listQueryString: string) {
 }
 
 export default function PublicMedicalLibraryPage() {
+  const { locale, dir } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [debouncedSearch, setDebouncedSearch] = useState(
@@ -142,7 +144,7 @@ export default function PublicMedicalLibraryPage() {
 
   const libraryQuery = usePlatformMedicalLibrary({
     q: debouncedSearch,
-    language: "ar",
+    language: locale,
     limitPerType: 12,
   });
 
@@ -234,8 +236,8 @@ export default function PublicMedicalLibraryPage() {
       </Helmet>
 
       <div
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8"
       >
         <section className="overflow-hidden rounded-[28px] border border-[#D9F2EF] bg-[linear-gradient(135deg,#E6F7F5_0%,#FFFFFF_60%,#F5FBFA_100%)] p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-8">

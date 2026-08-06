@@ -16,6 +16,7 @@ import { mapNotificationsToRows } from '@/components/admin/notifications/map-api
 import type { AdminNotificationKind } from '@/components/admin/notifications/types';
 import { useDoctorNotificationsPage } from '@/hooks';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+import { useI18n } from '@/i18n/provider';
 
 type NotificationType = AdminNotificationKind;
 
@@ -39,6 +40,7 @@ function getTypeIcon(type: NotificationType) {
 }
 
 export default function DoctorNotificationPage() {
+  const { locale, dir } = useI18n();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const unreadOnly = filter === 'unread';
 
@@ -85,8 +87,8 @@ export default function DoctorNotificationPage() {
       </Helmet>
 
       <div
-        dir='rtl'
-        lang='ar'
+        dir={dir}
+        lang={locale}
         className='pb-8 sm:pb-10'
       >
         <section className='rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6'>

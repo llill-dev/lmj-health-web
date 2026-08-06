@@ -34,6 +34,7 @@ export function InvoiceEditDialog({
   onSuccess?: () => void;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const settingsQuery = useBillingSettings();
   const updateInvoice = useUpdateBillingInvoice();
@@ -103,16 +104,22 @@ export function InvoiceEditDialog({
 
   const handleSave = async () => {
     if (!invoice.rawId || !invoice.patientId) {
-      toast('بيانات الفاتورة ناقصة — أعد تحميل التفاصيل.', {
-        title: 'تعذّر الحفظ',
-        variant: 'error',
-      });
+      toast(
+        tr(
+          'بيانات الفاتورة ناقصة — أعد تحميل التفاصيل.',
+          'Invoice data is incomplete — reload the details.',
+        ),
+        {
+          title: tr('تعذّر الحفظ', 'Could not save'),
+          variant: 'error',
+        },
+      );
       return;
     }
 
     if (!isDraft) {
-      toast('يمكن تعديل المسودات فقط.', {
-        title: 'لا يمكن التعديل',
+      toast(tr('يمكن تعديل المسودات فقط.', 'Only draft invoices can be edited.'), {
+        title: tr('لا يمكن التعديل', 'Edit unavailable'),
         variant: 'error',
       });
       return;
@@ -122,10 +129,16 @@ export function InvoiceEditDialog({
       (item) => item.service.trim() && item.quantity > 0 && item.price >= 0,
     );
     if (!validItems.length) {
-      toast('أضف بنداً واحداً على الأقل مع اسم الخدمة والسعر.', {
-        title: 'بنود ناقصة',
-        variant: 'error',
-      });
+      toast(
+        tr(
+          'أضف بنداً واحداً على الأقل مع اسم الخدمة والسعر.',
+          'Add at least one line with a service name and price.',
+        ),
+        {
+          title: tr('بنود ناقصة', 'Missing lines'),
+          variant: 'error',
+        },
+      );
       return;
     }
 
@@ -147,8 +160,8 @@ export function InvoiceEditDialog({
         },
       });
 
-      toast('تم حفظ تعديلات المسودة.', {
-        title: 'تم الحفظ',
+      toast(tr('تم حفظ تعديلات المسودة.', 'Draft changes saved.'), {
+        title: tr('تم الحفظ', 'Saved'),
         variant: 'success',
       });
       onSuccess?.();
@@ -163,7 +176,7 @@ export function InvoiceEditDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title="تعديل الفاتورة"
+      title={tr('تعديل الفاتورة', 'Edit invoice')}
       headerPattern
       maxWidthClass="max-w-[820px]"
     >
@@ -174,11 +187,17 @@ export function InvoiceEditDialog({
           </p>
           {!isDraft ? (
             <p className="mt-1 font-cairo text-[12px] font-semibold text-[#DC2626]">
-              هذه الفاتورة ليست مسودة — التعديل غير متاح.
+              {tr(
+                'هذه الفاتورة ليست مسودة — التعديل غير متاح.',
+                'This invoice is not a draft — editing is unavailable.',
+              )}
             </p>
           ) : (
             <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-              يمكن تعديل المسودات فقط قبل الإصدار.
+              {tr(
+                'يمكن تعديل المسودات فقط قبل الإصدار.',
+                'Only drafts can be edited before issuing.',
+              )}
             </p>
           )}
         </div>
@@ -192,9 +211,11 @@ export function InvoiceEditDialog({
               className="inline-flex items-center gap-2 rounded-[10px] border border-primary px-3 py-2 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-50"
             >
               <Plus className="h-4 w-4" aria-hidden />
-              إضافة بند
+              {tr('إضافة بند', 'Add line')}
             </button>
-            <h3 className="font-cairo text-[14px] font-extrabold text-[#111827]">البنود</h3>
+            <h3 className="font-cairo text-[14px] font-extrabold text-[#111827]">
+              {tr('البنود', 'Lines')}
+            </h3>
           </div>
 
           <div className="space-y-3">
@@ -209,7 +230,7 @@ export function InvoiceEditDialog({
                     disabled={!isDraft || items.length <= 1}
                     onClick={() => removeItem(item.id)}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#FEE2E2] text-[#DC2626] transition hover:bg-[#FEF2F2] disabled:opacity-40"
-                    aria-label="حذف البند"
+                    aria-label={tr('حذف البند', 'Delete line')}
                   >
                     <Trash2 className="h-4 w-4" aria-hidden />
                   </button>
@@ -220,7 +241,7 @@ export function InvoiceEditDialog({
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div className="md:col-span-3">
                     <label className="mb-1 block text-start font-cairo text-[11px] font-bold text-[#667085]">
-                      الخدمة
+                      {tr('الخدمة', 'Service')}
                     </label>
                     <input
                       disabled={!isDraft}
@@ -231,7 +252,7 @@ export function InvoiceEditDialog({
                   </div>
                   <div>
                     <label className="mb-1 block text-start font-cairo text-[11px] font-bold text-[#667085]">
-                      الكمية
+                      {tr('الكمية', 'Quantity')}
                     </label>
                     <input
                       type="number"
@@ -246,7 +267,7 @@ export function InvoiceEditDialog({
                   </div>
                   <div>
                     <label className="mb-1 block text-start font-cairo text-[11px] font-bold text-[#667085]">
-                      السعر
+                      {tr('السعر', 'Price')}
                     </label>
                     <input
                       type="number"
@@ -267,7 +288,7 @@ export function InvoiceEditDialog({
 
         <section className="rounded-[12px] border border-[#EEF2F6] p-4">
           <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-            الخصم والاستحقاق
+            {tr('الخصم والاستحقاق', 'Discount & due date')}
           </h3>
           <div className="mb-3 flex flex-wrap justify-start gap-2">
             {discountPresets.map((preset) => (
@@ -298,7 +319,7 @@ export function InvoiceEditDialog({
                 setCustomDiscount(e.target.value);
                 setDiscountPercent(Number(e.target.value) || 0);
               }}
-              placeholder="خصم مخصص (%)"
+              placeholder={tr('خصم مخصص (%)', 'Custom discount (%)')}
               className="h-[44px] rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[13px] font-semibold outline-none focus:border-primary disabled:bg-[#F9FAFB]"
             />
             <input
@@ -314,22 +335,24 @@ export function InvoiceEditDialog({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            placeholder="ملاحظات الفاتورة..."
+            placeholder={tr('ملاحظات الفاتورة...', 'Invoice notes...')}
             className="mt-3 w-full rounded-[10px] border border-[#E5E7EB] px-3 py-2 font-cairo text-[13px] font-semibold outline-none focus:border-primary disabled:bg-[#F9FAFB]"
           />
         </section>
 
         <div className="rounded-[12px] bg-[#F0FDFA] p-4 text-start">
           <p className="font-cairo text-[12px] font-semibold text-[#667085]">
-            المجموع الفرعي: {formatBillingAmount(totals.subtotal, currency)}
+            {tr('المجموع الفرعي:', 'Subtotal:')}{' '}
+            {formatBillingAmount(totals.subtotal, currency)}
           </p>
           {settingsQuery.settings?.taxEnabled ? (
             <p className="font-cairo text-[12px] font-semibold text-[#667085]">
-              الضريبة ({taxPercent}%): {formatBillingAmount(totals.tax, currency)}
+              {tr('الضريبة', 'Tax')} ({taxPercent}%):{' '}
+              {formatBillingAmount(totals.tax, currency)}
             </p>
           ) : null}
           <p className="mt-1 font-cairo text-[18px] font-black text-primary">
-            الإجمالي: {formatBillingAmount(totals.total, currency)}
+            {tr('الإجمالي:', 'Total:')} {formatBillingAmount(totals.total, currency)}
           </p>
         </div>
 
@@ -339,7 +362,7 @@ export function InvoiceEditDialog({
             onClick={onClose}
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] border border-[#E5E7EB] font-cairo text-[14px] font-extrabold text-[#667085]"
           >
-            إلغاء
+            {tr('إلغاء', 'Cancel')}
           </button>
           <button
             type="button"
@@ -348,7 +371,9 @@ export function InvoiceEditDialog({
             className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
           >
             <Save className="h-4 w-4" aria-hidden />
-            {updateInvoice.isPending ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+            {updateInvoice.isPending
+              ? tr('جاري الحفظ...', 'Saving...')
+              : tr('حفظ التعديلات', 'Save changes')}
           </button>
         </div>
       </div>

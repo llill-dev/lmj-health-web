@@ -24,12 +24,14 @@ import {
   useUpdateFacilityStatus,
 } from '@/hooks/admin/services/useAdminServices';
 import type { FacilitiesListParams, FacilityStatus, FacilitySummary } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 function resolveFacilityId(facility: FacilitySummary | null | undefined): string | null {
   return facility?.id || facility?._id || null;
 }
 
 export default function AdminServicesPage() {
+  const { locale, dir } = useI18n();
   const [activeTabIdx, setActiveTabIdx] = useState(0);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch] = useDebounce(searchInput, 400);
@@ -216,7 +218,7 @@ export default function AdminServicesPage() {
         }
       />
 
-      <div dir='rtl' lang='ar'>
+      <div dir={dir} lang={locale}>
         <AdminServicesHeader
           actionLabel={isFacilityTab ? 'إضافة منشأة' : 'إضافة نوع خدمة'}
           onAction={handleAddNew}

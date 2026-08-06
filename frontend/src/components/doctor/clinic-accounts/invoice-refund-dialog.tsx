@@ -38,6 +38,7 @@ export function InvoiceRefundDialog({
   onSuccess?: () => void;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const createRefund = useCreateBillingRefund();
 
@@ -78,8 +79,8 @@ export function InvoiceRefundDialog({
 
   const handleSubmit = async () => {
     if (!paymentId) {
-      toast('اختر دفعة لاسترجاع مبلغ منها.', {
-        title: 'دفعة مطلوبة',
+      toast(tr('اختر دفعة لاسترجاع مبلغ منها.', 'Select a payment to refund from.'), {
+        title: tr('دفعة مطلوبة', 'Payment required'),
         variant: 'error',
       });
       return;
@@ -87,8 +88,8 @@ export function InvoiceRefundDialog({
 
     const parsedAmount = Number(amount);
     if (!parsedAmount || parsedAmount <= 0) {
-      toast('أدخل مبلغ استرجاع صالحاً.', {
-        title: 'مبلغ غير صالح',
+      toast(tr('أدخل مبلغ استرجاع صالحاً.', 'Enter a valid refund amount.'), {
+        title: tr('مبلغ غير صالح', 'Invalid amount'),
         variant: 'error',
       });
       return;
@@ -96,9 +97,12 @@ export function InvoiceRefundDialog({
 
     if (parsedAmount > maxRefundable) {
       toast(
-        `المبلغ يتجاوز القابل للاسترداد (${formatBillingAmount(maxRefundable, currency)}).`,
+        tr(
+          `المبلغ يتجاوز القابل للاسترداد (${formatBillingAmount(maxRefundable, currency)}).`,
+          `Amount exceeds refundable balance (${formatBillingAmount(maxRefundable, currency)}).`,
+        ),
         {
-          title: 'مبلغ كبير',
+          title: tr('مبلغ كبير', 'Amount too high'),
           variant: 'error',
         },
       );
@@ -106,8 +110,8 @@ export function InvoiceRefundDialog({
     }
 
     if (!reason.trim()) {
-      toast('أدخل سبب الاسترجاع.', {
-        title: 'السبب مطلوب',
+      toast(tr('أدخل سبب الاسترجاع.', 'Enter a refund reason.'), {
+        title: tr('السبب مطلوب', 'Reason required'),
         variant: 'error',
       });
       return;
@@ -129,8 +133,8 @@ export function InvoiceRefundDialog({
         refundedAt: billingOptionalTransactionDateToIso(date),
       });
 
-      toast('تم تسجيل الاسترجاع بنجاح.', {
-        title: 'تم الاسترجاع',
+      toast(tr('تم تسجيل الاسترجاع بنجاح.', 'Refund recorded successfully.'), {
+        title: tr('تم الاسترجاع', 'Refunded'),
         variant: 'success',
       });
       onSuccess?.();
@@ -145,7 +149,7 @@ export function InvoiceRefundDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title="استرجاع دفعة"
+      title={tr('استرجاع دفعة', 'Refund payment')}
       headerPattern
       maxWidthClass="max-w-[640px]"
     >
@@ -155,7 +159,10 @@ export function InvoiceRefundDialog({
             {invoice.id} • {invoice.patientName}
           </p>
           <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-            الاسترجاع يُنشأ من دفعة محددة — وليس مباشرة من الفاتورة.
+            {tr(
+              'الاسترجاع يُنشأ من دفعة محددة — وليس مباشرة من الفاتورة.',
+              'Refunds are created from a specific payment — not directly from the invoice.',
+            )}
           </p>
         </div>
 
@@ -163,17 +170,20 @@ export function InvoiceRefundDialog({
           <div className="rounded-[12px] border border-[#FEE2E2] bg-[#FEF2F2] px-4 py-5 text-center">
             <RotateCcw className="mx-auto mb-2 h-8 w-8 text-[#DC2626]" aria-hidden />
             <p className="font-cairo text-[14px] font-extrabold text-[#DC2626]">
-              لا توجد دفعات قابلة للاسترداد
+              {tr('لا توجد دفعات قابلة للاسترداد', 'No refundable payments')}
             </p>
             <p className="mt-1 font-cairo text-[12px] font-semibold text-[#991B1B]">
-              أضف دفعة أولاً أو تم استرداد كامل المبلغ المدفوع.
+              {tr(
+                'أضف دفعة أولاً أو تم استرداد كامل المبلغ المدفوع.',
+                'Add a payment first, or the paid amount has already been fully refunded.',
+              )}
             </p>
           </div>
         ) : (
           <>
             <section>
               <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                اختر الدفعة
+                {tr('اختر الدفعة', 'Select payment')}
               </h3>
               <div className="space-y-2">
                 {refundablePayments.map((payment) => {
@@ -206,7 +216,8 @@ export function InvoiceRefundDialog({
                           {formatBillingAmount(payment.amount, currency)}
                         </p>
                         <p className="font-cairo text-[11px] font-semibold text-[#667085] tabular-nums">
-                          قابل للاسترداد: {formatBillingAmount(refundable, currency)}
+                          {tr('قابل للاسترداد:', 'Refundable:')}{' '}
+                          {formatBillingAmount(refundable, currency)}
                         </p>
                       </div>
                     </button>
@@ -218,7 +229,7 @@ export function InvoiceRefundDialog({
             <section className="space-y-3">
               <div>
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                  مبلغ الاسترجاع
+                  {tr('مبلغ الاسترجاع', 'Refund amount')}
                 </label>
                 <input
                   type="number"
@@ -231,31 +242,37 @@ export function InvoiceRefundDialog({
                 />
                 {selectedPayment ? (
                   <p className="mt-1 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                    الحد الأقصى: {formatBillingAmount(maxRefundable, currency)}
+                    {tr('الحد الأقصى:', 'Maximum:')}{' '}
+                    {formatBillingAmount(maxRefundable, currency)}
                   </p>
                 ) : null}
               </div>
 
               <div>
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                  سبب الاسترجاع
+                  {tr('سبب الاسترجاع', 'Refund reason')}
                 </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
-                  placeholder="مثال: تصحيح دفعة زائدة، إلغاء جزء من الخدمة..."
+                  placeholder={tr(
+                    'مثال: تصحيح دفعة زائدة، إلغاء جزء من الخدمة...',
+                    'e.g. overpayment correction, partial service cancel...',
+                  )}
                   className="w-full rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
                 />
               </div>
 
               <div>
                 <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
-                  تاريخ الاسترجاع (اختياري)
+                  {tr('تاريخ الاسترجاع (اختياري)', 'Refund date (optional)')}
                 </label>
                 <p className="mb-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  اتركه فارغاً أو اختر اليوم لاستخدام وقت التسجيل الحالي. للأيام السابقة اختر
-                  التاريخ المناسب.
+                  {tr(
+                    'اتركه فارغاً أو اختر اليوم لاستخدام وقت التسجيل الحالي. للأيام السابقة اختر التاريخ المناسب.',
+                    'Leave empty or pick today to use the current timestamp. For past days, choose the appropriate date.',
+                  )}
                 </p>
                 <input
                   type="date"
@@ -279,7 +296,7 @@ export function InvoiceRefundDialog({
             onClick={onClose}
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] border border-[#E5E7EB] font-cairo text-[14px] font-extrabold text-[#667085]"
           >
-            إلغاء
+            {tr('إلغاء', 'Cancel')}
           </button>
           <button
             type="button"
@@ -288,7 +305,9 @@ export function InvoiceRefundDialog({
             className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
           >
             <Receipt className="h-4 w-4" aria-hidden />
-            {createRefund.isPending ? 'جاري التسجيل...' : 'تأكيد الاسترجاع'}
+            {createRefund.isPending
+              ? tr('جاري التسجيل...', 'Saving...')
+              : tr('تأكيد الاسترجاع', 'Confirm refund')}
           </button>
         </div>
       </div>

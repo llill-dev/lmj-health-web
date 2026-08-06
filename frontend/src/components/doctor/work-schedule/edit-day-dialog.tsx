@@ -11,7 +11,7 @@ export type EditDayFormValues = {
   slots: ScheduleTimeSlot[];
 };
 
-const DAY_LABELS: Record<ScheduleDayKey, string> = {
+const DAY_LABELS_AR: Record<ScheduleDayKey, string> = {
   Sunday: "الأحد",
   Monday: "الإثنين",
   Tuesday: "الثلاثاء",
@@ -19,6 +19,16 @@ const DAY_LABELS: Record<ScheduleDayKey, string> = {
   Thursday: "الخميس",
   Friday: "الجمعة",
   Saturday: "السبت",
+};
+
+const DAY_LABELS_EN: Record<ScheduleDayKey, string> = {
+  Sunday: "Sunday",
+  Monday: "Monday",
+  Tuesday: "Tuesday",
+  Wednesday: "Wednesday",
+  Thursday: "Thursday",
+  Friday: "Friday",
+  Saturday: "Saturday",
 };
 
 export default function EditDayDialog({
@@ -35,6 +45,8 @@ export default function EditDayDialog({
   initialSlots: ScheduleTimeSlot[];
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const dayLabels = locale === "ar" ? DAY_LABELS_AR : DAY_LABELS_EN;
   const [slots, setSlots] = useState<ScheduleTimeSlot[]>(initialSlots);
   const [errors, setErrors] = useState<{
     [key: number]: { startTime?: string; endTime?: string };
@@ -101,14 +113,20 @@ export default function EditDayDialog({
 
     if (!startTime) {
       if (!newErrors[index]) newErrors[index] = {};
-      newErrors[index].startTime = "يرجى إدخال وقت البداية";
+      newErrors[index].startTime = tr(
+        "يرجى إدخال وقت البداية",
+        "Please enter a start time",
+      );
     } else {
       if (newErrors[index]) delete newErrors[index].startTime;
     }
 
     if (!endTime) {
       if (!newErrors[index]) newErrors[index] = {};
-      newErrors[index].endTime = "يرجى إدخال وقت النهاية";
+      newErrors[index].endTime = tr(
+        "يرجى إدخال وقت النهاية",
+        "Please enter an end time",
+      );
     } else {
       if (newErrors[index]) delete newErrors[index].endTime;
     }
@@ -122,7 +140,10 @@ export default function EditDayDialog({
 
       if (endMinutes <= startMinutes) {
         if (!newErrors[index]) newErrors[index] = {};
-        newErrors[index].endTime = "وقت النهاية يجب أن يكون بعد وقت البداية";
+        newErrors[index].endTime = tr(
+          "وقت النهاية يجب أن يكون بعد وقت البداية",
+          "End time must be after start time",
+        );
       } else {
         if (newErrors[index]) delete newErrors[index].endTime;
       }
@@ -150,12 +171,18 @@ export default function EditDayDialog({
     slots.forEach((slot, index) => {
       if (!slot.startTime) {
         if (!newErrors[index]) newErrors[index] = {};
-        newErrors[index].startTime = "يرجى إدخال وقت البداية";
+        newErrors[index].startTime = tr(
+          "يرجى إدخال وقت البداية",
+          "Please enter a start time",
+        );
         isValid = false;
       }
       if (!slot.endTime) {
         if (!newErrors[index]) newErrors[index] = {};
-        newErrors[index].endTime = "يرجى إدخال وقت النهاية";
+        newErrors[index].endTime = tr(
+          "يرجى إدخال وقت النهاية",
+          "Please enter an end time",
+        );
         isValid = false;
       }
 
@@ -167,7 +194,10 @@ export default function EditDayDialog({
 
         if (endMinutes <= startMinutes) {
           if (!newErrors[index]) newErrors[index] = {};
-          newErrors[index].endTime = "وقت النهاية يجب أن يكون بعد وقت البداية";
+          newErrors[index].endTime = tr(
+            "وقت النهاية يجب أن يكون بعد وقت البداية",
+            "End time must be after start time",
+          );
           isValid = false;
         }
       }
@@ -267,24 +297,27 @@ export default function EditDayDialog({
                   <button
                     type="button"
                     className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]"
-                    aria-label="إغلاق"
+                    aria-label={tr("إغلاق", "Close")}
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </Dialog.Close>
 
                 <Dialog.Title className="text-center font-cairo text-[20px] font-extrabold leading-[26px] text-[#111827]">
-                  تعديل يوم {DAY_LABELS[initialDay]}
+                  {tr("تعديل يوم", "Edit day")} {dayLabels[initialDay]}
                 </Dialog.Title>
                 <Dialog.Description className="mt-1 text-center font-cairo text-[12px] font-semibold leading-[18px] text-[#98A2B3]">
-                  عدّل أوقات العمل في هذا اليوم
+                  {tr(
+                    "عدّل أوقات العمل في هذا اليوم",
+                    "Edit working hours for this day",
+                  )}
                 </Dialog.Description>
 
                 <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
                   <div>
                     <div className="mb-3 flex items-center justify-between">
                       <div className="text-right font-cairo text-[13px] font-extrabold text-[#111827]">
-                        أوقات العمل
+                        {tr("أوقات العمل", "Working hours")}
                       </div>
                       <button
                         type="button"
@@ -292,7 +325,7 @@ export default function EditDayDialog({
                         className="flex h-[32px] items-center gap-2 rounded-[6px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary transition-colors hover:bg-[#F2FFFE]"
                       >
                         <Plus className="h-3.5 w-3.5" />
-                        إضافة فترة
+                        {tr("إضافة فترة", "Add slot")}
                       </button>
                     </div>
 
@@ -310,7 +343,7 @@ export default function EditDayDialog({
                               {/* Start Time */}
                               <div>
                                 <div className="mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]">
-                                  من
+                                  {tr("من", "From")}
                                 </div>
                                 <div className="relative">
                                   <input
@@ -356,7 +389,7 @@ export default function EditDayDialog({
                               {/* End Time */}
                               <div>
                                 <div className="mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]">
-                                  إلى
+                                  {tr("إلى", "To")}
                                 </div>
                                 <div className="relative">
                                   <input
@@ -403,7 +436,7 @@ export default function EditDayDialog({
                                 type="button"
                                 onClick={() => handleRemoveSlot(index)}
                                 className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[6px] bg-[#FEF3F2] text-[#F04438] transition-colors hover:bg-[#FEE4E2]"
-                                aria-label="حذف"
+                                aria-label={tr("حذف", "Delete")}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
@@ -421,7 +454,7 @@ export default function EditDayDialog({
                         disabled={isSubmitting}
                         className="h-[40px] rounded-[6px] border border-[#E5E7EB] bg-white px-6 font-cairo text-[13px] font-extrabold text-[#344054] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        إلغاء
+                        {tr("إلغاء", "Cancel")}
                       </button>
                     </Dialog.Close>
 
@@ -452,10 +485,10 @@ export default function EditDayDialog({
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                           </svg>
-                          جارِ الحفظ...
+                          {tr("جارِ الحفظ...", "Saving...")}
                         </>
                       ) : (
-                        "حفظ التعديلات"
+                        tr("حفظ التعديلات", "Save changes")
                       )}
                     </button>
                   </div>

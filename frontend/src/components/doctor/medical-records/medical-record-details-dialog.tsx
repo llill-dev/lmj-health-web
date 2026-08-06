@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 export type MedicalRecordPrescription = {
   name: string;
@@ -83,6 +84,7 @@ export default function MedicalRecordDetailsDialog({
   onOpenChange: (open: boolean) => void;
   record: MedicalRecordDetails | null;
 }) {
+  const { locale, dir } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -158,8 +160,8 @@ export default function MedicalRecordDetailsDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[720px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <motion.div
               initial={false}

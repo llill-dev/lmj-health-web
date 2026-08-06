@@ -23,6 +23,7 @@ import {
 import { readAuthUser } from '@/lib/cookies';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
+import { useI18n } from '@/i18n/provider';
 import { DoctorExpandableCardSkeleton } from '@/components/doctor/shared/skeletons';
 
 type AccessRequestStatus = 'pending' | 'approved' | 'rejected' | 'expired';
@@ -107,6 +108,7 @@ function formatArabicDate(value?: string | null) {
 }
 
 export default function DoctorAccessRequestsPage() {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const [searchTerm, setSearchTerm] = useState('');
@@ -147,7 +149,7 @@ export default function DoctorAccessRequestsPage() {
         <title>Access Requests • LMJ Health</title>
       </Helmet>
 
-      <div dir='rtl' lang='ar' className='pb-8 sm:pb-10'>
+      <div dir={dir} lang={locale} className='pb-8 sm:pb-10'>
         <DashboardOverviewSection
           sectionClassName='flex flex-col gap-[18px] mb-6 py-[22px] px-[24px] rounded-[24px] bg-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
           overlay={

@@ -18,6 +18,7 @@ import {
 } from "@/hooks/platform";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import type { AdminContentBlock } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 const TYPE_LABELS: Record<string, string> = {
   NEWS: "أخبار طبية",
@@ -67,17 +68,18 @@ function formatPublishedAt(value?: string) {
 }
 
 export default function PublicMedicalLibraryDetailsPage() {
+  const { locale, dir } = useI18n();
   const params = useParams<{ slug: string }>();
   const location = useLocation();
   const slug = params.slug ? decodeURIComponent(params.slug) : "";
-  const contentQuery = usePlatformContentBySlug(slug, "ar");
+  const contentQuery = usePlatformContentBySlug(slug, locale);
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">(
     "idle",
   );
   const blocks = contentQuery.data?.contentBlocks ?? [];
   const backToList = `/medical-library${location.search || ""}`;
   const relatedQuery = usePlatformMedicalLibrary({
-    language: "ar",
+    language: locale,
     limitPerType: 6,
   });
 
@@ -127,8 +129,8 @@ export default function PublicMedicalLibraryDetailsPage() {
   if (contentQuery.isLoading) {
     return (
       <div
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="flex min-h-[60vh] items-center justify-center"
       >
         <div className="flex items-center gap-3 font-cairo text-[14px] font-bold text-[#667085]">
@@ -142,8 +144,8 @@ export default function PublicMedicalLibraryDetailsPage() {
   if (contentQuery.isError || !contentQuery.data) {
     return (
       <div
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6"
       >
         <DoctorListErrorState
@@ -166,8 +168,8 @@ export default function PublicMedicalLibraryDetailsPage() {
       </Helmet>
 
       <div
-        dir="rtl"
-        lang="ar"
+        dir={dir}
+        lang={locale}
         className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6"
       >
         <Link

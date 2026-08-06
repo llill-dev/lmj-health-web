@@ -36,6 +36,7 @@ async function forceReLogin(navigate: ReturnType<typeof useNavigate>) {
 
 export default function DoctorProfileSecurityPanel() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -81,7 +82,7 @@ export default function DoctorProfileSecurityPanel() {
         ? error.message
         : error instanceof Error
           ? error.message
-          : 'تعذّر إكمال العملية.';
+          : tr('تعذّر إكمال العملية.', 'Could not complete the action.');
     toast(message, { title, variant: 'error', durationMs: 5200 });
   };
 
@@ -97,43 +98,53 @@ export default function DoctorProfileSecurityPanel() {
     if (!pendingAction) return null;
     if (pendingAction.kind === 'password') {
       return {
-        title: 'تأكيد تغيير كلمة المرور',
+        title: tr('تأكيد تغيير كلمة المرور', 'Confirm password change'),
         description: (
           <>
-            سيتم تحديث كلمة المرور وإنهاء جميع الجلسات النشطة. ستحتاج لتسجيل
-            الدخول مجدداً بعد الحفظ.
+            {tr(
+              'سيتم تحديث كلمة المرور وإنهاء جميع الجلسات النشطة. ستحتاج لتسجيل الدخول مجدداً بعد الحفظ.',
+              'Your password will be updated and all active sessions ended. You will need to sign in again after saving.',
+            )}
           </>
         ),
-        confirmLabel: 'تأكيد التغيير',
+        confirmLabel: tr('تأكيد التغيير', 'Confirm change'),
       };
     }
     if (pendingAction.kind === 'email') {
       return {
-        title: 'تأكيد طلب تغيير البريد',
+        title: tr('تأكيد طلب تغيير البريد', 'Confirm email change request'),
         description: (
           <>
-            سنرسل رمز تحقق إلى{' '}
+            {tr('سنرسل رمز تحقق إلى', 'We will send a verification code to')}{' '}
             <span className="font-extrabold text-[#101828]">
               {pendingAction.values.newEmail.trim()}
             </span>
-            . تأكد من صحة البريد قبل المتابعة.
+            .{' '}
+            {tr(
+              'تأكد من صحة البريد قبل المتابعة.',
+              'Make sure the email is correct before continuing.',
+            )}
           </>
         ),
-        confirmLabel: 'إرسال رمز التحقق',
+        confirmLabel: tr('إرسال رمز التحقق', 'Send verification code'),
       };
     }
     return {
-      title: 'تأكيد طلب تغيير الهاتف',
+      title: tr('تأكيد طلب تغيير الهاتف', 'Confirm phone change request'),
       description: (
         <>
-          سنرسل رمز تحقق إلى{' '}
+          {tr('سنرسل رمز تحقق إلى', 'We will send a verification code to')}{' '}
           <span className="font-extrabold text-[#101828]">
             {pendingAction.values.newPhone.replace(/[\s-]/g, '')}
           </span>
-          . تأكد من صحة الرقم قبل المتابعة.
+          .{' '}
+          {tr(
+            'تأكد من صحة الرقم قبل المتابعة.',
+            'Make sure the number is correct before continuing.',
+          )}
         </>
       ),
-      confirmLabel: 'إرسال رمز التحقق',
+      confirmLabel: tr('إرسال رمز التحقق', 'Send verification code'),
     };
   })();
 
@@ -146,10 +157,16 @@ export default function DoctorProfileSecurityPanel() {
           currentPassword: pendingAction.values.currentPassword,
           newPassword: pendingAction.values.newPassword,
         });
-        toast('تم تحديث كلمة المرور. سجّل الدخول مجدداً.', {
-          title: 'تم التحديث',
-          variant: 'success',
-        });
+        toast(
+          tr(
+            'تم تحديث كلمة المرور. سجّل الدخول مجدداً.',
+            'Password updated. Please sign in again.',
+          ),
+          {
+            title: tr('تم التحديث', 'Updated'),
+            variant: 'success',
+          },
+        );
         setConfirmOpen(false);
         setPendingAction(null);
         passwordForm.reset();
@@ -161,10 +178,16 @@ export default function DoctorProfileSecurityPanel() {
         await doctorSettingsApi.requestEmailChange(pendingAction.values);
         setPendingEmail(pendingAction.values.newEmail.trim());
         setEmailStep('verify');
-        toast('تم إرسال رمز التحقق إلى البريد الجديد.', {
-          title: 'تحقّق من بريدك',
-          variant: 'success',
-        });
+        toast(
+          tr(
+            'تم إرسال رمز التحقق إلى البريد الجديد.',
+            'A verification code was sent to the new email.',
+          ),
+          {
+            title: tr('تحقّق من بريدك', 'Check your email'),
+            variant: 'success',
+          },
+        );
         setConfirmOpen(false);
         setPendingAction(null);
         return;
@@ -177,19 +200,34 @@ export default function DoctorProfileSecurityPanel() {
       });
       setPendingPhone(phone);
       setPhoneStep('verify');
-      toast('تم إرسال رمز التحقق إلى الهاتف الجديد.', {
-        title: 'تحقّق من واتساب',
-        variant: 'success',
-      });
+      toast(
+        tr(
+          'تم إرسال رمز التحقق إلى الهاتف الجديد.',
+          'A verification code was sent to the new phone.',
+        ),
+        {
+          title: tr('تحقّق من واتساب', 'Check WhatsApp'),
+          variant: 'success',
+        },
+      );
       setConfirmOpen(false);
       setPendingAction(null);
     } catch (error) {
       if (pendingAction.kind === 'password') {
-        handleApiError(error, 'تعذّر تغيير كلمة المرور');
+        handleApiError(
+          error,
+          tr('تعذّر تغيير كلمة المرور', 'Could not change password'),
+        );
       } else if (pendingAction.kind === 'email') {
-        handleApiError(error, 'تعذّر طلب تغيير البريد');
+        handleApiError(
+          error,
+          tr('تعذّر طلب تغيير البريد', 'Could not request email change'),
+        );
       } else {
-        handleApiError(error, 'تعذّر طلب تغيير الهاتف');
+        handleApiError(
+          error,
+          tr('تعذّر طلب تغيير الهاتف', 'Could not request phone change'),
+        );
       }
       throw error;
     } finally {
@@ -205,17 +243,23 @@ export default function DoctorProfileSecurityPanel() {
         onResend={async () => {
           const values = emailForm.getValues();
           await doctorSettingsApi.requestEmailChange(values);
-          toast('أُعيد إرسال رمز التحقق.', {
-            title: 'تم الإرسال',
+          toast(tr('أُعيد إرسال رمز التحقق.', 'Verification code resent.'), {
+            title: tr('تم الإرسال', 'Sent'),
             variant: 'success',
           });
         }}
         onVerify={async (otp) => {
           await doctorSettingsApi.confirmEmailChange({ otp });
-          toast('تم تحديث البريد. سجّل الدخول مجدداً.', {
-            title: 'تم التحديث',
-            variant: 'success',
-          });
+          toast(
+            tr(
+              'تم تحديث البريد. سجّل الدخول مجدداً.',
+              'Email updated. Please sign in again.',
+            ),
+            {
+              title: tr('تم التحديث', 'Updated'),
+              variant: 'success',
+            },
+          );
           setEmailStep('closed');
           await forceReLogin(navigate);
         }}
@@ -235,17 +279,23 @@ export default function DoctorProfileSecurityPanel() {
             currentPassword: values.currentPassword,
             newPhone: phone,
           });
-          toast('أُعيد إرسال رمز التحقق.', {
-            title: 'تم الإرسال',
+          toast(tr('أُعيد إرسال رمز التحقق.', 'Verification code resent.'), {
+            title: tr('تم الإرسال', 'Sent'),
             variant: 'success',
           });
         }}
         onVerify={async (otp) => {
           await doctorSettingsApi.confirmPhoneChange({ otp });
-          toast('تم تحديث الهاتف. سجّل الدخول مجدداً.', {
-            title: 'تم التحديث',
-            variant: 'success',
-          });
+          toast(
+            tr(
+              'تم تحديث الهاتف. سجّل الدخول مجدداً.',
+              'Phone updated. Please sign in again.',
+            ),
+            {
+              title: tr('تم التحديث', 'Updated'),
+              variant: 'success',
+            },
+          );
           setPhoneStep('closed');
           await forceReLogin(navigate);
         }}
@@ -262,29 +312,32 @@ export default function DoctorProfileSecurityPanel() {
       >
         <div className="border-b border-[#EEF2F6] px-6 py-4">
           <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-            أمان الحساب
+            {tr('أمان الحساب', 'Account security')}
           </div>
           <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-            تغيير كلمة المرور أو البريد أو الهاتف يلغي جميع الجلسات النشطة.
+            {tr(
+              'تغيير كلمة المرور أو البريد أو الهاتف يلغي جميع الجلسات النشطة.',
+              'Changing password, email, or phone ends all active sessions.',
+            )}
           </p>
         </div>
         <div className="divide-y divide-[#EEF2F6]">
           {[
             {
               key: 'password',
-              label: 'تغيير كلمة المرور',
+              label: tr('تغيير كلمة المرور', 'Change password'),
               icon: KeyRound,
               onClick: () => setPasswordOpen(true),
             },
             {
               key: 'email',
-              label: 'تغيير البريد الإلكتروني',
+              label: tr('تغيير البريد الإلكتروني', 'Change email'),
               icon: Mail,
               onClick: () => setEmailStep('request'),
             },
             {
               key: 'phone',
-              label: 'تغيير رقم الهاتف',
+              label: tr('تغيير رقم الهاتف', 'Change phone number'),
               icon: Phone,
               onClick: () => setPhoneStep('request'),
             },
@@ -300,7 +353,7 @@ export default function DoctorProfileSecurityPanel() {
                 {item.label}
               </span>
               <span className="font-cairo text-[13px] font-extrabold text-primary">
-                تعديل
+                {tr('تعديل', 'Edit')}
               </span>
             </button>
           ))}
@@ -314,11 +367,13 @@ export default function DoctorProfileSecurityPanel() {
       >
         <div className="border-b border-[#FECACA] px-6 py-4">
           <div className="font-cairo text-[14px] font-extrabold text-[#B91C1C]">
-            منطقة الخطر
+            {tr('منطقة الخطر', 'Danger zone')}
           </div>
           <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-            حذف الحساب يضع حسابك في حالة «بانتظار الحذف» لمدة 7 أيام مع إمكانية
-            الاسترجاع.
+            {tr(
+              'حذف الحساب يضع حسابك في حالة «بانتظار الحذف» لمدة 7 أيام مع إمكانية الاسترجاع.',
+              'Deleting your account places it in a pending-deletion state for 7 days with recovery available.',
+            )}
           </p>
         </div>
         <div className="px-6 py-4">
@@ -327,7 +382,7 @@ export default function DoctorProfileSecurityPanel() {
             onClick={() => setDeleteConfirmOpen(true)}
             className="flex h-[44px] w-full items-center justify-center rounded-[8px] border border-[#FCA5A5] bg-white font-cairo text-[13px] font-extrabold text-[#DC2626] transition hover:bg-[#FEF2F2]"
           >
-            حذف الحساب
+            {tr('حذف الحساب', 'Delete account')}
           </button>
         </div>
       </section>
@@ -335,16 +390,20 @@ export default function DoctorProfileSecurityPanel() {
       <ConfirmActionDialog
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
-        title="تأكيد بدء حذف الحساب"
+        title={tr('تأكيد بدء حذف الحساب', 'Confirm account deletion')}
         description={
           <>
-            أنت على وشك بدء عملية حذف الحساب. سيتم إرشادك عبر خطوات التحقق (كلمة
-            المرور، السبب، رمز OTP). يمكنك استعادة حسابك خلال{' '}
-            <span className="font-extrabold text-[#101828]">7 أيام</span> قبل
-            الحذف النهائي.
+            {tr(
+              'أنت على وشك بدء عملية حذف الحساب. سيتم إرشادك عبر خطوات التحقق (كلمة المرور، السبب، رمز OTP). يمكنك استعادة حسابك خلال',
+              'You are about to start account deletion. You will be guided through verification steps (password, reason, OTP). You can recover your account within',
+            )}{' '}
+            <span className="font-extrabold text-[#101828]">
+              {tr('7 أيام', '7 days')}
+            </span>{' '}
+            {tr('قبل الحذف النهائي.', 'before permanent deletion.')}
           </>
         }
-        confirmLabel="متابعة إلى حذف الحساب"
+        confirmLabel={tr('متابعة إلى حذف الحساب', 'Continue to delete account')}
         onConfirm={() => {
           setDeleteConfirmOpen(false);
           navigate(resolveDeleteAccountPath(readAuthUser()?.role));
@@ -354,35 +413,47 @@ export default function DoctorProfileSecurityPanel() {
       <DoctorSecurityFormDialog
         open={passwordOpen}
         onOpenChange={setPasswordOpen}
-        title="تغيير كلمة المرور"
-        description="أدخل كلمة المرور الحالية والجديدة. بعد التأكيد ستُنهى جلستك الحالية."
+        title={tr('تغيير كلمة المرور', 'Change password')}
+        description={tr(
+          'أدخل كلمة المرور الحالية والجديدة. بعد التأكيد ستُنهى جلستك الحالية.',
+          'Enter your current and new password. After confirmation your current session will end.',
+        )}
         icon={KeyRound}
         form={passwordForm}
         fields={[
           {
             name: 'currentPassword',
-            label: 'كلمة المرور الحالية',
-            placeholder: 'أدخل كلمة المرور الحالية',
+            label: tr('كلمة المرور الحالية', 'Current password'),
+            placeholder: tr(
+              'أدخل كلمة المرور الحالية',
+              'Enter current password',
+            ),
             type: 'password',
             autoComplete: 'current-password',
           },
           {
             name: 'newPassword',
-            label: 'كلمة المرور الجديدة',
-            placeholder: '6 أحرف على الأقل',
+            label: tr('كلمة المرور الجديدة', 'New password'),
+            placeholder: tr('6 أحرف على الأقل', 'At least 6 characters'),
             type: 'password',
             autoComplete: 'new-password',
-            hint: 'يفضّل استخدام مزيج من أحرف وأرقام.',
+            hint: tr(
+              'يفضّل استخدام مزيج من أحرف وأرقام.',
+              'Prefer a mix of letters and numbers.',
+            ),
           },
           {
             name: 'confirmPassword',
-            label: 'تأكيد كلمة المرور',
-            placeholder: 'أعد إدخال كلمة المرور الجديدة',
+            label: tr('تأكيد كلمة المرور', 'Confirm password'),
+            placeholder: tr(
+              'أعد إدخال كلمة المرور الجديدة',
+              'Re-enter the new password',
+            ),
             type: 'password',
             autoComplete: 'new-password',
           },
         ]}
-        submitLabel="متابعة للتأكيد"
+        submitLabel={tr('متابعة للتأكيد', 'Continue to confirm')}
         onValidatedSubmit={(values) =>
           openConfirm({ kind: 'password', values })
         }
@@ -391,55 +462,70 @@ export default function DoctorProfileSecurityPanel() {
       <DoctorSecurityFormDialog
         open={emailStep === 'request'}
         onOpenChange={(next) => setEmailStep(next ? 'request' : 'closed')}
-        title="تغيير البريد الإلكتروني"
-        description="أدخل كلمة المرور الحالية والبريد الجديد. سنرسل رمز تحقق بعد التأكيد."
+        title={tr('تغيير البريد الإلكتروني', 'Change email')}
+        description={tr(
+          'أدخل كلمة المرور الحالية والبريد الجديد. سنرسل رمز تحقق بعد التأكيد.',
+          'Enter your current password and new email. We will send a verification code after confirmation.',
+        )}
         icon={Mail}
         form={emailForm}
         fields={[
           {
             name: 'currentPassword',
-            label: 'كلمة المرور الحالية',
-            placeholder: 'أدخل كلمة المرور الحالية',
+            label: tr('كلمة المرور الحالية', 'Current password'),
+            placeholder: tr(
+              'أدخل كلمة المرور الحالية',
+              'Enter current password',
+            ),
             type: 'password',
             autoComplete: 'current-password',
           },
           {
             name: 'newEmail',
-            label: 'البريد الإلكتروني الجديد',
+            label: tr('البريد الإلكتروني الجديد', 'New email'),
             placeholder: 'example@mail.com',
             type: 'email',
             autoComplete: 'email',
           },
         ]}
-        submitLabel="متابعة للتأكيد"
+        submitLabel={tr('متابعة للتأكيد', 'Continue to confirm')}
         onValidatedSubmit={(values) => openConfirm({ kind: 'email', values })}
       />
 
       <DoctorSecurityFormDialog
         open={phoneStep === 'request'}
         onOpenChange={(next) => setPhoneStep(next ? 'request' : 'closed')}
-        title="تغيير رقم الهاتف"
-        description="أدخل كلمة المرور الحالية ورقم الهاتف الجديد مع رمز الدولة."
+        title={tr('تغيير رقم الهاتف', 'Change phone number')}
+        description={tr(
+          'أدخل كلمة المرور الحالية ورقم الهاتف الجديد مع رمز الدولة.',
+          'Enter your current password and new phone number with country code.',
+        )}
         icon={Phone}
         form={phoneForm}
         fields={[
           {
             name: 'currentPassword',
-            label: 'كلمة المرور الحالية',
-            placeholder: 'أدخل كلمة المرور الحالية',
+            label: tr('كلمة المرور الحالية', 'Current password'),
+            placeholder: tr(
+              'أدخل كلمة المرور الحالية',
+              'Enter current password',
+            ),
             type: 'password',
             autoComplete: 'current-password',
           },
           {
             name: 'newPhone',
-            label: 'رقم الهاتف الجديد',
+            label: tr('رقم الهاتف الجديد', 'New phone number'),
             placeholder: '+9639XXXXXXXX',
             type: 'tel',
             autoComplete: 'tel',
-            hint: 'أدخل الرقم بصيغة دولية مع رمز الدولة.',
+            hint: tr(
+              'أدخل الرقم بصيغة دولية مع رمز الدولة.',
+              'Enter the number in international format with country code.',
+            ),
           },
         ]}
-        submitLabel="متابعة للتأكيد"
+        submitLabel={tr('متابعة للتأكيد', 'Continue to confirm')}
         onValidatedSubmit={(values) => openConfirm({ kind: 'phone', values })}
       />
 
@@ -453,7 +539,9 @@ export default function DoctorProfileSecurityPanel() {
           title={confirmCopy.title}
           description={confirmCopy.description}
           confirmLabel={
-            confirmBusy ? 'جاري التنفيذ…' : confirmCopy.confirmLabel
+            confirmBusy
+              ? tr('جاري التنفيذ…', 'Working…')
+              : confirmCopy.confirmLabel
           }
           confirmDisabled={confirmBusy}
           onConfirm={executePendingAction}

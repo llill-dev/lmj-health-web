@@ -41,6 +41,7 @@ import SlotsPreview from '@/components/doctor/work-schedule/slots-preview';
 import StyledSelect from '@/components/ui/styled-select';
 import type { ScheduleDayKey, ScheduleTimeSlot } from '@/lib/doctor/types';
 import { getWorkScheduleMutationErrorMessage } from '@/lib/doctor/writeFlowErrors';
+import { useI18n } from '@/i18n/provider';
 
 const DAY_LABELS: Record<ScheduleDayKey, string> = {
   Sunday: 'الأحد',
@@ -53,6 +54,7 @@ const DAY_LABELS: Record<ScheduleDayKey, string> = {
 };
 
 export default function DoctorWorkSchedulePage() {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { workSchedule, isAwaitingData, error, refetch } = useSchedule();
@@ -312,8 +314,8 @@ export default function DoctorWorkSchedulePage() {
       </Helmet>
 
       <div
-        dir='rtl'
-        lang='ar'
+        dir={dir}
+        lang={locale}
         className='pb-12 min-h-screen'
       >
         <AddDayDialog

@@ -430,34 +430,121 @@ export function buildReleaseAcceptanceFromDetails(
   });
 }
 
+export type ReleaseAcceptanceCatalogRow = {
+  type: AdminContentType;
+  status: AdminContentStatus;
+  scenarioKey: AcceptanceScenarioKey;
+  scenarioLabel: LocalizedCopy;
+  /** Catalog-level meaning: draft warn / review gate / info. */
+  overallMeaning: AcceptanceCheckStatus;
+  overallMeaningLabel: LocalizedCopy;
+  rules: TypeAcceptanceRules;
+  rulesSummary: LocalizedCopy;
+  nextActions: WorkflowActionCue[];
+};
+
+export function getScenarioOverallMeaning(
+  scenarioKey: AcceptanceScenarioKey,
+): { overall: AcceptanceCheckStatus; label: LocalizedCopy } {
+  if (scenarioKey === "draft_prep") {
+    return {
+      overall: "warn",
+      label: {
+        ar: "مسودة — تنبيه جاهزية (لا يمنع التصفح)",
+        en: "Draft — readiness warn (browsing stays open)",
+      },
+    };
+  }
+  if (scenarioKey === "in_review_gate") {
+    return {
+      overall: "fail",
+      label: {
+        ar: "بوابة مراجعة — اكتمال إلزامي قبل الموافقة/النشر",
+        en: "Review gate — completeness required before approve/publish",
+      },
+    };
+  }
+  if (scenarioKey === "published_info") {
+    return {
+      overall: "pass",
+      label: {
+        ar: "منشور — معلومات فقط (أرشفة اختيارية)",
+        en: "Published — informational only (archive optional)",
+      },
+    };
+  }
+  return {
+    overall: "pass",
+    label: {
+      ar: "مؤرشف — معلومات فقط (بدون إجراءات نشطة)",
+      en: "Archived — informational only (no active actions)",
+    },
+  };
+}
+
+export function summarizeTypeAcceptanceRules(
+  rules: TypeAcceptanceRules,
+): LocalizedCopy {
+  const arParts: string[] = [];
+  const enParts: string[] = [];
+
+  if (rules.requiresContentBlocks) {
+    arParts.push("بلوك محتوى");
+    enParts.push("content blocks");
+  }
+  if (rules.requiresSources) {
+    arParts.push("مصادر");
+    enParts.push("sources");
+  }
+  if (rules.requiresDisclaimer) {
+    arParts.push("تنبيه طبي");
+    enParts.push("disclaimer");
+  }
+  if (rules.requiresSeekHelp) {
+    arParts.push("Seek Help");
+    enParts.push("Seek Help");
+  }
+  if (rules.requiresNewsFields) {
+    arParts.push("حقول الخبر (sourceUrl/publishedAt)");
+    enParts.push("NEWS fields (sourceUrl/publishedAt)");
+  }
+
+  if (arParts.length === 0) {
+    return {
+      ar: "SETTINGS_PAGE: لا مصادر/تنبيه/بلوكات للمراجعة",
+      en: "SETTINGS_PAGE: no sources/disclaimer/blocks for review",
+    };
+  }
+
+  return {
+    ar: `مطلوب: ${arParts.join(" · ")}`,
+    en: `Requires: ${enParts.join(" · ")}`,
+  };
+}
+
 /**
  * Full type × status catalog for release signoff / UI matrices.
  * Does not invent APIs — encodes OpenAPI types/statuses + local acceptance rules.
  */
 export function listReleaseAcceptanceMatrixCatalog(
   role: WorkflowActorRole = "admin",
-): Array<{
-  type: AdminContentType;
-  status: AdminContentStatus;
-  scenarioKey: AcceptanceScenarioKey;
-  rules: TypeAcceptanceRules;
-  nextActions: WorkflowActionCue[];
-}> {
-  const rows: Array<{
-    type: AdminContentType;
-    status: AdminContentStatus;
-    scenarioKey: AcceptanceScenarioKey;
-    rules: TypeAcceptanceRules;
-    nextActions: WorkflowActionCue[];
-  }> = [];
+): ReleaseAcceptanceCatalogRow[] {
+  const rows: ReleaseAcceptanceCatalogRow[] = [];
 
   for (const type of RELEASE_CONTENT_TYPES) {
     for (const status of RELEASE_CONTENT_STATUSES) {
+      const scenarioKey = getAcceptanceScenarioKey(status);
+      const meaning = getScenarioOverallMeaning(scenarioKey);
+      const rules = getTypeAcceptanceRules(type);
       rows.push({
         type,
         status,
-        scenarioKey: getAcceptanceScenarioKey(status),
-        rules: getTypeAcceptanceRules(type),
+        scenarioKey,
+        scenarioLabel: SCENARIO_LABELS[scenarioKey],
+        overallMeaning: meaning.overall,
+        overallMeaningLabel: meaning.label,
+        rules,
+        rulesSummary: summarizeTypeAcceptanceRules(rules),
         nextActions: getNextWorkflowActions(status, role),
       });
     }

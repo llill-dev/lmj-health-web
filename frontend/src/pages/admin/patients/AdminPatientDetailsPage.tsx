@@ -20,6 +20,7 @@ import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppoint
 import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
 import { AppointmentStatusChip } from '@/components/admin/patients/AppointmentStatusChip';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import { adminApi } from '@/lib/admin/client';
 import type {
   AdminPatientSummary,
@@ -65,6 +66,7 @@ function formatDateTime(value?: string | null) {
 }
 
 export default function AdminPatientDetailsPage() {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const { patientId } = useParams();
   const location = useLocation();
@@ -177,8 +179,8 @@ export default function AdminPatientDetailsPage() {
       </Helmet>
 
       <div
-        dir='rtl'
-        lang='ar'
+        dir={dir}
+        lang={locale}
       >
         <div className='flex items-start justify-between'>
           <div className='text-right'>

@@ -5,6 +5,7 @@ import { X, Power } from 'lucide-react';
 import { useEffect } from 'react';
 import type { ServiceType } from '@/lib/admin/types';
 import { resolveLabel } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 type Action = 'deactivate' | 'activate';
 
@@ -57,12 +58,13 @@ export default function ServiceTypeStatusConfirmDialog({
   onConfirm,
   isPending,
 }: Props) {
+  const { locale, dir } = useI18n();
   const title = serviceType
     ? resolveLabel(
         typeof serviceType.name === 'string'
           ? { en: serviceType.name, ar: serviceType.name }
           : serviceType.name,
-        'ar',
+        locale,
       )
     : '—';
 
@@ -93,8 +95,8 @@ export default function ServiceTypeStatusConfirmDialog({
           forceMount
           onOpenAutoFocus={(e) => e.preventDefault()}
           className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
-          dir='rtl'
-          lang='ar'
+          dir={dir}
+          lang={locale}
         >
           <Dialog.Description className='sr-only'>
             تأكيد تغيير حالة تفعيل نوع الخدمة في النظام.

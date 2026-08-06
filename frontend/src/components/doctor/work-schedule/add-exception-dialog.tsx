@@ -34,6 +34,7 @@ export default function AddExceptionDialog({
   enabledDays = [],
 }: AddExceptionDialogProps) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [date, setDate] = useState("");
   const [exceptionType, setExceptionType] =
     useState<ExceptionFormValues["exceptionType"]>("closed");
@@ -44,9 +45,25 @@ export default function AddExceptionDialog({
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const dayLabels = useMemo(
+    () =>
+      ({
+        Sunday: tr("الأحد", "Sunday"),
+        Monday: tr("الإثنين", "Monday"),
+        Tuesday: tr("الثلاثاء", "Tuesday"),
+        Wednesday: tr("الأربعاء", "Wednesday"),
+        Thursday: tr("الخميس", "Thursday"),
+        Friday: tr("الجمعة", "Friday"),
+        Saturday: tr("السبت", "Saturday"),
+      }) as Record<ScheduleDayKey, string>,
+    [locale],
+  );
+
   const typeLabel = useMemo(() => {
-    return exceptionType === "closed" ? "يوم مغلق" : "ساعات مخصصة";
-  }, [exceptionType]);
+    return exceptionType === "closed"
+      ? tr("يوم مغلق", "Closed day")
+      : tr("ساعات مخصصة", "Custom hours");
+  }, [exceptionType, locale]);
 
   // Add new slot
   const handleAddSlot = () => {
@@ -72,7 +89,10 @@ export default function AddExceptionDialog({
   // Validate date against enabled days
   const validateDate = (selectedDate: string): boolean => {
     if (!selectedDate) {
-      setErrors((prev) => ({ ...prev, date: "يرجى اختيار التاريخ" }));
+      setErrors((prev) => ({
+        ...prev,
+        date: tr("يرجى اختيار التاريخ", "Please select a date"),
+      }));
       return false;
     }
 
@@ -87,19 +107,15 @@ export default function AddExceptionDialog({
     }) as ScheduleDayKey;
 
     if (!enabledDays.includes(dayName)) {
-      const arabicDays: Record<ScheduleDayKey, string> = {
-        Sunday: "الأحد",
-        Monday: "الإثنين",
-        Tuesday: "الثلاثاء",
-        Wednesday: "الأربعاء",
-        Thursday: "الخميس",
-        Friday: "الجمعة",
-        Saturday: "السبت",
-      };
-
+      const available = enabledDays.map((d) => dayLabels[d]).join(
+        locale === "ar" ? "، " : ", ",
+      );
       setErrors((prev) => ({
         ...prev,
-        date: `لا يمكن إضافة استثناء في يوم ${arabicDays[dayName]} لأنه غير موجود في جدول العمل الأسبوعي. الأيام المتاحة: ${enabledDays.map((d) => arabicDays[d]).join("، ")}`,
+        date: tr(
+          `لا يمكن إضافة استثناء في يوم ${dayLabels[dayName]} لأنه غير موجود في جدول العمل الأسبوعي. الأيام المتاحة: ${available}`,
+          `Cannot add an exception on ${dayLabels[dayName]} because it is not in the weekly schedule. Available days: ${available}`,
+        ),
       }));
       return false;
     }
@@ -123,14 +139,20 @@ export default function AddExceptionDialog({
 
     if (!startTime) {
       if (!newSlotErrors[index]) newSlotErrors[index] = {};
-      newSlotErrors[index].startTime = "يرجى إدخال وقت البداية";
+      newSlotErrors[index].startTime = tr(
+        "يرجى إدخال وقت البداية",
+        "Please enter a start time",
+      );
     } else {
       if (newSlotErrors[index]) delete newSlotErrors[index].startTime;
     }
 
     if (!endTime) {
       if (!newSlotErrors[index]) newSlotErrors[index] = {};
-      newSlotErrors[index].endTime = "يرجى إدخال وقت النهاية";
+      newSlotErrors[index].endTime = tr(
+        "يرجى إدخال وقت النهاية",
+        "Please enter an end time",
+      );
     } else {
       if (newSlotErrors[index]) delete newSlotErrors[index].endTime;
     }
@@ -144,8 +166,10 @@ export default function AddExceptionDialog({
 
       if (endMinutes <= startMinutes) {
         if (!newSlotErrors[index]) newSlotErrors[index] = {};
-        newSlotErrors[index].endTime =
-          "وقت النهاية يجب أن يكون بعد وقت البداية";
+        newSlotErrors[index].endTime = tr(
+          "وقت النهاية يجب أن يكون بعد وقت البداية",
+          "End time must be after start time",
+        );
       } else {
         if (newSlotErrors[index]) delete newSlotErrors[index].endTime;
       }
@@ -170,7 +194,7 @@ export default function AddExceptionDialog({
 
     // Validate date
     if (!date) {
-      newErrors.date = "يرجى اختيار التاريخ";
+      newErrors.date = tr("يرجى اختيار التاريخ", "Please select a date");
       isValid = false;
     } else if (!validateDate(date)) {
       isValid = false;
@@ -185,12 +209,18 @@ export default function AddExceptionDialog({
       slots.forEach((slot, index) => {
         if (!slot.startTime) {
           if (!slotErrors[index]) slotErrors[index] = {};
-          slotErrors[index].startTime = "يرجى إدخال وقت البداية";
+          slotErrors[index].startTime = tr(
+            "يرجى إدخال وقت البداية",
+            "Please enter a start time",
+          );
           isValid = false;
         }
         if (!slot.endTime) {
           if (!slotErrors[index]) slotErrors[index] = {};
-          slotErrors[index].endTime = "يرجى إدخال وقت النهاية";
+          slotErrors[index].endTime = tr(
+            "يرجى إدخال وقت النهاية",
+            "Please enter an end time",
+          );
           isValid = false;
         }
 
@@ -202,8 +232,10 @@ export default function AddExceptionDialog({
 
           if (endMinutes <= startMinutes) {
             if (!slotErrors[index]) slotErrors[index] = {};
-            slotErrors[index].endTime =
-              "وقت النهاية يجب أن يكون بعد وقت البداية";
+            slotErrors[index].endTime = tr(
+              "وقت النهاية يجب أن يكون بعد وقت البداية",
+              "End time must be after start time",
+            );
             isValid = false;
           }
         }
@@ -309,17 +341,20 @@ export default function AddExceptionDialog({
                   <button
                     type="button"
                     className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]"
-                    aria-label="إغلاق"
+                    aria-label={tr("إغلاق", "Close")}
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </Dialog.Close>
 
                 <Dialog.Title className="text-center font-cairo text-[20px] font-extrabold leading-[26px] text-[#111827]">
-                  إضافة استثناء جديد
+                  {tr("إضافة استثناء جديد", "Add new exception")}
                 </Dialog.Title>
                 <Dialog.Description className="mt-1 text-center font-cairo text-[12px] font-semibold leading-[18px] text-[#98A2B3]">
-                  حدد تاريخ ووقت الاستثناء
+                  {tr(
+                    "حدد تاريخ ووقت الاستثناء",
+                    "Choose the exception date and time",
+                  )}
                 </Dialog.Description>
 
                 <form
@@ -344,11 +379,7 @@ export default function AddExceptionDialog({
                         date,
                         exceptionType,
                         slots: finalSlots,
-                        note:
-                          note.trim() ||
-                          (exceptionType === "closed"
-                            ? "يوم مغلق"
-                            : "ساعات مخصصة"),
+                        note: note.trim() || typeLabel,
                       });
 
                       // Reset form on success
@@ -364,7 +395,10 @@ export default function AddExceptionDialog({
                         ...prev,
                         general:
                           error?.message ||
-                          "حدث خطأ أثناء إضافة الاستثناء. يرجى المحاولة مرة أخرى.",
+                          tr(
+                            "حدث خطأ أثناء إضافة الاستثناء. يرجى المحاولة مرة أخرى.",
+                            "Something went wrong while adding the exception. Please try again.",
+                          ),
                       }));
                     } finally {
                       setIsSubmitting(false);
@@ -373,7 +407,7 @@ export default function AddExceptionDialog({
                 >
                   <div>
                     <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
-                      التاريخ
+                      {tr("التاريخ", "Date")}
                     </div>
                     <input
                       type="date"
@@ -395,7 +429,7 @@ export default function AddExceptionDialog({
 
                   <div>
                     <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
-                      نوع الاستثناء
+                      {tr("نوع الاستثناء", "Exception type")}
                     </div>
                     <StyledSelect
                       value={exceptionType}
@@ -412,19 +446,28 @@ export default function AddExceptionDialog({
                       options={[
                         {
                           value: "closed",
-                          label: "يوم مغلق (لا توجد فترات متاحة)",
+                          label: tr(
+                            "يوم مغلق (لا توجد فترات متاحة)",
+                            "Closed day (no available slots)",
+                          ),
                         },
                         {
                           value: "custom_hours",
-                          label: "ساعات عمل مخصصة",
+                          label: tr("ساعات عمل مخصصة", "Custom working hours"),
                         },
                       ]}
-                      listboxAriaLabel="نوع الاستثناء"
+                      listboxAriaLabel={tr("نوع الاستثناء", "Exception type")}
                     />
                     <p className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#667085]">
                       {exceptionType === "closed"
-                        ? "سيتم إغلاق هذا اليوم بالكامل ولن يكون متاحاً للحجز"
-                        : "حدد ساعات العمل المخصصة لهذا اليوم"}
+                        ? tr(
+                            "سيتم إغلاق هذا اليوم بالكامل ولن يكون متاحاً للحجز",
+                            "This day will be fully closed and unavailable for booking",
+                          )
+                        : tr(
+                            "حدد ساعات العمل المخصصة لهذا اليوم",
+                            "Set custom working hours for this day",
+                          )}
                     </p>
                   </div>
 
@@ -432,14 +475,14 @@ export default function AddExceptionDialog({
                     <div>
                       <div className="mb-2 flex items-center justify-between">
                         <div className="text-right font-cairo text-[13px] font-extrabold text-[#111827]">
-                          الفترات المتاحة
+                          {tr("الفترات المتاحة", "Available slots")}
                         </div>
                         <button
                           type="button"
                           onClick={handleAddSlot}
                           className="rounded-[6px] bg-primary/10 px-3 py-1 font-cairo text-[11px] font-extrabold text-primary hover:bg-primary/20"
                         >
-                          + إضافة فترة
+                          + {tr("إضافة فترة", "Add slot")}
                         </button>
                       </div>
                       <div className="space-y-3">
@@ -491,7 +534,7 @@ export default function AddExceptionDialog({
                               </div>
 
                               <span className="font-cairo text-[12px] font-semibold text-[#667085] mt-2">
-                                إلى
+                                {tr("إلى", "to")}
                               </span>
 
                               {/* End Time */}
@@ -557,12 +600,15 @@ export default function AddExceptionDialog({
 
                   <div>
                     <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
-                      ملاحظة (اختياري)
+                      {tr("ملاحظة (اختياري)", "Note (optional)")}
                     </div>
                     <textarea
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
-                      placeholder="مثال: إجازة رسمية - عيد الفطر"
+                      placeholder={tr(
+                        "مثال: إجازة رسمية - عيد الفطر",
+                        "e.g. Public holiday — Eid",
+                      )}
                       className="min-h-[88px] w-full resize-none rounded-[6px] border-[1.82px] border-primary bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
                     />
                   </div>
@@ -584,7 +630,7 @@ export default function AddExceptionDialog({
                         disabled={isSubmitting}
                         className="h-[40px] rounded-[6px] border border-[#E5E7EB] bg-white px-6 font-cairo text-[13px] font-extrabold text-[#344054] hover:bg-[#F9FAFB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        إلغاء
+                        {tr("إلغاء", "Cancel")}
                       </button>
                     </Dialog.Close>
 
@@ -615,10 +661,10 @@ export default function AddExceptionDialog({
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                           </svg>
-                          جارِ الحفظ...
+                          {tr("جارِ الحفظ...", "Saving...")}
                         </>
                       ) : (
-                        "إضافة"
+                        tr("إضافة", "Add")
                       )}
                     </button>
                   </div>
