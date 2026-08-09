@@ -79,7 +79,10 @@ export type NormalizedMedicalContentDetails = AdminContentDetailsItem & {
 export type ReviewReadinessIssueCode =
   | "sources_required"
   | "disclaimer_required"
-  | "seek_help_required";
+  | "seek_help_required"
+  | "blocks_required"
+  | "news_source_url_required"
+  | "news_published_at_required";
 
 export function getReviewReadinessIssueMessage(
   code: ReviewReadinessIssueCode,
@@ -92,7 +95,16 @@ export function getReviewReadinessIssueMessage(
     if (code === "disclaimer_required") {
       return "Disclaimer version is missing.";
     }
-    return "Seek Help block requirement is not enabled.";
+    if (code === "seek_help_required") {
+      return "Seek Help block requirement is not enabled.";
+    }
+    if (code === "blocks_required") {
+      return "At least one meaningful content block is required.";
+    }
+    if (code === "news_source_url_required") {
+      return "NEWS sourceUrl is missing.";
+    }
+    return "NEWS publishedAt is missing.";
   }
 
   if (code === "sources_required") {
@@ -101,7 +113,16 @@ export function getReviewReadinessIssueMessage(
   if (code === "disclaimer_required") {
     return "إصدار التنبيه الطبي غير مضاف.";
   }
-  return "متطلب Seek Help Block غير مفعّل.";
+  if (code === "seek_help_required") {
+    return "متطلب Seek Help Block غير مفعّل.";
+  }
+  if (code === "blocks_required") {
+    return "يلزم وجود بلوك محتوى فعلي واحد على الأقل.";
+  }
+  if (code === "news_source_url_required") {
+    return "رابط مصدر الخبر (news.sourceUrl) غير مضاف.";
+  }
+  return "تاريخ نشر الخبر (news.publishedAt) غير مضاف.";
 }
 
 export function toDisplayText(value: unknown): string {
@@ -437,18 +458,78 @@ export function countValidContentSources(item: AdminContentDetailsItem | null): 
   return blockSources;
 }
 
+export function hasMeaningfulContentBlocks(
+  blocks: AdminContentBlock[] | null | undefined,
+): boolean {
+  if (!Array.isArray(blocks) || blocks.length === 0) return false;
+  return blocks.some((block) => {
+    if (!block || typeof block !== "object") return false;
+    const type = toDisplayText((block as { type?: unknown }).type).trim();
+    if (type === "divider") return true;
+    if (type === "heading" || type === "paragraph") {
+      return Boolean(toDisplayText((block as { text?: unknown }).text).trim());
+    }
+    if (type === "list") {
+      const items = (block as { items?: unknown }).items;
+      return (
+        Array.isArray(items) &&
+        items.some((entry) => toDisplayText(entry).trim())
+      );
+    }
+    if (type === "callout") {
+      return Boolean(
+        toDisplayText((block as { text?: unknown }).text).trim() ||
+          toDisplayText((block as { title?: unknown }).title).trim(),
+      );
+    }
+    if (type === "linkCard") {
+      return Boolean(
+        toDisplayText((block as { url?: unknown }).url).trim() ||
+          toDisplayText((block as { title?: unknown }).title).trim(),
+      );
+    }
+    if (type === "faq") {
+      const items = (block as { items?: unknown }).items;
+      return (
+        Array.isArray(items) &&
+        items.some((entry) => {
+          if (!entry || typeof entry !== "object") return false;
+          const row = entry as { question?: unknown; answer?: unknown };
+          return (
+            Boolean(toDisplayText(row.question).trim()) ||
+            Boolean(toDisplayText(row.answer).trim())
+          );
+        })
+      );
+    }
+    return Object.keys(block).length > 1;
+  });
+}
+
 export function getReviewReadinessIssueCodes(
   item: AdminContentDetailsItem | null,
 ): ReviewReadinessIssueCode[] {
-  if (!item) return ["sources_required", "disclaimer_required"];
+  if (!item) {
+    return ["sources_required", "disclaimer_required", "blocks_required"];
+  }
 
   const normalizedType = normalizeType(item.type);
   const issues: ReviewReadinessIssueCode[] = [];
   const sourceCount = countValidContentSources(item);
   const disclaimerVersion = toDisplayText(item.disclaimerVersion).trim();
   const requiresSeekHelpBlock = item.requiresSeekHelpBlock === true;
+  const news =
+    item.news && typeof item.news === "object"
+      ? (item.news as Record<string, unknown>)
+      : null;
+  const newsSourceUrl = toDisplayText(
+    news?.sourceUrl ?? item.sourceUrl,
+  ).trim();
+  const newsPublishedAt = toDisplayText(
+    news?.publishedAt ?? (normalizedType === "NEWS" ? item.publishedAt : undefined),
+  ).trim();
 
-  // SETTINGS_PAGE: sources + disclaimer exempt (release acceptance matrix).
+  // SETTINGS_PAGE: sources + disclaimer + blocks exempt (release acceptance matrix).
   if (normalizedType !== "SETTINGS_PAGE" && sourceCount === 0) {
     issues.push("sources_required");
   }
@@ -462,6 +543,21 @@ export function getReviewReadinessIssueCodes(
     !requiresSeekHelpBlock
   ) {
     issues.push("seek_help_required");
+  }
+
+  if (
+    normalizedType !== "SETTINGS_PAGE" &&
+    !hasMeaningfulContentBlocks(item.contentBlocks)
+  ) {
+    issues.push("blocks_required");
+  }
+
+  if (normalizedType === "NEWS" && !newsSourceUrl) {
+    issues.push("news_source_url_required");
+  }
+
+  if (normalizedType === "NEWS" && !newsPublishedAt) {
+    issues.push("news_published_at_required");
   }
 
   return issues;

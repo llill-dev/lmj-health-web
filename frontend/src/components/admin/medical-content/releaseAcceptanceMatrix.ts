@@ -1,5 +1,4 @@
 import type {
-  AdminContentBlock,
   AdminContentDetailsItem,
   AdminContentStatus,
   AdminContentType,
@@ -9,7 +8,10 @@ import {
   normalizeType,
   toDisplayText,
   toReleaseAcceptanceFields,
+  hasMeaningfulContentBlocks,
 } from "./dialogs/medicalContentDialogHelpers";
+
+export { hasMeaningfulContentBlocks };
 
 export type AcceptanceCheckStatus = "pass" | "fail" | "warn" | "na";
 
@@ -364,54 +366,6 @@ export function buildReleaseAcceptanceSnapshot(
     browsingNote: BROWSING_NOTE,
     typeRules,
   };
-}
-
-export function hasMeaningfulContentBlocks(
-  blocks: AdminContentBlock[] | null | undefined,
-): boolean {
-  if (!Array.isArray(blocks) || blocks.length === 0) return false;
-  return blocks.some((block) => {
-    if (!block || typeof block !== "object") return false;
-    const type = toDisplayText((block as { type?: unknown }).type).trim();
-    if (type === "divider") return true;
-    if (type === "heading" || type === "paragraph") {
-      return Boolean(toDisplayText((block as { text?: unknown }).text).trim());
-    }
-    if (type === "list") {
-      const items = (block as { items?: unknown }).items;
-      return (
-        Array.isArray(items) &&
-        items.some((entry) => toDisplayText(entry).trim())
-      );
-    }
-    if (type === "callout") {
-      return Boolean(
-        toDisplayText((block as { text?: unknown }).text).trim() ||
-          toDisplayText((block as { title?: unknown }).title).trim(),
-      );
-    }
-    if (type === "linkCard") {
-      return Boolean(
-        toDisplayText((block as { url?: unknown }).url).trim() ||
-          toDisplayText((block as { title?: unknown }).title).trim(),
-      );
-    }
-    if (type === "faq") {
-      const items = (block as { items?: unknown }).items;
-      return (
-        Array.isArray(items) &&
-        items.some((entry) => {
-          if (!entry || typeof entry !== "object") return false;
-          const row = entry as { question?: unknown; answer?: unknown };
-          return (
-            Boolean(toDisplayText(row.question).trim()) ||
-            Boolean(toDisplayText(row.answer).trim())
-          );
-        })
-      );
-    }
-    return Object.keys(block).length > 1;
-  });
 }
 
 export function buildReleaseAcceptanceFromDetails(

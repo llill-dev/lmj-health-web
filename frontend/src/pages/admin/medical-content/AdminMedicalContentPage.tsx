@@ -176,9 +176,27 @@ function getSubmitReviewBlockingMessages(
         "Set the disclaimer version.",
       );
     }
+    if (code === "seek_help_required") {
+      return tr(
+        "فعّل Seek Help Block لأن النوع حالة أو عرض.",
+        "Enable Seek Help Block for condition/symptom content.",
+      );
+    }
+    if (code === "blocks_required") {
+      return tr(
+        "أضف بلوك محتوى فعلي واحدًا على الأقل.",
+        "Add at least one meaningful content block.",
+      );
+    }
+    if (code === "news_source_url_required") {
+      return tr(
+        "أضف رابط مصدر الخبر (news.sourceUrl).",
+        "Add the NEWS source URL (news.sourceUrl).",
+      );
+    }
     return tr(
-      "فعّل Seek Help Block لأن النوع حالة أو عرض.",
-      "Enable Seek Help Block for condition/symptom content.",
+      "حدّد تاريخ نشر الخبر (news.publishedAt).",
+      "Set the NEWS published date (news.publishedAt).",
     );
   });
 }

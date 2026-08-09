@@ -18,6 +18,7 @@ import {
   extractMedicalContentDetails,
   formatDate,
   getReviewReadinessIssueCodes,
+  getReviewReadinessIssueMessage,
   toDisplayText,
   toPrettyJson,
 } from "./medicalContentDialogHelpers";
@@ -114,16 +115,9 @@ export default function MedicalContentViewDialog({
     [details, workflowRole],
   );
   const previewWarnings = details
-    ? getReviewReadinessIssueCodes(details).map((code) => {
-        if (previewLanguage === "en") {
-          if (code === "sources_required") return "No source references are currently attached.";
-          if (code === "disclaimer_required") return "Disclaimer version is missing.";
-          return "Seek Help block requirement is not enabled.";
-        }
-        if (code === "sources_required") return "لا توجد مراجع مصادر مرفقة حاليًا.";
-        if (code === "disclaimer_required") return "إصدار التنبيه الطبي غير مضاف.";
-        return "متطلب Seek Help Block غير مفعّل.";
-      })
+    ? getReviewReadinessIssueCodes(details).map((code) =>
+        getReviewReadinessIssueMessage(code, previewLanguage),
+      )
     : [];
 
   return (

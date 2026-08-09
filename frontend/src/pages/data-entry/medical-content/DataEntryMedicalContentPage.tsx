@@ -118,9 +118,27 @@ function getBlockingMessages(
         "Set the disclaimer version.",
       );
     }
+    if (code === "seek_help_required") {
+      return t(
+        "dataEntry.medicalContent.reviewChecklist.seekHelp",
+        "Enable Seek Help Block for condition/symptom content.",
+      );
+    }
+    if (code === "blocks_required") {
+      return t(
+        "dataEntry.medicalContent.reviewChecklist.blocks",
+        "Add at least one meaningful content block.",
+      );
+    }
+    if (code === "news_source_url_required") {
+      return t(
+        "dataEntry.medicalContent.reviewChecklist.newsSourceUrl",
+        "Add the NEWS source URL (news.sourceUrl).",
+      );
+    }
     return t(
-      "dataEntry.medicalContent.reviewChecklist.seekHelp",
-      "Enable Seek Help Block for condition/symptom content.",
+      "dataEntry.medicalContent.reviewChecklist.newsPublishedAt",
+      "Set the NEWS published date (news.publishedAt).",
     );
   });
 }
