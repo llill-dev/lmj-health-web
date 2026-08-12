@@ -141,7 +141,7 @@ export function textSearchMatch(hay: string, needle: string) {
   return a.toLowerCase().includes(b.toLowerCase());
 }
 
-function toDisplayText(value: unknown): string {
+export function toDisplayText(value: unknown): string {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
   if (value && typeof value === 'object') {

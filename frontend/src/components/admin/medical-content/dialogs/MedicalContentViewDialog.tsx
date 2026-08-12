@@ -168,7 +168,7 @@ export default function MedicalContentViewDialog({
                 <div className="rounded-[14px] border border-[#E4E7EC] bg-[#F9FAFB] p-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-cairo text-[20px] font-black text-[#111827]">
-                      {details.title || "—"}
+                      {toDisplayText(details.title) || "—"}
                     </span>
                     <span
                       className={`inline-flex h-[24px] items-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusTone(details.status)}`}

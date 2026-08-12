@@ -30,6 +30,7 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import MedicalContentViewDialog from "@/components/admin/medical-content/dialogs/MedicalContentViewDialog";
+import { toDisplayText } from "@/components/admin/medical-content/contentListUtils";
 import {
   CreateAdminContentDialog,
   EditAdminContentDialog,
@@ -385,7 +386,7 @@ export default function AdminMedicalContentPage() {
     const text = query.trim();
     if (!text) return itemsByLang;
     return itemsByLang.filter((it) => {
-      const title = String(it.title ?? "");
+      const title = toDisplayText(it.title);
       const summary = String(it.summary ?? "");
       const slug = String(it.slug ?? "");
       return (
@@ -974,7 +975,7 @@ export default function AdminMedicalContentPage() {
                   <div className="flex-1 min-w-0 text-start">
                     <div className="flex flex-wrap gap-2 justify-start items-center sm:gap-3">
                       <div className="min-w-0 font-cairo text-[14px] font-black text-[#111827]">
-                        {it.title ?? "—"}
+                        {toDisplayText(it.title) || "—"}
                       </div>
                       {(() => {
                         const lk = languageKindLabel(it.language);
@@ -1098,7 +1099,7 @@ export default function AdminMedicalContentPage() {
                           setActionConfirm({
                             kind: "submitReview",
                             id: it._id,
-                            title: it.title ?? "—",
+                            title: toDisplayText(it.title) || "—",
                           })
                         }
                         className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] disabled:opacity-50"
@@ -1120,7 +1121,7 @@ export default function AdminMedicalContentPage() {
                             setActionConfirm({
                               kind: "approve",
                               id: it._id,
-                              title: it.title ?? "—",
+                              title: toDisplayText(it.title) || "—",
                             })
                           }
                           className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50"
@@ -1157,7 +1158,7 @@ export default function AdminMedicalContentPage() {
                           setActionConfirm({
                             kind: "archive",
                             id: it._id,
-                            title: it.title ?? "—",
+                            title: toDisplayText(it.title) || "—",
                           })
                         }
                         className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] px-3 text-[#1D4ED8] disabled:opacity-50"
@@ -1178,7 +1179,7 @@ export default function AdminMedicalContentPage() {
                           setActionConfirm({
                             kind: "publish",
                             id: it._id,
-                            title: it.title ?? "—",
+                            title: toDisplayText(it.title) || "—",
                           })
                         }
                         className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] px-3 text-[#0891B2] disabled:opacity-50"
@@ -1556,7 +1557,7 @@ export default function AdminMedicalContentPage() {
           setRejectOpen(o);
           if (!o) setRejectTarget(null);
         }}
-        contentTitle={rejectTarget?.title ?? "—"}
+        contentTitle={toDisplayText(rejectTarget?.title) || "—"}
         onConfirm={confirmReject}
         isPending={rejectMutation.isPending}
       />

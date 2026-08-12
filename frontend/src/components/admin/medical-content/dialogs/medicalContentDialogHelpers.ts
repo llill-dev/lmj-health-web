@@ -298,7 +298,7 @@ export function extractMedicalContentDetails(
     requiresSeekHelpBlock,
     isFeatured,
     dataValue,
-    template,
+    template: template as AdminContentDetailsItem["template"],
     news,
   };
 }
@@ -529,12 +529,21 @@ export function getReviewReadinessIssueCodes(
     news?.publishedAt ?? (normalizedType === "NEWS" ? item.publishedAt : undefined),
   ).trim();
 
-  // SETTINGS_PAGE: sources + disclaimer + blocks exempt (release acceptance matrix).
-  if (normalizedType !== "SETTINGS_PAGE" && sourceCount === 0) {
+  // Sources + disclaimer are required only for CONDITION/SYMPTOM/MEDICATION/
+  // GENERAL_ADVICE per the medical-content requirements guide — SETTINGS_PAGE
+  // is exempt entirely, and NEWS has its own sourceUrl/publishedAt gate below
+  // instead of the generic sources/disclaimer one.
+  const requiresSourcesAndDisclaimer =
+    normalizedType === "CONDITION" ||
+    normalizedType === "SYMPTOM" ||
+    normalizedType === "MEDICATION" ||
+    normalizedType === "GENERAL_ADVICE";
+
+  if (requiresSourcesAndDisclaimer && sourceCount === 0) {
     issues.push("sources_required");
   }
 
-  if (normalizedType !== "SETTINGS_PAGE" && !disclaimerVersion) {
+  if (requiresSourcesAndDisclaimer && !disclaimerVersion) {
     issues.push("disclaimer_required");
   }
 

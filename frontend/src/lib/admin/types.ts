@@ -806,7 +806,8 @@ export type AdminContentItem = {
   _id: string;
   type: AdminContentType;
   status: AdminContentStatus;
-  title?: string;
+  /** Plain string for most types; `{ ar, en }` for SETTINGS_PAGE per API-3. */
+  title?: AdminLocalizedValue;
   summary?: string;
   language?: string;
   slug?: string;
@@ -922,7 +923,8 @@ export type AdminContentDetailsResponse = ApiSuccessEnvelope & {
  */
 export type CreateAdminContentBody = {
   type: AdminContentType;
-  title: string;
+  /** Plain string for most types; `{ ar, en }` for SETTINGS_PAGE per API-3. */
+  title: AdminLocalizedValue;
   summary?: string;
   language: "ar" | "en";
   slug?: string;
@@ -1069,11 +1071,9 @@ export type AdminContentTemplateParentType =
   | "MEDICATION";
 
 /** أنواع حقول القالب المعروضة في محرّر الحقول. */
+/** Matches ContentTemplateField.type in docs/openapi.json exactly — the backend
+ * has no `text`/`textarea`/`date`/`select` field types. */
 export type AdminContentTemplateFieldType =
-  | "text"
-  | "textarea"
-  | "date"
-  | "select"
   | "string"
   | "number"
   | "boolean"

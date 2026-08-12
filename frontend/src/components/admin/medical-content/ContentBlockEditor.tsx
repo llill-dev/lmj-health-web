@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Plus, Trash2 } from "lucide-react";
 import {
   Controller,
   type Control,
@@ -38,7 +38,14 @@ type ContentBlockEditorProps<
   register: UseFormRegister<TFormValues>;
   setValue: UseFormSetValue<TFormValues>;
   clearErrors: UseFormClearErrors<TFormValues>;
-  fieldArray: UseFieldArrayReturn<TFormValues, "contentBlocks", "id">;
+  // `ArrayPath<TFormValues>` can't be resolved against this open, bounded
+  // generic (see the widening cast below) — loosen the field-array typing
+  // at the prop boundary rather than fighting react-hook-form's variance.
+  fieldArray: UseFieldArrayReturn<
+    FieldValues & { contentBlocks: BlockFormValue[] },
+    "contentBlocks",
+    "id"
+  >;
   blocks: BlockFormValue[];
   error?: unknown;
   disabled?: boolean;
@@ -60,7 +67,17 @@ export default function ContentBlockEditor<
   title = "محتوى المقال",
   description = "أنشئ البلوكات الفعلية للمقال مع إبقاء جسم المقال منفصلًا عن بيانات القالب.",
 }: ContentBlockEditorProps<TFormValues>) {
-  const { fields, append, remove, move } = fieldArray;
+  // react-hook-form's generic `Path<TFormValues>` can't be statically resolved
+  // against a bounded-but-open generic like `TFormValues extends FieldValues & {...}`.
+  // This component only ever touches the `contentBlocks` slice via dynamic template-
+  // literal paths, so we widen to the loose `FieldValues` shape internally while
+  // keeping the exported props strictly typed for callers.
+  const formControl = control as unknown as Control<FieldValues>;
+  const formRegister = register as unknown as UseFormRegister<FieldValues>;
+  const formSetValue = setValue as unknown as UseFormSetValue<FieldValues>;
+  const formClearErrors =
+    clearErrors as unknown as UseFormClearErrors<FieldValues>;
+  const { fields, append, insert, remove, move } = fieldArray;
   const errorMessage =
     error &&
     typeof error === "object" &&
@@ -82,9 +99,7 @@ export default function ContentBlockEditor<
         </div>
         <button
           type="button"
-          onClick={() =>
-            append(createEmptyBlock() as TFormValues["contentBlocks"][number])
-          }
+          onClick={() => append(createEmptyBlock())}
           disabled={disabled}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-primary/15 bg-white px-3 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-50"
         >
@@ -113,16 +128,16 @@ export default function ContentBlockEditor<
                 <div className="min-w-0 flex-1">
                   <Controller
                     name={`contentBlocks.${index}.type` as const}
-                    control={control}
+                    control={formControl}
                     render={({ field: controlledField }) => (
                       <StyledSelect
                         value={controlledField.value}
                         onChange={(value) => {
-                          setValue(
+                          formSetValue(
                             `contentBlocks.${index}` as const,
                             createEmptyBlock(value as SupportedBlockType) as TFormValues["contentBlocks"][number],
                           );
-                          clearErrors("contentBlocks");
+                          formClearErrors("contentBlocks");
                         }}
                         onBlur={controlledField.onBlur}
                         name={controlledField.name}
@@ -159,10 +174,24 @@ export default function ContentBlockEditor<
                   <button
                     type="button"
                     onClick={() =>
+                      insert(
+                        index + 1,
+                        { ...(blocks[index] ?? createEmptyBlock()) } as TFormValues["contentBlocks"][number],
+                      )
+                    }
+                    disabled={disabled}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E6ECF2] text-[#667085] disabled:opacity-40"
+                    aria-label="تكرار البلوك"
+                  >
+                    <Copy className="h-4 w-4" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
                       fields.length === 1
-                        ? setValue(
+                        ? formSetValue(
                             `contentBlocks.${index}` as const,
-                            createEmptyBlock() as TFormValues["contentBlocks"][number],
+                            createEmptyBlock(),
                           )
                         : remove(index)
                     }
@@ -179,16 +208,16 @@ export default function ContentBlockEditor<
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <Controller
                     name={`contentBlocks.${index}.level` as const}
-                    control={control}
+                    control={formControl}
                     render={({ field: controlledField }) => (
                       <AdminFormField label="المستوى">
                         <StyledSelect
-                          value={controlledField.value ?? 2}
+                          value={String(controlledField.value ?? 2)}
                           onChange={(value) => controlledField.onChange(Number(value))}
                           onBlur={controlledField.onBlur}
                           name={controlledField.name}
                           options={HEADING_LEVEL_OPTIONS.map((option) => ({
-                            value: option.value,
+                            value: String(option.value),
                             label: option.label,
                           }))}
                           placeholder="مستوى العنوان"
@@ -200,7 +229,7 @@ export default function ContentBlockEditor<
                   />
                   <AdminFormField label="نص العنوان">
                     <input
-                      {...register(`contentBlocks.${index}.text` as const)}
+                      {...formRegister(`contentBlocks.${index}.text` as const)}
                       disabled={disabled}
                       placeholder="أدخل العنوان الفرعي"
                       className={adminFieldClass(
@@ -215,7 +244,7 @@ export default function ContentBlockEditor<
               {blockType === "paragraph" ? (
                 <AdminFormField label="النص">
                   <textarea
-                    {...register(`contentBlocks.${index}.text` as const)}
+                    {...formRegister(`contentBlocks.${index}.text` as const)}
                     disabled={disabled}
                     rows={4}
                     placeholder="اكتب الفقرة الأساسية للمقال…"
@@ -231,7 +260,7 @@ export default function ContentBlockEditor<
                 <div className="space-y-4">
                   <AdminFormField label="عناصر القائمة">
                     <textarea
-                      {...register(`contentBlocks.${index}.itemsText` as const)}
+                      {...formRegister(`contentBlocks.${index}.itemsText` as const)}
                       disabled={disabled}
                       rows={4}
                       placeholder="ضع كل عنصر في سطر مستقل"
@@ -244,7 +273,7 @@ export default function ContentBlockEditor<
                   <label className="flex items-center justify-end gap-2 font-cairo text-[12px] font-bold text-[#344054]">
                     <span>قائمة مرقّمة</span>
                     <input
-                      {...register(`contentBlocks.${index}.ordered` as const)}
+                      {...formRegister(`contentBlocks.${index}.ordered` as const)}
                       type="checkbox"
                       disabled={disabled}
                       className="h-4 w-4 rounded border-[#D0D5DD]"
@@ -257,7 +286,7 @@ export default function ContentBlockEditor<
                 <div className="space-y-4">
                   <Controller
                     name={`contentBlocks.${index}.variant` as const}
-                    control={control}
+                    control={formControl}
                     render={({ field: controlledField }) => (
                       <AdminFormField label="نوع التنبيه">
                         <StyledSelect
@@ -278,7 +307,7 @@ export default function ContentBlockEditor<
                   />
                   <AdminFormField label="عنوان التنبيه">
                     <input
-                      {...register(`contentBlocks.${index}.title` as const)}
+                      {...formRegister(`contentBlocks.${index}.title` as const)}
                       disabled={disabled}
                       placeholder="مثال: متى يجب طلب المساعدة؟"
                       className={adminFieldClass(
@@ -289,7 +318,7 @@ export default function ContentBlockEditor<
                   </AdminFormField>
                   <AdminFormField label="النص">
                     <textarea
-                      {...register(`contentBlocks.${index}.text` as const)}
+                      {...formRegister(`contentBlocks.${index}.text` as const)}
                       disabled={disabled}
                       rows={3}
                       placeholder="اكتب محتوى التنبيه أو المعلومة…"
@@ -306,7 +335,7 @@ export default function ContentBlockEditor<
                 <div className="space-y-4">
                   <AdminFormField label="عنوان البطاقة">
                     <input
-                      {...register(`contentBlocks.${index}.title` as const)}
+                      {...formRegister(`contentBlocks.${index}.title` as const)}
                       disabled={disabled}
                       placeholder="مثال: رابط إرشادي موثوق"
                       className={adminFieldClass(
@@ -317,7 +346,7 @@ export default function ContentBlockEditor<
                   </AdminFormField>
                   <AdminFormField label="وصف مختصر">
                     <textarea
-                      {...register(`contentBlocks.${index}.description` as const)}
+                      {...formRegister(`contentBlocks.${index}.description` as const)}
                       disabled={disabled}
                       rows={3}
                       placeholder="ملخص قصير لما سيفتحه الرابط..."
@@ -329,7 +358,7 @@ export default function ContentBlockEditor<
                   </AdminFormField>
                   <AdminFormField label="الرابط">
                     <input
-                      {...register(`contentBlocks.${index}.url` as const)}
+                      {...formRegister(`contentBlocks.${index}.url` as const)}
                       disabled={disabled}
                       dir="ltr"
                       placeholder="https://example.com"
@@ -355,7 +384,7 @@ export default function ContentBlockEditor<
               {blockType === "faq" ? (
                 <Controller
                   name={`contentBlocks.${index}.faqItems` as const}
-                  control={control}
+                  control={formControl}
                   render={({ field: controlledField }) => {
                     const faqItems =
                       Array.isArray(controlledField.value) &&
@@ -365,11 +394,11 @@ export default function ContentBlockEditor<
 
                     const updateFaqItems = (nextItems: FaqFormItem[]) => {
                       controlledField.onChange(nextItems);
-                      setValue(
+                      formSetValue(
                         `contentBlocks.${index}.faqItemsText` as const,
                         faqItemsToText(nextItems) as TFormValues[keyof TFormValues],
                       );
-                      clearErrors("contentBlocks");
+                      formClearErrors("contentBlocks");
                     };
 
                     return (

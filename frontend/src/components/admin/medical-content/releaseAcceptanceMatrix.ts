@@ -131,9 +131,18 @@ export function getTypeAcceptanceRules(
 ): TypeAcceptanceRules {
   const normalized = normalizeType(type);
   const isSettings = normalized === "SETTINGS_PAGE";
+  // Sources + disclaimer are required only for CONDITION/SYMPTOM/MEDICATION/
+  // GENERAL_ADVICE per the medical-content requirements guide. NEWS has its
+  // own sourceUrl/publishedAt gate (`requiresNewsFields`) instead, and
+  // SETTINGS_PAGE needs neither.
+  const requiresSourcesAndDisclaimer =
+    normalized === "CONDITION" ||
+    normalized === "SYMPTOM" ||
+    normalized === "MEDICATION" ||
+    normalized === "GENERAL_ADVICE";
   return {
-    requiresSources: !isSettings,
-    requiresDisclaimer: !isSettings,
+    requiresSources: requiresSourcesAndDisclaimer,
+    requiresDisclaimer: requiresSourcesAndDisclaimer,
     requiresSeekHelp:
       normalized === "CONDITION" || normalized === "SYMPTOM",
     requiresNewsFields: normalized === "NEWS",

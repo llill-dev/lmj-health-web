@@ -14,15 +14,16 @@ const TEMPLATE_ENABLED_TYPES = [
   "MEDICATION",
 ] as const;
 
-export type DynamicTemplateField = AdminContentTemplateField & {
-  description?: AdminLocalizedValue;
-  placeholder?: AdminLocalizedValue;
-  uiHints?: Record<string, unknown>;
-  fields?: DynamicTemplateField[];
-  itemFields?: DynamicTemplateField[];
-  items?: DynamicTemplateField[];
-  of?: DynamicTemplateField;
-};
+/**
+ * `ContentTemplateField` in docs/openapi.json is flat (`key`/`label`/`type`/
+ * `required`/`enum`/`min`/`max`/`regex`/`isPublic` only, `additionalProperties:
+ * false`) — there is no nested `fields`/`itemFields`, per-field `uiHints`, or
+ * `placeholder`/`description`. This alias used to widen the shape to model
+ * those, but nothing in the backend contract or `ContentTemplateFormDialog`
+ * ever produces them, so it stayed permanently unreachable. Keep this as a
+ * plain alias so the renderer only relies on what the backend actually sends.
+ */
+export type DynamicTemplateField = AdminContentTemplateField;
 
 export type TemplateFieldSelectOption = {
   value: string;
@@ -72,54 +73,7 @@ export function isDynamicRecord(value: unknown): value is AdminContentDynamicRec
 }
 
 export function getTemplateFieldType(field: DynamicTemplateField): string {
-  switch (field.type) {
-    case "text":
-    case "textarea":
-    case "date":
-    case "select":
-      return "string";
-    default:
-      return field.type || "string";
-  }
-}
-
-export function getNestedTemplateFields(
-  field: DynamicTemplateField | undefined,
-): DynamicTemplateField[] {
-  if (!field) return [];
-
-  if (Array.isArray(field.fields)) return field.fields;
-  if (Array.isArray(field.itemFields)) return field.itemFields;
-
-  if (Array.isArray(field.items)) {
-    return field.items.filter(
-      (item): item is DynamicTemplateField =>
-        Boolean(item && typeof item === "object" && "key" in item),
-    );
-  }
-
-  if (field.of && Array.isArray(field.of.fields)) return field.of.fields;
-  return [];
-}
-
-export function getArrayItemField(
-  field: DynamicTemplateField | undefined,
-): DynamicTemplateField | undefined {
-  if (!field) return undefined;
-
-  if (field.of && typeof field.of === "object") return field.of;
-
-  const firstItem = Array.isArray(field.items)
-    ? field.items.find(
-        (item): item is DynamicTemplateField =>
-          Boolean(item && typeof item === "object"),
-      )
-    : undefined;
-
-  if (!firstItem) return undefined;
-  if (typeof firstItem.type === "string") return firstItem;
-  if (Array.isArray(firstItem.fields)) return { ...firstItem, type: "object" };
-  return undefined;
+  return field.type || "string";
 }
 
 export function getTemplateValueAtPath(
@@ -245,86 +199,16 @@ export function getPrimitiveInputValue(
   return "";
 }
 
-function readOptionLabel(
-  value: unknown,
-  language: "ar" | "en",
-  fallback: string,
-): string {
-  if (typeof value === "string") return value;
-  if (isLocalizedRecord(value)) {
-    return value[language] || value.ar || value.en || fallback;
-  }
-  if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>;
-    if (typeof record.label === "string") return record.label;
-    if (isLocalizedRecord(record.label)) {
-      return (
-        record.label[language] ||
-        record.label.ar ||
-        record.label.en ||
-        fallback
-      );
-    }
-    if (typeof record.name === "string") return record.name;
-    if (isLocalizedRecord(record.name)) {
-      return (
-        record.name[language] ||
-        record.name.ar ||
-        record.name.en ||
-        fallback
-      );
-    }
-  }
-  return fallback;
-}
-
-function readUiHintOptions(
-  field: DynamicTemplateField,
-  language: "ar" | "en",
-): TemplateFieldSelectOption[] {
-  const hints = field.uiHints;
-  if (!hints || typeof hints !== "object") return [];
-  const record = hints as Record<string, unknown>;
-  const raw = Array.isArray(record.options)
-    ? record.options
-    : Array.isArray(record.enum)
-      ? record.enum
-      : [];
-
-  return raw
-    .map((entry): TemplateFieldSelectOption | null => {
-      if (
-        typeof entry === "string" ||
-        typeof entry === "number" ||
-        typeof entry === "boolean"
-      ) {
-        const scalar = String(entry);
-        return { value: scalar, label: scalar };
-      }
-
-      if (!entry || typeof entry !== "object") return null;
-      const source = entry as Record<string, unknown>;
-      const rawValue = source.value ?? source.key ?? source.id;
-      if (
-        typeof rawValue !== "string" &&
-        typeof rawValue !== "number" &&
-        typeof rawValue !== "boolean"
-      ) {
-        return null;
-      }
-      const value = String(rawValue);
-      return {
-        value,
-        label: readOptionLabel(source.label ?? source.name, language, value),
-      };
-    })
-    .filter((option): option is TemplateFieldSelectOption => Boolean(option));
-}
-
+/**
+ * `ContentTemplateField.enum` is the only backend-supported source of select
+ * options — there is no per-field `uiHints` in the contract (see the
+ * `DynamicTemplateField` alias comment above).
+ */
 export function getTemplateFieldSelectOptions(
   field: DynamicTemplateField,
   language: "ar" | "en",
 ): TemplateFieldSelectOption[] {
+  void language; // reserved for when the backend supports localized enum labels
   const fromEnum = (Array.isArray(field.enum) ? field.enum : [])
     .map((entry): TemplateFieldSelectOption | null => {
       if (
@@ -339,11 +223,8 @@ export function getTemplateFieldSelectOptions(
     })
     .filter((option): option is TemplateFieldSelectOption => Boolean(option));
 
-  const options = fromEnum.length ? fromEnum : readUiHintOptions(field, language);
-  if (!options.length) return [];
-
   const unique = new Map<string, TemplateFieldSelectOption>();
-  options.forEach((option) => {
+  fromEnum.forEach((option) => {
     if (!unique.has(option.value)) unique.set(option.value, option);
   });
   return Array.from(unique.values());
@@ -408,32 +289,28 @@ export function getArrayTextareaValue(value: unknown): string {
     .join("\n");
 }
 
+/**
+ * The backend's `array` field type carries no item-type metadata, so array
+ * values are authored as newline-separated strings — there is no `itemFields`
+ * concept in `ContentTemplateField` to coerce items to another primitive.
+ */
 export function coerceArrayTextareaValue(
   rawValue: string,
-  itemField?: DynamicTemplateField,
 ): AdminContentDynamicValue[] | undefined {
   const entries = rawValue
     .split("\n")
     .map((entry) => entry.trim())
     .filter(Boolean);
 
-  if (!entries.length) return undefined;
-  if (getTemplateFieldType(itemField || { key: "", type: "string" }) !== "number") {
-    return entries;
-  }
-
-  return entries
-    .map((entry) => Number(entry))
-    .filter((entry) => !Number.isNaN(entry));
+  return entries.length ? entries : undefined;
 }
 
 export function getFieldHelperText(
   field: DynamicTemplateField,
   language: "ar" | "en",
 ): string | undefined {
+  void language; // reserved for when the backend adds a localized description
   const pieces: string[] = [];
-  const description = getLocalizedTemplateText(field.description, language);
-  if (description) pieces.push(description);
   if (typeof field.min === "number" && typeof field.max === "number") {
     pieces.push(`Range: ${field.min} - ${field.max}`);
   } else if (typeof field.min === "number") {
@@ -552,70 +429,29 @@ export function collectTemplateFieldValidationIssues(
 ): TemplateValidationIssue[] {
   if (!template?.fields?.length) return [];
 
-  const visit = (
-    fields: DynamicTemplateField[],
-    parentPath: string[],
-  ): TemplateValidationIssue[] =>
-    fields.flatMap((field) => {
-      const currentPath = [...parentPath, field.key];
-      const fieldValue = getTemplateValueAtPath(value, currentPath);
-      const label =
-        getLocalizedTemplateText(field.label, language) || currentPath.join(".");
-      const nestedFields = getNestedTemplateFields(field);
-      const fieldType = getTemplateFieldType(field);
-      const path = currentPath.join(".");
+  // Fields are flat per the backend's `ContentTemplateField` schema — no
+  // nested traversal is needed (see `DynamicTemplateField` alias comment).
+  return (template.fields as DynamicTemplateField[]).flatMap((field) => {
+    const path = field.key;
+    const fieldValue = getTemplateValueAtPath(value, [path]);
+    const label = getLocalizedTemplateText(field.label, language) || path;
 
-      const currentErrors: TemplateValidationIssue[] = [];
-      if (field.required && !hasTemplateValue(fieldValue)) {
-        currentErrors.push({
-          code: "required",
-          path,
-          label,
-          message: `${label} مطلوب`,
-        });
-      }
+    const currentErrors: TemplateValidationIssue[] = [];
+    if (field.required && !hasTemplateValue(fieldValue)) {
+      currentErrors.push({
+        code: "required",
+        path,
+        label,
+        message: `${label} مطلوب`,
+      });
+    }
 
-      currentErrors.push(
-        ...validateValueAgainstField(field, fieldValue, path, label),
-      );
+    currentErrors.push(
+      ...validateValueAgainstField(field, fieldValue, path, label),
+    );
 
-      if (
-        nestedFields.length &&
-        fieldType === "object" &&
-        isDynamicRecord(fieldValue)
-      ) {
-        currentErrors.push(...visit(nestedFields, currentPath));
-      }
-
-      if (nestedFields.length && fieldType === "array" && Array.isArray(fieldValue)) {
-        fieldValue.forEach((entry, index) => {
-          if (!isDynamicRecord(entry)) return;
-          currentErrors.push(
-            ...visit(nestedFields, [...currentPath, String(index)]),
-          );
-        });
-      } else if (fieldType === "array" && Array.isArray(fieldValue)) {
-        const itemField = getArrayItemField(field);
-        if (itemField) {
-          fieldValue.forEach((entry, index) => {
-            const itemPath = [...currentPath, String(index)];
-            const itemLabel = `${label} (${index + 1})`;
-            currentErrors.push(
-              ...validateValueAgainstField(
-                itemField,
-                entry,
-                itemPath.join("."),
-                itemLabel,
-              ),
-            );
-          });
-        }
-      }
-
-      return currentErrors;
-    });
-
-  return visit(template.fields as DynamicTemplateField[], []);
+    return currentErrors;
+  });
 }
 
 export function collectMissingRequiredTemplateFields(

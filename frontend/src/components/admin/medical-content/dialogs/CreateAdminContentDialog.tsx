@@ -2,7 +2,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Save, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  type Resolver,
+} from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateAdminContent } from "@/hooks/admin/content/useAdminContent";
@@ -167,6 +172,8 @@ const formSchema = z
       "SETTINGS_PAGE",
     ]),
     title: z.string().min(1, "عنوان المحتوى مطلوب"),
+    /** English title — required only for SETTINGS_PAGE (sent as `{ ar, en }`). */
+    titleEn: z.string().optional(),
     summary: z.string().optional(),
     language: z.enum(["ar", "en"]),
     slug: optionalLatinSlugSchema(),
@@ -207,6 +214,17 @@ const formSchema = z
     }
 
     if (
+      value.type === "SETTINGS_PAGE" &&
+      (!value.titleEn || !value.titleEn.trim())
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["titleEn"],
+        message: "العنوان بالإنجليزية مطلوب لصفحات الإعدادات",
+      });
+    }
+
+    if (
       value.type !== "SETTINGS_PAGE" &&
       !value.contentBlocks.some((block) => isMeaningfulBlock(block))
     ) {
@@ -232,6 +250,7 @@ const typeOptions: { value: AdminContentType; label: string }[] = [
 const EMPTY_FORM: FormValues = {
   type: "GENERAL_ADVICE",
   title: "",
+  titleEn: "",
   summary: "",
   language: "ar",
   slug: "",
@@ -284,7 +303,11 @@ export default function CreateAdminContentDialog({
     watch,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    // zodResolver's inferred Resolver type diverges from `FormValues` because
+    // zod's `.default()` fields make the *input* type optional while
+    // `z.infer` (the output/parsed type) requires them — a known
+    // zodResolver v5 + zod v4 typing friction, not a real runtime mismatch.
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: EMPTY_FORM,
   });
   const contentBlocksFieldArray = useFieldArray({
@@ -645,7 +668,10 @@ export default function CreateAdminContentDialog({
 
       await createMut.mutateAsync({
         type: v.type,
-        title: v.title.trim(),
+        title:
+          v.type === "SETTINGS_PAGE"
+            ? { ar: v.title.trim(), en: v.titleEn?.trim() || "" }
+            : v.title.trim(),
         summary: v.summary?.trim() || undefined,
         language: v.language,
         slug: v.slug?.trim() || undefined,
@@ -765,7 +791,9 @@ export default function CreateAdminContentDialog({
                   ) : null}
 
                   <AdminFormField
-                    label="العنوان"
+                    label={
+                      selectedType === "SETTINGS_PAGE" ? "العنوان (عربي)" : "العنوان"
+                    }
                     required
                     error={errors.title?.message}
                   >
@@ -778,6 +806,24 @@ export default function CreateAdminContentDialog({
                       )}
                     />
                   </AdminFormField>
+
+                  {selectedType === "SETTINGS_PAGE" ? (
+                    <AdminFormField
+                      label="العنوان (إنجليزي)"
+                      required
+                      error={errors.titleEn?.message}
+                    >
+                      <input
+                        {...register("titleEn")}
+                        placeholder="Clear English title"
+                        dir="ltr"
+                        className={adminFieldClass(
+                          cn(adminInputClass, "text-start placeholder:text-start"),
+                          Boolean(errors.titleEn),
+                        )}
+                      />
+                    </AdminFormField>
+                  ) : null}
 
                   <AdminFormField label="ملخص" error={errors.summary?.message}>
                     <textarea
@@ -996,7 +1042,11 @@ export default function CreateAdminContentDialog({
                     register={register}
                     setValue={setValue}
                     clearErrors={clearErrors}
-                    fieldArray={contentBlocksFieldArray}
+                    // See ContentBlockEditor's prop typing note: its
+                    // `fieldArray` type can't statically unify with this
+                    // form's concrete field-array type (RHF generic variance).
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    fieldArray={contentBlocksFieldArray as any}
                     blocks={watchedBlocks}
                     error={errors.contentBlocks}
                     disabled={submitting}

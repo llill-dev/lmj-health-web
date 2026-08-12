@@ -570,7 +570,7 @@ function normalizeSourcesInput(value: unknown): CreateAdminContentBody["sources"
   if (!Array.isArray(normalized)) return undefined;
 
   const sources = normalized
-    .map((entry) => {
+    .map((entry): NonNullable<CreateAdminContentBody["sources"]>[number] | null => {
       const record = asAdminRecord(entry);
       if (!record) {
         const text = readLocalizedText(entry);
@@ -649,16 +649,18 @@ function normalizeNewsDateValue(value: unknown): string | undefined {
 }
 
 function buildAdminContentNewsPayload(
-  body: Pick<
-    CreateAdminContentBody,
-    | "news"
-    | "sourceName"
-    | "sourceUrl"
-    | "originalTitle"
-    | "publishedAt"
-    | "aiSummary"
-    | "title"
-    | "summary"
+  body: Partial<
+    Pick<
+      CreateAdminContentBody,
+      | "news"
+      | "sourceName"
+      | "sourceUrl"
+      | "originalTitle"
+      | "publishedAt"
+      | "aiSummary"
+      | "title"
+      | "summary"
+    >
   >,
 ) {
   const rawNews = normalizePossiblyJsonValue(body.news);

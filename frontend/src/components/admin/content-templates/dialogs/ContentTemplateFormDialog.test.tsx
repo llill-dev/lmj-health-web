@@ -168,7 +168,7 @@ describe("ContentTemplateFormDialog", () => {
           {
             key: "followUp",
             label: "ملاحظات المتابعة",
-            type: "text",
+            type: "string",
             required: false,
           },
         ],

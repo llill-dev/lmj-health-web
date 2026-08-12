@@ -204,7 +204,7 @@ export function buildContentBlocks(
   blocks: BlockFormValue[],
 ): AdminContentBlock[] {
   return blocks
-    .map((block) => {
+    .map((block): AdminContentBlock | null => {
       if (block.type === "divider") return { type: "divider" };
 
       if (block.type === "heading") {
@@ -336,9 +336,10 @@ export function normalizeContentBlocksForForm(
       return createEmptyBlock("divider");
     }
 
+    const fallbackText = (block as { text?: unknown }).text;
     return {
       type: "paragraph",
-      text: typeof block.text === "string" ? block.text : "",
+      text: typeof fallbackText === "string" ? fallbackText : "",
     } satisfies BlockFormValue;
   });
 

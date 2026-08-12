@@ -3,7 +3,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Save, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  type Resolver,
+} from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -69,6 +74,8 @@ const formSchema = z
       "SETTINGS_PAGE",
     ]),
     title: z.string().min(1, "عنوان المحتوى مطلوب"),
+    /** English title — required only for SETTINGS_PAGE (sent as `{ ar, en }`). */
+    titleEn: z.string().optional(),
     summary: z.string().optional(),
     language: z.enum(["ar", "en"]),
     slug: optionalLatinSlugSchema(),
@@ -102,6 +109,17 @@ const formSchema = z
         code: z.ZodIssueCode.custom,
         path: ["pageVersion"],
         message: "إصدار الصفحة مطلوب لصفحات الإعدادات",
+      });
+    }
+
+    if (
+      value.type === "SETTINGS_PAGE" &&
+      (!value.titleEn || !value.titleEn.trim())
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["titleEn"],
+        message: "العنوان بالإنجليزية مطلوب لصفحات الإعدادات",
       });
     }
 
@@ -171,10 +189,14 @@ export default function EditAdminContentDialog({
     clearErrors,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    // See CreateAdminContentDialog: zodResolver's inferred type diverges from
+    // `FormValues` for schemas using `.default()` (input vs. output types) —
+    // a known zodResolver v5 + zod v4 typing friction, not a runtime issue.
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       type: "GENERAL_ADVICE",
       title: "",
+      titleEn: "",
       summary: "",
       language: "ar",
       slug: "",
@@ -267,6 +289,26 @@ export default function EditAdminContentDialog({
 
     return undefined;
   }, [availableTemplates, details?.template, selectedTemplateId]);
+
+  // Keep an inactive/legacy template visible as a select option instead of
+  // rendering a blank dropdown for content that still references it — an
+  // empty-looking select invites silently swapping the template on save.
+  const templateOptions = useMemo(() => {
+    const options = availableTemplates.map((template) => ({
+      value: template._id,
+      label: template.name || template.slug || template._id,
+    }));
+    if (
+      selectedTemplate &&
+      !availableTemplates.some((template) => template._id === selectedTemplate._id)
+    ) {
+      options.push({
+        value: selectedTemplate._id,
+        label: `${selectedTemplate.name || selectedTemplate.slug || selectedTemplate._id} (غير نشط)`,
+      });
+    }
+    return options;
+  }, [availableTemplates, selectedTemplate]);
 
   const previewDataResult = parseJsonInput(previewDataJson || "", undefined);
   const previewSourcesResult = parseJsonInput(previewSourcesJson || "", []);
@@ -452,6 +494,10 @@ export default function EditAdminContentDialog({
     reset({
       type: details.type ?? "GENERAL_ADVICE",
       title: toDisplayText(details.title),
+      titleEn:
+        details.title && typeof details.title === "object"
+          ? toDisplayText((details.title as Record<string, unknown>).en)
+          : "",
       summary: toDisplayText(details.summary),
       language: lang === "en" ? "en" : "ar",
       slug: toDisplayText(details.slug),
@@ -568,7 +614,10 @@ export default function EditAdminContentDialog({
         id: contentId,
         body: {
           type: v.type,
-          title: v.title.trim(),
+          title:
+            v.type === "SETTINGS_PAGE"
+              ? { ar: v.title.trim(), en: v.titleEn?.trim() || "" }
+              : v.title.trim(),
           summary: v.summary?.trim() || undefined,
           language: v.language,
           slug: v.slug?.trim() || undefined,
@@ -726,7 +775,11 @@ export default function EditAdminContentDialog({
                       </div>
 
                       <AdminFormField
-                        label="العنوان"
+                        label={
+                          selectedType === "SETTINGS_PAGE"
+                            ? "العنوان (عربي)"
+                            : "العنوان"
+                        }
                         required
                         error={errors.title?.message}
                       >
@@ -742,6 +795,27 @@ export default function EditAdminContentDialog({
                           )}
                         />
                       </AdminFormField>
+
+                      {selectedType === "SETTINGS_PAGE" ? (
+                        <AdminFormField
+                          label="العنوان (إنجليزي)"
+                          required
+                          error={errors.titleEn?.message}
+                        >
+                          <input
+                            {...register("titleEn")}
+                            placeholder="Clear English title"
+                            dir="ltr"
+                            className={adminFieldClass(
+                              cn(
+                                adminInputClass,
+                                "text-start placeholder:text-start",
+                              ),
+                              Boolean(errors.titleEn),
+                            )}
+                          />
+                        </AdminFormField>
+                      ) : null}
 
                       <AdminFormField
                         label="ملخص"
@@ -828,10 +902,7 @@ export default function EditAdminContentDialog({
                                   }}
                                   onBlur={field.onBlur}
                                   name={field.name}
-                                  options={availableTemplates.map((template) => ({
-                                    value: template._id,
-                                    label: template.name || template.slug || template._id,
-                                  }))}
+                                  options={templateOptions}
                                   placeholder={
                                     templateQuery.isLoading
                                       ? "جارٍ تحميل القوالب..."
@@ -925,7 +996,11 @@ export default function EditAdminContentDialog({
                         register={register}
                         setValue={setValue}
                         clearErrors={clearErrors}
-                        fieldArray={contentBlocksFieldArray}
+                        // See ContentBlockEditor's prop typing note and
+                        // CreateAdminContentDialog: RHF generic variance
+                        // prevents static unification here.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        fieldArray={contentBlocksFieldArray as any}
                         blocks={watchedBlocks}
                         error={errors.contentBlocks}
                         disabled={submitting}
