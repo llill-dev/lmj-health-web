@@ -20,22 +20,56 @@ export function stripHttpStatusFromMessage(s: string): string {
   return t.trim();
 }
 
+export type FieldValidationError = { field?: string; message: string };
+
 /**
- * يستخرج أخطاء التحقق من الحقول المحددة من استجابة API 422.
+ * بعض استجابات الباك-إند تُعيد نصوص تحقّق تقنية خام (من مكتبة تحقق مثل zod)
+ * من نوع "Invalid input: expected string, received undefined". هذه النصوص
+ * تقنية بحتة ولا تُفهم من المستخدم العربي، وعرضها مباشرة يخالف سياسة عدم
+ * إظهار أخطاء تقنية خام للمستخدم — نستبدلها برسالة عربية عامة وواضحة.
  */
-function extractValidationErrors(err: ApiError): string[] {
+const TECHNICAL_MESSAGE_RE =
+  /invalid input|invalid_type|expected .+ received|^required$|is not a valid|must be a (string|number|boolean|array|object)/i;
+
+export function isTechnicalValidationMessage(message: string): boolean {
+  return TECHNICAL_MESSAGE_RE.test(message);
+}
+
+function humanizeValidationMessage(message: string): string {
+  if (!isTechnicalValidationMessage(message)) return message;
+  return getCurrentLocale() === "en"
+    ? "Please enter a valid value for this field."
+    : "يرجى إدخال قيمة صحيحة لهذا الحقل.";
+}
+
+/**
+ * يستخرج أخطاء التحقق من الحقول المحددة من استجابة API 422، مع الاحتفاظ
+ * بمسار الحقل (field) عند توفره ليتمكّن المستدعي من ربط الخطأ بالمُدخل
+ * الصحيح بدل عرضه كرسالة عامة فقط.
+ */
+export function extractFieldValidationErrors(
+  err: unknown,
+): FieldValidationError[] {
+  if (!(err instanceof ApiError) || err.status !== 422) return [];
   const errors = err.body.errors as
     | Array<{ field?: string; message?: string }>
     | undefined;
   if (!Array.isArray(errors) || errors.length === 0) return [];
 
   return errors
-    .map((e) => e.message)
     .filter(
-      (msg): msg is string => typeof msg === "string" && msg.trim().length > 0,
+      (e): e is { field?: string; message: string } =>
+        typeof e.message === "string" && e.message.trim().length > 0,
     )
-    .map((msg) => stripHttpStatusFromMessage(msg))
-    .filter((msg) => msg.length > 0);
+    .map((e) => ({
+      field: e.field,
+      message: humanizeValidationMessage(stripHttpStatusFromMessage(e.message)),
+    }))
+    .filter((e) => e.message.length > 0);
+}
+
+function extractValidationErrors(err: ApiError): string[] {
+  return extractFieldValidationErrors(err).map((e) => e.message);
 }
 
 /**

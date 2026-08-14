@@ -55,30 +55,70 @@ export function normalizeSchemaFieldType(value: unknown): SchemaFieldType {
   return LEGACY_FIELD_TYPE_TO_SCHEMA_TYPE[String(value)] ?? "string";
 }
 
+/**
+ * Builds the exact `LocalizedInput` shape for docs/openapi.json — an object
+ * containing only the locale key(s) that actually have text.
+ *
+ * This must never fall back to duplicating one locale's text into the
+ * other (e.g. `{ar: en}` when ar is blank), and must never collapse to a
+ * bare string when only one locale is filled. Both of those previously
+ * happened here, and if the backend's own bare-string handling for
+ * `LocalizedInput` mirrors the value into both `ar`/`en` on store, the
+ * result is the Arabic value silently reappearing in the English input
+ * (or vice versa) the next time the record is edited.
+ */
 export function serializeLocalizedLabel(parts: {
   ar: string;
   en: string;
-}): string | { ar: string; en: string } {
+}): { ar?: string; en?: string } | string {
   const ar = parts.ar.trim();
   const en = parts.en.trim();
 
-  if (!en) {
-    return ar;
-  }
-
-  return {
-    ar: ar || en,
-    en,
-  };
+  if (ar && en) return { ar, en };
+  if (ar) return { ar };
+  if (en) return { en };
+  return "";
 }
 
-export const schemaFieldTypeOptions: Array<{
-  value: SchemaFieldType;
-  label: string;
-}> = [
-  { value: "string", label: "نص" },
-  { value: "number", label: "رقم" },
-  { value: "boolean", label: "قيمة منطقية" },
-  { value: "array", label: "قائمة" },
-  { value: "object", label: "كائن" },
-];
+/**
+ * `ContentTemplateField.enum` (docs/openapi.json) is an untyped array of
+ * scalar option values. The form authors it as a single comma-separated
+ * text input rather than a repeatable-item widget, matching how
+ * tags/categories/riskFlags are authored elsewhere in the medical-content
+ * editor.
+ */
+export function enumToOptionsText(value: unknown[] | undefined): string {
+  if (!Array.isArray(value)) return "";
+  return value
+    .filter(
+      (entry): entry is string | number | boolean =>
+        typeof entry === "string" ||
+        typeof entry === "number" ||
+        typeof entry === "boolean",
+    )
+    .map((entry) => String(entry))
+    .join(", ");
+}
+
+export function optionsTextToEnum(value: string): string[] | undefined {
+  const options = value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  return options.length ? options : undefined;
+}
+
+export function getSchemaFieldTypeOptions(
+  t: (key: string, fallback?: string) => string,
+): Array<{ value: SchemaFieldType; label: string }> {
+  return [
+    { value: "string", label: t("contentTemplateDialog.schemaTypes.string", "نص") },
+    { value: "number", label: t("contentTemplateDialog.schemaTypes.number", "رقم") },
+    {
+      value: "boolean",
+      label: t("contentTemplateDialog.schemaTypes.boolean", "قيمة منطقية"),
+    },
+    { value: "array", label: t("contentTemplateDialog.schemaTypes.array", "قائمة") },
+    { value: "object", label: t("contentTemplateDialog.schemaTypes.object", "كائن") },
+  ];
+}

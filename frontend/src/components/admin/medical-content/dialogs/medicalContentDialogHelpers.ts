@@ -96,7 +96,7 @@ export function getReviewReadinessIssueMessage(
       return "Disclaimer version is missing.";
     }
     if (code === "seek_help_required") {
-      return "Seek Help block requirement is not enabled.";
+      return "Add a callout block with a warn/danger variant and a title that says to seek help — a toggle alone does not satisfy this.";
     }
     if (code === "blocks_required") {
       return "At least one meaningful content block is required.";
@@ -114,7 +114,7 @@ export function getReviewReadinessIssueMessage(
     return "إصدار التنبيه الطبي غير مضاف.";
   }
   if (code === "seek_help_required") {
-    return "متطلب Seek Help Block غير مفعّل.";
+    return "أضف بلوك تنبيه (callout) بنوع warn أو danger وعنوان يوضّح ضرورة مراجعة الطبيب — تفعيل الخيار وحده لا يكفي.";
   }
   if (code === "blocks_required") {
     return "يلزم وجود بلوك محتوى فعلي واحد على الأقل.";
@@ -506,6 +506,28 @@ export function hasMeaningfulContentBlocks(
   });
 }
 
+// docs/API.md:9800 — the backend's actual seek-help gate for CONDITION/
+// SYMPTOM inspects contentBlocks for a real callout with variant "warn" or
+// "danger" and a title containing "seek help" (or "متى تراجع الطبيب"). It
+// does not check the `requiresSeekHelpBlock` toggle — that field is stored
+// editorial metadata, not the enforcement itself. Checking only the toggle
+// let the frontend show "ready" for content the backend would still reject.
+const SEEK_HELP_TITLE_PATTERN = /seek help|متى تراجع الطبيب/i;
+
+export function hasSeekHelpCallout(
+  blocks: AdminContentBlock[] | null | undefined,
+): boolean {
+  if (!Array.isArray(blocks)) return false;
+  return blocks.some((block) => {
+    if (!block || typeof block !== "object") return false;
+    const record = block as Record<string, unknown>;
+    if (toDisplayText(record.type).trim() !== "callout") return false;
+    const variant = toDisplayText(record.variant).trim();
+    if (variant !== "danger" && variant !== "warn") return false;
+    return SEEK_HELP_TITLE_PATTERN.test(toDisplayText(record.title));
+  });
+}
+
 export function getReviewReadinessIssueCodes(
   item: AdminContentDetailsItem | null,
 ): ReviewReadinessIssueCode[] {
@@ -517,7 +539,6 @@ export function getReviewReadinessIssueCodes(
   const issues: ReviewReadinessIssueCode[] = [];
   const sourceCount = countValidContentSources(item);
   const disclaimerVersion = toDisplayText(item.disclaimerVersion).trim();
-  const requiresSeekHelpBlock = item.requiresSeekHelpBlock === true;
   const news =
     item.news && typeof item.news === "object"
       ? (item.news as Record<string, unknown>)
@@ -549,7 +570,7 @@ export function getReviewReadinessIssueCodes(
 
   if (
     (normalizedType === "CONDITION" || normalizedType === "SYMPTOM") &&
-    !requiresSeekHelpBlock
+    !hasSeekHelpCallout(item.contentBlocks)
   ) {
     issues.push("seek_help_required");
   }
@@ -582,7 +603,7 @@ export function toReleaseAcceptanceFields(item: AdminContentDetailsItem | null):
   status: AdminContentStatus;
   sourceCount: number;
   disclaimerVersion?: string;
-  requiresSeekHelpBlock: boolean;
+  hasSeekHelpCallout: boolean;
   newsSourceUrl?: string;
   newsPublishedAt?: string;
   reviewIssueCodes: ReviewReadinessIssueCode[];
@@ -606,7 +627,7 @@ export function toReleaseAcceptanceFields(item: AdminContentDetailsItem | null):
           ? 0
           : countValidContentSources(item),
     disclaimerVersion: toOptionalText(item.disclaimerVersion),
-    requiresSeekHelpBlock: item.requiresSeekHelpBlock === true,
+    hasSeekHelpCallout: hasSeekHelpCallout(item.contentBlocks),
     newsSourceUrl: toOptionalText(news?.sourceUrl ?? item.sourceUrl),
     newsPublishedAt: toOptionalText(
       news?.publishedAt ?? (type === "NEWS" ? item.publishedAt : undefined),

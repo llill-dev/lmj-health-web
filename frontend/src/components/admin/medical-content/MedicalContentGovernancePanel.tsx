@@ -7,6 +7,7 @@ import {
   toDisplayText,
   toPrettyJson,
 } from "./dialogs/medicalContentDialogHelpers";
+import { getTranslationValue } from "@/i18n/translations";
 import type { AdminContentStatus, AdminContentType } from "@/lib/admin/types";
 import {
   acceptanceStatusLabel,
@@ -15,6 +16,21 @@ import {
   type ReleaseAcceptanceSnapshot,
   type WorkflowActorRole,
 } from "./releaseAcceptanceMatrix";
+
+// This panel is shown for a specific content record's `language`, which is
+// independent of the admin's active UI locale (e.g. an English-UI admin
+// reviewing an Arabic-authored record) — so it translates against the
+// `language` prop directly rather than the global useI18n() locale.
+function translateFor(language: "ar" | "en") {
+  return (key: string, vars?: Record<string, string | number>): string => {
+    const template = getTranslationValue(language, key) ?? key;
+    if (!vars) return template;
+    return Object.entries(vars).reduce(
+      (text, [name, value]) => text.replace(`{${name}}`, String(value)),
+      template,
+    );
+  };
+}
 
 type SourceItem = {
   title?: string;
@@ -183,26 +199,34 @@ function BadgeList({
   );
 }
 
-function summarizeValue(value: unknown): string {
-  if (value == null) return "—";
-  if (typeof value === "string") return value || "—";
+function summarizeValue(value: unknown, t: ReturnType<typeof translateFor>): string {
+  const empty = t("governancePanel.emptyValue");
+  if (value == null) return empty;
+  if (typeof value === "string") return value || empty;
   if (typeof value === "number") return String(value);
   if (typeof value === "boolean") return value ? "true" : "false";
-  if (Array.isArray(value)) return `${value.length} عنصر`;
-  if (typeof value === "object") {
-    return `${Object.keys(value as Record<string, unknown>).length} حقول`;
+  if (Array.isArray(value)) {
+    return t("governancePanel.dynamicData.itemsCount", { count: value.length });
   }
-  return "—";
+  if (typeof value === "object") {
+    return t("governancePanel.dynamicData.fieldsCount", {
+      count: Object.keys(value as Record<string, unknown>).length,
+    });
+  }
+  return empty;
 }
 
 function DynamicDataSummary({
   dynamicData,
   invalidDynamicData,
-}: Pick<Props, "dynamicData" | "invalidDynamicData">) {
+  language,
+}: Pick<Props, "dynamicData" | "invalidDynamicData"> & { language: "ar" | "en" }) {
+  const t = translateFor(language);
+
   if (invalidDynamicData) {
     return (
       <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 font-cairo text-[12px] font-bold text-[#B42318]">
-        تعذّر قراءة JSON الخاص بالبيانات الديناميكية، لذلك تظهر هذه المنطقة كمرجع فقط.
+        {t("governancePanel.dynamicData.invalidJson")}
       </div>
     );
   }
@@ -210,7 +234,7 @@ function DynamicDataSummary({
   if (!dynamicData) {
     return (
       <div className="rounded-[12px] border border-dashed border-[#D0D5DD] bg-[#FCFCFD] px-3 py-2 font-cairo text-[12px] text-[#667085]">
-        لا توجد بيانات ديناميكية مرتبطة بهذا المحتوى.
+        {t("governancePanel.dynamicData.empty")}
       </div>
     );
   }
@@ -230,13 +254,13 @@ function DynamicDataSummary({
           >
             <div className="font-mono text-[11px] text-[#667085]">{key}</div>
             <div className="max-w-[70%] text-left font-cairo text-[12px] font-bold text-[#111827]">
-              {summarizeValue(value)}
+              {summarizeValue(value, t)}
             </div>
           </div>
         ))}
         {Object.keys(dynamicData as Record<string, unknown>).length > entries.length ? (
           <div className="font-cairo text-[11px] font-semibold text-[#667085]">
-            + عناصر إضافية في السجل الخام.
+            {t("governancePanel.dynamicData.moreItems")}
           </div>
         ) : null}
       </div>
@@ -269,6 +293,7 @@ export default function MedicalContentGovernancePanel({
   language = "ar",
   showAcceptanceMatrix = true,
 }: Props) {
+  const t = translateFor(language);
   const sourceCount = sources.filter((source) => source.title || source.url).length;
   const requiresSeekHelpByType =
     contentType === "CONDITION" || contentType === "SYMPTOM";
@@ -276,17 +301,17 @@ export default function MedicalContentGovernancePanel({
   const governanceChecklist = [
     {
       key: "sources",
-      label: "إضافة مصدر واحد موثوق على الأقل",
+      label: t("governancePanel.checklist.sources"),
       done: contentType === "SETTINGS_PAGE" || sourceCount > 0,
     },
     {
       key: "disclaimerVersion",
-      label: "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+      label: t("governancePanel.checklist.disclaimerVersion"),
       done: contentType === "SETTINGS_PAGE" || hasDisclaimerVersion,
     },
     {
       key: "seekHelp",
-      label: "تفعيل Seek Help Block لأن النوع حالة/عرض",
+      label: t("governancePanel.checklist.seekHelp"),
       done: !requiresSeekHelpByType || requiresSeekHelpBlock === true,
     },
   ];
@@ -307,12 +332,12 @@ export default function MedicalContentGovernancePanel({
       ? [
           {
             key: "newsSourceUrl",
-            label: "وجود رابط المصدر للخبر (news.sourceUrl)",
+            label: t("governancePanel.checklist.newsSourceUrl"),
             done: newsSourceUrl.length > 0,
           },
           {
             key: "newsPublishedAt",
-            label: "تحديد تاريخ نشر الخبر الأصلي (news.publishedAt)",
+            label: t("governancePanel.checklist.newsPublishedAt"),
             done: newsPublishedAt.length > 0,
           },
         ]
@@ -326,7 +351,7 @@ export default function MedicalContentGovernancePanel({
           status,
           sourceCount,
           disclaimerVersion,
-          requiresSeekHelpBlock,
+          hasSeekHelpCallout: requiresSeekHelpBlock,
           hasMeaningfulBlocks:
             hasMeaningfulBlocks ??
             (contentType === "SETTINGS_PAGE" ? true : undefined),
@@ -349,25 +374,31 @@ export default function MedicalContentGovernancePanel({
         <div className="rounded-[14px] border border-[#D0D5DD] bg-[#F8FAFC] p-4">
           <div className="inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
             <ShieldCheck className="h-4 w-4 text-primary" />
-            حالة السلامة
+            {t("governancePanel.section.safetyStatus")}
           </div>
           <div className="mt-3 space-y-2 font-cairo text-[12px] text-[#475467]">
-            <div>إصدار التنبيه: <span className="font-bold text-[#111827]">{disclaimerVersion || "غير محدد"}</span></div>
-            <div>يتطلب Seek Help Block: <span className="font-bold text-[#111827]">{formatBoolean(requiresSeekHelpBlock)}</span></div>
-            <div>محتوى مميز: <span className="font-bold text-[#111827]">{formatBoolean(isFeatured)}</span></div>
+            <div>{t("governancePanel.field.disclaimerVersion")}: <span className="font-bold text-[#111827]">{disclaimerVersion || t("governancePanel.field.notSet")}</span></div>
+            <div>{t("governancePanel.field.requiresSeekHelp")}: <span className="font-bold text-[#111827]">{formatBoolean(requiresSeekHelpBlock)}</span></div>
+            <div>{t("governancePanel.field.isFeatured")}: <span className="font-bold text-[#111827]">{formatBoolean(isFeatured)}</span></div>
           </div>
         </div>
 
         <div className="rounded-[14px] border border-[#D0D5DD] bg-[#FFF7ED] p-4">
           <div className="inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
             <AlertTriangle className="h-4 w-4 text-[#EA580C]" />
-            إشارات المخاطر
+            {t("governancePanel.section.riskFlags")}
           </div>
           <div className="mt-3 font-cairo text-[12px] text-[#475467]">
-            {riskFlags.length ? `${riskFlags.length} علامة خطر` : "لا توجد علامات خطر مسجلة"}
+            {riskFlags.length
+              ? t("governancePanel.riskFlags.count", { count: riskFlags.length })
+              : t("governancePanel.riskFlags.none")}
           </div>
           <div className="mt-3">
-            <BadgeList items={riskFlags} emptyLabel="لا توجد علامات خطر." tone="danger" />
+            <BadgeList
+              items={riskFlags}
+              emptyLabel={t("governancePanel.riskFlags.emptyList")}
+              tone="danger"
+            />
           </div>
         </div>
       </div>
@@ -375,23 +406,23 @@ export default function MedicalContentGovernancePanel({
       <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
         <div className="inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
           <Tag className="h-4 w-4 text-primary" />
-          التصنيف والربط
+          {t("governancePanel.section.classification")}
         </div>
         <div className="mt-4 space-y-4">
           <div>
-            <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">الوسوم</div>
-            <BadgeList items={tags} emptyLabel="لا توجد وسوم." />
+            <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">{t("governancePanel.field.tags")}</div>
+            <BadgeList items={tags} emptyLabel={t("governancePanel.tags.empty")} />
           </div>
           <div>
-            <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">الفئات</div>
-            <BadgeList items={categories} emptyLabel="لا توجد فئات." />
+            <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">{t("governancePanel.field.categories")}</div>
+            <BadgeList items={categories} emptyLabel={t("governancePanel.categories.empty")} />
           </div>
           <div>
             <div className="mb-2 inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#111827]">
               <Link2 className="h-3.5 w-3.5 text-[#667085]" />
-              المحتوى المرتبط
+              {t("governancePanel.field.relatedContent")}
             </div>
-            <BadgeList items={relatedContentIds} emptyLabel="لا توجد معرفات محتوى مرتبطة." />
+            <BadgeList items={relatedContentIds} emptyLabel={t("governancePanel.relatedContent.empty")} />
           </div>
         </div>
       </div>
@@ -399,7 +430,7 @@ export default function MedicalContentGovernancePanel({
       <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
         <div className="inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          قائمة جاهزية الحوكمة قبل المراجعة
+          {t("governancePanel.section.readinessChecklist")}
         </div>
         <div
           className={
@@ -409,12 +440,13 @@ export default function MedicalContentGovernancePanel({
           }
         >
           {missingChecklistItems.length
-            ? `تحذير جاهزية: ${missingChecklistItems.length} متطلبات غير مكتملة قبل إرسال المراجعة.`
-            : "جاهز للمراجعة: تم استكمال مؤشرات الحوكمة الأساسية."}
+            ? t("governancePanel.readiness.warning", {
+                count: missingChecklistItems.length,
+              })
+            : t("governancePanel.readiness.ready")}
         </div>
         <div className="mt-2 rounded-[10px] border border-[#D1E9FF] bg-[#F5FAFF] px-3 py-2 font-cairo text-[12px] font-bold text-[#175CD3]">
-          هذه إشارات تنبيهية فقط ولا تمنع عرض أو تصفح السجل. الإيقاف يتم عند محاولة
-          "إرسال للمراجعة" فقط.
+          {t("governancePanel.readiness.note")}
         </div>
         <div className="mt-4 space-y-2">
           {readinessChecklist.map((item) => (
@@ -426,7 +458,10 @@ export default function MedicalContentGovernancePanel({
                   : "rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 font-cairo text-[12px] font-bold text-amber-700"
               }
             >
-              {item.done ? "مكتمل" : "بحاجة لاستكمال"}: {item.label}
+              {item.done
+                ? t("governancePanel.readiness.done")
+                : t("governancePanel.readiness.pending")}
+              : {item.label}
             </div>
           ))}
         </div>
@@ -435,10 +470,12 @@ export default function MedicalContentGovernancePanel({
       <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
         <div className="inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
           <FileText className="h-4 w-4 text-primary" />
-          المصادر والمرجعيات
+          {t("governancePanel.section.sources")}
         </div>
         <div className="mt-2 font-cairo text-[12px] text-[#667085]">
-          {sourceCount ? `${sourceCount} مصدر ظاهر للمراجعة` : "لا توجد مصادر مضافة بعد."}
+          {sourceCount
+            ? t("governancePanel.sources.count", { count: sourceCount })
+            : t("governancePanel.sources.empty")}
         </div>
         <div className="mt-4 space-y-3">
           {sourceCount ? (
@@ -448,7 +485,7 @@ export default function MedicalContentGovernancePanel({
                 className="rounded-[12px] border border-[#EAECF0] bg-[#F9FAFB] px-3 py-3"
               >
                 <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                  {source.title || "مصدر بدون عنوان"}
+                  {source.title || t("governancePanel.sources.untitled")}
                 </div>
                 {source.url ? (
                   <a
@@ -461,32 +498,38 @@ export default function MedicalContentGovernancePanel({
                     <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 ) : (
-                  <div className="mt-1 font-cairo text-[12px] text-[#667085]">لا يوجد رابط مباشر.</div>
+                  <div className="mt-1 font-cairo text-[12px] text-[#667085]">
+                    {t("governancePanel.sources.noLink")}
+                  </div>
                 )}
               </div>
             ))
           ) : (
             <div className="rounded-[12px] border border-dashed border-[#D0D5DD] bg-[#FCFCFD] px-3 py-2 font-cairo text-[12px] text-[#667085]">
-              أضف مصادر موثوقة قبل الاعتماد أو النشر.
+              {t("governancePanel.sources.addBeforeApproval")}
             </div>
           )}
         </div>
       </div>
 
       <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
-        <div className="font-cairo text-[14px] font-extrabold text-[#111827]">البيانات الديناميكية</div>
+        <div className="font-cairo text-[14px] font-extrabold text-[#111827]">{t("governancePanel.section.dynamicData")}</div>
         <div className="mt-4">
-          <DynamicDataSummary dynamicData={dynamicData} invalidDynamicData={invalidDynamicData} />
+          <DynamicDataSummary
+            dynamicData={dynamicData}
+            invalidDynamicData={invalidDynamicData}
+            language={language}
+          />
         </div>
       </div>
 
       <div className="rounded-[14px] border border-[#E4E7EC] bg-white p-4">
-        <div className="font-cairo text-[14px] font-extrabold text-[#111827]">ملخص الخبر</div>
+        <div className="font-cairo text-[14px] font-extrabold text-[#111827]">{t("governancePanel.section.newsSummary")}</div>
         {hasNews ? (
           <div className="mt-4 space-y-2 font-cairo text-[12px] text-[#475467]">
-            <div>اسم المصدر: <span className="font-bold text-[#111827]">{toDisplayText(news?.sourceName) || "—"}</span></div>
-            <div>العنوان الأصلي: <span className="font-bold text-[#111827]">{toDisplayText(news?.originalTitle) || "—"}</span></div>
-            <div>تاريخ النشر الأصلي: <span className="font-bold text-[#111827]">{formatDate(toDisplayText(news?.publishedAt))}</span></div>
+            <div>{t("governancePanel.news.sourceName")}: <span className="font-bold text-[#111827]">{toDisplayText(news?.sourceName) || t("governancePanel.emptyValue")}</span></div>
+            <div>{t("governancePanel.news.originalTitle")}: <span className="font-bold text-[#111827]">{toDisplayText(news?.originalTitle) || t("governancePanel.emptyValue")}</span></div>
+            <div>{t("governancePanel.news.publishedAt")}: <span className="font-bold text-[#111827]">{formatDate(toDisplayText(news?.publishedAt))}</span></div>
             {toDisplayText(news?.sourceUrl) ? (
               <a
                 href={toDisplayText(news?.sourceUrl)}
@@ -506,7 +549,7 @@ export default function MedicalContentGovernancePanel({
           </div>
         ) : (
           <div className="mt-3 rounded-[12px] border border-dashed border-[#D0D5DD] bg-[#FCFCFD] px-3 py-2 font-cairo text-[12px] text-[#667085]">
-            لا توجد بيانات خبر إضافية لهذا السجل.
+            {t("governancePanel.news.empty")}
           </div>
         )}
       </div>

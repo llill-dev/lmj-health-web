@@ -18,14 +18,15 @@ import {
 } from "@/components/admin/form-field";
 import StyledSelect from "@/components/ui/styled-select";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 import {
-  CALL_OUT_VARIANT_OPTIONS,
-  CONTENT_BLOCK_TYPE_OPTIONS,
-  HEADING_LEVEL_OPTIONS,
   createEmptyBlock,
   faqItemsToText,
   getBlockValidationMessage,
+  getCalloutVariantOptions,
+  getContentBlockTypeOptions,
   getLinkCardUrlValidationMessage,
+  HEADING_LEVEL_OPTIONS,
   type BlockFormValue,
   type FaqFormItem,
   type SupportedBlockType,
@@ -64,9 +65,15 @@ export default function ContentBlockEditor<
   blocks,
   error,
   disabled = false,
-  title = "محتوى المقال",
-  description = "أنشئ البلوكات الفعلية للمقال مع إبقاء جسم المقال منفصلًا عن بيانات القالب.",
+  title,
+  description,
 }: ContentBlockEditorProps<TFormValues>) {
+  const { t } = useI18n();
+  const resolvedTitle = title ?? t("contentBlockEditor.title");
+  const resolvedDescription = description ?? t("contentBlockEditor.description");
+  const contentBlockTypeOptions = getContentBlockTypeOptions(t);
+  const calloutVariantOptions = getCalloutVariantOptions(t);
+
   // react-hook-form's generic `Path<TFormValues>` can't be statically resolved
   // against a bounded-but-open generic like `TFormValues extends FieldValues & {...}`.
   // This component only ever touches the `contentBlocks` slice via dynamic template-
@@ -91,10 +98,10 @@ export default function ContentBlockEditor<
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="text-right">
           <h3 className="font-cairo text-[15px] font-extrabold text-primary">
-            {title}
+            {resolvedTitle}
           </h3>
           <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-            {description}
+            {resolvedDescription}
           </p>
         </div>
         <button
@@ -104,7 +111,7 @@ export default function ContentBlockEditor<
           className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-primary/15 bg-white px-3 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-50"
         >
           <Plus className="h-4 w-4" aria-hidden />
-          إضافة بلوك
+          {t("contentBlockEditor.action.addBlock")}
         </button>
       </div>
 
@@ -113,10 +120,11 @@ export default function ContentBlockEditor<
           const blockType = blocks[index]?.type || "paragraph";
           const blockError = getBlockValidationMessage(
             blocks[index] ?? createEmptyBlock(),
+            t,
           );
           const linkCardUrlMessage =
             blockType === "linkCard"
-              ? getLinkCardUrlValidationMessage(blocks[index]?.url)
+              ? getLinkCardUrlValidationMessage(blocks[index]?.url, t)
               : "";
 
           return (
@@ -141,12 +149,11 @@ export default function ContentBlockEditor<
                         }}
                         onBlur={controlledField.onBlur}
                         name={controlledField.name}
-                        options={CONTENT_BLOCK_TYPE_OPTIONS.map((option) => ({
-                          value: option.value,
-                          label: option.label,
-                        }))}
-                        placeholder="نوع البلوك"
-                        listboxAriaLabel={`نوع البلوك ${index + 1}`}
+                        options={contentBlockTypeOptions}
+                        placeholder={t("contentBlockEditor.field.blockType.placeholder")}
+                        listboxAriaLabel={t(
+                          "contentBlockEditor.field.blockType.ariaLabel",
+                        ).replace("{index}", String(index + 1))}
                         disabled={disabled}
                       />
                     )}
@@ -158,7 +165,7 @@ export default function ContentBlockEditor<
                     onClick={() => move(index, index - 1)}
                     disabled={disabled || index === 0}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E6ECF2] text-[#667085] disabled:opacity-40"
-                    aria-label="تحريك لأعلى"
+                    aria-label={t("contentBlockEditor.action.moveUp")}
                   >
                     <ArrowUp className="h-4 w-4" aria-hidden />
                   </button>
@@ -167,7 +174,7 @@ export default function ContentBlockEditor<
                     onClick={() => move(index, index + 1)}
                     disabled={disabled || index === fields.length - 1}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E6ECF2] text-[#667085] disabled:opacity-40"
-                    aria-label="تحريك لأسفل"
+                    aria-label={t("contentBlockEditor.action.moveDown")}
                   >
                     <ArrowDown className="h-4 w-4" aria-hidden />
                   </button>
@@ -181,7 +188,7 @@ export default function ContentBlockEditor<
                     }
                     disabled={disabled}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E6ECF2] text-[#667085] disabled:opacity-40"
-                    aria-label="تكرار البلوك"
+                    aria-label={t("contentBlockEditor.action.duplicate")}
                   >
                     <Copy className="h-4 w-4" aria-hidden />
                   </button>
@@ -197,7 +204,7 @@ export default function ContentBlockEditor<
                     }
                     disabled={disabled}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#FECACA] text-red-600 disabled:opacity-50"
-                    aria-label="حذف البلوك"
+                    aria-label={t("contentBlockEditor.action.delete")}
                   >
                     <Trash2 className="h-4 w-4" aria-hidden />
                   </button>
@@ -210,7 +217,7 @@ export default function ContentBlockEditor<
                     name={`contentBlocks.${index}.level` as const}
                     control={formControl}
                     render={({ field: controlledField }) => (
-                      <AdminFormField label="المستوى">
+                      <AdminFormField label={t("contentBlockEditor.field.headingLevel.label")}>
                         <StyledSelect
                           value={String(controlledField.value ?? 2)}
                           onChange={(value) => controlledField.onChange(Number(value))}
@@ -220,18 +227,24 @@ export default function ContentBlockEditor<
                             value: String(option.value),
                             label: option.label,
                           }))}
-                          placeholder="مستوى العنوان"
-                          listboxAriaLabel="مستوى العنوان"
+                          placeholder={t(
+                            "contentBlockEditor.field.headingLevel.placeholder",
+                          )}
+                          listboxAriaLabel={t(
+                            "contentBlockEditor.field.headingLevel.placeholder",
+                          )}
                           disabled={disabled}
                         />
                       </AdminFormField>
                     )}
                   />
-                  <AdminFormField label="نص العنوان">
+                  <AdminFormField label={t("contentBlockEditor.field.headingText.label")}>
                     <input
                       {...formRegister(`contentBlocks.${index}.text` as const)}
                       disabled={disabled}
-                      placeholder="أدخل العنوان الفرعي"
+                      placeholder={t(
+                        "contentBlockEditor.field.headingText.placeholder",
+                      )}
                       className={adminFieldClass(
                         cn(adminInputClass, "text-start placeholder:text-start"),
                         false,
@@ -242,12 +255,14 @@ export default function ContentBlockEditor<
               ) : null}
 
               {blockType === "paragraph" ? (
-                <AdminFormField label="النص">
+                <AdminFormField label={t("contentBlockEditor.field.paragraphText.label")}>
                   <textarea
                     {...formRegister(`contentBlocks.${index}.text` as const)}
                     disabled={disabled}
                     rows={4}
-                    placeholder="اكتب الفقرة الأساسية للمقال…"
+                    placeholder={t(
+                      "contentBlockEditor.field.paragraphText.placeholder",
+                    )}
                     className={adminFieldClass(
                       cn(adminTextareaClass, "text-start placeholder:text-start"),
                       false,
@@ -258,12 +273,14 @@ export default function ContentBlockEditor<
 
               {blockType === "list" ? (
                 <div className="space-y-4">
-                  <AdminFormField label="عناصر القائمة">
+                  <AdminFormField label={t("contentBlockEditor.field.listItems.label")}>
                     <textarea
                       {...formRegister(`contentBlocks.${index}.itemsText` as const)}
                       disabled={disabled}
                       rows={4}
-                      placeholder="ضع كل عنصر في سطر مستقل"
+                      placeholder={t(
+                        "contentBlockEditor.field.listItems.placeholder",
+                      )}
                       className={adminFieldClass(
                         cn(adminTextareaClass, "text-start placeholder:text-start"),
                         false,
@@ -271,7 +288,7 @@ export default function ContentBlockEditor<
                     />
                   </AdminFormField>
                   <label className="flex items-center justify-end gap-2 font-cairo text-[12px] font-bold text-[#344054]">
-                    <span>قائمة مرقّمة</span>
+                    <span>{t("contentBlockEditor.field.listOrdered.label")}</span>
                     <input
                       {...formRegister(`contentBlocks.${index}.ordered` as const)}
                       type="checkbox"
@@ -288,40 +305,45 @@ export default function ContentBlockEditor<
                     name={`contentBlocks.${index}.variant` as const}
                     control={formControl}
                     render={({ field: controlledField }) => (
-                      <AdminFormField label="نوع التنبيه">
+                      <AdminFormField label={t("contentBlockEditor.field.calloutVariant.label")}>
                         <StyledSelect
                           value={controlledField.value ?? "info"}
                           onChange={controlledField.onChange}
                           onBlur={controlledField.onBlur}
                           name={controlledField.name}
-                          options={CALL_OUT_VARIANT_OPTIONS.map((option) => ({
-                            value: option.value,
-                            label: option.label,
-                          }))}
-                          placeholder="نوع التنبيه"
-                          listboxAriaLabel="نوع التنبيه"
+                          options={calloutVariantOptions}
+                          placeholder={t(
+                            "contentBlockEditor.field.calloutVariant.placeholder",
+                          )}
+                          listboxAriaLabel={t(
+                            "contentBlockEditor.field.calloutVariant.label",
+                          )}
                           disabled={disabled}
                         />
                       </AdminFormField>
                     )}
                   />
-                  <AdminFormField label="عنوان التنبيه">
+                  <AdminFormField label={t("contentBlockEditor.field.calloutTitle.label")}>
                     <input
                       {...formRegister(`contentBlocks.${index}.title` as const)}
                       disabled={disabled}
-                      placeholder="مثال: متى يجب طلب المساعدة؟"
+                      placeholder={t(
+                        "contentBlockEditor.field.calloutTitle.placeholder",
+                      )}
                       className={adminFieldClass(
                         cn(adminInputClass, "text-start placeholder:text-start"),
                         false,
                       )}
                     />
                   </AdminFormField>
-                  <AdminFormField label="النص">
+                  <AdminFormField label={t("contentBlockEditor.field.calloutText.label")}>
                     <textarea
                       {...formRegister(`contentBlocks.${index}.text` as const)}
                       disabled={disabled}
                       rows={3}
-                      placeholder="اكتب محتوى التنبيه أو المعلومة…"
+                      placeholder={t(
+                        "contentBlockEditor.field.calloutText.placeholder",
+                      )}
                       className={adminFieldClass(
                         cn(adminTextareaClass, "text-start placeholder:text-start"),
                         false,
@@ -333,30 +355,34 @@ export default function ContentBlockEditor<
 
               {blockType === "linkCard" ? (
                 <div className="space-y-4">
-                  <AdminFormField label="عنوان البطاقة">
+                  <AdminFormField label={t("contentBlockEditor.field.linkCardTitle.label")}>
                     <input
                       {...formRegister(`contentBlocks.${index}.title` as const)}
                       disabled={disabled}
-                      placeholder="مثال: رابط إرشادي موثوق"
+                      placeholder={t(
+                        "contentBlockEditor.field.linkCardTitle.placeholder",
+                      )}
                       className={adminFieldClass(
                         cn(adminInputClass, "text-start placeholder:text-start"),
                         false,
                       )}
                     />
                   </AdminFormField>
-                  <AdminFormField label="وصف مختصر">
+                  <AdminFormField label={t("contentBlockEditor.field.linkCardDescription.label")}>
                     <textarea
                       {...formRegister(`contentBlocks.${index}.description` as const)}
                       disabled={disabled}
                       rows={3}
-                      placeholder="ملخص قصير لما سيفتحه الرابط..."
+                      placeholder={t(
+                        "contentBlockEditor.field.linkCardDescription.placeholder",
+                      )}
                       className={adminFieldClass(
                         cn(adminTextareaClass, "text-start placeholder:text-start"),
                         false,
                       )}
                     />
                   </AdminFormField>
-                  <AdminFormField label="الرابط">
+                  <AdminFormField label={t("contentBlockEditor.field.linkCardUrl.label")}>
                     <input
                       {...formRegister(`contentBlocks.${index}.url` as const)}
                       disabled={disabled}
@@ -375,7 +401,7 @@ export default function ContentBlockEditor<
                     </p>
                   ) : (
                     <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#667085]">
-                      يُفضّل استخدام روابط عامة موثوقة تبدأ بـ https://
+                      {t("contentBlockEditor.field.linkCardUrl.hint")}
                     </p>
                   )}
                 </div>
@@ -404,8 +430,8 @@ export default function ContentBlockEditor<
                     return (
                       <div className="space-y-3">
                         <AdminFormField
-                          label="الأسئلة والإجابات"
-                          hint="أضف كل سؤال مع إجابته بشكل منفصل لرفع جودة المحتوى."
+                          label={t("contentBlockEditor.field.faqItems.label")}
+                          hint={t("contentBlockEditor.field.faqItems.hint")}
                         >
                           <div className="space-y-3">
                             {faqItems.map((item, faqIndex) => (
@@ -415,7 +441,10 @@ export default function ContentBlockEditor<
                               >
                                 <div className="mb-2 flex items-center justify-between">
                                   <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
-                                    عنصر FAQ {faqIndex + 1}
+                                    {t("contentBlockEditor.faq.itemLabel").replace(
+                                      "{index}",
+                                      String(faqIndex + 1),
+                                    )}
                                   </span>
                                   <button
                                     type="button"
@@ -429,7 +458,7 @@ export default function ContentBlockEditor<
                                     disabled={disabled}
                                     className="inline-flex h-7 items-center justify-center rounded-[8px] border border-[#FECACA] px-2 font-cairo text-[11px] font-bold text-red-600 disabled:opacity-50"
                                   >
-                                    حذف
+                                    {t("contentBlockEditor.action.deleteFaqItem")}
                                   </button>
                                 </div>
                                 <div className="space-y-2">
@@ -445,7 +474,9 @@ export default function ContentBlockEditor<
                                       )
                                     }
                                     disabled={disabled}
-                                    placeholder="السؤال"
+                                    placeholder={t(
+                                      "contentBlockEditor.field.faqQuestion.placeholder",
+                                    )}
                                     className={adminFieldClass(
                                       cn(adminInputClass, "text-start placeholder:text-start"),
                                       false,
@@ -464,7 +495,9 @@ export default function ContentBlockEditor<
                                     }
                                     disabled={disabled}
                                     rows={3}
-                                    placeholder="الإجابة"
+                                    placeholder={t(
+                                      "contentBlockEditor.field.faqAnswer.placeholder",
+                                    )}
                                     className={adminFieldClass(
                                       cn(adminTextareaClass, "text-start placeholder:text-start"),
                                       false,
@@ -484,7 +517,7 @@ export default function ContentBlockEditor<
                           className="inline-flex h-9 items-center justify-center gap-2 rounded-[10px] border border-primary/20 bg-white px-3 font-cairo text-[12px] font-extrabold text-primary disabled:opacity-50"
                         >
                           <Plus className="h-4 w-4" aria-hidden />
-                          إضافة سؤال
+                          {t("contentBlockEditor.action.addFaqItem")}
                         </button>
                       </div>
                     );
@@ -494,7 +527,7 @@ export default function ContentBlockEditor<
 
               {blockType === "divider" ? (
                 <div className="rounded-[10px] border border-dashed border-[#D0D5DD] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#667085]">
-                  سيتم إدراج فاصل بصري بين أجزاء المقال.
+                  {t("contentBlockEditor.dividerNote")}
                 </div>
               ) : null}
 

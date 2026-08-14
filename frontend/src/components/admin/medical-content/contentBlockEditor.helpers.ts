@@ -3,30 +3,53 @@
 import { z } from "zod";
 import type { AdminContentBlock } from "@/lib/admin/types";
 
-export const CONTENT_BLOCK_TYPE_OPTIONS = [
-  { value: "paragraph", label: "فقرة" },
-  { value: "heading", label: "عنوان فرعي" },
-  { value: "list", label: "قائمة" },
-  { value: "callout", label: "تنبيه / صندوق معلومات" },
-  { value: "linkCard", label: "بطاقة رابط" },
-  { value: "faq", label: "أسئلة شائعة" },
-  { value: "divider", label: "فاصل" },
+export const CONTENT_BLOCK_TYPES = [
+  "paragraph",
+  "heading",
+  "list",
+  "callout",
+  "linkCard",
+  "faq",
+  "divider",
 ] as const;
 
-export const CALL_OUT_VARIANT_OPTIONS = [
-  { value: "info", label: "معلومة" },
-  { value: "warn", label: "تنبيه" },
-  { value: "danger", label: "تحذير" },
-] as const;
+export type SupportedBlockType = (typeof CONTENT_BLOCK_TYPES)[number];
 
+export type Translate = (key: string, fallback?: string) => string;
+
+export function getContentBlockTypeOptions(
+  t: Translate,
+): Array<{ value: SupportedBlockType; label: string }> {
+  return [
+    { value: "paragraph", label: t("contentBlockEditor.blockType.paragraph") },
+    { value: "heading", label: t("contentBlockEditor.blockType.heading") },
+    { value: "list", label: t("contentBlockEditor.blockType.list") },
+    { value: "callout", label: t("contentBlockEditor.blockType.callout") },
+    { value: "linkCard", label: t("contentBlockEditor.blockType.linkCard") },
+    { value: "faq", label: t("contentBlockEditor.blockType.faq") },
+    { value: "divider", label: t("contentBlockEditor.blockType.divider") },
+  ];
+}
+
+export function getCalloutVariantOptions(
+  t: Translate,
+): Array<{ value: "info" | "warn" | "danger"; label: string }> {
+  return [
+    { value: "info", label: t("contentBlockEditor.calloutVariant.info") },
+    { value: "warn", label: t("contentBlockEditor.calloutVariant.warn") },
+    { value: "danger", label: t("contentBlockEditor.calloutVariant.danger") },
+  ];
+}
+
+// docs/API.md:9814 — backend accepts heading level 1-6.
 export const HEADING_LEVEL_OPTIONS = [
+  { value: 1, label: "H1" },
   { value: 2, label: "H2" },
   { value: 3, label: "H3" },
   { value: 4, label: "H4" },
+  { value: 5, label: "H5" },
+  { value: 6, label: "H6" },
 ] as const;
-
-export type SupportedBlockType =
-  (typeof CONTENT_BLOCK_TYPE_OPTIONS)[number]["value"];
 
 export type FaqFormItem = {
   question: string;
@@ -121,7 +144,11 @@ function normalizeFaqItem(value: unknown): FaqFormItem | null {
   const entry = value as Record<string, unknown>;
   const question = typeof entry.question === "string" ? entry.question.trim() : "";
   const answer = typeof entry.answer === "string" ? entry.answer.trim() : "";
-  if (!question && !answer) return null;
+  // Backend requires a complete question+answer pair — a one-sided pair
+  // (only one of the two filled in) must not be treated as valid, or it
+  // would pass the frontend's "at least one pair" check while the backend
+  // rejects the incomplete pair on submit-review.
+  if (!question || !answer) return null;
   return { question, answer };
 }
 
@@ -148,26 +175,29 @@ export function faqItemsToText(items: FaqFormItem[] | undefined): string {
     .join("\n");
 }
 
-export function getLinkCardUrlValidationMessage(url: string | undefined): string {
+export function getLinkCardUrlValidationMessage(
+  url: string | undefined,
+  t: Translate,
+): string {
   const value = url?.trim();
   if (!value) return "";
 
   if (value.includes(" ")) {
-    return "الرابط يجب ألا يحتوي على مسافات.";
+    return t("contentBlockEditor.validation.urlNoSpaces");
   }
 
   if (value.startsWith("www.")) {
-    return "أضف البروتوكول الكامل للرابط مثل https://";
+    return t("contentBlockEditor.validation.urlProtocolRequired");
   }
 
   try {
     const parsed = new URL(value);
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return "استخدم رابطًا يبدأ بـ http:// أو https:// فقط.";
+      return t("contentBlockEditor.validation.urlHttpOnly");
     }
     return "";
   } catch {
-    return "صيغة الرابط غير صحيحة. مثال صحيح: https://example.com";
+    return t("contentBlockEditor.validation.urlInvalid");
   }
 }
 
@@ -183,14 +213,14 @@ export function isMeaningfulBlock(block: BlockFormValue): boolean {
     );
   }
 
+  // docs/API.md:9817-9818 — the backend requires callout title+text and
+  // linkCard title+url together, not any-one-of. Description stays optional.
   if (block.type === "callout") {
-    return Boolean(block.title?.trim() || block.text?.trim());
+    return Boolean(block.title?.trim() && block.text?.trim());
   }
 
   if (block.type === "linkCard") {
-    return Boolean(
-      block.title?.trim() || block.description?.trim() || block.url?.trim(),
-    );
+    return Boolean(block.title?.trim() && block.url?.trim());
   }
 
   if (block.type === "faq") {
@@ -230,12 +260,12 @@ export function buildContentBlocks(
         const title = block.title?.trim();
         const text = block.text?.trim();
 
-        return title || text
+        return title && text
           ? {
               type: "callout",
               variant: block.variant || "info",
-              ...(title ? { title } : {}),
-              ...(text ? { text } : {}),
+              title,
+              text,
             }
           : null;
       }
@@ -245,12 +275,12 @@ export function buildContentBlocks(
         const description = block.description?.trim();
         const url = block.url?.trim();
 
-        return title || description || url
+        return title && url
           ? {
               type: "linkCard",
-              ...(title ? { title } : {}),
+              title,
+              url,
               ...(description ? { description } : {}),
-              ...(url ? { url } : {}),
             }
           : null;
       }
@@ -346,13 +376,16 @@ export function normalizeContentBlocksForForm(
   return normalized.length ? normalized : [createEmptyBlock()];
 }
 
-export function getBlockValidationMessage(block: BlockFormValue): string {
+export function getBlockValidationMessage(
+  block: BlockFormValue,
+  t: Translate,
+): string {
   if (block.type === "heading" && !block.text?.trim()) {
-    return "أدخل نص العنوان الفرعي.";
+    return t("contentBlockEditor.validation.headingTextRequired");
   }
 
   if (block.type === "paragraph" && !block.text?.trim()) {
-    return "أدخل نص الفقرة.";
+    return t("contentBlockEditor.validation.paragraphTextRequired");
   }
 
   if (
@@ -362,31 +395,30 @@ export function getBlockValidationMessage(block: BlockFormValue): string {
       .map((item) => item.trim())
       .filter(Boolean).length
   ) {
-    return "أضف عنصرًا واحدًا على الأقل في القائمة.";
+    return t("contentBlockEditor.validation.listItemRequired");
   }
 
-  if (block.type === "callout" && !block.title?.trim() && !block.text?.trim()) {
-    return "أدخل عنوان التنبيه أو نصه.";
+  if (
+    block.type === "callout" &&
+    !(block.title?.trim() && block.text?.trim())
+  ) {
+    return t("contentBlockEditor.validation.calloutBothRequired");
   }
 
   if (
     block.type === "linkCard" &&
-    !block.title?.trim() &&
-    !block.description?.trim() &&
-    !block.url?.trim()
+    !(block.title?.trim() && block.url?.trim())
   ) {
-    return "أدخل عنوان البطاقة أو وصفها أو الرابط.";
+    return t("contentBlockEditor.validation.linkCardBothRequired");
   }
 
-  if (
-    block.type === "linkCard" &&
-    getLinkCardUrlValidationMessage(block.url)
-  ) {
-    return getLinkCardUrlValidationMessage(block.url);
+  if (block.type === "linkCard") {
+    const urlMessage = getLinkCardUrlValidationMessage(block.url, t);
+    if (urlMessage) return urlMessage;
   }
 
   if (block.type === "faq" && normalizeFaqFormItems(block).length === 0) {
-    return "أضف سؤالًا وإجابة واحدة على الأقل.";
+    return t("contentBlockEditor.validation.faqPairRequired");
   }
 
   return "";

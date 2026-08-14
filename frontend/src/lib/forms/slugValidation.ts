@@ -27,3 +27,17 @@ export function requiredLatinSlugSchema(message = "المعرّف مطلوب") {
       message: LATIN_SLUG_MESSAGE,
     });
 }
+
+/**
+ * Best-effort slug suggestion from a Latin-script string (e.g. an English
+ * name). Non-Latin input (Arabic, etc.) has no safe automatic
+ * transliteration without a dedicated library, so it collapses to an empty
+ * suggestion rather than producing a misleading slug.
+ */
+export function slugifyLatin(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}

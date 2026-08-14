@@ -9,6 +9,7 @@ import {
   toDisplayText,
   toReleaseAcceptanceFields,
   hasMeaningfulContentBlocks,
+  hasSeekHelpCallout,
 } from "./dialogs/medicalContentDialogHelpers";
 
 export { hasMeaningfulContentBlocks };
@@ -57,7 +58,12 @@ export type ReleaseAcceptanceInput = {
   status: AdminContentStatus;
   sourceCount?: number;
   disclaimerVersion?: string;
-  requiresSeekHelpBlock?: boolean;
+  /**
+   * Whether contentBlocks actually contains a qualifying warn/danger callout
+   * with a "seek help" title — the real backend gate (docs/API.md:9800), not
+   * a raw toggle. See `hasSeekHelpCallout` in medicalContentDialogHelpers.
+   */
+  hasSeekHelpCallout?: boolean;
   hasMeaningfulBlocks?: boolean;
   newsSourceUrl?: string;
   newsPublishedAt?: string;
@@ -273,7 +279,7 @@ function buildTypeChecks(
       key: "seek_help",
       status: checkStatus(
         rules.requiresSeekHelp,
-        input.requiresSeekHelpBlock === true,
+        input.hasSeekHelpCallout === true,
         draftMode,
       ),
       label: {
@@ -389,7 +395,7 @@ export function buildReleaseAcceptanceFromDetails(
     status: fields.status,
     sourceCount: fields.sourceCount,
     disclaimerVersion: fields.disclaimerVersion,
-    requiresSeekHelpBlock: fields.requiresSeekHelpBlock,
+    hasSeekHelpCallout: fields.hasSeekHelpCallout,
     hasMeaningfulBlocks:
       fields.type === "SETTINGS_PAGE" ||
       hasMeaningfulContentBlocks(item.contentBlocks),
