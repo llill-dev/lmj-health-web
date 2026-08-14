@@ -196,6 +196,31 @@ function mapServerFieldToFormPath(field: string): Path<FormValues> | null {
   return null;
 }
 
+/**
+ * Focuses (and scrolls to) the input matching a form path, so the admin
+ * lands directly on the field a server-reported 422 error was attached to
+ * instead of only seeing a message somewhere in a long form. Tries RHF's
+ * own `setFocus` first (works for `register`/`Controller`-registered
+ * fields); falls back to a plain DOM query by `name` for fields whose
+ * focusable element isn't the one RHF registered.
+ */
+function focusFieldByPath(
+  formPath: string,
+  setFocus: (path: Path<FormValues>) => void,
+): void {
+  requestAnimationFrame(() => {
+    try {
+      setFocus(formPath as Path<FormValues>);
+    } catch {
+      // Some paths aren't directly registered — fall through to the DOM
+      // fallback below.
+    }
+    const el = document.querySelector<HTMLElement>(`[name="${formPath}"]`);
+    el?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+    el?.focus();
+  });
+}
+
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -226,6 +251,7 @@ export default function ContentTemplateFormDialog({
     control,
     reset,
     setError,
+    setFocus,
     setValue,
     watch,
     formState: { errors },
@@ -324,13 +350,18 @@ export default function ContentTemplateFormDialog({
       onOpenChange(false);
     } catch (submitError) {
       // Attach any server-reported field-path errors to their matching input
-      // in addition to the generic summary shown below via activeMut.isError.
+      // in addition to the generic summary shown below via activeMut.isError,
+      // and focus the first offending field so the admin lands on it
+      // directly instead of having to hunt for it in the form.
+      let firstFormPath: Path<FormValues> | null = null;
       extractFieldValidationErrors(submitError).forEach(({ field, message }) => {
         const formPath = field ? mapServerFieldToFormPath(field) : null;
         if (formPath) {
           setError(formPath, { type: "server", message });
+          firstFormPath ??= formPath;
         }
       });
+      if (firstFormPath) focusFieldByPath(firstFormPath, setFocus);
     }
   });
 

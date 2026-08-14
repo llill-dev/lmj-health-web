@@ -722,7 +722,9 @@ function buildAdminContentNewsPayload(
   };
 }
 
-function buildAdminContentPayload(body: CreateAdminContentBody | UpdateAdminContentBody) {
+function buildAdminContentPayload(
+  body: CreateAdminContentBody | UpdateAdminContentBody,
+) {
   const news = buildAdminContentNewsPayload(body);
   const payload: Record<string, unknown> = { ...body };
   const normalizedType = readLocalizedTextFromUnknown(payload.type);
@@ -730,8 +732,20 @@ function buildAdminContentPayload(body: CreateAdminContentBody | UpdateAdminCont
 
   if (isNewsType && news) {
     payload.news = news;
-  } else if ("news" in payload || ("type" in payload && !isNewsType)) {
-    payload.news = null;
+  } else {
+    // Non-NEWS types carry no news metadata. Neither of the two obvious
+    // encodings is safe against the real backend:
+    //  - an explicit `null` is rejected by the create validator with a 422
+    //    ("قيمة غير صالحة", path "news"), and
+    //  - omitting the key entirely reaches the route handler on create and
+    //    crashes with a 500 (it appears to spread/read `req.body.news`
+    //    without an undefined guard).
+    // An empty object satisfies the `{ type: "object" }` schema (so it
+    // isn't rejected like `null`) and gives any downstream `{...news}`
+    // spread something real to operate on (so it doesn't crash like
+    // `undefined`). It also still replaces/clears a previously-saved news
+    // object on update, the same way `null` was intended to.
+    payload.news = {};
   }
 
   delete payload.sourceName;

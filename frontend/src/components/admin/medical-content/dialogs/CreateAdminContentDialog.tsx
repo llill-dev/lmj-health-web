@@ -6,13 +6,17 @@ import {
   Controller,
   useFieldArray,
   useForm,
+  type Path,
   type Resolver,
 } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateAdminContent } from "@/hooks/admin/content/useAdminContent";
 import { useAdminContentTemplates } from "@/hooks/admin/content-templates/useAdminContentTemplates";
-import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
+import {
+  extractFieldValidationErrors,
+  userFacingErrorMessage,
+} from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
   AdminFormField,
@@ -244,6 +248,85 @@ function buildFormSchema(t: Translate) {
 
 type FormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
+/**
+ * Maps a server-reported 422 field path (e.g. "title", "news.sourceUrl",
+ * "sources[0].url") to this dialog's matching react-hook-form path, so a
+ * backend validation error attaches to the exact input instead of only
+ * appearing in the generic error summary at the bottom of the form.
+ * Field-path list per docs/API.md's POST /api/admin/content validation.
+ */
+function mapServerFieldToFormPath(field: string): Path<FormValues> | null {
+  const normalized = field.replace(/\[(\d+)\]/g, ".$1");
+
+  const direct: Partial<Record<string, Path<FormValues>>> = {
+    type: "type",
+    title: "title",
+    language: "language",
+    slug: "slug",
+    summary: "summary",
+    coverImage: "coverImage",
+    pageVersion: "pageVersion",
+    templateId: "templateId",
+    data: "templateData",
+    contentBlocks: "contentBlocks",
+    tags: "tagsInput",
+    categories: "categoriesInput",
+    riskFlags: "riskFlagsInput",
+    relatedContentIds: "relatedContentIdsInput",
+    isFeatured: "isFeatured",
+    disclaimerVersion: "disclaimerVersion",
+    requiresSeekHelpBlock: "requiresSeekHelpBlock",
+    sources: "sources",
+    "news.sourceName": "sourceTitle",
+    "news.sourceUrl": "sourceUrl",
+    "news.originalTitle": "originalTitle",
+    "news.publishedAt": "publishedAt",
+  };
+  if (direct[normalized]) return direct[normalized] ?? null;
+
+  if (normalized.startsWith("relatedContentIds.")) return "relatedContentIdsInput";
+
+  const dataMatch = normalized.match(/^data\.(.+)$/);
+  if (dataMatch) return `templateData.${dataMatch[1]}` as Path<FormValues>;
+
+  const sourceMatch = normalized.match(/^sources\.(\d+)\.(title|url)$/);
+  if (sourceMatch) {
+    return `sources.${sourceMatch[1]}.${sourceMatch[2]}` as Path<FormValues>;
+  }
+
+  if (normalized.startsWith("sources")) return "sources";
+  if (normalized.startsWith("contentBlocks")) return "contentBlocks";
+  if (normalized.startsWith("news")) return "sourceUrl";
+
+  return null;
+}
+
+/**
+ * Focuses (and scrolls to) the input matching a form path, so the admin
+ * lands directly on the field a server-reported 422 error was attached to
+ * instead of only seeing a message somewhere in a long form. Tries RHF's
+ * own `setFocus` first (works for `register`/`Controller`-registered
+ * fields); falls back to a plain DOM query by `name` for fields whose
+ * focusable element isn't the one RHF registered (e.g. a custom listbox
+ * trigger button carrying `name` but not the RHF ref).
+ */
+function focusFieldByPath(
+  formPath: string,
+  setFocus: (path: Path<FormValues>) => void,
+): void {
+  requestAnimationFrame(() => {
+    try {
+      setFocus(formPath as Path<FormValues>);
+    } catch {
+      // Some paths (array-root fields like "sources"/"contentBlocks")
+      // aren't directly registered — fall through to the DOM fallback.
+    }
+    const el = document.querySelector<HTMLElement>(`[name="${formPath}"]`);
+    el?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+    el?.focus();
+  });
+}
+
 function getTypeOptions(t: Translate): { value: AdminContentType; label: string }[] {
   return [
     { value: "CONDITION", label: t("createContentDialog.type.condition") },
@@ -307,6 +390,7 @@ export default function CreateAdminContentDialog({
     handleSubmit,
     control,
     setError,
+    setFocus,
     clearErrors,
     setValue,
     reset,
@@ -544,7 +628,12 @@ export default function CreateAdminContentDialog({
       previousTypeRef.current = undefined;
       setTypeSwitchSafetyMessage(null);
     }
-  }, [createMut, open, reset]);
+    // `createMut` is intentionally excluded: `useMutation` returns a new
+    // object identity on every state change, and `createMut.reset()` itself
+    // triggers one — including it here re-fires this effect in a loop
+    // ("Maximum update depth exceeded").
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, reset]);
 
   useEffect(() => {
     if (!open) return;
@@ -701,8 +790,20 @@ export default function CreateAdminContentDialog({
         },
       );
       onOpenChange(false);
-    } catch {
-      // Surface API errors through the existing mutation error rendering.
+    } catch (submitError) {
+      // Attach server-reported field-path errors to their matching input,
+      // in addition to the generic summary rendered from createMut.isError,
+      // and focus the first offending field so the admin lands on it
+      // directly instead of having to hunt for it in a long form.
+      let firstFormPath: Path<FormValues> | null = null;
+      extractFieldValidationErrors(submitError).forEach(({ field, message }) => {
+        const formPath = field ? mapServerFieldToFormPath(field) : null;
+        if (formPath) {
+          setError(formPath, { type: "server", message });
+          firstFormPath ??= formPath;
+        }
+      });
+      if (firstFormPath) focusFieldByPath(firstFormPath, setFocus);
     }
   });
 
@@ -1066,7 +1167,7 @@ export default function CreateAdminContentDialog({
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     fieldArray={contentBlocksFieldArray as any}
                     blocks={watchedBlocks}
-                    error={errors.contentBlocks}
+                    error={errors.contentBlocks?.root ?? errors.contentBlocks}
                     disabled={submitting}
                     description={t("createContentDialog.blockEditor.description")}
                   />
@@ -1096,36 +1197,60 @@ export default function CreateAdminContentDialog({
                       {t("createContentDialog.section.classification")}
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <AdminFormField label={t("createContentDialog.field.tags.label")}>
+                      <AdminFormField
+                        label={t("createContentDialog.field.tags.label")}
+                        error={errors.tagsInput?.message}
+                      >
                         <input
                           {...register("tagsInput")}
                           placeholder="tag-1, tag-2"
-                          className={adminFieldClass(cn(adminInputClass))}
+                          className={adminFieldClass(
+                            cn(adminInputClass),
+                            Boolean(errors.tagsInput),
+                          )}
                         />
                       </AdminFormField>
 
-                      <AdminFormField label={t("createContentDialog.field.categories.label")}>
+                      <AdminFormField
+                        label={t("createContentDialog.field.categories.label")}
+                        error={errors.categoriesInput?.message}
+                      >
                         <input
                           {...register("categoriesInput")}
                           placeholder="category-1, category-2"
-                          className={adminFieldClass(cn(adminInputClass))}
+                          className={adminFieldClass(
+                            cn(adminInputClass),
+                            Boolean(errors.categoriesInput),
+                          )}
                         />
                       </AdminFormField>
 
-                      <AdminFormField label={t("createContentDialog.field.riskFlags.label")}>
+                      <AdminFormField
+                        label={t("createContentDialog.field.riskFlags.label")}
+                        error={errors.riskFlagsInput?.message}
+                      >
                         <input
                           {...register("riskFlagsInput")}
                           placeholder="flag-1, flag-2"
-                          className={adminFieldClass(cn(adminInputClass))}
+                          className={adminFieldClass(
+                            cn(adminInputClass),
+                            Boolean(errors.riskFlagsInput),
+                          )}
                         />
                       </AdminFormField>
 
-                      <AdminFormField label={t("createContentDialog.field.relatedContentIds.label")}>
+                      <AdminFormField
+                        label={t("createContentDialog.field.relatedContentIds.label")}
+                        error={errors.relatedContentIdsInput?.message}
+                      >
                         <input
                           {...register("relatedContentIdsInput")}
                           dir="ltr"
                           placeholder="id-1, id-2"
-                          className={adminFieldClass(cn(adminInputClass))}
+                          className={adminFieldClass(
+                            cn(adminInputClass),
+                            Boolean(errors.relatedContentIdsInput),
+                          )}
                         />
                       </AdminFormField>
                     </div>
@@ -1189,16 +1314,27 @@ export default function CreateAdminContentDialog({
                           ))}
                         </div>
                       )}
+                      {typeof (errors.sources?.root?.message ?? errors.sources?.message) === "string" ? (
+                        <p className="mt-2 text-right font-cairo text-[12px] font-bold text-red-600">
+                          {errors.sources?.root?.message ?? errors.sources?.message}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <AdminFormField label={t("createContentDialog.field.disclaimerVersion.label")}>
+                      <AdminFormField
+                        label={t("createContentDialog.field.disclaimerVersion.label")}
+                        error={errors.disclaimerVersion?.message}
+                      >
                         <input
                           {...register("disclaimerVersion")}
                           placeholder={t(
                             "createContentDialog.field.disclaimerVersion.placeholder",
                           )}
-                          className={adminFieldClass(cn(adminInputClass))}
+                          className={adminFieldClass(
+                            cn(adminInputClass),
+                            Boolean(errors.disclaimerVersion),
+                          )}
                         />
                       </AdminFormField>
 

@@ -47,20 +47,32 @@ function humanizeValidationMessage(message: string): string {
  * بمسار الحقل (field) عند توفره ليتمكّن المستدعي من ربط الخطأ بالمُدخل
  * الصحيح بدل عرضه كرسالة عامة فقط.
  */
+/**
+ * شكل عنصر خطأ التحقق كما يُعيده الباك-إند فعليًا (express-validator):
+ * `{ type, path, location, msg, messageKey }`. بعض المسارات القديمة/التجريبية
+ * قد تُعيد شكلًا مبسّطًا `{ field, message }` بدلًا من ذلك، لذا ندعم الاثنين
+ * معًا بدل افتراض شكل واحد فقط.
+ */
+type RawValidationIssue = {
+  field?: string;
+  message?: string;
+  path?: string;
+  msg?: string;
+};
+
 export function extractFieldValidationErrors(
   err: unknown,
 ): FieldValidationError[] {
   if (!(err instanceof ApiError) || err.status !== 422) return [];
-  const errors = err.body.errors as
-    | Array<{ field?: string; message?: string }>
-    | undefined;
+  const errors = err.body.errors as RawValidationIssue[] | undefined;
   if (!Array.isArray(errors) || errors.length === 0) return [];
 
   return errors
-    .filter(
-      (e): e is { field?: string; message: string } =>
-        typeof e.message === "string" && e.message.trim().length > 0,
-    )
+    .map((e) => ({
+      field: e.field ?? e.path,
+      message: (e.message ?? e.msg ?? "").trim(),
+    }))
+    .filter((e) => e.message.length > 0)
     .map((e) => ({
       field: e.field,
       message: humanizeValidationMessage(stripHttpStatusFromMessage(e.message)),
