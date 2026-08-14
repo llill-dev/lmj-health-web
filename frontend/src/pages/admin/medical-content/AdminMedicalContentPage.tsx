@@ -118,14 +118,6 @@ function readSourceText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function actorLabel(
-  value: AdminContentItem["createdBy"] | AdminContentItem["reviewedBy"],
-): string {
-  if (typeof value === "string") return value.trim() || "—";
-  if (!value) return "—";
-  return value.fullName?.trim() || value.email?.trim() || value._id?.trim() || "—";
-}
-
 function quickSourceCount(item: AdminContentItem): number | null {
   const record = item as AdminContentItem & {
     sources?: unknown[];
@@ -872,7 +864,7 @@ export default function AdminMedicalContentPage() {
             </div>
           </div>
 
-          <div className="divide-y divide-[#EEF2F6]">
+          <div className={filteredItems.length > 0 && !contentQuery.isAwaitingData && !contentQuery.isError ? "flex flex-col gap-3 bg-[#FAFBFC] p-4 sm:p-5" : ""}>
             {contentQuery.isAwaitingData ? (
               <SkeletonList
                 count={8}
@@ -970,250 +962,266 @@ export default function AdminMedicalContentPage() {
                 return (
                 <div
                   key={it._id}
-                  className="flex flex-col gap-3 justify-between px-6 py-5 sm:flex-row sm:items-center"
+                  className="rounded-[14px] border border-[#EAECF0] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition hover:border-[#D0D5DD] hover:shadow-[0_6px_16px_rgba(16,24,40,0.08)] sm:p-5"
                 >
-                  <div className="flex-1 min-w-0 text-start">
-                    <div className="flex flex-wrap gap-2 justify-start items-center sm:gap-3">
-                      <div className="min-w-0 font-cairo text-[14px] font-black text-[#111827]">
-                        {toDisplayText(it.title) || "—"}
-                      </div>
-                      {(() => {
-                        const lk = languageKindLabel(it.language);
-                        return (
-                          <span
-                            className={cn(
-                              "inline-flex h-[22px] min-w-[1.6rem] shrink-0 items-center justify-center rounded-[8px] border px-2 font-cairo text-[10px] font-extrabold",
-                              lk.code === "ar" &&
-                                "border-primary/30 bg-[#E7FBFA] text-primary",
-                              lk.code === "en" &&
-                                "border-blue-200 bg-[#EFF6FF] text-[#1D4ED8]",
-                              lk.code === "other" &&
-                                "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
-                            )}
-                            title={lk.label}
-                          >
-                            {lk.code === "ar"
-                              ? tr("ع", "AR")
-                              : lk.code === "en"
-                                ? "EN"
-                                : tr("؟", "?")}
-                          </span>
-                        );
-                      })()}
-                      <div
-                        className={`inline-flex h-[22px] items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
-                      >
-                        {contentStatusLabel(it.status)}
-                      </div>
-                    </div>
-
-                    <div className="mt-2 flex flex-wrap items-center justify-start gap-6 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                      <div className="inline-flex gap-2 items-center">
-                        <LayoutGrid className="w-4 h-4" />
-                        {contentTypeLabel(it.type)}
-                      </div>
-                      <div className="inline-flex gap-2 items-center">
-                        <ClipboardCheck className="w-4 h-4" />
-                        {tr("المنشئ:", "Created by:")} {actorLabel(it.createdBy)}
-                      </div>
-                      <div className="inline-flex gap-2 items-center">
-                        <ShieldCheck className="w-4 h-4" />
-                        {tr("المراجع:", "Reviewed by:")} {actorLabel(it.reviewedBy)}
-                      </div>
-                      <div className="inline-flex gap-2 items-center">
-                        <Eye className="w-4 h-4" />
-                        {Number(it.viewCount ?? it.views ?? 0).toLocaleString(
-                          numberLocale,
-                        )}{" "}
-                        {tr("مشاهدة", "views")}
-                      </div>
-                      <div className="inline-flex gap-2 items-center">
-                        <Clock className="w-4 h-4" />
-                        {tr("آخر تحديث:", "Last update:")}{" "}
-                        {formatContentDate(it.updatedAt)}
-                      </div>
-                      <div className="inline-flex gap-2 items-center rounded-[8px] bg-[#F8FAFC] px-2 py-1 text-[#667085]">
-                        {it.status === "DRAFT"
-                          ? tr("التالي: إرسال للمراجعة", "Next: send for review")
-                          : it.status === "IN_REVIEW"
-                            ? tr("التالي: موافقة أو رفض", "Next: approve or reject")
-                            : it.status === "PUBLISHED"
-                              ? tr("التالي: أرشفة عند الحاجة", "Next: archive if needed")
-                              : tr("العنصر مؤرشف للمرجع", "Item archived for reference")}
-                      </div>
-                      <div
-                        className={cn(
-                          "inline-flex gap-2 items-center rounded-[8px] px-2 py-1",
-                          sourceCount === 0
-                            ? "bg-[#FFF7ED] text-[#C2410C]"
-                            : "bg-[#F8FAFC] text-[#667085]",
-                        )}
-                      >
-                        <LinkIcon className="w-4 h-4" />
-                        {sourceCount === null
-                          ? tr(
-                              "تحقق من المصادر داخل التفاصيل",
-                              "Check sources in details",
-                            )
-                          : sourceCount === 0
-                            ? tr(
-                                "لا توجد مصادر مرفقة بعد",
-                                "No sources attached yet",
-                              )
-                            : tr(
-                                `${sourceCount} مصدر/مصادر`,
-                                `${sourceCount} source(s)`,
-                              )}
-                      </div>
-                      <div
-                        className={cn(
-                          "inline-flex gap-2 items-center rounded-[8px] border px-2 py-1",
-                          readinessClass,
-                        )}
-                      >
-                        <AlertTriangle className="w-4 h-4" />
-                        {tr(readinessSignal.ar, readinessSignal.en)}
-                      </div>
-                      <div className="inline-flex gap-2 items-center rounded-[8px] border border-[#E4E7EC] bg-white px-2 py-1 font-cairo text-[11px] font-bold text-[#475467]">
-                        {acceptanceChip}
-                      </div>
-                      {nextActionCues.map((cue) => (
-                        <div
-                          key={`${it._id}-${cue.action}`}
-                          className="inline-flex gap-2 items-center rounded-[8px] border border-[#D0D5DD] bg-[#F9FAFB] px-2 py-1 font-cairo text-[11px] font-bold text-[#667085]"
-                        >
-                          {localizeAcceptanceCopy(
-                            cue.label,
-                            locale === "en" ? "en" : "ar",
-                          )}
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0 flex-1 text-start">
+                      {/* Title row */}
+                      <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-2.5">
+                        <div className="min-w-0 truncate font-cairo text-[15px] font-black text-[#101828]">
+                          {toDisplayText(it.title) || "—"}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 items-center sm:justify-start">
-                    {it.status === "DRAFT" ? (
-                      <button
-                        type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "submitReview",
-                            id: it._id,
-                            title: toDisplayText(it.title) || "—",
-                          })
-                        }
-                        className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] disabled:opacity-50"
-                        aria-label={tr("إرسال للمراجعة", "Send for review")}
-                      >
-                        <ClipboardCheck className="w-4 h-4" />
-                        <span className="font-cairo text-[11px] font-extrabold">
-                          {tr("إرسال للمراجعة", "Send for review")}
-                        </span>
-                      </button>
-                    ) : null}
+                        {(() => {
+                          const lk = languageKindLabel(it.language);
+                          return (
+                            <span
+                              className={cn(
+                                "inline-flex h-[22px] min-w-[1.6rem] shrink-0 items-center justify-center rounded-[8px] border px-2 font-cairo text-[10px] font-extrabold",
+                                lk.code === "ar" &&
+                                  "border-primary/30 bg-[#E7FBFA] text-primary",
+                                lk.code === "en" &&
+                                  "border-blue-200 bg-[#EFF6FF] text-[#1D4ED8]",
+                                lk.code === "other" &&
+                                  "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
+                              )}
+                              title={lk.label}
+                            >
+                              {lk.code === "ar"
+                                ? tr("ع", "AR")
+                                : lk.code === "en"
+                                  ? "EN"
+                                  : tr("؟", "?")}
+                            </span>
+                          );
+                        })()}
+                        <div
+                          className={`inline-flex h-[22px] shrink-0 items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
+                        >
+                          {contentStatusLabel(it.status)}
+                        </div>
+                        <div className="inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[8px] bg-[#F3F4F6] px-2.5 font-cairo text-[11px] font-bold text-[#475467]">
+                          <LayoutGrid className="h-3.5 w-3.5" />
+                          {contentTypeLabel(it.type)}
+                        </div>
+                      </div>
 
-                    {it.status === "IN_REVIEW" ? (
-                      <>
+                      {/* Facts row: views / last update */}
+                      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 font-cairo text-[12px] font-semibold text-[#667085]">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Eye className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
+                          {Number(
+                            it.viewCount ?? it.views ?? 0,
+                          ).toLocaleString(numberLocale)}{" "}
+                          {tr("مشاهدة", "views")}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
+                          {tr("آخر تحديث:", "Last update:")}{" "}
+                          {formatContentDate(it.updatedAt)}
+                        </span>
+                      </div>
+
+                      {/* Status signals row */}
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-dashed border-[#EEF2F6] pt-3">
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#667085]">
+                          {it.status === "DRAFT"
+                            ? tr(
+                                "التالي: إرسال للمراجعة",
+                                "Next: send for review",
+                              )
+                            : it.status === "IN_REVIEW"
+                              ? tr(
+                                  "التالي: موافقة أو رفض",
+                                  "Next: approve or reject",
+                                )
+                              : it.status === "PUBLISHED"
+                                ? tr(
+                                    "التالي: أرشفة عند الحاجة",
+                                    "Next: archive if needed",
+                                  )
+                                : tr(
+                                    "العنصر مؤرشف للمرجع",
+                                    "Item archived for reference",
+                                  )}
+                        </div>
+                        <div
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-cairo text-[10.5px] font-bold",
+                            sourceCount === 0
+                              ? "bg-[#FFF7ED] text-[#C2410C]"
+                              : "bg-[#F8FAFC] text-[#667085]",
+                          )}
+                        >
+                          <LinkIcon className="h-3.5 w-3.5" />
+                          {sourceCount === null
+                            ? tr(
+                                "تحقق من المصادر داخل التفاصيل",
+                                "Check sources in details",
+                              )
+                            : sourceCount === 0
+                              ? tr(
+                                  "لا توجد مصادر مرفقة بعد",
+                                  "No sources attached yet",
+                                )
+                              : tr(
+                                  `${sourceCount} مصدر/مصادر`,
+                                  `${sourceCount} source(s)`,
+                                )}
+                        </div>
+                        <div
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-cairo text-[10.5px] font-bold",
+                            readinessClass,
+                          )}
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          {tr(readinessSignal.ar, readinessSignal.en)}
+                        </div>
+                        <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E4E7EC] bg-white px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#475467]">
+                          {acceptanceChip}
+                        </div>
+                        {nextActionCues.map((cue) => (
+                          <div
+                            key={`${it._id}-${cue.action}`}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#667085]"
+                          >
+                            {localizeAcceptanceCopy(
+                              cue.label,
+                              locale === "en" ? "en" : "ar",
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-[#EEF2F6] pt-3 lg:border-t-0 lg:border-s lg:ps-4 lg:pt-0">
+                      {it.status === "DRAFT" ? (
                         <button
                           type="button"
                           disabled={actionBusy}
                           onClick={() =>
                             setActionConfirm({
-                              kind: "approve",
+                              kind: "submitReview",
                               id: it._id,
                               title: toDisplayText(it.title) || "—",
                             })
                           }
-                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50"
-                          aria-label={tr("موافقة", "Approve")}
+                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] transition hover:bg-[#F9FAFB] disabled:opacity-50"
+                          aria-label={tr("إرسال للمراجعة", "Send for review")}
                         >
-                          <Check className="w-4 h-4" />
+                          <ClipboardCheck className="w-4 h-4" />
                           <span className="font-cairo text-[11px] font-extrabold">
-                            {tr("موافقة", "Approve")}
+                            {tr("إرسال للمراجعة", "Send for review")}
                           </span>
                         </button>
+                      ) : null}
+
+                      {it.status === "IN_REVIEW" ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={actionBusy}
+                            onClick={() =>
+                              setActionConfirm({
+                                kind: "approve",
+                                id: it._id,
+                                title: toDisplayText(it.title) || "—",
+                              })
+                            }
+                            className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] bg-[#F6FEF9] px-3 text-[#16A34A] transition hover:bg-[#ECFDF3] disabled:opacity-50"
+                            aria-label={tr("موافقة", "Approve")}
+                          >
+                            <Check className="w-4 h-4" />
+                            <span className="font-cairo text-[11px] font-extrabold">
+                              {tr("موافقة", "Approve")}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionBusy}
+                            onClick={() => {
+                              setRejectTarget(it);
+                              setRejectOpen(true);
+                            }}
+                            className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] bg-[#FFFBFA] px-3 text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
+                            aria-label={tr("رفض", "Reject")}
+                          >
+                            <X className="w-4 h-4" />
+                            <span className="font-cairo text-[11px] font-extrabold">
+                              {tr("رفض", "Reject")}
+                            </span>
+                          </button>
+                        </>
+                      ) : null}
+
+                      {it.status === "PUBLISHED" ? (
                         <button
                           type="button"
                           disabled={actionBusy}
-                          onClick={() => {
-                            setRejectTarget(it);
-                            setRejectOpen(true);
-                          }}
-                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] px-3 text-[#EF4444] disabled:opacity-50"
-                          aria-label={tr("رفض", "Reject")}
+                          onClick={() =>
+                            setActionConfirm({
+                              kind: "archive",
+                              id: it._id,
+                              title: toDisplayText(it.title) || "—",
+                            })
+                          }
+                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] bg-[#F5FAFF] px-3 text-[#1D4ED8] transition hover:bg-[#EFF6FF] disabled:opacity-50"
+                          aria-label={tr("أرشفة", "Archive")}
                         >
-                          <X className="w-4 h-4" />
+                          <Archive className="w-4 h-4" />
                           <span className="font-cairo text-[11px] font-extrabold">
-                            {tr("رفض", "Reject")}
+                            {tr("أرشفة", "Archive")}
                           </span>
                         </button>
-                      </>
-                    ) : null}
+                      ) : null}
 
-                    {it.status === "PUBLISHED" ? (
+                      {it.status === "IN_REVIEW" ? (
+                        <button
+                          type="button"
+                          disabled={actionBusy}
+                          onClick={() =>
+                            setActionConfirm({
+                              kind: "publish",
+                              id: it._id,
+                              title: toDisplayText(it.title) || "—",
+                            })
+                          }
+                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] bg-[#F0FDFF] px-3 text-[#0891B2] transition hover:bg-[#ECFEFF] disabled:opacity-50"
+                          aria-label={tr("نشر", "Publish")}
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                          <span className="font-cairo text-[11px] font-extrabold">
+                            {tr("نشر", "Publish")}
+                          </span>
+                        </button>
+                      ) : null}
+
+                      <div className="mx-1 h-[24px] w-px shrink-0 bg-[#EAECF0]" />
+
                       <button
                         type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "archive",
-                            id: it._id,
-                            title: toDisplayText(it.title) || "—",
-                          })
-                        }
-                        className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] px-3 text-[#1D4ED8] disabled:opacity-50"
-                        aria-label={tr("أرشفة", "Archive")}
+                        onClick={() => {
+                          setEditingContentId(it._id);
+                          setEditOpen(true);
+                        }}
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#0F8F8B] transition hover:bg-[#E7FBFA]"
+                        aria-label={tr("تعديل", "Edit")}
                       >
-                        <Archive className="w-4 h-4" />
-                        <span className="font-cairo text-[11px] font-extrabold">
-                          {tr("أرشفة", "Archive")}
-                        </span>
+                        <Pencil className="w-4 h-4" />
                       </button>
-                    ) : null}
-
-                    {it.status === "IN_REVIEW" ? (
                       <button
                         type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "publish",
-                            id: it._id,
-                            title: toDisplayText(it.title) || "—",
-                          })
-                        }
-                        className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] px-3 text-[#0891B2] disabled:opacity-50"
-                        aria-label={tr("نشر", "Publish")}
+                        onClick={() => {
+                          setViewingContentId(it._id);
+                          setViewOpen(true);
+                        }}
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                        aria-label={tr("عرض", "View")}
                       >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span className="font-cairo text-[11px] font-extrabold">
-                          {tr("نشر", "Publish")}
-                        </span>
+                        <Eye className="w-4 h-4" />
                       </button>
-                    ) : null}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingContentId(it._id);
-                        setEditOpen(true);
-                      }}
-                      className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#0F8F8B]"
-                      aria-label={tr("تعديل", "Edit")}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setViewingContentId(it._id);
-                        setViewOpen(true);
-                      }}
-                      className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB]"
-                      aria-label={tr("عرض", "View")}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                    </div>
                   </div>
                 </div>
                 );

@@ -208,21 +208,22 @@ export function normalizeContentItems(payload: unknown): AdminContentItem[] {
         .filter((raw) => raw && typeof raw === 'object')
         .map((raw) => {
           const item = raw as Record<string, unknown>;
-          const createdByRaw = item.createdBy;
-          const createdBy =
-            createdByRaw && typeof createdByRaw === 'object'
+          const normalizeActor = (
+            raw: unknown,
+          ): AdminContentItem['createdBy'] =>
+            raw && typeof raw === 'object'
               ? {
-                  _id: toDisplayText(
-                    (createdByRaw as Record<string, unknown>)._id,
-                  ),
+                  _id: toDisplayText((raw as Record<string, unknown>)._id),
                   fullName: toDisplayText(
-                    (createdByRaw as Record<string, unknown>).fullName,
+                    (raw as Record<string, unknown>).fullName,
                   ),
                   email: toDisplayText(
-                    (createdByRaw as Record<string, unknown>).email,
+                    (raw as Record<string, unknown>).email,
                   ),
                 }
-              : toDisplayText(createdByRaw);
+              : toDisplayText(raw);
+          const createdBy = normalizeActor(item.createdBy);
+          const reviewedBy = normalizeActor(item.reviewedBy);
 
           return {
             _id: toDisplayText(item._id || item.id || item.slug),
@@ -243,7 +244,7 @@ export function normalizeContentItems(payload: unknown): AdminContentItem[] {
                 ? item.views
                 : Number(item.views ?? 0),
             createdBy,
-            reviewedBy: toDisplayText(item.reviewedBy),
+            reviewedBy,
             publishedAt: toDisplayText(item.publishedAt),
           } satisfies AdminContentItem;
         });
