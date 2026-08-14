@@ -1,8 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Save, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, Loader2, Save, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Controller,
   useFieldArray,
@@ -57,94 +57,103 @@ import {
   getNewsDraftGuidanceMessages,
   getNewsTypeSwitchSafetyMessage,
   hasNewsFields,
+  hasSeekHelpCallout,
   parseCommaSeparatedList,
   parseJsonInput,
   toDisplayText,
   toPrettyJson,
 } from "./medicalContentDialogHelpers";
 
-const formSchema = z
-  .object({
-    type: z.enum([
-      "CONDITION",
-      "SYMPTOM",
-      "GENERAL_ADVICE",
-      "NEWS",
-      "MEDICATION",
-      "SETTINGS_PAGE",
-    ]),
-    title: z.string().min(1, "عنوان المحتوى مطلوب"),
-    /** English title — required only for SETTINGS_PAGE (sent as `{ ar, en }`). */
-    titleEn: z.string().optional(),
-    summary: z.string().optional(),
-    language: z.enum(["ar", "en"]),
-    slug: optionalLatinSlugSchema(),
-    pageVersion: z.string().optional(),
-    templateId: z.string().optional(),
-    coverImage: z.string().optional(),
-    dataJson: z.string().optional(),
-    contentBlocks: z.array(contentBlockSchema).default([createEmptyBlock()]),
-    sourcesJson: z.string().optional(),
-    tagsInput: z.string().optional(),
-    categoriesInput: z.string().optional(),
-    riskFlagsInput: z.string().optional(),
-    relatedContentIdsInput: z.string().optional(),
-    disclaimerVersion: z.string().optional(),
-    requiresSeekHelpBlock: z.boolean().default(false),
-    isFeatured: z.boolean().default(false),
-    newsSourceName: z.string().optional(),
-    newsSourceUrl: z.string().optional(),
-    newsOriginalTitle: z.string().optional(),
-    newsPublishedAt: z.string().optional(),
-    newsAiSummary: z.string().optional(),
-    newsDedupeHash: z.string().optional(),
-    newsImportedAt: z.string().optional(),
-  })
-  .superRefine((value, ctx) => {
-    if (
-      value.type === "SETTINGS_PAGE" &&
-      (!value.pageVersion || !value.pageVersion.trim())
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["pageVersion"],
-        message: "إصدار الصفحة مطلوب لصفحات الإعدادات",
-      });
-    }
+type Translate = (key: string, fallback?: string) => string;
 
-    if (
-      value.type === "SETTINGS_PAGE" &&
-      (!value.titleEn || !value.titleEn.trim())
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["titleEn"],
-        message: "العنوان بالإنجليزية مطلوب لصفحات الإعدادات",
-      });
-    }
+function buildFormSchema(t: Translate) {
+  return z
+    .object({
+      type: z.enum([
+        "CONDITION",
+        "SYMPTOM",
+        "GENERAL_ADVICE",
+        "NEWS",
+        "MEDICATION",
+        "SETTINGS_PAGE",
+      ]),
+      title: z.string().min(1, t("editContentDialog.validation.titleRequired")),
+      /** English title — required only for SETTINGS_PAGE (sent as `{ ar, en }`). */
+      titleEn: z.string().optional(),
+      summary: z.string().optional(),
+      language: z.enum(["ar", "en"]),
+      slug: optionalLatinSlugSchema(),
+      pageVersion: z.string().optional(),
+      templateId: z.string().optional(),
+      coverImage: z.string().optional(),
+      dataJson: z.string().optional(),
+      contentBlocks: z.array(contentBlockSchema).default([createEmptyBlock()]),
+      sources: z
+        .array(z.object({ title: z.string(), url: z.string() }))
+        .default([]),
+      tagsInput: z.string().optional(),
+      categoriesInput: z.string().optional(),
+      riskFlagsInput: z.string().optional(),
+      relatedContentIdsInput: z.string().optional(),
+      disclaimerVersion: z.string().optional(),
+      requiresSeekHelpBlock: z.boolean().default(false),
+      isFeatured: z.boolean().default(false),
+      newsSourceName: z.string().optional(),
+      newsSourceUrl: z.string().optional(),
+      newsOriginalTitle: z.string().optional(),
+      newsPublishedAt: z.string().optional(),
+      newsAiSummary: z.string().optional(),
+      newsDedupeHash: z.string().optional(),
+      newsImportedAt: z.string().optional(),
+    })
+    .superRefine((value, ctx) => {
+      if (
+        value.type === "SETTINGS_PAGE" &&
+        (!value.pageVersion || !value.pageVersion.trim())
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["pageVersion"],
+          message: t("editContentDialog.validation.pageVersionRequired"),
+        });
+      }
 
-    if (
-      value.type !== "SETTINGS_PAGE" &&
-      !value.contentBlocks.some((block) => isMeaningfulBlock(block))
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["contentBlocks"],
-        message: "أضف على الأقل بلوك محتوى واحدًا فعليًا قبل حفظ التعديلات.",
-      });
-    }
-  });
+      if (
+        value.type === "SETTINGS_PAGE" &&
+        (!value.titleEn || !value.titleEn.trim())
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["titleEn"],
+          message: t("editContentDialog.validation.titleEnRequired"),
+        });
+      }
 
-type FormValues = z.infer<typeof formSchema>;
+      if (
+        value.type !== "SETTINGS_PAGE" &&
+        !value.contentBlocks.some((block) => isMeaningfulBlock(block))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["contentBlocks"],
+          message: t("editContentDialog.validation.blocksRequired"),
+        });
+      }
+    });
+}
 
-const typeOptions: { value: AdminContentType; label: string }[] = [
-  { value: "CONDITION", label: "الحالات الطبية" },
-  { value: "SYMPTOM", label: "الأعراض" },
-  { value: "GENERAL_ADVICE", label: "نصائح عامة" },
-  { value: "NEWS", label: "الأخبار" },
-  { value: "MEDICATION", label: "الأدوية" },
-  { value: "SETTINGS_PAGE", label: "صفحات الإعدادات" },
-];
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>;
+
+function getTypeOptions(t: Translate): { value: AdminContentType; label: string }[] {
+  return [
+    { value: "CONDITION", label: t("createContentDialog.type.condition") },
+    { value: "SYMPTOM", label: t("createContentDialog.type.symptom") },
+    { value: "GENERAL_ADVICE", label: t("createContentDialog.type.generalAdvice") },
+    { value: "NEWS", label: t("createContentDialog.type.news") },
+    { value: "MEDICATION", label: t("createContentDialog.type.medication") },
+    { value: "SETTINGS_PAGE", label: t("createContentDialog.type.settingsPage") },
+  ];
+}
 
 type Props = {
   open: boolean;
@@ -165,18 +174,76 @@ function parseTemplateRecordInput(
   return isDynamicRecord(result.value) ? result.value : fallback;
 }
 
+/**
+ * Collapsible wrapper for the raw-JSON dynamic-data fallback. It's an
+ * escape hatch for legacy/untemplated data (see the compatibility
+ * requirement — old content without a template must stay editable), not a
+ * primary input, so it shouldn't sit at the same visual level as the typed
+ * template fields when a template is available. `defaultOpen` lets the
+ * caller keep it open when it's genuinely the only way to edit the data
+ * (no template selected).
+ */
+function AdvancedFieldSection({
+  title,
+  hint,
+  defaultOpen,
+  forceOpen,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  defaultOpen: boolean;
+  /** Expands the section (and keeps it expanded) once true — e.g. a validation error inside it. */
+  forceOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen]);
+  return (
+    <div className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFBFC] p-3">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex w-full items-center justify-between gap-3 text-start"
+        aria-expanded={open}
+      >
+        <div>
+          <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+            {title}
+          </div>
+          {hint ? (
+            <div className="mt-0.5 font-cairo text-[11px] font-semibold text-[#667085]">
+              {hint}
+            </div>
+          ) : null}
+        </div>
+        {open ? (
+          <ChevronUp className="h-4 w-4 shrink-0 text-[#98A2B3]" />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 text-[#98A2B3]" />
+        )}
+      </button>
+      {open ? <div className="mt-3">{children}</div> : null}
+    </div>
+  );
+}
+
 export default function EditAdminContentDialog({
   open,
   onOpenChange,
   contentId,
   workflowRole = "admin",
 }: Props) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { toast } = useToast();
   const detailsQuery = useAdminContentById(open ? contentId : null);
   const details = extractMedicalContentDetails(detailsQuery.data);
   const updateMut = useUpdateAdminContent();
   const submitting = updateMut.isPending;
+  const formSchema = useMemo(() => buildFormSchema(t), [t]);
+  const typeOptions = useMemo(() => getTypeOptions(t), [t]);
 
   const {
     register,
@@ -205,7 +272,7 @@ export default function EditAdminContentDialog({
       coverImage: "",
       dataJson: "",
       contentBlocks: [createEmptyBlock()],
-      sourcesJson: "[]",
+      sources: [],
       tagsInput: "",
       categoriesInput: "",
       riskFlagsInput: "",
@@ -231,7 +298,7 @@ export default function EditAdminContentDialog({
   const previewSummary = watch("summary");
   const previewCoverImage = watch("coverImage");
   const previewDataJson = watch("dataJson");
-  const previewSourcesJson = watch("sourcesJson");
+  const watchedSources = watch("sources") ?? [];
   const previewTagsInput = watch("tagsInput");
   const previewCategoriesInput = watch("categoriesInput");
   const previewRiskFlagsInput = watch("riskFlagsInput");
@@ -255,6 +322,10 @@ export default function EditAdminContentDialog({
   const contentBlocksFieldArray = useFieldArray({
     control,
     name: "contentBlocks",
+  });
+  const sourcesFieldArray = useFieldArray({
+    control,
+    name: "sources",
   });
   const availableTemplates = useMemo(
     () =>
@@ -294,9 +365,11 @@ export default function EditAdminContentDialog({
   // rendering a blank dropdown for content that still references it — an
   // empty-looking select invites silently swapping the template on save.
   const templateOptions = useMemo(() => {
+    const templateLabel = (t: { name?: unknown; slug?: string; _id: string }) =>
+      toDisplayText(t.name) || t.slug || t._id;
     const options = availableTemplates.map((template) => ({
       value: template._id,
-      label: template.name || template.slug || template._id,
+      label: templateLabel(template),
     }));
     if (
       selectedTemplate &&
@@ -304,14 +377,13 @@ export default function EditAdminContentDialog({
     ) {
       options.push({
         value: selectedTemplate._id,
-        label: `${selectedTemplate.name || selectedTemplate.slug || selectedTemplate._id} (غير نشط)`,
+        label: `${templateLabel(selectedTemplate)} ${t("editContentDialog.field.template.inactiveSuffix")}`,
       });
     }
     return options;
-  }, [availableTemplates, selectedTemplate]);
+  }, [availableTemplates, selectedTemplate, t]);
 
   const previewDataResult = parseJsonInput(previewDataJson || "", undefined);
-  const previewSourcesResult = parseJsonInput(previewSourcesJson || "", []);
   const previewTags = parseCommaSeparatedList(previewTagsInput || "");
   const previewCategories = parseCommaSeparatedList(previewCategoriesInput || "");
   const previewRiskFlags = parseCommaSeparatedList(previewRiskFlagsInput || "");
@@ -319,45 +391,40 @@ export default function EditAdminContentDialog({
     previewRelatedContentIdsInput || "",
   );
   const previewBlocks = buildContentBlocks(watchedBlocks);
-  const previewSources = Array.isArray(previewSourcesResult.value)
-    ? previewSourcesResult.value
-        .filter((item) => item && typeof item === "object")
-        .map((item) => {
-          const source = item as Record<string, unknown>;
-          return {
-            title: toDisplayText(source.title),
-            url: toDisplayText(source.url),
-          };
-        })
-        .filter((item) => item.title || item.url)
-    : [];
+  const previewSources = watchedSources
+    .map((source) => ({
+      title: (source.title ?? "").trim(),
+      url: (source.url ?? "").trim(),
+    }))
+    .filter((item) => item.title || item.url);
   const governanceChecklist = useMemo(
     () => [
       {
         key: "sources",
-        label: "إضافة مصدر موثوق واحد على الأقل قبل الإرسال للمراجعة",
+        label: t("editContentDialog.readiness.sources"),
         done: selectedType === "SETTINGS_PAGE" || previewSources.length > 0,
       },
       {
         key: "disclaimerVersion",
-        label: "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+        label: t("editContentDialog.readiness.disclaimerVersion"),
         done:
           selectedType === "SETTINGS_PAGE" ||
           Boolean(previewDisclaimerVersion?.trim()),
       },
       {
         key: "seekHelp",
-        label: "تفعيل Seek Help Block لأن النوع حالة/عرض",
+        label: t("editContentDialog.readiness.seekHelp"),
         done:
           (selectedType !== "CONDITION" && selectedType !== "SYMPTOM") ||
-          previewRequiresSeekHelpBlock === true,
+          hasSeekHelpCallout(previewBlocks),
       },
     ],
     [
+      previewBlocks,
       previewDisclaimerVersion,
-      previewRequiresSeekHelpBlock,
       previewSources.length,
       selectedType,
+      t,
     ],
   );
   const releaseAcceptance = useMemo(
@@ -367,7 +434,7 @@ export default function EditAdminContentDialog({
         status: details?.status ?? "DRAFT",
         sourceCount: previewSources.length,
         disclaimerVersion: previewDisclaimerVersion,
-        requiresSeekHelpBlock: previewRequiresSeekHelpBlock,
+        hasSeekHelpCallout: hasSeekHelpCallout(previewBlocks),
         hasMeaningfulBlocks:
           selectedType === "SETTINGS_PAGE" ||
           watchedBlocks.some((block) => isMeaningfulBlock(block)),
@@ -377,10 +444,10 @@ export default function EditAdminContentDialog({
       }),
     [
       details?.status,
+      previewBlocks,
       previewDisclaimerVersion,
       previewNewsPublishedAt,
       previewNewsSourceUrl,
-      previewRequiresSeekHelpBlock,
       previewSources.length,
       selectedType,
       watchedBlocks,
@@ -400,57 +467,28 @@ export default function EditAdminContentDialog({
   }, [fallbackTemplateData, previewDataJson]);
   const previewWarnings = useMemo(() => {
     const warnings: string[] = [];
-    const isEnglish = selectedLanguage === "en";
 
     if (previewDataResult.error) {
-      warnings.push(
-        isEnglish
-          ? "Dynamic data JSON is invalid and will not be reflected accurately."
-          : "JSON الخاص بالبيانات الديناميكية غير صالح ولن ينعكس بدقة في المعاينة.",
-      );
-    }
-
-    if (previewSourcesResult.error) {
-      warnings.push(
-        isEnglish
-          ? "Sources JSON is invalid, so source references may be missing in preview."
-          : "JSON الخاص بالمصادر غير صالح، لذلك قد تغيب بعض المراجع من المعاينة.",
-      );
+      warnings.push(t("editContentDialog.warning.invalidDynamicData"));
     }
 
     if (selectedType !== "SETTINGS_PAGE" && previewBlocks.length === 0) {
-      warnings.push(
-        isEnglish
-          ? "No meaningful content blocks are currently available."
-          : "لا توجد بلوكات محتوى فعليّة متاحة حاليًا.",
-      );
+      warnings.push(t("editContentDialog.warning.noContentBlocks"));
     }
 
     if (selectedType !== "SETTINGS_PAGE" && previewSources.length === 0) {
-      warnings.push(
-        isEnglish
-          ? "No source references are currently attached."
-          : "لا توجد مراجع مصادر مرفقة حاليًا.",
-      );
+      warnings.push(t("editContentDialog.warning.noSources"));
     }
 
     if (selectedType !== "SETTINGS_PAGE" && !previewDisclaimerVersion?.trim()) {
-      warnings.push(
-        isEnglish
-          ? "Disclaimer version is missing."
-          : "إصدار التنبيه الطبي غير مضاف.",
-      );
+      warnings.push(t("editContentDialog.warning.noDisclaimer"));
     }
 
     if (
       (selectedType === "CONDITION" || selectedType === "SYMPTOM") &&
-      !previewRequiresSeekHelpBlock
+      !hasSeekHelpCallout(previewBlocks)
     ) {
-      warnings.push(
-        isEnglish
-          ? "Seek Help block requirement is not enabled."
-          : "متطلب Seek Help Block غير مفعّل.",
-      );
+      warnings.push(t("editContentDialog.warning.seekHelp"));
     }
 
     warnings.push(
@@ -466,18 +504,17 @@ export default function EditAdminContentDialog({
 
     return warnings;
   }, [
-    previewBlocks.length,
+    previewBlocks,
     previewDataResult.error,
     previewDisclaimerVersion,
     previewNewsPublishedAt,
     previewNewsSourceUrl,
-    previewRequiresSeekHelpBlock,
     previewSummary,
     previewSources.length,
-    previewSourcesResult.error,
     previewTitle,
     selectedLanguage,
     selectedType,
+    t,
   ]);
 
   useEffect(() => {
@@ -506,7 +543,10 @@ export default function EditAdminContentDialog({
       coverImage: toDisplayText(details.coverImage),
       dataJson: toPrettyJson(details.dataValue),
       contentBlocks: normalizeContentBlocksForForm(details.contentBlocks),
-      sourcesJson: toPrettyJson(details.sources, "[]"),
+      sources: details.sources.map((source) => ({
+        title: toDisplayText(source.title),
+        url: toDisplayText(source.url),
+      })),
       tagsInput: details.tags.join(", "),
       categoriesInput: details.categories.join(", "),
       riskFlagsInput: details.riskFlags.join(", "),
@@ -569,17 +609,12 @@ export default function EditAdminContentDialog({
   const onSubmit = handleSubmit(async (v) => {
     if (!contentId) return;
 
-    clearErrors(["dataJson", "contentBlocks", "sourcesJson"]);
+    clearErrors(["dataJson", "contentBlocks"]);
 
     const dataResult = parseJsonInput(v.dataJson || "", undefined);
-    const sourcesResult = parseJsonInput(v.sourcesJson || "", []);
 
     if (dataResult.error) {
       setError("dataJson", { message: dataResult.error });
-      return;
-    }
-    if (sourcesResult.error) {
-      setError("sourcesJson", { message: sourcesResult.error });
       return;
     }
 
@@ -594,7 +629,9 @@ export default function EditAdminContentDialog({
     );
     if (templateIssues.length) {
       setError("dataJson", {
-        message: templateIssues[0]?.message || "تحقق من بيانات القالب.",
+        message:
+          templateIssues[0]?.message ||
+          t("editContentDialog.validation.templateDataInvalid"),
       });
       return;
     }
@@ -626,7 +663,12 @@ export default function EditAdminContentDialog({
           coverImage: v.coverImage?.trim() || undefined,
           data: dataResult.value,
           contentBlocks: buildContentBlocks(v.contentBlocks),
-          sources: sourcesResult.value,
+          sources: v.sources
+            .map((source) => ({
+              title: source.title.trim() || undefined,
+              url: source.url.trim() || undefined,
+            }))
+            .filter((item) => item.title || item.url),
           tags: parseCommaSeparatedList(v.tagsInput || ""),
           categories: parseCommaSeparatedList(v.categoriesInput || ""),
           riskFlags: parseCommaSeparatedList(v.riskFlagsInput || ""),
@@ -639,11 +681,17 @@ export default function EditAdminContentDialog({
           news: hasNewsFields(news) ? news : undefined,
         } as Parameters<typeof updateMut.mutateAsync>[0]["body"],
       });
-      toast(`تم حفظ التعديلات على «${v.title.trim()}».`, {
-        title: "تم تحديث المحتوى",
-        variant: "success",
-        durationMs: 4200,
-      });
+      toast(
+        t(
+          "editContentDialog.toast.updated.message",
+          `تم حفظ التعديلات على «${v.title.trim()}».`,
+        ).replace("{title}", v.title.trim()),
+        {
+          title: t("editContentDialog.toast.updated.title"),
+          variant: "success",
+          durationMs: 4200,
+        },
+      );
       onOpenChange(false);
     } catch {
       // Surface API errors through the existing mutation error rendering.
@@ -657,7 +705,7 @@ export default function EditAdminContentDialog({
           className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="تعديل المحتوى الطبي"
+          aria-label={t("editContentDialog.title")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -689,17 +737,16 @@ export default function EditAdminContentDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={submitting}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("editContentDialog.close")}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  تعديل المحتوى الطبي
+                  {t("editContentDialog.title")}
                 </h2>
                 <p className="mt-1 font-cairo text-[13px] font-semibold text-[#5B7B79]">
-                  حدّث البيانات الأساسية، والحقول الديناميكية، ومحتوى المقال من
-                  نفس النافذة.
+                  {t("editContentDialog.subtitle")}
                 </p>
               </div>
             </div>
@@ -707,12 +754,12 @@ export default function EditAdminContentDialog({
             {loading ? (
               <div className="flex items-center justify-center gap-2 px-8 py-20 font-cairo text-[13px] font-bold text-[#667085]">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                جارٍ تحميل بيانات المحتوى...
+                {t("editContentDialog.loading")}
               </div>
             ) : loadError || !details ? (
               <div className="px-8 py-12">
                 <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[13px] font-bold text-red-600">
-                  تعذر تحميل بيانات المحتوى للتعديل.
+                  {t("editContentDialog.loadError")}
                 </div>
               </div>
             ) : (
@@ -721,11 +768,11 @@ export default function EditAdminContentDialog({
                   <div className="space-y-6">
                     <section className="space-y-5">
                       <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                        البيانات الأساسية
+                        {t("editContentDialog.section.basicInfo")}
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <AdminFormField label="نوع المحتوى" required>
+                        <AdminFormField label={t("editContentDialog.field.type.label")} required>
                           <Controller
                             name="type"
                             control={control}
@@ -736,8 +783,8 @@ export default function EditAdminContentDialog({
                                 onBlur={field.onBlur}
                                 name={field.name}
                                 options={typeOptions}
-                                placeholder="اختر نوع المحتوى"
-                                listboxAriaLabel="نوع المحتوى"
+                                placeholder={t("editContentDialog.field.type.placeholder")}
+                                listboxAriaLabel={t("editContentDialog.field.type.label")}
                               />
                             )}
                           />
@@ -749,7 +796,7 @@ export default function EditAdminContentDialog({
                         ) : null}
 
                         <AdminFormField
-                          label="اللغة"
+                          label={t("editContentDialog.field.language.label")}
                           required
                           error={errors.language?.message}
                         >
@@ -763,11 +810,11 @@ export default function EditAdminContentDialog({
                                 onBlur={field.onBlur}
                                 name={field.name}
                                 options={[
-                                  { value: "ar", label: "العربية" },
-                                  { value: "en", label: "English" },
+                                  { value: "ar", label: t("createContentDialog.field.language.ar") },
+                                  { value: "en", label: t("createContentDialog.field.language.en") },
                                 ]}
-                                placeholder="اختر اللغة"
-                                listboxAriaLabel="لغة المحتوى"
+                                placeholder={t("editContentDialog.field.language.placeholder")}
+                                listboxAriaLabel={t("editContentDialog.field.language.ariaLabel")}
                               />
                             )}
                           />
@@ -777,15 +824,15 @@ export default function EditAdminContentDialog({
                       <AdminFormField
                         label={
                           selectedType === "SETTINGS_PAGE"
-                            ? "العنوان (عربي)"
-                            : "العنوان"
+                            ? t("editContentDialog.field.titleAr.label")
+                            : t("editContentDialog.field.title.label")
                         }
                         required
                         error={errors.title?.message}
                       >
                         <input
                           {...register("title")}
-                          placeholder="عنوان واضح للمحتوى"
+                          placeholder={t("editContentDialog.field.title.placeholder")}
                           className={adminFieldClass(
                             cn(
                               adminInputClass,
@@ -798,7 +845,7 @@ export default function EditAdminContentDialog({
 
                       {selectedType === "SETTINGS_PAGE" ? (
                         <AdminFormField
-                          label="العنوان (إنجليزي)"
+                          label={t("editContentDialog.field.titleEn.label")}
                           required
                           error={errors.titleEn?.message}
                         >
@@ -818,13 +865,13 @@ export default function EditAdminContentDialog({
                       ) : null}
 
                       <AdminFormField
-                        label="ملخص"
+                        label={t("editContentDialog.field.summary.label")}
                         error={errors.summary?.message}
                       >
                         <textarea
                           {...register("summary")}
                           rows={3}
-                          placeholder="مقدمة قصيرة تصف المحتوى…"
+                          placeholder={t("editContentDialog.field.summary.placeholder")}
                           className={adminFieldClass(
                             cn(
                               adminTextareaClass,
@@ -837,7 +884,7 @@ export default function EditAdminContentDialog({
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <AdminFormField
-                          label="Slug (اختياري)"
+                          label={t("editContentDialog.field.slug.label")}
                           error={errors.slug?.message}
                         >
                           <input
@@ -852,11 +899,11 @@ export default function EditAdminContentDialog({
                         </AdminFormField>
 
                         <AdminFormField
-                          label="إصدار الصفحة (اختياري)"
+                          label={t("editContentDialog.field.pageVersion.label")}
                           hint={
                             selectedType === "SETTINGS_PAGE"
-                              ? "مطلوب لصفحات الإعدادات (SETTINGS_PAGE)."
-                              : "استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE."
+                              ? t("editContentDialog.field.pageVersion.hintSettings")
+                              : t("editContentDialog.field.pageVersion.hintOther")
                           }
                           error={errors.pageVersion?.message}
                         >
@@ -874,15 +921,15 @@ export default function EditAdminContentDialog({
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <AdminFormField
-                          label="القالب"
+                          label={t("editContentDialog.field.template.label")}
                           hint={
                             templateParentType
                               ? templateQuery.isLoading
-                                ? "جارٍ تحميل القوالب المتاحة…"
+                                ? t("editContentDialog.field.template.hintLoading")
                                 : availableTemplates.length > 0
-                                  ? "يمكنك تبديل القالب عند الحاجة، وسيتم تحديث الحقول الديناميكية أدناه."
-                                  : "لا توجد قوالب نشطة لهذا النوع حالياً."
-                              : "هذا النوع لا يستخدم قوالب ديناميكية حالياً."
+                                  ? t("editContentDialog.field.template.hintSwitchable")
+                                  : t("editContentDialog.field.template.hintNone")
+                              : t("editContentDialog.field.template.hintUnsupportedType")
                           }
                         >
                           {templateParentType ? (
@@ -905,10 +952,10 @@ export default function EditAdminContentDialog({
                                   options={templateOptions}
                                   placeholder={
                                     templateQuery.isLoading
-                                      ? "جارٍ تحميل القوالب..."
-                                      : "اختر قالبًا"
+                                      ? t("editContentDialog.field.template.placeholderLoading")
+                                      : t("editContentDialog.field.template.placeholder")
                                   }
-                                  listboxAriaLabel="القالب"
+                                  listboxAriaLabel={t("editContentDialog.field.template.label")}
                                 />
                               )}
                             />
@@ -922,7 +969,7 @@ export default function EditAdminContentDialog({
                           )}
                         </AdminFormField>
 
-                        <AdminFormField label="رابط صورة الغلاف">
+                        <AdminFormField label={t("editContentDialog.field.coverImage.label")}>
                           <input
                             {...register("coverImage")}
                             dir="ltr"
@@ -935,18 +982,17 @@ export default function EditAdminContentDialog({
 
                     <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-[#FCFCFD] p-4">
                       <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                        الحقول الديناميكية ومحتوى المقال
+                        {t("editContentDialog.section.dynamicAndContent")}
                       </div>
 
                       {selectedTemplate?.fields?.length ? (
                         <div className="rounded-[14px] border border-[#D8E6E5] bg-white p-4">
                           <div className="mb-4 text-right">
                             <div className="font-cairo text-[14px] font-extrabold text-primary">
-                              القالب المختار والبيانات المنظمة
+                              {t("editContentDialog.templateFields.title")}
                             </div>
                             <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-                              هذا المحرر يعكس الحقول المعروفة في القالب، بينما يبقى
-                              JSON الخام متاحًا كخيار احتياطي أدناه.
+                              {t("editContentDialog.templateFields.description")}
                             </div>
                           </div>
 
@@ -970,26 +1016,32 @@ export default function EditAdminContentDialog({
                         </div>
                       ) : null}
 
-                      <AdminFormField
-                        label="البيانات الديناميكية (JSON متقدم)"
+                      <AdvancedFieldSection
+                        title={t("editContentDialog.field.dataJsonAdvanced.label", "البيانات الديناميكية (JSON متقدم)")}
                         hint={
                           selectedTemplate?.fields?.length
-                            ? "حقل متقدم للتوافق مع بيانات قديمة أو حالات لا تغطيها الحقول المنظمة."
-                            : "مثال: structured template data القادمة من القالب."
+                            ? t("editContentDialog.field.dataJsonAdvanced.hintWithTemplate", "حقل متقدم للتوافق مع بيانات قديمة أو حالات لا تغطيها الحقول المنظمة أعلاه — التعديل هنا يُطبَّق مباشرة.")
+                            : t("editContentDialog.field.dataJsonAdvanced.hintNoTemplate", "لا يوجد قالب لهذا المحتوى، لذا هذا هو الحقل الوحيد لتحرير بياناته الديناميكية.")
                         }
-                        error={errors.dataJson?.message}
+                        defaultOpen={!selectedTemplate?.fields?.length}
+                        forceOpen={Boolean(errors.dataJson)}
                       >
-                        <textarea
-                          {...register("dataJson")}
-                          dir="ltr"
-                          rows={8}
-                          placeholder='{"key":"value"}'
-                          className={adminFieldClass(
-                            cn(adminTextareaClass, "font-mono text-[12px]"),
-                            Boolean(errors.dataJson),
-                          )}
-                        />
-                      </AdminFormField>
+                        <AdminFormField
+                          label="JSON"
+                          error={errors.dataJson?.message}
+                        >
+                          <textarea
+                            {...register("dataJson")}
+                            dir="ltr"
+                            rows={8}
+                            placeholder='{"key":"value"}'
+                            className={adminFieldClass(
+                              cn(adminTextareaClass, "font-mono text-[12px]"),
+                              Boolean(errors.dataJson),
+                            )}
+                          />
+                        </AdminFormField>
+                      </AdvancedFieldSection>
 
                       <ContentBlockEditor
                         control={control}
@@ -1004,17 +1056,17 @@ export default function EditAdminContentDialog({
                         blocks={watchedBlocks}
                         error={errors.contentBlocks}
                         disabled={submitting}
-                        description="حدّث ترتيب البلوكات ومحتوى المقال من هنا مع إبقاء البيانات الديناميكية منفصلة."
+                        description={t("editContentDialog.blockEditor.description")}
                       />
                     </section>
 
                     <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-white p-4">
                       <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                        التصنيف والحوكمة
+                        {t("editContentDialog.section.classification")}
                       </div>
                       <div className="rounded-[12px] border border-[#E4E7EC] bg-[#FCFCFD] p-3">
                         <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                          متطلبات الجاهزية قبل المراجعة
+                          {t("editContentDialog.readiness.title")}
                         </div>
                         <div className="mb-3">
                           <ReleaseAcceptanceSection
@@ -1034,14 +1086,17 @@ export default function EditAdminContentDialog({
                                   : "border border-amber-200 bg-amber-50 text-amber-700",
                               )}
                             >
-                              {item.done ? "مكتمل" : "بحاجة لاستكمال"}: {item.label}
+                              {item.done
+                                ? t("editContentDialog.readiness.done")
+                                : t("editContentDialog.readiness.pending")}
+                              : {item.label}
                             </div>
                           ))}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <AdminFormField label="الوسوم">
+                        <AdminFormField label={t("editContentDialog.field.tags.label")}>
                           <input
                             {...register("tagsInput")}
                             placeholder="tag-1, tag-2"
@@ -1049,7 +1104,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="الفئات">
+                        <AdminFormField label={t("editContentDialog.field.categories.label")}>
                           <input
                             {...register("categoriesInput")}
                             placeholder="category-1, category-2"
@@ -1057,7 +1112,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="Risk Flags">
+                        <AdminFormField label={t("editContentDialog.field.riskFlags.label")}>
                           <input
                             {...register("riskFlagsInput")}
                             placeholder="flag-1, flag-2"
@@ -1065,7 +1120,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="Related Content IDs">
+                        <AdminFormField label={t("editContentDialog.field.relatedContentIds.label")}>
                           <input
                             {...register("relatedContentIdsInput")}
                             dir="ltr"
@@ -1075,24 +1130,67 @@ export default function EditAdminContentDialog({
                         </AdminFormField>
                       </div>
 
-                      <AdminFormField
-                        label="المصادر (JSON متقدم)"
-                        hint='مثال: [{"title":"WHO","url":"https://..."}]'
-                        error={errors.sourcesJson?.message}
-                      >
-                        <textarea
-                          {...register("sourcesJson")}
-                          dir="ltr"
-                          rows={6}
-                          className={adminFieldClass(
-                            cn(adminTextareaClass, "font-mono text-[12px]"),
-                            Boolean(errors.sourcesJson),
-                          )}
-                        />
-                      </AdminFormField>
+                      <div className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFBFC] p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                            {t("editContentDialog.section.sources.title")}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              sourcesFieldArray.append({ title: "", url: "" })
+                            }
+                            className="inline-flex h-[32px] items-center gap-1.5 rounded-[10px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
+                          >
+                            {t("editContentDialog.action.addSource")}
+                          </button>
+                        </div>
+                        {sourcesFieldArray.fields.length === 0 ? (
+                          <p className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                            {t("editContentDialog.sources.empty")}
+                          </p>
+                        ) : (
+                          <div className="mt-3 space-y-2">
+                            {sourcesFieldArray.fields.map((row, index) => (
+                              <div key={row.id} className="flex flex-wrap items-end gap-2">
+                                <div className="min-w-[160px] flex-1">
+                                  <AdminFormField label={t("editContentDialog.field.sourceItemTitle.label")}>
+                                    <input
+                                      {...register(`sources.${index}.title` as const)}
+                                      placeholder={t("editContentDialog.field.sourceItemTitle.placeholder")}
+                                      className={adminFieldClass(
+                                        cn(adminInputClass, "text-start placeholder:text-start"),
+                                        false,
+                                      )}
+                                    />
+                                  </AdminFormField>
+                                </div>
+                                <div className="min-w-[200px] flex-[2]">
+                                  <AdminFormField label={t("editContentDialog.field.sourceItemUrl.label")}>
+                                    <input
+                                      {...register(`sources.${index}.url` as const)}
+                                      dir="ltr"
+                                      placeholder="https://example.com"
+                                      className={adminFieldClass(cn(adminInputClass), false)}
+                                    />
+                                  </AdminFormField>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => sourcesFieldArray.remove(index)}
+                                  aria-label={t("editContentDialog.action.deleteSource")}
+                                  className="inline-flex h-[44px] w-[44px] items-center justify-center rounded-[10px] border border-[#FECACA] text-[#EF4444] transition hover:bg-[#FEF2F2]"
+                                >
+                                  <X className="h-4 w-4" aria-hidden />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <AdminFormField label="إصدار التنبيه">
+                        <AdminFormField label={t("editContentDialog.field.disclaimerVersion.label")}>
                           <input
                             {...register("disclaimerVersion")}
                             placeholder="v1 / 2026-08"
@@ -1102,7 +1200,7 @@ export default function EditAdminContentDialog({
 
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           <label className="flex items-center justify-end gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#344054]">
-                            <span>يتطلب Seek Help Block</span>
+                            <span>{t("editContentDialog.field.requiresSeekHelp.label")}</span>
                             <input
                               type="checkbox"
                               {...register("requiresSeekHelpBlock")}
@@ -1111,7 +1209,7 @@ export default function EditAdminContentDialog({
                           </label>
 
                           <label className="flex items-center justify-end gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 font-cairo text-[13px] font-bold text-[#344054]">
-                            <span>محتوى مميز</span>
+                            <span>{t("editContentDialog.field.isFeatured.label")}</span>
                             <input
                               type="checkbox"
                               {...register("isFeatured")}
@@ -1124,11 +1222,11 @@ export default function EditAdminContentDialog({
 
                     <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-[#FCFCFD] p-4">
                       <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                        بيانات الخبر
+                        {t("editContentDialog.section.newsData")}
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <AdminFormField label="اسم المصدر">
+                        <AdminFormField label={t("editContentDialog.field.newsSourceName.label")}>
                           <input
                             {...register("newsSourceName")}
                             placeholder="Reuters"
@@ -1136,7 +1234,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="رابط المصدر">
+                        <AdminFormField label={t("editContentDialog.field.newsSourceUrl.label")}>
                           <input
                             {...register("newsSourceUrl")}
                             dir="ltr"
@@ -1145,7 +1243,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="العنوان الأصلي">
+                        <AdminFormField label={t("editContentDialog.field.newsOriginalTitle.label")}>
                           <input
                             {...register("newsOriginalTitle")}
                             placeholder="Original headline"
@@ -1153,7 +1251,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="تاريخ النشر الأصلي">
+                        <AdminFormField label={t("editContentDialog.field.newsPublishedAt.label")}>
                           <input
                             {...register("newsPublishedAt")}
                             dir="ltr"
@@ -1162,7 +1260,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="Dedupe Hash">
+                        <AdminFormField label={t("editContentDialog.field.newsDedupeHash.label")}>
                           <input
                             {...register("newsDedupeHash")}
                             dir="ltr"
@@ -1171,7 +1269,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
 
-                        <AdminFormField label="Imported At">
+                        <AdminFormField label={t("editContentDialog.field.newsImportedAt.label")}>
                           <input
                             {...register("newsImportedAt")}
                             dir="ltr"
@@ -1181,7 +1279,7 @@ export default function EditAdminContentDialog({
                         </AdminFormField>
                       </div>
 
-                      <AdminFormField label="AI Summary">
+                      <AdminFormField label={t("editContentDialog.field.newsAiSummary.label")}>
                         <textarea
                           {...register("newsAiSummary")}
                           rows={4}
@@ -1197,11 +1295,10 @@ export default function EditAdminContentDialog({
 
                     <section className="space-y-5 rounded-[14px] border border-[#E4E7EC] bg-white p-4">
                       <div className="font-cairo text-[15px] font-extrabold text-[#111827]">
-                        مراجعة الحوكمة والمعاينة
+                        {t("editContentDialog.section.reviewPreview.title")}
                       </div>
                       <p className="font-cairo text-[12px] font-semibold text-[#667085]">
-                        هذه المعاينة تساعد على التأكد من وضوح المصادر وعناصر السلامة
-                        وشكل العرض قبل الحفظ.
+                        {t("editContentDialog.section.reviewPreview.description")}
                       </p>
 
                       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
@@ -1209,7 +1306,7 @@ export default function EditAdminContentDialog({
                           contentType={selectedType}
                           status={details.status}
                           disclaimerVersion={previewDisclaimerVersion?.trim() || undefined}
-                          requiresSeekHelpBlock={previewRequiresSeekHelpBlock}
+                          requiresSeekHelpBlock={hasSeekHelpCallout(previewBlocks)}
                           isFeatured={previewIsFeatured}
                           riskFlags={previewRiskFlags}
                           tags={previewTags}
@@ -1261,7 +1358,7 @@ export default function EditAdminContentDialog({
                       <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600">
                         {userFacingErrorMessage(
                           updateMut.error,
-                          "تعذر التعديل",
+                          t("editContentDialog.error.updateFailed"),
                         )}
                       </div>
                     ) : null}
@@ -1275,7 +1372,7 @@ export default function EditAdminContentDialog({
                     disabled={submitting}
                     className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                   >
-                    إلغاء
+                    {t("editContentDialog.action.cancel")}
                   </button>
                   <button
                     type="submit"
@@ -1283,7 +1380,9 @@ export default function EditAdminContentDialog({
                     className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                   >
                     <Save className="h-4 w-4" aria-hidden />
-                    {submitting ? "جارٍ الحفظ…" : "حفظ التعديلات"}
+                    {submitting
+                      ? t("editContentDialog.action.saving")
+                      : t("editContentDialog.action.save")}
                   </button>
                 </div>
               </form>

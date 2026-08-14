@@ -1094,7 +1094,8 @@ export type AdminContentTemplateField = {
 
 export type AdminContentTemplate = {
   _id: string;
-  name?: string;
+  /** Matches `LocalizedInput` in docs/openapi.json — string or `{ar?, en?}`. */
+  name?: AdminLocalizedValue;
   slug?: string;
   description?: string;
   parentType?: AdminContentTemplateParentType | string;
@@ -1124,7 +1125,8 @@ export type AdminContentTemplatesListResponse = ApiSuccessEnvelope & {
 };
 
 export type CreateAdminContentTemplateBody = {
-  name: string;
+  /** Matches `LocalizedInput` in docs/openapi.json — string or `{ar?, en?}`. */
+  name: AdminLocalizedValue;
   slug?: string;
   parentType: AdminContentTemplateParentType;
   fields?: AdminContentTemplateField[];
