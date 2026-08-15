@@ -84,8 +84,11 @@ describe('UpsertServiceTypeDialog integration', () => {
 
     await user.click(screen.getByRole('button', { name: 'إنشاء' }));
 
-    expect(await screen.findAllByRole('alert')).toHaveLength(3);
-    expect(screen.getAllByText('مطلوب')).toHaveLength(3);
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts).toHaveLength(3);
+    // Scope to alert nodes only — "مطلوب" also labels the unrelated "required"
+    // checkbox on each field row, which isn't a validation error.
+    expect(alerts.filter((el) => el.textContent === 'مطلوب')).toHaveLength(3);
     expect(getLastCreateServiceTypePayload()).toBeNull();
   });
 
@@ -126,23 +129,26 @@ describe('UpsertServiceTypeDialog integration', () => {
     await user.click(screen.getByRole('button', { name: 'إنشاء' }));
 
     await waitFor(() => {
-      expect(getLastCreateServiceTypePayload()).toEqual({
+      const payload = getLastCreateServiceTypePayload();
+      // The live backend expects `fields` as a real structured array — sending a
+      // JSON-encoded string is rejected (422: "fields.forEach is not a function").
+      expect(payload).toMatchObject({
         name: { en: 'Laboratory', ar: 'مختبرات' },
         slug: 'laboratory',
         description: {
           en: 'Laboratory services',
           ar: 'خدمات المختبرات الطبية',
         },
-        fields: [
-          {
-            key: 'name',
-            label: { en: 'Name', ar: 'الاسم' },
-            type: 'string',
-            required: true,
-            isPublic: true,
-          },
-        ],
       });
+      expect(payload?.fields).toEqual([
+        {
+          key: 'name',
+          label: { en: 'Name', ar: 'الاسم' },
+          type: 'string',
+          required: true,
+          isPublic: true,
+        },
+      ]);
     });
 
     expect(

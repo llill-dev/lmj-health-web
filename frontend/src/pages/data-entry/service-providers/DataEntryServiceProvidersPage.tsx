@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
-import { Building2, Edit3, Loader2, Plus, RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Building2, ChevronLeft, ChevronRight, Edit3, Loader2, Plus, RefreshCw, Search, X } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import StyledSelect from "@/components/ui/styled-select";
@@ -10,31 +10,16 @@ import {
   useServiceProvidersList,
   useServiceTypesPublicList,
 } from "@/hooks/admin/services/useAdminServices";
-import type { ServiceProvider } from "@/lib/admin/types";
+import type { ManagedServiceProvider, ProviderStatus } from "@/lib/admin/types";
 import { resolveLabel } from "@/lib/admin/types";
 import { useI18n } from "@/i18n/provider";
 
-function resolveProviderSlug(provider: ServiceProvider): string {
-  if (typeof provider.serviceType === "string") return provider.serviceType;
-  return provider.serviceType?.slug ?? "";
-}
+const PAGE_LIMIT = 20;
 
-function resolveProviderLabel(
-  provider: ServiceProvider,
-  locale: "ar" | "en",
-): string {
-  const data = provider.data ?? {};
-  const name = data.name;
-  if (typeof name === "string" && name.trim()) return name.trim();
-  if (name && typeof name === "object") {
-    const localized = name as { ar?: string; en?: string };
-    return locale === "ar"
-      ? localized.ar?.trim() || localized.en?.trim() || "—"
-      : localized.en?.trim() || localized.ar?.trim() || "—";
-  }
-  const city = data.city;
-  if (typeof city === "string" && city.trim()) return city.trim();
-  return provider._id;
+function resolveProviderLabel(provider: ManagedServiceProvider): string {
+  if (provider.name?.trim()) return provider.name.trim();
+  if (provider.city?.trim()) return provider.city.trim();
+  return provider.id;
 }
 
 export default function DataEntryServiceProvidersPage() {
@@ -45,39 +30,62 @@ export default function DataEntryServiceProvidersPage() {
     draft: t("content.status.draft"),
   };
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedSlug = searchParams.get("type") ?? "";
-  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const selectedTypeId = searchParams.get("serviceType") ?? "";
+  const q = searchParams.get("q") ?? "";
+  const [searchInput, setSearchInput] = useState(q);
+  const [page, setPage] = useState(1);
+
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(
-    null,
-  );
+  const [selectedProvider, setSelectedProvider] = useState<ManagedServiceProvider | null>(null);
 
   const typesQuery = useServiceTypesPublicList();
-  const providersQuery = useServiceProvidersList(selectedSlug, cursor);
+  // Data-entry defaults to Draft: the backend already scopes this list to the
+  // signed-in user's own records, and drafts are the only status they act on
+  // day-to-day (no status-change controls are exposed to this role at all).
+  const providersQuery = useServiceProvidersList({
+    serviceType: selectedTypeId || undefined,
+    status: "draft" as ProviderStatus,
+    q: q || undefined,
+    page,
+    limit: PAGE_LIMIT,
+  });
 
   const serviceTypes = typesQuery.data?.serviceTypes ?? [];
-  const providers = providersQuery.data?.items ?? [];
-
-  useEffect(() => {
-    if (!selectedSlug && serviceTypes.length > 0) {
-      setSearchParams({ type: serviceTypes[0].slug });
-    }
-  }, [selectedSlug, serviceTypes, setSearchParams]);
+  const providers = providersQuery.data?.providers ?? [];
+  const total = providersQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
 
   const typeOptions = useMemo(
     () =>
       serviceTypes.map((type) => ({
-        value: type.slug,
+        value: type._id,
         label: resolveLabel(type.name, locale) || type.slug,
       })),
     [locale, serviceTypes],
   );
 
-  const selectedTypeName = useMemo(() => {
-    const match = serviceTypes.find((type) => type.slug === selectedSlug);
-    return match ? resolveLabel(match.name, locale) : selectedSlug;
-  }, [locale, selectedSlug, serviceTypes]);
+  const updateFilters = useCallback(
+    (next: { serviceType?: string; q?: string }) => {
+      const params = new URLSearchParams(searchParams);
+      const merged = { serviceType: selectedTypeId, q, ...next };
+      (["serviceType", "q"] as const).forEach((key) => {
+        if (merged[key]) params.set(key, merged[key]);
+        else params.delete(key);
+      });
+      setSearchParams(params);
+      setPage(1);
+    },
+    [searchParams, selectedTypeId, q, setSearchParams],
+  );
+
+  const clearFilters = useCallback(() => {
+    setSearchInput("");
+    setSearchParams({});
+    setPage(1);
+  }, [setSearchParams]);
+
+  const hasFilters = Boolean(selectedTypeId || q);
 
   return (
     <>
@@ -91,9 +99,7 @@ export default function DataEntryServiceProvidersPage() {
           surface="mint"
           title={t("dataEntry.serviceProviders.hero.title")}
           subtitle={
-            selectedSlug
-              ? `${t("dataEntry.serviceProviders.hero.selectedTypePrefix")}: ${selectedTypeName}`
-              : t("dataEntry.serviceProviders.hero.selectTypeHint")
+            locale === "ar" ? `${total} مسودة` : `${total} draft${total === 1 ? "" : "s"}`
           }
           headerIcon={<Building2 className="h-8 w-8 text-white" />}
           actionLabel={t("dataEntry.serviceProviders.hero.addAction")}
@@ -103,39 +109,67 @@ export default function DataEntryServiceProvidersPage() {
 
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-end">
-            <div className="lg:col-span-6">
+            <div className="lg:col-span-5">
               <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
                 {t("dataEntry.serviceProviders.filters.serviceType")}
               </div>
               <StyledSelect
-                value={selectedSlug}
-                onChange={(value) => {
-                  setCursor(undefined);
-                  if (value) {
-                    setSearchParams({ type: value });
-                  } else {
-                    setSearchParams({});
-                  }
-                }}
+                value={selectedTypeId}
+                onChange={(value) => updateFilters({ serviceType: value })}
                 options={[
-                  { value: "", label: t("dataEntry.serviceProviders.filters.selectType") },
+                  { value: "", label: locale === "ar" ? "كل الأنواع" : "All types" },
                   ...typeOptions,
                 ]}
                 listboxAriaLabel={t("dataEntry.serviceProviders.filters.serviceType")}
               />
             </div>
-            <div className="flex justify-start lg:col-span-6">
+            <div className="lg:col-span-4">
+              <div className="mb-2 font-cairo text-[12px] font-extrabold text-[#667085]">
+                {locale === "ar" ? "بحث" : "Search"}
+              </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  updateFilters({ q: searchInput.trim() });
+                }}
+                className="relative"
+              >
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder={locale === "ar" ? "ابحث بالاسم أو المدينة…" : "Search name or city…"}
+                  className="h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 pe-10 font-cairo text-[12px] font-bold text-[#101828] outline-none focus-visible:border-primary"
+                />
+                <button
+                  type="submit"
+                  aria-label={locale === "ar" ? "بحث" : "Search"}
+                  className="absolute inset-y-0 end-2 flex items-center text-[#98A2B3]"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </form>
+            </div>
+            <div className="flex items-center gap-2 lg:col-span-3">
               <button
                 type="button"
                 onClick={() => void providersQuery.refetch()}
-                disabled={!selectedSlug || providersQuery.isFetching}
-                className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
+                disabled={providersQuery.isFetching}
+                className="inline-flex h-[40px] flex-1 items-center justify-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054] disabled:opacity-50"
               >
-                <RefreshCw
-                  className={`h-4 w-4 ${providersQuery.isFetching ? "animate-spin" : ""}`}
-                />
+                <RefreshCw className={`h-4 w-4 ${providersQuery.isFetching ? "animate-spin" : ""}`} />
                 {t("common.refresh")}
               </button>
+              {hasFilters ? (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  aria-label={locale === "ar" ? "مسح الفلاتر" : "Clear filters"}
+                  className="inline-flex h-[40px] items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white px-3 text-[#667085]"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              ) : null}
             </div>
           </div>
         </section>
@@ -147,31 +181,40 @@ export default function DataEntryServiceProvidersPage() {
         ) : null}
 
         <section className="space-y-3">
-          {!selectedSlug ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {t("dataEntry.serviceProviders.empty.selectType")}
-            </div>
-          ) : providersQuery.isLoading ? (
+          {providersQuery.isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : providers.length === 0 ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              {t("dataEntry.serviceProviders.empty.noProviders")}
+            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-10 text-center">
+              <p className="font-cairo text-[13px] font-semibold text-[#667085]">
+                {locale === "ar"
+                  ? "لا يوجد مزودون يطابقون هذه الفلاتر."
+                  : "No providers match these filters."}
+              </p>
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-[8px] bg-primary px-4 py-2 font-cairo text-[12px] font-extrabold text-white"
+              >
+                <Plus className="h-4 w-4" />
+                {t("dataEntry.serviceProviders.hero.addAction")}
+              </button>
             </div>
           ) : (
             providers.map((provider) => (
               <div
-                key={provider._id}
+                key={provider.id}
                 className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="text-right">
                     <div className="font-cairo text-[14px] font-black text-[#111827]">
-                      {resolveProviderLabel(provider, locale)}
+                      {resolveProviderLabel(provider)}
                     </div>
                     <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
-                      {resolveProviderSlug(provider) || "—"} ·{" "}
+                      {resolveLabel(provider.serviceType.name, locale) || provider.serviceType.slug}
+                      {" · "}
                       {STATUS_LABELS[provider.status] ?? provider.status ?? "—"}
                     </div>
                   </div>
@@ -192,16 +235,28 @@ export default function DataEntryServiceProvidersPage() {
             ))
           )}
 
-          {providersQuery.data?.nextCursor ? (
-            <div className="flex justify-center pt-2">
+          {providers.length > 0 && totalPages > 1 ? (
+            <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 type="button"
-                onClick={() =>
-                  setCursor(providersQuery.data?.nextCursor ?? undefined)
-                }
-                className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-primary"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
+                aria-label={locale === "ar" ? "الصفحة السابقة" : "Previous page"}
               >
-                {t("common.loadMore")}
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              <span className="font-cairo text-[12px] font-bold text-[#344054]">
+                {locale === "ar" ? `صفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#344054] disabled:opacity-40"
+                aria-label={locale === "ar" ? "الصفحة التالية" : "Next page"}
+              >
+                <ChevronLeft className="h-4 w-4" />
               </button>
             </div>
           ) : null}
@@ -212,13 +267,15 @@ export default function DataEntryServiceProvidersPage() {
           onOpenChange={setCreateOpen}
           serviceTypes={serviceTypes}
           onSuccess={() => providersQuery.refetch()}
+          allowAdvancedJson={false}
         />
 
         <EditServiceProviderDialog
           open={editOpen}
           onOpenChange={setEditOpen}
-          provider={selectedProvider}
+          providerId={selectedProvider?.id ?? null}
           onSuccess={() => providersQuery.refetch()}
+          allowAdvancedJson={false}
         />
       </div>
     </>

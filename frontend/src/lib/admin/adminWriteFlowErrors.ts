@@ -2,6 +2,30 @@ import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 
 type SupportedLocale = "ar" | "en";
 
+/**
+ * Maps a 422 validation error response (`errors: ValidationIssue[]`, each with a
+ * `path`/`msg`) onto a flat `{ [fieldPath]: message }` object so callers can attach
+ * server errors to the specific field that failed instead of showing a generic toast.
+ */
+export function extractFieldValidationErrors(
+  error: unknown,
+): Record<string, string> | null {
+  if (!(error instanceof ApiError)) return null;
+  const issues = (error.body as { errors?: unknown } | undefined)?.errors;
+  if (!Array.isArray(issues)) return null;
+
+  const out: Record<string, string> = {};
+  for (const issue of issues) {
+    if (!issue || typeof issue !== "object") continue;
+    const path = (issue as { path?: unknown }).path;
+    const msg = (issue as { msg?: unknown }).msg;
+    if (typeof path === "string" && path && typeof msg === "string" && msg) {
+      out[path] = msg;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
 function tr(locale: SupportedLocale, ar: string, en: string): string {
   return locale === "ar" ? ar : en;
 }

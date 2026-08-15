@@ -1,18 +1,23 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Building2, MapPin, Plus, Tag, Save } from "lucide-react";
-import { useState, useEffect } from "react";
+import { X, Plus, Tag, Save, ChevronDown } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { resolveLabel } from "@/lib/admin/types";
+import type { ServiceType } from "@/lib/admin/types";
 import { adminApi } from "@/lib/admin/client";
-import { getAdminServiceProviderMutationErrorMessage } from "@/lib/admin/adminWriteFlowErrors";
+import {
+  getAdminServiceProviderMutationErrorMessage,
+  extractFieldValidationErrors,
+} from "@/lib/admin/adminWriteFlowErrors";
 import {
   AdminFormField,
   adminFieldClass,
   adminInputClass,
   adminTextareaClass,
 } from "@/components/admin/form-field";
+import DynamicProviderFieldRenderer from "@/components/admin/service-providers/DynamicProviderFieldRenderer";
 import { cn } from "@/lib/utils/utils";
 
 const STATUS_OPTIONS = [
@@ -24,12 +29,10 @@ const STATUS_OPTIONS = [
 interface CreateServiceProviderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  serviceTypes: Array<{
-    _id: string;
-    name: string | { en: string; ar: string };
-    slug: string;
-  }>;
+  serviceTypes: ServiceType[];
   onSuccess?: () => void;
+  /** Admins get an advanced JSON fallback panel; data-entry users only see generated fields. */
+  allowAdvancedJson?: boolean;
 }
 
 export default function CreateServiceProviderDialog({
@@ -37,22 +40,30 @@ export default function CreateServiceProviderDialog({
   onOpenChange,
   serviceTypes,
   onSuccess,
+  allowAdvancedJson = true,
 }: CreateServiceProviderDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    serviceType: "",
-    name: "",
-    city: "",
-    country: "",
-    data: "",
-    aliases: [] as string[],
-    status: "draft",
-  });
+  const [serviceTypeId, setServiceTypeId] = useState("");
+  const [name, setName] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [status, setStatus] = useState("draft");
+  const [aliases, setAliases] = useState<string[]>([]);
+  const [dynamicData, setDynamicData] = useState<Record<string, unknown>>({});
+  const [showAdvancedJson, setShowAdvancedJson] = useState(false);
+  const [advancedJson, setAdvancedJson] = useState("");
+  const [advancedJsonError, setAdvancedJsonError] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [newAlias, setNewAlias] = useState("");
+
+  const selectedType = useMemo(
+    () => serviceTypes.find((type) => type._id === serviceTypeId) ?? null,
+    [serviceTypes, serviceTypeId],
+  );
+  const isInactiveType = selectedType ? !selectedType.isActive : false;
 
   useEffect(() => {
     if (!open) return;
@@ -71,6 +82,29 @@ export default function CreateServiceProviderDialog({
     };
   }, [open, onOpenChange, isSubmitting]);
 
+  useEffect(() => {
+    if (!open) {
+      setServiceTypeId("");
+      setName("");
+      setCity("");
+      setCountry("");
+      setStatus("draft");
+      setAliases([]);
+      setDynamicData({});
+      setShowAdvancedJson(false);
+      setAdvancedJson("");
+      setAdvancedJsonError(null);
+      setErrors({});
+      setNewAlias("");
+    }
+  }, [open]);
+
+  useEffect(() => {
+    // Switching service type mid-session resets dynamic field values — they belong
+    // to the previous type's schema and would silently mismatch the new one.
+    setDynamicData({});
+  }, [serviceTypeId]);
+
   const typeOptions = serviceTypes.map((type) => ({
     value: type._id,
     label: resolveLabel(type.name, "ar") || type.slug,
@@ -79,20 +113,27 @@ export default function CreateServiceProviderDialog({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.serviceType) {
+    if (!serviceTypeId) {
       newErrors.serviceType = "يجب اختيار نوع الخدمة";
     }
-
-    if (!formData.name.trim()) {
+    if (!name.trim()) {
       newErrors.name = "الاسم مطلوب";
     }
-
-    if (!formData.city.trim()) {
+    if (!city.trim()) {
       newErrors.city = "المدينة مطلوبة";
     }
-
-    if (!formData.country.trim()) {
+    if (!country.trim()) {
       newErrors.country = "البلد مطلوب";
+    }
+
+    if (showAdvancedJson && advancedJson.trim()) {
+      try {
+        JSON.parse(advancedJson);
+        setAdvancedJsonError(null);
+      } catch {
+        setAdvancedJsonError("صيغة JSON غير صالحة");
+        newErrors.data = "صيغة JSON غير صالحة";
+      }
     }
 
     setErrors(newErrors);
@@ -101,20 +142,22 @@ export default function CreateServiceProviderDialog({
 
   const addAlias = () => {
     const trimmed = newAlias.trim();
-    if (trimmed && !formData.aliases.includes(trimmed)) {
-      setFormData((prev) => ({
-        ...prev,
-        aliases: [...prev.aliases, trimmed],
-      }));
+    if (trimmed && !aliases.includes(trimmed)) {
+      setAliases((prev) => [...prev, trimmed]);
       setNewAlias("");
     }
   };
 
   const removeAlias = (alias: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      aliases: prev.aliases.filter((a) => a !== alias),
-    }));
+    setAliases((prev) => prev.filter((a) => a !== alias));
+  };
+
+  const resolveData = (): Record<string, unknown> | undefined => {
+    if (showAdvancedJson) {
+      if (!advancedJson.trim()) return undefined;
+      return JSON.parse(advancedJson);
+    }
+    return Object.keys(dynamicData).length > 0 ? dynamicData : undefined;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,13 +168,13 @@ export default function CreateServiceProviderDialog({
     setIsSubmitting(true);
     try {
       await adminApi.serviceProviders.create({
-        serviceType: formData.serviceType,
-        name: formData.name,
-        city: formData.city,
-        country: formData.country,
-        data: formData.data ? JSON.parse(formData.data) : undefined,
-        aliases: formData.aliases,
-        status: formData.status,
+        serviceType: serviceTypeId,
+        name,
+        city,
+        country,
+        data: resolveData(),
+        aliases,
+        status,
       });
 
       toast("تم إنشاء مزود الخدمة بنجاح", {
@@ -140,20 +183,13 @@ export default function CreateServiceProviderDialog({
         durationMs: 4200,
       });
 
-      setFormData({
-        serviceType: "",
-        name: "",
-        city: "",
-        country: "",
-        data: "",
-        aliases: [],
-        status: "draft",
-      });
-      setErrors({});
-      setNewAlias("");
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
+      const fieldErrors = extractFieldValidationErrors(error);
+      if (fieldErrors) {
+        setErrors((prev) => ({ ...prev, ...fieldErrors }));
+      }
       toast(getAdminServiceProviderMutationErrorMessage(error, "create"), {
         title: "فشلت العملية",
         variant: "error",
@@ -181,7 +217,7 @@ export default function CreateServiceProviderDialog({
           }}
         >
           <motion.div
-            className="relative max-h-[min(92vh,860px)] w-full max-w-[760px] overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
+            className="relative flex max-h-[min(92vh,860px)] w-full max-w-[760px] flex-col overflow-hidden rounded-[16px] border border-[#EEF2F6] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
             initial={{ opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -222,12 +258,9 @@ export default function CreateServiceProviderDialog({
                     error={errors.serviceType}
                   >
                     <StyledSelect
-                      value={formData.serviceType}
+                      value={serviceTypeId}
                       onChange={(value) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          serviceType: value,
-                        }));
+                        setServiceTypeId(value);
                         if (errors.serviceType)
                           setErrors((prev) => ({ ...prev, serviceType: "" }));
                       }}
@@ -237,15 +270,19 @@ export default function CreateServiceProviderDialog({
                     />
                   </AdminFormField>
 
+                  {isInactiveType ? (
+                    <div className="rounded-[12px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-bold text-[#92400E]">
+                      هذا النوع غير مُفعّل حاليًا. يمكنك إنشاء مزودين، لكن لن
+                      يظهروا للمستخدمين حتى يُفعَّل النوع.
+                    </div>
+                  ) : null}
+
                   <AdminFormField label="الاسم" required error={errors.name}>
                     <input
                       type="text"
-                      value={formData.name}
+                      value={name}
                       onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }));
+                        setName(e.target.value);
                         if (errors.name)
                           setErrors((prev) => ({ ...prev, name: "" }));
                       }}
@@ -272,12 +309,9 @@ export default function CreateServiceProviderDialog({
                       >
                         <input
                           type="text"
-                          value={formData.city}
+                          value={city}
                           onChange={(e) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              city: e.target.value,
-                            }));
+                            setCity(e.target.value);
                             if (errors.city)
                               setErrors((prev) => ({ ...prev, city: "" }));
                           }}
@@ -299,12 +333,9 @@ export default function CreateServiceProviderDialog({
                       >
                         <input
                           type="text"
-                          value={formData.country}
+                          value={country}
                           onChange={(e) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              country: e.target.value,
-                            }));
+                            setCountry(e.target.value);
                             if (errors.country)
                               setErrors((prev) => ({ ...prev, country: "" }));
                           }}
@@ -321,29 +352,64 @@ export default function CreateServiceProviderDialog({
                     </div>
                   </div>
 
-                  <AdminFormField
-                    label="بيانات إضافية"
-                    hint="بيانات إضافية بصيغة JSON (اختياري)"
-                  >
-                    <textarea
-                      value={formData.data}
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          data: e.target.value,
-                        }));
-                      }}
-                      placeholder="بيانات إضافية بصيغة JSON"
-                      rows={2}
-                      className={adminFieldClass(
-                        cn(
-                          adminTextareaClass,
-                          "text-start placeholder:text-start font-mono",
-                        ),
-                        false,
-                      )}
-                    />
-                  </AdminFormField>
+                  {selectedType ? (
+                    <div>
+                      <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                        بيانات {resolveLabel(selectedType.name, "ar")}
+                      </h3>
+                      <DynamicProviderFieldRenderer
+                        fields={selectedType.fields ?? []}
+                        value={dynamicData}
+                        onChange={setDynamicData}
+                        locale="ar"
+                        disabled={showAdvancedJson}
+                      />
+                    </div>
+                  ) : null}
+
+                  {allowAdvancedJson ? (
+                    <div className="rounded-[12px] border border-[#E5E7EB]">
+                      <button
+                        type="button"
+                        onClick={() => setShowAdvancedJson((prev) => !prev)}
+                        className="flex w-full items-center justify-between px-4 py-3 font-cairo text-[12px] font-extrabold text-[#344054]"
+                      >
+                        <span>متقدّم: تحرير JSON مباشرةً (اختياري)</span>
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform",
+                            showAdvancedJson && "rotate-180",
+                          )}
+                        />
+                      </button>
+                      {showAdvancedJson ? (
+                        <div className="border-t border-[#E5E7EB] px-4 py-3">
+                          <AdminFormField
+                            label="بيانات إضافية (JSON)"
+                            hint="يستبدل الحقول المولدة أعلاه عند الحفظ."
+                            error={errors.data ?? advancedJsonError ?? undefined}
+                          >
+                            <textarea
+                              value={advancedJson}
+                              onChange={(e) => {
+                                setAdvancedJson(e.target.value);
+                                setAdvancedJsonError(null);
+                              }}
+                              placeholder="{ }"
+                              rows={4}
+                              className={adminFieldClass(
+                                cn(
+                                  adminTextareaClass,
+                                  "text-start placeholder:text-start font-mono",
+                                ),
+                                Boolean(advancedJsonError),
+                              )}
+                            />
+                          </AdminFormField>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
 
                   <AdminFormField label="الأسماء البديلة">
                     <div className="flex gap-2 items-center">
@@ -376,9 +442,9 @@ export default function CreateServiceProviderDialog({
                         <Plus className="w-4 h-4" aria-hidden />
                       </button>
                     </div>
-                    {formData.aliases.length > 0 ? (
+                    {aliases.length > 0 ? (
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {formData.aliases.map((alias) => (
+                        {aliases.map((alias) => (
                           <span
                             key={alias}
                             className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#E6F4F3] px-3 py-1 font-cairo text-[11px] font-bold text-primary"
@@ -406,10 +472,8 @@ export default function CreateServiceProviderDialog({
 
                   <AdminFormField label="الحالة" required>
                     <StyledSelect
-                      value={formData.status}
-                      onChange={(value) =>
-                        setFormData((prev) => ({ ...prev, status: value }))
-                      }
+                      value={status}
+                      onChange={setStatus}
                       options={STATUS_OPTIONS}
                       placeholder="اختر الحالة"
                     />
