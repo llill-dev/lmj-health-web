@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { MedicalRequestModalShell } from './medical-request-modal-shell';
+import { useI18n } from '@/i18n/provider';
 
 export function MedicalRequestUploadResultDialog({
   open,
@@ -19,6 +20,7 @@ export function MedicalRequestUploadResultDialog({
     isFinal: boolean;
   }) => Promise<void>;
 }) {
+  const { dir } = useI18n();
   const [reportText, setReportText] = useState('');
   const [isFinal, setIsFinal] = useState(false);
 
@@ -36,7 +38,7 @@ export function MedicalRequestUploadResultDialog({
       title="إضافة نتيجة"
       maxWidthClass="max-w-[520px]"
     >
-      <div className="space-y-5 text-right" dir="rtl">
+      <div className="space-y-5 text-right" dir={dir}>
         <p className="font-cairo text-[13px] font-semibold text-[#667085]">
           إضافة نتيجة لطلب المريض{' '}
           <span className="font-extrabold text-[#111827]">{patientName}</span>

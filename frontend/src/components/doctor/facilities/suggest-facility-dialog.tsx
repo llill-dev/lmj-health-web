@@ -15,6 +15,7 @@ import {
 import StyledSelect from '@/components/ui/styled-select';
 import type { FacilityType } from '@/lib/admin/types';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 const suggestFacilitySchema = z.object({
   name: z.string().min(2, 'اسم المنشأة مطلوب'),
@@ -58,6 +59,7 @@ export default function SuggestFacilityDialog({
   onClose: () => void;
   onSubmit: (values: SuggestFacilityPayload) => void;
 }) {
+  const { dir } = useI18n();
   const {
     register,
     control,
@@ -157,7 +159,7 @@ export default function SuggestFacilityDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={handleSubmit(submit)}>
+            <form dir={dir} onSubmit={handleSubmit(submit)}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-right font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">

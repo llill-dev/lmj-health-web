@@ -34,6 +34,8 @@ import {
 import { EXPENSE_CATEGORY_LABELS } from "@/lib/doctor/clinicAccounts/labels";
 import type { ExpenseCategory } from "@/lib/doctor/clinicAccounts/types";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
+import { useI18n } from "@/i18n/provider";
 
 type ExpenseFilter = "all" | ExpenseCategory;
 
@@ -63,7 +65,15 @@ function findCategoryCount(
 }
 
 export default function DoctorClinicExpensesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
+  const {
+    canManageExpenses,
+    canViewDashboard,
+    canViewSettings,
+    isSecretary,
+  } = useBillingAccess();
   const [filter, setFilter] = useState<ExpenseFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -74,8 +84,12 @@ export default function DoctorClinicExpensesPage() {
   const [category, setCategory] = useState<ExpenseCategory>("rent");
   const [date, setDate] = useState("");
 
-  const settingsQuery = useBillingSettings();
-  const dashboardQuery = useBillingDashboard("month", settingsQuery.currency);
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
+  const dashboardQuery = useBillingDashboard(
+    "month",
+    settingsQuery.currency,
+    !isSecretary || canViewDashboard,
+  );
   const expensesQuery = useBillingExpenses({
     page,
     limit,
@@ -141,7 +155,7 @@ export default function DoctorClinicExpensesPage() {
       setPage(1);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: "تعذّر الحفظ",
+        title: tr("تعذّر الحفظ", "Save failed"),
         variant: "error",
       });
     }
@@ -150,54 +164,80 @@ export default function DoctorClinicExpensesPage() {
   return (
     <>
       <Helmet>
-        <title>المصاريف • LMJ Health</title>
+        <title>{tr("المصاريف • LMJ Health", "Expenses • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
           headerIcon={<Receipt className="h-8 w-8 text-white" />}
-          title="المصاريف"
+          title={tr("المصاريف", "Expenses")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
                 {dashboardQuery.isAwaitingData
                   ? "—"
-                  : formatBillingAmount(
-                      dashboardQuery.summary?.expenses ?? 0,
-                      currency,
-                    )}
+                  : !isSecretary || canViewDashboard
+                    ? formatBillingAmount(
+                        dashboardQuery.summary?.expenses ?? 0,
+                        currency,
+                      )
+                    : "—"}
               </span>
-              <span className="text-primary/90"> — إجمالي المصاريف</span>
+              <span className="text-primary/90">
+                {tr(" — إجمالي المصاريف", " — total expenses")}
+              </span>
             </span>
           }
-          actionLabel="مصروف جديد"
-          actionIcon={<Plus className="h-4 w-4" />}
-          onActionClick={() => setDialogOpen(true)}
+          actionLabel={
+            canManageExpenses ? tr("مصروف جديد", "New expense") : undefined
+          }
+          actionIcon={canManageExpenses ? <Plus className="h-4 w-4" /> : undefined}
+          onActionClick={canManageExpenses ? () => setDialogOpen(true) : undefined}
           kpis={[
             {
               key: "rent",
               icon: <Home className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.rent,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.rent
+                  : "—",
               label: "إيجار",
             },
             {
               key: "services",
               icon: <Zap className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.services,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.services
+                  : "—",
               label: "خدمات",
             },
             {
               key: "salaries",
               icon: <Users className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.salaries,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.salaries
+                  : "—",
               label: "رواتب",
             },
             {
               key: "materials",
               icon: <Box className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.materials,
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.materials
+                  : "—",
               label: "مواد",
             },
           ]}
@@ -223,23 +263,31 @@ export default function DoctorClinicExpensesPage() {
             <ClinicAccountsSearchCount count={expensesQuery.total} label="مصروف" />
           }
         />
+        {!canManageExpenses ? (
+          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+            يمكنك عرض المصاريف فقط، بينما إضافة مصروف جديد تتطلب صلاحية إدارة.
+          </p>
+        ) : null}
 
         {expensesQuery.isAwaitingData ? (
           <DoctorTableSkeleton rows={5} columns={1} />
         ) : expensesQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل المصاريف"
+            title={tr("تعذّر تحميل المصاريف", "Failed to load expenses")}
             brief={getUserFacingRequestErrorMessage(expensesQuery.error)}
             retrying={retryingExpenses}
             onRetry={() => void retryExpenses()}
           />
         ) : expensesQuery.expenses.length === 0 ? (
           <ClinicAccountsEmptyState
-            title="لا توجد مصاريف مطابقة"
-            subtitle="جرّب تغيير البحث أو الفئة، أو أضف مصروفًا جديدًا لبدء السجل المالي."
-            actionLabel="إضافة مصروف"
-            onAction={() => setDialogOpen(true)}
-            actionIcon={<Plus className="w-4 h-4" aria-hidden />}
+            title={tr("لا توجد مصاريف مطابقة", "No matching expenses")}
+            subtitle={tr(
+              "جرّب تغيير البحث أو الفئة، أو أضف مصروفًا جديدًا لبدء السجل المالي.",
+              "Try changing search or category, or add a new expense to start the financial log.",
+            )}
+            actionLabel={canManageExpenses ? "إضافة مصروف" : undefined}
+            onAction={canManageExpenses ? () => setDialogOpen(true) : undefined}
+            actionIcon={canManageExpenses ? <Plus className="w-4 h-4" aria-hidden /> : undefined}
           />
         ) : (
           <div className="space-y-3">
@@ -270,9 +318,9 @@ export default function DoctorClinicExpensesPage() {
         ) : null}
 
         <ClinicAccountsModalShell
-          open={dialogOpen}
+          open={dialogOpen && canManageExpenses}
           onClose={() => setDialogOpen(false)}
-          title="إضافة مصروف"
+          title={tr("إضافة مصروف", "Add expense")}
           maxWidthClass="max-w-[560px]"
         >
           <div className="space-y-4">

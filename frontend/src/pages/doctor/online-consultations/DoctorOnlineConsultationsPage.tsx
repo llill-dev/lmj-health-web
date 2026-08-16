@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  RefreshCw,
   Search,
   Shield,
   User,
@@ -27,6 +28,7 @@ import {
   useSendConsultationMessage,
   useUpdateConsultationStatus,
 } from '@/hooks';
+import { useI18n } from '@/i18n/provider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { readAuthUser } from '@/lib/cookies';
@@ -91,6 +93,8 @@ function tabForTicketStatus(status?: string): ConsultationStatusTab {
 }
 
 export default function DoctorOnlineConsultationsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const ticketFromUrl = searchParams.get('ticket')?.trim() ?? '';
@@ -393,37 +397,48 @@ export default function DoctorOnlineConsultationsPage() {
     setSelectedMessageId(null);
   };
 
+  const isRefreshingConsultations =
+    !listAwaitingData && (listQuery.isRefetching || overviewQuery.isRefetching);
+
   return (
     <>
       <Helmet>
-        <title>Online Consultations • LMJ Health</title>
+        <title>
+          {tr(
+            'الاستشارات • LMJ Health',
+            'Online Consultations • LMJ Health',
+          )}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="consultations"
           surface="mint"
-          title="الاستشارات"
-          subtitle="الاستشارات المرسلة إليك من المرضى"
+          title={tr('الاستشارات', 'Consultations')}
+          subtitle={tr(
+            'الاستشارات المرسلة إليك من المرضى',
+            'Consultations sent to you by patients',
+          )}
           headerIcon={<Shield className="h-8 w-8 text-white" aria-hidden />}
           kpis={[
             {
               key: 'active',
               icon: <Activity className="h-5 w-5 shrink-0" aria-hidden />,
               value: overviewStats.loading ? '—' : overviewStats.active,
-              label: 'نشط',
+              label: tr('نشط', 'Active'),
             },
             {
               key: 'closed',
               icon: <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden />,
               value: overviewStats.loading ? '—' : overviewStats.closed,
-              label: 'مغلق',
+              label: tr('مغلق', 'Closed'),
             },
             {
               key: 'new',
               icon: <Clock className="h-5 w-5 shrink-0" aria-hidden />,
               value: overviewStats.loading ? '—' : overviewStats.new,
-              label: 'جديد',
+              label: tr('جديد', 'New'),
             },
           ]}
         />
@@ -433,7 +448,7 @@ export default function DoctorOnlineConsultationsPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="ابحث في الطلبات..."
+              placeholder={tr('ابحث في الطلبات...', 'Search requests...')}
               className="h-[40px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-11 pe-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3]"
             />
             <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
@@ -451,13 +466,42 @@ export default function DoctorOnlineConsultationsPage() {
           </div>
         </section>
 
+        {isRefreshingConsultations ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            جارٍ تحديث الاستشارات...
+          </div>
+        ) : null}
+
         {listAwaitingData ? (
           <div className="mt-6">
             <DoctorExpandableCardSkeleton count={4} expanded />
           </div>
         ) : listQuery.isError ? (
-          <div className="mt-6 rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-            تعذّر تحميل الاستشارات. حاول تحديث الصفحة.
+          <div className="mt-6 rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center">
+            <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
+              تعذّر تحميل الاستشارات. حاول إعادة المحاولة.
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                void listQuery.refetch();
+                void overviewQuery.refetch();
+              }}
+              disabled={listQuery.isRefetching || overviewQuery.isRefetching}
+              className="mt-4 inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:bg-[#FFF5F5] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${
+                  listQuery.isRefetching || overviewQuery.isRefetching
+                    ? 'animate-spin'
+                    : ''
+                }`}
+              />
+              {listQuery.isRefetching || overviewQuery.isRefetching
+                ? 'جارٍ إعادة المحاولة...'
+                : 'إعادة المحاولة'}
+            </button>
           </div>
         ) : (
           <ConsultationsListPanel

@@ -18,6 +18,7 @@ import { FaqAccordionList } from '@/components/platform/faq-accordion';
 import { PlatformFooter } from '@/components/platform/platform-footer';
 import { usePlatformSupport } from '@/components/platform/platform-support-provider';
 import { useDoctorSupportPage } from '@/hooks/doctor/support/useDoctorSupportPage';
+import { useI18n } from '@/i18n/provider';
 import { Loader2 } from 'lucide-react';
 
 type SupportCard =
@@ -81,23 +82,28 @@ const SUPPORT_CARDS: readonly SupportCard[] = [
 ];
 
 export default function DoctorSupportPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { openModal } = usePlatformSupport();
-  const support = useDoctorSupportPage('ar');
+  const support = useDoctorSupportPage(locale);
 
   return (
     <>
       <Helmet>
-        <title>الدعم والمساعدة • LMJ Health</title>
+        <title>{tr('الدعم والمساعدة • LMJ Health', 'Support • LMJ Health')}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="doctor"
           surface="mint"
-          title="الدعم والمساعدة"
-          subtitle="الأسئلة الشائعة، قنوات التواصل، والوثائق القانونية من منصة LMJ Health"
+          title={tr('الدعم والمساعدة', 'Support & Help')}
+          subtitle={tr(
+            'الأسئلة الشائعة، قنوات التواصل، والوثائق القانونية من منصة LMJ Health',
+            'FAQs, contact channels, and legal documents from LMJ Health',
+          )}
           headerIcon={<HelpCircle className="h-8 w-8 text-white" aria-hidden />}
-          actionLabel="تواصل مع الدعم"
+          actionLabel={tr('تواصل مع الدعم', 'Contact support')}
           onActionClick={() => openModal('contact')}
         />
 

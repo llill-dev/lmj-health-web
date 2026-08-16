@@ -6,6 +6,20 @@ function tr(locale: SupportedLocale, ar: string, en: string): string {
   return locale === "ar" ? ar : en;
 }
 
+function isMissingStorageLinkError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message === "missing download url" ||
+      error.message === "missing_url")
+  );
+}
+
+function isMissingAttachmentReferenceError(error: unknown): boolean {
+  return (
+    error instanceof Error && error.message === "missing attachment reference"
+  );
+}
+
 export function getCreateTemporaryPatientErrorMessage(
   error: unknown,
   locale: SupportedLocale = "ar",
@@ -307,18 +321,6 @@ export function getAppointmentWriteErrorMessage(
       );
     }
 
-    if (error.status === 403) {
-      return tr(
-        locale,
-        action === "cancel"
-          ? "هذا الحساب لا يملك صلاحية إلغاء هذا الموعد حالياً."
-          : "هذا الحساب لا يملك صلاحية إعادة جدولة هذا الموعد حالياً.",
-        action === "cancel"
-          ? "This account is not allowed to cancel this appointment right now."
-          : "This account is not allowed to reschedule this appointment right now.",
-      );
-    }
-
     if (error.status === 404) {
       return tr(
         locale,
@@ -349,6 +351,14 @@ export function getAppointmentStatusMutationErrorMessage(
   locale: SupportedLocale = "ar",
 ): string {
   if (error instanceof ApiError) {
+    if (error.status === 400 && action === "no-show") {
+      return tr(
+        locale,
+        "لا يمكن تسجيل عدم حضور لموعد مستقبلي. انتظر حتى موعد الزيارة أو استخدم إعادة الجدولة إذا تغيّر الموعد.",
+        "A future appointment cannot be marked as no-show. Wait until the visit time or use reschedule if the appointment changed.",
+      );
+    }
+
     if (error.status === 401) {
       return tr(
         locale,
@@ -447,6 +457,64 @@ export function getAppointmentFileMutationErrorMessage(
   return getUserFacingRequestErrorMessage(error, locale);
 }
 
+export function getAppointmentFileAccessErrorMessage(
+  error: unknown,
+  action: "open" | "download",
+  locale: SupportedLocale = "ar",
+): string {
+  if (isMissingStorageLinkError(error)) {
+    return tr(
+      locale,
+      action === "open"
+        ? "تعذر فتح الملف لأن خدمة التخزين لم تُرجع رابط عرض صالحاً حالياً. أعد المحاولة بعد قليل."
+        : "تعذر تنزيل الملف لأن خدمة التخزين لم تُرجع رابط تنزيل صالحاً حالياً. أعد المحاولة بعد قليل.",
+      action === "open"
+        ? "We could not open the file because the storage service did not return a usable viewing link right now. Try again shortly."
+        : "We could not download the file because the storage service did not return a usable download link right now. Try again shortly.",
+    );
+  }
+
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return tr(
+        locale,
+        "انتهت صلاحية جلسة الدخول. سجّل الدخول من جديد ثم أعد محاولة الوصول إلى ملف الموعد.",
+        "Your session has expired. Sign in again and then retry accessing the appointment file.",
+      );
+    }
+
+    if (error.status === 403) {
+      return tr(
+        locale,
+        action === "open"
+          ? "هذا الحساب لا يملك صلاحية فتح هذا الملف المرتبط بالموعد حالياً."
+          : "هذا الحساب لا يملك صلاحية تنزيل هذا الملف المرتبط بالموعد حالياً.",
+        action === "open"
+          ? "This account is not allowed to open this appointment file right now."
+          : "This account is not allowed to download this appointment file right now.",
+      );
+    }
+
+    if (error.status === 404) {
+      return tr(
+        locale,
+        "تعذر العثور على الموعد أو الملف المطلوب، أو لم يعد رابط الملف متاحاً.",
+        "We could not find the appointment or file, or the file link is no longer available.",
+      );
+    }
+
+    if (error.status === 422) {
+      return tr(
+        locale,
+        "تعذر الوصول إلى هذا الملف لأن الطلب لا يطابق متطلبات الخادم الحالية.",
+        "We could not access this file because the request does not meet current server validation rules.",
+      );
+    }
+  }
+
+  return getUserFacingRequestErrorMessage(error, locale);
+}
+
 export function getPatientFileMutationErrorMessage(
   error: unknown,
   action: "upload" | "delete",
@@ -494,6 +562,72 @@ export function getPatientFileMutationErrorMessage(
         action === "upload"
           ? "We could not upload the file because the file data or request format does not meet server validation rules."
           : "We could not delete the file because the request does not meet server validation rules.",
+      );
+    }
+  }
+
+  return getUserFacingRequestErrorMessage(error, locale);
+}
+
+export function getPatientFileAccessErrorMessage(
+  error: unknown,
+  action: "open" | "download",
+  locale: SupportedLocale = "ar",
+): string {
+  if (isMissingAttachmentReferenceError(error)) {
+    return tr(
+      locale,
+      "هذا المرفق لا يحتوي على مرجع ملف صالح بعد، لذلك لا يمكن فتحه أو تنزيله حالياً.",
+      "This attachment does not contain a valid file reference yet, so it cannot be opened or downloaded right now.",
+    );
+  }
+
+  if (isMissingStorageLinkError(error)) {
+    return tr(
+      locale,
+      action === "open"
+        ? "تعذر فتح الملف لأن خدمة التخزين لم تُرجع رابط عرض صالحاً حالياً. أعد المحاولة بعد قليل."
+        : "تعذر تنزيل الملف لأن خدمة التخزين لم تُرجع رابط تنزيل صالحاً حالياً. أعد المحاولة بعد قليل.",
+      action === "open"
+        ? "We could not open the file because the storage service did not return a usable viewing link right now. Try again shortly."
+        : "We could not download the file because the storage service did not return a usable download link right now. Try again shortly.",
+    );
+  }
+
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return tr(
+        locale,
+        "انتهت صلاحية جلسة الدخول. سجّل الدخول من جديد ثم أعد محاولة الوصول إلى ملف المريض.",
+        "Your session has expired. Sign in again and then retry accessing the patient file.",
+      );
+    }
+
+    if (error.status === 403) {
+      return tr(
+        locale,
+        action === "open"
+          ? "هذا الحساب لا يملك صلاحية فتح هذا الملف من سجل المريض حالياً."
+          : "هذا الحساب لا يملك صلاحية تنزيل هذا الملف من سجل المريض حالياً.",
+        action === "open"
+          ? "This account is not allowed to open this patient file right now."
+          : "This account is not allowed to download this patient file right now.",
+      );
+    }
+
+    if (error.status === 404) {
+      return tr(
+        locale,
+        "تعذر العثور على المريض أو الملف المطلوب، أو لم يعد رابط الملف متاحاً.",
+        "We could not find the patient or file, or the file link is no longer available.",
+      );
+    }
+
+    if (error.status === 422) {
+      return tr(
+        locale,
+        "تعذر الوصول إلى هذا الملف لأن الطلب لا يطابق متطلبات الخادم الحالية.",
+        "We could not access this file because the request does not meet current server validation rules.",
       );
     }
   }

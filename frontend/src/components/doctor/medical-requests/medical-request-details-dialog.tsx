@@ -5,6 +5,7 @@ import type { MedicalRequestDetailVm } from './map-doctor-medical-requests';
 import { MedicalRequestInfoCard } from './medical-request-info-card';
 import { MedicalRequestModalShell } from './medical-request-modal-shell';
 import { useMedicalRequestDocument } from './use-medical-request-document';
+import { useI18n } from '@/i18n/provider';
 
 export function MedicalRequestDetailsDialog({
   open,
@@ -25,6 +26,7 @@ export function MedicalRequestDetailsDialog({
   onUpdateStatus: () => void;
   onUploadResult: () => void;
 }) {
+  const { dir } = useI18n();
   const { openResultUrl, documentBusy } = useMedicalRequestDocument();
 
   if (!vm) return null;
@@ -44,7 +46,7 @@ export function MedicalRequestDetailsDialog({
       <div className="space-y-5">
         <MedicalRequestInfoCard vm={vm} />
 
-        <section dir="rtl" className="text-start">
+        <section dir={dir} className="text-start">
           <div className="mb-2 flex items-center justify-start gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
             <ClipboardList className="h-4 w-4 shrink-0 text-primary" aria-hidden />
             <span>ملاحظات إضافية</span>
@@ -55,7 +57,7 @@ export function MedicalRequestDetailsDialog({
         </section>
 
         {showResultSection ? (
-          <section dir="rtl" className="text-start">
+          <section dir={dir} className="text-start">
             <div className="mb-3 flex items-center justify-start gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
               <ClipboardList className="h-4 w-4 shrink-0 text-primary" aria-hidden />
               <span>النتيجة</span>

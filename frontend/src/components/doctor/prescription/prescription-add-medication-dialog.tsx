@@ -12,6 +12,7 @@ import {
   profileFieldClass,
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import type { PrescriptionDraftForm } from './prescription-types';
+import { useI18n } from '@/i18n/provider';
 
 const schema = z.object({
   name: z.string().trim().min(1, 'اسم الدواء مطلوب'),
@@ -35,6 +36,7 @@ export default function PrescriptionAddMedicationDialog({
   confirmLabel: string;
   onSubmit: (values: PrescriptionDraftForm) => void | Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
   const form = useForm<PrescriptionDraftForm>({
     resolver: zodResolver(schema),
     mode: 'onTouched',
@@ -72,8 +74,8 @@ export default function PrescriptionAddMedicationDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[9998] bg-black/45 backdrop-blur-[2px]" />
         <Dialog.Content
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
           className="fixed left-1/2 top-1/2 z-[9999] w-[min(520px,calc(100vw-32px))] max-h-[calc(100vh-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[12px] border border-[#E4E7EC] bg-white p-4 shadow-[0_24px_48px_rgba(15,23,42,0.18)] sm:p-6"
         >
           <div className="mb-5 flex items-start justify-between gap-3">

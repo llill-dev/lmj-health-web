@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Check, FileText } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export default function ComplaintsSummaryStatCard({
   variant,
@@ -10,6 +11,7 @@ export default function ComplaintsSummaryStatCard({
   value: number;
   delay?: number;
 }) {
+  const { dir } = useI18n();
   const label =
     variant === 'total'
       ? 'إجمالي الشكاوي'
@@ -78,7 +80,7 @@ export default function ComplaintsSummaryStatCard({
       >
         {icon}
         <div
-          dir='rtl'
+          dir={dir}
           className='flex min-w-0 flex-1 flex-col gap-1 text-right'
         >
           <div className={`font-cairo ${labelClass}`}>{label}</div>

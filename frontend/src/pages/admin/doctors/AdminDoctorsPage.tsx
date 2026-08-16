@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import {
+  AlertCircle,
   Ban,
   CheckCircle2,
   Clock,
@@ -186,6 +187,16 @@ export default function AdminDoctorsPage() {
             };
           })}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الصفحة مخصّصة لفرز ملفات الأطباء ومتابعة حالات القبول والرفض والانتقال إلى التفاصيل. مراجعة التحقق، دراسة الملف الكامل، وأي قرار إداري فعلي يتم من صفحة تفاصيل الطبيب أو من طلبات التحقق المرتبطة به.",
+              "This page is for triaging doctor records, tracking approval states, and navigating to details. Verification review, full profile inspection, and any real admin decision are handled from the doctor details page or its linked verification requests.",
+            )}
+          </div>
+        </div>
 
         <AdminSearchFiltersBar
           queryPlaceholder={tr("ابحث عن طبيب...", "Search for a doctor...")}

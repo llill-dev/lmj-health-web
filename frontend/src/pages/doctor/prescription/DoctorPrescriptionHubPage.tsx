@@ -14,8 +14,11 @@ import { useDoctorPrescriptionsHub } from '@/hooks/doctor/prescriptions/useDocto
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorPrescriptionHubPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const [search, setSearch] = useState('');
@@ -46,10 +49,12 @@ export default function DoctorPrescriptionHubPage() {
   return (
     <>
       <Helmet>
-        <title>الوصفات الطبية • LMJ Health</title>
+        <title>
+          {tr('الوصفات الطبية • LMJ Health', 'Prescriptions • LMJ Health')}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <PrescriptionsHubPageHeader />
 
         <section className="rounded-[12px] border border-[#EEF2F6] bg-white p-5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6">
@@ -60,7 +65,10 @@ export default function DoctorPrescriptionHubPage() {
               <DoctorTableSkeleton rows={8} columns={5} />
             ) : list.isError ? (
               <DoctorListErrorState
-                title="تعذّر تحميل الوصفات الطبية"
+                title={tr(
+                  'تعذّر تحميل الوصفات الطبية',
+                  'Failed to load prescriptions',
+                )}
                 brief={getUserFacingRequestErrorMessage(list.error)}
                 retrying={retryingList}
                 onRetry={() => void retryList()}

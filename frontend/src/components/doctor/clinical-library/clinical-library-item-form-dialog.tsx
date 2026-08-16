@@ -9,6 +9,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
 import type { DoctorLibraryItemType } from '@/lib/doctor/library/libraryTypes';
+import { useI18n } from '@/i18n/provider';
 
 const LIBRARY_TYPE_LABELS: Record<DoctorLibraryItemType, string> = {
   MEDICATION: 'دواء',
@@ -39,6 +40,7 @@ export function ClinicalLibraryItemFormDialog({
   onClose: () => void;
   onSubmit: (values: ClinicalLibraryItemFormValues) => Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
   const [libraryType, setLibraryType] = useState<DoctorLibraryItemType>('MEDICATION');
   const [label, setLabel] = useState('');
   const [dosage, setDosage] = useState('');
@@ -60,7 +62,7 @@ export function ClinicalLibraryItemFormDialog({
       maxWidthClass="max-w-[520px]"
       headerPattern
     >
-      <div dir="rtl" lang="ar" className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           احفظ اختصاراً سريرياً لإعادة استخدامه بسرعة أثناء الوصفات والطلبات.
         </p>

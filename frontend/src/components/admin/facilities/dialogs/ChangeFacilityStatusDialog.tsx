@@ -38,6 +38,9 @@ export default function ChangeFacilityStatusDialog({
   const mutation = useMutation({
     mutationFn: (status: string) =>
       adminApi.facilities.updateStatus(facilityId!, status),
+    meta: {
+      skipGlobalError: true,
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "facilities"] });
       queryClient.invalidateQueries({
@@ -149,6 +152,10 @@ export default function ChangeFacilityStatusDialog({
                 <label className="block font-cairo text-[12px] font-extrabold text-[#111827] mb-2">
                   الحالة الجديدة
                 </label>
+                <p className="mb-2 text-right font-cairo text-[12px] font-bold leading-6 text-[#667085]">
+                  أنت تغيّر حالة سجل المنشأة نفسه. هذا لا يحرر بيانات المنشأة،
+                  لكنه قد يغيّر ظهورها أو علاقتها التشغيلية مع الأطباء.
+                </p>
                 <StyledSelect
                   value={selectedStatus}
                   onChange={(value) => {
@@ -160,9 +167,19 @@ export default function ChangeFacilityStatusDialog({
                 />
               </div>
 
+              {currentStatus ? (
+                <div className="mb-4 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#475467]">
+                  الحالة الحالية: {STATUS_OPTIONS.find((option) => option.value === currentStatus)?.label ?? currentStatus}
+                </div>
+              ) : null}
+
               {selectedStatus === "DELETED" ? (
                 <div className="mb-6 rounded-[12px] border border-[#FECACA] bg-[#FFF1F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
                   تعيين الحالة إلى "محذوف" سيؤدي إلى فك ارتباط الأطباء بهذه المنشأة حسب عقد الـ API.
+                </div>
+              ) : selectedStatus && selectedStatus !== currentStatus ? (
+                <div className="mb-6 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#0F766E]">
+                  سيتم حفظ الحالة الجديدة فقط عند الضغط على زر "تغيير الحالة".
                 </div>
               ) : null}
 

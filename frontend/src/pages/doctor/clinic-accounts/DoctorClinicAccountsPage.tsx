@@ -35,15 +35,28 @@ import {
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { isAwaitingAnyInitialQueryData } from "@/lib/query/queryUi";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 import {
   formatBillingAmount,
   formatBillingNumber,
 } from "@/lib/doctor/billing/format";
 import type { AccountsPeriod } from "@/lib/doctor/clinicAccounts/types";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 export default function DoctorClinicAccountsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const {
+    basePath,
+    canViewReports,
+    canManagePayments,
+    canManageExpenses,
+    canManageInvoices,
+    canViewSettings,
+    isSecretary,
+  } = useBillingAccess();
   const [period, setPeriod] = useState<AccountsPeriod>("month");
   const [search, setSearch] = useState("");
   const [overduePage, setOverduePage] = useState(1);
@@ -51,7 +64,7 @@ export default function DoctorClinicAccountsPage() {
   const [outstandingPage, setOutstandingPage] = useState(1);
   const [outstandingLimit, setOutstandingLimit] = useState(10);
 
-  const settingsQuery = useBillingSettings();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const currency = settingsQuery.currency;
 
   const dashboardQuery = useBillingDashboard(period, currency);
@@ -73,11 +86,14 @@ export default function DoctorClinicAccountsPage() {
     page: outstandingPage,
     limit: outstandingLimit,
   });
-  const reportsQuery = useBillingReports({
-    year: new Date().getFullYear(),
-    month: "all",
-    currency,
-  });
+  const reportsQuery = useBillingReports(
+    {
+      year: new Date().getFullYear(),
+      month: "all",
+      currency,
+    },
+    !isSecretary || canViewReports,
+  );
   const { retry: retryDashboard, retrying: retryingDashboard } = useRetryAction(
     () =>
       Promise.all([
@@ -134,13 +150,13 @@ export default function DoctorClinicAccountsPage() {
   return (
     <>
       <Helmet>
-        <title>الحسابات • LMJ Health</title>
+        <title>{tr("الحسابات • LMJ Health", "Accounts • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="الحسابات"
-          subtitle="إدارة حسابات العيادة"
+          title={tr("الحسابات", "Accounts")}
+          subtitle={tr("إدارة حسابات العيادة", "Manage clinic accounts")}
           icon={<Wallet className="w-7 h-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -153,11 +169,11 @@ export default function DoctorClinicAccountsPage() {
             setOverduePage(1);
             setOutstandingPage(1);
           }}
-          placeholder="بحث..."
+          placeholder={tr("بحث...", "Search...")}
           trailing={
             <ClinicAccountsSearchCount
               count={overdueQuery.total}
-              label="فاتورة متأخرة"
+              label={tr("فاتورة متأخرة", "overdue invoices")}
             />
           }
         />
@@ -168,7 +184,7 @@ export default function DoctorClinicAccountsPage() {
 
         {isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الحسابات"
+            title={tr("تعذّر تحميل الحسابات", "Failed to load accounts")}
             brief={getUserFacingRequestErrorMessage(pageError)}
             retrying={retryingDashboard}
             onRetry={() => void retryDashboard()}
@@ -229,28 +245,39 @@ export default function DoctorClinicAccountsPage() {
               إجراءات سريعة
             </h2>
             <div className="space-y-3">
-              <Link
-                to="/doctor/accounts/invoices"
-                className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
-              >
-                <Plus className="w-4 h-4" aria-hidden />
-                إضافة دفعة على فاتورة
-              </Link>
-              <Link
-                to="/doctor/accounts/expenses"
-                className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
-              >
-                <Plus className="w-4 h-4" aria-hidden />
-                إضافة مصروف
-              </Link>
-              <Link
-                to="/doctor/accounts/invoices/new"
-                className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
-              >
-                <Plus className="w-4 h-4" aria-hidden />
-                إنشاء فاتورة
-              </Link>
+              {canManagePayments ? (
+                <Link
+                  to={`${basePath}/invoices`}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
+                >
+                  <Plus className="w-4 h-4" aria-hidden />
+                  إضافة دفعة على فاتورة
+                </Link>
+              ) : null}
+              {canManageExpenses ? (
+                <Link
+                  to={`${basePath}/expenses`}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
+                >
+                  <Plus className="w-4 h-4" aria-hidden />
+                  إضافة مصروف
+                </Link>
+              ) : null}
+              {canManageInvoices ? (
+                <Link
+                  to={`${basePath}/invoices/new`}
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
+                >
+                  <Plus className="w-4 h-4" aria-hidden />
+                  إنشاء فاتورة
+                </Link>
+              ) : null}
             </div>
+            {!canManagePayments && !canManageExpenses && !canManageInvoices ? (
+              <p className="mt-4 text-center font-cairo text-[13px] font-semibold text-[#667085]">
+                لديك صلاحية عرض البيانات المالية فقط بدون تنفيذ إجراءات إدارة.
+              </p>
+            ) : null}
           </div>
         </section>
 
@@ -373,14 +400,20 @@ export default function DoctorClinicAccountsPage() {
               النشاطات الأخيرة
             </h2>
             <Link
-              to="/doctor/accounts/invoices"
+              to={`${basePath}/invoices`}
               className="inline-flex shrink-0 items-center gap-2 font-cairo text-[12px] font-extrabold text-primary"
             >
               <Receipt className="w-4 h-4" aria-hidden />
               عرض كل الفواتير
             </Link>
           </div>
-          <RecentActivityList activities={reportsQuery.recentActivities} />
+          {canViewReports ? (
+            <RecentActivityList activities={reportsQuery.recentActivities} />
+          ) : (
+            <p className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
+              لا تظهر النشاطات المالية الأخيرة ضمن هذه الصفحة إلا عند منح صلاحية عرض التقارير المالية.
+            </p>
+          )}
         </section>
       </div>
     </>

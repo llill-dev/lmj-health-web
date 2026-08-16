@@ -3,8 +3,10 @@ import {
   Activity,
   Ban,
   Eye,
+  Info,
   Mail,
   Phone,
+  RefreshCw,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -70,7 +72,7 @@ export default function AdminPatientsPage() {
     ...defaultFilters,
   });
 
-  const { patients, results, total, isAwaitingData, error, refetch } =
+  const { patients, results, total, isAwaitingData, isRefetching, error, refetch } =
     useAdminPatients({
       account_status: filters.account_status,
       search: filters.search || undefined,
@@ -254,9 +256,56 @@ export default function AdminPatientsPage() {
               <div className="inline-flex h-[42px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#667085]">
                 {results} {tr("نتيجة", "results")}
               </div>
+
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                disabled={isRefetching}
+                className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+                {isRefetching
+                  ? tr("جارٍ التحديث...", "Refreshing...")
+                  : tr("تحديث", "Refresh")}
+              </button>
             </div>
           </div>
         </section>
+
+        <section className="mt-4 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
+          <div className="flex items-start gap-3 text-right">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Info className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                {tr(
+                  "صلاحيات الإدارة هنا تركز على المتابعة وحالة الحساب",
+                  "Admin actions here focus on monitoring and account status",
+                )}
+              </div>
+              <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
+                {tr(
+                  "يمكن من هذه الصفحة عرض التفاصيل، تعليق الحساب، أو إعادة التفعيل عند الحاجة. أما إدارة ملف المريض الطبي والملفات الحساسة فليست جزءًا من هذه القائمة.",
+                  "From this page, admins can open details, suspend accounts, or reactivate them when needed. Medical record management and sensitive patient files are intentionally outside this list view.",
+                )}
+              </div>
+              <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
+                {tr(
+                  "تُستخدم البطاقات هنا كمدخل إلى السجل الإداري المختصر للمريض وحالة الحساب فقط، بينما تبقى أي مراجعة أوسع للبيانات أو النشاط داخل صفحة التفاصيل الخاصة به.",
+                  "The cards here act only as an entry point to the patient’s short admin record and account state, while any broader review of data or activity stays inside the patient details page.",
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {isRefetching && !isAwaitingData ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث قائمة المرضى...", "Refreshing patients list...")}
+          </div>
+        ) : null}
 
         <section className="mt-5 space-y-5">
           {isAwaitingData ? (
@@ -267,11 +316,42 @@ export default function AdminPatientsPage() {
             </>
           ) : error ? (
             <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 font-cairo text-[12px] font-semibold text-[#B42318] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-              {tr("تعذر تحميل قائمة المرضى.", "Failed to load patients list.")}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  {tr("تعذر تحميل قائمة المرضى.", "Failed to load patients list.")}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void refetch()}
+                  disabled={isRefetching}
+                  className="inline-flex h-[34px] items-center justify-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[11px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+                  {isRefetching
+                    ? tr("جارٍ إعادة المحاولة...", "Retrying...")
+                    : tr("إعادة المحاولة", "Retry")}
+                </button>
+              </div>
             </div>
           ) : patients.length === 0 ? (
-            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 font-cairo text-[12px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
-              {tr("لا توجد نتائج مطابقة.", "No matching results.")}
+            <div className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                {tr("لا توجد نتائج مطابقة.", "No matching results.")}
+              </div>
+              <div className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                {hasActiveFilters
+                  ? tr(
+                      "جرّب مسح الفلاتر أو توسيع البحث لعرض مرضى أكثر.",
+                      "Try clearing filters or broadening the search to show more patients.",
+                    )
+                  : tr(
+                      "لا توجد بيانات مرضى ظاهرة ضمن النطاق الحالي.",
+                      "No patient data is visible within the current scope.",
+                    )}
+              </div>
             </div>
           ) : (
             patients.map((p) => {

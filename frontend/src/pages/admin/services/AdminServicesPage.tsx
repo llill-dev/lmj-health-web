@@ -24,12 +24,14 @@ import {
   useUpdateFacilityStatus,
 } from '@/hooks/admin/services/useAdminServices';
 import type { FacilitiesListParams, FacilityStatus, FacilitySummary } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 function resolveFacilityId(facility: FacilitySummary | null | undefined): string | null {
   return facility?.id || facility?._id || null;
 }
 
 export default function AdminServicesPage() {
+  const { locale, dir } = useI18n();
   const [activeTabIdx, setActiveTabIdx] = useState(0);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch] = useDebounce(searchInput, 400);
@@ -216,11 +218,19 @@ export default function AdminServicesPage() {
         }
       />
 
-      <div dir='rtl' lang='ar'>
+      <div dir={dir} lang={locale}>
         <AdminServicesHeader
           actionLabel={isFacilityTab ? 'إضافة منشأة' : 'إضافة نوع خدمة'}
           onAction={handleAddNew}
         />
+
+        <section className='mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]'>
+          <div className='font-cairo text-[13px] font-extrabold text-[#0F766E]'>
+            {isFacilityTab
+              ? 'هذه الشاشة مخصّصة لإدارة المنشآت نفسها. أنواع الخدمات تُدار من تبويبها المستقل، ومزوّدو الخدمة يُراجعون من داخل كل نوع خدمة.'
+              : 'هذا التبويب يعرّف نوع الخدمة وحقوله. بعد حفظ النوع يمكنك فتح قائمة مزوّدي الخدمة المرتبطين به من شاشة أنواع الخدمات.'}
+          </div>
+        </section>
 
         <AdminServicesToolbar
           tabs={ADMIN_SERVICES_TABS}

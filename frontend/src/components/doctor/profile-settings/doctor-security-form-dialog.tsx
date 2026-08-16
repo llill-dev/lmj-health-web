@@ -11,6 +11,7 @@ import type {
   UseFormReturn,
 } from 'react-hook-form';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   profileFieldClass,
@@ -84,6 +85,8 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
   onValidatedSubmit: (values: T) => void | Promise<void>;
   busy?: boolean;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const {
     register,
@@ -172,8 +175,8 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                 },
               }}
               className="pointer-events-auto relative w-full max-w-[min(96vw,520px)] origin-center overflow-hidden rounded-[22px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFFFE] via-white to-[#F8FAFC] shadow-[0_24px_64px_-12px_rgba(15,23,42,0.22)] outline-none"
-              dir="rtl"
-              lang="ar"
+              dir={dir}
+              lang={locale}
             >
               <div
                 aria-hidden
@@ -185,7 +188,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                   <button
                     type="button"
                     className="absolute left-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
-                    aria-label="إغلاق"
+                    aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className="h-5 w-5" strokeWidth={2.25} />
                   </button>
@@ -209,11 +212,20 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
               <form
                 className="space-y-4 px-6 py-5 sm:px-7 sm:pb-6"
                 onSubmit={handleSubmit(onValidatedSubmit, () => {
-                  toast('يرجى مراجعة الحقول المعلّمة قبل المتابعة.', {
-                    title: 'بيانات ناقصة أو غير صحيحة',
-                    variant: 'warning',
-                    durationMs: 4200,
-                  });
+                  toast(
+                    tr(
+                      'يرجى مراجعة الحقول المعلّمة قبل المتابعة.',
+                      'Please review the highlighted fields before continuing.',
+                    ),
+                    {
+                      title: tr(
+                        'بيانات ناقصة أو غير صحيحة',
+                        'Missing or invalid data',
+                      ),
+                      variant: 'warning',
+                      durationMs: 4200,
+                    },
+                  );
                 })}
                 noValidate
               >
@@ -275,7 +287,9 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                             }
                             className="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#667085] transition hover:bg-[#F2F4F7]"
                             aria-label={
-                              visible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'
+                              visible
+                                ? tr('إخفاء كلمة المرور', 'Hide password')
+                                : tr('إظهار كلمة المرور', 'Show password')
                             }
                           >
                             {visible ? (
@@ -297,7 +311,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                       disabled={submitting}
                       className="inline-flex h-11 items-center justify-center rounded-[12px] border border-[#F04438] bg-white px-6 font-cairo text-[13px] font-extrabold text-[#F04438] transition hover:bg-[#FFF5F5] disabled:opacity-60"
                     >
-                      إلغاء
+                      {tr('إلغاء', 'Cancel')}
                     </button>
                   </Dialog.Close>
                   <button

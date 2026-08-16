@@ -4,6 +4,7 @@ import {
   RefreshCw,
   Loader2,
   User,
+  ShieldCheck,
 } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
@@ -131,6 +132,15 @@ export default function AdminDoctorProfileChangeRequestsPage() {
           ]}
         />
 
+        <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-6 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
+          <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
+            {tr(
+              "هذه الصفحة مخصّصة لطلبات تعديل بيانات الطبيب بعد إنشاء الحساب، وليست لطلبات التحقق الأولي. تقوم الإدارة هنا بمراجعة الحقول المتغيّرة فقط ثم قبول التعديلات أو رفضها.",
+              "This page is for doctor profile change requests after account creation, not for initial verification requests. Admin reviews only the changed fields here, then approves or rejects the updates.",
+            )}
+          </div>
+        </section>
+
         <section className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-4">
@@ -163,6 +173,14 @@ export default function AdminDoctorProfileChangeRequestsPage() {
         </section>
 
         <section className="mt-4 space-y-3">
+          {!isAwaitingData && !isError && isRefetching ? (
+            <div className="inline-flex items-center gap-2 rounded-[10px] border border-[#D5E8E6] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-primary">
+              {tr(
+                "جارٍ تحديث طلبات تغيير البيانات...",
+                "Refreshing profile change requests...",
+              )}
+            </div>
+          ) : null}
           {isError ? (
             <div className="rounded-[12px] border border-red-200 bg-red-50 px-6 py-6 text-start">
               <p className="font-cairo text-[13px] font-bold text-red-800">
@@ -183,9 +201,12 @@ export default function AdminDoctorProfileChangeRequestsPage() {
               <button
                 type="button"
                 onClick={handleRefresh}
-                className="mt-3 font-cairo text-[12px] font-extrabold text-primary underline"
+                disabled={isRefetching}
+                className="mt-3 font-cairo text-[12px] font-extrabold text-primary underline disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {tr("إعادة المحاولة", "Retry")}
+                {isRefetching
+                  ? tr("جارٍ إعادة المحاولة...", "Retrying...")
+                  : tr("إعادة المحاولة", "Retry")}
               </button>
             </div>
           ) : isAwaitingData ? (
@@ -217,6 +238,9 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                           <User className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
+                          <div className="mb-1 inline-flex items-center rounded-[999px] border border-[#D5E8E6] bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-primary">
+                            {tr("طلب تغيير بيانات الطبيب", "Doctor profile change")}
+                          </div>
                           <div className="font-cairo text-[16px] font-black leading-[22px] text-[#111827]">
                             {request.doctor?.userId?.fullName ||
                               request.doctor?._id}
@@ -253,6 +277,12 @@ export default function AdminDoctorProfileChangeRequestsPage() {
                           {statusLabels[request.status || ""] ||
                             request.status ||
                             "—"}
+                        </div>
+                        <div className="inline-flex items-center gap-1 rounded-[999px] border border-[#E5E7EB] bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[11px] font-bold text-[#475467]">
+                          <ShieldCheck className="h-3.5 w-3.5" />
+                          {request.status === "pending"
+                            ? tr("الإجراء: مراجعة", "Action: review")
+                            : tr("الإجراء: تم التنفيذ", "Action: completed")}
                         </div>
                       </div>
                       {request.items.length > 0 ? (

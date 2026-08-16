@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import { AlertTriangle, X, LucideIcon } from 'lucide-react';
 import { useEffect, ReactNode } from 'react';
+import { useI18n } from '@/i18n/provider';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ export default function ConfirmDialog({
   customActions,
   maxWidth = '520px',
 }: ConfirmDialogProps) {
+  const { locale, dir } = useI18n();
   useEffect(() => {
     if (!open) return;
 
@@ -133,8 +135,8 @@ export default function ConfirmDialog({
             }}
             className='fixed left-1/2 top-1/2 z-[10000] max-h-[calc(100dvh-24px)] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             style={{ width: maxWidth }}
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <motion.div
               initial={false}

@@ -171,6 +171,7 @@ export default function SecretaryAppointmentsPage() {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
+  const canViewAppointments = hasPermission("appointments:view");
   const [searchInput, setSearchInput] = useState("");
   const [filter, setFilter] = useState<
     "all" | "scheduled" | "completed" | "postponed" | "cancelled"
@@ -185,7 +186,7 @@ export default function SecretaryAppointmentsPage() {
     page: 1,
     limit: 50,
     status: selectedStatus,
-  });
+  }, canViewAppointments);
 
   const appointments = useMemo(
     () =>
@@ -238,6 +239,9 @@ export default function SecretaryAppointmentsPage() {
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
               {(appointmentsQuery.total || appointments.length).toLocaleString(numberLocale)} {tr("موعد", "appointments")}
               {searchInput ? tr(" مطابق للبحث", " matching search") : ""}
+              {appointmentsQuery.isRefetching
+                ? tr(" • جاري تحديث البيانات", " • Refreshing data")
+                : ""}
             </p>
           </div>
 
@@ -289,11 +293,33 @@ export default function SecretaryAppointmentsPage() {
           </div>
         </div>
 
-        {appointmentsQuery.isAwaitingData ? (
+        {!canViewAppointments ? (
+          <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr("ليست لديك صلاحية عرض المواعيد.", "You do not have permission to view appointments.")}
+            </p>
+          </div>
+        ) : appointmentsQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {tr("جاري تحميل المواعيد...", "Loading appointments...")}
             </p>
+          </div>
+        ) : appointmentsQuery.isError ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr("تعذر تحميل المواعيد حالياً.", "Could not load appointments right now.")}
+            </p>
+            <button
+              type="button"
+              onClick={() => void appointmentsQuery.refetch()}
+              disabled={appointmentsQuery.isRefetching}
+              className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {appointmentsQuery.isRefetching
+                ? tr("جاري إعادة المحاولة...", "Retrying...")
+                : tr("إعادة المحاولة", "Retry")}
+            </button>
           </div>
         ) : searchedAppointments.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">

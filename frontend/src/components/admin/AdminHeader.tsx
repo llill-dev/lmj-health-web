@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import {
+  ArrowRight,
   Bell,
   HelpCircle,
   Loader2,
@@ -11,7 +12,10 @@ import {
   User,
 } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { getAdminPageMeta } from '@/constant/adminPageMeta';
+import {
+  getAdminBackNavigation,
+  getAdminPageMeta,
+} from '@/constant/adminPageMeta';
 import { useAdminUnreadNotificationCount } from '@/hooks/admin/notifications/useAdminNotifications';
 import { useAuthStore } from '@/store/authStore';
 import { useI18n } from '@/i18n/provider';
@@ -32,8 +36,7 @@ export default function AdminHeader({
   onLogoutClick,
   loggingOut = false,
 }: Props) {
-  const { locale, t } = useI18n();
-  const dir = locale === 'ar' ? 'rtl' : 'ltr';
+  const { dir, locale, t } = useI18n();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
   const { data: unreadTotal, isAwaitingData: unreadAwaiting } =
@@ -59,6 +62,19 @@ export default function AdminHeader({
     };
   }, [location.pathname, titleOverride, subtitleOverride, t]);
 
+  const backNavigation = useMemo(() => {
+    const back = getAdminBackNavigation(location.pathname);
+    if (!back) return null;
+
+    return {
+      href: back.href,
+      label: t(
+        'header.backToSection',
+        `Back to ${t(`sidebar.item.${back.section}`, back.section)}`,
+      ).replace('{section}', t(`sidebar.item.${back.section}`, back.section)),
+    };
+  }, [location.pathname, t]);
+
   const displayName =
     user?.name?.trim() || user?.email || t('header.defaultAdminName');
   const displayLine2 =
@@ -70,6 +86,8 @@ export default function AdminHeader({
         ? '99+'
         : String(unreadTotal)
       : null;
+
+  const backIconClassName = dir === 'rtl' ? 'rotate-180' : '';
 
   return (
     <header
@@ -87,6 +105,15 @@ export default function AdminHeader({
           <Menu className='h-5 w-5' aria-hidden />
         </button>
         <div className='min-w-0'>
+          {backNavigation ? (
+            <Link
+              to={backNavigation.href}
+              className='mb-2 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-[12px] font-semibold text-gray-700 transition-colors hover:border-primary/25 hover:bg-primary/5 hover:text-primary'
+            >
+              <ArrowRight className={`h-3.5 w-3.5 ${backIconClassName}`} aria-hidden />
+              <span>{backNavigation.label}</span>
+            </Link>
+          ) : null}
           <div className='truncate font-cairo text-[20px] font-black leading-[26px] text-[#111827]'>
             {title}
           </div>

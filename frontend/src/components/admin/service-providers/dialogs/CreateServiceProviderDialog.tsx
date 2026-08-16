@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Plus, Tag, Save, ChevronDown } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 import StyledSelect from "@/components/ui/styled-select";
 import { resolveLabel } from "@/lib/admin/types";
 import type { ServiceType } from "@/lib/admin/types";
@@ -42,6 +43,7 @@ export default function CreateServiceProviderDialog({
   onSuccess,
   allowAdvancedJson = true,
 }: CreateServiceProviderDialogProps) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -246,15 +248,21 @@ export default function CreateServiceProviderDialog({
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   إنشاء مزود خدمة جديد
                 </h2>
+                <p className="mt-2 max-w-[560px] font-cairo text-[12px] font-bold leading-6 text-[#667085]">
+                  أنشئ هنا سجل مزوّد الخدمة نفسه وربطه بنوع خدمة واحد. الحقول
+                  الأساسية الظاهرة في الكروت والقوائم تؤخذ من هذا النموذج، أما
+                  حقل JSON فهو فقط لبيانات إضافية لا تظهر مباشرة للمستخدم.
+                </p>
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={handleSubmit}>
+            <form dir={dir} onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField
                     label="نوع الخدمة"
                     required
+                    hint="اختر التصنيف المرجعي الذي سيظهر هذا المزوّد تحته داخل الإدارة."
                     error={errors.serviceType}
                   >
                     <StyledSelect
@@ -411,7 +419,10 @@ export default function CreateServiceProviderDialog({
                     </div>
                   ) : null}
 
-                  <AdminFormField label="الأسماء البديلة">
+                  <AdminFormField
+                    label="الأسماء البديلة"
+                    hint="تُستخدم لتوسيع البحث أو حفظ صيغ كتابة مختلفة لنفس المزوّد."
+                  >
                     <div className="flex gap-2 items-center">
                       <input
                         value={newAlias}
@@ -470,7 +481,11 @@ export default function CreateServiceProviderDialog({
                     )}
                   </AdminFormField>
 
-                  <AdminFormField label="الحالة" required>
+                  <AdminFormField
+                    label="الحالة"
+                    required
+                    hint="مسودة للمراجعة الداخلية، نشط للظهور والاستخدام، معطّل لإخفائه دون حذف السجل."
+                  >
                     <StyledSelect
                       value={status}
                       onChange={setStatus}

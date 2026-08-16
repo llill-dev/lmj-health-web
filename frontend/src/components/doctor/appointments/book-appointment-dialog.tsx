@@ -22,7 +22,6 @@ export type BookAppointmentValues = {
   patientId: string;
   date: string;
   time: string;
-  consultationType: "clinic" | "video";
   appointmentTypeId?: string;
   notes?: string;
 };
@@ -37,9 +36,6 @@ const bookAppointmentSchema = z.object({
     .string()
     .min(1, "يرجى اختيار وقت الموعد.")
     .regex(/^\d{2}:\d{2}$/, "صيغة الوقت غير صحيحة."),
-  consultationType: z.enum(["clinic", "video"], {
-    message: "يرجى تحديد نوع الاستشارة.",
-  }),
   appointmentTypeId: z.string().optional(),
   notes: z.string().max(500, "الحد الأقصى للملاحظات هو 500 حرف.").optional(),
 });
@@ -91,7 +87,6 @@ export default function BookAppointmentDialog({
       patientId: "",
       date: "",
       time: "",
-      consultationType: "clinic",
       appointmentTypeId: "",
       notes: "",
     },
@@ -163,7 +158,6 @@ export default function BookAppointmentDialog({
       patientId: "",
       date: "",
       time: "",
-      consultationType: "clinic",
       appointmentTypeId: "",
       notes: "",
     });
@@ -173,6 +167,7 @@ export default function BookAppointmentDialog({
     <Dialog.Root
       open={open}
       onOpenChange={(next) => {
+        if (isSubmitting && !next) return;
         onOpenChange(next);
         if (!next) resetForm();
       }}
@@ -191,7 +186,19 @@ export default function BookAppointmentDialog({
         </Dialog.Overlay>
 
         <div className="pointer-events-none fixed inset-0 z-[10000] box-border grid place-items-center">
-          <Dialog.Content asChild forceMount>
+          <Dialog.Content
+            forceMount
+            onEscapeKeyDown={(event) => {
+              if (isSubmitting) event.preventDefault();
+            }}
+            onPointerDownOutside={(event) => {
+              if (isSubmitting) event.preventDefault();
+            }}
+            onInteractOutside={(event) => {
+              if (isSubmitting) event.preventDefault();
+            }}
+            className="contents"
+          >
             <motion.div
               initial={{
                 opacity: 0,
@@ -241,7 +248,8 @@ export default function BookAppointmentDialog({
                     <Dialog.Close asChild>
                       <button
                         type="button"
-                        className="flex absolute top-5 left-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105"
+                        disabled={isSubmitting}
+                        className="flex absolute top-5 left-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
                         aria-label={tr("إغلاق", "Close")}
                       >
                         <X className="w-5 h-5" />
@@ -259,7 +267,6 @@ export default function BookAppointmentDialog({
                           patientId: values.patientId,
                           date: values.date,
                           time: values.time,
-                          consultationType: values.consultationType,
                           appointmentTypeId:
                             values.appointmentTypeId?.trim() || undefined,
                           notes: values.notes?.trim()
@@ -508,39 +515,6 @@ export default function BookAppointmentDialog({
                         </div>
                       </div>
 
-                      <div>
-                        <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                          {tr("نوع الاستشارة", "Consultation type")}
-                        </div>
-                        <Controller
-                          name="consultationType"
-                          control={control}
-                          render={({ field }) => (
-                            <StyledSelect
-                              listboxPortalRef={bookSelectOutletRef}
-                              options={[
-                                {
-                                  value: "clinic",
-                                  label: tr("حضوري", "In clinic"),
-                                },
-                                {
-                                  value: "video",
-                                  label: tr("أونلاين", "Online"),
-                                },
-                              ]}
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              error={Boolean(errors.consultationType)}
-                              listboxAriaLabel={tr(
-                                "نوع الاستشارة",
-                                "Consultation type",
-                              )}
-                            />
-                          )}
-                        />
-                      </div>
-
                       {appointmentTypes.length > 0 ? (
                         <div>
                           <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
@@ -670,7 +644,8 @@ export default function BookAppointmentDialog({
                       <Dialog.Close asChild>
                         <button
                           type="button"
-                          className="h-[50px] w-full rounded-[16px] border border-[#D0D5DD] bg-[#F9FAFB] font-cairo text-[14px] font-extrabold text-[#344054] transition hover:bg-[#F2F4F7]"
+                          disabled={isSubmitting}
+                          className="h-[50px] w-full rounded-[16px] border border-[#D0D5DD] bg-[#F9FAFB] font-cairo text-[14px] font-extrabold text-[#344054] transition hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {tr("إلغاء", "Cancel")}
                         </button>
@@ -689,9 +664,9 @@ export default function BookAppointmentDialog({
                       </button>
                     </div>
                   </form>
-                </motion.div>
-              </Dialog.Content>
-            </div>
+            </motion.div>
+          </Dialog.Content>
+        </div>
           </Dialog.Portal>
     </Dialog.Root>
   );

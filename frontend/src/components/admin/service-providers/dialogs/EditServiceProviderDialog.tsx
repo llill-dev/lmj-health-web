@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Plus, Tag, Save, ChevronDown, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 import StyledSelect from "@/components/ui/styled-select";
 import type { ProviderStatus, ServiceType } from "@/lib/admin/types";
 import { resolveLabel } from "@/lib/admin/types";
@@ -43,6 +44,7 @@ export default function EditServiceProviderDialog({
   onSuccess,
   allowAdvancedJson = true,
 }: EditServiceProviderDialogProps) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -236,6 +238,11 @@ export default function EditServiceProviderDialog({
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   تعديل بيانات مزود الخدمة
                 </h2>
+                <p className="mt-2 max-w-[560px] font-cairo text-[12px] font-bold leading-6 text-[#667085]">
+                  هذه النافذة تعدّل سجل مزوّد الخدمة الحالي فقط. نوع الخدمة
+                  المرجعي ثابت هنا، وأي تعديل على الاسم أو الحالة سينعكس على
+                  القوائم والكروت المرتبطة بهذا المزوّد.
+                </p>
               </div>
             </div>
 

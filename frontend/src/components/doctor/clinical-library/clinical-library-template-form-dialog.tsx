@@ -9,6 +9,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import StyledSelect from '@/components/ui/styled-select';
 import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
+import { useI18n } from '@/i18n/provider';
 
 const TEMPLATE_TYPE_LABELS: Record<DoctorTemplateType, string> = {
   PRESCRIPTION: 'وصفة',
@@ -43,6 +44,7 @@ export function ClinicalLibraryTemplateFormDialog({
   onClose: () => void;
   onSubmit: (values: ClinicalLibraryTemplateFormValues) => Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
   const [templateType, setTemplateType] =
     useState<DoctorTemplateType>('PRESCRIPTION');
   const [name, setName] = useState('');
@@ -75,7 +77,7 @@ export function ClinicalLibraryTemplateFormDialog({
       maxWidthClass="max-w-[520px]"
       headerPattern
     >
-      <div dir="rtl" lang="ar" className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           {hint}
         </p>

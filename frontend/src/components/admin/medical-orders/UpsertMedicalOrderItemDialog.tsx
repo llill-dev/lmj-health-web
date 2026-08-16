@@ -11,6 +11,7 @@ import { AppCheckbox } from '@/components/ui';
 import StyledSelect from '@/components/ui/styled-select';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import type {
   MedicalOrderCatalogItem,
   MedicalOrderCatalogKind,
@@ -36,6 +37,7 @@ export default function UpsertMedicalOrderItemDialog({
   kind,
   editTarget,
 }: Props) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const isEdit = !!editTarget;
   const [label, setLabel] = useState('');
@@ -220,8 +222,8 @@ export default function UpsertMedicalOrderItemDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[760px] max-h-[85vh] max-w-[calc(100vw-24px)] overflow-y-auto rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <div className='flex items-center justify-between border-b border-[#F2F4F7] px-5 py-4'>
               <Dialog.Title className='font-cairo text-[16px] font-extrabold text-[#101828]'>

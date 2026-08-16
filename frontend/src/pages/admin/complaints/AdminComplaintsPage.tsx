@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   ChevronLeft,
+  FilterX,
   MessageSquare,
   RefreshCw,
   Search,
@@ -170,6 +171,25 @@ export default function AdminComplaintsPage() {
     submittedPreview.data?.complaints?.[0]?.contactSnapshot?.fullName;
   const showNewBanner = (submittedPreview.data?.total ?? 0) > 0;
 
+  const nextActionLabel = (status: ComplaintLifecycleStatus) => {
+    if (status === "submitted") {
+      return tr("الإجراء التالي: بدء المراجعة", "Next action: start review");
+    }
+    if (status === "under_review") {
+      return tr(
+        "الإجراء التالي: تحويلها للمعالجة",
+        "Next action: move to in progress",
+      );
+    }
+    if (status === "in_progress") {
+      return tr("الإجراء التالي: إغلاق أو حل", "Next action: resolve or close");
+    }
+    if (status === "resolved") {
+      return tr("الإجراء الحالي: مراجعة الإغلاق", "Current action: review closure");
+    }
+    return tr("الشكوى مغلقة للمتابعة المرجعية", "Complaint closed for reference");
+  };
+
   return (
     <>
       <Helmet>
@@ -208,6 +228,16 @@ export default function AdminComplaintsPage() {
             },
           ]}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه القائمة مخصّصة لالتقاط الشكاوى الجديدة وفرزها حسب الحالة والنوع ثم فتح السجل الكامل. تحديث مسار الشكوى الفعلي ومراجعة المرفقات أو الإغلاق النهائي يتم من صفحة تفاصيل الشكوى نفسها.",
+              "This list is for spotting new complaints, filtering them by status and type, and opening the full record. The actual complaint workflow update, attachment review, and final closure happen from the complaint details page itself.",
+            )}
+          </div>
+        </div>
 
         {showNewBanner && bannerName ? (
           <motion.section
@@ -303,6 +333,22 @@ export default function AdminComplaintsPage() {
               ]}
               listboxAriaLabel={tr("تصفية نوع الشكوى", "Filter complaint type")}
             />
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput("");
+                  setDebouncedSearch("");
+                  setStatusFilter("all");
+                  setTypeFilter("all");
+                  setPage(1);
+                }}
+                className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]"
+              >
+                <FilterX className="h-4 w-4" />
+                {tr("مسح الفلاتر", "Clear filters")}
+              </button>
+            ) : null}
           </div>
         </motion.div>
 
@@ -400,6 +446,11 @@ export default function AdminComplaintsPage() {
                           {formatListTime(c.createdAt)}
                         </div>
                       </div>
+                      <div className="ms-0 mt-1 sm:ms-[80px]">
+                        <span className="inline-flex rounded-[8px] bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[11px] font-bold text-[#667085]">
+                          {nextActionLabel(c.status)}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex w-[56px] shrink-0 items-center justify-center bg-primary text-white transition-colors hover:bg-[#3e8f89]">
                       <ChevronLeft className="h-6 w-6" strokeWidth={2.25} />
@@ -410,14 +461,30 @@ export default function AdminComplaintsPage() {
             </motion.ul>
 
             {complaints.length === 0 ? (
-              <p className="mt-8 text-center font-cairo text-sm font-semibold text-[#94A3B8]">
-                {hasActiveFilters
-                  ? tr(
-                      "لا توجد شكاوى مطابقة للفلاتر أو البحث الحالي.",
-                      "No complaints match the current filters or search.",
-                    )
-                  : tr("لا توجد شكاوى حتى الآن.", "No complaints yet.")}
-              </p>
+              <div className="mt-8 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
+                <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                  {hasActiveFilters
+                    ? tr(
+                        "لا توجد شكاوى مطابقة للفلاتر أو البحث الحالي.",
+                        "No complaints match the current filters or search.",
+                      )
+                    : tr("لا توجد شكاوى حتى الآن.", "No complaints yet.")}
+                </p>
+                <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                  {hasActiveFilters
+                    ? tr(
+                        "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",
+                        "Adjust the search criteria or clear filters to show broader results.",
+                      )
+                    : tr(
+                        "ستظهر الشكاوى الجديدة هنا بمجرد إرسالها من المرضى أو قنوات الدعم.",
+                        "New complaints will appear here once they are submitted through patient or support channels.",
+                      )}
+                </p>
+              </div>
             ) : null}
 
             <Pagination page={page} totalPages={totalPages} onPage={setPage} />

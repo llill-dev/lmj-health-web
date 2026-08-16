@@ -12,6 +12,7 @@ import {
 import { memo } from "react";
 import type { AdminNotificationRow } from "./types";
 import { iconBoxClass, stripeColor } from "./notification-style";
+import { useI18n } from "@/i18n/provider";
 
 const KindIcon = memo(function KindIcon({
   kind,
@@ -46,6 +47,7 @@ export default memo(function AdminNotificationCard({
   onMarkRead: (id: string) => void;
   markReadPending?: boolean;
 }) {
+  const { dir } = useI18n();
   const stripe = stripeColor(item.kind);
   const iconWrap = iconBoxClass(item.kind);
   const canMark = item.isUnread && !markReadPending;
@@ -55,7 +57,7 @@ export default memo(function AdminNotificationCard({
       className="overflow-hidden rounded-[12px] border border-[#E8EDF2] border-l-4 bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)]"
       style={{ borderLeftColor: stripe }}
     >
-      <div dir="rtl" className="flex gap-4 items-start px-5 py-4 sm:gap-5">
+      <div dir={dir} className="flex gap-4 items-start px-5 py-4 sm:gap-5">
         <div
           className={`flex justify-center items-center w-12 h-12 shrink-0 rounded-[10px] ${iconWrap}`}
         >

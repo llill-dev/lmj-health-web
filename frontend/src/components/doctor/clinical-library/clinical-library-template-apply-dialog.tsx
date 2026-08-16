@@ -4,6 +4,7 @@ import { Copy, FileText } from 'lucide-react';
 import { ClinicAccountsModalShell } from '@/components/doctor/clinic-accounts/clinic-accounts-modal-shell';
 import type { DoctorTemplateType } from '@/lib/doctor/templates/templateTypes';
 import { summarizeTemplateApplication } from '@/lib/doctor/templates/templateDraftStorage';
+import { useI18n } from '@/i18n/provider';
 
 const TYPE_LABELS: Record<DoctorTemplateType, string> = {
   PRESCRIPTION: 'وصفة',
@@ -26,6 +27,7 @@ export function ClinicalLibraryTemplateApplyDialog({
   application?: Record<string, unknown>;
   onClose: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const summaryLines = summarizeTemplateApplication(application);
   const jsonPreview = application
     ? JSON.stringify(application, null, 2)
@@ -47,7 +49,7 @@ export function ClinicalLibraryTemplateApplyDialog({
       maxWidthClass="max-w-[560px]"
       headerPattern
     >
-      <div dir="rtl" lang="ar" className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-right">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           تم تحميل مسودة جاهزة من القالب. يمكنك نسخها أو استخدامها عند إنشاء
           وصفة أو طلب في الزيارة الطبية.

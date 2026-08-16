@@ -27,6 +27,9 @@ export default function DeleteFacilityDialog({
 
   const mutation = useMutation({
     mutationFn: () => adminApi.facilities.remove(facilityId!),
+    meta: {
+      skipGlobalError: true,
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "facilities"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "facility", facilityId] });

@@ -10,6 +10,7 @@ import { patch } from "@/lib/api";
 import { adminApi } from "@/lib/admin/client";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 
 const schema = z.object({
   reason: z.string().trim().min(1, "سبب التعليق مطلوب"),
@@ -38,6 +39,7 @@ export default function SuspendAccountDialog({
   targetLabel: string;
   onSuccess?: () => void;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
@@ -126,8 +128,8 @@ export default function SuspendAccountDialog({
               },
             }}
             className="fixed left-1/2 top-1/2 z-[10000] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
             <div className="relative px-8 pb-7 pt-7">
               <Dialog.Close asChild>

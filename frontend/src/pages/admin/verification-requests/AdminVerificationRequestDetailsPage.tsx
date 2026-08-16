@@ -7,8 +7,11 @@ import {
   BookOpen,
   ChevronLeft,
   FileBadge2,
+  FileSearch,
   MapPinned,
   Stethoscope,
+  User,
+  ShieldCheck,
 } from "lucide-react";
 import { DoctorSpecializationReviewBanner } from "@/components/admin/verification-requests/DoctorSpecializationReviewBanner";
 import ReviewVerificationRequestDialog from "@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog";
@@ -69,6 +72,7 @@ export default function AdminVerificationRequestDetailsPage() {
       return {
         id: requestId ?? "",
         doctorId: "",
+        statusKey: "pending" as const,
         doctor: "—",
         specialty: "—",
         address: "—",
@@ -100,10 +104,14 @@ export default function AdminVerificationRequestDetailsPage() {
     return {
       id: request._id,
       doctorId: request.doctor?._id ?? "",
+      statusKey: request.status,
+      requestType: tr("تحقق الطبيب", "Doctor verification"),
       doctor: doctorName,
       specialty: request.doctor?.specialization || "—",
       address: addressParts.length > 0 ? addressParts.join("، ") : "—",
       requestedAt: formatRequestedAt(request.createdAt),
+      adminNote: request.adminNote?.trim() || "—",
+      requestedBy: request.requestedBy?.fullName || "—",
       status:
         request.status === "pending"
           ? tr("معلق", "Pending")
@@ -117,7 +125,7 @@ export default function AdminVerificationRequestDetailsPage() {
         requestedChanges,
       }),
     };
-  }, [requestId, requestQuery.data]);
+  }, [requestId, requestQuery.data, tr]);
 
   const lookupCategory = resolveDoctorSpecialtyLookupCategory();
   const lookupsQuery = useAdminLookups({
@@ -133,12 +141,14 @@ export default function AdminVerificationRequestDetailsPage() {
       ),
     [requestQuery.data?.doctor, lookupsQuery.data?.lookups],
   );
+  const isPendingRequest = cardData.statusKey === "pending";
 
   return (
     <>
       <Helmet>
         <title>
-          {tr("تفاصيل طلب التحقق", "Verification request details")} • LMJ Health
+          {tr("تفاصيل طلب التحقق", "Verification request details")} • LMJ
+          Health
         </title>
       </Helmet>
 
@@ -154,7 +164,10 @@ export default function AdminVerificationRequestDetailsPage() {
             onClick={() => navigate("/admin/verification-requests")}
             className="inline-flex h-[34px] items-center gap-1 rounded-[8px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-bold text-[#344054]"
           >
-            {tr("رجوع", "Back")}
+            {tr(
+              "العودة إلى قائمة طلبات التحقق",
+              "Back to verification requests",
+            )}
             <ChevronLeft className="h-4 w-4" />
           </button>
         </div>
@@ -169,8 +182,8 @@ export default function AdminVerificationRequestDetailsPage() {
           </div>
         ) : (
           <section className="rounded-[10px] border border-[#B9D8D6] bg-white px-6 py-5 shadow-[0_6px_14px_rgba(16,24,40,0.05)]">
-            <div className="flex  items-start justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-1 items-center gap-3">
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
@@ -200,13 +213,76 @@ export default function AdminVerificationRequestDetailsPage() {
                 {cardData.status}
               </div>
             </div>
-            <div className="flex  items-center justify-between my-5">
+            <div className="my-5 flex items-center justify-between">
               <div className="mt-1 font-cairo text-[16px] font-semibold leading-[20px] text-[#4A5565]">
                 {cardData.address}
               </div>
               <div className="font-cairo text-[14px] font-semibold leading-[20px] text-[#99A1AF]">
                 {cardData.requestedAt}
               </div>
+            </div>
+
+            <div className="my-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <FileSearch className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("نوع الطلب", "Request type")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {cardData.requestType}
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <ShieldCheck className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("الإجراء المتاح", "Available action")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {isPendingRequest
+                    ? tr("قبول أو رفض الطلب", "Approve or reject request")
+                    : tr("تمت المراجعة", "Already reviewed")}
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <User className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("مقدم الطلب", "Requested by")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {cardData.requestedBy}
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <FileBadge2 className="h-4 w-4" />
+                  <div className="font-cairo text-[11px] font-extrabold">
+                    {tr("ملاحظة المراجعة", "Review note")}
+                  </div>
+                </div>
+                <div className="mt-2 font-cairo text-[13px] font-black text-[#111827]">
+                  {cardData.adminNote}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-4">
+              <p className="font-cairo text-[13px] font-semibold leading-6 text-[#215A57]">
+                {isPendingRequest
+                  ? tr(
+                      "هذه الصفحة مخصّصة لمراجعة طلب التحقق قبل اتخاذ القرار. يمكنك من هنا فحص بيانات الطبيب، مراجعة الحقول المتغيرة، ثم قبول الطلب أو رفضه.",
+                      "This page is used to review the verification request before making a decision. From here you can inspect the doctor data, review the changed fields, then approve or reject the request.",
+                    )
+                  : tr(
+                      "تمت مراجعة هذا الطلب سابقًا، لذلك تُعرض هذه الصفحة الآن كمرجع للحالة النهائية والبيانات التي كانت ضمن طلب التحقق.",
+                      "This request has already been reviewed, so this page now serves as a reference for the final status and the data included in the verification request.",
+                    )}
+              </p>
             </div>
 
             <DoctorSpecializationReviewBanner state={specializationState} />
@@ -292,28 +368,32 @@ export default function AdminVerificationRequestDetailsPage() {
                 <MapPinned className="h-4 w-4" />
                 {tr("الملف الشخصي", "Profile")}
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDialogMode("approve");
-                  setDialogOpen(true);
-                }}
-                className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#16A34A] px-5 font-cairo text-[16px] font-bold text-white"
-              >
-                <BookOpen className="h-4 w-4" />
-                {tr("قبول التعديلات", "Approve changes")}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDialogMode("reject");
-                  setDialogOpen(true);
-                }}
-                className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#EF4444] px-5 font-cairo text-[16px] font-bold text-white"
-              >
-                <FileBadge2 className="h-4 w-4" />
-                {tr("رفض التعديلات", "Reject changes")}
-              </button>
+              {isPendingRequest ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDialogMode("approve");
+                      setDialogOpen(true);
+                    }}
+                    className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#16A34A] px-5 font-cairo text-[16px] font-bold text-white"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    {tr("قبول التعديلات", "Approve changes")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDialogMode("reject");
+                      setDialogOpen(true);
+                    }}
+                    className="inline-flex h-[50px] items-center gap-2 rounded-[8px] bg-[#EF4444] px-5 font-cairo text-[16px] font-bold text-white"
+                  >
+                    <FileBadge2 className="h-4 w-4" />
+                    {tr("رفض التعديلات", "Reject changes")}
+                  </button>
+                </>
+              ) : null}
             </div>
           </section>
         )}

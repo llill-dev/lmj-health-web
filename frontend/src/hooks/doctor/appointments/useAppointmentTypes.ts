@@ -66,6 +66,9 @@ export function useCreateAppointmentType() {
   const doctorId = getDoctorIdFromAuth();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (data: CreateAppointmentTypeBody) =>
       doctorApi.appointmentTypes.createType(data),
     onSuccess: () => {
@@ -92,6 +95,9 @@ export function useUpdateAppointmentType() {
   const doctorId = getDoctorIdFromAuth();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       typeId,
       data,
@@ -123,6 +129,9 @@ export function useDeleteAppointmentType() {
   const doctorId = getDoctorIdFromAuth();
 
   const mutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (typeId: string) =>
       doctorApi.appointmentTypes.deleteType(typeId),
     onSuccess: () => {

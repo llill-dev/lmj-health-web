@@ -14,10 +14,19 @@ import type {
 const CONTENT_LIST_KEY = ['admin', 'content'];
 const STALE = 30 * 1000;
 
+function toMineListParams(params: AdminContentListParams): AdminContentListParams {
+  return {
+    ...(params.status ? { status: params.status } : {}),
+    ...(typeof params.page === 'number' ? { page: params.page } : {}),
+    ...(typeof params.limit === 'number' ? { limit: params.limit } : {}),
+  };
+}
+
 export function useAdminContentList(params: AdminContentListParams = {}) {
   const query = useQuery({
     queryKey: [...CONTENT_LIST_KEY, params],
     queryFn: () => adminApi.content.list(params),
+    placeholderData: (previousData) => previousData,
     staleTime: STALE,
   });
 
@@ -28,9 +37,11 @@ export function useAdminContentList(params: AdminContentListParams = {}) {
 }
 
 export function useAdminMyContentList(params: AdminContentListParams = {}) {
+  const mineParams = toMineListParams(params);
   const query = useQuery({
-    queryKey: [...CONTENT_LIST_KEY, 'mine', params],
-    queryFn: () => adminApi.content.listMine(params),
+    queryKey: [...CONTENT_LIST_KEY, 'mine', mineParams],
+    queryFn: () => adminApi.content.listMine(mineParams),
+    placeholderData: (previousData) => previousData,
     staleTime: STALE,
   });
 

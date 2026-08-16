@@ -22,16 +22,16 @@ export function complaintUserFacingError(
 ): string {
   if (error instanceof ApiError) {
     if (error.status === 401) {
-      return 'انتهت صلاحية جلسة المشرف. سجّل الدخول من جديد ثم أعد محاولة تنفيذ الإجراء على الشكوى.';
+      return 'انتهت الجلسة. سجّل الدخول من جديد ثم أعد المحاولة.';
     }
     if (error.status === 403) {
-      return 'ليست لديك صلاحية للوصول إلى هذه الشكوى أو تعديل حالتها حالياً.';
+      return 'ليست لديك صلاحية الوصول إلى هذه الشكوى أو تحديثها حالياً.';
     }
     if (error.status === 404) {
-      return 'لم يتم العثور على الشكوى المطلوبة، أو لم تعد متاحة لهذا الإجراء.';
+      return 'الشكوى المطلوبة غير موجودة أو لم تعد متاحة لهذا الإجراء.';
     }
     if (error.status === 422) {
-      return 'تعذر حفظ تحديث الشكوى لأن الحالة الجديدة أو رد الإدارة لا يطابقان متطلبات الخادم.';
+      return 'تعذّر حفظ تحديث الشكوى. راجع الحالة أو رد الإدارة ثم أعد المحاولة.';
     }
     const mapped = complaintMessageKeyToArabic(error.messageKey);
     if (mapped) return mapped;

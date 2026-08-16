@@ -9,6 +9,7 @@ import type { RadiologyClinicalForm } from '@/components/doctor/radiology/radiol
 import type { OrderClinicalFieldMessages } from '@/lib/doctor/orders/orderClinicalFormSchema';
 import { CLINICAL_URGENCY_SELECT_OPTIONS } from '@/lib/doctor/referrals/referralPriority';
 import type { EncounterOrderClinicalVariant } from './encounter-order-config';
+import { useI18n } from '@/i18n/provider';
 
 export function OrderClinicalFields({
   value,
@@ -29,6 +30,7 @@ export function OrderClinicalFields({
   showFastingCheckbox?: boolean;
   urgencyAsSelect?: boolean;
 }) {
+  const { locale, dir } = useI18n();
   const set = (patch: Partial<RadiologyClinicalForm>) =>
     onChange({ ...value, ...patch });
 
@@ -53,8 +55,8 @@ export function OrderClinicalFields({
     />
   ) : (
     <input
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       value={value.urgency}
       onChange={(e) => set({ urgency: e.target.value })}
       disabled={disabled}
@@ -93,8 +95,8 @@ export function OrderClinicalFields({
             error={fieldErrors.clinicalReason}
           >
             <textarea
-              dir="rtl"
-              lang="ar"
+              dir={dir}
+              lang={locale}
               value={value.clinicalReason}
               onChange={(e) => set({ clinicalReason: e.target.value })}
               disabled={disabled}
@@ -111,8 +113,8 @@ export function OrderClinicalFields({
             error={fieldErrors.instructionsToPatient}
           >
             <textarea
-              dir="rtl"
-              lang="ar"
+              dir={dir}
+              lang={locale}
               value={value.instructionsToPatient}
               onChange={(e) => set({ instructionsToPatient: e.target.value })}
               disabled={disabled}
@@ -129,8 +131,8 @@ export function OrderClinicalFields({
             error={fieldErrors.imagingCenterInstructions}
           >
             <textarea
-              dir="rtl"
-              lang="ar"
+              dir={dir}
+              lang={locale}
               value={value.imagingCenterInstructions}
               onChange={(e) =>
                 set({ imagingCenterInstructions: e.target.value })
@@ -151,8 +153,8 @@ export function OrderClinicalFields({
           error={fieldErrors.instructionsToPatient}
         >
           <textarea
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
             value={value.instructionsToPatient}
             onChange={(e) => set({ instructionsToPatient: e.target.value })}
             disabled={disabled}

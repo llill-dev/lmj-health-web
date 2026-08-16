@@ -2,6 +2,7 @@ import { useQueries } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin/client';
 import { isAwaitingAnyInitialQueryData } from '@/lib/query/queryUi';
 import type { AdminContentListResponse, AdminContentStatus } from '@/lib/admin/types';
+import { resolvePagedTotal } from '@/components/admin/medical-content/contentListUtils';
 
 const STAGES: ('all' | AdminContentStatus)[] = [
   'all',
@@ -26,7 +27,7 @@ export function useAdminContentStatusCounts() {
               page: 1,
               limit: 1,
             }),
-      select: (d: AdminContentListResponse) => d.total,
+      select: (d: AdminContentListResponse) => resolvePagedTotal(d, 0),
       staleTime: 45_000,
     })),
   });

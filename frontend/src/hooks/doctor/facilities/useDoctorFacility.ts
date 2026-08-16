@@ -99,6 +99,9 @@ export function useDoctorFacility() {
   });
 
   const saveMutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       mode,
       values,
@@ -150,6 +153,9 @@ export function useLinkFacility() {
   const queryClient = useQueryClient();
 
   const linkMutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       facilityId,
       facilityProviderId,
@@ -190,6 +196,9 @@ export function useLinkFacility() {
 
 export function useSuggestFacilityRequest() {
   const suggestMutation = useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (values: DoctorFacilitySuggestRequestBody) =>
       doctorFacilityApi.requestAddition(values),
   });

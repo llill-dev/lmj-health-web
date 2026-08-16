@@ -8,12 +8,14 @@ import { useEffect } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import StyledSelect from '@/components/ui/styled-select';
 import {
   useCreateServiceType,
   useMutateServiceType,
 } from '@/hooks/admin/services/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
+import { requiredLatinSlugSchema } from '@/lib/forms/slugValidation';
 import { resolveLabel } from '@/lib/admin/types';
 import type {
   CreateServiceTypeBody,
@@ -49,11 +51,7 @@ const fieldSchema = z.object({
 const schema = z.object({
   nameAr: z.string().trim().min(2, 'الاسم بالعربية مطلوب'),
   nameEn: z.string().trim().min(2, 'الاسم بالإنجليزية مطلوب'),
-  slug: z
-    .string()
-    .trim()
-    .min(2, 'المعرّف مطلوب')
-    .regex(/^[a-z0-9_-]+$/, 'أحرف صغيرة وأرقام و«-» أو «_» فقط'),
+  slug: requiredLatinSlugSchema('المعرّف مطلوب'),
   descriptionAr: z.string().trim().optional(),
   descriptionEn: z.string().trim().optional(),
   isActive: z.boolean(),
@@ -138,6 +136,7 @@ export default function UpsertServiceTypeDialog({
   onOpenChange,
   editTarget,
 }: Props) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const isEdit = Boolean(editTarget);
   const createMutation = useCreateServiceType();
@@ -305,8 +304,8 @@ export default function UpsertServiceTypeDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[600px] max-w-[calc(100vw-24px)] rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <div className='flex items-center justify-between border-b border-[#F2F4F7] px-6 py-4'>
               <Dialog.Title className='font-cairo text-[16px] font-extrabold text-[#101828]'>
@@ -324,6 +323,14 @@ export default function UpsertServiceTypeDialog({
 
             <form onSubmit={onSubmit}>
               <div className='max-h-[calc(100svh-220px)] overflow-y-auto px-6 py-5'>
+                <div className='mb-5 rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-3 text-right'>
+                  <div className='font-cairo text-[12px] font-extrabold leading-6 text-[#0F766E]'>
+                    {isEdit
+                      ? 'أنت تعدّل نوع خدمة مرجعيًا على مستوى النظام. أي تغيير في الاسم أو الـ slug أو الحقول الديناميكية سيؤثر على المزوّدين والنماذج المرتبطة بهذا النوع.'
+                      : 'أنت تنشئ نوع خدمة مرجعيًا جديدًا. استخدم هذا النموذج لتعريف الاسم والـ slug والحقول المطلوبة فقط، ثم أضف المزوّدين لاحقًا من شاشة مزوّدي الخدمة.'}
+                  </div>
+                </div>
+
                 <div className='grid grid-cols-2 gap-x-4 gap-y-4'>
                   <Field label='الاسم (عربي)' error={errors.nameAr?.message} required>
                     <input {...register('nameAr')} placeholder='مثال: تحاليل مخبرية' className={inputClass} />
@@ -342,7 +349,7 @@ export default function UpsertServiceTypeDialog({
                     label='المعرّف (slug)'
                     error={errors.slug?.message}
                     required
-                    hint='مفتاح إنجليزي ثابت يُستخدم في الـ API.'
+                    hint='مفتاح إنجليزي ثابت يُستخدم في الـ API والربط بين النوع ومزوّديه؛ لا تستخدم العربية أو مسافات.'
                   >
                     <input
                       {...register('slug')}
@@ -417,7 +424,7 @@ export default function UpsertServiceTypeDialog({
 
                   {fields.length === 0 ? (
                     <p className='mt-3 rounded-[8px] border border-dashed border-[#D0D5DD] bg-[#FAFBFC] px-3 py-4 text-center font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                      لا توجد حقول بعد. أضف حقلاً لتعريف بنية بيانات هذا النوع.
+                      لا توجد حقول بعد. أضف حقلاً لتعريف البنية المرجعية لهذا النوع قبل استخدامه مع المزوّدين أو النماذج المرتبطة.
                     </p>
                   ) : (
                     <div className='mt-3 space-y-3'>

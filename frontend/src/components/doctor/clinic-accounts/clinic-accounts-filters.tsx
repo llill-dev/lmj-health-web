@@ -2,13 +2,7 @@
 
 import type { AccountsPeriod } from '@/lib/doctor/clinicAccounts/types';
 import { cn } from '@/lib/utils/utils';
-
-const OPTIONS: { id: AccountsPeriod; label: string }[] = [
-  { id: 'week', label: 'الأسبوع' },
-  { id: 'month', label: 'الشهر' },
-  { id: 'custom', label: 'مخصص' },
-  { id: 'day', label: 'اليوم' },
-];
+import { useI18n } from '@/i18n/provider';
 
 export function ClinicAccountsPeriodFilter({
   value,
@@ -17,9 +11,19 @@ export function ClinicAccountsPeriodFilter({
   value: AccountsPeriod;
   onChange: (value: AccountsPeriod) => void;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+
+  const options: { id: AccountsPeriod; label: string }[] = [
+    { id: 'week', label: tr('الأسبوع', 'Week') },
+    { id: 'month', label: tr('الشهر', 'Month') },
+    { id: 'custom', label: tr('مخصص', 'Custom') },
+    { id: 'day', label: tr('اليوم', 'Day') },
+  ];
+
   return (
     <div className="grid w-full grid-cols-4 gap-1 rounded-[10px] border border-[#EEF2F6] bg-white p-1 shadow-sm">
-      {OPTIONS.map((option) => (
+      {options.map((option) => (
         <button
           key={option.id}
           type="button"

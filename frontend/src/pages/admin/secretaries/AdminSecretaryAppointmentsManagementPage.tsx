@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, CalendarClock } from 'lucide-react';
+import { ArrowRight, CalendarClock, Settings, Stethoscope } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import AdminDashboardOverview from '@/components/admin/dashboard/admin-dashboard-overview';
 import { SecretaryDoctorAppointmentsPanel } from '@/components/admin/secretaries/SecretaryDoctorAppointmentsPanel';
@@ -45,6 +45,57 @@ export default function AdminSecretaryAppointmentsManagementPage() {
           }
           headerIcon={<CalendarClock className='h-8 w-8 text-white' />}
         />
+
+        <section className='mt-5 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+          <div className='flex items-start gap-3 text-right'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary'>
+              <Settings className='h-5 w-5' />
+            </div>
+            <div>
+              <div className='font-cairo text-sm font-extrabold text-[#111827]'>
+                {tr('هذه شاشة إدارة المواعيد', 'This is the appointment management screen')}
+              </div>
+              <div className='mt-1 font-cairo text-sm font-semibold leading-6 text-[#667085]'>
+                {tr(
+                  'يتم استخدام هذا المسار فقط عندما تحتاج الإدارة إلى تنفيذ إجراءات تنظيمية مباشرة على مواعيد الطبيب المرتبطة بالسكرتير.',
+                  'Use this route only when the admin needs to perform direct operational actions on the doctor appointments linked to the secretary.',
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className='mt-4 grid grid-cols-1 gap-3 md:grid-cols-3'>
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+              {tr('الطبيب المرتبط', 'Linked doctor')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Stethoscope className='h-4 w-4 text-primary' />
+              {doctorName || tr('غير محدد', 'Not set')}
+            </div>
+          </div>
+
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+              {tr('نطاق الصفحة', 'Page scope')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Settings className='h-4 w-4 text-primary' />
+              {tr('تنفيذ إجراءات تشغيلية', 'Operational appointment actions')}
+            </div>
+          </div>
+
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
+              {tr('الإجراء الحالي', 'Current action')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <CalendarClock className='h-4 w-4 text-primary' />
+              {tr('إدارة جدول الطبيب', 'Manage doctor schedule')}
+            </div>
+          </div>
+        </section>
 
         <SecretaryDoctorAppointmentsPanel
           assignedDoctorId={assignedDoctorId}

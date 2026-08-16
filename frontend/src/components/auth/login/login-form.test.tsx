@@ -119,7 +119,7 @@ describe('LoginForm', () => {
     });
 
     expect(
-      await screen.findByText('تم تسجيل الدخول بنجاح. مرحباً بك في LMJ Health.'),
+      await screen.findByText(/تم تسجيل الدخول بنجاح\./),
     ).toBeInTheDocument();
 
     expect(mockNavigate).toHaveBeenCalledWith('/doctor/dashboard', {

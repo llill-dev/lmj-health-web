@@ -22,6 +22,7 @@ import {
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { readAuthUser } from '@/lib/cookies';
+import { useI18n } from '@/i18n/provider';
 
 const DEFAULT_FILTERS = {
   search: '',
@@ -86,6 +87,8 @@ function RadiologyVisitCardRow({
 }
 
 export default function DoctorRadiologyHubPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const [expandedVisitId, setExpandedVisitId] = useState<string | null>(null);
 
@@ -107,7 +110,7 @@ export default function DoctorRadiologyHubPage() {
   } else if (isError) {
     listContent = (
       <DoctorListErrorState
-        title="تعذّر تحميل الزيارات"
+        title={tr('تعذّر تحميل الزيارات', 'Failed to load encounters')}
         brief={getUserFacingRequestErrorMessage(error)}
         retrying={retryingVisits}
         onRetry={() => void retryVisits()}
@@ -116,7 +119,10 @@ export default function DoctorRadiologyHubPage() {
   } else if (openVisits.length === 0) {
     listContent = (
       <div className="rounded-[12px] border border-dashed border-[#BFEDEC] bg-[#F8FFFE] py-10 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        لا توجد زيارات مفتوحة لطلبات الأشعة.
+        {tr(
+          'لا توجد زيارات مفتوحة لطلبات الأشعة.',
+          'No open encounters for radiology orders.',
+        )}
       </div>
     );
   } else {
@@ -154,12 +160,14 @@ export default function DoctorRadiologyHubPage() {
   return (
     <>
       <Helmet>
-        <title>طلبات الأشعة • LMJ Health</title>
+        <title>
+          {tr('طلبات الأشعة • LMJ Health', 'Radiology Orders • LMJ Health')}
+        </title>
       </Helmet>
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <RadiologyPageHeader
-          patientName="الزيارات المفتوحة"
-          statusLabel="قائمة"
+          patientName={tr('الزيارات المفتوحة', 'Open encounters')}
+          statusLabel={tr('قائمة', 'List')}
           backTo="/doctor/encounters"
         />
         {listContent}

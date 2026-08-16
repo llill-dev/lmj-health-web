@@ -67,10 +67,14 @@ function mapInternalDoctorToCard(
   };
 }
 
-export function useDoctorDoctorsDirectory(params: InternalDirectoryListParams) {
+export function useDoctorDoctorsDirectory(
+  params: InternalDirectoryListParams,
+  enabled = true,
+) {
   const query = useQuery({
     queryKey: ['doctor-directory', params],
     queryFn: () => doctorApi.internalDirectory.list(params),
+    enabled,
     staleTime: 1000 * 30,
   });
 

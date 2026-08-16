@@ -14,6 +14,21 @@ export const ASSIGNABLE_SECRETARY_PERMISSIONS = [
   'patients:files:view',
   'patients:files:upload',
   'schedule:view',
+  'billing:dashboard:view',
+  'billing:invoices:view',
+  'billing:invoices:manage',
+  'billing:payments:view',
+  'billing:payments:manage',
+  'billing:refunds:view',
+  'billing:refunds:manage',
+  'billing:expenses:view',
+  'billing:expenses:manage',
+  'billing:reports:view',
+  'billing:reports:export',
+  'billing:settings:view',
+  'billing:settings:manage',
+  'billing:services:view',
+  'billing:services:manage',
 ] as const;
 
 export type AssignableSecretaryPermission =
@@ -34,6 +49,21 @@ export const SECRETARY_PERMISSION_LABELS: Record<string, string> = {
   'patients:files:view': 'عرض السجلات الطبية',
   'patients:files:upload': 'تعديل السجلات الطبية',
   'schedule:view': 'عرض الجدول',
+  'billing:dashboard:view': 'عرض لوحة الحسابات',
+  'billing:invoices:view': 'عرض الفواتير',
+  'billing:invoices:manage': 'إدارة الفواتير',
+  'billing:payments:view': 'عرض الدفعات',
+  'billing:payments:manage': 'إدارة الدفعات',
+  'billing:refunds:view': 'عرض الاسترجاعات',
+  'billing:refunds:manage': 'إدارة الاسترجاعات',
+  'billing:expenses:view': 'عرض المصاريف',
+  'billing:expenses:manage': 'إدارة المصاريف',
+  'billing:reports:view': 'عرض التقارير المالية',
+  'billing:reports:export': 'تصدير التقارير المالية',
+  'billing:settings:view': 'عرض الإعدادات المالية',
+  'billing:settings:manage': 'إدارة الإعدادات المالية',
+  'billing:services:view': 'عرض خدمات الفوترة',
+  'billing:services:manage': 'إدارة خدمات الفوترة',
 };
 
 /** Primary rows shown on secretary cards (API-supported permissions only). */

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  AlertCircle,
   ChevronRight,
   Download,
   Eye,
@@ -45,6 +46,14 @@ export default function AdminComplaintDetailsPage() {
   const [fileActionId, setFileActionId] = useState<string | null>(null);
   const [saveStatusOpen, setSaveStatusOpen] = useState(false);
 
+  const nextActionLabel = (status: ComplaintLifecycleStatus) => {
+    if (status === 'submitted') return 'الإجراء التالي: بدء المراجعة';
+    if (status === 'under_review') return 'الإجراء التالي: تحويلها للمعالجة';
+    if (status === 'in_progress') return 'الإجراء التالي: حل الشكوى أو إغلاقها';
+    if (status === 'resolved') return 'الإجراء الحالي: مراجعة الإغلاق النهائي';
+    return 'الشكوى مغلقة للمتابعة المرجعية فقط';
+  };
+
   const detailQuery = useQuery({
     queryKey: ['admin', 'complaints', 'detail', complaintId],
     queryFn: () => adminApi.complaints.getById(complaintId!),
@@ -79,13 +88,13 @@ export default function AdminComplaintDetailsPage() {
   const detailErrorMessage = detailQuery.isError
     ? complaintUserFacingError(
         detailQuery.error,
-        '????? ????? ?????? ??????.',
+        'تعذّر تحميل تفاصيل الشكوى.',
       )
     : null;
   const updateErrorMessage = updateMutation.isError
     ? complaintUserFacingError(
         updateMutation.error,
-        '????? ????? ???? ??????.',
+        'تعذّر تحديث حالة الشكوى.',
       )
     : null;
 
@@ -196,6 +205,55 @@ export default function AdminComplaintDetailsPage() {
               <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
                 {tr('الحالة:', 'Status:')} {statusLabelAr(c.status)}
               </p>
+              <div className='mt-2 inline-flex rounded-[8px] bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-bold text-[#667085]'>
+                {nextActionLabel(c.status)}
+              </div>
+            </div>
+
+            <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3'>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  {tr('نوع الطلب', 'Request type')}
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {tr('شكوى مستخدم', 'User complaint')}
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  {tr('نوع الشكوى', 'Complaint type')}
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {complaintTypeAr(c.type)}
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  {tr('الإجراء الحالي', 'Current action')}
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {nextActionLabel(c.status).replace('الإجراء التالي: ', '')}
+                </div>
+              </div>
+            </div>
+
+            <div className='rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-4 sm:px-5'>
+              <p className='font-cairo text-[13px] font-semibold leading-6 text-[#215A57]'>
+                {c.status === 'closed'
+                  ? tr(
+                      'أُغلقت هذه الشكوى بالفعل، لذلك تُستخدم الصفحة الآن للمتابعة المرجعية وقراءة السجل والردود السابقة فقط.',
+                      'This complaint is already closed, so the page is now used for reference, including status history and previous responses only.',
+                    )
+                  : c.status === 'resolved'
+                    ? tr(
+                        'تم حل الشكوى وتنتظر هذه الصفحة المراجعة النهائية قبل الإغلاق الكامل عند الحاجة.',
+                        'This complaint is resolved and the page now supports final review before full closure if needed.',
+                      )
+                    : tr(
+                        'تُستخدم هذه الصفحة لمراجعة الشكوى ومرفقاتها ثم تحديث حالتها وفق مرحلة المعالجة الحالية.',
+                        'Use this page to review the complaint and its attachments, then update its status according to the current handling stage.',
+                      )}
+              </p>
             </div>
 
             {/* بطاقة رئيسية — مطابقة هيكل الصورة */}
@@ -253,6 +311,17 @@ export default function AdminComplaintDetailsPage() {
                 <h2 className='mb-4 font-cairo text-[16px] font-black text-[#111827]'>
                   الملفات المرفقة :
                 </h2>
+
+                <div className='mb-4 rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3'>
+                  <div className='flex items-start gap-2'>
+                    <AlertCircle className='mt-0.5 h-4 w-4 shrink-0 text-primary' />
+                    <div className='font-cairo text-[12px] font-semibold leading-6 text-[#5B7B79]'>
+                      هذه الواجهة تتيح فتح مرفقات الشكوى أو تنزيلها من سياق
+                      المراجعة الإدارية فقط، ولا تُستخدم لإدارة ملفات المريض
+                      الطبية أو تعديلها.
+                    </div>
+                  </div>
+                </div>
 
                 {!hasAttachments ? (
                   <p className='rounded-lg border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#94A3B8]'>
@@ -406,7 +475,7 @@ export default function AdminComplaintDetailsPage() {
                 </label>
                 {updateMutation.isError ? (
                   <p className='font-cairo text-[12px] font-semibold text-red-600'>
-                    {updateErrorMessage ?? '????? ????? ???? ??????.'}
+                    {updateErrorMessage ?? 'تعذّر تحديث حالة الشكوى.'}
                   </p>
                 ) : null}
                 <button

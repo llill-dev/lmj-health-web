@@ -127,17 +127,75 @@ export default function SecretaryDashboardPage() {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
-  const appointmentsQuery = useDoctorAppointmentsApi({ page: 1, limit: 4 });
-  const patientsQuery = useDoctorPatients({ page: 1, limit: 1 });
-  const waitlistQuery = useDoctorWaitlist({ page: 1, limit: 1 });
-  const assignedDoctorQuery = useSecretaryAssignedDoctor();
-  const rating = assignedDoctorQuery.data?.doctor?.averageRating;
   const canViewAppointments = hasPermission("appointments:view");
   const canViewPatients = hasPermission("patients:view");
   const canViewWaitlist = hasPermission("waitlist:view");
   const canCreateTemporaryPatient = hasPermission("patients:temporary:create");
   const canBookAppointment = hasPermission("appointments:book");
   const canViewFiles = hasPermission("patients:files:view");
+  const appointmentsQuery = useDoctorAppointmentsApi(
+    { page: 1, limit: 4 },
+    canViewAppointments,
+  );
+  const patientsQuery = useDoctorPatients(
+    { page: 1, limit: 1 },
+    canViewPatients,
+  );
+  const waitlistQuery = useDoctorWaitlist(
+    { page: 1, limit: 1 },
+    canViewWaitlist,
+  );
+  const assignedDoctorQuery = useSecretaryAssignedDoctor();
+  const assignedDoctor = assignedDoctorQuery.assignedDoctor;
+  const rating = assignedDoctorQuery.assignedDoctor?.averageRating;
+
+  if (assignedDoctorQuery.isLoading) {
+    return (
+      <div
+        dir={dir}
+        lang={locale}
+        className="rounded-[20px] border border-[#E8EEF6] bg-white px-6 py-12 text-center font-cairo text-[15px] font-semibold text-[#667085]"
+      >
+        {tr(
+          "جاري تحميل الطبيب المسؤول ولوحة السكرتير...",
+          "Loading assigned doctor and secretary dashboard...",
+        )}
+      </div>
+    );
+  }
+
+  if (assignedDoctorQuery.isError || !assignedDoctor) {
+    return (
+      <div
+        dir={dir}
+        lang={locale}
+        className="space-y-4 rounded-[20px] border border-[#F1D6D6] bg-white px-6 py-10 text-center"
+      >
+        <div className="font-cairo text-[18px] font-black text-[#243044]">
+          {tr(
+            "تعذر تحميل الطبيب المسؤول حالياً",
+            "Assigned doctor is unavailable right now",
+          )}
+        </div>
+        <div className="font-cairo text-[14px] font-semibold text-[#667085]">
+          {tr(
+            "لا يمكن عرض بيانات المواعيد والمرضى قبل تأكيد ارتباط السكرتير بطبيب مسؤول.",
+            "Appointment and patient data stay hidden until the secretary assignment is confirmed.",
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => assignedDoctorQuery.refetch()}
+          disabled={assignedDoctorQuery.isRefetching}
+          className="inline-flex items-center justify-center rounded-[12px] bg-primary px-4 py-2 font-cairo text-[14px] font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {assignedDoctorQuery.isRefetching
+            ? tr("جاري إعادة المحاولة...", "Retrying...")
+            : tr("إعادة المحاولة", "Retry")}
+        </button>
+      </div>
+    );
+  }
 
   const kpis: KpiCard[] = [
     {
@@ -272,6 +330,12 @@ export default function SecretaryDashboardPage() {
           />
         ))}
       </section>
+
+      {assignedDoctorQuery.isRefetching ? (
+        <div className="rounded-[14px] border border-[#D8E2EE] bg-white px-4 py-3 text-center font-cairo text-[13px] font-semibold text-[#667085]">
+          {tr("جاري تحديث بيانات الطبيب المسؤول...", "Refreshing assigned doctor data...")}
+        </div>
+      ) : null}
 
       {canViewAppointments ? (
         <SurfaceSection title={tr("مواعيد اليوم", "Today's appointments")}>

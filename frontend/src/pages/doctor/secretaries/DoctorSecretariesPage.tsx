@@ -39,6 +39,7 @@ import type {
 } from "@/lib/doctor/secretaries/types";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 const STATUS_TABS: Array<{ id: SecretaryStatusFilter; label: string }> = [
   { id: "all", label: "الكل" },
@@ -49,6 +50,8 @@ const STATUS_TABS: Array<{ id: SecretaryStatusFilter; label: string }> = [
 const MAX_SECRETARIES = MAX_DOCTOR_SECRETARIES;
 
 export default function DoctorSecretariesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const listQuery = useDoctorSecretaries();
   const createSecretary = useCreateDoctorSecretary();
@@ -195,17 +198,22 @@ export default function DoctorSecretariesPage() {
   return (
     <>
       <Helmet>
-        <title>إدارة السكرتارية • LMJ Health</title>
+        <title>
+          {tr("إدارة السكرتارية • LMJ Health", "Secretary Management • LMJ Health")}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="pb-8 sm:pb-10">
         <DoctorDashboardOverview
           variant="patients"
           surface="mint"
           headerIcon={<UserCog className="h-8 w-8 text-white" />}
-          title="إدارة السكرتارية"
-          subtitle="تحكم كامل بصلاحيات وإعدادات السكرتارية"
-          actionLabel="إضافة سكرتير"
+          title={tr("إدارة السكرتارية", "Secretary Management")}
+          subtitle={tr(
+            "تحكم كامل بصلاحيات وإعدادات السكرتارية",
+            "Full control over secretary permissions and settings",
+          )}
+          actionLabel={tr("إضافة سكرتير", "Add secretary")}
           actionIcon={<Plus className="h-4 w-4" />}
           onActionClick={() => setCreateOpen(true)}
           actionDisabled={listQuery.secretaries.length >= MAX_SECRETARIES}
@@ -214,7 +222,7 @@ export default function DoctorSecretariesPage() {
               key: "total",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: listQuery.isAwaitingData ? "—" : listQuery.total,
-              label: "إجمالي السكرتير",
+              label: tr("إجمالي السكرتير", "Total secretaries"),
             },
             {
               key: "active",

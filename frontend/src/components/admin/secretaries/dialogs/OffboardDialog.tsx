@@ -10,6 +10,7 @@ import {
   AdminFormField,
   adminTextareaClass,
 } from "@/components/admin/form-field";
+import { useI18n } from "@/i18n/provider";
 
 const schema = z.object({
   reason: z.string().trim().min(1, "سبب الإيقاف مطلوب"),
@@ -46,6 +47,7 @@ export default function OffboardDialog({
   accountRole = "secretary",
   onSuccess,
 }: Props) {
+  const { dir } = useI18n();
   const [done, setDone] = useState(false);
   const offboard = useAdminOffboardUser();
 
@@ -154,7 +156,7 @@ export default function OffboardDialog({
               </div>
             </div>
 
-            <form dir="rtl" onSubmit={handleSubmit(onSubmit)}>
+            <form dir={dir} onSubmit={handleSubmit(onSubmit)}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField

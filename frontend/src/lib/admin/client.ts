@@ -262,7 +262,61 @@ function readAdminContentDetailsItemRecord(
   value: unknown,
 ): AdminContentDetailsResponse["item"] | undefined {
   const record = asAdminRecord(value);
-  return record ? (record as AdminContentDetailsResponse["item"]) : undefined;
+  if (!record) return undefined;
+
+  const newsRecord =
+    asAdminRecord(record.news) ??
+    asAdminRecord(readAdminNamedValue(record, "newsMeta")) ??
+    asAdminRecord(readAdminNamedValue(record, "newsItem"));
+  const templateRecord =
+    asAdminRecord(record.template) ??
+    asAdminRecord(record.contentTemplate) ??
+    asAdminRecord(record.templateDefinition);
+
+  return {
+    ...(record as AdminContentDetailsResponse["item"]),
+    ...(newsRecord
+      ? {
+          news: newsRecord as NonNullable<AdminContentDetailsResponse["item"]>["news"],
+          sourceName:
+            readAdminString(record.sourceName) ?? readAdminString(newsRecord.sourceName),
+          sourceUrl:
+            readAdminString(record.sourceUrl) ?? readAdminString(newsRecord.sourceUrl),
+          originalTitle:
+            readAdminString(record.originalTitle) ??
+            readAdminString(newsRecord.originalTitle),
+          publishedAt:
+            readAdminString(record.publishedAt) ?? readAdminString(newsRecord.publishedAt),
+          aiSummary:
+            readAdminString(record.aiSummary) ?? readAdminString(newsRecord.aiSummary),
+        }
+      : {}),
+    ...(templateRecord
+      ? {
+          template:
+            (record.template as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["template"]) ??
+            (templateRecord as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["template"]),
+          contentTemplate:
+            (record.contentTemplate as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["contentTemplate"]) ??
+            (templateRecord as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["contentTemplate"]),
+          templateDefinition:
+            (record.templateDefinition as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["templateDefinition"]) ??
+            (templateRecord as NonNullable<
+              AdminContentDetailsResponse["item"]
+            >["templateDefinition"]),
+        }
+      : {}),
+  };
 }
 
 function readAdminContentTemplateRecord(
@@ -435,6 +489,330 @@ function readLocalizedText(value: unknown): string | undefined {
   return undefined;
 }
 
+function tryParseJson(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+function normalizePossiblyJsonValue(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (
+    trimmed.startsWith("{") ||
+    trimmed.startsWith("[") ||
+    trimmed === "null" ||
+    trimmed === "true" ||
+    trimmed === "false"
+  ) {
+    return tryParseJson(trimmed);
+  }
+  return value;
+}
+
+function normalizeStringArrayInput(value: unknown): string[] | undefined {
+  const normalized = normalizePossiblyJsonValue(value);
+  if (normalized == null) return undefined;
+
+  if (Array.isArray(normalized)) {
+    const items = normalized
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        if (typeof item === "number" || typeof item === "boolean") return String(item);
+        if (item && typeof item === "object") {
+          const record = item as AdminApiRecord;
+          return (
+            readLocalizedText(record._id) ??
+            readLocalizedText(record.id) ??
+            readLocalizedText(record.value) ??
+            readLocalizedText(record.slug) ??
+            readLocalizedText(record.key) ??
+            readLocalizedText(record.name) ??
+            readLocalizedText(record.title)
+          );
+        }
+        return undefined;
+      })
+      .filter((item): item is string => Boolean(item && item.length > 0));
+    return items.length > 0 ? items : [];
+  }
+
+  if (typeof normalized === "string") {
+    const items = normalized
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return items.length > 0 ? items : [];
+  }
+
+  if (typeof normalized === "number" || typeof normalized === "boolean") {
+    return [String(normalized)];
+  }
+
+  if (typeof normalized === "object") {
+    const record = normalized as AdminApiRecord;
+    const single =
+      readLocalizedText(record._id) ??
+      readLocalizedText(record.id) ??
+      readLocalizedText(record.value) ??
+      readLocalizedText(record.slug) ??
+      readLocalizedText(record.key) ??
+      readLocalizedText(record.name) ??
+      readLocalizedText(record.title);
+    return single ? [single] : undefined;
+  }
+
+  return undefined;
+}
+
+function normalizeSourcesInput(value: unknown): CreateAdminContentBody["sources"] | undefined {
+  const normalized = normalizePossiblyJsonValue(value);
+  if (!Array.isArray(normalized)) return undefined;
+
+  const sources = normalized
+    .map((entry): NonNullable<CreateAdminContentBody["sources"]>[number] | null => {
+      const record = asAdminRecord(entry);
+      if (!record) {
+        const text = readLocalizedText(entry);
+        if (!text) return null;
+        return { title: text };
+      }
+      const title = readLocalizedText(record.title) ?? readLocalizedText(record.sourceName);
+      const url = readLocalizedText(record.url) ?? readLocalizedText(record.sourceUrl);
+      return title || url ? { ...(title ? { title } : {}), ...(url ? { url } : {}) } : null;
+    })
+    .filter(
+      (item): item is NonNullable<CreateAdminContentBody["sources"]>[number] => item != null,
+    );
+
+  return sources.length > 0 ? sources : [];
+}
+
+function normalizeTemplateIdValue(value: unknown): string | null | undefined {
+  if (value === null) return null;
+  const normalized = normalizePossiblyJsonValue(value);
+  if (normalized == null) return undefined;
+  if (typeof normalized === "string") {
+    const trimmed = normalized.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof normalized === "object") {
+    const record = normalized as AdminApiRecord;
+    return (
+      readLocalizedText(record._id) ??
+      readLocalizedText(record.id) ??
+      readLocalizedText(record.value) ??
+      readLocalizedText(record.templateId)
+    );
+  }
+  return undefined;
+}
+
+function readLocalizedTextFromUnknown(value: unknown): string | undefined {
+  return readLocalizedText(normalizePossiblyJsonValue(value));
+}
+
+function normalizeNewsSourceUrl(value: unknown): string | undefined {
+  const raw = readLocalizedTextFromUnknown(value);
+  if (!raw) return undefined;
+
+  try {
+    const url = new URL(raw);
+    const hostname = url.hostname.trim().toLowerCase();
+    const isGoogleRedirect =
+      hostname.includes("google.") &&
+      (url.pathname === "/url" || url.pathname.endsWith("/url"));
+
+    if (isGoogleRedirect) {
+      const redirected =
+        url.searchParams.get("url")?.trim() || url.searchParams.get("q")?.trim();
+      if (redirected) return normalizeNewsSourceUrl(redirected);
+    }
+
+    return url.toString();
+  } catch {
+    return raw.trim() || undefined;
+  }
+}
+
+function normalizeNewsDateValue(value: unknown): string | undefined {
+  const raw = readLocalizedTextFromUnknown(value);
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+
+  const looksLikeLocalDateTime =
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?$/.test(trimmed);
+  if (!looksLikeLocalDateTime) return trimmed;
+
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? trimmed : parsed.toISOString();
+}
+
+function buildAdminContentNewsPayload(
+  body: Partial<
+    Pick<
+      CreateAdminContentBody,
+      | "news"
+      | "sourceName"
+      | "sourceUrl"
+      | "originalTitle"
+      | "publishedAt"
+      | "aiSummary"
+      | "title"
+      | "summary"
+    >
+  >,
+) {
+  const rawNews = normalizePossiblyJsonValue(body.news);
+  const news =
+    rawNews && typeof rawNews === "object" && !Array.isArray(rawNews)
+      ? { ...(rawNews as Record<string, unknown>) }
+      : {};
+
+  const sourceName =
+    readLocalizedTextFromUnknown(news.sourceName) ??
+    readLocalizedTextFromUnknown(news.source) ??
+    readLocalizedTextFromUnknown(body.sourceName);
+  const sourceUrl = normalizeNewsSourceUrl(
+    news.sourceUrl ??
+      news.url ??
+      news.href ??
+      news.link ??
+      news.canonicalUrl ??
+      body.sourceUrl,
+  );
+  const originalTitle =
+    readLocalizedTextFromUnknown(news.originalTitle) ??
+    readLocalizedTextFromUnknown(news.title) ??
+    readLocalizedTextFromUnknown(news.headline) ??
+    readLocalizedTextFromUnknown(body.originalTitle) ??
+    readLocalizedTextFromUnknown(body.title);
+  const publishedAt = normalizeNewsDateValue(
+    news.publishedAt ?? news.publishDate ?? news.date ?? body.publishedAt,
+  );
+  const aiSummary =
+    readLocalizedTextFromUnknown(news.aiSummary) ??
+    readLocalizedTextFromUnknown(news.summary) ??
+    readLocalizedTextFromUnknown(body.aiSummary) ??
+    readLocalizedTextFromUnknown(body.summary);
+  const dedupeHash = readLocalizedTextFromUnknown(news.dedupeHash);
+  const importedAt = normalizeNewsDateValue(news.importedAt);
+
+  if (
+    !sourceName &&
+    !sourceUrl &&
+    !originalTitle &&
+    !publishedAt &&
+    !aiSummary &&
+    !dedupeHash &&
+    !importedAt
+  ) {
+    return undefined;
+  }
+
+  return {
+    ...news,
+    ...(sourceName ? { sourceName } : {}),
+    ...(sourceUrl ? { sourceUrl } : {}),
+    ...(originalTitle ? { originalTitle } : {}),
+    ...(publishedAt ? { publishedAt } : {}),
+    ...(aiSummary ? { aiSummary } : {}),
+    ...(dedupeHash ? { dedupeHash } : {}),
+    ...(importedAt ? { importedAt } : {}),
+  };
+}
+
+function buildAdminContentPayload(
+  body: CreateAdminContentBody | UpdateAdminContentBody,
+) {
+  const news = buildAdminContentNewsPayload(body);
+  const payload: Record<string, unknown> = { ...body };
+  const normalizedType = readLocalizedTextFromUnknown(payload.type);
+  const isNewsType = normalizedType === "NEWS";
+
+  if (isNewsType && news) {
+    payload.news = news;
+  } else {
+    // Non-NEWS types carry no news metadata. Neither of the two obvious
+    // encodings is safe against the real backend:
+    //  - an explicit `null` is rejected by the create validator with a 422
+    //    ("قيمة غير صالحة", path "news"), and
+    //  - omitting the key entirely reaches the route handler on create and
+    //    crashes with a 500 (it appears to spread/read `req.body.news`
+    //    without an undefined guard).
+    // An empty object satisfies the `{ type: "object" }` schema (so it
+    // isn't rejected like `null`) and gives any downstream `{...news}`
+    // spread something real to operate on (so it doesn't crash like
+    // `undefined`). It also still replaces/clears a previously-saved news
+    // object on update, the same way `null` was intended to.
+    payload.news = {};
+  }
+
+  delete payload.sourceName;
+  delete payload.sourceUrl;
+  delete payload.originalTitle;
+  delete payload.publishedAt;
+  delete payload.aiSummary;
+
+  if ("templateId" in payload) {
+    const templateId = normalizeTemplateIdValue(payload.templateId);
+    if (templateId === undefined) {
+      delete payload.templateId;
+    } else {
+      payload.templateId = templateId;
+    }
+  }
+
+  if ("data" in payload) {
+    const data = normalizePossiblyJsonValue(payload.data);
+    if (data === undefined) {
+      delete payload.data;
+    } else {
+      payload.data = data;
+    }
+  }
+
+  if ("contentBlocks" in payload) {
+    const contentBlocks = normalizePossiblyJsonValue(payload.contentBlocks);
+    if (contentBlocks === undefined) {
+      delete payload.contentBlocks;
+    } else {
+      payload.contentBlocks = contentBlocks;
+    }
+  }
+
+  if ("sources" in payload) {
+    const sources = normalizeSourcesInput(payload.sources);
+    if (sources === undefined) {
+      delete payload.sources;
+    } else {
+      payload.sources = sources;
+    }
+  }
+
+  const stringArrayFields = [
+    "tags",
+    "categories",
+    "riskFlags",
+    "relatedContentIds",
+  ] as const;
+
+  for (const field of stringArrayFields) {
+    if (!(field in payload)) continue;
+    const normalized = normalizeStringArrayInput(payload[field]);
+    if (normalized === undefined) {
+      delete payload[field];
+    } else {
+      payload[field] = normalized;
+    }
+  }
+
+  return payload;
+}
+
 function buildMedicalOrderCode(label: string): string {
   const normalized = label
     .trim()
@@ -445,10 +823,21 @@ function buildMedicalOrderCode(label: string): string {
 }
 
 function medicalOrderCategoryByKind(kind: MedicalOrderCatalogKind): string {
+  assertAdminMedicalOrderCatalogKindSupported(kind);
   if (kind === "lab") return "LAB";
   if (kind === "imaging") return "IMAGING";
   if (kind === "procedure") return "PROCEDURE";
   return "REFERRAL";
+}
+
+function assertAdminMedicalOrderCatalogKindSupported(
+  kind: MedicalOrderCatalogKind,
+) {
+  if (kind === "referral") {
+    throw new Error(
+      "Admin medical order referrals are not documented in docs/...",
+    );
+  }
 }
 
 function buildMedicalOrderCreatePayload(body: AdminMedicalOrderCatalogUpsertBody) {
@@ -2017,13 +2406,17 @@ export const adminApi = {
         locale: "ar",
       }).then(normalizeAdminContentDetailsResponse),
     create: (body: CreateAdminContentBody) =>
-      post<AdminContentMutationResponse>(adminEndpoints.content.create, body, {
-        locale: "ar",
-      }).then(normalizeAdminContentMutationResponse),
+      post<AdminContentMutationResponse>(
+        adminEndpoints.content.create,
+        buildAdminContentPayload(body),
+        {
+          locale: "ar",
+        },
+      ).then(normalizeAdminContentMutationResponse),
     update: (id: string, body: UpdateAdminContentBody) =>
       patch<AdminContentMutationResponse>(
         adminEndpoints.content.update(id),
-        body,
+        buildAdminContentPayload(body),
         { locale: "ar" },
       ).then(normalizeAdminContentMutationResponse),
     submitReview: (id: string, reviewNotes?: string) =>
@@ -2115,6 +2508,7 @@ export const adminApi = {
   },
   medicalOrderCatalog: {
     list: async (params: AdminMedicalOrderCatalogListParams) => {
+      assertAdminMedicalOrderCatalogKindSupported(params.type);
       const qs = new URLSearchParams();
       if (params.search?.trim()) qs.set("search", params.search.trim());
       if (params.q?.trim()) qs.set("q", params.q.trim());
@@ -2144,12 +2538,14 @@ export const adminApi = {
       }
     },
     create: (body: AdminMedicalOrderCatalogUpsertBody) =>
+      (assertAdminMedicalOrderCatalogKindSupported(body.kind),
       post<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.collection(body.kind),
         buildMedicalOrderCreatePayload(body),
         { locale: "ar" },
-      ).then(normalizeAdminMedicalOrderCatalogMutationResponse),
+      ).then(normalizeAdminMedicalOrderCatalogMutationResponse)),
     getById: (kind: MedicalOrderCatalogKind, id: string) =>
+      (assertAdminMedicalOrderCatalogKindSupported(kind),
       get<AdminMedicalOrderCatalogDetailsResponse | AdminApiRecord>(
         adminEndpoints.orderCatalog.item(kind, id),
         { locale: "ar" },
@@ -2166,17 +2562,18 @@ export const adminApi = {
           ...(asAdminRecord(raw) ?? {}),
           item,
         } as AdminMedicalOrderCatalogDetailsResponse;
-      }),
+      })),
     update: (
       kind: MedicalOrderCatalogKind,
       id: string,
       body: Partial<AdminMedicalOrderCatalogUpsertBody>,
     ) =>
+      (assertAdminMedicalOrderCatalogKindSupported(kind),
       patch<AdminMedicalOrderCatalogMutationResponse>(
         adminEndpoints.orderCatalog.item(kind, id),
         buildMedicalOrderUpdatePayload(body),
         { locale: "ar" },
-      ).then(normalizeAdminMedicalOrderCatalogMutationResponse),
+      ).then(normalizeAdminMedicalOrderCatalogMutationResponse)),
     remove: (kind: MedicalOrderCatalogKind, id: string) =>
       unsupportedApiOperation(
         `DELETE ${adminEndpoints.orderCatalog.item(kind, id)} is not documented in API-3.`,

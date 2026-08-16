@@ -37,10 +37,11 @@ import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
 
 const STALE_MS = 1000 * 30;
 
-export function useBillingSettings() {
+export function useBillingSettings(enabled = true) {
   const query = useQuery({
     queryKey: billingQueryKeys.settings(),
     queryFn: () => billingApi.settings.get(),
+    enabled,
     staleTime: STALE_MS * 4,
   });
 
@@ -50,11 +51,16 @@ export function useBillingSettings() {
     supportedCurrencies: query.data?.supportedCurrencies ?? [],
     currency:
       query.data?.settings?.currency ?? query.data?.defaultCurrency ?? "USD",
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
-export function useBillingDashboard(period: AccountsPeriod, currency?: string) {
+export function useBillingDashboard(
+  period: AccountsPeriod,
+  currency?: string,
+  enabled = true,
+) {
   const params = {
     ...resolveBillingDashboardPeriodParams(period),
     ...(currency ? { currency } : {}),
@@ -63,6 +69,7 @@ export function useBillingDashboard(period: AccountsPeriod, currency?: string) {
   const query = useQuery({
     queryKey: billingQueryKeys.dashboard(params),
     queryFn: () => billingApi.dashboard(params),
+    enabled,
     staleTime: STALE_MS,
   });
 
@@ -80,7 +87,8 @@ export function useBillingDashboard(period: AccountsPeriod, currency?: string) {
       : [],
     overdueCount: dashboard?.overdueSummary?.count ?? 0,
     outstandingCount: dashboard?.outstandingSummary?.count ?? 0,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -274,7 +282,7 @@ export function useBillingReports(input: {
   year: number;
   month?: number | "all";
   currency?: string;
-}) {
+}, enabled = true) {
   const params: BillingQueryParams = {
     ...resolveBillingReportPeriodParams(input),
     ...(input.currency ? { currency: input.currency } : {}),
@@ -283,6 +291,7 @@ export function useBillingReports(input: {
   const query = useQuery({
     queryKey: billingQueryKeys.reports(params),
     queryFn: () => billingApi.reports.get(params),
+    enabled,
     staleTime: STALE_MS,
   });
 
@@ -302,7 +311,8 @@ export function useBillingReports(input: {
         )
       : [],
     summary: report?.summary ?? null,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -313,6 +323,9 @@ function invalidateBilling(queryClient: ReturnType<typeof useQueryClient>) {
 export function useCreateBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingInvoiceBody) =>
       billingApi.invoices.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -322,6 +335,9 @@ export function useCreateBillingInvoice() {
 export function useCreateBillingPayment() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingPaymentBody) =>
       billingApi.payments.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -331,6 +347,9 @@ export function useCreateBillingPayment() {
 export function useUpdateBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: {
       invoiceId: string;
       body: UpdateBillingInvoiceBody;
@@ -359,6 +378,9 @@ export function useBillingInvoicePrefill(appointmentId: string | null) {
 export function useCancelBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: { invoiceId: string; reason?: string }) =>
       billingApi.invoices.cancel(input.invoiceId, {
         reason: input.reason,
@@ -370,6 +392,9 @@ export function useCancelBillingInvoice() {
 export function useIssueBillingInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: { invoiceId: string; dueAt?: string }) =>
       billingApi.invoices.issue(input.invoiceId, input.dueAt ? { dueAt: input.dueAt } : undefined),
     onSuccess: () => invalidateBilling(queryClient),
@@ -379,6 +404,9 @@ export function useIssueBillingInvoice() {
 export function useCreateBillingRefund() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingRefundBody) =>
       billingApi.refunds.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -388,6 +416,9 @@ export function useCreateBillingRefund() {
 export function useCreateBillingExpense() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateBillingExpenseBody) =>
       billingApi.expenses.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -396,6 +427,9 @@ export function useCreateBillingExpense() {
 
 export function useExportBillingReportPdf() {
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (params: BillingQueryParams) =>
       billingApi.reports.exportPdf(params),
   });
@@ -404,6 +438,9 @@ export function useExportBillingReportPdf() {
 export function useUpdateBillingSettings() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: Partial<ApiBillingSettings>) =>
       billingApi.settings.update(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -438,6 +475,9 @@ export function useBillingServices(params: {
 export function useCreateBillingService() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: import('@/lib/doctor/billing/apiTypes').CreateBillingServiceBody) =>
       billingApi.services.create(body),
     onSuccess: () => invalidateBilling(queryClient),
@@ -447,6 +487,9 @@ export function useCreateBillingService() {
 export function useUpdateBillingService() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: {
       serviceId: string;
       body: import('@/lib/doctor/billing/apiTypes').UpdateBillingServiceBody;
@@ -458,6 +501,9 @@ export function useUpdateBillingService() {
 export function useDeleteBillingService() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (serviceId: string) => billingApi.services.delete(serviceId),
     onSuccess: () => invalidateBilling(queryClient),
   });

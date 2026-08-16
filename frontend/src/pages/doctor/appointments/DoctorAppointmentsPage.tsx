@@ -12,7 +12,7 @@ import {
   WifiOff,
   XCircle,
 } from "lucide-react";
-import { useCallback, useMemo, useState, type ChangeEvent } from "react";
+import { useCallback, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Helmet } from "react-helmet-async";
 import StyledSelect from "@/components/ui/styled-select";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -44,8 +44,10 @@ import { readAuthUser } from "@/lib/cookies";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { doctorAppointmentsApi } from "@/lib/doctor/client";
+import { useI18n } from "@/i18n/provider";
 import {
   getAppointmentBookingErrorMessage,
+  getAppointmentFileAccessErrorMessage,
   getAppointmentFileMutationErrorMessage,
   getAppointmentStatusMutationErrorMessage,
   getAppointmentWriteErrorMessage,
@@ -121,7 +123,16 @@ function filterLocalSearch<
   });
 }
 
+function isFutureAppointmentSlot(date?: string, startTime?: string): boolean {
+  if (!date || !startTime) return false;
+  const slotDateTime = new Date(`${date}T${startTime}:00`);
+  if (Number.isNaN(slotDateTime.getTime())) return false;
+  return slotDateTime > new Date();
+}
+
 export default function DoctorAppointmentsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -169,6 +180,7 @@ export default function DoctorAppointmentsPage() {
   const [appointmentFileActionKey, setAppointmentFileActionKey] = useState<
     string | null
   >(null);
+  const appointmentFileActionKeyRef = useRef<string | null>(null);
   const [unlinkFileConfirmOpen, setUnlinkFileConfirmOpen] = useState(false);
   const [unlinkFileTarget, setUnlinkFileTarget] = useState<{
     fileId: string;
@@ -303,9 +315,21 @@ export default function DoctorAppointmentsPage() {
     [listQuery.error],
   );
 
+  const beginAppointmentFileAction = useCallback((actionKey: string) => {
+    if (appointmentFileActionKeyRef.current) return false;
+    appointmentFileActionKeyRef.current = actionKey;
+    setAppointmentFileActionKey(actionKey);
+    return true;
+  }, []);
+
+  const finishAppointmentFileAction = useCallback(() => {
+    appointmentFileActionKeyRef.current = null;
+    setAppointmentFileActionKey(null);
+  }, []);
+
   const handleAppointmentFileOpen = useCallback(
     async (appointmentId: string, fileId: string) => {
-      setAppointmentFileActionKey(fileId);
+      if (!beginAppointmentFileAction(fileId)) return;
       try {
         const response = await doctorAppointmentsApi.getFileDownloadUrl(
           appointmentId,
@@ -315,20 +339,20 @@ export default function DoctorAppointmentsPage() {
         if (!fileUrl) throw new Error("missing download url");
         window.open(fileUrl, "_blank", "noopener,noreferrer");
       } catch (error) {
-        toast(getUserFacingRequestErrorMessage(error), {
+        toast(getAppointmentFileAccessErrorMessage(error, "open"), {
           title: "تعذر فتح الملف",
           variant: "error",
         });
       } finally {
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, toast],
   );
 
   const handleAppointmentFileDownload = useCallback(
     async (appointmentId: string, fileId: string) => {
-      setAppointmentFileActionKey(fileId);
+      if (!beginAppointmentFileAction(fileId)) return;
       try {
         const [downloadResponse, fileResponse] = await Promise.all([
           doctorAppointmentsApi.getFileDownloadUrl(appointmentId, fileId),
@@ -341,15 +365,15 @@ export default function DoctorAppointmentsPage() {
           fileResponse.file?.originalName ?? "appointment-file",
         );
       } catch (error) {
-        toast(getUserFacingRequestErrorMessage(error), {
+        toast(getAppointmentFileAccessErrorMessage(error, "download"), {
           title: "تعذر تحميل الملف",
           variant: "error",
         });
       } finally {
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, toast],
   );
 
   const handleRequestUnlinkAppointmentFile = useCallback(
@@ -366,7 +390,7 @@ export default function DoctorAppointmentsPage() {
   /** تنفيذ فك الربط بعد التأكيد — يعرض نظام التوست داخلياً */
   const handleAppointmentFileUnlinkConfirmed = useCallback(
     async (fileId: string) => {
-      setAppointmentFileActionKey(fileId);
+      if (!beginAppointmentFileAction(fileId)) return;
       try {
         const response =
           await unlinkAppointmentFileMutation.mutateAsync(fileId);
@@ -383,10 +407,10 @@ export default function DoctorAppointmentsPage() {
         });
         throw error;
       } finally {
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [unlinkAppointmentFileMutation, toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, unlinkAppointmentFileMutation, toast],
   );
 
   const resetUnlinkDialog = useCallback((open: boolean) => {
@@ -398,7 +422,10 @@ export default function DoctorAppointmentsPage() {
     async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file || !expandedAppointmentId) return;
-      setAppointmentFileActionKey("upload");
+      if (!beginAppointmentFileAction("upload")) {
+        event.target.value = "";
+        return;
+      }
       try {
         const response = await uploadAppointmentFileMutation.mutateAsync({
           file,
@@ -415,10 +442,10 @@ export default function DoctorAppointmentsPage() {
         });
       } finally {
         event.target.value = "";
-        setAppointmentFileActionKey(null);
+        finishAppointmentFileAction();
       }
     },
-    [expandedAppointmentId, uploadAppointmentFileMutation, toast],
+    [beginAppointmentFileAction, expandedAppointmentId, finishAppointmentFileAction, uploadAppointmentFileMutation, toast],
   );
 
   const handleBookingAction = useCallback(() => {
@@ -461,14 +488,14 @@ export default function DoctorAppointmentsPage() {
         onChange={handleAppointmentFileUpload}
       />
       <Helmet>
-        <title>Appointments • LMJ Health</title>
+        <title>{tr("المواعيد • LMJ Health", "Appointments • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
-          title="إجمالي المواعيد"
+          title={tr("إجمالي المواعيد", "Total appointments")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
@@ -476,36 +503,36 @@ export default function DoctorAppointmentsPage() {
               </span>
               <span className="text-primary/90">
                 {" "}
-                — إجمالي المواعيد حسب الحالة
+                {tr("— إجمالي المواعيد حسب الحالة", "— total appointments by status")}
               </span>
             </span>
           }
           onActionClick={handleBookingAction}
-          actionLabel="حجز موعد لمريض"
+          actionLabel={tr("حجز موعد لمريض", "Book appointment for patient")}
           kpis={[
             {
               key: "scheduled",
               icon: <Clock className="w-5 h-5 shrink-0" />,
               value: scheduledTotal.isAwaitingData ? "—" : scheduledTotal.total,
-              label: "مجدولة",
+              label: tr("مجدولة", "Scheduled"),
             },
             {
               key: "completed",
               icon: <CheckCircle className="w-5 h-5 shrink-0" />,
               value: completedTotal.isAwaitingData ? "—" : completedTotal.total,
-              label: "مكتملة",
+              label: tr("مكتملة", "Completed"),
             },
             {
               key: "cancelled",
               icon: <XCircle className="w-5 h-5 shrink-0" />,
               value: cancelledTotal.isAwaitingData ? "—" : cancelledTotal.total,
-              label: "ملغية",
+              label: tr("ملغية", "Cancelled"),
             },
             {
               key: "no-show",
               icon: <UserX className="w-5 h-5 shrink-0" />,
               value: noShowTotal.isAwaitingData ? "—" : noShowTotal.total,
-              label: "عدم حضور",
+              label: tr("عدم حضور", "No-show"),
             },
           ]}
         />
@@ -518,11 +545,22 @@ export default function DoctorAppointmentsPage() {
           onSubmit={async (values) => {
             const doctorId = readAuthUser()?.actorIds?.doctorId;
             if (!doctorId) {
-              toast("تعذّر تحديد هوية الطبيب الحالية لهذا الحجز.", {
-                title: "خطأ",
+              toast(
+                tr(
+                  "تعذّر تحديد هوية الطبيب الحالية لهذا الحجز.",
+                  "Could not resolve the current doctor identity for this booking.",
+                ),
+                {
+                title: tr("خطأ", "Error"),
                 variant: "error",
-              });
-              throw new Error("تعذر تحديد هوية الطبيب الحالي لهذا الحجز.");
+              },
+              );
+              throw new Error(
+                tr(
+                  "تعذر تحديد هوية الطبيب الحالي لهذا الحجز.",
+                  "Could not resolve the current doctor identity for this booking.",
+                ),
+              );
             }
             try {
               await bookMutation.mutateAsync({
@@ -533,8 +571,8 @@ export default function DoctorAppointmentsPage() {
                 appointmentTypeId: values.appointmentTypeId,
                 notes: values.notes,
               });
-              toast("تم حجز الموعد بنجاح.", {
-                title: "تم الحجز",
+              toast(tr("تم حجز الموعد بنجاح.", "Appointment booked successfully."), {
+                title: tr("تم الحجز", "Booked"),
                 variant: "success",
                 durationMs: 4200,
               });
@@ -704,7 +742,7 @@ export default function DoctorAppointmentsPage() {
           doctorId={readAuthUser()?.actorIds?.doctorId}
           confirmDisabled={rescheduleMutation.isPending}
           onConfirm={async (values) => {
-            if (!rescheduleTarget) return;
+            if (!rescheduleTarget) return false;
             try {
               await rescheduleMutation.mutateAsync({
                 id: rescheduleTarget.id,
@@ -721,7 +759,8 @@ export default function DoctorAppointmentsPage() {
                 variant: "error",
                 durationMs: 4800,
               });
-              throw error;
+              return true;
+              return false;
             }
           }}
         />
@@ -942,8 +981,8 @@ export default function DoctorAppointmentsPage() {
                 />
               ) : false ? (
                 <div
-                  dir="rtl"
-                  lang="ar"
+                  dir={dir}
+                  lang={locale}
                   role="alert"
                   className="flex min-h-[360px] items-center justify-center px-3 py-10 sm:px-4"
                 >
@@ -1051,6 +1090,19 @@ export default function DoctorAppointmentsPage() {
                         setRescheduleOpen(true);
                       }}
                       onNoShow={() => {
+                        if (
+                          isFutureAppointmentSlot(
+                            appointment.date,
+                            appointment.startTime,
+                          )
+                        ) {
+                          toast("لا يمكن تسجيل عدم حضور لموعد مستقبلي.", {
+                            title: "إجراء غير متاح",
+                            variant: "warning",
+                            durationMs: 4200,
+                          });
+                          return;
+                        }
                         setNoShowTarget({
                           id: appointment._id,
                           patientName:

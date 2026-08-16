@@ -5,9 +5,11 @@ import {
   Stethoscope,
   Clock,
   Filter,
+  BadgeCheck,
+  FileSearch,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReviewVerificationRequestDialog from "@/components/admin/verification-requests/dialogs/ReviewVerificationRequestDialog";
@@ -18,7 +20,6 @@ import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryDataWithPlaceholder } from "@/lib/query/queryUi";
 import StyledSelect from "@/components/ui/styled-select";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
-import { Pagination } from "@/components/admin/services/Pagination";
 import { useI18n } from "@/i18n/provider";
 
 export default function AdminVerificationRequestsPage() {
@@ -114,10 +115,12 @@ export default function AdminVerificationRequestsPage() {
 
       return {
         id: request._id,
+        requestType: tr("تحقق الطبيب", "Doctor verification"),
         doctor: doctorName,
         specialty: request.doctor?.specialization || "—",
         address,
         requestedAt: formatRequestedAt(request.createdAt),
+        statusKey: request.status,
         status:
           request.status === "pending"
             ? tr("معلق", "Pending")
@@ -138,8 +141,12 @@ export default function AdminVerificationRequestsPage() {
   const currentPage = verificationQuery.data?.page ?? page;
   const currentLimit = verificationQuery.data?.limit ?? limit;
   const totalPages = Math.max(1, Math.ceil(total / Math.max(currentLimit, 1)));
-  const canPrev = currentPage > 1;
-  const canNext = currentPage < totalPages;
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   return (
     <>
@@ -178,6 +185,16 @@ export default function AdminVerificationRequestsPage() {
             },
           ]}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه القائمة مخصّصة لفرز طلبات التحقق والانتقال إلى صفحة التفاصيل أو الخريطة عند الحاجة. قرار القبول أو الرفض النهائي يتم من شاشة المراجعة المرتبطة بكل طلب، وليس من بطاقة القائمة نفسها.",
+              "This list is for triaging verification requests and opening the related details or map when needed. The final approve or reject decision is made from each request’s review flow, not directly from the list card itself.",
+            )}
+          </div>
+        </div>
 
         <section className="mt-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -280,87 +297,153 @@ export default function AdminVerificationRequestsPage() {
               )}
             </div>
           ) : (
-            <div className="space-y-3">
-              {locationRequests.map((r) => (
-                <article
-                  key={r.id}
-                  className="min-h-[122px] flex justify-between  overflow-hidden rounded-[8px] border border-[#B9D8D6] bg-[#F8FAFA]"
-                >
-                  <div className="px-4 py-3 flex items-center justify-between flex-1">
-                    <div className="flex items-start justify-start gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelected(r);
-                          setDialogMode("map");
-                          setDialogOpen(true);
-                        }}
-                        className="flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white"
-                        aria-label={tr("عرض الخريطة", "Open map")}
-                      >
-                        <Stethoscope className="h-6 w-6" />
-                      </button>
-                      <div className="text-start">
-                        <div className="font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]">
-                          {r.doctor}
-                        </div>
-                        <div className="mt-1 font-cairo text-[12px] font-bold leading-[22px] text-[#1F2937]">
-                          {r.specialty}
-                        </div>
-                        <div className="mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#4B5563]">
-                          {r.address}
+            <>
+              <div className="space-y-3">
+                {locationRequests.map((r) => (
+                  <article
+                    key={r.id}
+                    className="min-h-[122px] flex justify-between  overflow-hidden rounded-[8px] border border-[#B9D8D6] bg-[#F8FAFA]"
+                  >
+                    <div className="px-4 py-3 flex items-center justify-between flex-1">
+                      <div className="flex items-start justify-start gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelected(r);
+                            setDialogMode("map");
+                            setDialogOpen(true);
+                          }}
+                          className="flex h-[58px] w-[58px] items-center justify-center rounded-[8px] bg-[#129692] text-white"
+                          aria-label={tr("عرض الخريطة", "Open map")}
+                        >
+                          <Stethoscope className="h-6 w-6" />
+                        </button>
+                        <div className="text-start">
+                          <div className="mb-1 inline-flex items-center gap-1 rounded-full border border-[#D5E8E6] bg-white px-2 py-0.5 font-cairo text-[10px] font-extrabold text-primary">
+                            <FileSearch className="h-3 w-3" />
+                            {r.requestType}
+                          </div>
+                          <div className="font-cairo text-[14px] font-black leading-[24px] text-[#1F2937]">
+                            {r.doctor}
+                          </div>
+                          <div className="mt-1 font-cairo text-[12px] font-bold leading-[22px] text-[#1F2937]">
+                            {r.specialty}
+                          </div>
+                          <div className="mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#4B5563]">
+                            {r.address}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="mt-2 flex flex-col items-end justify-between h-full">
-                      <div className="inline-flex h-[22px] items-center gap-1 rounded-full bg-[#129692] px-2.5 font-cairo text-[11px] font-bold text-white">
-                        <Clock className="h-3 w-3" />
-                        {r.status}
-                      </div>
-                      <div className="font-cairo text-[12px] font-semibold leading-[20px] text-[#A0A7B0]">
-                        {r.requestedAt}
+                      <div className="mt-2 flex flex-col items-end justify-between h-full">
+                        <div
+                          className={`inline-flex h-[22px] items-center gap-1 rounded-full px-2.5 font-cairo text-[11px] font-bold text-white ${
+                            r.statusKey === "pending"
+                              ? "bg-[#F59E0B]"
+                              : r.statusKey === "approved"
+                                ? "bg-[#129692]"
+                                : "bg-[#EF4444]"
+                          }`}
+                        >
+                          <BadgeCheck className="h-3 w-3" />
+                          {r.status}
+                        </div>
+                        <div className="font-cairo text-[12px] font-semibold leading-[20px] text-[#A0A7B0]">
+                          {r.requestedAt}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                    <button
+                      type="button"
+                      aria-label={tr(
+                        "فتح صفحة تفاصيل طلب التحقق",
+                        "Open verification request details page",
+                      )}
+                      onClick={() => {
+                        navigate(
+                          `/admin/verification-requests/${encodeURIComponent(r.id)}`,
+                        );
+                      }}
+                      className="flex w-[58px] self-stretch items-center justify-center bg-[#129692] text-white transition hover:bg-[#0F8885]"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                  </article>
+                ))}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 border-t border-[#F2F4F7] pt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="text-center font-cairo text-[11px] font-semibold text-[#667085] sm:text-start sm:text-[12px]">
+                  {tr("الصفحة", "Page")} {currentPage} {tr("من", "of")}{" "}
+                  {totalPages}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end sm:gap-3">
+                  <StyledSelect
+                    className="w-full min-w-[110px] sm:w-[120px]"
+                    size="sm"
+                    tone="muted"
+                    value={String(limit)}
+                    onChange={(v) => {
+                      const nextLimit = Number(v) || 10;
+                      setLimit(nextLimit);
+                      setPage(1);
+                    }}
+                    options={[
+                      {
+                        value: "10",
+                        label: tr("10 / صفحة", "10 / page"),
+                      },
+                      {
+                        value: "20",
+                        label: tr("20 / صفحة", "20 / page"),
+                      },
+                      {
+                        value: "50",
+                        label: tr("50 / صفحة", "50 / page"),
+                      },
+                      {
+                        value: "100",
+                        label: tr("100 / صفحة", "100 / page"),
+                      },
+                    ]}
+                    listboxAriaLabel={tr(
+                      "عدد النتائج في الصفحة",
+                      "Results per page",
+                    )}
+                  />
+
                   <button
                     type="button"
-                    aria-label={tr(
-                      "فتح صفحة تفاصيل طلب التحقق",
-                      "Open verification request details page",
-                    )}
-                    onClick={() => {
-                      navigate(
-                        `/admin/verification-requests/${encodeURIComponent(r.id)}`,
-                      );
-                    }}
-                    className="flex w-[58px] self-stretch items-center justify-center bg-[#129692] text-white transition hover:bg-[#0F8885]"
+                    disabled={verificationAwaiting || currentPage <= 1}
+                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                    className={
+                      verificationAwaiting || currentPage <= 1
+                        ? "h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none"
+                        : "h-[38px] flex-1 rounded-[10px] bg-white px-4 font-cairo text-[12px] font-bold text-[#111827] shadow-[0_10px_20px_rgba(0,0,0,0.06)] sm:flex-none"
+                    }
                   >
-                    <ChevronLeft className="h-6 w-6" />
+                    {tr("السابق", "Previous")}
                   </button>
-                </article>
-              ))}
-            </div>
+                  <button
+                    type="button"
+                    disabled={verificationAwaiting || currentPage >= totalPages}
+                    onClick={() =>
+                      setPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    className={
+                      verificationAwaiting || currentPage >= totalPages
+                        ? "h-[38px] flex-1 rounded-[10px] bg-[#F2F4F7] px-4 font-cairo text-[12px] font-bold text-[#98A2B3] sm:flex-none"
+                        : "h-[38px] flex-1 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(15,143,139,0.25)] sm:flex-none"
+                    }
+                  >
+                    {tr("التالي", "Next")}
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </section>
-
-        {!verificationAwaiting && total > 0 ? (
-          <section className="mt-4">
-            <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
-              <div className="text-start font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr(
-                  `إجمالي ${total.toLocaleString(numberLocale)} طلب`,
-                  `Total ${total.toLocaleString(numberLocale)} requests`,
-                )}
-              </div>
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                onPage={setPage}
-              />
-            </div>
-          </section>
-        ) : null}
 
         <ReviewVerificationRequestDialog
           open={dialogOpen}

@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Layers, CheckCircle2, XCircle, FileText } from "lucide-react";
+import { Layers, CheckCircle2, XCircle, FileText, Info, FilterX } from "lucide-react";
 import { useMemo, useState } from "react";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import { useAdminContentTemplates } from "@/hooks/admin/content-templates/useAdminContentTemplates";
@@ -122,6 +122,22 @@ export default function DataEntryContentTemplatesPage() {
           ]}
         />
 
+        <section className="mt-5 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:px-6">
+          <div className="flex items-start gap-3 text-right">
+            <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Info className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
+                {t("dataEntry.contentTemplates.reference.title")}
+              </p>
+              <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                {t("dataEntry.contentTemplates.reference.body")}
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="font-cairo text-[11px] font-extrabold text-[#98A2B3]">
             {t("dataEntry.contentTemplates.filters.parentType")}
@@ -164,6 +180,21 @@ export default function DataEntryContentTemplatesPage() {
               </button>
             ))}
           </div>
+          {parentFilter !== "all" || activeFilter !== "all" ? (
+            <div className="mt-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setParentFilter("all");
+                  setActiveFilter("all");
+                }}
+                className="inline-flex h-9 items-center gap-1 rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#344054]"
+              >
+                <FilterX className="h-4 w-4" />
+                {t("common.clearFilters", "مسح الفلاتر")}
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <section className="mt-5 overflow-hidden rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)]">
@@ -189,8 +220,16 @@ export default function DataEntryContentTemplatesPage() {
                 {t("dataEntry.contentTemplates.list.error")}
               </div>
             ) : templates.length === 0 ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                {t("dataEntry.contentTemplates.list.empty")}
+              <div className="px-6 py-8 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                  <Layers className="h-5 w-5" />
+                </div>
+                <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                  {t("dataEntry.contentTemplates.list.empty")}
+                </p>
+                <p className="mt-1 font-cairo text-[12px] font-semibold text-[#667085]">
+                  {t("dataEntry.contentTemplates.list.emptyHint")}
+                </p>
               </div>
             ) : (
               templates.map((template) => {
@@ -229,6 +268,9 @@ export default function DataEntryContentTemplatesPage() {
                       {templateSlug ? (
                         <span dir="ltr">{templateSlug}</span>
                       ) : null}
+                      <span className="rounded-[8px] bg-[#F8FAFC] px-2 py-1 text-[#667085]">
+                        {t("dataEntry.contentTemplates.reference.badge")}
+                      </span>
                     </div>
                   </article>
                 );

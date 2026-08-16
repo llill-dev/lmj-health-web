@@ -19,7 +19,7 @@ import type {
   MedicalOrderCatalogKind,
 } from "@/lib/admin/types";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
-import { ClipboardList } from "lucide-react";
+import { AlertCircle, ClipboardList } from "lucide-react";
 import { Pagination } from "@/components/admin/services/Pagination";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import StyledSelect from "@/components/ui/styled-select";
@@ -28,6 +28,10 @@ import {
   medicalOrderCatalogDeleteSupported,
   medicalOrderCatalogKindSupported,
 } from "@/components/admin/medical-orders";
+
+type AdminMedicalOrdersPageProps = {
+  roleVariant?: "admin" | "data-entry";
+};
 
 function kindLabel(
   kind: MedicalOrderCatalogKind,
@@ -39,10 +43,13 @@ function kindLabel(
   return tr("تحويل", "Referral");
 }
 
-export default function AdminMedicalOrdersPage() {
+export default function AdminMedicalOrdersPage({
+  roleVariant = "admin",
+}: AdminMedicalOrdersPageProps) {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
+  const isDataEntry = roleVariant === "data-entry";
 
   const [kind, setKind] = useState<MedicalOrderCatalogKind>("lab");
   const [search, setSearch] = useState("");
@@ -61,7 +68,7 @@ export default function AdminMedicalOrdersPage() {
 
   const [debouncedSearch] = useDebounce(search, 300);
   const [debouncedCategory] = useDebounce(category, 350);
-  const { data, isAwaitingData, isError, error, refetch } =
+  const { data, isAwaitingData, isError, error, refetch, isRefetching } =
     useAdminMedicalOrderCatalog(kind, {
       search: debouncedSearch,
       category: debouncedCategory || undefined,
@@ -157,7 +164,13 @@ export default function AdminMedicalOrdersPage() {
     <>
       <Helmet>
         <title>
-          {tr("كتالوج الطلبات الطبية", "Medical orders catalog")} • LMJ Health
+          {isDataEntry
+            ? tr(
+                "كتالوج الطلبات الطبية • مدخل البيانات",
+                "Medical orders catalog • Data Entry",
+              )
+            : tr("كتالوج الطلبات الطبية", "Medical orders catalog")}{" "}
+          • LMJ Health
         </title>
       </Helmet>
 
@@ -165,13 +178,28 @@ export default function AdminMedicalOrdersPage() {
         <AdminDashboardOverview
           variant="admin"
           surface="mint"
-          title={tr("كتالوج الطلبات الطبية", "Medical orders catalog")}
-          subtitle={tr(
-            "إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض",
-            "Manage medical orders doctors request from patients",
-          )}
+          title={
+            isDataEntry
+              ? tr("كتالوج الطلبات الطبية", "Medical orders catalog")
+              : tr("كتالوج الطلبات الطبية", "Medical orders catalog")
+          }
+          subtitle={
+            isDataEntry
+              ? tr(
+                  "إدارة عناصر الكتالوج التي يستخدمها فريق مدخل البيانات مع نفس القيود المدعومة من الواجهة.",
+                  "Manage catalog items used by the data entry team within the same supported UI constraints.",
+                )
+              : tr(
+                  "إدارة الطلبات الطبية التي يحتاجها الطبيب من المريض",
+                  "Manage medical orders doctors request from patients",
+                )
+          }
           headerIcon={<ClipboardList className="h-8 w-8 text-white" />}
-          actionLabel={tr("إضافة نوع جديد", "Add new item")}
+          actionLabel={
+            isDataEntry
+              ? tr("إضافة عنصر جديد", "Add new item")
+              : tr("إضافة نوع جديد", "Add new item")
+          }
           actionDisabled={isAwaitingData || !medicalOrderCatalogKindSupported(kind)}
           onActionClick={openAdd}
           kpis={[
@@ -183,6 +211,38 @@ export default function AdminMedicalOrdersPage() {
             },
           ]}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {isDataEntry
+              ? tr(
+                  "هذه الشاشة مخصّصة لإدارة عناصر كتالوج الطلبات الطبية المرجعية ضمن الصلاحيات المتاحة لمدخل البيانات. ما يظهر هنا يخص تعريف العنصر وفهرسته فقط، وليس تنفيذ طلب طبي على مريض بعينه.",
+                  "This page is for managing reference medical-order catalog items within the data entry role’s supported permissions. What appears here is only the item definition and cataloging, not the execution of a medical order for a specific patient.",
+                )
+              : tr(
+                  "هذه الشاشة مخصّصة لإدارة كتالوج الطلبات الطبية المرجعية فقط. الإضافة أو التعديل هنا يغيّر العناصر المتاحة للأطباء لاحقًا، لكنه لا ينشئ طلبًا طبيًا فعليًا داخل ملف مريض محدد.",
+                  "This page is for managing the reference medical-order catalog only. Additions or edits here change the items available to doctors later, but do not create an actual medical order inside a specific patient record.",
+                )}
+          </div>
+        </div>
+
+        {isDataEntry ? (
+          <div className="rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3 text-start">
+            <p className="font-cairo text-[13px] font-bold text-[#0F766E]">
+              {tr(
+                "تعمل هذه الشاشة ضمن صلاحيات مدخل البيانات فقط.",
+                "This screen runs within the data entry role scope only.",
+              )}
+            </p>
+            <p className="mt-1 font-cairo text-[12px] font-semibold text-[#0F766E]">
+              {tr(
+                "ستظهر فقط الإجراءات المدعومة فعليًا من الواجهة والعقد الحالي، مع إخفاء أي مسارات غير مكتملة أو غير آمنة.",
+                "Only actions supported by the current UI and verified contract are shown, while incomplete or unsafe paths stay hidden.",
+              )}
+            </p>
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-3 items-stretch md:flex-row md:items-center md:justify-between">
           <div className="order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center">
@@ -259,12 +319,21 @@ export default function AdminMedicalOrdersPage() {
             <button
               type="button"
               onClick={() => void refetch()}
-              className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline"
+              disabled={isRefetching}
+              className="mt-2 font-cairo text-[12px] font-extrabold text-primary underline disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {tr("إعادة المحاولة", "Retry")}
+              {isRefetching ? tr("جارٍ إعادة المحاولة…", "Retrying...") : tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         )}
+
+        {!isAwaitingData && !isError && isRefetching ? (
+          <div className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-3 text-start">
+            <p className="font-cairo text-[12px] font-semibold text-[#667085]">
+              {tr("جارٍ تحديث بيانات الكتالوج…", "Refreshing catalog data...")}
+            </p>
+          </div>
+        ) : null}
 
         {isAwaitingData ? (
           <SkeletonList

@@ -22,6 +22,8 @@ import {
   adminInputClass,
   adminTextareaClass,
 } from "@/components/admin/form-field";
+import { requiredLatinSlugSchema } from "@/lib/forms/slugValidation";
+import { useI18n } from "@/i18n/provider";
 
 /**
  * Script checks for bilingual service-type fields (API-3 accepts any string per locale object;
@@ -59,10 +61,7 @@ const formSchema = z.object({
     .string()
     .min(1, "مطلوب")
     .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
-  slug: z
-    .string()
-    .min(1, "مطلوب")
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "للاتيني الصغير، أرقام، شرطة"),
+  slug: requiredLatinSlugSchema("مطلوب"),
   descEn: z
     .string()
     .optional()
@@ -282,6 +281,7 @@ export default function UpsertServiceTypeDialog({
   editTarget,
   onSuccess,
 }: Props) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const isEdit = !!editTarget?._id;
   const createMut = useCreateServiceType();
@@ -351,10 +351,10 @@ export default function UpsertServiceTypeDialog({
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             onMouseDown={(e) => e.stopPropagation()}
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-[#F2F4F7] px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-[#F2F4F7] bg-white/95 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/80">
               <div className="flex items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
                   <Layers className="h-5 w-5" />
@@ -425,7 +425,8 @@ export default function UpsertServiceTypeDialog({
                 }
               })}
             >
-              <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+              <div className="min-h-0 flex-1 overflow-hidden px-2 py-2">
+                <div className="max-h-[calc(min(90vh,760px)-148px)] space-y-5 overflow-y-auto px-4 py-3 overscroll-contain scroll-smooth [scrollbar-color:#0f8f8b_#E5E7EB] [scrollbar-width:thin] sm:px-5 [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[#E5E7EB] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/75 [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-[#E5E7EB] hover:[&::-webkit-scrollbar-thumb]:bg-primary">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <AdminFormField
                     label="الاسم (عربي)"
@@ -464,17 +465,17 @@ export default function UpsertServiceTypeDialog({
                   required
                   error={errors.slug?.message}
                 >
-                  <input
-                    {...register("slug")}
-                    aria-label="Slug"
-                    className={adminFieldClass(
-                      adminInputClass,
-                      Boolean(errors.slug),
-                    )}
-                    dir="ltr"
-                    disabled={isEdit}
-                    placeholder="lab"
-                  />
+                    <input
+                      {...register("slug")}
+                      aria-label="Slug"
+                      className={adminFieldClass(
+                        adminInputClass,
+                        Boolean(errors.slug),
+                      )}
+                      dir="ltr"
+                      disabled={isEdit}
+                      placeholder="lab"
+                    />
                   {isEdit && (
                     <p className="mt-1 text-right font-cairo text-[11px] text-[#98A2B3]">
                       لا يُنصح بتغيير الـ slug بعد الربط.
@@ -689,9 +690,10 @@ export default function UpsertServiceTypeDialog({
                     {serverError}
                   </div>
                 )}
+                </div>
               </div>
 
-              <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[#F2F4F7] bg-white px-6 py-4">
+              <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[#F2F4F7] bg-white/95 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/80">
                 <button
                   type="button"
                   onClick={() => {

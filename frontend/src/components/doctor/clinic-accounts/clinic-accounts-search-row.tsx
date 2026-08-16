@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { Search, X } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { formatBillingNumber } from '@/lib/doctor/billing/format';
+import { Search, X } from "lucide-react";
+import type { ReactNode } from "react";
+import { useI18n } from "@/i18n/provider";
+import { formatBillingNumber } from "@/lib/doctor/billing/format";
 
 export function ClinicAccountsSearchRow({
   value,
@@ -19,9 +20,12 @@ export function ClinicAccountsSearchRow({
   onValueChangeExtra?: () => void;
   onClear?: () => void;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+
   return (
     <div
-      dir="rtl"
+      dir={dir}
       className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center"
     >
       <div className="relative min-w-0 flex-1">
@@ -39,7 +43,7 @@ export function ClinicAccountsSearchRow({
             type="button"
             onClick={onClear}
             className="absolute start-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-[#98A2B3] transition-colors hover:bg-gray-100 hover:text-gray-600"
-            aria-label="مسح البحث"
+            aria-label={tr("مسح البحث", "Clear search")}
           >
             <X className="h-4 w-4" aria-hidden />
           </button>

@@ -25,10 +25,12 @@ import {
 } from "@/hooks/doctor/billing";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 import type {
   ClinicInvoice,
   InvoiceStatus,
 } from "@/lib/doctor/clinicAccounts/types";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 type InvoiceFilter = "all" | InvoiceStatus;
 
@@ -49,7 +51,17 @@ function pickStatusCount(
 }
 
 export default function DoctorClinicInvoicesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const navigate = useNavigate();
+  const {
+    basePath,
+    canManageInvoices,
+    canViewDashboard,
+    canViewSettings,
+    isSecretary,
+  } =
+    useBillingAccess();
   const [filter, setFilter] = useState<InvoiceFilter>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -57,8 +69,12 @@ export default function DoctorClinicInvoicesPage() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const settingsQuery = useBillingSettings();
-  const dashboardQuery = useBillingDashboard("month", settingsQuery.currency);
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
+  const dashboardQuery = useBillingDashboard(
+    "month",
+    settingsQuery.currency,
+    !isSecretary || canViewDashboard,
+  );
   const listQuery = useBillingInvoices({
     uiStatus: filter,
     search,
@@ -98,45 +114,68 @@ export default function DoctorClinicInvoicesPage() {
   return (
     <>
       <Helmet>
-        <title>الفواتير • LMJ Health</title>
+        <title>{tr("الفواتير • LMJ Health", "Invoices • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
           kpiColumns={3}
           headerIcon={<BookOpen className="h-8 w-8 text-white" />}
-          title="الفواتير"
+          title={tr("الفواتير", "Invoices")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
                 {listQuery.isAwaitingData ? "—" : listQuery.total}
               </span>
-              <span className="text-primary/90"> — إجمالي الفواتير</span>
+              <span className="text-primary/90">
+                {tr(" — إجمالي الفواتير", " — total invoices")}
+              </span>
             </span>
           }
-          actionLabel="فاتورة جديدة"
-          actionIcon={<Plus className="h-4 w-4" />}
-          onActionClick={() => navigate("/doctor/accounts/invoices/new")}
+          actionLabel={
+            canManageInvoices ? tr("فاتورة جديدة", "New invoice") : undefined
+          }
+          actionIcon={canManageInvoices ? <Plus className="h-4 w-4" /> : undefined}
+          onActionClick={
+            canManageInvoices
+              ? () => navigate(`${basePath}/invoices/new`)
+              : undefined
+          }
           kpis={[
             {
               key: "paid",
               icon: <CheckCircle className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.paid,
-              label: "مدفوعة",
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.paid
+                  : "—",
+              label: tr("مدفوعة", "Paid"),
             },
             {
               key: "unpaid",
               icon: <FileText className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.unpaid,
-              label: "غير مدفوعة",
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.unpaid
+                  : "—",
+              label: tr("غير مدفوعة", "Unpaid"),
             },
             {
               key: "overdue",
               icon: <Clock className="w-5 h-5 shrink-0" />,
-              value: dashboardQuery.isAwaitingData ? "—" : stats.overdue,
-              label: "متأخرة",
+              value:
+                !isSecretary || canViewDashboard
+                  ? dashboardQuery.isAwaitingData
+                    ? "—"
+                    : stats.overdue
+                  : "—",
+              label: tr("متأخرة", "Overdue"),
             },
           ]}
         />
@@ -171,7 +210,7 @@ export default function DoctorClinicInvoicesPage() {
           <DoctorTableSkeleton rows={6} columns={1} />
         ) : listQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الفواتير"
+            title={tr("تعذّر تحميل الفواتير", "Failed to load invoices")}
             brief={getUserFacingRequestErrorMessage(listQuery.error)}
             retrying={retryingList}
             onRetry={() => void retryList()}
@@ -191,9 +230,13 @@ export default function DoctorClinicInvoicesPage() {
                 ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
                 : 'أنشئ فواتير للمرضى وتتبع المدفوعات والمبالغ المستحقة'
             }
-            actionLabel="فاتورة جديدة"
-            onAction={() => navigate('/doctor/accounts/invoices/new')}
-            actionIcon={<Plus className="h-4 w-4" />}
+            actionLabel={canManageInvoices ? "فاتورة جديدة" : undefined}
+            onAction={
+              canManageInvoices
+                ? () => navigate(`${basePath}/invoices/new`)
+                : undefined
+            }
+            actionIcon={canManageInvoices ? <Plus className="h-4 w-4" /> : undefined}
           />
         ) : (
           <div className="space-y-3">

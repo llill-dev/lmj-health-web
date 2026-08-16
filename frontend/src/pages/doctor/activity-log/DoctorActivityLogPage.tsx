@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
@@ -15,8 +15,11 @@ import { useDoctorActivityLog } from "@/hooks";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import type { ActivityLogPeriod } from "@/lib/doctor/activityLog/types";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorActivityLogPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [period, setPeriod] = useState<ActivityLogPeriod>("all");
@@ -53,16 +56,16 @@ export default function DoctorActivityLogPage() {
     return (
       <>
         <Helmet>
-          <title>سجل النشاطات • LMJ Health</title>
+          <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
         </Helmet>
         <div
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
           className="flex min-h-[360px] items-center justify-center"
         >
           <div className="flex items-center gap-3 font-cairo text-[14px] font-semibold text-[#667085]">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            جارٍ تحميل سجل النشاطات…
+            {tr("جارٍ تحميل سجل النشاطات…", "Loading activity log…")}
           </div>
         </div>
       </>
@@ -73,12 +76,16 @@ export default function DoctorActivityLogPage() {
     return (
       <>
         <Helmet>
-          <title>سجل النشاطات • LMJ Health</title>
+          <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
         </Helmet>
         <DoctorListErrorState
-          title="تعذّر تحميل سجل النشاطات"
+          title={tr("تعذّر تحميل سجل النشاطات", "Could not load activity log")}
           brief={
-            errorMessage ?? "حدث خطأ أثناء جلب السجل من الخادم. حاول مرة أخرى."
+            errorMessage ??
+            tr(
+              "حدث خطأ أثناء جلب السجل من الخادم. حاول مرة أخرى.",
+              "An error occurred while fetching the log from the server. Please try again.",
+            )
           }
           onRetry={() => void retryActivity()}
           retrying={retryingActivity}
@@ -90,10 +97,10 @@ export default function DoctorActivityLogPage() {
   return (
     <>
       <Helmet>
-        <title>سجل النشاطات • LMJ Health</title>
+        <title>{tr("سجل النشاطات • LMJ Health", "Activity Log • LMJ Health")}</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ActivityLogBanner />
         <ActivityLogInfoAlert />
         <ActivityLogFilters
@@ -102,6 +109,33 @@ export default function DoctorActivityLogPage() {
           period={period}
           onPeriodChange={handlePeriodChange}
         />
+
+        {activityQuery.isRefetching ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث سجل النشاطات...", "Refreshing activity log...")}
+          </div>
+        ) : null}
+
+        {activityQuery.isError && activityQuery.data ? (
+          <div
+            role="alert"
+            className="mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-start"
+          >
+            <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
+              {errorMessage ?? "تعذّر تحديث سجل النشاطات. ما زالت آخر البيانات المتاحة معروضة."}
+            </div>
+            <button
+              type="button"
+              onClick={() => void retryActivity()}
+              disabled={retryingActivity}
+              className="mt-3 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${retryingActivity ? "animate-spin" : ""}`} />
+              {retryingActivity ? "جارٍ إعادة المحاولة..." : "إعادة المحاولة"}
+            </button>
+          </div>
+        ) : null}
 
         <ActivityLogList items={activityQuery.items} />
 

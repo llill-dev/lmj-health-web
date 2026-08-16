@@ -8,34 +8,28 @@ import {
   Phone,
   Search,
   Stethoscope,
-  Edit3,
+  Eye,
+  Lock,
   Users,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import {
   ADMIN_SECRETARY_BLOCKER_MESSAGE,
-  ADMIN_SECRETARY_BLOCKER_TITLE,
-  ADMIN_SECRETARY_WRITE_SUPPORTED,
   useAdminSecretariesList,
 } from "@/hooks/admin/secretaries/useAdminSecretaries";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
-import CreateSecretaryDialog from "@/components/admin/secretaries/dialogs/CreateSecretaryDialog";
-import EditSecretaryDialog from "@/components/admin/secretaries/dialogs/EditSecretaryDialog";
 import { SecretaryCardSkeleton } from "@/components/admin/secretaries/SecretaryCardSkeleton";
 import { PERM_LABEL } from "@/components/admin/secretaries/secretaryPermissions";
 import { resolveUserId } from "@/components/admin/secretaries/secretaryListUtils";
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
 import StyledSelect from "@/components/ui/styled-select";
-import type { AdminSecretarySummary } from "@/lib/admin/types";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import { useI18n } from "@/i18n/provider";
-import { useToast } from "@/components/ui/ToastProvider";
 
 export default function AdminSecretariesPage() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-EG" : "en-US";
@@ -46,12 +40,6 @@ export default function AdminSecretariesPage() {
   const [doctorIdFilter, setDoctorIdFilter] = useState<string>("");
   const [page, setPage] = useState(1);
   const LIMIT = 20;
-
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<AdminSecretarySummary | null>(
-    null,
-  );
 
   const { doctors: doctorOptions, isAwaitingData: doctorsListAwaiting } =
     useAdminDoctors({
@@ -80,33 +68,6 @@ export default function AdminSecretariesPage() {
   const showPaginationBar =
     !isAwaitingData && !isError && data && data.total > 0;
 
-  const openEdit = useCallback((s: AdminSecretarySummary) => {
-    if (!ADMIN_SECRETARY_WRITE_SUPPORTED) {
-      toast(tr(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, ADMIN_SECRETARY_BLOCKER_MESSAGE.en), {
-        title: tr(ADMIN_SECRETARY_BLOCKER_TITLE.ar, ADMIN_SECRETARY_BLOCKER_TITLE.en),
-        variant: "error",
-        durationMs: 4200,
-      });
-      return;
-    }
-
-    setEditTarget(s);
-    setEditOpen(true);
-  }, [toast, tr]);
-
-  const openCreate = useCallback(() => {
-    if (!ADMIN_SECRETARY_WRITE_SUPPORTED) {
-      toast(tr(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, ADMIN_SECRETARY_BLOCKER_MESSAGE.en), {
-        title: tr(ADMIN_SECRETARY_BLOCKER_TITLE.ar, ADMIN_SECRETARY_BLOCKER_TITLE.en),
-        variant: "error",
-        durationMs: 4200,
-      });
-      return;
-    }
-
-    setCreateOpen(true);
-  }, [toast, tr]);
-
   const handleSearchChange = (val: string) => {
     setSearchInput(val);
     setPage(1);
@@ -128,8 +89,8 @@ export default function AdminSecretariesPage() {
             "Monitor secretary accounts linked to doctors. The Admin area currently supports listing only, while create and edit remain blocked because approved Admin endpoints for these actions are missing.",
           )}
           headerIcon={<Users className="h-8 w-8 text-white" />}
-          actionLabel={tr("إنشاء سكرتير", "Create secretary")}
-          onActionClick={openCreate}
+          actionLabel={tr("عرض فقط", "Read only")}
+          actionDisabled
           kpis={[
             {
               key: "total",
@@ -153,6 +114,16 @@ export default function AdminSecretariesPage() {
             },
           ]}
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه القائمة مخصّصة لمراجعة السكرتيرين المرتبطين بالأطباء والتنقل إلى ملفاتهم أو صفحات مواعيدهم فقط. إنشاء السكرتير أو تعديل صلاحياته أو إيقافه ما يزال خارج هذا المسار حتى تتوفر endpoints إدارية معتمدة له.",
+              "This list is for reviewing secretaries linked to doctors and navigating to their profiles or appointment pages only. Creating a secretary, changing permissions, or offboarding them remains outside this flow until approved admin endpoints exist for it.",
+            )}
+          </div>
+        </div>
 
         <div className="mt-5 flex items-center justify-between gap-16 rounded-[12px] border border-[#EEF2F6] bg-white px-5 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="relative flex-1">
@@ -200,11 +171,19 @@ export default function AdminSecretariesPage() {
         </div>
 
         <div className="mt-5 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-4">
-          <div className="font-cairo text-[12px] font-extrabold text-[#991B1B]">
-            {tr(
-              ADMIN_SECRETARY_BLOCKER_MESSAGE.ar,
-              ADMIN_SECRETARY_BLOCKER_MESSAGE.en,
-            )}
+          <div className="flex items-start gap-3">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-[#B42318]" />
+            <div>
+              <div className="font-cairo text-[12px] font-extrabold text-[#991B1B]">
+                {tr("هذه الصفحة للعرض فقط", "This page is read-only")}
+              </div>
+              <div className="mt-1 font-cairo text-[11px] font-bold leading-6 text-[#B42318]">
+                {tr(
+                  ADMIN_SECRETARY_BLOCKER_MESSAGE.ar,
+                  ADMIN_SECRETARY_BLOCKER_MESSAGE.en,
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -273,15 +252,16 @@ export default function AdminSecretariesPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openEdit(s)}
-                          title={tr("تعديل البيانات", "Edit details")}
-                          className="flex h-8 items-center gap-1.5 rounded-[8px] border border-[#BBF7D0] bg-white px-3 font-cairo text-[11px] font-extrabold text-[#16A34A] transition hover:bg-[#F0FDF4]"
+                        <span
+                          className="flex h-8 items-center gap-1.5 rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]"
+                          title={tr(
+                            "تعديل البيانات غير متاح من لوحة الإدارة حالياً",
+                            "Editing secretary data is not available from the admin area right now",
+                          )}
                         >
-                          <Edit3 className="h-3.5 w-3.5" />
-                          {tr("تعديل", "Edit")}
-                        </button>
+                          <Eye className="h-3.5 w-3.5" />
+                          {tr("عرض فقط", "Read only")}
+                        </span>
                         {userId && (
                           <span className="flex h-8 items-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-3 font-cairo text-[11px] font-extrabold text-[#667085]">
                             {tr("إيقاف غير متاح", "Offboard unavailable")}
@@ -412,19 +392,6 @@ export default function AdminSecretariesPage() {
 
         <div className="h-8" />
       </div>
-
-      <CreateSecretaryDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSuccess={() => refetch()}
-      />
-
-      <EditSecretaryDialog
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        secretary={editTarget}
-        onSuccess={() => refetch()}
-      />
     </>
   );
 }

@@ -8,6 +8,7 @@ import {
 } from '@/hooks/doctor/encounters/useEncounterDocuments';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { EncounterDocumentLinkBody } from '@/lib/doctor/encounters/encounterDocumentsTypes';
+import { useI18n } from '@/i18n/provider';
 
 export function EncounterDocumentsPanel({
   doctorId,
@@ -23,6 +24,7 @@ export function EncounterDocumentsPanel({
     body: EncounterDocumentLinkBody;
   }>;
 }) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const documentsQuery = useEncounterDocuments(
     doctorId,
@@ -59,8 +61,8 @@ export function EncounterDocumentsPanel({
 
   return (
     <section
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="rounded-[12px] border border-[#EEF2F6] bg-white p-5"
     >
       <div className="mb-4 flex items-center gap-2">

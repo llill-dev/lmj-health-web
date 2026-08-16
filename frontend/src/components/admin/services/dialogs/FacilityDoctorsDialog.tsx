@@ -80,6 +80,10 @@ export default function FacilityDoctorsDialog({
           </div>
 
           <div className='border-b border-[#EEF2F6] px-6 py-3'>
+            <div className='mb-3 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-3 py-2 text-right font-cairo text-[12px] font-bold leading-6 text-[#0F766E]'>
+              هذه النافذة مرجعية لعرض الأطباء المرتبطين بالمنشأة والبحث عنهم فقط.
+              تغيير ربط الطبيب أو حالة حسابه يتم من مساره الإداري المخصص.
+            </div>
             <input
               value={search}
               onChange={(event) => {

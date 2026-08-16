@@ -1,13 +1,14 @@
-import { ChevronLeft, ScanLine, type LucideIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { buildRadiologyPatientSubtitle } from './map-radiology-ui';
+import { ChevronLeft, ScanLine, type LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useI18n } from "@/i18n/provider";
+import { buildRadiologyPatientSubtitle } from "./map-radiology-ui";
 
 export function RadiologyPageHeader({
   patientName,
   fileNumber,
-  statusLabel = 'مسودة',
-  backTo = '/doctor/radiology',
-  title = 'طلبات الأشعة',
+  statusLabel,
+  backTo = "/doctor/radiology",
+  title,
   subtitle,
   icon: Icon = ScanLine,
 }: {
@@ -20,6 +21,10 @@ export function RadiologyPageHeader({
   subtitle?: string;
   icon?: LucideIcon;
 }) {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const resolvedTitle = title ?? tr("طلبات الأشعة", "Radiology orders");
+  const resolvedStatusLabel = statusLabel ?? tr("مسودة", "Draft");
   const resolvedSubtitle =
     subtitle ?? buildRadiologyPatientSubtitle(patientName);
 
@@ -36,7 +41,7 @@ export function RadiologyPageHeader({
 
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div
-          dir="rtl"
+          dir={dir}
           className="flex min-w-0 flex-1 items-start justify-start gap-3 text-start sm:gap-4"
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[6px] bg-primary shadow-[0px_4px_14px_rgba(15,143,139,0.35)] sm:h-16 sm:w-16">
@@ -44,14 +49,14 @@ export function RadiologyPageHeader({
           </div>
           <div className="min-w-0 text-start">
             <h1 className="font-cairo text-[26px] font-black leading-[32px] text-primary sm:text-[30px] sm:leading-[36px]">
-              {title}
+              {resolvedTitle}
             </h1>
             <p className="mt-1 font-cairo text-[14px] font-bold leading-[22px] text-primary/90 sm:text-[16px]">
               {resolvedSubtitle}
             </p>
             {fileNumber ? (
               <p className="mt-0.5 font-cairo text-[12px] font-semibold text-primary/75">
-                رقم الملف: {fileNumber}
+                {tr("رقم الملف", "File number")}: {fileNumber}
               </p>
             ) : null}
           </div>
@@ -62,11 +67,11 @@ export function RadiologyPageHeader({
             to={backTo}
             className="inline-flex items-center gap-1 font-cairo text-[13px] font-extrabold text-primary transition hover:text-[#0A7A77]"
           >
-            <span>رجوع</span>
+            <span>{tr("رجوع", "Back")}</span>
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </Link>
           <span className="inline-flex rounded-full bg-[#FEF3C7] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#B45309]">
-            {statusLabel}
+            {resolvedStatusLabel}
           </span>
         </div>
       </div>

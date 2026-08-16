@@ -1,13 +1,24 @@
 "use client";
 
-import { ArrowLeft, CalendarDays, ExternalLink, FileText, Loader2, Share2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  ExternalLink,
+  FileText,
+  Loader2,
+  Share2,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "react-router-dom";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
-import { usePlatformContentBySlug, usePlatformMedicalLibrary } from "@/hooks/platform";
+import {
+  usePlatformContentBySlug,
+  usePlatformMedicalLibrary,
+} from "@/hooks/platform";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import type { AdminContentBlock } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 const TYPE_LABELS: Record<string, string> = {
   NEWS: "أخبار طبية",
@@ -57,15 +68,18 @@ function formatPublishedAt(value?: string) {
 }
 
 export default function PublicMedicalLibraryDetailsPage() {
+  const { locale, dir } = useI18n();
   const params = useParams<{ slug: string }>();
   const location = useLocation();
   const slug = params.slug ? decodeURIComponent(params.slug) : "";
-  const contentQuery = usePlatformContentBySlug(slug, "ar");
-  const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
+  const contentQuery = usePlatformContentBySlug(slug, locale);
+  const [shareState, setShareState] = useState<"idle" | "copied" | "shared">(
+    "idle",
+  );
   const blocks = contentQuery.data?.contentBlocks ?? [];
   const backToList = `/medical-library${location.search || ""}`;
   const relatedQuery = usePlatformMedicalLibrary({
-    language: "ar",
+    language: locale,
     limitPerType: 6,
   });
 
@@ -80,9 +94,7 @@ export default function PublicMedicalLibraryDetailsPage() {
 
   const relatedItems = [...relatedQuery.items]
     .filter(
-      (item) =>
-        item.slug !== slug &&
-        item.type === contentQuery.data?.type,
+      (item) => item.slug !== slug && item.type === contentQuery.data?.type,
     )
     .sort((a, b) => {
       const aDate = a.publishedAt ? Date.parse(a.publishedAt) : 0;
@@ -116,7 +128,11 @@ export default function PublicMedicalLibraryDetailsPage() {
 
   if (contentQuery.isLoading) {
     return (
-      <div dir="rtl" lang="ar" className="flex min-h-[60vh] items-center justify-center">
+      <div
+        dir={dir}
+        lang={locale}
+        className="flex min-h-[60vh] items-center justify-center"
+      >
         <div className="flex items-center gap-3 font-cairo text-[14px] font-bold text-[#667085]">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
           جارٍ تحميل المحتوى...
@@ -127,7 +143,11 @@ export default function PublicMedicalLibraryDetailsPage() {
 
   if (contentQuery.isError || !contentQuery.data) {
     return (
-      <div dir="rtl" lang="ar" className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
+      <div
+        dir={dir}
+        lang={locale}
+        className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6"
+      >
         <DoctorListErrorState
           title="تعذّر تحميل المحتوى الطبي"
           brief={
@@ -147,7 +167,11 @@ export default function PublicMedicalLibraryDetailsPage() {
         <title>{contentQuery.data.title} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
+      <div
+        dir={dir}
+        lang={locale}
+        className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6"
+      >
         <Link
           to={backToList}
           className="mb-5 inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-primary"
@@ -215,12 +239,16 @@ export default function PublicMedicalLibraryDetailsPage() {
             {blocks.length > 0 ? (
               <div className="space-y-6">
                 {blocks.map((block, index) => (
-                  <ContentBlockRenderer key={`${block.type}-${index}`} block={block} />
+                  <ContentBlockRenderer
+                    key={`${block.type}-${index}`}
+                    block={block}
+                  />
                 ))}
               </div>
             ) : (
               <div className="whitespace-pre-line font-cairo text-[15px] font-semibold leading-9 text-[#344054]">
-                {contentQuery.data.summary || "لا يوجد نص تفصيلي متاح لهذا المحتوى حالياً."}
+                {contentQuery.data.summary ||
+                  "لا يوجد نص تفصيلي متاح لهذا المحتوى حالياً."}
               </div>
             )}
 
@@ -230,18 +258,30 @@ export default function PublicMedicalLibraryDetailsPage() {
                   ملاحظة حول الميزة الحالية
                 </h3>
                 <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
-                  <p>هذه الصفحة مخصّصة لقراءة المحتوى الطبي المنشور ومراجعة مصادره فقط.</p>
-                  <p>تنزيل مكتبة PDF مشتركة أو طلب خدمة طبية من داخل هذا المحتوى غير متاح حالياً.</p>
+                  <p>
+                    هذه الصفحة مخصّصة لقراءة المحتوى الطبي المنشور ومراجعة
+                    مصادره فقط.
+                  </p>
+                  <p>
+                    تنزيل مكتبة PDF مشتركة أو طلب خدمة طبية من داخل هذا المحتوى
+                    غير متاح حالياً.
+                  </p>
                 </div>
               </div>
-              {contentQuery.data.sources?.filter((source) => source.url?.trim()).length ? (
+              {contentQuery.data.sources?.filter((source) => source.url?.trim())
+                .length ? (
                 <div className="w-full space-y-3 rounded-[18px] border border-[#EAECF0] bg-[#FCFCFD] px-5 py-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h3 className="font-cairo text-[16px] font-black text-[#101828]">
                       المراجع والمصادر
                     </h3>
                     <span className="rounded-full bg-white px-3 py-1 font-cairo text-[11px] font-extrabold text-primary shadow-sm">
-                      {contentQuery.data.sources.filter((source) => source.url?.trim()).length} مرجع
+                      {
+                        contentQuery.data.sources.filter((source) =>
+                          source.url?.trim(),
+                        ).length
+                      }{" "}
+                      مرجع
                     </span>
                   </div>
                   <div className="space-y-2">
@@ -436,7 +476,8 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
   }
 
   if (block.type === "image" || flexibleBlock.imageUrl || flexibleBlock.image) {
-    const imageUrl = readText(flexibleBlock.imageUrl) || readText(flexibleBlock.image);
+    const imageUrl =
+      readText(flexibleBlock.imageUrl) || readText(flexibleBlock.image);
     if (!imageUrl) return null;
     const caption = readText(flexibleBlock.caption);
     const alt = readText(flexibleBlock.alt) || caption || "صورة توضيحية";
@@ -457,7 +498,11 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
     );
   }
 
-  if (block.type === "gallery" && Array.isArray(flexibleBlock.images) && flexibleBlock.images.length > 0) {
+  if (
+    block.type === "gallery" &&
+    Array.isArray(flexibleBlock.images) &&
+    flexibleBlock.images.length > 0
+  ) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {flexibleBlock.images.map((image, index) =>

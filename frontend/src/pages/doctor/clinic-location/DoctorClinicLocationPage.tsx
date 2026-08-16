@@ -17,6 +17,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { useDoctorClinicLocation } from '@/hooks';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
+import { useI18n } from '@/i18n/provider';
 import { geocodeAddress } from '@/lib/doctor/clinicLocation/geocode';
 import {
   buildOpenStreetMapEmbedUrl,
@@ -50,6 +51,8 @@ function statusIcon(status: ClinicVerificationStatus) {
 }
 
 export default function DoctorClinicLocationPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const {
     doctor,
@@ -226,7 +229,9 @@ export default function DoctorClinicLocationPage() {
     return (
       <>
         <Helmet>
-          <title>موقع العيادة • LMJ Health</title>
+          <title>
+            {tr('موقع العيادة • LMJ Health', 'Clinic Location • LMJ Health')}
+          </title>
         </Helmet>
         <DoctorProfilePageLoading />
       </>
@@ -237,11 +242,16 @@ export default function DoctorClinicLocationPage() {
     return (
       <>
         <Helmet>
-          <title>موقع العيادة • LMJ Health</title>
+          <title>
+            {tr('موقع العيادة • LMJ Health', 'Clinic Location • LMJ Health')}
+          </title>
         </Helmet>
         <DoctorListErrorState
-          title="تعذّر تحميل موقع العيادة"
-          brief="حدث خطأ أثناء جلب بيانات الملف الشخصي."
+          title={tr('تعذّر تحميل موقع العيادة', 'Failed to load clinic location')}
+          brief={tr(
+            'حدث خطأ أثناء جلب بيانات الملف الشخصي.',
+            'An error occurred while fetching profile data.',
+          )}
           onRetry={() => void retryProfile()}
           retrying={retryingProfile}
         />
@@ -252,26 +262,31 @@ export default function DoctorClinicLocationPage() {
   return (
     <>
       <Helmet>
-        <title>موقع العيادة • LMJ Health</title>
+        <title>
+          {tr('موقع العيادة • LMJ Health', 'Clinic Location • LMJ Health')}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="pb-8 sm:pb-10">
         <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
               <button
                 type="button"
                 className="flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-primary text-white"
-                aria-label="موقع"
+                aria-label={tr('موقع', 'Location')}
               >
                 <MapPin className="h-4 w-4" />
               </button>
               <div className="text-right">
                 <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                  موقع العيادة
+                  {tr('موقع العيادة', 'Clinic location')}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                  حدد موقع عيادتك بدقة على الخريطة
+                  {tr(
+                    'حدد موقع عيادتك بدقة على الخريطة',
+                    'Pin your clinic location accurately on the map',
+                  )}
                 </div>
               </div>
             </div>
@@ -291,6 +306,13 @@ export default function DoctorClinicLocationPage() {
             <div className="mt-4 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#92400E]">
               لديك طلب موقع قيد المراجعة. يمكنك تعديل الإحداثيات وإعادة الإرسال لتحديث
               الطلب قبل موافقة الإدارة.
+            </div>
+          ) : null}
+
+          {profileQuery.isRefetching ? (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              جارٍ تحديث بيانات موقع العيادة...
             </div>
           ) : null}
         </section>

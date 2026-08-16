@@ -17,10 +17,14 @@ import type {
   DoctorPatientsListParams,
 } from '@/lib/doctor/types';
 
-export function useDoctorPatients(params: DoctorPatientsListParams) {
+export function useDoctorPatients(
+  params: DoctorPatientsListParams,
+  enabled = true,
+) {
   const query = useQuery({
     queryKey: doctorPatientsQueryKeys.list(params),
     queryFn: () => doctorApi.patients.list(params),
+    enabled,
     staleTime: 1000 * 60,
   });
 
@@ -31,7 +35,8 @@ export function useDoctorPatients(params: DoctorPatientsListParams) {
     limit: query.data?.limit ?? params.limit ?? 20,
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -208,6 +213,9 @@ export function useCreateTemporaryDoctorPatient() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: CreateTemporaryPatientBody) =>
       doctorApi.patients.createTemporary(body),
     onSuccess: () => {
@@ -222,6 +230,9 @@ export function useRequestDoctorPatientAccess(doctorId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       patientId,
       body,
@@ -285,6 +296,9 @@ export function useUploadDoctorPatientFile(patientId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       file,
       note,
@@ -309,6 +323,9 @@ export function useDeleteDoctorPatientFile(patientId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (fileId: string) => doctorApi.patients.deleteFile(patientId, fileId),
     onSuccess: () => {
       queryClient.invalidateQueries({

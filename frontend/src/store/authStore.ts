@@ -409,14 +409,28 @@ function initFromCookies() {
   const settings = readPersistedGeneralSettings();
   const pendingVerification = readPendingVerification();
 
-  if (stored.accessToken) {
+  const hasAnyStoredSessionFragment = Boolean(
+    stored.accessToken ||
+      stored.refreshToken ||
+      stored.refreshExpiresAt ||
+      stored.user,
+  );
+  const hasCompleteStoredSession = Boolean(
+    stored.accessToken && stored.refreshToken && user,
+  );
+
+  if (hasAnyStoredSessionFragment && !hasCompleteStoredSession) {
+    clearAuthSession();
+  }
+
+  if (hasCompleteStoredSession) {
     state = {
       ...state,
       accessToken: stored.accessToken,
       refreshToken: stored.refreshToken,
       refreshExpiresAt: stored.refreshExpiresAt,
       isAuthenticated: true,
-      ...(user ? { user } : {}),
+      user,
     };
   }
 
@@ -424,7 +438,7 @@ function initFromCookies() {
     state = { ...state, ...settings };
   }
 
-  if (pendingVerification && !stored.accessToken) {
+  if (pendingVerification && !hasCompleteStoredSession) {
     state = { ...state, pendingVerification };
   }
 }

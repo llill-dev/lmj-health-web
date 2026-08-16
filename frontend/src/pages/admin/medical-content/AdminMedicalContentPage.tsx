@@ -24,15 +24,18 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Link as LinkIcon,
+  AlertTriangle,
 } from "lucide-react";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminDashboardOverview from "@/components/admin/dashboard/admin-dashboard-overview";
 import MedicalContentViewDialog from "@/components/admin/medical-content/dialogs/MedicalContentViewDialog";
+import { toDisplayText } from "@/components/admin/medical-content/contentListUtils";
 import {
   CreateAdminContentDialog,
   EditAdminContentDialog,
   ContentRejectDialog,
+  ReleaseAcceptanceCatalogPanel,
 } from "@/components/admin/medical-content";
 import {
   ConfirmActionDialog,
@@ -65,19 +68,38 @@ import { MedicalContentRowSkeleton } from "@/components/admin/skeletons/MedicalC
 import { SkeletonList } from "@/components/admin/skeletons/SkeletonList";
 import { useI18n } from "@/i18n/provider";
 import {
+  buildReleaseAcceptanceFromDetails,
+  getIncompleteAcceptanceChecks,
+  getListAcceptanceScenarioChip,
+  getNextWorkflowActions,
+  isApprovePublishPathReady,
+  localizeAcceptanceCopy,
+} from "@/components/admin/medical-content/releaseAcceptanceMatrix";
+import {
   buildVisiblePageNumbers,
+  clampPage,
   contentStatusLabel,
   contentTypeLabel,
   formatContentDate,
+  getListReadinessSignal,
+  isMineStatusFilter,
   languageKindLabel,
   normalizeContentItems,
   normalizeItemLanguage,
   PAGE_SIZE,
+  resolvePagedLimit,
+  resolvePagedPage,
   parseTypeQueryParam,
+  resolvePagedTotal,
   textSearchMatch,
   type LangFilter,
   type UiContentStatus,
 } from "@/components/admin/medical-content/contentListUtils";
+import {
+  countValidContentSources,
+  getReviewReadinessIssueCodes,
+  type ReviewReadinessIssueCode,
+} from "@/components/admin/medical-content/dialogs/medicalContentDialogHelpers";
 
 function extractContentDetails(
   payload?: AdminContentDetailsResponse | null,
@@ -96,37 +118,80 @@ function readSourceText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function countValidContentSources(item: AdminContentDetailsItem | null): number {
-  if (!item) return 0;
+function quickSourceCount(item: AdminContentItem): number | null {
+  const record = item as AdminContentItem & {
+    sources?: unknown[];
+    contentBlocks?: unknown[];
+  };
 
-  const directSources = Array.isArray(item.sources)
-    ? item.sources.filter((source) => {
-        const record = source as Record<string, unknown>;
-        return Boolean(
-          readSourceText(record.url) ||
-            readSourceText(record.href) ||
-            readSourceText(record.sourceUrl) ||
-            readSourceText(record.link),
-        );
-      }).length
-    : 0;
+  if (Array.isArray(record.sources)) {
+    return record.sources.filter((source) => {
+      const sourceRecord = source as Record<string, unknown>;
+      return Boolean(
+        readSourceText(sourceRecord.url) ||
+          readSourceText(sourceRecord.href) ||
+          readSourceText(sourceRecord.sourceUrl) ||
+          readSourceText(sourceRecord.link),
+      );
+    }).length;
+  }
 
-  if (directSources > 0) return directSources;
+  if (Array.isArray(record.contentBlocks)) {
+    return record.contentBlocks.filter((block) => {
+      const blockRecord = block as Record<string, unknown>;
+      return Boolean(
+        readSourceText(blockRecord.url) ||
+          readSourceText(blockRecord.href) ||
+          readSourceText(blockRecord.sourceUrl) ||
+          readSourceText(blockRecord.sourceLink) ||
+          readSourceText(blockRecord.link),
+      );
+    }).length;
+  }
 
-  const blockSources = Array.isArray(item.contentBlocks)
-    ? item.contentBlocks.filter((block) => {
-        const record = block as Record<string, unknown>;
-        return Boolean(
-          readSourceText(record.url) ||
-            readSourceText(record.href) ||
-            readSourceText(record.sourceUrl) ||
-            readSourceText(record.sourceLink) ||
-            readSourceText(record.link),
-        );
-      }).length
-    : 0;
+  return null;
+}
 
-  return blockSources;
+function getSubmitReviewBlockingMessages(
+  tr: (ar: string, en: string) => string,
+  issueCodes: ReviewReadinessIssueCode[],
+): string[] {
+  return issueCodes.map((code) => {
+    if (code === "sources_required") {
+      return tr(
+        "أضف مصدرًا واحدًا موثوقًا على الأقل.",
+        "Add at least one trusted source.",
+      );
+    }
+    if (code === "disclaimer_required") {
+      return tr(
+        "حدّد إصدار التنبيه الطبي (Disclaimer Version).",
+        "Set the disclaimer version.",
+      );
+    }
+    if (code === "seek_help_required") {
+      return tr(
+        "فعّل Seek Help Block لأن النوع حالة أو عرض.",
+        "Enable Seek Help Block for condition/symptom content.",
+      );
+    }
+    if (code === "blocks_required") {
+      return tr(
+        "أضف بلوك محتوى فعلي واحدًا على الأقل.",
+        "Add at least one meaningful content block.",
+      );
+    }
+    if (code === "news_source_url_required") {
+      return tr(
+        "أضف رابط مصدر الخبر (news.sourceUrl).",
+        "Add the NEWS source URL (news.sourceUrl).",
+      );
+    }
+    return tr(
+      "حدّد تاريخ نشر الخبر (news.publishedAt).",
+      "Set the NEWS published date (news.publishedAt).",
+    );
+  });
 }
 
 export default function AdminMedicalContentPage() {
@@ -236,7 +301,7 @@ export default function AdminMedicalContentPage() {
     [],
   );
 
-  const listParams = useMemo(
+  const adminListParams = useMemo(
     () => ({
       page,
       limit: PAGE_SIZE,
@@ -249,9 +314,20 @@ export default function AdminMedicalContentPage() {
     [page, activeType, activeStatus, langFilter, statusToApi],
   );
 
+  const myListParams = useMemo(
+    () => ({
+      page,
+      limit: PAGE_SIZE,
+      ...(activeStatus !== "الكل" && isMineStatusFilter(activeStatus)
+        ? { status: statusToApi[activeStatus] as AdminContentStatus }
+        : {}),
+    }),
+    [page, activeStatus, statusToApi],
+  );
+
   const contentQuery = showMineOnly
-    ? useAdminMyContentList(listParams)
-    : useAdminContentList(listParams);
+    ? useAdminMyContentList(myListParams)
+    : useAdminContentList(adminListParams);
   const statusCounts = useAdminContentStatusCounts();
   const pendingNewsQuery = useAdminPendingNews({
     page: 1,
@@ -277,22 +353,32 @@ export default function AdminMedicalContentPage() {
   );
 
   /** تصفية لغة داخل الصفحة إذا أعاد السيرفر قيماً غير متوافقة مع ar/en */
+  const itemsByType = useMemo(() => {
+    if (activeType === "الكل") return items;
+    return items.filter((it) => it.type === activeType);
+  }, [items, activeType]);
+
   const itemsByLang = useMemo(() => {
-    if (langFilter === "الكل") return items;
-    return items.filter(
+    if (langFilter === "الكل") return itemsByType;
+    return itemsByType.filter(
       (it) => normalizeItemLanguage(it.language) === langFilter,
     );
-  }, [items, langFilter]);
+  }, [itemsByType, langFilter]);
 
-  const serverTotal = contentQuery.data?.total ?? 0;
+  const serverTotal = resolvePagedTotal(contentQuery.data, itemsByLang.length);
+  const serverLimit = resolvePagedLimit(contentQuery.data, PAGE_SIZE);
   const totalPages =
-    serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)) : 0;
+    serverTotal > 0 ? Math.max(1, Math.ceil(serverTotal / serverLimit)) : 0;
+  const currentPage =
+    totalPages > 0
+      ? clampPage(resolvePagedPage(contentQuery.data, page), totalPages)
+      : 1;
 
   const filteredItems = useMemo(() => {
     const text = query.trim();
     if (!text) return itemsByLang;
     return itemsByLang.filter((it) => {
-      const title = String(it.title ?? "");
+      const title = toDisplayText(it.title);
       const summary = String(it.summary ?? "");
       const slug = String(it.slug ?? "");
       return (
@@ -314,14 +400,14 @@ export default function AdminMedicalContentPage() {
 
   const paginationRange = useMemo(() => {
     if (serverTotal <= 0) return { start: 0, end: 0 };
-    const start = (page - 1) * PAGE_SIZE + 1;
-    const end = Math.min(page * PAGE_SIZE, serverTotal);
+    const start = (currentPage - 1) * serverLimit + 1;
+    const end = Math.min(currentPage * serverLimit, serverTotal);
     return { start, end };
-  }, [serverTotal, page]);
+  }, [serverTotal, currentPage, serverLimit]);
 
   const visiblePageNumbers = useMemo(
-    () => buildVisiblePageNumbers(page, totalPages, 7),
-    [page, totalPages],
+    () => buildVisiblePageNumbers(currentPage, totalPages, 7),
+    [currentPage, totalPages],
   );
 
   const showPaginationBar =
@@ -336,8 +422,21 @@ export default function AdminMedicalContentPage() {
   }, [activeType, activeStatus, langFilter]);
 
   useEffect(() => {
-    setPage(1);
-  }, [query]);
+    if (contentQuery.isAwaitingData) return;
+    if (totalPages === 0) {
+      if (page !== 1) setPage(1);
+      return;
+    }
+    if (page !== currentPage) {
+      setPage(currentPage);
+    }
+  }, [contentQuery.isAwaitingData, totalPages, page, currentPage]);
+
+  useEffect(() => {
+    if (showMineOnly && !isMineStatusFilter(activeStatus)) {
+      setActiveStatus("الكل");
+    }
+  }, [showMineOnly, activeStatus]);
 
   const statusBadge = (s: AdminContentStatus) => {
     if (s === "PUBLISHED") {
@@ -503,13 +602,29 @@ export default function AdminMedicalContentPage() {
           ]}
         />
 
+        <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+          <LinkIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#175CD3]">
+            {tr(
+              "هذه الصفحة تجمع بين إنشاء المحتوى، مراجعته، ونقله بين مراحل الدورة المعتمدة. استخدم بطاقات القائمة لفرز الحالة بسرعة، لكن نفّذ القبول أو الرفض أو النشر فقط بعد مراجعة المصادر واللغة والمنشئ من تفاصيل العنصر نفسه.",
+              "This page combines content creation, review, and movement across the approved lifecycle. Use the list cards to triage status quickly, but only approve, reject, or publish after reviewing sources, language, and creator context from the item’s own details.",
+            )}
+          </div>
+        </div>
+
+        <ReleaseAcceptanceCatalogPanel
+          language={locale === "en" ? "en" : "ar"}
+          role="admin"
+          defaultOpen={false}
+        />
+
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 sm:py-6">
           <div className="flex flex-col gap-3 w-full min-w-0 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1 min-w-0">
               <input
                 placeholder={tr(
-                  "بحث في العناوين والملخص (العربية/الإنجليزية)…",
-                  "Search titles and summaries (Arabic/English)…",
+                  "بحث داخل الصفحة الحالية في العناوين والملخص…",
+                  "Search within the current page titles and summaries…",
                 )}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -538,6 +653,30 @@ export default function AdminMedicalContentPage() {
 
           <div className="mt-5 font-cairo text-[11px] font-extrabold text-[#98A2B3]">
             {tr("نوع المحتوى", "Content type")}
+          </div>
+          <div className="mt-3 rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3">
+            <div className="font-cairo text-[12px] font-extrabold text-[#0F766E]">
+              {tr(
+                showMineOnly
+                  ? "وضع محتواي: الفلترة المتاحة (مسودة، قيد المراجعة)."
+                  : "دورة العمل المعتمدة: مسودة ← قيد المراجعة ← منشور ← مؤرشف",
+                showMineOnly
+                  ? "My-content mode: available statuses are Draft and In review."
+                  : "Approved workflow: Draft → In review → Published → Archived",
+              )}
+            </div>
+            <div className="mt-1 font-cairo text-[11px] font-semibold text-[#5B7B79]">
+              {tr(
+                "تحقق من المنشئ، المراجع، وحالة العنصر قبل تنفيذ القبول أو النشر أو الأرشفة.",
+                "Check the creator, reviewer, and item state before approving, publishing, or archiving.",
+              )}
+            </div>
+            <div className="mt-2 font-cairo text-[11px] font-bold text-[#0F766E]">
+              {tr(
+                "جاهزية الإطلاق (إرشادي): DRAFT→submit-review · IN_REVIEW→approve/reject/publish · PUBLISHED→archive — لا يمنع التصفح.",
+                "Release acceptance cues: DRAFT→submit-review · IN_REVIEW→approve/reject/publish · PUBLISHED→archive — browsing stays open.",
+              )}
+            </div>
           </div>
           <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
             <button
@@ -644,10 +783,11 @@ export default function AdminMedicalContentPage() {
             <button
               type="button"
               onClick={() => setActiveStatus("منشور")}
+              disabled={showMineOnly}
               className={
                 activeStatus === "منشور"
                   ? "inline-flex h-[30px] items-center justify-center rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white"
-                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
+                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-40"
               }
             >
               {tr("منشور", "Published")}
@@ -677,15 +817,24 @@ export default function AdminMedicalContentPage() {
             <button
               type="button"
               onClick={() => setActiveStatus("مؤرشف")}
+              disabled={showMineOnly}
               className={
                 activeStatus === "مؤرشف"
                   ? "inline-flex h-[30px] items-center justify-center rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white"
-                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827]"
+                  : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-40"
               }
             >
               {tr("مؤرشف", "Archived")}
             </button>
           </div>
+          {showMineOnly ? (
+            <div className="mt-2 font-cairo text-[11px] font-bold text-[#98A2B3]">
+              {tr(
+                "واجهة (محتواي فقط) مرتبطة بمسار /api/admin/content/mine وتدعم فقط: الكل، مسودة، قيد المراجعة.",
+                "My-content mode is backed by /api/admin/content/mine and supports only: All, Draft, In review.",
+              )}
+            </div>
+          ) : null}
         </section>
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.08)] overflow-hidden">
@@ -707,228 +856,376 @@ export default function AdminMedicalContentPage() {
                     )}
                 {showPaginationBar && totalPages > 0
                   ? tr(
-                      ` · صفحة ${page.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
-                      ` · page ${page.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                      ` · صفحة ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
+                      ` · page ${currentPage.toLocaleString(numberLocale)} / ${totalPages.toLocaleString(numberLocale)}`,
                     )
                   : ""}
               </span>
             </div>
           </div>
 
-          <div className="divide-y divide-[#EEF2F6]">
+          <div className={filteredItems.length > 0 && !contentQuery.isAwaitingData && !contentQuery.isError ? "flex flex-col gap-3 bg-[#FAFBFC] p-4 sm:p-5" : ""}>
             {contentQuery.isAwaitingData ? (
               <SkeletonList
                 count={8}
                 SkeletonComponent={MedicalContentRowSkeleton}
               />
             ) : contentQuery.isError ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#B42318]">
-                {tr(
-                  "تعذّر تحميل المحتوى الطبي.",
-                  "Failed to load medical content.",
-                )}
+              <div className="px-6 py-10 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#FEF2F2] text-[#B42318]">
+                  <X className="h-5 w-5" />
+                </div>
+                <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#B42318]">
+                  {tr(
+                    "تعذّر تحميل المحتوى الطبي.",
+                    "Failed to load medical content.",
+                  )}
+                </p>
+                <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                  {tr(
+                    "تحقق من الفلاتر أو الاتصال ثم أعد المحاولة.",
+                    "Check filters or connection, then try again.",
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void contentQuery.refetch();
+                  }}
+                  className="mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#FECACA] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318]"
+                >
+                  <Clock className="h-4 w-4" />
+                  {tr("إعادة المحاولة", "Retry")}
+                </button>
               </div>
             ) : filteredItems.length === 0 ? (
-              <div className="px-6 py-6 font-cairo text-[12px] font-semibold text-[#667085]">
-                {tr(
-                  "لا توجد عناصر مطابقة للفلاتر الحالية.",
-                  "No items match current filters.",
-                )}
+              <div className="px-6 py-10 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F2F4F7] text-[#98A2B3]">
+                  <Search className="h-5 w-5" />
+                </div>
+                <p className="mt-3 font-cairo text-[13px] font-extrabold text-[#344054]">
+                  {query.trim()
+                    ? tr(
+                        "لا توجد مطابقات ضمن الصفحة الحالية.",
+                        "No matches on the current page.",
+                      )
+                    : tr(
+                        "لا توجد عناصر مطابقة للفلاتر الحالية.",
+                        "No items match current filters.",
+                      )}
+                </p>
+                <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                  {query.trim()
+                    ? tr(
+                        "هذا البحث نصّي محلي داخل الصفحة فقط لأن /api/admin/content و /api/admin/content/mine لا يدعمان search.",
+                        "This text search is local to the current page because /api/admin/content and /api/admin/content/mine do not support search.",
+                      )
+                    : tr(
+                        "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",
+                        "Adjust search criteria or clear filters to see broader results.",
+                      )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setShowMineOnly(false);
+                    setActiveStatus("الكل");
+                    setLangFilter("الكل");
+                    setTypeFilter("الكل");
+                    setPage(1);
+                  }}
+                  className="mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]"
+                >
+                  <X className="h-4 w-4" />
+                  {tr("مسح الفلاتر", "Clear filters")}
+                </button>
               </div>
             ) : (
-              filteredItems.map((it) => (
+              filteredItems.map((it) => {
+                const sourceCount = quickSourceCount(it);
+                const readinessSignal = getListReadinessSignal(it, sourceCount);
+                const acceptanceChip = getListAcceptanceScenarioChip(
+                  it.status,
+                  locale === "en" ? "en" : "ar",
+                );
+                const nextActionCues = getNextWorkflowActions(
+                  it.status,
+                  showMineOnly ? "data_entry" : "admin",
+                );
+                const readinessClass =
+                  readinessSignal.tone === "warning"
+                    ? "border-[#FECACA] bg-[#FEF2F2] text-[#B42318]"
+                    : readinessSignal.tone === "success"
+                      ? "border-[#BBF7D0] bg-[#ECFDF3] text-[#027A48]"
+                      : "border-[#D1E9FF] bg-[#F5FAFF] text-[#175CD3]";
+                return (
                 <div
                   key={it._id}
-                  className="flex flex-col gap-3 justify-between px-6 py-5 sm:flex-row sm:items-center"
+                  className="rounded-[14px] border border-[#EAECF0] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition hover:border-[#D0D5DD] hover:shadow-[0_6px_16px_rgba(16,24,40,0.08)] sm:p-5"
                 >
-                  <div className="flex-1 min-w-0 text-start">
-                    <div className="flex flex-wrap gap-2 justify-start items-center sm:gap-3">
-                      <div className="min-w-0 font-cairo text-[14px] font-black text-[#111827]">
-                        {it.title ?? "—"}
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0 flex-1 text-start">
+                      {/* Title row */}
+                      <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-2.5">
+                        <div className="min-w-0 truncate font-cairo text-[15px] font-black text-[#101828]">
+                          {toDisplayText(it.title) || "—"}
+                        </div>
+                        {(() => {
+                          const lk = languageKindLabel(it.language);
+                          return (
+                            <span
+                              className={cn(
+                                "inline-flex h-[22px] min-w-[1.6rem] shrink-0 items-center justify-center rounded-[8px] border px-2 font-cairo text-[10px] font-extrabold",
+                                lk.code === "ar" &&
+                                  "border-primary/30 bg-[#E7FBFA] text-primary",
+                                lk.code === "en" &&
+                                  "border-blue-200 bg-[#EFF6FF] text-[#1D4ED8]",
+                                lk.code === "other" &&
+                                  "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
+                              )}
+                              title={lk.label}
+                            >
+                              {lk.code === "ar"
+                                ? tr("ع", "AR")
+                                : lk.code === "en"
+                                  ? "EN"
+                                  : tr("؟", "?")}
+                            </span>
+                          );
+                        })()}
+                        <div
+                          className={`inline-flex h-[22px] shrink-0 items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
+                        >
+                          {contentStatusLabel(it.status)}
+                        </div>
+                        <div className="inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[8px] bg-[#F3F4F6] px-2.5 font-cairo text-[11px] font-bold text-[#475467]">
+                          <LayoutGrid className="h-3.5 w-3.5" />
+                          {contentTypeLabel(it.type)}
+                        </div>
                       </div>
-                      {(() => {
-                        const lk = languageKindLabel(it.language);
-                        return (
-                          <span
-                            className={cn(
-                              "inline-flex h-[22px] min-w-[1.6rem] shrink-0 items-center justify-center rounded-[8px] border px-2 font-cairo text-[10px] font-extrabold",
-                              lk.code === "ar" &&
-                                "border-primary/30 bg-[#E7FBFA] text-primary",
-                              lk.code === "en" &&
-                                "border-blue-200 bg-[#EFF6FF] text-[#1D4ED8]",
-                              lk.code === "other" &&
-                                "border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]",
-                            )}
-                            title={lk.label}
-                          >
-                            {lk.code === "ar"
-                              ? tr("ع", "AR")
-                              : lk.code === "en"
-                                ? "EN"
-                                : tr("؟", "?")}
-                          </span>
-                        );
-                      })()}
-                      <div
-                        className={`inline-flex h-[22px] items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge(it.status)}`}
-                      >
-                        {contentStatusLabel(it.status)}
-                      </div>
-                    </div>
 
-                    <div className="mt-2 flex flex-wrap items-center justify-start gap-6 font-cairo text-[11px] font-bold text-[#98A2B3]">
-                      <div className="inline-flex gap-2 items-center">
-                        <LayoutGrid className="w-4 h-4" />
-                        {contentTypeLabel(it.type)}
-                      </div>
-                      <div className="inline-flex gap-2 items-center">
-                        <ClipboardCheck className="w-4 h-4" />
-                        {tr("الكاتب:", "Author:")}{" "}
-                        {typeof it.createdBy === "object"
-                          ? (it.createdBy?.fullName ?? "—")
-                          : (it.createdBy ?? "—")}
-                      </div>
-                      <div className="inline-flex gap-2 items-center">
-                        <Eye className="w-4 h-4" />
-                        {Number(it.viewCount ?? it.views ?? 0).toLocaleString(
-                          numberLocale,
-                        )}{" "}
-                        {tr("مشاهدة", "views")}
-                      </div>
-                      <div className="inline-flex gap-2 items-center">
-                        <Clock className="w-4 h-4" />
-                        {tr("آخر تحديث:", "Last update:")}{" "}
-                        {formatContentDate(it.updatedAt)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 items-center sm:justify-start">
-                    {it.status === "DRAFT" ? (
-                      <button
-                        type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "submitReview",
-                            id: it._id,
-                            title: it.title ?? "—",
-                          })
-                        }
-                        className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] disabled:opacity-50"
-                        aria-label={tr("إرسال للمراجعة", "Send for review")}
-                      >
-                        <ClipboardCheck className="w-4 h-4" />
-                        <span className="font-cairo text-[11px] font-extrabold">
-                          {tr("إرسال للمراجعة", "Send for review")}
+                      {/* Facts row: views / last update */}
+                      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 font-cairo text-[12px] font-semibold text-[#667085]">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Eye className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
+                          {Number(
+                            it.viewCount ?? it.views ?? 0,
+                          ).toLocaleString(numberLocale)}{" "}
+                          {tr("مشاهدة", "views")}
                         </span>
-                      </button>
-                    ) : null}
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
+                          {tr("آخر تحديث:", "Last update:")}{" "}
+                          {formatContentDate(it.updatedAt)}
+                        </span>
+                      </div>
 
-                    {it.status === "IN_REVIEW" ? (
-                      <>
+                      {/* Status signals row */}
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-dashed border-[#EEF2F6] pt-3">
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-[#F8FAFC] px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#667085]">
+                          {it.status === "DRAFT"
+                            ? tr(
+                                "التالي: إرسال للمراجعة",
+                                "Next: send for review",
+                              )
+                            : it.status === "IN_REVIEW"
+                              ? tr(
+                                  "التالي: موافقة أو رفض",
+                                  "Next: approve or reject",
+                                )
+                              : it.status === "PUBLISHED"
+                                ? tr(
+                                    "التالي: أرشفة عند الحاجة",
+                                    "Next: archive if needed",
+                                  )
+                                : tr(
+                                    "العنصر مؤرشف للمرجع",
+                                    "Item archived for reference",
+                                  )}
+                        </div>
+                        <div
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-cairo text-[10.5px] font-bold",
+                            sourceCount === 0
+                              ? "bg-[#FFF7ED] text-[#C2410C]"
+                              : "bg-[#F8FAFC] text-[#667085]",
+                          )}
+                        >
+                          <LinkIcon className="h-3.5 w-3.5" />
+                          {sourceCount === null
+                            ? tr(
+                                "تحقق من المصادر داخل التفاصيل",
+                                "Check sources in details",
+                              )
+                            : sourceCount === 0
+                              ? tr(
+                                  "لا توجد مصادر مرفقة بعد",
+                                  "No sources attached yet",
+                                )
+                              : tr(
+                                  `${sourceCount} مصدر/مصادر`,
+                                  `${sourceCount} source(s)`,
+                                )}
+                        </div>
+                        <div
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-cairo text-[10.5px] font-bold",
+                            readinessClass,
+                          )}
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          {tr(readinessSignal.ar, readinessSignal.en)}
+                        </div>
+                        <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E4E7EC] bg-white px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#475467]">
+                          {acceptanceChip}
+                        </div>
+                        {nextActionCues.map((cue) => (
+                          <div
+                            key={`${it._id}-${cue.action}`}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D5DD] bg-[#F9FAFB] px-2.5 py-1 font-cairo text-[10.5px] font-bold text-[#667085]"
+                          >
+                            {localizeAcceptanceCopy(
+                              cue.label,
+                              locale === "en" ? "en" : "ar",
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-[#EEF2F6] pt-3 lg:border-t-0 lg:border-s lg:ps-4 lg:pt-0">
+                      {it.status === "DRAFT" ? (
                         <button
                           type="button"
                           disabled={actionBusy}
                           onClick={() =>
                             setActionConfirm({
-                              kind: "approve",
+                              kind: "submitReview",
                               id: it._id,
-                              title: it.title ?? "—",
+                              title: toDisplayText(it.title) || "—",
                             })
                           }
-                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] px-3 text-[#16A34A] disabled:opacity-50"
-                          aria-label={tr("موافقة", "Approve")}
+                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#E5E7EB] px-3 text-[#475467] transition hover:bg-[#F9FAFB] disabled:opacity-50"
+                          aria-label={tr("إرسال للمراجعة", "Send for review")}
                         >
-                          <Check className="w-4 h-4" />
+                          <ClipboardCheck className="w-4 h-4" />
                           <span className="font-cairo text-[11px] font-extrabold">
-                            {tr("موافقة", "Approve")}
+                            {tr("إرسال للمراجعة", "Send for review")}
                           </span>
                         </button>
+                      ) : null}
+
+                      {it.status === "IN_REVIEW" ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={actionBusy}
+                            onClick={() =>
+                              setActionConfirm({
+                                kind: "approve",
+                                id: it._id,
+                                title: toDisplayText(it.title) || "—",
+                              })
+                            }
+                            className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BBF7D0] bg-[#F6FEF9] px-3 text-[#16A34A] transition hover:bg-[#ECFDF3] disabled:opacity-50"
+                            aria-label={tr("موافقة", "Approve")}
+                          >
+                            <Check className="w-4 h-4" />
+                            <span className="font-cairo text-[11px] font-extrabold">
+                              {tr("موافقة", "Approve")}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionBusy}
+                            onClick={() => {
+                              setRejectTarget(it);
+                              setRejectOpen(true);
+                            }}
+                            className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] bg-[#FFFBFA] px-3 text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
+                            aria-label={tr("رفض", "Reject")}
+                          >
+                            <X className="w-4 h-4" />
+                            <span className="font-cairo text-[11px] font-extrabold">
+                              {tr("رفض", "Reject")}
+                            </span>
+                          </button>
+                        </>
+                      ) : null}
+
+                      {it.status === "PUBLISHED" ? (
                         <button
                           type="button"
                           disabled={actionBusy}
-                          onClick={() => {
-                            setRejectTarget(it);
-                            setRejectOpen(true);
-                          }}
-                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#FECACA] px-3 text-[#EF4444] disabled:opacity-50"
-                          aria-label={tr("رفض", "Reject")}
+                          onClick={() =>
+                            setActionConfirm({
+                              kind: "archive",
+                              id: it._id,
+                              title: toDisplayText(it.title) || "—",
+                            })
+                          }
+                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] bg-[#F5FAFF] px-3 text-[#1D4ED8] transition hover:bg-[#EFF6FF] disabled:opacity-50"
+                          aria-label={tr("أرشفة", "Archive")}
                         >
-                          <X className="w-4 h-4" />
+                          <Archive className="w-4 h-4" />
                           <span className="font-cairo text-[11px] font-extrabold">
-                            {tr("رفض", "Reject")}
+                            {tr("أرشفة", "Archive")}
                           </span>
                         </button>
-                      </>
-                    ) : null}
+                      ) : null}
 
-                    {it.status === "PUBLISHED" ? (
+                      {it.status === "IN_REVIEW" ? (
+                        <button
+                          type="button"
+                          disabled={actionBusy}
+                          onClick={() =>
+                            setActionConfirm({
+                              kind: "publish",
+                              id: it._id,
+                              title: toDisplayText(it.title) || "—",
+                            })
+                          }
+                          className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] bg-[#F0FDFF] px-3 text-[#0891B2] transition hover:bg-[#ECFEFF] disabled:opacity-50"
+                          aria-label={tr("نشر", "Publish")}
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                          <span className="font-cairo text-[11px] font-extrabold">
+                            {tr("نشر", "Publish")}
+                          </span>
+                        </button>
+                      ) : null}
+
+                      <div className="mx-1 h-[24px] w-px shrink-0 bg-[#EAECF0]" />
+
                       <button
                         type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "archive",
-                            id: it._id,
-                            title: it.title ?? "—",
-                          })
-                        }
-                        className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#BFDBFE] px-3 text-[#1D4ED8] disabled:opacity-50"
-                        aria-label={tr("أرشفة", "Archive")}
+                        onClick={() => {
+                          setEditingContentId(it._id);
+                          setEditOpen(true);
+                        }}
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#0F8F8B] transition hover:bg-[#E7FBFA]"
+                        aria-label={tr("تعديل", "Edit")}
                       >
-                        <Archive className="w-4 h-4" />
-                        <span className="font-cairo text-[11px] font-extrabold">
-                          {tr("أرشفة", "Archive")}
-                        </span>
+                        <Pencil className="w-4 h-4" />
                       </button>
-                    ) : null}
-
-                    {it.status === "IN_REVIEW" ? (
                       <button
                         type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "publish",
-                            id: it._id,
-                            title: it.title ?? "—",
-                          })
-                        }
-                        className="flex h-[32px] items-center justify-center gap-1 rounded-[10px] border border-[#67E8F9] px-3 text-[#0891B2] disabled:opacity-50"
-                        aria-label={tr("نشر", "Publish")}
+                        onClick={() => {
+                          setViewingContentId(it._id);
+                          setViewOpen(true);
+                        }}
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                        aria-label={tr("عرض", "View")}
                       >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span className="font-cairo text-[11px] font-extrabold">
-                          {tr("نشر", "Publish")}
-                        </span>
+                        <Eye className="w-4 h-4" />
                       </button>
-                    ) : null}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingContentId(it._id);
-                        setEditOpen(true);
-                      }}
-                      className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#0F8F8B]"
-                      aria-label={tr("تعديل", "Edit")}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setViewingContentId(it._id);
-                        setViewOpen(true);
-                      }}
-                      className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#2563EB]"
-                      aria-label={tr("عرض", "View")}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                    </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -966,7 +1263,7 @@ export default function AdminMedicalContentPage() {
                   >
                     <button
                       type="button"
-                      disabled={page <= 1}
+                      disabled={currentPage <= 1}
                       onClick={() => setPage(1)}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
                       aria-label={tr("الصفحة الأولى", "First page")}
@@ -975,7 +1272,7 @@ export default function AdminMedicalContentPage() {
                     </button>
                     <button
                       type="button"
-                      disabled={page <= 1}
+                      disabled={currentPage <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
                       aria-label={tr("الصفحة السابقة", "Previous page")}
@@ -1011,12 +1308,12 @@ export default function AdminMedicalContentPage() {
                           onClick={() => setPage(n)}
                           className={cn(
                             "min-w-[2.25rem] rounded-[10px] border px-2.5 py-1.5 font-cairo text-[12px] font-extrabold transition",
-                            n === page
+                            n === currentPage
                               ? "border-primary bg-primary text-white shadow-[0_6px_16px_rgba(15,143,139,0.25)]"
                               : "border-[#E5E7EB] bg-white text-[#344054] hover:border-primary/30 hover:bg-[#F0FDFA]",
                           )}
                           aria-label={tr(`الصفحة ${n}`, `Page ${n}`)}
-                          aria-current={n === page ? "page" : undefined}
+                          aria-current={n === currentPage ? "page" : undefined}
                         >
                           {n.toLocaleString(numberLocale)}
                         </button>
@@ -1048,7 +1345,7 @@ export default function AdminMedicalContentPage() {
 
                     <button
                       type="button"
-                      disabled={page >= totalPages}
+                      disabled={currentPage >= totalPages}
                       onClick={() =>
                         setPage((p) => Math.min(totalPages, p + 1))
                       }
@@ -1059,7 +1356,7 @@ export default function AdminMedicalContentPage() {
                     </button>
                     <button
                       type="button"
-                      disabled={page >= totalPages}
+                      disabled={currentPage >= totalPages}
                       onClick={() => setPage(totalPages)}
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#344054] shadow-sm transition hover:border-primary/30 hover:bg-[#F0FDFA] disabled:pointer-events-none disabled:opacity-35"
                       aria-label={tr("الصفحة الأخيرة", "Last page")}
@@ -1089,6 +1386,7 @@ export default function AdminMedicalContentPage() {
           if (!next) setViewingContentId(null);
         }}
         contentId={viewingContentId}
+        workflowRole="admin"
       />
 
       <EditAdminContentDialog
@@ -1098,6 +1396,7 @@ export default function AdminMedicalContentPage() {
           if (!next) setEditingContentId(null);
         }}
         contentId={editingContentId}
+        workflowRole="admin"
       />
 
       <ConfirmActionDialog
@@ -1141,10 +1440,16 @@ export default function AdminMedicalContentPage() {
                 {actionConfirm.title}
               </span>
               ».{" "}
-              {tr(
-                "سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.",
-                "The action runs on the server and cannot be undone locally.",
-              )}
+              {actionConfirm.kind === "approve" ||
+              actionConfirm.kind === "publish"
+                ? tr(
+                    "سيتم التحقق من مصفوفة قبول الإطلاق قبل التنفيذ. إن وُجدت نواقص ستُعاد إلى التحرير.",
+                    "Release acceptance will be verified before running. Missing items open the editor.",
+                  )
+                : tr(
+                    "سيتم تنفيذ الإجراء على الخادم ولا يمكن التراجع محلياً.",
+                    "The action runs on the server and cannot be undone locally.",
+                  )}
             </>
           ) : (
             "—"
@@ -1169,22 +1474,23 @@ export default function AdminMedicalContentPage() {
             const details = extractContentDetails(
               await adminApi.content.getById(id),
             );
-            const validSources = countValidContentSources(details);
-            if (validSources === 0) {
+            const issueCodes = getReviewReadinessIssueCodes(details);
+            if (issueCodes.length > 0) {
+              const blockingMessages = getSubmitReviewBlockingMessages(tr, issueCodes);
               setActionConfirm(null);
               toast(
                 tr(
-                  "أضف مصدراً واحداً على الأقل قبل إرسال المحتوى للمراجعة.",
-                  "Add at least one source before sending content for review.",
+                  `تعذّر إرسال المحتوى للمراجعة قبل استكمال:\n- ${blockingMessages.join("\n- ")}`,
+                  `Cannot send for review before completing:\n- ${blockingMessages.join("\n- ")}`,
                 ),
                 {
-                  title: tr("المصادر مطلوبة", "Sources required"),
+                  title: tr("متطلبات الحوكمة غير مكتملة", "Governance requirements missing"),
                   variant: "error",
                 },
               );
               setEditingContentId(id);
               setEditOpen(true);
-              throw new Error("sources_required");
+              throw new Error("review_readiness_required");
             }
             await submitReviewMutation.mutateAsync({
               id,
@@ -1203,10 +1509,49 @@ export default function AdminMedicalContentPage() {
               },
               { replace: true },
             );
-          } else if (kind === "approve") {
-            await approveMutation.mutateAsync(id);
-          } else if (kind === "publish") {
-            await publishMutation.mutateAsync(id);
+          } else if (kind === "approve" || kind === "publish") {
+            const details = extractContentDetails(
+              await adminApi.content.getById(id),
+            );
+            const snapshot = buildReleaseAcceptanceFromDetails(details, "admin");
+            if (!snapshot || !isApprovePublishPathReady(snapshot)) {
+              const incomplete = snapshot
+                ? getIncompleteAcceptanceChecks(snapshot)
+                : [];
+              const language = locale === "en" ? "en" : "ar";
+              const blockingMessages = incomplete.length
+                ? incomplete.map((item) =>
+                    localizeAcceptanceCopy(item.label, language),
+                  )
+                : [
+                    tr(
+                      "تعذّر التحقق من جاهزية الإطلاق لهذا المحتوى.",
+                      "Could not verify release acceptance readiness for this content.",
+                    ),
+                  ];
+              setActionConfirm(null);
+              toast(
+                tr(
+                  `تعذّر ${kind === "approve" ? "الموافقة" : "النشر"} قبل استكمال جاهزية الإطلاق:\n- ${blockingMessages.join("\n- ")}`,
+                  `Cannot ${kind === "approve" ? "approve" : "publish"} before release acceptance is ready:\n- ${blockingMessages.join("\n- ")}`,
+                ),
+                {
+                  title: tr(
+                    "بوابة الاعتماد غير مكتملة",
+                    "Approval gate incomplete",
+                  ),
+                  variant: "error",
+                },
+              );
+              setEditingContentId(id);
+              setEditOpen(true);
+              throw new Error("approve_publish_readiness_required");
+            }
+            if (kind === "approve") {
+              await approveMutation.mutateAsync(id);
+            } else {
+              await publishMutation.mutateAsync(id);
+            }
           } else {
             await archiveMutation.mutateAsync(id);
           }
@@ -1220,7 +1565,7 @@ export default function AdminMedicalContentPage() {
           setRejectOpen(o);
           if (!o) setRejectTarget(null);
         }}
-        contentTitle={rejectTarget?.title ?? "—"}
+        contentTitle={toDisplayText(rejectTarget?.title) || "—"}
         onConfirm={confirmReject}
         isPending={rejectMutation.isPending}
       />
@@ -1228,6 +1573,7 @@ export default function AdminMedicalContentPage() {
       <CreateAdminContentDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
+        workflowRole="admin"
       />
     </>
   );

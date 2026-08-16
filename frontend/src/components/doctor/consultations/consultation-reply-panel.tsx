@@ -19,6 +19,7 @@ import type { PendingConsultationAttachment } from '@/lib/consultations/types';
 import { doctorApi } from '@/lib/doctor/client';
 import { getPatientFileMutationErrorMessage } from '@/lib/doctor/writeFlowErrors';
 import { useDoctorPatientFiles } from '@/hooks/doctor/patients/useDoctorPatients';
+import { useI18n } from '@/i18n/provider';
 
 const CLINICAL_ACTIONS: Array<{
   key: ConsultationClinicalAction;
@@ -73,6 +74,7 @@ export default function ConsultationReplyPanel({
   onDismiss: () => void;
   closing?: boolean;
 }) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -150,7 +152,7 @@ export default function ConsultationReplyPanel({
           value={draft}
           onChange={(event) => onDraftChange(event.target.value)}
           disabled={disabled}
-          dir="rtl"
+          dir={dir}
           placeholder={disabled ? 'لا يمكن الرد على هذه الاستشارة' : 'اكتب ردك...'}
           className="h-[44px] min-w-0 flex-1 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3] disabled:bg-[#F9FAFB] disabled:text-[#98A2B3]"
           onKeyDown={(event) => {
@@ -188,7 +190,7 @@ export default function ConsultationReplyPanel({
       </div>
 
       {pendingAttachments.length ? (
-        <div dir="rtl" className="mt-2 flex flex-wrap gap-2">
+        <div dir={dir} className="mt-2 flex flex-wrap gap-2">
           {pendingAttachments.map((attachment) => (
             <span
               key={attachment.ref}
@@ -213,7 +215,7 @@ export default function ConsultationReplyPanel({
         </div>
       ) : null}
 
-      <div dir="rtl" className="mt-2">
+      <div dir={dir} className="mt-2">
         <button
           type="button"
           disabled={disabled || !patientId || patientFilesAwaitingData}
@@ -225,7 +227,7 @@ export default function ConsultationReplyPanel({
       </div>
 
       {pickerOpen ? (
-        <div dir="rtl" className="mt-2 max-h-[140px] overflow-y-auto rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] p-2">
+        <div dir={dir} className="mt-2 max-h-[140px] overflow-y-auto rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] p-2">
           {patientFilesAwaitingData ? (
             <div className="flex items-center justify-center gap-2 py-4 font-cairo text-[12px] font-semibold text-[#667085]">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -264,7 +266,7 @@ export default function ConsultationReplyPanel({
         </div>
       ) : null}
 
-      <div dir="rtl" className="mt-4 grid grid-cols-3 gap-2">
+      <div dir={dir} className="mt-4 grid grid-cols-3 gap-2">
         {CLINICAL_ACTIONS.map((action) => {
           const Icon = action.icon;
           const isBusy = busyClinicalAction === action.key;
@@ -288,7 +290,7 @@ export default function ConsultationReplyPanel({
       </div>
 
       {!disabled ? (
-        <p dir="rtl" className="mt-2 font-cairo text-[10px] font-semibold text-[#98A2B3]">
+        <p dir={dir} className="mt-2 font-cairo text-[10px] font-semibold text-[#98A2B3]">
           عند فتح طلب تحاليل أو أشعة أو وصفة، يُربَط المريض تلقائياً بقائمتك ثم تُفتح
           زيارة سريرية مرتبطة بهذه الاستشارة. لن يُبلَغ المريض حتى تُنهي الطلب أو
           الوصفة.
@@ -296,7 +298,7 @@ export default function ConsultationReplyPanel({
       ) : null}
 
       {!disabled ? (
-        <div dir="rtl" className="mt-4 grid grid-cols-2 gap-3">
+        <div dir={dir} className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="button"
             disabled

@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import {
   DoctorProfileFormField,
   profileFieldClass,
@@ -107,6 +108,7 @@ export default function UpsertFacilityDialog({
   onOpenChange,
   editTarget,
 }: Props) {
+  const { dir } = useI18n();
   const { toast } = useToast();
   const isEdit = Boolean(editTarget);
   const createMutation = useCreateFacility();
@@ -325,9 +327,17 @@ export default function UpsertFacilityDialog({
               </div>
             </div>
 
-            <form dir='rtl' onSubmit={onSubmit}>
+            <form dir={dir} onSubmit={onSubmit}>
               <div className='max-h-[calc(92vh-240px)] overflow-y-auto px-8 py-6'>
                 <div className='space-y-5'>
+                  <div className='rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-3 text-right'>
+                    <div className='font-cairo text-[12px] font-extrabold text-[#0F766E]'>
+                      {isEdit
+                        ? 'هذا النموذج يحدّث سجل المنشأة نفسه: الاسم، الحالة، المالك، والموقع. لا يُستخدم لإدارة الأطباء المرتبطين أو تفاصيلهم الطبية.'
+                        : 'هذا النموذج يضيف سجل منشأة جديد إلى الدليل الإداري. ربط الأطباء ومراجعة التفاصيل الموسعة يتم لاحقًا من شاشة المنشآت نفسها.'}
+                    </div>
+                  </div>
+
                   <DoctorProfileFormField label='اسم المنشأة' required error={errors.name?.message}>
                     <input
                       {...register('name')}
@@ -445,7 +455,7 @@ export default function UpsertFacilityDialog({
                       <DoctorProfileFormField label='رقم الهاتف' error={errors.phone?.message}>
                         <input
                           {...register('phone')}
-                          dir='rtl'
+                          dir={dir}
                           placeholder='+963944000000'
                           className={profileFieldClass(
                             cn(profileInputClass),
@@ -457,7 +467,7 @@ export default function UpsertFacilityDialog({
                       <DoctorProfileFormField
                         label='الطبيب المالك'
                         error={errors.ownerDoctorId?.message}
-                        hint='اختياري. اختر طبيبًا معتمدًا أو اترك الحقل بدون مالك.'
+                        hint='اختياري. هذا الحقل يربط المنشأة بطبيب مالك على مستوى السجل الإداري فقط، وليس لإدارة قائمة الأطباء العاملين داخل المنشأة.'
                       >
                         <Controller
                           control={control}
@@ -487,7 +497,7 @@ export default function UpsertFacilityDialog({
                     <DoctorProfileFormField
                       label='إضافة سمة'
                       error={errors.attributes?.message}
-                      hint='مثال: night_shift أو echo_available'
+                      hint='أدخل سمة مرجعية قصيرة بصيغة تقنية ثابتة مثل night_shift أو echo_available لتظهر لاحقًا كوسم وصفي للمنشأة.'
                     >
                       <div className='flex items-center gap-2'>
                         <input

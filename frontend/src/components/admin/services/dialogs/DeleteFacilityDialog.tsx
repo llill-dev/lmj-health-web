@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import { useDeleteFacility } from '@/hooks/admin/services/useAdminServices';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { FacilitySummary } from '@/lib/admin/types';
@@ -20,6 +21,7 @@ export default function DeleteFacilityDialog({
   onOpenChange,
   facility,
 }: Props) {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const deleteMutation = useDeleteFacility();
 
@@ -98,8 +100,8 @@ export default function DeleteFacilityDialog({
               },
             }}
             className='fixed left-1/2 top-1/2 z-[10000] w-[440px] max-w-[calc(100vw-24px)] rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
-            dir='rtl'
-            lang='ar'
+            dir={dir}
+            lang={locale}
           >
             <div className='px-7 pb-6 pt-5'>
               <Dialog.Close asChild>

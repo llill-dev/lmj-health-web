@@ -23,6 +23,7 @@ import { formatBillingAmount } from "@/lib/doctor/billing/format";
 import { calcInvoiceTotals } from "@/lib/doctor/clinicAccounts/invoiceTotals";
 import { useToast } from "@/components/ui/ToastProvider";
 import { cn } from "@/lib/utils/utils";
+import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 const METHOD_LABELS: Record<string, string> = {
   cash: "نقدي",
@@ -38,14 +39,18 @@ import {
   isBillingDateInputAfterToday,
 } from "@/lib/doctor/billing/dateInput";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 
 export default function DoctorClinicAddPaymentPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const navigate = useNavigate();
+  const { basePath, canViewSettings, isSecretary } = useBillingAccess();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const invoiceParam = searchParams.get("invoice") ?? "";
 
-  const settingsQuery = useBillingSettings();
+  const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const invoiceQuery = useResolvedBillingInvoice(invoiceParam);
   const createPayment = useCreateBillingPayment();
   const { retry: retryInvoice, retrying: retryingInvoice } = useRetryAction(() =>
@@ -138,7 +143,7 @@ export default function DoctorClinicAddPaymentPage() {
         title: "تم الحفظ",
         variant: "success",
       });
-      navigate("/doctor/accounts/invoices");
+      navigate(`${basePath}/invoices`);
     } catch (error) {
       const { title, message } = getBillingPaymentErrorToast(error);
       toast(message, {
@@ -155,13 +160,18 @@ export default function DoctorClinicAddPaymentPage() {
   return (
     <>
       <Helmet>
-        <title>إضافة دفعة • LMJ Health</title>
+        <title>
+          {tr("إضافة دفعة • LMJ Health", "Add Payment • LMJ Health")}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="إضافة دفعة"
-          subtitle="تسجيل دفعة جديدة على الفاتورة"
+          title={tr("إضافة دفعة", "Add payment")}
+          subtitle={tr(
+            "تسجيل دفعة جديدة على الفاتورة",
+            "Record a new payment on the invoice",
+          )}
           icon={<CreditCard className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -169,15 +179,18 @@ export default function DoctorClinicAddPaymentPage() {
 
         {!invoiceParam ? (
           <DoctorListErrorState
-            title="فاتورة غير محددة"
+            title={tr("فاتورة غير محددة", "Invoice not specified")}
             brief="افتح هذه الصفحة من تفاصيل فاتورة (زر «إضافة دفعة») أو من قائمة الفواتير."
-            onRetry={() => navigate("/doctor/accounts/invoices")}
+            onRetry={() => navigate(`${basePath}/invoices`)}
           />
         ) : invoiceQuery.isAwaitingData ? (
           <DoctorInlineDetailsSkeleton rows={4} />
         ) : invoiceQuery.isError || !invoice || !totals ? (
           <DoctorListErrorState
-            title={loadErrorToast?.title ?? "تعذّر تحميل الفاتورة"}
+            title={
+              loadErrorToast?.title ??
+              tr("تعذّر تحميل الفاتورة", "Failed to load invoice")
+            }
             brief={loadErrorToast?.message ?? "تعذّر تحميل بيانات الفاتورة."}
             retrying={retryingInvoice}
             onRetry={() => void retryInvoice()}
@@ -322,7 +335,7 @@ export default function DoctorClinicAddPaymentPage() {
               </button>
 
               <Link
-                to="/doctor/accounts/invoices"
+                to={`${basePath}/invoices`}
                 className="inline-block font-cairo text-[13px] font-extrabold text-[#667085]"
               >
                 الرجوع إلى الفواتير ←

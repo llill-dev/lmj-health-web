@@ -4,6 +4,8 @@ import {
   ArrowRight,
   CalendarDays,
   CheckCircle2,
+  Eye,
+  Lock,
   Mail,
   Phone,
   Settings,
@@ -88,7 +90,11 @@ export default function AdminSecretaryDetailsPage() {
             </div>
           </div>
 
-          <div className='flex gap-2'>
+          <div className='flex flex-wrap gap-2'>
+            <span className='inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#667085]'>
+              <Eye className='h-4 w-4' />
+              {tr('عرض فقط', 'Read only')}
+            </span>
             <button
               type='button'
               onClick={() =>
@@ -126,6 +132,68 @@ export default function AdminSecretaryDetailsPage() {
           </div>
         </div>
 
+        <div className='mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-4'>
+          <div className='flex items-start gap-3'>
+            <Lock className='mt-0.5 h-4 w-4 shrink-0 text-[#B42318]' />
+            <div>
+              <div className='font-cairo text-sm font-extrabold text-[#991B1B]'>
+                {tr('صلاحيات السكرتيرة معروضة للمراجعة فقط', 'Secretary permissions are shown for review only')}
+              </div>
+              <div className='mt-1 font-cairo text-sm font-semibold leading-6 text-[#B42318]'>
+                {tr(
+                  'لا تسمح لوحة الإدارة حالياً بتعديل صلاحيات السكرتيرة أو بياناتها من هذه الواجهة، لذلك يتم عرض المعلومات هنا بشكل read-only لتفادي أي التباس.',
+                  'The admin area does not currently support editing secretary permissions or profile data from this screen, so the information is presented as read-only to avoid misleading actions.',
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className='mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4'>
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
+              {tr('نوع السجل', 'Record type')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Users className='h-4 w-4 text-primary' />
+              {tr('ملف سكرتير', 'Secretary profile')}
+            </div>
+          </div>
+
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
+              {tr('الطبيب المرتبط', 'Linked doctor')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Stethoscope className='h-4 w-4 text-primary' />
+              {secretary?.doctor?.user?.fullName ??
+                tr('غير مرتبط بطبيب', 'Not linked to a doctor')}
+            </div>
+          </div>
+
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
+              {tr('نطاق الصفحة', 'Page scope')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Eye className='h-4 w-4 text-primary' />
+              {tr('مراجعة بيانات وصلاحيات', 'Review profile and permissions')}
+            </div>
+          </div>
+
+          <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+            <div className='font-cairo text-[12px] font-bold text-[#98A2B3]'>
+              {tr('الإجراء الإداري الحالي', 'Current admin action')}
+            </div>
+            <div className='mt-2 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <Settings className='h-4 w-4 text-primary' />
+              {userId
+                ? tr('إيقاف الحساب أو فتح المواعيد', 'Offboard or open appointments')
+                : tr('مراجعة السجل فقط', 'Reference-only review')}
+            </div>
+          </div>
+        </div>
+
         {/* ── content grid ── */}
         <div className='mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3'>
 
@@ -134,7 +202,7 @@ export default function AdminSecretaryDetailsPage() {
 
             {/* contact info */}
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-              <h3 className='mb-4 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <h3 className='mb-4 font-cairo text-sm font-extrabold text-[#111827]'>
                 {tr('معلومات التواصل', 'Contact information')}
               </h3>
               <div className='space-y-3'>
@@ -142,11 +210,11 @@ export default function AdminSecretaryDetailsPage() {
                   <div className='flex items-center justify-between rounded-[8px] bg-[#F9FAFB] px-4 py-3'>
                     <div className='flex items-center gap-2 text-[#667085]'>
                       <Mail className='h-4 w-4 text-primary' />
-                      <span className='font-cairo text-[12px] font-bold'>
+                      <span className='font-cairo text-[13px] font-bold'>
                         {tr('البريد الإلكتروني', 'Email')}
                       </span>
                     </div>
-                    <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
+                    <span className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                       {secretary.user.email}
                     </span>
                   </div>
@@ -155,21 +223,21 @@ export default function AdminSecretaryDetailsPage() {
                   <div className='flex items-center justify-between rounded-[8px] bg-[#F9FAFB] px-4 py-3'>
                     <div className='flex items-center gap-2 text-[#667085]'>
                       <Phone className='h-4 w-4 text-primary' />
-                      <span className='font-cairo text-[12px] font-bold'>
+                      <span className='font-cairo text-[13px] font-bold'>
                         {tr('رقم الهاتف', 'Phone')}
                       </span>
                     </div>
-                    <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
+                    <span className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                       {secretary.user.phone}
                     </span>
                   </div>
                 )}
                 {secretary?.user?.gender && (
                   <div className='flex items-center justify-between rounded-[8px] bg-[#F9FAFB] px-4 py-3'>
-                    <span className='font-cairo text-[12px] font-bold text-[#667085]'>
+                    <span className='font-cairo text-[13px] font-bold text-[#667085]'>
                       {tr('الجنس', 'Gender')}
                     </span>
-                    <span className='font-cairo text-[12px] font-extrabold text-[#111827]'>
+                    <span className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                       {secretary.user.gender === 'Female'
                         ? tr('أنثى', 'Female')
                         : tr('ذكر', 'Male')}
@@ -177,7 +245,7 @@ export default function AdminSecretaryDetailsPage() {
                   </div>
                 )}
                 {!secretary?.user?.email && !secretary?.user?.phone && !isAwaitingData && (
-                  <div className='font-cairo text-[12px] text-[#98A2B3]'>
+                  <div className='font-cairo text-[13px] text-[#98A2B3]'>
                     {tr('لا توجد بيانات تواصل', 'No contact details')}
                   </div>
                 )}
@@ -186,7 +254,7 @@ export default function AdminSecretaryDetailsPage() {
 
             {/* assigned doctor */}
             <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-              <h3 className='mb-4 font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <h3 className='mb-4 font-cairo text-sm font-extrabold text-[#111827]'>
                 {tr('الطبيب المسؤول', 'Assigned doctor')}
               </h3>
               {secretary?.doctor ? (
@@ -196,11 +264,11 @@ export default function AdminSecretaryDetailsPage() {
                       <Stethoscope className='h-5 w-5 text-primary' />
                     </div>
                     <div>
-                      <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                      <div className='font-cairo text-sm font-extrabold text-[#111827]'>
                         {secretary.doctor.user?.fullName ?? '—'}
                       </div>
                       {secretary.doctor.specialization && (
-                        <div className='mt-0.5 font-cairo text-[11px] font-bold text-[#667085]'>
+                        <div className='mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]'>
                           {secretary.doctor.specialization}
                         </div>
                       )}
@@ -222,7 +290,7 @@ export default function AdminSecretaryDetailsPage() {
                   </div>
                 </div>
               ) : (
-                <div className='rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-5 text-center font-cairo text-[12px] text-[#98A2B3]'>
+                <div className='rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-5 text-center font-cairo text-[13px] text-[#98A2B3]'>
                   {tr('غير مرتبط بطبيب', 'Not linked to a doctor')}
                 </div>
               )}
@@ -232,7 +300,7 @@ export default function AdminSecretaryDetailsPage() {
           {/* right: permissions (spans 2 cols) */}
           <div className='xl:col-span-2 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='mb-5 flex items-center justify-between'>
-              <h3 className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+              <h3 className='font-cairo text-sm font-extrabold text-[#111827]'>
                 {tr('الصلاحيات الممنوحة', 'Granted permissions')}
               </h3>
               <span className='rounded-full bg-[#E7FBFA] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary'>

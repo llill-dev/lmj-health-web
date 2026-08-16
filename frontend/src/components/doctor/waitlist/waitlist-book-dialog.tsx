@@ -13,6 +13,7 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { AppointmentType } from '@/lib/doctor/types';
 import type { WaitlistBookBody, WaitlistRequest } from '@/lib/doctor/waitlist/types';
 import { resolveWaitlistPatientName } from '@/hooks/doctor/waitlist/useDoctorWaitlist';
+import { useI18n } from '@/i18n/provider';
 
 function formatLocalDate(date: Date) {
   const year = date.getFullYear();
@@ -49,6 +50,7 @@ export function WaitlistBookDialog({
   onClose: () => void;
   onBook: (body: WaitlistBookBody) => Promise<void>;
 }) {
+  const { locale, dir } = useI18n();
   const today = useMemo(() => formatLocalDate(new Date()), []);
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -152,7 +154,7 @@ export function WaitlistBookDialog({
       maxWidthClass="max-w-[520px]"
       headerPattern
     >
-      <div dir="rtl" lang="ar" className="space-y-4 text-right">
+      <div dir={dir} lang={locale} className="space-y-4 text-right">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           حجز موعد للمريض{' '}
           <span className="font-extrabold text-[#111827]">

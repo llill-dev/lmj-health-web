@@ -42,6 +42,7 @@ import { readAuthUser } from "@/lib/cookies";
 import { ApiError, getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { doctorApi } from "@/lib/doctor/client";
+import { useI18n } from "@/i18n/provider";
 import {
   determinePatientState,
   type PatientRelationshipState,
@@ -49,6 +50,7 @@ import {
 import {
   getCreateTemporaryPatientErrorMessage,
   getDoctorAccessRequestErrorMessage,
+  getPatientFileAccessErrorMessage,
   getPatientFileMutationErrorMessage,
 } from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
@@ -174,6 +176,8 @@ type DoctorPatientsFiltersState = {
 };
 
 export default function DoctorPatientsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const navigate = useNavigate();
   const authUser = readAuthUser();
@@ -539,7 +543,7 @@ export default function DoctorPatientsPage() {
       if (!fileUrl) throw new Error("missing download url");
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileAccessErrorMessage(error, "open"), {
         title: "تعذر فتح الملف",
         variant: "error",
       });
@@ -563,7 +567,7 @@ export default function DoctorPatientsPage() {
         fileResponse.file?.originalName ?? "patient-file",
       );
     } catch (error) {
-      toast(getUserFacingRequestErrorMessage(error), {
+      toast(getPatientFileAccessErrorMessage(error, "download"), {
         title: "تعذر تحميل الملف",
         variant: "error",
       });
@@ -621,15 +625,15 @@ export default function DoctorPatientsPage() {
         onChange={handlePatientFileUpload}
       />
       <Helmet>
-        <title>Patients • LMJ Health</title>
+        <title>{tr("المرضى • LMJ Health", "Patients • LMJ Health")}</title>
       </Helmet>
       {/* Overview section */}
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         {/* Overview section */}
         <DoctorDashboardOverview
           variant="patients"
           surface="mint"
-          title="إجمالي مرضى الطبيب"
+          title={tr("إجمالي مرضى الطبيب", "Total doctor patients")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
@@ -637,30 +641,30 @@ export default function DoctorPatientsPage() {
               </span>
               <span className="text-primary/90">
                 {" "}
-                — إجمالي المرضى حسب الحالة
+                {tr("— إجمالي المرضى حسب الحالة", "— total patients by status")}
               </span>
             </span>
           }
           onActionClick={() => setTempPatientOpen(true)}
-          actionLabel="إضافة مريض مؤقت"
+          actionLabel={tr("إضافة مريض مؤقت", "Add temporary patient")}
           kpis={[
             {
               key: "active",
               icon: <UserCheck className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.active,
-              label: "نشط",
+              label: tr("نشط", "Active"),
             },
             {
               key: "temporary",
               icon: <UserRoundPlus className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.temporary,
-              label: "مؤقت",
+              label: tr("مؤقت", "Temporary"),
             },
             {
               key: "suspended",
               icon: <UserMinus className="w-5 h-5 shrink-0" />,
               value: statusCounts.loading ? "—" : statusCounts.suspended,
-              label: "معلّق",
+              label: tr("معلّق", "Suspended"),
             },
           ]}
         />
@@ -673,13 +677,23 @@ export default function DoctorPatientsPage() {
           onSubmit={async (values) => {
             try {
               const response = await createTempMutation.mutateAsync(values);
-              toast(response.message ?? "تم إنشاء وربط المريض المؤقت.", {
-                title: "نجاح",
+              toast(
+                response.message ??
+                  tr(
+                    "تم إنشاء وربط المريض المؤقت.",
+                    "Temporary patient was created and linked.",
+                  ),
+                {
+                title: tr("نجاح", "Success"),
                 variant: "success",
-              });
+              },
+              );
             } catch (error) {
               toast(getCreateTemporaryPatientErrorMessage(error), {
-                title: "تعذّر إنشاء المريض المؤقت",
+                title: tr(
+                  "تعذّر إنشاء المريض المؤقت",
+                  "Could not create temporary patient",
+                ),
                 variant: "error",
               });
               throw error;

@@ -3,6 +3,7 @@ import { Calendar, Clock, Loader2, User } from 'lucide-react';
 import { useState } from 'react';
 import { useSlots } from '@/hooks/doctor';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 interface SlotsPreviewProps {
   date: string;
@@ -17,15 +18,16 @@ export default function SlotsPreview({
   doctorId,
   className,
 }: SlotsPreviewProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const [filterType, setFilterType] = useState<SlotFilterType>('all');
-  
+
   const {
     freeSlots,
     bookedSlots,
     totalFreeSlots,
     totalBookedSlots,
     duration,
-    gap,
     isAwaitingData,
     error,
   } = useSlots(date, filterType, doctorId);
@@ -40,7 +42,7 @@ export default function SlotsPreview({
       >
         <Loader2 className='h-8 w-8 animate-spin text-primary' />
         <p className='mt-4 font-cairo text-[14px] font-semibold text-[#667085]'>
-          جارِ تحميل الحجوزات...
+          {tr('جارِ تحميل الحجوزات...', 'Loading bookings...')}
         </p>
       </div>
     );
@@ -55,10 +57,12 @@ export default function SlotsPreview({
         )}
       >
         <p className='text-center font-cairo text-[14px] font-bold text-[#D92D20]'>
-          تعذّر تحميل معلومات الحجوزات
+          {tr('تعذّر تحميل معلومات الحجوزات', 'Could not load booking information')}
         </p>
         <p className='mt-2 text-center font-cairo text-[12px] font-semibold text-[#667085]'>
-          {error instanceof Error ? error.message : 'حدث خطأ غير متوقع'}
+          {error instanceof Error
+            ? error.message
+            : tr('حدث خطأ غير متوقع', 'An unexpected error occurred')}
         </p>
       </div>
     );
@@ -79,10 +83,16 @@ export default function SlotsPreview({
             <Calendar className='h-8 w-8 text-[#667085]' />
           </div>
           <p className='mt-4 text-center font-cairo text-[15px] font-extrabold text-[#344054]'>
-            لا توجد حجوزات متاحة في هذا اليوم
+            {tr(
+              'لا توجد حجوزات متاحة في هذا اليوم',
+              'No bookings available on this day',
+            )}
           </p>
           <p className='mt-2 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-            قد يكون هذا اليوم خارج جدول العمل الأسبوعي أو مغلقاً كاستثناء
+            {tr(
+              'قد يكون هذا اليوم خارج جدول العمل الأسبوعي أو مغلقاً كاستثناء',
+              'This day may be outside the weekly schedule or closed as an exception',
+            )}
           </p>
         </div>
       </div>
@@ -91,7 +101,6 @@ export default function SlotsPreview({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Filter Tabs */}
       <div className='flex gap-2 rounded-[12px] border border-[#E5E7EB] bg-white p-1'>
         <button
           onClick={() => setFilterType('all')}
@@ -102,7 +111,7 @@ export default function SlotsPreview({
               : 'text-[#667085] hover:bg-[#F9FAFB]',
           )}
         >
-          الكل
+          {tr('الكل', 'All')}
         </button>
         <button
           onClick={() => setFilterType('free')}
@@ -113,7 +122,7 @@ export default function SlotsPreview({
               : 'text-[#667085] hover:bg-[#F9FAFB]',
           )}
         >
-          المتاحة
+          {tr('المتاحة', 'Available')}
         </button>
         <button
           onClick={() => setFilterType('booked')}
@@ -124,11 +133,10 @@ export default function SlotsPreview({
               : 'text-[#667085] hover:bg-[#F9FAFB]',
           )}
         >
-          المحجوزة
+          {tr('المحجوزة', 'Booked')}
         </button>
       </div>
 
-      {/* Header Stats */}
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
         <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3'>
           <div className='flex items-center gap-3'>
@@ -137,7 +145,7 @@ export default function SlotsPreview({
             </div>
             <div>
               <p className='font-cairo text-[13px] font-semibold text-[#667085]'>
-                فترات متاحة
+                {tr('فترات متاحة', 'Available slots')}
               </p>
               <p className='font-cairo text-[20px] font-extrabold text-[#10B981]'>
                 {totalFreeSlots}
@@ -153,7 +161,7 @@ export default function SlotsPreview({
             </div>
             <div>
               <p className='font-cairo text-[13px] font-semibold text-[#667085]'>
-                محجوز
+                {tr('محجوز', 'Booked')}
               </p>
               <p className='font-cairo text-[20px] font-extrabold text-[#EF4444]'>
                 {totalBookedSlots}
@@ -169,104 +177,102 @@ export default function SlotsPreview({
             </div>
             <div>
               <p className='font-cairo text-[13px] font-semibold text-[#667085]'>
-                المدة الواحدة
+                {tr('المدة الواحدة', 'Slot duration')}
               </p>
               <p className='font-cairo text-[20px] font-extrabold text-[#0891B2]'>
-                {duration || 0}د
+                {duration || 0}
+                {tr('د', 'm')}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Slots Grid */}
       <div
         className={cn(
           'grid grid-cols-1 gap-4',
           filterType === 'all' ? 'lg:grid-cols-2' : '',
         )}
       >
-        {/* Free Slots */}
         {(filterType === 'all' || filterType === 'free') && (
           <div className='rounded-[16px] border border-[#D1FAE5] bg-[#F0FDF4] p-4'>
-          <div className='mb-3 flex items-center gap-2'>
-            <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#10B981]'>
-              <Clock className='h-4 w-4 text-white' />
+            <div className='mb-3 flex items-center gap-2'>
+              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#10B981]'>
+                <Clock className='h-4 w-4 text-white' />
+              </div>
+              <h3 className='font-cairo text-[15px] font-extrabold text-[#065F46]'>
+                {tr('فترات متاحة', 'Available slots')} ({totalFreeSlots})
+              </h3>
             </div>
-            <h3 className='font-cairo text-[15px] font-extrabold text-[#065F46]'>
-              فترات متاحة ({totalFreeSlots})
-            </h3>
-          </div>
-          <div className='max-h-[300px] space-y-2 overflow-y-auto'>
-            {freeSlots.length === 0 ? (
-              <p className='py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-                لا توجد فترات متاحة
-              </p>
-            ) : (
-              freeSlots.map((slot, idx) => (
-                <div
-                  key={`free-${idx}`}
-                  className='flex items-center justify-between rounded-[8px] bg-white px-3 py-2 shadow-sm'
-                >
-                  <span className='font-cairo text-[14px] font-bold text-[#111827]'>
-                    {slot.startTime}
-                  </span>
-                  <span className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                    إلى
-                  </span>
-                  <span className='font-cairo text-[14px] font-bold text-[#111827]'>
-                    {slot.endTime}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-        )}
-
-        {/* Booked Slots */}
-        {(filterType === 'all' || filterType === 'booked') && (
-          <div className='rounded-[16px] border border-[#FEE2E2] bg-[#FEF2F2] p-4'>
-          <div className='mb-3 flex items-center gap-2'>
-            <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#EF4444]'>
-              <User className='h-4 w-4 text-white' />
-            </div>
-            <h3 className='font-cairo text-[15px] font-extrabold text-[#991B1B]'>
-              محجوز ({totalBookedSlots})
-            </h3>
-          </div>
-          <div className='max-h-[300px] space-y-2 overflow-y-auto'>
-            {bookedSlots.length === 0 ? (
-              <p className='py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-                لا توجد حجوزات
-              </p>
-            ) : (
-              bookedSlots.map((slot, idx) => (
-                <div
-                  key={`booked-${idx}`}
-                  className='rounded-[8px] bg-white px-3 py-2 shadow-sm'
-                >
-                  <div className='flex items-center justify-between'>
+            <div className='max-h-[300px] space-y-2 overflow-y-auto'>
+              {freeSlots.length === 0 ? (
+                <p className='py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
+                  {tr('لا توجد فترات متاحة', 'No available slots')}
+                </p>
+              ) : (
+                freeSlots.map((slot, idx) => (
+                  <div
+                    key={`free-${idx}`}
+                    className='flex items-center justify-between rounded-[8px] bg-white px-3 py-2 shadow-sm'
+                  >
                     <span className='font-cairo text-[14px] font-bold text-[#111827]'>
                       {slot.startTime}
                     </span>
                     <span className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                      إلى
+                      {tr('إلى', 'to')}
                     </span>
                     <span className='font-cairo text-[14px] font-bold text-[#111827]'>
                       {slot.endTime}
                     </span>
                   </div>
-                  {slot.patientName && (
-                    <p className='mt-1 font-cairo text-[12px] font-semibold text-[#667085]'>
-                      المريض: {slot.patientName}
-                    </p>
-                  )}
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {(filterType === 'all' || filterType === 'booked') && (
+          <div className='rounded-[16px] border border-[#FEE2E2] bg-[#FEF2F2] p-4'>
+            <div className='mb-3 flex items-center gap-2'>
+              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#EF4444]'>
+                <User className='h-4 w-4 text-white' />
+              </div>
+              <h3 className='font-cairo text-[15px] font-extrabold text-[#991B1B]'>
+                {tr('محجوز', 'Booked')} ({totalBookedSlots})
+              </h3>
+            </div>
+            <div className='max-h-[300px] space-y-2 overflow-y-auto'>
+              {bookedSlots.length === 0 ? (
+                <p className='py-8 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
+                  {tr('لا توجد حجوزات', 'No bookings')}
+                </p>
+              ) : (
+                bookedSlots.map((slot, idx) => (
+                  <div
+                    key={`booked-${idx}`}
+                    className='rounded-[8px] bg-white px-3 py-2 shadow-sm'
+                  >
+                    <div className='flex items-center justify-between'>
+                      <span className='font-cairo text-[14px] font-bold text-[#111827]'>
+                        {slot.startTime}
+                      </span>
+                      <span className='font-cairo text-[12px] font-semibold text-[#667085]'>
+                        {tr('إلى', 'to')}
+                      </span>
+                      <span className='font-cairo text-[14px] font-bold text-[#111827]'>
+                        {slot.endTime}
+                      </span>
+                    </div>
+                    {slot.patientName && (
+                      <p className='mt-1 font-cairo text-[12px] font-semibold text-[#667085]'>
+                        {tr('المريض:', 'Patient:')} {slot.patientName}
+                      </p>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>

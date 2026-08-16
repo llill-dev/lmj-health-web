@@ -25,6 +25,13 @@ function formatDashDate(iso: string) {
   return `${d}-${m}-${y}`;
 }
 
+function isFutureAppointmentSlot(date?: string, startTime?: string): boolean {
+  if (!date || !startTime) return false;
+  const slotDateTime = new Date(`${date}T${startTime}:00`);
+  if (Number.isNaN(slotDateTime.getTime())) return false;
+  return slotDateTime > new Date();
+}
+
 function statusLabelAr(status: string): string {
   switch (status) {
     case "scheduled":
@@ -129,6 +136,10 @@ export default function DoctorAppointmentExpandableCard({
   const reason = appointment.notes?.trim() || "لم يذكر سبب الزيارة";
   const kindLabel = "مراجعة";
   const time = appointment.startTime ?? "—";
+  const noShowBlockedForFuture = isFutureAppointmentSlot(
+    appointment.date,
+    appointment.startTime,
+  );
 
   return (
     <div
@@ -319,7 +330,12 @@ export default function DoctorAppointmentExpandableCard({
                   <button
                     type="button"
                     onClick={onNoShow}
-                    disabled={noShowing}
+                    disabled={noShowing || noShowBlockedForFuture}
+                    title={
+                      noShowBlockedForFuture
+                        ? "لا يمكن تسجيل عدم حضور لموعد مستقبلي."
+                        : undefined
+                    }
                     className="inline-flex h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg border border-[#F59E0B] bg-[#FFF7ED] font-cairo text-[14px] font-extrabold text-[#B45309] transition-colors hover:bg-[#FFEDD5] disabled:opacity-50 sm:flex-initial sm:px-6"
                   >
                     <AlertTriangle className="h-4 w-4" />

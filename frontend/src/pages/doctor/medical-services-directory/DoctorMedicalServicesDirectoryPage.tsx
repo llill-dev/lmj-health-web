@@ -27,6 +27,7 @@ import { useMedicalServicesDirectoryPage } from "@/hooks";
 
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 
 import { formatBillingNumber } from "@/lib/doctor/billing/format";
 
@@ -38,6 +39,8 @@ import {
 const PAGE_SIZE = 8;
 
 export default function DoctorMedicalServicesDirectoryPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [search, setSearch] = useState("");
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -96,17 +99,25 @@ export default function DoctorMedicalServicesDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>دليل الخدمات الطبية • LMJ Health</title>
+          <title>
+            {tr(
+              "دليل الخدمات الطبية • LMJ Health",
+              "Medical Services Directory • LMJ Health",
+            )}
+          </title>
         </Helmet>
 
         <div
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
           className="flex min-h-[360px] items-center justify-center"
         >
           <div className="flex items-center gap-3 font-cairo text-[14px] font-semibold text-[#667085]">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            جارٍ تحميل دليل الخدمات الطبية…
+            {tr(
+              "جارٍ تحميل دليل الخدمات الطبية…",
+              "Loading medical services directory…",
+            )}
           </div>
         </div>
       </>
@@ -117,14 +128,25 @@ export default function DoctorMedicalServicesDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>دليل الخدمات الطبية • LMJ Health</title>
+          <title>
+            {tr(
+              "دليل الخدمات الطبية • LMJ Health",
+              "Medical Services Directory • LMJ Health",
+            )}
+          </title>
         </Helmet>
 
         <DoctorListErrorState
-          title="تعذّر تحميل دليل الخدمات الطبية"
+          title={tr(
+            "تعذّر تحميل دليل الخدمات الطبية",
+            "Failed to load medical services directory",
+          )}
           brief={
             errorMessage ??
-            "حدث خطأ أثناء جلب الجهات الطبية المنشورة. حاول مرة أخرى."
+            tr(
+              "حدث خطأ أثناء جلب الجهات الطبية المنشورة. حاول مرة أخرى.",
+              "An error occurred while fetching published medical facilities. Try again.",
+            )
           }
           onRetry={() => void retryDirectory()}
           retrying={retryingDirectory}
@@ -136,14 +158,19 @@ export default function DoctorMedicalServicesDirectoryPage() {
   return (
     <>
       <Helmet>
-        <title>دليل الخدمات الطبية • LMJ Health</title>
+        <title>
+          {tr(
+            "دليل الخدمات الطبية • LMJ Health",
+            "Medical Services Directory • LMJ Health",
+          )}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <DoctorDashboardOverview
           variant="appointments"
           surface="mint"
-          title="دليل الخدمات الطبية"
+          title={tr("دليل الخدمات الطبية", "Medical services directory")}
           subtitle={
             <span>
               <span className="font-extrabold text-primary">
@@ -154,7 +181,10 @@ export default function DoctorMedicalServicesDirectoryPage() {
 
               <span className="text-primary/90">
                 {" "}
-                — دليلك للوصول للخدمات والجهات الصحية المتاحة
+                {tr(
+                  "— دليلك للوصول للخدمات والجهات الصحية المتاحة",
+                  "— your guide to available health services and facilities",
+                )}
               </span>
             </span>
           }
@@ -165,7 +195,10 @@ export default function DoctorMedicalServicesDirectoryPage() {
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
-          placeholder="ابحث عن جهة أو خدمة..."
+          placeholder={tr(
+            "ابحث عن جهة أو خدمة...",
+            "Search a facility or service...",
+          )}
           onValueChangeExtra={() => setPage(1)}
           onClear={() => {
             setSearch('');

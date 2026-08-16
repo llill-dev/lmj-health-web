@@ -26,6 +26,9 @@ export function useConsultationDetails(ticketId: string | null) {
 export function useSendConsultationMessage(ticketId: string) {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (input: { content: string; attachments?: string[] }) =>
       consultationsApi.sendMessage(ticketId, input),
     onSuccess: () => {
@@ -43,6 +46,9 @@ export function useSendConsultationMessage(ticketId: string) {
 export function useUpdateConsultationStatus() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       ticketId,
       status,
@@ -67,6 +73,9 @@ export function useUpdateConsultationStatus() {
 export function useMarkConsultationRead() {
   const queryClient = useQueryClient();
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (ticketId: string) => consultationsApi.markRead(ticketId),
     onSuccess: (_data, ticketId) => {
       void queryClient.invalidateQueries({

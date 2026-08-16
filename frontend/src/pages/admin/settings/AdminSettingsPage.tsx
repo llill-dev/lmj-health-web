@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
-import { CloudUpload, Settings } from "lucide-react";
+import { AlertCircle, CloudUpload, Settings } from "lucide-react";
 import { get } from "@/lib/api";
 import { adminApi } from "@/lib/admin/client";
 import { isAwaitingInitialQueryData } from "@/lib/query/queryUi";
@@ -241,6 +241,16 @@ export default function AdminSettingsPage() {
             ]}
           />
 
+          <div className="mt-4 flex items-start gap-3 rounded-[12px] border border-[#D1E9FF] bg-[#F5FAFF] px-4 py-3 text-start">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#175CD3]" />
+            <div className="font-cairo text-sm font-semibold leading-6 text-[#175CD3]">
+              {tr(
+                "هذه الشاشة مخصّصة للإعدادات المحلية الظاهرة في لوحة الإدارة فقط. اسم المنصة واللغة والشعار هنا تُحفظ محليًا مؤقتًا، وليست بديلاً عن إعدادات backend العامة عند توفرها.",
+                "This page is for local admin-facing settings only. The platform name, language, and logo here are saved locally for now and do not replace backend-managed global settings when available.",
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <SettingsSectionCard
               title={tr("الإعدادات العامة", "General settings")}
@@ -257,7 +267,7 @@ export default function AdminSettingsPage() {
                 />
 
                 <div className="space-y-2">
-                  <div className="text-start font-cairo text-[12px] font-bold text-[#344054]">
+                  <div className="text-start font-cairo text-sm font-bold text-[#344054]">
                     {tr("اللغة الافتراضية", "Default language")}
                   </div>
                   <StyledSelect
@@ -281,13 +291,13 @@ export default function AdminSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setConfirmGeneralOpen(true)}
-                    className="inline-flex h-[34px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)] disabled:opacity-50"
+                    className="inline-flex h-[36px] items-center gap-2 rounded-[8px] bg-primary px-5 font-cairo text-sm font-extrabold text-white shadow-[0_12px_24px_rgba(15,143,139,0.20)] disabled:opacity-50"
                   >
                     {tr("حفظ الإعدادات", "Save settings")}
                   </button>
                 </div>
                 {saveStates.general === "saved" ? (
-                  <div className="text-start font-cairo text-[11px] font-semibold text-[#16A34A]">
+                  <div className="text-start font-cairo text-[12px] font-semibold text-[#16A34A]">
                     {tr(
                       "تم حفظ الإعدادات العامة محليًا",
                       "General settings saved locally",
@@ -320,7 +330,7 @@ export default function AdminSettingsPage() {
                   <button
                     type="button"
                     onClick={triggerLogoUpload}
-                    className="inline-flex h-[36px] items-center gap-2 rounded-[8px] border border-primary bg-white px-2 font-cairo text-[12px] font-extrabold text-primary"
+                    className="inline-flex h-[36px] items-center gap-2 rounded-[8px] border border-primary bg-white px-3 font-cairo text-sm font-extrabold text-primary"
                   >
                     {tr("تحميل شعار جديد", "Upload new logo")}
                   </button>
@@ -331,14 +341,14 @@ export default function AdminSettingsPage() {
                     onChange={handleLogoPick}
                     className="hidden"
                   />
-                  <div className="mt-2 text-start font-cairo text-[11px] font-medium text-[#98A2B3]">
+                  <div className="mt-2 text-start font-cairo text-[12px] font-medium text-[#98A2B3]">
                     {tr(
                       "الحجم المفضل 512×512 • الصيغة (PNG)",
                       "Preferred size 512×512 • format (PNG)",
                     )}
                   </div>
                   {saveStates.logo === "saved" ? (
-                    <div className="mt-1 text-start font-cairo text-[11px] font-semibold text-[#16A34A]">
+                    <div className="mt-1 text-start font-cairo text-[12px] font-semibold text-[#16A34A]">
                       {tr("تم حفظ الشعار محليًا", "Logo saved locally")}
                     </div>
                   ) : null}

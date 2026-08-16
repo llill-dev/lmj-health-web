@@ -1,13 +1,14 @@
-import { ChevronLeft, Pill } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { buildPrescriptionPatientSubtitle } from './map-prescription-ui';
+import { ChevronLeft, Pill } from "lucide-react";
+import { Link } from "react-router-dom";
+import { buildPrescriptionPatientSubtitle } from "./map-prescription-ui";
+import { useI18n } from "@/i18n/provider";
 
 export function PrescriptionPageHeader({
   patientName,
   patientLabel,
   fileNumber,
-  statusLabel = 'مسودة',
-  backTo = '/doctor/appointments',
+  statusLabel = "مسودة",
+  backTo = "/doctor/appointments",
 }: {
   patientName?: string;
   /** @deprecated استخدم patientName */
@@ -16,14 +17,15 @@ export function PrescriptionPageHeader({
   statusLabel?: string;
   backTo?: string;
 }) {
+  const { locale, dir } = useI18n();
   const subtitle =
     buildPrescriptionPatientSubtitle(patientName ?? patientLabel) ||
-    'الوصفة الطبية';
+    "الوصفة الطبية";
 
   return (
     <section
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={locale}
       className="relative mb-6 overflow-hidden rounded-[6px] px-4 py-6 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)] sm:px-6 sm:py-7 lg:px-8 lg:py-8"
     >
       <div

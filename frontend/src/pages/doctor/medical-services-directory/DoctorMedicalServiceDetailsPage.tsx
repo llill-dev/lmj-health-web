@@ -21,6 +21,7 @@ import {
   fetchMedicalServiceDetails,
   fetchMedicalServicesCatalog,
 } from "@/lib/doctor/medical-services-directory/fetch";
+import { useI18n } from "@/i18n/provider";
 
 function ContactLink({
   href,
@@ -45,6 +46,8 @@ function ContactLink({
 }
 
 export default function DoctorMedicalServiceDetailsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const params = useParams<{ serviceId: string }>();
   const serviceId = params.serviceId ?? "";
   const detailsQuery = useQuery({
@@ -62,10 +65,13 @@ export default function DoctorMedicalServiceDetailsPage() {
 
   if (detailsQuery.isLoading) {
     return (
-      <div dir="rtl" lang="ar" className="flex min-h-[60vh] items-center justify-center">
+      <div dir={dir} lang={locale} className="flex min-h-[60vh] items-center justify-center">
         <div className="flex items-center gap-3 font-cairo text-[14px] font-bold text-[#667085]">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          جارٍ تحميل ملف الجهة الطبية...
+          {tr(
+            "جارٍ تحميل ملف الجهة الطبية...",
+            "Loading medical facility profile...",
+          )}
         </div>
       </div>
     );
@@ -73,13 +79,19 @@ export default function DoctorMedicalServiceDetailsPage() {
 
   if (detailsQuery.isError || !detailsQuery.data) {
     return (
-      <div dir="rtl" lang="ar" className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+      <div dir={dir} lang={locale} className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         <DoctorListErrorState
-          title="تعذّر تحميل تفاصيل الجهة الطبية"
+          title={tr(
+            "تعذّر تحميل تفاصيل الجهة الطبية",
+            "Failed to load facility details",
+          )}
           brief={
             detailsQuery.error
               ? getUserFacingRequestErrorMessage(detailsQuery.error)
-              : "هذه الجهة غير متاحة حالياً."
+              : tr(
+                  "هذه الجهة غير متاحة حالياً.",
+                  "This facility is not available right now.",
+                )
           }
           onRetry={() => void detailsQuery.refetch()}
         />
@@ -101,7 +113,7 @@ export default function DoctorMedicalServiceDetailsPage() {
         <title>{facility.name} • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+      <div dir={dir} lang={locale} className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         <Link
           to="/doctor/medical-services-directory"
           className="mb-5 inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-primary"

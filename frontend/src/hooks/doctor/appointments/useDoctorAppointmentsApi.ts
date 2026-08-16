@@ -15,10 +15,14 @@ import type {
   DoctorRescheduleAppointmentBody,
 } from "@/lib/doctor/types";
 
-export function useDoctorAppointmentsApi(params: DoctorAppointmentListParams) {
+export function useDoctorAppointmentsApi(
+  params: DoctorAppointmentListParams,
+  enabled = true,
+) {
   const query = useQuery({
     queryKey: doctorAppointmentsQueryKeys.list(params),
     queryFn: () => doctorAppointmentsApi.list(params),
+    enabled,
     staleTime: 1000 * 60,
   });
 
@@ -29,7 +33,8 @@ export function useDoctorAppointmentsApi(params: DoctorAppointmentListParams) {
     limit: query.data?.limit ?? params.limit ?? 10,
     total: query.data?.total ?? 0,
     results: query.data?.results ?? 0,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData:
+      enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
@@ -63,6 +68,9 @@ export function useBookDoctorAppointmentApi() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (body: DoctorBookAppointmentBody) =>
       doctorAppointmentsApi.book(body),
     onSuccess: () => invalidateDoctorAppointments(queryClient),
@@ -73,6 +81,9 @@ export function useCancelDoctorAppointmentApi(appointmentId?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       id,
       body,
@@ -97,6 +108,9 @@ export function useRescheduleDoctorAppointmentApi(appointmentId?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       id,
       body,
@@ -121,6 +135,9 @@ export function useCompleteDoctorAppointmentApi(appointmentId?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       id,
       body,
@@ -145,6 +162,9 @@ export function useNoShowDoctorAppointmentApi(appointmentId?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       id,
       body,
@@ -190,6 +210,9 @@ export function useUploadDoctorAppointmentFileApi(appointmentId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: ({
       file,
       note,
@@ -214,6 +237,9 @@ export function useUnlinkDoctorAppointmentFileApi(appointmentId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: {
+      skipGlobalError: true,
+    },
     mutationFn: (fileId: string) =>
       doctorAppointmentsApi.unlinkFile(appointmentId, fileId),
     onSuccess: () => {

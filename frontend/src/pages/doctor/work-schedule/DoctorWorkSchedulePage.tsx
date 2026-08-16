@@ -41,18 +41,20 @@ import SlotsPreview from '@/components/doctor/work-schedule/slots-preview';
 import StyledSelect from '@/components/ui/styled-select';
 import type { ScheduleDayKey, ScheduleTimeSlot } from '@/lib/doctor/types';
 import { getWorkScheduleMutationErrorMessage } from '@/lib/doctor/writeFlowErrors';
-
-const DAY_LABELS: Record<ScheduleDayKey, string> = {
-  Sunday: 'الأحد',
-  Monday: 'الإثنين',
-  Tuesday: 'الثلاثاء',
-  Wednesday: 'الأربعاء',
-  Thursday: 'الخميس',
-  Friday: 'الجمعة',
-  Saturday: 'السبت',
-};
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorWorkSchedulePage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const dayLabels: Record<ScheduleDayKey, string> = {
+    Sunday: tr('الأحد', 'Sunday'),
+    Monday: tr('الإثنين', 'Monday'),
+    Tuesday: tr('الثلاثاء', 'Tuesday'),
+    Wednesday: tr('الأربعاء', 'Wednesday'),
+    Thursday: tr('الخميس', 'Thursday'),
+    Friday: tr('الجمعة', 'Friday'),
+    Saturday: tr('السبت', 'Saturday'),
+  };
   const { toast } = useToast();
   const navigate = useNavigate();
   const { workSchedule, isAwaitingData, error, refetch } = useSchedule();
@@ -105,16 +107,22 @@ export default function DoctorWorkSchedulePage() {
       });
       await refetch();
       setIsAddDayOpen(false);
-      toast(`تمت إضافة يوم ${DAY_LABELS[values.day]} بنجاح`, {
-        variant: 'success',
-        title: 'تم الحفظ',
-        durationMs: 4000,
-      });
+      toast(
+        tr(
+          `تمت إضافة يوم ${dayLabels[values.day]} بنجاح`,
+          `${dayLabels[values.day]} added successfully`,
+        ),
+        {
+          variant: 'success',
+          title: tr('تم الحفظ', 'Saved'),
+          durationMs: 4000,
+        },
+      );
     } catch (err: any) {
       const errorMessage = getWorkScheduleMutationErrorMessage(err, 'add-day');
       toast(errorMessage, {
         variant: 'error',
-        title: 'فشلت العملية',
+        title: tr('فشلت العملية', 'Operation failed'),
         durationMs: 5000,
       });
     }
@@ -129,11 +137,17 @@ export default function DoctorWorkSchedulePage() {
       await refetch();
       setIsEditDayOpen(false);
       setEditingDay(null);
-      toast(`تم تحديث يوم ${DAY_LABELS[values.day]} بنجاح`, {
-        variant: 'success',
-        title: 'تم التحديث',
-        durationMs: 4000,
-      });
+      toast(
+        tr(
+          `تم تحديث يوم ${dayLabels[values.day]} بنجاح`,
+          `${dayLabels[values.day]} updated successfully`,
+        ),
+        {
+          variant: 'success',
+          title: tr('تم التحديث', 'Updated'),
+          durationMs: 4000,
+        },
+      );
     } catch (err: any) {
       // Check for 409 Conflict error with detailed conflict information
       if (
@@ -149,7 +163,10 @@ export default function DoctorWorkSchedulePage() {
           day: values.day,
           nextAction:
             err.response.data.errors.nextAction ||
-            'قم بإلغاء أو إعادة جدولة المواعيد المتعارضة ثم حاول مجدداً.',
+            tr(
+              'قم بإلغاء أو إعادة جدولة المواعيد المتعارضة ثم حاول مجدداً.',
+              'Cancel or reschedule conflicting appointments, then try again.',
+            ),
         });
         setIsConflictDialogOpen(true);
         return;
@@ -161,7 +178,7 @@ export default function DoctorWorkSchedulePage() {
       );
       toast(errorMessage, {
         variant: 'error',
-        title: 'فشلت العملية',
+        title: tr('فشلت العملية', 'Operation failed'),
         durationMs: 5000,
       });
     }
@@ -178,11 +195,17 @@ export default function DoctorWorkSchedulePage() {
     try {
       await deleteDayAsync(dayToDelete);
       await refetch();
-      toast(`تم حذف يوم ${DAY_LABELS[dayToDelete]} بنجاح`, {
-        variant: 'success',
-        title: 'تم الحذف',
-        durationMs: 4000,
-      });
+      toast(
+        tr(
+          `تم حذف يوم ${dayLabels[dayToDelete]} بنجاح`,
+          `${dayLabels[dayToDelete]} deleted successfully`,
+        ),
+        {
+          variant: 'success',
+          title: tr('تم الحذف', 'Deleted'),
+          durationMs: 4000,
+        },
+      );
       setDayToDelete(null);
     } catch (err: any) {
       // Check for 409 Conflict error
@@ -199,7 +222,10 @@ export default function DoctorWorkSchedulePage() {
           day: dayToDelete,
           nextAction:
             err.response.data.errors.nextAction ||
-            'قم بإلغاء أو إعادة جدولة المواعيد المتعارضة ثم حاول مجدداً.',
+            tr(
+              'قم بإلغاء أو إعادة جدولة المواعيد المتعارضة ثم حاول مجدداً.',
+              'Cancel or reschedule conflicting appointments, then try again.',
+            ),
         });
         setIsConflictDialogOpen(true);
         return;
@@ -211,7 +237,7 @@ export default function DoctorWorkSchedulePage() {
       );
       toast(errorMessage, {
         variant: 'error',
-        title: 'فشلت العملية',
+        title: tr('فشلت العملية', 'Operation failed'),
         durationMs: 5000,
       });
     }
@@ -224,9 +250,9 @@ export default function DoctorWorkSchedulePage() {
         gap,
       });
       await refetch();
-      toast('تم حفظ إعدادات المواعيد بنجاح', {
+      toast(tr('تم حفظ إعدادات المواعيد بنجاح', 'Appointment settings saved'), {
         variant: 'success',
-        title: 'تم الحفظ',
+        title: tr('تم الحفظ', 'Saved'),
         durationMs: 4000,
       });
     } catch (err: any) {
@@ -236,7 +262,7 @@ export default function DoctorWorkSchedulePage() {
       );
       toast(errorMessage, {
         variant: 'error',
-        title: 'فشلت العملية',
+        title: tr('فشلت العملية', 'Operation failed'),
         durationMs: 5000,
       });
     }
@@ -251,9 +277,9 @@ export default function DoctorWorkSchedulePage() {
       });
       await refetch();
       setIsAddExceptionOpen(false);
-      toast('تمت إضافة الاستثناء بنجاح', {
+      toast(tr('تمت إضافة الاستثناء بنجاح', 'Exception added successfully'), {
         variant: 'success',
-        title: 'تم الحفظ',
+        title: tr('تم الحفظ', 'Saved'),
         durationMs: 4000,
       });
     } catch (err: any) {
@@ -263,7 +289,7 @@ export default function DoctorWorkSchedulePage() {
       );
       toast(errorMessage, {
         variant: 'error',
-        title: 'فشلت العملية',
+        title: tr('فشلت العملية', 'Operation failed'),
         durationMs: 5000,
       });
     }
@@ -280,9 +306,9 @@ export default function DoctorWorkSchedulePage() {
     try {
       await deleteExceptionAsync(exceptionToDelete);
       await refetch();
-      toast('تم حذف الاستثناء بنجاح', {
+      toast(tr('تم حذف الاستثناء بنجاح', 'Exception deleted successfully'), {
         variant: 'success',
-        title: 'تم الحذف',
+        title: tr('تم الحذف', 'Deleted'),
         durationMs: 4000,
       });
       setExceptionToDelete(null);
@@ -293,7 +319,7 @@ export default function DoctorWorkSchedulePage() {
       );
       toast(errorMessage, {
         variant: 'error',
-        title: 'فشلت العملية',
+        title: tr('فشلت العملية', 'Operation failed'),
         durationMs: 5000,
       });
     }
@@ -312,8 +338,8 @@ export default function DoctorWorkSchedulePage() {
       </Helmet>
 
       <div
-        dir='rtl'
-        lang='ar'
+        dir={dir}
+        lang={locale}
         className='pb-12 min-h-screen'
       >
         <AddDayDialog
@@ -516,7 +542,7 @@ export default function DoctorWorkSchedulePage() {
                           <div className='flex-1'>
                             <div className='flex gap-3 items-center mb-3'>
                               <div className='flex h-[32px] items-center justify-center rounded-[10px] bg-primary px-4 font-cairo text-[13px] font-extrabold text-white shadow-sm'>
-                                {DAY_LABELS[dayTemplate.day]}
+                                {dayLabels[dayTemplate.day]}
                               </div>
                               <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
                                 {dayTemplate.slots.length} فترة عمل
@@ -907,7 +933,7 @@ export default function DoctorWorkSchedulePage() {
         }}
         onConfirm={confirmDeleteDay}
         title='تأكيد حذف اليوم'
-        description={`هل أنت متأكد من حذف يوم ${dayToDelete ? DAY_LABELS[dayToDelete] : ''}؟ هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع الفترات المحددة لهذا اليوم من الجدول الأسبوعي.`}
+        description={`هل أنت متأكد من حذف يوم ${dayToDelete ? dayLabels[dayToDelete] : ''}؟ هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع الفترات المحددة لهذا اليوم من الجدول الأسبوعي.`}
         confirmText='حذف اليوم'
         cancelText='إلغاء'
         variant='danger'

@@ -11,8 +11,18 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { useEffect } from "react";
+
+function hasMissingAccessRequestIdentity(request: any) {
+  const doctorName = request.doctor?.fullName || request.doctorName;
+  const doctorEmail = request.doctor?.email || request.doctorEmail;
+  const patientName = request.patient?.fullName || request.patientName;
+  const patientId = request.patient?.publicId || request.patientId;
+
+  return !doctorName || !doctorEmail || !patientName || !patientId;
+}
 
 interface AccessRequestDetailsDialogProps {
   open: boolean;
@@ -117,6 +127,20 @@ export default function AccessRequestDetailsDialog({
                 </div>
               ) : (
                 <div className="space-y-5">
+                  {hasMissingAccessRequestIdentity(request) ? (
+                    <div className="rounded-[12px] border border-[#FDE68A] bg-[#FFFBEB] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-[#D97706]" />
+                        <div className="font-cairo text-[12px] font-bold text-[#92400E]">
+                          بعض البيانات غير مكتملة
+                        </div>
+                      </div>
+                      <div className="font-cairo text-[11px] font-semibold leading-5 text-[#B45309]">
+                        الاستجابة الحالية لا تحتوي على جميع حقول الطبيب أو المريض المتوقعة. يتم عرض القيم المتوفرة فقط لتجنّب إظهار معلومات غير مؤكدة.
+                      </div>
+                    </div>
+                  ) : null}
+
                   {/* Status Badge */}
                   <div className="flex items-center justify-between">
                     <div className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
@@ -132,6 +156,45 @@ export default function AccessRequestDetailsDialog({
                       })()}
                       {statusLabels[request.status || "pending"]}
                     </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <div className="font-cairo text-[11px] font-bold text-[#667085]">
+                          نوع الطلب
+                        </div>
+                      </div>
+                      <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
+                        طلب وصول لبيانات مريض
+                      </div>
+                    </div>
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        <div className="font-cairo text-[11px] font-bold text-[#667085]">
+                          الإجراء الحالي
+                        </div>
+                      </div>
+                      <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
+                        {request.status === "pending"
+                          ? "مراجعة القرار من قبل الإدارة"
+                          : request.status === "approved"
+                            ? "تم قبول الطلب"
+                            : "تم رفض الطلب"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] p-4">
+                    <div className="font-cairo text-[12px] font-semibold leading-6 text-[#215A57]">
+                      {request.status === "pending"
+                        ? "هذه النافذة مخصّصة لمراجعة طلب الوصول قبل اعتماد القرار النهائي، مع عرض القيم المتوفرة فقط إذا كانت بعض الحقول ناقصة من الاستجابة."
+                        : request.status === "approved"
+                          ? "تم قبول هذا الطلب سابقًا، لذلك تُعرض النافذة الآن كمرجع لبيانات الطلب والحالة النهائية دون إجراءات إضافية."
+                          : "تم رفض هذا الطلب سابقًا، لذلك تُستخدم النافذة الآن لمراجعة سبب الطلب والبيانات المرتبطة به فقط."}
+                    </div>
                   </div>
 
                   {/* Doctor Info */}
@@ -256,6 +319,16 @@ export default function AccessRequestDetailsDialog({
                         </div>
                       </div>
                     )}
+                    {request.reviewedAt ? (
+                      <div className="mt-3">
+                        <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
+                          تاريخ المراجعة
+                        </div>
+                        <div className="font-cairo text-[12px] font-bold text-[#111827]">
+                          {new Date(request.reviewedAt).toLocaleString("ar-SY")}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* Notes */}

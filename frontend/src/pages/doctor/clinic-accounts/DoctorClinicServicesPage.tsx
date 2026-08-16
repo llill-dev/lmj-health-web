@@ -22,9 +22,14 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import type { ApiBillingService } from '@/lib/doctor/billing/apiTypes';
 import { useRetryAction } from '@/lib/query/useRetryAction';
+import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorClinicServicesPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
+  const { canManageServices } = useBillingAccess();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -102,36 +107,48 @@ export default function DoctorClinicServicesPage() {
   return (
     <>
       <Helmet>
-        <title>خدمات الفوترة • LMJ Health</title>
+        <title>
+          {tr('خدمات الفوترة • LMJ Health', 'Billing Services • LMJ Health')}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
         <ClinicAccountsSubNav />
 
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="text-right">
             <h1 className="font-cairo text-[28px] font-black text-[#111827]">
-              كتالوج الخدمات
+              {tr('كتالوج الخدمات', 'Services catalog')}
             </h1>
             <p className="mt-2 font-cairo text-[14px] font-semibold text-[#667085]">
-              إدارة خدمات الفوترة المرتبطة بأنواع المواعيد.
+              {tr(
+                'إدارة خدمات الفوترة المرتبطة بأنواع المواعيد.',
+                'Manage billing services linked to appointment types.',
+              )}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="h-11 rounded-[10px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white"
-          >
-            خدمة جديدة
-          </button>
+          {canManageServices ? (
+            <button
+              type="button"
+              onClick={openCreate}
+              className="h-11 rounded-[10px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white"
+            >
+              {tr('خدمة جديدة', 'New service')}
+            </button>
+          ) : null}
         </header>
 
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
-          placeholder="بحث عن خدمة..."
+          placeholder={tr('بحث عن خدمة...', 'Search services...')}
           onClear={() => setSearch('')}
         />
+        {!canManageServices ? (
+          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+            هذه الصفحة في وضع العرض فقط حسب صلاحيات حسابك.
+          </p>
+        ) : null}
 
         <section className="mt-6 rounded-[12px] border border-[#EEF2F6] bg-white p-5">
           {list.isAwaitingData && !list.services.length ? (
@@ -143,17 +160,28 @@ export default function DoctorClinicServicesPage() {
               imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
               title={
                 search.trim()
-                  ? 'لا توجد خدمات تطابق البحث الحالي'
-                  : 'لا توجد خدمات مضافة بعد'
+                  ? tr(
+                      'لا توجد خدمات تطابق البحث الحالي',
+                      'No services match the current search',
+                    )
+                  : tr('لا توجد خدمات مضافة بعد', 'No services added yet')
               }
               subtitle={
                 search.trim()
-                  ? 'جرّب تعديل كلمات البحث لعرض النتائج'
-                  : 'أضف خدمات العيادة الطبية التي تقدمها للمرضى مع الأسعار والمدة الزمنية'
+                  ? tr(
+                      'جرّب تعديل كلمات البحث لعرض النتائج',
+                      'Try adjusting search terms to see results',
+                    )
+                  : tr(
+                      'أضف خدمات العيادة الطبية التي تقدمها للمرضى مع الأسعار والمدة الزمنية',
+                      'Add clinic medical services you offer patients with prices and duration',
+                    )
               }
-              actionLabel="إضافة خدمة"
-              onAction={openCreate}
-              actionIcon={<Plus className="h-4 w-4" />}
+              actionLabel={
+                canManageServices ? tr('إضافة خدمة', 'Add service') : undefined
+              }
+              onAction={canManageServices ? openCreate : undefined}
+              actionIcon={canManageServices ? <Plus className="h-4 w-4" /> : undefined}
             />
           ) : (
             <div className="overflow-x-auto">
@@ -164,7 +192,9 @@ export default function DoctorClinicServicesPage() {
                     <th className="px-3 py-3">السعر</th>
                     <th className="px-3 py-3">المدة</th>
                     <th className="px-3 py-3">الحالة</th>
-                    <th className="px-3 py-3">إجراءات</th>
+                    {canManageServices ? (
+                      <th className="px-3 py-3">إجراءات</th>
+                    ) : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -184,24 +214,26 @@ export default function DoctorClinicServicesPage() {
                       <td className="px-3 py-4">
                         {service.isActive !== false ? 'نشط' : 'غير نشط'}
                       </td>
-                      <td className="px-3 py-4">
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openEdit(service)}
-                            className="rounded-[6px] border border-primary px-3 py-1 text-[11px] font-extrabold text-primary"
-                          >
-                            تعديل
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleDelete(service)}
-                            className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
-                          >
-                            حذف
-                          </button>
-                        </div>
-                      </td>
+                      {canManageServices ? (
+                        <td className="px-3 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => openEdit(service)}
+                              className="rounded-[6px] border border-primary px-3 py-1 text-[11px] font-extrabold text-primary"
+                            >
+                              تعديل
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDelete(service)}
+                              className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
+                            >
+                              حذف
+                            </button>
+                          </div>
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
@@ -212,12 +244,16 @@ export default function DoctorClinicServicesPage() {
       </div>
 
       <ClinicAccountsModalShell
-        open={dialogOpen}
+        open={dialogOpen && canManageServices}
         onClose={() => setDialogOpen(false)}
-        title={editTarget ? 'تعديل خدمة' : 'خدمة جديدة'}
+        title={
+          editTarget
+            ? tr('تعديل خدمة', 'Edit service')
+            : tr('خدمة جديدة', 'New service')
+        }
         maxWidthClass="max-w-[520px]"
       >
-        <div dir="rtl" className="space-y-4 text-right">
+        <div dir={dir} className="space-y-4 text-right">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}

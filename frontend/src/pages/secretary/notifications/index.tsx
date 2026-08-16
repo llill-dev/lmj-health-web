@@ -137,6 +137,11 @@ export default function SecretaryNotificationsPage() {
             <button
               type="button"
               onClick={() => notificationsQuery.markAllReadMutation.mutate()}
+              disabled={
+                notificationsQuery.markAllReadMutation.isPending ||
+                notificationsQuery.listQuery.isLoading ||
+                notifications.length === 0
+              }
               className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]"
             >
               {tr("تحديد الكل كمقروء", "Mark all as read")}
@@ -148,6 +153,27 @@ export default function SecretaryNotificationsPage() {
               <p className="font-cairo text-[14px] font-semibold text-[#98A2B3]">
                 {tr("جاري تحميل الإشعارات...", "Loading notifications...")}
               </p>
+            </div>
+          ) : notificationsQuery.listQuery.isError ? (
+            <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-12 text-center">
+              <div>
+                <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
+                  {tr("تعذر تحميل الإشعارات", "Notifications could not be loaded")}
+                </h3>
+                <p className="mt-2 font-cairo text-[14px] font-semibold text-[#98A2B3]">
+                  {tr(
+                    "حدثت مشكلة أثناء جلب الإشعارات. حاول مرة أخرى.",
+                    "There was a problem loading notifications. Please try again.",
+                  )}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void notificationsQuery.listQuery.refetch()}
+                className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[13px] font-black text-[#1F2937] transition hover:bg-[#F8FAFC]"
+              >
+                {tr("إعادة المحاولة", "Retry")}
+              </button>
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-12">
@@ -164,18 +190,25 @@ export default function SecretaryNotificationsPage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              {notifications.map((notification) => (
-                <NotificationCard
-                  key={notification.id}
-                  title={notification.title}
-                  message={notification.message}
-                  time={notification.time}
-                  type={notification.type}
-                  isRead={notification.isRead}
-                />
-              ))}
-            </div>
+            <>
+              {notificationsQuery.listQuery.isRefetching ? (
+                <div className="mb-3 text-right font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                  {tr("جاري تحديث الإشعارات...", "Refreshing notifications...")}
+                </div>
+              ) : null}
+              <div className="space-y-3">
+                {notifications.map((notification) => (
+                  <NotificationCard
+                    key={notification.id}
+                    title={notification.title}
+                    message={notification.message}
+                    time={notification.time}
+                    type={notification.type}
+                    isRead={notification.isRead}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </SurfaceSection>

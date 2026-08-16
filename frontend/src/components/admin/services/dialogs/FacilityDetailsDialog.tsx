@@ -82,6 +82,12 @@ export default function FacilityDetailsDialog({
               </div>
             ) : (
               <div className='space-y-4'>
+                <div className='rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-3 text-right'>
+                  <div className='font-cairo text-[12px] font-extrabold leading-6 text-[#0F766E]'>
+                    هذه النافذة تعرض السجل الإداري المختصر للمنشأة فقط. لمراجعة الأطباء المرتبطين استخدم زر «الأطباء»، ولتعديل البيانات أو الحالة ارجع إلى إجراءات المنشأة في القائمة.
+                  </div>
+                </div>
+
                 <div className='rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-5 py-4'>
                   <div className='flex items-start justify-between gap-3'>
                     <div className='text-right'>

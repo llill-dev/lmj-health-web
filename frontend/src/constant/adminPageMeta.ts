@@ -72,3 +72,22 @@ export function getAdminPageMeta(pathname: string): {
 
   return fallback;
 }
+
+export function getAdminBackNavigation(pathname: string): {
+  href: string;
+  section: AdminSidebarItemId;
+} | null {
+  if (!pathname.startsWith('/admin')) return null;
+
+  const segs = pathname.replace(/^\/admin\/?/, '').split('/').filter(Boolean);
+  if (segs.length < 2) return null;
+
+  const section = segs[0] as AdminSidebarItemId;
+  const hasSidebarSection = adminSidebarItems.some((item) => item.path === section);
+  if (!hasSidebarSection) return null;
+
+  return {
+    href: `/admin/${section}`,
+    section,
+  };
+}

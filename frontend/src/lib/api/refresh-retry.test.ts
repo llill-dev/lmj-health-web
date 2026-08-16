@@ -108,7 +108,8 @@ class MockXMLHttpRequest {
 }
 
 describe('api refresh retry', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    vi.resetModules();
     authState.accessToken = 'old-access';
     refreshAccessTokenMock.mockReset();
     ensureFreshAccessTokenMock.mockReset();
@@ -124,6 +125,9 @@ describe('api refresh retry', () => {
 
     vi.stubGlobal('fetch', vi.fn());
     vi.stubGlobal('XMLHttpRequest', MockXMLHttpRequest as unknown as typeof XMLHttpRequest);
+
+    const { setCurrentLocale } = await import('@/i18n/runtime');
+    setCurrentLocale('ar');
   });
 
   it('retries a protected fetch request once after refresh succeeds', async () => {
@@ -203,7 +207,7 @@ describe('api refresh retry', () => {
     expect(
       (fetchMock.mock.calls[1]?.[1] as RequestInit).headers,
     ).toMatchObject({
-      Authorization: 'Bearer [REDACTED:Bearer token]',
+      Authorization: 'Bearer new-access',
     });
   });
 
@@ -228,6 +232,31 @@ describe('api refresh retry', () => {
     expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
     expect(xhrRequests).toHaveLength(2);
     expect(xhrRequests[0]?.Authorization).toBe('Bearer old-access');
+    expect(xhrRequests[1]?.Authorization).toBe('Bearer new-access');
+  });
+
+  it('retries a multipart upload with the refreshed store token even when the original upload used an explicit token', async () => {
+    refreshAccessTokenMock.mockImplementation(async () => {
+      authState.accessToken = 'new-access';
+      return true;
+    });
+
+    xhrPlans = [
+      { status: 401, responseText: JSON.stringify({ message: 'unauthorized' }) },
+      { status: 200, responseText: JSON.stringify({ uploaded: true }) },
+    ];
+
+    const { apiMultipart } = await import('@/lib/api');
+
+    const result = await apiMultipart('/api/secure/upload', new FormData(), {
+      token: 'stale-explicit-token',
+      onProgress: vi.fn(),
+    });
+
+    expect(result).toEqual({ uploaded: true });
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(xhrRequests).toHaveLength(2);
+    expect(xhrRequests[0]?.Authorization).toBe('Bearer stale-explicit-token');
     expect(xhrRequests[1]?.Authorization).toBe('Bearer new-access');
   });
 });

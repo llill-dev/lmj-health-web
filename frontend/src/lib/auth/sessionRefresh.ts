@@ -2,6 +2,7 @@ import { post } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { authEndpoints } from "@/lib/auth/endpoints";
 import {
+  clearAuthSession,
   normalizeTokenPair,
   persistAuthSession,
   readStoredAuthSession,
@@ -18,6 +19,16 @@ function asRefreshTokenRecord(value: RefreshTokenResponse): Record<string, unkno
     : null;
 }
 
+function isUnauthorizedRefreshError(error: unknown): boolean {
+  if (error instanceof ApiError) return error.status === 401;
+  return (
+    !!error
+    && typeof error === "object"
+    && "status" in error
+    && (error as { status?: unknown }).status === 401
+  );
+}
+
 function applyRefreshedTokens(data: RefreshTokenResponse): boolean {
   const record = asRefreshTokenRecord(data);
   const pair = record ? normalizeTokenPair(record) : null;
@@ -25,7 +36,17 @@ function applyRefreshedTokens(data: RefreshTokenResponse): boolean {
 
   const stored = readStoredAuthSession();
   const user = stored.user;
-  if (!user) return false;
+  if (!user) {
+    clearAuthSession();
+    useAuthStore.setState({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      refreshExpiresAt: null,
+      isAuthenticated: false,
+    });
+    return false;
+  }
 
   persistAuthSession(pair, {
     userId: user.userId,
@@ -70,7 +91,7 @@ export async function refreshAccessToken(): Promise<boolean> {
 
       return applyRefreshedTokens(data);
     } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
+      if (isUnauthorizedRefreshError(error)) {
         return false;
       }
       throw error;

@@ -6,6 +6,7 @@ import {
 } from '@/components/doctor/profile-settings/doctor-profile-form-field';
 import type { OrderManualFieldMessages } from '@/lib/doctor/orders/orderManualFormSchema';
 import type { RadiologyManualForm } from './radiology-types';
+import { useI18n } from '@/i18n/provider';
 
 export function RadiologyManualForm({
   value,
@@ -26,6 +27,7 @@ export function RadiologyManualForm({
   nameLabel?: string;
   fieldErrors?: OrderManualFieldMessages;
 }) {
+  const { locale, dir } = useI18n();
   const set = (patch: Partial<RadiologyManualForm>) =>
     onChange({ ...value, ...patch });
 
@@ -42,8 +44,8 @@ export function RadiologyManualForm({
           error={fieldErrors.name}
         >
           <input
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
             value={value.name}
             onChange={(e) => set({ name: e.target.value })}
             className={profileFieldClass(
@@ -54,8 +56,8 @@ export function RadiologyManualForm({
         </DoctorProfileFormField>
         <DoctorProfileFormField label="النوع" error={fieldErrors.type}>
           <input
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
             value={value.type}
             onChange={(e) => set({ type: e.target.value })}
             placeholder="مثال: عينة دم، بول"
@@ -67,8 +69,8 @@ export function RadiologyManualForm({
         </DoctorProfileFormField>
         <DoctorProfileFormField label="منطقة الجسم" error={fieldErrors.bodyArea}>
           <input
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
             value={value.bodyArea}
             onChange={(e) => set({ bodyArea: e.target.value })}
             placeholder="اختياري"
@@ -80,8 +82,8 @@ export function RadiologyManualForm({
         </DoctorProfileFormField>
         <DoctorProfileFormField label="الجهة" error={fieldErrors.side}>
           <input
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
             value={value.side}
             onChange={(e) => set({ side: e.target.value })}
             className={profileFieldClass(
@@ -92,8 +94,8 @@ export function RadiologyManualForm({
         </DoctorProfileFormField>
         <DoctorProfileFormField label="الوضعية" error={fieldErrors.position}>
           <input
-            dir="rtl"
-            lang="ar"
+            dir={dir}
+            lang={locale}
             value={value.position}
             onChange={(e) => set({ position: e.target.value })}
             className={profileFieldClass(
@@ -106,8 +108,8 @@ export function RadiologyManualForm({
 
       <DoctorProfileFormField label="ملاحظات" error={fieldErrors.notes}>
         <textarea
-          dir="rtl"
-          lang="ar"
+          dir={dir}
+          lang={locale}
           value={value.notes}
           onChange={(e) => set({ notes: e.target.value })}
           className={`${profileTextareaClass} min-h-[88px] ${

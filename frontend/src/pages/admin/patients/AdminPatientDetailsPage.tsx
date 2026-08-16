@@ -20,6 +20,7 @@ import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppoint
 import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
 import { AppointmentStatusChip } from '@/components/admin/patients/AppointmentStatusChip';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useI18n } from '@/i18n/provider';
 import { adminApi } from '@/lib/admin/client';
 import type {
   AdminPatientSummary,
@@ -65,6 +66,7 @@ function formatDateTime(value?: string | null) {
 }
 
 export default function AdminPatientDetailsPage() {
+  const { locale, dir } = useI18n();
   const { toast } = useToast();
   const { patientId } = useParams();
   const location = useLocation();
@@ -177,8 +179,8 @@ export default function AdminPatientDetailsPage() {
       </Helmet>
 
       <div
-        dir='rtl'
-        lang='ar'
+        dir={dir}
+        lang={locale}
       >
         <div className='flex items-start justify-between'>
           <div className='text-right'>
@@ -191,7 +193,7 @@ export default function AdminPatientDetailsPage() {
           </div>
           <button
             type='button'
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/admin/patients')}
             className='inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] hover:bg-[#F9FAFB]'
           >
             → رجوع للقائمة
@@ -221,7 +223,7 @@ export default function AdminPatientDetailsPage() {
             </div>
             <button
               type='button'
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/admin/patients')}
               className='mt-4 inline-flex h-[34px] items-center gap-2 rounded-[10px] bg-[#D97706] px-4 font-cairo text-[12px] font-extrabold text-white'
             >
               العودة لقائمة المرضى
@@ -229,6 +231,45 @@ export default function AdminPatientDetailsPage() {
           </div>
         ) : (
           <>
+            <section className='mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4'>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  نوع السجل
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  ملف مريض
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  حالة الحساب
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {accountStatusLabel[patient.user.accountStatus]}
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  نطاق الشاشة
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  مراجعة إدارية للبيانات والمواعيد
+                </div>
+              </div>
+              <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
+                <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
+                  الإجراء الحالي
+                </div>
+                <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                  {patient.user.accountStatus === 'active'
+                    ? 'متابعة السجل فقط'
+                    : patient.user.accountStatus === 'suspended'
+                      ? 'رفع التعليق أو إعادة التفعيل'
+                      : 'إعادة تفعيل الحساب عند الحاجة'}
+                </div>
+              </div>
+            </section>
+
             <section className='mt-6 rounded-[14px] border border-[#EEF2F6] bg-white px-6 py-6 shadow-[0_16px_32px_rgba(0,0,0,0.06)]'>
               <div className='flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between'>
                 <div className='flex items-start gap-4'>
@@ -321,6 +362,22 @@ export default function AdminPatientDetailsPage() {
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+            </section>
+
+            <section className='mt-5 rounded-[14px] border border-[#D5E8E6] bg-[#F8FFFE] px-6 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
+              <div className='flex items-start gap-3 text-right'>
+                <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary'>
+                  <Info className='h-5 w-5' />
+                </div>
+                <div>
+                  <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
+                    صلاحيات الإدارة في هذه الشاشة للقراءة والمتابعة فقط
+                  </div>
+                  <div className='mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
+                    تعرض هذه الصفحة بيانات المريض، المواعيد، وسجل النشاط المرتبط به للمراجعة الإدارية. لا تُستخدم هذه الواجهة كمسار لرفع أو حذف ملفات المريض الحساسة من حساب الإدارة.
+                  </div>
                 </div>
               </div>
             </section>

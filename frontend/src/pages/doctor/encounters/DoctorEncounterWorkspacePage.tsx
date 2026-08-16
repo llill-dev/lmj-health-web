@@ -22,6 +22,7 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { doctorPatientsQueryKeys } from '@/lib/doctor/client';
 import { readAuthUser } from '@/lib/cookies';
+import { useI18n } from '@/i18n/provider';
 
 const DEFAULT_EXPANDED_SECTIONS: Record<EncounterWorkspaceSectionKey, boolean> =
   {
@@ -33,6 +34,7 @@ const DEFAULT_EXPANDED_SECTIONS: Record<EncounterWorkspaceSectionKey, boolean> =
   };
 
 export default function DoctorEncounterWorkspacePage() {
+  const { locale, dir } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -114,7 +116,7 @@ export default function DoctorEncounterWorkspacePage() {
         <title>الزيارة الطبية • LMJ Health</title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="w-full">
+      <div dir={dir} lang={locale} className="w-full">
         <EncounterWorkspaceHeader doctorName={doctorName} />
 
         {workspace.isAwaitingEncounterData ? (

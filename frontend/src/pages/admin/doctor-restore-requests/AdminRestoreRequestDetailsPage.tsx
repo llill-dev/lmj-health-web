@@ -174,7 +174,10 @@ export default function AdminRestoreRequestDetailsPage() {
           className="inline-flex items-center gap-2 font-cairo text-[12px] font-extrabold text-[#667085] transition hover:text-primary"
         >
           <ChevronLeft className="h-4 w-4" />
-          {tr("العودة إلى قائمة الطلبات", "Back to requests list")}
+          {tr(
+            "العودة إلى قائمة طلبات استعادة الحساب",
+            "Back to restore requests",
+          )}
         </button>
 
         <AdminDashboardOverview
@@ -187,6 +190,54 @@ export default function AdminRestoreRequestDetailsPage() {
           )}
           headerIcon={<ShieldCheck className="h-8 w-8 text-white" />}
         />
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+            <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+              {tr("نوع الطلب", "Request type")}
+            </div>
+            <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+              {tr("استعادة حساب طبيب", "Doctor account restore")}
+            </div>
+          </div>
+          <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+            <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+              {tr("الطبيب", "Doctor")}
+            </div>
+            <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+              {request.doctorName || "—"}
+            </div>
+          </div>
+          <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+            <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+              {tr("الحالة الحالية", "Current status")}
+            </div>
+            <div className={`font-cairo text-[13px] font-extrabold ${config.color}`}>
+              {config.label}
+            </div>
+          </div>
+          <div className="rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
+            <div className="mb-2 font-cairo text-[11px] font-bold text-[#667085]">
+              {tr("الإجراء الحالي", "Current action")}
+            </div>
+            <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
+              {request.status === "pending"
+                ? tr("قبول أو رفض طلب الاستعادة", "Approve or reject the restore request")
+                : request.status === "approved"
+                  ? tr("متابعة الطلب كسجل مُراجع", "Track request as a reviewed record")
+                  : tr("مراجعة سبب الرفض فقط", "Review rejection context only")}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] px-4 py-4 sm:px-5">
+          <p className="font-cairo text-[13px] font-semibold leading-6 text-[#215A57]">
+            {tr(
+              "هذه الصفحة مخصّصة لمراجعة قرار استعادة الحساب بعد حذف الطبيب. عند بقاء الطلب معلّقًا يمكنك اتخاذ القرار من هنا، وبعد المراجعة تتحول الصفحة إلى مرجع للنتيجة فقط.",
+              "This page is dedicated to reviewing a doctor account restore decision after deletion. While the request is pending you can act here; once reviewed, the page becomes reference-only.",
+            )}
+          </p>
+        </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
           {/* Main Details Card */}

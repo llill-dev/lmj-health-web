@@ -158,13 +158,14 @@ export default function SecretaryPatientsPage() {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
+  const canViewPatients = hasPermission("patients:view");
   const [searchInput, setSearchInput] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "temporary">("all");
   const patientsQuery = useDoctorPatients({
     page: 1,
     limit: 100,
     search: searchInput.trim() || undefined,
-  });
+  }, canViewPatients);
 
   const patients = useMemo(
     () =>
@@ -210,6 +211,9 @@ export default function SecretaryPatientsPage() {
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
               {(patientsQuery.total || patients.length).toLocaleString(numberLocale)} {tr("مريض", "patients")}
               {searchInput ? tr(" مطابق للبحث", " matching search") : ""}
+              {patientsQuery.isRefetching
+                ? tr(" • جاري تحديث البيانات", " • Refreshing data")
+                : ""}
             </p>
           </div>
 
@@ -240,11 +244,33 @@ export default function SecretaryPatientsPage() {
           </div>
         </div>
 
-        {patientsQuery.isAwaitingData ? (
+        {!canViewPatients ? (
+          <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr("ليست لديك صلاحية عرض المرضى.", "You do not have permission to view patients.")}
+            </p>
+          </div>
+        ) : patientsQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {tr("جاري تحميل بيانات المرضى...", "Loading patient data...")}
             </p>
+          </div>
+        ) : patientsQuery.isError ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr("تعذر تحميل بيانات المرضى حالياً.", "Could not load patient data right now.")}
+            </p>
+            <button
+              type="button"
+              onClick={() => void patientsQuery.refetch()}
+              disabled={patientsQuery.isRefetching}
+              className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {patientsQuery.isRefetching
+                ? tr("جاري إعادة المحاولة...", "Retrying...")
+                : tr("إعادة المحاولة", "Retry")}
+            </button>
           </div>
         ) : searchedPatients.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">

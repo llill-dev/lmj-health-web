@@ -37,7 +37,7 @@ export default function AdminDoctorRestoreRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState<RestoreRequest | null>(
     null,
   );
-  const { requests, isAwaitingData, isError, refetch } =
+  const { requests, isAwaitingData, isRefetching, isError, refetch } =
     useAdminDoctorRestoreRequests({ limit: 50 });
 
   const pendingCount = requests.filter((item) => item.status === "pending")
@@ -98,6 +98,16 @@ export default function AdminDoctorRestoreRequestsPage() {
           ]}
         />
 
+        <div className="flex items-start gap-3 rounded-[12px] border border-[#FEF3C7] bg-[#FFFBEB] px-4 py-3 text-start">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
+          <div className="font-cairo text-[12px] font-bold leading-6 text-[#B54708]">
+            {tr(
+              "تُستخدم هذه القائمة لفرز الطلبات التي تحتاج قرارًا إداريًا بعد انتهاء الاسترجاع التلقائي. الطلبات المعلّقة تحتاج فتح المراجعة، أما الطلبات المقبولة أو المرفوضة فتبقى هنا كسجل مرجعي للحالة النهائية.",
+              "This list is used to triage requests that need an admin decision after the automatic restore window ends. Pending requests need review, while approved or rejected requests remain here as a reference record of the final status.",
+            )}
+          </div>
+        </div>
+
         {isError ? (
           <div className="flex flex-col items-center gap-3 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-[0_12px_24px_rgba(0,0,0,0.06)]">
             <AlertCircle className="h-7 w-7 text-[#DC2626]" />
@@ -124,6 +134,13 @@ export default function AdminDoctorRestoreRequestsPage() {
               "جار تحميل طلبات الاستعادة...",
               "Loading restore requests…",
             )}
+          </div>
+        ) : null}
+
+        {!isError && !isAwaitingData && isRefetching ? (
+          <div className="flex items-center justify-center gap-2 rounded-[12px] border border-[#D1FAE5] bg-[#ECFDF5] px-6 py-3 text-center font-cairo text-[12px] font-extrabold text-[#047857] shadow-[0_12px_24px_rgba(0,0,0,0.04)]">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            {tr("جارٍ تحديث طلبات الاستعادة...", "Refreshing restore requests...")}
           </div>
         ) : null}
 

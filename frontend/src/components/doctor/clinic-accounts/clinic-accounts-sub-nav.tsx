@@ -1,24 +1,50 @@
 'use client';
 
 import { NavLink } from 'react-router-dom';
+import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
 import { cn } from '@/lib/utils/utils';
-
-const LINKS = [
-  { to: '/doctor/accounts', label: 'لوحة الحسابات', end: true },
-  { to: '/doctor/accounts/invoices', label: 'الفواتير', end: false },
-  { to: '/doctor/accounts/services', label: 'الخدمات', end: false },
-  { to: '/doctor/accounts/expenses', label: 'المصاريف', end: false },
-  { to: '/doctor/accounts/reports', label: 'التقارير', end: false },
-  { to: '/doctor/accounts/settings', label: 'الإعدادات', end: false },
-] as const;
+import { useI18n } from '@/i18n/provider';
 
 export function ClinicAccountsSubNav() {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const {
+    basePath,
+    canViewDashboard,
+    canViewInvoices,
+    canViewServices,
+    canViewExpenses,
+    canViewReports,
+    canViewSettings,
+  } = useBillingAccess();
+
+  const links = [
+    canViewDashboard
+      ? { to: basePath, label: tr('لوحة الحسابات', 'Accounts'), end: true }
+      : null,
+    canViewInvoices
+      ? { to: `${basePath}/invoices`, label: tr('الفواتير', 'Invoices'), end: false }
+      : null,
+    canViewServices
+      ? { to: `${basePath}/services`, label: tr('الخدمات', 'Services'), end: false }
+      : null,
+    canViewExpenses
+      ? { to: `${basePath}/expenses`, label: tr('المصاريف', 'Expenses'), end: false }
+      : null,
+    canViewReports
+      ? { to: `${basePath}/reports`, label: tr('التقارير', 'Reports'), end: false }
+      : null,
+    canViewSettings
+      ? { to: `${basePath}/settings`, label: tr('الإعدادات', 'Settings'), end: false }
+      : null,
+  ].filter(Boolean) as Array<{ to: string; label: string; end: boolean }>;
+
   return (
     <nav
       className="mb-6 grid grid-cols-2 gap-2 rounded-[12px] border border-[#EEF2F6] bg-white p-2 shadow-sm sm:grid-cols-3 lg:grid-cols-6"
-      aria-label="تنقل الحسابات"
+      aria-label={tr('تنقل الحسابات', 'Accounts navigation')}
     >
-      {LINKS.map((link) => (
+      {links.map((link) => (
         <NavLink
           key={link.to}
           to={link.to}

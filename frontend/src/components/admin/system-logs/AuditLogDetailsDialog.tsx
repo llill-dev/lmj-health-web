@@ -7,8 +7,10 @@ import {
 } from '@/components/admin/system-logs/auditLogConstants';
 import { formatAuditLogDateTime } from '@/components/admin/system-logs/auditLogUtils';
 import type { AuditLogItem } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 function DetailLine({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  const { dir } = useI18n();
   const display = value?.trim() ? value : '—';
   const muted = display === '—';
   return (
@@ -16,7 +18,7 @@ function DetailLine({ label, value, mono }: { label: string; value: string; mono
       <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>{label}</div>
       <div
         className={`mt-1 break-all text-right font-cairo text-[13px] font-semibold ${muted ? 'text-[#98A2B3]' : 'text-[#111827]'} ${mono ? 'font-mono text-[12px]' : ''}`}
-        dir={mono ? 'ltr' : 'rtl'}
+        dir={mono ? 'ltr' : dir}
       >
         {display}
       </div>
@@ -33,6 +35,7 @@ export function AuditLogDetailsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { locale, dir } = useI18n();
   if (!log) return null;
 
   const { date, time } = formatAuditLogDateTime(log.createdAt);
@@ -47,8 +50,8 @@ export function AuditLogDetailsDialog({
         <Dialog.Overlay className='fixed inset-0 z-[9998] bg-black/50 backdrop-blur-[2px]' />
         <Dialog.Content
           className='fixed left-1/2 top-1/2 z-[9999] w-[min(100vw-24px,520px)] max-h-[min(90vh,640px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[16px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none'
-          dir='rtl'
-          lang='ar'
+          dir={dir}
+          lang={locale}
         >
           <div className='flex items-start justify-between gap-3 border-b border-[#EEF2F6] px-5 py-4'>
             <div className='flex min-w-0 items-start gap-2'>

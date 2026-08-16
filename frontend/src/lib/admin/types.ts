@@ -806,7 +806,8 @@ export type AdminContentItem = {
   _id: string;
   type: AdminContentType;
   status: AdminContentStatus;
-  title?: string;
+  /** Plain string for most types; `{ ar, en }` for SETTINGS_PAGE per API-3. */
+  title?: AdminLocalizedValue;
   summary?: string;
   language?: string;
   slug?: string;
@@ -853,18 +854,60 @@ export type AdminContentBlock =
   | { type: "divider" }
   | { type: string; [key: string]: unknown };
 
+export type AdminLocalizedValue = string | { ar?: string; en?: string };
+
+export type AdminContentDynamicValue =
+  | string
+  | number
+  | boolean
+  | null
+  | AdminLocalizedValue
+  | AdminContentDynamicRecord
+  | AdminContentDynamicValue[];
+
+export type AdminContentDynamicRecord = {
+  [key: string]: AdminContentDynamicValue;
+};
+
+export type AdminContentSource = {
+  title?: AdminLocalizedValue;
+  url?: string;
+};
+
+export type AdminContentNews = {
+  sourceName?: string;
+  sourceUrl?: string;
+  originalTitle?: string;
+  publishedAt?: string;
+  aiSummary?: string;
+  dedupeHash?: string;
+  importedAt?: string;
+};
+
 export type AdminContentDetailsItem = AdminContentItem & {
   contentBlocks?: AdminContentBlock[];
   tags?: string[];
-  sources?: Array<{ title?: string; url?: string }>;
+  categories?: string[];
+  riskFlags?: string[];
+  relatedContentIds?: string[];
+  sources?: AdminContentSource[];
+  news?: AdminContentNews | null;
   sourceName?: string;
+  sourceUrl?: string;
   originalTitle?: string;
+  publishedAt?: string;
   aiSummary?: string;
   coverImage?: string;
   pageVersion?: string | null;
   disclaimerVersion?: number | string;
+  requiresSeekHelpBlock?: boolean;
+  isFeatured?: boolean;
   rejectionReason?: string | null;
   templateId?: string | null;
+  data?: AdminContentDynamicRecord | AdminContentDynamicValue[] | null;
+  template?: AdminContentTemplate | null;
+  contentTemplate?: AdminContentTemplate | null;
+  templateDefinition?: AdminContentTemplate | null;
 };
 
 export type AdminContentDetailsResponse = ApiSuccessEnvelope & {
@@ -880,15 +923,31 @@ export type AdminContentDetailsResponse = ApiSuccessEnvelope & {
  */
 export type CreateAdminContentBody = {
   type: AdminContentType;
-  title: string;
+  /** Plain string for most types; `{ ar, en }` for SETTINGS_PAGE per API-3. */
+  title: AdminLocalizedValue;
   summary?: string;
   language: "ar" | "en";
   slug?: string;
+  coverImage?: string;
   pageVersion?: string | null;
+  status?: AdminContentStatus;
+  templateId?: string | null;
+  data?: AdminContentDynamicRecord | AdminContentDynamicValue[] | null;
   contentBlocks?: AdminContentBlock[];
-  sources?: Array<{ title?: string; url?: string }>;
+  tags?: string[];
+  categories?: string[];
+  riskFlags?: string[];
+  relatedContentIds?: string[];
+  isFeatured?: boolean;
+  disclaimerVersion?: number | string;
+  requiresSeekHelpBlock?: boolean;
+  sources?: AdminContentSource[];
+  news?: AdminContentNews | null;
   sourceName?: string;
   sourceUrl?: string;
+  originalTitle?: string;
+  publishedAt?: string;
+  aiSummary?: string;
 };
 
 export type UpdateAdminContentBody = Partial<CreateAdminContentBody> & {
@@ -1012,24 +1071,31 @@ export type AdminContentTemplateParentType =
   | "MEDICATION";
 
 /** أنواع حقول القالب المعروضة في محرّر الحقول. */
+/** Matches ContentTemplateField.type in docs/openapi.json exactly — the backend
+ * has no `text`/`textarea`/`date`/`select` field types. */
 export type AdminContentTemplateFieldType =
-  | "text"
-  | "textarea"
+  | "string"
   | "number"
-  | "date"
   | "boolean"
-  | "select";
+  | "array"
+  | "object";
 
 export type AdminContentTemplateField = {
   key: string;
-  label?: string | { ar?: string; en?: string };
+  label?: AdminLocalizedValue;
   type?: AdminContentTemplateFieldType | string;
   required?: boolean;
+  enum?: unknown[];
+  min?: number;
+  max?: number;
+  regex?: string;
+  isPublic?: boolean;
 };
 
 export type AdminContentTemplate = {
   _id: string;
-  name?: string;
+  /** Matches `LocalizedInput` in docs/openapi.json — string or `{ar?, en?}`. */
+  name?: AdminLocalizedValue;
   slug?: string;
   description?: string;
   parentType?: AdminContentTemplateParentType | string;
@@ -1059,7 +1125,8 @@ export type AdminContentTemplatesListResponse = ApiSuccessEnvelope & {
 };
 
 export type CreateAdminContentTemplateBody = {
-  name: string;
+  /** Matches `LocalizedInput` in docs/openapi.json — string or `{ar?, en?}`. */
+  name: AdminLocalizedValue;
   slug?: string;
   parentType: AdminContentTemplateParentType;
   fields?: AdminContentTemplateField[];
@@ -1085,6 +1152,11 @@ export type AdminNewsItem = {
   title: string;
   summary?: string;
   language?: "ar" | "en" | string;
+  sourceName?: string;
+  originalTitle?: string;
+  aiSummary?: string;
+  coverImage?: string;
+  rawPayload?: unknown;
 };
 
 export type AdminNewsIngestBody = {

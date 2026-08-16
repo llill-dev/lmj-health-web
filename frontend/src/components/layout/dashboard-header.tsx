@@ -1,8 +1,8 @@
 "use client";
 
-import { Bell, Loader2, Menu, MessageCircle } from "lucide-react";
+import { ArrowRight, Bell, Loader2, Menu, MessageCircle } from "lucide-react";
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDoctorUnreadNotificationCount } from "@/hooks/doctor/notifications/useDoctorNotifications";
 import { useAuthStore } from "@/store/authStore";
 import { useI18n } from "@/i18n/provider";
@@ -36,6 +36,10 @@ interface DashboardHeaderProps {
   showMessages?: boolean;
   showUnreadBadge?: boolean;
   showNotifications?: boolean;
+  backLink?: {
+    href: string;
+    label: string;
+  } | null;
 }
 
 export default function DashboardHeader({
@@ -46,9 +50,9 @@ export default function DashboardHeader({
   showMessages = true,
   showUnreadBadge = true,
   showNotifications = true,
+  backLink = null,
 }: DashboardHeaderProps) {
-  const { locale, t } = useI18n();
-  const dir = locale === "ar" ? "rtl" : "ltr";
+  const { dir, locale, t } = useI18n();
   const effectiveTitle = title ?? t("dashboard.title.default");
 
   const user = useAuthStore((s) => s.user);
@@ -121,6 +125,8 @@ export default function DashboardHeader({
         ? t("secretary.dashboard.subtitle")
         : t("dataEntry.dashboard.subtitle");
 
+  const backIconClassName = dir === "rtl" ? "rotate-180" : "";
+
   return (
     <header
       dir={dir}
@@ -169,6 +175,24 @@ export default function DashboardHeader({
               </div>
 
               <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-1 text-right">
+                {backLink ? (
+                  <Link
+                    to={backLink.href}
+                    className="mb-1 inline-flex w-fit items-center gap-2 self-start rounded-full border border-white/85 bg-white/90 px-3 py-1 font-cairo text-[11px] font-bold text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/25 hover:bg-white sm:text-[12px]"
+                  >
+                    <ArrowRight
+                      className={`h-3.5 w-3.5 ${backIconClassName}`}
+                      strokeWidth={2.25}
+                      aria-hidden
+                    />
+                    <span>
+                      {t("header.backToSection").replace(
+                        "{section}",
+                        backLink.label,
+                      )}
+                    </span>
+                  </Link>
+                ) : null}
                 <div className="flex min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-0.5">
                   <h1 className="max-w-full truncate font-cairo text-[16px] font-black leading-tight text-[#0f172a] sm:text-[17px]">
                     {titledDisplay}

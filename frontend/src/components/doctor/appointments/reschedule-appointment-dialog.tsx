@@ -61,7 +61,7 @@ export default function RescheduleAppointmentDialog({
     startTime: string;
     appointmentTypeId?: string;
     reason?: string;
-  }) => void | Promise<void>;
+  }) => void | boolean | Promise<void | boolean>;
   confirmDisabled?: boolean;
 }) {
   const { locale, dir } = useI18n();
@@ -153,6 +153,7 @@ export default function RescheduleAppointmentDialog({
     <Dialog.Root
       open={open}
       onOpenChange={(next) => {
+        if (isSubmitting && !next) return;
         onOpenChange(next);
         if (!next) {
           reset({
@@ -185,7 +186,19 @@ export default function RescheduleAppointmentDialog({
           />
         </Dialog.Overlay>
 
-        <Dialog.Content forceMount asChild>
+        <Dialog.Content
+          forceMount
+          onEscapeKeyDown={(event) => {
+            if (isSubmitting) event.preventDefault();
+          }}
+          onPointerDownOutside={(event) => {
+            if (isSubmitting) event.preventDefault();
+          }}
+          onInteractOutside={(event) => {
+            if (isSubmitting) event.preventDefault();
+          }}
+          className='contents'
+        >
           <motion.div
             initial={false}
             animate={open ? 'open' : 'closed'}
@@ -230,7 +243,8 @@ export default function RescheduleAppointmentDialog({
                 <Dialog.Close asChild>
                   <button
                     type='button'
-                    className='absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] sm:left-5 sm:top-5 lg:left-6 lg:top-6'
+                    disabled={isSubmitting}
+                    className='absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60 sm:left-5 sm:top-5 lg:left-6 lg:top-6'
                     aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
@@ -248,13 +262,15 @@ export default function RescheduleAppointmentDialog({
                 <form
                   className='mt-6 space-y-5 pb-5 sm:mt-8 sm:pb-6 lg:pb-7'
                   onSubmit={handleSubmit(async (values) => {
-                    await onConfirm({
+                    const result = await onConfirm({
                       date: values.date,
                       startTime: values.startTime,
                       appointmentTypeId: values.appointmentTypeId?.trim() || undefined,
                       reason: values.reason?.trim() || undefined,
                     });
-                    onOpenChange(false);
+                    if (result !== false) {
+                      onOpenChange(false);
+                    }
                   })}
                 >
                   <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
@@ -416,7 +432,8 @@ export default function RescheduleAppointmentDialog({
                     <Dialog.Close asChild>
                       <button
                         type='button'
-                        className='h-[46px] w-full rounded-[10px] border border-[#D0D5DD] bg-white font-cairo text-[14px] font-extrabold text-[#344054]'
+                        disabled={isSubmitting}
+                        className='h-[46px] w-full rounded-[10px] border border-[#D0D5DD] bg-white font-cairo text-[14px] font-extrabold text-[#344054] disabled:cursor-not-allowed disabled:opacity-60'
                       >
                         {tr('إلغاء', 'Cancel')}
                       </button>

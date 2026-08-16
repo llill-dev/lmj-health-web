@@ -2,6 +2,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Eye, X } from 'lucide-react';
 import { useAdminMedicalOrderCatalogItem } from '@/hooks/admin/medical-orders/useAdminMedicalOrderCatalog';
 import type { MedicalOrderCatalogKind } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 const KIND_AR: Record<MedicalOrderCatalogKind, string> = {
   lab: 'مختبر',
@@ -23,10 +24,9 @@ export default function MedicalOrderCatalogDetailsDialog({
   kind,
   itemId,
 }: Props) {
-  const { item, isAwaitingData, isError } = useAdminMedicalOrderCatalogItem(
-    kind,
-    open ? itemId : null,
-  );
+  const { locale, dir } = useI18n();
+  const { item, isAwaitingData, isError, refetch, isRefetching } =
+    useAdminMedicalOrderCatalogItem(kind, open ? itemId : null);
 
   const detailRows =
     item == null
@@ -98,8 +98,8 @@ export default function MedicalOrderCatalogDetailsDialog({
         <Dialog.Overlay className='fixed inset-0 z-[9998] bg-black/45 backdrop-blur-[2px]' />
         <Dialog.Content
           className='fixed left-1/2 top-1/2 z-[9999] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
-          dir='rtl'
-          lang='ar'
+          dir={dir}
+          lang={locale}
         >
           <div className='flex items-center justify-between border-b border-[#F2F4F7] px-5 py-4'>
             <div className='flex items-center gap-2'>
@@ -125,7 +125,15 @@ export default function MedicalOrderCatalogDetailsDialog({
               </div>
             ) : isError || !item ? (
               <div className='rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-6 text-center font-cairo text-[12px] font-semibold text-[#B42318]'>
-                تعذر تحميل تفاصيل البند.
+                <p>تعذر تحميل تفاصيل البند.</p>
+                <button
+                  type='button'
+                  onClick={() => void refetch()}
+                  disabled={isRefetching}
+                  className='mt-3 font-cairo text-[12px] font-extrabold text-[#B42318] underline disabled:opacity-60'
+                >
+                  {isRefetching ? 'جاري إعادة المحاولة…' : 'إعادة المحاولة'}
+                </button>
               </div>
             ) : (
               <>

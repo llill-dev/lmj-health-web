@@ -154,11 +154,12 @@ export default function SecretaryWaitlistPage() {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const numberLocale = locale === "ar" ? "ar-SA" : "en-US";
   const { hasPermission } = useSecretaryPermissions();
+  const canViewWaitlist = hasPermission("waitlist:view");
   const [searchInput, setSearchInput] = useState("");
   const waitlistQuery = useDoctorWaitlist({
     page: 1,
     limit: 100,
-  });
+  }, canViewWaitlist);
 
   const waitlistPatients = useMemo(
     () =>
@@ -215,6 +216,9 @@ export default function SecretaryWaitlistPage() {
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
               {waitlistPatients.length.toLocaleString(numberLocale)} {tr("مريض", "patients")}
               {searchInput ? tr(" مطابق للبحث", " matching search") : ""}
+              {waitlistQuery.isRefetching
+                ? tr(" • جاري تحديث البيانات", " • Refreshing data")
+                : ""}
             </p>
           </div>
         </div>
@@ -233,11 +237,33 @@ export default function SecretaryWaitlistPage() {
           </div>
         </div>
 
-        {waitlistQuery.isAwaitingData ? (
+        {!canViewWaitlist ? (
+          <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr("ليست لديك صلاحية عرض قائمة الانتظار.", "You do not have permission to view the waitlist.")}
+            </p>
+          </div>
+        ) : waitlistQuery.isAwaitingData ? (
           <div className="flex min-h-[220px] items-center justify-center px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {tr("جاري تحميل قائمة الانتظار...", "Loading waitlist...")}
             </p>
+          </div>
+        ) : waitlistQuery.isError ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr("تعذر تحميل قائمة الانتظار حالياً.", "Could not load the waitlist right now.")}
+            </p>
+            <button
+              type="button"
+              onClick={() => void waitlistQuery.refetch()}
+              disabled={waitlistQuery.isRefetching}
+              className="rounded-[10px] border border-[#D0D5DD] bg-white px-4 py-2 font-cairo text-[14px] font-black text-[#344054] transition-colors hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {waitlistQuery.isRefetching
+                ? tr("جاري إعادة المحاولة...", "Retrying...")
+                : tr("إعادة المحاولة", "Retry")}
+            </button>
           </div>
         ) : searchedPatients.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">

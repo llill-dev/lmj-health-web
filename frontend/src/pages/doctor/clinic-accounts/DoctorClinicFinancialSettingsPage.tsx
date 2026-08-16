@@ -33,13 +33,18 @@ import {
 } from '@/lib/doctor/billing/settingsUi';
 import { useRetryAction } from '@/lib/query/useRetryAction';
 import { cn } from '@/lib/utils/utils';
+import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
+import { useI18n } from '@/i18n/provider';
 
 function sectionCardClassName() {
   return 'rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm';
 }
 
 export default function DoctorClinicFinancialSettingsPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
+  const { canManageSettings } = useBillingAccess();
   const settingsQuery = useBillingSettings();
   const updateSettings = useUpdateBillingSettings();
   const { retry: retrySettings, retrying: retryingSettings } = useRetryAction(
@@ -148,13 +153,21 @@ export default function DoctorClinicFinancialSettingsPage() {
   return (
     <>
       <Helmet>
-        <title>الإعدادات المالية • LMJ Health</title>
+        <title>
+          {tr(
+            'الإعدادات المالية • LMJ Health',
+            'Financial Settings • LMJ Health',
+          )}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar">
+      <div dir={dir} lang={locale}>
         <ClinicAccountsBanner
-          title="الإعدادات المالية"
-          subtitle="إعدادات العملة والضريبة والخصومات وطرق الدفع"
+          title={tr('الإعدادات المالية', 'Financial settings')}
+          subtitle={tr(
+            'إعدادات العملة والضريبة والخصومات وطرق الدفع',
+            'Currency, tax, discounts, and payment method settings',
+          )}
           icon={<BookOpen className="h-7 w-7 text-white sm:h-8 sm:w-8" />}
         />
 
@@ -162,7 +175,7 @@ export default function DoctorClinicFinancialSettingsPage() {
 
         {settingsQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الإعدادات"
+            title={tr('تعذّر تحميل الإعدادات', 'Failed to load settings')}
             brief={getUserFacingRequestErrorMessage(settingsQuery.error)}
             retrying={retryingSettings}
             onRetry={() => void retrySettings()}
@@ -171,6 +184,13 @@ export default function DoctorClinicFinancialSettingsPage() {
           <DoctorInlineDetailsSkeleton rows={6} />
         ) : (
           <div className="space-y-5">
+            {!canManageSettings ? (
+              <div className="rounded-[16px] border border-[#D0D5DD] bg-[#F8FAFC] p-4 text-right">
+                <p className="font-cairo text-[13px] font-semibold text-[#667085]">
+                  يمكنك مراجعة الإعدادات المالية فقط. تعديلها يتطلب صلاحية إدارة الإعدادات.
+                </p>
+              </div>
+            ) : null}
             <section className={sectionCardClassName()}>
               <div className="mb-4 flex items-center gap-2 text-start">
                 <DollarSign className="h-5 w-5 text-primary" aria-hidden />
@@ -298,25 +318,29 @@ export default function DoctorClinicFinancialSettingsPage() {
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleMyHealthSync}
-                className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
-              >
-                <RefreshCw className="h-4 w-4" aria-hidden />
-                مزامنة الآن
-              </button>
+              {canManageSettings ? (
+                <button
+                  type="button"
+                  onClick={handleMyHealthSync}
+                  className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
+                >
+                  <RefreshCw className="h-4 w-4" aria-hidden />
+                  مزامنة الآن
+                </button>
+              ) : null}
             </section>
 
-            <button
-              type="button"
-              disabled={updateSettings.isPending}
-              onClick={() => void handleSave()}
-              className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] disabled:opacity-60"
-            >
-              <Save className="h-4 w-4" aria-hidden />
-              {updateSettings.isPending ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
-            </button>
+            {canManageSettings ? (
+              <button
+                type="button"
+                disabled={updateSettings.isPending}
+                onClick={() => void handleSave()}
+                className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] disabled:opacity-60"
+              >
+                <Save className="h-4 w-4" aria-hidden />
+                {updateSettings.isPending ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
+              </button>
+            ) : null}
           </div>
         )}
       </div>

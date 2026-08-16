@@ -9,6 +9,7 @@ import LogoutConfirmDialog, {
 import { useToast } from "@/components/ui/ToastProvider";
 import {
   dataEntrySidebarItems,
+  getSectionBackNavigation,
   type DataEntrySidebarItemId,
 } from "@/constant/sidebar-items";
 import { readAuthUser } from "@/lib/cookies";
@@ -81,6 +82,16 @@ export default function DataEntryLayout() {
         || pathname.startsWith(`/data-entry/${item.path}/`),
     )?.path ?? "dashboard";
 
+  const backLink = useMemo(
+    () =>
+      getSectionBackNavigation(
+        pathname,
+        "/data-entry",
+        dataEntrySidebarItems,
+      ),
+    [pathname],
+  );
+
   return (
     <div className="h-dvh overflow-hidden scrollbar-hide bg-[linear-gradient(165deg,#f4faf9_0%,#f8fafc_42%,#ffffff_100%)]">
       <div className="relative mx-auto flex h-dvh w-full max-w-screen-2xl">
@@ -93,6 +104,7 @@ export default function DataEntryLayout() {
               showMessages={false}
               showUnreadBadge={false}
               showNotifications={false}
+              backLink={backLink}
             />
           </div>
 

@@ -24,7 +24,7 @@ describe('Data-entry routing integration', () => {
     renderWithProviders(<App />, { route: '/data-entry/dashboard' });
 
     expect(
-      await screen.findByRole('heading', { name: 'لوحة مدخل البيانات' }),
+      await screen.findByRole('heading', { name: 'مدخل البيانات' }),
     ).toBeInTheDocument();
   });
 });

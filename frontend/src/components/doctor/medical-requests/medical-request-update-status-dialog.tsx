@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import StyledSelect from '@/components/ui/styled-select';
 import { buildDoctorOrderStatusUpdateOptions } from '@/lib/doctor/orders/orderStatusLabels';
 import { MedicalRequestModalShell } from './medical-request-modal-shell';
+import { useI18n } from '@/i18n/provider';
 
 export function MedicalRequestUpdateStatusDialog({
   open,
@@ -22,6 +23,7 @@ export function MedicalRequestUpdateStatusDialog({
   busy?: boolean;
   onConfirm: (statusCode: string) => Promise<void>;
 }) {
+  const { dir } = useI18n();
   const options = useMemo(
     () => buildDoctorOrderStatusUpdateOptions(currentStatusCode),
     [currentStatusCode],
@@ -41,7 +43,7 @@ export function MedicalRequestUpdateStatusDialog({
       title="تحديث الحالة"
       maxWidthClass="max-w-[480px]"
     >
-      <div className="space-y-5 text-right" dir="rtl">
+      <div className="space-y-5 text-right" dir={dir}>
         <p className="font-cairo text-[13px] font-semibold leading-6 text-[#667085]">
           تحديث حالة طلب المريض{' '}
           <span className="font-extrabold text-[#111827]">{patientName}</span>

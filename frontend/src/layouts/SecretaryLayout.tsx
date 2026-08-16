@@ -2,14 +2,18 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/layout/sidebar";
 import DashboardHeader from "@/components/layout/dashboard-header";
-import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
+import LogoutConfirmDialog, {
+  type LogoutScope,
+} from "@/components/auth/logout-confirm-dialog";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
+  getSectionBackNavigation,
   secretarySidebarItems,
   type SecretarySidebarItemId,
 } from "@/constant/sidebar-items";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { readAuthUser } from "@/lib/cookies";
+import { getSecretaryBillingEntryPath as resolveSecretaryBillingEntryPath } from "@/lib/secretary/permissions";
 import { SecretaryRouteFallback } from "@/routes/RouteFallbacks";
 import { useAuthStore } from "@/store/authStore";
 import MotionProvider from "@/motion/MotionProvider";
@@ -33,20 +37,31 @@ export default function SecretaryLayout() {
   const secretaryEmail = authUser?.email?.trim() || "";
   const permissionsReady =
     !secretaryPermissions.isLoading && !secretaryPermissions.isPending;
-  const visibleSidebarItems = useMemo(
+  const visibleSidebarItems: Array<
+    (typeof secretarySidebarItems)[number] & { href?: string }
+  > = useMemo(
     () =>
       !permissionsReady
         ? []
-        : secretarySidebarItems.filter((item) =>
-            secretaryPermissions.canAccessItem(item.path),
-          ),
+        : secretarySidebarItems
+            .filter((item) => secretaryPermissions.canAccessItem(item.path))
+            .map((item) =>
+              item.path === "accounts"
+                ? {
+                    ...item,
+                    href: resolveSecretaryBillingEntryPath(
+                      secretaryPermissions.permissions,
+                    ),
+                  }
+                : item,
+            ),
     [permissionsReady, secretaryPermissions.permissions],
   );
 
-  const performLogout = useCallback(async () => {
+  const performLogout = useCallback(async (scope: LogoutScope) => {
     setLoggingOut(true);
     try {
-      await useAuthStore.getState().logout();
+      await useAuthStore.getState().logout({ scope });
       toast(t("logout.toast.success.body"), {
         title: t("logout.toast.success.title"),
         variant: "success",
@@ -72,13 +87,20 @@ export default function SecretaryLayout() {
         pathname.startsWith(`/secretary/${item.path}/`),
     )?.path ?? "dashboard";
 
+  const backLink = useMemo(
+    () =>
+      getSectionBackNavigation(pathname, "/secretary", visibleSidebarItems),
+    [pathname, visibleSidebarItems],
+  );
+
   useEffect(() => {
     if (!permissionsReady) return;
-    const firstPath = visibleSidebarItems[0]?.path ?? "dashboard";
+    const firstItem = visibleSidebarItems[0];
+    const firstPath = firstItem?.href ?? `/secretary/${firstItem?.path ?? "dashboard"}`;
     const currentSegment = pathname.split("/")[2] as SecretarySidebarItemId | undefined;
     if (!currentSegment) return;
     if (secretaryPermissions.canAccessItem(currentSegment)) return;
-    navigate(`/secretary/${firstPath}`, { replace: true });
+    navigate(firstPath, { replace: true });
   }, [
     navigate,
     pathname,
@@ -117,6 +139,7 @@ export default function SecretaryLayout() {
               onMenuClick={() => setIsMobileSidebarOpen(true)}
               showMessages={false}
               showUnreadBadge={false}
+              backLink={backLink}
             />
           </div>
 
@@ -134,12 +157,9 @@ export default function SecretaryLayout() {
         </main>
       </div>
 
-      <ConfirmActionDialog
+      <LogoutConfirmDialog
         open={logoutConfirmOpen}
         onOpenChange={setLogoutConfirmOpen}
-        title={t("logout.title")}
-        description={t("logout.secretary.description")}
-        confirmLabel={loggingOut ? t("logout.pending") : t("common.logout")}
         confirmDisabled={loggingOut}
         onConfirm={performLogout}
       />

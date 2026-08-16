@@ -13,7 +13,7 @@ export function AdminServicesHeader({
       variant='admin'
       surface='mint'
       title='إدارة دليل الخدمات'
-      subtitle='إدارة المنشآت الصحية وأنواع الخدمات المتاحة للمرضى'
+      subtitle='إدارة المنشآت الصحية والخدمات الفعلية، بينما تبقى أنواع الخدمات ومزوّدوها في الشاشات المرتبطة بها'
       headerIcon={<Building2 className='h-8 w-8 text-white' />}
       actionLabel={actionLabel}
       onActionClick={onAction}

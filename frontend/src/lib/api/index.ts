@@ -479,25 +479,30 @@ export async function apiRequest<T = unknown>(
     }
 
     if (!res.ok) {
+      let unauthorizedRecovered = false;
+      let unauthorizedInvalidated = false;
+
       if (res.status === 401 && !retryAfterRefresh) {
-        const recovered = await tryRecoverUnauthorizedSession(
+        unauthorizedRecovered = await tryRecoverUnauthorizedSession(
           endpoint,
           locale,
           hadBearerToken,
         );
-          if (recovered) {
-            const nextToken = useAuthStore.getState().accessToken || "";
-            if (nextToken) {
-              config.headers = {
-                ...(asStringHeaderRecord(config.headers) ?? {}),
-                Authorization: `Bearer ${nextToken}`,
-              };
+        unauthorizedInvalidated = hadBearerToken && !unauthorizedRecovered;
+
+        if (unauthorizedRecovered) {
+          const nextToken = useAuthStore.getState().accessToken || "";
+          if (nextToken) {
+            config.headers = {
+              ...(asStringHeaderRecord(config.headers) ?? {}),
+              Authorization: `Bearer ${nextToken}`,
+            };
             return execute(true);
           }
         }
       }
 
-      if (res.status === 401) {
+      if (res.status === 401 && !unauthorizedInvalidated) {
         maybeHandleUnauthorizedSession(endpoint, locale, hadBearerToken);
       }
 
@@ -648,6 +653,8 @@ export async function apiMultipart<T = unknown>(
     try {
       return await uploadWithXhr(token);
     } catch (error) {
+      let unauthorizedInvalidated = false;
+
       if (
         error instanceof ApiError
         && error.status === 401
@@ -659,18 +666,20 @@ export async function apiMultipart<T = unknown>(
           locale,
           hadBearerToken,
         );
+        unauthorizedInvalidated = !recovered;
         if (recovered) {
-          const nextToken =
-            providedToken !== undefined && omitAuth !== true
-              ? providedToken
-              : useAuthStore.getState().accessToken || "";
+          const nextToken = useAuthStore.getState().accessToken || "";
           if (nextToken) {
             return uploadWithXhr(nextToken);
           }
         }
       }
 
-      if (error instanceof ApiError && error.status === 401) {
+      if (
+        error instanceof ApiError
+        && error.status === 401
+        && !unauthorizedInvalidated
+      ) {
         maybeHandleUnauthorizedSession(endpoint, locale, hadBearerToken);
       }
 

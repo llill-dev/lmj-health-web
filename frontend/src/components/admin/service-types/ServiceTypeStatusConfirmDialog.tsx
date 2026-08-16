@@ -5,6 +5,7 @@ import { X, Power } from 'lucide-react';
 import { useEffect } from 'react';
 import type { ServiceType } from '@/lib/admin/types';
 import { resolveLabel } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 type Action = 'deactivate' | 'activate';
 
@@ -57,12 +58,13 @@ export default function ServiceTypeStatusConfirmDialog({
   onConfirm,
   isPending,
 }: Props) {
+  const { locale, dir } = useI18n();
   const title = serviceType
     ? resolveLabel(
         typeof serviceType.name === 'string'
           ? { en: serviceType.name, ar: serviceType.name }
           : serviceType.name,
-        'ar',
+        locale,
       )
     : '—';
 
@@ -93,8 +95,8 @@ export default function ServiceTypeStatusConfirmDialog({
           forceMount
           onOpenAutoFocus={(e) => e.preventDefault()}
           className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
-          dir='rtl'
-          lang='ar'
+          dir={dir}
+          lang={locale}
         >
           <Dialog.Description className='sr-only'>
             تأكيد تغيير حالة تفعيل نوع الخدمة في النظام.
@@ -136,6 +138,11 @@ export default function ServiceTypeStatusConfirmDialog({
                   ? `سيتم إخفاء نوع الخدمة «${title || '—'}» عن القوائم العامة (isActive: false). يمكنك إعادة تفعيله لاحقاً.`
                   : `سيتم تفعيل نوع الخدمة «${title || '—'}» مرة أخرى.`}
               </p>
+              <div className='mt-3 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-3 py-2 text-right font-cairo text-[12px] font-bold leading-6 text-[#0F766E]'>
+                هذا الإجراء يغيّر حالة النوع المرجعي فقط. لا يحذف المزوّدين أو
+                المنشآت المرتبطين به، لكنه قد يغيّر ظهوره كخيار متاح في النماذج
+                المرتبطة.
+              </div>
             </div>
             <div className='flex items-center justify-end gap-2 border-t border-[#F2F4F7] px-5 py-4'>
               <Dialog.Close asChild>

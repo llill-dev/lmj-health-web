@@ -1,8 +1,10 @@
 import { Helmet } from 'react-helmet-async';
+import { useI18n } from '@/i18n/provider';
 
 export default function OnboardingPage() {
+  const { locale, dir } = useI18n();
   return (
-    <main dir='rtl' lang='ar' className='w-full'>
+    <main dir={dir} lang={locale} className='w-full'>
       <Helmet>
         <title>Onboarding • LMJ Health</title>
       </Helmet>

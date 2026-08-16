@@ -1,6 +1,7 @@
 import { Calendar } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { MedicalRequestDetailVm } from './map-doctor-medical-requests';
+import { useI18n } from '@/i18n/provider';
 
 export function MedicalRequestInfoCard({
   vm,
@@ -9,9 +10,10 @@ export function MedicalRequestInfoCard({
   vm: MedicalRequestDetailVm;
   subtitle?: ReactNode;
 }) {
+  const { dir } = useI18n();
   return (
     <div className="rounded-[8px] bg-[#E6F4F3] px-4 py-4">
-      <div dir="rtl" className="flex items-start gap-4 text-start">
+      <div dir={dir} className="flex items-start gap-4 text-start">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-primary font-cairo text-[18px] font-extrabold text-white shadow-[0_4px_12px_rgba(15,143,139,0.28)]">
           {vm.patientInitial}
         </div>

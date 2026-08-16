@@ -6,6 +6,7 @@ import {
   clearPushDeviceSyncRecord,
   readPushDeviceSyncRecord,
   setPushDeviceToken,
+  writePushDeviceSyncRecord,
 } from '@/lib/devices/storage';
 import {
   getRegisterDeviceRequests,
@@ -146,12 +147,12 @@ describe('Device registration lifecycle', () => {
   it('skips device unregister on logout-all because the backend removes devices server-side and still clears local sync state', async () => {
     seedAuthenticatedDoctor();
     setPushDeviceToken('push-token-1');
+    writePushDeviceSyncRecord({
+      userId: 'user-1',
+      token: 'push-token-1',
+    });
 
     renderWithProviders(<DeviceRegistrationBridge />);
-
-    await waitFor(() => {
-      expect(getRegisterDeviceRequests()).toHaveLength(1);
-    });
 
     await useAuthStore.getState().logout({ scope: 'all' });
 

@@ -230,6 +230,15 @@ export default function AdminFacilitiesPage() {
             ]}
         />
 
+        <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-6 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
+          <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
+            {tr(
+              "تُستخدم هذه الشاشة لإدارة سجل المنشأة نفسه: الاسم، النوع، الحالة، والربط بالطبيب المالك. تفاصيل الأطباء المرتبطين والمراجعة الأوسع للبيانات تتم من أزرار «الأطباء» و«تفاصيل» داخل كل منشأة.",
+              "Use this screen to manage the facility record itself: name, type, status, and owner-doctor linkage. Linked doctors and broader record review are handled from the “Doctors” and “Details” actions on each facility.",
+            )}
+          </div>
+        </section>
+
         <section className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>

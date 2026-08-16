@@ -22,20 +22,25 @@ import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-s
 import { useDoctorDoctorsDirectory } from "@/hooks";
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
+import { useI18n } from "@/i18n/provider";
 
 function tagChipClassName(tag: string, active: boolean) {
   if (!active) {
     return "border-[#E5E7EB] bg-[#F9FAFB] text-[#CBD5E1]";
   }
-  if (tag === "حضوري") {
+  if (tag === "حضوري" || tag === "In-person") {
     return "border-[#2E90FA] text-[#2E90FA]";
   }
   return "border-primary text-primary";
 }
 
-const CONSULTATION_TAGS = ["أونلاين", "حضوري"] as const;
-
 export default function DoctorDoctorsDirectoryPage() {
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const consultationTags = [
+    tr("أونلاين", "Online"),
+    tr("حضوري", "In-person"),
+  ] as const;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -103,7 +108,9 @@ export default function DoctorDoctorsDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>Doctors Directory • LMJ Health</title>
+          <title>
+            {tr("دليل الأطباء • LMJ Health", "Doctors Directory • LMJ Health")}
+          </title>
         </Helmet>
         <DoctorDirectoryCardsSkeleton cardCount={6} />
       </>
@@ -114,11 +121,22 @@ export default function DoctorDoctorsDirectoryPage() {
     return (
       <>
         <Helmet>
-          <title>Doctors Directory • LMJ Health</title>
+          <title>
+            {tr("دليل الأطباء • LMJ Health", "Doctors Directory • LMJ Health")}
+          </title>
         </Helmet>
         <DoctorListErrorState
-          title="تعذّر تحميل دليل الأطباء"
-          brief={errorMessage ?? "حدث خطأ أثناء تحميل القائمة."}
+          title={tr(
+            "تعذّر تحميل دليل الأطباء",
+            "Failed to load doctors directory",
+          )}
+          brief={
+            errorMessage ??
+            tr(
+              "حدث خطأ أثناء تحميل القائمة.",
+              "An error occurred while loading the list.",
+            )
+          }
           onRetry={() => void retryDirectory()}
           retrying={retryingDirectory}
         />
@@ -129,23 +147,28 @@ export default function DoctorDoctorsDirectoryPage() {
   return (
     <>
       <Helmet>
-        <title>Doctors Directory • LMJ Health</title>
+        <title>
+          {tr("دليل الأطباء • LMJ Health", "Doctors Directory • LMJ Health")}
+        </title>
       </Helmet>
 
-      <div dir="rtl" lang="ar" className="pb-8 sm:pb-10">
+      <div dir={dir} lang={locale} className="pb-8 sm:pb-10">
         <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="text-right">
               <div className="font-cairo text-[18px] font-extrabold text-[#111827]">
-                دليل الأطباء
+                {tr("دليل الأطباء", "Doctors Directory")}
               </div>
               <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                تصفح وابحث عن الأطباء المعتمدين
+                {tr(
+                  "تصفح وابحث عن الأطباء المعتمدين",
+                  "Browse and search approved doctors",
+                )}
               </div>
             </div>
 
             <span className="inline-flex h-[32px] items-center justify-center rounded-[6px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white">
-              {total} طبيب
+              {tr(`${total} طبيب`, `${total} doctors`)}
             </span>
           </div>
 
@@ -157,7 +180,10 @@ export default function DoctorDoctorsDirectoryPage() {
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="ابحث باسم الطبيب أو تخصصه أو مدينته..."
+                placeholder={tr(
+                  "ابحث باسم الطبيب أو تخصصه أو مدينته...",
+                  "Search by doctor name, specialty, or city...",
+                )}
                 className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
               />
             </div>
@@ -173,17 +199,19 @@ export default function DoctorDoctorsDirectoryPage() {
               ) : (
                 <Navigation className="w-4 h-4 text-primary" />
               )}
-              {geoCoords ? "تم تحديد الموقع" : "استخدم موقعي"}
+              {geoCoords
+                ? tr("تم تحديد الموقع", "Location set")
+                : tr("استخدم موقعي", "Use my location")}
             </button>
 
             <button
               type="button"
               disabled
-              title="قريباً"
+              title={tr("قريباً", "Coming soon")}
               className="flex h-[44px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[12px] font-extrabold text-[#98A2B3] shadow-[0_10px_20px_rgba(0,0,0,0.06)]"
             >
               <SlidersHorizontal className="w-4 h-4" />
-              فلاتر متقدمة
+              {tr("فلاتر متقدمة", "Advanced filters")}
             </button>
           </div>
         </section>
@@ -191,7 +219,10 @@ export default function DoctorDoctorsDirectoryPage() {
         <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 md:items-stretch">
           {doctors.length === 0 ? (
             <div className="col-span-full rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-16 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-              لا توجد نتائج مطابقة لبحثك حالياً.
+              {tr(
+                "لا توجد نتائج مطابقة لبحثك حالياً.",
+                "No results match your search right now.",
+              )}
             </div>
           ) : (
             doctors.map((d) => (
@@ -232,7 +263,7 @@ export default function DoctorDoctorsDirectoryPage() {
                 </div>
 
                 <div className="mt-3 flex min-h-[22px] flex-wrap items-center justify-center gap-2">
-                  {CONSULTATION_TAGS.map((tag) => {
+                  {consultationTags.map((tag) => {
                     const active = d.tags.includes(tag);
 
                     return (

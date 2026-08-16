@@ -112,7 +112,11 @@ describe('UpsertServiceTypeDialog integration', () => {
         'يجب أن يكون النص بالإنجليزية فقط: لا تُدخل حروفًا عربية في الحقول الإنجليزية.',
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText('للاتيني الصغير، أرقام، شرطة')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'المعرّف يجب أن يحتوي على أحرف لاتينية صغيرة وأرقام وشرطات فقط',
+      ),
+    ).toBeInTheDocument();
     expect(getLastCreateServiceTypePayload()).toBeNull();
   });
 
