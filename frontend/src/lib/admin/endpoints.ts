@@ -132,11 +132,15 @@ export const adminEndpoints = {
     update: (id: string) => `/api/service-types/${id}`,
   },
   serviceProviders: {
-    list: "/api/services",
-    getById: (id: string) => `/api/services/${id}`,
+    // Management API (admin/data-entry auth, full dynamic data, drafts/inactive included).
+    list: "/api/service-providers",
+    getById: (id: string) => `/api/service-providers/${id}`,
     create: "/api/service-providers",
     update: (id: string) => `/api/service-providers/${id}`,
     updateStatus: (id: string) => `/api/service-providers/${id}/status`,
+    // Public catalog — discovery only. Never use for admin/data-entry management screens.
+    publicList: "/api/services",
+    publicGetById: (id: string) => `/api/services/${id}`,
   },
   doctorProfileChangeRequests: {
     list: "/api/doctors/profile-change-requests",

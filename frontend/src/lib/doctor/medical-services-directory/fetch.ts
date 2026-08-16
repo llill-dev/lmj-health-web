@@ -53,7 +53,7 @@ async function fetchProvidersPage(typeSlug: string, cursor?: string) {
   if (cursor) qs.set('cursor', cursor);
 
   return get<ServiceProvidersListResponse>(
-    `${adminEndpoints.serviceProviders.list}?${qs.toString()}`,
+    `${adminEndpoints.serviceProviders.publicList}?${qs.toString()}`,
     { locale: 'ar' },
   );
 }
@@ -263,7 +263,7 @@ export async function fetchMedicalServiceProviderDetails(
   id: string,
 ): Promise<ServiceProvider | null> {
   const response = await get<ServiceProviderDetailsResponse>(
-    adminEndpoints.serviceProviders.getById(id),
+    adminEndpoints.serviceProviders.publicGetById(id),
     { locale: 'ar' },
   );
   return normalizeServiceProviderDetailsResponse(response);

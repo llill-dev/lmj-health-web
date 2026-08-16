@@ -91,6 +91,9 @@ import type {
   ServiceProviderStatusUpdateResponse,
   ServiceProviderUpdateResponse,
   UpdateProviderBody,
+  ManagedServiceProviderListParams,
+  ManagedServiceProviderListResponse,
+  ManagedServiceProviderDetailResponse,
 } from "@/lib/admin/types";
 
 type AdminApiRecord = {
@@ -1517,6 +1520,12 @@ function normalizeAdminMedicalOrderCatalogMutationResponse(
   return item ? { ...response, item } : response;
 }
 
+// NOTE: this used to JSON.stringify `data` here based on a misreading of the live
+// OpenAPI spec's declared type. The live backend's actual runtime behavior (a 422
+// on /api/service-types confirming `fields.forEach is not a function` when sent a
+// string) proves it expects real structured objects/arrays in the JSON body, not
+// JSON-encoded strings. Send `data` as-is.
+
 function normalizeServiceProviderCreateResponse(
   response: ServiceProviderCreateResponse,
 ): ServiceProviderCreateResponse {
@@ -2597,6 +2606,24 @@ export const adminApi = {
       }).then(normalizeAdminLookupDeleteResponse),
   },
   serviceProviders: {
+    list: (params: ManagedServiceProviderListParams = {}) => {
+      const qs = new URLSearchParams();
+      if (params.serviceType) qs.set("serviceType", params.serviceType);
+      if (params.status) qs.set("status", params.status);
+      if (params.q) qs.set("q", params.q);
+      if (params.page) qs.set("page", String(params.page));
+      if (params.limit) qs.set("limit", String(params.limit));
+      const query = qs.toString();
+      return get<ManagedServiceProviderListResponse>(
+        `${adminEndpoints.serviceProviders.list}${query ? `?${query}` : ""}`,
+        { locale: "ar" },
+      );
+    },
+    getById: (id: string) =>
+      get<ManagedServiceProviderDetailResponse>(
+        adminEndpoints.serviceProviders.getById(id),
+        { locale: "ar" },
+      ),
     create: (body: CreateProviderBody) =>
       post<ServiceProviderCreateResponse>(
         adminEndpoints.serviceProviders.create,

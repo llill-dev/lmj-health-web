@@ -23,9 +23,9 @@ import type {
   ServiceTypeResponse,
   CreateServiceTypeBody,
   UpdateServiceTypeBody,
-  ServiceProvidersListResponse,
   CreateProviderBody,
   UpdateProviderBody,
+  ManagedServiceProviderListParams,
   FacilityDoctorsListParams,
   FacilityDoctorsListResponse,
   FacilityDoctorSummary,
@@ -43,8 +43,9 @@ export const SERVICES_KEYS = {
   facilityDoctors: (id: string, params: FacilityDoctorsListParams) =>
     ["admin", "facility", id, "doctors", params] as const,
   serviceTypes: () => ["admin", "service-types"] as const,
-  serviceProviders: (typeSlug?: string, cursor?: string) =>
-    ["admin", "service-providers", typeSlug, cursor] as const,
+  serviceProviders: (params: ManagedServiceProviderListParams = {}) =>
+    ["admin", "service-providers", params] as const,
+  serviceProviderById: (id: string) => ["admin", "service-provider", id] as const,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -412,6 +413,12 @@ export function useServiceTypesPublicList() {
   };
 }
 
+// NOTE: an earlier version of this file JSON.stringify'd `fields` here, based on a
+// misreading of the live OpenAPI spec's type annotation. The live backend's actual
+// runtime behavior (confirmed via a 422 response: "القيمة يجب أن تكون مصفوفة." /
+// "fields.forEach is not a function") proves the opposite — it expects `fields` as
+// a real, structured array in the JSON body. Do not re-introduce stringification here.
+
 export function useCreateServiceType() {
   const qc = useQueryClient();
   return useMutation({
@@ -419,9 +426,11 @@ export function useCreateServiceType() {
       skipGlobalError: true,
     },
     mutationFn: (body: CreateServiceTypeBody) =>
-      post<ServiceTypeResponse>(adminEndpoints.serviceTypes.create, body, {
-        locale: "ar",
-      }),
+      post<ServiceTypeResponse>(
+        adminEndpoints.serviceTypes.create,
+        body,
+        { locale: "ar" },
+      ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceTypes() });
     },
@@ -435,9 +444,11 @@ export function useUpdateServiceType(id: string) {
       skipGlobalError: true,
     },
     mutationFn: (body: UpdateServiceTypeBody) =>
-      put<ServiceTypeResponse>(adminEndpoints.serviceTypes.update(id), body, {
-        locale: "ar",
-      }),
+      put<ServiceTypeResponse>(
+        adminEndpoints.serviceTypes.update(id),
+        body,
+        { locale: "ar" },
+      ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceTypes() });
     },
@@ -452,9 +463,11 @@ export function useMutateServiceType() {
       skipGlobalError: true,
     },
     mutationFn: ({ id, body }: { id: string; body: UpdateServiceTypeBody }) =>
-      put<ServiceTypeResponse>(adminEndpoints.serviceTypes.update(id), body, {
-        locale: "ar",
-      }),
+      put<ServiceTypeResponse>(
+        adminEndpoints.serviceTypes.update(id),
+        body,
+        { locale: "ar" },
+      ),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceTypes() });
     },
@@ -465,19 +478,30 @@ export function useMutateServiceType() {
 // Service Providers
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function useServiceProvidersList(typeSlug?: string, cursor?: string) {
-  const qs = new URLSearchParams({ limit: "20" });
-  if (typeSlug) qs.set("type", typeSlug);
-  if (cursor) qs.set("cursor", cursor);
+export function useServiceProvidersList(
+  params: ManagedServiceProviderListParams = {},
+) {
+  const query = useQuery({
+    queryKey: SERVICES_KEYS.serviceProviders(params),
+    queryFn: () => adminApi.serviceProviders.list(params),
+    placeholderData: keepPreviousData,
+  });
 
+  return {
+    ...query,
+    isAwaitingData: isAwaitingInitialQueryDataWithPlaceholder(
+      query.data,
+      query.isError,
+      undefined,
+    ),
+  };
+}
+
+export function useServiceProvider(id: string, enabled = true) {
   return useQuery({
-    queryKey: SERVICES_KEYS.serviceProviders(typeSlug, cursor),
-    queryFn: () =>
-      get<ServiceProvidersListResponse>(
-        `${adminEndpoints.serviceProviders.list}?${qs.toString()}`,
-        { locale: "ar" },
-      ),
-    enabled: !!typeSlug,
+    queryKey: SERVICES_KEYS.serviceProviderById(id),
+    queryFn: () => adminApi.serviceProviders.getById(id),
+    enabled: !!id && enabled,
   });
 }
 
@@ -505,6 +529,7 @@ export function useUpdateProvider(id: string) {
       adminApi.serviceProviders.update(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
+      qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceProviderById(id) });
     },
   });
 }
@@ -517,8 +542,9 @@ export function useUpdateProviderStatus() {
     },
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminApi.serviceProviders.updateStatus(id, { status }),
-    onSuccess: () => {
+    onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: ["admin", "service-providers"] });
+      qc.invalidateQueries({ queryKey: SERVICES_KEYS.serviceProviderById(id) });
     },
   });
 }

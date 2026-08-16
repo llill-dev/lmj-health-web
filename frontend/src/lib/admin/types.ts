@@ -1447,6 +1447,11 @@ export type ServiceTypeField = {
   type: "string" | "number" | "boolean" | "array" | "object";
   required?: boolean;
   isPublic?: boolean;
+  /** Allowed values for this field. Backend accepts any[]; UI treats entries as strings. */
+  enum?: unknown[];
+  min?: number;
+  max?: number;
+  regex?: string;
 };
 
 export type ServiceType = {
@@ -1551,4 +1556,59 @@ export type CreateProviderBody = {
 export type UpdateProviderBody = {
   data?: ServiceProviderPayload;
   status?: ProviderStatus;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Managed Service Providers — real management API shape (GET /api/service-providers,
+// GET /api/service-providers/:id). Confirmed against the live backend OpenAPI spec;
+// distinct from the legacy `ServiceProvider` type above, which mirrored the public
+// /api/services catalog response and used `_id` instead of `id`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ManagedServiceTypeSummary = {
+  id: string;
+  name: string | { en: string; ar: string };
+  slug: string;
+  schemaVersion: number;
+  isActive: boolean;
+};
+
+export type ManagedServiceProvider = {
+  id: string;
+  serviceType: ManagedServiceTypeSummary;
+  name: string | null;
+  city: string | null;
+  country: string | null;
+  aliases: string[];
+  data: ServiceProviderPayload;
+  status: ProviderStatus;
+  schemaVersionAtWrite: number;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type ManagedServiceProviderListParams = {
+  serviceType?: string;
+  status?: ProviderStatus;
+  q?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type ManagedServiceProviderListResponse = ApiSuccessEnvelope & {
+  page: number;
+  limit: number;
+  total: number;
+  results: number;
+  providers: ManagedServiceProvider[];
+};
+
+export type ManagedServiceProviderDetailResponse = ApiSuccessEnvelope & {
+  provider: ManagedServiceProvider;
+  /** Full localized service-type definition including dynamic field metadata. */
+  serviceType: ServiceType;
 };

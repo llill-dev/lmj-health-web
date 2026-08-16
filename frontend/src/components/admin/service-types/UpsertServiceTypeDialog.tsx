@@ -2,7 +2,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Plus, Trash2, Layers } from "lucide-react";
 import { useEffect } from "react";
-import { useFieldArray, useForm, Controller } from "react-hook-form";
+import type { Control, UseFormRegister, UseFormSetError } from "react-hook-form";
+import { useFieldArray, useForm, useWatch, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -10,6 +11,7 @@ import {
   useMutateServiceType,
 } from "@/hooks/admin/services/useAdminServices";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
+import { extractFieldValidationErrors } from "@/lib/admin/adminWriteFlowErrors";
 import { AppCheckbox } from "@/components/ui";
 import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
@@ -77,7 +79,13 @@ const formSchema = z.object({
   fields: z
     .array(
       z.object({
-        key: z.string().min(1, "مفتاح الحقل مطلوب"),
+        key: z
+          .string()
+          .min(1, "مفتاح الحقل مطلوب")
+          .regex(
+            /^[A-Za-z][A-Za-z0-9_]*$/,
+            "يجب أن يبدأ المفتاح بحرف لاتيني، ثم حروف/أرقام/شرطة سفلية فقط",
+          ),
         labelEn: z
           .string()
           .min(1, "مطلوب")
@@ -89,6 +97,11 @@ const formSchema = z.object({
         type: z.enum(["string", "number", "boolean", "array", "object"]),
         required: z.boolean(),
         isPublic: z.boolean(),
+        /** Comma-separated list; only meaningful for string/number types. */
+        enumValues: z.string().optional(),
+        min: z.string().optional(),
+        max: z.string().optional(),
+        regex: z.string().optional(),
       }),
     )
     .min(1, "أضف حقلاً schema واحداً على الأقل"),
@@ -129,6 +142,10 @@ function toFormValues(st: ServiceType): FormValues {
       type: f.type,
       required: !!f.required,
       isPublic: f.isPublic !== false,
+      enumValues: f.enum?.length ? f.enum.map((v) => String(v)).join(", ") : "",
+      min: f.min !== undefined ? String(f.min) : "",
+      max: f.max !== undefined ? String(f.max) : "",
+      regex: f.regex ?? "",
     })),
   };
 }
@@ -147,20 +164,108 @@ const defaultCreate: FormValues = {
       type: "string",
       required: true,
       isPublic: true,
+      enumValues: "",
+      min: "",
+      max: "",
+      regex: "",
     },
   ],
 };
 
+/** min/max/regex/enum only apply to string/number types; object/boolean/array
+ * cannot be searchable/filterable/sortable per the backend guardrails, so these
+ * capabilities are hidden for them in the UI (see fieldSupportsConstraints). */
+function fieldSupportsConstraints(type: FormValues["fields"][0]["type"]): boolean {
+  return type === "string" || type === "number";
+}
+
 function formToServiceTypeField(
   row: FormValues["fields"][0],
 ): ServiceTypeField {
+  const supportsConstraints = fieldSupportsConstraints(row.type);
+  const enumValues = supportsConstraints
+    ? (row.enumValues ?? "")
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean)
+    : [];
+  const min = supportsConstraints && row.min?.trim() ? Number(row.min) : undefined;
+  const max = supportsConstraints && row.max?.trim() ? Number(row.max) : undefined;
+  const regex =
+    supportsConstraints && row.regex?.trim() ? row.regex.trim() : undefined;
+
   return {
     key: row.key.trim(),
     label: { en: row.labelEn.trim(), ar: row.labelAr.trim() },
     type: row.type,
     required: row.required,
     isPublic: row.isPublic,
+    enum: enumValues.length > 0 ? enumValues : undefined,
+    min,
+    max,
+    regex,
   };
+}
+
+/** Maps a server 422 `{ [path]: message }` map (see `extractFieldValidationErrors`)
+ * onto the corresponding rendered form control so the person editing sees the
+ * exact reason next to the exact field, instead of one generic banner. Handles:
+ * - top-level bilingual objects: `name.ar` / `name.en` / `description.ar` / `description.en`
+ * - simple top-level keys: `slug`
+ * - schema field rows, in either express-validator array path style:
+ *   `fields[0].key` or `fields.0.key`, plus their bilingual `label.en`/`label.ar`
+ * Anything unrecognized is left for the generic `serverError` banner to surface. */
+const TOP_LEVEL_BILINGUAL_MAP: Record<string, keyof FormValues> = {
+  "name.ar": "nameAr",
+  "name.en": "nameEn",
+  "description.ar": "descAr",
+  "description.en": "descEn",
+};
+
+const FIELD_ROW_KEY_MAP: Record<string, string> = {
+  key: "key",
+  "label.ar": "labelAr",
+  "label.en": "labelEn",
+  type: "type",
+  required: "required",
+  isPublic: "isPublic",
+  enum: "enumValues",
+  min: "min",
+  max: "max",
+  regex: "regex",
+};
+
+function applyServerFieldErrors(
+  serverErrors: Record<string, string>,
+  setError: UseFormSetError<FormValues>,
+) {
+  const fieldRowPattern = /^fields(?:\[(\d+)\]|\.(\d+))\.(.+)$/;
+
+  for (const [path, message] of Object.entries(serverErrors)) {
+    if (path === "slug") {
+      setError("slug", { type: "server", message });
+      continue;
+    }
+    if (path in TOP_LEVEL_BILINGUAL_MAP) {
+      setError(TOP_LEVEL_BILINGUAL_MAP[path], { type: "server", message });
+      continue;
+    }
+
+    const rowMatch = fieldRowPattern.exec(path);
+    if (rowMatch) {
+      const index = Number(rowMatch[1] ?? rowMatch[2]);
+      const subPath = rowMatch[3];
+      const mappedKey = FIELD_ROW_KEY_MAP[subPath];
+      if (mappedKey && Number.isInteger(index)) {
+        setError(`fields.${index}.${mappedKey}` as `fields.${number}.key`, {
+          type: "server",
+          message,
+        });
+      }
+    }
+    // "fields" (the whole array) and anything else unmapped fall through to the
+    // generic `serverError` banner rendered below the form.
+  }
 }
 
 type Props = {
@@ -190,6 +295,7 @@ export default function UpsertServiceTypeDialog({
     handleSubmit,
     control,
     reset,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -239,7 +345,7 @@ export default function UpsertServiceTypeDialog({
           }}
         >
           <motion.div
-            className="relative max-h-[min(90vh,760px)] w-full max-w-[640px] overflow-hidden rounded-[18px] bg-white shadow-[0_24px_64px_rgba(0,0,0,0.22)]"
+            className="relative flex max-h-[min(90vh,760px)] w-full max-w-[640px] flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_24px_64px_rgba(0,0,0,0.22)]"
             initial={{ opacity: 0, y: 20, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -312,8 +418,10 @@ export default function UpsertServiceTypeDialog({
                   }
                   onOpenChange(false);
                   onSuccess?.();
-                } catch {
-                  /* يُعرض serverError */
+                } catch (err) {
+                  const fieldErrors = extractFieldValidationErrors(err);
+                  if (fieldErrors) applyServerFieldErrors(fieldErrors, setError);
+                  /* أي خطأ غير مُعرَّف على حقل محدد يظهر عبر serverError أدناه */
                 }
               })}
             >
@@ -425,6 +533,10 @@ export default function UpsertServiceTypeDialog({
                           type: "string",
                           required: false,
                           isPublic: true,
+                          enumValues: "",
+                          min: "",
+                          max: "",
+                          regex: "",
                         })
                       }
                       className="inline-flex items-center gap-1 rounded-[8px] border border-primary/30 bg-[#E7FBFA] px-2 py-1.5 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-primary/10"
@@ -470,7 +582,11 @@ export default function UpsertServiceTypeDialog({
                               dir="ltr"
                             />
                           </AdminFormField>
-                          <AdminFormField label="النوع" required>
+                          <AdminFormField
+                            label="النوع"
+                            required
+                            error={errors.fields?.[index]?.type?.message}
+                          >
                             <Controller
                               control={control}
                               name={`fields.${index}.type`}
@@ -552,6 +668,12 @@ export default function UpsertServiceTypeDialog({
                             حقل عام (isPublic)
                           </label>
                         </div>
+                        <FieldConstraintsRow
+                          control={control}
+                          register={register}
+                          index={index}
+                          errors={errors.fields?.[index]}
+                        />
                       </div>
                     ))}
                   </div>
@@ -596,5 +718,76 @@ export default function UpsertServiceTypeDialog({
         </motion.div>
       ) : null}
     </AnimatePresence>
+  );
+}
+
+/**
+ * enum/min/max/regex are only meaningful for string/number fields — object and
+ * geo_point-less array/boolean fields cannot be searchable/filterable/sortable
+ * per the backend guardrails, so these inputs are hidden rather than sent as
+ * dead weight. Isolated as its own component so only this row re-renders on
+ * type change (useWatch is scoped to a single field path).
+ */
+function FieldConstraintsRow({
+  control,
+  register,
+  index,
+  errors,
+}: {
+  control: Control<FormValues>;
+  register: UseFormRegister<FormValues>;
+  index: number;
+  errors?: {
+    enumValues?: { message?: string };
+    regex?: { message?: string };
+    min?: { message?: string };
+    max?: { message?: string };
+  };
+}) {
+  const type = useWatch({ control, name: `fields.${index}.type` });
+  if (!fieldSupportsConstraints(type)) return null;
+
+  return (
+    <div className="mt-3 grid grid-cols-1 gap-2 border-t border-[#F2F4F7] pt-3 sm:grid-cols-2">
+      <AdminFormField
+        label="القيم المسموحة (enum)"
+        hint="افصل بفاصلة، اتركه فارغاً إن لم يكن مطلوباً"
+        error={errors?.enumValues?.message}
+      >
+        <input
+          {...register(`fields.${index}.enumValues` as const)}
+          aria-label={`enum حقل ${index + 1}`}
+          className={adminFieldClass(adminInputClass, Boolean(errors?.enumValues))}
+          dir="ltr"
+          placeholder="a, b, c"
+        />
+      </AdminFormField>
+      <AdminFormField label="النمط (regex)" error={errors?.regex?.message}>
+        <input
+          {...register(`fields.${index}.regex` as const)}
+          aria-label={`regex حقل ${index + 1}`}
+          className={adminFieldClass(adminInputClass, Boolean(errors?.regex))}
+          dir="ltr"
+        />
+      </AdminFormField>
+      <AdminFormField label="الحد الأدنى (min)" error={errors?.min?.message}>
+        <input
+          type="number"
+          {...register(`fields.${index}.min` as const)}
+          aria-label={`min حقل ${index + 1}`}
+          className={adminFieldClass(adminInputClass, Boolean(errors?.min))}
+          dir="ltr"
+        />
+      </AdminFormField>
+      <AdminFormField label="الحد الأقصى (max)" error={errors?.max?.message}>
+        <input
+          type="number"
+          {...register(`fields.${index}.max` as const)}
+          aria-label={`max حقل ${index + 1}`}
+          className={adminFieldClass(adminInputClass, Boolean(errors?.max))}
+          dir="ltr"
+        />
+      </AdminFormField>
+    </div>
   );
 }

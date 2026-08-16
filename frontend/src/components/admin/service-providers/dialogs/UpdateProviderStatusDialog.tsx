@@ -21,6 +21,9 @@ interface UpdateProviderStatusDialogProps {
   providerId: string;
   providerName: string;
   currentStatus: string;
+  /** When the provider's service type is inactive, "active" is disabled client-side —
+   * the backend has no documented transition matrix, so this is a soft UX guard only. */
+  isServiceTypeActive?: boolean;
   onSuccess?: () => void;
 }
 
@@ -30,12 +33,21 @@ export default function UpdateProviderStatusDialog({
   providerId,
   providerName,
   currentStatus,
+  isServiceTypeActive = true,
   onSuccess,
 }: UpdateProviderStatusDialogProps) {
   const { dir } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(currentStatus);
+
+  useEffect(() => {
+    if (open) setStatus(currentStatus);
+  }, [open, currentStatus]);
+
+  const statusOptions = isServiceTypeActive
+    ? STATUS_OPTIONS
+    : STATUS_OPTIONS.filter((o) => o.value !== "active");
 
   useEffect(() => {
     if (!open) return;
@@ -140,11 +152,19 @@ export default function UpdateProviderStatusDialog({
             <form dir={dir} onSubmit={handleSubmit}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
-                  <AdminFormField label="الحالة الجديدة" required>
+                  <AdminFormField
+                    label="الحالة الجديدة"
+                    required
+                    hint={
+                      !isServiceTypeActive
+                        ? "نوع الخدمة غير مُفعّل حاليًا، لذا لا يمكن تفعيل هذا المزود قبل تفعيل النوع."
+                        : undefined
+                    }
+                  >
                     <StyledSelect
                       value={status}
                       onChange={setStatus}
-                      options={STATUS_OPTIONS}
+                      options={statusOptions}
                       placeholder="اختر الحالة"
                     />
                   </AdminFormField>
