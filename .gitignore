@@ -6,3 +6,13 @@
 
 # Internal report (exclude from Git; frontend README stays tracked)
 frontend/PROJECT_MIGRATION_REPORT.md
+
+# AI coding assistant / editor tool directories — local-only, do not push
+/.claude/
+/.cursor/
+/.agent/
+/.windsurf/
+/.aider*
+
+# Internal docs — do not push
+/docs/
