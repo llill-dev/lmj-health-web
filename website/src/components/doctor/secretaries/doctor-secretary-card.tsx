@@ -6,7 +6,6 @@ import {
   Mail,
   Phone,
   Pencil,
-  Power,
   Shield,
   Trash2,
   UserRound,
@@ -94,14 +93,6 @@ export function DoctorSecretaryCard({
               title="تعديل"
             >
               <Pencil className="h-4 w-4" aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={() => onUnassign(secretary)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] text-[#DC2626] transition hover:bg-[#FEE2E2]"
-              title="إلغاء تفعيل الربط"
-            >
-              <Power className="h-4 w-4" aria-hidden />
             </button>
           </div>
         </div>

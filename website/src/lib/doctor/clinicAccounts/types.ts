@@ -2,7 +2,8 @@ export type InvoiceStatus =
   | 'paid'
   | 'unpaid'
   | 'partial'
-  | 'overdue';
+  | 'overdue'
+  | 'cancelled';
 
 export type ExpenseCategory = 'rent' | 'salaries' | 'services' | 'materials';
 

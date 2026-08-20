@@ -1,4 +1,8 @@
 import type { DoctorAppointmentSummary } from "@/lib/doctor/types";
+import {
+  formatAppointmentDate,
+  formatAppointmentTime,
+} from "@/lib/shared/formatAppointmentDateTime";
 import { cn } from "@/lib/utils/utils";
 import { memo, type ComponentType } from "react";
 import {
@@ -18,12 +22,6 @@ import {
   Video,
   X,
 } from "lucide-react";
-
-function formatDashDate(iso: string) {
-  const [y, m, d] = iso.split("-");
-  if (!y || !m || !d) return iso;
-  return `${d}-${m}-${y}`;
-}
 
 function isFutureAppointmentSlot(date?: string, startTime?: string): boolean {
   if (!date || !startTime) return false;
@@ -131,11 +129,11 @@ export default function DoctorAppointmentExpandableCard({
     date: string;
     url?: string;
   }>;
-  const detailDate = appointment.date ? formatDashDate(appointment.date) : "—";
+  const detailDate = formatAppointmentDate(appointment.date);
   const location = "عيادة";
   const reason = appointment.notes?.trim() || "لم يذكر سبب الزيارة";
   const kindLabel = "مراجعة";
-  const time = appointment.startTime ?? "—";
+  const time = formatAppointmentTime(appointment.startTime);
   const noShowBlockedForFuture = isFutureAppointmentSlot(
     appointment.date,
     appointment.startTime,
@@ -177,7 +175,7 @@ export default function DoctorAppointmentExpandableCard({
                 </span>
                 <span className="inline-flex h-9 items-center gap-1.5 rounded-[6px] border border-primary bg-white px-3 font-cairo text-[12px] font-extrabold text-primary">
                   <Calendar className="h-3.5 w-3.5" />
-                  {appointment.date}
+                  {detailDate}
                 </span>
               </div>
             </div>
@@ -277,7 +275,7 @@ export default function DoctorAppointmentExpandableCard({
                               {file.name}
                             </div>
                             <div className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
-                              {formatDashDate(file.date)}
+                              {formatAppointmentDate(file.date)}
                             </div>
                           </div>
                           <div className="flex shrink-0 flex-wrap justify-end gap-2">

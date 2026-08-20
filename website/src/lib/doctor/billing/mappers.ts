@@ -67,6 +67,8 @@ export function mapApiInvoiceStatus(
       return 'partial';
     case 'overdue':
       return 'overdue';
+    case 'cancelled':
+      return 'cancelled';
     case 'issued':
     case 'draft':
     default:
@@ -84,6 +86,8 @@ export function mapUiInvoiceStatusToApi(
       return 'partial';
     case 'overdue':
       return 'overdue';
+    case 'cancelled':
+      return 'cancelled';
     case 'unpaid':
       return 'issued';
     default:

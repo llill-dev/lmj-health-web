@@ -10,10 +10,12 @@ import {
 } from '@/components/doctor/clinic-accounts';
 import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
 import DoctorListErrorState from '@/components/doctor/shared/doctor-list-error-state';
+import DoctorTablePagination from '@/components/doctor/shared/doctor-table-pagination';
 import { DoctorTableSkeleton } from '@/components/doctor/shared/skeletons';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   useBillingServices,
+  useBillingSettings,
   useCreateBillingService,
   useDeleteBillingService,
   useUpdateBillingService,
@@ -32,14 +34,16 @@ export default function DoctorClinicServicesPage() {
   const { canManageServices } = useBillingAccess();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ApiBillingService | null>(null);
   const [name, setName] = useState('');
   const [defaultPrice, setDefaultPrice] = useState('');
-  const [durationMinutes, setDurationMinutes] = useState('30');
+  const [durationMinutes, setDurationMinutes] = useState('');
   const [description, setDescription] = useState('');
 
-  const list = useBillingServices({ search, page, limit: 10, includeInactive: true });
+  const settingsQuery = useBillingSettings();
+  const list = useBillingServices({ search, page, limit, includeInactive: true });
   const createService = useCreateBillingService();
   const updateService = useUpdateBillingService();
   const deleteService = useDeleteBillingService();
@@ -54,7 +58,7 @@ export default function DoctorClinicServicesPage() {
     setDurationMinutes(
       editTarget?.durationMinutes != null
         ? String(editTarget.durationMinutes)
-        : '30',
+        : '',
     );
     setDescription(editTarget?.description ?? '');
   }, [dialogOpen, editTarget]);
@@ -78,7 +82,9 @@ export default function DoctorClinicServicesPage() {
         ? Number(durationMinutes)
         : undefined,
       description: description.trim() || undefined,
-      isActive: true,
+      // Only set on create — editing an existing (possibly deactivated) service must
+      // not silently reactivate it as a side effect of an unrelated field edit.
+      ...(editTarget ? {} : { isActive: true }),
     };
     try {
       if (editTarget?.id) {
@@ -94,11 +100,23 @@ export default function DoctorClinicServicesPage() {
     }
   };
 
-  const handleDelete = async (service: ApiBillingService) => {
-    if (!window.confirm(`حذف الخدمة "${service.name ?? ''}"؟`)) return;
+  const handleDeactivate = async (service: ApiBillingService) => {
+    if (!window.confirm(`تعطيل الخدمة "${service.name ?? ''}"؟ يمكنك تفعيلها مرة أخرى لاحقًا.`)) return;
     try {
       await deleteService.mutateAsync(service.id);
-      toast('تم حذف الخدمة.', { variant: 'success' });
+      toast('تم تعطيل الخدمة.', { variant: 'success' });
+    } catch (error) {
+      toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
+    }
+  };
+
+  const handleActivate = async (service: ApiBillingService) => {
+    try {
+      await updateService.mutateAsync({
+        serviceId: service.id,
+        body: { isActive: true },
+      });
+      toast('تم تفعيل الخدمة.', { variant: 'success' });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
     }
@@ -205,7 +223,7 @@ export default function DoctorClinicServicesPage() {
                       </td>
                       <td className="px-3 py-4 font-cairo text-[13px] font-semibold">
                         {service.defaultPrice != null
-                          ? formatBillingAmount(service.defaultPrice, 'USD')
+                          ? formatBillingAmount(service.defaultPrice, settingsQuery.currency)
                           : '—'}
                       </td>
                       <td className="px-3 py-4 font-cairo text-[13px] font-semibold">
@@ -224,13 +242,23 @@ export default function DoctorClinicServicesPage() {
                             >
                               تعديل
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => void handleDelete(service)}
-                              className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
-                            >
-                              حذف
-                            </button>
+                            {service.isActive !== false ? (
+                              <button
+                                type="button"
+                                onClick={() => void handleDeactivate(service)}
+                                className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
+                              >
+                                تعطيل
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => void handleActivate(service)}
+                                className="rounded-[6px] bg-[#F0FDFA] px-3 py-1 text-[11px] font-extrabold text-primary"
+                              >
+                                تفعيل
+                              </button>
+                            )}
                           </div>
                         </td>
                       ) : null}
@@ -241,6 +269,22 @@ export default function DoctorClinicServicesPage() {
             </div>
           )}
         </section>
+
+        {list.services.length > 0 ? (
+          <DoctorTablePagination
+            className="mt-6"
+            page={page}
+            totalPages={list.totalPages}
+            pageSize={limit}
+            pageSizeOptions={[10, 20, 50]}
+            disabled={list.isAwaitingData}
+            onPageChange={setPage}
+            onPageSizeChange={(nextLimit) => {
+              setLimit(nextLimit);
+              setPage(1);
+            }}
+          />
+        ) : null}
       </div>
 
       <ClinicAccountsModalShell
@@ -273,7 +317,7 @@ export default function DoctorClinicServicesPage() {
             min={1}
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(e.target.value)}
-            placeholder="المدة بالدقائق"
+            placeholder="المدة بالدقائق (مثال: 30)"
             className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
           />
           <textarea

@@ -53,7 +53,7 @@ import {
   getAppointmentWriteErrorMessage,
 } from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 /** نص قصير للواجهة + إبقاء الشرح الطويل داخل تفاصيل قابلة للطي. */
 function summarizeAppointmentsListError(error: unknown): {
@@ -82,14 +82,22 @@ function summarizeAppointmentsListError(error: unknown): {
   };
 }
 
-type MainView = "schedule" | "waiting";
-type StatusTab = "scheduled" | "completed" | "cancelled" | "no-show";
+type MainView = "schedule";
+type StatusTab =
+  | "scheduled"
+  | "rescheduled"
+  | "completed"
+  | "cancelled"
+  | "no-show";
 
 type DoctorAppointmentsFiltersState = {
   view: MainView;
   status: StatusTab;
   search: string;
   date: string;
+  /** Mutually exclusive with `date` — set either the single day or a from/to range. */
+  dateFrom: string;
+  dateTo: string;
   page: number;
   limit: number;
 };
@@ -142,6 +150,8 @@ export default function DoctorAppointmentsPage() {
       status: "scheduled",
       search: "",
       date: "",
+      dateFrom: "",
+      dateTo: "",
       page: 1,
       limit: 20,
     };
@@ -187,14 +197,19 @@ export default function DoctorAppointmentsPage() {
     fileName: string;
   } | null>(null);
 
-  const selectedStatus =
-    filters.view === "waiting" ? "scheduled" : filters.status;
+  const selectedStatus = filters.status;
+  const hasDateRange = Boolean(filters.dateFrom || filters.dateTo);
 
   const listQuery = useDoctorAppointmentsApi({
     page: filters.page,
     limit: filters.limit,
     status: selectedStatus,
-    date: filters.date || undefined,
+    ...(hasDateRange
+      ? {
+          dateFrom: filters.dateFrom || undefined,
+          dateTo: filters.dateTo || undefined,
+        }
+      : { date: filters.date || undefined }),
   });
   const detailsQuery = useDoctorAppointmentDetailsApi(
     expandedAppointmentId ?? "",
@@ -857,71 +872,45 @@ export default function DoctorAppointmentsPage() {
               <div className="grid flex-1 grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                 <div className="relative min-w-0">
                   <label
-                    htmlFor="doctor-appointments-view"
+                    htmlFor="doctor-appointments-status"
                     className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
                   >
-                    نوع العرض
+                    حالة الموعد
                   </label>
                   <StyledSelect
-                    id="doctor-appointments-view"
+                    id="doctor-appointments-status"
                     size="sm"
                     tone="muted"
-                    value={filters.view}
+                    value={filters.status}
                     onChange={(v) =>
                       setFilters((prev) => ({
                         ...prev,
-                        view: (v as MainView) || "schedule",
+                        status: (v as StatusTab) || "scheduled",
                         page: 1,
                       }))
                     }
                     options={[
-                      { value: "schedule", label: "جدول المواعيد" },
-                      { value: "waiting", label: "قائمة الانتظار" },
+                      { value: "scheduled", label: "المجدولة" },
+                      { value: "rescheduled", label: "معاد جدولتها" },
+                      { value: "completed", label: "المكتملة" },
+                      { value: "cancelled", label: "الملغية" },
+                      { value: "no-show", label: "عدم الحضور" },
                     ]}
-                    listboxAriaLabel="نوع العرض"
+                    listboxAriaLabel="حالة الموعد"
                   />
                 </div>
 
-                {filters.view === "schedule" ? (
-                  <div className="relative min-w-0">
-                    <label
-                      htmlFor="doctor-appointments-status"
-                      className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
+                <div className="flex min-h-[42px] min-w-0 flex-col justify-end rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2">
+                  <p className="font-cairo text-[11px] font-semibold leading-relaxed text-[#667085]">
+                    تبحث عن قائمة الانتظار؟{" "}
+                    <Link
+                      to="/doctor/waitlist"
+                      className="font-extrabold text-primary underline underline-offset-2"
                     >
-                      حالة الموعد
-                    </label>
-                    <StyledSelect
-                      id="doctor-appointments-status"
-                      size="sm"
-                      tone="muted"
-                      value={filters.status}
-                      onChange={(v) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          status: (v as StatusTab) || "scheduled",
-                          page: 1,
-                        }))
-                      }
-                      options={[
-                        { value: "scheduled", label: "المجدولة" },
-                        { value: "completed", label: "المكتملة" },
-                        { value: "cancelled", label: "الملغية" },
-                        { value: "no-show", label: "عدم الحضور" },
-                      ]}
-                      listboxAriaLabel="حالة الموعد"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex min-h-[42px] min-w-0 flex-col justify-end rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2">
-                    <p className="font-cairo text-[11px] font-semibold leading-relaxed text-[#667085]">
-                      قائمة الانتظار تعرض المواعيد{" "}
-                      <span className="font-extrabold text-[#344054]">
-                        المجدولة
-                      </span>{" "}
-                      وفق التاريخ المُرسل للخادم.
-                    </p>
-                  </div>
-                )}
+                      افتح صفحة قائمة الانتظار المخصصة
+                    </Link>
+                  </p>
+                </div>
               </div>
             </div>
             {/* date filter */}
@@ -935,22 +924,77 @@ export default function DoctorAppointmentsPage() {
                   تاريخ المواعيد
                 </span>
               </div>
-              <div className="max-w-xs">
-                <span className="mb-1.5 block font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                  اليوم
-                </span>
-                <input
-                  type="date"
-                  value={filters.date}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      date: e.target.value,
-                      page: 1,
-                    }))
-                  }
-                  className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
-                />
+              <div className="flex flex-wrap gap-4">
+                <div className="max-w-xs">
+                  <span className="mb-1.5 block font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
+                    يوم محدد
+                  </span>
+                  <input
+                    type="date"
+                    value={filters.date}
+                    disabled={hasDateRange}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        date: e.target.value,
+                        page: 1,
+                      }))
+                    }
+                    className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </div>
+                <div className="max-w-xs">
+                  <span className="mb-1.5 block font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
+                    من
+                  </span>
+                  <input
+                    type="date"
+                    value={filters.dateFrom}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        dateFrom: e.target.value,
+                        date: "",
+                        page: 1,
+                      }))
+                    }
+                    className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                  />
+                </div>
+                <div className="max-w-xs">
+                  <span className="mb-1.5 block font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
+                    إلى
+                  </span>
+                  <input
+                    type="date"
+                    value={filters.dateTo}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        dateTo: e.target.value,
+                        date: "",
+                        page: 1,
+                      }))
+                    }
+                    className="h-[40px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] shadow-sm outline-none transition-all focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                  />
+                </div>
+                {hasDateRange ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        dateFrom: "",
+                        dateTo: "",
+                        page: 1,
+                      }))
+                    }
+                    className="self-end font-cairo text-[11px] font-extrabold text-primary underline underline-offset-2"
+                  >
+                    مسح النطاق
+                  </button>
+                ) : null}
               </div>
             </div>
           </div>
@@ -958,14 +1002,6 @@ export default function DoctorAppointmentsPage() {
 
         <section className="mb-6">
           <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.06),0_2px_8px_rgba(0,0,0,0.03)]">
-            {filters.view === "waiting" && (
-              <div className="border-b border-[#F2F4F7] px-4 py-3 sm:px-6">
-                <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-                  قائمة الانتظار تعرض المواعيد المجدولة ضمن نفس فلاتر الباكند
-                  الحالية.
-                </p>
-              </div>
-            )}
 
             <div className="px-4 py-4 sm:px-6">
               {appointmentsListFailed ? (

@@ -39,6 +39,7 @@ const FILTER_OPTIONS: Array<{ id: InvoiceFilter; label: string }> = [
   { id: "paid", label: "مدفوعة" },
   { id: "unpaid", label: "غير مدفوعة" },
   { id: "overdue", label: "متأخرة" },
+  { id: "cancelled", label: "ملغاة" },
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];

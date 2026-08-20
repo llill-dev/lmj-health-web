@@ -12,4 +12,5 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
   unpaid: 'غير مدفوع',
   partial: 'مدفوع جزئياً',
   overdue: 'متأخرة',
+  cancelled: 'ملغاة',
 };

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import type { ClinicInvoice } from '@/lib/doctor/clinicAccounts/types';
-import { formatUsd } from '@/lib/doctor/billing/format';
+import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import { InvoiceStatusBadge } from '@/components/doctor/clinic-accounts/invoice-status-badge';
 
 export function InvoiceListItem({
@@ -38,7 +38,7 @@ export function InvoiceListItem({
         </p>
       </div>
       <span className="font-cairo text-[22px] font-black text-primary">
-        {formatUsd(invoice.total)}
+        {formatBillingAmount(invoice.total, invoice.currency ?? 'USD')}
       </span>
     </motion.button>
   );

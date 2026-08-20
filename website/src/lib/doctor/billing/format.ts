@@ -7,6 +7,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   GBP: '£',
   SAR: 'ر.س',
   AED: 'د.إ',
+  SYP: 'ل.س',
 };
 
 export function formatBillingNumber(

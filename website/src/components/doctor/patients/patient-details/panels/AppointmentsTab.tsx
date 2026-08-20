@@ -20,6 +20,10 @@ import {
   countPatientAppointments,
   type PatientAppointmentCounts,
 } from "@/lib/doctor/dashboard/countPatientAppointments";
+import {
+  formatAppointmentDate,
+  formatAppointmentTime,
+} from "@/lib/shared/formatAppointmentDateTime";
 
 function patientInitialsFromName(name?: string): string {
   const value = name?.trim() ?? "";
@@ -29,13 +33,6 @@ function patientInitialsFromName(name?: string): string {
     return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return value.slice(0, 2).toUpperCase();
-}
-
-function formatDashDate(iso?: string | null) {
-  if (!iso) return "—";
-  const [y, m, d] = iso.split("-");
-  if (!y || !m || !d) return iso;
-  return `${d}-${m}-${y}`;
 }
 
 interface AppointmentsTabProps {
@@ -209,7 +206,7 @@ export function AppointmentsTab({
                     <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
                       <div className="font-cairo text-[16px] font-bold text-primary">التاريخ</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
-                        {formatDashDate(appointment.date)}
+                        {formatAppointmentDate(appointment.date)}
                       </div>
                     </div>
                   </div>
@@ -218,7 +215,7 @@ export function AppointmentsTab({
                     <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
                       <div className="font-cairo text-[16px] font-bold text-primary">الوقت</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
-                        {appointment.startTime ?? appointment.time ?? "—"}
+                        {formatAppointmentTime(appointment.startTime ?? appointment.time)}
                       </div>
                     </div>
                   </div>
