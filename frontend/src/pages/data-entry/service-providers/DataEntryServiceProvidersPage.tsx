@@ -284,6 +284,7 @@ export default function DataEntryServiceProvidersPage() {
           serviceTypes={serviceTypes}
           onSuccess={() => providersQuery.refetch()}
           allowAdvancedJson={false}
+          allowStatusControl={false}
         />
 
         <EditServiceProviderDialog
@@ -292,6 +293,7 @@ export default function DataEntryServiceProvidersPage() {
           providerId={selectedProvider?.id ?? null}
           onSuccess={() => providersQuery.refetch()}
           allowAdvancedJson={false}
+          allowStatusControl={false}
         />
       </div>
     </>

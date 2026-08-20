@@ -191,9 +191,9 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.serviceProviders.empty.noProvidersHint":
       "يمكنك إضافة مزود جديد لهذا النوع أو تبديل نوع الخدمة من الأعلى.",
     "dataEntry.serviceProviders.scope.title":
-      "إدارة مزودي الخدمة ضمن النوع المحدد فقط",
+      "تشاهد وتدير مزوّديك الخاصين فقط كمسودات",
     "dataEntry.serviceProviders.scope.body":
-      "اختر نوع الخدمة أولاً، ثم أضف أو عدّل المزودين المرتبطين به فقط لتجنب الخلط بين المزود والنوع والخدمة نفسها.",
+      "تعرض هذه القائمة فقط المزوّدين الذين أنشأتهم، دائمًا كمسودات. استخدم فلتر نوع الخدمة أدناه اختياريًا لتضييق القائمة. النشر يتم من قِبل الإدارة.",
     "dataEntry.serviceProviders.actions.edit": "تعديل",
     "content.status.draft": "مسودة",
     "content.status.inReview": "قيد المراجعة",
@@ -905,9 +905,9 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.serviceProviders.empty.noProvidersHint":
       "You can add a new provider for this type or switch the service type above.",
     "dataEntry.serviceProviders.scope.title":
-      "Manage providers within the selected type only",
+      "You only see and manage your own draft providers",
     "dataEntry.serviceProviders.scope.body":
-      "Choose the service type first, then add or edit only the providers linked to it to avoid mixing provider, type, and service roles.",
+      "This list shows only the providers you created, always as drafts. Use the service type filter below optionally to narrow the list. Publishing is handled by an administrator.",
     "dataEntry.serviceProviders.actions.edit": "Edit",
     "content.status.draft": "Draft",
     "content.status.inReview": "In review",

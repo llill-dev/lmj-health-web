@@ -341,7 +341,7 @@ export default function AdminServiceTypesPage() {
                       */}
                       <div className="flex items-center justify-end gap-2 sm:gap-3">
                         <Link
-                          to={`/admin/service-providers?type=${encodeURIComponent(s.slug)}`}
+                          to={`/admin/service-providers?serviceType=${encodeURIComponent(s._id)}`}
                           className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-[#CFFAFE] bg-white px-3 font-cairo text-[12px] font-extrabold text-primary transition hover:bg-[#ECFEFF]"
                         >
                           <Building2 className="h-4 w-4" />

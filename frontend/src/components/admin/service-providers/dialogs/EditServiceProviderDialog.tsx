@@ -35,6 +35,9 @@ interface EditServiceProviderDialogProps {
   providerId: string | null;
   onSuccess?: () => void;
   allowAdvancedJson?: boolean;
+  /** Data-entry users own drafts only — publication is an admin-only decision, so the
+   * status selector is hidden entirely and the record's status is left untouched. */
+  allowStatusControl?: boolean;
 }
 
 export default function EditServiceProviderDialog({
@@ -43,8 +46,9 @@ export default function EditServiceProviderDialog({
   providerId,
   onSuccess,
   allowAdvancedJson = true,
+  allowStatusControl = true,
 }: EditServiceProviderDialogProps) {
-  const { dir } = useI18n();
+  const { dir, locale } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -164,7 +168,7 @@ export default function EditServiceProviderDialog({
         country,
         data: resolveData(),
         aliases,
-        status: status as ProviderStatus,
+        status: (allowStatusControl ? status : provider.status) as ProviderStatus,
       });
 
       toast("تم تحديث بيانات مزود الخدمة بنجاح", {
@@ -191,6 +195,14 @@ export default function EditServiceProviderDialog({
   };
 
   const isInactiveType = serviceType ? !serviceType.isActive : false;
+  // Soft UX guard (backend documents no transition matrix): never offer "active" while
+  // the service type is inactive, and never offer moving an already-active provider
+  // back to "draft".
+  const statusOptions = STATUS_OPTIONS.filter((o) => {
+    if (isInactiveType && o.value === "active") return false;
+    if (provider?.status === "active" && o.value === "draft") return false;
+    return true;
+  });
 
   return (
     <AnimatePresence>
@@ -255,7 +267,7 @@ export default function EditServiceProviderDialog({
                 تعذر تحميل بيانات مزود الخدمة.
               </div>
             ) : (
-              <form dir="rtl" onSubmit={handleSubmit}>
+              <form dir={dir} onSubmit={handleSubmit}>
                 <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                   <div className="space-y-5">
                     <AdminFormField label="نوع الخدمة" hint="لا يمكن التعديل">
@@ -359,7 +371,7 @@ export default function EditServiceProviderDialog({
                           value={dynamicData}
                           onChange={setDynamicData}
                           errors={errors}
-                          locale="ar"
+                          locale={locale}
                           disabled={showAdvancedJson}
                         />
                       </div>
@@ -467,14 +479,20 @@ export default function EditServiceProviderDialog({
                       )}
                     </AdminFormField>
 
-                    <AdminFormField label="الحالة" required>
-                      <StyledSelect
-                        value={status}
-                        onChange={setStatus}
-                        options={STATUS_OPTIONS}
-                        placeholder="اختر الحالة"
-                      />
-                    </AdminFormField>
+                    {allowStatusControl ? (
+                      <AdminFormField label="الحالة" required>
+                        <StyledSelect
+                          value={status}
+                          onChange={setStatus}
+                          options={statusOptions}
+                          placeholder="اختر الحالة"
+                        />
+                      </AdminFormField>
+                    ) : (
+                      <div className="rounded-[12px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-bold text-[#667085]">
+                        تفعيل مزود الخدمة أو تعطيله متاح للإدارة فقط.
+                      </div>
+                    )}
                   </div>
                 </div>
 

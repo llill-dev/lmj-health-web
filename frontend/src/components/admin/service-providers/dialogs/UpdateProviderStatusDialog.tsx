@@ -45,9 +45,14 @@ export default function UpdateProviderStatusDialog({
     if (open) setStatus(currentStatus);
   }, [open, currentStatus]);
 
-  const statusOptions = isServiceTypeActive
-    ? STATUS_OPTIONS
-    : STATUS_OPTIONS.filter((o) => o.value !== "active");
+  // Soft UX guard (backend documents no transition matrix, so the backend stays the
+  // final authority): never offer "active" while the service type is inactive, and
+  // never offer moving an already-active provider back to "draft".
+  const statusOptions = STATUS_OPTIONS.filter((o) => {
+    if (!isServiceTypeActive && o.value === "active") return false;
+    if (currentStatus === "active" && o.value === "draft") return false;
+    return true;
+  });
 
   useEffect(() => {
     if (!open) return;

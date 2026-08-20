@@ -34,6 +34,9 @@ interface CreateServiceProviderDialogProps {
   onSuccess?: () => void;
   /** Admins get an advanced JSON fallback panel; data-entry users only see generated fields. */
   allowAdvancedJson?: boolean;
+  /** Data-entry users own drafts only — publication is an admin-only decision, so the
+   * status selector is hidden entirely and the record is always created as "draft". */
+  allowStatusControl?: boolean;
 }
 
 export default function CreateServiceProviderDialog({
@@ -42,6 +45,7 @@ export default function CreateServiceProviderDialog({
   serviceTypes,
   onSuccess,
   allowAdvancedJson = true,
+  allowStatusControl = true,
 }: CreateServiceProviderDialogProps) {
   const { dir } = useI18n();
   const { toast } = useToast();
@@ -154,12 +158,15 @@ export default function CreateServiceProviderDialog({
     setAliases((prev) => prev.filter((a) => a !== alias));
   };
 
-  const resolveData = (): Record<string, unknown> | undefined => {
+  const resolveData = (): Record<string, unknown> => {
+    // The backend create contract expects a `data` object even when there are no
+    // dynamic values — never omit it, or a valid service type with zero optional
+    // fields would fail creation unnecessarily.
     if (showAdvancedJson) {
-      if (!advancedJson.trim()) return undefined;
+      if (!advancedJson.trim()) return {};
       return JSON.parse(advancedJson);
     }
-    return Object.keys(dynamicData).length > 0 ? dynamicData : undefined;
+    return dynamicData;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -176,7 +183,7 @@ export default function CreateServiceProviderDialog({
         country,
         data: resolveData(),
         aliases,
-        status,
+        status: allowStatusControl ? status : "draft",
       });
 
       toast("تم إنشاء مزود الخدمة بنجاح", {
@@ -481,18 +488,25 @@ export default function CreateServiceProviderDialog({
                     )}
                   </AdminFormField>
 
-                  <AdminFormField
-                    label="الحالة"
-                    required
-                    hint="مسودة للمراجعة الداخلية، نشط للظهور والاستخدام، معطّل لإخفائه دون حذف السجل."
-                  >
-                    <StyledSelect
-                      value={status}
-                      onChange={setStatus}
-                      options={STATUS_OPTIONS}
-                      placeholder="اختر الحالة"
-                    />
-                  </AdminFormField>
+                  {allowStatusControl ? (
+                    <AdminFormField
+                      label="الحالة"
+                      required
+                      hint="مسودة للمراجعة الداخلية، نشط للظهور والاستخدام، معطّل لإخفائه دون حذف السجل."
+                    >
+                      <StyledSelect
+                        value={status}
+                        onChange={setStatus}
+                        options={STATUS_OPTIONS}
+                        placeholder="اختر الحالة"
+                      />
+                    </AdminFormField>
+                  ) : (
+                    <div className="rounded-[12px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-bold text-[#667085]">
+                      يُحفظ هذا السجل كمسودة تلقائيًا. تفعيل مزود الخدمة أو
+                      تعطيله متاح للإدارة فقط.
+                    </div>
+                  )}
                 </div>
               </div>
 

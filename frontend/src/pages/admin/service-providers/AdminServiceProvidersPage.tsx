@@ -155,8 +155,8 @@ export default function AdminServiceProvidersPage() {
         <section className="mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-5 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]">
           <div className="font-cairo text-[13px] font-extrabold text-[#0F766E]">
             {tr(
-              "ابدأ بتحديد نوع الخدمة أولاً، ثم راجع مزوّدي هذا النوع فقط. الاسم الظاهر في كل بطاقة هو المزوّد، والحالة توضّح هل هو متاح للاستخدام أم لا.",
-              "Select a service type first, then review only its providers. Each card shows the provider name clearly, and the status indicates whether it is currently available.",
+              "هذه الشاشة تعرض كل مزوّدي الخدمة. استخدم فلتر نوع الخدمة اختياريًا لتضييق القائمة. الاسم الظاهر في كل بطاقة هو المزوّد، والحالة توضّح هل هو متاح للاستخدام أم لا.",
+              "This screen lists all service providers. Use the service type filter optionally to narrow the list. Each card shows the provider name clearly, and the status indicates whether it is currently available.",
             )}
           </div>
         </section>
