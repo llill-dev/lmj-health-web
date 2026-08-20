@@ -123,8 +123,6 @@ export const sidebarItems: Array<{
     path: "medical-library",
     label: "المكتبة الطبية",
     icon: BookOpen,
-    href: "/medical-library",
-    activeMatchPrefixes: ["/medical-library"],
   },
   {
     id: "appointments",

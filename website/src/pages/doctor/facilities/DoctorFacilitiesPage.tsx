@@ -128,6 +128,23 @@ export default function DoctorFacilitiesPage() {
     setDialogOpen(true);
   };
 
+  const handleUnlink = async (target: DoctorFacility) => {
+    if (
+      !window.confirm(
+        `إلغاء ربط منشأة "${target.name}"؟ يمكنك ربط منشأة أخرى لاحقًا.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await linkMutation.mutateAsync({ facilityId: null });
+      toast("تم إلغاء ربط المنشأة.", { variant: "success" });
+    } catch (error) {
+      const { title, message } = getDoctorFacilityLinkErrorToast(error);
+      toast(message, { title, variant: "error" });
+    }
+  };
+
   const handleSubmit = async (values: DoctorFacilityFormSchemaValues) => {
     try {
       await saveMutation.mutateAsync({
@@ -312,7 +329,7 @@ export default function DoctorFacilitiesPage() {
           />
         ) : (
           <>
-            <FacilitiesTable rows={pageRows} onEdit={openEdit} />
+            <FacilitiesTable rows={pageRows} onEdit={openEdit} onUnlink={handleUnlink} />
 
             {filtered.length > PAGE_SIZE ? (
               <DoctorTablePagination

@@ -160,11 +160,21 @@ export function useLinkFacility() {
       facilityId,
       facilityProviderId,
     }: {
-      facilityId: string;
+      /** `null` unlinks the doctor's currently linked (non-owned) facility. */
+      facilityId: string | null;
       facilityProviderId?: string | null;
       suggestSnapshot?: SuggestFacilityRecord;
     }) => doctorFacilityApi.assign({ facilityId, facilityProviderId }),
     onSuccess: (response, variables) => {
+      if (variables.facilityId === null) {
+        clearLinkedDoctorFacility();
+        queryClient.setQueryData(DOCTOR_FACILITY_KEYS.detail(), undefined);
+        void queryClient.invalidateQueries({
+          queryKey: DOCTOR_FACILITY_KEYS.detail(),
+        });
+        return;
+      }
+
       const record = parseDoctorFacilityRecordFromResponse(response);
       let mapped = record
         ? mapApiFacilityToDoctorFacility(record, { isOwned: false })

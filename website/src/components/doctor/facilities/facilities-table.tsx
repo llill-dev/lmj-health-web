@@ -8,11 +8,11 @@ import type { DoctorFacility } from '@/lib/doctor/facilities/types';
 import { FacilityStatusBadge } from '@/components/doctor/facilities/facility-status-badge';
 
 const TABLE_COLUMNS = [
-  'الإجراءات',
-  'الحالة',
-  'الهاتف',
-  'العنوان',
   'اسم منشأة',
+  'العنوان',
+  'الهاتف',
+  'الحالة',
+  'الإجراءات',
 ] as const;
 
 const thClass =
@@ -28,9 +28,11 @@ type ActionsMenuState = {
 export function FacilitiesTable({
   rows,
   onEdit,
+  onUnlink,
 }: {
   rows: DoctorFacility[];
   onEdit: (facility: DoctorFacility) => void;
+  onUnlink?: (facility: DoctorFacility) => void;
 }) {
   const [menu, setMenu] = useState<ActionsMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -96,6 +98,23 @@ export function FacilitiesTable({
                   transition={{ delay: index * 0.04, duration: 0.18 }}
                   className="border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60"
                 >
+                  <td
+                    className={`${tdClass} font-cairo text-[13px] font-extrabold text-[#101828]`}
+                  >
+                    {row.name}
+                  </td>
+                  <td className={`${tdClass} font-cairo text-[12px] font-semibold text-[#475467]`}>
+                    {row.city}
+                  </td>
+                  <td
+                    className={`${tdClass} font-cairo text-[12px] font-semibold text-[#475467]`}
+                    dir="ltr"
+                  >
+                    {row.phone}
+                  </td>
+                  <td className={tdClass}>
+                    <FacilityStatusBadge status={row.status} />
+                  </td>
                   <td className={tdClass}>
                     <button
                       type="button"
@@ -113,23 +132,6 @@ export function FacilitiesTable({
                     >
                       <Menu className="h-4 w-4" aria-hidden />
                     </button>
-                  </td>
-                  <td className={tdClass}>
-                    <FacilityStatusBadge status={row.status} />
-                  </td>
-                  <td
-                    className={`${tdClass} font-cairo text-[12px] font-semibold text-[#475467]`}
-                    dir="ltr"
-                  >
-                    {row.phone}
-                  </td>
-                  <td className={`${tdClass} font-cairo text-[12px] font-semibold text-[#475467]`}>
-                    {row.city}
-                  </td>
-                  <td
-                    className={`${tdClass} font-cairo text-[13px] font-extrabold text-[#101828]`}
-                  >
-                    {row.name}
                   </td>
                 </motion.tr>
               ))}
@@ -162,6 +164,19 @@ export function FacilitiesTable({
               >
                 تعديل المنشأة
               </button>
+              {activeRow.isOwned === false && onUnlink ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#B42318] hover:bg-[#FEF2F2]"
+                  onClick={() => {
+                    setMenu(null);
+                    onUnlink(activeRow);
+                  }}
+                >
+                  إلغاء ربط المنشأة
+                </button>
+              ) : null}
             </motion.div>,
             document.body,
           )

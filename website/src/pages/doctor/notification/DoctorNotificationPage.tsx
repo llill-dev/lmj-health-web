@@ -11,12 +11,36 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import { DoctorNotificationListSkeleton } from '@/components/doctor/shared/skeletons';
 import { mapNotificationsToRows } from '@/components/admin/notifications/map-api-to-rows';
 import type { AdminNotificationKind } from '@/components/admin/notifications/types';
 import { useDoctorNotificationsPage } from '@/hooks';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { useI18n } from '@/i18n/provider';
+
+/**
+ * The notifications API doesn't return a target resource id/link (no `targetId`,
+ * `link`, `appointmentId`, etc. in `NotificationItem` — see lib/notifications/client.ts),
+ * so we can't deep-link to the specific resource. We route to the relevant section
+ * instead, using only the `kind` the row already carries — never inventing an id.
+ */
+function notificationKindTargetPath(kind: AdminNotificationKind): string {
+  switch (kind) {
+    case 'appointment':
+    case 'reminder':
+    case 'cancel':
+      return '/doctor/appointments';
+    case 'message':
+      return '/doctor/online-consultations';
+    case 'access-request':
+      return '/doctor/access-requests';
+    case 'record':
+      return '/doctor/medical-records';
+    default:
+      return '/doctor/notification';
+  }
+}
 
 type NotificationType = AdminNotificationKind;
 
@@ -41,6 +65,7 @@ function getTypeIcon(type: NotificationType) {
 
 export default function DoctorNotificationPage() {
   const { locale, dir } = useI18n();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const unreadOnly = filter === 'unread';
 
@@ -171,10 +196,23 @@ export default function DoctorNotificationPage() {
               return (
                 <div
                   key={n.id}
+                  role='button'
+                  tabIndex={0}
+                  onClick={() => {
+                    if (n.isUnread) markRead(n.id);
+                    navigate(notificationKindTargetPath(n.kind));
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Enter' && e.key !== ' ') return;
+                    e.preventDefault();
+                    if (n.isUnread) markRead(n.id);
+                    navigate(notificationKindTargetPath(n.kind));
+                  }}
                   className={
-                    isAccent
+                    (isAccent
                       ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#0F8F8B]'
-                      : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]'
+                      : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]') +
+                    ' cursor-pointer transition hover:shadow-[0_16px_32px_rgba(0,0,0,0.09)]'
                   }
                 >
                   <div className='flex min-h-[151px] flex-col gap-4 px-4 py-4 sm:px-5'>
@@ -209,7 +247,10 @@ export default function DoctorNotificationPage() {
                         {n.isUnread ? (
                           <button
                             type='button'
-                            onClick={() => markRead(n.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markRead(n.id);
+                            }}
                             disabled={marking}
                             className='flex h-[34px] w-[34px] items-center justify-center rounded-[6px] border border-[#D1FAE5] bg-white text-[#16A34A] hover:bg-[#ECFDF3] disabled:opacity-60'
                             aria-label='تحديد كمقروء'

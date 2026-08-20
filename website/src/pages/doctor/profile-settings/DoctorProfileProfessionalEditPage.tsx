@@ -1,5 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
+import { DoctorPageBackButton } from '@/components/doctor/shared/doctor-page-back-button';
 import DoctorProfileProfessionalForm from '@/components/doctor/profile-settings/doctor-profile-professional-form';
 import {
   DoctorProfilePageError,
@@ -60,6 +61,9 @@ export default function DoctorProfileProfessionalEditPage() {
       <Helmet>
         <title>تعديل المعلومات المهنية • LMJ Health</title>
       </Helmet>
+      <div className="mb-4">
+        <DoctorPageBackButton fallbackTo="/doctor/profile-settings" />
+      </div>
       <DoctorProfileProfessionalForm
         doctor={profileQuery.data.doctor}
         busy={submitChangeRequest.isPending}

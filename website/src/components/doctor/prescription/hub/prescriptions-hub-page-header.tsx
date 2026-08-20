@@ -43,15 +43,23 @@ export function PrescriptionsHubPageHeader({
           </div>
         </div>
 
-        <Link
-          to={addHref}
-          className="inline-flex h-[48px] w-full min-w-0 shrink-0 items-center justify-between gap-3 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)] transition hover:border-primary/30 hover:bg-[#F0FDFA] sm:w-auto sm:min-w-[168px]"
-        >
-          <Plus className="h-4 w-4 shrink-0" aria-hidden />
-          <span className="whitespace-nowrap">
-            {tr("إضافة وصفة جديدة", "Add new prescription")}
-          </span>
-        </Link>
+        <div className="flex w-full shrink-0 flex-col items-end gap-1.5 sm:w-auto">
+          <Link
+            to={addHref}
+            className="inline-flex h-[48px] w-full min-w-0 items-center justify-between gap-3 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-[0_8px_20px_rgba(15,23,42,0.08)] transition hover:border-primary/30 hover:bg-[#F0FDFA] sm:w-auto sm:min-w-[168px]"
+          >
+            <Plus className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="whitespace-nowrap">
+              {tr("إضافة وصفة جديدة", "Add new prescription")}
+            </span>
+          </Link>
+          <p className="max-w-[220px] text-end font-cairo text-[11px] font-semibold leading-relaxed text-primary/80">
+            {tr(
+              "تُنشأ الوصفة من داخل زيارة المريض — سننقلك إلى قائمة الزيارات لاختيار الزيارة أولاً.",
+              "Prescriptions are created from within a patient visit — you'll be taken to the encounters list to pick one first.",
+            )}
+          </p>
+        </div>
       </div>
     </section>
   );

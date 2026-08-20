@@ -166,15 +166,27 @@ export default function App() {
             />
             <Route
               path="appointments"
-              element={<DoctorPages.DoctorAppointmentsPage />}
+              element={
+                <Suspense fallback={<DoctorDashboardRouteFallback />}>
+                  <DoctorPages.DoctorAppointmentsPage />
+                </Suspense>
+              }
             />
             <Route
               path="waitlist"
-              element={<DoctorPages.DoctorWaitlistPage />}
+              element={
+                <Suspense fallback={<DoctorDashboardRouteFallback />}>
+                  <DoctorPages.DoctorWaitlistPage />
+                </Suspense>
+              }
             />
             <Route
               path="patients"
-              element={<DoctorPages.DoctorPatientsPage />}
+              element={
+                <Suspense fallback={<DoctorDashboardRouteFallback />}>
+                  <DoctorPages.DoctorPatientsPage />
+                </Suspense>
+              }
             />
             <Route
               path="patients/:patientId"
@@ -186,7 +198,29 @@ export default function App() {
             />
             <Route
               path="online-consultations"
-              element={<DoctorPages.DoctorOnlineConsultationsPage />}
+              element={
+                <Suspense fallback={<DoctorDashboardRouteFallback />}>
+                  <DoctorPages.DoctorOnlineConsultationsPage />
+                </Suspense>
+              }
+            />
+            {/* Nested under DoctorLayout (not PublicPagesLayout) so navigating here from
+                the doctor dashboard doesn't swap out the doctor shell/sidebar. */}
+            <Route
+              path="medical-library"
+              element={
+                <Suspense fallback={<DoctorDashboardRouteFallback />}>
+                  <PublicPages.PublicMedicalLibraryPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="medical-library/:slug"
+              element={
+                <Suspense fallback={<DoctorDashboardRouteFallback />}>
+                  <PublicPages.PublicMedicalLibraryDetailsPage />
+                </Suspense>
+              }
             />
             <Route
               path="work-schedule"

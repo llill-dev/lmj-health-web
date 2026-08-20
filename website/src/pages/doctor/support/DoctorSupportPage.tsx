@@ -49,7 +49,7 @@ const SUPPORT_CARDS: readonly SupportCard[] = [
     title: 'المكتبة الطبية',
     description: 'مقالات ونصائح ومحتوى صحي منشور للقراءة السريعة',
     icon: BookOpen,
-    href: '/medical-library',
+    href: '/doctor/medical-library',
   },
   {
     id: 'faq',
@@ -161,7 +161,7 @@ export default function DoctorSupportPage() {
           />
           <div className="mt-5 border-t border-[#ECFDF3] pt-5">
             <Link
-              to="/medical-library"
+              to="/doctor/medical-library"
               className="inline-flex items-center gap-2 rounded-[12px] border border-[#B8E6E0] bg-[#F0FDFA] px-4 py-2 font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F7F5]"
             >
               <BookOpen className="h-4 w-4" aria-hidden />
