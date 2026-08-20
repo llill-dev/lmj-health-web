@@ -1,154 +1,154 @@
-import { lazy } from "react";
+import { lazyWithRetry } from "@/lib/routing/lazyWithRetry";
 
-export const DoctorDashboardPage = lazy(
+export const DoctorDashboardPage = lazyWithRetry(
   () => import("@/pages/doctor/dashboard/DoctorDashboardPage"),
 );
-export const DoctorAppointmentsPage = lazy(
+export const DoctorAppointmentsPage = lazyWithRetry(
   () => import("@/pages/doctor/appointments/DoctorAppointmentsPage"),
 );
-export const DoctorWaitlistPage = lazy(
+export const DoctorWaitlistPage = lazyWithRetry(
   () => import("@/pages/doctor/waitlist/DoctorWaitlistPage"),
 );
-export const DoctorPatientsPage = lazy(
+export const DoctorPatientsPage = lazyWithRetry(
   () => import("@/pages/doctor/patients/DoctorPatientsPage"),
 );
-export const DoctorPatientDetailsPage = lazy(
+export const DoctorPatientDetailsPage = lazyWithRetry(
   () => import("@/pages/doctor/patients/DoctorPatientDetailsPage"),
 );
-export const DoctorOnlineConsultationsPage = lazy(
+export const DoctorOnlineConsultationsPage = lazyWithRetry(
   () =>
     import("@/pages/doctor/online-consultations/DoctorOnlineConsultationsPage"),
 );
-export const DoctorWorkSchedulePage = lazy(
+export const DoctorWorkSchedulePage = lazyWithRetry(
   () => import("@/pages/doctor/work-schedule/DoctorWorkSchedulePage"),
 );
-export const DoctorAppointmentTypesPage = lazy(
+export const DoctorAppointmentTypesPage = lazyWithRetry(
   () => import("@/pages/doctor/appointment-types/DoctorAppointmentTypesPage"),
 );
-export const DoctorClinicalLibraryPage = lazy(
+export const DoctorClinicalLibraryPage = lazyWithRetry(
   () => import("@/pages/doctor/clinical-library/DoctorClinicalLibraryPage"),
 );
-export const DoctorMedicalRecordsPage = lazy(
+export const DoctorMedicalRecordsPage = lazyWithRetry(
   () => import("@/pages/doctor/medical-records/DoctorMedicalRecordsPage"),
 );
-export const DoctorPrescriptionPage = lazy(
+export const DoctorPrescriptionPage = lazyWithRetry(
   () => import("@/pages/doctor/prescription/DoctorPrescriptionPage"),
 );
-export const DoctorPrescriptionPreviewPage = lazy(
+export const DoctorPrescriptionPreviewPage = lazyWithRetry(
   () => import("@/pages/doctor/prescription/DoctorPrescriptionPreviewPage"),
 );
-export const DoctorRadiologyWorkspacePage = lazy(
+export const DoctorRadiologyWorkspacePage = lazyWithRetry(
   () => import("@/pages/doctor/radiology/DoctorRadiologyWorkspacePage"),
 );
-export const DoctorRadiologyManualPage = lazy(
+export const DoctorRadiologyManualPage = lazyWithRetry(
   () => import("@/pages/doctor/radiology/DoctorRadiologyManualPage"),
 );
-export const DoctorRadiologyPreviewPage = lazy(
+export const DoctorRadiologyPreviewPage = lazyWithRetry(
   () => import("@/pages/doctor/radiology/DoctorRadiologyPreviewPage"),
 );
-export const DoctorMedicalRequestsPage = lazy(
+export const DoctorMedicalRequestsPage = lazyWithRetry(
   () => import("@/pages/doctor/medical-requests/DoctorMedicalRequestsPage"),
 );
-export const DoctorEncountersPage = lazy(
+export const DoctorEncountersPage = lazyWithRetry(
   () => import("@/pages/doctor/encounters/DoctorEncountersPage"),
 );
-export const DoctorEncounterWorkspacePage = lazy(
+export const DoctorEncounterWorkspacePage = lazyWithRetry(
   () => import("@/pages/doctor/encounters/DoctorEncounterWorkspacePage"),
 );
-export const DoctorEncounterLabWorkspacePage = lazy(
+export const DoctorEncounterLabWorkspacePage = lazyWithRetry(
   () => import("@/pages/doctor/encounters/DoctorEncounterLabWorkspacePage"),
 );
-export const DoctorEncounterProcedureWorkspacePage = lazy(
+export const DoctorEncounterProcedureWorkspacePage = lazyWithRetry(
   () =>
     import("@/pages/doctor/encounters/DoctorEncounterProcedureWorkspacePage"),
 );
-export const DoctorEncounterReferralWorkspacePage = lazy(
+export const DoctorEncounterReferralWorkspacePage = lazyWithRetry(
   () =>
     import("@/pages/doctor/encounters/DoctorEncounterReferralWorkspacePage"),
 );
-export const DoctorEncounterOrderManualPage = lazy(
+export const DoctorEncounterOrderManualPage = lazyWithRetry(
   () => import("@/pages/doctor/encounters/DoctorEncounterOrderManualPage"),
 );
-export const DoctorEncounterOrderPreviewPage = lazy(
+export const DoctorEncounterOrderPreviewPage = lazyWithRetry(
   () => import("@/pages/doctor/encounters/DoctorEncounterOrderPreviewPage"),
 );
-export const DoctorEncounterSummaryPage = lazy(
+export const DoctorEncounterSummaryPage = lazyWithRetry(
   () => import("@/pages/doctor/encounters/DoctorEncounterSummaryPage"),
 );
-export const DoctorAccessRequestsPage = lazy(
+export const DoctorAccessRequestsPage = lazyWithRetry(
   () => import("@/pages/doctor/access-requests/DoctorAccessRequestsPage"),
 );
-export const DoctorDoctorsDirectoryPage = lazy(
+export const DoctorDoctorsDirectoryPage = lazyWithRetry(
   () => import("@/pages/doctor/doctors-directory/DoctorDoctorsDirectoryPage"),
 );
-export const DoctorMedicalServicesDirectoryPage = lazy(
+export const DoctorMedicalServicesDirectoryPage = lazyWithRetry(
   () =>
     import("@/pages/doctor/medical-services-directory/DoctorMedicalServicesDirectoryPage"),
 );
-export const DoctorMedicalServiceDetailsPage = lazy(
+export const DoctorMedicalServiceDetailsPage = lazyWithRetry(
   () =>
     import("@/pages/doctor/medical-services-directory/DoctorMedicalServiceDetailsPage"),
 );
-export const DoctorClinicLocationPage = lazy(
+export const DoctorClinicLocationPage = lazyWithRetry(
   () => import("@/pages/doctor/clinic-location/DoctorClinicLocationPage"),
 );
-export const DoctorNotificationPage = lazy(
+export const DoctorNotificationPage = lazyWithRetry(
   () => import("@/pages/doctor/notification/DoctorNotificationPage"),
 );
-export const DoctorProfileSettingsPage = lazy(
+export const DoctorProfileSettingsPage = lazyWithRetry(
   () => import("@/pages/doctor/profile-settings/DoctorProfileSettingsPage"),
 );
-export const DoctorProfilePersonalEditPage = lazy(
+export const DoctorProfilePersonalEditPage = lazyWithRetry(
   () => import("@/pages/doctor/profile-settings/DoctorProfilePersonalEditPage"),
 );
-export const DoctorProfileProfessionalEditPage = lazy(
+export const DoctorProfileProfessionalEditPage = lazyWithRetry(
   () =>
     import("@/pages/doctor/profile-settings/DoctorProfileProfessionalEditPage"),
 );
-export const DoctorProfileSuccessPage = lazy(
+export const DoctorProfileSuccessPage = lazyWithRetry(
   () => import("@/pages/doctor/profile-settings/DoctorProfileSuccessPage"),
 );
-export const DeleteAccountPage = lazy(
+export const DeleteAccountPage = lazyWithRetry(
   () => import("@/pages/account-deletion/DeleteAccountPage"),
 );
-export const RestoreAccountPage = lazy(
+export const RestoreAccountPage = lazyWithRetry(
   () => import("@/pages/account-deletion/RestoreAccountPage"),
 );
-export const DoctorClinicAccountsPage = lazy(
+export const DoctorClinicAccountsPage = lazyWithRetry(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicAccountsPage"),
 );
-export const DoctorClinicInvoicesPage = lazy(
+export const DoctorClinicInvoicesPage = lazyWithRetry(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicInvoicesPage"),
 );
-export const DoctorClinicCreateInvoicePage = lazy(
+export const DoctorClinicCreateInvoicePage = lazyWithRetry(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicCreateInvoicePage"),
 );
-export const DoctorClinicExpensesPage = lazy(
+export const DoctorClinicExpensesPage = lazyWithRetry(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicExpensesPage"),
 );
-export const DoctorClinicAddPaymentPage = lazy(
+export const DoctorClinicAddPaymentPage = lazyWithRetry(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicAddPaymentPage"),
 );
-export const DoctorClinicFinancialReportsPage = lazy(
+export const DoctorClinicFinancialReportsPage = lazyWithRetry(
   () =>
     import("@/pages/doctor/clinic-accounts/DoctorClinicFinancialReportsPage"),
 );
-export const DoctorClinicFinancialSettingsPage = lazy(
+export const DoctorClinicFinancialSettingsPage = lazyWithRetry(
   () =>
     import("@/pages/doctor/clinic-accounts/DoctorClinicFinancialSettingsPage"),
 );
-export const DoctorClinicServicesPage = lazy(
+export const DoctorClinicServicesPage = lazyWithRetry(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicServicesPage"),
 );
-export const DoctorFacilitiesPage = lazy(
+export const DoctorFacilitiesPage = lazyWithRetry(
   () => import("@/pages/doctor/facilities/DoctorFacilitiesPage"),
 );
-export const DoctorActivityLogPage = lazy(
+export const DoctorActivityLogPage = lazyWithRetry(
   () => import("@/pages/doctor/activity-log/DoctorActivityLogPage"),
 );
-export const DoctorSupportPage = lazy(
+export const DoctorSupportPage = lazyWithRetry(
   () => import("@/pages/doctor/support/DoctorSupportPage"),
 );
-export const DoctorSecretariesPage = lazy(
+export const DoctorSecretariesPage = lazyWithRetry(
   () => import("@/pages/doctor/secretaries/DoctorSecretariesPage"),
 );
