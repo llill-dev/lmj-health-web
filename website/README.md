@@ -111,7 +111,7 @@ Each role has isolated UI flows and permission-aware interfaces.
 ```bash
 # Clone the repository
 git clone git@github.com:emad-alsmadi/lmj-health.git
-cd lmj-health/frontend
+cd lmj-health/website
 
 # Install dependencies
 npm install
@@ -140,7 +140,7 @@ The development server runs on `http://localhost:5173` with:
 ## 📁 Project Structure
 
 ```
-frontend/
+website/
 ├── public/
 │   ├── favicon.svg
 │   └── images/
@@ -288,7 +288,7 @@ same-origin API calls.
 ### Manual deploy
 
 ```bash
-cd frontend
+cd website
 cp deploy/.env.prod.example deploy/.env.prod
 ./deploy/prod-deploy.sh
 ```
@@ -301,14 +301,14 @@ frontend service, and waits for `/healthz`.
 This repository includes two GitHub Actions workflows:
 
 - `frontend-ci.yml`
-  Runs on pull requests and pushes to `main`, using Node 20 in the `frontend/`
+  Runs on pull requests and pushes to `main`, using Node 20 in the `website/`
   directory for `npm ci`, `npm run lint`, `npm run typecheck`, and
   `npm run build`.
 
 - `frontend-deploy-prod.yml`
   Runs on pushes to `main` and manual `workflow_dispatch`. It connects to the
   VPS over SSH, updates the frontend repo at
-  `/srv/lmj-frontend/lmj-health-web/frontend`, runs
+  `/srv/lmj-frontend/lmj-health-web/website`, runs
   `bash deploy/prod-deploy.sh`, and verifies
   `https://app.syrhealth.com/healthz`,
   `https://app.syrhealth.com/`, and
@@ -329,7 +329,7 @@ Variables:
 
 Expected `FRONTEND_VPS_APP_DIR` value:
 
-- `/srv/lmj-frontend/lmj-health-web/frontend`
+- `/srv/lmj-frontend/lmj-health-web/website`
 
 ### Manual deploy workflow run
 
