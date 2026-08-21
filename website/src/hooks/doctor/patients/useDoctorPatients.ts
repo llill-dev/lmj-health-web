@@ -14,6 +14,7 @@ import type {
   DoctorEncounterDetailsResponse,
   DoctorPatientAccessRequestBody,
   DoctorPatientEncountersListParams,
+  DoctorPatientFilesListParams,
   DoctorPatientsListParams,
 } from '@/lib/doctor/types';
 
@@ -268,10 +269,14 @@ export function useLinkDoctorPatient(doctorId: string) {
   });
 }
 
-export function useDoctorPatientFiles(patientId: string, enabled = true) {
+export function useDoctorPatientFiles(
+  patientId: string,
+  enabled = true,
+  params: DoctorPatientFilesListParams = {},
+) {
   const query = useQuery({
-    queryKey: doctorPatientsQueryKeys.files(patientId),
-    queryFn: () => doctorApi.patients.listFiles(patientId),
+    queryKey: doctorPatientsQueryKeys.files(patientId, params),
+    queryFn: () => doctorApi.patients.listFiles(patientId, params),
     enabled: enabled && Boolean(patientId),
     staleTime: 1000 * 60,
   });

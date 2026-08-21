@@ -724,7 +724,7 @@ export default function App() {
             <Route
               path="doctors-directory"
               element={
-                <SecretaryPermissionRoute required={["appointments:book"]} />
+                <SecretaryPermissionRoute required={["appointments:view"]} />
               }
             >
               <Route
@@ -874,7 +874,7 @@ export default function App() {
             <Route
               path="appointment-suggestions"
               element={
-                <SecretaryPermissionRoute required={["waitlist:book"]} />
+                <SecretaryPermissionRoute required={["waitlist:view"]} />
               }
             >
               <Route

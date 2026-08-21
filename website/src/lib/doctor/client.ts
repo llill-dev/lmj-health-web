@@ -102,6 +102,7 @@ import type {
   DoctorCloseEncounterResponse,
   DoctorPatientsListParams,
   DoctorPatientsListResponse,
+  DoctorPatientFilesListParams,
   DoctorUpdateMedicalRecordBody,
   DoctorRescheduleAppointmentBody,
   DoctorScheduleResponse,
@@ -1727,6 +1728,28 @@ function buildPatientsListQuery(params: DoctorPatientsListParams): string {
   return qs.toString();
 }
 
+function buildPatientFilesListQuery(params: DoctorPatientFilesListParams): string {
+  const qs = new URLSearchParams();
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+  if (typeof params.archived === "boolean") qs.set("archived", String(params.archived));
+  if (params.search?.trim()) qs.set("search", params.search.trim());
+  if (params.category) qs.set("category", params.category);
+  if (params.subcategory) qs.set("subcategory", params.subcategory);
+  if (params.mimeCategory) qs.set("mimeCategory", params.mimeCategory);
+  if (params.clinicalContext) qs.set("clinicalContext", params.clinicalContext);
+  if (params.sourceModule) qs.set("sourceModule", params.sourceModule);
+  if (params.uploadedByRole) qs.set("uploadedByRole", params.uploadedByRole);
+  if (params.visibilityScope) qs.set("visibilityScope", params.visibilityScope);
+  if (params.appointmentId) qs.set("appointmentId", params.appointmentId);
+  if (params.tags?.length) qs.set("tags", params.tags.join(","));
+  if (params.serviceDateFrom) qs.set("serviceDateFrom", params.serviceDateFrom);
+  if (params.serviceDateTo) qs.set("serviceDateTo", params.serviceDateTo);
+  if (params.sortBy) qs.set("sortBy", params.sortBy);
+  if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
+  return qs.toString();
+}
+
 function buildAccessRequestsListQuery(
   params: DoctorAccessRequestListParams = {},
 ): string {
@@ -1922,8 +1945,10 @@ export const doctorPatientsQueryKeys = {
       "procedure-catalog",
       search ?? "",
     ] as const,
-  files: (patientId: string) =>
-    [...doctorPatientsQueryKeys.all, "files", patientId] as const,
+  files: (patientId: string, params?: DoctorPatientFilesListParams) =>
+    params
+      ? ([...doctorPatientsQueryKeys.all, "files", patientId, params] as const)
+      : ([...doctorPatientsQueryKeys.all, "files", patientId] as const),
   file: (patientId: string, fileId: string) =>
     [...doctorPatientsQueryKeys.files(patientId), fileId] as const,
 };
@@ -3005,11 +3030,14 @@ export const doctorApi = {
         body,
         { locale: "ar" },
       ).then(normalizeEncounterDocumentShareResponse),
-    listFiles: (patientId: string) =>
-      get<DoctorPatientFilesListResponse>(
-        doctorEndpoints.patients.files.list(patientId),
-        { locale: "ar" },
-      ).then(normalizeDoctorPatientFilesListResponse),
+    listFiles: (patientId: string, params: DoctorPatientFilesListParams = {}) => {
+      const query = buildPatientFilesListQuery(params);
+      const base = doctorEndpoints.patients.files.list(patientId);
+      const endpoint = query ? `${base}?${query}` : base;
+      return get<DoctorPatientFilesListResponse>(endpoint, { locale: "ar" }).then(
+        normalizeDoctorPatientFilesListResponse,
+      );
+    },
     getFile: (patientId: string, fileId: string) =>
       get<DoctorPatientFileDetailsResponse>(
         doctorEndpoints.patients.files.detail(patientId, fileId),

@@ -11,9 +11,11 @@ import { useDoctorPatientFiles, useDoctorPatients } from "@/hooks/doctor/patient
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { doctorApi } from "@/lib/doctor/client";
+import { ApiError } from "@/lib/api";
 import { getPatientFileAccessErrorMessage } from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload, triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
 import { useI18n } from "@/i18n/provider";
+import StyledSelect from "@/components/ui/styled-select";
 
 function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
@@ -153,6 +155,8 @@ export default function SecretaryPatientFilesPage() {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [searchInput, setSearchInput] = useState("");
   const [patientId, setPatientId] = useState("");
+  const [category, setCategory] = useState("");
+  const [archived, setArchived] = useState<"all" | "active" | "archived">("active");
   const { toast } = useToast();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const { hasPermission } = useSecretaryPermissions();
@@ -166,7 +170,17 @@ export default function SecretaryPatientFilesPage() {
   const filesQuery = useDoctorPatientFiles(
     patientId,
     canLoadPatientFiles && Boolean(patientId),
+    {
+      search: searchInput.trim() || undefined,
+      category: category || undefined,
+      archived: archived === "all" ? undefined : archived === "archived",
+    },
   );
+  // The backend enforces a per-patient profile-access guard in addition to the
+  // secretary's global patients:files:view + assigned-doctor check — a patient
+  // can be selectable in the dropdown yet still 403 once files are requested.
+  const filesAccessDenied =
+    filesQuery.error instanceof ApiError && filesQuery.error.status === 403;
   const fileActionsDisabledReason = useMemo(() => {
     if (!canViewFiles) {
       return tr(
@@ -263,16 +277,8 @@ export default function SecretaryPatientFilesPage() {
     }
   }
 
-  const searchedFiles = useMemo(() => {
-    if (!searchInput.trim()) return files;
-    const search = searchInput.toLowerCase();
-    return files.filter(
-      (f) =>
-        f.patientName.toLowerCase().includes(search) ||
-        f.patientId.includes(search) ||
-        f.fileType.toLowerCase().includes(search),
-    );
-  }, [files, searchInput]);
+  // search/category/archived are now sent to the backend via useDoctorPatientFiles params.
+  const searchedFiles = files;
 
   return (
     <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
@@ -300,8 +306,28 @@ export default function SecretaryPatientFilesPage() {
             ))}
           </select>
         </div>
-        <div className="px-4 py-5 sm:px-5 sm:py-6">
-          <FilesSearchInput value={searchInput} onChange={setSearchInput} />
+        <div className="flex flex-col gap-3 px-4 py-5 sm:px-5 sm:py-6 lg:flex-row lg:items-center">
+          <div className="flex-1">
+            <FilesSearchInput value={searchInput} onChange={setSearchInput} />
+          </div>
+          <input
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            placeholder={tr("الفئة", "Category")}
+            className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] outline-none focus:border-primary lg:w-[160px]"
+          />
+          <div className="w-full lg:w-[150px]">
+            <StyledSelect
+              value={archived}
+              onChange={(value) => setArchived(value as "all" | "active" | "archived")}
+              options={[
+                { value: "active", label: tr("غير مؤرشف", "Active") },
+                { value: "archived", label: tr("مؤرشف", "Archived") },
+                { value: "all", label: tr("الكل", "All") },
+              ]}
+              listboxAriaLabel={tr("حالة الأرشفة", "Archive status")}
+            />
+          </div>
         </div>
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
@@ -354,6 +380,15 @@ export default function SecretaryPatientFilesPage() {
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
               {tr("جاري تحميل الملفات...", "Loading files...")}
+            </p>
+          </div>
+        ) : filesAccessDenied ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
+            <p className="max-w-[560px] font-cairo text-[15px] font-semibold text-[#64748B]">
+              {tr(
+                "لا تملك صلاحية الوصول إلى ملف هذا المريض بعينه. قد تحتاج إلى طلب الوصول أولاً حتى لو كانت لديك صلاحية عرض ملفات المرضى عموماً.",
+                "You don't have access to this specific patient's file. You may need to request access first, even though you have general patient-files permission.",
+              )}
             </p>
           </div>
         ) : filesQuery.isError ? (

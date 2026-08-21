@@ -119,6 +119,26 @@ export type DoctorPatientFile = {
   tags?: string[];
 };
 
+export type DoctorPatientFilesListParams = {
+  page?: number;
+  limit?: number;
+  archived?: boolean;
+  search?: string;
+  category?: string;
+  subcategory?: string;
+  mimeCategory?: string;
+  clinicalContext?: string;
+  sourceModule?: string;
+  uploadedByRole?: string;
+  visibilityScope?: string;
+  appointmentId?: string;
+  tags?: string[];
+  serviceDateFrom?: string;
+  serviceDateTo?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+};
+
 export type DoctorPatientFilesListResponse = {
   messageKey?: string;
   message?: string;

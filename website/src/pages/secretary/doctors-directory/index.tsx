@@ -1,24 +1,60 @@
-import { Search, Filter, Stethoscope, Star, MapPin, Phone } from "lucide-react";
+import { Search, Filter, Stethoscope, Star, MapPin, Phone, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDoctorDoctorsDirectory } from "@/hooks/doctor/directory/useDoctorDoctorsDirectory";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { useI18n } from "@/i18n/provider";
 
+const CONSULTATION_TYPE_OPTIONS: Array<{ value: "" | "online" | "offline"; label: [string, string] }> = [
+  { value: "", label: ["الكل", "All"] },
+  { value: "online", label: ["أونلاين", "Online"] },
+  { value: "offline", label: ["حضوري", "In-person"] },
+];
+
 export default function SecretaryDoctorsDirectoryPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const [search, setSearch] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [specialization, setSpecialization] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [consultationType, setConsultationType] = useState<"" | "online" | "offline">("");
+  const [minRating, setMinRating] = useState("");
   const { hasPermission } = useSecretaryPermissions();
-  const canViewDirectory = hasPermission("appointments:book");
-  const directoryQuery = useDoctorDoctorsDirectory({
-    search: search.trim() || "",
-    page: 1,
-    limit: 24,
-  }, canViewDirectory);
+  // Backend GET /doctors/internal/directory only requires Doctor/Secretary
+  // role membership — no specific permission is enforced. We still require
+  // appointments:view (a lesser permission than :book) so a secretary needs
+  // at least some appointment-related access before browsing the directory.
+  const canViewDirectory = hasPermission("appointments:view");
+  const activeFilterCount = [specialization, city, country, consultationType, minRating].filter(
+    Boolean,
+  ).length;
+
+  const directoryQuery = useDoctorDoctorsDirectory(
+    {
+      search: search.trim() || "",
+      specialization: specialization.trim() || undefined,
+      city: city.trim() || undefined,
+      country: country.trim() || undefined,
+      consultationType: consultationType || undefined,
+      minRating: minRating ? Number(minRating) : undefined,
+      page: 1,
+      limit: 24,
+    },
+    canViewDirectory,
+  );
   const doctors = useMemo(
     () => directoryQuery.doctors ?? [],
     [directoryQuery.doctors],
   );
+
+  const clearFilters = () => {
+    setSpecialization("");
+    setCity("");
+    setCountry("");
+    setConsultationType("");
+    setMinRating("");
+  };
 
   return (
     <div dir={dir} lang={locale} className="space-y-6">
@@ -44,11 +80,78 @@ export default function SecretaryDoctorsDirectoryPage() {
             className="flex-1 bg-transparent font-cairo text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none"
           />
         </div>
-        <button className="flex items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 font-cairo text-sm font-bold text-[#0f172a] shadow-sm transition hover:bg-gray-50">
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((open) => !open)}
+          className="flex items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 font-cairo text-sm font-bold text-[#0f172a] shadow-sm transition hover:bg-gray-50"
+        >
           <Filter className="h-4 w-4" />
           {tr("تصفية", "Filter")}
+          {activeFilterCount > 0 ? (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-black text-white">
+              {activeFilterCount}
+            </span>
+          ) : null}
         </button>
       </div>
+
+      {filtersOpen ? (
+        <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <input
+              value={specialization}
+              onChange={(event) => setSpecialization(event.target.value)}
+              placeholder={tr("التخصص", "Specialization")}
+              className="h-[38px] rounded-[10px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary"
+            />
+            <input
+              value={city}
+              onChange={(event) => setCity(event.target.value)}
+              placeholder={tr("المدينة", "City")}
+              className="h-[38px] rounded-[10px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary"
+            />
+            <input
+              value={country}
+              onChange={(event) => setCountry(event.target.value)}
+              placeholder={tr("الدولة", "Country")}
+              className="h-[38px] rounded-[10px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary"
+            />
+            <select
+              value={consultationType}
+              onChange={(event) =>
+                setConsultationType(event.target.value as "" | "online" | "offline")
+              }
+              className="h-[38px] rounded-[10px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary"
+            >
+              {CONSULTATION_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {tr(option.label[0], option.label[1])}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={0}
+              max={5}
+              step={0.5}
+              value={minRating}
+              onChange={(event) => setMinRating(event.target.value)}
+              placeholder={tr("أقل تقييم", "Min. rating")}
+              className="h-[38px] rounded-[10px] border border-[#DCE3EC] bg-white px-3 font-cairo text-[13px] font-bold text-[#111827] outline-none focus:border-primary"
+            />
+          </div>
+          {activeFilterCount > 0 ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-3 inline-flex items-center gap-1 font-cairo text-[13px] font-bold text-[#B42318] hover:underline"
+            >
+              <X className="h-3.5 w-3.5" />
+              {tr("مسح عوامل التصفية", "Clear filters")}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {!canViewDirectory ? (

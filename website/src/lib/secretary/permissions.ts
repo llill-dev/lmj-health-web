@@ -15,10 +15,15 @@ export const secretaryRoutePermissionMap: Partial<
   "book-appointment": ["appointments:book"],
   "doctor-schedule": ["schedule:view"],
   "patient-files": ["patients:files:view"],
-  "doctors-directory": ["appointments:book"],
+  // Backend GET /doctors/internal/directory only requires Doctor/Secretary
+  // role membership, no specific permission — gate on the lesser
+  // appointments:view rather than appointments:book so directory browsing
+  // isn't blocked for secretaries who can view but not book appointments.
+  "doctors-directory": ["appointments:view"],
   appointments: ["appointments:view"],
   accounts: ["billing:dashboard:view"],
-  "appointment-suggestions": ["waitlist:book"],
+  // Backend GET /waitlist/suggestions requires waitlist:view, not waitlist:book.
+  "appointment-suggestions": ["waitlist:view"],
   waitlist: ["waitlist:view"],
   profile: [],
   notifications: [],
