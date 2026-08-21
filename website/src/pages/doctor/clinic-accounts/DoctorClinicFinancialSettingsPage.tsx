@@ -2,11 +2,9 @@
 
 import {
   BookOpen,
-  CheckCircle2,
   CreditCard,
   DollarSign,
   Percent,
-  RefreshCw,
   Save,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -139,17 +137,6 @@ export default function DoctorClinicFinancialSettingsPage() {
     }
   };
 
-  const handleMyHealthSync = () => {
-    toast(
-      'تكامل My Health غير متوفر في واجهة الفوترة حالياً (لا يوجد endpoint في API-3).',
-      {
-        title: 'My Health',
-        variant: 'info',
-        durationMs: 5200,
-      },
-    );
-  };
-
   return (
     <>
       <Helmet>
@@ -203,7 +190,11 @@ export default function DoctorClinicFinancialSettingsPage() {
                 value={currency}
                 onChange={setCurrency}
                 listboxAriaLabel="العملة"
+                disabled={!canManageSettings}
               />
+              <p className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
+                تغيير العملة لا يُحوّل الفواتير والمصاريف الحالية — كل سجل يحتفظ بالعملة التي أُنشئ بها، والتغيير يسري على السجلات الجديدة فقط.
+              </p>
             </section>
 
             <section className={sectionCardClassName()}>
@@ -221,6 +212,7 @@ export default function DoctorClinicFinancialSettingsPage() {
                   checked={taxEnabled}
                   onChange={setTaxEnabled}
                   label="تفعيل الضريبة"
+                  disabled={!canManageSettings}
                 />
               </div>
               {taxEnabled ? (
@@ -235,7 +227,8 @@ export default function DoctorClinicFinancialSettingsPage() {
                     step="0.01"
                     value={taxPercent}
                     onChange={(e) => setTaxPercent(e.target.value)}
-                    className="h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
+                    disabled={!canManageSettings}
+                    className="h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
               ) : null}
@@ -255,9 +248,10 @@ export default function DoctorClinicFinancialSettingsPage() {
                     <button
                       key={preset}
                       type="button"
+                      disabled={!canManageSettings}
                       onClick={() => toggleDiscountPreset(preset)}
                       className={cn(
-                        'h-[52px] rounded-[12px] border-2 font-cairo text-[15px] font-extrabold transition',
+                        'h-[52px] rounded-[12px] border-2 font-cairo text-[15px] font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60',
                         active
                           ? 'border-primary bg-[#F0FDFA] text-primary'
                           : 'border-[#E5E7EB] bg-white text-[#667085] hover:border-primary/40',
@@ -290,44 +284,22 @@ export default function DoctorClinicFinancialSettingsPage() {
                       checked={paymentMethods.includes(method.id)}
                       onChange={() => togglePaymentMethod(method.id)}
                       label={method.label}
+                      disabled={!canManageSettings}
                     />
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="rounded-[16px] border border-[#9EE8E0] bg-[#F0FDFA] p-6 shadow-sm">
-              <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-                <div className="text-start">
-                  <p className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                    My Health
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <CheckCircle2
-                      className="h-5 w-5 text-[#22C55E]"
-                      aria-hidden
-                    />
-                    <div>
-                      <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
-                        متصل
-                      </p>
-                      <p className="font-cairo text-[11px] font-semibold text-[#667085]">
-                        المزامنة نشطة
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            <section className="rounded-[16px] border border-[#E5E7EB] bg-[#F9FAFB] p-6 shadow-sm">
+              <div className="mb-2 text-start">
+                <p className="font-cairo text-[16px] font-extrabold text-[#111827]">
+                  My Health
+                </p>
+                <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
+                  تكامل My Health غير متاح حالياً في واجهة الفوترة — لا يوجد endpoint خلفي لمزامنة البيانات بعد.
+                </p>
               </div>
-              {canManageSettings ? (
-                <button
-                  type="button"
-                  onClick={handleMyHealthSync}
-                  className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FDFA]"
-                >
-                  <RefreshCw className="h-4 w-4" aria-hidden />
-                  مزامنة الآن
-                </button>
-              ) : null}
             </section>
 
             {canManageSettings ? (

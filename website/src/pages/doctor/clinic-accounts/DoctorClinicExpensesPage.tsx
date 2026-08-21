@@ -81,7 +81,10 @@ export default function DoctorClinicExpensesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<ExpenseCategory>("rent");
+  // Free-text category value sent to the backend as-is — the backend accepts
+  // arbitrary clinic-defined categories (billing:settings), not just the 4
+  // fixed values used for filter tabs below.
+  const [category, setCategory] = useState<string>("Rent");
   const [date, setDate] = useState("");
 
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
@@ -142,7 +145,7 @@ export default function DoctorClinicExpensesPage() {
 
     try {
       await createExpense.mutateAsync({
-        category: CATEGORY_TO_API[category] ?? category,
+        category,
         amount: parsedAmount,
         expenseDate: billingDateInputToIso(date),
         description: title.trim(),
@@ -186,7 +189,7 @@ export default function DoctorClinicExpensesPage() {
                     : "—"}
               </span>
               <span className="text-primary/90">
-                {tr(" — إجمالي المصاريف", " — total expenses")}
+                {tr(" — إجمالي مصاريف هذا الشهر", " — this month's total expenses")}
               </span>
             </span>
           }
@@ -340,22 +343,20 @@ export default function DoctorClinicExpensesPage() {
               </label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+                onChange={(e) => setCategory(e.target.value)}
                 className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
               >
-                {(Object.keys(EXPENSE_CATEGORY_LABELS) as ExpenseCategory[]).map(
-                  (key) => (
-                    <option key={key} value={key}>
-                      {EXPENSE_CATEGORY_LABELS[key]}
+                {categoryOptions.map((apiCategory) => {
+                  const knownKey = (Object.keys(CATEGORY_TO_API) as ExpenseCategory[]).find(
+                    (key) => CATEGORY_TO_API[key] === apiCategory,
+                  );
+                  return (
+                    <option key={apiCategory} value={apiCategory}>
+                      {knownKey ? EXPENSE_CATEGORY_LABELS[knownKey] : apiCategory}
                     </option>
-                  ),
-                )}
+                  );
+                })}
               </select>
-              {categoryOptions.length ? (
-                <p className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  فئات الخادم: {categoryOptions.join("، ")}
-                </p>
-              ) : null}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
