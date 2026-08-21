@@ -108,6 +108,11 @@ export type WaitlistFreeSlot = {
 export type WaitlistSlotCandidate = {
   id?: string;
   urgencyLevel?: WaitlistUrgency | string;
+  patientName?: string;
+  patientPublicId?: string;
+  patientId?: string;
+  status?: WaitlistStatus | string;
+  preferredTimeWindows?: Array<{ from?: string; to?: string }>;
 };
 
 export type WaitlistSuggestionsResponse = {

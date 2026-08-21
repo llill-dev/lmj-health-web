@@ -9,6 +9,7 @@ import {
   waitlistQueryKeys,
 } from '@/lib/doctor/waitlist/client';
 import type {
+  CreateWaitlistRequestBody,
   WaitlistBookBody,
   WaitlistListParams,
   WaitlistRequest,
@@ -94,6 +95,15 @@ export function useWaitlistSuggestions(
     queryFn: () => waitlistApi.suggestions(params!),
     enabled: enabled && Boolean(params?.date),
     staleTime: 60_000,
+  });
+}
+
+export function useCreateWaitlistRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateWaitlistRequestBody) => waitlistApi.create(body),
+    onSuccess: () => invalidateWaitlist(queryClient),
   });
 }
 
