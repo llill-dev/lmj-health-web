@@ -62,6 +62,7 @@ export type BillingInvoicesListParams = {
   search?: string;
   dateFrom?: string;
   dateTo?: string;
+  currency?: string;
   page?: number;
   limit?: number;
 };

@@ -96,6 +96,7 @@ export function useBillingInvoices(
   params: BillingInvoicesListParams & {
     uiStatus?: InvoiceStatus | "all";
   } = {},
+  enabled = true,
 ) {
   const apiParams: BillingInvoicesListParams = {
     page: params.page ?? 1,
@@ -104,6 +105,7 @@ export function useBillingInvoices(
     patientId: params.patientId,
     dateFrom: params.dateFrom,
     dateTo: params.dateTo,
+    currency: params.currency,
     status:
       params.status ??
       (params.uiStatus && params.uiStatus !== "all"
@@ -114,6 +116,7 @@ export function useBillingInvoices(
   const query = useQuery({
     queryKey: billingQueryKeys.invoices(apiParams),
     queryFn: () => billingApi.invoices.list(apiParams),
+    enabled,
     staleTime: STALE_MS,
   });
 
@@ -127,7 +130,7 @@ export function useBillingInvoices(
     total: query.data?.total ?? invoices.length,
     page: query.data?.page ?? apiParams.page ?? 1,
     limit: query.data?.limit ?? apiParams.limit ?? 50,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData: enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 
