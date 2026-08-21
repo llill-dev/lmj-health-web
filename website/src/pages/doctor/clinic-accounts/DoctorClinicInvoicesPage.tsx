@@ -38,6 +38,7 @@ const FILTER_OPTIONS: Array<{ id: InvoiceFilter; label: string }> = [
   { id: "all", label: "الكل" },
   { id: "paid", label: "مدفوعة" },
   { id: "unpaid", label: "غير مدفوعة" },
+  { id: "partial", label: "مدفوعة جزئياً" },
   { id: "overdue", label: "متأخرة" },
   { id: "cancelled", label: "ملغاة" },
 ];
@@ -95,9 +96,11 @@ export default function DoctorClinicInvoicesPage() {
   const stats = useMemo(
     () => ({
       paid: pickStatusCount(invoiceStatusRows, "paid"),
-      unpaid:
-        pickStatusCount(invoiceStatusRows, "issued") +
-        pickStatusCount(invoiceStatusRows, "draft"),
+      // The "Unpaid" tab only fetches status=issued (see mapUiInvoiceStatusToApi),
+      // so this KPI counts the same set — draft invoices are a separate lifecycle
+      // state with no dedicated tab and are intentionally excluded here.
+      unpaid: pickStatusCount(invoiceStatusRows, "issued"),
+      partial: pickStatusCount(invoiceStatusRows, "partial"),
       overdue: pickStatusCount(invoiceStatusRows, "overdue"),
     }),
     [invoiceStatusRows],

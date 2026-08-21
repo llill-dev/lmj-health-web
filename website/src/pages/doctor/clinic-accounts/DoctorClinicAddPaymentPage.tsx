@@ -65,9 +65,13 @@ export default function DoctorClinicAddPaymentPage() {
     [invoice],
   );
 
+  // Don't silently offer all payment methods when settings failed to load —
+  // the backend may reject a method that's actually disabled in clinic settings.
+  const methodsUnavailable =
+    settingsQuery.isError || !settingsQuery.settings?.allowedPaymentMethods?.length;
   const methods = settingsQuery.settings?.allowedPaymentMethods?.length
     ? settingsQuery.settings.allowedPaymentMethods
-    : ["cash", "card", "bank_transfer", "insurance"];
+    : [];
 
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<string>("cash");
@@ -259,6 +263,11 @@ export default function DoctorClinicAddPaymentPage() {
                 <h2 className="mb-4 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
                   طريقة الدفع
                 </h2>
+                {methodsUnavailable ? (
+                  <p className="rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B42318]">
+                    تعذّر تحميل طرق الدفع المفعّلة لهذه العيادة. لا يمكن تسجيل دفعة قبل توفّر هذه البيانات.
+                  </p>
+                ) : (
                 <div className="grid grid-cols-2 gap-3">
                   {methods.map((option) => {
                     const active = method === option;
@@ -286,6 +295,7 @@ export default function DoctorClinicAddPaymentPage() {
                     );
                   })}
                 </div>
+                )}
               </section>
 
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
@@ -326,7 +336,7 @@ export default function DoctorClinicAddPaymentPage() {
 
               <button
                 type="button"
-                disabled={createPayment.isPending || !canAcceptPayment}
+                disabled={createPayment.isPending || !canAcceptPayment || methodsUnavailable}
                 onClick={() => void handleSave()}
                 className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] disabled:opacity-60"
               >

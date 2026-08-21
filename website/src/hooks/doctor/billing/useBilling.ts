@@ -471,6 +471,8 @@ export function useBillingServices(params: {
     total,
     totalPages: Math.max(1, Math.ceil(total / limit)),
     isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isError: query.isError,
+    error: query.error,
     refetch: query.refetch,
   };
 }

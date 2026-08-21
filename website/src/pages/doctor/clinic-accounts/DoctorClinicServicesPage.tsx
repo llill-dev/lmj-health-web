@@ -75,6 +75,11 @@ export default function DoctorClinicServicesPage() {
 
   const handleSave = async () => {
     if (!name.trim()) return;
+    // Backend requires defaultPrice > 0 (exclusiveMinimum: 0) — reject 0/empty client-side.
+    if (defaultPrice.trim() && Number(defaultPrice) <= 0) {
+      toast('السعر الافتراضي يجب أن يكون أكبر من صفر.', { variant: 'error' });
+      return;
+    }
     const body = {
       name: name.trim(),
       defaultPrice: defaultPrice.trim() ? Number(defaultPrice) : undefined,
@@ -159,6 +164,7 @@ export default function DoctorClinicServicesPage() {
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
+          onValueChangeExtra={() => setPage(1)}
           placeholder={tr('بحث عن خدمة...', 'Search services...')}
           onClear={() => setSearch('')}
         />
@@ -171,6 +177,13 @@ export default function DoctorClinicServicesPage() {
         <section className="mt-6 rounded-[12px] border border-[#EEF2F6] bg-white p-5">
           {list.isAwaitingData && !list.services.length ? (
             <DoctorTableSkeleton rows={5} columns={4} />
+          ) : list.isError ? (
+            <DoctorListErrorState
+              title={tr('تعذّر تحميل الخدمات', 'Failed to load services')}
+              brief={getUserFacingRequestErrorMessage(list.error)}
+              retrying={retrying}
+              onRetry={() => void retry()}
+            />
           ) : list.services.length === 0 ? (
             <DoctorListEmptyIllustration
               variant="teal"
@@ -306,7 +319,8 @@ export default function DoctorClinicServicesPage() {
           />
           <input
             type="number"
-            min={0}
+            min={1}
+            step="any"
             value={defaultPrice}
             onChange={(e) => setDefaultPrice(e.target.value)}
             placeholder="السعر الافتراضي"

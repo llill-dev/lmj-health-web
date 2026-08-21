@@ -238,6 +238,16 @@ export function getBillingInvoiceLoadErrorToast(error: unknown): BillingPaymentE
     };
   }
 
+  if (error.status === 403) {
+    return {
+      title: 'صلاحية غير كافية',
+      // Adding a payment only requires billing:payments:manage, but loading the
+      // invoice itself requires the separate billing:invoices:view permission.
+      message:
+        'يتطلب فتح تفاصيل الفاتورة صلاحية عرض الفواتير (billing:invoices:view)، وهي منفصلة عن صلاحية إدارة الدفعات.',
+    };
+  }
+
   return getBillingPaymentErrorToast(error);
 }
 

@@ -22,6 +22,7 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import { BILLING_DISCOUNT_PRESET_OPTIONS } from '@/lib/doctor/billing/settingsUi';
 import { useBillingAccess } from '@/hooks/billing/useBillingAccess';
+import { useSecretaryPermissions } from '@/hooks/secretary/useSecretaryPermissions';
 import { useI18n } from '@/i18n/provider';
 
 type LineItem = {
@@ -36,13 +37,15 @@ export default function DoctorClinicCreateInvoicePage() {
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { basePath, canViewSettings, isSecretary } = useBillingAccess();
+  const { hasPermission: hasSecretaryPermission } = useSecretaryPermissions();
+  const canViewPatients = !isSecretary || hasSecretaryPermission('patients:view');
   const [searchParams] = useSearchParams();
   const appointmentId = searchParams.get('appointmentId');
   const { toast } = useToast();
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
   const prefillQuery = useBillingInvoicePrefill(appointmentId);
   const createInvoice = useCreateBillingInvoice();
-  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 });
+  const patientsQuery = useDoctorPatients({ page: 1, limit: 100 }, canViewPatients);
 
   const [patientId, setPatientId] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -135,7 +138,7 @@ export default function DoctorClinicCreateInvoicePage() {
     }
 
     const validItems = items.filter(
-      (item) => item.service.trim() && item.quantity > 0 && item.price >= 0,
+      (item) => item.service.trim() && item.quantity > 0 && item.price > 0,
     );
     if (!validItems.length) {
       toast('أضف بنداً واحداً على الأقل مع اسم الخدمة والسعر.', {
@@ -201,26 +204,39 @@ export default function DoctorClinicCreateInvoicePage() {
             <h2 className="mb-4 text-start font-cairo text-[15px] font-extrabold text-[#111827]">
               المريض
             </h2>
-            <StyledSelect
-              options={patientOptions}
-              value={patientId}
-              onChange={setPatientId}
-              placeholder="اختر المريض"
-              emptyTriggerLabel="لا يوجد مرضى في القائمة"
-              emptyState="لا يوجد مرضى مرتبطون بحسابك. أضف مريضاً من صفحة المرضى أولاً."
-              disabled={patientsQuery.isAwaitingData}
-            />
-            {selectedPatient ? (
-              <p className="mt-2 text-start font-cairo text-[12px] font-semibold text-[#667085]">
-                المريض المختار: {selectedPatient.user?.fullName}
+            {!canViewPatients ? (
+              <p className="rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
+                يتطلب اختيار مريض صلاحية عرض المرضى (patients:view)، وهي غير مفعّلة على حسابك حالياً.
               </p>
-            ) : null}
+            ) : (
+              <>
+                <StyledSelect
+                  options={patientOptions}
+                  value={patientId}
+                  onChange={setPatientId}
+                  placeholder="اختر المريض"
+                  emptyTriggerLabel="لا يوجد مرضى في القائمة"
+                  emptyState="لا يوجد مرضى مرتبطون بحسابك. أضف مريضاً من صفحة المرضى أولاً."
+                  disabled={patientsQuery.isAwaitingData}
+                />
+                {selectedPatient ? (
+                  <p className="mt-2 text-start font-cairo text-[12px] font-semibold text-[#667085]">
+                    المريض المختار: {selectedPatient.user?.fullName}
+                  </p>
+                ) : null}
+              </>
+            )}
           </section>
 
           <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-start font-cairo text-[15px] font-extrabold text-[#111827]">
               الخصم وتاريخ الاستحقاق
             </h2>
+            {settingsQuery.isError || (isSecretary && !canViewSettings) ? (
+              <p className="mb-4 rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
+                تعذّر تحميل إعدادات الفوترة الفعلية (العملة، الضريبة، الخصومات) — القيم أدناه افتراضية ولا تعكس بالضرورة إعدادات الطبيب.
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2 justify-start mb-4">
               {discountPresets.map((preset) => (
                 <button
@@ -242,10 +258,14 @@ export default function DoctorClinicCreateInvoicePage() {
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <input
+                type="number"
+                min={0}
+                max={100}
                 value={customDiscount}
                 onChange={(e) => {
                   setCustomDiscount(e.target.value);
-                  setDiscountPercent(Number(e.target.value) || 0);
+                  const clamped = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+                  setDiscountPercent(clamped);
                 }}
                 placeholder="خصم مخصص (%)"
                 className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
@@ -320,7 +340,8 @@ export default function DoctorClinicCreateInvoicePage() {
                       </label>
                       <input
                         type="number"
-                        min={0}
+                        min={1}
+                        step="any"
                         value={item.price}
                         onChange={(e) =>
                           updateItem(item.id, {
