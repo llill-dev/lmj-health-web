@@ -285,6 +285,11 @@ export function useBillingReports(input: {
   year: number;
   month?: number | "all";
   currency?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  status?: string;
+  method?: string;
+  category?: string;
 }, enabled = true) {
   const params: BillingQueryParams = {
     ...resolveBillingReportPeriodParams(input),
@@ -314,6 +319,7 @@ export function useBillingReports(input: {
         )
       : [],
     summary: report?.summary ?? null,
+    mixedCurrencies: Boolean(report?.mixedCurrencies),
     isAwaitingData:
       enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };

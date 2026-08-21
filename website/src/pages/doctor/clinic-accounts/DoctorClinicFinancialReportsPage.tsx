@@ -18,6 +18,7 @@ import {
   FinancialBarChart,
   FinancialLineChart,
 } from "@/components/doctor/clinic-accounts";
+import StyledSelect from "@/components/ui/styled-select";
 import DoctorListErrorState from "@/components/doctor/shared/doctor-list-error-state";
 import { DoctorStatCardsSkeleton } from "@/components/doctor/shared/skeletons";
 import {
@@ -28,6 +29,7 @@ import {
 import { getUserFacingRequestErrorMessage } from "@/lib/api";
 import { useRetryAction } from "@/lib/query/useRetryAction";
 import { formatBillingAmount } from "@/lib/doctor/billing/format";
+import { formatBillingCurrencyOptionLabel } from "@/lib/doctor/billing/settingsUi";
 import { triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
@@ -55,22 +57,45 @@ export default function DoctorClinicFinancialReportsPage() {
   const { toast } = useToast();
   const { canExportReports, canViewSettings, isSecretary } = useBillingAccess();
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
-  const [year, setYear] = useState(new Date().getFullYear());
+  const currentYear = new Date().getFullYear();
+  const [year, setYear] = useState(currentYear);
   const [month, setMonth] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [currencyOverride, setCurrencyOverride] = useState<string>("");
+  const yearOptions = useMemo(
+    () => Array.from({ length: 5 }, (_, index) => currentYear - 2 + index),
+    [currentYear],
+  );
 
   const reportMonth = month === "all" ? "all" : Number(month);
+  const useCustomRange = Boolean(dateFrom && dateTo);
   const reportsQuery = useBillingReports({
     year,
     month: reportMonth,
-    currency: settingsQuery.currency,
+    currency: currencyOverride || settingsQuery.currency,
+    dateFrom: useCustomRange ? dateFrom : undefined,
+    dateTo: useCustomRange ? dateTo : undefined,
   });
   const exportPdf = useExportBillingReportPdf();
   const { retry: retryReports, retrying: retryingReports } = useRetryAction(() =>
     reportsQuery.refetch(),
   );
 
-  const currency = reportsQuery.currency ?? settingsQuery.currency;
+  const currency = reportsQuery.currency ?? currencyOverride ?? settingsQuery.currency;
   const formatMoney = (value: number) => formatBillingAmount(value, currency);
+  const currencyOptions = useMemo(() => {
+    const list = settingsQuery.supportedCurrencies?.length
+      ? settingsQuery.supportedCurrencies
+      : [];
+    return [
+      { value: "", label: tr("العملة الافتراضية", "Default currency") },
+      ...list.map((item) => ({
+        value: item.code,
+        label: formatBillingCurrencyOptionLabel(item.code, item.name),
+      })),
+    ];
+  }, [settingsQuery.supportedCurrencies, tr]);
 
   const totals = useMemo(() => {
     const summary = reportsQuery.summary;
@@ -79,6 +104,7 @@ export default function DoctorClinicFinancialReportsPage() {
         income: summary.income ?? 0,
         expenses: summary.expenses ?? 0,
         profit: summary.profit ?? 0,
+        refunds: summary.refunds ?? 0,
       };
     }
     const data = reportsQuery.monthlyFinance;
@@ -86,6 +112,7 @@ export default function DoctorClinicFinancialReportsPage() {
       income: data.reduce((sum, item) => sum + item.income, 0),
       expenses: data.reduce((sum, item) => sum + item.expenses, 0),
       profit: data.reduce((sum, item) => sum + item.profit, 0),
+      refunds: 0,
     };
   }, [reportsQuery.monthlyFinance, reportsQuery.summary]);
 
@@ -132,13 +159,14 @@ export default function DoctorClinicFinancialReportsPage() {
 
         <ClinicAccountsSubNav />
 
-        <div className="mb-6 flex flex-wrap justify-start gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-start gap-3">
           <select
             value={String(year)}
+            disabled={useCustomRange}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="h-[44px] rounded-[10px] border border-[#EEF2F6] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
+            className="h-[44px] rounded-[10px] border border-[#EEF2F6] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {[2024, 2025, 2026, 2027].map((y) => (
+            {yearOptions.map((y) => (
               <option key={y} value={y}>
                 {y}
               </option>
@@ -146,8 +174,9 @@ export default function DoctorClinicFinancialReportsPage() {
           </select>
           <select
             value={month}
+            disabled={useCustomRange}
             onChange={(e) => setMonth(e.target.value)}
-            className="h-[44px] rounded-[10px] border border-[#EEF2F6] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
+            className="h-[44px] rounded-[10px] border border-[#EEF2F6] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
           >
             {MONTHS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -155,7 +184,54 @@ export default function DoctorClinicFinancialReportsPage() {
               </option>
             ))}
           </select>
+          <div className="w-[180px]">
+            <StyledSelect
+              options={currencyOptions}
+              value={currencyOverride}
+              onChange={setCurrencyOverride}
+              listboxAriaLabel={tr("العملة", "Currency")}
+            />
+          </div>
         </div>
+
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <span className="font-cairo text-[12px] font-bold text-[#667085]">
+            {tr("أو فترة مخصصة:", "Or a custom range:")}
+          </span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="h-[40px] rounded-[10px] border border-[#EEF2F6] bg-white px-3 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="h-[40px] rounded-[10px] border border-[#EEF2F6] bg-white px-3 font-cairo text-[13px] font-semibold outline-none focus:border-primary"
+          />
+          {useCustomRange ? (
+            <button
+              type="button"
+              onClick={() => {
+                setDateFrom("");
+                setDateTo("");
+              }}
+              className="font-cairo text-[12px] font-extrabold text-primary hover:underline"
+            >
+              {tr("إلغاء الفترة المخصصة", "Clear custom range")}
+            </button>
+          ) : null}
+        </div>
+
+        {reportsQuery.mixedCurrencies ? (
+          <div className="mb-4 rounded-[12px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B54708]">
+            {tr(
+              "هذا التقرير يحتوي على سجلات بعملات متعددة. الإجمالي المعروض ليس تحويلاً موحّداً — الأرقام تمثل العملة المحددة فقط دون تحويل سعر الصرف.",
+              "This report contains records in multiple currencies. The total shown is not a unified conversion — figures reflect only the selected currency, with no exchange-rate conversion applied.",
+            )}
+          </div>
+        ) : null}
 
         {reportsQuery.isError ? (
           <DoctorListErrorState
@@ -170,7 +246,7 @@ export default function DoctorClinicFinancialReportsPage() {
         ) : reportsQuery.isAwaitingData ? (
           <DoctorStatCardsSkeleton count={3} columns={3} />
         ) : (
-          <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <ClinicAccountsStatCard
               label="الدخل"
               value={formatMoney(totals.income)}
@@ -187,6 +263,12 @@ export default function DoctorClinicFinancialReportsPage() {
               value={formatMoney(totals.profit)}
               icon={BarChart3}
             />
+            <ClinicAccountsStatCard
+              label="الاسترجاعات"
+              value={formatMoney(totals.refunds)}
+              icon={TrendingDown}
+              className="bg-[#B54708]"
+            />
           </section>
         )}
 
@@ -195,13 +277,25 @@ export default function DoctorClinicFinancialReportsPage() {
             <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
               الدخل والمصاريف
             </h2>
-            <FinancialBarChart data={reportsQuery.monthlyFinance} />
+            {reportsQuery.monthlyFinance.length === 0 ? (
+              <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
+                {tr("لا توجد بيانات لهذه الفترة.", "No data for this period.")}
+              </p>
+            ) : (
+              <FinancialBarChart data={reportsQuery.monthlyFinance} />
+            )}
           </div>
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
               اتجاه الربح
             </h2>
-            <FinancialLineChart data={reportsQuery.monthlyFinance} />
+            {reportsQuery.monthlyFinance.length === 0 ? (
+              <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
+                {tr("لا توجد بيانات لهذه الفترة.", "No data for this period.")}
+              </p>
+            ) : (
+              <FinancialLineChart data={reportsQuery.monthlyFinance} />
+            )}
           </div>
         </section>
 
@@ -209,10 +303,16 @@ export default function DoctorClinicFinancialReportsPage() {
           <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
             المصاريف حسب الفئة
           </h2>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.2fr]">
-            <ExpensePieChart data={reportsQuery.expenseBreakdown} />
-            <ExpensePieLegend data={reportsQuery.expenseBreakdown} />
-          </div>
+          {reportsQuery.expenseBreakdown.length === 0 ? (
+            <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
+              {tr("لا توجد مصاريف مسجلة لهذه الفترة.", "No expenses recorded for this period.")}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.2fr]">
+              <ExpensePieChart data={reportsQuery.expenseBreakdown} />
+              <ExpensePieLegend data={reportsQuery.expenseBreakdown} />
+            </div>
+          )}
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">

@@ -55,23 +55,38 @@ export function resolveBillingDashboardPeriodParams(
 export function resolveBillingReportPeriodParams(input: {
   year: number;
   month?: number | 'all';
+  dateFrom?: string;
+  dateTo?: string;
+  status?: string;
+  method?: string;
+  category?: string;
 }): BillingQueryParams {
+  if (input.dateFrom && input.dateTo) {
+    return {
+      period: 'custom',
+      dateFrom: input.dateFrom,
+      dateTo: input.dateTo,
+      groupBy: 'day',
+      ...(input.status ? { status: input.status } : {}),
+      ...(input.method ? { method: input.method } : {}),
+      ...(input.category ? { category: input.category } : {}),
+    };
+  }
+
   const anchor = input.month && input.month !== 'all'
     ? new Date(Date.UTC(input.year, input.month - 1, 15))
     : new Date(Date.UTC(input.year, 5, 15));
 
-  if (input.month && input.month !== 'all') {
-    return {
-      period: 'month',
-      periodAnchor: isoDateOnly(anchor),
-      groupBy: 'day',
-    };
-  }
+  const base: BillingQueryParams =
+    input.month && input.month !== 'all'
+      ? { period: 'month', periodAnchor: isoDateOnly(anchor), groupBy: 'day' }
+      : { period: 'year', periodAnchor: isoDateOnly(anchor), groupBy: 'month' };
 
   return {
-    period: 'year',
-    periodAnchor: isoDateOnly(anchor),
-    groupBy: 'month',
+    ...base,
+    ...(input.status ? { status: input.status } : {}),
+    ...(input.method ? { method: input.method } : {}),
+    ...(input.category ? { category: input.category } : {}),
   };
 }
 
