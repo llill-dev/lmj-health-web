@@ -8,7 +8,6 @@ type BillingPermission =
   | "billing:invoices:manage"
   | "billing:payments:view"
   | "billing:payments:manage"
-  | "billing:refunds:view"
   | "billing:refunds:manage"
   | "billing:expenses:view"
   | "billing:expenses:manage"
@@ -48,7 +47,8 @@ export function useBillingAccess() {
     canManageInvoices: hasPermission("billing:invoices:manage"),
     canViewPayments: hasPermission("billing:payments:view"),
     canManagePayments: hasPermission("billing:payments:manage"),
-    canViewRefunds: hasPermission("billing:refunds:view"),
+    // Backend only recognizes billing:refunds:manage — there is no separate refunds:view key.
+    canViewRefunds: hasPermission("billing:refunds:manage"),
     canManageRefunds: hasPermission("billing:refunds:manage"),
     canViewExpenses: hasPermission("billing:expenses:view"),
     canManageExpenses: hasPermission("billing:expenses:manage"),

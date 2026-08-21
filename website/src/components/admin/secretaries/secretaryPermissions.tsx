@@ -30,7 +30,7 @@ export const PERM_GROUPS: SecretaryPermissionGroup[] = [
   {
     label: 'المرضى',
     icon: Users,
-    keys: ['patients:view', 'patients:edit', 'patients:temporary:create', 'patients:files:view', 'patients:files:upload'],
+    keys: ['patients:view', 'patients:temporary:create', 'patients:files:view', 'patients:files:upload'],
     color: 'text-[#15803D]',
     bg: 'bg-[#F0FDF4]',
     border: 'border-[#86EFAC]',
@@ -55,7 +55,6 @@ export const PERM_LABEL: Record<string, string> = {
   'waitlist:manage': 'إدارة قائمة الانتظار',
   'waitlist:book': 'حجز من قائمة الانتظار',
   'patients:view': 'عرض المرضى',
-  'patients:edit': 'تعديل بيانات المرضى',
   'patients:temporary:create': 'إنشاء مريض مؤقت',
   'patients:files:view': 'عرض ملفات المرضى',
   'patients:files:upload': 'رفع ملفات المرضى',

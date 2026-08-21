@@ -1,9 +1,12 @@
 import { memo, useMemo, useState } from "react";
-import { Search, ChevronRight, UserPlus } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { useI18n } from "@/i18n/provider";
+import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
+import StyledSelect from "@/components/ui/styled-select";
+import type { DoctorPatientAccountStatus } from "@/lib/doctor/types";
 
 function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
@@ -92,66 +95,126 @@ function PatientsSearchInput({
   );
 }
 
+type PatientRowData = {
+  id: string;
+  fileNo: string;
+  name: string;
+  phone: string;
+  email: string;
+  registrationDate: string;
+  isTemporary?: boolean;
+  accountStatus?: string;
+  allergies: string[];
+  medicalConditions: string[];
+  bloodType: string | null;
+};
+
 const PatientTableRow = memo<{
-  patient: {
-    id: string;
-    name: string;
-    phone: string;
-    email: string;
-    registrationDate: string;
-    isTemporary?: boolean;
-    accountStatus?: string;
-  };
-  onOpen: (patientId: string) => void;
+  patient: PatientRowData;
+  expanded: boolean;
+  onToggle: (patientId: string) => void;
   locale: "ar" | "en";
-}>(function PatientTableRow({ patient, onOpen, locale }) {
+}>(function PatientTableRow({ patient, expanded, onToggle, locale }) {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const status = accountStatusPresentation(patient, locale);
 
   return (
-    <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
-      <div className="flex gap-4 items-center lg:col-span-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
-          <span className="font-cairo text-[20px] font-black">
-            {patientInitials(patient.name)}
+    <div className="border-b border-[#EEF2F6] last:border-b-0">
+      <div className="grid grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
+        <div className="flex gap-4 items-center lg:col-span-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
+            <span className="font-cairo text-[20px] font-black">
+              {patientInitials(patient.name)}
+            </span>
+          </div>
+          <div className="min-w-0 text-right">
+            <div className="truncate font-cairo text-[18px] font-black text-[#243044]">
+              {patient.name}
+            </div>
+            <div className="truncate font-cairo text-[13px] font-bold text-[#98A2B3]">
+              {tr("رقم الملف", "File #")} {patient.fileNo || "—"}
+            </div>
+          </div>
+        </div>
+
+        <div className="truncate font-cairo text-[16px] font-bold text-[#243044] lg:col-span-3">
+          {patient.phone}
+        </div>
+        <div className="font-cairo text-[16px] font-extrabold text-[#243044] lg:col-span-2">
+          {formatIsoDate(patient.registrationDate, locale)}
+        </div>
+        <div className="lg:col-span-1">
+          <span
+            className={`inline-flex rounded-[8px] px-3 py-1.5 font-cairo text-[13px] font-black ${status.className}`}
+          >
+            {status.label}
           </span>
         </div>
-        <div className="min-w-0 text-right">
-          <div className="truncate font-cairo text-[18px] font-black text-[#243044]">
-            {patient.name}
-          </div>
-          <div className="truncate font-cairo text-[14px] font-semibold text-[#98A2B3]">
-            {patient.email}
-          </div>
+        <div className="text-right lg:col-span-2 lg:text-left">
+          <button
+            type="button"
+            onClick={() => onToggle(patient.id)}
+            aria-expanded={expanded}
+            className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
+          >
+            {tr("عرض التفاصيل", "View details")}
+            {expanded ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronRight className="w-4 h-4" />
+            )}
+          </button>
         </div>
       </div>
 
-      <div className="truncate font-cairo text-[16px] font-bold text-[#243044] lg:col-span-3">
-        {patient.phone}
-      </div>
-      <div className="font-cairo text-[16px] font-extrabold text-[#243044] lg:col-span-2">
-        {formatIsoDate(patient.registrationDate, locale)}
-      </div>
-      <div className="lg:col-span-1">
-        <span
-          className={`inline-flex rounded-[8px] px-3 py-1.5 font-cairo text-[13px] font-black ${status.className}`}
-        >
-          {status.label}
-        </span>
-      </div>
-      <div className="text-right lg:col-span-2 lg:text-left">
-        <button
-          type="button"
-          onClick={() => onOpen(patient.id)}
-          className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
-        >
-          {tr("عرض التفاصيل", "View details")}
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+      {expanded ? (
+        <div className="grid grid-cols-1 gap-4 border-t border-[#EEF2F6] bg-[#F8FAFC] px-4 py-5 text-right sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
+          <div>
+            <div className="font-cairo text-[12px] font-bold text-[#98A2B3]">
+              {tr("البريد الإلكتروني", "Email")}
+            </div>
+            <div className="font-cairo text-[14px] font-bold text-[#243044]">
+              {patient.email || "—"}
+            </div>
+          </div>
+          <div>
+            <div className="font-cairo text-[12px] font-bold text-[#98A2B3]">
+              {tr("فصيلة الدم", "Blood type")}
+            </div>
+            <div className="font-cairo text-[14px] font-bold text-[#243044]">
+              {patient.bloodType || tr("غير محدد", "Unknown")}
+            </div>
+          </div>
+          <div>
+            <div className="font-cairo text-[12px] font-bold text-[#98A2B3]">
+              {tr("الحساسية", "Allergies")}
+            </div>
+            <div className="font-cairo text-[14px] font-bold text-[#243044]">
+              {patient.allergies.length ? patient.allergies.join("، ") : tr("لا يوجد", "None")}
+            </div>
+          </div>
+          <div>
+            <div className="font-cairo text-[12px] font-bold text-[#98A2B3]">
+              {tr("الحالات الطبية", "Medical conditions")}
+            </div>
+            <div className="font-cairo text-[14px] font-bold text-[#243044]">
+              {patient.medicalConditions.length
+                ? patient.medicalConditions.join("، ")
+                : tr("لا يوجد", "None")}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 });
+
+const ACCOUNT_STATUS_OPTIONS: Array<{ value: DoctorPatientAccountStatus; label: string }> = [
+  { value: "all", label: "الكل" },
+  { value: "active", label: "نشط" },
+  { value: "temporary", label: "مؤقت" },
+  { value: "suspended", label: "معلّق" },
+];
 
 export default function SecretaryPatientsPage() {
   const { locale, dir } = useI18n();
@@ -160,45 +223,52 @@ export default function SecretaryPatientsPage() {
   const { hasPermission } = useSecretaryPermissions();
   const canViewPatients = hasPermission("patients:view");
   const [searchInput, setSearchInput] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "temporary">("all");
-  const patientsQuery = useDoctorPatients({
-    page: 1,
-    limit: 100,
-    search: searchInput.trim() || undefined,
-  }, canViewPatients);
+  const [accountStatus, setAccountStatus] = useState<DoctorPatientAccountStatus>("all");
+  const [diagnosis, setDiagnosis] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const patients = useMemo(
+  const patientsQuery = useDoctorPatients(
+    {
+      page,
+      limit,
+      search: searchInput.trim() || undefined,
+      account_status: accountStatus,
+      diagnosis: diagnosis.trim() || undefined,
+      from: from || undefined,
+      to: to || undefined,
+    },
+    canViewPatients,
+  );
+
+  const patients = useMemo<PatientRowData[]>(
     () =>
       (patientsQuery.patients ?? []).map((p) => ({
         id: p._id,
+        fileNo: p.publicId,
         name: p.user?.fullName || tr("مريض", "Patient"),
         phone: p.user?.phone || "—",
         email: p.user?.email || "—",
         registrationDate: p.lastVisitAt || "",
         isTemporary: p.isTemporary,
         accountStatus: p.user?.accountStatus,
+        allergies: p.allergies ?? [],
+        medicalConditions: p.medicalConditions ?? [],
+        bloodType: p.bloodType ?? null,
       })),
     [patientsQuery.patients, tr],
   );
 
-  const filterTabs = useMemo(
-    () => [
-      { key: "all" as const, label: "الكل" },
-      { key: "all" as const, label: tr("الكل", "All") },
-      { key: "active" as const, label: tr("نشط", "Active") },
-      { key: "temporary" as const, label: tr("مؤقت", "Temporary") },
-    ],
-    [tr],
-  );
+  const totalPages = Math.max(1, Math.ceil((patientsQuery.total || patients.length) / limit));
 
-  const filteredPatients = useMemo(() => {
-    if (filter === "all") return patients;
-    return patients.filter((p) =>
-      filter === "temporary" ? p.isTemporary : !p.isTemporary,
-    );
-  }, [patients, filter]);
+  const handleToggle = (patientId: string) => {
+    setExpandedId((current) => (current === patientId ? null : patientId));
+  };
 
-  const searchedPatients = filteredPatients;
+  const resetToFirstPage = () => setPage(1);
 
   return (
     <div dir={dir} lang={locale} className="pb-6 space-y-6 sm:space-y-7 sm:pb-8">
@@ -230,8 +300,69 @@ export default function SecretaryPatientsPage() {
           ) : null}
         </div>
 
-        <div className="px-4 py-5 sm:px-5 sm:py-6">
-          <PatientsSearchInput value={searchInput} onChange={setSearchInput} locale={locale} />
+        <div className="flex flex-col gap-3 px-4 py-5 sm:px-5 sm:py-6 lg:flex-row lg:items-center">
+          <div className="flex-1">
+            <PatientsSearchInput
+              value={searchInput}
+              onChange={(value) => {
+                setSearchInput(value);
+                resetToFirstPage();
+              }}
+              locale={locale}
+            />
+          </div>
+          <div className="w-full lg:w-[160px]">
+            <StyledSelect
+              value={accountStatus}
+              onChange={(value) => {
+                setAccountStatus(value as DoctorPatientAccountStatus);
+                resetToFirstPage();
+              }}
+              options={ACCOUNT_STATUS_OPTIONS.map((option) => ({
+                value: option.value,
+                label: tr(
+                  option.label,
+                  option.value === "all"
+                    ? "All"
+                    : option.value === "active"
+                      ? "Active"
+                      : option.value === "temporary"
+                        ? "Temporary"
+                        : "Suspended",
+                ),
+              }))}
+              listboxAriaLabel={tr("حالة الحساب", "Account status")}
+            />
+          </div>
+          <input
+            value={diagnosis}
+            onChange={(event) => {
+              setDiagnosis(event.target.value);
+              resetToFirstPage();
+            }}
+            placeholder={tr("التشخيص", "Diagnosis")}
+            className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] outline-none focus:border-primary lg:w-[160px]"
+          />
+          <input
+            type="date"
+            value={from}
+            onChange={(event) => {
+              setFrom(event.target.value);
+              resetToFirstPage();
+            }}
+            aria-label={tr("من تاريخ", "From date")}
+            className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] outline-none focus:border-primary lg:w-[150px]"
+          />
+          <input
+            type="date"
+            value={to}
+            onChange={(event) => {
+              setTo(event.target.value);
+              resetToFirstPage();
+            }}
+            aria-label={tr("إلى تاريخ", "To date")}
+            className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white px-4 font-cairo text-[14px] font-bold text-[#111827] outline-none focus:border-primary lg:w-[150px]"
+          />
         </div>
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
@@ -272,27 +403,41 @@ export default function SecretaryPatientsPage() {
                 : tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
-        ) : searchedPatients.length === 0 ? (
+        ) : patients.length === 0 ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:px-8">
             <p className="font-cairo text-[15px] font-semibold text-[#64748B]">
-              {searchInput
+              {searchInput || diagnosis || from || to || accountStatus !== "all"
                 ? tr("لا توجد نتائج مطابقة لبحثك.", "No results match your search.")
                 : tr("لا يوجد مرضى في هذه الفئة.", "No patients in this category.")}
             </p>
           </div>
         ) : (
           <>
-            {searchedPatients.map((patient) => (
+            {patients.map((patient) => (
               <PatientTableRow
                 key={patient.id}
                 patient={patient}
                 locale={locale}
-                onOpen={() => {}}
+                expanded={expandedId === patient.id}
+                onToggle={handleToggle}
               />
             ))}
           </>
         )}
       </SurfaceSection>
+
+      {canViewPatients && !patientsQuery.isAwaitingData && !patientsQuery.isError && patients.length > 0 ? (
+        <DoctorTablePagination
+          page={page}
+          totalPages={totalPages}
+          pageSize={limit}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setLimit(size);
+            resetToFirstPage();
+          }}
+        />
+      ) : null}
     </div>
   );
 }
