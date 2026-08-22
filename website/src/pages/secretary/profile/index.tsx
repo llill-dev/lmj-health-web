@@ -155,12 +155,11 @@ export default function SecretaryProfilePage() {
     },
   ];
 
+  // Attendance-rate has no backend contract for the secretary's own profile
+  // (docs/openapi.json exposes no such field or self-stats endpoint) — the
+  // card is omitted entirely rather than showing a developer-facing
+  // placeholder string, per manual-QA feedback.
   const stats = [
-    {
-      label: tr("معدل الحضور", "Attendance rate"),
-      value: tr("Needs backend contract", "Needs backend contract"),
-      icon: Calendar,
-    },
     {
       label: tr("المواعيد", "Appointments"),
       value: canViewAppointments ? appointmentsQuery.total ?? 0 : "—",
@@ -254,7 +253,7 @@ export default function SecretaryProfilePage() {
         )}
       </SurfaceSection>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         {stats.map((stat) => (
           <StatCard
             key={stat.label}
@@ -292,20 +291,14 @@ export default function SecretaryProfilePage() {
         ) : null}
       </SurfaceSection>
 
-      <SurfaceSection title={tr("معلومات الحساب", "Account information")}>
-        <div className="px-4 py-5 sm:px-5 sm:py-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <InfoRow
-              label={tr("آخر تسجيل دخول", "Last login")}
-              value={tr("Needs backend contract", "Needs backend contract")}
-            />
-            <InfoRow
-              label={tr("تاريخ التسجيل", "Registration date")}
-              value={tr("Needs backend contract", "Needs backend contract")}
-            />
-          </div>
-        </div>
-      </SurfaceSection>
+      {/*
+        "Account information" (last login / registration date) was removed:
+        no backend contract exposes these fields for a secretary's own
+        profile (checked docs/openapi.json — /api/secretaries/{id} is
+        doctor-only, and /api/secretaries/me/doctor returns the assigned
+        doctor, not the secretary's own account). Re-add this section if a
+        real endpoint/field becomes available.
+      */}
     </div>
   );
 }

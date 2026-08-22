@@ -19,10 +19,17 @@ import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissio
 import { Link } from "react-router-dom";
 import { useI18n } from "@/i18n/provider";
 
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 type KpiCard = {
   key: string;
   label: string;
-  value: number;
+  value: number | string;
   delta: string;
   icon: typeof Calendar;
   accent: string;
@@ -133,8 +140,9 @@ export default function SecretaryDashboardPage() {
   const canCreateTemporaryPatient = hasPermission("patients:temporary:create");
   const canBookAppointment = hasPermission("appointments:book");
   const canViewFiles = hasPermission("patients:files:view");
+  const todayIso = formatLocalDate(new Date());
   const appointmentsQuery = useDoctorAppointmentsApi(
-    { page: 1, limit: 4 },
+    { page: 1, limit: 4, date: todayIso },
     canViewAppointments,
   );
   const patientsQuery = useDoctorPatients(
@@ -231,8 +239,8 @@ export default function SecretaryDashboardPage() {
     {
       key: "available",
       label: tr("الأوقات المتاحة", "Available slots"),
-      value: appointmentsQuery.total ?? 0,
-      delta: `${(appointmentsQuery.total ?? 0).toLocaleString(numberLocale)} ${tr("موعد", "appointments")}`,
+      value: "—",
+      delta: tr("غير متاحة بعد", "Not available yet"),
       icon: Clock,
       accent: "#FF6A00",
       soft: "#FFF2E8",
@@ -283,6 +291,7 @@ export default function SecretaryDashboardPage() {
       key: "attendance",
       label: tr("نسبة الحضور", "Attendance rate"),
       value: "—",
+      caption: tr("هذا المؤشر غير متاح حالياً.", "This metric isn't available yet."),
       icon: Activity,
       iconClass: "bg-[#F4EBFF] text-[#A855F7]",
     },
@@ -290,6 +299,7 @@ export default function SecretaryDashboardPage() {
       key: "records",
       label: tr("السجلات الطبية", "Medical records"),
       value: "—",
+      caption: tr("هذا المؤشر غير متاح حالياً.", "This metric isn't available yet."),
       icon: FileText,
       iconClass: "bg-[#EAF1FF] text-[#3B82F6]",
     },
@@ -417,6 +427,11 @@ export default function SecretaryDashboardPage() {
                   <div className="mt-2 font-cairo text-[18px] font-semibold text-[#98A2B3]">
                     {card.label}
                   </div>
+                  {"caption" in card && card.caption ? (
+                    <div className="mt-1 font-cairo text-[12px] font-medium text-[#98A2B3]">
+                      {card.caption}
+                    </div>
+                  ) : null}
                 </div>
                 <div
                   className={`flex h-16 w-16 items-center justify-center rounded-[16px] ${card.iconClass}`}
