@@ -5,7 +5,7 @@
 /*.md
 
 # Internal report (exclude from Git; frontend README stays tracked)
-website/PROJECT_MIGRATION_REPORT.md
+frontend/PROJECT_MIGRATION_REPORT.md
 
 # AI coding assistant / editor tool directories — local-only, do not push
 /.claude/
