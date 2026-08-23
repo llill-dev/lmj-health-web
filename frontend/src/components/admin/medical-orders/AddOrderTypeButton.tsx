@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 type Props = {
   onClick: () => void;
@@ -12,6 +13,7 @@ export default function AddOrderTypeButton({
   disabled,
   className,
 }: Props) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -23,7 +25,7 @@ export default function AddOrderTypeButton({
       )}
     >
       <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-      إضافة نوع جديد
+      {t('adminMedicalOrders.upsert.createTitle')}
     </button>
   );
 }

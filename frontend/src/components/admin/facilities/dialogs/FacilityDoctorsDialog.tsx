@@ -9,12 +9,7 @@ import {
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
-
-const DOCTOR_APPROVAL_STATUS_LABELS: Record<string, string> = {
-  approved: "مقبول",
-  pending: "قيد المراجعة",
-  rejected: "مرفوض",
-};
+import { useI18n } from "@/i18n/provider";
 
 interface FacilityDoctorsDialogProps {
   open: boolean;
@@ -29,6 +24,12 @@ export default function FacilityDoctorsDialog({
   facilityId,
   facilityName,
 }: FacilityDoctorsDialogProps) {
+  const { t } = useI18n();
+  const DOCTOR_APPROVAL_STATUS_LABELS: Record<string, string> = {
+    approved: t("adminApproval.approved"),
+    pending: t("adminFacility.status.pending"),
+    rejected: t("adminApproval.rejected"),
+  };
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function FacilityDoctorsDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label={`الأطباء في ${facilityName || "المنشأة"}`}
+          aria-label={t('adminFacilityDialog.doctors.ariaLabelTemplate').replace('{name}', facilityName || t('adminFacilityDialog.doctors.fallbackName'))}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -103,13 +104,13 @@ export default function FacilityDoctorsDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  الأطباء في المنشأة
+                  {t('adminFacilityDialog.doctors.titleGeneric')}
                 </h2>
                 {facilityName && (
                   <p className="mt-1 font-cairo text-[12px] font-bold text-[#667085]">
@@ -126,7 +127,7 @@ export default function FacilityDoctorsDialog({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="بحث بالاسم..."
+                  placeholder={t('common.searchByName')}
                   className="w-full rounded-[8px] border border-[#E5E7EB] bg-white pr-10 pl-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
                 />
               </div>
@@ -138,8 +139,8 @@ export default function FacilityDoctorsDialog({
               ) : doctors.length === 0 ? (
                 <div className="text-center py-8 font-cairo text-[13px] font-semibold text-[#667085]">
                   {searchQuery.trim()
-                    ? "لا يوجد أطباء يطابقون البحث الحالي"
-                    : "لا يوجد أطباء في هذه المنشأة"}
+                    ? t('adminFacilityDialog.doctors.noMatch')
+                    : t('adminFacilityDialog.doctors.noneInFacility')}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -199,7 +200,7 @@ export default function FacilityDoctorsDialog({
                 onClick={() => onOpenChange(false)}
                 className="inline-flex h-[48px] w-full items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary"
               >
-                إغلاق
+                {t('common.close')}
               </button>
             </div>
           </motion.div>

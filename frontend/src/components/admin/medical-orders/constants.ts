@@ -9,12 +9,12 @@ import type { MedicalOrderCatalogKind } from '@/lib/admin/types';
 
 export const MEDICAL_ORDER_TAB_META: Array<{
   kind: MedicalOrderCatalogKind;
-  label: string;
+  labelKey: string;
 }> = [
-  { kind: 'lab', label: 'التحاليل' },
-  { kind: 'imaging', label: 'الأشعة' },
-  { kind: 'procedure', label: 'الإجراءات' },
-  { kind: 'referral', label: 'التحويلات' },
+  { kind: 'lab', labelKey: 'adminMedicalOrders.tab.lab' },
+  { kind: 'imaging', labelKey: 'adminMedicalOrders.tab.imaging' },
+  { kind: 'procedure', labelKey: 'adminMedicalOrders.tab.procedure' },
+  { kind: 'referral', labelKey: 'adminMedicalOrders.tab.referral' },
 ];
 
 export const SUPPORTED_MEDICAL_ORDER_TAB_META = MEDICAL_ORDER_TAB_META.filter(

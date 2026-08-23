@@ -378,8 +378,8 @@ export default function MedicalContentGovernancePanel({
           </div>
           <div className="mt-3 space-y-2 font-cairo text-[12px] text-[#475467]">
             <div>{t("governancePanel.field.disclaimerVersion")}: <span className="font-bold text-[#111827]">{disclaimerVersion || t("governancePanel.field.notSet")}</span></div>
-            <div>{t("governancePanel.field.requiresSeekHelp")}: <span className="font-bold text-[#111827]">{formatBoolean(requiresSeekHelpBlock)}</span></div>
-            <div>{t("governancePanel.field.isFeatured")}: <span className="font-bold text-[#111827]">{formatBoolean(isFeatured)}</span></div>
+            <div>{t("governancePanel.field.requiresSeekHelp")}: <span className="font-bold text-[#111827]">{formatBoolean(requiresSeekHelpBlock, language)}</span></div>
+            <div>{t("governancePanel.field.isFeatured")}: <span className="font-bold text-[#111827]">{formatBoolean(isFeatured, language)}</span></div>
           </div>
         </div>
 
@@ -529,7 +529,7 @@ export default function MedicalContentGovernancePanel({
           <div className="mt-4 space-y-2 font-cairo text-[12px] text-[#475467]">
             <div>{t("governancePanel.news.sourceName")}: <span className="font-bold text-[#111827]">{toDisplayText(news?.sourceName) || t("governancePanel.emptyValue")}</span></div>
             <div>{t("governancePanel.news.originalTitle")}: <span className="font-bold text-[#111827]">{toDisplayText(news?.originalTitle) || t("governancePanel.emptyValue")}</span></div>
-            <div>{t("governancePanel.news.publishedAt")}: <span className="font-bold text-[#111827]">{formatDate(toDisplayText(news?.publishedAt))}</span></div>
+            <div>{t("governancePanel.news.publishedAt")}: <span className="font-bold text-[#111827]">{formatDate(toDisplayText(news?.publishedAt), language)}</span></div>
             {toDisplayText(news?.sourceUrl) ? (
               <a
                 href={toDisplayText(news?.sourceUrl)}

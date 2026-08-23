@@ -80,7 +80,7 @@ export default function AdminVerificationRequestDetailsPage() {
         status: tr("معلق", "Pending"),
         lat: "—",
         lng: "—",
-        changeRows: buildChangeRows(null),
+        changeRows: buildChangeRows(null, locale),
       };
     }
 
@@ -109,7 +109,7 @@ export default function AdminVerificationRequestDetailsPage() {
       doctor: doctorName,
       specialty: request.doctor?.specialization || "—",
       address: addressParts.length > 0 ? addressParts.join("، ") : "—",
-      requestedAt: formatRequestedAt(request.createdAt),
+      requestedAt: formatRequestedAt(request.createdAt, locale),
       adminNote: request.adminNote?.trim() || "—",
       requestedBy: request.requestedBy?.fullName || "—",
       status:
@@ -123,9 +123,9 @@ export default function AdminVerificationRequestDetailsPage() {
       changeRows: buildChangeRows({
         ...request,
         requestedChanges,
-      }),
+      }, locale),
     };
-  }, [requestId, requestQuery.data, tr]);
+  }, [requestId, requestQuery.data, tr, locale]);
 
   const lookupCategory = resolveDoctorSpecialtyLookupCategory();
   const lookupsQuery = useAdminLookups({

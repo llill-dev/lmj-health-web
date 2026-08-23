@@ -12,11 +12,7 @@ import {
 } from "@/components/admin/form-field";
 import { useI18n } from "@/i18n/provider";
 
-const schema = z.object({
-  reason: z.string().trim().min(1, "سبب الإيقاف مطلوب"),
-});
-
-type Values = z.infer<typeof schema>;
+type Values = { reason: string };
 
 type Props = {
   open: boolean;
@@ -28,16 +24,6 @@ type Props = {
   onSuccess?: () => void;
 };
 
-const OFFBOARD_DESCRIPTION: Record<
-  NonNullable<Props["accountRole"]>,
-  string
-> = {
-  secretary: "وإلغاء ارتباطه بالطبيب وإلغاء جميع مواعيده النشطة.",
-  doctor:
-    "وإخفاؤه من البحث وإلغاء مواعيده المستقبلية وإغلاق الاستشارات النشطة.",
-  staff: "وتعطيل وصوله إلى المنصة.",
-};
-
 export default function OffboardDialog({
   open,
   onOpenChange,
@@ -47,9 +33,26 @@ export default function OffboardDialog({
   accountRole = "secretary",
   onSuccess,
 }: Props) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const [done, setDone] = useState(false);
   const offboard = useAdminOffboardUser();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        reason: z
+          .string()
+          .trim()
+          .min(1, t("adminSecretaryDialog.offboard.reasonRequired")),
+      }),
+    [t],
+  );
+
+  const OFFBOARD_DESCRIPTION: Record<NonNullable<Props["accountRole"]>, string> = {
+    secretary: t("adminSecretaryDialog.offboard.description.secretary"),
+    doctor: t("adminSecretaryDialog.offboard.description.doctor"),
+    staff: t("adminSecretaryDialog.offboard.description.staff"),
+  };
 
   const defaultValues = useMemo(() => ({ reason: "" }), []);
   const {
@@ -99,7 +102,7 @@ export default function OffboardDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="إيقاف الحساب نهائياً"
+          aria-label={t("adminSecretaryDialog.offboard.ariaLabel")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -126,7 +129,7 @@ export default function OffboardDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
@@ -140,17 +143,17 @@ export default function OffboardDialog({
                   </div>
                 </div>
                 <h2 className="font-cairo text-[22px] font-extrabold text-[#101828]">
-                  إيقاف الحساب نهائياً
+                  {t("adminSecretaryDialog.offboard.ariaLabel")}
                 </h2>
                 <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
-                  سيتم إيقاف حساب{" "}
+                  {t("adminSecretaryDialog.offboard.willSuspend")}{" "}
                   <span className="font-extrabold text-[#111827]">
                     {targetLabel}
                   </span>{" "}
                   {OFFBOARD_DESCRIPTION[accountRole]}
                   <br />
                   <span className="text-[#DC2626]">
-                    هذا الإجراء لا يمكن التراجع عنه.
+                    {t("adminSecretaryDialog.offboard.irreversible")}
                   </span>
                 </p>
               </div>
@@ -160,13 +163,13 @@ export default function OffboardDialog({
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField
-                    label="سبب الإيقاف"
+                    label={t("adminSecretaryDialog.offboard.field.reason.label")}
                     required
                     error={errors.reason?.message}
                   >
                     <textarea
                       {...register("reason")}
-                      placeholder="اكتب سبب إيقاف الحساب..."
+                      placeholder={t("adminSecretaryDialog.offboard.reason.placeholder")}
                       className={adminTextareaClass}
                     />
                   </AdminFormField>
@@ -175,14 +178,14 @@ export default function OffboardDialog({
                     <div className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#991B1B]">
                       {userFacingErrorMessage(
                         offboard.error,
-                        "حدث خطأ أثناء إيقاف الحساب",
+                        t("adminSecretaryDialog.offboard.error.generic"),
                       )}
                     </div>
                   )}
 
                   {done && (
                     <div className="rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 font-cairo text-[12px] font-bold text-[#166534]">
-                      تم إيقاف الحساب بنجاح
+                      {t("adminSecretaryDialog.offboard.success")}
                     </div>
                   )}
                 </div>
@@ -195,7 +198,7 @@ export default function OffboardDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#111827] disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -203,7 +206,9 @@ export default function OffboardDialog({
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-[#DC2626] font-cairo text-[14px] font-extrabold text-white hover:bg-[#B91C1C] disabled:opacity-60"
                 >
                   <AlertTriangle className="w-4 h-4" aria-hidden />
-                  {isSubmitting ? "جارٍ الإيقاف…" : "تأكيد الإيقاف"}
+                  {isSubmitting
+                    ? t("adminSecretaryDialog.offboard.confirming")
+                    : t("adminSecretaryDialog.offboard.confirmButton")}
                 </button>
               </div>
             </form>

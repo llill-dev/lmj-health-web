@@ -58,7 +58,7 @@ export default function ServiceTypeStatusConfirmDialog({
   onConfirm,
   isPending,
 }: Props) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const title = serviceType
     ? resolveLabel(
         typeof serviceType.name === 'string'
@@ -99,7 +99,7 @@ export default function ServiceTypeStatusConfirmDialog({
           lang={locale}
         >
           <Dialog.Description className='sr-only'>
-            تأكيد تغيير حالة تفعيل نوع الخدمة في النظام.
+            {t('adminServiceTypeDialog.statusDialog.description')}
           </Dialog.Description>
           <motion.div
             initial={false}
@@ -119,14 +119,14 @@ export default function ServiceTypeStatusConfirmDialog({
                   <Power className='h-5 w-5' />
                 </div>
                 <Dialog.Title className='font-cairo text-[16px] font-extrabold leading-snug text-[#101828]'>
-                  {isDeactivate ? 'تعطيل نوع الخدمة' : 'تفعيل نوع الخدمة'}
+                  {isDeactivate ? t('adminServiceTypeDialog.statusDialog.deactivateTitle') : t('adminServiceTypeDialog.statusDialog.activateTitle')}
                 </Dialog.Title>
               </div>
               <Dialog.Close asChild>
                 <button
                   type='button'
                   className='flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F2F4F7]'
-                  aria-label='إغلاق'
+                  aria-label={t("common.close")}
                 >
                   <X className='h-4 w-4' />
                 </button>
@@ -135,13 +135,11 @@ export default function ServiceTypeStatusConfirmDialog({
             <div className='px-5 py-4'>
               <p className='text-right font-cairo text-[14px] font-semibold leading-relaxed text-[#475467]'>
                 {isDeactivate
-                  ? `سيتم إخفاء نوع الخدمة «${title || '—'}» عن القوائم العامة (isActive: false). يمكنك إعادة تفعيله لاحقاً.`
-                  : `سيتم تفعيل نوع الخدمة «${title || '—'}» مرة أخرى.`}
+                  ? t('adminServiceTypeDialog.statusDialog.deactivateBody').replace('{name}', title || '—')
+                  : t('adminServiceTypeDialog.statusDialog.activateBody').replace('{name}', title || '—')}
               </p>
               <div className='mt-3 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-3 py-2 text-right font-cairo text-[12px] font-bold leading-6 text-[#0F766E]'>
-                هذا الإجراء يغيّر حالة النوع المرجعي فقط. لا يحذف المزوّدين أو
-                المنشآت المرتبطين به، لكنه قد يغيّر ظهوره كخيار متاح في النماذج
-                المرتبطة.
+                {t('adminServiceTypeDialog.statusDialog.note')}
               </div>
             </div>
             <div className='flex items-center justify-end gap-2 border-t border-[#F2F4F7] px-5 py-4'>
@@ -151,7 +149,7 @@ export default function ServiceTypeStatusConfirmDialog({
                   className='h-10 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:bg-[#F9FAFB] disabled:opacity-50'
                   disabled={isPending}
                 >
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
               </Dialog.Close>
               <button
@@ -164,7 +162,7 @@ export default function ServiceTypeStatusConfirmDialog({
                     : 'h-10 rounded-[10px] bg-primary px-4 font-cairo text-[12px] font-extrabold text-white shadow-[0_8px_20px_rgba(15,143,139,0.35)] transition hover:brightness-105 disabled:opacity-50'
                 }
               >
-                {isPending ? 'جاري التنفيذ…' : isDeactivate ? 'تعطيل' : 'تفعيل'}
+                {isPending ? t('adminServiceTypeDialog.statusDialog.executing') : isDeactivate ? t('adminServiceTypeDialog.statusDialog.deactivateAction') : t('adminServiceTypeDialog.statusDialog.activateAction')}
               </button>
             </div>
           </motion.div>

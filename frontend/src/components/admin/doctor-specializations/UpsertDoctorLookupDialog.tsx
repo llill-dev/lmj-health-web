@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,18 +23,14 @@ import {
   adminFieldClass,
   adminInputClass,
 } from "@/components/admin/form-field";
+import { useI18n } from "@/i18n/provider";
 
-const schema = z.object({
-  key: z
-    .string()
-    .min(1, "المفتاح مطلوب")
-    .regex(/^[a-z][a-z0-9_]*$/, "حروف إنجليزية صغيرة، أرقام، شرطة سفلية"),
-  textAr: z.string().min(1, "الاسم العربي مطلوب"),
-  textEn: z.string(),
-  order: z.coerce.number().int().min(0),
-});
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = {
+  key: string;
+  textAr: string;
+  textEn: string;
+  order: number;
+};
 
 export default function UpsertDoctorLookupDialog({
   open,
@@ -47,9 +43,24 @@ export default function UpsertDoctorLookupDialog({
   category: AdminLookupCategory;
   editTarget: AdminLookupRecord | null;
 }) {
+  const { t } = useI18n();
   const { toast } = useToast();
   const createMut = useCreateLookup();
   const patchMut = usePatchLookup();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        key: z
+          .string()
+          .min(1, t("adminDoctorLookup.validation.keyRequired"))
+          .regex(/^[a-z][a-z0-9_]*$/, t("adminDoctorLookup.validation.keyPattern")),
+        textAr: z.string().min(1, t("adminDoctorLookup.validation.arabicNameRequired")),
+        textEn: z.string(),
+        order: z.coerce.number().int().min(0),
+      }),
+    [t],
+  );
 
   const {
     register,
@@ -114,8 +125,8 @@ export default function UpsertDoctorLookupDialog({
             order: values.order,
           },
         });
-        toast(`تم تحديث التخصص «${values.textAr}».`, {
-          title: "تم الحفظ",
+        toast(t("adminDoctorLookup.toast.updatedBody").replace("{name}", values.textAr), {
+          title: t("adminDoctorLookup.toast.updatedTitle"),
           variant: "success",
           durationMs: 3800,
         });
@@ -126,15 +137,15 @@ export default function UpsertDoctorLookupDialog({
           text,
           order: values.order,
         });
-        toast(`تمت إضافة التخصص «${values.textAr}» إلى الكتالوج.`, {
-          title: "تمت الإضافة",
+        toast(t("adminDoctorLookup.toast.createdBody").replace("{name}", values.textAr), {
+          title: t("adminMedicalOrders.toast.created.title"),
           variant: "success",
           durationMs: 3800,
         });
       }
       onOpenChange(false);
     } catch {
-      /* رسالة الخادم في الأسفل */
+      /* server error message rendered below */
     }
   }
 
@@ -168,12 +179,13 @@ export default function UpsertDoctorLookupDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="p-1.5 rounded-full text-[#98A2B3] transition hover:bg-[#F9FAFB] hover:text-[#475467]"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" />
               </button>
               <div className="text-right">
                 <h3 className="font-cairo text-[16px] font-black text-[#111827]">
-                  {isEdit ? "تعديل تخصص" : "إضافة تخصص طبيب"}
+                  {isEdit ? t("adminDoctorLookup.editTitle") : t("adminDoctorLookup.createTitle")}
                 </h3>
               </div>
             </div>
@@ -196,11 +208,11 @@ export default function UpsertDoctorLookupDialog({
                       }
                       className="rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#475467] transition hover:border-primary/35 hover:bg-[#F0FDFA] hover:text-primary disabled:opacity-50"
                     >
-                      توليد مفتاح جديد
+                      {t("adminDoctorLookup.action.generateNewKey")}
                     </button>
                   ) : null}
                   <label className="block font-cairo text-[12px] font-bold text-[#344054]">
-                    المفتاح (machine key)
+                    {t("adminDoctorLookup.field.key.label")}
                   </label>
                 </div>
                 <input
@@ -220,7 +232,7 @@ export default function UpsertDoctorLookupDialog({
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
-                    الاسم العربي
+                    {t("adminDoctorLookup.field.nameAr.label")}
                   </label>
                   <input
                     {...register("textAr")}
@@ -235,7 +247,7 @@ export default function UpsertDoctorLookupDialog({
                 </div>
                 <div>
                   <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
-                    الاسم الإنجليزي
+                    {t("adminDoctorLookup.field.nameEn.label")}
                   </label>
                   <input
                     {...register("textEn")}
@@ -253,7 +265,7 @@ export default function UpsertDoctorLookupDialog({
 
               <div>
                 <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
-                  الترتيب
+                  {t("adminDoctorLookup.field.order.label")}
                 </label>
                 <input
                   type="number"
@@ -283,14 +295,14 @@ export default function UpsertDoctorLookupDialog({
                   onClick={() => onOpenChange(false)}
                   className="h-[40px] rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#475467]"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
                   className="inline-flex h-[40px] min-w-[120px] items-center justify-center rounded-[10px] bg-primary px-5 font-cairo text-[12px] font-extrabold text-white shadow-[0_14px_28px_rgba(15,143,139,0.28)] disabled:opacity-60"
                 >
-                  {busy ? "جاري الحفظ…" : isEdit ? "حفظ التعديلات" : "إضافة"}
+                  {busy ? t("adminServiceTypeDialog.action.saving") : isEdit ? t("adminDoctorLookup.action.saveEdits") : t("adminMedicalFileOptions.action.add")}
                 </button>
               </div>
             </form>

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { adminApi } from "@/lib/admin/client";
 import { getAdminReboardErrorMessage } from "@/lib/admin/adminWriteFlowErrors";
+import { useI18n } from "@/i18n/provider";
 
 interface ReboardDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ export default function ReboardDialog({
   userName,
   onSuccess,
 }: ReboardDialogProps) {
+  const { t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,8 +32,8 @@ export default function ReboardDialog({
     try {
       await adminApi.users.reboard(userId);
 
-      toast("تم تفعيل حساب المستخدم بنجاح", {
-        title: "تم التفعيل",
+      toast(t("adminUsersDialog.reboard.toast"), {
+        title: t("adminUsersDialog.reboard.toast.activatedTitle"),
         variant: "success",
         durationMs: 4200,
       });
@@ -40,7 +42,7 @@ export default function ReboardDialog({
       onSuccess?.();
     } catch (error) {
       toast(getAdminReboardErrorMessage(error), {
-        title: "فشلت العملية",
+        title: t("common.operationFailed"),
         variant: "error",
         durationMs: 4200,
       });
@@ -69,7 +71,7 @@ export default function ReboardDialog({
                   </div>
                   <div>
                     <Dialog.Title className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                      تفعيل حساب المستخدم
+                      {t("adminUsersDialog.reboard.title")}
                     </Dialog.Title>
                     <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
                       {userName}
@@ -85,7 +87,7 @@ export default function ReboardDialog({
                 <div className="flex items-start gap-3 rounded-[8px] bg-[#FFFBEB] border border-[#FDE68A] p-4">
                   <AlertTriangle className="h-5 w-5 flex-shrink-0 text-[#D97706] mt-0.5" />
                   <div className="font-cairo text-[12px] font-bold text-[#92400E]">
-                    سيتم تفعيل حساب هذا المستخدم وستتم استعادة جميع صلاحياته.
+                    {t("adminUsersDialog.reboard.warning")}
                   </div>
                 </div>
               </div>
@@ -97,7 +99,7 @@ export default function ReboardDialog({
                     disabled={isSubmitting}
                     className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:bg-[#F9FAFB] disabled:opacity-50"
                   >
-                    إلغاء
+                    {t("common.cancel")}
                   </button>
                 </Dialog.Close>
                 <button
@@ -106,7 +108,7 @@ export default function ReboardDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#16A34A] bg-[#16A34A] px-4 font-cairo text-[12px] font-extrabold text-white transition hover:bg-[#15803D] disabled:opacity-50"
                 >
-                  {isSubmitting ? "جاري التفعيل..." : "تفعيل الحساب"}
+                  {isSubmitting ? t("adminUsersDialog.reboard.activating") : t("adminUsersDialog.reboard.confirmButton")}
                 </button>
               </div>
             </div>

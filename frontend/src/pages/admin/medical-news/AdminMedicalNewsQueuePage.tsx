@@ -51,6 +51,23 @@ function extractContentDetails(
   return payload.item ?? payload.content ?? payload.contentItem ?? payload.data ?? null;
 }
 
+/** Same lifecycle palette as AdminContentListItem's statusBadgeClass, localized bilingually here. */
+function newsStatusBadge(
+  status: AdminContentDetailsItem["status"] | undefined,
+  tr: (ar: string, en: string) => string,
+): { label: string; className: string } {
+  if (status === "PUBLISHED") {
+    return { label: tr("منشور", "Published"), className: "border-[#BBF7D0] bg-[#DCFCE7] text-[#16A34A]" };
+  }
+  if (status === "IN_REVIEW") {
+    return { label: tr("قيد المراجعة", "In review"), className: "border-[#FDE68A] bg-[#FFFBEB] text-[#D97706]" };
+  }
+  if (status === "ARCHIVED") {
+    return { label: tr("مؤرشف", "Archived"), className: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]" };
+  }
+  return { label: tr("مسودة", "Draft"), className: "border-[#E5E7EB] bg-[#F3F4F6] text-[#344054]" };
+}
+
 export default function AdminMedicalNewsQueuePage() {
   const { toast } = useToast();
   const { locale, dir } = useI18n();
@@ -260,8 +277,8 @@ export default function AdminMedicalNewsQueuePage() {
         </section>
 
         <section className="mt-5 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
                 {tr("فلاتر الطابور", "Queue filters")}
               </div>
@@ -273,77 +290,72 @@ export default function AdminMedicalNewsQueuePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-4 lg:min-w-[920px]">
-              <label className="flex flex-col gap-1 text-start">
-                <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  Source URL
-                </span>
-                <input
-                  value={sourceUrl}
-                  onChange={(e) => {
-                      setSourceUrl(e.target.value);
-                      setPage(1);
-                    }}
-                  placeholder="https://example.com/news/..."
-                  dir="ltr"
-                  className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-start">
-                <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  {tr("من تاريخ", "From date")}
-                </span>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => {
-                      setDateFrom(e.target.value);
-                      setPage(1);
-                    }}
-                  className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-start">
-                <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  {tr("إلى تاريخ", "To date")}
-                </span>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => {
-                      setDateTo(e.target.value);
-                      setPage(1);
-                    }}
-                  className="h-[42px] rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
-                />
-              </label>
-              <div className="flex flex-col gap-1 text-start">
-                <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
-                  {tr("اللغة", "Language")}
-                </span>
-                <LanguageModeToggle
-                  value={langFilter}
-                  onChange={(next) => {
-                    setLangFilter(next);
-                    setPage(1);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-end">
             <button
               type="button"
               onClick={() => void pendingNewsQuery.refetch()}
               disabled={pendingNewsQuery.isFetching}
-              className="inline-flex h-[38px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] disabled:opacity-50"
+              className="inline-flex h-[38px] shrink-0 items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-bold text-[#344054] disabled:opacity-50"
             >
               <RefreshCw
                 className={`h-4 w-4 ${pendingNewsQuery.isFetching ? "animate-spin" : ""}`}
               />
               {tr("تحديث", "Refresh")}
             </button>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-end gap-3">
+            <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-start">
+              <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
+                Source URL
+              </span>
+              <input
+                value={sourceUrl}
+                onChange={(e) => {
+                    setSourceUrl(e.target.value);
+                    setPage(1);
+                  }}
+                placeholder="https://example.com/news/..."
+                dir="ltr"
+                className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3]"
+              />
+            </label>
+            <label className="flex min-w-[160px] flex-1 flex-col gap-1 text-start">
+              <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
+                {tr("من تاريخ", "From date")}
+              </span>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => {
+                    setDateFrom(e.target.value);
+                    setPage(1);
+                  }}
+                className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
+              />
+            </label>
+            <label className="flex min-w-[160px] flex-1 flex-col gap-1 text-start">
+              <span className="font-cairo text-[11px] font-extrabold text-[#667085]">
+                {tr("إلى تاريخ", "To date")}
+              </span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => {
+                    setDateTo(e.target.value);
+                    setPage(1);
+                  }}
+                className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-semibold text-[#111827]"
+              />
+            </label>
+            <div className="shrink-0">
+              <LanguageModeToggle
+                value={langFilter}
+                onChange={(next) => {
+                  setLangFilter(next);
+                  setPage(1);
+                }}
+              />
+            </div>
           </div>
         </section>
 
@@ -397,187 +409,202 @@ export default function AdminMedicalNewsQueuePage() {
                   )}
             </div>
           ) : (
-            visibleItems.map((item) => (
-              <article
-                key={item._id ?? `${item.slug ?? toDisplayText(item.title) ?? "pending"}-${item.updatedAt ?? ""}`}
-                className="rounded-[12px] border border-[#E5E7EB] bg-white px-5 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
-              >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  {item.coverImage ? (
-                    <div className="overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-[#F8FAFC] lg:w-[180px] lg:shrink-0">
-                      <img
-                        src={item.coverImage}
-                        alt={toDisplayText(item.title) || item.originalTitle || "news cover"}
-                        className="h-[120px] w-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  ) : null}
+            visibleItems.map((item) => {
+              const statusBadge = newsStatusBadge(item.status, tr);
+              return (
+                <article
+                  key={item._id ?? `${item.slug ?? toDisplayText(item.title) ?? "pending"}-${item.updatedAt ?? ""}`}
+                  className="rounded-[14px] border border-[#EAECF0] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition hover:border-[#D0D5DD] hover:shadow-[0_6px_16px_rgba(16,24,40,0.08)] sm:p-5"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex min-w-0 flex-1 gap-4">
+                      {item.coverImage ? (
+                        <div className="hidden shrink-0 overflow-hidden rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] sm:block sm:w-[140px] lg:w-[160px]">
+                          <img
+                            src={item.coverImage}
+                            alt={toDisplayText(item.title) || item.originalTitle || "news cover"}
+                            className="h-[100px] w-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : null}
 
-                    <div className="min-w-0 flex-1 text-start">
-                    <div className="flex flex-wrap items-center justify-start gap-2">
-                      <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#B54708]">
-                        pending
-                      </span>
-                      <span className="rounded-full border border-[#D1FAE5] bg-[#ECFDF3] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#027A48]">
-                        {item.language ?? "—"}
-                      </span>
-                    </div>
+                      <div className="min-w-0 flex-1 text-start">
+                        <div className="flex flex-wrap items-center justify-start gap-2">
+                          <span
+                            className={`inline-flex h-[22px] shrink-0 items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadge.className}`}
+                          >
+                            {statusBadge.label}
+                          </span>
+                          <span className="inline-flex h-[22px] shrink-0 items-center justify-center rounded-[8px] border border-[#D1FAE5] bg-[#ECFDF3] px-2.5 font-cairo text-[10px] font-extrabold text-[#027A48]">
+                            {(item.language ?? "—").toUpperCase()}
+                          </span>
+                        </div>
 
-                    <div className="mt-3 font-cairo text-[15px] font-extrabold text-[#111827]">
-                      {toDisplayText(item.title) || "—"}
-                    </div>
-                    {item.originalTitle && item.originalTitle !== toDisplayText(item.title) ? (
-                      <div className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                        {tr("العنوان الأصلي:", "Original title:")}{" "}
-                        {item.originalTitle}
+                        <div className="mt-2.5 truncate font-cairo text-[15px] font-black text-[#101828]">
+                          {toDisplayText(item.title) || "—"}
+                        </div>
+                        {item.originalTitle && item.originalTitle !== toDisplayText(item.title) ? (
+                          <div className="mt-1 truncate font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                            {tr("العنوان الأصلي:", "Original title:")}{" "}
+                            {item.originalTitle}
+                          </div>
+                        ) : null}
+                        <div className="mt-1.5 line-clamp-2 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
+                          {item.summary ??
+                            item.aiSummary ??
+                            tr("لا يوجد ملخص.", "No summary.")}
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-dashed border-[#EEF2F6] pt-3 font-cairo text-[11.5px] font-bold text-[#667085]">
+                          {item.sourceName ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Newspaper className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
+                              {item.sourceName}
+                            </span>
+                          ) : null}
+                          <span className="inline-flex items-center gap-1.5">
+                            <RefreshCw className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
+                            {tr("آخر تحديث:", "Last updated:")}{" "}
+                            {formatContentDate(item.updatedAt ?? item.createdAt, locale)}
+                          </span>
+                          {item.publishedAt ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <ClipboardCheck className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
+                              {tr("نُشر أصلًا:", "Originally published:")}{" "}
+                              {formatContentDate(item.publishedAt, locale)}
+                            </span>
+                          ) : null}
+                          {item.pageVersion ? (
+                            <span className="text-[#98A2B3]">v{item.pageVersion}</span>
+                          ) : null}
+                        </div>
+
+                        {item.sources?.[0]?.url ? (
+                          <a
+                            href={item.sources[0].url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-2.5 inline-flex max-w-full items-center gap-1.5 truncate font-cairo text-[11px] font-bold text-primary hover:underline"
+                          >
+                            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate" dir="ltr">
+                              {item.sources[0].url}
+                            </span>
+                          </a>
+                        ) : null}
                       </div>
-                    ) : null}
-                    <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]">
-                      {item.summary ??
-                        item.aiSummary ??
-                        tr("لا يوجد ملخص.", "No summary.")}
                     </div>
 
-                    <div className="mt-3 flex flex-wrap items-center justify-start gap-4 font-cairo text-[11px] font-bold text-[#667085]">
-                      {item.sourceName ? (
-                        <span>
-                          {tr("المصدر:", "Source:")} {item.sourceName}
-                        </span>
-                      ) : null}
-                      <span>
-                        {tr("آخر تحديث:", "Last updated:")}{" "}
-                        {formatContentDate(item.updatedAt ?? item.createdAt)}
-                      </span>
-                      {item.publishedAt ? (
-                        <span>
-                          {tr("نُشر أصلًا:", "Originally published:")}{" "}
-                          {formatContentDate(item.publishedAt)}
-                        </span>
-                      ) : null}
-                      {item.pageVersion ? (
-                        <span>pageVersion: {item.pageVersion}</span>
-                      ) : null}
-                    </div>
-
-                    {item.sources?.[0]?.url ? (
-                      <a
-                        href={item.sources[0].url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-3 inline-flex max-w-full items-center gap-2 truncate font-cairo text-[11px] font-bold text-primary"
-                      >
-                        <LinkIcon className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate" dir="ltr">
-                          {item.sources[0].url}
-                        </span>
-                      </a>
-                    ) : null}
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-start gap-2">
-                    {item.status === "DRAFT" && item._id ? (
-                      <button
-                        type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "submitReview",
-                            id: item._id as string,
-                            title: toDisplayText(item.title) || "—",
-                          })
-                        }
-                        className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[12px] font-extrabold text-[#475467] transition hover:bg-[#F9FAFB] disabled:opacity-50"
-                      >
-                        <ClipboardCheck className="h-4 w-4" />
-                        {tr("إرسال للمراجعة", "Send for review")}
-                      </button>
-                    ) : null}
-                    {item.status === "IN_REVIEW" && item._id ? (
-                      <>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-[#EEF2F6] pt-3 lg:border-t-0 lg:border-s lg:ps-4 lg:pt-0">
+                      {item.status === "DRAFT" && item._id ? (
                         <button
                           type="button"
                           disabled={actionBusy}
                           onClick={() =>
                             setActionConfirm({
-                              kind: "approve",
+                              kind: "submitReview",
                               id: item._id as string,
                               title: toDisplayText(item.title) || "—",
                             })
                           }
-                          className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BBF7D0] bg-[#F6FEF9] px-3 font-cairo text-[12px] font-extrabold text-[#16A34A] transition hover:bg-[#ECFDF3] disabled:opacity-50"
+                          className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] px-3 font-cairo text-[12px] font-extrabold text-[#475467] transition hover:bg-[#F9FAFB] disabled:opacity-50"
                         >
-                          <Check className="h-4 w-4" />
-                          {tr("موافقة", "Approve")}
+                          <ClipboardCheck className="h-4 w-4" />
+                          {tr("إرسال للمراجعة", "Send for review")}
                         </button>
-                        <button
-                          type="button"
-                          disabled={actionBusy}
-                          onClick={() => {
-                            setRejectTarget(item);
-                            setRejectOpen(true);
-                          }}
-                          className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FECACA] bg-[#FFFBFA] px-3 font-cairo text-[12px] font-extrabold text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
-                        >
-                          <X className="h-4 w-4" />
-                          {tr("رفض", "Reject")}
-                        </button>
+                      ) : null}
+                      {item.status === "IN_REVIEW" && item._id ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={actionBusy}
+                            onClick={() =>
+                              setActionConfirm({
+                                kind: "approve",
+                                id: item._id as string,
+                                title: toDisplayText(item.title) || "—",
+                              })
+                            }
+                            className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BBF7D0] bg-[#F6FEF9] px-3 font-cairo text-[12px] font-extrabold text-[#16A34A] transition hover:bg-[#ECFDF3] disabled:opacity-50"
+                          >
+                            <Check className="h-4 w-4" />
+                            {tr("موافقة", "Approve")}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionBusy}
+                            onClick={() => {
+                              setRejectTarget(item);
+                              setRejectOpen(true);
+                            }}
+                            className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FECACA] bg-[#FFFBFA] px-3 font-cairo text-[12px] font-extrabold text-[#EF4444] transition hover:bg-[#FEF2F2] disabled:opacity-50"
+                          >
+                            <X className="h-4 w-4" />
+                            {tr("رفض", "Reject")}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionBusy}
+                            onClick={() =>
+                              setActionConfirm({
+                                kind: "publish",
+                                id: item._id as string,
+                                title: toDisplayText(item.title) || "—",
+                              })
+                            }
+                            className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#67E8F9] bg-[#F0FDFF] px-3 font-cairo text-[12px] font-extrabold text-[#0891B2] transition hover:bg-[#ECFEFF] disabled:opacity-50"
+                          >
+                            <ShieldCheck className="h-4 w-4" />
+                            {tr("نشر", "Publish")}
+                          </button>
+                        </>
+                      ) : null}
+                      {item.status === "PUBLISHED" && item._id ? (
                         <button
                           type="button"
                           disabled={actionBusy}
                           onClick={() =>
                             setActionConfirm({
-                              kind: "publish",
+                              kind: "archive",
                               id: item._id as string,
                               title: toDisplayText(item.title) || "—",
                             })
                           }
-                          className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#67E8F9] bg-[#F0FDFF] px-3 font-cairo text-[12px] font-extrabold text-[#0891B2] transition hover:bg-[#ECFEFF] disabled:opacity-50"
+                          className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BFDBFE] bg-[#F5FAFF] px-3 font-cairo text-[12px] font-extrabold text-[#1D4ED8] transition hover:bg-[#EFF6FF] disabled:opacity-50"
                         >
-                          <ShieldCheck className="h-4 w-4" />
-                          {tr("نشر", "Publish")}
+                          <Archive className="h-4 w-4" />
+                          {tr("أرشفة", "Archive")}
                         </button>
-                      </>
-                    ) : null}
-                    {item.status === "PUBLISHED" && item._id ? (
+                      ) : null}
+
+                      <div className="mx-1 hidden h-[24px] w-px shrink-0 bg-[#EAECF0] sm:block" />
+
+                      {item._id ? (
+                        <button
+                          type="button"
+                          onClick={() => openPreview(item)}
+                          className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
+                          aria-label={tr("معاينة", "Preview")}
+                          title={tr("معاينة", "Preview")}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                      ) : null}
                       <button
                         type="button"
-                        disabled={actionBusy}
-                        onClick={() =>
-                          setActionConfirm({
-                            kind: "archive",
-                            id: item._id as string,
-                            title: toDisplayText(item.title) || "—",
-                          })
-                        }
-                        className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BFDBFE] bg-[#F5FAFF] px-3 font-cairo text-[12px] font-extrabold text-[#1D4ED8] transition hover:bg-[#EFF6FF] disabled:opacity-50"
+                        onClick={() => setIngestOpen(true)}
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[10px] text-[#15803D] transition hover:bg-[#ECFDF3]"
+                        aria-label={tr("ingest جديد", "New ingest")}
+                        title={tr("ingest جديد", "New ingest")}
                       >
-                        <Archive className="h-4 w-4" />
-                        {tr("أرشفة", "Archive")}
+                        <Plus className="h-4 w-4" />
                       </button>
-                    ) : null}
-                    {item._id ? (
-                      <button
-                        type="button"
-                        onClick={() => openPreview(item)}
-                        className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BFDBFE] px-3 font-cairo text-[12px] font-extrabold text-[#1D4ED8]"
-                      >
-                        <Eye className="h-4 w-4" />
-                        {tr("معاينة", "Preview")}
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() => setIngestOpen(true)}
-                      className="inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#BBF7D0] px-3 font-cairo text-[12px] font-extrabold text-[#15803D]"
-                    >
-                      <Plus className="h-4 w-4" />
-                      {tr("ingest جديد", "New ingest")}
-                    </button>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))
+                </article>
+              );
+            })
           )}
         </section>
 

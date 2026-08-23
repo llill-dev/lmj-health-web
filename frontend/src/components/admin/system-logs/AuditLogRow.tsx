@@ -2,13 +2,14 @@ import type { ReactNode } from "react";
 import { memo } from "react";
 import { Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
-  CATEGORY_LABELS,
+  categoryLabel,
   CATEGORY_STYLES,
-  OUTCOME_LABELS,
-  ROLE_LABELS,
+  outcomeLabel,
+  roleLabel,
 } from "@/components/admin/system-logs/auditLogConstants";
 import { formatAuditLogDateTime } from "@/components/admin/system-logs/auditLogUtils";
 import type { AuditLogItem, AuditLogOutcome } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 const OUTCOME_STYLES: Record<
   AuditLogOutcome,
@@ -38,11 +39,12 @@ export const AuditLogRow = memo(function AuditLogRow({
   log: AuditLogItem;
   onOpenDetails: (log: AuditLogItem) => void;
 }) {
+  const { locale, t } = useI18n();
   const catStyle = CATEGORY_STYLES[log.category] ?? CATEGORY_STYLES.SYSTEM;
   const outStyle = OUTCOME_STYLES[log.outcome] ?? OUTCOME_STYLES.FAIL;
-  const { date, time } = formatAuditLogDateTime(log.createdAt);
+  const { date, time } = formatAuditLogDateTime(log.createdAt, locale);
   const actorLabel = log.actorRole
-    ? (ROLE_LABELS[log.actorRole] ?? log.actorRole)
+    ? roleLabel(log.actorRole, locale)
     : "—";
 
   return (
@@ -55,7 +57,7 @@ export const AuditLogRow = memo(function AuditLogRow({
           className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-cairo text-[11px] font-bold ${catStyle.bg} ${catStyle.text}`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${catStyle.dot}`} />
-          {CATEGORY_LABELS[log.category]}
+          {categoryLabel(log.category, locale)}
         </span>
       </div>
 
@@ -73,7 +75,7 @@ export const AuditLogRow = memo(function AuditLogRow({
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-cairo text-[11px] font-bold ${outStyle.bg} ${outStyle.text}`}
         >
           {outStyle.icon}
-          {OUTCOME_LABELS[log.outcome]}
+          {outcomeLabel(log.outcome, locale)}
         </span>
       </div>
 
@@ -89,7 +91,7 @@ export const AuditLogRow = memo(function AuditLogRow({
           onClick={() => onOpenDetails(log)}
           className="mt-2 font-cairo text-[11px] font-extrabold text-primary underline-offset-2 hover:underline"
         >
-          تفاصيل تقنية
+          {t('adminAuditLog.row.technicalDetails')}
         </button>
       </div>
 

@@ -320,7 +320,7 @@ export default function AdminDashboardPage() {
               activityLogs.map((log) => {
                 const { Icon, box, iconColor } = activityRowVisual(log);
                 const title = activityHeadline(log);
-                const desc = activityDescription(log);
+                const desc = activityDescription(log, locale);
                 return (
                   <div
                     key={log._id}
@@ -345,7 +345,7 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                     <div className="shrink-0 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                      {formatRelativeTimeAr(log.createdAt)}
+                      {formatRelativeTimeAr(log.createdAt, locale)}
                     </div>
                   </div>
                 );
@@ -377,7 +377,7 @@ export default function AdminDashboardPage() {
             ) : (
               <ul className="flex flex-col gap-3">
                 {complaints.map((row: AdminComplaintListItem) => {
-                  const st = complaintStatusLabel(row.status);
+                  const st = complaintStatusLabel(row.status, locale);
                   const patientName =
                     asPlainText(row.contactSnapshot?.fullName) || "—";
                   const subj = asPlainText(row.subject);
@@ -409,13 +409,13 @@ export default function AdminDashboardPage() {
                               <span className="text-[#98A2B3]">
                                 {tr("نوع الشكوى : ", "Complaint type: ")}
                               </span>
-                              {complaintTypeLabel(row.type)}
+                              {complaintTypeLabel(row.type, locale)}
                             </div>
                             <div className="mt-1 font-cairo text-[12px] font-medium leading-relaxed text-[#98A2B3]">
                               {locationLine}
                             </div>
                             <div className="mt-3 font-cairo text-[11px] font-semibold text-[#9CA3AF]">
-                              {formatTimeTodayOrDate(row.createdAt)}
+                              {formatTimeTodayOrDate(row.createdAt, locale)}
                             </div>
                           </div>
                         </div>
@@ -462,7 +462,7 @@ export default function AdminDashboardPage() {
             ) : (
               <ul className="flex flex-col gap-3">
                 {contentRows.map((item) => {
-                  const st = contentStatusLabel(item.status);
+                  const st = contentStatusLabel(item.status, locale);
                   const views = item.viewCount ?? item.views ?? 0;
                   const canArchive = item.status === "PUBLISHED";
                   return (
@@ -483,7 +483,7 @@ export default function AdminDashboardPage() {
                             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 justify-end font-cairo text-[11px] font-semibold text-[#98A2B3]">
                               <span className="inline-flex gap-1.5 items-center">
                                 <Tag className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
-                                {contentTypeCategoryLabel(item.type)}
+                                {contentTypeCategoryLabel(item.type, locale)}
                               </span>
                               <span className="inline-flex gap-1.5 items-center">
                                 <User className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
@@ -497,7 +497,7 @@ export default function AdminDashboardPage() {
                               <span className="inline-flex gap-1.5 items-center">
                                 <CalendarClock className="h-3.5 w-3.5 shrink-0 text-[#9CA3AF]" />
                                 {tr("آخر تحديث: ", "Last updated: ")}
-                                {formatShortDate(item.updatedAt)}
+                                {formatShortDate(item.updatedAt, locale)}
                               </span>
                             </div>
                           </div>

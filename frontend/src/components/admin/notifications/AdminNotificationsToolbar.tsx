@@ -21,7 +21,7 @@ export default function AdminNotificationsToolbar({
   /** إن ظهرت بطاقات غير مقروءة في الصفحة الحالية رغم اختلاف العدد من الـ API */
   hasUnreadInView?: boolean;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   return (
     <div
       dir={dir}
@@ -38,7 +38,7 @@ export default function AdminNotificationsToolbar({
           }
         >
           <ListFilter className='h-4 w-4 opacity-90' aria-hidden />
-          الكل ({totalCount})
+          {t('common.all')} ({totalCount})
         </button>
         <button
           type='button'
@@ -50,7 +50,7 @@ export default function AdminNotificationsToolbar({
           }
         >
           <Clock className='h-4 w-4 opacity-90' aria-hidden />
-          غير مقروءة ({unreadCount})
+          {t('adminNotifications.kpi.unread')} ({unreadCount})
         </button>
       </div>
 
@@ -71,7 +71,7 @@ export default function AdminNotificationsToolbar({
         ) : (
           <CheckCheck className='h-4 w-4 text-primary' aria-hidden />
         )}
-        تحديد الكل كمقروء
+        {t('adminNotifications.action.markAllRead')}
       </button>
     </div>
   );

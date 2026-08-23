@@ -355,9 +355,9 @@ export default function AdminComplaintsPage() {
                   value: "all",
                   label: tr("نوع الشكوى — الكل", "Complaint type — all"),
                 },
-                ...COMPLAINT_TYPES.map((t) => ({
-                  value: t,
-                  label: complaintTypeAr(t),
+                ...COMPLAINT_TYPES.map((type) => ({
+                  value: type,
+                  label: complaintTypeAr(type, locale),
                 })),
               ]}
               listboxAriaLabel={tr("تصفية نوع الشكوى", "Filter complaint type")}
@@ -495,7 +495,7 @@ export default function AdminComplaintsPage() {
                             <div className="mt-1 font-cairo text-[18px] font-semibold leading-[22px] text-primary">
                               {tr("نوع الشكوى:", "Complaint type:")}{" "}
                               <span className="text-[#1F2937]">
-                                {complaintTypeAr(c.type)}
+                                {complaintTypeAr(c.type, locale)}
                               </span>
                             </div>
                           </div>
@@ -505,7 +505,7 @@ export default function AdminComplaintsPage() {
                             c.status,
                           )}`}
                         >
-                          {statusLabelAr(c.status)}
+                          {statusLabelAr(c.status, locale)}
                         </span>
                       </div>
 
@@ -517,7 +517,7 @@ export default function AdminComplaintsPage() {
                           </span>
                         </div>
                         <div className="shrink-0 font-cairo text-[14px] font-bold text-[#99A1AF]">
-                          {formatListTime(c.createdAt)}
+                          {formatListTime(c.createdAt, locale, tr('اليوم', 'Today'))}
                         </div>
                       </div>
                       <div className="ms-0 mt-1 sm:ms-[80px]">

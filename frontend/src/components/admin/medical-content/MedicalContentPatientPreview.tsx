@@ -345,7 +345,7 @@ export default function MedicalContentPatientPreview({
               ) : null}
               {newsPublishedAt ? (
                 <span>
-                  {copy.publishedAtLabel} {formatDate(newsPublishedAt)}
+                  {copy.publishedAtLabel} {formatDate(newsPublishedAt, language)}
                 </span>
               ) : null}
             </div>

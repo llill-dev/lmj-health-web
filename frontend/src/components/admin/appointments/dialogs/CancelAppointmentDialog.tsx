@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,11 +13,7 @@ import {
 } from "@/components/admin/form-field";
 import { useI18n } from "@/i18n/provider";
 
-const cancelAppointmentSchema = z.object({
-  reason: z.string().max(300, "سبب الإلغاء يجب ألا يتجاوز 300 حرف."),
-});
-
-type CancelAppointmentFormValues = z.infer<typeof cancelAppointmentSchema>;
+type CancelAppointmentFormValues = { reason: string };
 
 export default function CancelAppointmentDialog({
   open,
@@ -36,8 +32,15 @@ export default function CancelAppointmentDialog({
   confirmLabel?: string;
   successToast?: { title?: string; message: string; variant?: ToastVariant };
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
+  const cancelAppointmentSchema = useMemo(
+    () =>
+      z.object({
+        reason: z.string().max(300, t("adminAppointments.cancel.validation.reasonTooLong")),
+      }),
+    [t],
+  );
   const {
     register,
     handleSubmit,
@@ -105,18 +108,18 @@ export default function CancelAppointmentDialog({
                   reset({ reason: "" });
                 }}
                 className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />
               </button>
 
               <h2 className="text-right font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]">
-                إلغاء الموعد
+                {t("adminAppointments.cancel.title")}
               </h2>
 
               <div className="mt-10 text-right">
                 <div className="font-cairo text-[14px] font-bold text-[#101828]">
-                  الهدف
+                  {t("adminAppointments.cancel.targetLabel")}
                 </div>
                 <div className="mt-1 font-cairo text-[16px] font-extrabold text-[#101828]">
                   {targetName}
@@ -125,12 +128,12 @@ export default function CancelAppointmentDialog({
 
               <div className="mt-7">
                 <AdminFormField
-                  label="سبب الإلغاء"
+                  label={t("adminAppointments.cancel.reasonLabel")}
                   error={errors.reason?.message}
                 >
                   <textarea
                     {...register("reason")}
-                    placeholder="اكتب سبب إلغاء الموعد هنا..."
+                    placeholder={t("adminAppointments.cancel.reason.placeholder")}
                     className={adminTextareaClass}
                     rows={5}
                   />
@@ -147,7 +150,7 @@ export default function CancelAppointmentDialog({
                   }}
                   className="h-[46px] w-full rounded-[10px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
 
                 <button
@@ -171,7 +174,7 @@ export default function CancelAppointmentDialog({
                   })}
                   className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[10px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-extrabold text-white shadow-[0_14px_24px_rgba(15, 143, 139,0.25)] disabled:opacity-60"
                 >
-                  <span>{confirmLabel ?? "تأكيد الإلغاء"}</span>
+                  <span>{confirmLabel ?? t("adminAppointments.cancel.confirmAction")}</span>
                   <Check className="h-5 w-5" />
                 </button>
               </div>

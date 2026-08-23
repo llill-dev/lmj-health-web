@@ -16,9 +16,9 @@ const greetingWord = (t: (key: string, fallback?: string) => string): string => 
   return t("doctor.greeting.default");
 };
 
-const initialsFromName = (name: string): string => {
+const initialsFromName = (name: string, fallback: string): string => {
   const t = name.trim();
-  if (!t) return "د";
+  if (!t) return fallback.trim().charAt(0).toUpperCase() || fallback;
   const parts = t.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     const a = parts[0]?.[0] ?? "";
@@ -91,8 +91,9 @@ export default function DashboardHeader({
     () =>
       initialsFromName(
         subtitleProp?.trim() ? subtitleProp.trim() : (user?.name?.trim() ?? ""),
+        displayName,
       ),
-    [subtitleProp, user?.name],
+    [subtitleProp, user?.name, displayName],
   );
 
   const greeting = greetingWord(t);
@@ -223,7 +224,7 @@ export default function DashboardHeader({
                   type="button"
                   onClick={handleNotificationsClick}
                   className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]"
-                  aria-label="الإشعارات"
+                  aria-label={t("header.notifications")}
                   title={t("header.notifications")}
                 >
                   <Bell className="h-[17px] w-[17px]" strokeWidth={2.25} />

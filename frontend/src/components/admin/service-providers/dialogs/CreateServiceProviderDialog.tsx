@@ -21,12 +21,6 @@ import {
 import DynamicProviderFieldRenderer from "@/components/admin/service-providers/DynamicProviderFieldRenderer";
 import { cn } from "@/lib/utils/utils";
 
-const STATUS_OPTIONS = [
-  { value: "draft", label: "مسودة" },
-  { value: "active", label: "نشط" },
-  { value: "inactive", label: "معطّل" },
-];
-
 interface CreateServiceProviderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -43,9 +37,15 @@ export default function CreateServiceProviderDialog({
   onSuccess,
   allowAdvancedJson = true,
 }: CreateServiceProviderDialogProps) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const STATUS_OPTIONS = [
+    { value: "draft", label: t("adminServiceProvider.status.draft") },
+    { value: "active", label: t("common.active") },
+    { value: "inactive", label: t("common.disabled") },
+  ];
 
   const [serviceTypeId, setServiceTypeId] = useState("");
   const [name, setName] = useState("");
@@ -116,16 +116,16 @@ export default function CreateServiceProviderDialog({
     const newErrors: Record<string, string> = {};
 
     if (!serviceTypeId) {
-      newErrors.serviceType = "يجب اختيار نوع الخدمة";
+      newErrors.serviceType = t("adminServiceProviderDialog.validation.serviceTypeRequired");
     }
     if (!name.trim()) {
-      newErrors.name = "الاسم مطلوب";
+      newErrors.name = t("adminServiceProviderDialog.validation.nameRequired");
     }
     if (!city.trim()) {
-      newErrors.city = "المدينة مطلوبة";
+      newErrors.city = t("adminFacilityDialog.validation.cityRequired");
     }
     if (!country.trim()) {
-      newErrors.country = "البلد مطلوب";
+      newErrors.country = t("adminServiceProviderDialog.validation.countryRequired");
     }
 
     if (showAdvancedJson && advancedJson.trim()) {
@@ -133,8 +133,8 @@ export default function CreateServiceProviderDialog({
         JSON.parse(advancedJson);
         setAdvancedJsonError(null);
       } catch {
-        setAdvancedJsonError("صيغة JSON غير صالحة");
-        newErrors.data = "صيغة JSON غير صالحة";
+        setAdvancedJsonError(t("adminServiceProviderDialog.validation.jsonInvalid"));
+        newErrors.data = t("adminServiceProviderDialog.validation.jsonInvalid");
       }
     }
 
@@ -179,8 +179,8 @@ export default function CreateServiceProviderDialog({
         status,
       });
 
-      toast("تم إنشاء مزود الخدمة بنجاح", {
-        title: "تم الإنشاء",
+      toast(t("adminServiceProviderDialog.toast.created"), {
+        title: t("adminFacilityDialog.toast.createdTitle"),
         variant: "success",
         durationMs: 4200,
       });
@@ -193,7 +193,7 @@ export default function CreateServiceProviderDialog({
         setErrors((prev) => ({ ...prev, ...fieldErrors }));
       }
       toast(getAdminServiceProviderMutationErrorMessage(error, "create"), {
-        title: "فشلت العملية",
+        title: t("common.operationFailed"),
         variant: "error",
         durationMs: 4200,
       });
@@ -209,7 +209,7 @@ export default function CreateServiceProviderDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="إنشاء مزود خدمة جديد"
+          aria-label={t("adminServiceProviderDialog.create.ariaLabel")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -240,18 +240,16 @@ export default function CreateServiceProviderDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  إنشاء مزود خدمة جديد
+                  {t("adminServiceProviderDialog.create.ariaLabel")}
                 </h2>
                 <p className="mt-2 max-w-[560px] font-cairo text-[12px] font-bold leading-6 text-[#667085]">
-                  أنشئ هنا سجل مزوّد الخدمة نفسه وربطه بنوع خدمة واحد. الحقول
-                  الأساسية الظاهرة في الكروت والقوائم تؤخذ من هذا النموذج، أما
-                  حقل JSON فهو فقط لبيانات إضافية لا تظهر مباشرة للمستخدم.
+                  {t("adminServiceProviderDialog.create.description")}
                 </p>
               </div>
             </div>
@@ -260,9 +258,9 @@ export default function CreateServiceProviderDialog({
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField
-                    label="نوع الخدمة"
+                    label={t("adminServiceProviderDialog.field.serviceType.placeholder")}
                     required
-                    hint="اختر التصنيف المرجعي الذي سيظهر هذا المزوّد تحته داخل الإدارة."
+                    hint={t("adminServiceProviderDialog.field.serviceType.hint")}
                     error={errors.serviceType}
                   >
                     <StyledSelect
@@ -273,19 +271,18 @@ export default function CreateServiceProviderDialog({
                           setErrors((prev) => ({ ...prev, serviceType: "" }));
                       }}
                       options={typeOptions}
-                      placeholder="اختر نوع الخدمة"
+                      placeholder={t("adminServiceProviderDialog.field.serviceType.placeholder")}
                       error={Boolean(errors.serviceType)}
                     />
                   </AdminFormField>
 
                   {isInactiveType ? (
                     <div className="rounded-[12px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-bold text-[#92400E]">
-                      هذا النوع غير مُفعّل حاليًا. يمكنك إنشاء مزودين، لكن لن
-                      يظهروا للمستخدمين حتى يُفعَّل النوع.
+                      {t("adminServiceProviderDialog.inactiveTypeWarning.create")}
                     </div>
                   ) : null}
 
-                  <AdminFormField label="الاسم" required error={errors.name}>
+                  <AdminFormField label={t("adminServiceProviderDialog.field.name.label")} required error={errors.name}>
                     <input
                       type="text"
                       value={name}
@@ -294,7 +291,7 @@ export default function CreateServiceProviderDialog({
                         if (errors.name)
                           setErrors((prev) => ({ ...prev, name: "" }));
                       }}
-                      placeholder="أدخل اسم مزود الخدمة"
+                      placeholder={t("adminServiceProviderDialog.field.name.placeholder")}
                       className={adminFieldClass(
                         cn(
                           adminInputClass,
@@ -307,11 +304,11 @@ export default function CreateServiceProviderDialog({
 
                   <div>
                     <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                      الموقع
+                      {t("common.location")}
                     </h3>
                     <div className="space-y-4">
                       <AdminFormField
-                        label="المدينة"
+                        label={t("adminFacilityDialog.field.city.label")}
                         required
                         error={errors.city}
                       >
@@ -323,7 +320,7 @@ export default function CreateServiceProviderDialog({
                             if (errors.city)
                               setErrors((prev) => ({ ...prev, city: "" }));
                           }}
-                          placeholder="أدخل المدينة"
+                          placeholder={t("common.enterCity")}
                           className={adminFieldClass(
                             cn(
                               adminInputClass,
@@ -335,7 +332,7 @@ export default function CreateServiceProviderDialog({
                       </AdminFormField>
 
                       <AdminFormField
-                        label="البلد"
+                        label={t("adminFacilityDialog.field.country.label")}
                         required
                         error={errors.country}
                       >
@@ -347,7 +344,7 @@ export default function CreateServiceProviderDialog({
                             if (errors.country)
                               setErrors((prev) => ({ ...prev, country: "" }));
                           }}
-                          placeholder="أدخل البلد"
+                          placeholder={t("common.enterCountry")}
                           className={adminFieldClass(
                             cn(
                               adminInputClass,
@@ -363,7 +360,7 @@ export default function CreateServiceProviderDialog({
                   {selectedType ? (
                     <div>
                       <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
-                        بيانات {resolveLabel(selectedType.name, "ar")}
+                        {t("adminServiceProviderDialog.section.dataFor").replace("{name}", resolveLabel(selectedType.name, "ar"))}
                       </h3>
                       <DynamicProviderFieldRenderer
                         fields={selectedType.fields ?? []}
@@ -382,7 +379,7 @@ export default function CreateServiceProviderDialog({
                         onClick={() => setShowAdvancedJson((prev) => !prev)}
                         className="flex w-full items-center justify-between px-4 py-3 font-cairo text-[12px] font-extrabold text-[#344054]"
                       >
-                        <span>متقدّم: تحرير JSON مباشرةً (اختياري)</span>
+                        <span>{t("adminServiceProviderDialog.field.advancedToggle")}</span>
                         <ChevronDown
                           className={cn(
                             "h-4 w-4 transition-transform",
@@ -393,8 +390,8 @@ export default function CreateServiceProviderDialog({
                       {showAdvancedJson ? (
                         <div className="border-t border-[#E5E7EB] px-4 py-3">
                           <AdminFormField
-                            label="بيانات إضافية (JSON)"
-                            hint="يستبدل الحقول المولدة أعلاه عند الحفظ."
+                            label={t("adminServiceProviderDialog.field.advancedJson.label")}
+                            hint={t("adminServiceProviderDialog.field.advancedJson.hint")}
                             error={errors.data ?? advancedJsonError ?? undefined}
                           >
                             <textarea
@@ -420,8 +417,8 @@ export default function CreateServiceProviderDialog({
                   ) : null}
 
                   <AdminFormField
-                    label="الأسماء البديلة"
-                    hint="تُستخدم لتوسيع البحث أو حفظ صيغ كتابة مختلفة لنفس المزوّد."
+                    label={t("adminServiceProviderDialog.field.aliases.label")}
+                    hint={t("adminServiceProviderDialog.field.aliases.hint")}
                   >
                     <div className="flex gap-2 items-center">
                       <input
@@ -433,7 +430,7 @@ export default function CreateServiceProviderDialog({
                             addAlias();
                           }
                         }}
-                        placeholder="أضف اسماً بديلاً"
+                        placeholder={t("adminServiceProviderDialog.field.altName.placeholder")}
                         disabled={isSubmitting}
                         className={adminFieldClass(
                           cn(
@@ -448,7 +445,7 @@ export default function CreateServiceProviderDialog({
                         onClick={addAlias}
                         disabled={isSubmitting || !newAlias.trim()}
                         className="inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[12px] bg-primary text-white disabled:opacity-50"
-                        aria-label="إضافة اسم بديل"
+                        aria-label={t("adminServiceProviderDialog.action.addAltName")}
                       >
                         <Plus className="w-4 h-4" aria-hidden />
                       </button>
@@ -467,7 +464,7 @@ export default function CreateServiceProviderDialog({
                               onClick={() => removeAlias(alias)}
                               disabled={isSubmitting}
                               className="text-primary/70 transition hover:text-[#B42318] disabled:opacity-50"
-                              aria-label={`إزالة ${alias}`}
+                              aria-label={t("adminFacilityDialog.attributes.removeAria").replace("{name}", alias)}
                             >
                               <X className="w-3 h-3" aria-hidden />
                             </button>
@@ -476,21 +473,21 @@ export default function CreateServiceProviderDialog({
                       </div>
                     ) : (
                       <p className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                        لا توجد أسماء بديلة مضافة بعد.
+                        {t("adminServiceProviderDialog.aliases.empty")}
                       </p>
                     )}
                   </AdminFormField>
 
                   <AdminFormField
-                    label="الحالة"
+                    label={t("common.statusLabel")}
                     required
-                    hint="مسودة للمراجعة الداخلية، نشط للظهور والاستخدام، معطّل لإخفائه دون حذف السجل."
+                    hint={t("adminServiceProviderDialog.status.hint")}
                   >
                     <StyledSelect
                       value={status}
                       onChange={setStatus}
                       options={STATUS_OPTIONS}
-                      placeholder="اختر الحالة"
+                      placeholder={t("common.selectStatus")}
                     />
                   </AdminFormField>
                 </div>
@@ -503,7 +500,7 @@ export default function CreateServiceProviderDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -511,7 +508,7 @@ export default function CreateServiceProviderDialog({
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" aria-hidden />
-                  {isSubmitting ? "جارٍ الإنشاء…" : "إنشاء مزود الخدمة"}
+                  {isSubmitting ? t("adminFacilityDialog.action.creating") : t("adminServiceProviderDialog.action.create")}
                 </button>
               </div>
             </form>

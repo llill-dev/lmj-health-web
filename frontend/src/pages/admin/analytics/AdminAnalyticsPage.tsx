@@ -21,8 +21,8 @@ import { TableRowSkeleton } from '@/components/admin/analytics/AnalyticsSkeleton
 import {
   formatDateTime,
   localizeSpec,
+  statusLabel,
   STATUS_COLOR,
-  STATUS_LABEL,
 } from '@/components/admin/analytics/analyticsUtils';
 import { useI18n } from '@/i18n/provider';
 
@@ -297,7 +297,7 @@ export default function AdminAnalyticsPage() {
                                   </div>
                                 </td>
                                 <td className='px-4 py-3.5 font-cairo text-[12px] font-bold text-[#667085]'>
-                                  {localizeSpec(d.specialization)}
+                                  {localizeSpec(d.specialization, locale)}
                                 </td>
                                 <td className='px-4 py-3.5 font-cairo text-[12px] font-bold text-[#667085]'>
                                   {d.locationCity ?? '—'}
@@ -550,13 +550,13 @@ export default function AdminAnalyticsPage() {
                               {a.patient?.userId?.fullName ?? a.patient?.publicId ?? '—'}
                             </td>
                             <td className='px-4 py-3.5 font-cairo text-[12px] font-bold text-[#667085]'>
-                              {formatDateTime(a)}
+                              {formatDateTime(a, locale)}
                             </td>
                             <td className='px-4 py-3.5'>
                               <span
                                 className={`rounded-full px-2.5 py-1 font-cairo text-[10px] font-extrabold ${STATUS_COLOR[a.status]}`}
                               >
-                                {STATUS_LABEL[a.status]}
+                                {statusLabel(a.status, locale)}
                               </span>
                             </td>
                           </tr>

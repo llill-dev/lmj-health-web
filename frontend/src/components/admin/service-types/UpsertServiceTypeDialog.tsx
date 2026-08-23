@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Plus, Trash2, Layers } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { Control, UseFormRegister, UseFormSetError } from "react-hook-form";
 import { useFieldArray, useForm, useWatch, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -30,7 +30,7 @@ import { useI18n } from "@/i18n/provider";
  * UX rule: EN inputs Latin-only, AR inputs Arabic-only — avoids pasted text in wrong column).
  */
 const ARABIC_SCRIPT =
-  /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
 
 function containsArabicScript(value: string): boolean {
   return ARABIC_SCRIPT.test(value);
@@ -40,74 +40,25 @@ function containsLatinLetters(value: string): boolean {
   return /[A-Za-z]/.test(value);
 }
 
-const MSG_EN_SCRIPT =
-  "يجب أن يكون النص بالإنجليزية فقط: لا تُدخل حروفًا عربية في الحقول الإنجليزية.";
-const MSG_AR_SCRIPT =
-  "يجب أن يكون النص بالعربية فقط: لا تُدخل حروفًا لاتينية (إنجليزية) في الحقول العربية.";
-const fieldTypes = [
-  { value: "string" as const, label: "نص" },
-  { value: "number" as const, label: "رقم" },
-  { value: "boolean" as const, label: "نعم/لا" },
-  { value: "array" as const, label: "مصفوفة" },
-  { value: "object" as const, label: "كائن" },
-];
-
-const formSchema = z.object({
-  nameEn: z
-    .string()
-    .min(1, "مطلوب")
-    .refine((s) => !containsArabicScript(s), MSG_EN_SCRIPT),
-  nameAr: z
-    .string()
-    .min(1, "مطلوب")
-    .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
-  slug: requiredLatinSlugSchema("مطلوب"),
-  descEn: z
-    .string()
-    .optional()
-    .refine(
-      (s) => !(s ?? "").trim() || !containsArabicScript(s),
-      MSG_EN_SCRIPT,
-    ),
-  descAr: z
-    .string()
-    .optional()
-    .refine(
-      (s) => !(s ?? "").trim() || !containsLatinLetters(s),
-      MSG_AR_SCRIPT,
-    ),
-  fields: z
-    .array(
-      z.object({
-        key: z
-          .string()
-          .min(1, "مفتاح الحقل مطلوب")
-          .regex(
-            /^[A-Za-z][A-Za-z0-9_]*$/,
-            "يجب أن يبدأ المفتاح بحرف لاتيني، ثم حروف/أرقام/شرطة سفلية فقط",
-          ),
-        labelEn: z
-          .string()
-          .min(1, "مطلوب")
-          .refine((s) => !containsArabicScript(s), MSG_EN_SCRIPT),
-        labelAr: z
-          .string()
-          .min(1, "مطلوب")
-          .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
-        type: z.enum(["string", "number", "boolean", "array", "object"]),
-        required: z.boolean(),
-        isPublic: z.boolean(),
-        /** Comma-separated list; only meaningful for string/number types. */
-        enumValues: z.string().optional(),
-        min: z.string().optional(),
-        max: z.string().optional(),
-        regex: z.string().optional(),
-      }),
-    )
-    .min(1, "أضف حقلاً schema واحداً على الأقل"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = {
+  nameEn: string;
+  nameAr: string;
+  slug: string;
+  descEn?: string;
+  descAr?: string;
+  fields: Array<{
+    key: string;
+    labelEn: string;
+    labelAr: string;
+    type: "string" | "number" | "boolean" | "array" | "object";
+    required: boolean;
+    isPublic: boolean;
+    enumValues?: string;
+    min?: string;
+    max?: string;
+    regex?: string;
+  }>;
+};
 
 function toFormValues(st: ServiceType): FormValues {
   const name = st.name;
@@ -281,7 +232,7 @@ export default function UpsertServiceTypeDialog({
   editTarget,
   onSuccess,
 }: Props) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
   const isEdit = !!editTarget?._id;
   const createMut = useCreateServiceType();
@@ -289,6 +240,77 @@ export default function UpsertServiceTypeDialog({
   const busy = createMut.isPending || updateMut.isPending;
   const serverErr = createMut.error ?? updateMut.error;
   const serverError = serverErr ? userFacingErrorMessage(serverErr) : undefined;
+
+  const fieldTypes = useMemo(
+    () => [
+      { value: "string" as const, label: t("adminServiceTypeDialog.fieldType.string") },
+      { value: "number" as const, label: t("adminServiceTypeDialog.fieldType.number") },
+      { value: "boolean" as const, label: t("adminServiceTypeDialog.fieldType.boolean") },
+      { value: "array" as const, label: t("adminServiceTypeDialog.fieldType.array") },
+      { value: "object" as const, label: t("adminServiceTypeDialog.fieldType.object") },
+    ],
+    [t],
+  );
+
+  const formSchema = useMemo(() => {
+    const MSG_EN_SCRIPT = t("adminServiceTypeDialog.validation.enScriptOnly");
+    const MSG_AR_SCRIPT = t("adminServiceTypeDialog.validation.arScriptOnly");
+    const required = t("common.required");
+    return z.object({
+      nameEn: z
+        .string()
+        .min(1, required)
+        .refine((s) => !containsArabicScript(s), MSG_EN_SCRIPT),
+      nameAr: z
+        .string()
+        .min(1, required)
+        .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
+      slug: requiredLatinSlugSchema(required),
+      descEn: z
+        .string()
+        .optional()
+        .refine(
+          (s) => !(s ?? "").trim() || !containsArabicScript(s),
+          MSG_EN_SCRIPT,
+        ),
+      descAr: z
+        .string()
+        .optional()
+        .refine(
+          (s) => !(s ?? "").trim() || !containsLatinLetters(s),
+          MSG_AR_SCRIPT,
+        ),
+      fields: z
+        .array(
+          z.object({
+            key: z
+              .string()
+              .min(1, t("adminServiceTypeDialog.validation.fieldKeyRequired"))
+              .regex(
+                /^[A-Za-z][A-Za-z0-9_]*$/,
+                t("adminServiceTypeDialog.validation.fieldKeyPattern"),
+              ),
+            labelEn: z
+              .string()
+              .min(1, required)
+              .refine((s) => !containsArabicScript(s), MSG_EN_SCRIPT),
+            labelAr: z
+              .string()
+              .min(1, required)
+              .refine((s) => !containsLatinLetters(s), MSG_AR_SCRIPT),
+            type: z.enum(["string", "number", "boolean", "array", "object"]),
+            required: z.boolean(),
+            isPublic: z.boolean(),
+            /** Comma-separated list; only meaningful for string/number types. */
+            enumValues: z.string().optional(),
+            min: z.string().optional(),
+            max: z.string().optional(),
+            regex: z.string().optional(),
+          }),
+        )
+        .min(1, t("adminServiceTypeDialog.validation.atLeastOneField")),
+    });
+  }, [t]);
 
   const {
     register,
@@ -363,7 +385,7 @@ export default function UpsertServiceTypeDialog({
                   id="service-type-dialog-title"
                   className="font-cairo text-[18px] font-extrabold text-[#101828]"
                 >
-                  {isEdit ? "تعديل نوع الخدمة" : "إضافة نوع خدمة"}
+                  {isEdit ? t("adminServiceTypeDialog.editTitle") : t("adminServiceTypeDialog.createTitle")}
                 </h2>
               </div>
               <button
@@ -373,7 +395,7 @@ export default function UpsertServiceTypeDialog({
                   reset(defaultCreate);
                 }}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F2F4F7]"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -394,13 +416,14 @@ export default function UpsertServiceTypeDialog({
                       : undefined,
                   fields: values.fields.map(formToServiceTypeField),
                 };
+                const itemName = values.nameAr.trim() || values.nameEn.trim();
                 try {
                   if (isEdit && editTarget) {
                     await updateMut.mutateAsync({ id: editTarget._id, body });
                     toast(
-                      `تم حفظ تعديلات نوع الخدمة «${values.nameAr.trim() || values.nameEn.trim()}» والحقول المرتبطة به.`,
+                      t('adminServiceTypeDialog.toast.updated.body').replace('{name}', itemName),
                       {
-                        title: "تم التعديل",
+                        title: t('adminServiceTypeDialog.toast.updated.title'),
                         variant: "success",
                         durationMs: 4000,
                       },
@@ -408,9 +431,9 @@ export default function UpsertServiceTypeDialog({
                   } else {
                     await createMut.mutateAsync(body);
                     toast(
-                      `أُضيف نوع الخدمة «${values.nameAr.trim() || values.nameEn.trim()}» إلى النظام. راجع حالة التفعيل عند الحاجة.`,
+                      t('adminServiceTypeDialog.toast.created.body').replace('{name}', itemName),
                       {
-                        title: "تمت الإضافة",
+                        title: t('adminMedicalOrders.toast.created.title'),
                         variant: "success",
                         durationMs: 4000,
                       },
@@ -429,28 +452,28 @@ export default function UpsertServiceTypeDialog({
                 <div className="max-h-[calc(min(90vh,760px)-148px)] space-y-5 overflow-y-auto px-4 py-3 overscroll-contain scroll-smooth [scrollbar-color:#0f8f8b_#E5E7EB] [scrollbar-width:thin] sm:px-5 [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[#E5E7EB] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/75 [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-[#E5E7EB] hover:[&::-webkit-scrollbar-thumb]:bg-primary">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <AdminFormField
-                    label="الاسم (عربي)"
+                    label={t('adminServiceTypeDialog.field.nameAr.ariaLabel')}
                     required
                     error={errors.nameAr?.message}
                   >
                     <input
                       {...register("nameAr")}
-                      aria-label="الاسم (عربي)"
+                      aria-label={t('adminServiceTypeDialog.field.nameAr.ariaLabel')}
                       className={adminFieldClass(
                         adminInputClass,
                         Boolean(errors.nameAr),
                       )}
-                      placeholder="مثال: مختبرات"
+                      placeholder={t('adminServiceTypeDialog.field.nameAr.placeholder')}
                     />
                   </AdminFormField>
                   <AdminFormField
-                    label="الاسم (English)"
+                    label={t('adminServiceTypeDialog.field.nameEn.ariaLabel')}
                     required
                     error={errors.nameEn?.message}
                   >
                     <input
                       {...register("nameEn")}
-                      aria-label="الاسم (English)"
+                      aria-label={t('adminServiceTypeDialog.field.nameEn.ariaLabel')}
                       className={adminFieldClass(
                         adminInputClass,
                         Boolean(errors.nameEn),
@@ -478,30 +501,30 @@ export default function UpsertServiceTypeDialog({
                     />
                   {isEdit && (
                     <p className="mt-1 text-right font-cairo text-[11px] text-[#98A2B3]">
-                      لا يُنصح بتغيير الـ slug بعد الربط.
+                      {t('adminServiceTypeDialog.field.slug.hint')}
                     </p>
                   )}
                 </AdminFormField>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <AdminFormField
-                    label="وصف (عربي)"
+                    label={t('adminServiceTypeDialog.field.descAr.ariaLabel')}
                     error={errors.descAr?.message}
                   >
                     <textarea
                       {...register("descAr")}
-                      aria-label="وصف (عربي)"
+                      aria-label={t('adminServiceTypeDialog.field.descAr.ariaLabel')}
                       rows={2}
                       className={adminTextareaClass}
-                      placeholder="اختياري"
+                      placeholder={t('adminServiceTypeDialog.field.descAr.placeholder')}
                     />
                   </AdminFormField>
                   <AdminFormField
-                    label="وصف (English)"
+                    label={t('adminServiceTypeDialog.field.descEn.ariaLabel')}
                     error={errors.descEn?.message}
                   >
                     <textarea
                       {...register("descEn")}
-                      aria-label="وصف (English)"
+                      aria-label={t('adminServiceTypeDialog.field.descEn.ariaLabel')}
                       rows={2}
                       className={adminTextareaClass}
                       dir="ltr"
@@ -514,7 +537,7 @@ export default function UpsertServiceTypeDialog({
                   <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-cairo text-[12px] font-bold text-[#344054]">
-                        حقول الـ schema
+                        {t('adminServiceTypeDialog.section.schemaFields')}
                       </span>
                       <span className="text-red-500">*</span>
                     </div>
@@ -542,7 +565,7 @@ export default function UpsertServiceTypeDialog({
                       className="inline-flex items-center gap-1 rounded-[8px] border border-primary/30 bg-[#E7FBFA] px-2 py-1.5 font-cairo text-[11px] font-extrabold text-primary transition hover:bg-primary/10"
                     >
                       <Plus className="h-3.5 w-3.5" />
-                      إضافة حقل
+                      {t('adminServiceTypeDialog.action.addField')}
                     </button>
                   </div>
                   <div className="space-y-3 rounded-[12px] border border-[#E9EEF2] bg-[#FAFBFC] p-3">
@@ -553,14 +576,14 @@ export default function UpsertServiceTypeDialog({
                       >
                         <div className="mb-2 flex items-center justify-between">
                           <span className="font-cairo text-[12px] font-extrabold text-primary">
-                            حقل {index + 1}
+                            {t('adminServiceTypeDialog.field.fieldNumber').replace('{n}', String(index + 1))}
                           </span>
                           {fields.length > 1 && (
                             <button
                               type="button"
                               onClick={() => remove(index)}
                               className="rounded-[6px] p-1.5 text-[#EF4444] hover:bg-red-50"
-                              aria-label="حذف الحقل"
+                              aria-label={t('adminServiceTypeDialog.action.removeField')}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -574,7 +597,7 @@ export default function UpsertServiceTypeDialog({
                           >
                             <input
                               {...register(`fields.${index}.key` as const)}
-                              aria-label={`key حقل ${index + 1}`}
+                              aria-label={t('adminServiceTypeDialog.field.key.ariaLabel').replace('{n}', String(index + 1))}
                               className={adminFieldClass(
                                 adminInputClass,
                                 Boolean(errors.fields?.[index]?.key),
@@ -583,7 +606,7 @@ export default function UpsertServiceTypeDialog({
                             />
                           </AdminFormField>
                           <AdminFormField
-                            label="النوع"
+                            label={t('adminServiceTypeDialog.field.type.label')}
                             required
                             error={errors.fields?.[index]?.type?.message}
                           >
@@ -601,19 +624,19 @@ export default function UpsertServiceTypeDialog({
                                   onBlur={field.onBlur}
                                   name={field.name}
                                   triggerClassName={adminInputClass}
-                                  listboxAriaLabel={`نوع حقل ${index + 1}`}
+                                  listboxAriaLabel={t('adminServiceTypeDialog.field.type.ariaLabel').replace('{n}', String(index + 1))}
                                 />
                               )}
                             />
                           </AdminFormField>
                           <AdminFormField
-                            label="تسمية (عربي)"
+                            label={t('adminServiceTypeDialog.field.labelAr.label')}
                             required
                             error={errors.fields?.[index]?.labelAr?.message}
                           >
                             <input
                               {...register(`fields.${index}.labelAr` as const)}
-                              aria-label={`تسمية عربية لحقل ${index + 1}`}
+                              aria-label={t('adminServiceTypeDialog.field.labelAr.ariaLabel').replace('{n}', String(index + 1))}
                               className={adminFieldClass(
                                 adminInputClass,
                                 Boolean(errors.fields?.[index]?.labelAr),
@@ -627,7 +650,7 @@ export default function UpsertServiceTypeDialog({
                           >
                             <input
                               {...register(`fields.${index}.labelEn` as const)}
-                              aria-label={`تسمية إنجليزية لحقل ${index + 1}`}
+                              aria-label={t('adminServiceTypeDialog.field.labelEn.ariaLabel').replace('{n}', String(index + 1))}
                               className={adminFieldClass(
                                 adminInputClass,
                                 Boolean(errors.fields?.[index]?.labelEn),
@@ -650,7 +673,7 @@ export default function UpsertServiceTypeDialog({
                                 />
                               )}
                             />
-                            مطلوب
+                            {t('common.required')}
                           </label>
                           <label className="inline-flex cursor-pointer items-center gap-2 font-cairo text-[12px] font-semibold text-[#344054]">
                             <Controller
@@ -665,7 +688,7 @@ export default function UpsertServiceTypeDialog({
                                 />
                               )}
                             />
-                            حقل عام (isPublic)
+                            {t('adminServiceTypeDialog.field.isPublic.label')}
                           </label>
                         </div>
                         <FieldConstraintsRow
@@ -681,7 +704,7 @@ export default function UpsertServiceTypeDialog({
 
                 {isEdit && editTarget && (
                   <p className="text-right font-cairo text-[12px] font-semibold text-[#667085]">
-                    schemaVersion الحالي: {editTarget.schemaVersion}
+                    {t('adminServiceTypeDialog.schemaVersionPrefix')}{editTarget.schemaVersion}
                   </p>
                 )}
 
@@ -703,14 +726,14 @@ export default function UpsertServiceTypeDialog({
                   className="h-11 rounded-[10px] border border-[#E5E7EB] bg-white px-5 font-cairo text-[13px] font-extrabold text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-50"
                   disabled={busy}
                 >
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
                   className="h-11 rounded-[10px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_8px_24px_rgba(15,143,139,0.3)] transition hover:brightness-105 disabled:opacity-50"
                 >
-                  {busy ? "جاري الحفظ…" : isEdit ? "حفظ التعديل" : "إنشاء"}
+                  {busy ? t('adminServiceTypeDialog.action.saving') : isEdit ? t('adminMedicalOrders.upsert.saveEdit') : t('adminServiceTypeDialog.action.create')}
                 </button>
               </div>
             </form>
@@ -744,46 +767,47 @@ function FieldConstraintsRow({
     max?: { message?: string };
   };
 }) {
+  const { t } = useI18n();
   const type = useWatch({ control, name: `fields.${index}.type` });
   if (!fieldSupportsConstraints(type)) return null;
 
   return (
     <div className="mt-3 grid grid-cols-1 gap-2 border-t border-[#F2F4F7] pt-3 sm:grid-cols-2">
       <AdminFormField
-        label="القيم المسموحة (enum)"
-        hint="افصل بفاصلة، اتركه فارغاً إن لم يكن مطلوباً"
+        label={t('adminServiceTypeDialog.field.enum.label')}
+        hint={t('adminServiceTypeDialog.field.enum.hint')}
         error={errors?.enumValues?.message}
       >
         <input
           {...register(`fields.${index}.enumValues` as const)}
-          aria-label={`enum حقل ${index + 1}`}
+          aria-label={t('adminServiceTypeDialog.field.enum.ariaLabel').replace('{n}', String(index + 1))}
           className={adminFieldClass(adminInputClass, Boolean(errors?.enumValues))}
           dir="ltr"
           placeholder="a, b, c"
         />
       </AdminFormField>
-      <AdminFormField label="النمط (regex)" error={errors?.regex?.message}>
+      <AdminFormField label={t('adminServiceTypeDialog.field.regex.label')} error={errors?.regex?.message}>
         <input
           {...register(`fields.${index}.regex` as const)}
-          aria-label={`regex حقل ${index + 1}`}
+          aria-label={t('adminServiceTypeDialog.field.regex.ariaLabel').replace('{n}', String(index + 1))}
           className={adminFieldClass(adminInputClass, Boolean(errors?.regex))}
           dir="ltr"
         />
       </AdminFormField>
-      <AdminFormField label="الحد الأدنى (min)" error={errors?.min?.message}>
+      <AdminFormField label={t('adminServiceTypeDialog.field.min.label')} error={errors?.min?.message}>
         <input
           type="number"
           {...register(`fields.${index}.min` as const)}
-          aria-label={`min حقل ${index + 1}`}
+          aria-label={t('adminServiceTypeDialog.field.min.ariaLabel').replace('{n}', String(index + 1))}
           className={adminFieldClass(adminInputClass, Boolean(errors?.min))}
           dir="ltr"
         />
       </AdminFormField>
-      <AdminFormField label="الحد الأقصى (max)" error={errors?.max?.message}>
+      <AdminFormField label={t('adminServiceTypeDialog.field.max.label')} error={errors?.max?.message}>
         <input
           type="number"
           {...register(`fields.${index}.max` as const)}
-          aria-label={`max حقل ${index + 1}`}
+          aria-label={t('adminServiceTypeDialog.field.max.ariaLabel').replace('{n}', String(index + 1))}
           className={adminFieldClass(adminInputClass, Boolean(errors?.max))}
           dir="ltr"
         />

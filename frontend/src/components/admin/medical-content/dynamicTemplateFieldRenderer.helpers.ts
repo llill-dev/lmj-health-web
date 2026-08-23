@@ -342,9 +342,11 @@ function validateValueAgainstField(
   value: unknown,
   path: string,
   label: string,
+  language: "ar" | "en" = "ar",
 ): TemplateValidationIssue[] {
   const issues: TemplateValidationIssue[] = [];
   const fieldType = getTemplateFieldType(field);
+  const isEn = language === "en";
 
   if (!hasTemplateValue(value)) return issues;
 
@@ -362,7 +364,9 @@ function validateValueAgainstField(
         code: "enum",
         path,
         label,
-        message: `${label} يجب أن تكون قيمة ضمن الخيارات المحددة.`,
+        message: isEn
+          ? `${label} must be one of the allowed options.`
+          : `${label} يجب أن تكون قيمة ضمن الخيارات المحددة.`,
       });
     }
   }
@@ -373,7 +377,9 @@ function validateValueAgainstField(
         code: "min",
         path,
         label,
-        message: `${label} يجب أن تكون أكبر من أو تساوي ${field.min}.`,
+        message: isEn
+          ? `${label} must be greater than or equal to ${field.min}.`
+          : `${label} يجب أن تكون أكبر من أو تساوي ${field.min}.`,
       });
     }
     if (typeof field.max === "number" && value > field.max) {
@@ -381,7 +387,9 @@ function validateValueAgainstField(
         code: "max",
         path,
         label,
-        message: `${label} يجب أن تكون أصغر من أو تساوي ${field.max}.`,
+        message: isEn
+          ? `${label} must be less than or equal to ${field.max}.`
+          : `${label} يجب أن تكون أصغر من أو تساوي ${field.max}.`,
       });
     }
   }
@@ -392,7 +400,9 @@ function validateValueAgainstField(
         code: "min",
         path,
         label,
-        message: `${label} يجب أن يحتوي على ${field.min} أحرف على الأقل.`,
+        message: isEn
+          ? `${label} must be at least ${field.min} characters.`
+          : `${label} يجب أن يحتوي على ${field.min} أحرف على الأقل.`,
       });
     }
     if (typeof field.max === "number" && value.length > field.max) {
@@ -400,7 +410,9 @@ function validateValueAgainstField(
         code: "max",
         path,
         label,
-        message: `${label} يجب ألا يتجاوز ${field.max} أحرف.`,
+        message: isEn
+          ? `${label} must not exceed ${field.max} characters.`
+          : `${label} يجب ألا يتجاوز ${field.max} أحرف.`,
       });
     }
     if (field.regex) {
@@ -410,7 +422,9 @@ function validateValueAgainstField(
             code: "regex",
             path,
             label,
-            message: `${label} لا يطابق النمط المطلوب.`,
+            message: isEn
+              ? `${label} does not match the required pattern.`
+              : `${label} لا يطابق النمط المطلوب.`,
           });
         }
       } catch {
@@ -442,12 +456,12 @@ export function collectTemplateFieldValidationIssues(
         code: "required",
         path,
         label,
-        message: `${label} مطلوب`,
+        message: language === "en" ? `${label} is required` : `${label} مطلوب`,
       });
     }
 
     currentErrors.push(
-      ...validateValueAgainstField(field, fieldValue, path, label),
+      ...validateValueAgainstField(field, fieldValue, path, label, language),
     );
 
     return currentErrors;

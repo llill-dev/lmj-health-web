@@ -350,7 +350,7 @@ export default function AdminAppointmentsPage() {
                           className={`flex gap-1 items-center h-[22px] rounded-[6px] px-3 font-cairo text-[11px] font-extrabold ${statusPill[a.status]}`}
                         >
                           <Clock className="h-3 w-3" />
-                          {statusLabel[a.status]}
+                          {statusLabel(a.status, locale)}
                         </span>
                       </div>
                       <div className="mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]">

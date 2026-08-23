@@ -2,12 +2,13 @@ import { ChevronDown, Filter, Search, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import StyledSelect from '@/components/ui/styled-select';
 import {
-  FILTER_CATEGORIES,
-  FILTER_OUTCOMES,
-  FILTER_ROLES,
+  filterCategories,
+  filterOutcomes,
+  filterRoles,
   SELECT_CLASS,
 } from '@/components/admin/system-logs/auditLogConstants';
 import type { AuditLogCategory, AuditLogOutcome } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 export type AuditAdvancedFilters = {
   actorUserId: string;
@@ -19,22 +20,6 @@ export type AuditAdvancedFilters = {
   requestId: string;
   ip: string;
 };
-
-const ADVANCED_FIELDS: Array<{
-  key: keyof AuditAdvancedFilters;
-  label: string;
-  placeholder: string;
-  dir?: 'ltr' | 'rtl';
-}> = [
-  { key: 'actorUserId', label: 'معرّف المنفِّذ', placeholder: 'Actor User ID', dir: 'ltr' },
-  { key: 'targetUserId', label: 'المستخدم المستهدف', placeholder: 'Target User ID', dir: 'ltr' },
-  { key: 'patientId', label: 'معرّف المريض', placeholder: 'Patient ID', dir: 'ltr' },
-  { key: 'entityType', label: 'نوع الكيان', placeholder: 'مثال: User' },
-  { key: 'entityId', label: 'معرّف الكيان', placeholder: 'Entity ID', dir: 'ltr' },
-  { key: 'action', label: 'الإجراء', placeholder: 'مثال: AUTH_LOGIN_FAILED', dir: 'ltr' },
-  { key: 'requestId', label: 'معرّف الطلب', placeholder: 'req-123', dir: 'ltr' },
-  { key: 'ip', label: 'عنوان IP', placeholder: '203.0.113.10', dir: 'ltr' },
-];
 
 export function AdminAuditLogFilters({
   search,
@@ -71,6 +56,24 @@ export function AdminAuditLogFilters({
   onAdvancedChange: (key: keyof AuditAdvancedFilters, value: string) => void;
   onReset: () => void;
 }) {
+  const { locale, t } = useI18n();
+
+  const ADVANCED_FIELDS: Array<{
+    key: keyof AuditAdvancedFilters;
+    label: string;
+    placeholder: string;
+    dir?: 'ltr' | 'rtl';
+  }> = [
+    { key: 'actorUserId', label: t('adminAuditLog.filters.field.actorUserId'), placeholder: 'Actor User ID', dir: 'ltr' },
+    { key: 'targetUserId', label: t('adminAuditLog.filters.field.targetUserId'), placeholder: 'Target User ID', dir: 'ltr' },
+    { key: 'patientId', label: t('adminAuditLog.filters.field.patientId'), placeholder: 'Patient ID', dir: 'ltr' },
+    { key: 'entityType', label: t('adminAuditLog.filters.field.entityType'), placeholder: t('adminAuditLog.filters.field.entityType.placeholder') },
+    { key: 'entityId', label: t('adminAuditLog.filters.field.entityId'), placeholder: 'Entity ID', dir: 'ltr' },
+    { key: 'action', label: t('adminAuditLog.filters.field.action'), placeholder: t('adminAuditLog.filters.field.action.placeholder'), dir: 'ltr' },
+    { key: 'requestId', label: t('adminAuditLog.filters.field.requestId'), placeholder: 'req-123', dir: 'ltr' },
+    { key: 'ip', label: t('adminAuditLog.filters.field.ip'), placeholder: '203.0.113.10', dir: 'ltr' },
+  ];
+
   const advancedActiveCount = ADVANCED_FIELDS.filter(
     (f) => advanced[f.key].trim() !== '',
   ).length;
@@ -81,7 +84,7 @@ export function AdminAuditLogFilters({
       <div className='mb-3 flex items-center justify-between'>
         <div className='flex items-center gap-2 text-[#344054]'>
           <Filter className='h-4 w-4' />
-          <span className='font-cairo text-[13px] font-extrabold'>تصفية السجلات</span>
+          <span className='font-cairo text-[13px] font-extrabold'>{t('adminAuditLog.filters.title')}</span>
         </div>
         {hasActiveFilters && (
           <button
@@ -89,7 +92,7 @@ export function AdminAuditLogFilters({
             onClick={onReset}
             className='font-cairo text-[12px] font-bold text-primary underline-offset-2 hover:underline'
           >
-            إعادة تعيين
+            {t('adminAuditLog.filters.reset')}
           </button>
         )}
       </div>
@@ -97,7 +100,7 @@ export function AdminAuditLogFilters({
       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8'>
         <div className='relative sm:col-span-2 lg:col-span-2 xl:col-span-2'>
           <input
-            placeholder='بحث في السجلات...'
+            placeholder={t('adminSystemLogs.filters.search.placeholder')}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             className='h-[40px] w-full rounded-[10px] border border-[#EEF2F6] bg-white pe-10 ps-4 text-right font-cairo text-[13px] font-bold text-[#111827] placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-primary/20'
@@ -112,11 +115,11 @@ export function AdminAuditLogFilters({
           triggerClassName="!h-[40px] !rounded-[10px] border-0 !shadow-none"
           value={category}
           onChange={(v) => onCategoryChange(v as AuditLogCategory | '')}
-          options={FILTER_CATEGORIES.map((c) => ({
+          options={filterCategories(locale).map((c) => ({
             value: c.value,
             label: c.label,
           }))}
-          listboxAriaLabel="تصنيف السجل"
+          listboxAriaLabel={t('adminAuditLog.filters.categoryAriaLabel')}
         />
 
         <StyledSelect
@@ -126,11 +129,11 @@ export function AdminAuditLogFilters({
           triggerClassName="!h-[40px] !rounded-[10px] border-0 !shadow-none"
           value={outcome}
           onChange={(v) => onOutcomeChange(v as AuditLogOutcome | '')}
-          options={FILTER_OUTCOMES.map((o) => ({
+          options={filterOutcomes(locale).map((o) => ({
             value: o.value,
             label: o.label,
           }))}
-          listboxAriaLabel="نتيجة العملية"
+          listboxAriaLabel={t('adminAuditLog.filters.outcomeAriaLabel')}
         />
 
         <StyledSelect
@@ -140,11 +143,11 @@ export function AdminAuditLogFilters({
           triggerClassName="!h-[40px] !rounded-[10px] border-0 !shadow-none"
           value={actorRole}
           onChange={onActorRoleChange}
-          options={FILTER_ROLES.map((r) => ({
+          options={filterRoles(locale).map((r) => ({
             value: r.value,
             label: r.label,
           }))}
-          listboxAriaLabel="دور المستخدم"
+          listboxAriaLabel={t('adminAuditLog.filters.roleAriaLabel')}
         />
 
         <div className='flex min-w-0 items-center gap-2 sm:col-span-2 lg:col-span-4 xl:col-span-3'>
@@ -153,15 +156,15 @@ export function AdminAuditLogFilters({
             value={from}
             onChange={(e) => onFromChange(e.target.value)}
             className={`${SELECT_CLASS} min-w-0 flex-1 px-2`}
-            title='من تاريخ'
+            title={t('adminSystemLogs.filters.fromDate')}
           />
-          <span className='font-cairo text-[11px] text-[#98A2B3]'>إلى</span>
+          <span className='font-cairo text-[11px] text-[#98A2B3]'>{t('adminAuditLog.filters.toWord')}</span>
           <input
             type='date'
             value={to}
             onChange={(e) => onToChange(e.target.value)}
             className={`${SELECT_CLASS} min-w-0 flex-1 px-2`}
-            title='إلى تاريخ'
+            title={t('adminSystemLogs.filters.toDate')}
           />
         </div>
       </div>
@@ -174,7 +177,7 @@ export function AdminAuditLogFilters({
           aria-expanded={expanded}
         >
           <SlidersHorizontal className='h-4 w-4' />
-          فلاتر متقدمة
+          {t('adminAuditLog.filters.advanced')}
           {advancedActiveCount > 0 ? (
             <span className='inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 font-cairo text-[10px] font-extrabold text-white'>
               {advancedActiveCount}

@@ -1,4 +1,5 @@
 import { Activity, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export function AdminAuditLogStatsCards({
   isLoading,
@@ -13,6 +14,8 @@ export function AdminAuditLogStatsCards({
   denyCount: number;
   phiCount: number;
 }) {
+  const { locale, t } = useI18n();
+  const numberLocale = locale === 'ar' ? 'ar-SA' : 'en-US';
   return (
     <section className='mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4'>
       <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#E0F2FE] bg-gradient-to-br from-[#F0F9FF] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
@@ -21,10 +24,10 @@ export function AdminAuditLogStatsCards({
             <Activity className='h-5 w-5 text-primary' />
           </div>
           <div className='font-cairo text-[11px] font-bold text-[#667085]'>
-            {isLoading ? '—' : total.toLocaleString('ar-SA')}
+            {isLoading ? '—' : total.toLocaleString(numberLocale)}
           </div>
         </div>
-        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>إجمالي السجلات</div>
+        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>{t('adminAuditLog.stats.total')}</div>
       </div>
 
       <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#FECACA] bg-gradient-to-br from-[#FEF2F2] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
@@ -34,7 +37,7 @@ export function AdminAuditLogStatsCards({
           </div>
           <div className='font-cairo text-[11px] font-bold text-[#667085]'>{isLoading ? '—' : failCount}</div>
         </div>
-        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>إجراءات فاشلة</div>
+        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>{t('adminAuditLog.stats.failed')}</div>
       </div>
 
       <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#FED7AA] bg-gradient-to-br from-[#FFF7ED] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
@@ -44,7 +47,7 @@ export function AdminAuditLogStatsCards({
           </div>
           <div className='font-cairo text-[11px] font-bold text-[#667085]'>{isLoading ? '—' : denyCount}</div>
         </div>
-        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>محاولات مرفوضة</div>
+        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>{t('adminAuditLog.stats.denied')}</div>
       </div>
 
       <div className='flex h-[120px] flex-col justify-between rounded-[14px] border border-[#FBCFE8] bg-gradient-to-br from-[#FDF2F8] to-white px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
@@ -54,7 +57,7 @@ export function AdminAuditLogStatsCards({
           </div>
           <div className='font-cairo text-[11px] font-bold text-[#667085]'>{isLoading ? '—' : phiCount}</div>
         </div>
-        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>وصول للبيانات الطبية</div>
+        <div className='font-cairo text-[12px] font-extrabold text-[#344054]'>{t('adminAuditLog.stats.phi')}</div>
       </div>
     </section>
   );

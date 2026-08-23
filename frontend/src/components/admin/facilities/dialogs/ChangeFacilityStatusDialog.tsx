@@ -7,13 +7,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { adminApi } from "@/lib/admin/client";
 import { resolveAdminFacilityFormFeedback } from "@/lib/admin/facilities/facilityFormErrors";
 import StyledSelect from "@/components/ui/styled-select";
-
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "نشط" },
-  { value: "PENDING", label: "قيد المراجعة" },
-  { value: "INACTIVE", label: "معطّل" },
-  { value: "DELETED", label: "محذوف" },
-];
+import { useI18n } from "@/i18n/provider";
 
 interface ChangeFacilityStatusDialogProps {
   open: boolean;
@@ -30,6 +24,13 @@ export default function ChangeFacilityStatusDialog({
   facilityName,
   currentStatus,
 }: ChangeFacilityStatusDialogProps) {
+  const { t } = useI18n();
+  const STATUS_OPTIONS = [
+    { value: "ACTIVE", label: t("common.active") },
+    { value: "PENDING", label: t("adminFacility.status.pending") },
+    { value: "INACTIVE", label: t("common.disabled") },
+    { value: "DELETED", label: t("adminFacility.status.deleted") },
+  ];
   const [selectedStatus, setSelectedStatus] = useState("");
   const [rootError, setRootError] = useState("");
   const queryClient = useQueryClient();
@@ -97,7 +98,7 @@ export default function ChangeFacilityStatusDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="تغيير حالة المنشأة"
+          aria-label={t('adminFacilityDialog.changeStatus.ariaLabel')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -126,13 +127,13 @@ export default function ChangeFacilityStatusDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  تغيير حالة المنشأة
+                  {t('adminFacilityDialog.changeStatus.ariaLabel')}
                 </h2>
                 {facilityName && (
                   <p className="mt-1 font-cairo text-[12px] font-bold text-[#667085]">
@@ -150,11 +151,10 @@ export default function ChangeFacilityStatusDialog({
               ) : null}
               <div className="mb-6">
                 <label className="block font-cairo text-[12px] font-extrabold text-[#111827] mb-2">
-                  الحالة الجديدة
+                  {t('adminFacilityDialog.changeStatus.newStatusLabel')}
                 </label>
                 <p className="mb-2 text-right font-cairo text-[12px] font-bold leading-6 text-[#667085]">
-                  أنت تغيّر حالة سجل المنشأة نفسه. هذا لا يحرر بيانات المنشأة،
-                  لكنه قد يغيّر ظهورها أو علاقتها التشغيلية مع الأطباء.
+                  {t('adminFacilityDialog.changeStatus.explain')}
                 </p>
                 <StyledSelect
                   value={selectedStatus}
@@ -163,23 +163,23 @@ export default function ChangeFacilityStatusDialog({
                     if (rootError) setRootError("");
                   }}
                   options={STATUS_OPTIONS}
-                  placeholder="اختر الحالة"
+                  placeholder={t('common.selectStatus')}
                 />
               </div>
 
               {currentStatus ? (
                 <div className="mb-4 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#475467]">
-                  الحالة الحالية: {STATUS_OPTIONS.find((option) => option.value === currentStatus)?.label ?? currentStatus}
+                  {t('adminFacilityDialog.changeStatus.currentStatusPrefix')}{STATUS_OPTIONS.find((option) => option.value === currentStatus)?.label ?? currentStatus}
                 </div>
               ) : null}
 
               {selectedStatus === "DELETED" ? (
                 <div className="mb-6 rounded-[12px] border border-[#FECACA] bg-[#FFF1F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]">
-                  تعيين الحالة إلى "محذوف" سيؤدي إلى فك ارتباط الأطباء بهذه المنشأة حسب عقد الـ API.
+                  {t('adminFacilityDialog.changeStatus.deletedWarning')}
                 </div>
               ) : selectedStatus && selectedStatus !== currentStatus ? (
                 <div className="mb-6 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#0F766E]">
-                  سيتم حفظ الحالة الجديدة فقط عند الضغط على زر "تغيير الحالة".
+                  {t('adminFacilityDialog.changeStatus.pendingSaveNote')}
                 </div>
               ) : null}
 
@@ -189,7 +189,7 @@ export default function ChangeFacilityStatusDialog({
                   onClick={() => onOpenChange(false)}
                   className="flex-1 h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#344054]"
                 >
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -202,10 +202,10 @@ export default function ChangeFacilityStatusDialog({
                         className="w-4 h-4 animate-spin ml-2"
                         aria-hidden
                       />
-                      جاري الحفظ...
+                      {t('adminFacilityDialog.changeStatus.saving')}
                     </>
                   ) : (
-                    "تغيير الحالة"
+                    t('adminFacilityDialog.changeStatus.submit')
                   )}
                 </button>
               </div>

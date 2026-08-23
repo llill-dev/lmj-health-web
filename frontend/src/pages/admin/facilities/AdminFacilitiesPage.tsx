@@ -319,8 +319,8 @@ export default function AdminFacilitiesPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 mt-4 md:grid-cols-6">
-            <div className="relative">
-              <Search className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
+            <div className="relative text-center">
+              <Search className="absolute start-3 top-1/3 pt-1 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
               <input
                 type="text"
                 value={filters.q}
@@ -416,7 +416,7 @@ export default function AdminFacilitiesPage() {
                 "Attribute (e.g. night_shift)…",
               )}
               dir="ltr"
-              className="w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 text-start font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
+              className={`w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 ${locale === "ar" ? "text-right" : "text-left"} font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none`}
             />
 
             <StyledSelect

@@ -93,16 +93,16 @@ export default function AdminHeader({
     <header
       dir={dir}
       lang={locale}
-      className='flex min-h-[90px] w-full flex-wrap items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:px-6'
+      className='flex min-h-[90px] w-full flex-nowrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-4 py-4 sm:gap-4 sm:px-6'
     >
-      <section className='flex min-w-0 items-start gap-3'>
+      <section className='flex min-w-0 flex-1 items-center gap-3'>
         <button
           type='button'
           onClick={onMenuClick}
-          className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 lg:hidden'
+          className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 sm:h-10 sm:w-10 lg:hidden'
           aria-label={t('common.openSidebar')}
         >
-          <Menu className='h-5 w-5' aria-hidden />
+          <Menu className='h-4 w-4 sm:h-5 sm:w-5' aria-hidden />
         </button>
         <div className='min-w-0'>
           {backNavigation ? (
@@ -123,20 +123,22 @@ export default function AdminHeader({
         </div>
       </section>
 
-      <div className='flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3'>
+      <div className='flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 lg:gap-3'>
+        {/* Support: reachable from the sidebar drawer on mobile, so it only takes header space from sm up */}
         <Link
           to='/admin/complaints'
-          className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50'
+          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50 sm:flex'
           aria-label={t('header.adminSupport')}
           title={t('header.adminSupport')}
         >
           <HelpCircle className='h-5 w-5 text-gray-600' aria-hidden />
         </Link>
 
+        {/* Notifications stay visible at every size — the unread badge needs to be glanceable */}
         <NavLink
           to='/admin/notifications'
           className={({ isActive }) =>
-            `relative flex h-10 w-10 items-center justify-center rounded-lg border transition-colors ${
+            `relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors sm:h-10 sm:w-10 ${
               isActive
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-gray-200 bg-white hover:bg-gray-50'
@@ -145,7 +147,7 @@ export default function AdminHeader({
           aria-label={t('header.notifications')}
           title={t('header.notifications')}
         >
-          <Bell className='h-5 w-5 text-gray-600' aria-hidden />
+          <Bell className='h-4 w-4 text-gray-600 sm:h-5 sm:w-5' aria-hidden />
           {unreadAwaiting ? (
             <span className='absolute -top-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100'>
               <Loader2
@@ -160,9 +162,10 @@ export default function AdminHeader({
           ) : null}
         </NavLink>
 
+        {/* Settings: also a sidebar nav item, so drop it from the mobile header */}
         <Link
           to='/admin/settings'
-          className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50'
+          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50 sm:flex'
           aria-label={t('header.settings')}
           title={t('header.settings')}
         >
@@ -187,11 +190,12 @@ export default function AdminHeader({
           </div>
         </Link>
 
+        {/* Logout: the mobile sidebar drawer already exposes its own logout action */}
         <button
           type='button'
           disabled={loggingOut}
           onClick={onLogoutClick}
-          className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60'
+          className='hidden h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 sm:flex'
           aria-label={t('common.logout')}
           title={t('common.logout')}
         >
@@ -201,7 +205,7 @@ export default function AdminHeader({
             <LogOut className='h-5 w-5 text-gray-600' aria-hidden />
           )}
         </button>
-        <LanguageSwitcher compact />
+        <LanguageSwitcher compact className='h-9 sm:h-10' />
       </div>
     </header>
   );

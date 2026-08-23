@@ -8,12 +8,10 @@ import {
   User,
   Mail,
   Phone,
-  Lock,
-  AlertCircle,
   Eye,
   EyeOff,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import StyledSelect from "@/components/ui/styled-select";
@@ -33,56 +31,14 @@ import {
   adminInputClass,
 } from "@/components/admin/form-field";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Zod Schema - Professional validation matching backend requirements
-// ─────────────────────────────────────────────────────────────────────────────
-
-const createAdminUserSchema = z
-  .object({
-    fullName: z
-      .string()
-      .min(2, "الاسم يجب أن يكون حرفين على الأقل")
-      .max(100, "الاسم يجب أن لا يتجاوز 100 حرف")
-      .trim()
-      .regex(/^[\u0600-\u06FFa-zA-Z\s]+$/, "الاسم يجب أن يحتوي على أحرف فقط"),
-
-    email: z
-      .string()
-      .min(1, "البريد الإلكتروني مطلوب")
-      .email("البريد الإلكتروني غير صالح")
-      .max(255, "البريد الإلكتروني طويل جداً")
-      .toLowerCase()
-      .trim(),
-
-    phoneDialCode: z.enum(
-      PHONE_DIAL_CODE_OPTIONS.map((o) => o.value) as [
-        PhoneDialCode,
-        ...PhoneDialCode[],
-      ],
-      {
-        message: "رمز النداء غير مدعوم",
-      },
-    ),
-    phoneLocal: z
-      .string()
-      .min(1, "رقم الهاتف مطلوب")
-      .max(9, "رقم الهاتف طويل جداً")
-      .regex(/^\d+$/, "رقم الهاتف يجب أن يحتوي على أرقام فقط"),
-
-    password: z
-      .string()
-      .min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
-      .max(128, "كلمة المرور طويلة جداً")
-      .regex(/[a-z]/, "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل")
-      .regex(/[A-Z]/, "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل")
-      .regex(/[0-9]/, "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل")
-      .regex(/[^a-zA-Z0-9]/, "كلمة المرور يجب أن تحتوي على رمز واحد على الأقل"),
-
-    role: z.enum(["data_entry"]),
-  })
-  .strict();
-
-type CreateAdminUserFormValues = z.infer<typeof createAdminUserSchema>;
+type CreateAdminUserFormValues = {
+  fullName: string;
+  email: string;
+  phoneDialCode: PhoneDialCode;
+  phoneLocal: string;
+  password: string;
+  role: "data_entry";
+};
 
 const DEFAULT_VALUES: CreateAdminUserFormValues = {
   fullName: "",
@@ -106,10 +62,62 @@ export default function CreateAdminUserDialog({
   open,
   onOpenChange,
 }: CreateAdminUserDialogProps) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { toast } = useToast();
   const createMutation = useCreateAdminUser();
   const [showPassword, setShowPassword] = useState(false);
+
+  // ───────────────────────────────────────────────────────────────────────
+  // Zod Schema - Professional validation matching backend requirements
+  // ───────────────────────────────────────────────────────────────────────
+  const createAdminUserSchema = useMemo(
+    () =>
+      z
+        .object({
+          fullName: z
+            .string()
+            .min(2, t("adminUsersDialog.validation.nameMinLength"))
+            .max(100, t("adminUsersDialog.validation.nameMaxLength"))
+            .trim()
+            .regex(/^[؀-ۿa-zA-Z\s]+$/, t("adminUsersDialog.validation.nameLettersOnly")),
+
+          email: z
+            .string()
+            .min(1, t("adminSecretaryDialog.validation.emailRequired"))
+            .email(t("adminSecretaryDialog.validation.emailInvalid"))
+            .max(255, t("adminUsersDialog.validation.emailTooLong"))
+            .toLowerCase()
+            .trim(),
+
+          phoneDialCode: z.enum(
+            PHONE_DIAL_CODE_OPTIONS.map((o) => o.value) as [
+              PhoneDialCode,
+              ...PhoneDialCode[],
+            ],
+            {
+              message: t("adminUsersDialog.validation.dialCodeUnsupported"),
+            },
+          ),
+          phoneLocal: z
+            .string()
+            .min(1, t("adminSecretaryDialog.validation.phoneRequired"))
+            .max(9, t("adminUsersDialog.validation.phoneTooLong"))
+            .regex(/^\d+$/, t("adminUsersDialog.validation.phoneDigitsOnly")),
+
+          password: z
+            .string()
+            .min(8, t("adminSecretaryDialog.validation.passwordTooShort"))
+            .max(128, t("adminUsersDialog.validation.passwordTooLong"))
+            .regex(/[a-z]/, t("adminUsersDialog.validation.passwordLowercase"))
+            .regex(/[A-Z]/, t("adminUsersDialog.validation.passwordUppercase"))
+            .regex(/[0-9]/, t("adminUsersDialog.validation.passwordDigit"))
+            .regex(/[^a-zA-Z0-9]/, t("adminUsersDialog.validation.passwordSymbol")),
+
+          role: z.enum(["data_entry"]),
+        })
+        .strict(),
+    [t],
+  );
 
   const {
     register,
@@ -134,15 +142,15 @@ export default function CreateAdminUserDialog({
 
     try {
       await createMutation.mutateAsync(payload);
-      toast("تم إنشاء حساب إداري جديد بنجاح.", {
-        title: "تمت الإضافة",
+      toast(t("adminUsersDialog.create.toast"), {
+        title: t("adminMedicalOrders.toast.created.title"),
         variant: "success",
       });
       reset(DEFAULT_VALUES);
       onOpenChange(false);
     } catch (error) {
       toast(userFacingErrorMessage(error), {
-        title: "تعذّر إنشاء الحساب",
+        title: t("adminUsersDialog.toast.createFailedTitle"),
         variant: "error",
       });
     }
@@ -180,7 +188,7 @@ export default function CreateAdminUserDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="إنشاء مستخدم إدارة"
+          aria-label={t("adminUsersDialog.create.ariaLabel")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -208,16 +216,16 @@ export default function CreateAdminUserDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={createMutation.isPending}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  إنشاء مستخدم إدارة
+                  {t("adminUsersDialog.create.ariaLabel")}
                 </h2>
                 <p className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
-                  قم بملء البيانات التالية لإنشاء حساب إداري جديد في النظام
+                  {t("adminUsersDialog.create.description")}
                 </p>
               </div>
             </div>
@@ -228,7 +236,7 @@ export default function CreateAdminUserDialog({
                 <div className="space-y-5">
                   {/* Full Name */}
                   <AdminFormField
-                    label="الاسم الكامل"
+                    label={t("adminSecretaryDialog.field.fullName.label")}
                     required
                     error={errors.fullName?.message}
                   >
@@ -240,7 +248,7 @@ export default function CreateAdminUserDialog({
                           cn(adminInputClass, "pl-10"),
                           Boolean(errors.fullName),
                         )}
-                        placeholder="أدخل الاسم الكامل للمستخدم"
+                        placeholder={t("adminUsersDialog.field.fullName.placeholder")}
                         disabled={createMutation.isPending}
                       />
                     </div>
@@ -248,7 +256,7 @@ export default function CreateAdminUserDialog({
 
                   {/* Email */}
                   <AdminFormField
-                    label="البريد الإلكتروني"
+                    label={t("adminSecretaryDialog.field.email.label")}
                     required
                     error={errors.email?.message}
                   >
@@ -269,7 +277,7 @@ export default function CreateAdminUserDialog({
 
                   {/* Phone Number */}
                   <AdminFormField
-                    label="رقم الهاتف"
+                    label={t("adminFacilityDialog.field.phone.label")}
                     required
                     error={
                       errors.phoneDialCode?.message ||
@@ -311,7 +319,7 @@ export default function CreateAdminUserDialog({
 
                   {/* Password */}
                   <AdminFormField
-                    label="كلمة المرور"
+                    label={t("adminSecretaryDialog.field.password.label")}
                     required
                     error={errors.password?.message}
                   >
@@ -343,33 +351,33 @@ export default function CreateAdminUserDialog({
                     {/* Password Requirements */}
                     <div className="mt-2 space-y-1">
                       <p className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                        يجب أن تحتوي كلمة المرور على:
+                        {t("adminUsersDialog.password.requirementsIntro")}
                       </p>
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-[#6B7280]">
-                        <span className="text-primary">•</span>8 أحرف على الأقل
+                        <span className="text-primary">•</span>{t("adminUsersDialog.password.req.length")}
                       </div>
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-[#6B7280]">
                         <span className="text-primary">•</span>
-                        حرف كبير واحد على الأقل (A-Z)
+                        {t("adminUsersDialog.password.req.uppercase")}
                       </div>
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-[#6B7280]">
                         <span className="text-primary">•</span>
-                        حرف صغير واحد على الأقل (a-z)
+                        {t("adminUsersDialog.password.req.lowercase")}
                       </div>
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-[#6B7280]">
                         <span className="text-primary">•</span>
-                        رقم واحد على الأقل (0-9)
+                        {t("adminUsersDialog.password.req.digit")}
                       </div>
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-[#6B7280]">
                         <span className="text-primary">•</span>
-                        رمز واحد على الأقل (!@#$%^&*)
+                        {t("adminUsersDialog.password.req.symbol")}
                       </div>
                     </div>
                   </AdminFormField>
 
                   {/* Role */}
                   <AdminFormField
-                    label="الدور"
+                    label={t("adminUsersDialog.field.role.label")}
                     required
                     error={errors.role?.message}
                   >
@@ -383,10 +391,10 @@ export default function CreateAdminUserDialog({
                           options={[
                             {
                               value: "data_entry",
-                              label: "مدخل بيانات (Data Entry)",
+                              label: t("adminUsersDialog.role.dataEntry"),
                             },
                           ]}
-                          placeholder="اختر الدور"
+                          placeholder={t("adminUsersDialog.field.role.placeholder")}
                           disabled={createMutation.isPending}
                           error={Boolean(errors.role)}
                           size="sm"
@@ -406,7 +414,7 @@ export default function CreateAdminUserDialog({
                   disabled={createMutation.isPending}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -414,7 +422,7 @@ export default function CreateAdminUserDialog({
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" aria-hidden />
-                  {createMutation.isPending ? "جارٍ الحفظ…" : "حفظ"}
+                  {createMutation.isPending ? t("adminUsersDialog.action.saving") : t("adminUsersDialog.action.save")}
                 </button>
               </div>
             </form>

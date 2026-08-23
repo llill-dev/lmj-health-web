@@ -226,11 +226,11 @@ export default function AdminMedicalOrdersPage({
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-3 items-stretch md:flex-row md:items-center md:justify-between">
-          <div className="order-1 min-w-0 flex-1 md:order-2 md:flex md:min-h-[44px] md:items-center">
+        <div className="flex flex-col gap-3">
+          <div className="min-w-0">
             <MedicalOrderCategoryTabs active={kind} onChange={setKind} />
           </div>
-          <div className="order-2 w-full md:order-1 md:flex-1">
+          <div className="w-full">
             <MedicalOrderCatalogToolbar
               search={search}
               onSearchChange={(value) => {
@@ -275,20 +275,6 @@ export default function AdminMedicalOrdersPage({
               {tr(
                 "تم إخفاء هذا المسار من التبويبات النشطة لمنع الوصول إلى تكامل غير صحيح.",
                 "This route is kept out of active tabs to avoid an invalid integration path.",
-              )}
-            </p>
-          </div>
-        )}
-
-        {!deleteSupported && (
-          <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-start">
-            <p className="font-cairo text-[13px] font-bold text-amber-900">
-              {tr("حذف عناصر الكتالوج غير مدعوم حالياً.", "Catalog item deletion is currently unsupported.")}
-            </p>
-            <p className="mt-1 font-cairo text-[12px] font-semibold text-amber-800">
-              {tr(
-                "تم تعطيل زر الحذف حتى يتم توفير عقد API صحيح وآمن لهذه العملية.",
-                "Delete actions stay disabled until a safe, verified API contract exists for them.",
               )}
             </p>
           </div>

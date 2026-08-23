@@ -1,5 +1,6 @@
 import { Edit, Eye, Trash2 } from 'lucide-react';
 import type { MedicalOrderCatalogItem } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 type Props = {
   item: MedicalOrderCatalogItem;
@@ -18,6 +19,7 @@ export default function MedicalOrderCatalogRow({
   deleteDisabled,
   deleteUnsupported,
 }: Props) {
+  const { t } = useI18n();
   const active = item.isActive !== false;
   const visible = item.isVisible !== false;
 
@@ -27,7 +29,7 @@ export default function MedicalOrderCatalogRow({
         <div className='font-cairo text-[13px] font-semibold text-[#344054]'>
           {item.label}
         </div>
-        <div className='mt-1 flex flex-wrap justify-end gap-2'>
+        <div className='flex flex-wrap items-center justify-end gap-2'>
           <span
             className={`inline-flex items-center rounded-[999px] border px-2.5 py-0.5 font-cairo text-[10px] font-extrabold ${
               active
@@ -35,7 +37,7 @@ export default function MedicalOrderCatalogRow({
                 : 'border-[#FECACA] bg-[#FEF2F2] text-[#B42318]'
             }`}
           >
-            {active ? 'نشط' : 'معطّل'}
+            {active ? t('common.active') : t('common.disabled')}
           </span>
           <span
             className={`inline-flex items-center rounded-[999px] border px-2.5 py-0.5 font-cairo text-[10px] font-extrabold ${
@@ -44,7 +46,7 @@ export default function MedicalOrderCatalogRow({
                 : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#667085]'
             }`}
           >
-            {visible ? 'ظاهر' : 'مخفي'}
+            {visible ? t('common.visible') : t('common.hidden')}
           </span>
         </div>
       </div>
@@ -53,7 +55,7 @@ export default function MedicalOrderCatalogRow({
           type='button'
           onClick={() => onView(item)}
           className='flex h-8 w-8 items-center justify-center rounded-[8px] border border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8] transition-colors hover:bg-[#DBEAFE]'
-          aria-label={`معاينة ${item.label}`}
+          aria-label={t('common.previewItemAria').replace('{name}', item.label)}
         >
           <Eye className='w-4 h-4' />
         </button>
@@ -61,7 +63,7 @@ export default function MedicalOrderCatalogRow({
           type='button'
           onClick={() => onEdit(item)}
           className='flex h-8 w-8 items-center justify-center rounded-[8px] border border-primary/25 bg-[#E7FBFA] text-primary transition-colors hover:bg-primary/10'
-          aria-label={`تعديل ${item.label}`}
+          aria-label={t('common.editItemAria').replace('{name}', item.label)}
         >
           <Edit className='w-4 h-4' />
         </button>
@@ -71,7 +73,7 @@ export default function MedicalOrderCatalogRow({
             onClick={() => onDelete(item)}
             disabled={deleteDisabled}
             className='flex h-8 w-8 items-center justify-center rounded-[8px] text-[#EF4444] transition-colors hover:bg-red-50 disabled:pointer-events-none disabled:opacity-40'
-            aria-label={`حذف ${item.label}`}
+            aria-label={t('common.deleteItemAria').replace('{name}', item.label)}
           >
             <Trash2 className='w-4 h-4' />
           </button>

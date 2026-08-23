@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,14 +11,7 @@ import {
 } from "@/components/admin/form-field";
 import { useI18n } from "@/i18n/provider";
 
-const schema = z.object({
-  reason: z
-    .string()
-    .min(4, "أدخل سبباً واضحاً (4 أحرف على الأقل)")
-    .max(2000, "الحد الأقصى 2000 حرف"),
-});
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = { reason: string };
 
 type Props = {
   open: boolean;
@@ -35,7 +28,17 @@ export default function ContentRejectDialog({
   onConfirm,
   isPending,
 }: Props) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
+  const schema = useMemo(
+    () =>
+      z.object({
+        reason: z
+          .string()
+          .min(4, t("adminMedicalContentDialog.reject.validation.tooShort"))
+          .max(2000, t("adminMedicalContentDialog.reject.validation.tooLong")),
+      }),
+    [t],
+  );
   const {
     register,
     handleSubmit,
@@ -68,7 +71,7 @@ export default function ContentRejectDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="رفض المحتوى"
+          aria-label={t('adminMedicalContentDialog.reject.ariaLabel')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -94,7 +97,7 @@ export default function ContentRejectDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
@@ -108,10 +111,10 @@ export default function ContentRejectDialog({
                   </div>
                 </div>
                 <h2 className="font-cairo text-[22px] font-extrabold text-[#101828]">
-                  رفض المحتوى
+                  {t('adminMedicalContentDialog.reject.ariaLabel')}
                 </h2>
                 <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
-                  سيتم رفض:{" "}
+                  {t('adminMedicalContentDialog.reject.willReject')}{" "}
                   <span className="text-[#101827]">
                     «{contentTitle || "—"}»
                   </span>
@@ -128,14 +131,14 @@ export default function ContentRejectDialog({
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField
-                    label="سبب الرفض"
+                    label={t('adminMedicalContentDialog.reject.field.label')}
                     required
                     error={errors.reason?.message}
                   >
                     <textarea
                       {...register("reason")}
                       rows={4}
-                      placeholder="وضّح ما يجب تعديله…"
+                      placeholder={t('adminMedicalContentDialog.reject.reason.placeholder')}
                       className={adminTextareaClass}
                     />
                   </AdminFormField>
@@ -149,14 +152,14 @@ export default function ContentRejectDialog({
                   disabled={isPending}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#111827] disabled:opacity-50"
                 >
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] bg-[#DC2626] font-cairo text-[14px] font-extrabold text-white hover:bg-[#B91C1C] disabled:opacity-60"
                 >
-                  {isPending ? "جاري الرفض…" : "تأكيد الرفض"}
+                  {isPending ? t('adminMedicalContentDialog.reject.rejecting') : t('adminMedicalContentDialog.reject.confirmButton')}
                 </button>
               </div>
             </form>

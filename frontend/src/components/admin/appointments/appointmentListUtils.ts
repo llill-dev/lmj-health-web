@@ -1,4 +1,5 @@
 import type { AppointmentStatus, AppointmentSummary } from '@/lib/admin/types';
+import type { AppLocale } from '@/i18n/runtime';
 
 export type UiAppointmentCard = {
   id: string;
@@ -12,13 +13,17 @@ export type UiAppointmentCard = {
   time: string;
 };
 
-export const statusLabel: Record<AppointmentStatus, string> = {
-  scheduled: 'مجدولة',
-  rescheduled: 'معاد جدولتها',
-  completed: 'مكتملة',
-  cancelled: 'ملغية',
-  'no-show': 'عدم حضور',
+const STATUS_LABEL_MAP: Record<AppointmentStatus, { ar: string; en: string }> = {
+  scheduled: { ar: 'مجدولة', en: 'Scheduled' },
+  rescheduled: { ar: 'معاد جدولتها', en: 'Rescheduled' },
+  completed: { ar: 'مكتملة', en: 'Completed' },
+  cancelled: { ar: 'ملغية', en: 'Cancelled' },
+  'no-show': { ar: 'عدم حضور', en: 'No-show' },
 };
+
+export function statusLabel(status: AppointmentStatus, locale: AppLocale = 'ar'): string {
+  return STATUS_LABEL_MAP[status]?.[locale] ?? status;
+}
 
 export const statusPill: Record<AppointmentStatus, string> = {
   completed: 'bg-[#DCFCE7] text-[#16A34A]',

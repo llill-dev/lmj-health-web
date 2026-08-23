@@ -247,11 +247,11 @@ export default function MedicalContentViewDialog({
                     <MetaRow label={t("viewContentDialog.field.slug")} value={details.slug} mono />
                     <MetaRow
                       label={t("viewContentDialog.field.updatedAt")}
-                      value={formatDate(details.updatedAt)}
+                      value={formatDate(details.updatedAt, locale)}
                     />
                     <MetaRow
                       label={t("viewContentDialog.field.publishedAt")}
-                      value={formatDate(details.publishedAt)}
+                      value={formatDate(details.publishedAt, locale)}
                     />
                     <MetaRow
                       label={t("viewContentDialog.field.pageVersion")}

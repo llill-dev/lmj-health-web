@@ -1,15 +1,12 @@
 import type { AuditLogCategory, AuditLogOutcome } from '@/lib/admin/types';
+import type { AppLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 
 export const PAGE_SIZE = 20;
 
-export const CATEGORY_LABELS: Record<AuditLogCategory, string> = {
-  AUTH: 'مصادقة',
-  AUTHZ: 'صلاحيات',
-  PHI: 'بيانات طبية',
-  DATA: 'بيانات',
-  ADMIN: 'إدارة',
-  SYSTEM: 'نظام',
-};
+function tt(locale: AppLocale, key: string): string {
+  return getTranslationValue(locale, key) ?? key;
+}
 
 export const CATEGORY_STYLES: Record<
   AuditLogCategory,
@@ -23,45 +20,54 @@ export const CATEGORY_STYLES: Record<
   SYSTEM: { bg: 'bg-[#F0F9FF]', text: 'text-[#0369A1]', dot: 'bg-[#0EA5E9]' },
 };
 
-export const OUTCOME_LABELS: Record<AuditLogOutcome, string> = {
-  SUCCESS: 'ناجح',
-  FAIL: 'فشل',
-  DENY: 'مرفوض',
-};
+const CATEGORIES: AuditLogCategory[] = ['AUTH', 'AUTHZ', 'PHI', 'DATA', 'ADMIN', 'SYSTEM'];
+const OUTCOMES: AuditLogOutcome[] = ['SUCCESS', 'FAIL', 'DENY'];
+const ROLES = ['admin', 'doctor', 'patient', 'secretary', 'data_entry'] as const;
 
-export const ROLE_LABELS: Record<string, string> = {
-  admin: 'مدير',
-  doctor: 'طبيب',
-  patient: 'مريض',
-  secretary: 'سكرتير',
-  data_entry: 'إدخال بيانات',
-};
+export function categoryLabel(category: AuditLogCategory, locale: AppLocale = 'ar'): string {
+  return tt(locale, `adminAuditLog.category.${category}`);
+}
 
-export const FILTER_CATEGORIES: Array<{ value: AuditLogCategory | ''; label: string }> = [
-  { value: '', label: 'جميع الفئات' },
-  { value: 'AUTH', label: 'مصادقة (AUTH)' },
-  { value: 'AUTHZ', label: 'صلاحيات (AUTHZ)' },
-  { value: 'PHI', label: 'بيانات طبية (PHI)' },
-  { value: 'DATA', label: 'بيانات (DATA)' },
-  { value: 'ADMIN', label: 'إدارة (ADMIN)' },
-  { value: 'SYSTEM', label: 'نظام (SYSTEM)' },
-];
+export function outcomeLabel(outcome: AuditLogOutcome, locale: AppLocale = 'ar'): string {
+  return tt(locale, `adminAuditLog.outcome.${outcome}`);
+}
 
-export const FILTER_OUTCOMES: Array<{ value: AuditLogOutcome | ''; label: string }> = [
-  { value: '', label: 'جميع النتائج' },
-  { value: 'SUCCESS', label: 'ناجح' },
-  { value: 'FAIL', label: 'فشل' },
-  { value: 'DENY', label: 'مرفوض' },
-];
+export function roleLabel(role: string, locale: AppLocale = 'ar'): string {
+  return getTranslationValue(locale, `adminAuditLog.role.${role}`) ?? role;
+}
 
-export const FILTER_ROLES: Array<{ value: string; label: string }> = [
-  { value: '', label: 'جميع الأدوار' },
-  { value: 'admin', label: 'مدير' },
-  { value: 'doctor', label: 'طبيب' },
-  { value: 'patient', label: 'مريض' },
-  { value: 'secretary', label: 'سكرتير' },
-  { value: 'data_entry', label: 'إدخال بيانات' },
-];
+export function categoryLabels(locale: AppLocale = 'ar'): Record<AuditLogCategory, string> {
+  return Object.fromEntries(CATEGORIES.map((c) => [c, categoryLabel(c, locale)])) as Record<AuditLogCategory, string>;
+}
+
+export function outcomeLabels(locale: AppLocale = 'ar'): Record<AuditLogOutcome, string> {
+  return Object.fromEntries(OUTCOMES.map((o) => [o, outcomeLabel(o, locale)])) as Record<AuditLogOutcome, string>;
+}
+
+export function roleLabels(locale: AppLocale = 'ar'): Record<string, string> {
+  return Object.fromEntries(ROLES.map((r) => [r, roleLabel(r, locale)]));
+}
+
+export function filterCategories(locale: AppLocale = 'ar'): Array<{ value: AuditLogCategory | ''; label: string }> {
+  return [
+    { value: '', label: tt(locale, 'adminAuditLog.filter.allCategories') },
+    ...CATEGORIES.map((c) => ({ value: c, label: `${categoryLabel(c, locale)} (${c})` })),
+  ];
+}
+
+export function filterOutcomes(locale: AppLocale = 'ar'): Array<{ value: AuditLogOutcome | ''; label: string }> {
+  return [
+    { value: '', label: tt(locale, 'adminAuditLog.filter.allOutcomes') },
+    ...OUTCOMES.map((o) => ({ value: o, label: outcomeLabel(o, locale) })),
+  ];
+}
+
+export function filterRoles(locale: AppLocale = 'ar'): Array<{ value: string; label: string }> {
+  return [
+    { value: '', label: tt(locale, 'adminAuditLog.filter.allRoles') },
+    ...ROLES.map((r) => ({ value: r, label: roleLabel(r, locale) })),
+  ];
+}
 
 export const SELECT_CLASS =
   'h-[40px] rounded-[10px] border border-[#EEF2F6] bg-white px-3 font-cairo text-[13px] font-bold text-[#344054] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer';

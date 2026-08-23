@@ -1,10 +1,12 @@
 import type { AppointmentSummary } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 export function AppointmentStatusChip({
   status,
 }: {
   status?: AppointmentSummary['status'];
 }) {
+  const { t } = useI18n();
   const tone =
     status === 'completed'
       ? 'bg-[#ECFDF3] text-[#16A34A]'
@@ -16,15 +18,15 @@ export function AppointmentStatusChip({
 
   const label =
     status === 'completed'
-      ? 'مكتمل'
+      ? t('adminAppointments.chip.completed')
       : status === 'scheduled'
-        ? 'مجدول'
+        ? t('adminAppointments.chip.scheduled')
         : status === 'rescheduled'
-          ? 'معاد جدولته'
+          ? t('adminAppointments.chip.rescheduled')
           : status === 'cancelled'
-            ? 'ملغى'
+            ? t('adminAppointments.chip.cancelled')
             : status === 'no-show'
-              ? 'لم يحضر'
+              ? t('adminAppointments.chip.noShow')
               : '—';
 
   return (

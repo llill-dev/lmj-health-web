@@ -47,7 +47,7 @@ export default memo(function AdminNotificationCard({
   onMarkRead: (id: string) => void;
   markReadPending?: boolean;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const stripe = stripeColor(item.kind);
   const iconWrap = iconBoxClass(item.kind);
   const canMark = item.isUnread && !markReadPending;
@@ -71,7 +71,7 @@ export default memo(function AdminNotificationCard({
             </h2>
             {item.isNew && item.isUnread ? (
               <span className="inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 font-cairo text-[11px] font-extrabold text-white">
-                جديد
+                {t('adminNotifications.card.new')}
               </span>
             ) : null}
           </div>
@@ -96,7 +96,7 @@ export default memo(function AdminNotificationCard({
                 ? "flex h-8 w-8 cursor-pointer items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F8FAFB] transition hover:border-primary/40 hover:bg-[#F2FFFE]"
                 : "flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB] opacity-60"
             }
-            aria-label="تعليم كمقروء"
+            aria-label={t('adminNotifications.card.markRead')}
           >
             {markReadPending ? (
               <Loader2

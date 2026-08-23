@@ -5,6 +5,7 @@ import { AuditLogRow } from '@/components/admin/system-logs/AuditLogRow';
 import { AuditLogSkeletonRow } from '@/components/admin/system-logs/AuditLogSkeletonRow';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 import type { AuditLogItem } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 export function AdminAuditLogTable({
   isAwaitingData,
@@ -23,6 +24,7 @@ export function AdminAuditLogTable({
   onResetFilters: () => void;
   onRetry: () => void;
 }) {
+  const { t } = useI18n();
   const [detailLog, setDetailLog] = useState<AuditLogItem | null>(null);
 
   return (
@@ -37,13 +39,13 @@ export function AdminAuditLogTable({
 
       <div className='grid grid-cols-12 gap-2 border-b border-[#EEF2F6] px-6 py-3'>
         <div className='col-span-3 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
-          الإجراء / الفئة
+          {t('adminAuditLog.table.actionCategory')}
         </div>
-        <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>المستخدم</div>
-        <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>النتيجة</div>
+        <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>{t('adminAuditLog.table.user')}</div>
+        <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>{t('adminAuditLog.table.outcome')}</div>
         <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>IP</div>
         <div className='col-span-3 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
-          التاريخ والوقت
+          {t('adminAuditLog.table.dateTime')}
         </div>
       </div>
 
@@ -58,9 +60,9 @@ export function AdminAuditLogTable({
       {isError && !isAwaitingData && (
         <div className='px-6 py-16 text-center'>
           <ShieldAlert className='mx-auto mb-3 h-10 w-10 text-[#FCA5A5]' />
-          <div className='font-cairo text-[14px] font-black text-[#991B1B]'>تعذّر تحميل السجلات</div>
+          <div className='font-cairo text-[14px] font-black text-[#991B1B]'>{t('adminAuditLog.table.loadError')}</div>
           <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-            {userFacingErrorMessage(error, 'خطأ في الاتصال بالخادم')}
+            {userFacingErrorMessage(error, t('adminAuditLog.table.connectionErrorFallback'))}
           </div>
           <button
             type='button'
@@ -68,7 +70,7 @@ export function AdminAuditLogTable({
             className='mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#FECACA] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318]'
           >
             <RotateCcw className='h-4 w-4' />
-            إعادة المحاولة
+            {t('adminMedicalOrders.details.retry')}
           </button>
         </div>
       )}
@@ -76,11 +78,11 @@ export function AdminAuditLogTable({
       {!isAwaitingData && !isError && logs.length === 0 && (
         <div className='px-6 py-16 text-center'>
           <SearchX className='mx-auto mb-3 h-10 w-10 text-[#D0D5DD]' />
-          <div className='font-cairo text-[14px] font-black text-[#667085]'>لا توجد سجلات مطابقة</div>
+          <div className='font-cairo text-[14px] font-black text-[#667085]'>{t('adminAuditLog.table.noMatches')}</div>
           <div className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
             {hasActiveFilters
-              ? 'جرّب تغيير الفلاتر أو امسحها لعرض نتائج أوسع.'
-              : 'لا توجد سجلات لعرضها ضمن النطاق الحالي.'}
+              ? t('adminAuditLog.table.tryChangingFilters')
+              : t('adminAuditLog.table.noRecordsInScope')}
           </div>
           {hasActiveFilters ? (
             <button
@@ -89,7 +91,7 @@ export function AdminAuditLogTable({
               className='mt-4 inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#D0D5DD] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]'
             >
               <RotateCcw className='h-4 w-4' />
-              مسح الفلاتر
+              {t('adminAuditLog.table.clearFilters')}
             </button>
           ) : null}
         </div>
