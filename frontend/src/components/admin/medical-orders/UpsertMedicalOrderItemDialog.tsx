@@ -17,11 +17,11 @@ import type {
   MedicalOrderCatalogKind,
 } from '@/lib/admin/types';
 
-const KIND_AR: Record<MedicalOrderCatalogKind, string> = {
-  lab: 'مختبر',
-  imaging: 'تصوير',
-  procedure: 'إجراء',
-  referral: 'تحويل',
+const KIND_KEY: Record<MedicalOrderCatalogKind, string> = {
+  lab: 'adminMedicalOrders.tab.lab',
+  imaging: 'adminMedicalOrders.tab.imaging',
+  procedure: 'adminMedicalOrders.tab.procedure',
+  referral: 'adminMedicalOrders.tab.referral',
 };
 
 type Props = {
@@ -37,7 +37,7 @@ export default function UpsertMedicalOrderItemDialog({
   kind,
   editTarget,
 }: Props) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
   const isEdit = !!editTarget;
   const [label, setLabel] = useState('');
@@ -139,7 +139,8 @@ export default function UpsertMedicalOrderItemDialog({
       defaultAftercare: defaultAftercare.trim() || undefined,
     };
 
-    const kindLabel = KIND_AR[kind] ?? kind;
+    const kindLabel = t(KIND_KEY[kind] ?? kind);
+    const itemName = trimmed || trimmedAr || trimmedEn;
     if (isEdit && editTarget) {
       updateMut.mutate(
         {
@@ -149,8 +150,10 @@ export default function UpsertMedicalOrderItemDialog({
         {
           onSuccess: () => {
             toast(
-              `تم تحديث بند «${trimmed || trimmedAr || trimmedEn}» ضمن فئة ${kindLabel} في كتالوج الطلبات.`,
-              { title: 'تم حفظ التعديل', variant: 'success', durationMs: 3800 },
+              t('adminMedicalOrders.toast.updated.body')
+                .replace('{name}', itemName)
+                .replace('{kind}', kindLabel),
+              { title: t('adminMedicalOrders.toast.updated.title'), variant: 'success', durationMs: 3800 },
             );
             onOpenChange(false);
           },
@@ -162,8 +165,10 @@ export default function UpsertMedicalOrderItemDialog({
         {
           onSuccess: () => {
             toast(
-              `أُضيف بند «${trimmed || trimmedAr || trimmedEn}» إلى كتالوج ${kindLabel}. سيظهر للأطباء عند طلباتهم.`,
-              { title: 'تمت الإضافة', variant: 'success', durationMs: 4000 },
+              t('adminMedicalOrders.toast.created.body')
+                .replace('{name}', itemName)
+                .replace('{kind}', kindLabel),
+              { title: t('adminMedicalOrders.toast.created.title'), variant: 'success', durationMs: 4000 },
             );
             onOpenChange(false);
           },
@@ -227,12 +232,12 @@ export default function UpsertMedicalOrderItemDialog({
           >
             <div className='flex items-center justify-between border-b border-[#F2F4F7] px-5 py-4'>
               <Dialog.Title className='font-cairo text-[16px] font-extrabold text-[#101828]'>
-                {isEdit ? 'تعديل نوع الطلب' : 'إضافة نوع جديد'}
+                {isEdit ? t('adminMedicalOrders.upsert.editTitle') : t('adminMedicalOrders.upsert.createTitle')}
               </Dialog.Title>
               <Dialog.Description className='sr-only'>
                 {isEdit
-                  ? 'تعديل تسمية بند في كتالوج الطلبات الطبية.'
-                  : 'إضافة بند جديد إلى كتالوج الطلبات الطبية.'}
+                  ? t('adminMedicalOrders.upsert.editDescription')
+                  : t('adminMedicalOrders.upsert.createDescription')}
               </Dialog.Description>
               <Dialog.Close asChild>
                 <button
@@ -249,19 +254,19 @@ export default function UpsertMedicalOrderItemDialog({
                 <div className='grid gap-3 sm:grid-cols-2'>
                   <div>
                     <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                      الاسم المعروض
+                      {t('adminMedicalOrders.field.displayName.label')}
                     </label>
                     <input
                       value={label}
                       onChange={(e) => setLabel(e.target.value)}
-                      placeholder='مثال: complete blood count (CBC)'
+                      placeholder={t('adminMedicalOrders.field.exampleName.placeholder')}
                       className={inputClass}
                       autoFocus
                     />
                   </div>
                   <div>
                     <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                      الفئة (Category)
+                      {t('adminMedicalOrders.field.category.label')}
                     </label>
                     <input
                       value={category}
@@ -275,18 +280,18 @@ export default function UpsertMedicalOrderItemDialog({
                 <div className='grid gap-3 sm:grid-cols-2'>
                   <div>
                     <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                      الاسم العربي
+                      {t('adminMedicalOrders.field.nameAr.label')}
                     </label>
                     <input
                       value={nameAr}
                       onChange={(e) => setNameAr(e.target.value)}
-                      placeholder='اسم الطلب بالعربية'
+                      placeholder={t('adminMedicalOrders.field.nameAr.placeholder')}
                       className={inputClass}
                     />
                   </div>
                   <div>
                     <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                      الاسم الإنجليزي
+                      {t('adminMedicalOrders.field.nameEn.label')}
                     </label>
                     <input
                       value={nameEn}
@@ -325,25 +330,25 @@ export default function UpsertMedicalOrderItemDialog({
                 <div className='grid gap-3 sm:grid-cols-3'>
                   <div>
                     <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                      مستوى الأولوية
+                      {t('adminMedicalOrders.field.priorityLevel.label')}
                     </label>
                     <StyledSelect
                       value={priorityLevel}
                       onChange={setPriorityLevel}
                       options={[
-                        { value: '', label: 'بدون' },
+                        { value: '', label: t('adminMedicalOrders.field.priorityLevel.none') },
                         { value: 'critical', label: 'critical' },
                         { value: 'high', label: 'high' },
                         { value: 'normal', label: 'normal' },
                         { value: 'low', label: 'low' },
                       ]}
-                      listboxAriaLabel='مستوى الأولوية'
+                      listboxAriaLabel={t('adminMedicalOrders.field.priorityLevel.label')}
                       triggerClassName='h-[42px] rounded-[8px]'
                     />
                   </div>
                   <div>
                     <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                      الترتيب (sortOrder)
+                      {t('adminMedicalOrders.field.sortOrder.label')}
                     </label>
                     <input
                       value={sortOrder}
@@ -355,7 +360,7 @@ export default function UpsertMedicalOrderItemDialog({
                   </div>
                   <div>
                     <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                      مرادفات (synonyms)
+                      {t('adminMedicalOrders.field.synonyms.label')}
                     </label>
                     <input
                       value={synonyms}
@@ -377,17 +382,17 @@ export default function UpsertMedicalOrderItemDialog({
                     <input
                       value={sampleType}
                       onChange={(e) => setSampleType(e.target.value)}
-                      placeholder='نوع العينة'
+                      placeholder={t('adminMedicalOrders.field.specimenType.placeholder')}
                       className={inputClass}
                     />
                     <input
                       value={resultType}
                       onChange={(e) => setResultType(e.target.value)}
-                      placeholder='نوع النتيجة'
+                      placeholder={t('adminMedicalOrders.field.resultType.placeholder')}
                       className={inputClass}
                     />
                     <label className='sm:col-span-3 flex items-center justify-end gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
-                      <span>يتطلب صيام</span>
+                      <span>{t('adminMedicalOrders.field.fastingRequired.label')}</span>
                       <AppCheckbox
                         size='sm'
                         checked={fastingRequired}
@@ -408,11 +413,11 @@ export default function UpsertMedicalOrderItemDialog({
                     <input
                       value={bodyArea}
                       onChange={(e) => setBodyArea(e.target.value)}
-                      placeholder='منطقة الجسم'
+                      placeholder={t('adminMedicalOrders.field.bodyRegion.placeholder')}
                       className={inputClass}
                     />
                     <label className='sm:col-span-2 flex items-center justify-end gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
-                      <span>يدعم حقن المادة الظليلة</span>
+                      <span>{t('adminMedicalOrders.field.supportsContrast.label')}</span>
                       <AppCheckbox
                         size='sm'
                         checked={supportsContrast}
@@ -427,13 +432,13 @@ export default function UpsertMedicalOrderItemDialog({
                     <textarea
                       value={defaultPreparation}
                       onChange={(e) => setDefaultPreparation(e.target.value)}
-                      placeholder='التحضير الافتراضي قبل الإجراء'
+                      placeholder={t('adminMedicalOrders.field.defaultPrep.placeholder')}
                       className='min-h-[84px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
                     />
                     <textarea
                       value={defaultAftercare}
                       onChange={(e) => setDefaultAftercare(e.target.value)}
-                      placeholder='تعليمات ما بعد الإجراء'
+                      placeholder={t('adminMedicalOrders.field.postInstructions.placeholder')}
                       className='min-h-[84px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
                     />
                   </div>
@@ -441,12 +446,12 @@ export default function UpsertMedicalOrderItemDialog({
 
                 <div>
                   <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
-                    ملاحظات
+                    {t('adminMedicalOrders.field.notes.label')}
                   </label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder='أي ملاحظات إضافية للبند'
+                    placeholder={t('adminMedicalOrders.field.notes.placeholder')}
                     className='min-h-[72px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
                   />
                 </div>
@@ -457,7 +462,7 @@ export default function UpsertMedicalOrderItemDialog({
                 )}
                 <div className='mt-4 grid gap-3 sm:grid-cols-2'>
                   <label className='flex items-center justify-end gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
-                    <span>العنصر نشط</span>
+                    <span>{t('adminMedicalOrders.field.isActive.label')}</span>
                     <AppCheckbox
                       size='sm'
                       checked={isActive}
@@ -465,7 +470,7 @@ export default function UpsertMedicalOrderItemDialog({
                     />
                   </label>
                   <label className='flex items-center justify-end gap-2 rounded-[10px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
-                    <span>العنصر ظاهر للأطباء</span>
+                    <span>{t('adminMedicalOrders.field.isVisible.label')}</span>
                     <AppCheckbox
                       size='sm'
                       checked={isVisible}
@@ -480,7 +485,7 @@ export default function UpsertMedicalOrderItemDialog({
                     type='button'
                     className='h-10 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-[#667085] hover:bg-[#F2F4F7]'
                   >
-                    إلغاء
+                    {t('common.cancel')}
                   </button>
                 </Dialog.Close>
                 <button
@@ -488,7 +493,7 @@ export default function UpsertMedicalOrderItemDialog({
                   disabled={pending || (!label.trim() && !nameAr.trim() && !nameEn.trim())}
                   className='h-10 rounded-[8px] bg-primary px-5 font-cairo text-[13px] font-extrabold text-white shadow-sm hover:opacity-95 disabled:pointer-events-none disabled:opacity-50'
                 >
-                  {pending ? 'جاري الحفظ…' : isEdit ? 'حفظ التعديل' : 'إضافة'}
+                  {pending ? t('adminMedicalOrders.upsert.saving') : isEdit ? t('adminMedicalOrders.upsert.saveEdit') : t('adminMedicalFileOptions.action.add')}
                 </button>
               </div>
             </form>

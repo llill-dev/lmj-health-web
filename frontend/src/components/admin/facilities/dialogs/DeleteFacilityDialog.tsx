@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/ToastProvider";
 import { adminApi } from "@/lib/admin/client";
 import { resolveAdminFacilityFormFeedback } from "@/lib/admin/facilities/facilityFormErrors";
+import { useI18n } from "@/i18n/provider";
 
 interface DeleteFacilityDialogProps {
   open: boolean;
@@ -20,6 +21,7 @@ export default function DeleteFacilityDialog({
   facilityId,
   facilityName,
 }: DeleteFacilityDialogProps) {
+  const { t } = useI18n();
   const [confirmText, setConfirmText] = useState("");
   const [rootError, setRootError] = useState("");
   const queryClient = useQueryClient();
@@ -40,7 +42,7 @@ export default function DeleteFacilityDialog({
       const feedback = resolveAdminFacilityFormFeedback(error, "edit");
       setRootError(feedback.rootBanner ?? "");
       toast(feedback.toastMessage, {
-        title: "حذف المنشأة",
+        title: t('adminFacilityDialog.delete.ariaLabel'),
         variant: "error",
         durationMs: 4200,
       });
@@ -86,7 +88,7 @@ export default function DeleteFacilityDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="حذف المنشأة"
+          aria-label={t('adminFacilityDialog.delete.ariaLabel')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -111,13 +113,13 @@ export default function DeleteFacilityDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
-                aria-label="إغلاق"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-red-600">
-                  حذف المنشأة
+                  {t('adminFacilityDialog.delete.ariaLabel')}
                 </h2>
               </div>
             </div>
@@ -134,7 +136,7 @@ export default function DeleteFacilityDialog({
                 </div>
                 <div className="flex-1">
                   <p className="font-cairo text-[13px] font-semibold text-[#111827] mb-2">
-                    هل أنت متأكد من حذف هذه المنشأة؟
+                    {t('adminFacilityDialog.delete.confirmQuestion')}
                   </p>
                   {facilityName && (
                     <p className="font-cairo text-[12px] font-bold text-[#667085]">
@@ -142,7 +144,7 @@ export default function DeleteFacilityDialog({
                     </p>
                   )}
                   <p className="font-cairo text-[11px] font-semibold text-[#DC2626] mt-2">
-                    الحذف هنا حذف منطقي فقط، وسيؤدي أيضًا إلى إزالة ربط الأطباء بهذه المنشأة.
+                    {t('adminFacilityDialog.delete.warning')}
                   </p>
                 </div>
               </div>
@@ -150,7 +152,7 @@ export default function DeleteFacilityDialog({
               {facilityName && (
                 <div className="mb-6">
                   <label className="block font-cairo text-[12px] font-extrabold text-[#111827] mb-2">
-                    اكتب اسم المنشأة للتأكيد
+                    {t('adminFacilityDialog.delete.confirmLabel')}
                   </label>
                   <input
                     type="text"
@@ -171,7 +173,7 @@ export default function DeleteFacilityDialog({
                   onClick={() => onOpenChange(false)}
                   className="flex-1 h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#344054]"
                 >
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -181,10 +183,10 @@ export default function DeleteFacilityDialog({
                   {mutation.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin ml-2" aria-hidden />
-                      جاري الحذف...
+                      {t('adminFacilityDialog.delete.deleting')}
                     </>
                   ) : (
-                    "حذف"
+                    t('adminFacilityDialog.delete.confirmButton')
                   )}
                 </button>
               </div>

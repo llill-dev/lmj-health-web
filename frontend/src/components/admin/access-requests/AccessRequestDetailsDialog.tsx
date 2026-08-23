@@ -14,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useEffect } from "react";
+import { useI18n } from "@/i18n/provider";
 
 function hasMissingAccessRequestIdentity(request: any) {
   const doctorName = request.doctor?.fullName || request.doctorName;
@@ -39,10 +40,11 @@ export default function AccessRequestDetailsDialog({
   request,
   isAwaitingData,
 }: AccessRequestDetailsDialogProps) {
+  const { locale, t } = useI18n();
   const statusLabels: Record<string, string> = {
-    pending: "معلّقة",
-    approved: "مقبولة",
-    rejected: "مرفوضة",
+    pending: t("adminAccessRequests.status.pending"),
+    approved: t("adminAccessRequests.status.approved"),
+    rejected: t("adminAccessRequests.status.rejected"),
   };
 
   const statusColors: Record<string, string> = {
@@ -56,6 +58,8 @@ export default function AccessRequestDetailsDialog({
     approved: CheckCircle,
     rejected: XCircle,
   };
+
+  const dateLocale = locale === "ar" ? "ar-SY" : "en-US";
 
   useEffect(() => {
     if (!open) return;
@@ -73,7 +77,7 @@ export default function AccessRequestDetailsDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="تفاصيل طلب الوصول"
+          aria-label={t("adminAccessRequests.details.ariaLabel")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -102,13 +106,13 @@ export default function AccessRequestDetailsDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  تفاصيل طلب الوصول
+                  {t("adminAccessRequests.details.ariaLabel")}
                 </h2>
                 <p className="mt-1 font-cairo text-[13px] font-semibold text-[#5B7B79]">
                   {requestId || "—"}
@@ -119,11 +123,11 @@ export default function AccessRequestDetailsDialog({
             <div className="max-h-[calc(92vh-200px)] overflow-y-auto px-8 py-6">
               {isAwaitingData ? (
                 <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                  جارِ تحميل التفاصيل...
+                  {t("adminAccessRequests.loadingDetails")}
                 </div>
               ) : !request ? (
                 <div className="py-12 text-center font-cairo text-[13px] font-semibold text-[#B42318]">
-                  تعذّر تحميل تفاصيل الطلب.
+                  {t("adminAccessRequests.loadError")}
                 </div>
               ) : (
                 <div className="space-y-5">
@@ -132,11 +136,11 @@ export default function AccessRequestDetailsDialog({
                       <div className="mb-2 flex items-center gap-2">
                         <AlertCircle className="h-4 w-4 text-[#D97706]" />
                         <div className="font-cairo text-[12px] font-bold text-[#92400E]">
-                          بعض البيانات غير مكتملة
+                          {t("adminAccessRequests.incompleteData.title")}
                         </div>
                       </div>
                       <div className="font-cairo text-[11px] font-semibold leading-5 text-[#B45309]">
-                        الاستجابة الحالية لا تحتوي على جميع حقول الطبيب أو المريض المتوقعة. يتم عرض القيم المتوفرة فقط لتجنّب إظهار معلومات غير مؤكدة.
+                        {t("adminAccessRequests.incompleteData.body")}
                       </div>
                     </div>
                   ) : null}
@@ -144,7 +148,7 @@ export default function AccessRequestDetailsDialog({
                   {/* Status Badge */}
                   <div className="flex items-center justify-between">
                     <div className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                      حالة الطلب
+                      {t("adminAccessRequests.requestStatusLabel")}
                     </div>
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-cairo text-[11px] font-extrabold ${statusColors[request.status || "pending"]}`}
@@ -163,26 +167,26 @@ export default function AccessRequestDetailsDialog({
                       <div className="mb-2 flex items-center gap-2">
                         <FileText className="h-4 w-4 text-primary" />
                         <div className="font-cairo text-[11px] font-bold text-[#667085]">
-                          نوع الطلب
+                          {t("adminAccessRequests.requestType.label")}
                         </div>
                       </div>
                       <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                        طلب وصول لبيانات مريض
+                        {t("adminAccessRequests.requestType.value")}
                       </div>
                     </div>
                     <div className="rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] p-4">
                       <div className="mb-2 flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-primary" />
                         <div className="font-cairo text-[11px] font-bold text-[#667085]">
-                          الإجراء الحالي
+                          {t("adminAccessRequests.currentAction.label")}
                         </div>
                       </div>
                       <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
                         {request.status === "pending"
-                          ? "مراجعة القرار من قبل الإدارة"
+                          ? t("adminAccessRequests.currentAction.pending")
                           : request.status === "approved"
-                            ? "تم قبول الطلب"
-                            : "تم رفض الطلب"}
+                            ? t("adminAccessRequests.currentAction.approved")
+                            : t("adminAccessRequests.currentAction.rejected")}
                       </div>
                     </div>
                   </div>
@@ -190,10 +194,10 @@ export default function AccessRequestDetailsDialog({
                   <div className="rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] p-4">
                     <div className="font-cairo text-[12px] font-semibold leading-6 text-[#215A57]">
                       {request.status === "pending"
-                        ? "هذه النافذة مخصّصة لمراجعة طلب الوصول قبل اعتماد القرار النهائي، مع عرض القيم المتوفرة فقط إذا كانت بعض الحقول ناقصة من الاستجابة."
+                        ? t("adminAccessRequests.contextNote.pending")
                         : request.status === "approved"
-                          ? "تم قبول هذا الطلب سابقًا، لذلك تُعرض النافذة الآن كمرجع لبيانات الطلب والحالة النهائية دون إجراءات إضافية."
-                          : "تم رفض هذا الطلب سابقًا، لذلك تُستخدم النافذة الآن لمراجعة سبب الطلب والبيانات المرتبطة به فقط."}
+                          ? t("adminAccessRequests.contextNote.approved")
+                          : t("adminAccessRequests.contextNote.rejected")}
                     </div>
                   </div>
 
@@ -202,13 +206,13 @@ export default function AccessRequestDetailsDialog({
                     <div className="mb-3 flex items-center gap-2">
                       <User className="h-4 w-4 text-primary" />
                       <div className="font-cairo text-[12px] font-bold text-[#111827]">
-                        معلومات الطبيب
+                        {t("adminAccessRequests.doctorInfo.title")}
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          الاسم الكامل
+                          {t("common.fullNameLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.doctor?.fullName ||
@@ -218,7 +222,7 @@ export default function AccessRequestDetailsDialog({
                       </div>
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          البريد الإلكتروني
+                          {t("adminSecretaryDialog.field.email.label")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.doctor?.email || request.doctorEmail || "—"}
@@ -226,7 +230,7 @@ export default function AccessRequestDetailsDialog({
                       </div>
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          الهاتف
+                          {t("adminAccessRequests.phoneLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.doctor?.phone || request.doctorPhone || "—"}
@@ -234,7 +238,7 @@ export default function AccessRequestDetailsDialog({
                       </div>
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          التخصص
+                          {t("adminDoctorProfileChangeRequests.field.specialization")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.doctor?.specialization || "—"}
@@ -248,13 +252,13 @@ export default function AccessRequestDetailsDialog({
                     <div className="mb-3 flex items-center gap-2">
                       <FileText className="h-4 w-4 text-primary" />
                       <div className="font-cairo text-[12px] font-bold text-[#111827]">
-                        معلومات المريض
+                        {t("adminAccessRequests.patientInfo.title")}
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          الاسم الكامل
+                          {t("common.fullNameLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.patient?.fullName ||
@@ -264,7 +268,7 @@ export default function AccessRequestDetailsDialog({
                       </div>
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          الرقم المرجعي
+                          {t("adminAccessRequests.referenceIdLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.patient?.publicId ||
@@ -280,30 +284,30 @@ export default function AccessRequestDetailsDialog({
                     <div className="mb-3 flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-primary" />
                       <div className="font-cairo text-[12px] font-bold text-[#111827]">
-                        تفاصيل الطلب
+                        {t("adminAccessRequests.requestDetails.title")}
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          تاريخ الطلب
+                          {t("adminAccessRequests.requestDateLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.createdAt
                             ? new Date(request.createdAt).toLocaleDateString(
-                                "ar-SY",
+                                dateLocale,
                               )
                             : "—"}
                         </div>
                       </div>
                       <div>
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          وقت الطلب
+                          {t("adminAccessRequests.requestTimeLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.createdAt
                             ? new Date(request.createdAt).toLocaleTimeString(
-                                "ar-SY",
+                                dateLocale,
                               )
                             : "—"}
                         </div>
@@ -312,7 +316,7 @@ export default function AccessRequestDetailsDialog({
                     {request.reason && (
                       <div className="mt-3">
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          سبب الطلب
+                          {t("adminAccessRequests.requestReasonLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
                           {request.reason}
@@ -322,10 +326,10 @@ export default function AccessRequestDetailsDialog({
                     {request.reviewedAt ? (
                       <div className="mt-3">
                         <div className="font-cairo text-[10px] font-semibold text-[#98A2B3]">
-                          تاريخ المراجعة
+                          {t("adminAccessRequests.reviewDateLabel")}
                         </div>
                         <div className="font-cairo text-[12px] font-bold text-[#111827]">
-                          {new Date(request.reviewedAt).toLocaleString("ar-SY")}
+                          {new Date(request.reviewedAt).toLocaleString(dateLocale)}
                         </div>
                       </div>
                     ) : null}
@@ -337,7 +341,7 @@ export default function AccessRequestDetailsDialog({
                       <div className="mb-2 flex items-center gap-2">
                         <AlertCircle className="h-4 w-4 text-[#D97706]" />
                         <div className="font-cairo text-[12px] font-bold text-[#92400E]">
-                          ملاحظات
+                          {t("adminMedicalOrders.field.notes.label")}
                         </div>
                       </div>
                       <div className="font-cairo text-[11px] font-semibold text-[#B45309]">
@@ -355,7 +359,7 @@ export default function AccessRequestDetailsDialog({
                 onClick={() => onOpenChange(false)}
                 className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary"
               >
-                إغلاق
+                {t("common.close")}
               </button>
             </div>
           </motion.div>

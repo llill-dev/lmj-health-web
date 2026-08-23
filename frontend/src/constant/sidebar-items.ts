@@ -25,6 +25,7 @@ import {
   LifeBuoy,
   Hourglass,
   Layers,
+  Newspaper,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -66,6 +67,7 @@ export type AdminSidebarItemId =
   | "patients"
   | "secretaries"
   | "medical-content"
+  | "medical-news"
   | "content-templates"
   | "services"
   | "service-types"
@@ -301,6 +303,12 @@ export const adminSidebarItems: Array<{
     path: "medical-content",
     label: "المحتوى الطبي",
     icon: BookOpen,
+  },
+  {
+    id: "medical-news",
+    path: "medical-news",
+    label: "طابور الأخبار الطبية",
+    icon: Newspaper,
   },
   {
     id: "content-templates",

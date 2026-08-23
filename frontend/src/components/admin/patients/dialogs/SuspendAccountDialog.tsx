@@ -12,11 +12,7 @@ import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useI18n } from "@/i18n/provider";
 
-const schema = z.object({
-  reason: z.string().trim().min(1, "سبب التعليق مطلوب"),
-});
-
-type Values = z.infer<typeof schema>;
+type Values = { reason: string };
 
 function endpointFor(kind: "patient" | "doctor" | "secretary", id: string) {
   // ABI لم يذكر بشكل صريح "تعليق الحساب" لهذه الكيانات في الأقسام التي قرأناها،
@@ -39,12 +35,19 @@ export default function SuspendAccountDialog({
   targetLabel: string;
   onSuccess?: () => void;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
   const defaultValues = useMemo(() => ({ reason: "" }), []);
+  const schema = useMemo(
+    () =>
+      z.object({
+        reason: z.string().trim().min(1, t("adminPatients.suspend.validation.reasonRequired")),
+      }),
+    [t],
+  );
 
   const {
     register,
@@ -136,18 +139,18 @@ export default function SuspendAccountDialog({
                 <button
                   type="button"
                   className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
-                  aria-label="إغلاق"
+                  aria-label={t("common.close")}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </Dialog.Close>
 
               <Dialog.Title className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
-                تعليق الحساب
+                {t("adminPatients.suspend.title")}
               </Dialog.Title>
 
               <div className="mt-3 font-cairo text-[12px] font-semibold text-[#667085]">
-                الهدف:{" "}
+                {t("adminAppointments.cancel.targetLabel")}{" "}
                 <span className="font-extrabold text-[#111827]">
                   {targetLabel}
                 </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ToggleSwitch } from "@/components/ui";
+import { useI18n } from "@/i18n/provider";
 
 type Props = {
   isActive: boolean;
@@ -15,6 +16,10 @@ export default function ServiceTypeActiveToggle({
   onRequestToggle,
   name,
 }: Props) {
+  const { t } = useI18n();
+  const action = isActive
+    ? t('adminServiceTypeDialog.statusDialog.deactivateAction')
+    : t('adminServiceTypeDialog.statusDialog.activateAction');
   return (
     <ToggleSwitch
       checked={isActive}
@@ -22,10 +27,10 @@ export default function ServiceTypeActiveToggle({
       onChange={() => onRequestToggle()}
       label={
         name
-          ? `${isActive ? "تعطيل" : "تفعيل"} ${name}`
+          ? `${action} ${name}`
           : isActive
-            ? "تعطيل العنصر"
-            : "تفعيل العنصر"
+            ? t('adminServiceTypeDialog.toggle.deactivateItem')
+            : t('adminServiceTypeDialog.toggle.activateItem')
       }
       size="md"
       className="focus-visible:ring-offset-white"

@@ -30,7 +30,7 @@ export default function AdminAppointmentDetailsDialog({
   onOpenChange: (open: boolean) => void;
   appointmentId: string | null;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const enabled = open && !!appointmentId;
 
   const detailsQuery = useQuery({
@@ -117,26 +117,26 @@ export default function AdminAppointmentDetailsDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />
               </button>
 
               <h2 className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
-                تفاصيل الموعد
+                {t("adminAppointments.details.title")}
               </h2>
 
               {detailsAwaiting ? (
                 <div className="mt-6 font-cairo text-[13px] font-semibold text-[#667085]">
-                  جارِ التحميل...
+                  {t("adminAppointments.details.loading")}
                 </div>
               ) : detailsQuery.isError ? (
                 <div className="mt-6 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[13px] font-bold text-[#991B1B]">
-                  تعذّر تحميل تفاصيل الموعد.
+                  {t("adminAppointments.details.loadError")}
                 </div>
               ) : !appointment ? (
                 <div className="mt-6 font-cairo text-[13px] font-semibold text-[#667085]">
-                  لا توجد بيانات.
+                  {t("adminAppointments.details.noData")}
                 </div>
               ) : (
                 <>
@@ -145,7 +145,7 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <CalendarDays className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          التاريخ/الوقت
+                          {t("adminAppointments.details.dateTime")}
                         </div>
                       </div>
                       <div className="mt-3 space-y-2 font-cairo text-[12px] font-bold text-[#344054]">
@@ -168,7 +168,7 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <Ban className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          الحالة
+                          {t("common.statusLabel")}
                         </div>
                       </div>
                       <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
@@ -176,7 +176,7 @@ export default function AdminAppointmentDetailsDialog({
                       </div>
                       {appointment.cancelReason ? (
                         <div className="mt-2 font-cairo text-[12px] font-semibold text-[#667085]">
-                          سبب الإلغاء: {appointment.cancelReason}
+                          {t("adminAppointments.details.cancelReasonPrefix")}{appointment.cancelReason}
                         </div>
                       ) : null}
                     </div>
@@ -185,11 +185,11 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <User className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          المريض
+                          {t("adminAppointments.panel.patientLabel").replace(":", "")}
                         </div>
                       </div>
                       <div className="mt-3 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085]">
-                        <span>المريض:</span>
+                        <span>{t("adminAppointments.panel.patientLabel")}</span>
                         <span className="text-[#111827]">
                           {formatPatientLabel(appointment.patient)}
                         </span>
@@ -200,18 +200,18 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <Stethoscope className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          الطبيب
+                          {t("adminAppointments.details.doctorTitle")}
                         </div>
                       </div>
                       <div className="mt-3 flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085]">
-                        <span>الطبيب:</span>
+                        <span>{t("adminAppointments.panel.doctorLabel")}</span>
                         <span className="text-[#111827]">
                           {appointment.doctor?.userId?.fullName ?? "—"}
                         </span>
                       </div>
                       {appointment.doctor?.specialization ? (
                         <div className="mt-2 flex items-center gap-2 font-cairo text-[12px] font-semibold text-[#667085]">
-                          <span>التخصص:</span>
+                          <span>{t("adminAppointments.panel.specializationLabel")}</span>
                           <span className="text-[#111827]">
                             {appointment.doctor.specialization}
                           </span>
@@ -223,7 +223,7 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <Tag className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          نوع الموعد
+                          {t("adminAppointments.details.appointmentType")}
                         </div>
                       </div>
                       <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
@@ -237,7 +237,7 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <Wallet className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          السعر (لقطة)
+                          {t("adminAppointments.details.priceSnapshot")}
                         </div>
                       </div>
                       <div className="mt-3 font-cairo text-[13px] font-extrabold text-[#111827]">
@@ -255,7 +255,7 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <FileText className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          ملاحظات
+                          {t("adminMedicalOrders.field.notes.label")}
                         </div>
                       </div>
                       <div className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#344054]">
@@ -269,20 +269,20 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <FolderOpen className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          ملخص الـ encounter
+                          {t("adminAppointments.details.encounterSummary")}
                         </div>
                       </div>
 
                       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
-                          <div className="text-[#98A2B3]">المعرّف</div>
+                          <div className="text-[#98A2B3]">{t("adminMedicalOrders.details.id")}</div>
                           <div className="mt-1 break-all font-bold text-[#111827]">
                             {appointment.encounter._id ?? "—"}
                           </div>
                         </div>
 
                         <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
-                          <div className="text-[#98A2B3]">الحالة / المصدر</div>
+                          <div className="text-[#98A2B3]">{t("adminAppointments.details.statusSourceLabel")}</div>
                           <div className="mt-1 font-bold text-[#111827]">
                             {appointment.encounter.status ?? "—"}
                             {appointment.encounter.origin
@@ -292,14 +292,14 @@ export default function AdminAppointmentDetailsDialog({
                         </div>
 
                         <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
-                          <div className="text-[#98A2B3]">بدأ في</div>
+                          <div className="text-[#98A2B3]">{t("adminAppointments.details.startedAt")}</div>
                           <div className="mt-1 font-bold text-[#111827]">
                             {formatDateTime(appointment.encounter.startedAt)}
                           </div>
                         </div>
 
                         <div className="rounded-[10px] bg-[#F9FAFB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#344054]">
-                          <div className="text-[#98A2B3]">أُغلق في</div>
+                          <div className="text-[#98A2B3]">{t("adminAppointments.details.closedAt")}</div>
                           <div className="mt-1 font-bold text-[#111827]">
                             {formatDateTime(appointment.encounter.closedAt)}
                           </div>
@@ -313,7 +313,7 @@ export default function AdminAppointmentDetailsDialog({
                       <div className="flex items-center gap-2 text-primary">
                         <Paperclip className="h-4 w-4" />
                         <div className="font-cairo text-[12px] font-extrabold">
-                          المرفقات المرتبطة بالموعد
+                          {t("adminAppointments.details.attachments")}
                         </div>
                       </div>
 
@@ -334,7 +334,7 @@ export default function AdminAppointmentDetailsDialog({
                                   <span>{formatBytes(file.sizeBytes)}</span>
                                   <span>•</span>
                                   <span>
-                                    {file.isArchived ? "مؤرشف" : "نشط"}
+                                    {file.isArchived ? t("adminAppointments.details.archived") : t("common.active")}
                                   </span>
                                 </div>
                               </div>
@@ -361,7 +361,7 @@ export default function AdminAppointmentDetailsDialog({
                       onClick={() => onOpenChange(false)}
                       className="h-[40px] rounded-[10px] bg-primary px-8 font-cairo text-[12px] font-extrabold text-white"
                     >
-                      إغلاق
+                      {t("common.close")}
                     </button>
                   </div>
                 </>

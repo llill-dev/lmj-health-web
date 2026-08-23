@@ -5,6 +5,7 @@ import type {
 import { medicalOrderCatalogHeaderIcon } from './constants';
 import MedicalOrderCatalogRow from './MedicalOrderCatalogRow';
 import { MEDICAL_ORDER_TAB_META } from './constants';
+import { useI18n } from '@/i18n/provider';
 
 type Props = {
   kind: MedicalOrderCatalogKind;
@@ -25,8 +26,10 @@ export default function MedicalOrderCatalogCard({
   isBusy,
   deleteUnsupported,
 }: Props) {
-  const title =
-    MEDICAL_ORDER_TAB_META.find((t) => t.kind === kind)?.label ?? '';
+  const { t } = useI18n();
+  const labelKey =
+    MEDICAL_ORDER_TAB_META.find((item) => item.kind === kind)?.labelKey;
+  const title = labelKey ? t(labelKey) : '';
   const Icon = medicalOrderCatalogHeaderIcon(kind);
 
   return (
@@ -43,7 +46,7 @@ export default function MedicalOrderCatalogCard({
       <div className='px-5 py-2'>
         {items.length === 0 ? (
           <p className='py-8 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]'>
-            لا توجد عناصر في هذه الفئة بعد.
+            {t('adminMedicalOrders.category.empty')}
           </p>
         ) : (
           items.map((item) => (

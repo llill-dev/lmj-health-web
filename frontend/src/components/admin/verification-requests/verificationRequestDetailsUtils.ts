@@ -1,4 +1,6 @@
 import type { VerificationRequestSummary } from '@/lib/admin/types';
+import type { AppLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 
 export type ChangeRow = {
   key: string;
@@ -7,19 +9,23 @@ export type ChangeRow = {
   after: string;
 };
 
-const FIELD_LABELS: Record<string, string> = {
-  education: 'التعليم',
-  specialization: 'التخصص',
-  medicalLicenseNumber: 'رقم الترخيص',
-  licenseNumber: 'رقم الترخيص',
-  clinicAddress: 'عنوان العيادة',
-  locationCity: 'المدينة',
-  locationCountry: 'الدولة',
-  consultationFee: 'أجرة الاستشارة',
-  bio: 'النبذة التعريفية',
+const FIELD_LABEL_KEYS: Record<string, string> = {
+  education: 'adminDoctorProfileChangeRequests.field.education',
+  specialization: 'adminDoctorProfileChangeRequests.field.specialization',
+  medicalLicenseNumber: 'adminVerificationRequests.field.licenseNumber',
+  licenseNumber: 'adminVerificationRequests.field.licenseNumber',
+  clinicAddress: 'adminDoctorProfileChangeRequests.field.clinicAddress',
+  locationCity: 'adminFacilityDialog.field.city.label',
+  locationCountry: 'adminDoctorProfileChangeRequests.field.locationCountry',
+  consultationFee: 'adminVerificationRequests.field.consultationFee',
+  bio: 'adminVerificationRequests.field.bio',
 };
 
-export function formatRequestedAt(value?: string) {
+function tt(locale: AppLocale, key: string): string {
+  return getTranslationValue(locale, key) ?? key;
+}
+
+export function formatRequestedAt(value?: string, locale: AppLocale = 'ar') {
   if (!value) return '—';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
@@ -28,16 +34,18 @@ export function formatRequestedAt(value?: string) {
     d.getFullYear() === now.getFullYear() &&
     d.getMonth() === now.getMonth() &&
     d.getDate() === now.getDate();
-  const time = d.toLocaleTimeString('ar-SY', {
+  const dateLocale = locale === 'ar' ? 'ar-SY' : 'en-US';
+  const time = d.toLocaleTimeString(dateLocale, {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
   });
-  return sameDay ? `اليوم ${time}` : d.toLocaleDateString('ar-SY');
+  return sameDay ? `${tt(locale, 'common.today')} ${time}` : d.toLocaleDateString(dateLocale);
 }
 
-function labelForField(key: string) {
-  return FIELD_LABELS[key] ?? key;
+function labelForField(key: string, locale: AppLocale) {
+  const labelKey = FIELD_LABEL_KEYS[key];
+  return labelKey ? tt(locale, labelKey) : key;
 }
 
 function formatAnyValue(value: unknown): string {
@@ -75,6 +83,7 @@ export function extractRequestFromDetails(details: unknown): VerificationRequest
 
 export function buildChangeRows(
   request: VerificationRequestSummary | null,
+  locale: AppLocale = 'ar',
 ): ChangeRow[] {
   if (!request) {
     return [];
@@ -101,7 +110,7 @@ export function buildChangeRows(
       ) {
         rows.push({
           key,
-          label: labelForField(key),
+          label: labelForField(key, locale),
           before: formatAnyValue(rawObject.before),
           after: formatAnyValue(rawObject.after),
         });
@@ -110,7 +119,7 @@ export function buildChangeRows(
 
       rows.push({
         key,
-        label: labelForField(key),
+        label: labelForField(key, locale),
         before: formatAnyValue(doctorSource[key]),
         after: formatAnyValue(raw),
       });
@@ -120,13 +129,13 @@ export function buildChangeRows(
   if (rows.length === 0) {
     rows.push({
       key: 'education',
-      label: 'التعليم',
+      label: tt(locale, 'adminDoctorProfileChangeRequests.field.education'),
       before: formatAnyValue(doctorSource.education ?? request.doctor?.specialization),
       after: formatAnyValue(doctorSource.education ?? request.doctor?.specialization),
     });
     rows.push({
       key: 'medicalLicenseNumber',
-      label: 'رقم الترخيص',
+      label: tt(locale, 'adminVerificationRequests.field.licenseNumber'),
       before: formatAnyValue(request.doctor?.medicalLicenseNumber),
       after: formatAnyValue(request.doctor?.medicalLicenseNumber),
     });

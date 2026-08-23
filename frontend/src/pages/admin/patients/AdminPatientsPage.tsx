@@ -386,7 +386,7 @@ export default function AdminPatientsPage() {
                           <div
                             className={`inline-flex h-[24px] items-center justify-center rounded-[6px] px-3 font-cairo text-[11px] font-extrabold ${tone.chip}`}
                           >
-                            {patientStatusLabel[p.user.accountStatus]}
+                            {patientStatusLabel(p.user.accountStatus, locale)}
                           </div>
                         </div>
                       </div>

@@ -22,11 +22,6 @@ import {
 } from "@/components/admin/form-field";
 import { cn } from "@/lib/utils/utils";
 
-const GENDER_OPTIONS = [
-  { value: "Male", label: "ذكر" },
-  { value: "Female", label: "أنثى" },
-];
-
 const PERMISSION_OPTIONS = ASSIGNABLE_SECRETARY_PERMISSIONS.map((value) => ({
   value,
   label: SECRETARY_PERMISSION_LABELS[value] ?? value,
@@ -43,10 +38,15 @@ export default function CreateSecretaryDialog({
   onOpenChange,
   onSuccess,
 }: CreateSecretaryDialogProps) {
-  const { dir } = useI18n();
+  const { dir, locale, t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const writeBlocked = !ADMIN_SECRETARY_WRITE_SUPPORTED;
+
+  const GENDER_OPTIONS = [
+    { value: "Male", label: t("adminSecretaryDialog.field.gender.male") },
+    { value: "Female", label: t("adminSecretaryDialog.field.gender.female") },
+  ];
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -80,29 +80,29 @@ export default function CreateSecretaryDialog({
     const newErrors: Record<string, string> = {};
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "الاسم الكامل مطلوب";
+      newErrors.fullName = t("adminSecretaryDialog.validation.fullNameRequired");
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "البريد الإلكتروني مطلوب";
+      newErrors.email = t("adminSecretaryDialog.validation.emailRequired");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "البريد الإلكتروني غير صالح";
+      newErrors.email = t("adminSecretaryDialog.validation.emailInvalid");
     }
 
     if (!formData.password) {
-      newErrors.password = "كلمة المرور مطلوبة";
+      newErrors.password = t("adminSecretaryDialog.validation.passwordRequired");
     } else if (formData.password.length < 8) {
-      newErrors.password = "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+      newErrors.password = t("adminSecretaryDialog.validation.passwordTooShort");
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = "رقم الهاتف مطلوب";
+      newErrors.phone = t("adminSecretaryDialog.validation.phoneRequired");
     } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "رقم الهاتف غير صالح";
+      newErrors.phone = t("adminFacilityDialog.validation.phoneInvalid");
     }
 
     if (formData.permissions.length === 0) {
-      newErrors.permissions = "يجب اختيار صلاحية واحدة على الأقل";
+      newErrors.permissions = t("adminSecretaryDialog.validation.permissionsRequired");
     }
 
     setErrors(newErrors);
@@ -113,8 +113,8 @@ export default function CreateSecretaryDialog({
     e.preventDefault();
 
     if (writeBlocked) {
-      toast(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, {
-        title: ADMIN_SECRETARY_BLOCKER_TITLE.ar,
+      toast(ADMIN_SECRETARY_BLOCKER_MESSAGE[locale], {
+        title: ADMIN_SECRETARY_BLOCKER_TITLE[locale],
         variant: "error",
         durationMs: 4200,
       });
@@ -143,7 +143,7 @@ export default function CreateSecretaryDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="إنشاء حساب سكرتير جديد"
+          aria-label={t("adminSecretaryDialog.create.ariaLabel")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -174,13 +174,13 @@ export default function CreateSecretaryDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  إنشاء حساب سكرتير جديد
+                  {t("adminSecretaryDialog.create.ariaLabel")}
                 </h2>
               </div>
             </div>
@@ -192,13 +192,13 @@ export default function CreateSecretaryDialog({
                     <div className="flex items-start gap-2">
                       <TriangleAlert className="mt-0.5 h-4 w-4 text-[#DC2626]" />
                       <div className="font-cairo text-[11px] font-semibold leading-relaxed text-[#991B1B]">
-                        {ADMIN_SECRETARY_BLOCKER_MESSAGE.ar}
+                        {ADMIN_SECRETARY_BLOCKER_MESSAGE[locale]}
                       </div>
                     </div>
                   </div>
 
                   <AdminFormField
-                    label="الاسم الكامل"
+                    label={t("adminSecretaryDialog.field.fullName.label")}
                     required
                     error={errors.fullName}
                   >
@@ -214,7 +214,7 @@ export default function CreateSecretaryDialog({
                         if (errors.fullName)
                           setErrors((prev) => ({ ...prev, fullName: "" }));
                       }}
-                      placeholder="أدخل الاسم الكامل"
+                      placeholder={t("common.enterFullName")}
                       className={adminFieldClass(
                         cn(
                           adminInputClass,
@@ -226,7 +226,7 @@ export default function CreateSecretaryDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="البريد الإلكتروني"
+                    label={t("adminSecretaryDialog.field.email.label")}
                     required
                     error={errors.email}
                   >
@@ -254,7 +254,7 @@ export default function CreateSecretaryDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="كلمة المرور"
+                    label={t("adminSecretaryDialog.field.password.label")}
                     required
                     error={errors.password}
                   >
@@ -282,7 +282,7 @@ export default function CreateSecretaryDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="رقم الهاتف"
+                    label={t("adminFacilityDialog.field.phone.label")}
                     required
                     error={errors.phone}
                   >
@@ -309,7 +309,7 @@ export default function CreateSecretaryDialog({
                     />
                   </AdminFormField>
 
-                  <AdminFormField label="الجنس" required>
+                  <AdminFormField label={t("common.genderLabel")} required>
                     <StyledSelect
                       value={formData.gender}
                       disabled={writeBlocked}
@@ -317,12 +317,12 @@ export default function CreateSecretaryDialog({
                         setFormData((prev) => ({ ...prev, gender: value }))
                       }
                       options={GENDER_OPTIONS}
-                      placeholder="اختر الجنس"
+                      placeholder={t("common.selectGender")}
                     />
                   </AdminFormField>
 
                   <AdminFormField
-                    label="الصلاحيات"
+                    label={t("adminSecretaryDialog.field.permissions.label")}
                     required
                     error={errors.permissions}
                   >
@@ -361,7 +361,7 @@ export default function CreateSecretaryDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -370,10 +370,10 @@ export default function CreateSecretaryDialog({
                 >
                   <Save className="w-4 h-4" aria-hidden />
                   {isSubmitting
-                    ? "جارٍ الإنشاء…"
+                    ? t("adminFacilityDialog.action.creating")
                     : writeBlocked
-                      ? "غير متاح حالياً"
-                      : "إنشاء الحساب"}
+                      ? t("adminSecretaryDialog.action.unavailable")
+                      : t("adminSecretaryDialog.action.createAccount")}
                 </button>
               </div>
             </form>

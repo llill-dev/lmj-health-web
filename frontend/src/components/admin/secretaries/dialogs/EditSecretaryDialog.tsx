@@ -22,11 +22,6 @@ import {
 } from "@/components/admin/form-field";
 import { cn } from "@/lib/utils/utils";
 
-const GENDER_OPTIONS = [
-  { value: "Male", label: "ذكر" },
-  { value: "Female", label: "أنثى" },
-];
-
 const PERMISSION_OPTIONS = ASSIGNABLE_SECRETARY_PERMISSIONS.map((value) => ({
   value,
   label: SECRETARY_PERMISSION_LABELS[value] ?? value,
@@ -57,10 +52,15 @@ export default function EditSecretaryDialog({
   secretary,
   onSuccess,
 }: EditSecretaryDialogProps) {
-  const { dir } = useI18n();
+  const { dir, locale, t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const writeBlocked = !ADMIN_SECRETARY_WRITE_SUPPORTED;
+
+  const GENDER_OPTIONS = [
+    { value: "Male", label: t("adminSecretaryDialog.field.gender.male") },
+    { value: "Female", label: t("adminSecretaryDialog.field.gender.female") },
+  ];
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -104,17 +104,17 @@ export default function EditSecretaryDialog({
     const newErrors: Record<string, string> = {};
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "الاسم الكامل مطلوب";
+      newErrors.fullName = t("adminSecretaryDialog.validation.fullNameRequired");
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = "رقم الهاتف مطلوب";
+      newErrors.phone = t("adminSecretaryDialog.validation.phoneRequired");
     } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "رقم الهاتف غير صالح";
+      newErrors.phone = t("adminFacilityDialog.validation.phoneInvalid");
     }
 
     if (formData.permissions.length === 0) {
-      newErrors.permissions = "يجب اختيار صلاحية واحدة على الأقل";
+      newErrors.permissions = t("adminSecretaryDialog.validation.permissionsRequired");
     }
 
     setErrors(newErrors);
@@ -127,8 +127,8 @@ export default function EditSecretaryDialog({
     if (!secretary) return;
 
     if (writeBlocked) {
-      toast(ADMIN_SECRETARY_BLOCKER_MESSAGE.ar, {
-        title: ADMIN_SECRETARY_BLOCKER_TITLE.ar,
+      toast(ADMIN_SECRETARY_BLOCKER_MESSAGE[locale], {
+        title: ADMIN_SECRETARY_BLOCKER_TITLE[locale],
         variant: "error",
         durationMs: 4200,
       });
@@ -157,7 +157,7 @@ export default function EditSecretaryDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="تعديل بيانات السكرتير"
+          aria-label={t("adminSecretaryDialog.edit.ariaLabel")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -188,13 +188,13 @@ export default function EditSecretaryDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  تعديل بيانات السكرتير
+                  {t("adminSecretaryDialog.edit.ariaLabel")}
                 </h2>
               </div>
             </div>
@@ -206,14 +206,14 @@ export default function EditSecretaryDialog({
                     <div className="flex items-start gap-2">
                       <TriangleAlert className="mt-0.5 h-4 w-4 text-[#DC2626]" />
                       <div className="font-cairo text-[11px] font-semibold leading-relaxed text-[#991B1B]">
-                        {ADMIN_SECRETARY_BLOCKER_MESSAGE.ar}
+                        {ADMIN_SECRETARY_BLOCKER_MESSAGE[locale]}
                       </div>
                     </div>
                   </div>
 
                   <AdminFormField
-                    label="البريد الإلكتروني"
-                    hint="لا يمكن التعديل"
+                    label={t("adminSecretaryDialog.field.email.label")}
+                    hint={t("common.cannotEdit")}
                   >
                     <input
                       type="email"
@@ -224,7 +224,7 @@ export default function EditSecretaryDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="الاسم الكامل"
+                    label={t("adminSecretaryDialog.field.fullName.label")}
                     required
                     error={errors.fullName}
                   >
@@ -240,7 +240,7 @@ export default function EditSecretaryDialog({
                         if (errors.fullName)
                           setErrors((prev) => ({ ...prev, fullName: "" }));
                       }}
-                      placeholder="أدخل الاسم الكامل"
+                      placeholder={t("common.enterFullName")}
                       className={adminFieldClass(
                         cn(
                           adminInputClass,
@@ -252,7 +252,7 @@ export default function EditSecretaryDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="رقم الهاتف"
+                    label={t("adminFacilityDialog.field.phone.label")}
                     required
                     error={errors.phone}
                   >
@@ -279,7 +279,7 @@ export default function EditSecretaryDialog({
                     />
                   </AdminFormField>
 
-                  <AdminFormField label="الجنس" required>
+                  <AdminFormField label={t("common.genderLabel")} required>
                     <StyledSelect
                       value={formData.gender}
                       disabled={writeBlocked}
@@ -287,12 +287,12 @@ export default function EditSecretaryDialog({
                         setFormData((prev) => ({ ...prev, gender: value }))
                       }
                       options={GENDER_OPTIONS}
-                      placeholder="اختر الجنس"
+                      placeholder={t("common.selectGender")}
                     />
                   </AdminFormField>
 
                   <AdminFormField
-                    label="الصلاحيات"
+                    label={t("adminSecretaryDialog.field.permissions.label")}
                     required
                     error={errors.permissions}
                   >
@@ -331,7 +331,7 @@ export default function EditSecretaryDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -340,10 +340,10 @@ export default function EditSecretaryDialog({
                 >
                   <Save className="w-4 h-4" aria-hidden />
                   {isSubmitting
-                    ? "جارٍ التحديث…"
+                    ? t("adminFacilityDialog.action.updating")
                     : writeBlocked
-                      ? "غير متاح حالياً"
-                      : "حفظ التغييرات"}
+                      ? t("adminSecretaryDialog.action.unavailable")
+                      : t("adminFacilityDialog.action.saveChanges")}
                 </button>
               </div>
             </form>

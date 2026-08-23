@@ -1,9 +1,12 @@
+import { useI18n } from '@/i18n/provider';
+
 export function AdminSystemLogsHeader() {
+  const { t } = useI18n();
   return (
     <div className='text-right'>
-      <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>سجلات النظام</div>
+      <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>{t('adminSystemLogs.page.title')}</div>
       <div className='mt-1 font-cairo text-[12px] font-semibold leading-[16px] text-[#98A2B3]'>
-        مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي
+        {t('adminSystemLogs.page.subtitle')}
       </div>
     </div>
   );

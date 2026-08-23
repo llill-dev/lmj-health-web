@@ -16,13 +16,14 @@ import type {
 import { isAdminDoctorOffboarded } from "@/lib/admin/doctors/isAdminDoctorOffboarded";
 import { resolveAdminDoctorUserId } from "@/lib/admin/doctors/resolveAdminDoctorUserId";
 import { formatPhoneForDisplay } from "@/lib/phone/formatPhoneForDisplay";
+import { useI18n } from "@/i18n/provider";
 
 const TEAL = "#108B8B";
 const STAT_BG = "#E6F4F4";
 
-function doctorInitial(fullName?: string) {
+function doctorInitial(fullName: string | undefined, fallback: string) {
   const n = (fullName ?? "").trim();
-  if (!n.length) return "د";
+  if (!n.length) return fallback.charAt(0);
   return n.charAt(0);
 }
 
@@ -33,11 +34,12 @@ function StatusBadge({
   status?: AdminDoctorApprovalStatus;
   offboarded?: boolean;
 }) {
+  const { t } = useI18n();
   if (offboarded) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7F1D1D] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
         <UserX className="h-3.5 w-3.5 shrink-0" />
-        موقوف
+        {t("adminDoctors.status.suspended")}
       </span>
     );
   }
@@ -46,7 +48,7 @@ function StatusBadge({
     return (
       <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#28A745] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-        مقبول
+        {t("adminApproval.approved")}
       </span>
     );
   }
@@ -55,7 +57,7 @@ function StatusBadge({
     return (
       <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#DC3545] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
         <Ban className="h-3.5 w-3.5 shrink-0" />
-        مرفوض
+        {t("adminApproval.rejected")}
       </span>
     );
   }
@@ -63,7 +65,7 @@ function StatusBadge({
   return (
     <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#343A40] px-3 py-1.5 font-cairo text-[11px] font-extrabold text-white">
       <Clock className="h-3.5 w-3.5 shrink-0" />
-      بانتظار الموافقة
+      {t("adminDoctors.status.pendingApproval")}
     </span>
   );
 }
@@ -89,6 +91,7 @@ export default function DoctorListCard({
   }) => void;
   isDuplicatePhone?: boolean;
 }) {
+  const { t } = useI18n();
   const appt = d.appointmentsCount;
   const done = d.completedAppointmentsCount;
   const pts = d.linkedPatientsCount;
@@ -108,7 +111,7 @@ export default function DoctorListCard({
             className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] text-[22px] font-black text-white"
             style={{ backgroundColor: TEAL }}
           >
-            {doctorInitial(d.user?.fullName)}
+            {doctorInitial(d.user?.fullName, t("adminDoctors.card.initialFallback"))}
           </div>
           <div className="min-w-0 flex-1 text-right">
             <div className="break-words font-cairo text-sm font-extrabold leading-snug text-[#1F2937] sm:text-[15px]">
@@ -122,9 +125,9 @@ export default function DoctorListCard({
 
         <div className="grid w-full shrink-0 grid-cols-3 gap-2 lg:w-[17.5rem] lg:justify-self-start">
           {[
-            { label: "المواعيد", value: fmt(appt) },
-            { label: "مكتملة", value: fmt(done) },
-            { label: "المرضى", value: fmt(pts) },
+            { label: t("adminDoctors.card.appointments"), value: fmt(appt) },
+            { label: t("adminDoctors.card.completed"), value: fmt(done) },
+            { label: t("adminDoctors.card.patients"), value: fmt(pts) },
           ].map((box) => (
             <div
               key={box.label}
@@ -155,7 +158,7 @@ export default function DoctorListCard({
               aria-hidden
             />
             <span className="font-cairo text-[12px] font-semibold text-[#6B7280]">
-              رخصة:{" "}
+              {t("adminDoctors.card.licensePrefix")}
               <span className="text-[#374151]">
                 {d.medicalLicenseNumber ?? "—"}
               </span>
@@ -185,7 +188,7 @@ export default function DoctorListCard({
             </span>
             {isDuplicatePhone ? (
               <span className="rounded-[6px] bg-[#FEF3C7] px-2 py-0.5 font-cairo text-[10px] font-extrabold text-[#92400E]">
-                رقم مكرر
+                {t("adminDoctors.card.duplicatePhone")}
               </span>
             ) : null}
           </div>
@@ -201,7 +204,7 @@ export default function DoctorListCard({
             className="inline-flex h-[44px] w-full items-center justify-center gap-2 rounded-[8px] px-4 font-cairo text-[13px] font-extrabold text-white transition hover:opacity-92 lg:w-auto lg:min-w-[8.5rem]"
             style={{ backgroundColor: TEAL }}
           >
-            <span>التفاصيل</span>
+            <span>{t("adminAppointments.panel.detailsButton")}</span>
             <Eye className="h-4 w-4 shrink-0" />
           </button>
           {onOffboard ? (
@@ -226,7 +229,7 @@ export default function DoctorListCard({
               }`}
             >
               <UserX className="h-4 w-4 shrink-0" />
-              <span>إيقاف الحساب</span>
+              <span>{t("adminDoctors.card.suspendAccount")}</span>
             </button>
           ) : null}
           {onReboard ? (
@@ -251,7 +254,7 @@ export default function DoctorListCard({
               }`}
             >
               <UserPlus className="h-4 w-4 shrink-0" />
-              <span>تفعيل الحساب</span>
+              <span>{t("adminDoctors.card.activateAccount")}</span>
             </button>
           ) : null}
         </div>

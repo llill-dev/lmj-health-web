@@ -493,9 +493,13 @@ function StyledSelectInner(
             disabled={mergedDisabled}
             className={`min-w-0 flex-1 text-right outline-none transition-colors hover:bg-[#FAFFFE]/80 focus-visible:bg-[#FAFFFE]/80 disabled:pointer-events-none ${PADDING_TRIGGER[size]}`}
             onClick={toggle}
+            title={
+              typeof labelForTrigger === "string" ? labelForTrigger : undefined
+            }
           >
             <span
-              className={
+              className={[
+                "block truncate",
                 showPlaceholderStyle &&
                 mergedDisabled &&
                 emptyTriggerLabel != null
@@ -504,8 +508,8 @@ function StyledSelectInner(
                     ? "font-semibold text-[#98A2B3]"
                     : tone === "emphasis"
                       ? "font-extrabold text-primary"
-                      : "font-extrabold text-[#111827]"
-              }
+                      : "font-extrabold text-[#111827]",
+              ].join(" ")}
             >
               {mergedDisabled && emptyTriggerLabel != null
                 ? emptyTriggerLabel

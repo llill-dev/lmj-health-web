@@ -9,12 +9,12 @@ export default function LanguageModeToggle({
   value: LangFilter;
   onChange: (v: LangFilter) => void;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const inBinary = value === "ar" || value === "en";
   return (
     <div className="flex flex-wrap gap-2 justify-end items-center w-full min-w-0 sm:ms-auto sm:w-auto">
       <span className="font-cairo text-[11px] font-extrabold text-[#98A2B3]">
-        لغة المحتوى
+        {t('adminMedicalContent.languageToggle.label')}
       </span>
       <div className="flex min-w-0 items-center justify-end gap-1.5">
         <button
@@ -27,13 +27,13 @@ export default function LanguageModeToggle({
               : "border border-[#E5E7EB] bg-white text-[#344054] shadow-sm hover:bg-[#F9FAFB]",
           )}
         >
-          الكل
+          {t('common.all')}
         </button>
         <div
           className="relative h-9 w-[11.25rem] max-w-full shrink-0 overflow-hidden rounded-full bg-primary p-0.5 shadow-[0_8px_22px_rgba(15,143,139,0.3)]"
           dir={dir}
           role="group"
-          aria-label="تبديل لغة العرض: العربية أو English"
+          aria-label={t('adminMedicalContent.languageToggle.ariaLabel')}
         >
           <div
             className="pointer-events-none absolute top-0.5 bottom-0.5 w-[calc(50%-0.2rem)] rounded-full bg-white/30 shadow-inner transition-all duration-200 ease-out"
@@ -54,7 +54,7 @@ export default function LanguageModeToggle({
                   : "text-white/75 hover:text-white",
               )}
             >
-              العربية
+              {t('language.ar')}
             </button>
             <button
               type="button"
@@ -66,7 +66,7 @@ export default function LanguageModeToggle({
                   : "text-white/75 hover:text-white",
               )}
             >
-              English
+              {t('language.en')}
             </button>
           </div>
         </div>

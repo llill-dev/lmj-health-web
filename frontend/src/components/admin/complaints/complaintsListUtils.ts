@@ -3,6 +3,7 @@ import type {
   ComplaintLifecycleStatus,
   ComplaintType,
 } from '@/lib/admin/types';
+import type { AppLocale } from '@/i18n/runtime';
 
 export const COMPLAINT_TYPES: ComplaintType[] = [
   'appointment',
@@ -12,15 +13,16 @@ export const COMPLAINT_TYPES: ComplaintType[] = [
   'other',
 ];
 
-export function complaintTypeAr(t: ComplaintType): string {
-  const m: Record<ComplaintType, string> = {
-    appointment: 'موعد',
-    consultation: 'استشارة',
-    access_request: 'طلب وصول',
-    technical: 'تقني',
-    other: 'أخرى',
-  };
-  return m[t] ?? t;
+const TYPE_LABEL: Record<ComplaintType, { ar: string; en: string }> = {
+  appointment: { ar: 'موعد', en: 'Appointment' },
+  consultation: { ar: 'استشارة', en: 'Consultation' },
+  access_request: { ar: 'طلب وصول', en: 'Access request' },
+  technical: { ar: 'تقني', en: 'Technical' },
+  other: { ar: 'أخرى', en: 'Other' },
+};
+
+export function complaintTypeAr(t: ComplaintType, locale: AppLocale = 'ar'): string {
+  return TYPE_LABEL[t]?.[locale] ?? t;
 }
 
 export function statusBadgeClasses(status: ComplaintLifecycleStatus) {
@@ -37,18 +39,19 @@ export function statusBadgeClasses(status: ComplaintLifecycleStatus) {
   }
 }
 
-export function statusLabelAr(s: ComplaintLifecycleStatus): string {
-  const m: Record<ComplaintLifecycleStatus, string> = {
-    submitted: 'مقدّمة',
-    under_review: 'قيد المراجعة',
-    in_progress: 'قيد المعالجة',
-    resolved: 'تم الحل',
-    closed: 'مغلقة',
-  };
-  return m[s] ?? s;
+const STATUS_LABEL: Record<ComplaintLifecycleStatus, { ar: string; en: string }> = {
+  submitted: { ar: 'مقدّمة', en: 'Submitted' },
+  under_review: { ar: 'قيد المراجعة', en: 'Under review' },
+  in_progress: { ar: 'قيد المعالجة', en: 'In progress' },
+  resolved: { ar: 'تم الحل', en: 'Resolved' },
+  closed: { ar: 'مغلقة', en: 'Closed' },
+};
+
+export function statusLabelAr(s: ComplaintLifecycleStatus, locale: AppLocale = 'ar'): string {
+  return STATUS_LABEL[s]?.[locale] ?? s;
 }
 
-export function formatListTime(iso?: string) {
+export function formatListTime(iso: string | undefined, locale: AppLocale = 'ar', todayLabel = 'اليوم') {
   if (!iso) return '—';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';
@@ -57,12 +60,13 @@ export function formatListTime(iso?: string) {
     d.getFullYear() === now.getFullYear() &&
     d.getMonth() === now.getMonth() &&
     d.getDate() === now.getDate();
-  const time = d.toLocaleTimeString('ar-SY', {
+  const dateLocale = locale === 'ar' ? 'ar-SY' : 'en-US';
+  const time = d.toLocaleTimeString(dateLocale, {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
   });
-  return sameDay ? `اليوم ${time}` : d.toLocaleDateString('ar-SY');
+  return sameDay ? `${todayLabel} ${time}` : d.toLocaleDateString(dateLocale);
 }
 
 export function listPreviewLine(c: AdminComplaintListItem) {

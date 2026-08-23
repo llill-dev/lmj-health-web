@@ -24,6 +24,7 @@ import StyledSelect from '@/components/ui/styled-select';
 import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppointments';
 import { adminApi } from '@/lib/admin/client';
 import type { AppointmentStatus } from '@/lib/admin/types';
+import { useI18n } from '@/i18n/provider';
 
 export function SecretaryDoctorAppointmentsPanel({
   assignedDoctorId,
@@ -34,6 +35,7 @@ export function SecretaryDoctorAppointmentsPanel({
   doctorName: string;
   mode: 'view' | 'manage';
 }) {
+  const { locale, t } = useI18n();
   const queryClient = useQueryClient();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -97,8 +99,7 @@ export function SecretaryDoctorAppointmentsPanel({
     return (
       <div className='mt-2 rounded-[12px] border border-[#FEF3C7] bg-[#FFFBEB] px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
         <p className='text-right font-cairo text-[13px] font-semibold text-[#92400E]'>
-          لا يوجد طبيب مرتبط بهذا السكرتير. عيّن طبيباً أولاً لعرض المواعيد ضمن
-          نطاقه.
+          {t('adminAppointments.panel.noDoctorAssigned')}
         </p>
       </div>
     );
@@ -108,12 +109,11 @@ export function SecretaryDoctorAppointmentsPanel({
     <>
       <section className='mt-2 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
         <p className='mb-4 text-right font-cairo text-[12px] font-semibold text-[#667085]'>
-          عرض مواعيد الطبيب المرتبط:{' '}
+          {t('adminAppointments.panel.viewingFor')}{' '}
           <span className='font-extrabold text-[#111827]'>{doctorName}</span>
           {mode === 'manage' ? (
             <span className='text-[#98A2B3]'>
-              {' '}
-              — يمكنك الإلغاء وعرض التفاصيل وفق صلاحيات الإدارة.
+              {t('adminAppointments.panel.manageHint')}
             </span>
           ) : null}
         </p>
@@ -126,7 +126,7 @@ export function SecretaryDoctorAppointmentsPanel({
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, search: e.target.value }))
               }
-              placeholder='بحث باسم المريض أو المعرّف…'
+              placeholder={t('adminSecretary.doctorAppointments.search.placeholder')}
               className='h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white pr-10 pl-3 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
             />
           </div>
@@ -153,14 +153,14 @@ export function SecretaryDoctorAppointmentsPanel({
                 }))
               }
               options={[
-                { value: '', label: 'كل الحالات' },
-                { value: 'scheduled', label: 'مجدولة' },
-                { value: 'rescheduled', label: 'معاد جدولتها' },
-                { value: 'completed', label: 'مكتملة' },
-                { value: 'cancelled', label: 'ملغية' },
-                { value: 'no-show', label: 'عدم حضور' },
+                { value: '', label: t('adminMedicalOrders.toolbar.active.allStatuses') },
+                { value: 'scheduled', label: statusLabel('scheduled', locale) },
+                { value: 'rescheduled', label: statusLabel('rescheduled', locale) },
+                { value: 'completed', label: statusLabel('completed', locale) },
+                { value: 'cancelled', label: statusLabel('cancelled', locale) },
+                { value: 'no-show', label: statusLabel('no-show', locale) },
               ]}
-              listboxAriaLabel='حالة الموعد'
+              listboxAriaLabel={t('adminAppointments.panel.statusFilter.ariaLabel')}
             />
           </div>
         </div>
@@ -169,19 +169,18 @@ export function SecretaryDoctorAppointmentsPanel({
       <section className='mt-4 space-y-3'>
         {isAwaitingData ? (
           <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[12px] font-semibold text-[#667085]'>
-            جارٍ تحميل المواعيد…
+            {t('adminAppointments.panel.loading')}
           </div>
         ) : error ? (
           <div className='rounded-[12px] border border-[#FEE2E2] bg-[#FEF2F2] px-6 py-6 text-right font-cairo text-[12px] font-semibold text-[#B42318]'>
-            تعذّر تحميل المواعيد.
+            {t('adminAppointments.panel.loadError')}
           </div>
         ) : uiAppointments.length === 0 ? (
           <div className='rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[12px] font-semibold text-[#667085]'>
-            لا توجد مواعيد مطابقة لهذا الطبيب.
+            {t('adminAppointments.panel.noneMatching')}
             {total > 0 ? (
               <span className='mt-1 block text-[#98A2B3]'>
-                قد تكون النتائج في صفحة أخرى من القائمة العامة — جرّب تغيير
-                التاريخ أو الحالة.
+                {t('adminAppointments.panel.tryOtherPage')}
               </span>
             ) : null}
           </div>
@@ -201,7 +200,7 @@ export function SecretaryDoctorAppointmentsPanel({
                       <div className='flex items-center justify-start gap-2'>
                         <User className='h-4 w-4 text-primary' />
                         <span className='font-cairo text-[12px] font-bold text-[#667085]'>
-                          المريض:
+                          {t('adminAppointments.panel.patientLabel')}
                         </span>
                         <span className='font-cairo text-[14px] font-black text-[#111827]'>
                           {a.patientLabel}
@@ -210,7 +209,7 @@ export function SecretaryDoctorAppointmentsPanel({
                           className={`inline-flex h-[22px] items-center gap-1 rounded-[6px] px-3 font-cairo text-[11px] font-extrabold ${statusPill[a.status]}`}
                         >
                           <Clock className='h-3 w-3' />
-                          {statusLabel[a.status]}
+                          {statusLabel(a.status, locale)}
                         </span>
                       </div>
                       <div className='mt-2 flex flex-wrap items-center gap-4 font-cairo text-[12px] font-bold text-[#667085]'>
@@ -224,13 +223,13 @@ export function SecretaryDoctorAppointmentsPanel({
                         </span>
                         <span className='inline-flex items-center gap-1.5'>
                           <Stethoscope className='h-4 w-4 text-primary' />
-                          <span>الطبيب:</span>
+                          <span>{t('adminAppointments.panel.doctorLabel')}</span>
                           <span className='text-[#111827]'>{a.doctorName}</span>
                         </span>
                         {a.doctorSpecialization ? (
                           <span className='inline-flex items-center gap-1.5'>
                             <CalendarDays className='h-4 w-4 text-primary' />
-                            <span>التخصص:</span>
+                            <span>{t('adminAppointments.panel.specializationLabel')}</span>
                             <span className='text-[#111827]'>
                               {a.doctorSpecialization}
                             </span>
@@ -249,7 +248,7 @@ export function SecretaryDoctorAppointmentsPanel({
                         className='inline-flex h-[32px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054]'
                       >
                         <Eye className='h-4 w-4' />
-                        التفاصيل
+                        {t('adminAppointments.panel.detailsButton')}
                       </button>
                       {mode === 'manage' ? (
                         <button
@@ -267,7 +266,7 @@ export function SecretaryDoctorAppointmentsPanel({
                           className='inline-flex h-[32px] items-center gap-2 rounded-[10px] bg-[#FEF2F2] px-4 font-cairo text-[12px] font-extrabold text-[#EF4444] disabled:opacity-40'
                         >
                           <AlertCircle className='h-4 w-4' />
-                          إلغاء
+                          {t('common.cancel')}
                         </button>
                       ) : null}
                     </div>
@@ -298,8 +297,8 @@ export function SecretaryDoctorAppointmentsPanel({
           });
         }}
         successToast={{
-          title: 'تم إلغاء الموعد',
-          message: 'سُجّل إلغاء الموعد في النظام.',
+          title: t('adminAppointments.panel.cancelToast.title'),
+          message: t('adminAppointments.panel.cancelToast.message'),
           variant: 'success',
         }}
       />

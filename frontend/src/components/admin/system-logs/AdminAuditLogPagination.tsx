@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useI18n } from '@/i18n/provider';
 
 export function AdminAuditLogPagination({
   page,
@@ -13,13 +14,16 @@ export function AdminAuditLogPagination({
   pageSize: number;
   onPageChange: (page: number) => void;
 }) {
+  const { locale, t } = useI18n();
   if (total <= pageSize) return null;
 
   return (
     <section className='mt-4 flex items-center justify-between px-1'>
       <div className='font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-        عرض {Math.min((page - 1) * pageSize + 1, total)}–{Math.min(page * pageSize, total)} من{' '}
-        {total.toLocaleString('ar-SA')} سجل
+        {t('adminAuditLog.pagination.summary')
+          .replace('{from}', String(Math.min((page - 1) * pageSize + 1, total)))
+          .replace('{to}', String(Math.min(page * pageSize, total)))
+          .replace('{total}', total.toLocaleString(locale === 'ar' ? 'ar-SA' : 'en-US'))}
       </div>
       <div className='flex items-center gap-2'>
         <button

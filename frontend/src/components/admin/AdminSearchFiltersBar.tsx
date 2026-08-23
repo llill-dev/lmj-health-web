@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import StyledSelect from '@/components/ui/styled-select';
+import { useI18n } from '@/i18n/provider';
 
 export type AdminSearchFiltersValues = {
   query?: string;
@@ -48,6 +49,7 @@ export default function AdminSearchFiltersBar({
   defaultValues?: AdminSearchFiltersValues;
   onChange?: (values: AdminSearchFiltersValues) => void;
 }) {
+  const { t } = useI18n();
   const resolvedDefaultValues = useMemo(() => {
     return {
       query: '',
@@ -121,14 +123,14 @@ export default function AdminSearchFiltersBar({
                   value={values.specialty ?? ''}
                   onChange={(v) => setValues((prev) => ({ ...prev, specialty: v }))}
                   options={[
-                    { value: '', label: specialtyPlaceholder ?? 'الاختصاص' },
+                    { value: '', label: specialtyPlaceholder ?? t('common.specialtyLabel') },
                     ...(specialtyOptions?.map((opt) => ({
                       value: opt.value,
                       label: opt.label,
                     })) ?? []),
                   ]}
-                  placeholder={specialtyPlaceholder ?? 'الاختصاص'}
-                  listboxAriaLabel={specialtyPlaceholder ?? 'الاختصاص'}
+                  placeholder={specialtyPlaceholder ?? t('common.specialtyLabel')}
+                  listboxAriaLabel={specialtyPlaceholder ?? t('common.specialtyLabel')}
                 />
               </div>
             ) : null}
@@ -141,14 +143,14 @@ export default function AdminSearchFiltersBar({
                   value={values.status ?? ''}
                   onChange={(v) => setValues((prev) => ({ ...prev, status: v }))}
                   options={[
-                    { value: '', label: statusPlaceholder ?? 'الحالة' },
+                    { value: '', label: statusPlaceholder ?? t('common.statusLabel') },
                     ...(statusOptions?.map((opt) => ({
                       value: opt.value,
                       label: opt.label,
                     })) ?? []),
                   ]}
-                  placeholder={statusPlaceholder ?? 'الحالة'}
-                  listboxAriaLabel={statusPlaceholder ?? 'الحالة'}
+                  placeholder={statusPlaceholder ?? t('common.statusLabel')}
+                  listboxAriaLabel={statusPlaceholder ?? t('common.statusLabel')}
                 />
               </div>
             ) : null}

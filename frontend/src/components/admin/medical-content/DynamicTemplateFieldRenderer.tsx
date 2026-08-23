@@ -98,7 +98,7 @@ export default function DynamicTemplateFieldRenderer({
                 label: language === "en" ? "No" : "لا",
               },
             ]}
-            placeholder="اختر القيمة"
+            placeholder={language === "en" ? "Select a value" : "اختر القيمة"}
             listboxAriaLabel={label}
           />
         </AdminFormField>
@@ -118,7 +118,7 @@ export default function DynamicTemplateFieldRenderer({
             value={getTemplateSelectValue(currentValue, language)}
             onChange={(nextValue) => setPathValue(path, nextValue || undefined)}
             options={selectOptions}
-            placeholder="اختر القيمة"
+            placeholder={language === "en" ? "Select a value" : "اختر القيمة"}
             listboxAriaLabel={label}
           />
         </AdminFormField>
@@ -133,7 +133,9 @@ export default function DynamicTemplateFieldRenderer({
           required={field.required}
           hint={
             helper ||
-            "أدخل كل عنصر في سطر مستقل. يدعم هذا الإدخال القوائم البسيطة فقط."
+            (language === "en"
+              ? "Enter each item on its own line. This input only supports simple lists."
+              : "أدخل كل عنصر في سطر مستقل. يدعم هذا الإدخال القوائم البسيطة فقط.")
           }
           error={error}
         >
@@ -144,7 +146,7 @@ export default function DynamicTemplateFieldRenderer({
             }
             rows={4}
             disabled={disabled}
-            placeholder="عنصر أول&#10;عنصر ثانٍ"
+            placeholder={language === "en" ? "First item&#10;Second item" : "عنصر أول&#10;عنصر ثانٍ"}
             className={adminFieldClass(
               cn(adminTextareaClass, "text-start placeholder:text-start"),
               Boolean(error),
@@ -166,7 +168,9 @@ export default function DynamicTemplateFieldRenderer({
             required={field.required}
             hint={
               helper ||
-              "أدخل القيم المحلية مباشرة بدل تحرير JSON لهذا الحقل."
+              (language === "en"
+                ? "Enter the localized values directly instead of editing JSON for this field."
+                : "أدخل القيم المحلية مباشرة بدل تحرير JSON لهذا الحقل.")
             }
             error={error}
           >
@@ -216,7 +220,9 @@ export default function DynamicTemplateFieldRenderer({
           required={field.required}
           hint={
             helper ||
-            "أدخل JSON صالحًا عندما لا يوفّر القالب حقولاً فرعية مفصلة لهذا الكائن."
+            (language === "en"
+              ? "Enter valid JSON when the template doesn't provide detailed sub-fields for this object."
+              : "أدخل JSON صالحًا عندما لا يوفّر القالب حقولاً فرعية مفصلة لهذا الكائن.")
           }
           error={error}
         >
@@ -274,7 +280,7 @@ export default function DynamicTemplateFieldRenderer({
           max={fieldType === "number" ? field.max : undefined}
           pattern={field.regex}
           disabled={disabled}
-          placeholder="أدخل القيمة"
+          placeholder={language === "en" ? "Enter a value" : "أدخل القيمة"}
           className={adminFieldClass(
             cn(adminInputClass, "text-start placeholder:text-start"),
             Boolean(error),

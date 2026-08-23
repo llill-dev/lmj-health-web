@@ -467,10 +467,10 @@ export default function DataEntryMedicalContentPage() {
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-bold">
                       <span className="rounded-[8px] bg-[#F2F4F7] px-2 py-1 text-[#344054]">
-                        {contentTypeLabel(item.type)}
+                        {contentTypeLabel(item.type, locale)}
                       </span>
                       <span className="rounded-[8px] bg-[#ECFEFF] px-2 py-1 text-primary">
-                        {contentStatusLabel(item.status)}
+                        {contentStatusLabel(item.status, locale)}
                       </span>
                       <span className="rounded-[8px] bg-[#F9FAFB] px-2 py-1 text-[#667085]">
                         {item.language === "en" ? t("language.en") : t("language.ar")}
@@ -504,7 +504,7 @@ export default function DataEntryMedicalContentPage() {
                         </span>
                       ))}
                       <span className="text-[#98A2B3]">
-                        {t("dataEntry.medicalContent.lastUpdated")}: {formatContentDate(item.updatedAt)}
+                        {t("dataEntry.medicalContent.lastUpdated")}: {formatContentDate(item.updatedAt, locale)}
                       </span>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-bold text-[#667085]">

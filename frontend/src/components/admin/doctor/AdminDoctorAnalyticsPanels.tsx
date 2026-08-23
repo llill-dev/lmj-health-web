@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import type { DiagnosisChartItem, DoctorSummaryStats } from '@/lib/admin/types';
 import { scaleToChartBand } from '@/lib/admin/doctors/doctorAdminAnalytics';
+import { useI18n } from '@/i18n/provider';
 
 const TEAL = '#0F8F8B';
 const GRID = '#EEF2F6';
@@ -95,7 +96,7 @@ function StatTooltip({
   );
 }
 
-function StarRating({ value }: { value: number }) {
+function StarRating({ value, ariaLabel }: { value: number; ariaLabel: string }) {
   const v = Math.min(5, Math.max(0, value));
   const filled = Math.min(5, Math.round(v));
   return (
@@ -103,7 +104,7 @@ function StarRating({ value }: { value: number }) {
       className='mt-0.5 flex items-center justify-end gap-0.5'
       dir='ltr'
       role='img'
-      aria-label={`تقييم ${v.toFixed(1)} من 5`}
+      aria-label={ariaLabel}
     >
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
@@ -129,6 +130,8 @@ export function AdminDoctorAnalyticsPanels({
   hasDiagnosisError,
   hasSummaryError,
 }: Props) {
+  const { locale, t } = useI18n();
+  const numberLocale = locale === 'ar' ? 'ar-SY' : 'en-US';
   const diagnosisChart = diagnosisItems.map((d) => ({
     label:
       d.label.length > 16 ? `${d.label.slice(0, 15).trimEnd()}…` : d.label,
@@ -143,10 +146,10 @@ export function AdminDoctorAnalyticsPanels({
     key: keyof DoctorSummaryStats;
     raw: number;
   }[] = [
-    { name: 'المرضى الجدد', chartName: 'المرضى', key: 'patients', raw: summary.patients },
-    { name: 'المواعيد المكتملة', chartName: 'المواعيد', key: 'visits', raw: summary.visits },
-    { name: 'السجلات الطبية', chartName: 'السجلات', key: 'diagnoses', raw: summary.diagnoses },
-    { name: 'التقييمات', chartName: 'التقييمات', key: 'ratings', raw: summary.ratings },
+    { name: t('adminDoctorAnalytics.stat.newPatients.name'), chartName: t('adminDoctorAnalytics.stat.newPatients.chart'), key: 'patients', raw: summary.patients },
+    { name: t('adminDoctorAnalytics.stat.completedAppointments.name'), chartName: t('adminDoctorAnalytics.stat.completedAppointments.chart'), key: 'visits', raw: summary.visits },
+    { name: t('adminDoctorAnalytics.stat.medicalRecords.name'), chartName: t('adminDoctorAnalytics.stat.medicalRecords.chart'), key: 'diagnoses', raw: summary.diagnoses },
+    { name: t('adminDoctorAnalytics.stat.ratings.name'), chartName: t('adminDoctorAnalytics.stat.ratings.chart'), key: 'ratings', raw: summary.ratings },
   ];
   const band = scaleToChartBand(statRows.map((r) => r.raw));
   const statChart = statRows.map((r, i) => ({
@@ -159,18 +162,18 @@ export function AdminDoctorAnalyticsPanels({
   return (
     <>
       <section>
-        <PanelTitle>التشخيصات المرضية</PanelTitle>
+        <PanelTitle>{t('adminDoctorAnalytics.diagnosisPanelTitle')}</PanelTitle>
         <div className='rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-white p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6'>
           <div className='grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 md:items-stretch'>
             <div className='flex min-w-0 flex-col gap-3'>
               {isDiagnosisLoading ? (
-                <p className='font-cairo text-sm text-[#667085]'>جاري تحميل التشخيصات…</p>
+                <p className='font-cairo text-sm text-[#667085]'>{t('adminDoctorAnalytics.loadingDiagnoses')}</p>
               ) : hasDiagnosisError ? (
                 <p className='font-cairo text-sm text-amber-800'>
-                  تعذر تحميل بيانات التشخيصات.
+                  {t('adminDoctorAnalytics.diagnosesLoadError')}
                 </p>
               ) : diagnosisItems.length === 0 ? (
-                <p className='font-cairo text-sm text-[#667085]'>لا توجد تشخيصات في هذه الفترة.</p>
+                <p className='font-cairo text-sm text-[#667085]'>{t('adminDoctorAnalytics.noDiagnosesInPeriod')}</p>
               ) : (
                 <ul className='flex max-h-80 flex-col gap-2.5 overflow-y-auto pe-0.5'>
                   {diagnosisItems.map((d, i) => (
@@ -182,8 +185,8 @@ export function AdminDoctorAnalyticsPanels({
                         {d.label}
                       </span>
                       <span className='shrink-0 font-cairo text-sm font-semibold text-[#1F2937] sm:text-base'>
-                        {d.value.toLocaleString('ar-SY')}{' '}
-                        <span className='text-[#6B7280]'>حالة</span>
+                        {d.value.toLocaleString(numberLocale)}{' '}
+                        <span className='text-[#6B7280]'>{t('adminDoctorAnalytics.caseWord')}</span>
                       </span>
                     </li>
                   ))}
@@ -243,7 +246,7 @@ export function AdminDoctorAnalyticsPanels({
                 </ChartCard>
               ) : isDiagnosisLoading || hasDiagnosisError || diagnosisItems.length === 0 ? (
                 <div className='flex h-[200px] items-center justify-center rounded-[6px] border border-dashed border-[#E5E7EB] bg-[#FAFBFC] font-cairo text-sm text-[#98A2B3]'>
-                  المخطط
+                  {t('adminDoctorAnalytics.chartFallback')}
                 </div>
               ) : null}
             </div>
@@ -252,14 +255,14 @@ export function AdminDoctorAnalyticsPanels({
       </section>
 
       <section>
-        <PanelTitle>الإحصائيات</PanelTitle>
+        <PanelTitle>{t('adminDoctorAnalytics.statsPanelTitle')}</PanelTitle>
         <div className='rounded-[6px] border-[1.82px] border-[#F3F4F6] bg-white p-4 shadow-[0px_1px_3px_0px_#0000001A] sm:p-5 md:p-6'>
           <div className='grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 md:items-stretch'>
             <ul className='flex min-w-0 flex-col gap-2.5'>
               {isSummaryLoading ? (
-                <li className='font-cairo text-sm text-[#667085]'>جاري تحميل الإحصائيات…</li>
+                <li className='font-cairo text-sm text-[#667085]'>{t('adminDoctorAnalytics.loadingStats')}</li>
               ) : hasSummaryError ? (
-                <li className='font-cairo text-sm text-amber-800'>تعذر تحميل الملخّص.</li>
+                <li className='font-cairo text-sm text-amber-800'>{t('adminDoctorAnalytics.summaryLoadError')}</li>
               ) : (
                 <>
                   {statRows.map((r) => (
@@ -268,21 +271,24 @@ export function AdminDoctorAnalyticsPanels({
                       className='flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0 border-b border-[#F3F4F6] py-1.5 last:border-0'
                     >
                       <span className='font-cairo text-sm font-bold text-primary sm:text-base'>
-                        {`عدد ${r.name}`}
+                        {`${t('adminDoctorAnalytics.countPrefix')}${r.name}`}
                       </span>
                       <span
                         className='font-cairo text-sm font-semibold text-[#1F2937] sm:text-base'
                         dir='ltr'
                       >
-                        {r.raw.toLocaleString('ar-SY')}
+                        {r.raw.toLocaleString(numberLocale)}
                       </span>
                     </li>
                   ))}
                   <li className='flex flex-col gap-0.5 border-b border-[#F3F4F6] py-1.5 last:border-0 sm:flex-row sm:items-center sm:justify-between'>
                     <span className='shrink-0 font-cairo text-sm font-bold text-primary sm:text-base'>
-                      متوسط التقييم
+                      {t('adminDoctorAnalytics.averageRating')}
                     </span>
-                    <StarRating value={summary.averageRating} />
+                    <StarRating
+                      value={summary.averageRating}
+                      ariaLabel={t('adminDoctorAnalytics.ratingAriaLabel').replace('{value}', summary.averageRating.toFixed(1))}
+                    />
                   </li>
                 </>
               )}
@@ -339,7 +345,7 @@ export function AdminDoctorAnalyticsPanels({
                 </ChartCard>
               ) : (
                 <div className='flex h-[200px] items-center justify-center rounded-[6px] border border-dashed border-[#E5E7EB] bg-[#FAFBFC] font-cairo text-sm text-[#98A2B3]'>
-                  المخطط
+                  {t('adminDoctorAnalytics.chartFallback')}
                 </div>
               )}
             </div>

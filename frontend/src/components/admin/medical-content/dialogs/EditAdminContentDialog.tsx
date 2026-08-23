@@ -705,7 +705,7 @@ export default function EditAdminContentDialog({
     const dataResult = parseJsonInput(v.dataJson || "", undefined);
 
     if (dataResult.error) {
-      setError("dataJson", { message: dataResult.error });
+      setError("dataJson", { message: t("editContentDialog.validation.invalidJson") });
       return;
     }
 

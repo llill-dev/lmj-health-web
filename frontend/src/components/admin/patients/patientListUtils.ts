@@ -1,11 +1,17 @@
 import type { PatientAccountStatus } from '@/lib/admin/types';
+import type { AppLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 
-export const patientStatusLabel: Record<PatientAccountStatus, string> = {
-  active: 'نشط',
-  temporary: 'مؤقت',
-  suspended: 'معلق',
-  locked: 'موقوف',
+const STATUS_KEYS: Record<PatientAccountStatus, string> = {
+  active: 'common.active',
+  temporary: 'adminPatients.status.temporary',
+  suspended: 'adminPatients.status.suspended',
+  locked: 'adminPatients.status.locked',
 };
+
+export function patientStatusLabel(status: PatientAccountStatus, locale: AppLocale = 'ar'): string {
+  return getTranslationValue(locale, STATUS_KEYS[status]) ?? status;
+}
 
 export function patientStatusTone(s: PatientAccountStatus) {
   if (s === 'active') {

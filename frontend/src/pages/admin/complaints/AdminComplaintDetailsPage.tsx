@@ -22,6 +22,10 @@ import {
   statusLabelAr,
 } from '@/components/admin/complaints/complaintDetailsUtils';
 import { adminApi } from '@/lib/admin/client';
+import {
+  triggerBrowserFileDownload,
+  triggerBrowserFileDownloadAndOpen,
+} from '@/lib/files/triggerBrowserFileDownload';
 import { complaintUserFacingError } from '@/lib/admin/complaints/complaintErrors';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -47,11 +51,27 @@ export default function AdminComplaintDetailsPage() {
   const [saveStatusOpen, setSaveStatusOpen] = useState(false);
 
   const nextActionLabel = (status: ComplaintLifecycleStatus) => {
-    if (status === 'submitted') return 'الإجراء التالي: بدء المراجعة';
-    if (status === 'under_review') return 'الإجراء التالي: تحويلها للمعالجة';
-    if (status === 'in_progress') return 'الإجراء التالي: حل الشكوى أو إغلاقها';
-    if (status === 'resolved') return 'الإجراء الحالي: مراجعة الإغلاق النهائي';
-    return 'الشكوى مغلقة للمتابعة المرجعية فقط';
+    if (status === 'submitted')
+      return tr('الإجراء التالي: بدء المراجعة', 'Next action: start review');
+    if (status === 'under_review')
+      return tr(
+        'الإجراء التالي: تحويلها للمعالجة',
+        'Next action: move to processing',
+      );
+    if (status === 'in_progress')
+      return tr(
+        'الإجراء التالي: حل الشكوى أو إغلاقها',
+        'Next action: resolve or close the complaint',
+      );
+    if (status === 'resolved')
+      return tr(
+        'الإجراء الحالي: مراجعة الإغلاق النهائي',
+        'Current action: review final closure',
+      );
+    return tr(
+      'الشكوى مغلقة للمتابعة المرجعية فقط',
+      'The complaint is closed for reference only',
+    );
   };
 
   const detailQuery = useQuery({
@@ -88,13 +108,13 @@ export default function AdminComplaintDetailsPage() {
   const detailErrorMessage = detailQuery.isError
     ? complaintUserFacingError(
         detailQuery.error,
-        'تعذّر تحميل تفاصيل الشكوى.',
+        tr('تعذّر تحميل تفاصيل الشكوى.', 'Failed to load complaint details.'),
       )
     : null;
   const updateErrorMessage = updateMutation.isError
     ? complaintUserFacingError(
         updateMutation.error,
-        'تعذّر تحديث حالة الشكوى.',
+        tr('تعذّر تحديث حالة الشكوى.', 'Failed to update complaint status.'),
       )
     : null;
 
@@ -104,10 +124,16 @@ export default function AdminComplaintDetailsPage() {
   ) {
     const fid = attachment.fileId;
     if (!complaintId || !fid) {
-      toast('تعذّر العثور على بيانات المرفق المطلوبة لهذه الشكوى.', {
-        title: 'تعذّر فتح المرفق',
-        variant: 'error',
-      });
+      toast(
+        tr(
+          'تعذّر العثور على بيانات المرفق المطلوبة لهذه الشكوى.',
+          'Could not find the required attachment data for this complaint.',
+        ),
+        {
+          title: tr('تعذّر فتح المرفق', 'Failed to open attachment'),
+          variant: 'error',
+        },
+      );
       return;
     }
     setFileActionId(`${fid}-${mode}`);
@@ -118,44 +144,58 @@ export default function AdminComplaintDetailsPage() {
       );
       const url = res.downloadUrl || res.url;
       if (!url) {
-        toast('لم يُرجع الخادم رابطًا صالحًا لهذا المرفق.', {
-          title: 'تعذّر فتح المرفق',
-          variant: 'error',
-        });
+        toast(
+          tr(
+            'لم يُرجع الخادم رابطًا صالحًا لهذا المرفق.',
+            'The server did not return a valid link for this attachment.',
+          ),
+          {
+            title: tr('تعذّر فتح المرفق', 'Failed to open attachment'),
+            variant: 'error',
+          },
+        );
         return;
       }
+      // Presigned S3/MinIO URLs are cross-origin, so a plain <a download>
+      // is ignored by the browser and just opens/navigates instead of
+      // saving — fetch the bytes into a blob: URL first (same helper used
+      // by the secretary/doctor file-download flows).
+      const filename =
+        res.originalName || attachment.label?.replace(/\s+/g, '_') || 'attachment';
       if (mode === 'view') {
-        window.open(url, '_blank', 'noopener,noreferrer');
-        toast('تم فتح المرفق في تبويب جديد.', {
-          title: 'تم فتح المرفق',
-          variant: 'success',
-          durationMs: 2600,
-        });
+        await triggerBrowserFileDownloadAndOpen(url, filename);
+        toast(
+          tr('تم فتح المرفق في تبويب جديد.', 'The attachment was opened in a new tab.'),
+          {
+            title: tr('تم فتح المرفق', 'Attachment opened'),
+            variant: 'success',
+            durationMs: 2600,
+          },
+        );
       } else {
-        const a = document.createElement('a');
-        a.href = url;
-        a.rel = 'noopener noreferrer';
-        a.target = '_blank';
-        a.download = attachment.label?.replace(/\s+/g, '_') || 'attachment';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        toast('بدأ تنزيل المرفق.', {
-          title: 'تم بدء التنزيل',
-          variant: 'success',
-          durationMs: 2600,
-        });
+        await triggerBrowserFileDownload(url, filename);
+        toast(
+          tr('بدأ تنزيل المرفق.', 'The attachment download has started.'),
+          {
+            title: tr('تم بدء التنزيل', 'Download started'),
+            variant: 'success',
+            durationMs: 2600,
+          },
+        );
       }
     } catch (error) {
       toast(
         complaintUserFacingError(
           error,
           mode === 'view'
-            ? 'تعذّر فتح المرفق.'
-            : 'تعذّر تنزيل المرفق.',
+            ? tr('تعذّر فتح المرفق.', 'Failed to open the attachment.')
+            : tr('تعذّر تنزيل المرفق.', 'Failed to download the attachment.'),
         ),
         {
-          title: mode === 'view' ? 'تعذّر فتح المرفق' : 'تعذّر تنزيل المرفق',
+          title:
+            mode === 'view'
+              ? tr('تعذّر فتح المرفق', 'Failed to open attachment')
+              : tr('تعذّر تنزيل المرفق', 'Failed to download attachment'),
           variant: 'error',
           durationMs: 4200,
         },
@@ -205,7 +245,7 @@ export default function AdminComplaintDetailsPage() {
                 {tr('إدارة الشكاوي', 'Complaints management')}
               </h1>
               <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                {tr('الحالة:', 'Status:')} {statusLabelAr(c.status)}
+                {tr('الحالة:', 'Status:')} {statusLabelAr(c.status, locale)}
               </p>
               <div className='mt-2 inline-flex rounded-[8px] bg-[#F8FAFC] px-3 py-1 font-cairo text-[11px] font-bold text-[#667085]'>
                 {nextActionLabel(c.status)}
@@ -226,7 +266,7 @@ export default function AdminComplaintDetailsPage() {
                   {tr('نوع الشكوى', 'Complaint type')}
                 </div>
                 <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                  {complaintTypeAr(c.type)}
+                  {complaintTypeAr(c.type, locale)}
                 </div>
               </div>
               <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
@@ -234,7 +274,7 @@ export default function AdminComplaintDetailsPage() {
                   {tr('الإجراء الحالي', 'Current action')}
                 </div>
                 <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                  {nextActionLabel(c.status).replace('الإجراء التالي: ', '')}
+                  {nextActionLabel(c.status).replace(tr('الإجراء التالي: ', 'Next action: '), '')}
                 </div>
               </div>
             </div>
@@ -275,9 +315,9 @@ export default function AdminComplaintDetailsPage() {
                         {c.contactSnapshot?.fullName ?? '—'}
                       </div>
                       <div className='mt-2 font-cairo text-[16px] font-semibold leading-snug sm:text-[17px]'>
-                        <span className='text-primary'>نوع الشكوى : </span>
+                        <span className='text-primary'>{tr('نوع الشكوى : ', 'Complaint type: ')}</span>
                         <span className='text-[#1F2937]'>
-                          {complaintTypeAr(c.type)}
+                          {complaintTypeAr(c.type, locale)}
                         </span>
                       </div>
                       <div className='mt-2 flex flex-wrap items-center gap-2 font-cairo text-[14px] font-semibold text-[#4A5565]'>
@@ -298,7 +338,7 @@ export default function AdminComplaintDetailsPage() {
                     </div>
                   </div>
                   <div className='shrink-0 font-cairo text-[15px] font-black text-[#99A1AF] sm:pt-1'>
-                    {formatHeaderTime(c.createdAt)}
+                    {formatHeaderTime(c.createdAt, locale, tr('اليوم', 'Today'))}
                   </div>
                 </div>
 
@@ -311,30 +351,33 @@ export default function AdminComplaintDetailsPage() {
                 <hr className='my-6 border-0 border-t border-[#E5E7EB]' />
 
                 <h2 className='mb-4 font-cairo text-[16px] font-black text-[#111827]'>
-                  الملفات المرفقة :
+                  {tr('الملفات المرفقة :', 'Attached files:')}
                 </h2>
 
                 <div className='mb-4 rounded-[10px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-3'>
                   <div className='flex items-start gap-2'>
                     <AlertCircle className='mt-0.5 h-4 w-4 shrink-0 text-primary' />
                     <div className='font-cairo text-[12px] font-semibold leading-6 text-[#5B7B79]'>
-                      هذه الواجهة تتيح فتح مرفقات الشكوى أو تنزيلها من سياق
-                      المراجعة الإدارية فقط، ولا تُستخدم لإدارة ملفات المريض
-                      الطبية أو تعديلها.
+                      {tr(
+                        'هذه الواجهة تتيح فتح مرفقات الشكوى أو تنزيلها من سياق المراجعة الإدارية فقط، ولا تُستخدم لإدارة ملفات المريض الطبية أو تعديلها.',
+                        'This interface only allows opening or downloading complaint attachments from an admin review context — it is not used to manage or edit the patient\'s medical files.',
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {!hasAttachments ? (
                   <p className='rounded-lg border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#94A3B8]'>
-                    لا توجد ملفات مرفقة
+                    {tr('لا توجد ملفات مرفقة', 'No attached files')}
                   </p>
                 ) : (
                   <div className='flex flex-col gap-3 rounded-[10px] border border-[#D6EEEC] bg-[#F3FBFA] p-3 sm:p-4'>
                     {attachments.length === 0 ? (
                       <p className='font-cairo text-[13px] text-[#64748B]'>
-                        يُشار إلى وجود مرفقات ({c.attachmentCount}) لكن التفاصيل غير
-                        مُحمّلة في الاستجابة.
+                        {tr(
+                          `يُشار إلى وجود مرفقات (${c.attachmentCount}) لكن التفاصيل غير مُحمّلة في الاستجابة.`,
+                          `Attachments (${c.attachmentCount}) are indicated but details were not loaded in the response.`,
+                        )}
                       </p>
                     ) : (
                       attachments.map((att) => (
@@ -356,7 +399,7 @@ export default function AdminComplaintDetailsPage() {
                               }
                               onClick={() => openAttachment(att, 'view')}
                               className='flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#148283] text-white shadow-sm transition hover:brightness-110 disabled:opacity-50'
-                              aria-label='عرض الملف'
+                              aria-label={tr('عرض الملف', 'View file')}
                             >
                               {fileActionId === `${att.fileId}-view` ? (
                                 <Loader2 className='w-5 h-5 animate-spin' />
@@ -374,7 +417,7 @@ export default function AdminComplaintDetailsPage() {
                               }
                               onClick={() => openAttachment(att, 'download')}
                               className='flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#148283] text-white shadow-sm transition hover:brightness-110 disabled:opacity-50'
-                              aria-label='تحميل الملف'
+                              aria-label={tr('تحميل الملف', 'Download file')}
                             >
                               {fileActionId === `${att.fileId}-download` ? (
                                 <Loader2 className='w-5 h-5 animate-spin' />
@@ -399,7 +442,7 @@ export default function AdminComplaintDetailsPage() {
               {c.statusHistory?.length ? (
                 <section className='rounded-[10px] border border-[#E8ECF2] bg-white p-5 shadow-sm'>
                   <h2 className='mb-3 font-cairo text-[15px] font-black text-primary'>
-                    سجل الحالات
+                    {tr('سجل الحالات', 'Status history')}
                   </h2>
                   <ul className='p-0 space-y-2 list-none'>
                     {c.statusHistory.map((h, i) => (
@@ -408,10 +451,10 @@ export default function AdminComplaintDetailsPage() {
                         className='rounded-lg border border-[#F1F5F9] bg-[#FAFAFA] px-3 py-2 font-cairo text-[12px]'
                       >
                         <span className='font-bold'>
-                          {statusLabelAr(h.status)}
+                          {statusLabelAr(h.status, locale)}
                         </span>
                         {' — '}
-                        {h.actorRole} · {formatDateTime(h.changedAt)}
+                        {h.actorRole} · {formatDateTime(h.changedAt, locale)}
                       </li>
                     ))}
                   </ul>
@@ -421,13 +464,13 @@ export default function AdminComplaintDetailsPage() {
               {c.adminResponse ? (
                 <section className='rounded-[10px] border border-emerald-200 bg-emerald-50/60 p-5'>
                   <h2 className='mb-2 font-cairo text-[14px] font-black text-emerald-900'>
-                    رد الإدارة
+                    {tr('رد الإدارة', 'Admin response')}
                   </h2>
                   <p className='whitespace-pre-wrap font-cairo text-[13px] text-emerald-950'>
                     {c.adminResponse}
                   </p>
                   <p className='mt-2 font-cairo text-[11px] text-emerald-800'>
-                    {formatDateTime(c.adminRespondedAt ?? undefined)}
+                    {formatDateTime(c.adminRespondedAt ?? undefined, locale)}
                   </p>
                 </section>
               ) : null}
@@ -435,34 +478,37 @@ export default function AdminComplaintDetailsPage() {
 
             <section className='rounded-[10px] border border-[#E8ECF2] bg-white p-5 shadow-sm sm:p-6'>
               <h2 className='mb-1 font-cairo text-[15px] font-black text-primary'>
-                تحديث حالة الشكوى
+                {tr('تحديث حالة الشكوى', 'Update complaint status')}
               </h2>
               <p className='mb-4 font-cairo text-[12px] text-[#64748B]'>
-                الحالة الحالية:{' '}
-                <strong>{statusLabelAr(c.status)}</strong>. يتم التحقق من انتقال
-                الحالة على الخادم.
+                {tr('الحالة الحالية:', 'Current status:')}{' '}
+                <strong>{statusLabelAr(c.status, locale)}</strong>.{' '}
+                {tr('يتم التحقق من انتقال الحالة على الخادم.', 'The status transition is validated on the server.')}
               </p>
               <div className='flex flex-col gap-3 max-w-xl'>
                 <label className='block'>
                   <span className='mb-1 block font-cairo text-[12px] font-bold text-[#475467]'>
-                    الحالة الجديدة
+                    {tr('الحالة الجديدة', 'New status')}
                   </span>
                   <StyledSelect
                     value={nextStatus}
                     onChange={(v) =>
                       setNextStatus(v as ComplaintLifecycleStatus | '')
                     }
-                    placeholder='— اختر —'
+                    placeholder={tr('— اختر —', '— Select —')}
                     options={STATUS_OPTIONS.map((s) => ({
                       value: s,
-                      label: statusLabelAr(s),
+                      label: statusLabelAr(s, locale),
                     }))}
-                    listboxAriaLabel='الحالة الجديدة للشكوى'
+                    listboxAriaLabel={tr('الحالة الجديدة للشكوى', 'New complaint status')}
                   />
                 </label>
                 <label className='block'>
                   <span className='mb-1 block font-cairo text-[12px] font-bold text-[#475467]'>
-                    رد الإدارة (اختياري — يُرسل للمريض عند التحديث)
+                    {tr(
+                      'رد الإدارة (اختياري — يُرسل للمريض عند التحديث)',
+                      'Admin response (optional — sent to the patient on update)',
+                    )}
                   </span>
                   <textarea
                     value={adminResponse}
@@ -470,12 +516,12 @@ export default function AdminComplaintDetailsPage() {
                     rows={4}
                     maxLength={2000}
                     className='w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-3 font-cairo text-[13px]'
-                    placeholder='نص الرد للمريض...'
+                    placeholder={tr('نص الرد للمريض...', 'Reply text for the patient...')}
                   />
                 </label>
                 {updateMutation.isError ? (
                   <p className='font-cairo text-[12px] font-semibold text-red-600'>
-                    {updateErrorMessage ?? 'تعذّر تحديث حالة الشكوى.'}
+                    {updateErrorMessage ?? tr('تعذّر تحديث حالة الشكوى.', 'Failed to update complaint status.')}
                   </p>
                 ) : null}
                 <button
@@ -487,7 +533,7 @@ export default function AdminComplaintDetailsPage() {
                   {updateMutation.isPending ? (
                     <Loader2 className='w-5 h-5 animate-spin' />
                   ) : (
-                    'حفظ التحديث'
+                    tr('حفظ التحديث', 'Save update')
                   )}
                 </button>
               </div>
@@ -500,37 +546,37 @@ export default function AdminComplaintDetailsPage() {
         open={saveStatusOpen}
         onOpenChange={setSaveStatusOpen}
         variant='primary'
-        title='تأكيد تحديث حالة الشكوى'
+        title={tr('تأكيد تحديث حالة الشكوى', 'Confirm complaint status update')}
         icon={<Save className='h-6 w-6' strokeWidth={2} aria-hidden />}
         description={
           nextStatus ? (
             <>
-              سيتم تغيير حالة الشكوى من «
+              {tr('سيتم تغيير حالة الشكوى من «', 'The complaint status will change from “')}
               <span className='font-extrabold text-[#344054]'>
-                {statusLabelAr(c?.status as ComplaintLifecycleStatus)}
+                {statusLabelAr(c?.status as ComplaintLifecycleStatus, locale)}
               </span>
-              » إلى «
+              {tr('» إلى «', '” to “')}
               <span className='font-extrabold text-[#344054]'>
-                {statusLabelAr(nextStatus)}
+                {statusLabelAr(nextStatus, locale)}
               </span>
-              »
+              {tr('»', '”')}
               {adminResponse.trim()
-                ? '، وإرسال نص الرد للمريض عند دعم الخادم لذلك.'
+                ? tr('، وإرسال نص الرد للمريض عند دعم الخادم لذلك.', ', and the reply text will be sent to the patient if supported by the server.')
                 : '.'}
             </>
           ) : (
-            'اختر حالة جديدة أولاً.'
+            tr('اختر حالة جديدة أولاً.', 'Select a new status first.')
           )
         }
-        confirmLabel='تأكيد الحفظ'
+        confirmLabel={tr('تأكيد الحفظ', 'Confirm save')}
         confirmDisabled={!nextStatus || updateMutation.isPending}
         onConfirm={async () => {
           if (!nextStatus) return;
           await updateMutation.mutateAsync();
         }}
         successToast={{
-          title: 'تم التحديث',
-          message: 'حُدّثت حالة الشكوى وستنعكس في القوائم.',
+          title: tr('تم التحديث', 'Updated'),
+          message: tr('حُدّثت حالة الشكوى وستنعكس في القوائم.', 'The complaint status was updated and will be reflected in the lists.'),
           variant: 'success',
         }}
       />

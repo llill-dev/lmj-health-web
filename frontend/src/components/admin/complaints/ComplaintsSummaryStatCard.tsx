@@ -11,13 +11,13 @@ export default function ComplaintsSummaryStatCard({
   value: number;
   delay?: number;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const label =
     variant === 'total'
-      ? 'إجمالي الشكاوي'
+      ? t('adminComplaints.summary.total')
       : variant === 'closed'
-        ? 'مغلقة'
-        : 'قيد المراجعة';
+        ? t('adminComplaints.summary.closed')
+        : t('adminComplaints.summary.review');
 
   const icon =
     variant === 'total' ? (

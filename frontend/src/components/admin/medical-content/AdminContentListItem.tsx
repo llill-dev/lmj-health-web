@@ -137,7 +137,7 @@ export function AdminContentListItem({
               {toDisplayText(item.title) || "—"}
             </div>
             {(() => {
-              const lk = languageKindLabel(item.language);
+              const lk = languageKindLabel(item.language, locale as "ar" | "en");
               return (
                 <span
                   className={cn(
@@ -155,11 +155,11 @@ export function AdminContentListItem({
             <div
               className={`inline-flex h-[22px] shrink-0 items-center justify-center rounded-[8px] border px-3 font-cairo text-[11px] font-extrabold ${statusBadgeClass(item.status)}`}
             >
-              {contentStatusLabel(item.status)}
+              {contentStatusLabel(item.status, locale as "ar" | "en")}
             </div>
             <div className="inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[8px] bg-[#F3F4F6] px-2.5 font-cairo text-[11px] font-bold text-[#475467]">
               <LayoutGrid className="h-3.5 w-3.5" />
-              {contentTypeLabel(item.type)}
+              {contentTypeLabel(item.type, locale as "ar" | "en")}
             </div>
           </div>
 
@@ -172,7 +172,7 @@ export function AdminContentListItem({
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]" />
-              {tr("آخر تحديث:", "Last update:")} {formatContentDate(item.updatedAt)}
+              {tr("آخر تحديث:", "Last update:")} {formatContentDate(item.updatedAt, locale as "ar" | "en")}
             </span>
             {creatorName ? (
               <span className="inline-flex items-center gap-1.5">

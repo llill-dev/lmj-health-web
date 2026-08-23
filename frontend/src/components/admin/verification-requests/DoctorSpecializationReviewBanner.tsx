@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { DoctorSpecializationReviewState } from '@/lib/admin/doctors/doctorSpecializationReview';
+import { useI18n } from '@/i18n/provider';
 
 const toneClasses: Record<
   DoctorSpecializationReviewState['statusTone'],
@@ -25,31 +26,34 @@ type BannerCopy = {
   showManageLink: boolean;
 };
 
-function resolveBannerCopy(state: DoctorSpecializationReviewState): BannerCopy {
+function resolveBannerCopy(
+  state: DoctorSpecializationReviewState,
+  t: (key: string) => string,
+): BannerCopy {
   if (state.mode === 'catalog') {
     return {
-      title: 'التخصص مرتبط بالقائمة المعتمدة',
-      body: `التخصص الرسمي: ${state.displayLabel}`,
+      title: t('adminVerificationRequests.specBanner.catalogTitle'),
+      body: t('adminVerificationRequests.specBanner.catalogBody').replace('{label}', state.displayLabel),
       showManageLink: false,
     };
   }
 
   if (state.mode === 'custom_pending') {
     return {
-      title: 'تخصص يدوي — يلزم الربط قبل الموافقة',
-      body: `أدخل الطبيب التخصص «${state.displayLabel}» يدوياً. قبل قبول الطلب، اختر تخصصاً مطابقاً من القائمة المعتمدة أو أضف تخصصاً جديداً إلى النظام.`,
+      title: t('adminVerificationRequests.specBanner.customPendingTitle'),
+      body: t('adminVerificationRequests.specBanner.customPendingBody').replace('{label}', state.displayLabel),
       showManageLink: true,
     };
   }
 
   const specialtyPart =
     state.displayLabel !== '—'
-      ? `التخصص الظاهر في ملف الطبيب: «${state.displayLabel}». `
+      ? t('adminVerificationRequests.specBanner.unresolvedSpecialtyPrefix').replace('{label}', state.displayLabel)
       : '';
 
   return {
-    title: 'يلزم مراجعة التخصص قبل الموافقة',
-    body: `${specialtyPart}تعذّر التحقق من التخصص المرتبط بهذا الطبيب. يرجى ربطه بتخصص رسمي من القائمة قبل قبول الطلب.`,
+    title: t('adminVerificationRequests.specBanner.unresolvedTitle'),
+    body: `${specialtyPart}${t('adminVerificationRequests.specBanner.unresolvedBody')}`,
     showManageLink: true,
   };
 }
@@ -61,8 +65,9 @@ export function DoctorSpecializationReviewBanner({
   state: DoctorSpecializationReviewState;
   showManageLink?: boolean;
 }) {
+  const { t } = useI18n();
   const tone = toneClasses[state.statusTone];
-  const copy = resolveBannerCopy(state);
+  const copy = resolveBannerCopy(state, t);
 
   return (
     <div
@@ -81,7 +86,7 @@ export function DoctorSpecializationReviewBanner({
           to='/admin/doctor-specializations'
           className='mt-3 inline-block font-cairo text-[12px] font-extrabold text-primary underline-offset-2 hover:underline'
         >
-          إدارة التخصصات
+          {t('adminVerificationRequests.specBanner.manageLink')}
         </Link>
       ) : null}
     </div>

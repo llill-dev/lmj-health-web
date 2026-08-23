@@ -18,8 +18,9 @@ import { useAdminSecretariesList } from '@/hooks/admin/secretaries/useAdminSecre
 import OffboardDialog from '@/components/admin/secretaries/dialogs/OffboardDialog';
 import {
   PERM_GROUPS,
-  PERM_LABEL,
+  permLabel,
 } from '@/components/admin/secretaries/secretaryPermissions';
+import { getTranslationValue } from '@/i18n/translations';
 import type { AdminSecretarySummary } from '@/lib/admin/types';
 import { useI18n } from '@/i18n/provider';
 
@@ -317,12 +318,13 @@ export default function AdminSecretaryDetailsPage() {
               </div>
             ) : (
               <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-                {PERM_GROUPS.map(({ label, icon: Icon, keys, color, bg, border }) => {
+                {PERM_GROUPS.map(({ labelKey, icon: Icon, keys, color, bg, border }) => {
                   const granted = keys.filter((k) => perms.includes(k));
                   if (granted.length === 0) return null;
+                  const label = getTranslationValue(locale, labelKey) ?? labelKey;
                   return (
                     <div
-                      key={label}
+                      key={labelKey}
                       className={`rounded-[12px] border ${border} ${bg} px-4 py-4`}
                     >
                       <div className={`mb-3 flex items-center gap-2 ${color}`}>
@@ -343,7 +345,7 @@ export default function AdminSecretaryDetailsPage() {
                               <div
                                 className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${has ? 'bg-current' : 'bg-[#D0D5DD]'}`}
                               />
-                              {PERM_LABEL[k] ?? k}
+                              {permLabel(k, locale)}
                             </div>
                           );
                         })}

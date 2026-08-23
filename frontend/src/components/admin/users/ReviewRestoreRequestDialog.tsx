@@ -8,11 +8,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import StyledSelect from "@/components/ui/styled-select";
 import { adminApi } from "@/lib/admin/client";
 import { userFacingErrorMessage } from "@/lib/admin/userFacingError";
-
-const DECISION_OPTIONS = [
-  { value: "approved", label: "موافقة" },
-  { value: "rejected", label: "رفض" },
-];
+import { useI18n } from "@/i18n/provider";
 
 interface RestoreRequest {
   _id: string;
@@ -39,23 +35,29 @@ export default function ReviewRestoreRequestDialog({
   request,
   onSuccess,
 }: ReviewRestoreRequestDialogProps) {
+  const { locale, t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [decision, setDecision] = useState("");
   const [reviewNote, setReviewNote] = useState("");
 
+  const DECISION_OPTIONS = [
+    { value: "approved", label: t("adminUsersDialog.restore.decisionOption.approved") },
+    { value: "rejected", label: t("adminUsersDialog.restore.decisionOption.rejected") },
+  ];
+
   const requestedAtLabel = useMemo(() => {
     if (!request?.requestedAt) return null;
     const date = new Date(request.requestedAt);
     if (Number.isNaN(date.getTime())) return null;
-    return new Intl.DateTimeFormat("ar", {
+    return new Intl.DateTimeFormat(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
     }).format(date);
-  }, [request?.requestedAt]);
+  }, [request?.requestedAt, locale]);
 
   const handleClose = (nextOpen: boolean) => {
     if (isSubmitting) return;
@@ -70,8 +72,8 @@ export default function ReviewRestoreRequestDialog({
     e?.preventDefault();
 
     if (!decision) {
-      toast("يجب اختيار القرار أولاً.", {
-        title: "خطأ في التحقق",
+      toast(t("adminUsersDialog.restore.toast.selectDecision"), {
+        title: t("adminUsersDialog.restore.toast.validationErrorTitle"),
         variant: "error",
         durationMs: 4200,
       });
@@ -79,8 +81,8 @@ export default function ReviewRestoreRequestDialog({
     }
 
     if (decision === "rejected" && !reviewNote.trim()) {
-      toast("يجب إضافة ملاحظة عند رفض الطلب.", {
-        title: "خطأ في التحقق",
+      toast(t("adminUsersDialog.restore.toast.noteRequired"), {
+        title: t("adminUsersDialog.restore.toast.validationErrorTitle"),
         variant: "error",
         durationMs: 4200,
       });
@@ -89,8 +91,8 @@ export default function ReviewRestoreRequestDialog({
 
     const userId = request?.userId?.trim();
     if (!userId) {
-      toast("تعذر تحديد طلب الاستعادة المطلوب. أعد تحميل القائمة ثم حاول مرة أخرى.", {
-        title: "تعذر إكمال العملية",
+      toast(t("adminUsersDialog.restore.toast.noRequest"), {
+        title: t("adminUsersDialog.restore.toast.cannotCompleteTitle"),
         variant: "error",
         durationMs: 4200,
       });
@@ -106,10 +108,10 @@ export default function ReviewRestoreRequestDialog({
 
       toast(
         decision === "approved"
-          ? "تمت الموافقة على طلب استعادة الحساب."
-          : "تم رفض طلب استعادة الحساب.",
+          ? t("adminUsersDialog.restore.toast.approvedBody")
+          : t("adminUsersDialog.restore.toast.rejectedBody"),
         {
-          title: decision === "approved" ? "تمت الموافقة" : "تم الرفض",
+          title: decision === "approved" ? t("adminUsersDialog.restore.toast.approvedTitle") : t("adminUsersDialog.restore.toast.rejectedTitle"),
           variant: "success",
           durationMs: 4200,
         },
@@ -120,8 +122,8 @@ export default function ReviewRestoreRequestDialog({
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast(userFacingErrorMessage(error, "تعذر مراجعة طلب الاستعادة حالياً."), {
-        title: "فشلت العملية",
+      toast(userFacingErrorMessage(error, t("adminUsersDialog.restore.toast.reviewFailedFallback")), {
+        title: t("common.operationFailed"),
         variant: "error",
         durationMs: 4200,
       });
@@ -151,7 +153,7 @@ export default function ReviewRestoreRequestDialog({
                   </div>
                   <div>
                     <Dialog.Title className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                      مراجعة طلب استعادة الحساب
+                      {t("adminUsersDialog.restore.title")}
                     </Dialog.Title>
                     <Dialog.Description className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
                       {request.doctorName || request.doctorEmail || "—"}
@@ -185,7 +187,7 @@ export default function ReviewRestoreRequestDialog({
                   {requestedAtLabel ? (
                     <div className="mt-3 border-t border-[#EEF2F6] pt-3">
                       <div className="mb-1 font-cairo text-[11px] font-extrabold text-[#667085]">
-                        تاريخ الطلب:
+                        {t("adminUsersDialog.restore.requestDatePrefix")}
                       </div>
                       <div className="font-cairo text-[12px] font-semibold text-[#111827]">
                         {requestedAtLabel}
@@ -196,7 +198,7 @@ export default function ReviewRestoreRequestDialog({
                   {request.reason ? (
                     <div className="mt-3 border-t border-[#EEF2F6] pt-3">
                       <div className="mb-1 font-cairo text-[11px] font-extrabold text-[#667085]">
-                        سبب الطلب:
+                        {t("adminUsersDialog.restore.reasonPrefix")}
                       </div>
                       <div className="font-cairo text-[12px] font-semibold text-[#111827]">
                         {request.reason}
@@ -207,7 +209,7 @@ export default function ReviewRestoreRequestDialog({
                   {request.deletionReason ? (
                     <div className="mt-3 border-t border-[#EEF2F6] pt-3">
                       <div className="mb-1 font-cairo text-[11px] font-extrabold text-[#DC2626]">
-                        سبب الحذف:
+                        {t("adminUsersDialog.restore.deletionReasonPrefix")}
                       </div>
                       <div className="font-cairo text-[12px] font-semibold text-[#991B1B]">
                         {request.deletionReason}
@@ -218,13 +220,13 @@ export default function ReviewRestoreRequestDialog({
 
                 <div>
                   <label className="mb-2 block font-cairo text-[12px] font-extrabold text-[#111827]">
-                    القرار *
+                    {t("adminUsersDialog.restore.decisionLabel")}
                   </label>
                   <StyledSelect
                     value={decision}
                     onChange={setDecision}
                     options={DECISION_OPTIONS}
-                    placeholder="اختر القرار"
+                    placeholder={t("adminUsersDialog.restore.field.decision.placeholder")}
                     size="sm"
                     tone="muted"
                     disabled={isSubmitting}
@@ -233,12 +235,12 @@ export default function ReviewRestoreRequestDialog({
 
                 <div>
                   <label className="mb-2 block font-cairo text-[12px] font-extrabold text-[#111827]">
-                    ملاحظة المراجعة {decision === "rejected" && "*"}
+                    {t("adminUsersDialog.restore.noteLabel")} {decision === "rejected" && "*"}
                   </label>
                   <textarea
                     value={reviewNote}
                     onChange={(e) => setReviewNote(e.target.value)}
-                    placeholder="أضف ملاحظة حول القرار..."
+                    placeholder={t("adminUsersDialog.restore.field.note.placeholder")}
                     rows={3}
                     disabled={isSubmitting}
                     className="w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 font-cairo text-[12px] font-semibold text-[#111827] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-[#F9FAFB]"
@@ -249,7 +251,7 @@ export default function ReviewRestoreRequestDialog({
                   <div className="flex items-start gap-3 rounded-[8px] border border-[#FDE68A] bg-[#FFFBEB] p-3">
                     <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#D97706]" />
                     <div className="font-cairo text-[11px] font-bold text-[#92400E]">
-                      سيتم تفعيل حساب المستخدم واستعادة صلاحياته المرتبطة بالحساب.
+                      {t("adminUsersDialog.restore.approveWarning")}
                     </div>
                   </div>
                 ) : null}
@@ -262,7 +264,7 @@ export default function ReviewRestoreRequestDialog({
                     disabled={isSubmitting}
                     className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:bg-[#F9FAFB] disabled:opacity-50"
                   >
-                    إلغاء
+                    {t("common.cancel")}
                   </button>
                 </Dialog.Close>
                 <button
@@ -271,7 +273,7 @@ export default function ReviewRestoreRequestDialog({
                   disabled={isSubmitting || !decision}
                   className="inline-flex h-[40px] items-center gap-2 rounded-[8px] border border-primary bg-primary px-4 font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {isSubmitting ? "جارٍ الإرسال..." : "إرسال القرار"}
+                  {isSubmitting ? t("adminUsersDialog.restore.sending") : t("adminUsersDialog.restore.submitDecision")}
                 </button>
               </div>
             </div>

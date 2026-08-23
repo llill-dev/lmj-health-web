@@ -11,11 +11,7 @@ import {
   AdminFormField,
   adminTextareaClass,
 } from "@/components/admin/form-field";
-
-const DECISION_OPTIONS = [
-  { value: "approved", label: "موافقة" },
-  { value: "denied", label: "رفض" },
-];
+import { useI18n } from "@/i18n/provider";
 
 interface ReviewProfileChangeDialogProps {
   open: boolean;
@@ -23,19 +19,6 @@ interface ReviewProfileChangeDialogProps {
   request: AdminDoctorProfileChangeRequest | null;
   onSuccess?: () => void;
 }
-
-const FIELD_LABELS: Record<string, string> = {
-  specialization: "التخصص",
-  medicalLicenseNumber: "رقم الترخيص الطبي",
-  education: "التعليم",
-  clinicAddress: "عنوان العيادة",
-  locationCity: "المدينة",
-  locationCountry: "الدولة",
-  bio: "السيرة الذاتية",
-  consultationFee: "رسوم الاستشارة",
-  clinicLat: "خط عرض العيادة",
-  clinicLng: "خط طول العيادة",
-};
 
 function renderValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
@@ -70,10 +53,29 @@ export default function ReviewProfileChangeDialog({
   request,
   onSuccess,
 }: ReviewProfileChangeDialogProps) {
+  const { t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [decision, setDecision] = useState("");
   const [adminNote, setAdminNote] = useState("");
+
+  const DECISION_OPTIONS = [
+    { value: "approved", label: t("adminUsersDialog.restore.decisionOption.approved") },
+    { value: "denied", label: t("adminUsersDialog.restore.decisionOption.rejected") },
+  ];
+
+  const FIELD_LABELS: Record<string, string> = {
+    specialization: t("adminDoctorProfileChangeRequests.field.specialization"),
+    medicalLicenseNumber: t("adminDoctorProfileChangeRequests.field.medicalLicenseNumber"),
+    education: t("adminDoctorProfileChangeRequests.field.education"),
+    clinicAddress: t("adminDoctorProfileChangeRequests.field.clinicAddress"),
+    locationCity: t("adminFacilityDialog.field.city.label"),
+    locationCountry: t("adminDoctorProfileChangeRequests.field.locationCountry"),
+    bio: t("adminDoctorProfileChangeRequests.field.bio"),
+    consultationFee: t("adminDoctorProfileChangeRequests.field.consultationFee"),
+    clinicLat: t("adminDoctorProfileChangeRequests.field.clinicLat"),
+    clinicLng: t("adminDoctorProfileChangeRequests.field.clinicLng"),
+  };
 
   useEffect(() => {
     setDecision("");
@@ -86,8 +88,8 @@ export default function ReviewProfileChangeDialog({
     e.preventDefault();
 
     if (!decision) {
-      toast("يجب اختيار القرار (موافقة أو رفض)", {
-        title: "خطأ في التحقق",
+      toast(t("adminDoctorProfileChangeRequests.toast.decisionRequired"), {
+        title: t("adminUsersDialog.restore.toast.validationErrorTitle"),
         variant: "error",
         durationMs: 4200,
       });
@@ -95,8 +97,8 @@ export default function ReviewProfileChangeDialog({
     }
 
     if (decision === "denied" && !adminNote.trim()) {
-      toast("يجب إضافة ملاحظة عند رفض الطلب", {
-        title: "خطأ في التحقق",
+      toast(t("adminDoctorProfileChangeRequests.toast.noteRequired"), {
+        title: t("adminUsersDialog.restore.toast.validationErrorTitle"),
         variant: "error",
         durationMs: 4200,
       });
@@ -110,12 +112,13 @@ export default function ReviewProfileChangeDialog({
         adminNote: adminNote || undefined,
       });
 
+      const doctorLabel = request.doctor?.userId?.fullName || request.doctor?._id || "—";
       const message =
         decision === "approved"
-          ? `تمت الموافقة على طلب تغيير بيانات الطبيب «${request.doctor?.userId?.fullName || request.doctor?._id || "—"}» وتحديث حالته إلى «موافق عليه».`
-          : `تم رفض طلب تغيير بيانات الطبيب «${request.doctor?.userId?.fullName || request.doctor?._id || "—"}» وتحديث حالته إلى «مرفوض».`;
+          ? t("adminDoctorProfileChangeRequests.toast.approvedBody").replace("{name}", doctorLabel)
+          : t("adminDoctorProfileChangeRequests.toast.rejectedBody").replace("{name}", doctorLabel);
       toast(message, {
-        title: decision === "approved" ? "تمت الموافقة" : "تم الرفض",
+        title: decision === "approved" ? t("adminUsersDialog.restore.toast.approvedTitle") : t("adminUsersDialog.restore.toast.rejectedTitle"),
         variant: "success",
         durationMs: 4200,
       });
@@ -128,10 +131,10 @@ export default function ReviewProfileChangeDialog({
       toast(
         userFacingErrorMessage(
           error,
-          "حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.",
+          t("adminDoctorProfileChangeRequests.toast.genericError"),
         ),
         {
-        title: "فشلت العملية",
+        title: t("common.operationFailed"),
         variant: "error",
         durationMs: 4200,
         },
@@ -170,10 +173,10 @@ export default function ReviewProfileChangeDialog({
                 </div>
                 <div>
                   <h3 className="font-cairo text-[16px] font-extrabold text-[#111827]">
-                    مراجعة طلب تغيير البيانات
+                    {t("adminDoctorProfileChangeRequests.title")}
                   </h3>
                   <p className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                    راجع التغييرات المطلوبة وقرر الموافقة أو الرفض
+                    {t("adminDoctorProfileChangeRequests.subtitle")}
                   </p>
                 </div>
               </div>
@@ -208,10 +211,10 @@ export default function ReviewProfileChangeDialog({
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <div className="font-cairo font-semibold text-[#667085]">
-                    رقم الترخيص: {request.doctor?.medicalLicenseNumber || "—"}
+                    {t("adminDoctorProfileChangeRequests.licenseNumberPrefix")}{request.doctor?.medicalLicenseNumber || "—"}
                   </div>
                   <div className="font-cairo font-semibold text-[#667085]">
-                    طلب بواسطة: {request.requestedBy?.fullName || "—"}
+                    {t("adminDoctorProfileChangeRequests.requestedByPrefix")}{request.requestedBy?.fullName || "—"}
                   </div>
                 </div>
               </div>
@@ -220,7 +223,7 @@ export default function ReviewProfileChangeDialog({
               {request.items && request.items.length > 0 ? (
                 <div>
                   <label className="block mb-3 font-cairo text-[12px] font-extrabold text-[#111827]">
-                    التغييرات المطلوبة
+                    {t("adminDoctorProfileChangeRequests.requestedChanges")}
                   </label>
                   <div className="space-y-3">
                     {request.items.map((item, index) => (
@@ -234,7 +237,7 @@ export default function ReviewProfileChangeDialog({
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <div className="font-cairo text-[10px] font-semibold text-[#98A2B3] mb-1">
-                              القيمة الحالية
+                              {t("adminDoctorProfileChangeRequests.currentValue")}
                             </div>
                             <div className="font-cairo text-[11px] font-bold text-[#667085] bg-[#F9FAFB] p-2 rounded-[6px]">
                               {renderValue(item.oldValue)}
@@ -242,7 +245,7 @@ export default function ReviewProfileChangeDialog({
                           </div>
                           <div>
                             <div className="font-cairo text-[10px] font-semibold text-[#16A34A] mb-1">
-                              القيمة الجديدة
+                              {t("adminDoctorProfileChangeRequests.newValue")}
                             </div>
                             <div className="font-cairo text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] p-2 rounded-[6px]">
                               {renderValue(item.newValue)}
@@ -257,7 +260,7 @@ export default function ReviewProfileChangeDialog({
                 <div className="rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] p-4 flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-[#D97706] shrink-0 mt-0.5" />
                   <div className="font-cairo text-[12px] font-semibold text-[#92400E]">
-                    لا توجد تفاصيل التغييرات متاحة
+                    {t("adminDoctorProfileChangeRequests.noChangeDetails")}
                   </div>
                 </div>
               )}
@@ -265,13 +268,13 @@ export default function ReviewProfileChangeDialog({
               {/* Decision */}
               <div>
                 <label className="block mb-2 font-cairo text-[12px] font-extrabold text-[#111827]">
-                  القرار *
+                  {t("adminDoctorProfileChangeRequests.field.decision.placeholder")} *
                 </label>
                 <StyledSelect
                   value={decision}
                   onChange={setDecision}
                   options={DECISION_OPTIONS}
-                  placeholder="اختر القرار"
+                  placeholder={t("adminDoctorProfileChangeRequests.field.decision.placeholder")}
                   size="sm"
                   tone="muted"
                   disabled={isSubmitting}
@@ -280,7 +283,7 @@ export default function ReviewProfileChangeDialog({
 
               {/* Admin Note */}
               <AdminFormField
-                label="ملاحظة الإدارة"
+                label={t("adminDoctorProfileChangeRequests.adminNoteLabel")}
                 required={decision === "denied"}
               >
                 <textarea
@@ -289,8 +292,8 @@ export default function ReviewProfileChangeDialog({
                   disabled={isSubmitting}
                   placeholder={
                     decision === "denied"
-                      ? "أدخل سبب الرفض..."
-                      : "أضف ملاحظة اختيارية..."
+                      ? t("adminDoctorProfileChangeRequests.field.note.denyPlaceholder")
+                      : t("adminDoctorProfileChangeRequests.field.note.optionalPlaceholder")
                   }
                   rows={3}
                   className={adminTextareaClass}
@@ -302,8 +305,7 @@ export default function ReviewProfileChangeDialog({
                 <div className="rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] p-3 flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-[#D97706] shrink-0 mt-0.5" />
                   <div className="font-cairo text-[11px] font-semibold text-[#92400E]">
-                    سيتم تحديث بيانات الطبيب فوراً بعد الموافقة. تأكد من صحة
-                    جميع التغييرات.
+                    {t("adminDoctorProfileChangeRequests.approveWarning")}
                   </div>
                 </div>
               )}
@@ -316,7 +318,7 @@ export default function ReviewProfileChangeDialog({
                   disabled={isSubmitting}
                   className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[12px] font-extrabold text-[#111827] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -324,10 +326,10 @@ export default function ReviewProfileChangeDialog({
                   className="flex-1 h-[44px] items-center justify-center rounded-[10px] border border-primary bg-primary font-cairo text-[12px] font-extrabold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting
-                    ? "جارٍ المعالجة..."
+                    ? t("adminDoctorProfileChangeRequests.processing")
                     : decision === "approved"
-                      ? "موافقة وتحديث"
-                      : "رفض الطلب"}
+                      ? t("adminDoctorProfileChangeRequests.approveAndUpdate")
+                      : t("adminDoctorProfileChangeRequests.rejectRequest")}
                 </button>
               </div>
             </form>

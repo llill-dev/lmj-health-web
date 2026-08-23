@@ -1,8 +1,10 @@
 import type { ElementType } from 'react';
 import { CalendarDays, Settings, Users } from 'lucide-react';
+import type { AppLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
 
 export type SecretaryPermissionGroup = {
-  label: string;
+  labelKey: string;
   icon: ElementType;
   keys: string[];
   color: string;
@@ -12,7 +14,7 @@ export type SecretaryPermissionGroup = {
 
 export const PERM_GROUPS: SecretaryPermissionGroup[] = [
   {
-    label: 'المواعيد',
+    labelKey: 'adminSecretaryPermissions.group.appointments',
     icon: CalendarDays,
     keys: ['appointments:book', 'appointments:view', 'appointments:edit', 'appointments:cancel'],
     color: 'text-[#0369A1]',
@@ -20,7 +22,7 @@ export const PERM_GROUPS: SecretaryPermissionGroup[] = [
     border: 'border-[#BAE6FD]',
   },
   {
-    label: 'قائمة الانتظار',
+    labelKey: 'adminSecretaryPermissions.group.waitlist',
     icon: Users,
     keys: ['waitlist:create', 'waitlist:view', 'waitlist:manage', 'waitlist:book'],
     color: 'text-[#7C3AED]',
@@ -28,7 +30,7 @@ export const PERM_GROUPS: SecretaryPermissionGroup[] = [
     border: 'border-[#C4B5FD]',
   },
   {
-    label: 'المرضى',
+    labelKey: 'adminSecretaryPermissions.group.patients',
     icon: Users,
     keys: ['patients:view', 'patients:temporary:create', 'patients:files:view', 'patients:files:upload'],
     color: 'text-[#15803D]',
@@ -36,7 +38,7 @@ export const PERM_GROUPS: SecretaryPermissionGroup[] = [
     border: 'border-[#86EFAC]',
   },
   {
-    label: 'الجدول',
+    labelKey: 'adminSecretaryPermissions.group.schedule',
     icon: Settings,
     keys: ['schedule:view'],
     color: 'text-[#D97706]',
@@ -45,18 +47,23 @@ export const PERM_GROUPS: SecretaryPermissionGroup[] = [
   },
 ];
 
-export const PERM_LABEL: Record<string, string> = {
-  'appointments:book': 'حجز مواعيد',
-  'appointments:view': 'عرض المواعيد',
-  'appointments:edit': 'تعديل المواعيد',
-  'appointments:cancel': 'إلغاء المواعيد',
-  'waitlist:create': 'إنشاء قائمة الانتظار',
-  'waitlist:view': 'عرض قائمة الانتظار',
-  'waitlist:manage': 'إدارة قائمة الانتظار',
-  'waitlist:book': 'حجز من قائمة الانتظار',
-  'patients:view': 'عرض المرضى',
-  'patients:temporary:create': 'إنشاء مريض مؤقت',
-  'patients:files:view': 'عرض ملفات المرضى',
-  'patients:files:upload': 'رفع ملفات المرضى',
-  'schedule:view': 'عرض الجدول',
+const PERM_LABEL_KEY: Record<string, string> = {
+  'appointments:book': 'adminSecretaryPermissions.perm.appointments_book',
+  'appointments:view': 'adminSecretaryPermissions.perm.appointments_view',
+  'appointments:edit': 'adminSecretaryPermissions.perm.appointments_edit',
+  'appointments:cancel': 'adminSecretaryPermissions.perm.appointments_cancel',
+  'waitlist:create': 'adminSecretaryPermissions.perm.waitlist_create',
+  'waitlist:view': 'adminSecretaryPermissions.perm.waitlist_view',
+  'waitlist:manage': 'adminSecretaryPermissions.perm.waitlist_manage',
+  'waitlist:book': 'adminSecretaryPermissions.perm.waitlist_book',
+  'patients:view': 'adminSecretaryPermissions.perm.patients_view',
+  'patients:temporary:create': 'adminSecretaryPermissions.perm.patients_temporary_create',
+  'patients:files:view': 'adminSecretaryPermissions.perm.patients_files_view',
+  'patients:files:upload': 'adminSecretaryPermissions.perm.patients_files_upload',
+  'schedule:view': 'adminSecretaryPermissions.perm.schedule_view',
 };
+
+export function permLabel(key: string, locale: AppLocale = 'ar'): string {
+  const labelKey = PERM_LABEL_KEY[key];
+  return labelKey ? (getTranslationValue(locale, labelKey) ?? key) : key;
+}

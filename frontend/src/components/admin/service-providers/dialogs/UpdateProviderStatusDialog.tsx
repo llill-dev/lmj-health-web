@@ -9,12 +9,6 @@ import { adminApi } from "@/lib/admin/client";
 import { getAdminServiceProviderMutationErrorMessage } from "@/lib/admin/adminWriteFlowErrors";
 import { AdminFormField } from "@/components/admin/form-field";
 
-const STATUS_OPTIONS = [
-  { value: "draft", label: "مسودة" },
-  { value: "active", label: "نشط" },
-  { value: "inactive", label: "معطّل" },
-];
-
 interface UpdateProviderStatusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,10 +30,16 @@ export default function UpdateProviderStatusDialog({
   isServiceTypeActive = true,
   onSuccess,
 }: UpdateProviderStatusDialogProps) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState(currentStatus);
+
+  const STATUS_OPTIONS = [
+    { value: "draft", label: t("adminServiceProvider.status.draft") },
+    { value: "active", label: t("common.active") },
+    { value: "inactive", label: t("common.disabled") },
+  ];
 
   useEffect(() => {
     if (open) setStatus(currentStatus);
@@ -78,8 +78,8 @@ export default function UpdateProviderStatusDialog({
     try {
       await adminApi.serviceProviders.updateStatus(providerId, { status });
 
-      toast("تم تحديث حالة مزود الخدمة بنجاح", {
-        title: "تم التحديث",
+      toast(t("adminServiceProviderDialog.toast.statusUpdated"), {
+        title: t("adminFacilityDialog.toast.updatedTitle"),
         variant: "success",
         durationMs: 4200,
       });
@@ -88,7 +88,7 @@ export default function UpdateProviderStatusDialog({
       onSuccess?.();
     } catch (error) {
       toast(getAdminServiceProviderMutationErrorMessage(error, "status"), {
-        title: "فشلت العملية",
+        title: t("common.operationFailed"),
         variant: "error",
         durationMs: 4200,
       });
@@ -104,7 +104,7 @@ export default function UpdateProviderStatusDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="تغيير حالة مزود الخدمة"
+          aria-label={t("adminServiceProviderDialog.changeStatus.ariaLabel")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -135,13 +135,13 @@ export default function UpdateProviderStatusDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  تغيير حالة مزود الخدمة
+                  {t("adminServiceProviderDialog.changeStatus.ariaLabel")}
                 </h2>
                 <p className="mt-1 font-cairo text-[13px] font-bold text-[#667085]">
                   {providerName}
@@ -153,11 +153,11 @@ export default function UpdateProviderStatusDialog({
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <AdminFormField
-                    label="الحالة الجديدة"
+                    label={t("adminFacilityDialog.changeStatus.newStatusLabel")}
                     required
                     hint={
                       !isServiceTypeActive
-                        ? "نوع الخدمة غير مُفعّل حاليًا، لذا لا يمكن تفعيل هذا المزود قبل تفعيل النوع."
+                        ? t("adminServiceProviderDialog.changeStatus.inactiveTypeHint")
                         : undefined
                     }
                   >
@@ -165,7 +165,7 @@ export default function UpdateProviderStatusDialog({
                       value={status}
                       onChange={setStatus}
                       options={statusOptions}
-                      placeholder="اختر الحالة"
+                      placeholder={t("common.selectStatus")}
                     />
                   </AdminFormField>
 
@@ -173,8 +173,7 @@ export default function UpdateProviderStatusDialog({
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-5 w-5 text-[#D97706] mt-0.5 shrink-0" />
                       <div className="font-cairo text-[12px] font-semibold text-[#92400E] leading-relaxed">
-                        سيؤثر تغيير الحالة على إمكانية عرض مزود الخدمة
-                        للمستخدمين. تأكد من صحة القرار قبل المتابعة.
+                        {t("adminServiceProviderDialog.changeStatus.warning")}
                       </div>
                     </div>
                   </div>
@@ -188,7 +187,7 @@ export default function UpdateProviderStatusDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -196,7 +195,7 @@ export default function UpdateProviderStatusDialog({
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Check className="w-4 h-4" aria-hidden />
-                  {isSubmitting ? "جارٍ التحديث…" : "تأكيد التغيير"}
+                  {isSubmitting ? t("adminFacilityDialog.action.updating") : t("adminServiceProviderDialog.changeStatus.confirmButton")}
                 </button>
               </div>
             </form>

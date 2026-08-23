@@ -21,7 +21,7 @@ import {
 } from "@/hooks/admin/secretaries/useAdminSecretaries";
 import { useAdminDoctors } from "@/hooks/admin/doctors/useAdminDoctors";
 import { SecretaryCardSkeleton } from "@/components/admin/secretaries/SecretaryCardSkeleton";
-import { PERM_LABEL } from "@/components/admin/secretaries/secretaryPermissions";
+import { permLabel } from "@/components/admin/secretaries/secretaryPermissions";
 import { resolveUserId } from "@/components/admin/secretaries/secretaryListUtils";
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
 import StyledSelect from "@/components/ui/styled-select";
@@ -329,7 +329,7 @@ export default function AdminSecretariesPage() {
                               key={p}
                               className="rounded-full border border-[#E0F2FE] bg-[#F0F9FF] px-2.5 py-1 font-cairo text-[10px] font-extrabold text-[#0369A1]"
                             >
-                              {PERM_LABEL[p] ?? p}
+                              {permLabel(p, locale)}
                             </span>
                           ))}
                         </div>

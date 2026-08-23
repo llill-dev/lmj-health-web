@@ -4,33 +4,7 @@ import { X, Building2, MapPin, Phone, FileText, User, Tag } from "lucide-react";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "@/lib/admin/client";
-
-const FACILITY_TYPE_LABELS: Record<string, string> = {
-  hospital: "مستشفى",
-  clinic: "عيادة",
-  polyclinic: "عيادات متعددة",
-  medical_center: "مركز طبي",
-  laboratory: "مختبر",
-  imaging_center: "مركز أشعة",
-  pharmacy: "صيدلية",
-  rehabilitation_center: "مركز تأهيل",
-  dialysis_center: "مركز غسيل كلوي",
-  emergency_center: "طوارئ",
-  other: "أخرى",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: "نشط",
-  PENDING: "قيد المراجعة",
-  INACTIVE: "معطّل",
-  DELETED: "محذوف",
-};
-
-const DOCTOR_APPROVAL_STATUS_LABELS: Record<string, string> = {
-  approved: "مقبول",
-  pending: "قيد المراجعة",
-  rejected: "مرفوض",
-};
+import { useI18n } from "@/i18n/provider";
 
 function formatFacilityAttributeLabel(value: string): string {
   return value.replace(/_/g, " ");
@@ -57,6 +31,35 @@ export default function FacilityDetailsDialog({
   onOpenChange,
   facilityId,
 }: FacilityDetailsDialogProps) {
+  const { t } = useI18n();
+
+  const FACILITY_TYPE_LABELS: Record<string, string> = {
+    hospital: t("adminFacility.type.hospital"),
+    clinic: t("adminFacility.type.clinic"),
+    polyclinic: t("adminFacility.type.polyclinic"),
+    medical_center: t("adminFacility.type.medicalCenter"),
+    laboratory: t("adminFacility.type.laboratory"),
+    imaging_center: t("adminFacility.type.imagingCenter"),
+    pharmacy: t("adminFacility.type.pharmacy"),
+    rehabilitation_center: t("adminFacility.type.rehabilitationCenter"),
+    dialysis_center: t("adminFacility.type.dialysisCenter"),
+    emergency_center: t("adminFacility.type.emergencyCenter"),
+    other: t("adminFacility.type.other"),
+  };
+
+  const STATUS_LABELS: Record<string, string> = {
+    ACTIVE: t("common.active"),
+    PENDING: t("adminFacility.status.pending"),
+    INACTIVE: t("common.disabled"),
+    DELETED: t("adminFacility.status.deleted"),
+  };
+
+  const DOCTOR_APPROVAL_STATUS_LABELS: Record<string, string> = {
+    approved: t("adminApproval.approved"),
+    pending: t("adminFacility.status.pending"),
+    rejected: t("adminApproval.rejected"),
+  };
+
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["admin", "facility", facilityId],
     queryFn: () => adminApi.facilities.getById(facilityId!),
@@ -103,7 +106,7 @@ export default function FacilityDetailsDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="تفاصيل المنشأة الطبية"
+          aria-label={t('adminFacilityDialog.details.ariaLabel')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -132,13 +135,13 @@ export default function FacilityDetailsDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  تفاصيل المنشأة الطبية
+                  {t('adminFacilityDialog.details.ariaLabel')}
                 </h2>
               </div>
             </div>
@@ -179,7 +182,7 @@ export default function FacilityDetailsDialog({
                         <User className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
                         <div className="flex-1">
                           <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mb-1">
-                            عدد الأطباء المرتبطين
+                            {t('adminFacilityDialog.details.doctorCount')}
                           </div>
                           <div className="font-cairo text-[14px] font-bold text-[#111827]">
                             {facility.doctorCount as number}
@@ -193,7 +196,7 @@ export default function FacilityDetailsDialog({
                         <MapPin className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
                         <div className="flex-1">
                           <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mb-1">
-                            الموقع
+                            {t('adminFacilityDialog.details.location')}
                           </div>
                           <div className="font-cairo text-[14px] font-bold text-[#111827]">
                             {getFacilityLocationLabel(facility)}
@@ -212,7 +215,7 @@ export default function FacilityDetailsDialog({
                         <Phone className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
                         <div className="flex-1">
                           <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mb-1">
-                            رقم الهاتف
+                            {t('adminFacilityDialog.field.phone.label')}
                           </div>
                           <div className="font-cairo text-[14px] font-bold text-[#111827]">
                             {facility.phone as string}
@@ -226,7 +229,7 @@ export default function FacilityDetailsDialog({
                         <FileText className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
                         <div className="flex-1">
                           <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mb-1">
-                            الوصف
+                            {t('adminFacilityDialog.field.description.label')}
                           </div>
                           <div className="font-cairo text-[14px] font-semibold text-[#667085]">
                             {facility.description as string}
@@ -240,7 +243,7 @@ export default function FacilityDetailsDialog({
                         <User className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
                         <div className="flex-1">
                           <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mb-1">
-                            الطبيب المالك
+                            {t('adminFacilityDialog.field.ownerDoctor.label')}
                           </div>
                           <div className="font-cairo text-[14px] font-bold text-[#111827]">
                             {ownerDisplayName}
@@ -252,7 +255,7 @@ export default function FacilityDetailsDialog({
                           )}
                           {owner?.approvalStatus && (
                             <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mt-1">
-                              حالة الاعتماد:{" "}
+                              {t('adminFacilityDialog.details.approvalStatusPrefix')}
                               {DOCTOR_APPROVAL_STATUS_LABELS[owner.approvalStatus as string] ||
                                 (owner.approvalStatus as string)}
                             </div>
@@ -268,7 +271,7 @@ export default function FacilityDetailsDialog({
                           <Tag className="h-5 w-5 mt-0.5 text-[#98A2B3]" />
                           <div className="flex-1">
                             <div className="font-cairo text-[11px] font-bold text-[#98A2B3] mb-1">
-                              السمات والخصائص
+                              {t('adminFacilityDialog.field.attributes.label')}
                             </div>
                             <div className="flex flex-wrap gap-2 mt-2">
                               {(facility.attributes as string[]).map(
@@ -290,7 +293,7 @@ export default function FacilityDetailsDialog({
                 </div>
               ) : (
                 <div className="text-center py-8 font-cairo text-[13px] font-semibold text-[#667085]">
-                  لم يتم العثور على بيانات المنشأة
+                  {t('adminFacilityDialog.details.notFound')}
                 </div>
               )}
             </div>
@@ -301,7 +304,7 @@ export default function FacilityDetailsDialog({
                 onClick={() => onOpenChange(false)}
                 className="inline-flex h-[48px] w-full items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary"
               >
-                إغلاق
+                {t('common.close')}
               </button>
             </div>
           </motion.div>

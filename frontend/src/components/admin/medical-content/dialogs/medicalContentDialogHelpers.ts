@@ -321,6 +321,7 @@ export function toPrettyJson(value: unknown, fallback = ""): string {
 export function parseJsonInput(
   value: string,
   fallback: unknown,
+  language: "ar" | "en" = "ar",
 ): { value: unknown; error?: string } {
   const trimmed = value.trim();
   if (!trimmed) return { value: fallback };
@@ -337,7 +338,10 @@ export function parseJsonInput(
     }
     return { value: parsed };
   } catch {
-    return { value: fallback, error: "صيغة JSON غير صالحة." };
+    return {
+      value: fallback,
+      error: language === "en" ? "Invalid JSON format." : "صيغة JSON غير صالحة.",
+    };
   }
 }
 
@@ -636,14 +640,15 @@ export function toReleaseAcceptanceFields(item: AdminContentDetailsItem | null):
   };
 }
 
-export function formatDate(value?: string) {
+export function formatDate(value?: string, language: "ar" | "en" = "ar") {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleString("ar-SY");
+  return d.toLocaleString(language === "en" ? "en-US" : "ar-SY");
 }
 
-export function formatBoolean(value?: boolean) {
+export function formatBoolean(value?: boolean, language: "ar" | "en" = "ar") {
   if (value == null) return "—";
+  if (language === "en") return value ? "Yes" : "No";
   return value ? "نعم" : "لا";
 }

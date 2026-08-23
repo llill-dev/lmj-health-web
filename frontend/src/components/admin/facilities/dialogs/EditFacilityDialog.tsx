@@ -28,27 +28,6 @@ import { cn } from "@/lib/utils/utils";
 import type { FacilitySummary } from "@/lib/admin/types";
 import { useI18n } from "@/i18n/provider";
 
-const FACILITY_TYPE_OPTIONS = [
-  { value: "hospital", label: "مستشفى" },
-  { value: "clinic", label: "عيادة" },
-  { value: "polyclinic", label: "عيادات متعددة" },
-  { value: "medical_center", label: "مركز طبي" },
-  { value: "laboratory", label: "مختبر" },
-  { value: "imaging_center", label: "مركز أشعة" },
-  { value: "pharmacy", label: "صيدلية" },
-  { value: "rehabilitation_center", label: "مركز تأهيل" },
-  { value: "dialysis_center", label: "مركز غسيل كلوي" },
-  { value: "emergency_center", label: "طوارئ" },
-  { value: "other", label: "أخرى" },
-];
-
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "نشط" },
-  { value: "PENDING", label: "قيد المراجعة" },
-  { value: "INACTIVE", label: "معطّل" },
-  { value: "DELETED", label: "محذوف" },
-];
-
 interface EditFacilityDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -78,9 +57,23 @@ export default function EditFacilityDialog({
   doctors,
   onSuccess,
 }: EditFacilityDialogProps) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const FACILITY_TYPE_OPTIONS = [
+    { value: "hospital", label: t("adminFacility.type.hospital") },
+    { value: "clinic", label: t("adminFacility.type.clinic") },
+    { value: "polyclinic", label: t("adminFacility.type.polyclinic") },
+    { value: "medical_center", label: t("adminFacility.type.medicalCenter") },
+    { value: "laboratory", label: t("adminFacility.type.laboratory") },
+    { value: "imaging_center", label: t("adminFacility.type.imagingCenter") },
+    { value: "pharmacy", label: t("adminFacility.type.pharmacy") },
+    { value: "rehabilitation_center", label: t("adminFacility.type.rehabilitationCenter") },
+    { value: "dialysis_center", label: t("adminFacility.type.dialysisCenter") },
+    { value: "emergency_center", label: t("adminFacility.type.emergencyCenter") },
+    { value: "other", label: t("adminFacility.type.other") },
+  ];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -120,7 +113,9 @@ export default function EditFacilityDialog({
     label: doctor.user?.fullName || doctor._id,
   }));
   const ownerDoctorPlaceholder =
-    doctorOptions.length > 0 ? "اختر الطبيب المالك" : "لا يوجد أطباء متاحون";
+    doctorOptions.length > 0
+      ? t("adminFacilityDialog.field.ownerDoctor.placeholder")
+      : t("adminFacilityDialog.field.ownerDoctor.empty");
 
   useEffect(() => {
     if (facility) {
@@ -145,22 +140,22 @@ export default function EditFacilityDialog({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "اسم المنشأة مطلوب";
+      newErrors.name = t("adminFacilityDialog.validation.nameRequired");
     }
 
     if (!formData.city.trim()) {
-      newErrors.city = "المدينة مطلوبة";
+      newErrors.city = t("adminFacilityDialog.validation.cityRequired");
     }
 
     if (!formData.facilityType) {
-      newErrors.facilityType = "يجب اختيار نوع المنشأة";
+      newErrors.facilityType = t("adminFacilityDialog.validation.typeRequired");
     }
 
     if (
       formData.phone.trim() &&
       !/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/\s/g, ""))
     ) {
-      newErrors.phone = "رقم الهاتف غير صالح";
+      newErrors.phone = t("adminFacilityDialog.validation.phoneInvalid");
     }
 
     setErrors(newErrors);
@@ -208,8 +203,8 @@ export default function EditFacilityDialog({
         attributes: formData.attributes,
       });
 
-      toast("تم تحديث بيانات المنشأة بنجاح", {
-        title: "تم التحديث",
+      toast(t('adminFacilityDialog.toast.updated'), {
+        title: t("adminFacilityDialog.toast.updatedTitle"),
         variant: "success",
         durationMs: 4200,
       });
@@ -237,7 +232,7 @@ export default function EditFacilityDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="تعديل بيانات المنشأة الطبية"
+          aria-label={t('adminFacilityDialog.edit.ariaLabel')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -268,13 +263,13 @@ export default function EditFacilityDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
                 className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
               <div className="relative text-right">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  تعديل بيانات المنشأة الطبية
+                  {t("adminFacilityDialog.edit.ariaLabel")}
                 </h2>
               </div>
             </div>
@@ -289,7 +284,7 @@ export default function EditFacilityDialog({
                   ) : null}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <AdminFormField
-                      label="اسم المنشأة"
+                      label={t("adminFacilityDialog.field.name.label")}
                       required
                       error={errors.name}
                     >
@@ -304,7 +299,7 @@ export default function EditFacilityDialog({
                           if (errors.name)
                             setErrors((prev) => ({ ...prev, name: "" }));
                         }}
-                        placeholder="أدخل اسم المنشأة"
+                        placeholder={t('adminFacilityDialog.field.name.placeholder')}
                         className={adminFieldClass(
                           cn(
                             adminInputClass,
@@ -316,7 +311,7 @@ export default function EditFacilityDialog({
                     </AdminFormField>
 
                     <AdminFormField
-                      label="المدينة"
+                      label={t("adminFacilityDialog.field.city.label")}
                       required
                       error={errors.city}
                     >
@@ -331,7 +326,7 @@ export default function EditFacilityDialog({
                           if (errors.city)
                             setErrors((prev) => ({ ...prev, city: "" }));
                         }}
-                        placeholder="أدخل المدينة"
+                        placeholder={t('common.enterCity')}
                         className={adminFieldClass(
                           cn(
                             adminInputClass,
@@ -343,7 +338,7 @@ export default function EditFacilityDialog({
                     </AdminFormField>
 
                     <AdminFormField
-                      label="نوع المنشأة"
+                      label={t("adminFacilityDialog.field.type.label")}
                       required
                       error={errors.facilityType}
                     >
@@ -361,13 +356,13 @@ export default function EditFacilityDialog({
                             }));
                         }}
                         options={FACILITY_TYPE_OPTIONS}
-                        placeholder="اختر نوع المنشأة"
+                        placeholder={t('adminFacilityDialog.field.type.placeholder')}
                         error={Boolean(errors.facilityType)}
                       />
                     </AdminFormField>
 
                     <AdminFormField
-                      label="البلد"
+                      label={t("adminFacilityDialog.field.country.label")}
                       error={errors.country}
                     >
                       <input
@@ -381,7 +376,7 @@ export default function EditFacilityDialog({
                           if (errors.country)
                             setErrors((prev) => ({ ...prev, country: "" }));
                         }}
-                        placeholder="أدخل البلد"
+                        placeholder={t('common.enterCountry')}
                         className={adminFieldClass(
                           cn(
                             adminInputClass,
@@ -393,7 +388,7 @@ export default function EditFacilityDialog({
                     </AdminFormField>
 
                     <AdminFormField
-                      label="رقم الهاتف"
+                      label={t("adminFacilityDialog.field.phone.label")}
                       required
                       error={errors.phone}
                     >
@@ -421,7 +416,7 @@ export default function EditFacilityDialog({
                   </div>
 
                   <AdminFormField
-                    label="العنوان"
+                    label={t("adminFacilityDialog.field.address.label")}
                     error={errors.address}
                   >
                     <input
@@ -435,7 +430,7 @@ export default function EditFacilityDialog({
                         if (errors.address)
                           setErrors((prev) => ({ ...prev, address: "" }));
                       }}
-                      placeholder="أدخل العنوان الكامل"
+                      placeholder={t('adminFacilityDialog.field.address.placeholder')}
                       className={adminFieldClass(
                         cn(
                           adminInputClass,
@@ -447,8 +442,8 @@ export default function EditFacilityDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="الوصف"
-                    hint="أدخل وصفاً للمنشأة (اختياري)"
+                    label={t("adminFacilityDialog.field.description.label")}
+                    hint={t("adminFacilityDialog.field.description.hint")}
                   >
                     <textarea
                       value={formData.description}
@@ -458,7 +453,7 @@ export default function EditFacilityDialog({
                           description: e.target.value,
                         }))
                       }
-                      placeholder="أدخل وصفاً للمنشأة"
+                      placeholder={t('adminFacilityDialog.field.description.placeholder')}
                       rows={3}
                       className={adminFieldClass(
                         cn(
@@ -471,8 +466,8 @@ export default function EditFacilityDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="الطبيب المالك"
-                    hint="اختر الطبيب المالك (اختياري)"
+                    label={t("adminFacilityDialog.field.ownerDoctor.label")}
+                    hint={t("adminFacilityDialog.field.ownerDoctor.hint")}
                   >
                     <StyledSelect
                       value={formData.ownerDoctorId}
@@ -486,7 +481,7 @@ export default function EditFacilityDialog({
                         }
                       }}
                       options={[
-                        { value: "", label: "بدون طبيب مالك" },
+                        { value: "", label: t("adminFacilityDialog.field.ownerDoctor.none") },
                         ...doctorOptions,
                       ]}
                       placeholder={ownerDoctorPlaceholder}
@@ -494,9 +489,9 @@ export default function EditFacilityDialog({
                   </AdminFormField>
 
                   <AdminFormField
-                    label="السمات والخصائص"
+                    label={t("adminFacilityDialog.field.attributes.label")}
                     error={errors.attributes}
-                    hint="سيتم حفظ السمات بصيغة مفاتيح مثل night_shift و echo_available."
+                    hint={t("adminFacilityDialog.field.attributes.hint")}
                   >
                     <div className="flex gap-2 items-center">
                       <input
@@ -510,7 +505,7 @@ export default function EditFacilityDialog({
                             addAttribute();
                           }
                         }}
-                        placeholder="أضف سمة (مثال: طوارئ، ICU)"
+                        placeholder={t('adminFacilityDialog.field.tag.placeholder')}
                         disabled={isSubmitting}
                         className={adminFieldClass(
                           cn(
@@ -525,7 +520,7 @@ export default function EditFacilityDialog({
                         onClick={addAttribute}
                         disabled={isSubmitting || !newAttribute.trim()}
                         className="inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[12px] bg-primary text-white disabled:opacity-50"
-                        aria-label="إضافة سمة"
+                        aria-label={t('adminFacilityDialog.action.addTag')}
                       >
                         <Plus className="w-4 h-4" aria-hidden />
                       </button>
@@ -544,7 +539,7 @@ export default function EditFacilityDialog({
                               onClick={() => removeAttribute(attribute)}
                               disabled={isSubmitting}
                               className="text-primary/70 transition hover:text-[#B42318] disabled:opacity-50"
-                              aria-label={`إزالة ${attribute}`}
+                              aria-label={t("adminFacilityDialog.attributes.removeAria").replace("{name}", attribute)}
                             >
                               <X className="w-3 h-3" aria-hidden />
                             </button>
@@ -553,7 +548,7 @@ export default function EditFacilityDialog({
                       </div>
                     ) : (
                       <p className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                        لا توجد سمات مضافة بعد.
+                        {t("adminFacilityDialog.attributes.empty")}
                       </p>
                     )}
                   </AdminFormField>
@@ -567,7 +562,7 @@ export default function EditFacilityDialog({
                   disabled={isSubmitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -575,7 +570,7 @@ export default function EditFacilityDialog({
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" aria-hidden />
-                  {isSubmitting ? "جارٍ التحديث…" : "حفظ التغييرات"}
+                  {isSubmitting ? t("adminFacilityDialog.action.updating") : t("adminFacilityDialog.action.saveChanges")}
                 </button>
               </div>
             </form>

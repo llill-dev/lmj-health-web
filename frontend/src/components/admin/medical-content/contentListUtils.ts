@@ -10,6 +10,12 @@ import {
   localizeAcceptanceCopy,
   type WorkflowActorRole,
 } from './releaseAcceptanceMatrix';
+import type { AppLocale } from '@/i18n/runtime';
+import { getTranslationValue } from '@/i18n/translations';
+
+function tt(locale: AppLocale, key: string): string {
+  return getTranslationValue(locale, key) ?? key;
+}
 
 export const PAGE_SIZE = 20;
 
@@ -269,9 +275,10 @@ export function buildVisiblePageNumbers(
 
 export function languageKindLabel(
   languageField: string | undefined,
+  locale: AppLocale = 'ar',
 ): { code: 'ar' | 'en' | 'other'; label: string } {
   const n = normalizeItemLanguage(languageField);
-  if (n === 'ar') return { code: 'ar', label: 'العربية' };
+  if (n === 'ar') return { code: 'ar', label: tt(locale, 'adminContent.language.arabic') };
   if (n === 'en') return { code: 'en', label: 'English' };
   return {
     code: 'other',
@@ -279,11 +286,8 @@ export function languageKindLabel(
   };
 }
 
-export function contentStatusLabel(s: AdminContentStatus) {
-  if (s === 'PUBLISHED') return 'منشور';
-  if (s === 'IN_REVIEW') return 'قيد المراجعة';
-  if (s === 'ARCHIVED') return 'مؤرشف';
-  return 'مسودة';
+export function contentStatusLabel(s: AdminContentStatus, locale: AppLocale = 'ar') {
+  return tt(locale, `adminContent.status.${s}`);
 }
 
 export type ReadinessSignalTone = 'info' | 'success' | 'warning';
@@ -372,21 +376,16 @@ export function isDataEntryWorkflowStatus(status: AdminContentStatus): boolean {
   return status === 'DRAFT' || status === 'IN_REVIEW';
 }
 
-export function contentTypeLabel(t?: AdminContentType) {
-  if (t === 'CONDITION') return 'الحالات الطبية';
-  if (t === 'SYMPTOM') return 'الأعراض';
-  if (t === 'GENERAL_ADVICE') return 'نصائح عامة';
-  if (t === 'NEWS') return 'الأخبار';
-  if (t === 'MEDICATION') return 'الأدوية';
-  if (t === 'SETTINGS_PAGE') return 'صفحات الإعدادات';
-  return 'عام';
+export function contentTypeLabel(t?: AdminContentType, locale: AppLocale = 'ar') {
+  if (!t) return tt(locale, 'adminContent.type.general');
+  return getTranslationValue(locale, `adminContent.type.${t}`) ?? tt(locale, 'adminContent.type.general');
 }
 
-export function formatContentDate(value?: string) {
+export function formatContentDate(value?: string, locale: AppLocale = 'ar') {
   if (!value) return '—';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('ar-SY');
+  return d.toLocaleDateString(locale === 'ar' ? 'ar-SY' : 'en-US');
 }
 
 /**

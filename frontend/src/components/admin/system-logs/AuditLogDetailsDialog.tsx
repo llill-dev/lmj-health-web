@@ -1,9 +1,9 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { Info, X } from 'lucide-react';
 import {
-  CATEGORY_LABELS,
-  OUTCOME_LABELS,
-  ROLE_LABELS,
+  categoryLabel,
+  outcomeLabel,
+  roleLabel,
 } from '@/components/admin/system-logs/auditLogConstants';
 import { formatAuditLogDateTime } from '@/components/admin/system-logs/auditLogUtils';
 import type { AuditLogItem } from '@/lib/admin/types';
@@ -35,11 +35,11 @@ export function AuditLogDetailsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   if (!log) return null;
 
-  const { date, time } = formatAuditLogDateTime(log.createdAt);
-  const actorRoleLabel = log.actorRole ? ROLE_LABELS[log.actorRole] ?? log.actorRole : '—';
+  const { date, time } = formatAuditLogDateTime(log.createdAt, locale);
+  const actorRoleLabel = log.actorRole ? roleLabel(log.actorRole, locale) : '—';
 
   return (
     <Dialog.Root
@@ -60,10 +60,10 @@ export function AuditLogDetailsDialog({
               </div>
               <div className='min-w-0 text-right'>
                 <Dialog.Title className='font-cairo text-[16px] font-black text-[#111827]'>
-                  تفاصيل تقنية للسجل
+                  {t('adminAuditLog.details.title')}
                 </Dialog.Title>
                 <Dialog.Description className='mt-0.5 font-cairo text-[11px] font-semibold leading-snug text-[#98A2B3]'>
-                  معلومات الطلب والمسار للمراجعة والامتثال — لا تُعرض في الجدول الرئيسي لتقليل الازدحام وتقليل كشف هيكل الـ API.
+                  {t('adminAuditLog.details.description')}
                 </Dialog.Description>
               </div>
             </div>
@@ -71,7 +71,7 @@ export function AuditLogDetailsDialog({
               <button
                 type='button'
                 className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-[#667085] hover:bg-[#F2F4F7]'
-                aria-label='إغلاق'
+                aria-label={t("common.close")}
               >
                 <X className='h-4 w-4' />
               </button>
@@ -79,29 +79,29 @@ export function AuditLogDetailsDialog({
           </div>
 
           <div className='max-h-[calc(min(90vh,640px)-88px)] overflow-y-auto px-5 py-2'>
-            <DetailLine label='معرّف السجل' value={log._id} mono />
-            <DetailLine label='الإجراء (action)' value={log.action} mono />
-            <DetailLine label='الفئة' value={CATEGORY_LABELS[log.category] ?? log.category} />
-            <DetailLine label='النتيجة' value={OUTCOME_LABELS[log.outcome] ?? log.outcome} />
-            <DetailLine label='التاريخ' value={`${date} · ${time}`} />
-            <DetailLine label='المستخدم' value={log.actorUserName || '—'} />
-            <DetailLine label='الدور' value={actorRoleLabel} />
-            <DetailLine label='معرّف المستخدم (actorUserId)' value={log.actorUserId ?? ''} mono />
-            <DetailLine label='عنوان IP' value={log.ip ?? ''} mono />
-            <DetailLine label='طريقة HTTP' value={log.method ?? ''} mono />
-            <DetailLine label='المسار (route)' value={log.route ?? ''} mono />
-            <DetailLine label='معرّف الطلب (requestId)' value={log.requestId ?? ''} mono />
+            <DetailLine label={t('adminAuditLog.details.recordId')} value={log._id} mono />
+            <DetailLine label={t('adminAuditLog.details.action')} value={log.action} mono />
+            <DetailLine label={t('adminAuditLog.details.categoryLabel')} value={categoryLabel(log.category, locale)} />
+            <DetailLine label={t('adminAuditLog.table.outcome')} value={outcomeLabel(log.outcome, locale)} />
+            <DetailLine label={t('adminAuditLog.details.dateLabel')} value={`${date} · ${time}`} />
+            <DetailLine label={t('adminAuditLog.table.user')} value={log.actorUserName || '—'} />
+            <DetailLine label={t('adminAuditLog.details.role')} value={actorRoleLabel} />
+            <DetailLine label={t('adminAuditLog.details.actorUserId')} value={log.actorUserId ?? ''} mono />
+            <DetailLine label={t('adminAuditLog.details.ipAddress')} value={log.ip ?? ''} mono />
+            <DetailLine label={t('adminAuditLog.details.httpMethod')} value={log.method ?? ''} mono />
+            <DetailLine label={t('adminAuditLog.details.route')} value={log.route ?? ''} mono />
+            <DetailLine label={t('adminAuditLog.details.requestId')} value={log.requestId ?? ''} mono />
             <DetailLine label='User-Agent' value={log.userAgent ?? ''} mono />
-            <DetailLine label='نوع الكيان' value={log.entityType ?? ''} mono />
-            <DetailLine label='معرّف الكيان' value={log.entityId ?? ''} mono />
+            <DetailLine label={t('adminAuditLog.details.entityType')} value={log.entityType ?? ''} mono />
+            <DetailLine label={t('adminAuditLog.details.entityId')} value={log.entityId ?? ''} mono />
             <DetailLine
-              label='المريض'
+              label={t('adminAuditLog.details.patientLabel')}
               value={
                 [log.patientName, log.patientPublicId, log.patientId].filter(Boolean).join(' · ') || ''
               }
             />
             <DetailLine
-              label='المستخدم المستهدف'
+              label={t('adminAuditLog.details.targetUser')}
               value={[log.targetUserName, log.targetUserId].filter(Boolean).join(' · ') || ''}
             />
           </div>
