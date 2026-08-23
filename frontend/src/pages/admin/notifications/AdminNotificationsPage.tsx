@@ -125,7 +125,7 @@ export default function AdminNotificationsPage() {
 
         {!isAwaitingData && listQuery.isRefetching ? (
           <div className="inline-flex items-center gap-2 rounded-[10px] border border-[#D5E8E6] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-primary">
-            جاري تحديث الإشعارات...
+            {tr("جاري تحديث الإشعارات...", "Refreshing notifications...")}
           </div>
         ) : null}
 

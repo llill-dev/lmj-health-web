@@ -36,6 +36,7 @@ import type {
 } from '@/lib/admin/types';
 import { userFacingErrorMessage } from '@/lib/admin/userFacingError';
 
+// قيم داخلية للحالة/الربط بواجهة API فقط، وليست نصاً معروضاً — لا تُترجم.
 type AddCategoryUiKey = 'الأمراض المزمنة' | 'أنواع الحساسية';
 
 const ADD_CATEGORY_UI_TO_API: Record<AddCategoryUiKey, AdminLookupCategory> = {
@@ -57,7 +58,10 @@ type LookupCardItem = MedicalFileOptionItem & {
   order: number;
 };
 
-function mapLookupItems(records: AdminLookupRecord[]): LookupCardItem[] {
+function mapLookupItems(
+  records: AdminLookupRecord[],
+  locale: 'ar' | 'en',
+): LookupCardItem[] {
   return [...records]
     .sort(
       (a, b) =>
@@ -65,7 +69,7 @@ function mapLookupItems(records: AdminLookupRecord[]): LookupCardItem[] {
     )
     .map((row) => ({
       id: row._id,
-      label: resolveLookupText(row.text, 'ar') || row.key,
+      label: resolveLookupText(row.text, locale) || row.key,
       isActive: row.isActive,
       category: row.category,
       key: row.key,
@@ -75,12 +79,13 @@ function mapLookupItems(records: AdminLookupRecord[]): LookupCardItem[] {
 
 function mapHealthProfileEntries(
   entries: HealthProfileOptionEntry[],
+  locale: 'ar' | 'en',
 ): LookupCardItem[] {
   return [...entries]
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map((row) => ({
       id: row.id,
-      label: resolveLookupText(row.text, 'ar') || row.key,
+      label: resolveLookupText(row.text, locale) || row.key,
       isActive: true,
       category: 'BLOOD_TYPE',
       key: row.key,
@@ -89,7 +94,7 @@ function mapHealthProfileEntries(
 }
 
 export default function AdminMedicalFileOptionsPage() {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
   const createLookup = useCreateLookup();
   const patchLookup = usePatchLookup();
@@ -112,16 +117,16 @@ export default function AdminMedicalFileOptionsPage() {
   const bloodQuery = useHealthProfileOptions();
 
   const chronicDiseases = useMemo(
-    () => mapLookupItems(chronicQuery.data?.lookups ?? []),
-    [chronicQuery.data?.lookups],
+    () => mapLookupItems(chronicQuery.data?.lookups ?? [], locale),
+    [chronicQuery.data?.lookups, locale],
   );
   const allergies = useMemo(
-    () => mapLookupItems(allergyQuery.data?.lookups ?? []),
-    [allergyQuery.data?.lookups],
+    () => mapLookupItems(allergyQuery.data?.lookups ?? [], locale),
+    [allergyQuery.data?.lookups, locale],
   );
   const bloodTypes = useMemo(
-    () => mapHealthProfileEntries(bloodQuery.data?.bloodTypes ?? []),
-    [bloodQuery.data?.bloodTypes],
+    () => mapHealthProfileEntries(bloodQuery.data?.bloodTypes ?? [], locale),
+    [bloodQuery.data?.bloodTypes, locale],
   );
 
   const [selectedCategory, setSelectedCategory] =
@@ -149,6 +154,11 @@ export default function AdminMedicalFileOptionsPage() {
   const hasLookupItems =
     chronicDiseases.length > 0 || allergies.length > 0 || bloodTypes.length > 0;
 
+  const categoryUiLabel = (key: AddCategoryUiKey) =>
+    key === 'الأمراض المزمنة'
+      ? t('adminMedicalFileOptions.section.chronicDiseases')
+      : t('adminMedicalFileOptions.section.allergyTypes');
+
   function refetchAll() {
     void chronicQuery.refetch();
     void allergyQuery.refetch();
@@ -163,7 +173,7 @@ export default function AdminMedicalFileOptionsPage() {
 
     const trimmed = label.trim();
     if (!trimmed) {
-      toast('أدخل اسم الخيار أولًا.', { variant: 'error' });
+      toast(t('adminMedicalFileOptions.toast.nameRequired'), { variant: 'error' });
       return;
     }
 
@@ -174,12 +184,12 @@ export default function AdminMedicalFileOptionsPage() {
         text: { ar: trimmed },
         order: 0,
       });
-      toast('تمت إضافة الخيار.', { variant: 'success' });
+      toast(t('adminMedicalFileOptions.toast.added'), { variant: 'success' });
       setNewOption('');
       setQuickAddCategory(null);
     } catch (error) {
       toast(userFacingErrorMessage(error), {
-        title: 'تعذّر الإضافة',
+        title: t('adminMedicalFileOptions.toast.addFailedTitle'),
         variant: 'error',
       });
     }
@@ -194,11 +204,11 @@ export default function AdminMedicalFileOptionsPage() {
     if (!deleteTarget) return;
     try {
       await removeLookup.mutateAsync(deleteTarget.id);
-      toast('تم حذف الخيار.', { variant: 'success' });
+      toast(t('adminMedicalFileOptions.toast.deleted'), { variant: 'success' });
       setDeleteTarget(null);
     } catch (error) {
       toast(userFacingErrorMessage(error), {
-        title: 'تعذّر الحذف',
+        title: t('adminMedicalFileOptions.toast.deleteFailedTitle'),
         variant: 'error',
       });
     }
@@ -208,8 +218,8 @@ export default function AdminMedicalFileOptionsPage() {
     if (!editTarget) return;
     const trimmed = editValue.trim();
     if (!trimmed) {
-      toast('أدخل الاسم الجديد للخيار أولًا.', {
-        title: 'بيانات ناقصة',
+      toast(t('adminMedicalFileOptions.toast.newNameRequired'), {
+        title: t('adminMedicalFileOptions.toast.incompleteDataTitle'),
         variant: 'error',
       });
       return;
@@ -224,12 +234,12 @@ export default function AdminMedicalFileOptionsPage() {
           isActive: editTarget.isActive,
         },
       });
-      toast('تم تحديث الخيار.', { variant: 'success' });
+      toast(t('adminMedicalFileOptions.toast.updated'), { variant: 'success' });
       setEditTarget(null);
       setEditValue('');
     } catch (error) {
       toast(userFacingErrorMessage(error), {
-        title: 'تعذّر التحديث',
+        title: t('adminMedicalFileOptions.toast.updateFailedTitle'),
         variant: 'error',
       });
     }
@@ -258,15 +268,15 @@ export default function AdminMedicalFileOptionsPage() {
   return (
     <>
       <Helmet>
-        <title>خيارات الملف الطبي • LMJ Health</title>
+        <title>{`${t('adminMedicalFileOptions.header.title')} • LMJ Health`}</title>
       </Helmet>
 
       <div dir={dir} lang={locale}>
         <AdminDashboardOverview
           variant='admin'
           surface='mint'
-          title='خيارات الملف الطبي'
-          subtitle='إضافة وإدارة الخيارات ضمن الملف الطبي للمريض'
+          title={t('adminMedicalFileOptions.header.title')}
+          subtitle={t('adminMedicalFileOptions.header.subtitle')}
           headerIcon={<FileCog className='h-8 w-8 text-white' />}
           kpiColumns={3}
           kpis={[
@@ -274,26 +284,26 @@ export default function AdminMedicalFileOptionsPage() {
               key: 'chronic',
               icon: <Heart className='h-5 w-5 shrink-0' />,
               value: chronicQuery.isAwaitingData ? '—' : chronicDiseases.length,
-              label: 'أمراض مزمنة',
+              label: t('adminMedicalFileOptions.kpi.chronicDiseases'),
             },
             {
               key: 'allergies',
               icon: <AlertTriangle className='h-5 w-5 shrink-0' />,
               value: allergyQuery.isAwaitingData ? '—' : allergies.length,
-              label: 'أنواع حساسية',
+              label: t('adminMedicalFileOptions.kpi.allergyTypes'),
             },
             {
               key: 'blood',
               icon: <Droplets className='h-5 w-5 shrink-0' />,
               value: bloodQuery.isAwaitingData ? '—' : bloodTypes.length,
-              label: 'فصائل دم',
+              label: t('adminMedicalFileOptions.kpi.bloodTypes'),
             },
           ]}
         />
 
         <section className='mt-4 rounded-[12px] border border-[#D6EEEC] bg-[#F3FBFA] px-6 py-4 shadow-[0_10px_24px_rgba(20,130,131,0.08)]'>
           <div className='font-cairo text-[13px] font-extrabold text-[#0F766E]'>
-            هذه الشاشة مخصّصة لإدارة القيم المرجعية التي تظهر داخل الملف الطبي مثل الأمراض المزمنة والحساسيات وفصائل الدم. أي تعديل هنا ينعكس على النماذج المرتبطة، لذلك تُستخدم لإدارة الخيارات نفسها لا لإدخال بيانات المرضى.
+            {t('adminMedicalFileOptions.banner')}
           </div>
         </section>
 
@@ -306,7 +316,7 @@ export default function AdminMedicalFileOptionsPage() {
                 checked={langOnly}
                 onChange={(e) => setLangOnly(e.target.checked)}
               />
-              نص اللغة الحالية فقط
+              {t('adminMedicalFileOptions.filter.currentLangOnly')}
             </label>
             <label className='mr-2 flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)]'>
               <input
@@ -315,7 +325,7 @@ export default function AdminMedicalFileOptionsPage() {
                 checked={includeInactive}
                 onChange={(e) => setIncludeInactive(e.target.checked)}
               />
-              عرض الخيارات المعطلة
+              {t('adminMedicalFileOptions.filter.showDisabled')}
             </label>
             <button
               type='button'
@@ -326,14 +336,16 @@ export default function AdminMedicalFileOptionsPage() {
               <RefreshCw
                 className={`h-4 w-4 ${isRefetchingAnyData ? 'animate-spin' : ''}`}
               />
-              {isRefetchingAnyData ? 'جارٍ التحديث...' : 'تحديث'}
+              {isRefetchingAnyData
+                ? t('adminMedicalFileOptions.action.refreshing')
+                : t('common.refresh')}
             </button>
           </div>
 
           {isRefetchingAnyData ? (
             <div className='mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]'>
               <RefreshCw className='h-4 w-4 animate-spin' />
-              جارٍ تحديث خيارات الملف الطبي...
+              {t('adminMedicalFileOptions.refreshingBanner')}
             </div>
           ) : null}
 
@@ -342,7 +354,7 @@ export default function AdminMedicalFileOptionsPage() {
               <div className='font-cairo text-[13px] font-semibold text-[#B42318]'>
                 {userFacingErrorMessage(
                   loadError,
-                  'تعذر تحميل خيارات الملف الطبي.',
+                  t('adminMedicalFileOptions.loadError'),
                 )}
               </div>
               <button
@@ -354,26 +366,28 @@ export default function AdminMedicalFileOptionsPage() {
                 <RefreshCw
                   className={`h-4 w-4 ${isRefetchingAnyData ? 'animate-spin' : ''}`}
                 />
-                {isRefetchingAnyData ? 'جارٍ إعادة المحاولة...' : 'إعادة المحاولة'}
+                {isRefetchingAnyData
+                  ? t('adminMedicalFileOptions.retrying')
+                  : t('adminMedicalOrders.details.retry')}
               </button>
             </div>
           ) : null}
 
           {isAwaitingAnyData ? (
             <div className='mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
-              جاري تحميل خيارات الملف الطبي...
+              {t('adminMedicalFileOptions.loadingOptions')}
             </div>
           ) : !loadError && !hasLookupItems ? (
             <div className='mt-4 rounded-[12px] border border-dashed border-[#D0D5DD] bg-white px-6 py-8 text-center font-cairo text-[13px] font-semibold text-[#667085] shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
-              لا توجد خيارات مسجلة حالياً في الملف الطبي.
+              {t('adminMedicalFileOptions.noOptionsRegistered')}
             </div>
           ) : !loadError ? (
             <div className='mt-2 grid grid-cols-1 gap-6 lg:grid-cols-3'>
               <MedicalFileOptionCard
-                title='الأمراض المزمنة'
+                title={t('adminMedicalFileOptions.section.chronicDiseases')}
                 items={chronicDiseases}
                 icon={Heart}
-                addLabel='إضافة مرض'
+                addLabel={t('adminMedicalFileOptions.action.addDisease')}
                 onAdd={() => openQuickAdd('MEDICAL_CONDITION')}
                 onEdit={buildEditHandler(chronicDiseases)}
                 onRemove={(id) => {
@@ -393,10 +407,10 @@ export default function AdminMedicalFileOptionsPage() {
                 }}
               />
               <MedicalFileOptionCard
-                title='أنواع الحساسية'
+                title={t('adminMedicalFileOptions.section.allergyTypes')}
                 items={allergies}
                 icon={AlertTriangle}
-                addLabel='إضافة حساسية'
+                addLabel={t('adminMedicalFileOptions.action.addAllergy')}
                 onAdd={() => openQuickAdd('ALLERGY')}
                 onEdit={buildEditHandler(allergies)}
                 onRemove={(id) => {
@@ -416,7 +430,7 @@ export default function AdminMedicalFileOptionsPage() {
                 }}
               />
               <MedicalFileOptionCard
-                title='فصائل الدم'
+                title={t('adminMedicalFileOptions.section.bloodTypes')}
                 items={bloodTypes}
                 icon={Droplets}
                 variant='chips'
@@ -436,19 +450,19 @@ export default function AdminMedicalFileOptionsPage() {
             <div className='flex items-center justify-start gap-2'>
               <FileCog className='h-5 w-5 text-primary' />
               <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                إدارة الخيارات
+                {t('adminMedicalFileOptions.manageOptionsTitle')}
               </div>
             </div>
 
             <div className='mt-6 grid grid-cols-1 items-center gap-4 lg:grid-cols-12'>
               <div className='lg:col-span-5'>
                 <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
-                  إضافة خيار جديد
+                  {t('adminMedicalFileOptions.addNewOptionLabel')}
                 </div>
                 <input
                   value={newOption}
                   onChange={(e) => setNewOption(e.target.value)}
-                  placeholder='ادخل الخيار الجديد...'
+                  placeholder={t('adminMedicalFileOptions.field.newOption.placeholder')}
                   className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
                 />
               </div>
@@ -459,7 +473,7 @@ export default function AdminMedicalFileOptionsPage() {
                   onClick={() => void handleBottomAdd()}
                   disabled={isBusy || !newOption.trim()}
                   className='mx-auto flex h-[44px] w-[44px] items-center justify-center rounded-[6px] bg-primary text-white disabled:opacity-50'
-                  aria-label='إضافة'
+                  aria-label={t('adminMedicalFileOptions.action.add')}
                 >
                   {createLookup.isPending ? (
                     <Loader2 className='h-5 w-5 animate-spin' />
@@ -471,27 +485,31 @@ export default function AdminMedicalFileOptionsPage() {
 
               <div className='lg:col-span-6'>
                 <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
-                  اختر الفئة
+                  {t('adminMedicalFileOptions.selectCategoryLabel')}
                 </div>
                 <StyledSelect
                   value={selectedCategory}
                   onChange={(v) => setSelectedCategory(v as AddCategoryUiKey)}
                   options={[
-                    { value: 'الأمراض المزمنة', label: 'الأمراض المزمنة' },
-                    { value: 'أنواع الحساسية', label: 'أنواع الحساسية' },
+                    {
+                      value: 'الأمراض المزمنة',
+                      label: t('adminMedicalFileOptions.section.chronicDiseases'),
+                    },
+                    {
+                      value: 'أنواع الحساسية',
+                      label: t('adminMedicalFileOptions.section.allergyTypes'),
+                    },
                   ]}
-                  listboxAriaLabel='فئة الخيار'
+                  listboxAriaLabel={t('adminMedicalFileOptions.categoryAriaLabel')}
                 />
               </div>
             </div>
 
             {quickAddCategory ? (
               <p className='mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]'>
-                إضافة سريعة لفئة{' '}
-                {quickAddCategory === 'MEDICAL_CONDITION'
-                  ? 'الأمراض المزمنة'
-                  : 'أنواع الحساسية'}{' '}
-                — اكتب الاسم واضغط إضافة.
+                {t('adminMedicalFileOptions.quickAdd.prefix')}{' '}
+                {categoryUiLabel(ADD_CATEGORY_API_TO_UI[quickAddCategory])}{' '}
+                {t('adminMedicalFileOptions.quickAdd.suffix')}
               </p>
             ) : null}
           </div>
@@ -507,17 +525,17 @@ export default function AdminMedicalFileOptionsPage() {
           }
         }}
         variant='primary'
-        title='تحديث الخيار'
+        title={t('adminMedicalFileOptions.updateDialog.title')}
         description={
           editTarget ? (
             <div className='space-y-3 text-right'>
               <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                عدّل اسم الخيار ثم احفظ التغييرات.
+                {t('adminMedicalFileOptions.editDialog.description')}
               </div>
               <input
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                placeholder='الاسم الجديد...'
+                placeholder={t('adminMedicalFileOptions.field.newName.placeholder')}
                 className='h-[44px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
               />
             </div>
@@ -525,7 +543,7 @@ export default function AdminMedicalFileOptionsPage() {
             ''
           )
         }
-        confirmLabel='حفظ'
+        confirmLabel={t('adminUsersDialog.action.save')}
         confirmDisabled={patchLookup.isPending || !editValue.trim()}
         onConfirm={() => void confirmEdit()}
       />
@@ -536,13 +554,16 @@ export default function AdminMedicalFileOptionsPage() {
           if (!open) setDeleteTarget(null);
         }}
         variant='destructive'
-        title='حذف الخيار'
+        title={t('adminMedicalFileOptions.deleteDialog.title')}
         description={
           deleteTarget
-            ? `هل تريد حذف «${deleteTarget.label}» من خيارات الملف الطبي؟`
+            ? t('adminMedicalFileOptions.deleteDialog.confirmQuestion').replace(
+                '{name}',
+                deleteTarget.label,
+              )
             : ''
         }
-        confirmLabel='حذف'
+        confirmLabel={t('adminFacilityDialog.delete.confirmButton')}
         confirmDisabled={removeLookup.isPending}
         onConfirm={() => void confirmDelete()}
       />

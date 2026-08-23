@@ -191,31 +191,43 @@ export default function AdminMedicalContentPage() {
     const { kind } = actionConfirm;
     if (kind === "submitReview") {
       return {
-        title: "تم",
-        message: "أُرسل المحتوى للمراجعة.",
+        title: tr("تم", "Done"),
+        message: tr(
+          "أُرسل المحتوى للمراجعة.",
+          "Content has been sent for review.",
+        ),
         variant: "success",
       };
     }
     if (kind === "approve") {
       return {
-        title: "تمت الموافقة",
-        message: "يمكنك نشر المحتوى متى نضج.",
+        title: tr("تمت الموافقة", "Approved"),
+        message: tr(
+          "يمكنك نشر المحتوى متى نضج.",
+          "You can publish the content whenever it's ready.",
+        ),
         variant: "success",
       };
     }
     if (kind === "publish") {
       return {
-        title: "تم النشر",
-        message: "صار المحتوى متاحاً للمستفيدين حسب قواعد العرض.",
+        title: tr("تم النشر", "Published"),
+        message: tr(
+          "صار المحتوى متاحاً للمستفيدين حسب قواعد العرض.",
+          "The content is now available to users according to display rules.",
+        ),
         variant: "success",
       };
     }
     return {
-      title: "تمت الأرشفة",
-      message: "أُرشف العنصر ويُنقل لأرشيف المحتوى.",
+      title: tr("تمت الأرشفة", "Archived"),
+      message: tr(
+        "أُرشف العنصر ويُنقل لأرشيف المحتوى.",
+        "The item has been archived and moved to the content archive.",
+      ),
       variant: "success",
     };
-  }, [actionConfirm]);
+  }, [actionConfirm, tr]);
 
   useEffect(() => {
     if (searchParams.get("queue") === "review") {

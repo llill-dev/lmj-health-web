@@ -19,6 +19,7 @@ import { useAdminPatient } from '@/hooks/admin/patients/useAdminPatient';
 import { useAdminAppointments } from '@/hooks/admin/appointments/useAdminAppointments';
 import { useAdminAuditLogs } from '@/hooks/admin/audit/useAdminAuditLogs';
 import { AppointmentStatusChip } from '@/components/admin/patients/AppointmentStatusChip';
+import { patientStatusLabel } from '@/components/admin/patients/patientListUtils';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useI18n } from '@/i18n/provider';
 import { adminApi } from '@/lib/admin/client';
@@ -27,13 +28,6 @@ import type {
   PatientAccountStatus,
 } from '@/lib/admin/types';
 
-const accountStatusLabel: Record<PatientAccountStatus, string> = {
-  active: 'نشط',
-  temporary: 'مؤقت',
-  suspended: 'معلق',
-  locked: 'موقوف',
-};
-
 const accountStatusChip: Record<PatientAccountStatus, string> = {
   active: 'bg-[#ECFDF3] text-[#16A34A]',
   temporary: 'bg-[#E0F2FE] text-[#0369A1]',
@@ -41,22 +35,22 @@ const accountStatusChip: Record<PatientAccountStatus, string> = {
   locked: 'bg-[#FEE2E2] text-[#B42318]',
 };
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: 'ar' | 'en') {
   if (!value) return '—';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('ar-SY', {
+  return d.toLocaleDateString(locale === 'ar' ? 'ar-SY' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   });
 }
 
-function formatDateTime(value?: string | null) {
+function formatDateTime(value: string | null | undefined, locale: 'ar' | 'en') {
   if (!value) return '—';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleString('ar-SY', {
+  return d.toLocaleString(locale === 'ar' ? 'ar-SY' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -66,7 +60,7 @@ function formatDateTime(value?: string | null) {
 }
 
 export default function AdminPatientDetailsPage() {
-  const { locale, dir } = useI18n();
+  const { locale, dir, t } = useI18n();
   const { toast } = useToast();
   const { patientId } = useParams();
   const location = useLocation();
@@ -138,15 +132,15 @@ export default function AdminPatientDetailsPage() {
     try {
       if (action === 'activate') {
         await adminApi.patients.activate(resolvedPatientId);
-        toast('تم تفعيل حساب المريض بنجاح.', {
-          title: 'تم التفعيل',
+        toast(t('adminPatients.toast.activated'), {
+          title: t('adminPatientDetails.toast.activatedTitle'),
           variant: 'success',
           durationMs: 4200,
         });
       } else {
         await adminApi.patients.unsuspend(resolvedPatientId);
-        toast('تمت إعادة تفعيل الحساب بعد رفع التعليق.', {
-          title: 'تم رفع التعليق',
+        toast(t('adminPatients.toast.reactivatedAfterAppeal'), {
+          title: t('adminPatientDetails.toast.unsuspendedTitle'),
           variant: 'success',
           durationMs: 4200,
         });
@@ -159,10 +153,10 @@ export default function AdminPatientDetailsPage() {
     } catch {
       toast(
         action === 'activate'
-          ? 'تعذر تفعيل حساب المريض حاليًا.'
-          : 'تعذر رفع تعليق الحساب حاليًا.',
+          ? t('adminPatientDetails.toast.activateFailed')
+          : t('adminPatientDetails.toast.unsuspendFailed'),
         {
-          title: 'خطأ',
+          title: t('adminPatientDetails.toast.errorTitle'),
           variant: 'error',
           durationMs: 5000,
         },
@@ -175,7 +169,7 @@ export default function AdminPatientDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>تفاصيل المريض • LMJ Health</title>
+        <title>{`${t('adminPatientDetails.pageTitle')} • LMJ Health`}</title>
       </Helmet>
 
       <div
@@ -185,10 +179,12 @@ export default function AdminPatientDetailsPage() {
         <div className='flex items-start justify-between'>
           <div className='text-right'>
             <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
-              بطاقة تفاصيل المريض
+              {t('adminPatientDetails.header.title')}
             </div>
             <div className='mt-1 font-cairo text-[12px] font-semibold leading-[16px] text-[#98A2B3]'>
-              {patientId ? `المعرّف المرجعي: ${patientId}` : '—'}
+              {patientId
+                ? t('adminPatientDetails.header.refId').replace('{id}', patientId)
+                : '—'}
             </div>
           </div>
           <button
@@ -196,37 +192,37 @@ export default function AdminPatientDetailsPage() {
             onClick={() => navigate('/admin/patients')}
             className='inline-flex h-[36px] items-center gap-2 rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#344054] hover:bg-[#F9FAFB]'
           >
-            → رجوع للقائمة
+            → {t('adminPatientDetails.header.back')}
           </button>
         </div>
 
         {isAwaitingData ? (
           <div className='mt-6 rounded-[14px] border border-[#EEF2F6] bg-white px-6 py-10 text-center shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='font-cairo text-[13px] font-semibold text-[#667085]'>
-              جارِ تحميل تفاصيل المريض...
+              {t('adminPatientDetails.loading')}
             </div>
           </div>
         ) : error ? (
           <div className='mt-6 rounded-[14px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-10 text-center shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <div className='font-cairo text-[13px] font-semibold text-[#B42318]'>
-              تعذّر تحميل تفاصيل المريض
+              {t('adminPatientDetails.loadError')}
             </div>
           </div>
         ) : !patient ? (
           <div className='mt-6 rounded-[14px] border border-[#FDE68A] bg-[#FFFBEB] px-6 py-10 text-center shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
             <AlertCircle className='mx-auto h-8 w-8 text-[#D97706]' />
             <div className='mt-3 font-cairo text-[14px] font-extrabold text-[#92400E]'>
-              لم يُعثر على بيانات هذا المريض
+              {t('adminPatientDetails.notFound.title')}
             </div>
             <div className='mt-2 font-cairo text-[12px] font-semibold text-[#B45309]'>
-              قد يكون الـ ID غير صحيح، أو أن المريض محذوف. جرّب العودة لقائمة المرضى والضغط على "عرض التفاصيل" مباشرةً.
+              {t('adminPatientDetails.notFound.body')}
             </div>
             <button
               type='button'
               onClick={() => navigate('/admin/patients')}
               className='mt-4 inline-flex h-[34px] items-center gap-2 rounded-[10px] bg-[#D97706] px-4 font-cairo text-[12px] font-extrabold text-white'
             >
-              العودة لقائمة المرضى
+              {t('adminPatientDetails.notFound.backButton')}
             </button>
           </div>
         ) : (
@@ -234,38 +230,38 @@ export default function AdminPatientDetailsPage() {
             <section className='mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4'>
               <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
                 <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
-                  نوع السجل
+                  {t('adminPatientDetails.summary.recordType')}
                 </div>
                 <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                  ملف مريض
+                  {t('adminPatientDetails.summary.recordTypeValue')}
                 </div>
               </div>
               <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
                 <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
-                  حالة الحساب
+                  {t('adminPatientDetails.summary.accountStatus')}
                 </div>
                 <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                  {accountStatusLabel[patient.user.accountStatus]}
+                  {patientStatusLabel(patient.user.accountStatus, locale)}
                 </div>
               </div>
               <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
                 <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
-                  نطاق الشاشة
+                  {t('adminPatientDetails.summary.scope')}
                 </div>
                 <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                  مراجعة إدارية للبيانات والمواعيد
+                  {t('adminPatientDetails.summary.scopeValue')}
                 </div>
               </div>
               <div className='rounded-[10px] border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3'>
                 <div className='mb-2 font-cairo text-[11px] font-bold text-[#667085]'>
-                  الإجراء الحالي
+                  {t('adminPatientDetails.summary.currentAction')}
                 </div>
                 <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                   {patient.user.accountStatus === 'active'
-                    ? 'متابعة السجل فقط'
+                    ? t('adminPatientDetails.summary.action.followUpOnly')
                     : patient.user.accountStatus === 'suspended'
-                      ? 'رفع التعليق أو إعادة التفعيل'
-                      : 'إعادة تفعيل الحساب عند الحاجة'}
+                      ? t('adminPatientDetails.summary.action.unsuspendOrReactivate')
+                      : t('adminPatientDetails.summary.action.reactivateWhenNeeded')}
                 </div>
               </div>
             </section>
@@ -281,13 +277,16 @@ export default function AdminPatientDetailsPage() {
                       {patient.user.fullName}
                     </div>
                     <div className='mt-1 font-cairo text-[12px] font-bold text-[#98A2B3]'>
-                      رقم المريض: {patient.publicId || '—'}
+                      {t('adminPatientDetails.patientIdLabel').replace(
+                        '{id}',
+                        patient.publicId || '—',
+                      )}
                     </div>
                     <div className='mt-2'>
                       <span
                         className={`inline-flex h-[24px] items-center rounded-full px-3 font-cairo text-[11px] font-extrabold ${accountStatusChip[patient.user.accountStatus]}`}
                       >
-                        {accountStatusLabel[patient.user.accountStatus]}
+                        {patientStatusLabel(patient.user.accountStatus, locale)}
                       </span>
                     </div>
                   </div>
@@ -304,26 +303,37 @@ export default function AdminPatientDetailsPage() {
                   </div>
                   <div className='inline-flex items-center gap-2 rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
                     <ShieldCheck className='h-4 w-4 text-primary' />
-                    {patient.isClaimed ? 'الحساب مُفعّل (Claimed)' : 'الحساب غير مُطالب به'}
+                    {patient.isClaimed
+                      ? t('adminPatientDetails.claimed.yes')
+                      : t('adminPatientDetails.claimed.no')}
                   </div>
                   <div className='inline-flex items-center gap-2 rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
                     <CalendarClock className='h-4 w-4 text-primary' />
-                    تاريخ التفعيل: {formatDate(patient.claimedAt)}
+                    {t('adminPatientDetails.claimedAtLabel').replace(
+                      '{date}',
+                      formatDate(patient.claimedAt, locale),
+                    )}
                   </div>
                   <div className='inline-flex items-center gap-2 rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3 font-cairo text-[12px] font-bold text-[#344054]'>
                     <Calendar className='h-4 w-4 text-primary' />
-                    تاريخ التسجيل: {formatDate(patient.createdAt)}
+                    {t('adminPatientDetails.createdAtLabel').replace(
+                      '{date}',
+                      formatDate(patient.createdAt, locale),
+                    )}
                   </div>
                   {patient.user.mustChangePassword && (
                     <div className='inline-flex items-center gap-2 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-bold text-[#92400E]'>
                       <Key className='h-4 w-4 text-[#D97706]' />
-                      يجب تغيير كلمة المرور
+                      {t('adminPatientDetails.mustChangePassword')}
                     </div>
                   )}
                   {patient.user.accountStatus === 'suspended' && patient.suspendReason && (
                     <div className='col-span-2 inline-flex items-start gap-2 rounded-[10px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 font-cairo text-[12px] font-bold text-[#B42318]'>
                       <Info className='mt-0.5 h-4 w-4 shrink-0' />
-                      سبب التعليق: {patient.suspendReason}
+                      {t('adminPatientDetails.suspendReasonLabel').replace(
+                        '{reason}',
+                        patient.suspendReason,
+                      )}
                     </div>
                   )}
                   {patient.user.accountStatus !== 'active' && (
@@ -341,7 +351,7 @@ export default function AdminPatientDetailsPage() {
                         ) : (
                           <ShieldCheck className='h-4 w-4' />
                         )}
-                        تفعيل الحساب
+                        {t('adminPatientDetails.action.activate')}
                       </button>
                       {patient.user.accountStatus === 'suspended' && (
                         <button
@@ -357,7 +367,7 @@ export default function AdminPatientDetailsPage() {
                           ) : (
                             <ShieldCheck className='h-4 w-4' />
                           )}
-                          رفع التعليق
+                          {t('adminPatientDetails.action.unsuspend')}
                         </button>
                       )}
                     </div>
@@ -373,10 +383,10 @@ export default function AdminPatientDetailsPage() {
                 </div>
                 <div>
                   <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                    صلاحيات الإدارة في هذه الشاشة للقراءة والمتابعة فقط
+                    {t('adminPatientDetails.readOnlyNotice.title')}
                   </div>
                   <div className='mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
-                    تعرض هذه الصفحة بيانات المريض، المواعيد، وسجل النشاط المرتبط به للمراجعة الإدارية. لا تُستخدم هذه الواجهة كمسار لرفع أو حذف ملفات المريض الحساسة من حساب الإدارة.
+                    {t('adminPatientDetails.readOnlyNotice.body')}
                   </div>
                 </div>
               </div>
@@ -384,25 +394,33 @@ export default function AdminPatientDetailsPage() {
 
             <section className='mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4'>
               <div className='rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
-                <div className='font-cairo text-[11px] font-bold text-[#667085]'>مواعيد قادمة</div>
+                <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                  {t('adminPatientDetails.stats.upcoming')}
+                </div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-[#16A34A]'>
                   {appointmentsQuery.isAwaitingData ? '...' : upcomingCount}
                 </div>
               </div>
               <div className='rounded-[12px] border border-[#67E8F9] bg-[#ECFEFF] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
-                <div className='font-cairo text-[11px] font-bold text-[#667085]'>مواعيد مكتملة</div>
+                <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                  {t('adminPatientDetails.stats.completed')}
+                </div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-primary'>
                   {appointmentsQuery.isAwaitingData ? '...' : completedCount}
                 </div>
               </div>
               <div className='rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
-                <div className='font-cairo text-[11px] font-bold text-[#667085]'>مواعيد ملغاة</div>
+                <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                  {t('adminPatientDetails.stats.cancelled')}
+                </div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-[#B42318]'>
                   {appointmentsQuery.isAwaitingData ? '...' : cancelledCount}
                 </div>
               </div>
               <div className='rounded-[12px] border border-[#E9D4FF] bg-[#FAF5FF] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.05)]'>
-                <div className='font-cairo text-[11px] font-bold text-[#667085]'>لم يحضر (No-show)</div>
+                <div className='font-cairo text-[11px] font-bold text-[#667085]'>
+                  {t('adminPatientDetails.stats.noShow')}
+                </div>
                 <div className='mt-2 font-cairo text-[28px] font-black text-[#7C3AED]'>
                   {appointmentsQuery.isAwaitingData ? '...' : noShowCount}
                 </div>
@@ -413,28 +431,33 @@ export default function AdminPatientDetailsPage() {
               <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
                 <div className='inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]'>
                   <HeartPulse className='h-4 w-4 text-primary' />
-                  آخر المواعيد المرتبطة بالمريض
+                  {t('adminPatientDetails.appointmentsSection.title')}
                 </div>
                 <div className='flex items-center gap-2'>
                   <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                    {appointmentsQuery.isAwaitingData ? 'جارِ التحميل...' : `${patientAppointments.length} عنصر`}
+                    {appointmentsQuery.isAwaitingData
+                      ? t('adminPatientDetails.appointmentsSection.loading')
+                      : t('adminPatientDetails.appointmentsSection.itemsCount').replace(
+                          '{count}',
+                          String(patientAppointments.length),
+                        )}
                   </div>
                   <div
-                    title='الأرقام محسوبة من أحدث 500 موعد. الـ API لا يدعم فلترة بـ patientId مباشرة.'
+                    title={t('adminPatients.appointmentsNote.title')}
                     className='inline-flex h-[20px] items-center rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2 font-cairo text-[10px] font-bold text-[#98A2B3] cursor-help'
                   >
-                    تقريبي
+                    {t('adminPatientDetails.appointmentsSection.approxBadge')}
                   </div>
                 </div>
               </div>
               <div className='space-y-3 px-6 py-4'>
                 {appointmentsQuery.isAwaitingData ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                    جارِ تحميل المواعيد...
+                    {t('adminPatientDetails.appointmentsSection.loadingAppointments')}
                   </div>
                 ) : patientAppointments.length === 0 ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                    لا توجد مواعيد مرتبطة بهذا المريض ضمن البيانات الحالية.
+                    {t('adminPatientDetails.appointmentsSection.empty')}
                   </div>
                 ) : (
                   patientAppointments.slice(0, 8).map((a) => (
@@ -453,7 +476,7 @@ export default function AdminPatientDetailsPage() {
                             </div>
                           )}
                           <div className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
-                            {formatDateTime(a.startDateTime || a.date)}
+                            {formatDateTime(a.startDateTime || a.date, locale)}
                           </div>
                         </div>
                         <AppointmentStatusChip status={a.status} />
@@ -468,20 +491,25 @@ export default function AdminPatientDetailsPage() {
               <div className='flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4'>
                 <div className='inline-flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]'>
                   <Activity className='h-4 w-4 text-primary' />
-                  سجل النشاط المرتبط بالمريض (Audit)
+                  {t('adminPatientDetails.auditSection.title')}
                 </div>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  {auditQuery.isAwaitingData ? 'جارِ التحميل...' : `${patientAuditLogs.length} حدث`}
+                  {auditQuery.isAwaitingData
+                    ? t('adminPatientDetails.auditSection.loadingLogs')
+                    : t('adminPatientDetails.auditSection.eventsCount').replace(
+                        '{count}',
+                        String(patientAuditLogs.length),
+                      )}
                 </div>
               </div>
               <div className='space-y-3 px-6 py-4'>
                 {auditQuery.isAwaitingData ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                    جارِ تحميل السجلات...
+                    {t('adminPatientDetails.auditSection.loadingLogs')}
                   </div>
                 ) : patientAuditLogs.length === 0 ? (
                   <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
-                    لا توجد سجلات نشاط ظاهرة لهذا المريض ضمن آخر النتائج.
+                    {t('adminPatientDetails.auditSection.empty')}
                   </div>
                 ) : (
                   patientAuditLogs.slice(0, 8).map((l) => (
@@ -495,7 +523,7 @@ export default function AdminPatientDetailsPage() {
                             {l.action}
                           </div>
                           <div className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
-                            {l.actorUserName || '—'} • {formatDateTime(l.createdAt)}
+                            {l.actorUserName || '—'} • {formatDateTime(l.createdAt, locale)}
                           </div>
                         </div>
                         <div className='inline-flex h-[22px] items-center rounded-full bg-[#ECFEFF] px-2.5 font-cairo text-[11px] font-extrabold text-primary'>

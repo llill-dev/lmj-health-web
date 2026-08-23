@@ -186,7 +186,7 @@ export default function AdminSettingsPage() {
         setPendingLogoFile(null);
         resolve();
       };
-      reader.onerror = () => reject(new Error("فشل قراءة الملف"));
+      reader.onerror = () => reject(new Error(tr("فشل قراءة الملف", "Failed to read the file")));
       reader.readAsDataURL(file);
     });
   }
@@ -259,7 +259,7 @@ export default function AdminSettingsPage() {
             >
               <div className="space-y-4">
                 <SettingsField
-                  label="اسم المنصة"
+                  label={tr("اسم المنصة", "Platform name")}
                   value={draftGeneral.platformName}
                   onChange={(v) =>
                     setDraftGeneral((prev) => ({ ...prev, platformName: v }))
