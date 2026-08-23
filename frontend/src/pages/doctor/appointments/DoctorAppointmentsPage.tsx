@@ -56,7 +56,10 @@ import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownlo
 import { Link, useNavigate } from "react-router-dom";
 
 /** نص قصير للواجهة + إبقاء الشرح الطويل داخل تفاصيل قابلة للطي. */
-function summarizeAppointmentsListError(error: unknown): {
+function summarizeAppointmentsListError(
+  error: unknown,
+  tr: (ar: string, en: string) => string,
+): {
   title: string;
   brief: string;
   detail: string;
@@ -64,18 +67,27 @@ function summarizeAppointmentsListError(error: unknown): {
 } {
   const detail = error
     ? getUserFacingRequestErrorMessage(error)
-    : "حدث خطأ غير متوقع أثناء الاتصال بالخادم.";
+    : tr(
+        "حدث خطأ غير متوقع أثناء الاتصال بالخادم.",
+        "An unexpected error occurred while connecting to the server.",
+      );
   const verbose =
     detail.length > 160 ||
     detail.includes("لم نتمكن من إتمام الطلب") ||
     detail.includes("VPN") ||
     detail.includes("جدار الحماية") ||
-    detail.includes("توقيت خاطئ");
+    detail.includes("توقيت خاطئ") ||
+    detail.includes("We could not complete the request") ||
+    detail.includes("firewall") ||
+    detail.includes("incorrect time");
   const brief = verbose
-    ? "لم نتمكن من جلب المواعيد في هذه المحاولة. تحقّق من اتصالك بالإنترنت ثم أعد المحاولة، أو انتظر قليلاً إن كانت الخدمة مشغولة."
+    ? tr(
+        "لم نتمكن من جلب المواعيد في هذه المحاولة. تحقّق من اتصالك بالإنترنت ثم أعد المحاولة، أو انتظر قليلاً إن كانت الخدمة مشغولة.",
+        "We could not fetch the appointments this time. Check your internet connection and try again, or wait a moment if the service is busy.",
+      )
     : detail;
   return {
-    title: "تعذّر تحميل المواعيد",
+    title: tr("تعذّر تحميل المواعيد", "Failed to load appointments"),
     brief,
     detail,
     showTechnicalDetail: verbose,
@@ -279,7 +291,7 @@ export default function DoctorAppointmentsPage() {
           ...detailsQuery.appointment,
           appointmentFiles: filesSource.map((file) => ({
             id: file._id,
-            name: file.originalName ?? "ملف",
+            name: file.originalName ?? tr("ملف", "File"),
             date: (file.linkedAt ?? "").slice(0, 10),
             url: undefined,
           })),
@@ -293,6 +305,7 @@ export default function DoctorAppointmentsPage() {
     detailsQuery.files,
     expandedAppointmentId,
     listQuery.appointments,
+    tr,
   ]);
 
   const visibleAppointments = useMemo(
@@ -326,8 +339,8 @@ export default function DoctorAppointmentsPage() {
     useRetryAction(() => listQuery.refetch());
 
   const appointmentsLoadErrorPresentation = useMemo(
-    () => summarizeAppointmentsListError(listQuery.error),
-    [listQuery.error],
+    () => summarizeAppointmentsListError(listQuery.error, tr),
+    [listQuery.error, tr],
   );
 
   const beginAppointmentFileAction = useCallback((actionKey: string) => {
@@ -355,14 +368,14 @@ export default function DoctorAppointmentsPage() {
         window.open(fileUrl, "_blank", "noopener,noreferrer");
       } catch (error) {
         toast(getAppointmentFileAccessErrorMessage(error, "open"), {
-          title: "تعذر فتح الملف",
+          title: tr("تعذر فتح الملف", "Could not open the file"),
           variant: "error",
         });
       } finally {
         finishAppointmentFileAction();
       }
     },
-    [beginAppointmentFileAction, finishAppointmentFileAction, toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, toast, tr],
   );
 
   const handleAppointmentFileDownload = useCallback(
@@ -381,25 +394,25 @@ export default function DoctorAppointmentsPage() {
         );
       } catch (error) {
         toast(getAppointmentFileAccessErrorMessage(error, "download"), {
-          title: "تعذر تحميل الملف",
+          title: tr("تعذر تحميل الملف", "Could not download the file"),
           variant: "error",
         });
       } finally {
         finishAppointmentFileAction();
       }
     },
-    [beginAppointmentFileAction, finishAppointmentFileAction, toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, toast, tr],
   );
 
   const handleRequestUnlinkAppointmentFile = useCallback(
     (fileId: string, fileName?: string) => {
       setUnlinkFileTarget({
         fileId,
-        fileName: fileName?.trim() || "ملف مرفق",
+        fileName: fileName?.trim() || tr("ملف مرفق", "Attached file"),
       });
       setUnlinkFileConfirmOpen(true);
     },
-    [],
+    [tr],
   );
 
   /** تنفيذ فك الربط بعد التأكيد — يعرض نظام التوست داخلياً */
@@ -409,14 +422,18 @@ export default function DoctorAppointmentsPage() {
       try {
         const response =
           await unlinkAppointmentFileMutation.mutateAsync(fileId);
-        toast(response.message ?? "تم فك ربط الملف من الموعد بنجاح.", {
-          title: "تم فك الربط",
-          variant: "success",
-          durationMs: 4200,
-        });
+        toast(
+          response.message ??
+            tr("تم فك ربط الملف من الموعد بنجاح.", "The file was unlinked from the appointment successfully."),
+          {
+            title: tr("تم فك الربط", "Unlinked"),
+            variant: "success",
+            durationMs: 4200,
+          },
+        );
       } catch (error) {
         toast(getAppointmentFileMutationErrorMessage(error, "unlink"), {
-          title: "تعذّر فك ربط الملف",
+          title: tr("تعذّر فك ربط الملف", "Could not unlink the file"),
           variant: "error",
           durationMs: 4800,
         });
@@ -425,7 +442,7 @@ export default function DoctorAppointmentsPage() {
         finishAppointmentFileAction();
       }
     },
-    [beginAppointmentFileAction, finishAppointmentFileAction, unlinkAppointmentFileMutation, toast],
+    [beginAppointmentFileAction, finishAppointmentFileAction, unlinkAppointmentFileMutation, toast, tr],
   );
 
   const resetUnlinkDialog = useCallback((open: boolean) => {
@@ -445,14 +462,18 @@ export default function DoctorAppointmentsPage() {
         const response = await uploadAppointmentFileMutation.mutateAsync({
           file,
         });
-        toast(response.message ?? "تم رفع الملف وربطه بالموعد بنجاح.", {
-          title: "تم الرفع",
-          variant: "success",
-          durationMs: 4200,
-        });
+        toast(
+          response.message ??
+            tr("تم رفع الملف وربطه بالموعد بنجاح.", "The file was uploaded and linked to the appointment successfully."),
+          {
+            title: tr("تم الرفع", "Uploaded"),
+            variant: "success",
+            durationMs: 4200,
+          },
+        );
       } catch (error) {
         toast(getAppointmentFileMutationErrorMessage(error, "upload"), {
-          title: "تعذر رفع الملف",
+          title: tr("تعذر رفع الملف", "Could not upload the file"),
           variant: "error",
         });
       } finally {
@@ -460,14 +481,14 @@ export default function DoctorAppointmentsPage() {
         finishAppointmentFileAction();
       }
     },
-    [beginAppointmentFileAction, expandedAppointmentId, finishAppointmentFileAction, uploadAppointmentFileMutation, toast],
+    [beginAppointmentFileAction, expandedAppointmentId, finishAppointmentFileAction, uploadAppointmentFileMutation, toast, tr],
   );
 
   const handleBookingAction = useCallback(() => {
     // Check if we have patients available
     if (doctorPatientsQuery.isAwaitingData) {
-      toast("جارٍ تحميل قائمة المرضى...", {
-        title: "انتظر قليلاً",
+      toast(tr("جارٍ تحميل قائمة المرضى...", "Loading the patient list..."), {
+        title: tr("انتظر قليلاً", "Please wait"),
         variant: "info",
         durationMs: 2000,
       });
@@ -476,9 +497,12 @@ export default function DoctorAppointmentsPage() {
 
     if (doctorPatientsQuery.patients.length === 0) {
       toast(
-        "لا توجد مرضى مرتبطين بحسابك حالياً. يرجى إضافة مرضى أولاً من صفحة المرضى.",
+        tr(
+          "لا توجد مرضى مرتبطين بحسابك حالياً. يرجى إضافة مرضى أولاً من صفحة المرضى.",
+          "There are no patients linked to your account yet. Please add patients first from the patients page.",
+        ),
         {
-          title: "لا توجد مرضى",
+          title: tr("لا توجد مرضى", "No patients"),
           variant: "warning",
           durationMs: 5000,
         },
@@ -491,6 +515,7 @@ export default function DoctorAppointmentsPage() {
     doctorPatientsQuery.isAwaitingData,
     doctorPatientsQuery.patients.length,
     toast,
+    tr,
   ]);
 
   return (
@@ -593,7 +618,7 @@ export default function DoctorAppointmentsPage() {
               });
             } catch (error) {
               toast(getAppointmentBookingErrorMessage(error), {
-                title: "فشل حجز الموعد",
+                title: tr("فشل حجز الموعد", "Failed to book the appointment"),
                 variant: "error",
                 durationMs: 5200,
               });
@@ -605,8 +630,8 @@ export default function DoctorAppointmentsPage() {
         <ConfirmActionDialog
           open={unlinkFileConfirmOpen}
           onOpenChange={resetUnlinkDialog}
-          title="فك ربط الملف من الموعد"
-          confirmLabel="نعم، فك الربط"
+          title={tr("فك ربط الملف من الموعد", "Unlink the file from the appointment")}
+          confirmLabel={tr("نعم، فك الربط", "Yes, unlink")}
           confirmDisabled={
             unlinkAppointmentFileMutation.isPending ||
             Boolean(
@@ -616,7 +641,7 @@ export default function DoctorAppointmentsPage() {
           }
           description={
             <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
-              هل أنت متأكد من فك ربط الملف
+              {tr("هل أنت متأكد من فك ربط الملف", "Are you sure you want to unlink the file")}
               {unlinkFileTarget?.fileName ? (
                 <>
                   {" "}
@@ -625,8 +650,10 @@ export default function DoctorAppointmentsPage() {
                   </span>
                 </>
               ) : null}{" "}
-              عن هذا الموعد؟ لا يُحذف الملف من النظام بالكامل، لكن لن يعد ظاهراً
-              ضمن هذا الموعد.
+              {tr(
+                "عن هذا الموعد؟ لا يُحذف الملف من النظام بالكامل، لكن لن يعد ظاهراً ضمن هذا الموعد.",
+                "from this appointment? The file is not fully deleted from the system, but it will no longer appear under this appointment.",
+              )}
             </span>
           }
           onConfirm={async () => {
@@ -643,10 +670,13 @@ export default function DoctorAppointmentsPage() {
           }}
           targetName={cancelTarget?.patientName ?? ""}
           confirmDisabled={cancelMutation.isPending}
-          confirmLabel="تأكيد إلغاء الموعد"
+          confirmLabel={tr("تأكيد إلغاء الموعد", "Confirm cancelling the appointment")}
           successToast={{
-            title: "تم إلغاء الموعد",
-            message: "تم إلغاء الموعد وحفظ السبب بنجاح.",
+            title: tr("تم إلغاء الموعد", "Appointment cancelled"),
+            message: tr(
+              "تم إلغاء الموعد وحفظ السبب بنجاح.",
+              "The appointment was cancelled and the reason was saved successfully.",
+            ),
             variant: "success",
           }}
           onConfirm={async (reason) => {
@@ -658,7 +688,7 @@ export default function DoctorAppointmentsPage() {
                 });
             } catch (error) {
               toast(getAppointmentWriteErrorMessage(error, "cancel"), {
-                title: "خطأ",
+                title: tr("خطأ", "Error"),
                 variant: "error",
                 durationMs: 4800,
               });
@@ -676,10 +706,13 @@ export default function DoctorAppointmentsPage() {
           patientName={completeTarget?.patientName ?? ""}
           confirmDisabled={completeMutation.isPending}
           maxLength={2000}
-          title="إنهاء الموعد"
-          fieldLabel="ملاحظات الإنهاء"
-          placeholder="اكتب ملاحظات الطبيب التي يجب إرسالها مع إنهاء الموعد..."
-          confirmLabel="إنهاء الموعد"
+          title={tr("إنهاء الموعد", "Finish the appointment")}
+          fieldLabel={tr("ملاحظات الإنهاء", "Completion notes")}
+          placeholder={tr(
+            "اكتب ملاحظات الطبيب التي يجب إرسالها مع إنهاء الموعد...",
+            "Write the doctor's notes to send when finishing the appointment...",
+          )}
+          confirmLabel={tr("إنهاء الموعد", "Finish appointment")}
           onConfirm={async (medicalNotes) => {
             if (!completeTarget) return;
             try {
@@ -687,14 +720,20 @@ export default function DoctorAppointmentsPage() {
                   id: completeTarget.id,
                   body: { notes: medicalNotes || undefined },
                 });
-              toast("تم إنهاء الموعد وتسجيل الملاحظات بنجاح.", {
-                title: "تم الإنهاء",
-                variant: "success",
-                durationMs: 4200,
-              });
+              toast(
+                tr(
+                  "تم إنهاء الموعد وتسجيل الملاحظات بنجاح.",
+                  "The appointment was finished and the notes were recorded successfully.",
+                ),
+                {
+                  title: tr("تم الإنهاء", "Finished"),
+                  variant: "success",
+                  durationMs: 4200,
+                },
+              );
             } catch (error) {
               toast(getAppointmentStatusMutationErrorMessage(error, "complete"), {
-                title: "خطأ",
+                title: tr("خطأ", "Error"),
                 variant: "error",
                 durationMs: 4800,
               });
@@ -712,10 +751,13 @@ export default function DoctorAppointmentsPage() {
           patientName={noShowTarget?.patientName ?? ""}
           confirmDisabled={noShowMutation.isPending}
           maxLength={1000}
-          title="تسجيل عدم حضور"
-          fieldLabel="سبب عدم الحضور"
-          placeholder="اكتب سبب تسجيل الموعد كعدم حضور..."
-          confirmLabel="تسجيل عدم الحضور"
+          title={tr("تسجيل عدم حضور", "Record a no-show")}
+          fieldLabel={tr("سبب عدم الحضور", "No-show reason")}
+          placeholder={tr(
+            "اكتب سبب تسجيل الموعد كعدم حضور...",
+            "Write the reason for recording the appointment as a no-show...",
+          )}
+          confirmLabel={tr("تسجيل عدم الحضور", "Record no-show")}
           onConfirm={async (reason) => {
             if (!noShowTarget) return;
             try {
@@ -723,14 +765,20 @@ export default function DoctorAppointmentsPage() {
                   id: noShowTarget.id,
                   body: { reason: reason || undefined },
                 });
-              toast("تم تسجيل عدم حضور المريض لهذا الموعد.", {
-                title: "تم التسجيل",
-                variant: "success",
-                durationMs: 4200,
-              });
+              toast(
+                tr(
+                  "تم تسجيل عدم حضور المريض لهذا الموعد.",
+                  "The patient's no-show was recorded for this appointment.",
+                ),
+                {
+                  title: tr("تم التسجيل", "Recorded"),
+                  variant: "success",
+                  durationMs: 4200,
+                },
+              );
             } catch (error) {
               toast(getAppointmentStatusMutationErrorMessage(error, "no-show"), {
-                title: "خطأ",
+                title: tr("خطأ", "Error"),
                 variant: "error",
                 durationMs: 4800,
               });
@@ -763,14 +811,20 @@ export default function DoctorAppointmentsPage() {
                 id: rescheduleTarget.id,
                 body: values,
               });
-              toast("تم تحديث تاريخ ووقت الموعد بنجاح.", {
-                title: "تم إعادة الجدولة",
-                variant: "success",
-                durationMs: 4200,
-              });
+              toast(
+                tr(
+                  "تم تحديث تاريخ ووقت الموعد بنجاح.",
+                  "The appointment date and time were updated successfully.",
+                ),
+                {
+                  title: tr("تم إعادة الجدولة", "Rescheduled"),
+                  variant: "success",
+                  durationMs: 4200,
+                },
+              );
             } catch (error) {
               toast(getAppointmentWriteErrorMessage(error, "reschedule"), {
-                title: "خطأ",
+                title: tr("خطأ", "Error"),
                 variant: "error",
                 durationMs: 4800,
               });
@@ -783,7 +837,7 @@ export default function DoctorAppointmentsPage() {
         {/* شريط تصفية احترافي — مطابق لصفحة المرضى، البحث ~50% على الشاشات الواسعة */}
         <section
           className="my-6 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
-          aria-label="تصفية قائمة المواعيد"
+          aria-label={tr("تصفية قائمة المواعيد", "Filter the appointments list")}
         >
           <div className="border-b border-[#EEF2F6] bg-gradient-to-l from-primary/[0.07] via-[#F8FAFC] to-white px-5 py-4 sm:px-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -796,7 +850,7 @@ export default function DoctorAppointmentsPage() {
                 </div>
                 <div className="min-w-0 text-right">
                   <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
-                    تصفية المواعيد
+                    {tr("تصفية المواعيد", "Filter appointments")}
                   </h2>
                 </div>
               </div>
@@ -812,7 +866,7 @@ export default function DoctorAppointmentsPage() {
                       : "inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-xl border border-primary/30 bg-white px-4 font-cairo text-[12px] font-extrabold text-primary shadow-[0_1px_2px_rgba(15,143,139,0.12)] transition-all hover:bg-primary/[0.06] hover:shadow-[0_4px_14px_rgba(15,143,139,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                   }
                 >
-                  مسح الفلاتر
+                  {tr("مسح الفلاتر", "Clear filters")}
                 </button>
 
                 <output
@@ -822,7 +876,7 @@ export default function DoctorAppointmentsPage() {
                   <span className="text-primary">
                     {appointmentsListFailed ? "—" : listQuery.total || 0}
                   </span>
-                  <span className="font-extrabold text-[#667085]">نتيجة</span>
+                  <span className="font-extrabold text-[#667085]">{tr("نتيجة", "results")}</span>
                 </output>
               </div>
             </div>
@@ -841,10 +895,10 @@ export default function DoctorAppointmentsPage() {
                       className="h-3.5 w-3.5 text-primary"
                       aria-hidden
                     />
-                    بحث في القائمة الحالية
+                    {tr("بحث في القائمة الحالية", "Search the current list")}
                   </span>
                   <span className="hidden font-cairo text-[10px] font-bold uppercase tracking-wider text-[#98A2B3] sm:inline">
-                    المريض · المعرّف · الملاحظات
+                    {tr("المريض · المعرّف · الملاحظات", "Patient · ID · Notes")}
                   </span>
                 </label>
                 <div className="relative group">
@@ -853,7 +907,10 @@ export default function DoctorAppointmentsPage() {
                     type="search"
                     enterKeyHint="search"
                     autoComplete="off"
-                    placeholder="ابدأ بالكتابة داخل نتائج هذه الصفحة فقط..."
+                    placeholder={tr(
+                      "ابدأ بالكتابة داخل نتائج هذه الصفحة فقط...",
+                      "Start typing to search within this page's results only...",
+                    )}
                     className="h-[48px] w-full rounded-xl border-2 border-[#E8ECF3] bg-gradient-to-b from-[#FBFCFD] to-white pe-12 ps-4 font-cairo text-[13px] font-bold text-[#111827] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] outline-none transition-[border-color,box-shadow,background] placeholder:text-[#98A2B3] hover:border-[#D0D8E6] focus:border-primary focus:bg-white focus:shadow-[0_0_0_4px_rgba(15,143,139,0.12),inset_0_1px_2px_rgba(0,0,0,0.02)]"
                     value={filters.search}
                     onChange={(e) =>
@@ -875,7 +932,7 @@ export default function DoctorAppointmentsPage() {
                     htmlFor="doctor-appointments-status"
                     className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
                   >
-                    حالة الموعد
+                    {tr("حالة الموعد", "Appointment status")}
                   </label>
                   <StyledSelect
                     id="doctor-appointments-status"
@@ -890,24 +947,24 @@ export default function DoctorAppointmentsPage() {
                       }))
                     }
                     options={[
-                      { value: "scheduled", label: "المجدولة" },
-                      { value: "rescheduled", label: "معاد جدولتها" },
-                      { value: "completed", label: "المكتملة" },
-                      { value: "cancelled", label: "الملغية" },
-                      { value: "no-show", label: "عدم الحضور" },
+                      { value: "scheduled", label: tr("المجدولة", "Scheduled") },
+                      { value: "rescheduled", label: tr("معاد جدولتها", "Rescheduled") },
+                      { value: "completed", label: tr("المكتملة", "Completed") },
+                      { value: "cancelled", label: tr("الملغية", "Cancelled") },
+                      { value: "no-show", label: tr("عدم الحضور", "No-show") },
                     ]}
-                    listboxAriaLabel="حالة الموعد"
+                    listboxAriaLabel={tr("حالة الموعد", "Appointment status")}
                   />
                 </div>
 
                 <div className="flex min-h-[42px] min-w-0 flex-col justify-end rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2">
                   <p className="font-cairo text-[11px] font-semibold leading-relaxed text-[#667085]">
-                    تبحث عن قائمة الانتظار؟{" "}
+                    {tr("تبحث عن قائمة الانتظار؟", "Looking for the waitlist?")}{" "}
                     <Link
                       to="/doctor/waitlist"
                       className="font-extrabold text-primary underline underline-offset-2"
                     >
-                      افتح صفحة قائمة الانتظار المخصصة
+                      {tr("افتح صفحة قائمة الانتظار المخصصة", "Open the dedicated waitlist page")}
                     </Link>
                   </p>
                 </div>
@@ -921,13 +978,13 @@ export default function DoctorAppointmentsPage() {
                   aria-hidden
                 />
                 <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
-                  تاريخ المواعيد
+                  {tr("تاريخ المواعيد", "Appointments date")}
                 </span>
               </div>
               <div className="flex flex-wrap gap-4">
                 <div className="max-w-xs">
                   <span className="mb-1.5 block font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                    يوم محدد
+                    {tr("يوم محدد", "Specific day")}
                   </span>
                   <input
                     type="date"
@@ -945,7 +1002,7 @@ export default function DoctorAppointmentsPage() {
                 </div>
                 <div className="max-w-xs">
                   <span className="mb-1.5 block font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                    من
+                    {tr("من", "From")}
                   </span>
                   <input
                     type="date"
@@ -963,7 +1020,7 @@ export default function DoctorAppointmentsPage() {
                 </div>
                 <div className="max-w-xs">
                   <span className="mb-1.5 block font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                    إلى
+                    {tr("إلى", "To")}
                   </span>
                   <input
                     type="date"
@@ -992,7 +1049,7 @@ export default function DoctorAppointmentsPage() {
                     }
                     className="self-end font-cairo text-[11px] font-extrabold text-primary underline underline-offset-2"
                   >
-                    مسح النطاق
+                    {tr("مسح النطاق", "Clear range")}
                   </button>
                 ) : null}
               </div>
@@ -1043,7 +1100,7 @@ export default function DoctorAppointmentsPage() {
                     {appointmentsLoadErrorPresentation.showTechnicalDetail ? (
                       <details className="group mt-5 rounded-2xl border border-[#EAECF0] bg-white/75 px-4 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[2px]">
                         <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-cairo text-[12px] font-extrabold text-[#344054] transition-colors hover:text-[#101828] [&::-webkit-details-marker]:hidden">
-                          <span>تفاصيل إضافية</span>
+                          <span>{tr("تفاصيل إضافية", "More details")}</span>
                           <ChevronDown
                             className="h-4 w-4 shrink-0 text-[#98A2B3] transition-transform duration-200 group-open:rotate-180"
                             aria-hidden
@@ -1063,7 +1120,7 @@ export default function DoctorAppointmentsPage() {
                       {retryingAppointmentsList ? (
                         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                       ) : null}
-                      إعادة المحاولة
+                      {tr("إعادة المحاولة", "Retry")}
                     </button>
                   </div>
                 </div>
@@ -1075,7 +1132,10 @@ export default function DoctorAppointmentsPage() {
                 <div className="py-12 text-center">
                   <Calendar className="mx-auto w-12 h-12 text-gray-300" />
                   <p className="mt-3 font-cairo text-[14px] font-semibold text-[#667085]">
-                    لا توجد نتائج مطابقة للبحث المحلي ضمن هذه الصفحة.
+                    {tr(
+                      "لا توجد نتائج مطابقة للبحث المحلي ضمن هذه الصفحة.",
+                      "No results match the local search within this page.",
+                    )}
                   </p>
                 </div>
               ) : (
@@ -1132,11 +1192,17 @@ export default function DoctorAppointmentsPage() {
                             appointment.startTime,
                           )
                         ) {
-                          toast("لا يمكن تسجيل عدم حضور لموعد مستقبلي.", {
-                            title: "إجراء غير متاح",
-                            variant: "warning",
-                            durationMs: 4200,
-                          });
+                          toast(
+                            tr(
+                              "لا يمكن تسجيل عدم حضور لموعد مستقبلي.",
+                              "Cannot record a no-show for a future appointment.",
+                            ),
+                            {
+                              title: tr("إجراء غير متاح", "Action unavailable"),
+                              variant: "warning",
+                              durationMs: 4200,
+                            },
+                          );
                           return;
                         }
                         setNoShowTarget({
@@ -1170,7 +1236,10 @@ export default function DoctorAppointmentsPage() {
         {/* Pagination — متناغم مع بطاقة الفلاتر */}
         <section className="mt-5 flex flex-col gap-4 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_20px_50px_rgba(15,143,139,0.06),0_2px_8px_rgba(0,0,0,0.03)] sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="text-right font-cairo text-[12px] font-bold text-[#667085]">
-            الصفحة {filters.page} من {totalPages}
+            {tr(
+              `الصفحة ${filters.page} من ${totalPages}`,
+              `Page ${filters.page} of ${totalPages}`,
+            )}
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
@@ -1191,7 +1260,7 @@ export default function DoctorAppointmentsPage() {
                   value: String(v),
                   label: String(v),
                 }))}
-                listboxAriaLabel="عدد العناصر في الصفحة"
+                listboxAriaLabel={tr("عدد العناصر في الصفحة", "Items per page")}
               />
             </div>
 
@@ -1206,7 +1275,7 @@ export default function DoctorAppointmentsPage() {
               disabled={filters.page <= 1 || !appointmentsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              السابق
+              {tr("السابق", "Previous")}
             </button>
 
             <button
@@ -1220,7 +1289,7 @@ export default function DoctorAppointmentsPage() {
               disabled={filters.page >= totalPages || !appointmentsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-xl border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              التالي
+              {tr("التالي", "Next")}
             </button>
           </div>
         </section>

@@ -70,21 +70,36 @@ type PendingAccessState = Record<
   { pendingRequestId?: string | null; message?: string }
 >;
 
-function getPatientsListErrorMessage(error: unknown): string {
+function getPatientsListErrorMessage(
+  error: unknown,
+  tr: (ar: string, en: string) => string,
+): string {
   if (!(error instanceof ApiError)) {
     return getUserFacingRequestErrorMessage(error);
   }
 
   if (error.messageKey === "errors.doctor.notApproved") {
-    return "حساب الطبيب الحالي غير مُعتمد بعد، لذلك لا يمكن تحميل قائمة المرضى.";
+    return tr(
+      "حساب الطبيب الحالي غير مُعتمد بعد، لذلك لا يمكن تحميل قائمة المرضى.",
+      "The current doctor account is not approved yet, so the patient list cannot be loaded.",
+    );
   }
 
   if (error.status === 401) {
-    return "انتهت صلاحية جلسة الدخول أو لم يتم التحقق من الهوية. سجّل الدخول من جديد.";
+    return tr(
+      "انتهت صلاحية جلسة الدخول أو لم يتم التحقق من الهوية. سجّل الدخول من جديد.",
+      "Your session has expired or your identity could not be verified. Please sign in again.",
+    );
   }
 
   if (error.status === 403) {
-    return error.message || "لا تملك صلاحية عرض مرضى الطبيب بهذا الحساب.";
+    return (
+      error.message ||
+      tr(
+        "لا تملك صلاحية عرض مرضى الطبيب بهذا الحساب.",
+        "You do not have permission to view the doctor's patients with this account.",
+      )
+    );
   }
 
   return (
@@ -92,58 +107,75 @@ function getPatientsListErrorMessage(error: unknown): string {
   );
 }
 
-function summarizePatientsListError(error: unknown): {
+function summarizePatientsListError(
+  error: unknown,
+  tr: (ar: string, en: string) => string,
+): {
   title: string;
   brief: string;
   detail: string;
   showTechnicalDetail: boolean;
 } {
-  const detail = getPatientsListErrorMessage(error);
+  const detail = getPatientsListErrorMessage(error, tr);
   const verbose =
     detail.length > 160 ||
     detail.includes("لم نتمكن من إتمام الطلب") ||
     detail.includes("VPN") ||
     detail.includes("جدار الحماية") ||
-    detail.includes("توقيت خاطئ");
+    detail.includes("توقيت خاطئ") ||
+    detail.includes("We could not complete the request") ||
+    detail.includes("firewall") ||
+    detail.includes("incorrect time");
   const brief = verbose
-    ? "لم نتمكن من جلب قائمة المرضى في هذه المحاولة. تحقق من اتصالك بالإنترنت ثم أعد المحاولة، أو انتظر قليلًا إن كانت الخدمة مشغولة."
+    ? tr(
+        "لم نتمكن من جلب قائمة المرضى في هذه المحاولة. تحقق من اتصالك بالإنترنت ثم أعد المحاولة، أو انتظر قليلًا إن كانت الخدمة مشغولة.",
+        "We could not fetch the patient list this time. Check your internet connection and try again, or wait a moment if the service is busy.",
+      )
     : detail;
 
   return {
-    title: "تعذّر تحميل مرضى الطبيب",
+    title: tr("تعذّر تحميل مرضى الطبيب", "Failed to load the doctor's patients"),
     brief,
     detail,
     showTechnicalDetail: verbose,
   };
 }
 
-function formatIsoDate(value?: string | null): string {
-  if (!value) return "لا توجد زيارات";
+function formatIsoDate(
+  value: string | null | undefined,
+  locale: "ar" | "en",
+  tr: (ar: string, en: string) => string,
+): string {
+  if (!value) return tr("لا توجد زيارات", "No visits");
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ar-SA");
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
-function toCardData(patient: {
-  _id: string;
-  publicId: string;
-  user: {
-    fullName: string;
-    phone?: string;
-    accountStatus?: "active" | "temporary" | "suspended";
-  };
-  allergies: string[];
-  medicalConditions: string[];
-  bloodType: string | null;
-  lastVisitAt: string | null;
-  isTemporary?: boolean;
-}): Omit<DoctorPatientExpandableCardData, "relationshipState"> {
+function toCardData(
+  patient: {
+    _id: string;
+    publicId: string;
+    user: {
+      fullName: string;
+      phone?: string;
+      accountStatus?: "active" | "temporary" | "suspended";
+    };
+    allergies: string[];
+    medicalConditions: string[];
+    bloodType: string | null;
+    lastVisitAt: string | null;
+    isTemporary?: boolean;
+  },
+  locale: "ar" | "en",
+  tr: (ar: string, en: string) => string,
+): Omit<DoctorPatientExpandableCardData, "relationshipState"> {
   const accountStatusLabel =
     patient.user.accountStatus === "temporary"
-      ? "مؤقت"
+      ? tr("مؤقت", "Temporary")
       : patient.user.accountStatus === "suspended"
-        ? "معلّق"
-        : "نشط";
+        ? tr("معلّق", "Suspended")
+        : tr("نشط", "Active");
 
   return {
     id: patient._id,
@@ -154,10 +186,10 @@ function toCardData(patient: {
     isTemporary:
       patient.isTemporary ?? patient.user.accountStatus === "temporary",
     phone: patient.user.phone ?? "—",
-    lastVisit: formatIsoDate(patient.lastVisitAt),
+    lastVisit: formatIsoDate(patient.lastVisitAt, locale, tr),
     allergies: patient.allergies ?? [],
     medicalConditions: patient.medicalConditions ?? [],
-    bloodType: patient.bloodType ?? "غير محدد",
+    bloodType: patient.bloodType ?? tr("غير محدد", "Not specified"),
     heightLabel: "—",
     weightLabel: "—",
     measurementUnitLabel: "—",
@@ -288,8 +320,8 @@ export default function DoctorPatientsPage() {
   const { retry: retryPatientsList, retrying: retryingPatientsList } =
     useRetryAction(() => listQuery.refetch());
   const patientsLoadErrorPresentation = useMemo(
-    () => summarizePatientsListError(listQuery.error),
-    [listQuery.error],
+    () => summarizePatientsListError(listQuery.error, tr),
+    [listQuery.error, tr],
   );
 
   const hasActiveFilters = useMemo(() => {
@@ -327,15 +359,15 @@ export default function DoctorPatientsPage() {
         medicalHistory: (fullProfileQuery.patient.medicalHistory ?? []).map(
           (record) => ({
             id: record._id,
-            title: record.title ?? "سجل طبي",
+            title: record.title ?? tr("سجل طبي", "Medical record"),
             diagnosis: record.diagnosis ?? "—",
-            date: formatIsoDate(record.date ?? record.createdAt),
+            date: formatIsoDate(record.date ?? record.createdAt, locale, tr),
           }),
         ),
         medications: (fullProfileQuery.patient.medications ?? []).map(
           (medication, index) => ({
             id: medication._id ?? `med-${index}`,
-            name: medication.name ?? "دواء",
+            name: medication.name ?? tr("دواء", "Medication"),
             dosage: medication.dosage ?? "—",
             frequency: medication.frequency ?? "—",
           }),
@@ -346,13 +378,16 @@ export default function DoctorPatientsPage() {
             : (fullProfileQuery.patient.files ?? [])
         ).map((file) => ({
           id: file._id,
-          name: file.originalName ?? "ملف",
-          createdAt: formatIsoDate(file.createdAt),
+          name: file.originalName ?? tr("ملف", "File"),
+          createdAt: formatIsoDate(file.createdAt, locale, tr),
         })),
         orders: (fullProfileQuery.patient.orders ?? []).map((order, index) => ({
           id: order._id ?? `order-${index}`,
           title:
-            order.orderTitle ?? order.orderName ?? order.orderType ?? "طلب",
+            order.orderTitle ??
+            order.orderName ??
+            order.orderType ??
+            tr("طلب", "Order"),
           status: order.status ?? order.statusCode ?? "—",
         })),
       }
@@ -477,7 +512,7 @@ export default function DoctorPatientsPage() {
     };
 
     const enhancedPatients = listQuery.patients.map((patient) => {
-      const base = toCardData(patient);
+      const base = toCardData(patient, locale, tr);
       const relationshipState = buildRelationshipState(base, patient._id);
 
       if (
@@ -494,14 +529,14 @@ export default function DoctorPatientsPage() {
             base.medicalConditions,
           bloodType: publicProfileQuery.patient.bloodType ?? base.bloodType,
           heightLabel: publicProfileQuery.patient.heightCm
-            ? `${publicProfileQuery.patient.heightCm} سم`
+            ? `${publicProfileQuery.patient.heightCm} ${tr("سم", "cm")}`
             : "—",
           weightLabel: publicProfileQuery.patient.weightKg
-            ? `${publicProfileQuery.patient.weightKg} كغ`
+            ? `${publicProfileQuery.patient.weightKg} ${tr("كغ", "kg")}`
             : "—",
           measurementUnitLabel:
             publicProfileQuery.patient.measurementUnit === "metric"
-              ? "متري"
+              ? tr("متري", "Metric")
               : (publicProfileQuery.patient.measurementUnit ?? "—"),
         };
       }
@@ -522,6 +557,8 @@ export default function DoctorPatientsPage() {
     pendingAccessByPatient,
     publicProfileQuery.patient,
     filters.relationship,
+    locale,
+    tr,
   ]);
 
   const patientFilesLoading =
@@ -544,7 +581,7 @@ export default function DoctorPatientsPage() {
       window.open(fileUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "open"), {
-        title: "تعذر فتح الملف",
+        title: tr("تعذر فتح الملف", "Could not open the file"),
         variant: "error",
       });
     } finally {
@@ -568,7 +605,7 @@ export default function DoctorPatientsPage() {
       );
     } catch (error) {
       toast(getPatientFileAccessErrorMessage(error, "download"), {
-        title: "تعذر تحميل الملف",
+        title: tr("تعذر تحميل الملف", "Could not download the file"),
         variant: "error",
       });
     } finally {
@@ -581,13 +618,16 @@ export default function DoctorPatientsPage() {
     setPatientFileActionKey(fileId);
     try {
       const response = await deletePatientFileMutation.mutateAsync(fileId);
-      toast(response.message ?? "تم حذف الملف بنجاح.", {
-        title: "نجاح",
-        variant: "success",
-      });
+      toast(
+        response.message ?? tr("تم حذف الملف بنجاح.", "The file was deleted successfully."),
+        {
+          title: tr("نجاح", "Success"),
+          variant: "success",
+        },
+      );
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "delete"), {
-        title: "تعذر حذف الملف",
+        title: tr("تعذر حذف الملف", "Could not delete the file"),
         variant: "error",
       });
     } finally {
@@ -601,13 +641,16 @@ export default function DoctorPatientsPage() {
     setPatientFileActionKey("upload");
     try {
       const response = await uploadPatientFileMutation.mutateAsync({ file });
-      toast(response.message ?? "تم رفع الملف بنجاح.", {
-        title: "نجاح",
-        variant: "success",
-      });
+      toast(
+        response.message ?? tr("تم رفع الملف بنجاح.", "The file was uploaded successfully."),
+        {
+          title: tr("نجاح", "Success"),
+          variant: "success",
+        },
+      );
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, "upload"), {
-        title: "تعذر رفع الملف",
+        title: tr("تعذر رفع الملف", "Could not upload the file"),
         variant: "error",
       });
     } finally {
@@ -1012,17 +1055,17 @@ export default function DoctorPatientsPage() {
                 aria-hidden
               />
               <div className="font-cairo text-[15px] font-extrabold text-[#B42318]">
-                تعذّر تحميل مرضى الطبيب
+                {tr("تعذّر تحميل مرضى الطبيب", "Failed to load the doctor's patients")}
               </div>
               <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#7A271A]">
-                {getPatientsListErrorMessage(listQuery.error)}
+                {getPatientsListErrorMessage(listQuery.error, tr)}
               </p>
               <button
                 type="button"
                 onClick={() => listQuery.refetch()}
                 className="mt-6 inline-flex h-[40px] min-w-[160px] items-center justify-center rounded-xl bg-primary px-5 font-cairo text-[13px] font-extrabold text-white shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
-                إعادة المحاولة
+                {tr("إعادة المحاولة", "Retry")}
               </button>
             </div>
           ) : patientsListPending ? (
@@ -1033,9 +1076,9 @@ export default function DoctorPatientsPage() {
                 variant="teal"
                 imageSrc="/images/photo-not-found-patient.png"
                 imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
-                title="لا يوجد مرضى مضافة بعد"
-                subtitle="قم بإضافة مريض جديد الآن"
-                actionLabel="إضافة مريض"
+                title={tr("لا يوجد مرضى مضافة بعد", "No patients added yet")}
+                subtitle={tr("قم بإضافة مريض جديد الآن", "Add a new patient now")}
+                actionLabel={tr("إضافة مريض", "Add patient")}
                 onAction={() => setTempPatientOpen(true)}
                 actionIcon={<UserRoundPlus className="w-4 h-4" />}
               />
@@ -1043,8 +1086,10 @@ export default function DoctorPatientsPage() {
               <div className="rounded-2xl border border-[#E8ECF3] bg-white px-6 py-12 text-center shadow-sm">
                 <Users className="mx-auto h-12 w-12 text-[#D0D5DD]" aria-hidden />
                 <p className="mt-4 font-cairo text-[14px] font-semibold leading-relaxed text-[#667085]">
-                  لا توجد مرضى في هذه الصفحة وفقًا لعدد النتائج الإجمالي. جرّب
-                  العودة إلى صفحة سابقة أو تعديل عدد النتائج بالصفحة.
+                  {tr(
+                    "لا توجد مرضى في هذه الصفحة وفقًا لعدد النتائج الإجمالي. جرّب العودة إلى صفحة سابقة أو تعديل عدد النتائج بالصفحة.",
+                    "There are no patients on this page based on the total result count. Try going back to a previous page or changing the results per page.",
+                  )}
                 </p>
               </div>
             )
@@ -1052,8 +1097,10 @@ export default function DoctorPatientsPage() {
             <div className="rounded-2xl border border-[#E5E7EB] bg-white px-6 py-12 text-center shadow-sm">
               <Users className="mx-auto h-12 w-12 text-[#D0D5DD]" aria-hidden />
               <p className="mt-4 font-cairo text-[14px] font-semibold text-[#667085]">
-                لا يوجد مرضى يطابقون فلتر «علاقة الوصول» الحالي ضمن الصفحة
-                المعروضة. جرّب اختيار «كل العلاقات» أو غيّر الفلاتر الأخرى.
+                {tr(
+                  "لا يوجد مرضى يطابقون فلتر «علاقة الوصول» الحالي ضمن الصفحة المعروضة. جرّب اختيار «كل العلاقات» أو غيّر الفلاتر الأخرى.",
+                  "No patients match the current “access relationship” filter within the displayed page. Try selecting “All relationships” or change the other filters.",
+                )}
               </p>
             </div>
           ) : (
@@ -1112,9 +1159,12 @@ export default function DoctorPatientsPage() {
                 }}
                 onStartConsultation={() =>
                   toast(
-                    "تدفق بدء الاستشارة يرتبط بوحدة encounters/consultations التالية.",
+                    tr(
+                      "تدفق بدء الاستشارة يرتبط بوحدة encounters/consultations التالية.",
+                      "The start-consultation flow is linked to the next encounters/consultations module.",
+                    ),
                     {
-                      title: "مرتبط بمسار آخر",
+                      title: tr("مرتبط بمسار آخر", "Linked to another flow"),
                       variant: "info",
                       durationMs: 4200,
                     },
@@ -1122,18 +1172,26 @@ export default function DoctorPatientsPage() {
                 }
                 onRequestAccess={async () => {
                   if (!doctorId) {
-                    toast("تعذر تحديد هوية الطبيب الحالية لإنشاء طلب الوصول.", {
-                      title: "خطأ",
-                      variant: "error",
-                    });
+                    toast(
+                      tr(
+                        "تعذر تحديد هوية الطبيب الحالية لإنشاء طلب الوصول.",
+                        "Could not determine the current doctor's identity to create the access request.",
+                      ),
+                      {
+                        title: tr("خطأ", "Error"),
+                        variant: "error",
+                      },
+                    );
                     return;
                   }
                   try {
                     const response = await requestAccessMutation.mutateAsync({
                       patientId: patient.id,
                       body: {
-                        reason:
+                        reason: tr(
                           "طلب وصول للملف الطبي الكامل لمتابعة الحالة الصحية",
+                          "Requesting access to the full medical file to follow up on the health condition",
+                        ),
                       },
                     });
 
@@ -1148,14 +1206,18 @@ export default function DoctorPatientsPage() {
                       }));
                     }
 
-                    toast(response.message ?? "تم إرسال طلب الوصول بنجاح.", {
-                      title: "نجاح",
-                      variant: "success",
-                      durationMs: 4000,
-                    });
+                    toast(
+                      response.message ??
+                        tr("تم إرسال طلب الوصول بنجاح.", "The access request was sent successfully."),
+                      {
+                        title: tr("نجاح", "Success"),
+                        variant: "success",
+                        durationMs: 4000,
+                      },
+                    );
                   } catch (error) {
                     toast(getDoctorAccessRequestErrorMessage(error), {
-                      title: "تعذّر إرسال طلب الوصول",
+                      title: tr("تعذّر إرسال طلب الوصول", "Could not send the access request"),
                       variant: "error",
                     });
                   }
@@ -1167,7 +1229,10 @@ export default function DoctorPatientsPage() {
         {/* Modern pagination section - Admin style */}
         <section className="mt-5 flex flex-col gap-4 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="text-right font-cairo text-[12px] font-bold text-[#667085]">
-            الصفحة {filters.page} من {totalPages}
+            {tr(
+              `الصفحة ${filters.page} من ${totalPages}`,
+              `Page ${filters.page} of ${totalPages}`,
+            )}
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
@@ -1188,7 +1253,7 @@ export default function DoctorPatientsPage() {
                   value: String(v),
                   label: String(v),
                 }))}
-                listboxAriaLabel="عدد العناصر في الصفحة"
+                listboxAriaLabel={tr("عدد العناصر في الصفحة", "Items per page")}
               />
             </div>
 
@@ -1203,7 +1268,7 @@ export default function DoctorPatientsPage() {
               disabled={filters.page <= 1 || !patientsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              السابق
+              {tr("السابق", "Previous")}
             </button>
 
             <button
@@ -1217,7 +1282,7 @@ export default function DoctorPatientsPage() {
               disabled={filters.page >= totalPages || !patientsListReady}
               className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              التالي
+              {tr("التالي", "Next")}
             </button>
           </div>
         </section>
