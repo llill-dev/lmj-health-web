@@ -334,7 +334,7 @@ export default function DoctorWorkSchedulePage() {
   return (
     <>
       <Helmet>
-        <title>جدول العمل • LMJ Health</title>
+        <title>{tr('جدول العمل', 'Work schedule')} • LMJ Health</title>
       </Helmet>
 
       <div
@@ -369,7 +369,7 @@ export default function DoctorWorkSchedulePage() {
       />
 
         <ClinicAccountsBanner
-          title='جدول العمل'
+          title={tr('جدول العمل', 'Work schedule')}
           icon={<Calendar className='h-7 w-7 text-white sm:h-8 sm:w-8' />}
         />
 
@@ -388,7 +388,7 @@ export default function DoctorWorkSchedulePage() {
               <div className='flex gap-3 items-center'>
                 <AlertCircle className='h-5 w-5 text-[#B42318]' />
                 <div className='font-cairo text-[13px] font-bold text-[#B42318]'>
-                  فشل تحميل جدول العمل
+                  {tr('فشل تحميل جدول العمل', 'Failed to load the work schedule')}
                 </div>
               </div>
               <button
@@ -396,7 +396,7 @@ export default function DoctorWorkSchedulePage() {
                 onClick={() => refetch()}
                 className='h-[36px] rounded-[10px] bg-[#F04438] px-5 font-cairo text-[12px] font-extrabold text-white transition-colors hover:bg-[#D92D20]'
               >
-                إعادة المحاولة
+                {tr('إعادة المحاولة', 'Retry')}
               </button>
             </motion.div>
           )}
@@ -412,11 +412,11 @@ export default function DoctorWorkSchedulePage() {
               <div className='flex gap-2 items-center'>
                 <SettingsIcon className='w-5 h-5 text-primary' />
                 <h2 className='font-cairo text-[16px] font-extrabold text-[#111827]'>
-                  إعدادات المواعيد
+                  {tr('إعدادات المواعيد', 'Appointment settings')}
                 </h2>
               </div>
               <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                حدد مدة كل موعد والفجوة بين المواعيد
+                {tr('حدد مدة كل موعد والفجوة بين المواعيد', "Set each appointment's duration and the gap between appointments")}
               </p>
             </div>
 
@@ -425,36 +425,36 @@ export default function DoctorWorkSchedulePage() {
                 <div>
                   <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[13px] font-bold text-[#344054]'>
                     <Clock className='w-4 h-4 text-primary' />
-                    مدة الموعد (دقيقة)
+                    {tr('مدة الموعد (دقيقة)', 'Appointment duration (minutes)')}
                   </label>
                   <StyledSelect
                     value={String(duration)}
                     onChange={(v) => setDuration(Number(v))}
                     options={[
-                      { value: '15', label: '15 دقيقة' },
-                      { value: '30', label: '30 دقيقة' },
-                      { value: '45', label: '45 دقيقة' },
-                      { value: '60', label: '60 دقيقة' },
+                      { value: '15', label: tr('15 دقيقة', '15 minutes') },
+                      { value: '30', label: tr('30 دقيقة', '30 minutes') },
+                      { value: '45', label: tr('45 دقيقة', '45 minutes') },
+                      { value: '60', label: tr('60 دقيقة', '60 minutes') },
                     ]}
-                    listboxAriaLabel='مدة الموعد بالدقيقة'
+                    listboxAriaLabel={tr('مدة الموعد بالدقيقة', 'Appointment duration in minutes')}
                   />
                 </div>
 
                 <div>
                   <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[13px] font-bold text-[#344054]'>
                     <Clock className='w-4 h-4 text-primary' />
-                    الفجوة بين المواعيد (دقيقة)
+                    {tr('الفجوة بين المواعيد (دقيقة)', 'Gap between appointments (minutes)')}
                   </label>
                   <StyledSelect
                     value={String(gap)}
                     onChange={(v) => setGap(Number(v))}
                     options={[
-                      { value: '0', label: 'بدون فجوة' },
-                      { value: '5', label: '5 دقائق' },
-                      { value: '10', label: '10 دقائق' },
-                      { value: '15', label: '15 دقيقة' },
+                      { value: '0', label: tr('بدون فجوة', 'No gap') },
+                      { value: '5', label: tr('5 دقائق', '5 minutes') },
+                      { value: '10', label: tr('10 دقائق', '10 minutes') },
+                      { value: '15', label: tr('15 دقيقة', '15 minutes') },
                     ]}
-                    listboxAriaLabel='الفجوة بين المواعيد بالدقيقة'
+                    listboxAriaLabel={tr('الفجوة بين المواعيد بالدقيقة', 'Gap between appointments in minutes')}
                   />
                 </div>
               </div>
@@ -469,7 +469,7 @@ export default function DoctorWorkSchedulePage() {
                   className='flex h-[42px] w-full items-center justify-center gap-2 rounded-[10px] bg-primary px-6 font-cairo text-[13px] font-extrabold text-white shadow-[0_8px_16px_rgba(15,143,139,0.25)] transition-all hover:bg-[#0d7a77] disabled:opacity-50 sm:w-auto'
                 >
                   <SettingsIcon className='w-4 h-4' />
-                  {isUpdatingSettings ? 'جارٍ الحفظ...' : 'حفظ الإعدادات'}
+                  {isUpdatingSettings ? tr('جارٍ الحفظ...', 'Saving...') : tr('حفظ الإعدادات', 'Save settings')}
                 </motion.button>
               </div>
             </div>
@@ -487,13 +487,16 @@ export default function DoctorWorkSchedulePage() {
                 <div className='flex gap-2 items-center'>
                   <Calendar className='w-5 h-5 text-primary' />
                   <h2 className='font-cairo text-[16px] font-extrabold text-[#111827]'>
-                    أيام وساعات العمل
+                    {tr('أيام وساعات العمل', 'Work days and hours')}
                   </h2>
                 </div>
                 <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
                   {availableTimes.length === 0
-                    ? 'لم تقم بإضافة أيام عمل بعد'
-                    : `لديك ${availableTimes.length} أيام عمل`}
+                    ? tr('لم تقم بإضافة أيام عمل بعد', "You haven't added any work days yet")
+                    : tr(
+                        `لديك ${availableTimes.length} أيام عمل`,
+                        `You have ${availableTimes.length} work days`,
+                      )}
                 </p>
               </div>
               <motion.button
@@ -505,7 +508,7 @@ export default function DoctorWorkSchedulePage() {
                 className='flex h-[38px] items-center gap-2 rounded-[10px] border-[2px] border-primary bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition-all hover:bg-primary hover:text-white disabled:opacity-50'
               >
                 <Plus className='w-4 h-4' />
-                إضافة يوم عمل
+                {tr('إضافة يوم عمل', 'Add work day')}
               </motion.button>
             </div>
 
@@ -520,10 +523,13 @@ export default function DoctorWorkSchedulePage() {
                 >
                   <Calendar className='mx-auto h-12 w-12 text-[#D1D5DB]' />
                   <p className='mt-3 font-cairo text-[14px] font-bold text-[#6B7280]'>
-                    لا توجد أيام عمل محددة
+                    {tr('لا توجد أيام عمل محددة', 'No work days set')}
                   </p>
                   <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                    ابدأ بإضافة أيام عملك لتمكين المرضى من الحجز
+                    {tr(
+                      'ابدأ بإضافة أيام عملك لتمكين المرضى من الحجز',
+                      'Start by adding your work days to let patients book',
+                    )}
                   </p>
                 </motion.div>
               ) : (
@@ -545,7 +551,10 @@ export default function DoctorWorkSchedulePage() {
                                 {dayLabels[dayTemplate.day]}
                               </div>
                               <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>
-                                {dayTemplate.slots.length} فترة عمل
+                                {tr(
+                                  `${dayTemplate.slots.length} فترة عمل`,
+                                  `${dayTemplate.slots.length} time slots`,
+                                )}
                               </div>
                             </div>
 
@@ -587,7 +596,7 @@ export default function DoctorWorkSchedulePage() {
                               }}
                               disabled={isUpdatingDay}
                               className='flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#F2FFFE] text-primary transition-colors hover:bg-primary hover:text-white'
-                              aria-label='تعديل'
+                              aria-label={tr('تعديل', 'Edit')}
                             >
                               <Edit2 className='w-4 h-4' />
                             </motion.button>
@@ -599,7 +608,7 @@ export default function DoctorWorkSchedulePage() {
                               onClick={() => handleDeleteDay(dayTemplate.day)}
                               disabled={isDeletingDay}
                               className='flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#FEF3F2] text-[#F04438] transition-colors hover:bg-[#F04438] hover:text-white'
-                              aria-label='حذف'
+                              aria-label={tr('حذف', 'Delete')}
                             >
                               <Trash2 className='w-4 h-4' />
                             </motion.button>
@@ -625,13 +634,16 @@ export default function DoctorWorkSchedulePage() {
                 <div className='flex gap-2 items-center'>
                   <Calendar className='w-5 h-5 text-primary' />
                   <h2 className='font-cairo text-[16px] font-extrabold text-[#111827]'>
-                    الاستثناءات والإجازات
+                    {tr('الاستثناءات والإجازات', 'Exceptions and leaves')}
                   </h2>
                 </div>
                 <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
                   {exceptions.length === 0
-                    ? 'لا توجد استثناءات'
-                    : `لديك ${exceptions.length} استثناء`}
+                    ? tr('لا توجد استثناءات', 'No exceptions')
+                    : tr(
+                        `لديك ${exceptions.length} استثناء`,
+                        `You have ${exceptions.length} exceptions`,
+                      )}
                 </p>
               </div>
               <motion.button
@@ -643,7 +655,7 @@ export default function DoctorWorkSchedulePage() {
                 className='flex h-[38px] items-center gap-2 rounded-[10px] border-[2px] border-primary bg-white px-4 font-cairo text-[13px] font-extrabold text-primary shadow-sm transition-all hover:bg-primary hover:text-white disabled:opacity-50'
               >
                 <Plus className='w-4 h-4' />
-                إضافة استثناء
+                {tr('إضافة استثناء', 'Add exception')}
               </motion.button>
             </div>
 
@@ -656,10 +668,10 @@ export default function DoctorWorkSchedulePage() {
                 >
                   <Calendar className='mx-auto h-12 w-12 text-[#D1D5DB]' />
                   <p className='mt-3 font-cairo text-[14px] font-bold text-[#6B7280]'>
-                    لا توجد استثناءات أو إجازات
+                    {tr('لا توجد استثناءات أو إجازات', 'No exceptions or leaves')}
                   </p>
                   <p className='mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                    أضف أيام غير متاحة أو إجازات خاصة
+                    {tr('أضف أيام غير متاحة أو إجازات خاصة', 'Add unavailable days or special leaves')}
                   </p>
                 </motion.div>
               ) : (
@@ -682,7 +694,7 @@ export default function DoctorWorkSchedulePage() {
                             <div className='flex-1'>
                               <div className='flex items-center gap-2 flex-wrap'>
                                 <div className='font-cairo text-[14px] font-extrabold text-[#111827]'>
-                                  {exception.note || 'استثناء'}
+                                  {exception.note || tr('استثناء', 'Exception')}
                                 </div>
                                 {/* Exception Type Badge */}
                                 <span
@@ -693,13 +705,13 @@ export default function DoctorWorkSchedulePage() {
                                   }`}
                                 >
                                   {!exception.slots || exception.slots.length === 0
-                                    ? 'يوم مغلق'
-                                    : 'ساعات مخصصة'}
+                                    ? tr('يوم مغلق', 'Closed day')
+                                    : tr('ساعات مخصصة', 'Custom hours')}
                                 </span>
                               </div>
                               <div className='mt-1 font-cairo text-[12px] font-bold text-[#667085]'>
                                 {new Date(exception.date).toLocaleDateString(
-                                  'ar-SA',
+                                  locale === 'ar' ? 'ar-SA' : 'en-US',
                                   {
                                     weekday: 'long',
                                     year: 'numeric',
@@ -735,7 +747,7 @@ export default function DoctorWorkSchedulePage() {
                             onClick={() => handleDeleteException(exception._id!)}
                             disabled={isDeletingException}
                             className='flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#FEF3F2] text-[#F04438] transition-colors hover:bg-[#F04438] hover:text-white flex-shrink-0'
-                            aria-label='حذف'
+                            aria-label={tr('حذف', 'Delete')}
                           >
                             <Trash2 className='w-4 h-4' />
                           </motion.button>
@@ -763,7 +775,7 @@ export default function DoctorWorkSchedulePage() {
                       <Calendar className='w-5 h-5 text-primary' />
                     </div>
                     <h2 className='font-cairo text-[18px] font-extrabold text-[#111827]'>
-                      معاينة الحجوزات
+                      {tr('معاينة الحجوزات', 'Bookings preview')}
                     </h2>
                   </div>
                   <input
@@ -785,10 +797,13 @@ export default function DoctorWorkSchedulePage() {
                       <Calendar className='h-10 w-10 text-[#667085]' />
                     </div>
                     <p className='mt-4 font-cairo text-[15px] font-extrabold text-[#344054]'>
-                      اختر تاريخاً لمعاينة الحجوزات
+                      {tr('اختر تاريخاً لمعاينة الحجوزات', 'Choose a date to preview bookings')}
                     </p>
                     <p className='mt-2 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
-                      ستظهر لك جميع الفترات المتاحة والمحجوزة في التاريخ المحدد
+                      {tr(
+                        'ستظهر لك جميع الفترات المتاحة والمحجوزة في التاريخ المحدد',
+                        'All available and booked slots for the selected date will be shown here',
+                      )}
                     </p>
                   </div>
                 )}
@@ -811,32 +826,21 @@ export default function DoctorWorkSchedulePage() {
                   </div>
                   <div className='flex-1'>
                     <h3 className='font-cairo text-[16px] font-extrabold text-primary'>
-                      ملخص جدول العمل التشغيلي
+                      {tr('ملخص جدول العمل التشغيلي', 'Operational schedule summary')}
                     </h3>
                     <div className='grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2'>
                       <div className='rounded-[12px] bg-white/70 p-4 shadow-sm'>
                         <div className='flex gap-2 items-center mb-2'>
                           <Calendar className='w-4 h-4 text-primary' />
                           <h4 className='font-cairo text-[13px] font-extrabold text-[#155E75]'>
-                            أيام العمل
+                            {tr('أيام العمل', 'Work days')}
                           </h4>
                         </div>
                         <p className='font-cairo text-[24px] font-extrabold text-primary'>
                           {availableTimes.length}
                         </p>
                         <p className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
-                          {availableTimes.map((t) => {
-                            const dayLabels: Record<ScheduleDayKey, string> = {
-                              Sunday: 'الأحد',
-                              Monday: 'الإثنين',
-                              Tuesday: 'الثلاثاء',
-                              Wednesday: 'الأربعاء',
-                              Thursday: 'الخميس',
-                              Friday: 'الجمعة',
-                              Saturday: 'السبت',
-                            };
-                            return dayLabels[t.day];
-                          }).join(' - ')}
+                          {availableTimes.map((t) => dayLabels[t.day]).join(' - ')}
                         </p>
                       </div>
 
@@ -844,7 +848,7 @@ export default function DoctorWorkSchedulePage() {
                         <div className='flex gap-2 items-center mb-2'>
                           <Clock className='w-4 h-4 text-primary' />
                           <h4 className='font-cairo text-[13px] font-extrabold text-[#155E75]'>
-                            إعدادات الفترات
+                            {tr('إعدادات الفترات', 'Slot settings')}
                           </h4>
                         </div>
                         <div className='flex gap-2 items-baseline'>
@@ -852,11 +856,14 @@ export default function DoctorWorkSchedulePage() {
                             {slotSettings?.duration || 30}
                           </span>
                           <span className='font-cairo text-[13px] font-semibold text-[#667085]'>
-                            دقيقة/موعد
+                            {tr('دقيقة/موعد', 'min/appointment')}
                           </span>
                         </div>
                         <p className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
-                          فاصل {slotSettings?.gap || 5} دقائق بين المواعيد
+                          {tr(
+                            `فاصل ${slotSettings?.gap || 5} دقائق بين المواعيد`,
+                            `${slotSettings?.gap || 5} minute gap between appointments`,
+                          )}
                         </p>
                       </div>
 
@@ -864,7 +871,7 @@ export default function DoctorWorkSchedulePage() {
                         <div className='flex gap-2 items-center mb-2'>
                           <AlertCircle className='w-4 h-4 text-primary' />
                           <h4 className='font-cairo text-[13px] font-extrabold text-[#155E75]'>
-                            الاستثناءات
+                            {tr('الاستثناءات', 'Exceptions')}
                           </h4>
                         </div>
                         <p className='font-cairo text-[24px] font-extrabold text-primary'>
@@ -872,8 +879,11 @@ export default function DoctorWorkSchedulePage() {
                         </p>
                         <p className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
                           {exceptions.length === 0
-                            ? 'لا توجد أيام مغلقة أو استثناءات'
-                            : `${exceptions.length} ${exceptions.length === 1 ? 'يوم' : exceptions.length === 2 ? 'يومان' : 'أيام'} مغلقة أو مخصصة`}
+                            ? tr('لا توجد أيام مغلقة أو استثناءات', 'No closed days or exceptions')
+                            : tr(
+                                `${exceptions.length} ${exceptions.length === 1 ? 'يوم' : exceptions.length === 2 ? 'يومان' : 'أيام'} مغلقة أو مخصصة`,
+                                `${exceptions.length} closed or custom day${exceptions.length === 1 ? '' : 's'}`,
+                              )}
                         </p>
                       </div>
 
@@ -881,7 +891,7 @@ export default function DoctorWorkSchedulePage() {
                         <div className='flex gap-2 items-center mb-2'>
                           <SettingsIcon className='w-4 h-4 text-primary' />
                           <h4 className='font-cairo text-[13px] font-extrabold text-[#155E75]'>
-                            المواعيد المتوقعة
+                            {tr('المواعيد المتوقعة', 'Expected appointments')}
                           </h4>
                         </div>
                         <p className='font-cairo text-[24px] font-extrabold text-primary'>
@@ -906,14 +916,18 @@ export default function DoctorWorkSchedulePage() {
                           })()}
                         </p>
                         <p className='mt-1 font-cairo text-[11px] font-semibold text-[#667085]'>
-                          متوسط عدد المواعيد في اليوم الواحد
+                          {tr('متوسط عدد المواعيد في اليوم الواحد', 'Average number of appointments per day')}
                         </p>
                       </div>
                     </div>
 
                     <div className='mt-4 rounded-[10px] bg-primary/5 p-3 border border-primary/10'>
                       <p className='font-cairo text-[12px] font-semibold text-[#155E75]'>
-                        <strong className='font-extrabold'>نصيحة:</strong> استخدم قسم "معاينة الحجوزات" أعلاه لرؤية الفترات المتاحة والمحجوزة في أي تاريخ محدد
+                        <strong className='font-extrabold'>{tr('نصيحة:', 'Tip:')}</strong>{' '}
+                        {tr(
+                          'استخدم قسم "معاينة الحجوزات" أعلاه لرؤية الفترات المتاحة والمحجوزة في أي تاريخ محدد',
+                          'Use the "Bookings preview" section above to see the available and booked slots for any given date',
+                        )}
                       </p>
                     </div>
                   </div>
@@ -932,10 +946,13 @@ export default function DoctorWorkSchedulePage() {
           if (!open) setDayToDelete(null);
         }}
         onConfirm={confirmDeleteDay}
-        title='تأكيد حذف اليوم'
-        description={`هل أنت متأكد من حذف يوم ${dayToDelete ? dayLabels[dayToDelete] : ''}؟ هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع الفترات المحددة لهذا اليوم من الجدول الأسبوعي.`}
-        confirmText='حذف اليوم'
-        cancelText='إلغاء'
+        title={tr('تأكيد حذف اليوم', 'Confirm deleting the day')}
+        description={tr(
+          `هل أنت متأكد من حذف يوم ${dayToDelete ? dayLabels[dayToDelete] : ''}؟ هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع الفترات المحددة لهذا اليوم من الجدول الأسبوعي.`,
+          `Are you sure you want to delete ${dayToDelete ? dayLabels[dayToDelete] : ''}? This action cannot be undone. All time slots set for this day will be removed from the weekly schedule.`,
+        )}
+        confirmText={tr('حذف اليوم', 'Delete day')}
+        cancelText={tr('إلغاء', 'Cancel')}
         variant='danger'
         isLoading={isDeletingDay}
       />
@@ -947,10 +964,13 @@ export default function DoctorWorkSchedulePage() {
           if (!open) setExceptionToDelete(null);
         }}
         onConfirm={confirmDeleteException}
-        title='تأكيد حذف الاستثناء'
-        description='هل أنت متأكد من حذف هذا الاستثناء؟ سيتم استرجاع الجدول الأسبوعي العادي لهذا التاريخ.'
-        confirmText='حذف الاستثناء'
-        cancelText='إلغاء'
+        title={tr('تأكيد حذف الاستثناء', 'Confirm deleting the exception')}
+        description={tr(
+          'هل أنت متأكد من حذف هذا الاستثناء؟ سيتم استرجاع الجدول الأسبوعي العادي لهذا التاريخ.',
+          'Are you sure you want to delete this exception? The regular weekly schedule will be restored for this date.',
+        )}
+        confirmText={tr('حذف الاستثناء', 'Delete exception')}
+        cancelText={tr('إلغاء', 'Cancel')}
         variant='warning'
         isLoading={isDeletingException}
       />
