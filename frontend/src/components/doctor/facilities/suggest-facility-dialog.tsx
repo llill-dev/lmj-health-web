@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Send, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
@@ -17,16 +17,21 @@ import type { FacilityType } from '@/lib/admin/types';
 import { cn } from '@/lib/utils/utils';
 import { useI18n } from '@/i18n/provider';
 
-const suggestFacilitySchema = z.object({
-  name: z.string().min(2, 'اسم المنشأة مطلوب'),
-  city: z.string().min(2, 'المدينة مطلوبة'),
-  facilityType: z.string().optional(),
-  address: z.string().optional(),
-  phone: z.string().optional(),
-  description: z.string().optional(),
-});
+type TrFn = (ar: string, en: string) => string;
+const defaultTr: TrFn = (ar) => ar;
 
-type SuggestFacilityValues = z.infer<typeof suggestFacilitySchema>;
+function buildSuggestFacilitySchema(tr: TrFn = defaultTr) {
+  return z.object({
+    name: z.string().min(2, tr('اسم المنشأة مطلوب', 'The facility name is required')),
+    city: z.string().min(2, tr('المدينة مطلوبة', 'The city is required')),
+    facilityType: z.string().optional(),
+    address: z.string().optional(),
+    phone: z.string().optional(),
+    description: z.string().optional(),
+  });
+}
+
+type SuggestFacilityValues = z.infer<ReturnType<typeof buildSuggestFacilitySchema>>;
 
 export type SuggestFacilityPayload = {
   name: string;
@@ -59,7 +64,12 @@ export default function SuggestFacilityDialog({
   onClose: () => void;
   onSubmit: (values: SuggestFacilityPayload) => void;
 }) {
-  const { dir } = useI18n();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const suggestFacilitySchema = useMemo(
+    () => buildSuggestFacilitySchema(tr),
+    [locale],
+  );
   const {
     register,
     control,
@@ -118,7 +128,7 @@ export default function SuggestFacilityDialog({
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 px-4 py-8"
           role="dialog"
           aria-modal="true"
-          aria-label="اقتراح منشأة"
+          aria-label={tr('اقتراح منشأة', 'Suggest a facility')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -148,13 +158,13 @@ export default function SuggestFacilityDialog({
                 onClick={handleClose}
                 disabled={submitting}
                 className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={tr('إغلاق', 'Close')}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
               <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
-                  اقتراح منشأة
+                  {tr('اقتراح منشأة', 'Suggest a facility')}
                 </h2>
               </div>
             </div>
@@ -163,18 +173,20 @@ export default function SuggestFacilityDialog({
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                   <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-start font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
-                    إذا لم تجد المنشأة في القائمة، أرسل اقتراحاً وسيتم مراجعته
-                    وإضافته إلى النظام بعد الموافقة.
+                    {tr(
+                      'إذا لم تجد المنشأة في القائمة، أرسل اقتراحاً وسيتم مراجعته وإضافته إلى النظام بعد الموافقة.',
+                      'If you cannot find the facility in the list, send a suggestion and it will be reviewed and added to the system after approval.',
+                    )}
                   </p>
 
                   <DoctorProfileFormField
-                    label="اسم المنشأة"
+                    label={tr('اسم المنشأة', 'Facility name')}
                     required
                     error={errors.name?.message}
                   >
                     <input
                       {...register('name')}
-                      placeholder="أدخل اسم المنشأة"
+                      placeholder={tr('أدخل اسم المنشأة', 'Enter the facility name')}
                       disabled={submitting}
                       className={profileFieldClass(
                         cn(profileInputClass, 'text-start placeholder:text-start'),
@@ -184,8 +196,8 @@ export default function SuggestFacilityDialog({
                   </DoctorProfileFormField>
 
                   <DoctorProfileFormField
-                    label="نوع المنشأة"
-                    hint="اختياري"
+                    label={tr('نوع المنشأة', 'Facility type')}
+                    hint={tr('اختياري', 'optional')}
                   >
                     <Controller
                       control={control}
@@ -198,7 +210,7 @@ export default function SuggestFacilityDialog({
                             value: option.value,
                             label: option.label,
                           }))}
-                          placeholder="اختر نوع المنشأة"
+                          placeholder={tr('اختر نوع المنشأة', 'Select the facility type')}
                           disabled={submitting}
                         />
                       )}
@@ -206,14 +218,14 @@ export default function SuggestFacilityDialog({
                   </DoctorProfileFormField>
 
                   <DoctorProfileFormField
-                    label="الوصف"
-                    hint="اختياري"
+                    label={tr('الوصف', 'Description')}
+                    hint={tr('اختياري', 'optional')}
                     error={errors.description?.message}
                   >
                     <textarea
                       {...register('description')}
                       rows={3}
-                      placeholder="أدخل وصف المنشأة أو أي ملاحظات إضافية"
+                      placeholder={tr('أدخل وصف المنشأة أو أي ملاحظات إضافية', 'Enter the facility description or any additional notes')}
                       disabled={submitting}
                       className={profileFieldClass(
                         cn(profileTextareaClass, 'text-start placeholder:text-start'),
@@ -224,17 +236,17 @@ export default function SuggestFacilityDialog({
 
                   <div>
                     <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                      الموقع
+                      {tr('الموقع', 'Location')}
                     </h3>
                     <div className="space-y-4">
                       <DoctorProfileFormField
-                        label="المدينة"
+                        label={tr('المدينة', 'City')}
                         required
                         error={errors.city?.message}
                       >
                         <input
                           {...register('city')}
-                          placeholder="أدخل المدينة"
+                          placeholder={tr('أدخل المدينة', 'Enter the city')}
                           disabled={submitting}
                           className={profileFieldClass(
                             cn(profileInputClass, 'text-start placeholder:text-start'),
@@ -244,13 +256,13 @@ export default function SuggestFacilityDialog({
                       </DoctorProfileFormField>
 
                       <DoctorProfileFormField
-                        label="العنوان"
-                        hint="اختياري"
+                        label={tr('العنوان', 'Address')}
+                        hint={tr('اختياري', 'optional')}
                         error={errors.address?.message}
                       >
                         <input
                           {...register('address')}
-                          placeholder="أدخل العنوان التفصيلي"
+                          placeholder={tr('أدخل العنوان التفصيلي', 'Enter the detailed address')}
                           disabled={submitting}
                           className={profileFieldClass(
                             cn(profileInputClass, 'text-start placeholder:text-start'),
@@ -263,11 +275,11 @@ export default function SuggestFacilityDialog({
 
                   <div>
                     <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                      التواصل
+                      {tr('التواصل', 'Contact')}
                     </h3>
                     <DoctorProfileFormField
-                      label="الهاتف"
-                      hint="اختياري"
+                      label={tr('الهاتف', 'Phone')}
+                      hint={tr('اختياري', 'optional')}
                       error={errors.phone?.message}
                     >
                       <input
@@ -292,7 +304,7 @@ export default function SuggestFacilityDialog({
                   disabled={submitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {tr('إلغاء', 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -300,7 +312,7 @@ export default function SuggestFacilityDialog({
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Send className="h-4 w-4" aria-hidden />
-                  {submitting ? 'جارٍ الإرسال…' : 'إرسال الاقتراح'}
+                  {submitting ? tr('جارٍ الإرسال…', 'Sending…') : tr('إرسال الاقتراح', 'Send suggestion')}
                 </button>
               </div>
             </form>
