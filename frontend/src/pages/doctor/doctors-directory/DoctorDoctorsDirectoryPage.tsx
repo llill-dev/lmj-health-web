@@ -62,14 +62,18 @@ export default function DoctorDoctorsDirectoryPage() {
     return () => window.clearTimeout(timer);
   }, [searchTerm]);
 
-  const directoryQuery = useDoctorDoctorsDirectory({
-    search: debouncedSearch || undefined,
-    page,
-    limit: pageSize,
-    lat: geoCoords?.lat,
-    lng: geoCoords?.lng,
-    radiusKm: geoCoords ? 25 : undefined,
-  });
+  const directoryQuery = useDoctorDoctorsDirectory(
+    {
+      search: debouncedSearch || undefined,
+      page,
+      limit: pageSize,
+      lat: geoCoords?.lat,
+      lng: geoCoords?.lng,
+      radiusKm: geoCoords ? 25 : undefined,
+    },
+    true,
+    tr,
+  );
   const { retry: retryDirectory, retrying: retryingDirectory } = useRetryAction(
     () => directoryQuery.refetch(),
   );
@@ -258,7 +262,7 @@ export default function DoctorDoctorsDirectoryPage() {
                     <Star className="h-4 w-4 text-[#FACC15]" fill="#FACC15" />
                   </span>
                   <span className="font-semibold text-[#98A2B3]">
-                    ({d.reviews} تقييم)
+                    ({tr(`${d.reviews} تقييم`, `${d.reviews} reviews`)})
                   </span>
                 </div>
 
@@ -271,7 +275,7 @@ export default function DoctorDoctorsDirectoryPage() {
                         key={tag}
                         className={`flex h-[22px] items-center justify-center gap-1 rounded-full border-[1.82px] px-3 font-cairo text-[11px] font-extrabold ${tagChipClassName(tag, active)}`}
                       >
-                        {tag === "أونلاين" ? (
+                        {tag === tr("أونلاين", "Online") ? (
                           <Video
                             className={`h-4 w-4 ${active ? "text-primary" : "text-[#CBD5E1]"}`}
                           />
@@ -315,7 +319,7 @@ export default function DoctorDoctorsDirectoryPage() {
                     onClick={() => setSelectedDoctor(d)}
                     className="mx-auto flex h-[36px] w-full max-w-[290px] items-center justify-center rounded-[6px] bg-gradient-to-b from-[#0F8F8B] to-[#14B3AE] font-cairo text-[14px] font-semibold text-white transition-colors hover:from-[#14B3AE] hover:to-[#12A8A4]"
                   >
-                    عرض التفاصيل
+                    {tr("عرض التفاصيل", "View details")}
                   </button>
                 </div>
               </div>
@@ -332,7 +336,10 @@ export default function DoctorDoctorsDirectoryPage() {
         <section className="mt-8 rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="font-cairo text-[12px] font-semibold text-[#667085]">
-              عرض {showingFrom}-{showingTo} من أصل {total} طبيب
+              {tr(
+                `عرض ${showingFrom}-${showingTo} من أصل ${total} طبيب`,
+                `Showing ${showingFrom}-${showingTo} of ${total} doctors`,
+              )}
             </div>
 
             <div className="flex gap-3 justify-center items-center">
@@ -341,17 +348,17 @@ export default function DoctorDoctorsDirectoryPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1 || directoryQuery.isAwaitingData}
                 className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#667085] disabled:opacity-40"
-                aria-label="السابق"
+                aria-label={tr("السابق", "Previous")}
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
 
               <div className="flex items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2">
                 <div className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                  صفحة
+                  {tr("صفحة", "Page")}
                 </div>
                 <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                  {page} من {totalPages}
+                  {tr(`${page} من ${totalPages}`, `${page} of ${totalPages}`)}
                 </div>
               </div>
 
@@ -360,7 +367,7 @@ export default function DoctorDoctorsDirectoryPage() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages || directoryQuery.isAwaitingData}
                 className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#667085] disabled:opacity-40"
-                aria-label="التالي"
+                aria-label={tr("التالي", "Next")}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -368,7 +375,7 @@ export default function DoctorDoctorsDirectoryPage() {
 
             <div className="flex gap-2 justify-end items-center">
               <div className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                عدد النتائج:
+                {tr("عدد النتائج:", "Results count:")}
               </div>
               <div className="rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#111827]">
                 {total}
