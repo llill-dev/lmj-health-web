@@ -98,6 +98,32 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.dashboard.subtitle": "نظرة عامة على نشاط عيادتك",
     "doctor.dashboard.guest": "ضيفاً كريماً",
     "doctor.badge": "د.",
+    "doctor.profileEditDialog.title": "تعديل الملف الشخصي",
+    "doctor.profileEditDialog.description":
+      "يمكنك تحديث البيانات غير الحساسة مباشرة. التخصص والرقم المهني والعنوان الطبي يتطلبون طلب تغيير منفصل.",
+    "doctor.profileEditDialog.submitLabel": "حفظ التعديلات",
+    "doctor.profileEditDialog.saveFailedTitle": "تعذّر حفظ الملف",
+    "doctor.profileEditDialog.fields.fullName.label": "الاسم الكامل",
+    "doctor.profileEditDialog.fields.fullName.placeholder": "د. اسم الطبيب",
+    "doctor.profileEditDialog.fields.phone.label": "رقم الهاتف",
+    "doctor.profileEditDialog.fields.address.label": "العنوان",
+    "doctor.profileEditDialog.fields.address.placeholder": "المدينة، الشارع",
+    "doctor.profileEditDialog.fields.bio.label": "نبذة عن الطبيب",
+    "doctor.profileEditDialog.fields.bio.placeholder":
+      "اكتب نبذة مختصرة عن خبرتك وتخصصك",
+    "doctor.profileEditDialog.fields.bio.hint": "10–1000 حرف",
+    "doctor.profileEditDialog.fields.consultationFee.label": "رسوم الاستشارة",
+    "doctor.profileEditDialog.errors.fullNameRequired": "الاسم الكامل مطلوب",
+    "doctor.profileEditDialog.errors.phoneRequired": "رقم الهاتف مطلوب",
+    "doctor.profileEditDialog.errors.phoneInvalid":
+      "أدخل رقم هاتف صالحاً مع رمز الدولة",
+    "doctor.profileEditDialog.errors.addressRequired": "العنوان مطلوب",
+    "doctor.profileEditDialog.errors.bioTooShort":
+      "النبذة قصيرة جداً (10 أحرف على الأقل)",
+    "doctor.profileEditDialog.errors.bioTooLong": "النبذة طويلة جداً",
+    "doctor.profileEditDialog.errors.feeRequired": "رسوم الاستشارة مطلوبة",
+    "doctor.profileEditDialog.errors.feeInvalid":
+      "أدخل رسوماً صالحة (0 أو أكثر)",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -1644,6 +1670,33 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.dashboard.subtitle": "Overview of your clinic activity",
     "doctor.dashboard.guest": "Guest Doctor",
     "doctor.badge": "Dr.",
+    "doctor.profileEditDialog.title": "Edit personal profile",
+    "doctor.profileEditDialog.description":
+      "You can update non-sensitive data directly. Specialization, license number, and clinic address require a separate change request.",
+    "doctor.profileEditDialog.submitLabel": "Save changes",
+    "doctor.profileEditDialog.saveFailedTitle": "Failed to save the profile",
+    "doctor.profileEditDialog.fields.fullName.label": "Full name",
+    "doctor.profileEditDialog.fields.fullName.placeholder": "Dr. Doctor's name",
+    "doctor.profileEditDialog.fields.phone.label": "Phone number",
+    "doctor.profileEditDialog.fields.address.label": "Address",
+    "doctor.profileEditDialog.fields.address.placeholder": "City, street",
+    "doctor.profileEditDialog.fields.bio.label": "About the doctor",
+    "doctor.profileEditDialog.fields.bio.placeholder":
+      "Write a short bio about your experience and specialization",
+    "doctor.profileEditDialog.fields.bio.hint": "10–1000 characters",
+    "doctor.profileEditDialog.fields.consultationFee.label": "Consultation fee",
+    "doctor.profileEditDialog.errors.fullNameRequired": "Full name is required",
+    "doctor.profileEditDialog.errors.phoneRequired": "Phone number is required",
+    "doctor.profileEditDialog.errors.phoneInvalid":
+      "Enter a valid phone number with the country code",
+    "doctor.profileEditDialog.errors.addressRequired": "Address is required",
+    "doctor.profileEditDialog.errors.bioTooShort":
+      "The bio is too short (at least 10 characters)",
+    "doctor.profileEditDialog.errors.bioTooLong": "The bio is too long",
+    "doctor.profileEditDialog.errors.feeRequired":
+      "The consultation fee is required",
+    "doctor.profileEditDialog.errors.feeInvalid":
+      "Enter a valid fee (0 or more)",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",

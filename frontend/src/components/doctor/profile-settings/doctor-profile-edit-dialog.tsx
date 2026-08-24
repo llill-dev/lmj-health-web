@@ -11,33 +11,38 @@ import DoctorSecurityFormDialog, {
 import { useToast } from '@/components/ui/ToastProvider';
 import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import type { DoctorProfileRecord } from '@/lib/doctor/profile/profileClient';
+import { useI18n } from '@/i18n/provider';
 
-const profileEditSchema = z.object({
-  fullName: z.string().trim().min(1, 'الاسم الكامل مطلوب'),
-  phone: z
-    .string()
-    .trim()
-    .min(1, 'رقم الهاتف مطلوب')
-    .refine(
-      (value) => /^\+?[0-9]{7,15}$/.test(value.replace(/[\s-]/g, '')),
-      'أدخل رقم هاتف صالحاً مع رمز الدولة',
-    ),
-  address: z.string().trim().min(1, 'العنوان مطلوب'),
-  bio: z
-    .string()
-    .trim()
-    .min(10, 'النبذة قصيرة جداً (10 أحرف على الأقل)')
-    .max(1000, 'النبذة طويلة جداً'),
-  consultationFee: z
-    .string()
-    .trim()
-    .min(1, 'رسوم الاستشارة مطلوبة')
-    .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, {
-      message: 'أدخل رسوماً صالحة (0 أو أكثر)',
-    }),
-});
+type TFn = (key: string, fallback?: string) => string;
 
-type ProfileEditForm = z.infer<typeof profileEditSchema>;
+function buildProfileEditSchema(t: TFn) {
+  return z.object({
+    fullName: z.string().trim().min(1, t('doctor.profileEditDialog.errors.fullNameRequired')),
+    phone: z
+      .string()
+      .trim()
+      .min(1, t('doctor.profileEditDialog.errors.phoneRequired'))
+      .refine(
+        (value) => /^\+?[0-9]{7,15}$/.test(value.replace(/[\s-]/g, '')),
+        t('doctor.profileEditDialog.errors.phoneInvalid'),
+      ),
+    address: z.string().trim().min(1, t('doctor.profileEditDialog.errors.addressRequired')),
+    bio: z
+      .string()
+      .trim()
+      .min(10, t('doctor.profileEditDialog.errors.bioTooShort'))
+      .max(1000, t('doctor.profileEditDialog.errors.bioTooLong')),
+    consultationFee: z
+      .string()
+      .trim()
+      .min(1, t('doctor.profileEditDialog.errors.feeRequired'))
+      .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, {
+        message: t('doctor.profileEditDialog.errors.feeInvalid'),
+      }),
+  });
+}
+
+type ProfileEditForm = z.infer<ReturnType<typeof buildProfileEditSchema>>;
 
 export default function DoctorProfileEditDialog({
   open,
@@ -52,6 +57,7 @@ export default function DoctorProfileEditDialog({
   busy?: boolean;
   onSubmit: (values: ProfileEditForm) => Promise<void>;
 }) {
+  const { locale, t } = useI18n();
   const { toast } = useToast();
   const user = doctor?.user;
 
@@ -67,6 +73,8 @@ export default function DoctorProfileEditDialog({
     [doctor?.bio, doctor?.consultationFee, user],
   );
 
+  const profileEditSchema = useMemo(() => buildProfileEditSchema(t), [locale]);
+
   const form = useForm<ProfileEditForm>({
     resolver: zodResolver(profileEditSchema),
     mode: 'onTouched',
@@ -80,35 +88,35 @@ export default function DoctorProfileEditDialog({
   const fields: SecurityFormFieldConfig<ProfileEditForm>[] = [
     {
       name: 'fullName',
-      label: 'الاسم الكامل',
-      placeholder: 'د. اسم الطبيب',
+      label: t('doctor.profileEditDialog.fields.fullName.label'),
+      placeholder: t('doctor.profileEditDialog.fields.fullName.placeholder'),
       type: 'text',
       autoComplete: 'name',
     },
     {
       name: 'phone',
-      label: 'رقم الهاتف',
+      label: t('doctor.profileEditDialog.fields.phone.label'),
       placeholder: '+9639XXXXXXXX',
       type: 'tel',
       autoComplete: 'tel',
     },
     {
       name: 'address',
-      label: 'العنوان',
-      placeholder: 'المدينة، الشارع',
+      label: t('doctor.profileEditDialog.fields.address.label'),
+      placeholder: t('doctor.profileEditDialog.fields.address.placeholder'),
       type: 'text',
     },
     {
       name: 'bio',
-      label: 'نبذة عن الطبيب',
-      placeholder: 'اكتب نبذة مختصرة عن خبرتك وتخصصك',
+      label: t('doctor.profileEditDialog.fields.bio.label'),
+      placeholder: t('doctor.profileEditDialog.fields.bio.placeholder'),
       type: 'text',
       multiline: true,
-      hint: '10–1000 حرف',
+      hint: t('doctor.profileEditDialog.fields.bio.hint'),
     },
     {
       name: 'consultationFee',
-      label: 'رسوم الاستشارة',
+      label: t('doctor.profileEditDialog.fields.consultationFee.label'),
       placeholder: '200',
       type: 'text',
     },
@@ -118,12 +126,12 @@ export default function DoctorProfileEditDialog({
     <DoctorSecurityFormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="تعديل الملف الشخصي"
-      description="يمكنك تحديث البيانات غير الحساسة مباشرة. التخصص والرقم المهني والعنوان الطبي يتطلبون طلب تغيير منفصل."
+      title={t('doctor.profileEditDialog.title')}
+      description={t('doctor.profileEditDialog.description')}
       icon={UserRound}
       form={form}
       fields={fields}
-      submitLabel="حفظ التعديلات"
+      submitLabel={t('doctor.profileEditDialog.submitLabel')}
       busy={busy}
       onValidatedSubmit={async (values) => {
         try {
@@ -131,7 +139,7 @@ export default function DoctorProfileEditDialog({
           onOpenChange(false);
         } catch (error) {
           toast(getUserFacingRequestErrorMessage(error), {
-            title: 'تعذّر حفظ الملف',
+            title: t('doctor.profileEditDialog.saveFailedTitle'),
             variant: 'error',
           });
           throw error;
