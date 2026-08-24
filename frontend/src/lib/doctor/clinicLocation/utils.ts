@@ -92,28 +92,44 @@ export function resolveClinicVerificationStatus(
   return 'unverified';
 }
 
-export function clinicVerificationLabel(status: ClinicVerificationStatus): string {
-  if (status === 'verified') return 'موثق';
-  if (status === 'pending') return 'قيد المراجعة';
-  return 'غير محقق';
+export function clinicVerificationLabel(
+  status: ClinicVerificationStatus,
+  tr: (ar: string, en: string) => string = (ar) => ar,
+): string {
+  if (status === 'verified') return tr('موثق', 'Verified');
+  if (status === 'pending') return tr('قيد المراجعة', 'Under review');
+  return tr('غير محقق', 'Unverified');
 }
 
-export function validateClinicLocationForm(values: ClinicLocationFormValues): string | null {
+export function validateClinicLocationForm(
+  values: ClinicLocationFormValues,
+  tr: (ar: string, en: string) => string = (ar) => ar,
+): string | null {
   const address = values.address.trim();
   const lat = values.lat.trim();
   const lng = values.lng.trim();
 
-  if (!address) return 'عنوان العيادة مطلوب.';
-  if (address.length < 5) return 'عنوان العيادة قصير جداً (5 أحرف على الأقل).';
-  if (!lat || !lng) return 'يجب تحديد خط العرض وخط الطول معاً.';
+  if (!address) return tr('عنوان العيادة مطلوب.', 'The clinic address is required.');
+  if (address.length < 5)
+    return tr(
+      'عنوان العيادة قصير جداً (5 أحرف على الأقل).',
+      'The clinic address is too short (at least 5 characters).',
+    );
+  if (!lat || !lng)
+    return tr(
+      'يجب تحديد خط العرض وخط الطول معاً.',
+      'Both latitude and longitude must be set.',
+    );
   if (Number.isNaN(Number(lat)) || Number.isNaN(Number(lng))) {
-    return 'الإحداثيات غير صالحة.';
+    return tr('الإحداثيات غير صالحة.', 'The coordinates are invalid.');
   }
 
   const latNum = Number(lat);
   const lngNum = Number(lng);
-  if (latNum < -90 || latNum > 90) return 'خط العرض يجب أن يكون بين -90 و 90.';
-  if (lngNum < -180 || lngNum > 180) return 'خط الطول يجب أن يكون بين -180 و 180.';
+  if (latNum < -90 || latNum > 90)
+    return tr('خط العرض يجب أن يكون بين -90 و 90.', 'Latitude must be between -90 and 90.');
+  if (lngNum < -180 || lngNum > 180)
+    return tr('خط الطول يجب أن يكون بين -180 و 180.', 'Longitude must be between -180 and 180.');
 
   return null;
 }
