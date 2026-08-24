@@ -68,15 +68,14 @@ function LinkedAppointmentSection({
   date: string;
   time: string;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   return (
     <motion.section
       variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
       className="rounded-[12px] border border-[#B2DDFF] bg-[#EFF8FF] px-4 py-4"
     >
       <h4 className="text-start font-cairo text-[13px] font-extrabold text-[#101828]">
-        {tr("الموعد المرتبط", "Linked appointment")}
+        {t("doctor.encounterCard.linkedAppointment.title")}
       </h4>
       <div className="mt-3 space-y-3">
         <div className="flex h-11 items-center justify-start gap-3 rounded-[10px] border border-[#E2E8F0] bg-white px-3">
@@ -108,10 +107,12 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
   onCloseVisit,
   onWarmWorkspace,
 }: MedicalVisitExpandableCardProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   const isOpen = visit.status === "open";
-  const ageLabel = visit.patientAge != null ? tr(`${visit.patientAge} سنة`, `${visit.patientAge} years`) : "—";
+  const ageLabel =
+    visit.patientAge != null
+      ? t("doctor.encounterCard.age").replace("{n}", String(visit.patientAge))
+      : "—";
 
   return (
     <motion.article
@@ -183,7 +184,9 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
               : "bg-[#F2F4F7] text-[#475467]",
           )}
         >
-          {isOpen ? tr("نشط", "Active") : tr("مغلقة", "Closed")}
+          {isOpen
+            ? t("doctor.encounterCard.status.active")
+            : t("doctor.encounterCard.status.closed")}
         </span>
         <motion.div
           animate={{ rotate: expanded ? 180 : 0 }}
@@ -212,10 +215,10 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
               className="space-y-4 border-t border-[#E2E8F0]/80 bg-white px-4 py-5 sm:px-5"
             >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <InfoCell label={tr("الاسم", "Name")} value={visit.patientName} />
-                <InfoCell label={tr("العمر", "Age")} value={ageLabel} />
-                <InfoCell label={tr("رقم الملف", "File number")} value={visit.fileNumber} />
-                <InfoCell label={tr("بدء الزيارة", "Encounter started")} value={visit.startedAtLabel} />
+                <InfoCell label={t("doctor.encounterCard.fields.name")} value={visit.patientName} />
+                <InfoCell label={t("doctor.encounterCard.fields.age")} value={ageLabel} />
+                <InfoCell label={t("doctor.encounterCard.fields.fileNumber")} value={visit.fileNumber} />
+                <InfoCell label={t("doctor.encounterCard.fields.started")} value={visit.startedAtLabel} />
               </div>
 
               <motion.div
@@ -224,7 +227,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
               >
                 <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
                   <div className="font-cairo text-[11px] font-bold text-[#667085]">
-                    {tr("بدأت", "Started")}
+                    {t("doctor.encounterCard.fields.startedShort")}
                   </div>
                   <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#101828]">
                     {visit.startedAtLabel}
@@ -232,7 +235,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                 </div>
                 <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
                   <div className="font-cairo text-[11px] font-bold text-[#667085]">
-                    {tr("موعد", "Appointment")}
+                    {t("doctor.encounterCard.fields.appointment")}
                   </div>
                   <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#101828]">
                     {visit.listTimeLabel !== "—"
@@ -251,17 +254,17 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                 variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
                 className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
               >
-                <InfoCell label={tr("نوع الزيارة", "Encounter type")} value={visit.visitTypeLabel} />
+                <InfoCell label={t("doctor.encounterCard.fields.visitType")} value={visit.visitTypeLabel} />
                 <InfoCell
-                  label={tr("نوع الموعد", "Appointment type")}
+                  label={t("doctor.encounterCard.fields.appointmentType")}
                   value={visit.appointmentTypeName || "—"}
                 />
                 <InfoCell
-                  label={tr("إغلاق الزيارة", "Encounter closed")}
+                  label={t("doctor.encounterCard.fields.closedAt")}
                   value={
                     visit.status === "closed"
                       ? visit.closedAtLabel || "—"
-                      : tr("لم تُغلق بعد", "Not closed yet")
+                      : t("doctor.encounterCard.notClosedYet")
                   }
                 />
               </motion.div>
@@ -289,7 +292,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                   <div className="flex items-center gap-2 text-[#344054]">
                     <FileText className="w-4 h-4 text-primary" />
                     <h4 className="font-cairo text-[13px] font-extrabold">
-                      {tr("ملاحظات الزيارة", "Encounter notes")}
+                      {t("doctor.encounterCard.notes.title")}
                     </h4>
                   </div>
                   <p className="mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#475467]">
@@ -304,7 +307,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                   className="rounded-[12px] border border-[#9EE8E0] bg-gradient-to-br from-[#F0FDFA] to-white p-4"
                 >
                   <h4 className="mb-3 text-start font-cairo text-[13px] font-extrabold text-[#0F766E]">
-                    {tr("مسودات الزيارات", "Encounter drafts")}
+                    {t("doctor.encounterCard.drafts.title")}
                   </h4>
                   <div className="space-y-3">
                     {visit.drafts.map((draft) => (
@@ -323,15 +326,24 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                         <div className="flex flex-wrap gap-2 mt-3">
                           <DraftBadge
                             icon={<Pill className="h-3.5 w-3.5" />}
-                            label={tr(`${draft.prescriptionsCount} وصفات`, `${draft.prescriptionsCount} prescriptions`)}
+                            label={t("doctor.encounterCard.drafts.prescriptions").replace(
+                              "{n}",
+                              String(draft.prescriptionsCount),
+                            )}
                           />
                           <DraftBadge
                             icon={<FlaskConical className="h-3.5 w-3.5" />}
-                            label={tr(`${draft.labTestsCount} تحاليل`, `${draft.labTestsCount} lab tests`)}
+                            label={t("doctor.encounterCard.drafts.labTests").replace(
+                              "{n}",
+                              String(draft.labTestsCount),
+                            )}
                           />
                           <DraftBadge
                             icon={<ScanLine className="h-3.5 w-3.5" />}
-                            label={tr(`${draft.imagingCount} أشعة`, `${draft.imagingCount} imaging`)}
+                            label={t("doctor.encounterCard.drafts.imaging").replace(
+                              "{n}",
+                              String(draft.imagingCount),
+                            )}
                           />
                         </div>
                         <button
@@ -340,7 +352,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                           onClick={() => onContinueDraft?.(draft.id)}
                           className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#0F766E] font-cairo text-[13px] font-extrabold text-white transition-opacity hover:opacity-95"
                         >
-                          {tr("استكمال المسودة", "Continue draft")}
+                          {t("doctor.encounterCard.drafts.continue")}
                           <ChevronLeft className="w-4 h-4" aria-hidden />
                         </button>
                       </div>
@@ -361,11 +373,13 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                     className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#F04438] transition hover:bg-[#FFF5F5] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Stethoscope className="w-4 h-4" />
-                    {closing ? tr("جارٍ إغلاق الزيارة...", "Closing the encounter...") : tr("إغلاق الزيارة", "Close encounter")}
+                    {closing
+                      ? t("doctor.encounterCard.closing")
+                      : t("doctor.encounterCard.closeVisit")}
                   </button>
                 ) : (
                   <div className="inline-flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#D0D5DD] bg-[#F9FAFB] font-cairo text-[14px] font-extrabold text-[#667085]">
-                    {tr("الزيارة مغلقة", "Encounter is closed")}
+                    {t("doctor.encounterCard.visitClosed")}
                   </div>
                 )}
                 <motion.button
@@ -375,7 +389,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                   whileTap={{ scale: 0.995 }}
                   className="inline-flex h-12 items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)]"
                 >
-                  {tr("بدء زيارة جديدة", "Start new encounter")}
+                  {t("doctor.encounterCard.startNewVisit")}
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -385,4 +399,3 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
     </motion.article>
   );
 });
-
