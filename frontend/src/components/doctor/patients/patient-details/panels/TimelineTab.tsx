@@ -11,6 +11,7 @@ import {
 
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData } from "../types";
@@ -41,6 +42,8 @@ export function TimelineTab({
   onOpenPrescriptionsTab,
   onOpenOrdersTab,
 }: TimelineTabProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const latestEncounter =
     encounters.find((encounter) => encounter.status === "open") ??
     encounters[0] ??
@@ -63,8 +66,8 @@ export function TimelineTab({
       id: encounter._id,
       type: "encounter",
       date: encounter.startedAt ?? encounter.createdAt ?? "",
-      title: "زيارة طبية",
-      description: encounter.notes || "زيارة سريرية",
+      title: tr("زيارة طبية", "Medical encounter"),
+      description: encounter.notes || tr("زيارة سريرية", "Clinical encounter"),
       icon: Stethoscope,
       color: "bg-[#0EA5E9] text-white",
     });
@@ -75,7 +78,7 @@ export function TimelineTab({
       id: file.id,
       type: "file",
       date: file.createdAt,
-      title: "ملف جديد",
+      title: tr("ملف جديد", "New file"),
       description: file.name,
       icon: FileText,
       color: "bg-primary text-white",
@@ -87,7 +90,7 @@ export function TimelineTab({
       id: order.id,
       type: "order",
       date: new Date().toISOString(),
-      title: "طلب طبي",
+      title: tr("طلب طبي", "Medical order"),
       description: order.title,
       icon: Activity,
       color: "bg-[#EAB308] text-white",
@@ -99,8 +102,8 @@ export function TimelineTab({
       id: prescription.id,
       type: "prescription",
       date: prescription.createdAt,
-      title: "وصفة طبية",
-      description: `${prescription.items.length} دواء`,
+      title: tr("وصفة طبية", "Prescription"),
+      description: tr(`${prescription.items.length} دواء`, `${prescription.items.length} medication(s)`),
       icon: FileText,
       color: "bg-[#8B5CF6] text-white",
     });
@@ -126,12 +129,12 @@ export function TimelineTab({
       : timelineItems.filter((item) => item.type === timelineFilter);
 
   const filters: Array<{ id: TimelineFilter; label: string; icon: LucideIcon }> = [
-    { id: "all", label: "الكل", icon: Clock },
-    { id: "encounter", label: "الزيارات", icon: Stethoscope },
-    { id: "history", label: "السجلات", icon: ClipboardList },
-    { id: "prescription", label: "الوصفات", icon: FileText },
-    { id: "order", label: "الطلبات", icon: Activity },
-    { id: "file", label: "الملفات", icon: FileText },
+    { id: "all", label: tr("الكل", "All"), icon: Clock },
+    { id: "encounter", label: tr("الزيارات", "Encounters"), icon: Stethoscope },
+    { id: "history", label: tr("السجلات", "Records"), icon: ClipboardList },
+    { id: "prescription", label: tr("الوصفات", "Prescriptions"), icon: FileText },
+    { id: "order", label: tr("الطلبات", "Orders"), icon: Activity },
+    { id: "file", label: tr("الملفات", "Files"), icon: FileText },
   ];
 
   if (!timelineItems.length) {
@@ -142,9 +145,9 @@ export function TimelineTab({
             variant="teal"
             imageSrc="/images/photo-not-meduical-file.png"
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.12)]"
-            title="لا توجد نشاطات مسجّلة بعد"
-            subtitle="سيظهر هنا التسلسل الزمني لجميع نشاطات المريض عند إضافتها"
-            actionLabel="إضافة سجل طبي"
+            title={tr("لا توجد نشاطات مسجّلة بعد", "No activity recorded yet")}
+            subtitle={tr("سيظهر هنا التسلسل الزمني لجميع نشاطات المريض عند إضافتها", "The patient's activity timeline will appear here once added")}
+            actionLabel={tr("إضافة سجل طبي", "Add medical record")}
             onAction={onCreateMedicalRecord}
             actionIcon={<ClipboardList className="h-4 w-4" />}
           />
@@ -167,10 +170,13 @@ export function TimelineTab({
               </div>
               <div className="text-start">
                 <h3 className="font-cairo text-[15px] font-black text-[#9A3412]">
-                  الحالات المرضية المرتبطة بالملف
+                  {tr("الحالات المرضية المرتبطة بالملف", "Medical conditions linked to this record")}
                 </h3>
                 <p className="mt-1 font-cairo text-[13px] font-semibold leading-6 text-[#7C2D12]">
-                  هذه الحالات تظهر ضمن الملف الطبي الحالي، ويمكنك متابعة نشاطها السريري عبر الزيارات والوصفات والطلبات.
+                  {tr(
+                    "هذه الحالات تظهر ضمن الملف الطبي الحالي، ويمكنك متابعة نشاطها السريري عبر الزيارات والوصفات والطلبات.",
+                    "These conditions appear within the current medical record, and you can follow their clinical activity through encounters, prescriptions, and orders.",
+                  )}
                 </p>
               </div>
             </div>
@@ -189,7 +195,7 @@ export function TimelineTab({
                         {condition}
                       </div>
                       <div className="mt-1 font-cairo text-[12px] font-semibold text-[#9A3412]/80">
-                        حالة مرضية مزمنة ظاهرة في بيانات المريض الأساسية.
+                        {tr("حالة مرضية مزمنة ظاهرة في بيانات المريض الأساسية.", "A chronic condition shown in the patient's core data.")}
                       </div>
                     </div>
 
@@ -200,7 +206,7 @@ export function TimelineTab({
                         className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#EFF8FF] px-3.5 font-cairo text-[12px] font-extrabold text-[#175CD3] ring-1 ring-inset ring-[#B2DDFF]/70 transition-colors hover:bg-[#DFF1FF]"
                       >
                         <Stethoscope className="h-3.5 w-3.5" />
-                        الزيارات {encounters.length}
+                        {tr("الزيارات", "Encounters")} {encounters.length}
                       </button>
                       <button
                         type="button"
@@ -208,7 +214,7 @@ export function TimelineTab({
                         className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FAF5FF] px-3.5 font-cairo text-[12px] font-extrabold text-[#7C3AED] ring-1 ring-inset ring-[#DDD6FE] transition-colors hover:bg-[#F3E8FF]"
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        الوصفات {fullProfileData.prescriptions.length}
+                        {tr("الوصفات", "Prescriptions")} {fullProfileData.prescriptions.length}
                       </button>
                       <button
                         type="button"
@@ -216,7 +222,7 @@ export function TimelineTab({
                         className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FFFBEB] px-3.5 font-cairo text-[12px] font-extrabold text-[#B45309] ring-1 ring-inset ring-[#FCD34D]/70 transition-colors hover:bg-[#FEF3C7]"
                       >
                         <Activity className="h-3.5 w-3.5" />
-                        الطلبات {fullProfileData.orders.length}
+                        {tr("الطلبات", "Orders")} {fullProfileData.orders.length}
                       </button>
                     </div>
                   </div>
@@ -226,16 +232,16 @@ export function TimelineTab({
                       <div className="flex items-center gap-2 text-[#175CD3]">
                         <Stethoscope className="h-4 w-4" />
                         <span className="font-cairo text-[12px] font-extrabold">
-                          آخر زيارة مرتبطة بالملف
+                          {tr("آخر زيارة مرتبطة بالملف", "Last encounter linked to this record")}
                         </span>
                       </div>
                       <div className="mt-3 text-start">
                         <div className="font-cairo text-[13px] font-black text-[#0F172A]">
                           {latestEncounter
                             ? latestEncounter.status === "open"
-                              ? "زيارة مفتوحة حاليًا"
-                              : "آخر زيارة سريرية"
-                            : "لا توجد زيارات بعد"}
+                              ? tr("زيارة مفتوحة حاليًا", "Currently open encounter")
+                              : tr("آخر زيارة سريرية", "Last clinical encounter")
+                            : tr("لا توجد زيارات بعد", "No encounters yet")}
                         </div>
                         <div className="mt-1 font-cairo text-[12px] font-semibold text-[#475467]">
                           {latestEncounter
@@ -249,14 +255,14 @@ export function TimelineTab({
                       <div className="flex items-center gap-2 text-[#7C3AED]">
                         <FileText className="h-4 w-4" />
                         <span className="font-cairo text-[12px] font-extrabold">
-                          آخر وصفة مرتبطة بالملف
+                          {tr("آخر وصفة مرتبطة بالملف", "Last prescription linked to this record")}
                         </span>
                       </div>
                       <div className="mt-3 text-start">
                         <div className="font-cairo text-[13px] font-black text-[#0F172A]">
                           {latestPrescription
-                            ? `${latestPrescription.items.length} دواء`
-                            : "لا توجد وصفات بعد"}
+                            ? tr(`${latestPrescription.items.length} دواء`, `${latestPrescription.items.length} medication(s)`)
+                            : tr("لا توجد وصفات بعد", "No prescriptions yet")}
                         </div>
                         <div className="mt-1 font-cairo text-[12px] font-semibold text-[#475467]">
                           {latestPrescription?.createdAt ?? "—"}
@@ -268,12 +274,12 @@ export function TimelineTab({
                       <div className="flex items-center gap-2 text-[#B45309]">
                         <Activity className="h-4 w-4" />
                         <span className="font-cairo text-[12px] font-extrabold">
-                          آخر طلب مرتبط بالملف
+                          {tr("آخر طلب مرتبط بالملف", "Last order linked to this record")}
                         </span>
                       </div>
                       <div className="mt-3 text-start">
                         <div className="font-cairo text-[13px] font-black text-[#0F172A]">
-                          {latestOrder?.title ?? "لا توجد طلبات بعد"}
+                          {latestOrder?.title ?? tr("لا توجد طلبات بعد", "No orders yet")}
                         </div>
                         <div className="mt-1 font-cairo text-[12px] font-semibold text-[#475467]">
                           {latestOrder?.status ?? "—"}
@@ -284,10 +290,13 @@ export function TimelineTab({
 
                   <div className="rounded-2xl border border-dashed border-[#FDE7C2] bg-[#FFF9F3] px-4 py-3 text-start">
                     <div className="font-cairo text-[15px] font-black text-[#7C2D12]">
-                      الربط السريري السريع
+                      {tr("الربط السريري السريع", "Quick clinical link")}
                     </div>
                     <div className="mt-1 font-cairo text-[12px] font-semibold leading-6 text-[#9A3412]/80">
-                      يتيح لك هذا القسم متابعة الحالة المرضية ضمن سياق الملف الحالي، ثم الانتقال مباشرة إلى الزيارات أو الوصفات أو الطلبات لمراجعة التفاصيل التشغيلية.
+                      {tr(
+                        "يتيح لك هذا القسم متابعة الحالة المرضية ضمن سياق الملف الحالي، ثم الانتقال مباشرة إلى الزيارات أو الوصفات أو الطلبات لمراجعة التفاصيل التشغيلية.",
+                        "This section lets you follow the condition within the current record's context, then jump directly to encounters, prescriptions, or orders to review operational details.",
+                      )}
                     </div>
                   </div>
                 </div>
@@ -319,7 +328,7 @@ export function TimelineTab({
           );
         })}
         <div className="mr-auto font-cairo text-[12px] font-semibold text-[#64748B]">
-          {items.length} نشاط
+          {tr(`${items.length} نشاط`, `${items.length} activities`)}
         </div>
       </motion.div>
 
@@ -331,7 +340,7 @@ export function TimelineTab({
           <div className="text-center">
             <Clock className="mx-auto h-12 w-12 text-[#94A3B8]" />
             <p className="mt-3 font-cairo text-[15px] font-bold text-[#64748B]">
-              لا توجد نشاطات تطابق الفلتر المحدد
+              {tr("لا توجد نشاطات تطابق الفلتر المحدد", "No activities match the selected filter")}
             </p>
           </div>
         </motion.div>
