@@ -770,11 +770,11 @@ function buildAdminContentPayload(
 
   if ("data" in payload) {
     const data = normalizePossiblyJsonValue(payload.data);
-    if (data === undefined) {
-      delete payload.data;
-    } else {
-      payload.data = data;
-    }
+    // Mirrors the `news` handling above: an entirely-absent `data` key crashes
+    // the create/update route with a 500 (same unguarded req.body.<field> read
+    // pattern), so template-less content types (e.g. NEWS) must still send an
+    // empty object rather than omitting the key.
+    payload.data = data === undefined ? {} : data;
   }
 
   if ("contentBlocks" in payload) {
