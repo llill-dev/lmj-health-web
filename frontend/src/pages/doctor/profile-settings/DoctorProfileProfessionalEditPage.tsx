@@ -15,8 +15,11 @@ import {
   useSubmitDoctorProfileChangeRequest,
 } from '@/hooks';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorProfileProfessionalEditPage() {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const profileQuery = useDoctorProfile();
@@ -32,16 +35,16 @@ export default function DoctorProfileProfessionalEditPage() {
     try {
       await submitChangeRequest.mutateAsync({
         items,
-        reason: 'طلب تحديث المعلومات المهنية',
+        reason: tr('طلب تحديث المعلومات المهنية', 'Request to update professional information'),
       });
-      toast('تم إرسال طلب التعديل للمراجعة.', {
-        title: 'إرسال للمراجعة',
+      toast(tr('تم إرسال طلب التعديل للمراجعة.', 'The edit request has been sent for review.'), {
+        title: tr('إرسال للمراجعة', 'Sent for review'),
         variant: 'success',
       });
       navigate('/doctor/profile-settings', { replace: true });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر إرسال الطلب',
+        title: tr('تعذّر إرسال الطلب', 'Failed to send the request'),
         variant: 'error',
       });
       throw error;
@@ -59,7 +62,7 @@ export default function DoctorProfileProfessionalEditPage() {
   return (
     <>
       <Helmet>
-        <title>تعديل المعلومات المهنية • LMJ Health</title>
+        <title>{tr('تعديل المعلومات المهنية', 'Edit professional information')} • LMJ Health</title>
       </Helmet>
       <div className="mb-4">
         <DoctorPageBackButton fallbackTo="/doctor/profile-settings" />
@@ -69,8 +72,8 @@ export default function DoctorProfileProfessionalEditPage() {
         busy={submitChangeRequest.isPending}
         onSubmit={handleSubmit}
         onNoChanges={() => {
-          toast('لم يتم تغيير أي حقل مهني.', {
-            title: 'لا توجد تغييرات',
+          toast(tr('لم يتم تغيير أي حقل مهني.', 'No professional field was changed.'), {
+            title: tr('لا توجد تغييرات', 'No changes'),
             variant: 'error',
           });
         }}

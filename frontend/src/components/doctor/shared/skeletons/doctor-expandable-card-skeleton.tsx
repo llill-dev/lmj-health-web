@@ -20,7 +20,7 @@ export function DoctorExpandableCardSkeleton({
             <div className="flex items-center justify-between gap-4 border-b border-[#EEF2F6] px-5 py-4">
               <div className="flex items-center gap-3">
                 <SkeletonBlock className="h-11 w-11 rounded-full" />
-                <div className="space-y-2 text-right">
+                <div className="space-y-2 text-start">
                   <SkeletonBlock className="h-5 w-36" />
                   <SkeletonBlock className="h-3 w-28" />
                 </div>

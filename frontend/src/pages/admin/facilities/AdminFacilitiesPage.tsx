@@ -326,7 +326,7 @@ export default function AdminFacilitiesPage() {
                 value={filters.q}
                 onChange={(e) => setFilters({ ...filters, q: e.target.value })}
                 placeholder={tr("بحث بالاسم...", "Search by name…")}
-                className="w-full rounded-[8px] border border-[#E5E7EB] bg-white pr-10 pl-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
+                className="w-full rounded-[8px] border border-[#E5E7EB] bg-white pe-10 ps-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -416,7 +416,7 @@ export default function AdminFacilitiesPage() {
                 "Attribute (e.g. night_shift)…",
               )}
               dir="ltr"
-              className={`w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 ${locale === "ar" ? "text-right" : "text-left"} font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none`}
+              className={`w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3 py-2.5 ${locale === "ar" ? "text-start" : "text-end"} font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none`}
             />
 
             <StyledSelect

@@ -10,7 +10,7 @@ export function ContentTemplateRowSkeleton({ index = 0 }: { index?: number }) {
       className="flex flex-col justify-between gap-3 px-6 py-5 sm:flex-row sm:items-center"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="min-w-0 flex-1 text-right space-y-3">
+      <div className="min-w-0 flex-1 text-start space-y-3">
         <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3">
           <AdminSkeletonBlock className="h-5 w-40" />
           <AdminSkeletonBlock className="h-5 w-24 rounded-[8px]" />

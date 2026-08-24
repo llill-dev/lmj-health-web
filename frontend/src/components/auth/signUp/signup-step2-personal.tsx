@@ -77,7 +77,7 @@ export default function SignUpStep2Personal({
       >
         <div className='space-y-5'>
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <User className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 الجنس
@@ -120,7 +120,7 @@ export default function SignUpStep2Personal({
           </div>
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <div className='flex gap-2 justify-start items-center text-right'>
+              <div className='flex gap-2 justify-start items-center text-start'>
                 <CalendarDays className='w-4 h-4 text-primary' />
                 <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                   تاريخ الميلاد
@@ -147,7 +147,7 @@ export default function SignUpStep2Personal({
             </div>
 
             <div>
-              <div className='flex gap-2 justify-start items-center text-right'>
+              <div className='flex gap-2 justify-start items-center text-start'>
                 <MapPin className='w-4 h-4 text-primary' />
                 <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                   العنوان
@@ -160,7 +160,7 @@ export default function SignUpStep2Personal({
                 type='text'
                 placeholder='المدينة, الحي, الشارع'
                 {...register('address')}
-                className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+                className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
               />
               {errors.address?.message && (
                 <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>

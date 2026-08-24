@@ -45,7 +45,7 @@ export default function DoctorProfileHeroCard({
         aria-hidden
       />
 
-      <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 font-cairo text-[11px] font-extrabold text-primary shadow-sm">
+      <span className="absolute start-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 font-cairo text-[11px] font-extrabold text-primary shadow-sm">
         <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
         {isApproved ? 'حالة الحساب: نشط' : 'حالة الحساب: قيد المراجعة'}
       </span>

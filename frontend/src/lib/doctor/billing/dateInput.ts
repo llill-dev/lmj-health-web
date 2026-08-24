@@ -33,11 +33,17 @@ export function isBillingDateInputAfterToday(dateStr: string): boolean {
   return trimmed > billingTodayDateInput();
 }
 
-export const BILLING_FUTURE_DATE_MESSAGE = {
-  title: 'تاريخ غير صالح',
-  message:
-    'التاريخ المدخل لا يمكن أن يكون في المستقبل. اختر تاريخ اليوم أو تاريخاً سابقاً.',
-} as const;
+export function getBillingFutureDateMessage(
+  tr: (ar: string, en: string) => string = (ar) => ar,
+) {
+  return {
+    title: tr('تاريخ غير صالح', 'Invalid date'),
+    message: tr(
+      'التاريخ المدخل لا يمكن أن يكون في المستقبل. اختر تاريخ اليوم أو تاريخاً سابقاً.',
+      'The entered date cannot be in the future. Choose today or an earlier date.',
+    ),
+  };
+}
 
 export function isoToBillingDateInput(iso?: string | null): string {
   if (!iso) return '';

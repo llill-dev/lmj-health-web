@@ -434,7 +434,7 @@ export function RecentActivityList({
           }
           className="flex items-center justify-between gap-3 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-3"
         >
-          <div className="flex gap-3 items-center text-right">
+          <div className="flex gap-3 items-center text-start">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F0FDFA] text-primary">
               <FileText className="w-4 h-4" aria-hidden />
             </div>

@@ -34,7 +34,7 @@ type PrescriptionVisitExpandableCardProps = {
 
 function InfoCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+    <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
       <div className="font-cairo text-[11px] font-bold text-[#667085]">{label}</div>
       <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#101828]">
         {value}
@@ -74,7 +74,7 @@ export function PrescriptionVisitExpandableCard({
     >
       <div
         className={cn(
-          'flex w-full items-start gap-3 px-4 py-4 text-right sm:px-5',
+          'flex w-full items-start gap-3 px-4 py-4 text-start sm:px-5',
           expanded ? 'bg-[#F8FFFE]' : 'border-b border-[#F2F4F7]',
         )}
       >
@@ -163,7 +163,7 @@ export function PrescriptionVisitExpandableCard({
               {detailsError ? (
                 <motion.div
                   variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                  className="rounded-[12px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[13px] font-bold text-[#B42318]"
+                  className="rounded-[12px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[13px] font-bold text-[#B42318]"
                 >
                   {detailsError}
                 </motion.div>
@@ -184,7 +184,7 @@ export function PrescriptionVisitExpandableCard({
                   </div>
 
                   <motion.section variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}>
-                    <h4 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#667085]">
+                    <h4 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#667085]">
                       الأدوية الموصوفة ({medications.length})
                     </h4>
                     {medications.length === 0 ? (
@@ -208,7 +208,7 @@ export function PrescriptionVisitExpandableCard({
                   {previewVm.generalInstructions ? (
                     <motion.section
                       variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                      className="rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#F8FFFE] px-4 py-4 text-right"
+                      className="rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#F8FFFE] px-4 py-4 text-start"
                     >
                       <div className="font-cairo text-[13px] font-extrabold text-primary">
                         التعليمات العامة

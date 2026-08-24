@@ -126,12 +126,12 @@ export default function ChangeFacilityStatusDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
                 aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {t('adminFacilityDialog.changeStatus.ariaLabel')}
                 </h2>
@@ -153,7 +153,7 @@ export default function ChangeFacilityStatusDialog({
                 <label className="block font-cairo text-[12px] font-extrabold text-[#111827] mb-2">
                   {t('adminFacilityDialog.changeStatus.newStatusLabel')}
                 </label>
-                <p className="mb-2 text-right font-cairo text-[12px] font-bold leading-6 text-[#667085]">
+                <p className="mb-2 text-start font-cairo text-[12px] font-bold leading-6 text-[#667085]">
                   {t('adminFacilityDialog.changeStatus.explain')}
                 </p>
                 <StyledSelect
@@ -168,7 +168,7 @@ export default function ChangeFacilityStatusDialog({
               </div>
 
               {currentStatus ? (
-                <div className="mb-4 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#475467]">
+                <div className="mb-4 rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-start font-cairo text-[12px] font-bold text-[#475467]">
                   {t('adminFacilityDialog.changeStatus.currentStatusPrefix')}{STATUS_OPTIONS.find((option) => option.value === currentStatus)?.label ?? currentStatus}
                 </div>
               ) : null}
@@ -178,7 +178,7 @@ export default function ChangeFacilityStatusDialog({
                   {t('adminFacilityDialog.changeStatus.deletedWarning')}
                 </div>
               ) : selectedStatus && selectedStatus !== currentStatus ? (
-                <div className="mb-6 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#0F766E]">
+                <div className="mb-6 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-4 py-3 text-start font-cairo text-[12px] font-bold text-[#0F766E]">
                   {t('adminFacilityDialog.changeStatus.pendingSaveNote')}
                 </div>
               ) : null}
@@ -199,7 +199,7 @@ export default function ChangeFacilityStatusDialog({
                   {mutation.isPending ? (
                     <>
                       <Loader2
-                        className="w-4 h-4 animate-spin ml-2"
+                        className="w-4 h-4 animate-spin ms-2"
                         aria-hidden
                       />
                       {t('adminFacilityDialog.changeStatus.saving')}

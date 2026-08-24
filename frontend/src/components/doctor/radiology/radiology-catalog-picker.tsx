@@ -175,7 +175,7 @@ export function RadiologyCatalogPicker({
                         type="button"
                         disabled={disabled}
                         onClick={() => onAddCatalogItem(item)}
-                        className="flex min-w-0 flex-1 items-center justify-between gap-3 text-right transition hover:opacity-90 disabled:opacity-60"
+                        className="flex min-w-0 flex-1 items-center justify-between gap-3 text-start transition hover:opacity-90 disabled:opacity-60"
                       >
                         <Plus className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                         <div className="min-w-0 flex-1">

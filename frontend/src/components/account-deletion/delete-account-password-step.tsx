@@ -39,7 +39,7 @@ export function DeleteAccountPasswordStep({
       </p>
 
       <form
-        className="mt-6 text-right"
+        className="mt-6 text-start"
         noValidate
         onSubmit={handleSubmit((values) =>
           void onContinue(values.currentPassword),
@@ -72,19 +72,19 @@ export function DeleteAccountPasswordStep({
             id="delete-account-password"
             type={visible ? 'text' : 'password'}
             autoComplete="current-password"
-            className="h-[48px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-10 ps-10 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-[#EF4444]/20 focus:border-[#EF4444] focus:ring-2"
+            className="h-[48px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-10 ps-10 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-[#EF4444]/20 focus:border-[#EF4444] focus:ring-2"
             placeholder="••••••••"
             {...register('currentPassword')}
           />
         </div>
 
         {errors.currentPassword ? (
-          <p className="mt-2 text-right font-cairo text-[12px] font-bold text-[#DC2626]">
+          <p className="mt-2 text-start font-cairo text-[12px] font-bold text-[#DC2626]">
             {errors.currentPassword.message}
           </p>
         ) : null}
 
-        <div className="mt-4 rounded-[10px] border border-[#FECACA] bg-[#FFFBEB] px-4 py-3 text-right">
+        <div className="mt-4 rounded-[10px] border border-[#FECACA] bg-[#FFFBEB] px-4 py-3 text-start">
           <p className="font-cairo text-[12px] font-semibold leading-[20px] text-[#92400E]">
             <span className="font-extrabold text-[#EF4444]">!</span> لحماية حسابك،
             نحتاج إلى التأكد من هويتك قبل إتمام عملية الحذف
@@ -94,7 +94,7 @@ export function DeleteAccountPasswordStep({
         {error ? (
           <p
             role="alert"
-            className="mt-3 text-right font-cairo text-[12px] font-bold text-[#DC2626]"
+            className="mt-3 text-start font-cairo text-[12px] font-bold text-[#DC2626]"
           >
             {error}
           </p>

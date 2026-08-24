@@ -54,7 +54,7 @@ export default function DoctorConsultationExpandableCard({
               <Ticket className="w-5 h-5" />
             </motion.div>
 
-            <div className="flex-1 min-w-0 text-right">
+            <div className="flex-1 min-w-0 text-start">
               <div className="flex flex-wrap gap-2 items-center">
                 <motion.h3
                   layout="position"

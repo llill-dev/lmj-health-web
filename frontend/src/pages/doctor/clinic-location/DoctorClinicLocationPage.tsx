@@ -223,15 +223,15 @@ export default function DoctorClinicLocationPage() {
       toast(
         hasPendingLocationRequest
           ? tr('تم تحديث طلب المراجعة الحالي.', 'The current review request was updated.')
-          : 'تم إرسال موقع العيادة للمراجعة. ستُحدَّث حالة التوثيق بعد موافقة الإدارة.',
+          : tr('تم إرسال موقع العيادة للمراجعة. ستُحدَّث حالة التوثيق بعد موافقة الإدارة.', 'The clinic location was submitted for review. Its verification status will update after admin approval.'),
         {
-          title: 'تم الإرسال',
+          title: tr('تم الإرسال', 'Submitted'),
           variant: 'success',
         },
       );
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر إرسال الطلب',
+        title: tr('تعذّر إرسال الطلب', 'Could not submit the request'),
         variant: 'error',
       });
     }
@@ -290,7 +290,7 @@ export default function DoctorClinicLocationPage() {
               >
                 <MapPin className="h-4 w-4" />
               </button>
-              <div className="text-right">
+              <div className="text-start">
                 <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
                   {tr('موقع العيادة', 'Clinic location')}
                 </div>
@@ -316,15 +316,17 @@ export default function DoctorClinicLocationPage() {
 
           {hasPendingLocationRequest ? (
             <div className="mt-4 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 font-cairo text-[12px] font-semibold text-[#92400E]">
-              لديك طلب موقع قيد المراجعة. يمكنك تعديل الإحداثيات وإعادة الإرسال لتحديث
-              الطلب قبل موافقة الإدارة.
+              {tr(
+                'لديك طلب موقع قيد المراجعة. يمكنك تعديل الإحداثيات وإعادة الإرسال لتحديث الطلب قبل موافقة الإدارة.',
+                'You have a location request under review. You can edit the coordinates and resubmit to update the request before admin approval.',
+              )}
             </div>
           ) : null}
 
           {profileQuery.isRefetching ? (
             <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              جارٍ تحديث بيانات موقع العيادة...
+              {tr('جارٍ تحديث بيانات موقع العيادة...', 'Updating clinic location data...')}
             </div>
           ) : null}
         </section>
@@ -343,7 +345,7 @@ export default function DoctorClinicLocationPage() {
                   void handleSearchAddress();
                 }
               }}
-              placeholder="ابحث عن عنوان..."
+              placeholder={tr('ابحث عن عنوان...', 'Search for an address...')}
               className="h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-4 pe-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
             />
           </div>
@@ -360,7 +362,7 @@ export default function DoctorClinicLocationPage() {
               ) : (
                 <Search className="h-4 w-4 text-primary" />
               )}
-              بحث عن العنوان
+              {tr('بحث عن العنوان', 'Search for address')}
             </button>
 
             <button
@@ -374,7 +376,7 @@ export default function DoctorClinicLocationPage() {
               ) : (
                 <Locate className="h-4 w-4" />
               )}
-              الحصول على موقعي الحالي
+              {tr('الحصول على موقعي الحالي', 'Get my current location')}
             </button>
           </div>
         </section>
@@ -382,7 +384,7 @@ export default function DoctorClinicLocationPage() {
         <section className="mt-5 overflow-hidden rounded-[6px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
           <div className="relative h-[340px] bg-[#F3F4F6]">
             <iframe
-              title="خريطة موقع العيادة"
+              title={tr('خريطة موقع العيادة', 'Clinic location map')}
               src={mapUrl}
               className="absolute inset-0 h-full w-full border-0"
               loading="lazy"
@@ -393,23 +395,23 @@ export default function DoctorClinicLocationPage() {
               <div className="rounded-full bg-white/90 px-4 py-2 shadow-sm">
                 <div className="flex items-center gap-2 font-cairo text-[12px] font-semibold text-[#667085]">
                   <MapIcon className="h-4 w-4 text-primary" />
-                  عدّل الإحداثيات أدناه لتحديث المؤشر
+                  {tr('عدّل الإحداثيات أدناه لتحديث المؤشر', 'Edit the coordinates below to update the marker')}
                 </div>
               </div>
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 grid grid-cols-1 gap-3 bg-white/95 px-4 py-4 backdrop-blur-sm sm:grid-cols-2 sm:px-5">
-              <div className="text-right">
+            <div className="absolute bottom-0 start-0 end-0 grid grid-cols-1 gap-3 bg-white/95 px-4 py-4 backdrop-blur-sm sm:grid-cols-2 sm:px-5">
+              <div className="text-start">
                 <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  خط العرض
+                  {tr('خط العرض', 'Latitude')}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-extrabold tabular-nums text-[#111827]">
                   {form.lat || '—'}
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-start">
                 <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
-                  خط الطول
+                  {tr('خط الطول', 'Longitude')}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-extrabold tabular-nums text-[#111827]">
                   {form.lng || '—'}
@@ -426,15 +428,15 @@ export default function DoctorClinicLocationPage() {
                 <Navigation className="h-4 w-4" />
               </div>
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                تفاصيل الموقع
+                {tr('تفاصيل الموقع', 'Location details')}
               </div>
             </div>
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
-                خط العرض (Latitude)
+              <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
+                {tr('خط العرض (Latitude)', 'Latitude')}
               </div>
               <input
                 value={form.lat}
@@ -444,8 +446,8 @@ export default function DoctorClinicLocationPage() {
               />
             </div>
             <div>
-              <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
-                خط الطول (Longitude)
+              <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
+                {tr('خط الطول (Longitude)', 'Longitude')}
               </div>
               <input
                 value={form.lng}
@@ -457,8 +459,8 @@ export default function DoctorClinicLocationPage() {
           </div>
 
           <div className="mt-4">
-            <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
-              عنوان العيادة
+            <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
+              {tr('عنوان العيادة', 'Clinic address')}
             </div>
             <input
               value={form.address}
@@ -468,9 +470,9 @@ export default function DoctorClinicLocationPage() {
           </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-right">
+            <div className="text-start">
               <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                حالة التحقق
+                {tr('حالة التحقق', 'Verification status')}
               </div>
             </div>
             <span
@@ -494,7 +496,7 @@ export default function DoctorClinicLocationPage() {
             ) : (
               <Navigation className="h-4 w-4" />
             )}
-            إرسال المراجعة
+            {tr('إرسال المراجعة', 'Submit for review')}
           </button>
         </section>
 
@@ -505,7 +507,7 @@ export default function DoctorClinicLocationPage() {
                 <MapPin className="h-4 w-4" />
               </div>
               <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                تعليمات التحديد
+                {tr('تعليمات التحديد', 'Pinning instructions')}
               </div>
             </div>
           </div>
@@ -513,11 +515,11 @@ export default function DoctorClinicLocationPage() {
           <div className="mt-5 rounded-[16px] bg-[#F8FAFC]">
             <ol className="space-y-3 p-4">
               {[
-                'انقر على "الحصول على موقعي الحالي" لتحديد تلقائي',
-                'ابحث عن العنوان أو عدّل الإحداثيات يدوياً لتحديث المؤشر على الخريطة',
-                'اكتب عنوان العيادة الكامل في الحقل المخصص',
-                'اضغط على "إرسال المراجعة" لإرسال التعديلات عبر طلب تغيير الملف',
-                'بعد موافقة الإدارة يُحدَّث الموقع وتصبح حالة التوثيق «موثق»',
+                tr('انقر على "الحصول على موقعي الحالي" لتحديد تلقائي', 'Click "Get my current location" for automatic detection'),
+                tr('ابحث عن العنوان أو عدّل الإحداثيات يدوياً لتحديث المؤشر على الخريطة', 'Search for the address or manually edit the coordinates to update the marker on the map'),
+                tr('اكتب عنوان العيادة الكامل في الحقل المخصص', 'Type the full clinic address in the dedicated field'),
+                tr('اضغط على "إرسال المراجعة" لإرسال التعديلات عبر طلب تغيير الملف', 'Click "Submit for review" to send the changes via a profile change request'),
+                tr('بعد موافقة الإدارة يُحدَّث الموقع وتصبح حالة التوثيق «موثق»', 'Once approved by admin, the location is updated and the verification status becomes "Verified"'),
               ].map((text, idx) => (
                 <li key={text} className="flex items-start gap-3">
                   <div className="mt-[1px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-primary font-cairo text-[12px] font-extrabold text-[#E9FFFE]">

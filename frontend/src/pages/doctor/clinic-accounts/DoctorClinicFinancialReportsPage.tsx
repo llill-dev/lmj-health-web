@@ -35,25 +35,28 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 import { useI18n } from "@/i18n/provider";
 
-const MONTHS = [
-  { value: "all", label: "السنة كاملة" },
-  { value: "1", label: "يناير" },
-  { value: "2", label: "فبراير" },
-  { value: "3", label: "مارس" },
-  { value: "4", label: "أبريل" },
-  { value: "5", label: "مايو" },
-  { value: "6", label: "يونيو" },
-  { value: "7", label: "يوليو" },
-  { value: "8", label: "أغسطس" },
-  { value: "9", label: "سبتمبر" },
-  { value: "10", label: "أكتوبر" },
-  { value: "11", label: "نوفمبر" },
-  { value: "12", label: "ديسمبر" },
-];
+function buildMonths(tr: (ar: string, en: string) => string) {
+  return [
+    { value: "all", label: tr("السنة كاملة", "Full year") },
+    { value: "1", label: tr("يناير", "January") },
+    { value: "2", label: tr("فبراير", "February") },
+    { value: "3", label: tr("مارس", "March") },
+    { value: "4", label: tr("أبريل", "April") },
+    { value: "5", label: tr("مايو", "May") },
+    { value: "6", label: tr("يونيو", "June") },
+    { value: "7", label: tr("يوليو", "July") },
+    { value: "8", label: tr("أغسطس", "August") },
+    { value: "9", label: tr("سبتمبر", "September") },
+    { value: "10", label: tr("أكتوبر", "October") },
+    { value: "11", label: tr("نوفمبر", "November") },
+    { value: "12", label: tr("ديسمبر", "December") },
+  ];
+}
 
 export default function DoctorClinicFinancialReportsPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const months = buildMonths(tr);
   const { toast } = useToast();
   const { canExportReports, canViewSettings, isSecretary } = useBillingAccess();
   const settingsQuery = useBillingSettings(!isSecretary || canViewSettings);
@@ -92,7 +95,7 @@ export default function DoctorClinicFinancialReportsPage() {
       { value: "", label: tr("العملة الافتراضية", "Default currency") },
       ...list.map((item) => ({
         value: item.code,
-        label: formatBillingCurrencyOptionLabel(item.code, item.name),
+        label: formatBillingCurrencyOptionLabel(item.code, item.name, tr),
       })),
     ];
   }, [settingsQuery.supportedCurrencies, tr]);
@@ -127,13 +130,13 @@ export default function DoctorClinicFinancialReportsPage() {
         result.fileName?.trim() ||
         `billing-report-${year}${month === "all" ? "" : `-${month}`}.pdf`;
       await triggerBrowserFileDownloadAndOpen(url, fileName);
-      toast("تم تنزيل التقرير وفتحه في تبويب جديد.", {
-        title: "تصدير PDF",
+      toast(tr("تم تنزيل التقرير وفتحه في تبويب جديد.", "The report was downloaded and opened in a new tab."), {
+        title: tr("تصدير PDF", "Export PDF"),
         variant: "success",
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: "تعذّر التصدير",
+        title: tr("تعذّر التصدير", "Could not export"),
         variant: "error",
       });
     }
@@ -178,7 +181,7 @@ export default function DoctorClinicFinancialReportsPage() {
             onChange={(e) => setMonth(e.target.value)}
             className="h-[44px] rounded-[10px] border border-[#EEF2F6] bg-white px-4 font-cairo text-[13px] font-semibold outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {MONTHS.map((option) => (
+            {months.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -225,7 +228,7 @@ export default function DoctorClinicFinancialReportsPage() {
         </div>
 
         {reportsQuery.mixedCurrencies ? (
-          <div className="mb-4 rounded-[12px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B54708]">
+          <div className="mb-4 rounded-[12px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B54708]">
             {tr(
               "هذا التقرير يحتوي على سجلات بعملات متعددة. الإجمالي المعروض ليس تحويلاً موحّداً — الأرقام تمثل العملة المحددة فقط دون تحويل سعر الصرف.",
               "This report contains records in multiple currencies. The total shown is not a unified conversion — figures reflect only the selected currency, with no exchange-rate conversion applied.",
@@ -248,23 +251,23 @@ export default function DoctorClinicFinancialReportsPage() {
         ) : (
           <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <ClinicAccountsStatCard
-              label="الدخل"
+              label={tr("الدخل", "Income")}
               value={formatMoney(totals.income)}
               icon={TrendingUp}
             />
             <ClinicAccountsStatCard
-              label="المصاريف"
+              label={tr("المصاريف", "Expenses")}
               value={formatMoney(totals.expenses)}
               icon={TrendingDown}
               className="bg-[#EF4444]"
             />
             <ClinicAccountsStatCard
-              label="الربح"
+              label={tr("الربح", "Profit")}
               value={formatMoney(totals.profit)}
               icon={BarChart3}
             />
             <ClinicAccountsStatCard
-              label="الاسترجاعات"
+              label={tr("الاسترجاعات", "Refunds")}
               value={formatMoney(totals.refunds)}
               icon={TrendingDown}
               className="bg-[#B54708]"
@@ -274,8 +277,8 @@ export default function DoctorClinicFinancialReportsPage() {
 
         <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-              الدخل والمصاريف
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+              {tr("الدخل والمصاريف", "Income and expenses")}
             </h2>
             {reportsQuery.monthlyFinance.length === 0 ? (
               <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
@@ -286,8 +289,8 @@ export default function DoctorClinicFinancialReportsPage() {
             )}
           </div>
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-              اتجاه الربح
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+              {tr("اتجاه الربح", "Profit trend")}
             </h2>
             {reportsQuery.monthlyFinance.length === 0 ? (
               <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
@@ -300,8 +303,8 @@ export default function DoctorClinicFinancialReportsPage() {
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-            المصاريف حسب الفئة
+          <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+            {tr("المصاريف حسب الفئة", "Expenses by category")}
           </h2>
           {reportsQuery.expenseBreakdown.length === 0 ? (
             <p className="py-10 text-center font-cairo text-[13px] font-semibold text-[#98A2B3]">
@@ -316,8 +319,8 @@ export default function DoctorClinicFinancialReportsPage() {
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-            تصدير التقرير
+          <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+            {tr("تصدير التقرير", "Export report")}
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {canExportReports ? (
@@ -328,11 +331,11 @@ export default function DoctorClinicFinancialReportsPage() {
                 className="inline-flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
               >
                 <FileText className="h-4 w-4" aria-hidden />
-                {exportPdf.isPending ? "جاري التصدير..." : "PDF"}
+                {exportPdf.isPending ? tr("جاري التصدير...", "Exporting...") : "PDF"}
               </button>
             ) : (
               <div className="inline-flex h-[52px] items-center justify-center rounded-[12px] bg-[#F2F4F7] px-4 font-cairo text-[13px] font-bold text-[#667085]">
-                التصدير غير متاح ضمن صلاحياتك الحالية
+                {tr("التصدير غير متاح ضمن صلاحياتك الحالية", "Export is not available with your current permissions")}
               </div>
             )}
             <button
@@ -345,7 +348,7 @@ export default function DoctorClinicFinancialReportsPage() {
               )}
             >
               <FileSpreadsheet className="h-4 w-4" aria-hidden />
-              Excel (قريباً)
+              {tr("Excel (قريباً)", "Excel (coming soon)")}
             </button>
           </div>
         </section>

@@ -14,7 +14,7 @@ export function PrescriptionSelectedMedications({
 }) {
   return (
     <section className="mb-6">
-      <h2 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#667085]">
+      <h2 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#667085]">
         الأدوية المختارة ({items.length})
       </h2>
 

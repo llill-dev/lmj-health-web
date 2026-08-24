@@ -253,7 +253,7 @@ function DynamicDataSummary({
             className="flex items-start justify-between gap-3 rounded-[12px] border border-[#EAECF0] bg-white px-3 py-2"
           >
             <div className="font-mono text-[11px] text-[#667085]">{key}</div>
-            <div className="max-w-[70%] text-left font-cairo text-[12px] font-bold text-[#111827]">
+            <div className="max-w-[70%] text-end font-cairo text-[12px] font-bold text-[#111827]">
               {summarizeValue(value, t)}
             </div>
           </div>
@@ -268,7 +268,7 @@ function DynamicDataSummary({
   }
 
   return (
-    <pre className="overflow-x-auto rounded-[12px] bg-[#0F172A] p-3 text-left font-mono text-[11px] leading-6 text-[#E2E8F0]">
+    <pre className="overflow-x-auto rounded-[12px] bg-[#0F172A] p-3 text-end font-mono text-[11px] leading-6 text-[#E2E8F0]">
       {toPrettyJson(dynamicData)}
     </pre>
   );

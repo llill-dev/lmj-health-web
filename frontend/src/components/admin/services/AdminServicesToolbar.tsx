@@ -105,9 +105,9 @@ export function AdminServicesToolbar({
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={tr('ابحث بالاسم أو المدينة…', 'Search by name or city…')}
-            className='h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-[#FAFBFC] pe-12 ps-4 text-right font-cairo text-[13px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15'
+            className='h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-[#FAFBFC] pe-12 ps-4 text-start font-cairo text-[13px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15'
           />
-          <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
+          <div className='pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
             <Search className='h-4 w-4' />
           </div>
         </div>

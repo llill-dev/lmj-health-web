@@ -115,7 +115,7 @@ export default function SignUpStep3Professional({
         />
         <div className='space-y-5'>
           <div>
-            <div className='flex items-center justify-start gap-2 text-right'>
+            <div className='flex items-center justify-start gap-2 text-start'>
               <Stethoscope className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 التخصص
@@ -125,7 +125,7 @@ export default function SignUpStep3Professional({
               </span>
             </div>
             {specialtiesError && (
-              <div className='mt-2 flex flex-col gap-2 rounded-[6px] border border-amber-200 bg-amber-50 px-3 py-2 text-right'>
+              <div className='mt-2 flex flex-col gap-2 rounded-[6px] border border-amber-200 bg-amber-50 px-3 py-2 text-start'>
                 <p className='font-cairo text-[12px] font-semibold text-amber-900'>
                   تعذر تحميل قائمة التخصصات. يمكنك إدخال التخصص يدوياً أو إعادة المحاولة.
                 </p>
@@ -149,7 +149,7 @@ export default function SignUpStep3Professional({
                   emptyTriggerLabel='جاري تحميل التخصصات…'
                   listboxAriaLabel='التخصص'
                 />
-                <Loader2 className='pointer-events-none absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 animate-spin text-primary' />
+                <Loader2 className='pointer-events-none absolute start-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 animate-spin text-primary' />
               </div>
             ) : useCatalogSpecialty ? (
               <>
@@ -219,7 +219,7 @@ export default function SignUpStep3Professional({
                       });
                     },
                   })}
-                  className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+                  className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
                 />
                 {hasSpecialtyCatalog ? (
                   <button
@@ -252,7 +252,7 @@ export default function SignUpStep3Professional({
           </div>
 
           <div>
-            <div className='flex items-center justify-start gap-2 text-right'>
+            <div className='flex items-center justify-start gap-2 text-start'>
               <IdCard className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 رقم مزاولة المهنة
@@ -267,7 +267,7 @@ export default function SignUpStep3Professional({
               {...register('licenseNumber', {
                 onChange: () => onDismissServerLicenseMessage?.(),
               })}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             {(errors.licenseNumber?.message?.trim() ||
               serverLicenseMessage?.trim()) && (
@@ -281,7 +281,7 @@ export default function SignUpStep3Professional({
           </div>
 
           <div>
-            <div className='flex items-center justify-start gap-2 text-right'>
+            <div className='flex items-center justify-start gap-2 text-start'>
               <GraduationCap className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 المؤهل العلمي
@@ -294,7 +294,7 @@ export default function SignUpStep3Professional({
               type='text'
               placeholder='مثال: جامعة دمشق - كلية الطب'
               {...register('qualification')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             {errors.qualification?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
@@ -304,7 +304,7 @@ export default function SignUpStep3Professional({
           </div>
 
           <div>
-            <div className='flex items-center justify-start gap-2 text-right'>
+            <div className='flex items-center justify-start gap-2 text-start'>
               <MapPin className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 عنوان العيادة
@@ -317,7 +317,7 @@ export default function SignUpStep3Professional({
               type='text'
               placeholder='موقع عيادتك'
               {...register('clinicAddress')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             {errors.clinicAddress?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>
@@ -327,7 +327,7 @@ export default function SignUpStep3Professional({
           </div>
 
           <div>
-            <div className='flex items-center justify-start gap-2 text-right'>
+            <div className='flex items-center justify-start gap-2 text-start'>
               <Text className='h-4 w-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 النبذة التعريفية
@@ -340,7 +340,7 @@ export default function SignUpStep3Professional({
               rows={4}
               placeholder='اكتب نبذة عنك وعن خبراتك...'
               {...register('bio')}
-              className='mt-2 h-[120px] w-full resize-none rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-3 text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+              className='mt-2 h-[120px] w-full resize-none rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-3 text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
             {errors.bio?.message && (
               <div className='mt-1 font-cairo text-[12px] font-semibold text-red-500'>

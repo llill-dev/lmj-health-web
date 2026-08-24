@@ -108,7 +108,7 @@ export default function DataEntryServiceProvidersPage() {
         />
 
         <section className="rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-6 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
-          <div className="flex items-start gap-3 text-right">
+          <div className="flex items-start gap-3 text-start">
             <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Info className="h-4 w-4" />
             </div>
@@ -224,7 +224,7 @@ export default function DataEntryServiceProvidersPage() {
                 className="rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_12px_24px_rgba(0,0,0,0.05)]"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="text-right">
+                  <div className="text-start">
                     <div className="font-cairo text-[14px] font-black text-[#111827]">
                       {resolveProviderLabel(provider)}
                     </div>

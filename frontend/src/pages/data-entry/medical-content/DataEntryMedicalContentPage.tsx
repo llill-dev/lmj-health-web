@@ -324,7 +324,7 @@ export default function DataEntryMedicalContentPage() {
                 "dataEntry.medicalContent.filters.searchPlaceholder",
                 "Search within the current page",
               )}
-              className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
+              className="h-10 rounded-[10px] border border-[#E5E7EB] px-3 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none focus:border-primary"
             />
             <StyledSelect
               value={status}
@@ -376,7 +376,7 @@ export default function DataEntryMedicalContentPage() {
         </section>
 
         {query.isError ? (
-          <section className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4 text-right">
+          <section className="rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4 text-start">
             <p className="font-cairo text-[13px] font-extrabold text-[#B42318]">
               {t("dataEntry.medicalContent.error.loadTitle")}
             </p>
@@ -458,7 +458,7 @@ export default function DataEntryMedicalContentPage() {
                   key={item._id}
                   className="flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
                 >
-                  <div className="min-w-0 flex-1 text-right">
+                  <div className="min-w-0 flex-1 text-start">
                     <h3 className="truncate font-cairo text-[14px] font-black text-[#111827]">
                       {titleText || "بدون عنوان"}
                     </h3>

@@ -37,7 +37,7 @@ export default function MedicalOrderCatalogToolbar({
     <div className="grid w-full min-w-0 grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
       <div className="relative min-w-0 sm:col-span-2">
         <Search
-          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+          className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
           aria-hidden
         />
         <input
@@ -45,14 +45,14 @@ export default function MedicalOrderCatalogToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t("adminMedicalOrders.toolbar.search.placeholder")}
-          className="h-[44px] w-full min-w-0 rounded-[12px] border border-[#E5E7EB] bg-white py-2 ps-10 pe-4 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="h-[44px] w-full min-w-0 rounded-[12px] border border-[#E5E7EB] bg-white py-2 ps-10 pe-4 text-start font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20"
           autoComplete="off"
           aria-label={t("adminMedicalOrders.toolbar.search.ariaLabel")}
         />
       </div>
       <div className="relative min-w-0">
         <SlidersHorizontal
-          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+          className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
           aria-hidden
         />
         <input
@@ -60,7 +60,7 @@ export default function MedicalOrderCatalogToolbar({
           value={category}
           onChange={(event) => onCategoryChange(event.target.value)}
           placeholder={t("adminMedicalOrders.toolbar.category.placeholder")}
-          className="h-[44px] w-full min-w-0 rounded-[12px] border border-[#E5E7EB] bg-white py-2 ps-10 pe-4 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="h-[44px] w-full min-w-0 rounded-[12px] border border-[#E5E7EB] bg-white py-2 ps-10 pe-4 text-start font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20"
           aria-label={t("adminMedicalOrders.toolbar.category.ariaLabel")}
         />
       </div>

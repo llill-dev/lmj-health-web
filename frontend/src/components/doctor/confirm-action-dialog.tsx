@@ -88,7 +88,7 @@ export default function ConfirmActionDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] w-[460px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed start-1/2 top-1/2 z-[10000] w-[460px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             dir={dir}
             lang={locale}
           >
@@ -115,7 +115,7 @@ export default function ConfirmActionDialog({
                 <Dialog.Close asChild>
                   <button
                     type='button'
-                    className='absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
+                    className='absolute start-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]'
                     aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
@@ -126,7 +126,7 @@ export default function ConfirmActionDialog({
                   {title}
                 </Dialog.Title>
 
-                <Dialog.Description className='mt-2 text-right font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]'>
+                <Dialog.Description className='mt-2 text-start font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]'>
                   {description}
                 </Dialog.Description>
 

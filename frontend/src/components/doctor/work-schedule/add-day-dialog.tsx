@@ -148,7 +148,7 @@ export default function AddDayDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] w-[580px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed start-1/2 top-1/2 z-[10000] w-[580px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             dir={dir}
             lang={locale}
           >
@@ -175,7 +175,7 @@ export default function AddDayDialog({
                 <Dialog.Close asChild>
                   <button
                     type='button'
-                    className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]'
+                    className='absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]'
                     aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />
@@ -205,7 +205,7 @@ export default function AddDayDialog({
                   ) : (
                     <>
                       <div>
-                        <div className='mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
+                        <div className='mb-2 text-start font-cairo text-[13px] font-extrabold text-[#111827]'>
                           {tr('اليوم', 'Day')}
                         </div>
                         <StyledSelect
@@ -229,7 +229,7 @@ export default function AddDayDialog({
 
                       <div>
                         <div className='mb-3 flex items-center justify-between'>
-                          <div className='text-right font-cairo text-[13px] font-extrabold text-[#111827]'>
+                          <div className='text-start font-cairo text-[13px] font-extrabold text-[#111827]'>
                             {tr('أوقات العمل', 'Working hours')}
                           </div>
                           <button
@@ -253,7 +253,7 @@ export default function AddDayDialog({
                             >
                               <div className='flex flex-1 items-center gap-3'>
                                 <div className='flex-1'>
-                                  <div className='mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]'>
+                                  <div className='mb-1 text-start font-cairo text-[11px] font-bold text-[#667085]'>
                                     {tr('من', 'From')}
                                   </div>
                                   <input
@@ -269,7 +269,7 @@ export default function AddDayDialog({
                                   />
                                 </div>
                                 <div className='flex-1'>
-                                  <div className='mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]'>
+                                  <div className='mb-1 text-start font-cairo text-[11px] font-bold text-[#667085]'>
                                     {tr('إلى', 'To')}
                                   </div>
                                   <input

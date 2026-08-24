@@ -28,10 +28,10 @@ import { formatBillingAmount } from "@/lib/doctor/billing/format";
 import {
   billingDateInputToIso,
   billingTodayDateInput,
-  BILLING_FUTURE_DATE_MESSAGE,
+  getBillingFutureDateMessage,
   isBillingDateInputAfterToday,
 } from "@/lib/doctor/billing/dateInput";
-import { EXPENSE_CATEGORY_LABELS } from "@/lib/doctor/clinicAccounts/labels";
+import { expenseCategoryLabel } from "@/lib/doctor/clinicAccounts/labels";
 import type { ExpenseCategory } from "@/lib/doctor/clinicAccounts/types";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
@@ -39,13 +39,17 @@ import { useI18n } from "@/i18n/provider";
 
 type ExpenseFilter = "all" | ExpenseCategory;
 
-const FILTER_OPTIONS: Array<{ id: ExpenseFilter; label: string }> = [
-  { id: "all", label: "الكل" },
-  { id: "rent", label: "إيجار" },
-  { id: "salaries", label: "رواتب" },
-  { id: "services", label: "خدمات" },
-  { id: "materials", label: "مواد" },
-];
+function buildFilterOptions(
+  tr: (ar: string, en: string) => string,
+): Array<{ id: ExpenseFilter; label: string }> {
+  return [
+    { id: "all", label: tr("الكل", "All") },
+    { id: "rent", label: tr("إيجار", "Rent") },
+    { id: "salaries", label: tr("رواتب", "Salaries") },
+    { id: "services", label: tr("خدمات", "Services") },
+    { id: "materials", label: tr("مواد", "Materials") },
+  ];
+}
 
 const CATEGORY_TO_API: Record<ExpenseCategory, string> = {
   rent: "Rent",
@@ -67,6 +71,7 @@ function findCategoryCount(
 export default function DoctorClinicExpensesPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const filterOptions = buildFilterOptions(tr);
   const { toast } = useToast();
   const {
     canManageExpenses,
@@ -128,16 +133,16 @@ export default function DoctorClinicExpensesPage() {
   const handleSave = async () => {
     const parsedAmount = Number(amount);
     if (!title.trim() || !parsedAmount || parsedAmount <= 0 || !date) {
-      toast("يرجى تعبئة العنوان والمبلغ والتاريخ.", {
-        title: "حقول ناقصة",
+      toast(tr("يرجى تعبئة العنوان والمبلغ والتاريخ.", "Please fill in the title, amount, and date."), {
+        title: tr("حقول ناقصة", "Missing fields"),
         variant: "error",
       });
       return;
     }
 
     if (isBillingDateInputAfterToday(date)) {
-      toast(BILLING_FUTURE_DATE_MESSAGE.message, {
-        title: BILLING_FUTURE_DATE_MESSAGE.title,
+      toast(getBillingFutureDateMessage(tr).message, {
+        title: getBillingFutureDateMessage(tr).title,
         variant: "error",
       });
       return;
@@ -150,7 +155,7 @@ export default function DoctorClinicExpensesPage() {
         expenseDate: billingDateInputToIso(date),
         description: title.trim(),
       });
-      toast("تم حفظ المصروف.", { title: "تم الحفظ", variant: "success" });
+      toast(tr("تم حفظ المصروف.", "The expense was saved."), { title: tr("تم الحفظ", "Saved"), variant: "success" });
       setDialogOpen(false);
       setTitle("");
       setAmount("");
@@ -208,7 +213,7 @@ export default function DoctorClinicExpensesPage() {
                     ? "—"
                     : stats.rent
                   : "—",
-              label: "إيجار",
+              label: tr("إيجار", "Rent"),
             },
             {
               key: "services",
@@ -219,7 +224,7 @@ export default function DoctorClinicExpensesPage() {
                     ? "—"
                     : stats.services
                   : "—",
-              label: "خدمات",
+              label: tr("خدمات", "Services"),
             },
             {
               key: "salaries",
@@ -230,7 +235,7 @@ export default function DoctorClinicExpensesPage() {
                     ? "—"
                     : stats.salaries
                   : "—",
-              label: "رواتب",
+              label: tr("رواتب", "Salaries"),
             },
             {
               key: "materials",
@@ -241,7 +246,7 @@ export default function DoctorClinicExpensesPage() {
                     ? "—"
                     : stats.materials
                   : "—",
-              label: "مواد",
+              label: tr("مواد", "Materials"),
             },
           ]}
         />
@@ -254,21 +259,24 @@ export default function DoctorClinicExpensesPage() {
             setFilter(nextFilter);
             setPage(1);
           }}
-          options={FILTER_OPTIONS}
+          options={filterOptions}
         />
 
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
           onValueChangeExtra={() => setPage(1)}
-          placeholder="بحث في المصاريف"
+          placeholder={tr("بحث في المصاريف", "Search expenses")}
           trailing={
-            <ClinicAccountsSearchCount count={expensesQuery.total} label="مصروف" />
+            <ClinicAccountsSearchCount count={expensesQuery.total} label={tr("مصروف", "expense")} />
           }
         />
         {!canManageExpenses ? (
-          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
-            يمكنك عرض المصاريف فقط، بينما إضافة مصروف جديد تتطلب صلاحية إدارة.
+          <p className="mt-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
+            {tr(
+              "يمكنك عرض المصاريف فقط، بينما إضافة مصروف جديد تتطلب صلاحية إدارة.",
+              "You can only view expenses; adding a new expense requires the management permission.",
+            )}
           </p>
         ) : null}
 
@@ -288,7 +296,7 @@ export default function DoctorClinicExpensesPage() {
               "جرّب تغيير البحث أو الفئة، أو أضف مصروفًا جديدًا لبدء السجل المالي.",
               "Try changing search or category, or add a new expense to start the financial log.",
             )}
-            actionLabel={canManageExpenses ? "إضافة مصروف" : undefined}
+            actionLabel={canManageExpenses ? tr("إضافة مصروف", "Add expense") : undefined}
             onAction={canManageExpenses ? () => setDialogOpen(true) : undefined}
             actionIcon={canManageExpenses ? <Plus className="w-4 h-4" aria-hidden /> : undefined}
           />
@@ -328,8 +336,8 @@ export default function DoctorClinicExpensesPage() {
         >
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
-                العنوان
+              <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
+                {tr("العنوان", "Title")}
               </label>
               <input
                 value={title}
@@ -338,8 +346,8 @@ export default function DoctorClinicExpensesPage() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
-                الفئة
+              <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
+                {tr("الفئة", "Category")}
               </label>
               <select
                 value={category}
@@ -352,7 +360,7 @@ export default function DoctorClinicExpensesPage() {
                   );
                   return (
                     <option key={apiCategory} value={apiCategory}>
-                      {knownKey ? EXPENSE_CATEGORY_LABELS[knownKey] : apiCategory}
+                      {knownKey ? expenseCategoryLabel(knownKey, tr) : apiCategory}
                     </option>
                   );
                 })}
@@ -360,8 +368,8 @@ export default function DoctorClinicExpensesPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
-                  المبلغ
+                <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
+                  {tr("المبلغ", "Amount")}
                 </label>
                 <input
                   value={amount}
@@ -370,8 +378,8 @@ export default function DoctorClinicExpensesPage() {
                 />
               </div>
               <div>
-                <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
-                  التاريخ
+                <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
+                  {tr("التاريخ", "Date")}
                 </label>
                 <input
                   type="date"
@@ -392,7 +400,7 @@ export default function DoctorClinicExpensesPage() {
               onClick={() => void handleSave()}
               className="mt-2 flex h-[48px] w-full items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
             >
-              {createExpense.isPending ? "جارٍ الحفظ..." : "حفظ المصروف"}
+              {createExpense.isPending ? tr("جارٍ الحفظ...", "Saving...") : tr("حفظ المصروف", "Save expense")}
             </button>
           </div>
         </ClinicAccountsModalShell>

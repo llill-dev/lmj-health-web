@@ -21,7 +21,7 @@ export function InvoiceListItem({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.2 }}
       onClick={() => onOpen(invoice)}
-      className="flex w-full items-center justify-between gap-4 rounded-[12px] border border-[#D1FAE5] bg-white px-5 py-4 text-right shadow-sm transition hover:border-primary/40 hover:shadow-md"
+      className="flex w-full items-center justify-between gap-4 rounded-[12px] border border-[#D1FAE5] bg-white px-5 py-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
     >
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap gap-2 justify-start items-center mb-2">

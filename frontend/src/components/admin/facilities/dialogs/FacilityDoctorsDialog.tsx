@@ -103,12 +103,12 @@ export default function FacilityDoctorsDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
                 aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {t('adminFacilityDialog.doctors.titleGeneric')}
                 </h2>
@@ -122,13 +122,13 @@ export default function FacilityDoctorsDialog({
 
             <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
               <div className="relative mb-4">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
+                <Search className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#98A2B3]" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('common.searchByName')}
-                  className="w-full rounded-[8px] border border-[#E5E7EB] bg-white pr-10 pl-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
+                  className="w-full rounded-[8px] border border-[#E5E7EB] bg-white pe-10 ps-3 py-2.5 font-cairo text-[12px] font-bold text-[#344054] placeholder:text-[#98A2B3] focus:border-primary focus:outline-none"
                 />
               </div>
 

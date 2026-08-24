@@ -147,12 +147,12 @@ export default function SuggestFacilityDialog({
                 type="button"
                 onClick={handleClose}
                 disabled={submitting}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label="إغلاق"
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   اقتراح منشأة
                 </h2>
@@ -162,7 +162,7 @@ export default function SuggestFacilityDialog({
             <form dir={dir} onSubmit={handleSubmit(submit)}>
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
-                  <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-right font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
+                  <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-start font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
                     إذا لم تجد المنشأة في القائمة، أرسل اقتراحاً وسيتم مراجعته
                     وإضافته إلى النظام بعد الموافقة.
                   </p>
@@ -223,7 +223,7 @@ export default function SuggestFacilityDialog({
                   </DoctorProfileFormField>
 
                   <div>
-                    <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                    <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                       الموقع
                     </h3>
                     <div className="space-y-4">
@@ -262,7 +262,7 @@ export default function SuggestFacilityDialog({
                   </div>
 
                   <div>
-                    <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                    <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                       التواصل
                     </h3>
                     <DoctorProfileFormField

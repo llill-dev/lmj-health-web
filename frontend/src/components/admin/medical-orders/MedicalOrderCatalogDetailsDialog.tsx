@@ -97,7 +97,7 @@ export default function MedicalOrderCatalogDetailsDialog({
       <Dialog.Portal>
         <Dialog.Overlay className='fixed inset-0 z-[9998] bg-black/45 backdrop-blur-[2px]' />
         <Dialog.Content
-          className='fixed left-1/2 top-1/2 z-[9999] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
+          className='fixed start-1/2 top-1/2 z-[9999] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
           dir={dir}
           lang={locale}
         >
@@ -147,7 +147,7 @@ export default function MedicalOrderCatalogDetailsDialog({
                 </div>
 
                 <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                  <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-right'>
+                  <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-start'>
                     <div className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
                       {t('adminMedicalOrders.details.activationStatus')}
                     </div>
@@ -155,7 +155,7 @@ export default function MedicalOrderCatalogDetailsDialog({
                       {item.isActive !== false ? t('common.active') : t('common.disabled')}
                     </div>
                   </div>
-                  <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-right'>
+                  <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-start'>
                     <div className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
                       {t('adminMedicalOrders.details.visibilityToDoctors')}
                     </div>
@@ -165,7 +165,7 @@ export default function MedicalOrderCatalogDetailsDialog({
                   </div>
                 </div>
 
-                <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-right'>
+                <div className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-start'>
                   <div className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
                     {t('adminMedicalOrders.details.id')}
                   </div>
@@ -179,7 +179,7 @@ export default function MedicalOrderCatalogDetailsDialog({
                     {detailRows.map((row) => (
                       <div
                         key={row.label}
-                        className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-right'
+                        className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-start'
                       >
                         <div className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
                           {row.label}
@@ -197,7 +197,7 @@ export default function MedicalOrderCatalogDetailsDialog({
                     {kindSpecificRows.map((row) => (
                       <div
                         key={row.label}
-                        className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-right'
+                        className='rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-3 text-start'
                       >
                         <div className='font-cairo text-[11px] font-extrabold text-[#98A2B3]'>
                           {row.label}

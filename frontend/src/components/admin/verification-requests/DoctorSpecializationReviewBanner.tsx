@@ -71,7 +71,7 @@ export function DoctorSpecializationReviewBanner({
 
   return (
     <div
-      className={`rounded-[12px] border px-4 py-3 text-right ${tone.box}`}
+      className={`rounded-[12px] border px-4 py-3 text-start ${tone.box}`}
     >
       <div className={`font-cairo text-[13px] font-extrabold ${tone.text}`}>
         {copy.title}

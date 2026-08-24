@@ -59,7 +59,7 @@ export function MedicalRequestsStatCards({
               isPrimary ? card.activeClass : card.idleClass,
             )}
           >
-            <div className="text-right">
+            <div className="text-start">
               <div
                 className={cn(
                   'font-cairo text-[12px] font-bold',

@@ -1,6 +1,7 @@
 import type { InvoiceStatus } from '@/lib/doctor/clinicAccounts/types';
-import { INVOICE_STATUS_LABELS } from '@/lib/doctor/clinicAccounts/labels';
+import { invoiceStatusLabel } from '@/lib/doctor/clinicAccounts/labels';
 import { cn } from '@/lib/utils/utils';
+import { useI18n } from '@/i18n/provider';
 
 const STYLES: Record<InvoiceStatus, string> = {
   paid: 'bg-primary text-white',
@@ -11,6 +12,8 @@ const STYLES: Record<InvoiceStatus, string> = {
 };
 
 export function InvoiceStatusBadge({ status }: { status: InvoiceStatus }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   return (
     <span
       className={cn(
@@ -18,7 +21,7 @@ export function InvoiceStatusBadge({ status }: { status: InvoiceStatus }) {
         STYLES[status],
       )}
     >
-      {INVOICE_STATUS_LABELS[status]}
+      {invoiceStatusLabel(status, tr)}
     </span>
   );
 }

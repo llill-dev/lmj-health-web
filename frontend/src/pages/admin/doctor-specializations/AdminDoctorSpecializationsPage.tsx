@@ -390,7 +390,7 @@ export default function AdminDoctorSpecializationsPage() {
                             </p>
                             <p
                               dir="ltr"
-                              className="mt-2 truncate font-mono text-[11px] font-semibold text-[#98A2B3] text-left"
+                              className="mt-2 truncate font-mono text-[11px] font-semibold text-[#98A2B3] text-end"
                             >
                               key: {row.key}
                             </p>
@@ -469,11 +469,10 @@ export default function AdminDoctorSpecializationsPage() {
         description={
           deleteTarget ? (
             <>
-              {tr("سيتم استدعاء", "Will call")}{" "}
-              <span className="font-mono text-[11px]">
-                DELETE /api/admin/lookups/:id
-              </span>{" "}
-              {tr("(تعطيل ناعم). العنصر:", "(soft delete). Item:")}{" "}
+              {tr(
+                "سيتم تعطيل هذا العنصر ولن يظهر بعد الآن، ويمكن استرجاعه لاحقاً. العنصر:",
+                "This item will be disabled and hidden going forward; it can be restored later. Item:"
+              )}{" "}
               <strong>{resolveLookupText(deleteTarget.text, locale)}</strong>
             </>
           ) : null

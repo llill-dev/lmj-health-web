@@ -229,12 +229,12 @@ export default function EditServiceProviderDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {t("adminServiceProviderDialog.edit.ariaLabel")}
                 </h2>
@@ -261,7 +261,7 @@ export default function EditServiceProviderDialog({
                         type="text"
                         value={resolveLabel(serviceType?.name, "ar") || serviceType?.slug || ""}
                         disabled
-                        className="w-full h-[48px] rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-right font-cairo text-[13px] font-bold text-[#667085] outline-none cursor-not-allowed"
+                        className="w-full h-[48px] rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-start font-cairo text-[13px] font-bold text-[#667085] outline-none cursor-not-allowed"
                       />
                     </AdminFormField>
 
@@ -292,7 +292,7 @@ export default function EditServiceProviderDialog({
                     </AdminFormField>
 
                     <div>
-                      <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                      <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                         {t("common.location")}
                       </h3>
                       <div className="space-y-4">
@@ -348,7 +348,7 @@ export default function EditServiceProviderDialog({
 
                     {serviceType ? (
                       <div>
-                        <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                        <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                           {t("adminServiceProviderDialog.section.dataFor").replace("{name}", resolveLabel(serviceType.name, "ar"))}
                         </h3>
                         <DynamicProviderFieldRenderer

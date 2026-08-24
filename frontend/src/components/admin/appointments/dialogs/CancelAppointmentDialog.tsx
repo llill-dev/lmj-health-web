@@ -107,17 +107,17 @@ export default function CancelAppointmentDialog({
                   onOpenChange(false);
                   reset({ reason: "" });
                 }}
-                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60"
+                className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <h2 className="text-right font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]">
+              <h2 className="text-start font-cairo text-[24px] font-extrabold leading-[30px] text-[#101828]">
                 {t("adminAppointments.cancel.title")}
               </h2>
 
-              <div className="mt-10 text-right">
+              <div className="mt-10 text-start">
                 <div className="font-cairo text-[14px] font-bold text-[#101828]">
                   {t("adminAppointments.cancel.targetLabel")}
                 </div>

@@ -2,15 +2,19 @@ import type { DoctorPatientsListParams } from '@/lib/doctor/types';
 
 export type DashboardPatientFilter = 'all' | 'today' | 'active' | 'upcoming';
 
-export const DASHBOARD_PATIENT_FILTER_LABELS: Record<
-  DashboardPatientFilter,
-  string
-> = {
-  all: 'الكل',
-  today: 'اليوم',
-  active: 'نشط',
-  upcoming: 'القادم',
-};
+type TrFn = (ar: string, en: string) => string;
+const defaultTr: TrFn = (ar) => ar;
+
+export function buildDashboardPatientFilterLabels(
+  tr: TrFn = defaultTr,
+): Record<DashboardPatientFilter, string> {
+  return {
+    all: tr('الكل', 'All'),
+    today: tr('اليوم', 'Today'),
+    active: tr('نشط', 'Active'),
+    upcoming: tr('القادم', 'Upcoming'),
+  };
+}
 
 export const DASHBOARD_PATIENTS_PAGE_SIZE = 8;
 

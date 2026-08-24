@@ -845,12 +845,12 @@ export default function CreateAdminContentDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={submitting}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t("createContentDialog.close")}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {t("createContentDialog.title")}
                 </h2>
@@ -881,7 +881,7 @@ export default function CreateAdminContentDialog({
                     />
                   </AdminFormField>
                   {typeSwitchSafetyMessage ? (
-                    <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-right font-cairo text-[12px] font-bold text-amber-700">
+                    <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-start font-cairo text-[12px] font-bold text-amber-700">
                       {typeSwitchSafetyMessage}
                     </div>
                   ) : null}
@@ -1005,7 +1005,7 @@ export default function CreateAdminContentDialog({
 
                   {templateParentType ? (
                     <div className="rounded-[14px] border border-[#D8E6E5] bg-[#F8FBFB] p-4">
-                      <div className="mb-4 text-right">
+                      <div className="mb-4 text-start">
                         <h3 className="font-cairo text-[15px] font-extrabold text-primary">
                           {t("createContentDialog.section.template.title")}
                         </h3>
@@ -1315,7 +1315,7 @@ export default function CreateAdminContentDialog({
                         </div>
                       )}
                       {typeof (errors.sources?.root?.message ?? errors.sources?.message) === "string" ? (
-                        <p className="mt-2 text-right font-cairo text-[12px] font-bold text-red-600">
+                        <p className="mt-2 text-start font-cairo text-[12px] font-bold text-red-600">
                           {errors.sources?.root?.message ?? errors.sources?.message}
                         </p>
                       ) : null}
@@ -1361,7 +1361,7 @@ export default function CreateAdminContentDialog({
                   </section>
 
                   <div className="rounded-[14px] border border-[#E4E7EC] bg-[#FCFCFD] p-4">
-                    <div className="text-right">
+                    <div className="text-start">
                       <h3 className="font-cairo text-[15px] font-extrabold text-primary">
                         {t("createContentDialog.readiness.title")}
                       </h3>
@@ -1381,7 +1381,7 @@ export default function CreateAdminContentDialog({
                         <div
                           key={item.key}
                           className={cn(
-                            "rounded-[10px] px-3 py-2 text-right font-cairo text-[12px] font-bold",
+                            "rounded-[10px] px-3 py-2 text-start font-cairo text-[12px] font-bold",
                             item.done
                               ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                               : "border border-amber-200 bg-amber-50 text-amber-700",
@@ -1395,7 +1395,7 @@ export default function CreateAdminContentDialog({
                       ))}
                     </div>
                     {previewWarnings.length ? (
-                      <ul className="mt-3 list-disc space-y-1 ps-5 text-right font-cairo text-[12px] font-bold text-amber-700">
+                      <ul className="mt-3 list-disc space-y-1 ps-5 text-start font-cairo text-[12px] font-bold text-amber-700">
                         {previewWarnings.map((warning, index) => (
                           <li key={`create-preview-warning-${index}`}>{warning}</li>
                         ))}
@@ -1457,7 +1457,7 @@ export default function CreateAdminContentDialog({
                   </section>
 
                   {createMut.isError ? (
-                    <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600">
+                    <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-start font-cairo text-[12px] font-bold text-red-600">
                       {userFacingErrorMessage(
                         createMut.error,
                         t("createContentDialog.error.createFailed"),

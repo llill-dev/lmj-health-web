@@ -130,7 +130,7 @@ export default function SuspendAccountDialog({
                 transitionEnd: { visibility: "hidden" },
               },
             }}
-            className="fixed left-1/2 top-1/2 z-[10000] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
+            className="fixed start-1/2 top-1/2 z-[10000] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
             dir={dir}
             lang={locale}
           >
@@ -138,14 +138,14 @@ export default function SuspendAccountDialog({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                  className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                   aria-label={t("common.close")}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </Dialog.Close>
 
-              <Dialog.Title className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
+              <Dialog.Title className="text-start font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
                 {t("adminPatients.suspend.title")}
               </Dialog.Title>
 
@@ -200,7 +200,7 @@ export default function SuspendAccountDialog({
                 })}
               >
                 <div>
-                  <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#101828]">
+                  <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#101828]">
                     سبب التعليق:
                     <span className="ms-1 text-[#F04438]">*</span>
                   </div>

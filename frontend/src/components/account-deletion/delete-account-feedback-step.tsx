@@ -62,7 +62,7 @@ export function DeleteAccountFeedbackStep({
                 )
               }
               className={cn(
-                'flex w-full items-center justify-between rounded-[10px] border px-4 py-3 text-right transition',
+                'flex w-full items-center justify-between rounded-[10px] border px-4 py-3 text-start transition',
                 active
                   ? 'border-[#FCA5A5] bg-[#FFF5F5]'
                   : 'border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]',
@@ -83,7 +83,7 @@ export function DeleteAccountFeedbackStep({
         })}
       </div>
 
-      <div className="mt-5 text-right">
+      <div className="mt-5 text-start">
         <label
           htmlFor="delete-account-feedback"
           className="mb-2 block font-cairo text-[12px] font-extrabold text-[#344054]"
@@ -96,12 +96,12 @@ export function DeleteAccountFeedbackStep({
           onChange={(event) => setFeedback(event.target.value)}
           rows={4}
           placeholder="شاركنا تجربتك أو اقتراحاتك للتحسين..."
-          className="w-full resize-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-[#EF4444]/20 placeholder:text-[#98A2B3] focus:border-[#EF4444] focus:ring-2"
+          className="w-full resize-none rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-[#EF4444]/20 placeholder:text-[#98A2B3] focus:border-[#EF4444] focus:ring-2"
         />
       </div>
 
       {error ? (
-        <p className="mt-3 text-right font-cairo text-[12px] font-bold text-[#DC2626]">
+        <p className="mt-3 text-start font-cairo text-[12px] font-bold text-[#DC2626]">
           {error}
         </p>
       ) : null}

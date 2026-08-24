@@ -180,7 +180,7 @@ export default function DoctorProfilePersonalForm({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-[0_2px_8px_rgba(15,143,139,0.35)]"
+                  className="absolute bottom-0 end-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-[0_2px_8px_rgba(15,143,139,0.35)]"
                   aria-label="رفع صورة"
                 >
                   <Camera className="h-3.5 w-3.5" />
@@ -272,7 +272,7 @@ export default function DoctorProfilePersonalForm({
               maxLength={200}
               aria-invalid={Boolean(errors.bio)}
             />
-            <div className="text-left font-cairo text-[11px] font-semibold text-[#667085]">
+            <div className="text-end font-cairo text-[11px] font-semibold text-[#667085]">
               {bioValue.length}/200
             </div>
           </DoctorProfileFormField>

@@ -32,7 +32,7 @@ import { useI18n } from "@/i18n/provider";
 import { formatBillingNumber } from "@/lib/doctor/billing/format";
 
 import {
-  MEDICAL_SERVICE_CATEGORY_TABS,
+  buildMedicalServiceCategoryTabs,
   type MedicalServiceCategory,
 } from "@/lib/doctor/medical-services-directory/types";
 
@@ -210,16 +210,16 @@ export default function DoctorMedicalServicesDirectoryPage() {
         <ClinicAccountsFilterTabs
           value={activeCategory}
           onChange={handleCategoryChange}
-          options={MEDICAL_SERVICE_CATEGORY_TABS}
+          options={buildMedicalServiceCategoryTabs(tr)}
         />
 
         <section className="mt-4 rounded-[14px] border border-[#FDE68A] bg-[#FFFBEB] px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
           <h2 className="font-cairo text-[14px] font-extrabold text-[#92400E]">
-            تنبيه مهم
+            {tr('تنبيه مهم', 'Important notice')}
           </h2>
           <div className="mt-2 space-y-1 font-cairo text-[12px] font-bold leading-7 text-[#92400E]">
-            <p>هذا الدليل مخصّص لاستعراض الجهات الطبية المنشورة وبيانات التواصل معها.</p>
-            <p>الحجز أو طلب الخدمة من داخل هذا المسار غير متاح حالياً.</p>
+            <p>{tr('هذا الدليل مخصّص لاستعراض الجهات الطبية المنشورة وبيانات التواصل معها.', 'This directory is for browsing published medical facilities and their contact details.')}</p>
+            <p>{tr('الحجز أو طلب الخدمة من داخل هذا المسار غير متاح حالياً.', 'Booking or requesting a service from within this section is not available yet.')}</p>
           </div>
         </section>
 
@@ -231,15 +231,15 @@ export default function DoctorMedicalServicesDirectoryPage() {
               imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
               title={
                 debouncedSearch.trim()
-                  ? 'لا توجد جهات تطابق البحث في هذا التصنيف'
-                  : 'لا توجد جهات منشورة في هذا التصنيف بعد'
+                  ? tr('لا توجد جهات تطابق البحث في هذا التصنيف', 'No facilities match your search in this category')
+                  : tr('لا توجد جهات منشورة في هذا التصنيف بعد', 'No facilities have been published in this category yet')
               }
               subtitle={
                 debouncedSearch.trim()
-                  ? 'جرّب تعديل كلمات البحث أو تغيير التصنيف لعرض المزيد من النتائج'
-                  : 'تصفح الجهات والخدمات الطبية المنشورة والمتاحة حالياً'
+                  ? tr('جرّب تعديل كلمات البحث أو تغيير التصنيف لعرض المزيد من النتائج', 'Try adjusting your search terms or changing the category to see more results')
+                  : tr('تصفح الجهات والخدمات الطبية المنشورة والمتاحة حالياً', 'Browse the published medical facilities and services currently available')
               }
-              actionLabel="تصفح دليل الخدمات"
+              actionLabel={tr('تصفح دليل الخدمات', 'Browse services directory')}
               onAction={() => setActiveCategory('clinics')}
               actionIcon={<Search className="h-4 w-4" />}
             />

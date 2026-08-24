@@ -16,7 +16,7 @@ export function DashboardActivitySkeletonRow({
     >
       <div className="flex flex-1 gap-3 items-center min-w-0">
         <div className="flex justify-center items-center h-[36px] w-[36px] shrink-0 rounded-[10px] bg-[#F3F4F6] animate-pulse" />
-        <div className="flex-1 min-w-0 text-right space-y-2">
+        <div className="flex-1 min-w-0 text-start space-y-2">
           <AdminSkeletonBlock className="h-3 w-3/4" />
           <AdminSkeletonBlock className="h-2 w-1/2" />
         </div>
@@ -39,7 +39,7 @@ export function DashboardComplaintCardSkeleton({
     >
       <div className="flex flex-1 gap-3 p-4 min-w-0 sm:gap-4 sm:p-5">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] sm:h-14 sm:w-14 bg-[#F3F4F6] animate-pulse" />
-        <div className="flex-1 min-w-0 text-right space-y-2">
+        <div className="flex-1 min-w-0 text-start space-y-2">
           <div className="flex flex-wrap gap-2 justify-end items-center">
             <AdminSkeletonBlock className="h-5 w-20 rounded-full" />
           </div>
@@ -66,7 +66,7 @@ export function DashboardContentCardSkeleton({
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex-1 min-w-0 text-right space-y-3">
+        <div className="flex-1 min-w-0 text-start space-y-3">
           <div className="flex flex-wrap gap-2 justify-start items-center">
             <AdminSkeletonBlock className="h-5 w-48" />
             <AdminSkeletonBlock className="h-5 w-20 rounded-full" />

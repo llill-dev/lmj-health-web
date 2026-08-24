@@ -44,7 +44,7 @@ export default function ConsultationsWaitingSection({
             <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.22)]">
               <UserRound className="h-6 w-6" />
             </div>
-            <div className="flex-1 text-right">
+            <div className="flex-1 text-start">
               <h3 className="font-cairo text-[18px] font-black leading-none text-[#243044]">
                 {patientName ?? "طلب انتظار"}
               </h3>

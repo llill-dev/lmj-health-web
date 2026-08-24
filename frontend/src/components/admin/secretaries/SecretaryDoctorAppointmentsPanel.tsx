@@ -98,7 +98,7 @@ export function SecretaryDoctorAppointmentsPanel({
   if (!assignedDoctorId) {
     return (
       <div className='mt-2 rounded-[12px] border border-[#FEF3C7] bg-[#FFFBEB] px-6 py-6 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-        <p className='text-right font-cairo text-[13px] font-semibold text-[#92400E]'>
+        <p className='text-start font-cairo text-[13px] font-semibold text-[#92400E]'>
           {t('adminAppointments.panel.noDoctorAssigned')}
         </p>
       </div>
@@ -108,7 +108,7 @@ export function SecretaryDoctorAppointmentsPanel({
   return (
     <>
       <section className='mt-2 rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]'>
-        <p className='mb-4 text-right font-cairo text-[12px] font-semibold text-[#667085]'>
+        <p className='mb-4 text-start font-cairo text-[12px] font-semibold text-[#667085]'>
           {t('adminAppointments.panel.viewingFor')}{' '}
           <span className='font-extrabold text-[#111827]'>{doctorName}</span>
           {mode === 'manage' ? (
@@ -120,14 +120,14 @@ export function SecretaryDoctorAppointmentsPanel({
 
         <div className='flex flex-col gap-3 lg:flex-row lg:items-center'>
           <div className='relative flex-1'>
-            <Search className='pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+            <Search className='pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
             <input
               value={filters.search}
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, search: e.target.value }))
               }
               placeholder={t('adminSecretary.doctorAppointments.search.placeholder')}
-              className='h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white pr-10 pl-3 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+              className='h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white pe-10 ps-3 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
             />
           </div>
           <input
@@ -172,7 +172,7 @@ export function SecretaryDoctorAppointmentsPanel({
             {t('adminAppointments.panel.loading')}
           </div>
         ) : error ? (
-          <div className='rounded-[12px] border border-[#FEE2E2] bg-[#FEF2F2] px-6 py-6 text-right font-cairo text-[12px] font-semibold text-[#B42318]'>
+          <div className='rounded-[12px] border border-[#FEE2E2] bg-[#FEF2F2] px-6 py-6 text-start font-cairo text-[12px] font-semibold text-[#B42318]'>
             {t('adminAppointments.panel.loadError')}
           </div>
         ) : uiAppointments.length === 0 ? (
@@ -196,7 +196,7 @@ export function SecretaryDoctorAppointmentsPanel({
                 </div>
                 <div className='flex-1'>
                   <div className='flex flex-wrap items-center justify-between gap-3'>
-                    <div className='text-right'>
+                    <div className='text-start'>
                       <div className='flex items-center justify-start gap-2'>
                         <User className='h-4 w-4 text-primary' />
                         <span className='font-cairo text-[12px] font-bold text-[#667085]'>

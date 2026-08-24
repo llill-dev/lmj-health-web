@@ -10,7 +10,7 @@ export function MedicalContentRowSkeleton({ index = 0 }: { index?: number }) {
       className="flex flex-col gap-3 justify-between px-6 py-5 sm:flex-row sm:items-center"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex-1 min-w-0 text-right space-y-3">
+      <div className="flex-1 min-w-0 text-start space-y-3">
         <div className="flex flex-wrap gap-2 justify-start items-center sm:gap-3">
           <AdminSkeletonBlock className="h-5 w-48" />
           <AdminSkeletonBlock className="h-5 w-12 rounded-[8px]" />

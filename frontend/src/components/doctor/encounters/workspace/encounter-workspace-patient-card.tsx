@@ -38,7 +38,7 @@ export function EncounterWorkspacePatientCard({
     <article className="relative overflow-hidden rounded-[14px] border border-[#0F8F8B] bg-[#E6F4F3] px-4 py-5 shadow-[0_12px_32px_-14px_rgba(15,23,42,0.1)] sm:px-5">
       <span
         className={cn(
-          "absolute left-3 top-3 inline-flex rounded-full px-3 py-1 font-cairo text-[11px] font-extrabold sm:left-4 sm:top-4",
+          "absolute start-3 top-3 inline-flex rounded-full px-3 py-1 font-cairo text-[11px] font-extrabold sm:start-4 sm:top-4",
           patient.isActive
             ? "bg-[#DCFCE7] text-[#15803D]"
             : "bg-[#F2F4F7] text-[#667085]",
@@ -58,7 +58,7 @@ export function EncounterWorkspacePatientCard({
         </div>
       </div>
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
-        <div className="space-y-1 text-right sm:ms-6">
+        <div className="space-y-1 text-start sm:ms-6">
           <DetailLine label="الاسم" value={patient.name} />
           <DetailLine label="العمر" value={patient.ageLabel} />
           <DetailLine label="رقم الملف" value={patient.fileNumber} />

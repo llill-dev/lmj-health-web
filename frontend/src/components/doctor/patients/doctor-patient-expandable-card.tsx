@@ -99,7 +99,7 @@ const QuickInfo = memo<{ label: string; value: string }>(function QuickInfo({
   value,
 }) {
   return (
-    <div className="rounded-xl border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+    <div className="rounded-xl border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
       <div className="font-cairo text-[11px] font-bold text-[#667085]">
         {label}
       </div>
@@ -181,7 +181,7 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
               <UserRound className="w-7 h-7" aria-hidden strokeWidth={1.75} />
             </div>
 
-            <div className="min-w-0 flex-1 space-y-1.5 text-right">
+            <div className="min-w-0 flex-1 space-y-1.5 text-start">
               <div className="font-cairo text-[17px] font-extrabold leading-tight text-primary">
                 {patient.name}
               </div>
@@ -217,7 +217,7 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
                   <Phone className="w-4 h-4 shrink-0 text-primary" />
                   <span
                     dir="ltr"
-                    className="text-left font-semibold text-[#344054]"
+                    className="text-end font-semibold text-[#344054]"
                   >
                     {phoneDisplay}
                   </span>
@@ -294,7 +294,7 @@ const DoctorPatientExpandableCard = memo(function DoctorPatientExpandableCard({
               >
                 <div className="flex gap-3 items-start">
                   <StateIcon className="mt-0.5 h-5 w-5 shrink-0" />
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <div className="font-cairo text-[14px] font-extrabold">
                       {stateMessage.title}
                     </div>

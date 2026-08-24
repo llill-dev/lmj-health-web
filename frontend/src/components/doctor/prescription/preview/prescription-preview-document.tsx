@@ -9,12 +9,12 @@ export function PrescriptionPreviewDocument({
 }) {
   return (
     <article className="relative rounded-[16px] border border-[#E4E7EC] bg-white px-5 py-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:px-8">
-      <div className="absolute -top-5 left-1/2 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary shadow-[0_8px_20px_rgba(15,143,139,0.35)]">
+      <div className="absolute -top-5 start-1/2 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary shadow-[0_8px_20px_rgba(15,143,139,0.35)]">
         <Link2 className="w-5 h-5 text-white" aria-hidden />
       </div>
 
       <div className="mt-2 flex flex-col gap-6 border-b border-[#EEF2F6] pb-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-1 gap-8 justify-start items-start text-right">
+        <div className="flex flex-1 gap-8 justify-start items-start text-start">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-[#E6F4F3]">
             <UserRound className="w-6 h-6 text-primary" aria-hidden />
           </div>
@@ -33,7 +33,7 @@ export function PrescriptionPreviewDocument({
             </div>
           </div>
         </div>
-        <div className="text-right sm:min-w-[200px]">
+        <div className="text-start sm:min-w-[200px]">
           <div className="font-cairo text-[12px] font-bold text-[#667085]">
             رقم الوصفة
           </div>
@@ -67,7 +67,7 @@ export function PrescriptionPreviewDocument({
         )}
 
         {vm.generalInstructions ? (
-          <div className="mt-6 rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#F8FFFE] px-4 py-4 text-right">
+          <div className="mt-6 rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#F8FFFE] px-4 py-4 text-start">
             <div className="font-cairo text-[13px] font-extrabold text-primary">
               التعليمات العامة
             </div>

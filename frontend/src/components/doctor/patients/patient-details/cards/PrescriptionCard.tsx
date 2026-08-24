@@ -49,11 +49,11 @@ export function PrescriptionCard({
       className="group relative overflow-hidden rounded-[22px] border border-[#E8E7FF]/95 bg-[linear-gradient(165deg,#fefeff_0%,#faf5ff_42%,#f0fdf4_100%)] shadow-[0_16px_42px_-14px_rgba(139,92,246,0.1),0_10px_28px_rgba(15,143,139,0.07)] ring-1 ring-[#e9d5ff]/50"
     >
       <div
-        className="pointer-events-none absolute -left-16 top-1/2 h-36 w-36 -translate-y-1/2 rounded-full bg-[#8B5CF6]/[0.06] blur-3xl"
+        className="pointer-events-none absolute -start-16 top-1/2 h-36 w-36 -translate-y-1/2 rounded-full bg-[#8B5CF6]/[0.06] blur-3xl"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-primary/[0.05] blur-2xl"
+        className="pointer-events-none absolute -end-10 -top-10 h-28 w-28 rounded-full bg-primary/[0.05] blur-2xl"
         aria-hidden
       />
 
@@ -92,7 +92,7 @@ export function PrescriptionCard({
                 </h3>
               </div>
             </div>
-            <div className="rounded-xl border border-[#E2E8F0] bg-white/80 px-3 py-2 text-right shadow-sm backdrop-blur-sm">
+            <div className="rounded-xl border border-[#E2E8F0] bg-white/80 px-3 py-2 text-start shadow-sm backdrop-blur-sm">
               <div className="flex items-center gap-1.5 font-cairo text-[10px] font-bold text-[#667085]">
                 <Clock className="w-3 h-3" />
                 التاريخ

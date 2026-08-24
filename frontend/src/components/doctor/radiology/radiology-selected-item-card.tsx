@@ -33,7 +33,7 @@ export function RadiologySelectedItemCard({
   return (
     <article className="rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#E6F4F3] px-4 py-4 shadow-[0_4px_14px_rgba(15,143,139,0.06)]">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 text-right">
+        <div className="min-w-0 flex-1 text-start">
           <h3 className="font-cairo text-[15px] font-extrabold text-[#101828]">
             {item.name}
           </h3>

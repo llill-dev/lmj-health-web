@@ -54,7 +54,7 @@ export default memo(function AdminNotificationCard({
 
   return (
     <article
-      className="overflow-hidden rounded-[12px] border border-[#E8EDF2] border-l-4 bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)]"
+      className="overflow-hidden rounded-[12px] border border-[#E8EDF2] border-s-4 bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)]"
       style={{ borderLeftColor: stripe }}
     >
       <div dir={dir} className="flex gap-4 items-start px-5 py-4 sm:gap-5">
@@ -64,7 +64,7 @@ export default memo(function AdminNotificationCard({
           <KindIcon kind={item.kind} />
         </div>
 
-        <div className="flex-1 min-w-0 text-right">
+        <div className="flex-1 min-w-0 text-start">
           <div className="flex flex-wrap gap-2 justify-start items-center">
             <h2 className="font-cairo text-[16px] font-extrabold leading-[22px] text-[#111827]">
               {item.title}

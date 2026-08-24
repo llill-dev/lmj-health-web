@@ -37,7 +37,7 @@ export function PrescriptionMedicationCard({
   return (
     <article className="rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#E6F4F3] px-4 py-4 shadow-[0_4px_14px_rgba(15,143,139,0.06)]">
       <div className="flex gap-3 justify-between items-start">
-        <div className="flex-1 min-w-0 text-right">
+        <div className="flex-1 min-w-0 text-start">
           <h3 className="font-cairo text-[15px] font-extrabold text-[#101828]">
             {item.name}
           </h3>

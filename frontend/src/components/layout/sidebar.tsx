@@ -119,7 +119,7 @@ export default function Sidebar({
 
   const desktopWidthClass = collapsed ? "lg:w-[88px]" : "lg:w-[320px]";
   const desktopOrderClass = "lg:order-first";
-  const mobileAnchorClass = locale === "ar" ? "right-0" : "left-0";
+  const mobileAnchorClass = locale === "ar" ? "end-0" : "start-0";
   const mobileClosedTransform =
     locale === "ar" ? "translate-x-full" : "-translate-x-full";
   const expanded = !collapsed || mobileOpen;
@@ -252,12 +252,12 @@ export default function Sidebar({
                       )}
                     </div>
                     <div className="flex-1">
-                      <div className="text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]">
+                      <div className="text-start font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]">
                         {role === "admin"
                           ? t("sidebar.role.admin")
                           : displayName}
                       </div>
-                      <div className="mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
+                      <div className="mt-1 text-start font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
                         {role === "admin"
                           ? t("sidebar.admin.emailDefault")
                           : role === "data-entry" && displayEmail === "—"

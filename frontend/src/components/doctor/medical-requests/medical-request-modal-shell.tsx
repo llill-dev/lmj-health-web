@@ -64,7 +64,7 @@ export function MedicalRequestModalShell({
             <button
               type="button"
               onClick={onClose}
-              className="absolute left-6 top-6 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
+              className="absolute start-6 top-6 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
               aria-label="إغلاق"
             >
               <X className="h-5 w-5" aria-hidden />

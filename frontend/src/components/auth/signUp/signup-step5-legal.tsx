@@ -33,7 +33,7 @@ export default function SignUpStep5Legal({
           بمتابعة استخدامك للنظام، فإنك توافق على:
         </p>
 
-        <ul className="mt-8 w-full max-w-[520px] space-y-3 text-right">
+        <ul className="mt-8 w-full max-w-[520px] space-y-3 text-start">
           {LEGAL_ROWS.map((row) => (
             <li key={row.href}>
               <a
@@ -49,7 +49,7 @@ export default function SignUpStep5Legal({
           ))}
         </ul>
 
-        <label className="mt-8 flex w-full max-w-[520px] cursor-pointer items-start justify-end gap-3 text-right">
+        <label className="mt-8 flex w-full max-w-[520px] cursor-pointer items-start justify-end gap-3 text-start">
           <span className="font-cairo text-[13px] font-semibold leading-7 text-[#374151]">
             أوافق على جميع الشروط والأحكام المذكورة أعلاه وأقر بأني قرأتها وفهمتها بشكل
             كامل

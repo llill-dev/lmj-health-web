@@ -234,7 +234,7 @@ export default function AdminPatientsPage() {
                   }))
                 }
               />
-              <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+              <div className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
                 <Search className="w-5 h-5" />
               </div>
             </div>
@@ -273,7 +273,7 @@ export default function AdminPatientsPage() {
         </section>
 
         <section className="mt-4 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
-          <div className="flex items-start gap-3 text-right">
+          <div className="flex items-start gap-3 text-start">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Info className="h-5 w-5" />
             </div>

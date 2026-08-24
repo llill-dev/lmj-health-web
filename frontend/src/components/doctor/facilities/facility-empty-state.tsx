@@ -23,7 +23,7 @@ export function FacilityEmptyState({
         <div className="absolute inset-0 rounded-full bg-[#F0FDFA]" />
         <ClipboardList className="relative h-12 w-12 text-primary/70" aria-hidden />
         <Search
-          className="absolute -bottom-1 -left-1 h-8 w-8 rounded-full border border-[#EEF2F6] bg-white p-1.5 text-[#98A2B3]"
+          className="absolute -bottom-1 -start-1 h-8 w-8 rounded-full border border-[#EEF2F6] bg-white p-1.5 text-[#98A2B3]"
           aria-hidden
         />
       </div>

@@ -1,16 +1,28 @@
 import type { ExpenseCategory, InvoiceStatus } from '@/lib/doctor/clinicAccounts/types';
 
-export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
-  rent: 'إيجار',
-  salaries: 'رواتب',
-  services: 'خدمات',
-  materials: 'مواد',
-};
+export function expenseCategoryLabel(
+  category: ExpenseCategory,
+  tr: (ar: string, en: string) => string = (ar) => ar,
+): string {
+  const labels: Record<ExpenseCategory, [string, string]> = {
+    rent: ['إيجار', 'Rent'],
+    salaries: ['رواتب', 'Salaries'],
+    services: ['خدمات', 'Services'],
+    materials: ['مواد', 'Materials'],
+  };
+  return tr(...labels[category]);
+}
 
-export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
-  paid: 'مدفوع',
-  unpaid: 'غير مدفوع',
-  partial: 'مدفوع جزئياً',
-  overdue: 'متأخرة',
-  cancelled: 'ملغاة',
-};
+export function invoiceStatusLabel(
+  status: InvoiceStatus,
+  tr: (ar: string, en: string) => string = (ar) => ar,
+): string {
+  const labels: Record<InvoiceStatus, [string, string]> = {
+    paid: ['مدفوع', 'Paid'],
+    unpaid: ['غير مدفوع', 'Unpaid'],
+    partial: ['مدفوع جزئياً', 'Partially paid'],
+    overdue: ['متأخرة', 'Overdue'],
+    cancelled: ['ملغاة', 'Cancelled'],
+  };
+  return tr(...labels[status]);
+}

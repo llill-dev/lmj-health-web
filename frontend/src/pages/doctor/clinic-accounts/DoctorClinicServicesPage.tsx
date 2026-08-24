@@ -77,7 +77,7 @@ export default function DoctorClinicServicesPage() {
     if (!name.trim()) return;
     // Backend requires defaultPrice > 0 (exclusiveMinimum: 0) — reject 0/empty client-side.
     if (defaultPrice.trim() && Number(defaultPrice) <= 0) {
-      toast('السعر الافتراضي يجب أن يكون أكبر من صفر.', { variant: 'error' });
+      toast(tr('السعر الافتراضي يجب أن يكون أكبر من صفر.', 'The default price must be greater than zero.'), { variant: 'error' });
       return;
     }
     const body = {
@@ -94,10 +94,10 @@ export default function DoctorClinicServicesPage() {
     try {
       if (editTarget?.id) {
         await updateService.mutateAsync({ serviceId: editTarget.id, body });
-        toast('تم تحديث الخدمة.', { variant: 'success' });
+        toast(tr('تم تحديث الخدمة.', 'The service was updated.'), { variant: 'success' });
       } else {
         await createService.mutateAsync(body);
-        toast('تم إنشاء الخدمة.', { variant: 'success' });
+        toast(tr('تم إنشاء الخدمة.', 'The service was created.'), { variant: 'success' });
       }
       setDialogOpen(false);
     } catch (error) {
@@ -106,10 +106,18 @@ export default function DoctorClinicServicesPage() {
   };
 
   const handleDeactivate = async (service: ApiBillingService) => {
-    if (!window.confirm(`تعطيل الخدمة "${service.name ?? ''}"؟ يمكنك تفعيلها مرة أخرى لاحقًا.`)) return;
+    if (
+      !window.confirm(
+        tr(
+          `تعطيل الخدمة "${service.name ?? ''}"؟ يمكنك تفعيلها مرة أخرى لاحقًا.`,
+          `Deactivate the service "${service.name ?? ''}"? You can reactivate it later.`,
+        ),
+      )
+    )
+      return;
     try {
       await deleteService.mutateAsync(service.id);
-      toast('تم تعطيل الخدمة.', { variant: 'success' });
+      toast(tr('تم تعطيل الخدمة.', 'The service was deactivated.'), { variant: 'success' });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
     }
@@ -121,7 +129,7 @@ export default function DoctorClinicServicesPage() {
         serviceId: service.id,
         body: { isActive: true },
       });
-      toast('تم تفعيل الخدمة.', { variant: 'success' });
+      toast(tr('تم تفعيل الخدمة.', 'The service was activated.'), { variant: 'success' });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), { variant: 'error' });
     }
@@ -139,7 +147,7 @@ export default function DoctorClinicServicesPage() {
         <ClinicAccountsSubNav />
 
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div className="text-right">
+          <div className="text-start">
             <h1 className="font-cairo text-[28px] font-black text-[#111827]">
               {tr('كتالوج الخدمات', 'Services catalog')}
             </h1>
@@ -169,8 +177,8 @@ export default function DoctorClinicServicesPage() {
           onClear={() => setSearch('')}
         />
         {!canManageServices ? (
-          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
-            هذه الصفحة في وضع العرض فقط حسب صلاحيات حسابك.
+          <p className="mt-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
+            {tr('هذه الصفحة في وضع العرض فقط حسب صلاحيات حسابك.', 'This page is view-only based on your account permissions.')}
           </p>
         ) : null}
 
@@ -216,15 +224,15 @@ export default function DoctorClinicServicesPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-[720px] w-full text-right">
+              <table className="min-w-[720px] w-full text-start">
                 <thead>
                   <tr className="border-b border-[#EEF2F6] font-cairo text-[12px] font-extrabold text-[#667085]">
-                    <th className="px-3 py-3">الخدمة</th>
-                    <th className="px-3 py-3">السعر</th>
-                    <th className="px-3 py-3">المدة</th>
-                    <th className="px-3 py-3">الحالة</th>
+                    <th className="px-3 py-3">{tr('الخدمة', 'Service')}</th>
+                    <th className="px-3 py-3">{tr('السعر', 'Price')}</th>
+                    <th className="px-3 py-3">{tr('المدة', 'Duration')}</th>
+                    <th className="px-3 py-3">{tr('الحالة', 'Status')}</th>
                     {canManageServices ? (
-                      <th className="px-3 py-3">إجراءات</th>
+                      <th className="px-3 py-3">{tr('إجراءات', 'Actions')}</th>
                     ) : null}
                   </tr>
                 </thead>
@@ -240,10 +248,10 @@ export default function DoctorClinicServicesPage() {
                           : '—'}
                       </td>
                       <td className="px-3 py-4 font-cairo text-[13px] font-semibold">
-                        {service.durationMinutes ?? '—'} د
+                        {service.durationMinutes ?? '—'} {tr('د', 'min')}
                       </td>
                       <td className="px-3 py-4">
-                        {service.isActive !== false ? 'نشط' : 'غير نشط'}
+                        {service.isActive !== false ? tr('نشط', 'Active') : tr('غير نشط', 'Inactive')}
                       </td>
                       {canManageServices ? (
                         <td className="px-3 py-4">
@@ -253,7 +261,7 @@ export default function DoctorClinicServicesPage() {
                               onClick={() => openEdit(service)}
                               className="rounded-[6px] border border-primary px-3 py-1 text-[11px] font-extrabold text-primary"
                             >
-                              تعديل
+                              {tr('تعديل', 'Edit')}
                             </button>
                             {service.isActive !== false ? (
                               <button
@@ -261,7 +269,7 @@ export default function DoctorClinicServicesPage() {
                                 onClick={() => void handleDeactivate(service)}
                                 className="rounded-[6px] bg-[#FEF3F2] px-3 py-1 text-[11px] font-extrabold text-[#B42318]"
                               >
-                                تعطيل
+                                {tr('تعطيل', 'Deactivate')}
                               </button>
                             ) : (
                               <button
@@ -269,7 +277,7 @@ export default function DoctorClinicServicesPage() {
                                 onClick={() => void handleActivate(service)}
                                 className="rounded-[6px] bg-[#F0FDFA] px-3 py-1 text-[11px] font-extrabold text-primary"
                               >
-                                تفعيل
+                                {tr('تفعيل', 'Activate')}
                               </button>
                             )}
                           </div>
@@ -310,11 +318,11 @@ export default function DoctorClinicServicesPage() {
         }
         maxWidthClass="max-w-[520px]"
       >
-        <div dir={dir} className="space-y-4 text-right">
+        <div dir={dir} className="space-y-4 text-start">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="اسم الخدمة"
+            placeholder={tr('اسم الخدمة', 'Service name')}
             className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
           />
           <input
@@ -323,7 +331,7 @@ export default function DoctorClinicServicesPage() {
             step="any"
             value={defaultPrice}
             onChange={(e) => setDefaultPrice(e.target.value)}
-            placeholder="السعر الافتراضي"
+            placeholder={tr('السعر الافتراضي', 'Default price')}
             className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
           />
           <input
@@ -331,13 +339,13 @@ export default function DoctorClinicServicesPage() {
             min={1}
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(e.target.value)}
-            placeholder="المدة بالدقائق (مثال: 30)"
+            placeholder={tr('المدة بالدقائق (مثال: 30)', 'Duration in minutes (e.g. 30)')}
             className="h-11 w-full rounded-[8px] border border-[#E5E7EB] px-3 font-cairo text-[13px]"
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="الوصف"
+            placeholder={tr('الوصف', 'Description')}
             rows={3}
             className="w-full rounded-[8px] border border-[#E5E7EB] px-3 py-2 font-cairo text-[13px]"
           />
@@ -351,7 +359,7 @@ export default function DoctorClinicServicesPage() {
             onClick={() => void handleSave()}
             className="h-11 w-full rounded-[8px] bg-primary font-cairo text-[13px] font-extrabold text-white disabled:opacity-60"
           >
-            حفظ
+            {tr('حفظ', 'Save')}
           </button>
         </div>
       </ClinicAccountsModalShell>

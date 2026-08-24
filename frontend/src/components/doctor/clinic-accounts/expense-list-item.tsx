@@ -9,8 +9,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { ClinicExpense, ExpenseCategory } from '@/lib/doctor/clinicAccounts/types';
-import { EXPENSE_CATEGORY_LABELS } from '@/lib/doctor/clinicAccounts/labels';
+import { expenseCategoryLabel } from '@/lib/doctor/clinicAccounts/labels';
 import { formatUsd } from '@/lib/doctor/billing/format';
+import { useI18n } from '@/i18n/provider';
 
 const CATEGORY_ICONS: Record<ExpenseCategory, LucideIcon> = {
   rent: Home,
@@ -26,6 +27,8 @@ export function ExpenseListItem({
   expense: ClinicExpense;
   index: number;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const Icon = CATEGORY_ICONS[expense.category];
 
   return (
@@ -38,7 +41,7 @@ export function ExpenseListItem({
       <div className="flex-1 min-w-0">
         <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#F0FDFA] px-3 py-1 font-cairo text-[11px] font-extrabold text-primary">
           <Icon className="h-3.5 w-3.5" aria-hidden />
-          {EXPENSE_CATEGORY_LABELS[expense.category]}
+          {expenseCategoryLabel(expense.category, tr)}
         </div>
         <p className="font-cairo text-[14px] font-extrabold text-[#111827]">
           {expense.title}

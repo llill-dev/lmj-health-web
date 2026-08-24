@@ -151,7 +151,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   )}
                 </div>
 
-                <div className="min-w-0 flex-1 text-right">
+                <div className="min-w-0 flex-1 text-start">
                   {t.title ? (
                     <div className="text-[13px] font-extrabold text-[#101828]">
                       {t.title}

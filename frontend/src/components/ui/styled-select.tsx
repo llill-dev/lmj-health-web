@@ -398,7 +398,7 @@ function StyledSelectInner(
               }}
             >
               {clickable.length === 0 ? (
-                <div className="px-4 py-4 text-right text-[12px] font-semibold leading-6 text-[#667085]">
+                <div className="px-4 py-4 text-start text-[12px] font-semibold leading-6 text-[#667085]">
                   {emptyState ?? emptyTriggerLabel ?? "لا توجد خيارات متاحة."}
                 </div>
               ) : (
@@ -432,7 +432,7 @@ function StyledSelectInner(
                         ].join(" ")}
                       >
                         {!renderOptionTrailing ? (
-                          <span className="min-w-0 flex-1 truncate text-right">
+                          <span className="min-w-0 flex-1 truncate text-start">
                             {opt.label}
                           </span>
                         ) : (
@@ -440,7 +440,7 @@ function StyledSelectInner(
                             <span className="shrink-0 font-bold">
                               {extra ?? null}
                             </span>
-                            <span className="min-w-0 flex-1 truncate text-right tabular-nums">
+                            <span className="min-w-0 flex-1 truncate text-start tabular-nums">
                               {opt.label}
                             </span>
                           </>
@@ -491,7 +491,7 @@ function StyledSelectInner(
             aria-expanded={open}
             aria-controls={listboxId}
             disabled={mergedDisabled}
-            className={`min-w-0 flex-1 text-right outline-none transition-colors hover:bg-[#FAFFFE]/80 focus-visible:bg-[#FAFFFE]/80 disabled:pointer-events-none ${PADDING_TRIGGER[size]}`}
+            className={`min-w-0 flex-1 text-start outline-none transition-colors hover:bg-[#FAFFFE]/80 focus-visible:bg-[#FAFFFE]/80 disabled:pointer-events-none ${PADDING_TRIGGER[size]}`}
             onClick={toggle}
             title={
               typeof labelForTrigger === "string" ? labelForTrigger : undefined

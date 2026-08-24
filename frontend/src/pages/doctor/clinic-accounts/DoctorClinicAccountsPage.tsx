@@ -196,33 +196,34 @@ export default function DoctorClinicAccountsPage() {
         ) : (
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <ClinicAccountsStatCard
-              label="الدخل"
+              label={tr("الدخل", "Income")}
               value={formatMoney(summary.income)}
               icon={TrendingUp}
             />
             <ClinicAccountsStatCard
-              label="المصروفات"
+              label={tr("المصروفات", "Expenses")}
               value={formatMoney(summary.expenses)}
               icon={TrendingDown}
             />
             <ClinicAccountsStatCard
-              label="صافي الربح"
+              label={tr("صافي الربح", "Net profit")}
               value={formatMoney(summary.netProfit)}
               icon={Wallet}
             />
             <ClinicAccountsStatCard
-              label="غير المدفوع"
+              label={tr("غير المدفوع", "Unpaid")}
               value={formatMoney(summary.unpaid)}
               icon={FileText}
             />
             <ClinicAccountsStatCard
-              label="المتأخر"
+              label={tr("المتأخر", "Pending")}
               value={formatMoney(summary.pending)}
               icon={Clock}
             />
             <ClinicAccountsStatCard
-              label="عدد الدفعات"
+              label={tr("عدد الدفعات", "Number of payments")}
               value={formatBillingNumber(summary.payments, {
+
                 maximumFractionDigits: 0,
               })}
               icon={CreditCard}
@@ -232,8 +233,8 @@ export default function DoctorClinicAccountsPage() {
 
         <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-              نظرة عامة
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+              {tr("نظرة عامة", "Overview")}
             </h2>
             {dashboardQuery.isAwaitingData ? (
               <div className="h-[220px] rounded-[12px] bg-[#F3F4F6]" />
@@ -243,8 +244,8 @@ export default function DoctorClinicAccountsPage() {
           </div>
 
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-              إجراءات سريعة
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+              {tr("إجراءات سريعة", "Quick actions")}
             </h2>
             <div className="space-y-3">
               {canManagePayments ? (
@@ -254,11 +255,14 @@ export default function DoctorClinicAccountsPage() {
                     className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
                   >
                     <Plus className="w-4 h-4" aria-hidden />
-                    إضافة دفعة على فاتورة
+                    {tr("إضافة دفعة على فاتورة", "Add a payment to an invoice")}
                   </Link>
                   {!canLoadInvoiceLists ? (
                     <p className="font-cairo text-[12px] font-semibold text-[#B54708]">
-                      يتطلب فتح الفواتير من هذه الصفحة صلاحية عرض الفواتير أيضاً.
+                      {tr(
+                        "يتطلب فتح الفواتير من هذه الصفحة صلاحية عرض الفواتير أيضاً.",
+                        "Opening invoices from this page also requires the view-invoices permission.",
+                      )}
                     </p>
                   ) : null}
                 </>
@@ -270,11 +274,14 @@ export default function DoctorClinicAccountsPage() {
                     className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
                   >
                     <Plus className="w-4 h-4" aria-hidden />
-                    إضافة مصروف
+                    {tr("إضافة مصروف", "Add expense")}
                   </Link>
                   {isSecretary && !canViewExpenses ? (
                     <p className="font-cairo text-[12px] font-semibold text-[#B54708]">
-                      يتطلب فتح صفحة المصاريف صلاحية عرض المصاريف أيضاً.
+                      {tr(
+                        "يتطلب فتح صفحة المصاريف صلاحية عرض المصاريف أيضاً.",
+                        "Opening the expenses page also requires the view-expenses permission.",
+                      )}
                     </p>
                   ) : null}
                 </>
@@ -285,13 +292,16 @@ export default function DoctorClinicAccountsPage() {
                   className="flex h-[52px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white"
                 >
                   <Plus className="w-4 h-4" aria-hidden />
-                  إنشاء فاتورة
+                  {tr("إنشاء فاتورة", "Create invoice")}
                 </Link>
               ) : null}
             </div>
             {!canManagePayments && !canManageExpenses && !canManageInvoices ? (
               <p className="mt-4 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                لديك صلاحية عرض البيانات المالية فقط بدون تنفيذ إجراءات إدارة.
+                {tr(
+                  "لديك صلاحية عرض البيانات المالية فقط بدون تنفيذ إجراءات إدارة.",
+                  "You have permission to view financial data only, without performing management actions.",
+                )}
               </p>
             ) : null}
           </div>
@@ -302,22 +312,22 @@ export default function DoctorClinicAccountsPage() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <ClinicAccountsSearchCount
                 count={overdueQuery.total}
-                label="فاتورة"
+                label={tr("فاتورة", "invoice")}
               />
-              <h2 className="text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-                فواتير متأخرة
+              <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+                {tr("فواتير متأخرة", "Overdue invoices")}
               </h2>
             </div>
             {!canLoadInvoiceLists ? (
               <p className="py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                يتطلب عرض الفواتير المتأخرة صلاحية عرض الفواتير.
+                {tr("يتطلب عرض الفواتير المتأخرة صلاحية عرض الفواتير.", "Viewing overdue invoices requires the view-invoices permission.")}
               </p>
             ) : (
               <>
                 <div className="space-y-3">
                   {overdueInvoices.length === 0 ? (
                     <p className="py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                      لا توجد فواتير متأخرة في الفترة الحالية.
+                      {tr("لا توجد فواتير متأخرة في الفترة الحالية.", "No overdue invoices for the current period.")}
                     </p>
                   ) : (
                     overdueInvoices.map((invoice) => (
@@ -331,7 +341,7 @@ export default function DoctorClinicAccountsPage() {
                             invoice.currency ?? currency,
                           )}
                         </span>
-                        <div className="text-right">
+                        <div className="text-start">
                           <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
                             {invoice.id}
                           </p>
@@ -347,7 +357,7 @@ export default function DoctorClinicAccountsPage() {
                   to={`${basePath}/invoices`}
                   className="mt-5 flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] font-cairo text-[13px] font-extrabold text-primary transition-colors hover:bg-[#F8FAFC]"
                 >
-                  عرض كل الفواتير المتأخرة
+                  {tr("عرض كل الفواتير المتأخرة", "View all overdue invoices")}
                 </Link>
               </>
             )}
@@ -357,22 +367,22 @@ export default function DoctorClinicAccountsPage() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <ClinicAccountsSearchCount
                 count={outstandingTotal}
-                label="فاتورة"
+                label={tr("فاتورة", "invoice")}
               />
-              <h2 className="text-right font-cairo text-[16px] font-extrabold text-[#111827]">
-                فواتير غير مسددة
+              <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#111827]">
+                {tr("فواتير غير مسددة", "Outstanding invoices")}
               </h2>
             </div>
             {!canLoadInvoiceLists ? (
               <p className="py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                يتطلب عرض الفواتير غير المسددة صلاحية عرض الفواتير.
+                {tr("يتطلب عرض الفواتير غير المسددة صلاحية عرض الفواتير.", "Viewing outstanding invoices requires the view-invoices permission.")}
               </p>
             ) : (
               <>
                 <div className="space-y-3">
                   {outstandingInvoices.length === 0 ? (
                     <p className="py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                      لا توجد فواتير معلّقة حاليًا.
+                      {tr("لا توجد فواتير معلّقة حاليًا.", "No pending invoices right now.")}
                     </p>
                   ) : (
                     outstandingInvoices.slice(0, PREVIEW_LIMIT).map((invoice) => (
@@ -387,7 +397,7 @@ export default function DoctorClinicAccountsPage() {
                             invoice.currency ?? currency,
                           )}
                         </span>
-                        <div className="text-right">
+                        <div className="text-start">
                           <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
                             {invoice.id}
                           </p>
@@ -403,7 +413,7 @@ export default function DoctorClinicAccountsPage() {
                   to={`${basePath}/invoices`}
                   className="mt-5 flex h-[44px] items-center justify-center gap-2 rounded-[10px] border border-[#E5E7EB] font-cairo text-[13px] font-extrabold text-primary transition-colors hover:bg-[#F8FAFC]"
                 >
-                  عرض كل الفواتير غير المسددة
+                  {tr("عرض كل الفواتير غير المسددة", "View all outstanding invoices")}
                 </Link>
               </>
             )}
@@ -413,21 +423,24 @@ export default function DoctorClinicAccountsPage() {
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
           <div className="mb-4 flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#111827]">
-              النشاطات الأخيرة
+              {tr("النشاطات الأخيرة", "Recent activity")}
             </h2>
             <Link
               to={`${basePath}/invoices`}
               className="inline-flex shrink-0 items-center gap-2 font-cairo text-[12px] font-extrabold text-primary"
             >
               <Receipt className="w-4 h-4" aria-hidden />
-              عرض كل الفواتير
+              {tr("عرض كل الفواتير", "View all invoices")}
             </Link>
           </div>
           {canViewReports ? (
             <RecentActivityList activities={reportsQuery.recentActivities} />
           ) : (
             <p className="rounded-[12px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-              لا تظهر النشاطات المالية الأخيرة ضمن هذه الصفحة إلا عند منح صلاحية عرض التقارير المالية.
+              {tr(
+                "لا تظهر النشاطات المالية الأخيرة ضمن هذه الصفحة إلا عند منح صلاحية عرض التقارير المالية.",
+                "Recent financial activity is only shown on this page once the view-reports permission is granted.",
+              )}
             </p>
           )}
         </section>

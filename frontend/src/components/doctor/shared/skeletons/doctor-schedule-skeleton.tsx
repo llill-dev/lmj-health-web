@@ -13,7 +13,7 @@ export function DoctorScheduleSkeleton({ days = 4 }: { days?: number }) {
           >
             <div className="flex items-center gap-3">
               <SkeletonBlock className="h-10 w-10 rounded-[10px]" />
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <SkeletonBlock className="h-5 w-28" />
                 <SkeletonBlock className="h-3 w-40" />
               </div>

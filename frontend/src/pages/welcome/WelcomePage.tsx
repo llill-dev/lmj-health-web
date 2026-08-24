@@ -14,17 +14,17 @@ export default function WelcomePage() {
         </Helmet>
 
         <div className='mx-auto flex w-full max-w-[480px] flex-col items-center gap-4'>
-          <div className='pointer-events-none absolute left-10 top-24 grid gap-6'>
+          <div className='pointer-events-none absolute start-10 top-24 grid gap-6'>
             <div className='relative flex h-10 w-10 rotate-12 items-center justify-center rounded-xl bg-transparent text-teal-500 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
               <Pill size={18} />
             </div>
-            <div className='relative ml-10 flex h-12 w-12 translate-x-1/2 -translate-y-1/2 rotate-8 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
+            <div className='relative ms-10 flex h-12 w-12 translate-x-1/2 -translate-y-1/2 rotate-8 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
               <Heart
                 size={20}
                 className='fill-white'
               />
             </div>
-            <div className='relative -left-10 -top-10 ml-10 flex h-12 w-12 -rotate-12 items-center justify-center rounded-2xl bg-transparent text-teal-500 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
+            <div className='relative -start-10 -top-10 ms-10 flex h-12 w-12 -rotate-12 items-center justify-center rounded-2xl bg-transparent text-teal-500 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
               <Heart
                 size={20}
                 className='fill-[#0F8F8B]'
@@ -32,7 +32,7 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          <div className='pointer-events-none absolute bottom-16 right-6 flex h-12 w-12 rotate-12 items-center justify-center rounded-2xl bg-white/80 text-teal-500 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
+          <div className='pointer-events-none absolute bottom-16 end-6 flex h-12 w-12 rotate-12 items-center justify-center rounded-2xl bg-white/80 text-teal-500 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur'>
             <Activity size={20} />
           </div>
 
@@ -51,10 +51,10 @@ export default function WelcomePage() {
 
           <div className='relative flex w-full items-center justify-center'>
             <div className='relative w-fit'>
-              <div className='pointer-events-none absolute -right-20 -top-6 -z-10'>
+              <div className='pointer-events-none absolute -end-20 -top-6 -z-10'>
                 <div className='relative h-44 w-44'>
-                  <div className='absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
-                  <div className='absolute left-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-500/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
+                  <div className='absolute start-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-3xl bg-teal-600/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
+                  <div className='absolute start-1/2 top-1/2 h-14 w-44 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-3xl bg-teal-500/90 shadow-[0_25px_70px_rgba(0,0,0,0.18)]' />
                 </div>
               </div>
 
@@ -90,7 +90,7 @@ export default function WelcomePage() {
 
             <div className='mt-5 flex flex-col items-center justify-center gap-3'>
               <button
-                className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-primary pl-[0.03px] text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
+                className='h-[63px] w-[297px] gap-[11.99px] rounded-[6px] bg-primary ps-[0.03px] text-lg font-bold text-white opacity-100 shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#14B3AE]'
                 type='button'
                 onClick={() => navigate('/login')}
               >

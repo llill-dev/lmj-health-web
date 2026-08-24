@@ -15,7 +15,7 @@ export function ActivityLogBanner() {
           <List className="h-7 w-7" aria-hidden />
         </div>
 
-        <div className="min-w-0 flex-1 text-right">
+        <div className="min-w-0 flex-1 text-start">
           <h1 className="font-cairo text-[26px] font-black leading-[32px] text-white sm:text-[30px]">
             سجل النشاطات
           </h1>

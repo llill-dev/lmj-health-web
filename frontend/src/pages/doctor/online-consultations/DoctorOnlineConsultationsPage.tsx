@@ -218,10 +218,10 @@ export default function DoctorOnlineConsultationsPage() {
               : activeBase.status,
       statusLabel:
         detailStatus === 'dismissed'
-          ? 'مرفوضة'
+          ? tr('مرفوضة', 'Dismissed')
           : activeBase.statusLabel,
     };
-  }, [activeBase, detailsQuery.data?.ticket]);
+  }, [activeBase, detailsQuery.data?.ticket, tr]);
 
   const activePatientId = useMemo(() => {
     const fromDetail = detailsQuery.data?.ticket?.patientSummary?._id;
@@ -248,22 +248,22 @@ export default function DoctorOnlineConsultationsPage() {
         | 'patient',
       authorName:
         m.senderRole === 'doctor'
-          ? 'الطبيب'
-          : active?.patientName ?? 'المريض',
+          ? tr('الطبيب', 'Doctor')
+          : active?.patientName ?? tr('المريض', 'Patient'),
       text: m.content ?? '',
       timeLabel: m.createdAt
-        ? new Date(m.createdAt).toLocaleString('ar-SY')
+        ? new Date(m.createdAt).toLocaleString(locale === 'ar' ? 'ar-SY' : 'en-US')
         : '—',
       isNew: false,
       attachmentFiles: m.attachmentFiles ?? [],
     }));
-  }, [active?.messages, active?.patientName, detailsQuery.data?.messages]);
+  }, [active?.messages, active?.patientName, detailsQuery.data?.messages, locale, tr]);
 
   const consultationAttachments = useMemo((): ConsultationAttachmentItem[] => {
     const items: ConsultationAttachmentItem[] = ticketAttachmentFiles.map(
       (file) => ({
         ...file,
-        senderLabel: 'المريض',
+        senderLabel: tr('المريض', 'Patient'),
       }),
     );
 
@@ -271,13 +271,13 @@ export default function DoctorOnlineConsultationsPage() {
       for (const file of message.attachmentFiles ?? []) {
         items.push({
           ...file,
-          senderLabel: message.author === 'doctor' ? 'أنت' : 'المريض',
+          senderLabel: message.author === 'doctor' ? tr('أنت', 'You') : tr('المريض', 'Patient'),
         });
       }
     }
 
     return items;
-  }, [activeMessages, ticketAttachmentFiles]);
+  }, [activeMessages, ticketAttachmentFiles, tr]);
 
   const tabCounts = useMemo(
     () => ({
@@ -303,7 +303,7 @@ export default function DoctorOnlineConsultationsPage() {
     returnTo: '/doctor/online-consultations',
     onError: (message) => {
       toast(message, {
-        title: 'تعذّر فتح الأداة السريرية',
+        title: tr('تعذّر فتح الأداة السريرية', 'Could not open the clinical tool'),
         variant: 'error',
       });
     },
@@ -330,14 +330,14 @@ export default function DoctorOnlineConsultationsPage() {
         ticketId: expandedId,
         status: 'closed',
       });
-      toast('تم إغلاق الاستشارة بنجاح.', {
-        title: 'إنهاء الاستشارة',
+      toast(tr('تم إغلاق الاستشارة بنجاح.', 'The consultation was closed successfully.'), {
+        title: tr('إنهاء الاستشارة', 'Close consultation'),
         variant: 'success',
       });
       setCloseOpen(false);
     } catch (error) {
       toast(getConsultationMutationErrorMessage(error, 'close'), {
-        title: 'تعذّر إغلاق الاستشارة',
+        title: tr('تعذّر إغلاق الاستشارة', 'Could not close the consultation'),
         variant: 'error',
       });
     }
@@ -351,14 +351,14 @@ export default function DoctorOnlineConsultationsPage() {
         status: 'dismissed',
         reason,
       });
-      toast('تم رفض الاستشارة.', {
-        title: 'رفض الاستشارة',
+      toast(tr('تم رفض الاستشارة.', 'The consultation was dismissed.'), {
+        title: tr('رفض الاستشارة', 'Dismiss consultation'),
         variant: 'success',
       });
       setDismissOpen(false);
     } catch (error) {
       toast(getConsultationMutationErrorMessage(error, 'dismiss'), {
-        title: 'تعذّر رفض الاستشارة',
+        title: tr('تعذّر رفض الاستشارة', 'Could not dismiss the consultation'),
         variant: 'error',
       });
     }
@@ -371,7 +371,7 @@ export default function DoctorOnlineConsultationsPage() {
 
     sendMessage.mutate(
       {
-        content: text || 'مرفق',
+        content: text || tr('مرفق', 'Attachment'),
         attachments: attachments.length ? attachments : undefined,
       },
       {
@@ -381,7 +381,7 @@ export default function DoctorOnlineConsultationsPage() {
         },
         onError: (error) => {
           toast(getConsultationMutationErrorMessage(error, 'send-message'), {
-            title: 'تعذّر إرسال الرد',
+            title: tr('تعذّر إرسال الرد', 'Could not send the reply'),
             variant: 'error',
           });
         },
@@ -451,7 +451,7 @@ export default function DoctorOnlineConsultationsPage() {
               placeholder={tr('ابحث في الطلبات...', 'Search requests...')}
               className="h-[40px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-11 pe-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3]"
             />
-            <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+            <div className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
               <Search className="h-[18px] w-[18px]" />
             </div>
           </div>
@@ -469,7 +469,7 @@ export default function DoctorOnlineConsultationsPage() {
         {isRefreshingConsultations ? (
           <div className="mt-4 inline-flex items-center gap-2 rounded-[10px] border border-[#D1FAE5] bg-[#ECFDF5] px-3 py-2 font-cairo text-[12px] font-bold text-[#047857]">
             <RefreshCw className="h-4 w-4 animate-spin" />
-            جارٍ تحديث الاستشارات...
+            {tr('جارٍ تحديث الاستشارات...', 'Refreshing consultations...')}
           </div>
         ) : null}
 
@@ -480,7 +480,7 @@ export default function DoctorOnlineConsultationsPage() {
         ) : listQuery.isError ? (
           <div className="mt-6 rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center">
             <div className="font-cairo text-[13px] font-semibold text-[#B42318]">
-              تعذّر تحميل الاستشارات. حاول إعادة المحاولة.
+              {tr('تعذّر تحميل الاستشارات. حاول إعادة المحاولة.', 'Failed to load consultations. Please try again.')}
             </div>
             <button
               type="button"
@@ -499,8 +499,8 @@ export default function DoctorOnlineConsultationsPage() {
                 }`}
               />
               {listQuery.isRefetching || overviewQuery.isRefetching
-                ? 'جارٍ إعادة المحاولة...'
-                : 'إعادة المحاولة'}
+                ? tr('جارٍ إعادة المحاولة...', 'Retrying...')
+                : tr('إعادة المحاولة', 'Retry')}
             </button>
           </div>
         ) : (
@@ -512,7 +512,7 @@ export default function DoctorOnlineConsultationsPage() {
               {visibleConsultations.length === 0 ? (
                 <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-6 py-16 text-center shadow-[0_14px_30px_rgba(0,0,0,0.06)]">
                   <div className="font-cairo text-[14px] font-extrabold text-[#111827]">
-                    لا توجد استشارات في هذا التصنيف
+                    {tr('لا توجد استشارات في هذا التصنيف', 'No consultations in this category')}
                   </div>
                 </div>
               ) : (
@@ -551,7 +551,7 @@ export default function DoctorOnlineConsultationsPage() {
                             <>
                               <motion.div variants={CONSULTATIONS_EXPAND_CONTENT_ITEM}>
                                 <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                                  عنوان المشكلة
+                                  {tr('عنوان المشكلة', 'Issue title')}
                                 </div>
                                 <div className="mt-2 font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
                                   {active.title || '—'}
@@ -560,7 +560,7 @@ export default function DoctorOnlineConsultationsPage() {
 
                               <motion.div variants={CONSULTATIONS_EXPAND_CONTENT_ITEM}>
                                 <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                                  وصف المشكلة
+                                  {tr('وصف المشكلة', 'Issue description')}
                                 </div>
                                 <div className="mt-2 font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
                                   {active.description || '—'}
@@ -573,7 +573,7 @@ export default function DoctorOnlineConsultationsPage() {
                                     attachments={consultationAttachments}
                                     doctorId={doctorId}
                                     patientId={activePatientId}
-                                    title="الملفات المرفقة"
+                                    title={tr('الملفات المرفقة', 'Attached files')}
                                     variant="cards"
                                   />
                                 </motion.div>
@@ -582,7 +582,7 @@ export default function DoctorOnlineConsultationsPage() {
                               {active.symptoms.length > 0 ? (
                                 <motion.div variants={CONSULTATIONS_EXPAND_CONTENT_ITEM}>
                                   <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                                    الأعراض
+                                    {tr('الأعراض', 'Symptoms')}
                                   </div>
                                   <div className="mt-3 flex flex-wrap gap-2">
                                     {active.symptoms.map((s) => (
@@ -602,7 +602,7 @@ export default function DoctorOnlineConsultationsPage() {
                                   variants={CONSULTATIONS_EXPAND_CONTENT_ITEM}
                                   className="rounded-[8px] bg-[#FFF7ED] px-3 py-2 font-cairo text-[12px] font-semibold text-[#B45309]"
                                 >
-                                  سبب الإغلاق: {closedReason}
+                                  {tr('سبب الإغلاق:', 'Closure reason:')} {closedReason}
                                 </motion.div>
                               ) : null}
 
@@ -612,7 +612,7 @@ export default function DoctorOnlineConsultationsPage() {
                                   className="rounded-[8px] border border-[#EEF2F6] bg-[#F9FAFB] px-3 py-3"
                                 >
                                   <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                                    تقييم المريض
+                                    {tr('تقييم المريض', 'Patient rating')}
                                   </div>
                                   <div className="mt-2 flex items-center gap-1">
                                     {Array.from({ length: 5 }).map((_, index) => (
@@ -638,7 +638,7 @@ export default function DoctorOnlineConsultationsPage() {
                                 variants={CONSULTATIONS_EXPAND_CONTENT_ITEM}
                               >
                                 <h2 className="font-cairo text-[12px] font-extrabold text-[#111827]">
-                                  سجل المحادثة ({activeMessages.length} رد)
+                                  {tr(`سجل المحادثة (${activeMessages.length} رد)`, `Conversation log (${activeMessages.length} replies)`)}
                                 </h2>
 
                                 <div className="mt-3 space-y-3">
@@ -654,8 +654,8 @@ export default function DoctorOnlineConsultationsPage() {
                                         onClick={() => setSelectedMessageId(m.id)}
                                         className={
                                           isSelected
-                                            ? 'w-full rounded-[10px] border border-[#EEF2F6] bg-[#0F8F8B1A] px-4 py-3 text-right'
-                                            : 'w-full rounded-[10px] border border-[#EEF2F6] bg-white px-4 py-3 text-right'
+                                            ? 'w-full rounded-[10px] border border-[#EEF2F6] bg-[#0F8F8B1A] px-4 py-3 text-start'
+                                            : 'w-full rounded-[10px] border border-[#EEF2F6] bg-white px-4 py-3 text-start'
                                         }
                                       >
                                         <div className="flex items-center justify-between">
@@ -666,7 +666,7 @@ export default function DoctorOnlineConsultationsPage() {
                                             </div>
                                             {m.isNew ? (
                                               <span className="inline-flex h-[18px] items-center justify-center rounded-[6px] bg-[#F43F5E] px-2 font-cairo text-[10px] font-extrabold text-white">
-                                                جديد
+                                                {tr('جديد', 'New')}
                                               </span>
                                             ) : null}
                                           </div>
@@ -683,13 +683,13 @@ export default function DoctorOnlineConsultationsPage() {
                                               ...file,
                                               senderLabel:
                                                 m.author === 'doctor'
-                                                  ? 'أنت'
-                                                  : 'المريض',
+                                                  ? tr('أنت', 'You')
+                                                  : tr('المريض', 'Patient'),
                                             }),
                                           )}
                                           doctorId={doctorId}
                                           patientId={activePatientId}
-                                          title="مرفقات الرسالة"
+                                          title={tr('مرفقات الرسالة', 'Message attachments')}
                                         />
                                       </button>
                                     );
@@ -743,9 +743,9 @@ export default function DoctorOnlineConsultationsPage() {
         <ConfirmActionDialog
           open={closeOpen}
           onOpenChange={setCloseOpen}
-          title="إنهاء الاستشارة"
-          description="هل أنت متأكد من إغلاق هذه الاستشارة؟ لن يتمكن المريض من إرسال رسائل جديدة بعد الإغلاق."
-          confirmLabel="إغلاق الاستشارة"
+          title={tr('إنهاء الاستشارة', 'Close consultation')}
+          description={tr('هل أنت متأكد من إغلاق هذه الاستشارة؟ لن يتمكن المريض من إرسال رسائل جديدة بعد الإغلاق.', 'Are you sure you want to close this consultation? The patient will not be able to send new messages after closing.')}
+          confirmLabel={tr('إغلاق الاستشارة', 'Close consultation')}
           confirmDisabled={updateStatus.isPending}
           onConfirm={handleCloseConsultation}
         />

@@ -33,7 +33,7 @@ export function RadiologyManualForm({
 
   return (
     <section className="mb-6 space-y-4 rounded-[12px] border border-[#E4E7EC] bg-white px-4 py-5 sm:px-5">
-      <h2 className="text-right font-cairo text-[16px] font-extrabold text-[#101828]">
+      <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#101828]">
         {title}
       </h2>
 

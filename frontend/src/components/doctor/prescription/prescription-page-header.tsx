@@ -7,7 +7,7 @@ export function PrescriptionPageHeader({
   patientName,
   patientLabel,
   fileNumber,
-  statusLabel = "مسودة",
+  statusLabel,
   backTo = "/doctor/appointments",
 }: {
   patientName?: string;
@@ -18,9 +18,11 @@ export function PrescriptionPageHeader({
   backTo?: string;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const subtitle =
-    buildPrescriptionPatientSubtitle(patientName ?? patientLabel) ||
-    "الوصفة الطبية";
+    buildPrescriptionPatientSubtitle(patientName ?? patientLabel, tr) ||
+    tr("الوصفة الطبية", "Prescription");
+  const resolvedStatusLabel = statusLabel ?? tr("مسودة", "Draft");
 
   return (
     <section
@@ -38,20 +40,20 @@ export function PrescriptionPageHeader({
       />
 
       <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-1 items-start justify-start gap-3 text-right sm:gap-4">
+        <div className="flex min-w-0 flex-1 items-start justify-start gap-3 text-start sm:gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[6px] bg-primary shadow-[0px_4px_14px_rgba(15,143,139,0.35)] sm:h-16 sm:w-16">
             <Pill className="h-7 w-7 text-white sm:h-8 sm:w-8" aria-hidden />
           </div>
           <div className="min-w-0">
             <h1 className="font-cairo text-[26px] font-black leading-[32px] text-primary sm:text-[30px] sm:leading-[36px]">
-              الوصفة الطبية
+              {tr("الوصفة الطبية", "Prescription")}
             </h1>
             <p className="mt-1 font-cairo text-[14px] font-bold leading-[22px] text-primary/90 sm:text-[16px]">
               {subtitle}
             </p>
             {fileNumber ? (
               <p className="mt-0.5 font-cairo text-[12px] font-semibold text-primary/75">
-                رقم الملف: {fileNumber}
+                {tr("رقم الملف:", "File number:")} {fileNumber}
               </p>
             ) : null}
           </div>
@@ -62,11 +64,11 @@ export function PrescriptionPageHeader({
             to={backTo}
             className="inline-flex min-w-[88px] items-center justify-between gap-2 font-cairo text-[13px] font-extrabold text-primary transition hover:text-[#0A7A77]"
           >
-            <span>رجوع</span>
+            <span>{tr("رجوع", "Back")}</span>
             <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
           </Link>
           <span className="inline-flex rounded-full bg-[#FEF3C7] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#B45309]">
-            {statusLabel}
+            {resolvedStatusLabel}
           </span>
         </div>
       </div>

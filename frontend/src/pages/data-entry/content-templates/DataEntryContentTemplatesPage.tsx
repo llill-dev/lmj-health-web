@@ -123,7 +123,7 @@ export default function DataEntryContentTemplatesPage() {
         />
 
         <section className="mt-5 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:px-6">
-          <div className="flex items-start gap-3 text-right">
+          <div className="flex items-start gap-3 text-start">
             <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Info className="h-4 w-4" />
             </div>
@@ -239,7 +239,7 @@ export default function DataEntryContentTemplatesPage() {
                 return (
                   <article
                     key={template._id}
-                    className="flex flex-col gap-2 px-6 py-5 text-right"
+                    className="flex flex-col gap-2 px-6 py-5 text-start"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-cairo text-[14px] font-black text-[#111827]">

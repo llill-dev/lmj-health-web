@@ -75,7 +75,7 @@ export function PlatformModalShell({
               <button
                 type="button"
                 onClick={onClose}
-                className="absolute left-5 top-5 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-white/70 hover:text-[#111827]"
+                className="absolute start-5 top-5 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-white/70 hover:text-[#111827]"
                 aria-label="إغلاق"
               >
                 <X className="h-5 w-5" aria-hidden />

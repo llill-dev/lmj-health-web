@@ -121,7 +121,7 @@ export default function NewPassword({
         noValidate
       >
         <div>
-          <label className='mb-2 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
+          <label className='mb-2 block text-start font-cairo text-[14px] font-bold text-[#101828]'>
             كلمة المرور الجديدة
           </label>
           <div className='flex h-[40px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F3F3F5] px-3 shadow-[0_10px_24px_rgba(0,0,0,0.06)]'>
@@ -135,7 +135,7 @@ export default function NewPassword({
               autoComplete='new-password'
               placeholder='password123'
               {...register('password')}
-              className='h-full w-full bg-transparent px-3 text-right font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
+              className='h-full w-full bg-transparent px-3 text-start font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
             />
             <button
               type='button'
@@ -153,7 +153,7 @@ export default function NewPassword({
         </div>
 
         <div>
-          <label className='mb-2 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
+          <label className='mb-2 block text-start font-cairo text-[14px] font-bold text-[#101828]'>
             تأكيد كلمة المرور
           </label>
           <div className='flex h-[40px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F3F3F5] px-3 shadow-[0_10px_24px_rgba(0,0,0,0.06)]'>
@@ -167,7 +167,7 @@ export default function NewPassword({
               autoComplete='new-password'
               placeholder='password123'
               {...register('confirmPassword')}
-              className='h-full w-full bg-transparent px-3 text-right font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
+              className='h-full w-full bg-transparent px-3 text-start font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
             />
             <button
               type='button'
@@ -189,7 +189,7 @@ export default function NewPassword({
         </div>
 
         <div className='rounded-[10px] border border-[#D9EEF0] bg-[#F0FAFA] px-4 py-3'>
-          <p className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#0F766E]'>
+          <p className='mb-2 text-start font-cairo text-[12px] font-extrabold text-[#0F766E]'>
             متطلبات كلمة المرور:
           </p>
           <ul className='space-y-2'>
@@ -213,7 +213,7 @@ export default function NewPassword({
         </div>
 
         <div
-          className={`min-h-[20px] text-right font-cairo text-[12px] font-semibold leading-snug ${fieldError ? 'text-[#D92D20]' : 'text-transparent'}`}
+          className={`min-h-[20px] text-start font-cairo text-[12px] font-semibold leading-snug ${fieldError ? 'text-[#D92D20]' : 'text-transparent'}`}
           aria-live='polite'
         >
           {fieldError ?? '\u00A0'}

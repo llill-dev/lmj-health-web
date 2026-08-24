@@ -26,6 +26,7 @@ import { useI18n } from '@/i18n/provider';
 
 export default function DoctorPrescriptionPreviewPage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -69,7 +70,7 @@ export default function DoctorPrescriptionPreviewPage() {
       openPdfBlobInNewTab(blob, `prescription-${prescriptionId}.pdf`);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر إنشاء PDF',
+        title: tr('تعذّر إنشاء PDF', 'Could not create PDF'),
         variant: 'error',
       });
     } finally {
@@ -82,8 +83,8 @@ export default function DoctorPrescriptionPreviewPage() {
       <Helmet>
         <title>
           {preview.previewVm?.patientName
-            ? `معاينة وصفة ${preview.previewVm.patientName}`
-            : 'معاينة الوصفة الطبية'}{' '}
+            ? tr(`معاينة وصفة ${preview.previewVm.patientName}`, `Prescription preview — ${preview.previewVm.patientName}`)
+            : tr('معاينة الوصفة الطبية', 'Prescription preview')}{' '}
           • LMJ Health
         </title>
       </Helmet>
@@ -100,7 +101,7 @@ export default function DoctorPrescriptionPreviewPage() {
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
-            title="تعذّر تحميل معاينة الوصفة"
+            title={tr('تعذّر تحميل معاينة الوصفة', 'Failed to load the prescription preview')}
             brief={getUserFacingRequestErrorMessage(preview.error)}
             retrying={retryingPreview}
             onRetry={() => void retryPreview()}
@@ -122,27 +123,27 @@ export default function DoctorPrescriptionPreviewPage() {
         <ConfirmActionDialog
           open={finalizeOpen}
           onOpenChange={setFinalizeOpen}
-          title="اعتماد نهائي"
+          title={tr('اعتماد نهائي', 'Finalize')}
           description={
-            <div className="space-y-2 text-right font-cairo text-[14px] font-semibold text-[#344054]">
-              <p>هل تريد اعتماد الوصفة وإرسالها للمريض؟</p>
+            <div className="space-y-2 text-start font-cairo text-[14px] font-semibold text-[#344054]">
+              <p>{tr('هل تريد اعتماد الوصفة وإرسالها للمريض؟', 'Do you want to finalize the prescription and send it to the patient?')}</p>
               <p>
-                المريض: <strong>{preview.previewVm?.patientName}</strong>
+                {tr('المريض:', 'Patient:')} <strong>{preview.previewVm?.patientName}</strong>
               </p>
               <p>
-                رقم الوصفة:{' '}
+                {tr('رقم الوصفة:', 'Prescription number:')}{' '}
                 <strong>{preview.previewVm?.prescriptionCode}</strong>
               </p>
             </div>
           }
-          confirmLabel="تأكيد الاعتماد"
+          confirmLabel={tr('تأكيد الاعتماد', 'Confirm finalization')}
           confirmDisabled={busy || workspace.isBusy}
           onConfirm={async () => {
             setBusy(true);
             try {
               const response = await workspace.finalize();
-              toast(response.message ?? 'تم اعتماد الوصفة نهائياً.', {
-                title: 'اعتماد نهائي',
+              toast(response.message ?? tr('تم اعتماد الوصفة نهائياً.', 'The prescription was finalized.'), {
+                title: tr('اعتماد نهائي', 'Finalized'),
                 variant: 'success',
               });
               setFinalizeOpen(false);
@@ -152,7 +153,7 @@ export default function DoctorPrescriptionPreviewPage() {
               );
             } catch (error) {
               toast(getUserFacingRequestErrorMessage(error), {
-                title: 'تعذّر الاعتماد',
+                title: tr('تعذّر الاعتماد', 'Could not finalize'),
                 variant: 'error',
               });
             } finally {

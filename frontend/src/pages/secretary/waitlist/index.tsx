@@ -41,7 +41,7 @@ function SurfaceSection({
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
-        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+        <h2 className="text-start font-cairo text-[23px] font-black leading-none text-[#243044]">
           {title}
         </h2>
       </header>
@@ -285,7 +285,7 @@ export default function SecretaryWaitlistPage() {
         title={tr("إضافة إلى قائمة الانتظار", "Add to waitlist")}
         maxWidthClass="max-w-[520px]"
       >
-        <div dir={dir} className="space-y-4 text-right">
+        <div dir={dir} className="space-y-4 text-start">
           <select
             value={createPatientId}
             onChange={(e) => setCreatePatientId(e.target.value)}

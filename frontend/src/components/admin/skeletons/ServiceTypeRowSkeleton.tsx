@@ -10,7 +10,7 @@ export function ServiceTypeRowSkeleton({ index = 0 }: { index?: number }) {
       className="flex flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-6"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="min-w-0 flex-1 text-right">
+      <div className="min-w-0 flex-1 text-start">
         <div className="flex items-start gap-2 sm:items-center">
           <AdminSkeletonBlock className="h-10 w-10 shrink-0 rounded-[6px]" />
           <div className="min-w-0 space-y-2">

@@ -97,9 +97,12 @@ export default function DoctorFacilitiesPage() {
   const openCreate = () => {
     if (!canCreate) {
       toast(
-        "يمكنك امتلاك منشأة واحدة فقط. عدّل المنشأة الحالية بدلًا من إنشاء أخرى.",
+        tr(
+          "يمكنك امتلاك منشأة واحدة فقط. عدّل المنشأة الحالية بدلًا من إنشاء أخرى.",
+          "You can only own one facility. Edit the current facility instead of creating another.",
+        ),
         {
-          title: "منشأة موجودة",
+          title: tr("منشأة موجودة", "Facility already exists"),
           variant: "error",
         },
       );
@@ -114,9 +117,12 @@ export default function DoctorFacilitiesPage() {
   const openEdit = (target: DoctorFacility) => {
     if (target.isOwned === false) {
       toast(
-        "هذه منشأة مرتبطة بحسابك ولا تملكها. لا يمكن تعديل بياناتها من هنا.",
+        tr(
+          "هذه منشأة مرتبطة بحسابك ولا تملكها. لا يمكن تعديل بياناتها من هنا.",
+          "This facility is linked to your account but you do not own it. Its data cannot be edited from here.",
+        ),
         {
-          title: "تعديل غير متاح",
+          title: tr("تعديل غير متاح", "Editing unavailable"),
           variant: "error",
         },
       );
@@ -131,14 +137,17 @@ export default function DoctorFacilitiesPage() {
   const handleUnlink = async (target: DoctorFacility) => {
     if (
       !window.confirm(
-        `إلغاء ربط منشأة "${target.name}"؟ يمكنك ربط منشأة أخرى لاحقًا.`,
+        tr(
+          `إلغاء ربط منشأة "${target.name}"؟ يمكنك ربط منشأة أخرى لاحقًا.`,
+          `Unlink the facility "${target.name}"? You can link another facility later.`,
+        ),
       )
     ) {
       return;
     }
     try {
       await linkMutation.mutateAsync({ facilityId: null });
-      toast("تم إلغاء ربط المنشأة.", { variant: "success" });
+      toast(tr("تم إلغاء ربط المنشأة.", "The facility was unlinked."), { variant: "success" });
     } catch (error) {
       const { title, message } = getDoctorFacilityLinkErrorToast(error);
       toast(message, { title, variant: "error" });
@@ -154,10 +163,10 @@ export default function DoctorFacilitiesPage() {
 
       toast(
         dialogMode === "edit"
-          ? "تم حفظ تعديلات المنشأة."
-          : "تمت إضافة المنشأة بنجاح.",
+          ? tr("تم حفظ تعديلات المنشأة.", "The facility changes were saved.")
+          : tr("تمت إضافة المنشأة بنجاح.", "The facility was added successfully."),
         {
-          title: dialogMode === "edit" ? "تم التحديث" : "تمت الإضافة",
+          title: dialogMode === "edit" ? tr("تم التحديث", "Updated") : tr("تمت الإضافة", "Added"),
           variant: "success",
         },
       );
@@ -190,8 +199,8 @@ export default function DoctorFacilitiesPage() {
   }) => {
     try {
       await linkMutation.mutateAsync(payload);
-      toast("تم ربط حسابك بالمنشأة بنجاح.", {
-        title: "تم الربط",
+      toast(tr("تم ربط حسابك بالمنشأة بنجاح.", "Your account was linked to the facility successfully."), {
+        title: tr("تم الربط", "Linked"),
         variant: "success",
       });
       setLinkDialogOpen(false);
@@ -207,8 +216,8 @@ export default function DoctorFacilitiesPage() {
   const handleSuggestSubmit = async (payload: SuggestFacilityPayload) => {
     try {
       await suggestMutation.mutateAsync(payload);
-      toast("تم إرسال اقتراح المنشأة وسيتم مراجعته من الإدارة.", {
-        title: "تم إرسال الاقتراح",
+      toast(tr("تم إرسال اقتراح المنشأة وسيتم مراجعته من الإدارة.", "The facility suggestion was submitted and will be reviewed by admin."), {
+        title: tr("تم إرسال الاقتراح", "Suggestion sent"),
         variant: "success",
       });
       setSuggestDialogOpen(false);
@@ -339,7 +348,10 @@ export default function DoctorFacilitiesPage() {
                 totalPages={totalPages}
                 pageSize={PAGE_SIZE}
                 pageSizeOptions={[10, 20]}
-                summaryLabel={`عرض ${rangeStart}-${rangeEnd} من أصل ${filtered.length} منشأة`}
+                summaryLabel={tr(
+                  `عرض ${rangeStart}-${rangeEnd} من أصل ${filtered.length} منشأة`,
+                  `Showing ${rangeStart}-${rangeEnd} of ${filtered.length} facilities`,
+                )}
                 onPageChange={setPage}
                 onPageSizeChange={() => setPage(1)}
               />

@@ -35,16 +35,17 @@ const DEFAULT_EXPANDED_SECTIONS: Record<EncounterWorkspaceSectionKey, boolean> =
 
 export default function DoctorEncounterWorkspacePage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const authUser = readAuthUser();
   const doctorName = authUser?.fullName?.trim()
-    ? /^د\.?\s/u.test(authUser.fullName)
-      ? authUser.fullName
-      : `د. ${authUser.fullName}`
-    : 'الطبيب';
+    ? locale === 'ar' && !/^د\.?\s/u.test(authUser.fullName)
+      ? `د. ${authUser.fullName}`
+      : authUser.fullName
+    : tr('الطبيب', 'Doctor');
 
   const [expandedSections, setExpandedSections] = useState(
     DEFAULT_EXPANDED_SECTIONS,
@@ -73,8 +74,8 @@ export default function DoctorEncounterWorkspacePage() {
 
   const handleSaveProgress = () => {
     void retryWorkspace();
-    toast('تم تحديث عرض الزيارة من الخادم.', {
-      title: 'حفظ التقدم',
+    toast(tr('تم تحديث عرض الزيارة من الخادم.', 'The encounter view was refreshed from the server.'), {
+      title: tr('حفظ التقدم', 'Save progress'),
       variant: 'success',
     });
   };
@@ -86,8 +87,8 @@ export default function DoctorEncounterWorkspacePage() {
         patientId,
         encounterId,
       });
-      toast(response.message ?? 'تم إغلاق الزيارة الطبية بنجاح.', {
-        title: 'إغلاق الزيارة',
+      toast(response.message ?? tr('تم إغلاق الزيارة الطبية بنجاح.', 'The medical encounter was closed successfully.'), {
+        title: tr('إغلاق الزيارة', 'Close encounter'),
         variant: 'success',
       });
       setCloseOpen(false);
@@ -103,7 +104,7 @@ export default function DoctorEncounterWorkspacePage() {
       });
     } catch (requestError) {
       toast(getUserFacingRequestErrorMessage(requestError), {
-        title: 'تعذّر إغلاق الزيارة',
+        title: tr('تعذّر إغلاق الزيارة', 'Could not close the encounter'),
         variant: 'error',
       });
       throw requestError;
@@ -113,7 +114,7 @@ export default function DoctorEncounterWorkspacePage() {
   return (
     <>
       <Helmet>
-        <title>الزيارة الطبية • LMJ Health</title>
+        <title>{tr('الزيارة الطبية', 'Medical encounter')} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full">
@@ -123,7 +124,7 @@ export default function DoctorEncounterWorkspacePage() {
           <EncounterWorkspacePageSkeleton />
         ) : workspace.isError || !workspace.encounter || !workspace.patientVm ? (
           <DoctorListErrorState
-            title="تعذّر تحميل مساحة الزيارة الطبية"
+            title={tr('تعذّر تحميل مساحة الزيارة الطبية', 'Failed to load the encounter workspace')}
             brief={getUserFacingRequestErrorMessage(workspace.error)}
             detail={getUserFacingRequestErrorMessage(workspace.error)}
             retrying={retryingWorkspace}
@@ -142,14 +143,14 @@ export default function DoctorEncounterWorkspacePage() {
                 onClick={() => openSection('prescription')}
                 className="flex h-12 w-full items-center justify-center rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FAF9]"
               >
-                فتح الوصفة الطبية
+                {tr('فتح الوصفة الطبية', 'Open prescription')}
               </button>
               <button
                 type="button"
                 onClick={() => openSection('radiology')}
                 className="flex h-12 w-full items-center justify-center rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FAF9]"
               >
-                فتح طلبات الأشعة
+                {tr('فتح طلبات الأشعة', 'Open imaging orders')}
               </button>
             </div>
 
@@ -159,21 +160,21 @@ export default function DoctorEncounterWorkspacePage() {
                 onClick={() => openSection('lab')}
                 className="flex h-11 w-full items-center justify-center rounded-[12px] border border-[#BFEDEC] bg-[#F8FFFE] font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F4F3]"
               >
-                طلبات التحاليل
+                {tr('طلبات التحاليل', 'Lab orders')}
               </button>
               <button
                 type="button"
                 onClick={() => openSection('procedure')}
                 className="flex h-11 w-full items-center justify-center rounded-[12px] border border-[#BFEDEC] bg-[#F8FFFE] font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F4F3]"
               >
-                طلبات الإجراءات
+                {tr('طلبات الإجراءات', 'Procedure orders')}
               </button>
               <button
                 type="button"
                 onClick={() => openSection('referral')}
                 className="flex h-11 w-full items-center justify-center rounded-[12px] border border-[#BFEDEC] bg-[#F8FFFE] font-cairo text-[13px] font-extrabold text-primary transition hover:bg-[#E6F4F3]"
               >
-                التحويلات الطبية
+                {tr('التحويلات الطبية', 'Medical referrals')}
               </button>
             </div>
 
@@ -209,8 +210,8 @@ export default function DoctorEncounterWorkspacePage() {
                 className="inline-flex h-12 items-center justify-center rounded-[12px] border-2 border-primary bg-white font-cairo text-[14px] font-extrabold text-primary transition hover:bg-[#F0FAF9] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {closeEncounterMutation.isPending
-                  ? 'جارٍ إغلاق الزيارة...'
-                  : 'إغلاق الزيارة'}
+                  ? tr('جارٍ إغلاق الزيارة...', 'Closing the encounter...')
+                  : tr('إغلاق الزيارة', 'Close encounter')}
               </button>
               <button
                 type="button"
@@ -218,14 +219,13 @@ export default function DoctorEncounterWorkspacePage() {
                 disabled={retryingWorkspace}
                 className="inline-flex h-12 items-center justify-center rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_28px_rgba(15,143,139,0.28)] transition hover:opacity-95 disabled:opacity-60"
               >
-                {retryingWorkspace ? 'جارٍ التحديث...' : 'تحديث من الخادم'}
+                {retryingWorkspace ? tr('جارٍ التحديث...', 'Refreshing...') : tr('تحديث من الخادم', 'Refresh from server')}
               </button>
             </div>
 
             {workspace.profileDenied ? (
-              <div className="rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B45309]">
-                الوصول الكامل لملف المريض غير متاح؛ بيانات الأقسام من طلبات هذه
-                الزيارة فقط.
+              <div className="rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B45309]">
+                {tr('الوصول الكامل لملف المريض غير متاح؛ بيانات الأقسام من طلبات هذه الزيارة فقط.', "Full access to the patient file is not available; section data is limited to this encounter's own requests.")}
               </div>
             ) : null}
           </div>
@@ -234,9 +234,12 @@ export default function DoctorEncounterWorkspacePage() {
         <ConfirmActionDialog
           open={closeOpen}
           onOpenChange={setCloseOpen}
-          title="إغلاق الزيارة الطبية"
-          description="هل أنت متأكد من إغلاق هذه الزيارة؟ تأكد من اعتماد الطلبات قبل المتابعة."
-          confirmLabel="تأكيد الإغلاق"
+          title={tr('إغلاق الزيارة الطبية', 'Close the medical encounter')}
+          description={tr(
+            'هل أنت متأكد من إغلاق هذه الزيارة؟ تأكد من اعتماد الطلبات قبل المتابعة.',
+            'Are you sure you want to close this encounter? Make sure the orders are finalized before proceeding.',
+          )}
+          confirmLabel={tr('تأكيد الإغلاق', 'Confirm closing')}
           confirmDisabled={closeEncounterMutation.isPending}
           onConfirm={handleCloseEncounter}
         />

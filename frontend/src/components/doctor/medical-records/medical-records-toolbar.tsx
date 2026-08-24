@@ -21,7 +21,7 @@ export function MedicalRecordsToolbar({
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder={tr("ابحث عن مريض...", "Search patient...")}
-        className="h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-4 pe-11 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/20 placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2"
+        className="h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-4 pe-11 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/20 placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2"
       />
       {search && onClear ? (
         <button

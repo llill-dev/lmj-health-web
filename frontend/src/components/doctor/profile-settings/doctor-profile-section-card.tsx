@@ -29,7 +29,7 @@ export default function DoctorProfileSectionCard({
 
       <div className="grid gap-4 px-6 py-5 sm:grid-cols-2">
         {fields.map((field) => (
-          <div key={field.label} className="text-right">
+          <div key={field.label} className="text-start">
             <div className="font-cairo text-[11px] font-bold text-[#667085]">
               {field.label}
             </div>

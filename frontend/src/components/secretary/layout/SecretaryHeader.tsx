@@ -85,11 +85,11 @@ export default function SecretaryHeader({
             }}
           />
           <div
-            className="pointer-events-none absolute -left-16 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-[#14b8a6]/18 blur-3xl"
+            className="pointer-events-none absolute -start-16 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-[#14b8a6]/18 blur-3xl"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute -right-12 top-0 h-28 w-28 rounded-full bg-[#0f766e]/12 blur-2xl"
+            className="pointer-events-none absolute -end-12 top-0 h-28 w-28 rounded-full bg-[#0f766e]/12 blur-2xl"
             aria-hidden
           />
 
@@ -115,7 +115,7 @@ export default function SecretaryHeader({
                 />
               </div>
 
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-1 text-right">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-1 text-start">
                 <div className="flex min-w-0 flex-wrap items-center justify-start gap-x-2 gap-y-0.5">
                   <h1 className="max-w-full truncate font-cairo text-[16px] font-black leading-tight text-[#0f172a] sm:text-[17px]">
                     {displayName}
@@ -138,7 +138,7 @@ export default function SecretaryHeader({
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2 border-r border-[#e2e8f0]/80 pr-2 sm:gap-2.5 sm:pr-4">
+            <div className="flex shrink-0 items-center gap-2 border-e border-[#e2e8f0]/80 pe-2 sm:gap-2.5 sm:pe-4">
               <button
                 type="button"
                 onClick={handleNotificationsClick}

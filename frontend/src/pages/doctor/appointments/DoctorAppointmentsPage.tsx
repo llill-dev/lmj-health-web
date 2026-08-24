@@ -848,7 +848,7 @@ export default function DoctorAppointmentsPage() {
                 >
                   <Filter className="h-[18px] w-[18px]" strokeWidth={2.25} />
                 </div>
-                <div className="min-w-0 text-right">
+                <div className="min-w-0 text-start">
                   <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
                     {tr("تصفية المواعيد", "Filter appointments")}
                   </h2>
@@ -920,7 +920,7 @@ export default function DoctorAppointmentsPage() {
                       }))
                     }
                   />
-                  <div className="pointer-events-none absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-focus-within:bg-primary/[0.14]">
+                  <div className="pointer-events-none absolute start-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-focus-within:bg-primary/[0.14]">
                     <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
                   </div>
                 </div>
@@ -972,7 +972,7 @@ export default function DoctorAppointmentsPage() {
             </div>
             {/* date filter */}
             <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFBFC]/90 px-4 py-4 sm:px-5">
-              <div className="flex flex-wrap gap-2 items-center mb-3 text-right">
+              <div className="flex flex-wrap gap-2 items-center mb-3 text-start">
                 <Calendar
                   className="w-4 h-4 shrink-0 text-primary"
                   aria-hidden
@@ -1098,7 +1098,7 @@ export default function DoctorAppointmentsPage() {
                       {appointmentsLoadErrorPresentation.brief}
                     </p>
                     {appointmentsLoadErrorPresentation.showTechnicalDetail ? (
-                      <details className="group mt-5 rounded-2xl border border-[#EAECF0] bg-white/75 px-4 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[2px]">
+                      <details className="group mt-5 rounded-2xl border border-[#EAECF0] bg-white/75 px-4 py-3 text-start shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[2px]">
                         <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-cairo text-[12px] font-extrabold text-[#344054] transition-colors hover:text-[#101828] [&::-webkit-details-marker]:hidden">
                           <span>{tr("تفاصيل إضافية", "More details")}</span>
                           <ChevronDown
@@ -1106,7 +1106,7 @@ export default function DoctorAppointmentsPage() {
                             aria-hidden
                           />
                         </summary>
-                        <p className="mt-3 border-t border-[#F2F4F7] pt-3 text-right font-cairo text-[12px] font-medium leading-[1.75] text-[#667085]">
+                        <p className="mt-3 border-t border-[#F2F4F7] pt-3 text-start font-cairo text-[12px] font-medium leading-[1.75] text-[#667085]">
                           {appointmentsLoadErrorPresentation.detail}
                         </p>
                       </details>
@@ -1235,7 +1235,7 @@ export default function DoctorAppointmentsPage() {
 
         {/* Pagination — متناغم مع بطاقة الفلاتر */}
         <section className="mt-5 flex flex-col gap-4 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_20px_50px_rgba(15,143,139,0.06),0_2px_8px_rgba(0,0,0,0.03)] sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="text-right font-cairo text-[12px] font-bold text-[#667085]">
+          <div className="text-start font-cairo text-[12px] font-bold text-[#667085]">
             {tr(
               `الصفحة ${filters.page} من ${totalPages}`,
               `Page ${filters.page} of ${totalPages}`,

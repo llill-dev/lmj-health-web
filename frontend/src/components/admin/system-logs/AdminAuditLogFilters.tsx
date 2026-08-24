@@ -103,9 +103,9 @@ export function AdminAuditLogFilters({
             placeholder={t('adminSystemLogs.filters.search.placeholder')}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className='h-[40px] w-full rounded-[10px] border border-[#EEF2F6] bg-white pe-10 ps-4 text-right font-cairo text-[13px] font-bold text-[#111827] placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-primary/20'
+            className='h-[40px] w-full rounded-[10px] border border-[#EEF2F6] bg-white pe-10 ps-4 text-start font-cairo text-[13px] font-bold text-[#111827] placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-primary/20'
           />
-          <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+          <Search className='pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
         </div>
 
         <StyledSelect
@@ -192,7 +192,7 @@ export function AdminAuditLogFilters({
           <div className='mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
             {ADVANCED_FIELDS.map((f) => (
               <div key={f.key} className='min-w-0'>
-                <label className='mb-1 block text-right font-cairo text-[11px] font-extrabold text-[#667085]'>
+                <label className='mb-1 block text-start font-cairo text-[11px] font-extrabold text-[#667085]'>
                   {f.label}
                 </label>
                 <input

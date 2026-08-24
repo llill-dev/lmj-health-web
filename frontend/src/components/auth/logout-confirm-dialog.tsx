@@ -74,7 +74,7 @@ export default function LogoutConfirmDialog({
                 transitionEnd: { visibility: "hidden" },
               },
             }}
-            className="fixed left-1/2 top-1/2 z-[10000] w-[480px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
+            className="fixed start-1/2 top-1/2 z-[10000] w-[480px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
             dir={dir}
             lang={locale}
           >
@@ -82,7 +82,7 @@ export default function LogoutConfirmDialog({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="absolute left-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                  className="absolute start-5 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                   aria-label={t('common.close')}
                 >
                   <X className="w-5 h-5" />
@@ -93,13 +93,13 @@ export default function LogoutConfirmDialog({
                 {t('logout.title')}
               </Dialog.Title>
 
-              <Dialog.Description className="mt-2 text-right font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
+              <Dialog.Description className="mt-2 text-start font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
                 {t('logout.description')}
               </Dialog.Description>
 
               <div className="mt-5 space-y-3">
                 <label className="flex cursor-pointer items-center justify-between rounded-[12px] border border-[#E4E7EC] px-4 py-3">
-                  <span className="text-right font-cairo text-[13px] font-bold text-[#101828]">
+                  <span className="text-start font-cairo text-[13px] font-bold text-[#101828]">
                     {t('logout.scope.current')}
                   </span>
                   <input
@@ -110,7 +110,7 @@ export default function LogoutConfirmDialog({
                   />
                 </label>
                 <label className="flex cursor-pointer items-center justify-between rounded-[12px] border border-[#E4E7EC] px-4 py-3">
-                  <span className="text-right font-cairo text-[13px] font-bold text-[#101828]">
+                  <span className="text-start font-cairo text-[13px] font-bold text-[#101828]">
                     {t('logout.scope.all')}
                   </span>
                   <input

@@ -117,7 +117,7 @@ export default function SignUpStep1Account({
       >
         <div className='space-y-5'>
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <User className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 الاسم الكامل
@@ -142,7 +142,7 @@ export default function SignUpStep1Account({
           </div>
 
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <Mail className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 البريد الإلكتروني
@@ -172,7 +172,7 @@ export default function SignUpStep1Account({
           </div>
 
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <LockKeyhole className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 كلمة المرور
@@ -213,13 +213,13 @@ export default function SignUpStep1Account({
             >
               {errors.password?.message ?? 'x'}
             </div>
-            <p className='mt-0.5 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+            <p className='mt-0.5 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]'>
               8+ أحرف وتتضمن حرفاً كبيراً وحرفاً صغيراً ورقماً واحداً على الأقل
             </p>
           </div>
 
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <LockKeyhole className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 تأكيد كلمة المرور
@@ -263,7 +263,7 @@ export default function SignUpStep1Account({
           </div>
 
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <Phone className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 رقم الهاتف
@@ -313,7 +313,7 @@ export default function SignUpStep1Account({
                 )}
               />
             </div>
-            <p className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+            <p className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]'>
               اختر مفتاح الدولة ثم أدخل الرقم المحلي فقط (بدون الصفر الأول)
             </p>
             <div
@@ -326,7 +326,7 @@ export default function SignUpStep1Account({
           </div>
 
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 قناة التحقق
               </span>

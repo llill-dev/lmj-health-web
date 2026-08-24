@@ -31,18 +31,25 @@ export type DoctorDirectoryDetails = DoctorDirectoryListItem;
 
 export type DirectoryServiceItem = PlatformServiceTypeItem;
 
-function mapConsultationTags(types?: Array<'online' | 'offline' | string>) {
+type TrFn = (ar: string, en: string) => string;
+const defaultTr: TrFn = (ar) => ar;
+
+function mapConsultationTags(
+  types: Array<'online' | 'offline' | string> | undefined,
+  tr: TrFn,
+) {
   if (!types?.length) return [];
   const unique = new Set<string>();
   types.forEach((type) => {
-    if (type === 'online') unique.add('أونلاين');
-    if (type === 'offline') unique.add('حضوري');
+    if (type === 'online') unique.add(tr('أونلاين', 'Online'));
+    if (type === 'offline') unique.add(tr('حضوري', 'In-person'));
   });
   return [...unique];
 }
 
 function mapInternalDoctorToCard(
   doctor: InternalDirectoryDoctor,
+  tr: TrFn = defaultTr,
 ): DoctorDirectoryListItem {
   const city = [doctor.locationCity, doctor.locationCountry]
     .filter(Boolean)
@@ -50,19 +57,19 @@ function mapInternalDoctorToCard(
 
   return {
     id: doctor._id,
-    name: doctor.user?.fullName ?? 'طبيب',
-    specialty: doctor.specialization ?? 'غير محدد',
+    name: doctor.user?.fullName ?? tr('طبيب', 'Doctor'),
+    specialty: doctor.specialization ?? tr('غير محدد', 'Not specified'),
     rating: doctor.averageRating ?? 0,
     reviews: doctor.totalReviews ?? 0,
-    tags: mapConsultationTags(doctor.consultationTypes),
+    tags: mapConsultationTags(doctor.consultationTypes, tr),
     price: doctor.consultationFee ?? null,
-    city: city || 'غير محدد',
+    city: city || tr('غير محدد', 'Not specified'),
     email: doctor.user?.email,
     phone: doctor.user?.phone,
     photoUrl: doctor.user?.photoUrl ?? null,
     bio: doctor.bio,
     clinicAddress: doctor.clinicAddress,
-    consultationTypes: mapConsultationTags(doctor.consultationTypes),
+    consultationTypes: mapConsultationTags(doctor.consultationTypes, tr),
     distanceMeters: doctor.distanceMeters ?? null,
   };
 }
@@ -70,6 +77,7 @@ function mapInternalDoctorToCard(
 export function useDoctorDoctorsDirectory(
   params: InternalDirectoryListParams,
   enabled = true,
+  tr: TrFn = defaultTr,
 ) {
   const query = useQuery({
     queryKey: ['doctor-directory', params],
@@ -79,8 +87,8 @@ export function useDoctorDoctorsDirectory(
   });
 
   const doctors = useMemo(
-    () => (query.data?.doctors ?? []).map(mapInternalDoctorToCard),
-    [query.data?.doctors],
+    () => (query.data?.doctors ?? []).map((doctor) => mapInternalDoctorToCard(doctor, tr)),
+    [query.data?.doctors, tr],
   );
 
   return {
@@ -94,7 +102,10 @@ export function useDoctorDoctorsDirectory(
   };
 }
 
-export function useDoctorDirectoryDoctorDetails(doctorId?: string | null) {
+export function useDoctorDirectoryDoctorDetails(
+  doctorId?: string | null,
+  tr: TrFn = defaultTr,
+) {
   const query = useQuery({
     queryKey: ['doctor-directory-details', doctorId],
     queryFn: () =>
@@ -107,7 +118,7 @@ export function useDoctorDirectoryDoctorDetails(doctorId?: string | null) {
     staleTime: 1000 * 30,
     select: (data) => {
       const match = data.doctors.find((row) => row._id === doctorId);
-      return match ? mapInternalDoctorToCard(match) : null;
+      return match ? mapInternalDoctorToCard(match, tr) : null;
     },
   });
 

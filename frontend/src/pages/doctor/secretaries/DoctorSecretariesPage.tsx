@@ -41,17 +41,22 @@ import { useRetryAction } from "@/lib/query/useRetryAction";
 import { cn } from "@/lib/utils/utils";
 import { useI18n } from "@/i18n/provider";
 
-const STATUS_TABS: Array<{ id: SecretaryStatusFilter; label: string }> = [
-  { id: "all", label: "الكل" },
-  { id: "active", label: "المفعلة" },
-  { id: "disabled", label: "المعطلة" },
-];
+function buildStatusTabs(
+  tr: (ar: string, en: string) => string,
+): Array<{ id: SecretaryStatusFilter; label: string }> {
+  return [
+    { id: "all", label: tr("الكل", "All") },
+    { id: "active", label: tr("المفعلة", "Active") },
+    { id: "disabled", label: tr("المعطلة", "Disabled") },
+  ];
+}
 
 const MAX_SECRETARIES = MAX_DOCTOR_SECRETARIES;
 
 export default function DoctorSecretariesPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const statusTabs = buildStatusTabs(tr);
   const { toast } = useToast();
   const listQuery = useDoctorSecretaries();
   const createSecretary = useCreateDoctorSecretary();
@@ -108,10 +113,16 @@ export default function DoctorSecretariesPage() {
 
   const handleCreate = async (input: DoctorSecretaryCreateFormValues) => {
     if (listQuery.secretaries.length >= MAX_SECRETARIES) {
-      toast(`الحد الأقصى ${MAX_SECRETARIES} سكرتيرين لكل طبيب.`, {
-        title: "لا يمكن الإضافة",
-        variant: "error",
-      });
+      toast(
+        tr(
+          `الحد الأقصى ${MAX_SECRETARIES} سكرتيرين لكل طبيب.`,
+          `The maximum is ${MAX_SECRETARIES} secretaries per doctor.`,
+        ),
+        {
+          title: tr("لا يمكن الإضافة", "Cannot add"),
+          variant: "error",
+        },
+      );
       return;
     }
 
@@ -128,8 +139,8 @@ export default function DoctorSecretariesPage() {
         gender: input.gender,
         permissions: input.permissions,
       });
-      toast("تم إنشاء السكرتير وربطه بحسابك.", {
-        title: "تمت الإضافة",
+      toast(tr("تم إنشاء السكرتير وربطه بحسابك.", "The secretary was created and linked to your account."), {
+        title: tr("تمت الإضافة", "Added"),
         variant: "success",
       });
       setCreateOpen(false);
@@ -139,7 +150,7 @@ export default function DoctorSecretariesPage() {
         "create",
       );
       toast(errorMessage, {
-        title: "تعذّر إنشاء السكرتير",
+        title: tr("تعذّر إنشاء السكرتير", "Could not create the secretary"),
         variant: "error",
       });
     }
@@ -163,14 +174,14 @@ export default function DoctorSecretariesPage() {
           permissions: input.permissions,
         },
       });
-      toast("تم تحديث بيانات السكرتير.", {
-        title: "تم الحفظ",
+      toast(tr("تم تحديث بيانات السكرتير.", "The secretary's data was updated."), {
+        title: tr("تم الحفظ", "Saved"),
         variant: "success",
       });
       setEditTarget(null);
     } catch (error) {
       toast(getDoctorSecretaryMutationErrorMessage(error, "update"), {
-        title: "تعذّر الحفظ",
+        title: tr("تعذّر الحفظ", "Could not save"),
         variant: "error",
       });
     }
@@ -181,14 +192,14 @@ export default function DoctorSecretariesPage() {
     if (!secretaryId) return;
     try {
       await unassignSecretary.mutateAsync(secretaryId);
-      toast("تم إلغاء ربط السكرتير من حسابك.", {
-        title: "تم الإلغاء",
+      toast(tr("تم إلغاء ربط السكرتير من حسابك.", "The secretary was unlinked from your account."), {
+        title: tr("تم الإلغاء", "Unlinked"),
         variant: "success",
       });
       setUnassignTarget(null);
     } catch (error) {
       toast(getDoctorSecretaryMutationErrorMessage(error, "unassign"), {
-        title: "تعذّر الإلغاء",
+        title: tr("تعذّر الإلغاء", "Could not unlink"),
         variant: "error",
       });
       throw error;
@@ -228,13 +239,13 @@ export default function DoctorSecretariesPage() {
               key: "active",
               icon: <UserCog className="h-5 w-5 shrink-0" />,
               value: listQuery.isAwaitingData ? "—" : activeCount,
-              label: "مفعل",
+              label: tr("مفعل", "Active"),
             },
             {
               key: "limit",
               icon: <Users className="h-5 w-5 shrink-0" />,
               value: MAX_SECRETARIES,
-              label: "الحد الأقصى",
+              label: tr("الحد الأقصى", "Maximum"),
             },
           ]}
         />
@@ -243,7 +254,7 @@ export default function DoctorSecretariesPage() {
           <ClinicAccountsSearchRow
             value={search}
             onChange={setSearch}
-            placeholder="بحث..."
+            placeholder={tr("بحث...", "Search...")}
             onClear={() => {
               setSearch("");
               setStatusFilter("all");
@@ -251,13 +262,13 @@ export default function DoctorSecretariesPage() {
             trailing={
               <ClinicAccountsSearchCount
                 count={filtered.length}
-                label="سكرتير"
+                label={tr("سكرتير", "secretary")}
               />
             }
           />
 
           <div className="mt-4 flex flex-wrap justify-start gap-2">
-            {STATUS_TABS.map((tab) => {
+            {statusTabs.map((tab) => {
               const active = statusFilter === tab.id;
               return (
                 <button
@@ -280,7 +291,7 @@ export default function DoctorSecretariesPage() {
 
         {listQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل السكرتير"
+            title={tr("تعذّر تحميل السكرتير", "Failed to load secretaries")}
             brief={getUserFacingRequestErrorMessage(listQuery.error)}
             retrying={retryingList}
             onRetry={() => void retryList()}
@@ -297,15 +308,18 @@ export default function DoctorSecretariesPage() {
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
             title={
               isFilteredEmpty
-                ? "لا توجد نتائج مطابقة للبحث أو الفلتر الحالي"
-                : "لا يوجد سكرتير مرتبط بحسابك"
+                ? tr("لا توجد نتائج مطابقة للبحث أو الفلتر الحالي", "No results match the current search or filter")
+                : tr("لا يوجد سكرتير مرتبط بحسابك", "No secretary is linked to your account")
             }
             subtitle={
               isFilteredEmpty
-                ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج"
-                : "يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك."
+                ? tr("جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج", "Try adjusting the search terms or resetting the filters to see results")
+                : tr(
+                    "يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك.",
+                    "You can add up to 3 secretaries and set their permissions to help manage your clinic.",
+                  )
             }
-            actionLabel="إضافة سكرتير"
+            actionLabel={tr("إضافة سكرتير", "Add secretary")}
             onAction={() => setCreateOpen(true)}
             actionIcon={<Plus className="h-4 w-4" />}
           />
@@ -343,17 +357,19 @@ export default function DoctorSecretariesPage() {
           onOpenChange={(open) => {
             if (!open) setUnassignTarget(null);
           }}
-          title="إلغاء ربط السكرتير"
-          confirmLabel="نعم، إلغاء الربط"
+          title={tr("إلغاء ربط السكرتير", "Unlink secretary")}
+          confirmLabel={tr("نعم، إلغاء الربط", "Yes, unlink")}
           confirmDisabled={unassignSecretary.isPending}
           description={
             <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
-              هل تريد إلغاء ربط{" "}
+              {tr("هل تريد إلغاء ربط", "Do you want to unlink")}{" "}
               <span className="font-black text-[#101828]">
-                {unassignTarget?.user?.fullName ?? "هذا السكرتير"}
+                {unassignTarget?.user?.fullName ?? tr("هذا السكرتير", "this secretary")}
               </span>{" "}
-              من عيادتك؟ لن يُحذف حساب المستخدم من النظام، لكنه لن يعود مرتبطاً
-              بك.
+              {tr(
+                "من عيادتك؟ لن يُحذف حساب المستخدم من النظام، لكنه لن يعود مرتبطاً بك.",
+                "from your clinic? The user account will not be deleted from the system, but it will no longer be linked to you.",
+              )}
             </span>
           }
           onConfirm={handleUnassign}

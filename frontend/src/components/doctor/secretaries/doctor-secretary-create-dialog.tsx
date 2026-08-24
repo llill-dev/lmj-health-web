@@ -91,7 +91,7 @@ export function DoctorSecretaryCreateDialog({
     >
       {atSecretaryLimit ? (
         <div
-          className="mb-4 rounded-[8px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B42318]"
+          className="mb-4 rounded-[8px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]"
           role="alert"
         >
           لقد وصلت للحد الأقصى ({MAX_DOCTOR_SECRETARIES} سكرتيرين). ألغِ ربط

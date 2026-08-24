@@ -65,6 +65,7 @@ function getTypeIcon(type: NotificationType) {
 
 export default function DoctorNotificationPage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const unreadOnly = filter === 'unread';
@@ -108,7 +109,7 @@ export default function DoctorNotificationPage() {
   return (
     <>
       <Helmet>
-        <title>Notifications • LMJ Health</title>
+        <title>{tr('الإشعارات', 'Notifications')} • LMJ Health</title>
       </Helmet>
 
       <div
@@ -118,18 +119,18 @@ export default function DoctorNotificationPage() {
       >
         <section className='rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6'>
           <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
-            <div className='flex flex-col gap-1 text-right'>
+            <div className='flex flex-col gap-1 text-start'>
               <h1 className='font-cairo text-[22px] font-black leading-[28px] text-[#111827]'>
-                الإشعارات
+                {tr('الإشعارات', 'Notifications')}
               </h1>
               <p className='font-cairo text-[13px] font-semibold text-[#98A2B3]'>
-                لديك {newCount} إشعار جديد
+                {tr(`لديك ${newCount} إشعار جديد`, `You have ${newCount} new notifications`)}
               </p>
             </div>
 
             <div className='flex flex-col items-stretch gap-3 sm:items-end'>
               <div className='inline-flex h-[34px] items-center justify-center rounded-[6px] bg-primary px-3 font-cairo text-[12px] font-extrabold text-white shadow-[0_12px_24px_rgba(15, 143, 139,0.25)]'>
-                {newCount} جديد
+                {tr(`${newCount} جديد`, `${newCount} new`)}
               </div>
 
               <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
@@ -143,7 +144,7 @@ export default function DoctorNotificationPage() {
                   className='flex h-[34px] items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB] disabled:opacity-60'
                 >
                   <Check className='h-4 w-4 text-primary' />
-                  تحديد الكل كمقروء
+                  {tr('تحديد الكل كمقروء', 'Mark all as read')}
                 </button>
 
                 <button
@@ -154,7 +155,7 @@ export default function DoctorNotificationPage() {
                   className='flex h-[34px] items-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white px-3 font-cairo text-[12px] font-extrabold text-[#111827] hover:bg-[#F9FAFB]'
                 >
                   <Bell className='h-4 w-4 text-[#667085]' />
-                  غير مقروءة ({unreadCount})
+                  {tr(`غير مقروءة (${unreadCount})`, `Unread (${unreadCount})`)}
                 </button>
               </div>
             </div>
@@ -165,28 +166,28 @@ export default function DoctorNotificationPage() {
           {!isInitialLoading && listQuery.isRefetching ? (
             <div className='inline-flex items-center gap-2 rounded-[10px] border border-[#D5E8E6] bg-white px-4 py-2 font-cairo text-[12px] font-bold text-primary'>
               <Loader2 className='h-4 w-4 animate-spin' />
-              جاري تحديث الإشعارات...
+              {tr('جاري تحديث الإشعارات...', 'Refreshing notifications...')}
             </div>
           ) : null}
           {isInitialLoading ? (
             <DoctorNotificationListSkeleton rows={6} />
           ) : listQuery.isError ? (
             <div className='rounded-[14px] border border-[#FEE2E2] bg-[#FFF1F2] px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#B42318]'>
-              <p>تعذّر تحميل الإشعارات. حاول تحديث الصفحة.</p>
+              <p>{tr('تعذّر تحميل الإشعارات. حاول تحديث الصفحة.', 'Failed to load notifications. Try refreshing the page.')}</p>
               <button
                 type='button'
                 onClick={() => void listQuery.refetch()}
                 disabled={listQuery.isRefetching}
                 className='mt-3 rounded-[8px] border border-[#FCA5A5] bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60'
               >
-                {listQuery.isRefetching ? 'جارٍ إعادة المحاولة...' : 'إعادة المحاولة'}
+                {listQuery.isRefetching ? tr('جارٍ إعادة المحاولة...', 'Retrying...') : tr('إعادة المحاولة', 'Retry')}
               </button>
             </div>
           ) : items.length === 0 ? (
             <div className='rounded-[14px] border border-[#E5E7EB] bg-white px-6 py-10 text-center font-cairo text-[13px] font-semibold text-[#667085]'>
               {filter === 'unread'
-                ? 'لا توجد إشعارات غير مقروءة.'
-                : 'لا توجد إشعارات حالياً.'}
+                ? tr('لا توجد إشعارات غير مقروءة.', 'No unread notifications.')
+                : tr('لا توجد إشعارات حالياً.', 'No notifications right now.')}
             </div>
           ) : (
             items.map((n) => {
@@ -210,8 +211,8 @@ export default function DoctorNotificationPage() {
                   }}
                   className={
                     (isAccent
-                      ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#0F8F8B]'
-                      : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]') +
+                      ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-s-[4.7px] border-s-[#0F8F8B]'
+                      : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-s-[4.7px] border-s-[#f0a95d]') +
                     ' cursor-pointer transition hover:shadow-[0_16px_32px_rgba(0,0,0,0.09)]'
                   }
                 >
@@ -220,7 +221,7 @@ export default function DoctorNotificationPage() {
                       <div className='flex items-center justify-center  bg-[#FFFFFF] w-12 h-12 rounded-[6px] shadow-[0px_4px_6px_-1px_#0000001A]'>
                         {getTypeIcon(n.kind)}
                       </div>
-                      <div className='flex flex-1 flex-col text-right'>
+                      <div className='flex flex-1 flex-col text-start'>
                         <div className='font-cairo text-[16px] font-extrabold leading-[22px] text-[#111827]'>
                           {n.title}
                         </div>
@@ -238,7 +239,7 @@ export default function DoctorNotificationPage() {
                       <div className='flex items-center justify-between gap-3 sm:justify-start sm:self-start'>
                         {n.isNew ? (
                           <div className='inline-flex h-[22px] items-center justify-center rounded-[6px] bg-primary px-2 font-cairo text-[12px] font-semibold text-white'>
-                            جديد
+                            {tr('جديد', 'New')}
                           </div>
                         ) : (
                           <div className='h-[26px] w-[52px]' />
@@ -253,7 +254,7 @@ export default function DoctorNotificationPage() {
                             }}
                             disabled={marking}
                             className='flex h-[34px] w-[34px] items-center justify-center rounded-[6px] border border-[#D1FAE5] bg-white text-[#16A34A] hover:bg-[#ECFDF3] disabled:opacity-60'
-                            aria-label='تحديد كمقروء'
+                            aria-label={tr('تحديد كمقروء', 'Mark as read')}
                           >
                             {marking ? (
                               <Loader2 className='h-4 w-4 animate-spin' />

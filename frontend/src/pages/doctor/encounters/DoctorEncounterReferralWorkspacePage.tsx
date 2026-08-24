@@ -9,6 +9,7 @@ import { useI18n } from '@/i18n/provider';
 
 export default function DoctorEncounterReferralWorkspacePage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -27,9 +28,13 @@ export default function DoctorEncounterReferralWorkspacePage() {
 
   useEffect(() => {
     if (!appliedTemplateDraftName) return;
-    toast(`تم تطبيق قالب «${appliedTemplateDraftName}» على التحويل.`, {
-      variant: 'success',
-    });
+    toast(
+      tr(
+        `تم تطبيق قالب «${appliedTemplateDraftName}» على التحويل.`,
+        `The "${appliedTemplateDraftName}" template has been applied to the referral.`,
+      ),
+      { variant: 'success' },
+    );
     clearAppliedTemplateDraftName();
   }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast]);
 

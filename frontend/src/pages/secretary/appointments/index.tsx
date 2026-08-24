@@ -83,7 +83,7 @@ function SurfaceSection({
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
-        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+        <h2 className="text-start font-cairo text-[23px] font-black leading-none text-[#243044]">
           {title}
         </h2>
       </header>
@@ -109,9 +109,9 @@ function AppointmentsSearchInput({
         onChange={(event) => onChange(event.target.value)}
         placeholder={tr("ابحث بالاسم أو رقم الملف…", "Search by name or file number…")}
         aria-label={tr("بحث عن موعد", "Search appointment")}
-        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
+        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
-      <div className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
+      <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
         <Search className="h-5 w-5" />
       </div>
     </div>
@@ -161,7 +161,7 @@ const AppointmentTableRow = memo<{
               {patientInitials(appointment.patientName)}
             </span>
           </div>
-          <div className="min-w-0 text-right">
+          <div className="min-w-0 text-start">
             <div className="truncate font-cairo text-[18px] font-black text-[#243044]">
               {appointment.patientName}
             </div>
@@ -189,7 +189,7 @@ const AppointmentTableRow = memo<{
           </span>
         </div>
 
-        <div className="text-right lg:col-span-1 lg:text-left">
+        <div className="text-start lg:col-span-1 lg:text-end">
           <button
             type="button"
             onClick={() => onToggle(appointment.id)}
@@ -329,7 +329,7 @@ export default function SecretaryAppointmentsPage() {
     <div dir={dir} lang={locale} className="space-y-6 pb-6 sm:space-y-7 sm:pb-8">
       <SurfaceSection title={tr("المواعيد", "Appointments")}>
         <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
-          <div className="text-right">
+          <div className="text-start">
             <p className="font-cairo text-[13px] font-semibold text-[#98A2B3]">
               {(appointmentsQuery.total || appointments.length).toLocaleString(numberLocale)} {tr("موعد", "appointments")}
               {searchInput ? tr(" مطابق للبحث", " matching search") : ""}
@@ -403,7 +403,7 @@ export default function SecretaryAppointmentsPage() {
         </div>
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
-          <div className="grid grid-cols-12 gap-4 text-right font-cairo text-[14px] font-bold text-[#A1AAB9]">
+          <div className="grid grid-cols-12 gap-4 text-start font-cairo text-[14px] font-bold text-[#A1AAB9]">
             <div className="col-span-4">{tr("المريض", "Patient")}</div>
             <div className="col-span-3">{tr("التاريخ", "Date")}</div>
             <div className="col-span-2">{tr("الوقت", "Time")}</div>

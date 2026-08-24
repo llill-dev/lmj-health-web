@@ -28,12 +28,16 @@ export type MedicalServiceFacility = {
   };
 };
 
-export const MEDICAL_SERVICE_CATEGORY_TABS: Array<{
-  id: MedicalServiceCategory;
-  label: string;
-}> = [
-  { id: 'clinics', label: 'عيادات' },
-  { id: 'imaging', label: 'تصوير طبي' },
-  { id: 'treatment', label: 'مراكز علاج' },
-  { id: 'labs', label: 'مخابر' },
-];
+type TrFn = (ar: string, en: string) => string;
+const defaultTr: TrFn = (ar) => ar;
+
+export function buildMedicalServiceCategoryTabs(
+  tr: TrFn = defaultTr,
+): Array<{ id: MedicalServiceCategory; label: string }> {
+  return [
+    { id: 'clinics', label: tr('عيادات', 'Clinics') },
+    { id: 'imaging', label: tr('تصوير طبي', 'Imaging') },
+    { id: 'treatment', label: tr('مراكز علاج', 'Treatment centers') },
+    { id: 'labs', label: tr('مخابر', 'Labs') },
+  ];
+}

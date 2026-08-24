@@ -70,7 +70,7 @@ export function OrdersTab({
         variants={TAB_STAGGER_ITEM}
         className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#E2E8F0]/90 bg-[linear-gradient(145deg,#fffbeb_0%,#ffffff_60%,#f0fdf4_100%)] px-4 py-3"
       >
-        <div className="text-right">
+        <div className="text-start">
           <p className="font-cairo text-[13px] font-extrabold text-[#0F172A]">
             {fullProfileData.orders.length} طلب طبي
           </p>

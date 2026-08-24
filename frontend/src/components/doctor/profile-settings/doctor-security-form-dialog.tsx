@@ -42,19 +42,19 @@ function SecurityFormField<T extends FieldValues>({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-right font-cairo text-[12px] font-extrabold text-[#344054]">
+      <label className="block text-start font-cairo text-[12px] font-extrabold text-[#344054]">
         {label}
       </label>
       {children}
       {error ? (
         <p
           role="alert"
-          className="text-right font-cairo text-[11px] font-bold leading-[18px] text-[#D92D20]"
+          className="text-start font-cairo text-[11px] font-bold leading-[18px] text-[#D92D20]"
         >
           {error}
         </p>
       ) : hint ? (
-        <p className="text-right font-cairo text-[11px] font-semibold leading-[18px] text-[#667085]">
+        <p className="text-start font-cairo text-[11px] font-semibold leading-[18px] text-[#667085]">
           {hint}
         </p>
       ) : null}
@@ -187,14 +187,14 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    className="absolute left-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
+                    className="absolute start-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]"
                     aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className="h-5 w-5" strokeWidth={2.25} />
                   </button>
                 </Dialog.Close>
 
-                <div className="flex gap-3 text-right">
+                <div className="flex gap-3 text-start">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-white shadow-[0_10px_24px_rgba(15,143,139,0.12)]">
                     <Icon className="h-6 w-6 text-primary" strokeWidth={2} />
                   </div>
@@ -285,7 +285,7 @@ export default function DoctorSecurityFormDialog<T extends FieldValues>({
                                 [fieldKey]: !visible,
                               }))
                             }
-                            className="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#667085] transition hover:bg-[#F2F4F7]"
+                            className="absolute start-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#667085] transition hover:bg-[#F2F4F7]"
                             aria-label={
                               visible
                                 ? tr('إخفاء كلمة المرور', 'Hide password')

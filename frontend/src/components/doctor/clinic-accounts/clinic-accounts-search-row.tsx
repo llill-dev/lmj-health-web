@@ -36,7 +36,7 @@ export function ClinicAccountsSearchRow({
             onValueChangeExtra?.();
           }}
           placeholder={placeholder}
-          className="h-[46px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-right font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary"
+          className="h-[46px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary"
         />
         {value && onClear ? (
           <button

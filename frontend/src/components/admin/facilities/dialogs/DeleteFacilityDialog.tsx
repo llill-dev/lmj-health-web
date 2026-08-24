@@ -112,12 +112,12 @@ export default function DeleteFacilityDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827]"
                 aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-red-600">
                   {t('adminFacilityDialog.delete.ariaLabel')}
                 </h2>
@@ -182,7 +182,7 @@ export default function DeleteFacilityDialog({
                 >
                   {mutation.isPending ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin ml-2" aria-hidden />
+                      <Loader2 className="w-4 h-4 animate-spin ms-2" aria-hidden />
                       {t('adminFacilityDialog.delete.deleting')}
                     </>
                   ) : (

@@ -86,9 +86,9 @@ function PatientsSearchInput({
         onChange={(event) => onChange(event.target.value)}
         placeholder={tr("ابحث بالاسم، الهاتف، البريد، أو رقم الملف…", "Search by name, phone, email, or file number…")}
         aria-label={tr("بحث عن مريض", "Search patient")}
-        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
+        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
-      <div className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
+      <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
         <Search className="w-5 h-5" />
       </div>
     </div>
@@ -127,7 +127,7 @@ const PatientTableRow = memo<{
               {patientInitials(patient.name)}
             </span>
           </div>
-          <div className="min-w-0 text-right">
+          <div className="min-w-0 text-start">
             <div className="truncate font-cairo text-[18px] font-black text-[#243044]">
               {patient.name}
             </div>
@@ -150,7 +150,7 @@ const PatientTableRow = memo<{
             {status.label}
           </span>
         </div>
-        <div className="text-right lg:col-span-2 lg:text-left">
+        <div className="text-start lg:col-span-2 lg:text-end">
           <button
             type="button"
             onClick={() => onToggle(patient.id)}
@@ -168,7 +168,7 @@ const PatientTableRow = memo<{
       </div>
 
       {expanded ? (
-        <div className="grid grid-cols-1 gap-4 border-t border-[#EEF2F6] bg-[#F8FAFC] px-4 py-5 text-right sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 border-t border-[#EEF2F6] bg-[#F8FAFC] px-4 py-5 text-start sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
           <div>
             <div className="font-cairo text-[12px] font-bold text-[#98A2B3]">
               {tr("البريد الإلكتروني", "Email")}
@@ -274,7 +274,7 @@ export default function SecretaryPatientsPage() {
     <div dir={dir} lang={locale} className="pb-6 space-y-6 sm:space-y-7 sm:pb-8">
       <SurfaceSection>
         <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
-          <div className="text-right">
+          <div className="text-start">
             <h2 className="font-cairo text-[23px] font-black text-[#243044]">
               {tr("المرضى", "Patients")}
             </h2>
@@ -366,7 +366,7 @@ export default function SecretaryPatientsPage() {
         </div>
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
-          <div className="grid grid-cols-12 gap-4 text-right font-cairo text-[14px] font-bold text-[#A1AAB9]">
+          <div className="grid grid-cols-12 gap-4 text-start font-cairo text-[14px] font-bold text-[#A1AAB9]">
             <div className="col-span-4">{tr("اسم المريض", "Patient name")}</div>
             <div className="col-span-3">{tr("رقم الهاتف", "Phone number")}</div>
             <div className="col-span-2">{tr("تاريخ التسجيل", "Registration date")}</div>

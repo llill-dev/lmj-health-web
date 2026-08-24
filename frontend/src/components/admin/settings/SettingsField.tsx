@@ -13,7 +13,7 @@ export default function SettingsField({
 }) {
   return (
     <div className='space-y-2'>
-      <div className='text-right font-cairo text-[12px] font-bold text-[#344054]'>
+      <div className='text-start font-cairo text-[12px] font-bold text-[#344054]'>
         {label}
       </div>
       <input

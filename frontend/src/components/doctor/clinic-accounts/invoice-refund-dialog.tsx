@@ -8,7 +8,7 @@ import { useCreateBillingRefund } from '@/hooks/doctor/billing';
 import {
   billingOptionalTransactionDateToIso,
   billingTodayDateInput,
-  BILLING_FUTURE_DATE_MESSAGE,
+  getBillingFutureDateMessage,
   isBillingDateInputAfterToday,
 } from '@/lib/doctor/billing/dateInput';
 import { getBillingRefundErrorToast } from '@/lib/doctor/billing/errors';
@@ -118,8 +118,8 @@ export function InvoiceRefundDialog({
     }
 
     if (isBillingDateInputAfterToday(date)) {
-      toast(BILLING_FUTURE_DATE_MESSAGE.message, {
-        title: BILLING_FUTURE_DATE_MESSAGE.title,
+      toast(getBillingFutureDateMessage(tr).message, {
+        title: getBillingFutureDateMessage(tr).title,
         variant: 'error',
       });
       return;

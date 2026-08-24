@@ -116,13 +116,13 @@ export default function AdminAppointmentDetailsDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                 aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <h2 className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
+              <h2 className="text-start font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
                 {t("adminAppointments.details.title")}
               </h2>
 
@@ -324,7 +324,7 @@ export default function AdminAppointmentDetailsDialog({
                             className="rounded-[10px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-3"
                           >
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                              <div className="min-w-0 text-right">
+                              <div className="min-w-0 text-start">
                                 <div className="break-all font-cairo text-[12px] font-extrabold text-[#111827]">
                                   {file.originalName ?? file.id ?? file._id}
                                 </div>
@@ -339,7 +339,7 @@ export default function AdminAppointmentDetailsDialog({
                                 </div>
                               </div>
 
-                              <div className="rounded-[8px] bg-white px-3 py-2 text-right font-cairo text-[11px] font-semibold text-[#475467]">
+                              <div className="rounded-[8px] bg-white px-3 py-2 text-start font-cairo text-[11px] font-semibold text-[#475467]">
                                 <div className="flex items-center justify-end gap-1 text-[#16A34A]">
                                   <ShieldCheck className="h-3.5 w-3.5" />
                                   <span>{file.linkedByRole ?? "—"}</span>

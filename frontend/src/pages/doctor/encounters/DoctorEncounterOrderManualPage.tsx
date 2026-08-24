@@ -35,6 +35,7 @@ export default function DoctorEncounterOrderManualPage({
   category: CatalogOrderCategory;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -56,8 +57,8 @@ export default function DoctorEncounterOrderManualPage({
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title="رابط غير صالح"
-        brief="معرّف المريض أو الزيارة مفقود."
+        title={tr('رابط غير صالح', 'Invalid link')}
+        brief={tr('معرّف المريض أو الزيارة مفقود.', 'The patient or encounter identifier is missing.')}
         onRetry={() => navigate(config.hubPath(patientId, encounterId))}
       />
     );
@@ -66,7 +67,7 @@ export default function DoctorEncounterOrderManualPage({
   return (
     <>
       <Helmet>
-        <title>إدخال يدوي • {config.title} • LMJ Health</title>
+        <title>{tr('إدخال يدوي', 'Manual entry')} • {config.title} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -85,7 +86,7 @@ export default function DoctorEncounterOrderManualPage({
             setFieldErrors({});
           }}
           title={config.manualFormTitle}
-          nameLabel={category === 'lab' ? 'اسم التحليل' : 'الاسم'}
+          nameLabel={category === 'lab' ? tr('اسم التحليل', 'Test name') : tr('الاسم', 'Name')}
           fieldErrors={fieldErrors}
           saving={workspace.isBusy}
           onSave={async () => {

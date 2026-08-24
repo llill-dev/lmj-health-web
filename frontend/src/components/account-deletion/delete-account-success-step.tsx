@@ -38,7 +38,7 @@ export function DeleteAccountSuccessStep({
         </p>
       ) : null}
 
-      <ul className="mt-6 space-y-3 text-right">
+      <ul className="mt-6 space-y-3 text-start">
         {PENDING_ITEMS.map((item) => (
           <li
             key={item}

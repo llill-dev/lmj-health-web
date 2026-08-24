@@ -310,7 +310,7 @@ export default function AdminComplaintDetailsPage() {
                         strokeWidth={2.25}
                       />
                     </div>
-                    <div className='flex-1 min-w-0 text-right'>
+                    <div className='flex-1 min-w-0 text-start'>
                       <div className='font-cairo text-[18px] font-black text-[#0F172A] sm:text-[19px]'>
                         {c.contactSnapshot?.fullName ?? '—'}
                       </div>

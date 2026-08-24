@@ -89,14 +89,14 @@ export default function DoctorDetailsDialog({
             <button
               type="button"
               onClick={onClose}
-              className="absolute left-4 top-4 text-[#667085]"
+              className="absolute start-4 top-4 text-[#667085]"
               aria-label="إغلاق"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div className="px-5 pb-6 pt-6 sm:px-7">
-              <div className="text-right font-cairo text-[24px] font-bold text-[#101828]">
+              <div className="text-start font-cairo text-[24px] font-bold text-[#101828]">
                 تفاصيل الطبيب
               </div>
 
@@ -158,7 +158,7 @@ export default function DoctorDetailsDialog({
               </div>
 
               {doctor.bio ? (
-                <p className="mt-5 text-right font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
+                <p className="mt-5 text-start font-cairo text-[13px] font-semibold leading-[22px] text-[#667085]">
                   {doctor.bio}
                 </p>
               ) : null}
@@ -168,7 +168,7 @@ export default function DoctorDetailsDialog({
 
             <div className="px-7 py-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
-                <div className="text-right">
+                <div className="text-start">
                   <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                     البريد الإلكتروني
                   </div>
@@ -179,7 +179,7 @@ export default function DoctorDetailsDialog({
                     {doctor.email ?? '—'}
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-primary" />
                     <div>
@@ -222,11 +222,11 @@ export default function DoctorDetailsDialog({
                     موقع العيادة
                   </div>
                   {doctor.clinicAddress ? (
-                    <div className="text-right font-cairo text-[13px] font-semibold text-[#667085]">
+                    <div className="text-start font-cairo text-[13px] font-semibold text-[#667085]">
                       {doctor.clinicAddress}
                     </div>
                   ) : null}
-                  <div className="text-right font-cairo text-[13px] font-semibold text-[#667085]">
+                  <div className="text-start font-cairo text-[13px] font-semibold text-[#667085]">
                     {doctor.city}
                   </div>
                 </div>

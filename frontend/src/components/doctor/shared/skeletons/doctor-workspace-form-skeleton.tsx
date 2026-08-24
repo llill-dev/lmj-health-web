@@ -11,7 +11,7 @@ export function DoctorWorkspaceFormSkeleton({
     <DoctorLoadingShell label="جارٍ تحميل مساحة العمل…">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-2 text-right">
+          <div className="space-y-2 text-start">
             <SkeletonBlock className="h-7 w-44" />
             <SkeletonBlock className="h-4 w-56" />
           </div>

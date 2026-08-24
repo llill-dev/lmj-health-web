@@ -49,16 +49,16 @@ export default function TodayScheduleTable({
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#e2e8f0] bg-gray-50">
-              <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
+              <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
                 الوقت
               </th>
-              <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
+              <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
                 اسم المريض
               </th>
-              <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
+              <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
                 الحالة
               </th>
-              <th className="px-6 py-3 text-right font-cairo text-xs font-bold text-[#64748b]">
+              <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
                 الإجراءات
               </th>
             </tr>

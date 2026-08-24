@@ -27,6 +27,7 @@ import { useI18n } from '@/i18n/provider';
 
 export default function DoctorPrescriptionPage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -69,6 +70,7 @@ export default function DoctorPrescriptionPage() {
 
   const statusLabel = resolvePrescriptionStatusLabel(
     workspace.prescription?.status,
+    tr,
   );
 
   const editable = isPrescriptionEditable(
@@ -83,11 +85,17 @@ export default function DoctorPrescriptionPage() {
 
   useEffect(() => {
     if (!appliedTemplateDraftName) return;
-    toast(`تم تطبيق قالب «${appliedTemplateDraftName}» على الوصفة.`, {
-      variant: 'success',
-    });
+    toast(
+      tr(
+        `تم تطبيق قالب «${appliedTemplateDraftName}» على الوصفة.`,
+        `Template "${appliedTemplateDraftName}" was applied to the prescription.`,
+      ),
+      {
+        variant: 'success',
+      },
+    );
     clearAppliedTemplateDraftName();
-  }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast]);
+  }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast, tr]);
 
   useEffect(() => {
     if (!templateDraftNotice) return;
@@ -104,15 +112,21 @@ export default function DoctorPrescriptionPage() {
     try {
       if (editingItemId) {
         await workspace.updateItem({ itemId: editingItemId, values });
-        toast('تم تحديث الدواء.', { title: 'الوصفة الطبية', variant: 'success' });
+        toast(tr('تم تحديث الدواء.', 'The medication was updated.'), {
+          title: tr('الوصفة الطبية', 'Prescription'),
+          variant: 'success',
+        });
       } else {
         await workspace.addItem(values);
-        toast('تمت إضافة الدواء.', { title: 'الوصفة الطبية', variant: 'success' });
+        toast(tr('تمت إضافة الدواء.', 'The medication was added.'), {
+          title: tr('الوصفة الطبية', 'Prescription'),
+          variant: 'success',
+        });
       }
       setEditingItemId(null);
     } catch (error) {
       toast(workspace.getErrorMessage(error), {
-        title: 'تعذّر حفظ الدواء',
+        title: tr('تعذّر حفظ الدواء', 'Could not save the medication'),
         variant: 'error',
       });
       throw error;
@@ -123,11 +137,14 @@ export default function DoctorPrescriptionPage() {
     if (!deleteTargetId) return;
     try {
       await workspace.deleteItem(deleteTargetId);
-      toast('تم حذف الدواء.', { title: 'الوصفة الطبية', variant: 'success' });
+      toast(tr('تم حذف الدواء.', 'The medication was deleted.'), {
+        title: tr('الوصفة الطبية', 'Prescription'),
+        variant: 'success',
+      });
       setDeleteTargetId(null);
     } catch (error) {
       toast(workspace.getErrorMessage(error), {
-        title: 'تعذّر حذف الدواء',
+        title: tr('تعذّر حذف الدواء', 'Could not delete the medication'),
         variant: 'error',
       });
     }
@@ -136,8 +153,8 @@ export default function DoctorPrescriptionPage() {
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title="رابط غير صالح"
-        brief="معرّف المريض أو الزيارة مفقود."
+        title={tr('رابط غير صالح', 'Invalid link')}
+        brief={tr('معرّف المريض أو الزيارة مفقود.', 'The patient or encounter ID is missing.')}
         onRetry={() => navigate('/doctor/prescription')}
       />
     );
@@ -148,8 +165,8 @@ export default function DoctorPrescriptionPage() {
       <Helmet>
         <title>
           {patientName
-            ? `الوصفة الطبية — ${patientName}`
-            : 'الوصفة الطبية'}{' '}
+            ? tr(`الوصفة الطبية — ${patientName}`, `Prescription — ${patientName}`)
+            : tr('الوصفة الطبية', 'Prescription')}{' '}
           • LMJ Health
         </title>
       </Helmet>
@@ -159,7 +176,7 @@ export default function DoctorPrescriptionPage() {
           <DoctorWorkspaceFormSkeleton medicationCards={3} />
         ) : workspace.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الوصفة الطبية"
+            title={tr('تعذّر تحميل الوصفة الطبية', 'Failed to load the prescription')}
             brief={workspace.getErrorMessage(workspace.error)}
             retrying={retryingWorkspace}
             onRetry={() => void retryWorkspace()}
@@ -174,8 +191,8 @@ export default function DoctorPrescriptionPage() {
             />
 
             {!editable ? (
-              <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#1D4ED8]">
-                هذه الوصفة للعرض فقط (زيارة مغلقة أو وصفة معتمدة نهائياً).
+              <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#1D4ED8]">
+                {tr('هذه الوصفة للعرض فقط (زيارة مغلقة أو وصفة معتمدة نهائياً).', 'This prescription is view-only (closed visit or finalized prescription).')}
               </div>
             ) : null}
 
@@ -202,10 +219,10 @@ export default function DoctorPrescriptionPage() {
                 if (!editable) return;
                 try {
                   await workspace.duplicateItem(id);
-                  toast('تم نسخ الدواء.', { variant: 'success' });
+                  toast(tr('تم نسخ الدواء.', 'The medication was duplicated.'), { variant: 'success' });
                 } catch (error) {
                   toast(workspace.getErrorMessage(error), {
-                    title: 'تعذّر نسخ الدواء',
+                    title: tr('تعذّر نسخ الدواء', 'Could not duplicate the medication'),
                     variant: 'error',
                   });
                 }
@@ -230,8 +247,8 @@ export default function DoctorPrescriptionPage() {
                 setGeneralInstructionsError(null);
                 try {
                   const response = await workspace.saveDraft();
-                  toast(response.message ?? 'تم حفظ المسودة.', {
-                    title: 'حفظ المسودة',
+                  toast(response.message ?? tr('تم حفظ المسودة.', 'The draft was saved.'), {
+                    title: tr('حفظ المسودة', 'Save draft'),
                     variant: 'success',
                   });
                 } catch (error) {
@@ -241,7 +258,7 @@ export default function DoctorPrescriptionPage() {
                     setGeneralInstructionsError(fields.generalInstructions);
                   }
                   toast(toastMessage, {
-                    title: 'تعذّر حفظ المسودة',
+                    title: tr('تعذّر حفظ المسودة', 'Could not save the draft'),
                     variant: 'error',
                   });
                 }
@@ -254,7 +271,7 @@ export default function DoctorPrescriptionPage() {
                   );
                 } catch (error) {
                   toast(workspace.getErrorMessage(error), {
-                    title: 'تعذّر فتح المعاينة',
+                    title: tr('تعذّر فتح المعاينة', 'Could not open the preview'),
                     variant: 'error',
                   });
                 }
@@ -270,8 +287,8 @@ export default function DoctorPrescriptionPage() {
             setMedicationDialogOpen(open);
             if (!open) setEditingItemId(null);
           }}
-          title={editingItemId ? 'تعديل الدواء' : 'إضافة دواء'}
-          confirmLabel={editingItemId ? 'حفظ التعديل' : 'إضافة للوصفة'}
+          title={editingItemId ? tr('تعديل الدواء', 'Edit medication') : tr('إضافة دواء', 'Add medication')}
+          confirmLabel={editingItemId ? tr('حفظ التعديل', 'Save changes') : tr('إضافة للوصفة', 'Add to prescription')}
           initialValues={editingMedication}
           onSubmit={handleAddOrUpdateMedication}
         />
@@ -281,9 +298,9 @@ export default function DoctorPrescriptionPage() {
           onOpenChange={(open) => {
             if (!open) setDeleteTargetId(null);
           }}
-          title="حذف الدواء"
-          description="هل تريد حذف هذا الدواء من الوصفة؟"
-          confirmLabel="حذف"
+          title={tr('حذف الدواء', 'Delete medication')}
+          description={tr('هل تريد حذف هذا الدواء من الوصفة؟', 'Do you want to delete this medication from the prescription?')}
+          confirmLabel={tr('حذف', 'Delete')}
           confirmDisabled={workspace.isBusy}
           onConfirm={handleDeleteMedication}
         />
@@ -291,30 +308,30 @@ export default function DoctorPrescriptionPage() {
         <ConfirmActionDialog
           open={finalizeOpen}
           onOpenChange={setFinalizeOpen}
-          title="اعتماد نهائي"
+          title={tr('اعتماد نهائي', 'Finalize')}
           description={
-            <div className="space-y-2 text-right font-cairo text-[14px] font-semibold text-[#344054]">
+            <div className="space-y-2 text-start font-cairo text-[14px] font-semibold text-[#344054]">
               <p>
-                سيتم اعتماد الوصفة نهائياً للمريض{' '}
-                <strong>{patientName || '—'}</strong> ومزامنة الأدوية مع ملف المريض.
+                {tr('سيتم اعتماد الوصفة نهائياً للمريض', 'The prescription will be finalized for the patient')}{' '}
+                <strong>{patientName || '—'}</strong> {tr('ومزامنة الأدوية مع ملف المريض.', 'and sync the medications with the patient file.')}
               </p>
               <p>
-                عدد الأدوية: <strong>{workspace.medications.length}</strong>
+                {tr('عدد الأدوية:', 'Medications count:')} <strong>{workspace.medications.length}</strong>
               </p>
               {workspace.medications.length === 0 ? (
                 <p className="text-[#B45309]">
-                  يجب إضافة دواء واحد على الأقل قبل الاعتماد (حسب API).
+                  {tr('يجب إضافة دواء واحد على الأقل قبل الاعتماد (حسب API).', 'At least one medication must be added before finalizing (per the API).')}
                 </p>
               ) : null}
             </div>
           }
-          confirmLabel="تأكيد الاعتماد"
+          confirmLabel={tr('تأكيد الاعتماد', 'Confirm finalization')}
           confirmDisabled={workspace.isBusy || workspace.medications.length === 0}
           onConfirm={async () => {
             try {
               const response = await workspace.finalize();
-              toast(response.message ?? 'تم اعتماد الوصفة نهائياً.', {
-                title: 'اعتماد نهائي',
+              toast(response.message ?? tr('تم اعتماد الوصفة نهائياً.', 'The prescription was finalized.'), {
+                title: tr('اعتماد نهائي', 'Finalize'),
                 variant: 'success',
               });
               setFinalizeOpen(false);
@@ -324,7 +341,7 @@ export default function DoctorPrescriptionPage() {
               );
             } catch (error) {
               toast(workspace.getErrorMessage(error), {
-                title: 'تعذّر الاعتماد',
+                title: tr('تعذّر الاعتماد', 'Could not finalize'),
                 variant: 'error',
               });
             }

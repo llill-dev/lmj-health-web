@@ -19,6 +19,7 @@ import { InfoCard } from "../cards";
 import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData, PatientDetailsTab } from "../types";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 type OverviewPatient = {
   bloodType?: string | null;
@@ -79,7 +80,7 @@ function OverviewStatCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-[#E2E8F0] p-4 text-right transition-all hover:shadow-lg",
+        "group relative overflow-hidden rounded-2xl border border-[#E2E8F0] p-4 text-start transition-all hover:shadow-lg",
         tone,
       )}
     >
@@ -135,6 +136,8 @@ export function OverviewTab({
   onRequestAccess,
   onSelectTab,
 }: OverviewTabProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const filesCount = fullProfileData?.files.length ?? 0;
   const ordersCount = fullProfileData?.orders.length ?? 0;
   const medicationsCount = fullProfileData?.medications.length ?? 0;
@@ -152,20 +155,20 @@ export function OverviewTab({
     >
       <motion.div variants={TAB_STAGGER_ITEM}>
         <h3 className="mb-3 font-cairo text-[15px] font-black text-[#101828]">
-          المؤشرات السريعة
+          {tr("المؤشرات السريعة", "Quick indicators")}
         </h3>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
           <OverviewStatCard
             icon={<CalendarDays className="h-5 w-5 text-primary" />}
             value={appointmentsLoading ? "…" : appointmentsCount}
-            label="إجمالي المواعيد"
+            label={tr("إجمالي المواعيد", "Total appointments")}
             tone="bg-gradient-to-br from-[#f0fdfa] to-white hover:border-primary"
             onClick={() => onSelectTab("appointments")}
           />
           <OverviewStatCard
             icon={<Stethoscope className="h-5 w-5 text-[#0EA5E9]" />}
             value={encountersCount}
-            label="الزيارات"
+            label={tr("الزيارات", "Encounters")}
             active={hasOpenEncounter}
             tone="bg-gradient-to-br from-[#f0f9ff] to-white hover:border-[#0EA5E9]"
             onClick={() => onSelectTab("encounters")}
@@ -173,35 +176,35 @@ export function OverviewTab({
           <OverviewStatCard
             icon={<ClipboardList className="h-5 w-5 text-[#A855F7]" />}
             value={historyCount}
-            label="السجلات"
+            label={tr("السجلات", "Records")}
             tone="bg-gradient-to-br from-[#faf5ff] to-white hover:border-[#A855F7]"
             onClick={() => onSelectTab("history")}
           />
           <OverviewStatCard
             icon={<Pill className="h-5 w-5 text-[#F43F5E]" />}
             value={medicationsCount}
-            label="الأدوية"
+            label={tr("الأدوية", "Medications")}
             tone="bg-gradient-to-br from-[#fef3f2] to-white hover:border-[#F43F5E]"
             onClick={() => onSelectTab("medications")}
           />
           <OverviewStatCard
             icon={<FileText className="h-5 w-5 text-[#8B5CF6]" />}
             value={prescriptionsCount}
-            label="الوصفات"
+            label={tr("الوصفات", "Prescriptions")}
             tone="bg-gradient-to-br from-[#faf5ff] to-white hover:border-[#8B5CF6]"
             onClick={() => onSelectTab("prescriptions")}
           />
           <OverviewStatCard
             icon={<Activity className="h-5 w-5 text-[#EAB308]" />}
             value={ordersCount}
-            label="الطلبات"
+            label={tr("الطلبات", "Orders")}
             tone="bg-gradient-to-br from-[#fefce8] to-white hover:border-[#EAB308]"
             onClick={() => onSelectTab("tests")}
           />
           <OverviewStatCard
             icon={<FileText className="h-5 w-5 text-primary" />}
             value={filesCount}
-            label="الملفات"
+            label={tr("الملفات", "Files")}
             tone="bg-gradient-to-br from-[#f0fdfa] to-white hover:border-primary"
             onClick={() => onSelectTab("files")}
           />
@@ -227,7 +230,7 @@ export function OverviewTab({
               </div>
               <div className="min-w-0 flex-1">
                 <h4 className="font-cairo text-[14px] font-extrabold text-[#101828]">
-                  حالة الوصول إلى الملف
+                  {tr("حالة الوصول إلى الملف", "Record access status")}
                 </h4>
                 <p className="mt-1 font-cairo text-[13px] font-semibold leading-relaxed text-[#475467]">
                   {stateMessage.body}
@@ -240,7 +243,7 @@ export function OverviewTab({
                     className="mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-cairo text-[12px] font-extrabold text-white transition-colors hover:bg-[#0d7a77] disabled:opacity-60"
                   >
                     <Link2 className="h-3.5 w-3.5" />
-                    إرسال طلب وصول
+                    {tr("إرسال طلب وصول", "Send access request")}
                   </button>
                 ) : null}
               </div>
@@ -254,7 +257,7 @@ export function OverviewTab({
           <motion.div variants={TAB_STAGGER_ITEM}>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-cairo text-[15px] font-black text-[#101828]">
-                آخر نشاط
+                {tr("آخر نشاط", "Latest activity")}
               </h3>
               {(latestEncounter > 0 || latestFile) && (
                 <button
@@ -262,7 +265,7 @@ export function OverviewTab({
                   onClick={() => onSelectTab("timeline")}
                   className="font-cairo text-[12px] font-bold text-primary hover:underline"
                 >
-                  عرض الخط الزمني
+                  {tr("عرض الخط الزمني", "View timeline")}
                 </button>
               )}
             </div>
@@ -271,7 +274,7 @@ export function OverviewTab({
               <div className="rounded-2xl border-2 border-dashed border-[#E2E8F0] bg-[#F8FAFC] px-6 py-8 text-center">
                 <Clock className="mx-auto h-10 w-10 text-[#CBD5E1]" />
                 <p className="mt-3 font-cairo text-[14px] font-bold text-[#64748B]">
-                  لا يوجد نشاط مسجّل بعد
+                  {tr("لا يوجد نشاط مسجّل بعد", "No activity recorded yet")}
                 </p>
               </div>
             ) : (
@@ -283,12 +286,12 @@ export function OverviewTab({
                     </div>
                     <div className="flex-1">
                       <div className="font-cairo text-[11px] font-bold text-[#64748B]">
-                        الزيارات
+                        {tr("الزيارات", "Encounters")}
                       </div>
                       <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#0F172A]">
                         {hasOpenEncounter
-                          ? "توجد زيارة مفتوحة حاليًا"
-                          : `${encountersCount} زيارة مسجلة`}
+                          ? tr("توجد زيارة مفتوحة حاليًا", "There is a currently open encounter")
+                          : tr(`${encountersCount} زيارة مسجلة`, `${encountersCount} recorded encounters`)}
                       </div>
                     </div>
                   </div>
@@ -301,10 +304,10 @@ export function OverviewTab({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-cairo text-[11px] font-bold text-[#64748B]">
-                        آخر ملف
+                        {tr("آخر ملف", "Latest file")}
                       </div>
                       <div className="mt-1 truncate font-cairo text-[13px] font-extrabold text-[#0F172A]">
-                        {latestFile?.name ?? "لا توجد ملفات"}
+                        {latestFile?.name ?? tr("لا توجد ملفات", "No files")}
                       </div>
                     </div>
                   </div>
@@ -315,26 +318,26 @@ export function OverviewTab({
 
           <motion.div variants={TAB_STAGGER_ITEM}>
             <h3 className="mb-3 font-cairo text-[15px] font-black text-[#101828]">
-              المعلومات الأساسية
+              {tr("المعلومات الأساسية", "Basic information")}
             </h3>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <InfoCard label="فصيلة الدم" value={patient?.bloodType ?? "—"} icon={Heart} />
-              <InfoCard label="الطول" value={patient?.heightLabel ?? "—"} />
-              <InfoCard label="الوزن" value={patient?.weightLabel ?? "—"} />
-              <InfoCard label="وحدة القياس" value={patient?.measurementUnitLabel ?? "—"} />
+              <InfoCard label={tr("فصيلة الدم", "Blood type")} value={patient?.bloodType ?? "—"} icon={Heart} />
+              <InfoCard label={tr("الطول", "Height")} value={patient?.heightLabel ?? "—"} />
+              <InfoCard label={tr("الوزن", "Weight")} value={patient?.weightLabel ?? "—"} />
+              <InfoCard label={tr("وحدة القياس", "Measurement unit")} value={patient?.measurementUnitLabel ?? "—"} />
             </div>
           </motion.div>
 
           <motion.div variants={TAB_STAGGER_ITEM}>
             <h3 className="mb-3 font-cairo text-[15px] font-black text-[#101828]">
-              الحساسية والأمراض المزمنة
+              {tr("الحساسية والأمراض المزمنة", "Allergies and chronic conditions")}
             </h3>
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
               <div className="rounded-2xl bg-[#FEF2F2] px-4 py-4">
                 <div className="mb-3 flex items-start gap-2">
                   <AlertTriangle className="h-5 w-5 shrink-0 text-[#B42318]" />
                   <span className="font-cairo text-[14px] font-extrabold text-[#B42318]">
-                    الحساسية
+                    {tr("الحساسية", "Allergies")}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -349,7 +352,7 @@ export function OverviewTab({
                     ))
                   ) : (
                     <span className="font-cairo text-[13px] font-semibold text-[#667085]">
-                      لا توجد حساسية مسجلة
+                      {tr("لا توجد حساسية مسجلة", "No allergies recorded")}
                     </span>
                   )}
                 </div>
@@ -359,7 +362,7 @@ export function OverviewTab({
                 <div className="mb-3 flex items-start gap-2">
                   <Heart className="h-5 w-5 shrink-0 text-[#EA580C]" />
                   <span className="font-cairo text-[14px] font-extrabold text-[#C4320A]">
-                    الأمراض المزمنة
+                    {tr("الأمراض المزمنة", "Chronic conditions")}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -374,7 +377,7 @@ export function OverviewTab({
                     ))
                   ) : (
                     <span className="font-cairo text-[13px] font-semibold text-[#667085]">
-                      لا توجد حالات مزمنة مسجلة
+                      {tr("لا توجد حالات مزمنة مسجلة", "No chronic conditions recorded")}
                     </span>
                   )}
                 </div>

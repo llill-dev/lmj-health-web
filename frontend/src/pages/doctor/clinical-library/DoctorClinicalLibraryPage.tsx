@@ -88,33 +88,28 @@ import type { DoctorTemplateRecord, DoctorTemplateType } from '@/lib/doctor/temp
 
 
 
-const LIBRARY_TYPE_LABELS: Record<DoctorLibraryItemType, string> = {
+function buildLibraryTypeLabels(
+  tr: (ar: string, en: string) => string,
+): Record<DoctorLibraryItemType, string> {
+  return {
+    MEDICATION: tr('دواء', 'Medication'),
+    LAB: tr('تحليل', 'Lab test'),
+    IMAGING: tr('أشعة', 'Imaging'),
+    PROCEDURE: tr('إجراء', 'Procedure'),
+  };
+}
 
-  MEDICATION: 'دواء',
-
-  LAB: 'تحليل',
-
-  IMAGING: 'أشعة',
-
-  PROCEDURE: 'إجراء',
-
-};
-
-
-
-const TEMPLATE_TYPE_LABELS: Record<DoctorTemplateType, string> = {
-
-  PRESCRIPTION: 'وصفة',
-
-  LAB_ORDER: 'طلب مخبري',
-
-  IMAGING_ORDER: 'طلب أشعة',
-
-  PROCEDURE_ORDER: 'طلب إجراء',
-
-  REFERRAL_ORDER: 'إحالة',
-
-};
+function buildTemplateTypeLabels(
+  tr: (ar: string, en: string) => string,
+): Record<DoctorTemplateType, string> {
+  return {
+    PRESCRIPTION: tr('وصفة', 'Prescription'),
+    LAB_ORDER: tr('طلب مخبري', 'Lab order'),
+    IMAGING_ORDER: tr('طلب أشعة', 'Imaging order'),
+    PROCEDURE_ORDER: tr('طلب إجراء', 'Procedure order'),
+    REFERRAL_ORDER: tr('إحالة', 'Referral'),
+  };
+}
 
 
 
@@ -122,6 +117,8 @@ export default function DoctorClinicalLibraryPage() {
 
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const libraryTypeLabels = buildLibraryTypeLabels(tr);
+  const templateTypeLabels = buildTemplateTypeLabels(tr);
   const { toast } = useToast();
 
   const [section, setSection] = useState<ClinicalLibrarySection>('library');
@@ -352,12 +349,12 @@ export default function DoctorClinicalLibraryPage() {
   ) => {
     try {
       await toggleLibraryFavorite.mutateAsync({ itemId, isFavorite });
-      toast(isFavorite ? 'أُضيف إلى المفضلة.' : 'أُزيل من المفضلة.', {
+      toast(isFavorite ? tr('أُضيف إلى المفضلة.', 'Added to favorites.') : tr('أُزيل من المفضلة.', 'Removed from favorites.'), {
         variant: 'success',
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر تحديث المفضلة',
+        title: tr('تعذّر تحديث المفضلة', 'Could not update favorites'),
         variant: 'error',
       });
     }
@@ -382,11 +379,11 @@ export default function DoctorClinicalLibraryPage() {
               }
             : { displayName: values.label },
       });
-      toast('تمت إضافة العنصر للمكتبة.', { variant: 'success' });
+      toast(tr('تمت إضافة العنصر للمكتبة.', 'The item was added to the library.'), { variant: 'success' });
       setLibraryFormOpen(false);
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر الحفظ',
+        title: tr('تعذّر الحفظ', 'Could not save'),
         variant: 'error',
       });
     }
@@ -405,7 +402,7 @@ export default function DoctorClinicalLibraryPage() {
             description: values.description,
           },
         });
-        toast('تم تحديث القالب.', { variant: 'success' });
+        toast(tr('تم تحديث القالب.', 'The template was updated.'), { variant: 'success' });
       } else {
         await createTemplate.mutateAsync({
           type: values.type,
@@ -413,14 +410,14 @@ export default function DoctorClinicalLibraryPage() {
           description: values.description,
           payload: {},
         });
-        toast('تم إنشاء القالب.', { variant: 'success' });
+        toast(tr('تم إنشاء القالب.', 'The template was created.'), { variant: 'success' });
       }
       setTemplateFormOpen(false);
       setEditTemplate(null);
       setTemplateFormMode('create');
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: templateFormMode === 'edit' ? 'تعذّر تحديث القالب' : 'تعذّر إنشاء القالب',
+        title: templateFormMode === 'edit' ? tr('تعذّر تحديث القالب', 'Could not update the template') : tr('تعذّر إنشاء القالب', 'Could not create the template'),
         variant: 'error',
       });
     }
@@ -431,21 +428,21 @@ export default function DoctorClinicalLibraryPage() {
     try {
       const response = await applyTemplate.mutateAsync(templateId);
       if (!response.storedLocally) {
-        toast('تعذّر حفظ مسودة القالب في المتصفح. يمكنك نسخها من المعاينة.', {
+        toast(tr('تعذّر حفظ مسودة القالب في المتصفح. يمكنك نسخها من المعاينة.', 'Could not save the template draft in the browser. You can copy it from the preview.'), {
           variant: 'warning',
         });
       }
       setApplyPreview({
-        templateName: response.name?.trim() || template?.name?.trim() || 'قالب',
+        templateName: response.name?.trim() || template?.name?.trim() || tr('قالب', 'Template'),
         templateType: response.type ?? (template?.type as DoctorTemplateType | undefined),
         application: response.application,
       });
       if (response.storedLocally) {
-        toast('تم تحميل مسودة القالب.', { variant: 'success' });
+        toast(tr('تم تحميل مسودة القالب.', 'The template draft was loaded.'), { variant: 'success' });
       }
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر استخدام القالب',
+        title: tr('تعذّر استخدام القالب', 'Could not use the template'),
         variant: 'error',
       });
     }
@@ -648,7 +645,7 @@ export default function DoctorClinicalLibraryPage() {
           {section === 'library' ? (
             <ClinicalLibraryRecentStrip
               items={recentLibraryQuery.items}
-              typeLabels={LIBRARY_TYPE_LABELS}
+              typeLabels={libraryTypeLabels}
               isAwaitingData={recentLibraryQuery.isAwaitingData}
             />
           ) : null}
@@ -677,11 +674,11 @@ export default function DoctorClinicalLibraryPage() {
 
                   imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
 
-                  title={libraryFilteredEmpty ? "لا توجد عناصر تطابق البحث أو الفلتر الحالي" : "لا توجد عناصر في المكتبة بعد"}
+            title={libraryFilteredEmpty ? tr('لا توجد عناصر تطابق البحث أو الفلتر الحالي', 'No items match the current search or filter') : tr('لا توجد عناصر في المكتبة بعد', 'No items in the library yet')}
 
-                  subtitle={libraryFilteredEmpty ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج" : "احفظ اختصارات الأدوية والتحاليل والإجراءات لإعادة استخدامها بسرعة"}
+            subtitle={libraryFilteredEmpty ? tr('جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج', 'Try adjusting the search terms or resetting the filters to see results') : tr('احفظ اختصارات الأدوية والتحاليل والإجراءات لإعادة استخدامها بسرعة', 'Save shortcuts for medications, lab tests, and procedures to reuse them quickly')}
 
-                  actionLabel="إضافة للمكتبة"
+            actionLabel={tr('إضافة للمكتبة', 'Add to library')}
 
                   onAction={() => setLibraryFormOpen(true)}
 
@@ -695,7 +692,7 @@ export default function DoctorClinicalLibraryPage() {
 
                   items={libraryQuery.items}
 
-                  typeLabels={LIBRARY_TYPE_LABELS}
+                  typeLabels={libraryTypeLabels}
 
                   onArchive={setDeleteLibraryId}
 
@@ -733,11 +730,11 @@ export default function DoctorClinicalLibraryPage() {
 
                 imageClassName="drop-shadow-[0_12px_32px_rgba(99,102,241,0.1)]"
 
-                title={templatesFilteredEmpty ? "لا توجد قوالب تطابق البحث أو الفلتر الحالي" : "لا توجد قوالب بعد"}
+            title={templatesFilteredEmpty ? tr('لا توجد قوالب تطابق البحث أو الفلتر الحالي', 'No templates match the current search or filter') : tr('لا توجد قوالب بعد', 'No templates yet')}
 
-                subtitle={templatesFilteredEmpty ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج" : "أنشئ قوالب جاهزة للوصفات وطلبات المختبر والأشعة والإحالات"}
+            subtitle={templatesFilteredEmpty ? tr('جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج', 'Try adjusting the search terms or resetting the filters to see results') : tr('أنشئ قوالب جاهزة للوصفات وطلبات المختبر والأشعة والإحالات', 'Create ready-made templates for prescriptions, lab and imaging orders, and referrals')}
 
-                actionLabel="قالب جديد"
+            actionLabel={tr('قالب جديد', 'New template')}
 
                 onAction={() => setTemplateFormOpen(true)}
 
@@ -751,7 +748,7 @@ export default function DoctorClinicalLibraryPage() {
 
                 templates={templatesQuery.templates}
 
-                typeLabels={TEMPLATE_TYPE_LABELS}
+                typeLabels={templateTypeLabels}
 
                 applyingTemplateId={
                   applyTemplate.isPending ? applyTemplate.variables : null
@@ -803,7 +800,7 @@ export default function DoctorClinicalLibraryPage() {
 
               pageSize={pageSize}
 
-              itemLabel="عنصر"
+              itemLabel={tr('عنصر', 'item')}
 
               onPageChange={setLibraryPage}
 
@@ -847,7 +844,7 @@ export default function DoctorClinicalLibraryPage() {
 
               pageSize={pageSize}
 
-              itemLabel="قالب"
+              itemLabel={tr('قالب', 'template')}
 
               onPageChange={setTemplatesPage}
 
@@ -895,7 +892,7 @@ export default function DoctorClinicalLibraryPage() {
 
       <ClinicalLibraryTemplateApplyDialog
         open={Boolean(applyPreview)}
-        templateName={applyPreview?.templateName ?? 'قالب'}
+        templateName={applyPreview?.templateName ?? tr('قالب', 'Template')}
         templateType={applyPreview?.templateType}
         application={applyPreview?.application}
         onClose={() => setApplyPreview(null)}
@@ -907,11 +904,11 @@ export default function DoctorClinicalLibraryPage() {
 
         open={Boolean(deleteLibraryId)}
 
-        title="أرشفة عنصر المكتبة"
+        title={tr('أرشفة عنصر المكتبة', 'Archive library item')}
 
-        description="سيتم إخفاء العنصر من القائمة النشطة."
+        description={tr('سيتم إخفاء العنصر من القائمة النشطة.', 'The item will be hidden from the active list.')}
 
-        confirmLabel="أرشفة"
+        confirmLabel={tr('أرشفة', 'Archive')}
 
         onOpenChange={(open) => {
           if (!open) setDeleteLibraryId(null);
@@ -925,7 +922,7 @@ export default function DoctorClinicalLibraryPage() {
 
             await deleteLibrary.mutateAsync(deleteLibraryId);
 
-            toast('تمت أرشفة العنصر.', { variant: 'success' });
+            toast(tr('تمت أرشفة العنصر.', 'The item was archived.'), { variant: 'success' });
 
             setDeleteLibraryId(null);
 
@@ -945,11 +942,11 @@ export default function DoctorClinicalLibraryPage() {
 
         open={Boolean(deleteTemplateId)}
 
-        title="حذف القالب"
+        title={tr('حذف القالب', 'Delete template')}
 
-        description="لا يمكن التراجع عن هذا الإجراء."
+        description={tr('لا يمكن التراجع عن هذا الإجراء.', 'This action cannot be undone.')}
 
-        confirmLabel="حذف"
+        confirmLabel={tr('حذف', 'Delete')}
 
         onOpenChange={(open) => {
           if (!open) setDeleteTemplateId(null);
@@ -963,7 +960,7 @@ export default function DoctorClinicalLibraryPage() {
 
             await deleteTemplate.mutateAsync(deleteTemplateId);
 
-            toast('تم حذف القالب.', { variant: 'success' });
+            toast(tr('تم حذف القالب.', 'The template was deleted.'), { variant: 'success' });
 
             setDeleteTemplateId(null);
 

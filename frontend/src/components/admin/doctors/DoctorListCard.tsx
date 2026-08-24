@@ -113,7 +113,7 @@ export default function DoctorListCard({
           >
             {doctorInitial(d.user?.fullName, t("adminDoctors.card.initialFallback"))}
           </div>
-          <div className="min-w-0 flex-1 text-right">
+          <div className="min-w-0 flex-1 text-start">
             <div className="break-words font-cairo text-sm font-extrabold leading-snug text-[#1F2937] sm:text-[15px]">
               {d.user?.fullName ?? "—"}
             </div>
@@ -150,7 +150,7 @@ export default function DoctorListCard({
           ))}
         </div>
 
-        <div className="flex w-full min-w-0 flex-col gap-2 text-right lg:min-w-0">
+        <div className="flex w-full min-w-0 flex-col gap-2 text-start lg:min-w-0">
           <div className="flex items-start gap-2">
             <Award
               className="mt-0.5 h-4 w-4 shrink-0"

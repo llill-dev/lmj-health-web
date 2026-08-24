@@ -310,7 +310,7 @@ export default function ReviewVerificationRequestDialog({
                 transitionEnd: { visibility: "hidden" },
               },
             }}
-            className="fixed left-1/2 top-1/2 z-[10000] max-h-[90vh] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
+            className="fixed start-1/2 top-1/2 z-[10000] max-h-[90vh] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
             dir={dir}
             lang={locale}
           >
@@ -318,14 +318,14 @@ export default function ReviewVerificationRequestDialog({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
+                  className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7]"
                   aria-label={t("common.close")}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </Dialog.Close>
 
-              <Dialog.Title className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
+              <Dialog.Title className="text-start font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
                 {title}
               </Dialog.Title>
 
@@ -438,7 +438,7 @@ export default function ReviewVerificationRequestDialog({
                   {mode === "approve" &&
                   specializationState.needsAdminResolve ? (
                     <div className="space-y-4 rounded-[12px] border border-[#EEF2F6] bg-[#F8FAFC] px-4 py-4">
-                      <div className="text-right font-cairo text-[13px] font-extrabold text-[#101828]">
+                      <div className="text-start font-cairo text-[13px] font-extrabold text-[#101828]">
                         {t("adminVerificationRequests.specialization.linkBeforeApprove")}
                       </div>
 
@@ -459,7 +459,7 @@ export default function ReviewVerificationRequestDialog({
                       {createNewSpecialization ? (
                         <div className="space-y-3">
                           <div>
-                            <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]">
+                            <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#101828]">
                               {t("adminVerificationRequests.specialization.keyEnLabel")}
                               <span className="ms-1 text-[#F04438]">*</span>
                             </div>
@@ -473,7 +473,7 @@ export default function ReviewVerificationRequestDialog({
                             />
                           </div>
                           <div>
-                            <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]">
+                            <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#101828]">
                               {t("adminVerificationRequests.specialization.nameArLabel")}
                               <span className="ms-1 text-[#F04438]">*</span>
                             </div>
@@ -487,7 +487,7 @@ export default function ReviewVerificationRequestDialog({
                             />
                           </div>
                           <div>
-                            <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]">
+                            <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#101828]">
                               {t("adminVerificationRequests.specialization.nameEnLabel")}
                             </div>
                             <input
@@ -502,7 +502,7 @@ export default function ReviewVerificationRequestDialog({
                         </div>
                       ) : (
                         <div>
-                          <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#101828]">
+                          <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#101828]">
                             {t("adminVerificationRequests.specialization.chooseFromList")}
                             <span className="ms-1 text-[#F04438]">*</span>
                           </div>
@@ -536,7 +536,7 @@ export default function ReviewVerificationRequestDialog({
                   ) : null}
 
                   <div>
-                    <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#101828]">
+                    <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#101828]">
                       {t("adminVerificationRequests.adminNoteLabel")}
                       <span className="ms-1 text-[#F04438]">*</span>
                     </div>
@@ -555,7 +555,7 @@ export default function ReviewVerificationRequestDialog({
                   {mode === "approve" ? (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#101828]">
+                        <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#101828]">
                           {t("adminVerificationRequests.field.clinicLat.label")}
                         </div>
                         <input
@@ -566,7 +566,7 @@ export default function ReviewVerificationRequestDialog({
                         />
                       </div>
                       <div>
-                        <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#101828]">
+                        <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#101828]">
                           {t("adminVerificationRequests.field.clinicLng.label")}
                         </div>
                         <input

@@ -25,7 +25,7 @@ export default function MedicalOrderCatalogRow({
 
   return (
     <div className='flex items-center justify-between gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0'>
-      <div className='min-w-0 flex-1 text-right'>
+      <div className='min-w-0 flex-1 text-start'>
         <div className='font-cairo text-[13px] font-semibold text-[#344054]'>
           {item.label}
         </div>

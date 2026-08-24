@@ -106,7 +106,7 @@ export function DoctorSupportContactForm({
       onSubmit={handleSubmit}
       dir={dir}
       lang={locale}
-      className="space-y-4 text-right"
+      className="space-y-4 text-start"
     >
       <div className="rounded-[12px] border border-[#E0F2FE] bg-[#F0F9FF] px-4 py-3">
         <p className="font-cairo text-[12px] font-semibold leading-[20px] text-[#0369A1]">

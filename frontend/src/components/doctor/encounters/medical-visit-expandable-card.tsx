@@ -39,7 +39,7 @@ function InfoCell({ label, value }: { label: string; value: string }) {
   return (
     <motion.div
       variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-      className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right"
+      className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start"
     >
       <div className="font-cairo text-[11px] font-bold text-[#667085]">
         {label}
@@ -72,7 +72,7 @@ function LinkedAppointmentSection({
       variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
       className="rounded-[12px] border border-[#B2DDFF] bg-[#EFF8FF] px-4 py-4"
     >
-      <h4 className="text-right font-cairo text-[13px] font-extrabold text-[#101828]">
+      <h4 className="text-start font-cairo text-[13px] font-extrabold text-[#101828]">
         الموعد المرتبط
       </h4>
       <div className="mt-3 space-y-3">
@@ -127,7 +127,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
         onClick={onToggle}
         aria-expanded={expanded}
         className={cn(
-          "flex w-full items-start gap-3 px-4 py-4 text-right transition-colors sm:px-5",
+          "flex w-full items-start gap-3 px-4 py-4 text-start transition-colors sm:px-5",
           expanded ? "bg-[#F8FFFE]" : "hover:bg-[#FAFBFC]",
           !expanded && "border-b border-[#F2F4F7]",
         )}
@@ -140,7 +140,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
           >
             <UserRound className="w-5 h-5" aria-hidden />
           </motion.div>
-          <div className="flex-1 min-w-0 text-right">
+          <div className="flex-1 min-w-0 text-start">
             <div className="truncate font-cairo text-[15px] font-black text-[#101828]">
               {visit.patientName}
             </div>
@@ -217,7 +217,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                 variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
                 className="grid grid-cols-1 gap-3 sm:grid-cols-2"
               >
-                <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+                <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
                   <div className="font-cairo text-[11px] font-bold text-[#667085]">
                     بدأت
                   </div>
@@ -225,7 +225,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                     {visit.startedAtLabel}
                   </div>
                 </div>
-                <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+                <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
                   <div className="font-cairo text-[11px] font-bold text-[#667085]">
                     موعد
                   </div>
@@ -270,7 +270,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
               {detailsError ? (
                 <motion.div
                   variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                  className="rounded-[12px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[13px] font-bold text-[#B42318]"
+                  className="rounded-[12px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[13px] font-bold text-[#B42318]"
                 >
                   {detailsError}
                 </motion.div>
@@ -279,7 +279,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
               {visit.notes ? (
                 <motion.section
                   variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
-                  className="rounded-[12px] border border-[#D0D5DD] bg-[#FCFCFD] p-4 text-right"
+                  className="rounded-[12px] border border-[#D0D5DD] bg-[#FCFCFD] p-4 text-start"
                 >
                   <div className="flex items-center gap-2 text-[#344054]">
                     <FileText className="w-4 h-4 text-primary" />
@@ -298,7 +298,7 @@ export const MedicalVisitExpandableCard = memo(function MedicalVisitExpandableCa
                   variants={ENCOUNTERS_EXPAND_CONTENT_ITEM}
                   className="rounded-[12px] border border-[#9EE8E0] bg-gradient-to-br from-[#F0FDFA] to-white p-4"
                 >
-                  <h4 className="mb-3 text-right font-cairo text-[13px] font-extrabold text-[#0F766E]">
+                  <h4 className="mb-3 text-start font-cairo text-[13px] font-extrabold text-[#0F766E]">
                     مسودات الزيارات
                   </h4>
                   <div className="space-y-3">

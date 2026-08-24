@@ -184,8 +184,8 @@ export default function DoctorEncountersPage() {
       setCreateDialogPatientId(null);
       setExpandedVisitId(response.encounter._id);
       setFilters((prev) => ({ ...prev, status: "all" }));
-      toast(response.message ?? "تم إنشاء الزيارة الطبية بنجاح.", {
-        title: "إنشاء زيارة",
+      toast(response.message ?? tr("تم إنشاء الزيارة الطبية بنجاح.", "The medical encounter was created successfully."), {
+        title: tr("إنشاء زيارة", "Create encounter"),
         variant: "success",
       });
       void refetch();
@@ -204,8 +204,8 @@ export default function DoctorEncountersPage() {
         encounterId: closeTarget.id,
       });
 
-      toast(response.message ?? "تم إغلاق الزيارة الطبية بنجاح.", {
-        title: "إغلاق زيارة",
+      toast(response.message ?? tr("تم إغلاق الزيارة الطبية بنجاح.", "The medical encounter was closed successfully."), {
+        title: tr("إغلاق زيارة", "Close encounter"),
         variant: "success",
       });
       const closedPatientId = closeTarget.patientId;
@@ -217,7 +217,7 @@ export default function DoctorEncountersPage() {
       );
     } catch (requestError) {
       toast(getUserFacingRequestErrorMessage(requestError), {
-        title: "تعذر إغلاق الزيارة",
+        title: tr("تعذر إغلاق الزيارة", "Could not close the encounter"),
         variant: "error",
       });
       throw requestError;
@@ -279,7 +279,7 @@ export default function DoctorEncountersPage() {
           </motion.div>
         ) : isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل الزيارات الطبية"
+            title={tr("تعذّر تحميل الزيارات الطبية", "Failed to load medical encounters")}
             brief={getUserFacingRequestErrorMessage(error)}
             detail={getUserFacingRequestErrorMessage(error)}
             retrying={retryingEncounters}
@@ -296,7 +296,7 @@ export default function DoctorEncountersPage() {
                 imageSrc="/images/photo-not-meduical-file.png"
                 title={emptyCopy.title}
                 subtitle={emptyCopy.subtitle}
-                actionLabel="إضافة زيارة جديدة"
+                actionLabel={tr("إضافة زيارة جديدة", "Add new encounter")}
                 onAction={() => openCreateEncounterDialog()}
                 actionIcon={<Plus className="h-4 w-4" />}
               />
@@ -394,18 +394,26 @@ export default function DoctorEncountersPage() {
         onOpenChange={(open) => {
           if (!open) setCloseTarget(null);
         }}
-        title="إغلاق الزيارة الطبية"
+        title={tr("إغلاق الزيارة الطبية", "Close the medical encounter")}
         description={
           closeTarget ? (
-            <>
-              سيتم إغلاق زيارة المريض <strong>{closeTarget.patientName}</strong>.
-              تأكد من عدم وجود مسودات وصفات أو طلبات غير مكتملة قبل المتابعة.
-            </>
+            locale === "ar" ? (
+              <>
+                سيتم إغلاق زيارة المريض <strong>{closeTarget.patientName}</strong>.
+                تأكد من عدم وجود مسودات وصفات أو طلبات غير مكتملة قبل المتابعة.
+              </>
+            ) : (
+              <>
+                The encounter for patient <strong>{closeTarget.patientName}</strong> will
+                be closed. Make sure there are no incomplete prescription drafts or
+                orders before proceeding.
+              </>
+            )
           ) : (
-            "سيتم إغلاق الزيارة الحالية."
+            tr("سيتم إغلاق الزيارة الحالية.", "The current encounter will be closed.")
           )
         }
-        confirmLabel="تأكيد الإغلاق"
+        confirmLabel={tr("تأكيد الإغلاق", "Confirm closing")}
         confirmDisabled={closeEncounterMutation.isPending}
         onConfirm={handleCloseEncounter}
       />

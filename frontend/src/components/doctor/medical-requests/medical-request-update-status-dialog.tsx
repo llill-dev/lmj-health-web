@@ -43,7 +43,7 @@ export function MedicalRequestUpdateStatusDialog({
       title="تحديث الحالة"
       maxWidthClass="max-w-[480px]"
     >
-      <div className="space-y-5 text-right" dir={dir}>
+      <div className="space-y-5 text-start" dir={dir}>
         <p className="font-cairo text-[13px] font-semibold leading-6 text-[#667085]">
           تحديث حالة طلب المريض{' '}
           <span className="font-extrabold text-[#111827]">{patientName}</span>

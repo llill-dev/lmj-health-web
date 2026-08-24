@@ -20,10 +20,10 @@ export function FaqAccordionItem({
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center gap-3 px-5 py-4 text-right transition hover:bg-[#ECFDF5]"
+        className="flex w-full items-center gap-3 px-5 py-4 text-start transition hover:bg-[#ECFDF5]"
         aria-expanded={open}
       >
-        <div className="flex min-w-0 flex-1 items-center justify-start gap-3 text-right">
+        <div className="flex min-w-0 flex-1 items-center justify-start gap-3 text-start">
           <span className="shrink-0 font-cairo text-[14px] font-black text-primary">
             {item.number}
           </span>

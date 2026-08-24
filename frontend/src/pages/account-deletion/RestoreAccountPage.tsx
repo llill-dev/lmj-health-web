@@ -513,7 +513,7 @@ export default function RestoreAccountPage() {
                   {error ? (
                     <p
                       role="alert"
-                      className="mt-3 text-right font-cairo text-[12px] font-bold leading-[20px] text-[#DC2626]"
+                      className="mt-3 text-start font-cairo text-[12px] font-bold leading-[20px] text-[#DC2626]"
                     >
                       {error}
                     </p>

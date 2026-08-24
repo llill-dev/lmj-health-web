@@ -196,19 +196,19 @@ export default function BroadcastNotificationDialog({
                   if (!isSubmitting) onOpenChange(false);
                 }}
                 disabled={isSubmitting}
-                className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-50"
+                className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={t("common.close")}
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <h2 className="text-right font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
+              <h2 className="text-start font-cairo text-[22px] font-extrabold leading-[28px] text-[#101828]">
                 {t("adminNotifications.broadcast.ariaLabel")}
               </h2>
 
               <form
                 onSubmit={handleSubmit}
-                className="mt-10 max-h-[calc(92vh-220px)] overflow-y-auto space-y-6 pl-3 pr-2"
+                className="mt-10 max-h-[calc(92vh-220px)] overflow-y-auto space-y-6 ps-3 pe-2"
               >
                 <div className="rounded-[8px] border border-[#FDE68A] bg-[#FFFBEB] p-3">
                   <div className="flex items-start gap-2">
@@ -342,7 +342,7 @@ export default function BroadcastNotificationDialog({
                     }}
                     placeholder={t("adminNotifications.broadcast.field.extraData.placeholder")}
                     rows={2}
-                    className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-right font-cairo text-[11px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none font-mono"
+                    className="w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-3 text-start font-cairo text-[11px] font-bold text-[#111827] outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none font-mono"
                   />
                   {errors.data && (
                     <p className="mt-1 font-cairo text-[11px] font-semibold text-[#DC2626]">

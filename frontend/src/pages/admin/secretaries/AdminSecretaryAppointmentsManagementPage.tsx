@@ -47,7 +47,7 @@ export default function AdminSecretaryAppointmentsManagementPage() {
         />
 
         <section className='mt-5 rounded-[12px] border border-[#D5E8E6] bg-[#F8FFFE] px-5 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-          <div className='flex items-start gap-3 text-right'>
+          <div className='flex items-start gap-3 text-start'>
             <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary'>
               <Settings className='h-5 w-5' />
             </div>

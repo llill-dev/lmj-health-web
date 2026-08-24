@@ -28,6 +28,7 @@ export default function DoctorEncounterOrderPreviewPage({
   category: CatalogOrderCategory;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -83,8 +84,8 @@ export default function DoctorEncounterOrderPreviewPage({
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title="رابط غير صالح"
-        brief="معرّف المريض أو الزيارة مفقود."
+        title={tr('رابط غير صالح', 'Invalid link')}
+        brief={tr('معرّف المريض أو الزيارة مفقود.', 'The patient or encounter identifier is missing.')}
         onRetry={() => navigate('/doctor/encounters')}
       />
     );
@@ -93,7 +94,7 @@ export default function DoctorEncounterOrderPreviewPage({
   return (
     <>
       <Helmet>
-        <title>معاينة {preview.config.title} • LMJ Health</title>
+        <title>{tr('معاينة', 'Preview')} {preview.config.title} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -107,7 +108,7 @@ export default function DoctorEncounterOrderPreviewPage({
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
-            title="تعذّر تحميل المعاينة"
+            title={tr('تعذّر تحميل المعاينة', 'Failed to load the preview')}
             brief={getUserFacingRequestErrorMessage(preview.error)}
             retrying={retryingPreview}
             onRetry={() => void retryPreview()}
@@ -128,15 +129,18 @@ export default function DoctorEncounterOrderPreviewPage({
         <ConfirmActionDialog
           open={finalizeOpen}
           onOpenChange={setFinalizeOpen}
-          title="اعتماد نهائي"
-          description={`اعتماد ${preview.config.title} للمريض ${preview.previewVm?.patientName ?? '—'}`}
-          confirmLabel="تأكيد"
+          title={tr('اعتماد نهائي', 'Final approval')}
+          description={tr(
+            `اعتماد ${preview.config.title} للمريض ${preview.previewVm?.patientName ?? '—'}`,
+            `Approve ${preview.config.title} for patient ${preview.previewVm?.patientName ?? '—'}`,
+          )}
+          confirmLabel={tr('تأكيد', 'Confirm')}
           confirmDisabled={busy || workspace.isBusy}
           onConfirm={async () => {
             setBusy(true);
             try {
               await workspace.finalize();
-              toast('تم اعتماد الطلب.', { variant: 'success' });
+              toast(tr('تم اعتماد الطلب.', 'The order has been approved.'), { variant: 'success' });
               setFinalizeOpen(false);
               navigate(
                 `/doctor/encounters/${patientId}/${encounterId}/summary`,

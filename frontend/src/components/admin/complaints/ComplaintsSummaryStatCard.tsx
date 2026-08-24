@@ -81,7 +81,7 @@ export default function ComplaintsSummaryStatCard({
         {icon}
         <div
           dir={dir}
-          className='flex min-w-0 flex-1 flex-col gap-1 text-right'
+          className='flex min-w-0 flex-1 flex-col gap-1 text-start'
         >
           <div className={`font-cairo ${labelClass}`}>{label}</div>
           <div className={`font-cairo ${valueClass}`}>{value}</div>

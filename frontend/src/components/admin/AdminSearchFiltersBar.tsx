@@ -101,12 +101,12 @@ export default function AdminSearchFiltersBar({
             }
             className={
               queryEndAdornment
-                ? 'h-[42px] w-full min-w-0 rounded-[10px] border border-[#E5E7EB] bg-white pe-10 ps-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
-                : 'h-[42px] w-full min-w-0 rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+                ? 'h-[42px] w-full min-w-0 rounded-[10px] border border-[#E5E7EB] bg-white pe-10 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+                : 'h-[42px] w-full min-w-0 rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
             }
           />
           {queryEndAdornment ? (
-            <div className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
+            <div className='pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
               {queryEndAdornment}
             </div>
           ) : null}
