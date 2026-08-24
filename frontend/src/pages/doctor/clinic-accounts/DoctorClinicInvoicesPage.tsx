@@ -34,14 +34,18 @@ import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
 
 type InvoiceFilter = "all" | InvoiceStatus;
 
-const FILTER_OPTIONS: Array<{ id: InvoiceFilter; label: string }> = [
-  { id: "all", label: "الكل" },
-  { id: "paid", label: "مدفوعة" },
-  { id: "unpaid", label: "غير مدفوعة" },
-  { id: "partial", label: "مدفوعة جزئياً" },
-  { id: "overdue", label: "متأخرة" },
-  { id: "cancelled", label: "ملغاة" },
-];
+function buildFilterOptions(
+  tr: (ar: string, en: string) => string,
+): Array<{ id: InvoiceFilter; label: string }> {
+  return [
+    { id: "all", label: tr("الكل", "All") },
+    { id: "paid", label: tr("مدفوعة", "Paid") },
+    { id: "unpaid", label: tr("غير مدفوعة", "Unpaid") },
+    { id: "partial", label: tr("مدفوعة جزئياً", "Partially paid") },
+    { id: "overdue", label: tr("متأخرة", "Overdue") },
+    { id: "cancelled", label: tr("ملغاة", "Cancelled") },
+  ];
+}
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -55,6 +59,7 @@ function pickStatusCount(
 export default function DoctorClinicInvoicesPage() {
   const { locale, dir } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const filterOptions = buildFilterOptions(tr);
   const navigate = useNavigate();
   const {
     basePath,
@@ -192,21 +197,21 @@ export default function DoctorClinicInvoicesPage() {
             setFilter(nextFilter);
             setPage(1);
           }}
-          options={FILTER_OPTIONS}
+          options={filterOptions}
         />
 
         <ClinicAccountsSearchRow
           value={search}
           onChange={setSearch}
           onValueChangeExtra={() => setPage(1)}
-          placeholder="بحث بالاسم أو رقم الفاتورة..."
+          placeholder={tr("بحث بالاسم أو رقم الفاتورة...", "Search by name or invoice number...")}
           onClear={() => {
             setSearch('');
             setFilter('all');
             setPage(1);
           }}
           trailing={
-            <ClinicAccountsSearchCount count={listQuery.total} label="فاتورة" />
+            <ClinicAccountsSearchCount count={listQuery.total} label={tr("فاتورة", "invoice")} />
           }
         />
 
@@ -226,15 +231,15 @@ export default function DoctorClinicInvoicesPage() {
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
             title={
               search.trim() || filter !== 'all'
-                ? 'لا توجد فواتير تطابق البحث أو الفلتر الحالي'
-                : 'لا توجد فواتير صادرة بعد'
+                ? tr('لا توجد فواتير تطابق البحث أو الفلتر الحالي', 'No invoices match the current search or filter')
+                : tr('لا توجد فواتير صادرة بعد', 'No invoices issued yet')
             }
             subtitle={
               search.trim() || filter !== 'all'
-                ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
-                : 'أنشئ فواتير للمرضى وتتبع المدفوعات والمبالغ المستحقة'
+                ? tr('جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج', 'Try adjusting the search terms or resetting the filters to see results')
+                : tr('أنشئ فواتير للمرضى وتتبع المدفوعات والمبالغ المستحقة', 'Create invoices for patients and track payments and amounts due')
             }
-            actionLabel={canManageInvoices ? "فاتورة جديدة" : undefined}
+            actionLabel={canManageInvoices ? tr("فاتورة جديدة", "New invoice") : undefined}
             onAction={
               canManageInvoices
                 ? () => navigate(`${basePath}/invoices/new`)
