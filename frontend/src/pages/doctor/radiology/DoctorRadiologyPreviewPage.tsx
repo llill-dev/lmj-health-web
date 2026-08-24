@@ -26,6 +26,7 @@ import { useI18n } from '@/i18n/provider';
 
 export default function DoctorRadiologyPreviewPage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -83,7 +84,7 @@ export default function DoctorRadiologyPreviewPage() {
   return (
     <>
       <Helmet>
-        <title>معاينة طلب الأشعة • LMJ Health</title>
+        <title>{tr('معاينة طلب الأشعة', 'Radiology order preview')} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -97,7 +98,7 @@ export default function DoctorRadiologyPreviewPage() {
           <DoctorDocumentPreviewSkeleton />
         ) : preview.isError || !preview.previewVm ? (
           <DoctorListErrorState
-            title="تعذّر تحميل المعاينة"
+            title={tr('تعذّر تحميل المعاينة', 'Failed to load the preview')}
             brief={getUserFacingRequestErrorMessage(preview.error)}
             retrying={retryingPreview}
             onRetry={() => void retryPreview()}
@@ -118,15 +119,18 @@ export default function DoctorRadiologyPreviewPage() {
         <ConfirmActionDialog
           open={finalizeOpen}
           onOpenChange={setFinalizeOpen}
-          title="اعتماد نهائي"
-          description={`اعتماد طلب الأشعة للمريض ${preview.previewVm?.patientName ?? '—'}`}
-          confirmLabel="تأكيد"
+          title={tr('اعتماد نهائي', 'Final approval')}
+          description={tr(
+            `اعتماد طلب الأشعة للمريض ${preview.previewVm?.patientName ?? '—'}`,
+            `Approve the radiology order for patient ${preview.previewVm?.patientName ?? '—'}`,
+          )}
+          confirmLabel={tr('تأكيد', 'Confirm')}
           confirmDisabled={busy || workspace.isBusy}
           onConfirm={async () => {
             setBusy(true);
             try {
               await workspace.finalize();
-              toast('تم اعتماد الطلب.', { variant: 'success' });
+              toast(tr('تم اعتماد الطلب.', 'The order has been approved.'), { variant: 'success' });
               setFinalizeOpen(false);
               navigate(
                 `/doctor/encounters/${patientId}/${encounterId}/summary`,
