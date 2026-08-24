@@ -263,7 +263,7 @@ export default function DoctorAppointmentTypesPage() {
 
       });
 
-      toast('تم إنشاء نوع الموعد.', { variant: 'success' });
+      toast(tr('تم إنشاء نوع الموعد.', 'The appointment type has been created.'), { variant: 'success' });
 
       setCreateOpen(false);
 
@@ -303,7 +303,7 @@ export default function DoctorAppointmentTypesPage() {
 
       });
 
-      toast('تم تحديث نوع الموعد.', { variant: 'success' });
+      toast(tr('تم تحديث نوع الموعد.', 'The appointment type has been updated.'), { variant: 'success' });
 
       setEditTarget(null);
 
@@ -327,7 +327,7 @@ export default function DoctorAppointmentTypesPage() {
 
       await deleteType.deleteTypeAsync(deleteTarget._id);
 
-      toast('تم حذف نوع الموعد.', { variant: 'success' });
+      toast(tr('تم حذف نوع الموعد.', 'The appointment type has been deleted.'), { variant: 'success' });
 
       setDeleteTarget(null);
 
@@ -542,7 +542,7 @@ export default function DoctorAppointmentTypesPage() {
                       )
                 }
 
-                actionLabel="نوع جديد"
+                actionLabel={tr('نوع جديد', 'New type')}
 
                 onAction={() => setCreateOpen(true)}
 
@@ -592,7 +592,7 @@ export default function DoctorAppointmentTypesPage() {
 
               pageSize={pageSize}
 
-              itemLabel="نوع"
+              itemLabel={tr('نوع', 'type')}
 
               onPageChange={setPage}
 
@@ -658,9 +658,12 @@ export default function DoctorAppointmentTypesPage() {
 
         title={tr('حذف نوع الموعد', 'Delete appointment type')}
 
-        description={`هل تريد حذف "${deleteTarget?.name ?? ''}"؟`}
+        description={tr(
+          `هل تريد حذف "${deleteTarget?.name ?? ''}"؟`,
+          `Do you want to delete "${deleteTarget?.name ?? ''}"?`,
+        )}
 
-        confirmLabel="حذف"
+        confirmLabel={tr('حذف', 'Delete')}
 
         confirmDisabled={deleteType.isLoading}
 
