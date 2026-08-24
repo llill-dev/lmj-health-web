@@ -82,7 +82,7 @@ export default function DoctorClinicLocationPage() {
     }
   }, [initialValues, dirty]);
 
-  const statusLabel = clinicVerificationLabel(verificationStatus);
+  const statusLabel = clinicVerificationLabel(verificationStatus, tr);
 
   const parsedCoords = useMemo(() => {
     const lat = Number(form.lat);
@@ -118,8 +118,8 @@ export default function DoctorClinicLocationPage() {
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast('المتصفح لا يدعم تحديد الموقع الجغرافي.', {
-        title: 'غير متاح',
+      toast(tr('المتصفح لا يدعم تحديد الموقع الجغرافي.', 'The browser does not support geolocation.'), {
+        title: tr('غير متاح', 'Unavailable'),
         variant: 'error',
       });
       return;
@@ -133,17 +133,23 @@ export default function DoctorClinicLocationPage() {
           position.coords.longitude,
         );
         setGeoLoading(false);
-        toast('تم تحديد موقعك الحالي على الخريطة.', {
-          title: 'تم التحديد',
+        toast(tr('تم تحديد موقعك الحالي على الخريطة.', 'Your current location was pinned on the map.'), {
+          title: tr('تم التحديد', 'Located'),
           variant: 'success',
         });
       },
       () => {
         setGeoLoading(false);
-        toast('تعذّر الحصول على موقعك. تحقق من أذونات المتصفح.', {
-          title: 'فشل تحديد الموقع',
-          variant: 'error',
-        });
+        toast(
+          tr(
+            'تعذّر الحصول على موقعك. تحقق من أذونات المتصفح.',
+            'Could not get your location. Check your browser permissions.',
+          ),
+          {
+            title: tr('فشل تحديد الموقع', 'Failed to locate'),
+            variant: 'error',
+          },
+        );
       },
       { enableHighAccuracy: true, timeout: 15000 },
     );
@@ -152,8 +158,8 @@ export default function DoctorClinicLocationPage() {
   const handleSearchAddress = async () => {
     const trimmed = query.trim();
     if (!trimmed) {
-      toast('اكتب عنواناً للبحث أولاً.', {
-        title: 'بحث فارغ',
+      toast(tr('اكتب عنواناً للبحث أولاً.', 'Type an address to search first.'), {
+        title: tr('بحث فارغ', 'Empty search'),
         variant: 'error',
       });
       return;
@@ -163,22 +169,28 @@ export default function DoctorClinicLocationPage() {
     try {
       const result = await geocodeAddress(trimmed);
       if (!result) {
-        toast('لم نجد نتيجة مطابقة لهذا العنوان.', {
-          title: 'لا توجد نتائج',
+        toast(tr('لم نجد نتيجة مطابقة لهذا العنوان.', 'No matching result was found for this address.'), {
+          title: tr('لا توجد نتائج', 'No results'),
           variant: 'error',
         });
         return;
       }
       applyCoordinates(result.lat, result.lng, result.displayName);
-      toast('تم تحديد الموقع من نتيجة البحث.', {
-        title: 'تم العثور على العنوان',
+      toast(tr('تم تحديد الموقع من نتيجة البحث.', 'The location was set from the search result.'), {
+        title: tr('تم العثور على العنوان', 'Address found'),
         variant: 'success',
       });
     } catch {
-      toast('تعذّر البحث عن العنوان حالياً. حاول مرة أخرى.', {
-        title: 'خطأ في البحث',
-        variant: 'error',
-      });
+      toast(
+        tr(
+          'تعذّر البحث عن العنوان حالياً. حاول مرة أخرى.',
+          'Could not search for the address right now. Please try again.',
+        ),
+        {
+          title: tr('خطأ في البحث', 'Search error'),
+          variant: 'error',
+        },
+      );
     } finally {
       setSearchLoading(false);
     }
@@ -187,16 +199,16 @@ export default function DoctorClinicLocationPage() {
   const handleSubmitReview = async () => {
     if (!doctor) return;
 
-    const validationError = validateClinicLocationForm(form);
+    const validationError = validateClinicLocationForm(form, tr);
     if (validationError) {
-      toast(validationError, { title: 'تحقق من البيانات', variant: 'error' });
+      toast(validationError, { title: tr('تحقق من البيانات', 'Check the data'), variant: 'error' });
       return;
     }
 
     const items = buildChangeItems(doctor, form);
     if (!items.length) {
-      toast('لم يتم تغيير الموقع أو العنوان.', {
-        title: 'لا توجد تغييرات',
+      toast(tr('لم يتم تغيير الموقع أو العنوان.', 'The location or address was not changed.'), {
+        title: tr('لا توجد تغييرات', 'No changes'),
         variant: 'error',
       });
       return;
@@ -205,12 +217,12 @@ export default function DoctorClinicLocationPage() {
     try {
       await submitLocationChange({
         items,
-        reason: 'طلب تحديث موقع العيادة',
+        reason: tr('طلب تحديث موقع العيادة', 'Request to update the clinic location'),
       });
       setDirty(false);
       toast(
         hasPendingLocationRequest
-          ? 'تم تحديث طلب المراجعة الحالي.'
+          ? tr('تم تحديث طلب المراجعة الحالي.', 'The current review request was updated.')
           : 'تم إرسال موقع العيادة للمراجعة. ستُحدَّث حالة التوثيق بعد موافقة الإدارة.',
         {
           title: 'تم الإرسال',

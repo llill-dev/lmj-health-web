@@ -354,7 +354,7 @@ export default function AdminFacilitiesPage() {
                 })
               }
               options={[
-                { value: "", label: "كل الأنواع" },
+                { value: "", label: tr("كل الأنواع", "All types") },
                 ...Object.entries(FACILITY_TYPE_LABELS).map(
                   ([value, label]) => ({
                     value,
