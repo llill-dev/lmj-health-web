@@ -123,7 +123,7 @@ export default function DoctorActivityLogPage() {
             className="mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-start"
           >
             <div className="font-cairo text-[12px] font-semibold text-[#B42318]">
-              {errorMessage ?? "تعذّر تحديث سجل النشاطات. ما زالت آخر البيانات المتاحة معروضة."}
+              {errorMessage ?? tr("تعذّر تحديث سجل النشاطات. ما زالت آخر البيانات المتاحة معروضة.", "Failed to refresh the activity log. The latest available data is still shown.")}
             </div>
             <button
               type="button"
@@ -132,7 +132,7 @@ export default function DoctorActivityLogPage() {
               className="mt-3 inline-flex h-[34px] items-center gap-2 rounded-[10px] border border-[#FCA5A5] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#B42318] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw className={`h-4 w-4 ${retryingActivity ? "animate-spin" : ""}`} />
-              {retryingActivity ? "جارٍ إعادة المحاولة..." : "إعادة المحاولة"}
+              {retryingActivity ? tr("جارٍ إعادة المحاولة...", "Retrying...") : tr("إعادة المحاولة", "Retry")}
             </button>
           </div>
         ) : null}
@@ -147,7 +147,7 @@ export default function DoctorActivityLogPage() {
             pageSize={activityQuery.pageSize}
             disabled={activityQuery.searching}
             onPageChange={setPage}
-            itemLabel="نشاط"
+            itemLabel={tr("نشاط", "activity")}
           />
         ) : null}
 
