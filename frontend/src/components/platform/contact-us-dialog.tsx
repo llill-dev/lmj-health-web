@@ -399,7 +399,7 @@ export function ContactUsDialog({
               {selectedFileName ?? "اضغط لاختيار ملف"}
             </span>
             <span className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
-              المرفقات عبر API متاحة للمرضى فقط (POST /api/complaints + ملفات المريض)
+              إرفاق الملفات متاح للمرضى المسجلين فقط
             </span>
           </button>
         </div>

@@ -23,6 +23,7 @@ import { useI18n } from '@/i18n/provider';
 
 export default function DoctorEncounterSummaryPage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -49,8 +50,11 @@ export default function DoctorEncounterSummaryPage() {
   const handleExportPdf = async () => {
     if (!exportPdfSource) {
       toast(
-        'لا توجد وصفة أو طلب معتمد لتصديره. اعتماد الوصفة أو الطلبات يفعّل التصدير.',
-        { title: 'تصدير PDF', variant: 'info' },
+        tr(
+          'لا توجد وصفة أو طلب معتمد لتصديره. اعتماد الوصفة أو الطلبات يفعّل التصدير.',
+          'There is no finalized prescription or order to export. Finalizing the prescription or orders enables export.',
+        ),
+        { title: tr('تصدير PDF', 'Export PDF'), variant: 'info' },
       );
       return;
     }
@@ -63,7 +67,7 @@ export default function DoctorEncounterSummaryPage() {
       );
     } catch (requestError) {
       toast(getUserFacingRequestErrorMessage(requestError), {
-        title: 'تعذّر تصدير PDF',
+        title: tr('تعذّر تصدير PDF', 'Could not export PDF'),
         variant: 'error',
       });
     } finally {
@@ -74,8 +78,8 @@ export default function DoctorEncounterSummaryPage() {
   const handleFinishConfirm = async () => {
     setFinishing(true);
     try {
-      toast('تم حفظ مراجعة ملخص الزيارة.', {
-        title: 'إنهاء الزيارة',
+      toast(tr('تم حفظ مراجعة ملخص الزيارة.', 'The encounter summary review was saved.'), {
+        title: tr('إنهاء الزيارة', 'Finish encounter'),
         variant: 'success',
       });
       setFinishConfirmOpen(false);
@@ -88,8 +92,8 @@ export default function DoctorEncounterSummaryPage() {
   if (!patientId || !encounterId) {
     return (
       <DoctorListErrorState
-        title="رابط غير صالح"
-        brief="معرّف المريض أو الزيارة مفقود."
+        title={tr('رابط غير صالح', 'Invalid link')}
+        brief={tr('معرّف المريض أو الزيارة مفقود.', 'The patient or encounter ID is missing.')}
         onRetry={() => navigate('/doctor/encounters')}
       />
     );
@@ -98,7 +102,7 @@ export default function DoctorEncounterSummaryPage() {
   return (
     <>
       <Helmet>
-        <title>ملخص الزيارة الطبية • LMJ Health</title>
+        <title>{tr('ملخص الزيارة الطبية', 'Encounter summary')} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className="w-full pb-8 sm:pb-10">
@@ -108,7 +112,7 @@ export default function DoctorEncounterSummaryPage() {
           <DoctorSummaryPageSkeleton />
         ) : isError || !summary || !encounter ? (
           <DoctorListErrorState
-            title="تعذّر تحميل ملخص الزيارة"
+            title={tr('تعذّر تحميل ملخص الزيارة', 'Failed to load the encounter summary')}
             brief={getUserFacingRequestErrorMessage(error)}
             retrying={retryingSummary}
             onRetry={() => void retrySummary()}
@@ -117,19 +121,23 @@ export default function DoctorEncounterSummaryPage() {
           <>
             {profileDenied ? (
               <div className="mb-4 rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B45309]">
-                بعض بيانات الملف الكامل غير متاحة؛ يُعرض الملخص من بيانات الزيارة
-                والملف العام.
+                {tr(
+                  'بعض بيانات الملف الكامل غير متاحة؛ يُعرض الملخص من بيانات الزيارة والملف العام.',
+                  'Some full-profile data is not available; the summary is shown from encounter and public profile data.',
+                )}
               </div>
             ) : null}
 
             {encounter.status !== 'closed' ? (
               <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#1D4ED8]">
-                هذه الزيارة ما زالت مفتوحة. الملخص يعرض التوثيق الحالي قبل
-                الإغلاق النهائي.
+                {tr(
+                  'هذه الزيارة ما زالت مفتوحة. الملخص يعرض التوثيق الحالي قبل الإغلاق النهائي.',
+                  'This encounter is still open. The summary shows the current documentation before final closure.',
+                )}
               </div>
             ) : summary.closedAtLabel ? (
               <div className="mb-4 rounded-[12px] border border-[#BFEDEC] bg-[#E6F4F3] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-primary">
-                تم إغلاق الزيارة: {summary.closedAtLabel}
+                {tr('تم إغلاق الزيارة:', 'Encounter closed:')} {summary.closedAtLabel}
               </div>
             ) : null}
 
