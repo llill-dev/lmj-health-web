@@ -21,27 +21,32 @@ import { getPatientFileMutationErrorMessage } from '@/lib/doctor/writeFlowErrors
 import { useDoctorPatientFiles } from '@/hooks/doctor/patients/useDoctorPatients';
 import { useI18n } from '@/i18n/provider';
 
-const CLINICAL_ACTIONS: Array<{
+type TrFn = (ar: string, en: string) => string;
+const defaultTr: TrFn = (ar) => ar;
+
+function buildClinicalActions(tr: TrFn = defaultTr): Array<{
   key: ConsultationClinicalAction;
   label: string;
   icon: typeof FlaskConical;
-}> = [
-  {
-    key: 'lab',
-    label: 'طلب تحاليل',
-    icon: FlaskConical,
-  },
-  {
-    key: 'imaging',
-    label: 'طلب أشعة',
-    icon: ScanLine,
-  },
-  {
-    key: 'prescription',
-    label: 'الوصفة الطبية',
-    icon: Pill,
-  },
-];
+}> {
+  return [
+    {
+      key: 'lab',
+      label: tr('طلب تحاليل', 'Order labs'),
+      icon: FlaskConical,
+    },
+    {
+      key: 'imaging',
+      label: tr('طلب أشعة', 'Order imaging'),
+      icon: ScanLine,
+    },
+    {
+      key: 'prescription',
+      label: tr('الوصفة الطبية', 'Prescription'),
+      icon: Pill,
+    },
+  ];
+}
 
 export default function ConsultationReplyPanel({
   patientId,
@@ -74,7 +79,8 @@ export default function ConsultationReplyPanel({
   onDismiss: () => void;
   closing?: boolean;
 }) {
-  const { dir } = useI18n();
+  const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -106,7 +112,7 @@ export default function ConsultationReplyPanel({
       const response = await doctorApi.patients.uploadFile(
         patientId,
         file,
-        'مرفق استشارة أونلاين',
+        tr('مرفق استشارة أونلاين', 'Online consultation attachment'),
       );
       const uploaded = response.file;
       const ref = uploaded?._id ?? uploaded?.id;
@@ -115,10 +121,10 @@ export default function ConsultationReplyPanel({
         ref,
         fileName: uploaded.originalName?.trim() || file.name,
       });
-      toast('تم إرفاق الملف.', { title: 'رفع الملف', variant: 'success' });
+      toast(tr('تم إرفاق الملف.', 'The file has been attached.'), { title: tr('رفع الملف', 'Upload file'), variant: 'success' });
     } catch (error) {
       toast(getPatientFileMutationErrorMessage(error, 'upload'), {
-        title: 'تعذّر رفع الملف',
+        title: tr('تعذّر رفع الملف', 'Failed to upload the file'),
         variant: 'error',
       });
     } finally {
@@ -130,7 +136,7 @@ export default function ConsultationReplyPanel({
   return (
     <div className="mt-4 rounded-[12px] border border-[#EEF2F6] bg-white px-4 py-4">
       <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
-        إرسال رد
+        {tr('إرسال رد', 'Send a reply')}
       </div>
 
       <div dir="ltr" className="mt-3 flex items-center gap-2">
@@ -138,7 +144,7 @@ export default function ConsultationReplyPanel({
           type="button"
           disabled={!canSend}
           onClick={onSend}
-          aria-label="إرسال الرد"
+          aria-label={tr('إرسال الرد', 'Send the reply')}
           className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[8px] bg-primary text-white shadow-[0_10px_20px_rgba(15,143,139,0.28)] disabled:opacity-50"
         >
           {sending ? (
@@ -153,7 +159,7 @@ export default function ConsultationReplyPanel({
           onChange={(event) => onDraftChange(event.target.value)}
           disabled={disabled}
           dir={dir}
-          placeholder={disabled ? 'لا يمكن الرد على هذه الاستشارة' : 'اكتب ردك...'}
+          placeholder={disabled ? tr('لا يمكن الرد على هذه الاستشارة', 'You cannot reply to this consultation') : tr('اكتب ردك...', 'Write your reply...')}
           className="h-[44px] min-w-0 flex-1 rounded-[8px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3] disabled:bg-[#F9FAFB] disabled:text-[#98A2B3]"
           onKeyDown={(event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -177,8 +183,8 @@ export default function ConsultationReplyPanel({
           type="button"
           disabled={disabled || uploading || !patientId}
           onClick={() => fileInputRef.current?.click()}
-          aria-label="رفع ملف"
-          title="رفع ملف"
+          aria-label={tr('رفع ملف', 'Upload file')}
+          title={tr('رفع ملف', 'Upload file')}
           className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#667085] hover:bg-[#F9FAFB] disabled:opacity-50"
         >
           {uploading ? (
@@ -206,7 +212,7 @@ export default function ConsultationReplyPanel({
                   )
                 }
                 className="text-[#667085] hover:text-[#B42318]"
-                aria-label="إزالة المرفق"
+                aria-label={tr('إزالة المرفق', 'Remove attachment')}
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -222,7 +228,7 @@ export default function ConsultationReplyPanel({
           onClick={() => setPickerOpen((open) => !open)}
           className="font-cairo text-[11px] font-semibold text-primary hover:underline disabled:opacity-50"
         >
-          {pickerOpen ? 'إخفاء ملفات المريض' : 'اختيار من ملفات المريض'}
+          {pickerOpen ? tr('إخفاء ملفات المريض', 'Hide patient files') : tr('اختيار من ملفات المريض', 'Choose from patient files')}
         </button>
       </div>
 
@@ -231,11 +237,11 @@ export default function ConsultationReplyPanel({
           {patientFilesAwaitingData ? (
             <div className="flex items-center justify-center gap-2 py-4 font-cairo text-[12px] font-semibold text-[#667085]">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              جاري تحميل الملفات…
+              {tr('جاري تحميل الملفات…', 'Loading files…')}
             </div>
           ) : patientFilesQuery.files.length === 0 ? (
             <div className="py-3 text-center font-cairo text-[12px] font-semibold text-[#98A2B3]">
-              لا توجد ملفات مرتبطة بهذا المريض.
+              {tr('لا توجد ملفات مرتبطة بهذا المريض.', 'No files are linked to this patient.')}
             </div>
           ) : (
             patientFilesQuery.files.map((file) => {
@@ -249,15 +255,15 @@ export default function ConsultationReplyPanel({
                   onClick={() => {
                     addAttachment({
                       ref,
-                      fileName: file.originalName?.trim() || 'ملف مريض',
+                      fileName: file.originalName?.trim() || tr('ملف مريض', 'Patient file'),
                     });
                     setPickerOpen(false);
                   }}
                   className="flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-start font-cairo text-[12px] font-semibold text-[#111827] hover:bg-white disabled:opacity-50"
                 >
-                  <span className="truncate">{file.originalName || 'ملف بدون اسم'}</span>
+                  <span className="truncate">{file.originalName || tr('ملف بدون اسم', 'Unnamed file')}</span>
                   {selected ? (
-                    <span className="text-[11px] font-extrabold text-primary">مضاف</span>
+                    <span className="text-[11px] font-extrabold text-primary">{tr('مضاف', 'Added')}</span>
                   ) : null}
                 </button>
               );
@@ -267,7 +273,7 @@ export default function ConsultationReplyPanel({
       ) : null}
 
       <div dir={dir} className="mt-4 grid grid-cols-3 gap-2">
-        {CLINICAL_ACTIONS.map((action) => {
+        {buildClinicalActions(tr).map((action) => {
           const Icon = action.icon;
           const isBusy = busyClinicalAction === action.key;
           return (
@@ -291,9 +297,10 @@ export default function ConsultationReplyPanel({
 
       {!disabled ? (
         <p dir={dir} className="mt-2 font-cairo text-[10px] font-semibold text-[#98A2B3]">
-          عند فتح طلب تحاليل أو أشعة أو وصفة، يُربَط المريض تلقائياً بقائمتك ثم تُفتح
-          زيارة سريرية مرتبطة بهذه الاستشارة. لن يُبلَغ المريض حتى تُنهي الطلب أو
-          الوصفة.
+          {tr(
+            'عند فتح طلب تحاليل أو أشعة أو وصفة، يُربَط المريض تلقائياً بقائمتك ثم تُفتح زيارة سريرية مرتبطة بهذه الاستشارة. لن يُبلَغ المريض حتى تُنهي الطلب أو الوصفة.',
+            'When you open a lab, imaging, or prescription order, the patient is automatically linked to your list and a clinical encounter tied to this consultation is opened. The patient will not be notified until you finalize the order or prescription.',
+          )}
         </p>
       ) : null}
 
@@ -302,11 +309,11 @@ export default function ConsultationReplyPanel({
           <button
             type="button"
             disabled
-            title="حفظ المسودة غير مدعوم حالياً في API الاستشارات"
+            title={tr('حفظ المسودة غير مدعوم حالياً في API الاستشارات', 'Saving a draft is not currently supported in the consultations API')}
             className="flex h-[44px] items-center justify-center gap-2 rounded-[8px] bg-[#475467] font-cairo text-[12px] font-extrabold text-white opacity-50"
           >
             <Link2 className="h-4 w-4" />
-            حفظ كمسودة
+            {tr('حفظ كمسودة', 'Save as draft')}
           </button>
           <button
             type="button"
@@ -319,7 +326,7 @@ export default function ConsultationReplyPanel({
             ) : (
               <CheckCircle2 className="h-4 w-4" />
             )}
-            إغلاق الاستشارة
+            {tr('إغلاق الاستشارة', 'Close consultation')}
           </button>
         </div>
       ) : null}
@@ -332,7 +339,7 @@ export default function ConsultationReplyPanel({
           className="mt-3 flex h-[40px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#FECACA] bg-[#FFF1F2] font-cairo text-[12px] font-extrabold text-[#B42318] disabled:opacity-60"
         >
           <ShieldClose className="h-4 w-4" />
-          رفض الاستشارة
+          {tr('رفض الاستشارة', 'Reject consultation')}
         </button>
       ) : null}
     </div>
