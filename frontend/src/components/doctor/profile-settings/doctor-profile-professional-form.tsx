@@ -34,6 +34,7 @@ export default function DoctorProfileProfessionalForm({
   onNoChanges?: () => void;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const user = doctor.user;
   const {
@@ -103,16 +104,21 @@ export default function DoctorProfileProfessionalForm({
 
       <div className="rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.08)]">
         <h2 className="text-center font-cairo text-[15px] font-extrabold text-primary">
-          تعديل المعلومات المهنية
+          {tr('تعديل المعلومات المهنية', 'Edit professional information')}
         </h2>
 
         <div className="mt-4 space-y-3">
           <DoctorProfileInfoBanner tone="warning">
-            التعديلات على المعلومات المهنية تتطلب موافقة الإدارة قبل تطبيقها
+            {tr(
+              'التعديلات على المعلومات المهنية تتطلب موافقة الإدارة قبل تطبيقها',
+              'Changes to professional information require admin approval before they take effect',
+            )}
           </DoctorProfileInfoBanner>
           <DoctorProfileInfoBanner>
-            ملاحظة مهمة: سيتم مراجعة التغييرات من قبل فريق الإدارة خلال 24–48
-            ساعة. سيتم إشعارك بنتيجة المراجعة.
+            {tr(
+              'ملاحظة مهمة: سيتم مراجعة التغييرات من قبل فريق الإدارة خلال 24–48 ساعة. سيتم إشعارك بنتيجة المراجعة.',
+              'Important note: changes will be reviewed by the admin team within 24–48 hours. You will be notified of the review outcome.',
+            )}
           </DoctorProfileInfoBanner>
         </div>
 
@@ -131,7 +137,7 @@ export default function DoctorProfileProfessionalForm({
           onSubmit={form.handleSubmit(handleValidatedSubmit)}
         >
           <DoctorProfileFormField
-            label="رقم الشهادة الطبية"
+            label={tr('رقم الشهادة الطبية', 'Medical license number')}
             required
             error={errors.medicalLicenseNumber?.message}
           >
@@ -147,7 +153,7 @@ export default function DoctorProfileProfessionalForm({
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label="التخصص"
+            label={tr('التخصص', 'Specialization')}
             required
             error={errors.specialization?.message}
           >
@@ -157,13 +163,13 @@ export default function DoctorProfileProfessionalForm({
                 profileInputClass,
                 Boolean(errors.specialization),
               )}
-              placeholder="طب القلب"
+              placeholder={tr('طب القلب', 'Cardiology')}
               aria-invalid={Boolean(errors.specialization)}
             />
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label="التعليم"
+            label={tr('التعليم', 'Education')}
             required
             error={errors.education?.message}
           >
@@ -173,14 +179,14 @@ export default function DoctorProfileProfessionalForm({
                 profileTextareaClass,
                 Boolean(errors.education),
               )}
-              placeholder="مثال: بكالوريوس طب وجراحة — جامعة الملك سعود"
+              placeholder={tr('مثال: بكالوريوس طب وجراحة — جامعة الملك سعود', 'e.g. Bachelor of Medicine and Surgery — King Saud University')}
               rows={3}
               aria-invalid={Boolean(errors.education)}
             />
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label="عنوان العيادة"
+            label={tr('عنوان العيادة', 'Clinic address')}
             required
             error={errors.clinicAddress?.message}
           >
@@ -190,7 +196,7 @@ export default function DoctorProfileProfessionalForm({
                 profileTextareaClass,
                 Boolean(errors.clinicAddress),
               )}
-              placeholder="أدخل عنوان العيادة بالكامل"
+              placeholder={tr('أدخل عنوان العيادة بالكامل', 'Enter the full clinic address')}
               rows={3}
               aria-invalid={Boolean(errors.clinicAddress)}
             />
@@ -198,12 +204,12 @@ export default function DoctorProfileProfessionalForm({
 
           <div>
             <h3 className="mb-3 font-cairo text-[14px] font-extrabold text-primary">
-              موقع العيادة
+              {tr('موقع العيادة', 'Clinic location')}
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <DoctorProfileFormField
-                label="البلد"
-                hint="اختياري"
+                label={tr('البلد', 'Country')}
+                hint={tr('اختياري', 'optional')}
                 error={errors.locationCountry?.message}
               >
                 <input
@@ -212,12 +218,12 @@ export default function DoctorProfileProfessionalForm({
                     profileInputClass,
                     Boolean(errors.locationCountry),
                   )}
-                  placeholder="سوريا"
+                  placeholder={tr('سوريا', 'Syria')}
                 />
               </DoctorProfileFormField>
               <DoctorProfileFormField
-                label="المدينة"
-                hint="اختياري"
+                label={tr('المدينة', 'City')}
+                hint={tr('اختياري', 'optional')}
                 error={errors.locationCity?.message}
               >
                 <input
@@ -226,7 +232,7 @@ export default function DoctorProfileProfessionalForm({
                     profileInputClass,
                     Boolean(errors.locationCity),
                   )}
-                  placeholder="الرياض"
+                  placeholder={tr('الرياض', 'Riyadh')}
                 />
               </DoctorProfileFormField>
             </div>
@@ -234,14 +240,14 @@ export default function DoctorProfileProfessionalForm({
 
           <div>
             <h3 className="font-cairo text-[14px] font-extrabold text-primary">
-              إحداثيات العيادة
+              {tr('إحداثيات العيادة', 'Clinic coordinates')}
             </h3>
             <p className="mt-1 font-cairo text-[11px] font-semibold text-[#667085]">
-              اختياري — يمكن الحصول على الإحداثيات من خرائط جوجل
+              {tr('اختياري — يمكن الحصول على الإحداثيات من خرائط جوجل', 'Optional — coordinates can be obtained from Google Maps')}
             </p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
               <DoctorProfileFormField
-                label="خط العرض"
+                label={tr('خط العرض', 'Latitude')}
                 error={errors.clinicLat?.message}
               >
                 <input
@@ -256,7 +262,7 @@ export default function DoctorProfileProfessionalForm({
                 />
               </DoctorProfileFormField>
               <DoctorProfileFormField
-                label="خط الطول"
+                label={tr('خط الطول', 'Longitude')}
                 error={errors.clinicLng?.message}
               >
                 <input
@@ -274,14 +280,14 @@ export default function DoctorProfileProfessionalForm({
 
             <div className="mt-4 rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3">
               <p className="font-cairo text-[12px] font-extrabold text-[#92400E]">
-                كيفية الحصول على الإحداثيات:
+                {tr('كيفية الحصول على الإحداثيات:', 'How to get the coordinates:')}
               </p>
               <ol className="mt-2 list-decimal space-y-1 ps-5 text-start font-cairo text-[11px] font-semibold leading-[18px] text-[#92400E]">
-                <li>افتح خرائط Google على جهازك</li>
-                <li>ابحث عن موقع العيادة أو انقر عليه</li>
-                <li>اضغط مطولاً على الموقع لإظهار الإحداثيات</li>
-                <li>انسخ خط العرض (Latitude) وخط الطول (Longitude)</li>
-                <li>الصق القيم في الحقول أعلاه</li>
+                <li>{tr('افتح خرائط Google على جهازك', 'Open Google Maps on your device')}</li>
+                <li>{tr('ابحث عن موقع العيادة أو انقر عليه', 'Search for the clinic location or tap it')}</li>
+                <li>{tr('اضغط مطولاً على الموقع لإظهار الإحداثيات', 'Press and hold the location to reveal the coordinates')}</li>
+                <li>{tr('انسخ خط العرض (Latitude) وخط الطول (Longitude)', 'Copy the latitude and longitude')}</li>
+                <li>{tr('الصق القيم في الحقول أعلاه', 'Paste the values into the fields above')}</li>
               </ol>
             </div>
           </div>
@@ -296,7 +302,7 @@ export default function DoctorProfileProfessionalForm({
             ) : (
               <Send className="h-4 w-4" />
             )}
-            إرسال للمراجعة
+            {tr('إرسال للمراجعة', 'Submit for review')}
           </button>
 
           <button
@@ -304,7 +310,7 @@ export default function DoctorProfileProfessionalForm({
             onClick={handleCancel}
             className="flex h-[44px] w-full items-center justify-center font-cairo text-[13px] font-bold text-[#667085] transition hover:text-primary"
           >
-            إلغاء
+            {tr('إلغاء', 'Cancel')}
           </button>
         </form>
       </div>
