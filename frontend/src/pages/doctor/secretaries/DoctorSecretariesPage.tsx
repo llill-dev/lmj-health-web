@@ -291,7 +291,7 @@ export default function DoctorSecretariesPage() {
 
         {listQuery.isError ? (
           <DoctorListErrorState
-            title="تعذّر تحميل السكرتير"
+            title={tr("تعذّر تحميل السكرتير", "Failed to load secretaries")}
             brief={getUserFacingRequestErrorMessage(listQuery.error)}
             retrying={retryingList}
             onRetry={() => void retryList()}
@@ -308,15 +308,18 @@ export default function DoctorSecretariesPage() {
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
             title={
               isFilteredEmpty
-                ? "لا توجد نتائج مطابقة للبحث أو الفلتر الحالي"
-                : "لا يوجد سكرتير مرتبط بحسابك"
+                ? tr("لا توجد نتائج مطابقة للبحث أو الفلتر الحالي", "No results match the current search or filter")
+                : tr("لا يوجد سكرتير مرتبط بحسابك", "No secretary is linked to your account")
             }
             subtitle={
               isFilteredEmpty
-                ? "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج"
-                : "يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك."
+                ? tr("جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج", "Try adjusting the search terms or resetting the filters to see results")
+                : tr(
+                    "يمكنك إضافة حتى 3 سكرتيرين وتحديد صلاحياتهم للمساعدة في إدارة عيادتك.",
+                    "You can add up to 3 secretaries and set their permissions to help manage your clinic.",
+                  )
             }
-            actionLabel="إضافة سكرتير"
+            actionLabel={tr("إضافة سكرتير", "Add secretary")}
             onAction={() => setCreateOpen(true)}
             actionIcon={<Plus className="h-4 w-4" />}
           />
@@ -354,17 +357,19 @@ export default function DoctorSecretariesPage() {
           onOpenChange={(open) => {
             if (!open) setUnassignTarget(null);
           }}
-          title="إلغاء ربط السكرتير"
-          confirmLabel="نعم، إلغاء الربط"
+          title={tr("إلغاء ربط السكرتير", "Unlink secretary")}
+          confirmLabel={tr("نعم، إلغاء الربط", "Yes, unlink")}
           confirmDisabled={unassignSecretary.isPending}
           description={
             <span className="block font-cairo text-[13px] font-semibold leading-[1.65]">
-              هل تريد إلغاء ربط{" "}
+              {tr("هل تريد إلغاء ربط", "Do you want to unlink")}{" "}
               <span className="font-black text-[#101828]">
-                {unassignTarget?.user?.fullName ?? "هذا السكرتير"}
+                {unassignTarget?.user?.fullName ?? tr("هذا السكرتير", "this secretary")}
               </span>{" "}
-              من عيادتك؟ لن يُحذف حساب المستخدم من النظام، لكنه لن يعود مرتبطاً
-              بك.
+              {tr(
+                "من عيادتك؟ لن يُحذف حساب المستخدم من النظام، لكنه لن يعود مرتبطاً بك.",
+                "from your clinic? The user account will not be deleted from the system, but it will no longer be linked to you.",
+              )}
             </span>
           }
           onConfirm={handleUnassign}
