@@ -28,7 +28,7 @@ import { formatBillingAmount } from "@/lib/doctor/billing/format";
 import {
   billingDateInputToIso,
   billingTodayDateInput,
-  BILLING_FUTURE_DATE_MESSAGE,
+  getBillingFutureDateMessage,
   isBillingDateInputAfterToday,
 } from "@/lib/doctor/billing/dateInput";
 import { EXPENSE_CATEGORY_LABELS } from "@/lib/doctor/clinicAccounts/labels";
@@ -136,8 +136,8 @@ export default function DoctorClinicExpensesPage() {
     }
 
     if (isBillingDateInputAfterToday(date)) {
-      toast(BILLING_FUTURE_DATE_MESSAGE.message, {
-        title: BILLING_FUTURE_DATE_MESSAGE.title,
+      toast(getBillingFutureDateMessage(tr).message, {
+        title: getBillingFutureDateMessage(tr).title,
         variant: "error",
       });
       return;
