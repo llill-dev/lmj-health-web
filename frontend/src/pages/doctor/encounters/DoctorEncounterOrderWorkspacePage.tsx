@@ -17,6 +17,7 @@ export default function DoctorEncounterOrderWorkspacePage({
   category: CatalogOrderCategory;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patientId = '', encounterId = '' } = useParams();
@@ -48,9 +49,13 @@ export default function DoctorEncounterOrderWorkspacePage({
 
   useEffect(() => {
     if (!appliedTemplateDraftName) return;
-    toast(`تم تطبيق قالب «${appliedTemplateDraftName}» على الطلب.`, {
-      variant: 'success',
-    });
+    toast(
+      tr(
+        `تم تطبيق قالب «${appliedTemplateDraftName}» على الطلب.`,
+        `The "${appliedTemplateDraftName}" template has been applied to the order.`,
+      ),
+      { variant: 'success' },
+    );
     clearAppliedTemplateDraftName();
   }, [appliedTemplateDraftName, clearAppliedTemplateDraftName, toast]);
 

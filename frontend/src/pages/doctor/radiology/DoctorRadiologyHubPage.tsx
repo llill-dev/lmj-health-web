@@ -44,6 +44,8 @@ function RadiologyVisitCardRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const workspace = useEncounterRadiologyWorkspace(
     doctorId,
@@ -55,7 +57,7 @@ function RadiologyVisitCardRow({
   const items = expanded ? workspace.items : [];
   const statusLabel = workspace.order
     ? resolveRadiologyStatusLabel(workspace.order)
-    : 'مسودة';
+    : tr('مسودة', 'Draft');
   const orderCode = workspace.order?._id
     ? formatRadiologyOrderCode(workspace.order._id)
     : undefined;

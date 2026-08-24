@@ -8,8 +8,11 @@ import {
   resolveDoctorProfileSuccessNavState,
   type DoctorProfileSuccessNavState,
 } from '@/lib/doctor/profile/doctorProfileSuccessNavState';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorProfileSuccessPage() {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const location = useLocation();
   const [state, setState] = useState<DoctorProfileSuccessNavState | null>(null);
   const [resolved, setResolved] = useState(false);
@@ -36,7 +39,7 @@ export default function DoctorProfileSuccessPage() {
   return (
     <>
       <Helmet>
-        <title>تم التحديث • LMJ Health</title>
+        <title>{tr('تم التحديث', 'Updated')} • LMJ Health</title>
       </Helmet>
       <DoctorProfileSuccessScreen
         redirectTo={state.redirectTo?.trim() || '/doctor/dashboard'}

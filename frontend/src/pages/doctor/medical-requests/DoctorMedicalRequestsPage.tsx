@@ -286,7 +286,7 @@ export default function DoctorMedicalRequestsPage() {
         {(detailsOpen || labOpen || radiologyOpen || statusOpen || uploadResultOpen) &&
         detailsQuery.isAwaitingData ? (
           <div className="pointer-events-none fixed bottom-6 start-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#111827] px-4 py-2 font-cairo text-[12px] font-bold text-white shadow-lg">
-            جارٍ تحميل التفاصيل...
+            {tr('جارٍ تحميل التفاصيل...', 'Loading details...')}
           </div>
         ) : null}
       </div>
