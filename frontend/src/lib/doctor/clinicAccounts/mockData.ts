@@ -155,6 +155,6 @@ export const RECENT_ACTIVITIES: RecentActivity[] = [
   },
 ];
 
-export { EXPENSE_CATEGORY_LABELS, INVOICE_STATUS_LABELS } from '@/lib/doctor/clinicAccounts/labels';
+export { expenseCategoryLabel, invoiceStatusLabel } from '@/lib/doctor/clinicAccounts/labels';
 export { calcInvoiceTotals } from '@/lib/doctor/clinicAccounts/invoiceTotals';
 export { formatUsd, formatBillingAmount, formatBillingNumber } from '@/lib/doctor/billing/format';
