@@ -21,6 +21,10 @@ import StyledSelect from '@/components/ui/styled-select';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
+import { useI18n } from '@/i18n/provider';
+
+type TrFn = (ar: string, en: string) => string;
+const defaultTr: TrFn = (ar) => ar;
 
 type PatientOption = {
   id: string;
@@ -36,63 +40,65 @@ type MedicalDataType =
   | 'encounters'
   | 'files';
 
-const addAccessRequestSchema = z.object({
-  patientId: z.string().min(1, 'اختر المريض'),
-  items: z.array(z.string()).min(1, 'اختر نوع بيانات واحد على الأقل'),
-  expiresAt: z.string().optional(),
-  reason: z.string().min(2, 'سبب الطلب مطلوب'),
-});
+function buildAddAccessRequestSchema(tr: TrFn = defaultTr) {
+  return z.object({
+    patientId: z.string().min(1, tr('اختر المريض', 'Select the patient')),
+    items: z.array(z.string()).min(1, tr('اختر نوع بيانات واحد على الأقل', 'Select at least one data type')),
+    expiresAt: z.string().optional(),
+    reason: z.string().min(2, tr('سبب الطلب مطلوب', 'A reason for the request is required')),
+  });
+}
 
-type AddAccessRequestValues = z.input<typeof addAccessRequestSchema>;
+type AddAccessRequestValues = z.input<ReturnType<typeof buildAddAccessRequestSchema>>;
 
-function dataTypeMeta(type: MedicalDataType) {
+function dataTypeMeta(type: MedicalDataType, tr: TrFn = defaultTr) {
   switch (type) {
     case 'medications':
       return {
-        label: 'الأدوية',
-        subtitle: 'الأدوية النشطة والتاريخ الدوائي',
+        label: tr('الأدوية', 'Medications'),
+        subtitle: tr('الأدوية النشطة والتاريخ الدوائي', 'Active medications and medication history'),
         icon: <Pill className='h-4 w-4 text-[#16A34A]' />,
         color: 'text-[#16A34A]',
       };
     case 'lab-results':
       return {
-        label: 'نتائج المختبر',
-        subtitle: 'التحاليل والفحوصات المخبرية',
+        label: tr('نتائج المختبر', 'Lab results'),
+        subtitle: tr('التحاليل والفحوصات المخبرية', 'Lab tests and analyses'),
         icon: <TestTube2 className='h-4 w-4 text-[#DC2626]' />,
         color: 'text-[#DC2626]',
       };
     case 'imaging':
       return {
-        label: 'الأشعة والتصوير',
-        subtitle: 'نتائج التصوير الطبي والأشعة',
+        label: tr('الأشعة والتصوير', 'Imaging'),
+        subtitle: tr('نتائج التصوير الطبي والأشعة', 'Medical imaging and radiology results'),
         icon: <Scan className='h-4 w-4 text-[#9333EA]' />,
         color: 'text-[#9333EA]',
       };
     case 'diagnoses':
       return {
-        label: 'التشخيصات',
-        subtitle: 'التشخيصات الطبية السابقة',
+        label: tr('التشخيصات', 'Diagnoses'),
+        subtitle: tr('التشخيصات الطبية السابقة', 'Previous medical diagnoses'),
         icon: <Stethoscope className='h-4 w-4 text-[#0F766E]' />,
         color: 'text-[#0F766E]',
       };
     case 'prescriptions':
       return {
-        label: 'الوصفات الطبية',
-        subtitle: 'الوصفات الطبية المسجلة',
+        label: tr('الوصفات الطبية', 'Prescriptions'),
+        subtitle: tr('الوصفات الطبية المسجلة', 'Recorded prescriptions'),
         icon: <FileText className='h-4 w-4 text-[#2563EB]' />,
         color: 'text-[#2563EB]',
       };
     case 'encounters':
       return {
-        label: 'الزيارات الطبية',
-        subtitle: 'سجل الزيارات والمواعيد',
+        label: tr('الزيارات الطبية', 'Medical encounters'),
+        subtitle: tr('سجل الزيارات والمواعيد', 'Encounter and appointment history'),
         icon: <Calendar className='h-4 w-4 text-[#EA580C]' />,
         color: 'text-[#EA580C]',
       };
     case 'files':
       return {
-        label: 'الملفات والمرفقات',
-        subtitle: 'المستندات والملفات الطبية',
+        label: tr('الملفات والمرفقات', 'Files and attachments'),
+        subtitle: tr('المستندات والملفات الطبية', 'Medical documents and files'),
         icon: <FolderOpen className='h-4 w-4 text-[#CA8A04]' />,
         color: 'text-[#CA8A04]',
       };
@@ -113,6 +119,9 @@ export default function AddAccessRequestForm({
     reason: string;
   }) => void;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const addAccessRequestSchema = useMemo(() => buildAddAccessRequestSchema(tr), [locale]);
   const {
     register,
     control,
@@ -193,7 +202,7 @@ export default function AddAccessRequestForm({
     <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
       <div className='border-b border-[#EEF2F6] px-8 py-5'>
         <div className='text-start font-cairo text-[15px] font-extrabold text-[#111827]'>
-          طلب وصول جديد
+          {tr('طلب وصول جديد', 'New access request')}
         </div>
       </div>
 
@@ -203,7 +212,7 @@ export default function AddAccessRequestForm({
       >
         <div className='grid grid-cols-1 gap-5'>
           <div>
-            <div className={labelBase}>اختر المريض</div>
+            <div className={labelBase}>{tr('اختر المريض', 'Select patient')}</div>
             <Controller
               name='patientId'
               control={control}
@@ -213,11 +222,11 @@ export default function AddAccessRequestForm({
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  placeholder='اختر المريض...'
+                  placeholder={tr('اختر المريض...', 'Select patient...')}
                   error={Boolean(errors.patientId)}
-                  emptyTriggerLabel='لا يوجد مرضى في القائمة'
-                  emptyState='لا يوجد مرضى متاحين للاختيار.'
-                  listboxAriaLabel='اختيار المريض'
+                  emptyTriggerLabel={tr('لا يوجد مرضى في القائمة', 'No patients in the list')}
+                  emptyState={tr('لا يوجد مرضى متاحين للاختيار.', 'No patients are available to select.')}
+                  listboxAriaLabel={tr('اختيار المريض', 'Select patient')}
                 />
               )}
             />
@@ -236,12 +245,12 @@ export default function AddAccessRequestForm({
                     {patientLabel || '-'}
                   </div>
                   <div className='mt-1 font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                    معلومات المريض الطبية العامة
+                    {tr('معلومات المريض الطبية العامة', "Patient's general medical information")}
                   </div>
                 </div>
                 <div className='flex h-[36px] w-[36px] items-center justify-center rounded-[6px] bg-primary text-white'>
                   <span className='font-cairo text-[14px] font-extrabold'>
-                    {patientLabel?.trim()?.[0] ?? 'م'}
+                    {patientLabel?.trim()?.[0] ?? tr('م', 'P')}
                   </span>
                 </div>
               </div>
@@ -254,7 +263,7 @@ export default function AddAccessRequestForm({
                   2
                 </span>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  سجل طبي
+                  {tr('سجل طبي', 'Medical record')}
                 </div>
               </div>
               <div className='rounded-[6px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
@@ -263,7 +272,7 @@ export default function AddAccessRequestForm({
                   1
                 </span>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  دواء
+                  {tr('دواء', 'Medication')}
                 </div>
               </div>
               <div className='rounded-[6px] bg-white px-4 py-3 flex flex-col items-center justify-center gap-2'>
@@ -272,14 +281,14 @@ export default function AddAccessRequestForm({
                   2
                 </span>
                 <div className='font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-                  تشخيص
+                  {tr('تشخيص', 'Diagnosis')}
                 </div>
               </div>
             </div>
           </div>
 
           <div>
-            <div className={labelBase}>نطاق البيانات المطلوبة</div>
+            <div className={labelBase}>{tr('نطاق البيانات المطلوبة', 'Requested data scope')}</div>
             <div className='grid grid-cols-1 gap-2.5'>
               {(
                 [
@@ -292,7 +301,7 @@ export default function AddAccessRequestForm({
                   'files',
                 ] as MedicalDataType[]
               ).map((type) => {
-                const meta = dataTypeMeta(type);
+                const meta = dataTypeMeta(type, tr);
                 const checked = selectedItems.includes(type);
 
                 return (
@@ -344,15 +353,15 @@ export default function AddAccessRequestForm({
             ) : null}
             <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]'>
               {selectedItems.length === 0
-                ? 'اختر نوع بيانات واحد أو أكثر'
-                : `تم اختيار ${selectedItems.length} من ${7} أنواع`}
+                ? tr('اختر نوع بيانات واحد أو أكثر', 'Select one or more data types')
+                : tr(`تم اختيار ${selectedItems.length} من ${7} أنواع`, `${selectedItems.length} of ${7} types selected`)}
             </div>
           </div>
 
           <div>
             <div className={labelBase}>
-              تاريخ انتهاء الصلاحية{' '}
-              <span className='font-normal text-[#98A2B3]'>(اختياري)</span>
+              {tr('تاريخ انتهاء الصلاحية', 'Expiration date')}{' '}
+              <span className='font-normal text-[#98A2B3]'>({tr('اختياري', 'optional')})</span>
             </div>
             <div className='relative'>
               <input
@@ -361,7 +370,7 @@ export default function AddAccessRequestForm({
                 min={today}
                 max={maxDate}
                 className={`${inputBase} cursor-pointer`}
-                placeholder='اختر تاريخ انتهاء الصلاحية...'
+                placeholder={tr('اختر تاريخ انتهاء الصلاحية...', 'Select an expiration date...')}
               />
               <Calendar
                 className='pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]'
@@ -369,16 +378,16 @@ export default function AddAccessRequestForm({
               />
             </div>
             <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]'>
-              إذا لم تحدد تاريخاً، سيكون الوصول دائماً (حتى يتم إلغاؤه)
+              {tr('إذا لم تحدد تاريخاً، سيكون الوصول دائماً (حتى يتم إلغاؤه)', 'If you do not set a date, access will be permanent (until revoked)')}
             </div>
           </div>
 
           <div>
-            <div className={labelBase}>سبب الطلب</div>
+            <div className={labelBase}>{tr('سبب الطلب', 'Reason for the request')}</div>
             <textarea
               {...register('reason')}
               className={textAreaBase}
-              placeholder='اشرح سبب طلب الوصول للبيانات الطبية...'
+              placeholder={tr('اشرح سبب طلب الوصول للبيانات الطبية...', 'Explain the reason for requesting access to the medical data...')}
             />
             {errors.reason?.message ? (
               <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
@@ -392,11 +401,13 @@ export default function AddAccessRequestForm({
               <ShieldCheck className='h-4 w-4 text-[#0F8F8B]' />
               <div className='flex flex-col gap-1'>
                 <div className='font-cairo text-[12px] font-extrabold text-[#0F8F8B]'>
-                  ملاحظة
+                  {tr('ملاحظة', 'Note')}
                 </div>
                 <div className='font-cairo text-[11px] font-semibold text-[#0F8F8B]'>
-                  سيتم إرسال الطلب إلى المريض للموافقة، وعند الموافقة يمكنك
-                  الوصول إلى بياناته.
+                  {tr(
+                    'سيتم إرسال الطلب إلى المريض للموافقة، وعند الموافقة يمكنك الوصول إلى بياناته.',
+                    'The request will be sent to the patient for approval, and once approved you can access their data.',
+                  )}
                 </div>
               </div>
             </div>
@@ -411,7 +422,7 @@ export default function AddAccessRequestForm({
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
             >
-              إلغاء
+              {tr('إلغاء', 'Cancel')}
             </motion.button>
 
             <motion.button
@@ -423,7 +434,7 @@ export default function AddAccessRequestForm({
               transition={{ duration: 0.12, ease: 'easeOut' }}
             >
               <Send className='h-4 w-4' />
-              إرسال الطلب
+              {tr('إرسال الطلب', 'Send request')}
             </motion.button>
           </div>
         </div>
