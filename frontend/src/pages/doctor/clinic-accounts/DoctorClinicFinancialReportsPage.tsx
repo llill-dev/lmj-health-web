@@ -95,7 +95,7 @@ export default function DoctorClinicFinancialReportsPage() {
       { value: "", label: tr("العملة الافتراضية", "Default currency") },
       ...list.map((item) => ({
         value: item.code,
-        label: formatBillingCurrencyOptionLabel(item.code, item.name),
+        label: formatBillingCurrencyOptionLabel(item.code, item.name, tr),
       })),
     ];
   }, [settingsQuery.supportedCurrencies, tr]);
