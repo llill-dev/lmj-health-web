@@ -272,14 +272,22 @@ export default function DoctorMedicalRecordsPage() {
                   name: patient.user.fullName,
                 }))}
                 title={
-                  mode === "edit" ? "تعديل السجل الطبي" : "إنشاء سجل طبي جديد"
+                  mode === "edit"
+                    ? tr("تعديل السجل الطبي", "Edit medical record")
+                    : tr("إنشاء سجل طبي جديد", "Create new medical record")
                 }
                 description={
                   mode === "edit"
-                    ? "يمكنك تعديل الحقول التي يدعمها الـ API الحالي ثم حفظ التغييرات."
-                    : "سيتم حفظ العنوان والتشخيص والوصفات النصية وحالة المتابعة فقط في هذا الإصدار."
+                    ? tr(
+                        "يمكنك تعديل الحقول التي يدعمها الـ API الحالي ثم حفظ التغييرات.",
+                        "You can edit the fields supported by the current API, then save the changes.",
+                      )
+                    : tr(
+                        "سيتم حفظ العنوان والتشخيص والوصفات النصية وحالة المتابعة فقط في هذا الإصدار.",
+                        "Only the title, diagnosis, text prescriptions, and follow-up status will be saved in this version.",
+                      )
                 }
-                submitLabel={mode === "edit" ? "حفظ التعديلات" : "حفظ السجل"}
+                submitLabel={mode === "edit" ? tr("حفظ التعديلات", "Save changes") : tr("حفظ السجل", "Save record")}
                 patientLocked={mode === "edit"}
                 initialValues={
                   mode === "edit" && editingRecord
@@ -309,8 +317,8 @@ export default function DoctorMedicalRecordsPage() {
                             : undefined,
                         followUpRequired: payload.followUpRequired,
                       });
-                      toast("تم تحديث السجل الطبي بنجاح", {
-                        title: "تم الحفظ",
+                      toast(tr("تم تحديث السجل الطبي بنجاح", "The medical record was updated successfully"), {
+                        title: tr("تم الحفظ", "Saved"),
                         variant: "success",
                       });
                     } else {
@@ -326,8 +334,8 @@ export default function DoctorMedicalRecordsPage() {
                           followUpRequired: payload.followUpRequired,
                         },
                       });
-                      toast("تم إنشاء السجل الطبي بنجاح", {
-                        title: "تم الحفظ",
+                      toast(tr("تم إنشاء السجل الطبي بنجاح", "The medical record was created successfully"), {
+                        title: tr("تم الحفظ", "Saved"),
                         variant: "success",
                       });
                     }
@@ -337,7 +345,7 @@ export default function DoctorMedicalRecordsPage() {
                     void list.refetch();
                   } catch (error) {
                     toast(getUserFacingRequestErrorMessage(error), {
-                      title: "فشلت العملية",
+                      title: tr("فشلت العملية", "Operation failed"),
                       variant: "error",
                     });
                   }
@@ -366,7 +374,7 @@ export default function DoctorMedicalRecordsPage() {
                     </div>
                   ) : list.isError ? (
                     <DoctorListErrorState
-                      title="تعذّر تحميل السجلات الطبية"
+                      title={tr("تعذّر تحميل السجلات الطبية", "Failed to load medical records")}
                       brief={getUserFacingRequestErrorMessage(list.error)}
                       retrying={retryingList}
                       onRetry={() => void retryList()}
