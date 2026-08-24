@@ -14,8 +14,11 @@ import { getUserFacingRequestErrorMessage } from '@/lib/api';
 import { persistDoctorProfileSuccessNavState } from '@/lib/doctor/profile/doctorProfileSuccessNavState';
 import { useDoctorProfile, useUpdateDoctorProfile } from '@/hooks';
 import { isAwaitingInitialQueryData } from '@/lib/query/queryUi';
+import { useI18n } from '@/i18n/provider';
 
 export default function DoctorProfilePersonalEditPage() {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const navigate = useNavigate();
   const { toast } = useToast();
   const profileQuery = useDoctorProfile();
@@ -48,7 +51,7 @@ export default function DoctorProfilePersonalEditPage() {
       });
     } catch (error) {
       toast(getUserFacingRequestErrorMessage(error), {
-        title: 'تعذّر حفظ التغييرات',
+        title: tr('تعذّر حفظ التغييرات', 'Failed to save changes'),
         variant: 'error',
       });
       throw error;
@@ -66,7 +69,7 @@ export default function DoctorProfilePersonalEditPage() {
   return (
     <>
       <Helmet>
-        <title>تعديل المعلومات الشخصية • LMJ Health</title>
+        <title>{tr('تعديل المعلومات الشخصية', 'Edit personal information')} • LMJ Health</title>
       </Helmet>
       <div className="mb-4">
         <DoctorPageBackButton fallbackTo="/doctor/dashboard" />
