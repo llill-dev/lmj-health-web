@@ -35,16 +35,16 @@ function normalizeStatus(status?: string): AccessRequestStatus {
   return 'pending';
 }
 
-function statusLabel(status: AccessRequestStatus) {
+function statusLabel(status: AccessRequestStatus, tr: (ar: string, en: string) => string) {
   switch (status) {
     case 'pending':
-      return 'قيد المراجعة';
+      return tr('قيد المراجعة', 'Pending review');
     case 'approved':
-      return 'مقبول';
+      return tr('مقبول', 'Approved');
     case 'rejected':
-      return 'مرفوض';
+      return tr('مرفوض', 'Rejected');
     case 'expired':
-      return 'منتهي';
+      return tr('منتهي', 'Expired');
   }
 }
 
@@ -100,15 +100,20 @@ function bottomBarTextClassName(status: AccessRequestStatus) {
   return 'font-cairo text-[12px] font-extrabold text-[#111827]';
 }
 
-function formatArabicDate(value?: string | null) {
-  if (!value) return 'غير محدد';
+function formatArabicDate(
+  value: string | null | undefined,
+  locale: 'ar' | 'en',
+  tr: (ar: string, en: string) => string,
+) {
+  if (!value) return tr('غير محدد', 'Not specified');
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-SA');
+  return date.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US');
 }
 
 export default function DoctorAccessRequestsPage() {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const { toast } = useToast();
   const doctorId = readAuthUser()?.actorIds?.doctorId ?? '';
   const [searchTerm, setSearchTerm] = useState('');
@@ -146,7 +151,7 @@ export default function DoctorAccessRequestsPage() {
   return (
     <>
       <Helmet>
-        <title>Access Requests • LMJ Health</title>
+        <title>{tr('طلبات الوصول', 'Access requests')} • LMJ Health</title>
       </Helmet>
 
       <div dir={dir} lang={locale} className='pb-8 sm:pb-10'>
@@ -158,7 +163,7 @@ export default function DoctorAccessRequestsPage() {
                 type='button'
                 onClick={() => setMode('list')}
                 className='absolute left-4 top-4 flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:left-[16px] sm:top-[16px]'
-                aria-label='إغلاق'
+                aria-label={tr('إغلاق', 'Close')}
               >
                 <X className='h-5 w-5 text-[#0F8F8B]' />
               </motion.button>
@@ -172,10 +177,10 @@ export default function DoctorAccessRequestsPage() {
                 </div>
                 <div className='flex flex-col gap-1 text-right'>
                   <h1 className='font-cairo text-[12px] font-semibold leading-[18px] text-[#FFFFFFCC]'>
-                    طلبات الوصول
+                    {tr('طلبات الوصول', 'Access requests')}
                   </h1>
                   <span className='font-cairo text-[22px] font-black leading-[28px] text-[#FFFFFF]'>
-                    {pendingCount} طلب
+                    {tr(`${pendingCount} طلب`, `${pendingCount} requests`)}
                   </span>
                 </div>
               </div>
@@ -189,7 +194,7 @@ export default function DoctorAccessRequestsPage() {
                 className='flex items-center justify-center gap-2 rounded-[6px] h-[40px] bg-[#FFFFFF] px-4 font-cairo text-[12px] font-extrabold text-primary shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)]'
               >
                 <Plus className='h-4 w-4' />
-                إضافة طلب وصول
+                {tr('إضافة طلب وصول', 'Add access request')}
               </motion.button>
             ) : undefined
           }
@@ -198,19 +203,19 @@ export default function DoctorAccessRequestsPage() {
             <div key='rejected' className='flex h-[64px] items-center justify-center rounded-[6px] bg-white/15 px-4'>
               <div className='text-center'>
                 <div className='font-cairo text-[18px] font-black text-white'>{rejectedCount}</div>
-                <div className='mt-1 font-cairo text-[12px] font-bold text-white/80'>مرفوض</div>
+                <div className='mt-1 font-cairo text-[12px] font-bold text-white/80'>{tr('مرفوض', 'Rejected')}</div>
               </div>
             </div>,
             <div key='approved' className='flex h-[64px] items-center justify-center rounded-[6px] bg-white/15 px-4'>
               <div className='text-center'>
                 <div className='font-cairo text-[18px] font-black text-white'>{approvedCount}</div>
-                <div className='mt-1 font-cairo text-[12px] font-bold text-white/80'>مقبول</div>
+                <div className='mt-1 font-cairo text-[12px] font-bold text-white/80'>{tr('مقبول', 'Approved')}</div>
               </div>
             </div>,
             <div key='pending' className='flex h-[64px] items-center justify-center rounded-[6px] bg-white/15 px-4'>
               <div className='text-center'>
                 <div className='font-cairo text-[18px] font-black text-white'>{pendingCount}</div>
-                <div className='mt-1 font-cairo text-[12px] font-bold text-white/80'>قيد المراجعة</div>
+                <div className='mt-1 font-cairo text-[12px] font-bold text-white/80'>{tr('قيد المراجعة', 'Pending')}</div>
               </div>
             </div>,
           ]}
@@ -241,15 +246,15 @@ export default function DoctorAccessRequestsPage() {
                         expiresAt: payload.expiresAt || undefined,
                       },
                     });
-                    toast('تم إرسال طلب الوصول بنجاح', {
-                      title: 'تم الحفظ',
+                    toast(tr('تم إرسال طلب الوصول بنجاح', 'The access request was sent successfully'), {
+                      title: tr('تم الحفظ', 'Saved'),
                       variant: 'success',
                     });
                     setMode('list');
                     void listQuery.refetch();
                   } catch (error) {
                     toast(getUserFacingRequestErrorMessage(error), {
-                      title: 'فشلت العملية',
+                      title: tr('فشلت العملية', 'Operation failed'),
                       variant: 'error',
                     });
                   }
@@ -271,7 +276,7 @@ export default function DoctorAccessRequestsPage() {
                   <input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder='ابحث في الطلبات...'
+                    placeholder={tr('ابحث في الطلبات...', 'Search requests...')}
                     className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
                   />
                 </div>
@@ -286,10 +291,10 @@ export default function DoctorAccessRequestsPage() {
               ) : filtered.length === 0 ? (
                 <div className='rounded-[18px] border border-dashed border-[#D0D5DD] bg-white px-6 py-12 text-center'>
                   <div className='font-cairo text-[15px] font-extrabold text-[#111827]'>
-                    لا توجد طلبات وصول بعد
+                    {tr('لا توجد طلبات وصول بعد', 'No access requests yet')}
                   </div>
                   <div className='mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
-                    يمكنك إنشاء طلب جديد من الزر أعلاه.
+                    {tr('يمكنك إنشاء طلب جديد من الزر أعلاه.', 'You can create a new request from the button above.')}
                   </div>
                 </div>
               ) : (
@@ -299,7 +304,7 @@ export default function DoctorAccessRequestsPage() {
                     const patientName =
                       request.patient?.user?.fullName ??
                       request.patient?.userId?.fullName ??
-                      'مريض';
+                      tr('مريض', 'Patient');
 
                     return (
                       <div
@@ -319,12 +324,12 @@ export default function DoctorAccessRequestsPage() {
                                 <div className='mt-1 flex items-center justify-start gap-2 font-cairo text-[12px] font-semibold text-[#98A2B3]'>
                                   <span>{request.patient?.publicId ?? request._id}</span>
                                   <span className='h-1 w-1 rounded-full bg-[#D0D5DD]' />
-                                  <span>طلب وصول طبي</span>
+                                  <span>{tr('طلب وصول طبي', 'Medical access request')}</span>
                                 </div>
                               </div>
                             </div>
                             <div className={statusChipClassName(status)}>
-                              {statusLabel(status)}
+                              {statusLabel(status, tr)}
                             </div>
                           </div>
                         </div>
@@ -334,17 +339,17 @@ export default function DoctorAccessRequestsPage() {
                             <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-right'>
                               <div className='flex items-center justify-start gap-2 font-cairo text-[11px] font-bold text-[#98A2B3]'>
                                 <FileText className='h-4 w-4' />
-                                <span>تاريخ الطلب</span>
+                                <span>{tr('تاريخ الطلب', 'Request date')}</span>
                               </div>
                               <div className='mt-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                                {formatArabicDate(request.createdAt)}
+                                {formatArabicDate(request.createdAt, locale, tr)}
                               </div>
                             </div>
 
                             <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-right'>
                               <div className='flex items-center justify-start gap-2 font-cairo text-[11px] font-bold text-[#98A2B3]'>
                                 <Shield className='h-4 w-4' />
-                                <span>نطاق الوصول</span>
+                                <span>{tr('نطاق الوصول', 'Access scope')}</span>
                               </div>
                               <div className='mt-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
                                 {request.scope ?? 'PROFILE'}
@@ -354,27 +359,27 @@ export default function DoctorAccessRequestsPage() {
                             <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-right'>
                               <div className='flex items-center justify-start gap-2 font-cairo text-[11px] font-bold text-[#98A2B3]'>
                                 <FileText className='h-4 w-4' />
-                                <span>مصدر الطلب</span>
+                                <span>{tr('مصدر الطلب', 'Request source')}</span>
                               </div>
                               <div className='mt-2 font-cairo text-[13px] font-extrabold text-[#111827]'>
-                                الطبيب المعالج
+                                {tr('الطبيب المعالج', 'Treating doctor')}
                               </div>
                             </div>
                           </div>
 
                           <div className='mt-4 rounded-[18px] border border-[#E6F4F3] bg-[#F6FFFE] px-4 py-4 text-right'>
                             <div className='font-cairo text-[11px] font-bold text-primary/80'>
-                              سبب الطلب
+                              {tr('سبب الطلب', 'Request reason')}
                             </div>
                             <div className='mt-2 font-cairo text-[13px] font-semibold leading-7 text-[#344054]'>
                               {request.reason ||
                                 (status === 'approved'
-                                  ? 'تمت الموافقة على طلب الوصول وأصبح الملف الطبي متاحاً للطبيب.'
+                                  ? tr('تمت الموافقة على طلب الوصول وأصبح الملف الطبي متاحاً للطبيب.', 'The access request was approved and the medical file is now available to the doctor.')
                                   : status === 'rejected'
-                                    ? 'تم رفض الطلب من قبل المريض أو انتهت مبررات الوصول الحالية.'
+                                    ? tr('تم رفض الطلب من قبل المريض أو انتهت مبررات الوصول الحالية.', 'The request was rejected by the patient or the current access justification has expired.')
                                     : status === 'expired'
-                                      ? 'انتهت صلاحية الطلب قبل مراجعته، ويمكن إرسال طلب جديد عند الحاجة.'
-                                      : 'الطلب بانتظار موافقة المريض قبل إتاحة الملف الطبي الكامل.')}
+                                      ? tr('انتهت صلاحية الطلب قبل مراجعته، ويمكن إرسال طلب جديد عند الحاجة.', 'The request expired before review; a new request can be sent when needed.')
+                                      : tr('الطلب بانتظار موافقة المريض قبل إتاحة الملف الطبي الكامل.', 'The request is awaiting patient approval before the full medical file is made available.'))}
                             </div>
                           </div>
 
@@ -382,12 +387,12 @@ export default function DoctorAccessRequestsPage() {
                             {bottomBarIcon(status)}
                             <div className={bottomBarTextClassName(status)}>
                               {status === 'approved'
-                                ? 'الوصول أصبح متاحاً ويمكن متابعة الملف الطبي الكامل.'
+                                ? tr('الوصول أصبح متاحاً ويمكن متابعة الملف الطبي الكامل.', 'Access is now available and the full medical file can be reviewed.')
                                 : status === 'rejected'
-                                  ? 'الوصول غير متاح حالياً. يمكنك مراجعة السبب أو إعادة الطلب لاحقاً.'
+                                  ? tr('الوصول غير متاح حالياً. يمكنك مراجعة السبب أو إعادة الطلب لاحقاً.', 'Access is not currently available. You can review the reason or resend the request later.')
                                   : status === 'expired'
-                                    ? 'الطلب منتهي الصلاحية ويحتاج إلى إنشاء طلب جديد.'
-                                    : 'بانتظار قرار المريض. سيتم تحديث الحالة تلقائياً عند المراجعة.'}
+                                    ? tr('الطلب منتهي الصلاحية ويحتاج إلى إنشاء طلب جديد.', 'The request has expired and needs a new one to be created.')
+                                    : tr('بانتظار قرار المريض. سيتم تحديث الحالة تلقائياً عند المراجعة.', "Awaiting the patient's decision. The status will update automatically upon review.")}
                             </div>
                           </div>
                         </div>
