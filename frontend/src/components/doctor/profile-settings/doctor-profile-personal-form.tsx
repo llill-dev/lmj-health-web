@@ -33,16 +33,15 @@ import { cn } from "@/lib/utils/utils";
 import type { DoctorProfileRecord } from "@/lib/doctor/profile/profileClient";
 import { resolveDoctorProfilePatchFeedback } from "@/lib/doctor/profile/doctorProfilePatchErrors";
 
-type TrFn = (ar: string, en: string) => string;
-const defaultTr: TrFn = (ar) => ar;
+type TFn = (key: string, fallback?: string) => string;
 
 function buildConsultationModeOptions(
-  tr: TrFn = defaultTr,
+  t: TFn,
 ): { value: ConsultationModeSelection; label: string }[] {
   return [
-    { value: "offline", label: tr("حضورية فقط", "In-person only") },
-    { value: "online", label: tr("عن بعد فقط", "Remote only") },
-    { value: "both", label: tr("حضورية + عن بعد", "In-person + remote") },
+    { value: "offline", label: t("doctor.personalProfileForm.consultationMode.offline") },
+    { value: "online", label: t("doctor.personalProfileForm.consultationMode.online") },
+    { value: "both", label: t("doctor.personalProfileForm.consultationMode.both") },
   ];
 }
 
@@ -58,8 +57,7 @@ export default function DoctorProfilePersonalForm({
     photo: File | null,
   ) => Promise<void>;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const navigate = useNavigate();
   const user = doctor.user;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -151,15 +149,12 @@ export default function DoctorProfilePersonalForm({
 
       <div className="rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.08)]">
         <h2 className="text-center font-cairo text-[15px] font-extrabold text-primary">
-          {tr("تعديل المعلومات الشخصية", "Edit personal information")}
+          {t("doctor.personalProfileForm.title")}
         </h2>
 
         <div className="mt-4">
           <DoctorProfileInfoBanner>
-            {tr(
-              "التعديلات على المعلومات الشخصية تطبق فوراً بدون الحاجة لموافقة",
-              "Changes to personal information apply immediately without requiring approval",
-            )}
+            {t("doctor.personalProfileForm.infoBanner")}
           </DoctorProfileInfoBanner>
         </div>
 
@@ -169,8 +164,8 @@ export default function DoctorProfilePersonalForm({
           onSubmit={form.handleSubmit(handleValidatedSave)}
         >
           <DoctorProfileFormField
-            label={tr("الصورة الشخصية", "Profile photo")}
-            hint={tr("اختياري — يفضل استخدام صورة واضحة بحجم 400×400 بكسل", "Optional — a clear 400×400 pixel photo is recommended")}
+            label={t("doctor.personalProfileForm.photo.label")}
+            hint={t("doctor.personalProfileForm.photo.hint")}
           >
             <div className="flex items-center gap-4">
               <div className="relative shrink-0">
@@ -189,7 +184,7 @@ export default function DoctorProfilePersonalForm({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-0 end-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-[0_2px_8px_rgba(15,143,139,0.35)]"
-                  aria-label={tr("رفع صورة", "Upload photo")}
+                  aria-label={t("doctor.personalProfileForm.photo.uploadAria")}
                 >
                   <Camera className="h-3.5 w-3.5" />
                 </button>
@@ -199,7 +194,7 @@ export default function DoctorProfilePersonalForm({
                 onClick={() => fileInputRef.current?.click()}
                 className="font-cairo text-[12px] font-bold text-primary underline-offset-2 hover:underline"
               >
-                {tr("تغيير الصورة", "Change photo")}
+                {t("doctor.personalProfileForm.photo.change")}
               </button>
               <input
                 ref={fileInputRef}
@@ -216,7 +211,7 @@ export default function DoctorProfilePersonalForm({
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label={tr("الاسم الكامل", "Full name")}
+            label={t("doctor.profileEditDialog.fields.fullName.label")}
             required
             error={errors.fullName?.message}
           >
@@ -226,13 +221,13 @@ export default function DoctorProfilePersonalForm({
                 profileInputClass,
                 Boolean(errors.fullName),
               )}
-              placeholder={tr("د. خالد عبدالله", "Dr. John Doe")}
+              placeholder={t("doctor.personalProfileForm.fields.fullName.placeholder")}
               aria-invalid={Boolean(errors.fullName)}
             />
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label={tr("تاريخ الميلاد", "Date of birth")}
+            label={t("doctor.personalProfileForm.fields.dateOfBirth.label")}
             required
             error={errors.dateOfBirth?.message}
           >
@@ -248,7 +243,7 @@ export default function DoctorProfilePersonalForm({
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label={tr("العنوان", "Address")}
+            label={t("doctor.profileEditDialog.fields.address.label")}
             required
             error={errors.address?.message}
           >
@@ -258,15 +253,15 @@ export default function DoctorProfilePersonalForm({
                 profileTextareaClass,
                 Boolean(errors.address),
               )}
-              placeholder={tr("أدخل العنوان الكامل", "Enter the full address")}
+              placeholder={t("doctor.personalProfileForm.fields.address.placeholder")}
               rows={3}
               aria-invalid={Boolean(errors.address)}
             />
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label={tr("نبذة تعريفية", "Bio")}
-            hint={tr("اختياري — حتى 200 حرف", "Optional — up to 200 characters")}
+            label={t("doctor.personalProfileForm.fields.bio.label")}
+            hint={t("doctor.personalProfileForm.fields.bio.hint")}
             error={errors.bio?.message}
           >
             <textarea
@@ -275,7 +270,7 @@ export default function DoctorProfilePersonalForm({
                 profileTextareaClass,
                 Boolean(errors.bio),
               )}
-              placeholder={tr("اكتب نبذة تعريفية عنك...", "Write a short bio about yourself...")}
+              placeholder={t("doctor.personalProfileForm.fields.bio.placeholder")}
               rows={4}
               maxLength={200}
               aria-invalid={Boolean(errors.bio)}
@@ -286,8 +281,8 @@ export default function DoctorProfilePersonalForm({
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label={tr("تكلفة الاستشارة", "Consultation fee")}
-            hint={tr("اختياري — بالليرة السورية", "Optional — in Syrian pounds")}
+            label={t("doctor.personalProfileForm.fields.consultationFee.label")}
+            hint={t("doctor.personalProfileForm.fields.consultationFee.hint")}
             error={errors.consultationFee?.message}
           >
             <input
@@ -303,12 +298,12 @@ export default function DoctorProfilePersonalForm({
           </DoctorProfileFormField>
 
           <DoctorProfileFormField
-            label={tr("نوع الاستشارات", "Consultation type")}
+            label={t("doctor.personalProfileForm.fields.consultationMode.label")}
             required
             error={errors.consultationMode?.message}
           >
             <div className="space-y-2">
-              {buildConsultationModeOptions(tr).map((option) => {
+              {buildConsultationModeOptions(t).map((option) => {
                 const selected =
                   form.watch("consultationMode") === option.value;
                 return (
@@ -354,7 +349,7 @@ export default function DoctorProfilePersonalForm({
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {tr("حفظ التغييرات", "Save changes")}
+            {t("doctor.personalProfileForm.saveChanges")}
           </button>
 
           <button
@@ -362,7 +357,7 @@ export default function DoctorProfilePersonalForm({
             onClick={handleCancel}
             className="flex h-[44px] w-full items-center justify-center rounded-[8px] border border-[#E4E7EC] bg-white font-cairo text-[13px] font-bold text-[#667085] transition hover:bg-[#F9FAFB]"
           >
-            {tr("إلغاء", "Cancel")}
+            {t("common.cancel")}
           </button>
         </form>
       </div>
