@@ -119,7 +119,7 @@ export default function DoctorMedicalServiceDetailsPage() {
           className="mb-5 inline-flex items-center gap-2 font-cairo text-[13px] font-extrabold text-[#667085] transition hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
-          العودة إلى دليل الخدمات الطبية
+          {tr("العودة إلى دليل الخدمات الطبية", "Back to the medical services directory")}
         </Link>
 
         <article className="overflow-hidden rounded-[28px] border border-[#E4E7EC] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
@@ -145,7 +145,7 @@ export default function DoctorMedicalServiceDetailsPage() {
                 </div>
               </div>
               <span className="rounded-full bg-white px-4 py-2 font-cairo text-[12px] font-extrabold text-primary shadow-sm">
-                عرض معلومات وتواصل مباشر فقط
+                {tr("عرض معلومات وتواصل مباشر فقط", "Information and direct contact only")}
               </span>
             </div>
 
@@ -160,7 +160,7 @@ export default function DoctorMedicalServiceDetailsPage() {
                 <div className="mb-4 flex items-center gap-2">
                   <Clock3 className="h-4 w-4 text-primary" />
                   <h2 className="font-cairo text-[18px] font-black text-[#101828]">
-                    ساعات العمل
+                    {tr("ساعات العمل", "Working hours")}
                   </h2>
                 </div>
                 <div className="space-y-2 rounded-[18px] border border-[#E4E7EC] bg-[#FCFCFD] px-5 py-4">
@@ -180,7 +180,7 @@ export default function DoctorMedicalServiceDetailsPage() {
             {facility.services.length > 0 ? (
               <section>
                 <h2 className="mb-4 font-cairo text-[18px] font-black text-[#101828]">
-                  الخدمات المتاحة
+                  {tr("الخدمات المتاحة", "Available services")}
                 </h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {facility.services.map((service) => (
@@ -202,34 +202,34 @@ export default function DoctorMedicalServiceDetailsPage() {
             facility.contact.website ? (
               <section>
                 <h2 className="mb-4 font-cairo text-[18px] font-black text-[#101828]">
-                  وسائل التواصل
+                  {tr("وسائل التواصل", "Contact methods")}
                 </h2>
                 <div className="flex flex-wrap gap-3">
                   {facility.contact.phone ? (
                     <ContactLink
                       href={facility.contact.phone}
-                      label="اتصال مباشر"
+                      label={tr("اتصال مباشر", "Direct call")}
                       icon={<Phone className="h-4 w-4" />}
                     />
                   ) : null}
                   {facility.contact.whatsapp ? (
                     <ContactLink
                       href={facility.contact.whatsapp}
-                      label="واتساب"
+                      label={tr("واتساب", "WhatsApp")}
                       icon={<ExternalLink className="h-4 w-4" />}
                     />
                   ) : null}
                   {facility.contact.facebook ? (
                     <ContactLink
                       href={facility.contact.facebook}
-                      label="فيسبوك"
+                      label={tr("فيسبوك", "Facebook")}
                       icon={<Facebook className="h-4 w-4" />}
                     />
                   ) : null}
                   {facility.contact.website ? (
                     <ContactLink
                       href={facility.contact.website}
-                      label="الموقع الإلكتروني"
+                      label={tr("الموقع الإلكتروني", "Website")}
                       icon={<Globe className="h-4 w-4" />}
                     />
                   ) : null}
@@ -239,11 +239,13 @@ export default function DoctorMedicalServiceDetailsPage() {
 
             <section className="rounded-[18px] border border-[#FDE68A] bg-[#FFFBEB] px-5 py-4">
               <h2 className="font-cairo text-[16px] font-black text-[#92400E]">
-                ملاحظة مهمة
+                {tr("ملاحظة مهمة", "Important note")}
               </h2>
               <p className="mt-2 font-cairo text-[13px] font-bold leading-7 text-[#92400E]">
-                الحجز أو طلب الخدمة من داخل المنصة غير مدعوم حالياً لهذا الدليل. المتاح هو
-                استعراض المعلومات والتواصل المباشر مع الجهة الطبية.
+                {tr(
+                  "الحجز أو طلب الخدمة من داخل المنصة غير مدعوم حالياً لهذا الدليل. المتاح هو استعراض المعلومات والتواصل المباشر مع الجهة الطبية.",
+                  "Booking or requesting the service from within the platform is not currently supported for this directory. Only viewing information and direct contact with the facility is available.",
+                )}
               </p>
             </section>
 
@@ -251,13 +253,13 @@ export default function DoctorMedicalServiceDetailsPage() {
               <section>
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 className="font-cairo text-[18px] font-black text-[#101828]">
-                    جهات مشابهة
+                    {tr("جهات مشابهة", "Similar providers")}
                   </h2>
                   <Link
                     to="/doctor/medical-services-directory"
                     className="font-cairo text-[12px] font-extrabold text-primary transition hover:opacity-80"
                   >
-                    العودة إلى الدليل
+                    {tr("العودة إلى الدليل", "Back to the directory")}
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
