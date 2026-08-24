@@ -139,7 +139,7 @@ export default function DoctorClinicServicesPage() {
         <ClinicAccountsSubNav />
 
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div className="text-right">
+          <div className="text-start">
             <h1 className="font-cairo text-[28px] font-black text-[#111827]">
               {tr('كتالوج الخدمات', 'Services catalog')}
             </h1>
@@ -169,7 +169,7 @@ export default function DoctorClinicServicesPage() {
           onClear={() => setSearch('')}
         />
         {!canManageServices ? (
-          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+          <p className="mt-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
             هذه الصفحة في وضع العرض فقط حسب صلاحيات حسابك.
           </p>
         ) : null}
@@ -216,7 +216,7 @@ export default function DoctorClinicServicesPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-[720px] w-full text-right">
+              <table className="min-w-[720px] w-full text-start">
                 <thead>
                   <tr className="border-b border-[#EEF2F6] font-cairo text-[12px] font-extrabold text-[#667085]">
                     <th className="px-3 py-3">الخدمة</th>
@@ -310,7 +310,7 @@ export default function DoctorClinicServicesPage() {
         }
         maxWidthClass="max-w-[520px]"
       >
-        <div dir={dir} className="space-y-4 text-right">
+        <div dir={dir} className="space-y-4 text-start">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}

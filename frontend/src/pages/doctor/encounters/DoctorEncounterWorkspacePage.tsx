@@ -223,7 +223,7 @@ export default function DoctorEncounterWorkspacePage() {
             </div>
 
             {workspace.profileDenied ? (
-              <div className="rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B45309]">
+              <div className="rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B45309]">
                 الوصول الكامل لملف المريض غير متاح؛ بيانات الأقسام من طلبات هذه
                 الزيارة فقط.
               </div>

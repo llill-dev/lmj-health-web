@@ -60,7 +60,7 @@ export default function SignUpStep4Additional({
       >
         <div className='space-y-5'>
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <MapPin className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 المدينة
@@ -70,12 +70,12 @@ export default function SignUpStep4Additional({
               type='text'
               placeholder='مزة، دمشق ...'
               {...register('city')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
           </div>
 
           <div>
-            <div className='flex gap-2 justify-start items-center text-right'>
+            <div className='flex gap-2 justify-start items-center text-start'>
               <Globe className='w-4 h-4 text-primary' />
               <span className='font-cairo text-[14px] font-bold text-[#374151]'>
                 الدولة
@@ -85,11 +85,11 @@ export default function SignUpStep4Additional({
               type='text'
               placeholder='سوريا'
               {...register('country')}
-              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-right font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
+              className='mt-2 h-[48px] w-full rounded-[6px] border-[0.8px] border-[#9EE8E0] bg-[#FFFFFF] px-4 py-[4px] text-start font-cairo text-[14px] font-semibold text-[#6B7280] shadow-[0_10px_25px_rgba(0,0,0,0.05)] outline-none focus:border-primary'
             />
           </div>
 
-          <div className='rounded-[6px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-4 text-right'>
+          <div className='rounded-[6px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-4 text-start'>
             <div className='font-cairo text-[14px] font-bold text-[#374151]'>
               أنماط الاستشارة{' '}
               <span className='text-[12px] font-semibold text-[#98A2B3]'>
@@ -121,7 +121,7 @@ export default function SignUpStep4Additional({
             <div className='flex justify-center items-center w-10 h-10 rounded-full bg-primary/15 text-primary'>
               <Shield className='w-5 h-5' />
             </div>
-            <div className='flex-1 text-right'>
+            <div className='flex-1 text-start'>
               <div className='font-cairo text-[14px] font-extrabold text-[#101828]'>
                 ملاحظة هامة
               </div>

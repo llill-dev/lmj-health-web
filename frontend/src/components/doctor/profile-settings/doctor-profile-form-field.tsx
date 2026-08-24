@@ -20,7 +20,7 @@ export function DoctorProfileFormField({
 }) {
   return (
     <div className={cn('space-y-1.5', className)}>
-      <label className="block text-right font-cairo text-[12px] font-extrabold text-[#344054]">
+      <label className="block text-start font-cairo text-[12px] font-extrabold text-[#344054]">
         {label}
         {required ? <span className="text-[#F04438]"> *</span> : null}
       </label>
@@ -28,12 +28,12 @@ export function DoctorProfileFormField({
       {error ? (
         <p
           role="alert"
-          className="text-right font-cairo text-[11px] font-bold text-[#D92D20]"
+          className="text-start font-cairo text-[11px] font-bold text-[#D92D20]"
         >
           {error}
         </p>
       ) : hint ? (
-        <p className="text-right font-cairo text-[11px] font-semibold text-[#667085]">
+        <p className="text-start font-cairo text-[11px] font-semibold text-[#667085]">
           {hint}
         </p>
       ) : null}

@@ -188,7 +188,7 @@ export default function SecretaryDoctorsDirectoryPage() {
         ) : (
           <>
             {directoryQuery.isRefetching ? (
-              <div className="col-span-full text-right font-cairo text-xs font-semibold text-[#64748b]">
+              <div className="col-span-full text-start font-cairo text-xs font-semibold text-[#64748b]">
                 {tr("جاري تحديث البيانات...", "Refreshing data...")}
               </div>
             ) : null}

@@ -53,7 +53,7 @@ export function DoctorSupportChannels({
             href={href}
             target={channel.kind === 'email' || channel.kind === 'phone' ? undefined : '_blank'}
             rel={channel.kind === 'social' || channel.kind === 'whatsapp' ? 'noreferrer' : undefined}
-            className="flex items-center justify-between gap-3 rounded-[12px] border border-[#D1FAE5] bg-white px-4 py-4 text-right shadow-sm transition hover:border-primary/40 hover:shadow-md"
+            className="flex items-center justify-between gap-3 rounded-[12px] border border-[#D1FAE5] bg-white px-4 py-4 text-start shadow-sm transition hover:border-primary/40 hover:shadow-md"
           >
             <ExternalLink className="h-4 w-4 shrink-0 text-[#98A2B3]" aria-hidden />
             <div className="min-w-0 flex-1">

@@ -318,7 +318,7 @@ export default function AdminMedicalFileOptionsPage() {
               />
               {t('adminMedicalFileOptions.filter.currentLangOnly')}
             </label>
-            <label className='mr-2 flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)]'>
+            <label className='me-2 flex cursor-pointer select-none items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)]'>
               <input
                 type='checkbox'
                 className='h-4 w-4 rounded border-[#D0D5DD] text-primary focus:ring-primary/40'
@@ -331,7 +331,7 @@ export default function AdminMedicalFileOptionsPage() {
               type='button'
               onClick={refetchAll}
               disabled={isRefetchingAnyData}
-              className='mr-2 inline-flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] disabled:cursor-not-allowed disabled:opacity-60'
+              className='me-2 inline-flex items-center gap-2 rounded-[12px] border border-[#E5E7EB] bg-white px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] shadow-[0_10px_22px_rgba(0,0,0,0.05)] disabled:cursor-not-allowed disabled:opacity-60'
             >
               <RefreshCw
                 className={`h-4 w-4 ${isRefetchingAnyData ? 'animate-spin' : ''}`}
@@ -350,7 +350,7 @@ export default function AdminMedicalFileOptionsPage() {
           ) : null}
 
           {loadError ? (
-            <div className='mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 text-right shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
+            <div className='mt-4 rounded-[12px] border border-[#FECACA] bg-[#FEF2F2] px-6 py-5 text-start shadow-[0_12px_24px_rgba(0,0,0,0.06)]'>
               <div className='font-cairo text-[13px] font-semibold text-[#B42318]'>
                 {userFacingErrorMessage(
                   loadError,
@@ -456,14 +456,14 @@ export default function AdminMedicalFileOptionsPage() {
 
             <div className='mt-6 grid grid-cols-1 items-center gap-4 lg:grid-cols-12'>
               <div className='lg:col-span-5'>
-                <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
+                <div className='mb-2 text-start font-cairo text-[12px] font-extrabold text-[#667085]'>
                   {t('adminMedicalFileOptions.addNewOptionLabel')}
                 </div>
                 <input
                   value={newOption}
                   onChange={(e) => setNewOption(e.target.value)}
                   placeholder={t('adminMedicalFileOptions.field.newOption.placeholder')}
-                  className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+                  className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
                 />
               </div>
 
@@ -484,7 +484,7 @@ export default function AdminMedicalFileOptionsPage() {
               </div>
 
               <div className='lg:col-span-6'>
-                <div className='mb-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
+                <div className='mb-2 text-start font-cairo text-[12px] font-extrabold text-[#667085]'>
                   {t('adminMedicalFileOptions.selectCategoryLabel')}
                 </div>
                 <StyledSelect
@@ -506,7 +506,7 @@ export default function AdminMedicalFileOptionsPage() {
             </div>
 
             {quickAddCategory ? (
-              <p className='mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]'>
+              <p className='mt-4 text-start font-cairo text-[12px] font-semibold text-[#667085]'>
                 {t('adminMedicalFileOptions.quickAdd.prefix')}{' '}
                 {categoryUiLabel(ADD_CATEGORY_API_TO_UI[quickAddCategory])}{' '}
                 {t('adminMedicalFileOptions.quickAdd.suffix')}
@@ -528,7 +528,7 @@ export default function AdminMedicalFileOptionsPage() {
         title={t('adminMedicalFileOptions.updateDialog.title')}
         description={
           editTarget ? (
-            <div className='space-y-3 text-right'>
+            <div className='space-y-3 text-start'>
               <div className='font-cairo text-[12px] font-semibold text-[#667085]'>
                 {t('adminMedicalFileOptions.editDialog.description')}
               </div>
@@ -536,7 +536,7 @@ export default function AdminMedicalFileOptionsPage() {
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 placeholder={t('adminMedicalFileOptions.field.newName.placeholder')}
-                className='h-[44px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 text-right font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+                className='h-[44px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
               />
             </div>
           ) : (

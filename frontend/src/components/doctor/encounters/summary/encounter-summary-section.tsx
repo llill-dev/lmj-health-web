@@ -39,7 +39,7 @@ export function EncounterSummarySection({
           type="button"
           aria-expanded={expanded}
           onClick={onToggle}
-          className="flex gap-3 justify-between items-center w-full text-right"
+          className="flex gap-3 justify-between items-center w-full text-start"
         >
           <div className="flex flex-1 gap-3 justify-start items-center min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#E6F4F3]">

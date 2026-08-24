@@ -10,7 +10,7 @@ export function FieldBlock({
   valueDir?: 'ltr' | 'rtl';
 }) {
   return (
-    <div className='flex flex-col gap-0.5 text-right sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-0'>
+    <div className='flex flex-col gap-0.5 text-start sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-0'>
       <div className='shrink-0 font-cairo text-sm font-semibold leading-snug text-primary sm:text-base md:text-lg lg:text-[22px] lg:leading-[28px]'>
         {label} :
       </div>

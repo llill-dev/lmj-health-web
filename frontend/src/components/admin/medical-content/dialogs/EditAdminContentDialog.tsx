@@ -839,12 +839,12 @@ export default function EditAdminContentDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={submitting}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t("editContentDialog.close")}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {t("editContentDialog.title")}
                 </h2>
@@ -861,7 +861,7 @@ export default function EditAdminContentDialog({
               </div>
             ) : loadError || !details ? (
               <div className="px-8 py-12">
-                <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[13px] font-bold text-red-600">
+                <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-start font-cairo text-[13px] font-bold text-red-600">
                   {t("editContentDialog.loadError")}
                 </div>
               </div>
@@ -893,7 +893,7 @@ export default function EditAdminContentDialog({
                           />
                         </AdminFormField>
                         {typeSwitchSafetyMessage ? (
-                          <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-right font-cairo text-[12px] font-bold text-amber-700 sm:col-span-2">
+                          <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-start font-cairo text-[12px] font-bold text-amber-700 sm:col-span-2">
                             {typeSwitchSafetyMessage}
                           </div>
                         ) : null}
@@ -1090,7 +1090,7 @@ export default function EditAdminContentDialog({
 
                       {selectedTemplate?.fields?.length ? (
                         <div className="rounded-[14px] border border-[#D8E6E5] bg-white p-4">
-                          <div className="mb-4 text-right">
+                          <div className="mb-4 text-start">
                             <div className="font-cairo text-[14px] font-extrabold text-primary">
                               {t("editContentDialog.templateFields.title")}
                             </div>
@@ -1183,7 +1183,7 @@ export default function EditAdminContentDialog({
                             <div
                               key={item.key}
                               className={cn(
-                                "rounded-[10px] px-3 py-2 text-right font-cairo text-[12px] font-bold",
+                                "rounded-[10px] px-3 py-2 text-start font-cairo text-[12px] font-bold",
                                 item.done
                                   ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                                   : "border border-amber-200 bg-amber-50 text-amber-700",
@@ -1315,7 +1315,7 @@ export default function EditAdminContentDialog({
                           </div>
                         )}
                         {typeof (errors.sources?.root?.message ?? errors.sources?.message) === "string" ? (
-                          <p className="mt-2 text-right font-cairo text-[12px] font-bold text-red-600">
+                          <p className="mt-2 text-start font-cairo text-[12px] font-bold text-red-600">
                             {errors.sources?.root?.message ?? errors.sources?.message}
                           </p>
                         ) : null}
@@ -1533,7 +1533,7 @@ export default function EditAdminContentDialog({
                     </section>
 
                     {updateMut.isError ? (
-                      <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600">
+                      <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-start font-cairo text-[12px] font-bold text-red-600">
                         {userFacingErrorMessage(
                           updateMut.error,
                           t("editContentDialog.error.updateFailed"),

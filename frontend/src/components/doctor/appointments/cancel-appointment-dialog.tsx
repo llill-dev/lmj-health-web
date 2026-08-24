@@ -143,7 +143,7 @@ export default function CancelAppointmentDialog({
                 transitionEnd: { visibility: 'hidden' },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
+            className='fixed start-1/2 top-1/2 z-[10000] w-[680px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none'
             dir={dir}
             lang={locale}
           >
@@ -171,7 +171,7 @@ export default function CancelAppointmentDialog({
                   <button
                     type='button'
                     disabled={isSubmitting}
-                    className='absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60'
+                    className='absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] disabled:cursor-not-allowed disabled:opacity-60'
                     aria-label={tr('إغلاق', 'Close')}
                   >
                     <X className='h-5 w-5' />

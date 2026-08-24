@@ -177,7 +177,7 @@ export default function AdminPatientDetailsPage() {
         lang={locale}
       >
         <div className='flex items-start justify-between'>
-          <div className='text-right'>
+          <div className='text-start'>
             <div className='font-cairo text-[26px] font-black leading-[34px] text-[#111827]'>
               {t('adminPatientDetails.header.title')}
             </div>
@@ -272,7 +272,7 @@ export default function AdminPatientDetailsPage() {
                   <div className='flex h-[68px] w-[68px] items-center justify-center rounded-[14px] bg-primary text-white'>
                     <UserRound className='h-8 w-8' />
                   </div>
-                  <div className='text-right'>
+                  <div className='text-start'>
                     <div className='font-cairo text-[22px] font-black leading-[28px] text-[#111827]'>
                       {patient.user.fullName}
                     </div>
@@ -377,7 +377,7 @@ export default function AdminPatientDetailsPage() {
             </section>
 
             <section className='mt-5 rounded-[14px] border border-[#D5E8E6] bg-[#F8FFFE] px-6 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.04)]'>
-              <div className='flex items-start gap-3 text-right'>
+              <div className='flex items-start gap-3 text-start'>
                 <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary'>
                   <Info className='h-5 w-5' />
                 </div>
@@ -466,7 +466,7 @@ export default function AdminPatientDetailsPage() {
                       className='rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3'
                     >
                       <div className='flex items-center justify-between gap-3'>
-                        <div className='text-right'>
+                        <div className='text-start'>
                           <div className='font-cairo text-[12px] font-black text-[#111827]'>
                             {a.doctor?.userId?.fullName ?? '—'}
                           </div>
@@ -518,7 +518,7 @@ export default function AdminPatientDetailsPage() {
                       className='rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-3'
                     >
                       <div className='flex items-center justify-between gap-3'>
-                        <div className='text-right'>
+                        <div className='text-start'>
                           <div className='font-cairo text-[12px] font-black text-[#111827]'>
                             {l.action}
                           </div>

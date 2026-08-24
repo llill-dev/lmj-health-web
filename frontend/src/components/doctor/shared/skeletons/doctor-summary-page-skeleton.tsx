@@ -8,7 +8,7 @@ export function DoctorSummaryPageSkeleton() {
     <DoctorLoadingShell label="جارٍ تحميل ملخص الزيارة…">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-2 text-right">
+          <div className="space-y-2 text-start">
             <SkeletonBlock className="h-8 w-52" />
             <SkeletonBlock className="h-4 w-64" />
           </div>

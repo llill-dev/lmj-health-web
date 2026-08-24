@@ -124,7 +124,7 @@ export default function ScheduleConflictDialog({
         </div>
       }
     >
-      <h4 className='mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]'>
+      <h4 className='mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]'>
         {tr('المواعيد المتعارضة:', 'Conflicting appointments:')}
       </h4>
       <div className='max-h-[300px] space-y-2 overflow-y-auto'>
@@ -133,7 +133,7 @@ export default function ScheduleConflictDialog({
             key={conflict.appointmentId}
             className='flex items-center justify-between rounded-[10px] border border-amber-200 bg-amber-50 p-3'
           >
-            <div className='flex-1 text-right'>
+            <div className='flex-1 text-start'>
               <div className='flex items-center justify-end gap-2'>
                 <span className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                   {tr('موعد', 'Appointment')} #{index + 1}
@@ -156,7 +156,7 @@ export default function ScheduleConflictDialog({
       </div>
 
       {data.nextAction && (
-        <div className='mt-4 rounded-[10px] border border-blue-200 bg-blue-50 p-3 text-right'>
+        <div className='mt-4 rounded-[10px] border border-blue-200 bg-blue-50 p-3 text-start'>
           <p className='font-cairo text-[13px] font-semibold text-blue-900'>
             <span className='font-extrabold'>
               {tr('الإجراء المطلوب:', 'Required action:')}

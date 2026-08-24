@@ -154,7 +154,7 @@ export function WaitlistBookDialog({
       maxWidthClass="max-w-[520px]"
       headerPattern
     >
-      <div dir={dir} lang={locale} className="space-y-4 text-right">
+      <div dir={dir} lang={locale} className="space-y-4 text-start">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           حجز موعد للمريض{' '}
           <span className="font-extrabold text-[#111827]">

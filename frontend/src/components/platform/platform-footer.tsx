@@ -81,7 +81,7 @@ export function PlatformFooter() {
     >
       <div className="px-6 py-10 sm:px-10 sm:py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          <section className="text-right">
+          <section className="text-start">
             <h3 className="mb-4 font-cairo text-[18px] font-extrabold">
               {tr('عن المنصة', 'About the platform')}
             </h3>
@@ -103,7 +103,7 @@ export function PlatformFooter() {
             </div>
           </section>
 
-          <section className="text-right">
+          <section className="text-start">
             <h3 className="mb-4 font-cairo text-[18px] font-extrabold">القسم القانوني</h3>
             <ul className="space-y-3">
               {[
@@ -125,7 +125,7 @@ export function PlatformFooter() {
             </ul>
           </section>
 
-          <section className="text-right">
+          <section className="text-start">
             <h3 className="mb-4 font-cairo text-[18px] font-extrabold">الدعم والمساعدة</h3>
             <ul className="mb-5 space-y-3">
               <li>
@@ -170,7 +170,7 @@ export function PlatformFooter() {
             </div>
           </section>
 
-          <section className="text-right">
+          <section className="text-start">
             <h3 className="mb-4 font-cairo text-[18px] font-extrabold">خدماتنا</h3>
             <ul className="space-y-3">
               <li>

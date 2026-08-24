@@ -92,7 +92,7 @@ export default function CreateMedicalRecordForm({
   const textAreaBase =
     'min-h-[104px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-[#0F8F8B] focus:ring-opacity-20';
   const labelBase =
-    'mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]';
+    'mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]';
 
   const onSubmit = (values: MedicalRecordFormValues) => {
     const prescriptions = (values.prescriptionsText ?? '')
@@ -112,18 +112,18 @@ export default function CreateMedicalRecordForm({
   return (
     <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
       <div className='relative border-b border-[#EEF2F6] px-8 py-5'>
-        <div className='text-right font-cairo text-[16px] font-extrabold text-[#111827]'>
+        <div className='text-start font-cairo text-[16px] font-extrabold text-[#111827]'>
           {title}
         </div>
         {description ? (
-          <p className='mt-2 max-w-2xl text-right font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
+          <p className='mt-2 max-w-2xl text-start font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
             {description}
           </p>
         ) : null}
         <button
           type='button'
           onClick={onCancel}
-          className='absolute left-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[6px] border border-[#EEF2F6] bg-white text-[#667085]'
+          className='absolute start-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[6px] border border-[#EEF2F6] bg-white text-[#667085]'
           aria-label='إغلاق'
         >
           <X className='w-4 h-4' />
@@ -153,12 +153,12 @@ export default function CreateMedicalRecordForm({
               )}
             />
             {errors.patientId?.message ? (
-              <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
+              <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
                 {errors.patientId.message}
               </div>
             ) : null}
             {patientLabel ? (
-              <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+              <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]'>
                 {patientLabel}
               </div>
             ) : null}
@@ -172,7 +172,7 @@ export default function CreateMedicalRecordForm({
               placeholder='مثال: متابعة ضغط الدم'
             />
             {errors.title?.message ? (
-              <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
+              <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
                 {errors.title.message}
               </div>
             ) : null}
@@ -186,7 +186,7 @@ export default function CreateMedicalRecordForm({
               placeholder='اكتب التشخيص الطبي كما سيُحفَظ في السجل...'
             />
             {errors.diagnosis?.message ? (
-              <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
+              <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
                 {errors.diagnosis.message}
               </div>
             ) : null}
@@ -202,7 +202,7 @@ export default function CreateMedicalRecordForm({
           </div>
 
           <label className='flex items-center justify-between rounded-[10px] border border-[#D6F5F3] bg-[#F0FDFC] px-4 py-4'>
-            <div className='text-right'>
+            <div className='text-start'>
               <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
                 يحتاج متابعة
               </div>

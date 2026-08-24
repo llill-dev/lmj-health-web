@@ -15,7 +15,7 @@ export function PatientCardSkeleton({ index = 0 }: { index?: number }) {
           <div className="flex justify-between items-start">
             <div className="flex gap-3 items-start">
               <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[12px] bg-[#F3F4F6] animate-pulse" />
-              <div className="text-right space-y-2">
+              <div className="text-start space-y-2">
                 <AdminSkeletonBlock className="h-5 w-40" />
                 <AdminSkeletonBlock className="h-3 w-24" />
               </div>

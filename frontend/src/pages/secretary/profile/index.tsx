@@ -33,7 +33,7 @@ function SurfaceSection({
               <Icon className="h-5 w-5" />
             </div>
           )}
-          <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+          <h2 className="text-start font-cairo text-[23px] font-black leading-none text-[#243044]">
             {title}
           </h2>
         </div>
@@ -83,7 +83,7 @@ function StatCard({
   return (
     <div className="rounded-[10px] bg-[#FFFFFF] px-4 py-5 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.10),0px_1px_3px_0px_rgba(0,0,0,0.10)] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       <div className="flex items-center justify-between">
-        <div className="text-right">
+        <div className="text-start">
           <div className="font-cairo text-[22px] font-black text-[#243044]">
             {value}
           </div>
@@ -193,9 +193,9 @@ export default function SecretaryProfilePage() {
                 {tr("سكرتير", "Secretary")}
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-start">
               <div className="inline-flex items-center rounded-[8px] bg-[#ECFDF3] px-3 py-1.5 font-cairo text-[13px] font-black text-[#16A34A]">
-                <ShieldCheck className="ml-2 h-4 w-4" />
+                <ShieldCheck className="ms-2 h-4 w-4" />
                 {tr("نشط", "Active")}
               </div>
             </div>

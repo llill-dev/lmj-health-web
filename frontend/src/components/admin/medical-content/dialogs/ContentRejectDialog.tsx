@@ -96,7 +96,7 @@ export default function ContentRejectDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#667085] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />

@@ -148,7 +148,7 @@ export function CreateEncounterDialog({
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-primary/10 text-primary">
               <UserRound className="w-4 h-4" />
             </div>
-            <div className="flex-1 min-w-0 text-right">
+            <div className="flex-1 min-w-0 text-start">
               <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
                 {patient.user?.fullName ?? "مريض"}
               </div>
@@ -290,7 +290,7 @@ export function CreateEncounterDialog({
         <Dialog.Content
           dir={dir}
           lang={locale}
-          className="fixed left-1/2 top-1/2 z-[121] flex w-[min(760px,calc(100vw-24px))] max-h-[calc(100vh-28px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[26px] border border-[#D0D5DD] bg-white shadow-[0_30px_80px_rgba(15,23,42,0.22)]"
+          className="fixed start-1/2 top-1/2 z-[121] flex w-[min(760px,calc(100vw-24px))] max-h-[calc(100vh-28px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[26px] border border-[#D0D5DD] bg-white shadow-[0_30px_80px_rgba(15,23,42,0.22)]"
         >
           <div
             ref={selectListboxOutletRef}
@@ -298,7 +298,7 @@ export function CreateEncounterDialog({
             className="pointer-events-none absolute inset-0 z-[99999] isolate overflow-visible"
           />
           <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[#EAECF0] bg-[linear-gradient(180deg,#F8FFFE_0%,#FFFFFF_100%)] px-6 py-5">
-            <div className="text-right">
+            <div className="text-start">
               <Dialog.Title className="mt-3 font-cairo text-[24px] font-black text-[#101828]">
                 إنشاء زيارة طبية
               </Dialog.Title>
@@ -325,7 +325,7 @@ export function CreateEncounterDialog({
             <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6 [scrollbar-color:#0f8f8b_#dff6f5] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-track]:bg-[#E6F7F6] [&::-webkit-scrollbar]:w-2">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="min-w-0">
-                  <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]">
+                  <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
                     المريض
                   </label>
                   <div className={fieldShell(Boolean(errors.patientId))}>
@@ -345,14 +345,14 @@ export function CreateEncounterDialog({
                     />
                   </div>
                   {errors.patientId ? (
-                    <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                    <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                       {errors.patientId}
                     </div>
                   ) : null}
                 </div>
 
                 <div className="min-w-0">
-                  <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]">
+                  <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
                     نوع الزيارة
                   </label>
                   <div className={fieldShell(Boolean(errors.origin))}>
@@ -372,7 +372,7 @@ export function CreateEncounterDialog({
                     />
                   </div>
                   {errors.origin ? (
-                    <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                    <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                       {errors.origin}
                     </div>
                   ) : null}
@@ -380,7 +380,7 @@ export function CreateEncounterDialog({
               </div>
 
               <div>
-                <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]">
+                <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
                   رقم الموعد المرتبط
                 </label>
                 <div className={fieldShell(Boolean(errors.appointmentId))}>
@@ -400,24 +400,24 @@ export function CreateEncounterDialog({
                           ? "أدخل معرّف الموعد (24 حرفاً) من نظام المواعيد"
                           : "اختياري — اتركه فارغاً إن لم تربط بموعد"
                       }
-                      className="h-12 w-full border-0 bg-transparent px-0 text-right font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
+                      className="h-12 w-full border-0 bg-transparent px-0 text-start font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
                       aria-invalid={Boolean(errors.appointmentId)}
                     />
                   </div>
                 </div>
                 {errors.appointmentId ? (
-                  <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                  <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                     {errors.appointmentId}
                   </div>
                 ) : (
-                  <div className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#667085]">
+                  <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#667085]">
                     {values.origin === "appointment"
                       ? "عند اختيار «مرتبطة بموعد» يصبح معرّف الموعد مطلوباً."
                       : "إذا أدخلت معرّف موعد، يجب أن يكون صالحاً بالكامل."}
                   </div>
                 )}
               </div>
-              <div className="rounded-[20px] border border-[#D9F1EF] bg-[linear-gradient(180deg,#F7FFFE_0%,#FFFFFF_100%)] px-4 py-4 text-right">
+              <div className="rounded-[20px] border border-[#D9F1EF] bg-[linear-gradient(180deg,#F7FFFE_0%,#FFFFFF_100%)] px-4 py-4 text-start">
                 <div className="flex gap-3 items-start">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-primary text-white shadow-[0_12px_24px_rgba(15,143,139,0.22)]">
                     <FileText className="w-4 h-4" />
@@ -434,7 +434,7 @@ export function CreateEncounterDialog({
                 </div>
               </div>
               <div>
-                <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]">
+                <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]">
                   ملاحظات افتتاحية
                 </label>
                 <div className={fieldShell(Boolean(errors.notes))}>
@@ -450,18 +450,18 @@ export function CreateEncounterDialog({
                       onBlur={() => markTouched("notes")}
                       placeholder="اكتب ملخصًا افتتاحيًا يوضح سبب الزيارة، الشكوى الأساسية، أو الهدف من المتابعة."
                       rows={5}
-                      className="min-h-[132px] w-full resize-none border-0 bg-transparent px-0 py-1 text-right font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
+                      className="min-h-[132px] w-full resize-none border-0 bg-transparent px-0 py-1 text-start font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
                       aria-invalid={Boolean(errors.notes)}
                     />
                   </div>
                 </div>
                 <div className="flex gap-3 justify-between items-center mt-2">
                   {errors.notes ? (
-                    <div className="text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                    <div className="text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                       {errors.notes}
                     </div>
                   ) : (
-                    <div className="text-right font-cairo text-[11px] font-semibold text-[#667085]">
+                    <div className="text-start font-cairo text-[11px] font-semibold text-[#667085]">
                       يفضّل أن تكون الملاحظات مباشرة وواضحة منذ بداية الزيارة.
                     </div>
                   )}

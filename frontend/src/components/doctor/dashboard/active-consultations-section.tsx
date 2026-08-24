@@ -45,7 +45,7 @@ export default function ActiveConsultationsSection({
         <article className="h-[160px] w-full rounded-[10px] border-[0.5px] border-[#078F8D] bg-white px-4 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-1 gap-3">
-              <h3 className="min-w-0 truncate text-right font-cairo text-[16px] font-bold leading-[20px] text-[#1F2937]">
+              <h3 className="min-w-0 truncate text-start font-cairo text-[16px] font-bold leading-[20px] text-[#1F2937]">
                 {subject ?? "استشارة نشطة"}
               </h3>
               <span className="inline-flex shrink-0 items-center justify-center rounded-[10px] bg-[#E6F4F3] px-[8px] py-[3px] font-cairo text-[12px] font-bold text-primary">

@@ -215,12 +215,12 @@ export default function CreateAdminUserDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={createMutation.isPending}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {t("adminUsersDialog.create.ariaLabel")}
                 </h2>
@@ -241,11 +241,11 @@ export default function CreateAdminUserDialog({
                     error={errors.fullName?.message}
                   >
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
+                      <User className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                       <input
                         {...register("fullName")}
                         className={adminFieldClass(
-                          cn(adminInputClass, "pl-10"),
+                          cn(adminInputClass, "ps-10"),
                           Boolean(errors.fullName),
                         )}
                         placeholder={t("adminUsersDialog.field.fullName.placeholder")}
@@ -261,11 +261,11 @@ export default function CreateAdminUserDialog({
                     error={errors.email?.message}
                   >
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
+                      <Mail className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                       <input
                         {...register("email")}
                         className={adminFieldClass(
-                          cn(adminInputClass, "pl-10"),
+                          cn(adminInputClass, "ps-10"),
                           Boolean(errors.email),
                         )}
                         placeholder="name@example.com"
@@ -300,11 +300,11 @@ export default function CreateAdminUserDialog({
                         )}
                       />
                       <div className="relative flex-1">
-                        <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
+                        <Phone className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                         <input
                           {...register("phoneLocal")}
                           className={adminFieldClass(
-                            cn(adminInputClass, "pl-10"),
+                            cn(adminInputClass, "ps-10"),
                             Boolean(errors.phoneLocal),
                           )}
                           placeholder="912345678"
@@ -328,7 +328,7 @@ export default function CreateAdminUserDialog({
                         {...register("password")}
                         type={showPassword ? "text" : "password"}
                         className={adminFieldClass(
-                          cn(adminInputClass, "pl-10 pr-10"),
+                          cn(adminInputClass, "ps-10 pe-10"),
                           Boolean(errors.password),
                         )}
                         placeholder="••••••••"
@@ -338,7 +338,7 @@ export default function CreateAdminUserDialog({
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280] transition hover:text-[#111827]"
+                        className="absolute start-3 top-1/2 -translate-y-1/2 text-[#6B7280] transition hover:text-[#111827]"
                         disabled={createMutation.isPending}
                       >
                         {showPassword ? (

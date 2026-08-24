@@ -118,7 +118,7 @@ export default function DoctorNotificationPage() {
       >
         <section className='rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] sm:px-6'>
           <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
-            <div className='flex flex-col gap-1 text-right'>
+            <div className='flex flex-col gap-1 text-start'>
               <h1 className='font-cairo text-[22px] font-black leading-[28px] text-[#111827]'>
                 الإشعارات
               </h1>
@@ -210,8 +210,8 @@ export default function DoctorNotificationPage() {
                   }}
                   className={
                     (isAccent
-                      ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#0F8F8B]'
-                      : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-l-[4.7px] border-l-[#f0a95d]') +
+                      ? 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-s-[4.7px] border-s-[#0F8F8B]'
+                      : 'rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_12px_26px_rgba(0,0,0,0.06)] border-s-[4.7px] border-s-[#f0a95d]') +
                     ' cursor-pointer transition hover:shadow-[0_16px_32px_rgba(0,0,0,0.09)]'
                   }
                 >
@@ -220,7 +220,7 @@ export default function DoctorNotificationPage() {
                       <div className='flex items-center justify-center  bg-[#FFFFFF] w-12 h-12 rounded-[6px] shadow-[0px_4px_6px_-1px_#0000001A]'>
                         {getTypeIcon(n.kind)}
                       </div>
-                      <div className='flex flex-1 flex-col text-right'>
+                      <div className='flex flex-1 flex-col text-start'>
                         <div className='font-cairo text-[16px] font-extrabold leading-[22px] text-[#111827]'>
                           {n.title}
                         </div>

@@ -24,7 +24,7 @@ export function FaqDialog({
       ) : (
         <div className="space-y-5">
           <FaqAccordionList items={items} />
-          <div className="rounded-[14px] border border-[#D9F2EF] bg-[#F8FFFE] px-4 py-4 text-right">
+          <div className="rounded-[14px] border border-[#D9F2EF] bg-[#F8FFFE] px-4 py-4 text-start">
             <div className="flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
               <BookOpen className="h-4 w-4 text-primary" />
               ابحث في المكتبة الطبية

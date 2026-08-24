@@ -40,7 +40,7 @@ export function EncountersFiltersBar({
         />
       </label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <label className="block text-right">
+        <label className="block text-start">
           <span className="mb-1.5 block font-cairo text-[12px] font-bold text-[#475467]">
             من
           </span>
@@ -51,7 +51,7 @@ export function EncountersFiltersBar({
             className="h-11 w-full rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] px-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
           />
         </label>
-        <label className="block text-right">
+        <label className="block text-start">
           <span className="mb-1.5 block font-cairo text-[12px] font-bold text-[#475467]">
             إلى
           </span>
@@ -62,7 +62,7 @@ export function EncountersFiltersBar({
             className="h-11 w-full rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] px-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none transition-shadow focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
           />
         </label>
-        <div className="text-right">
+        <div className="text-start">
           <span className="mb-1.5 block font-cairo text-[12px] font-bold text-[#475467]">
             الترتيب
           </span>

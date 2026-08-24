@@ -183,7 +183,7 @@ export default function UpsertDoctorLookupDialog({
               >
                 <X className="w-5 h-5" />
               </button>
-              <div className="text-right">
+              <div className="text-start">
                 <h3 className="font-cairo text-[16px] font-black text-[#111827]">
                   {isEdit ? t("adminDoctorLookup.editTitle") : t("adminDoctorLookup.createTitle")}
                 </h3>
@@ -223,7 +223,7 @@ export default function UpsertDoctorLookupDialog({
                   disabled={busy}
                 />
                 {errors.key && (
-                  <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                  <p className="mt-1 text-start font-cairo text-[11px] font-semibold text-[#D92D20]">
                     {errors.key.message}
                   </p>
                 )}
@@ -231,7 +231,7 @@ export default function UpsertDoctorLookupDialog({
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
+                  <label className="mb-1 block text-start font-cairo text-[12px] font-bold text-[#344054]">
                     {t("adminDoctorLookup.field.nameAr.label")}
                   </label>
                   <input
@@ -240,13 +240,13 @@ export default function UpsertDoctorLookupDialog({
                     disabled={busy}
                   />
                   {errors.textAr && (
-                    <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                    <p className="mt-1 text-start font-cairo text-[11px] font-semibold text-[#D92D20]">
                       {errors.textAr.message}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
+                  <label className="mb-1 block text-start font-cairo text-[12px] font-bold text-[#344054]">
                     {t("adminDoctorLookup.field.nameEn.label")}
                   </label>
                   <input
@@ -256,7 +256,7 @@ export default function UpsertDoctorLookupDialog({
                     disabled={busy}
                   />
                   {errors.textEn && (
-                    <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                    <p className="mt-1 text-start font-cairo text-[11px] font-semibold text-[#D92D20]">
                       {errors.textEn.message}
                     </p>
                   )}
@@ -264,7 +264,7 @@ export default function UpsertDoctorLookupDialog({
               </div>
 
               <div>
-                <label className="mb-1 block text-right font-cairo text-[12px] font-bold text-[#344054]">
+                <label className="mb-1 block text-start font-cairo text-[12px] font-bold text-[#344054]">
                   {t("adminDoctorLookup.field.order.label")}
                 </label>
                 <input
@@ -274,14 +274,14 @@ export default function UpsertDoctorLookupDialog({
                   disabled={busy}
                 />
                 {errors.order && (
-                  <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#D92D20]">
+                  <p className="mt-1 text-start font-cairo text-[11px] font-semibold text-[#D92D20]">
                     {errors.order.message}
                   </p>
                 )}
               </div>
 
               {serverErr && (
-                <div className="rounded-[10px] border border-red-200 bg-red-50 px-3 py-2 text-right">
+                <div className="rounded-[10px] border border-red-200 bg-red-50 px-3 py-2 text-start">
                   <p className="font-cairo text-[12px] font-semibold text-red-800">
                     {userFacingErrorMessage(serverErr)}
                   </p>

@@ -61,7 +61,7 @@ export default function DoctorPatientsFiltersSection({
             >
               <Filter className="h-[18px] w-[18px]" strokeWidth={2.25} />
             </div>
-            <div className="min-w-0 text-right">
+            <div className="min-w-0 text-start">
               <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
                 تصفية قائمة المرضى
               </h2>
@@ -121,7 +121,7 @@ export default function DoctorPatientsFiltersSection({
                 value={filters.search}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
-              <div className="pointer-events-none absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-focus-within:bg-primary/[0.14]">
+              <div className="pointer-events-none absolute start-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-focus-within:bg-primary/[0.14]">
                 <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function DoctorPatientsFiltersSection({
                 placeholder="كلمة في التشخيص..."
                 value={filters.diagnosis}
                 onChange={(e) => onDiagnosisChange(e.target.value)}
-                className="h-[42px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3.5 text-right font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all placeholder:text-[#98A2B3] hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
+                className="h-[42px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3.5 text-start font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all placeholder:text-[#98A2B3] hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
               />
             </div>
 
@@ -211,7 +211,7 @@ export default function DoctorPatientsFiltersSection({
         </div>
 
         <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#FAFBFC]/90 px-4 py-4 sm:px-5">
-          <div className="flex flex-wrap gap-2 items-center mb-3 text-right">
+          <div className="flex flex-wrap gap-2 items-center mb-3 text-start">
             <Calendar className="w-4 h-4 text-primary shrink-0" aria-hidden />
             <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
               نطاق تاريخ آخر زيارة

@@ -423,7 +423,7 @@ export default function DoctorWorkSchedulePage() {
             <div className='p-4 sm:p-6'>
               <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
                 <div>
-                  <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[13px] font-bold text-[#344054]'>
+                  <label className='mb-2 flex items-center gap-2 text-start font-cairo text-[13px] font-bold text-[#344054]'>
                     <Clock className='w-4 h-4 text-primary' />
                     {tr('مدة الموعد (دقيقة)', 'Appointment duration (minutes)')}
                   </label>
@@ -441,7 +441,7 @@ export default function DoctorWorkSchedulePage() {
                 </div>
 
                 <div>
-                  <label className='mb-2 flex items-center gap-2 text-right font-cairo text-[13px] font-bold text-[#344054]'>
+                  <label className='mb-2 flex items-center gap-2 text-start font-cairo text-[13px] font-bold text-[#344054]'>
                     <Clock className='w-4 h-4 text-primary' />
                     {tr('الفجوة بين المواعيد (دقيقة)', 'Gap between appointments (minutes)')}
                   </label>

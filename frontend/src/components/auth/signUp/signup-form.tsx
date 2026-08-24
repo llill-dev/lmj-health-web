@@ -277,10 +277,10 @@ export default function SignUpForm({
           className="fixed inset-0 z-0 overflow-hidden bg-[#B2E5E5]"
           aria-hidden
         >
-          <div className="pointer-events-none absolute -left-28 -top-36 h-[460px] w-[460px] rounded-full bg-[#7DCBCC]/55 blur-2xl" />
-          <div className="pointer-events-none absolute -left-16 top-[8%] h-[380px] w-[380px] rounded-full bg-[#8FD5D2]/40" />
-          <div className="pointer-events-none absolute left-[5%] top-[-12%] h-[520px] w-[520px] rounded-full bg-[#6BBEB9]/30" />
-          <div className="pointer-events-none absolute right-[-8%] bottom-[10%] h-[280px] w-[280px] rounded-full bg-[#94DAD8]/35" />
+          <div className="pointer-events-none absolute -start-28 -top-36 h-[460px] w-[460px] rounded-full bg-[#7DCBCC]/55 blur-2xl" />
+          <div className="pointer-events-none absolute -start-16 top-[8%] h-[380px] w-[380px] rounded-full bg-[#8FD5D2]/40" />
+          <div className="pointer-events-none absolute start-[5%] top-[-12%] h-[520px] w-[520px] rounded-full bg-[#6BBEB9]/30" />
+          <div className="pointer-events-none absolute end-[-8%] bottom-[10%] h-[280px] w-[280px] rounded-full bg-[#94DAD8]/35" />
         </div>
       ) : null}
 
@@ -317,7 +317,7 @@ export default function SignUpForm({
             <SignUpStepper step={step} />
 
             {submitError ? (
-              <div className="mt-4 whitespace-pre-line rounded-[6px] border border-[#FEE4E2] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[13px] font-bold leading-6 text-[#B42318]">
+              <div className="mt-4 whitespace-pre-line rounded-[6px] border border-[#FEE4E2] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[13px] font-bold leading-6 text-[#B42318]">
                 {submitError}
               </div>
             ) : null}

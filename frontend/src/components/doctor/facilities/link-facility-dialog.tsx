@@ -88,7 +88,7 @@ export default function LinkFacilityDialog({
       maxWidthClass="max-w-[640px]"
       headerPattern
     >
-      <div dir={dir} lang={locale} className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-start">
         <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
           ابحث عن منشأة مسجّلة في النظام واربط حسابك بها. إذا لم تجدها، استخدم
           «اقتراح منشأة» لإرسال طلب إضافتها.
@@ -186,7 +186,7 @@ export default function LinkFacilityDialog({
                       disabled={submitting}
                       onClick={() => setSelectedId(id)}
                       className={cn(
-                        'flex w-full items-start gap-3 rounded-[12px] border px-4 py-3 text-right transition',
+                        'flex w-full items-start gap-3 rounded-[12px] border px-4 py-3 text-start transition',
                         isSelected
                           ? 'border-primary bg-[#E6F4F3] shadow-sm'
                           : 'border-[#EEF2F6] bg-white hover:border-primary/30 hover:bg-[#F0FDFA]',

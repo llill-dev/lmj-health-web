@@ -172,7 +172,7 @@ export default function DoctorClinicFinancialSettingsPage() {
         ) : (
           <div className="space-y-5">
             {!canManageSettings ? (
-              <div className="rounded-[16px] border border-[#D0D5DD] bg-[#F8FAFC] p-4 text-right">
+              <div className="rounded-[16px] border border-[#D0D5DD] bg-[#F8FAFC] p-4 text-start">
                 <p className="font-cairo text-[13px] font-semibold text-[#667085]">
                   يمكنك مراجعة الإعدادات المالية فقط. تعديلها يتطلب صلاحية إدارة الإعدادات.
                 </p>

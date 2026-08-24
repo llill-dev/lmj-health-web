@@ -61,7 +61,7 @@ const DetailRow = memo<{
   return (
     <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
       <Icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
-      <div className="flex min-w-0 flex-1 flex-col gap-1 text-right sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 text-start sm:flex-row sm:items-center sm:gap-4">
         <div className="font-cairo text-[16px] font-bold text-primary">
           {label}
         </div>
@@ -270,7 +270,7 @@ export default function DoctorAppointmentExpandableCard({
                           key={fileId}
                           className="flex flex-col gap-3 rounded-lg border border-[#D6F5F3] bg-[#F0FDFC] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                         >
-                          <div className="min-w-0 text-right">
+                          <div className="min-w-0 text-start">
                             <div className="font-cairo text-[14px] font-bold text-[#101828]">
                               {file.name}
                             </div>

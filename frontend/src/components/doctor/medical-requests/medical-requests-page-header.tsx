@@ -13,7 +13,7 @@ export function MedicalRequestsPageHeader() {
       />
 
       <div className="relative flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 items-start gap-4 text-right">
+        <div className="flex min-w-0 flex-1 items-start gap-4 text-start">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[6px] bg-primary shadow-[0px_4px_14px_rgba(15,143,139,0.35)] sm:h-16 sm:w-16">
             <ClipboardList
               className="h-7 w-7 text-white sm:h-8 sm:w-8"

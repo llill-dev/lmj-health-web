@@ -60,7 +60,7 @@ export function EncounterWorkspaceSectionCard({
             type="button"
             aria-expanded={expanded}
             onClick={onToggle}
-            className="flex flex-1 gap-3 justify-between items-center min-w-0 text-right"
+            className="flex flex-1 gap-3 justify-between items-center min-w-0 text-start"
           >
             <div
               dir={dir}
@@ -135,7 +135,7 @@ export function EncounterWorkspaceSectionCard({
                 section.referrals?.map((referral) => (
                   <div
                     key={referral.id}
-                    className="rounded-[12px] border border-[#E2E8F0] bg-white px-4 py-3 text-right shadow-sm"
+                    className="rounded-[12px] border border-[#E2E8F0] bg-white px-4 py-3 text-start shadow-sm"
                   >
                     <div className="flex flex-wrap gap-2 justify-between items-center">
                       <div className="flex flex-wrap gap-2 items-center">
@@ -168,7 +168,7 @@ export function EncounterWorkspaceSectionCard({
                 section.items.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-[12px] border border-[#E2E8F0] bg-white px-4 py-3 text-right shadow-sm"
+                    className="rounded-[12px] border border-[#E2E8F0] bg-white px-4 py-3 text-start shadow-sm"
                   >
                     <div className="flex flex-wrap gap-2 justify-between items-start">
                       <div className="min-w-0 flex-1">
@@ -195,7 +195,7 @@ export function EncounterWorkspaceSectionCard({
                   </div>
                 ))
               ) : (
-                <div className="rounded-[10px] border border-[#E2E8F0] bg-white px-4 py-4 text-right">
+                <div className="rounded-[10px] border border-[#E2E8F0] bg-white px-4 py-4 text-start">
                   <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
                     {section.count} طلب/طلبات مسجّلة
                   </div>

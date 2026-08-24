@@ -174,7 +174,7 @@ export default function DoctorMedicalRequestsPage() {
         </div>
 
         {list.isDemo ? (
-          <p className="mb-4 rounded-[10px] border border-[#FEF3C7] bg-[#FFFBEB] px-4 py-2 text-right font-cairo text-[12px] font-semibold text-[#92400E]">
+          <p className="mb-4 rounded-[10px] border border-[#FEF3C7] bg-[#FFFBEB] px-4 py-2 text-start font-cairo text-[12px] font-semibold text-[#92400E]">
             {tr(
               'وضع الواجهة فقط (VITE_UI_ONLY) مفعّل — بيانات تجريبية محلية.',
               'UI-only mode (VITE_UI_ONLY) is enabled — local demo data.',
@@ -285,7 +285,7 @@ export default function DoctorMedicalRequestsPage() {
 
         {(detailsOpen || labOpen || radiologyOpen || statusOpen || uploadResultOpen) &&
         detailsQuery.isAwaitingData ? (
-          <div className="pointer-events-none fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#111827] px-4 py-2 font-cairo text-[12px] font-bold text-white shadow-lg">
+          <div className="pointer-events-none fixed bottom-6 start-1/2 z-[70] -translate-x-1/2 rounded-full bg-[#111827] px-4 py-2 font-cairo text-[12px] font-bold text-white shadow-lg">
             جارٍ تحميل التفاصيل...
           </div>
         ) : null}

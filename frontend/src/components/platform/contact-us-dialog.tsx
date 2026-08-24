@@ -35,7 +35,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+      <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
         {label}
         {required ? <span className="ms-1 text-[#DC2626]">*</span> : null}
       </label>
@@ -45,10 +45,10 @@ function Field({
 }
 
 const inputClass =
-  'h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[13px] font-semibold text-[#111827] text-right placeholder:text-right outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white';
+  'h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 font-cairo text-[13px] font-semibold text-[#111827] text-start placeholder:text-start outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white';
 
 const textareaClass =
-  'w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] text-right placeholder:text-right outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white';
+  'w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] text-start placeholder:text-start outline-none transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white';
 
 const FALLBACK_SOCIAL = [
   {
@@ -309,7 +309,7 @@ export function ContactUsDialog({
         onSubmit={handleSubmit}
         dir={dir}
         lang={locale}
-        className="space-y-5 text-right"
+        className="space-y-5 text-start"
       >
         <div className="flex gap-2 justify-start items-center">
           <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#F0FDFA] text-primary">
@@ -431,7 +431,7 @@ export function ContactUsDialog({
               </a>
             ))}
           </div>
-          <div className="mt-5 rounded-[12px] border border-[#D9F2EF] bg-white px-4 py-4 text-right">
+          <div className="mt-5 rounded-[12px] border border-[#D9F2EF] bg-white px-4 py-4 text-start">
             <div className="flex items-center gap-2 font-cairo text-[14px] font-extrabold text-[#111827]">
               <BookOpen className="h-4 w-4 text-primary" />
               قبل إرسال الطلب

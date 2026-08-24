@@ -230,10 +230,10 @@ export default function BookAppointmentDialog({
                   />
 
                   <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f8f8b_0%,#14b8a6_62%,#dff8f6_100%)] px-8 pb-7 pt-7 text-white">
-                    <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full blur-2xl bg-white/15" />
-                    <div className="absolute -bottom-14 right-8 h-28 w-28 rounded-full bg-[#083344]/20 blur-2xl" />
+                    <div className="absolute -top-10 -start-10 w-32 h-32 rounded-full blur-2xl bg-white/15" />
+                    <div className="absolute -bottom-14 end-8 h-28 w-28 rounded-full bg-[#083344]/20 blur-2xl" />
 
-                    <div className="relative max-w-[520px] pr-12 text-right lg:max-w-none lg:pr-0">
+                    <div className="relative max-w-[520px] pe-12 text-start lg:max-w-none lg:pe-0">
                       <Dialog.Title className="font-cairo text-[24px] font-black leading-[30px]">
                         {tr("حجز موعد جديد", "Book new appointment")}
                       </Dialog.Title>
@@ -249,7 +249,7 @@ export default function BookAppointmentDialog({
                       <button
                         type="button"
                         disabled={isSubmitting}
-                        className="flex absolute top-5 left-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex absolute top-5 start-5 z-10 justify-center items-center w-10 h-10 text-white rounded-full border transition border-white/20 bg-white/12 hover:bg-white/20 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
                         aria-label={tr("إغلاق", "Close")}
                       >
                         <X className="w-5 h-5" />
@@ -285,7 +285,7 @@ export default function BookAppointmentDialog({
                         <motion.div
                           initial={{ opacity: 0, y: -8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="flex items-start gap-3 rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4 text-right"
+                          className="flex items-start gap-3 rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-4 text-start"
                         >
                           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#DC2626]" />
                           <div>
@@ -303,7 +303,7 @@ export default function BookAppointmentDialog({
                         <motion.div
                           initial={{ opacity: 0, y: -8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="flex items-start gap-3 rounded-[18px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-4 text-right"
+                          className="flex items-start gap-3 rounded-[18px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-4 text-start"
                         >
                           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#B54708]" />
                           <div>
@@ -318,7 +318,7 @@ export default function BookAppointmentDialog({
                       ) : null}
 
                       <div>
-                        <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                        <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                           {tr("اختر المريض", "Select patient")}
                         </div>
                         <Controller
@@ -348,7 +348,7 @@ export default function BookAppointmentDialog({
                           )}
                         />
                         {errors.patientId ? (
-                          <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                          <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                             {errors.patientId.message}
                           </div>
                         ) : null}
@@ -356,7 +356,7 @@ export default function BookAppointmentDialog({
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                          <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                             {tr("التاريخ", "Date")}
                           </div>
                           <input
@@ -370,7 +370,7 @@ export default function BookAppointmentDialog({
                             } bg-white px-4 font-cairo text-[13px] font-bold text-[#111827] outline-none`}
                           />
                           {errors.date ? (
-                            <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                            <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                               {errors.date.message}
                             </div>
                           ) : null}
@@ -378,7 +378,7 @@ export default function BookAppointmentDialog({
 
                         <div>
                           <div className="flex gap-3 justify-between items-center mb-2">
-                            <div className="text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                            <div className="text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                               {tr("الوقت المتاح", "Available time")}
                             </div>
                             {selectedDate ? (
@@ -398,7 +398,7 @@ export default function BookAppointmentDialog({
                                   : "border-primary/60"
                               } bg-white p-3`}
                             >
-                              <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                              <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#98A2B3]">
                                 {tr(
                                   "اختر التاريخ أولاً حتى تظهر لك المواعيد المتاحة فقط.",
                                   "Select a date first to see available appointments only.",
@@ -413,7 +413,7 @@ export default function BookAppointmentDialog({
                                   : "border-primary/60"
                               } bg-white p-3`}
                             >
-                              <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+                              <div className="rounded-[12px] bg-[#F9FAFB] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
                                 {tr(
                                   "جارٍ تحميل الأوقات المتاحة...",
                                   "Loading available times...",
@@ -428,7 +428,7 @@ export default function BookAppointmentDialog({
                                   : "border-primary/60"
                               } bg-white p-3`}
                             >
-                              <div className="rounded-[12px] bg-[#FEF2F2] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#B42318]">
+                              <div className="rounded-[12px] bg-[#FEF2F2] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
                                 {tr(
                                   "تعذر تحميل الأوقات المتاحة لهذا التاريخ.",
                                   "Could not load available times for this date.",
@@ -443,7 +443,7 @@ export default function BookAppointmentDialog({
                                   : "border-primary/60"
                               } bg-white p-3`}
                             >
-                              <div className="rounded-[12px] bg-[#FFF7ED] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#C2410C]">
+                              <div className="rounded-[12px] bg-[#FFF7ED] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#C2410C]">
                                 {tr(
                                   "لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً آخر.",
                                   "No available times on this date. Choose another date.",
@@ -494,18 +494,18 @@ export default function BookAppointmentDialog({
                           )}
 
                           {errors.time ? (
-                            <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                            <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                               {errors.time.message}
                             </div>
                           ) : !isSelectedTimeAvailable ? (
-                            <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                            <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                               {tr(
                                 "الوقت المحدد لم يعد متاحاً. اختر وقتاً من الأوقات المتاحة.",
                                 "Selected time is no longer available. Choose another available time.",
                               )}
                             </div>
                           ) : (
-                            <div className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]">
+                            <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
                               {tr(
                                 "تظهر لك فقط الأوقات المتاحة حسب جدول الطبيب.",
                                 "Only available times from the doctor's schedule are shown.",
@@ -517,7 +517,7 @@ export default function BookAppointmentDialog({
 
                       {appointmentTypes.length > 0 ? (
                         <div>
-                          <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                          <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                             {tr("نوع الموعد", "Appointment type")}
                           </div>
                           <Controller
@@ -562,7 +562,7 @@ export default function BookAppointmentDialog({
                       ) : null}
 
                       <div>
-                        <div className="mb-2 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                        <div className="mb-2 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                           {tr("ملاحظات", "Notes")}
                         </div>
                         <textarea
@@ -578,7 +578,7 @@ export default function BookAppointmentDialog({
                           } bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]`}
                         />
                         {errors.notes ? (
-                          <div className="mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]">
+                          <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
                             {errors.notes.message}
                           </div>
                         ) : null}
@@ -593,7 +593,7 @@ export default function BookAppointmentDialog({
                     >
                       <div className="rounded-[21px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,255,255,0.65))] px-4 py-5 sm:px-5">
                         <div className="mb-4 flex items-center gap-3">
-                          <div className="text-right font-cairo text-[13px] font-black text-[#0f766e]">
+                          <div className="text-start font-cairo text-[13px] font-black text-[#0f766e]">
                             {tr("ملخص الحجز", "Booking summary")}
                           </div>
                           <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/28 to-primary/10" />

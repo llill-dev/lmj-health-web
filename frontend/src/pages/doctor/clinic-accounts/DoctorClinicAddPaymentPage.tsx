@@ -212,7 +212,7 @@ export default function DoctorClinicAddPaymentPage() {
         ) : (
           <>
             <section className="mb-5 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-              <div className="mb-4 text-right">
+              <div className="mb-4 text-start">
                 <p className="font-cairo text-[18px] font-black text-[#111827]">
                   {invoice.id}
                 </p>
@@ -258,7 +258,7 @@ export default function DoctorClinicAddPaymentPage() {
 
             <div className="space-y-5">
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-                <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                   {tr("المبلغ", "Amount")}
                 </label>
                 <input
@@ -273,11 +273,11 @@ export default function DoctorClinicAddPaymentPage() {
               </section>
 
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                <h2 className="mb-4 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                   {tr("طريقة الدفع", "Payment method")}
                 </h2>
                 {methodsUnavailable ? (
-                  <p className="rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B42318]">
+                  <p className="rounded-[10px] border border-dashed border-[#FDA29B] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B42318]">
                     {tr(
                       "تعذّر تحميل طرق الدفع المفعّلة لهذه العيادة. لا يمكن تسجيل دفعة قبل توفّر هذه البيانات.",
                       "Could not load the enabled payment methods for this clinic. A payment cannot be recorded until this data is available.",
@@ -315,10 +315,10 @@ export default function DoctorClinicAddPaymentPage() {
               </section>
 
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-                <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                   {tr("التاريخ (اختياري)", "Date (optional)")}
                 </label>
-                <p className="mb-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]">
+                <p className="mb-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]">
                   {tr(
                     "اتركه فارغاً أو اختر اليوم لاستخدام وقت التسجيل الحالي. للأيام السابقة اختر التاريخ المناسب — التواريخ المستقبلية غير متاحة.",
                     "Leave it empty or select today to use the current recording time. For previous days, pick the appropriate date — future dates are not available.",
@@ -339,7 +339,7 @@ export default function DoctorClinicAddPaymentPage() {
               </section>
 
               <section className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-                <label className="mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                <label className="mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                   {tr("ملاحظات", "Notes")}
                 </label>
                 <textarea

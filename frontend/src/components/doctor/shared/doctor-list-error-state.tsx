@@ -50,7 +50,7 @@ export default function DoctorListErrorState({
           {brief}
         </p>
         {showTechnicalDetail && detail ? (
-          <details className="group mt-5 rounded-2xl border border-[#EAECF0] bg-white/75 px-4 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[2px]">
+          <details className="group mt-5 rounded-2xl border border-[#EAECF0] bg-white/75 px-4 py-3 text-start shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[2px]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-cairo text-[12px] font-extrabold text-[#344054] transition-colors hover:text-[#101828] [&::-webkit-details-marker]:hidden">
               <span>{tr("تفاصيل إضافية", "Additional details")}</span>
               <ChevronDown
@@ -58,7 +58,7 @@ export default function DoctorListErrorState({
                 aria-hidden
               />
             </summary>
-            <p className="mt-3 border-t border-[#F2F4F7] pt-3 text-right font-cairo text-[12px] font-medium leading-[1.75] text-[#667085]">
+            <p className="mt-3 border-t border-[#F2F4F7] pt-3 text-start font-cairo text-[12px] font-medium leading-[1.75] text-[#667085]">
               {detail}
             </p>
           </details>

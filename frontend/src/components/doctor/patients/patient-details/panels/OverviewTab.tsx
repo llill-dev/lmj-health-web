@@ -79,7 +79,7 @@ function OverviewStatCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-[#E2E8F0] p-4 text-right transition-all hover:shadow-lg",
+        "group relative overflow-hidden rounded-2xl border border-[#E2E8F0] p-4 text-start transition-all hover:shadow-lg",
         tone,
       )}
     >

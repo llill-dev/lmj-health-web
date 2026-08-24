@@ -24,7 +24,7 @@ export function DoctorStatCardsSkeleton({
             key={index}
             className="flex items-center justify-between gap-3 rounded-[10px] border border-[#E2E8F0] bg-white px-4 py-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]"
           >
-            <div className="space-y-2 text-right">
+            <div className="space-y-2 text-start">
               <SkeletonBlock className="h-3 w-16" />
               <SkeletonBlock className="h-7 w-10" />
             </div>

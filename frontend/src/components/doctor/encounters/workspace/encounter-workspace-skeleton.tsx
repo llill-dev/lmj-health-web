@@ -9,11 +9,11 @@ function PatientCardSkeleton() {
       className="relative overflow-hidden rounded-[14px] border border-[#BFEDEC] bg-[#F0FAF9] px-5 py-5"
       aria-hidden
     >
-      <div className={`absolute left-4 top-4 h-6 w-16 ${PULSE} rounded-full`} />
+      <div className={`absolute start-4 top-4 h-6 w-16 ${PULSE} rounded-full`} />
       <div className="flex flex-col gap-4 pt-6">
         <div className="flex items-center justify-start gap-3">
           <div className={`h-10 w-10 shrink-0 rounded-full ${PULSE}`} />
-          <div className="space-y-2 text-right">
+          <div className="space-y-2 text-start">
             <div className={`h-6 w-40 ${PULSE}`} />
             <div className={`h-4 w-28 ${PULSE}`} />
           </div>

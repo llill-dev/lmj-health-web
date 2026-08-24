@@ -451,7 +451,7 @@ export default function DoctorOnlineConsultationsPage() {
               placeholder={tr('ابحث في الطلبات...', 'Search requests...')}
               className="h-[40px] w-full rounded-[6px] border border-[#E5E7EB] bg-white ps-11 pe-4 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#98A2B3]"
             />
-            <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+            <div className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
               <Search className="h-[18px] w-[18px]" />
             </div>
           </div>
@@ -654,8 +654,8 @@ export default function DoctorOnlineConsultationsPage() {
                                         onClick={() => setSelectedMessageId(m.id)}
                                         className={
                                           isSelected
-                                            ? 'w-full rounded-[10px] border border-[#EEF2F6] bg-[#0F8F8B1A] px-4 py-3 text-right'
-                                            : 'w-full rounded-[10px] border border-[#EEF2F6] bg-white px-4 py-3 text-right'
+                                            ? 'w-full rounded-[10px] border border-[#EEF2F6] bg-[#0F8F8B1A] px-4 py-3 text-start'
+                                            : 'w-full rounded-[10px] border border-[#EEF2F6] bg-white px-4 py-3 text-start'
                                         }
                                       >
                                         <div className="flex items-center justify-between">

@@ -94,7 +94,7 @@ export default function ServiceTypeStatusConfirmDialog({
         <Dialog.Content
           forceMount
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className='fixed left-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
+          className='fixed start-1/2 top-1/2 z-[10060] w-[min(100vw-1.5rem,420px)] -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 shadow-none outline-none'
           dir={dir}
           lang={locale}
         >
@@ -133,12 +133,12 @@ export default function ServiceTypeStatusConfirmDialog({
               </Dialog.Close>
             </div>
             <div className='px-5 py-4'>
-              <p className='text-right font-cairo text-[14px] font-semibold leading-relaxed text-[#475467]'>
+              <p className='text-start font-cairo text-[14px] font-semibold leading-relaxed text-[#475467]'>
                 {isDeactivate
                   ? t('adminServiceTypeDialog.statusDialog.deactivateBody').replace('{name}', title || '—')
                   : t('adminServiceTypeDialog.statusDialog.activateBody').replace('{name}', title || '—')}
               </p>
-              <div className='mt-3 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-3 py-2 text-right font-cairo text-[12px] font-bold leading-6 text-[#0F766E]'>
+              <div className='mt-3 rounded-[12px] border border-[#D9F2EF] bg-[#F4FFFD] px-3 py-2 text-start font-cairo text-[12px] font-bold leading-6 text-[#0F766E]'>
                 {t('adminServiceTypeDialog.statusDialog.note')}
               </div>
             </div>

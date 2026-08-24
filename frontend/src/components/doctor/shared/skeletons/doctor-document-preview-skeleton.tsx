@@ -8,7 +8,7 @@ export function DoctorDocumentPreviewSkeleton() {
       <div className="space-y-4">
         <div className="rounded-[16px] border border-[#E2E8F0] bg-white p-6 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.08)]">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-[#EEF2F6] pb-5">
-            <div className="space-y-2 text-right">
+            <div className="space-y-2 text-start">
               <SkeletonBlock className="h-7 w-48" />
               <SkeletonBlock className="h-4 w-56" />
             </div>

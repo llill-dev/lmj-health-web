@@ -97,7 +97,7 @@ function SurfaceSection({
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
-        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+        <h2 className="text-start font-cairo text-[23px] font-black leading-none text-[#243044]">
           {title}
         </h2>
       </header>
@@ -120,9 +120,9 @@ function PatientsSearchInput({
         onChange={(event) => onChange(event.target.value)}
         placeholder="ابحث بالاسم، الهاتف، البريد، أو رقم الملف…"
         aria-label="بحث عن مريض"
-        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pr-10 pl-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
+        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
-      <div className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
+      <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
         <Search className="h-5 w-5" />
       </div>
     </div>
@@ -143,7 +143,7 @@ const PatientTableRow = memo<{
             {patientInitials(patient.user.fullName)}
           </span>
         </div>
-        <div className="min-w-0 text-right">
+        <div className="min-w-0 text-start">
           <div className="truncate font-cairo text-[18px] font-black text-[#243044]">
             {patient.user.fullName}
           </div>
@@ -166,7 +166,7 @@ const PatientTableRow = memo<{
           {status.label}
         </span>
       </div>
-      <div className="text-right lg:col-span-2 lg:text-left">
+      <div className="text-start lg:col-span-2 lg:text-end">
         <button
           type="button"
           onClick={() => onOpen(patient._id)}
@@ -195,7 +195,7 @@ const PatientsWeeklyActivityChart = memo<{
 
   return (
     <div className="mt-5 flex min-h-[270px] flex-col justify-between rounded-[18px] bg-[#E3F6F8] px-6 py-6">
-      <div className="flex items-start justify-between gap-3 text-right">
+      <div className="flex items-start justify-between gap-3 text-start">
         <div className="font-cairo text-[16px] font-bold text-[#A3B2BF]">
           نشاط المرضى - آخر 7 أيام
         </div>
@@ -339,7 +339,7 @@ export function DashboardPatientsTable({
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
-        <div className="text-right">
+        <div className="text-start">
           <h2 className="font-cairo text-[23px] font-black text-[#243044]">
             المرضى
           </h2>
@@ -373,7 +373,7 @@ export function DashboardPatientsTable({
       </div>
 
       <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
-        <div className="grid grid-cols-12 gap-4 text-right font-cairo text-[14px] font-bold text-[#A1AAB9]">
+        <div className="grid grid-cols-12 gap-4 text-start font-cairo text-[14px] font-bold text-[#A1AAB9]">
           <div className="col-span-4">اسم المريض</div>
           <div className="col-span-3">رقم الهاتف</div>
           <div className="col-span-2">آخر زيارة</div>

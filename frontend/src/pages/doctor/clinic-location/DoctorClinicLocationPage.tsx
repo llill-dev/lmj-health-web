@@ -290,7 +290,7 @@ export default function DoctorClinicLocationPage() {
               >
                 <MapPin className="h-4 w-4" />
               </button>
-              <div className="text-right">
+              <div className="text-start">
                 <div className="font-cairo text-[16px] font-extrabold text-[#111827]">
                   {tr('موقع العيادة', 'Clinic location')}
                 </div>
@@ -400,8 +400,8 @@ export default function DoctorClinicLocationPage() {
               </div>
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 grid grid-cols-1 gap-3 bg-white/95 px-4 py-4 backdrop-blur-sm sm:grid-cols-2 sm:px-5">
-              <div className="text-right">
+            <div className="absolute bottom-0 start-0 end-0 grid grid-cols-1 gap-3 bg-white/95 px-4 py-4 backdrop-blur-sm sm:grid-cols-2 sm:px-5">
+              <div className="text-start">
                 <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                   {tr('خط العرض', 'Latitude')}
                 </div>
@@ -409,7 +409,7 @@ export default function DoctorClinicLocationPage() {
                   {form.lat || '—'}
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-start">
                 <div className="font-cairo text-[11px] font-semibold text-[#98A2B3]">
                   {tr('خط الطول', 'Longitude')}
                 </div>
@@ -435,7 +435,7 @@ export default function DoctorClinicLocationPage() {
 
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
+              <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
                 {tr('خط العرض (Latitude)', 'Latitude')}
               </div>
               <input
@@ -446,7 +446,7 @@ export default function DoctorClinicLocationPage() {
               />
             </div>
             <div>
-              <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
+              <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
                 {tr('خط الطول (Longitude)', 'Longitude')}
               </div>
               <input
@@ -459,7 +459,7 @@ export default function DoctorClinicLocationPage() {
           </div>
 
           <div className="mt-4">
-            <div className="mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]">
+            <div className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]">
               {tr('عنوان العيادة', 'Clinic address')}
             </div>
             <input
@@ -470,7 +470,7 @@ export default function DoctorClinicLocationPage() {
           </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-right">
+            <div className="text-start">
               <div className="font-cairo text-[12px] font-extrabold text-[#111827]">
                 {tr('حالة التحقق', 'Verification status')}
               </div>

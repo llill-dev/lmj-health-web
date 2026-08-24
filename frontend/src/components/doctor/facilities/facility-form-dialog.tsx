@@ -149,12 +149,12 @@ export function FacilityFormDialog({
                 type="button"
                 onClick={onClose}
                 disabled={submitting}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label="إغلاق"
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {title}
                 </h2>
@@ -218,7 +218,7 @@ export function FacilityFormDialog({
                 </DoctorProfileFormField>
 
                 <div>
-                  <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                  <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                     الموقع
                   </h3>
                   <div className="space-y-4">
@@ -270,7 +270,7 @@ export function FacilityFormDialog({
                 </div>
 
                 <div>
-                  <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                  <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                     التواصل
                   </h3>
                   <DoctorProfileFormField
@@ -292,7 +292,7 @@ export function FacilityFormDialog({
 
                 {mode === 'edit' ? (
                   <div>
-                    <h3 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#111827]">
+                    <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
                       سمات المنشأة
                     </h3>
                     <DoctorProfileFormField
@@ -363,7 +363,7 @@ export function FacilityFormDialog({
                     </span>
                   </div>
                 ) : (
-                  <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+                  <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
                     بعد الإنشاء تُفعَّل المنشأة تلقائياً وتظهر حالتها في الجدول.
                   </p>
                 )}

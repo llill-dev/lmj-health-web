@@ -130,7 +130,7 @@ export default function PageDashboardOverview({
       headerLeft={
         <div className='flex gap-[16px]'>
           <div className={iconTileClass}>{headerIcon ?? defaultHeaderIcon}</div>
-          <div className='flex min-w-0 flex-col gap-1 text-right'>
+          <div className='flex min-w-0 flex-col gap-1 text-start'>
             <h1 className={titleClass}>{title}</h1>
             {subtitle ? <p className={subtitleClass}>{subtitle}</p> : null}
           </div>

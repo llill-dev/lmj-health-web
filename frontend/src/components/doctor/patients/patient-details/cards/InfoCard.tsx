@@ -8,9 +8,9 @@ interface InfoCardProps {
 
 export function InfoCard({ label, value, icon: Icon }: InfoCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-[#E2E8F0]/90 bg-gradient-to-br from-white via-[#FAFDFC] to-[#F0F9F8] px-4 py-4 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_12px_32px_rgba(15,23,42,0.05)] transition-[box-shadow,transform] duration-300 hover:-translate-y-px hover:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_16px_40px_rgba(15,143,139,0.1)]">
+    <div className="group relative overflow-hidden rounded-2xl border border-[#E2E8F0]/90 bg-gradient-to-br from-white via-[#FAFDFC] to-[#F0F9F8] px-4 py-4 text-start shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_12px_32px_rgba(15,23,42,0.05)] transition-[box-shadow,transform] duration-300 hover:-translate-y-px hover:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_16px_40px_rgba(15,143,139,0.1)]">
       <div
-        className="pointer-events-none absolute -left-8 top-0 h-24 w-24 rounded-full bg-primary/[0.06] blur-2xl transition-opacity group-hover:opacity-100"
+        className="pointer-events-none absolute -start-8 top-0 h-24 w-24 rounded-full bg-primary/[0.06] blur-2xl transition-opacity group-hover:opacity-100"
         aria-hidden
       />
       <div className="flex relative gap-3 items-start">

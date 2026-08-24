@@ -2,7 +2,7 @@ import type { PrescriptionPreviewMedicationVm } from "./prescription-preview-typ
 
 function MetaCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-2 items-center text-right">
+    <div className="flex gap-2 items-center text-start">
       <div className="font-cairo text-[12px] font-extrabold text-[#101828]">
         {label}:
       </div>
@@ -20,11 +20,11 @@ export function PrescriptionPreviewMedicationCard({
 }) {
   return (
     <article className="relative rounded-[12px] border-[0.5px] border-[#0F8F8B] bg-[#E6F4F3] px-4 py-4">
-      <span className="absolute top-3 left-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary font-cairo text-[12px] font-extrabold text-white">
+      <span className="absolute top-3 start-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary font-cairo text-[12px] font-extrabold text-white">
         {item.index}
       </span>
 
-      <h3 className="mb-4 pe-8 text-right font-cairo text-[16px] font-extrabold text-[#101828]">
+      <h3 className="mb-4 pe-8 text-start font-cairo text-[16px] font-extrabold text-[#101828]">
         {item.name}
       </h3>
 

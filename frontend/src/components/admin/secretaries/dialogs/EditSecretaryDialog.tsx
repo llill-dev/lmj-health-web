@@ -187,12 +187,12 @@ export default function EditSecretaryDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t("common.close")}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {t("adminSecretaryDialog.edit.ariaLabel")}
                 </h2>
@@ -219,7 +219,7 @@ export default function EditSecretaryDialog({
                       type="email"
                       value={secretary?.user?.email || ""}
                       disabled
-                      className="w-full h-[48px] rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-right font-cairo text-[13px] font-bold text-[#667085] outline-none cursor-not-allowed"
+                      className="w-full h-[48px] rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-start font-cairo text-[13px] font-bold text-[#667085] outline-none cursor-not-allowed"
                     />
                   </AdminFormField>
 

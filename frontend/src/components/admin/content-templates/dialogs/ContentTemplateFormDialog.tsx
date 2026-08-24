@@ -407,12 +407,12 @@ export default function ContentTemplateFormDialog({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={submitting}
-                className="absolute left-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
+                className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
                 aria-label={t("contentTemplateDialog.close")}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
-              <div className="relative text-right">
+              <div className="relative text-start">
                 <h2 className="font-cairo text-[22px] font-extrabold text-primary">
                   {isEdit
                     ? t("contentTemplateDialog.title.edit")
@@ -518,7 +518,7 @@ export default function ContentTemplateFormDialog({
                     <div className="flex items-center justify-between">
                       <div className="font-cairo text-[13px] font-extrabold text-[#111827]">
                         {t("contentTemplateDialog.section.fields.title")}
-                        <span className="mr-2 rounded-full bg-[#EEF2F6] px-2 py-0.5 font-cairo text-[11px] font-bold text-[#667085]">
+                        <span className="me-2 rounded-full bg-[#EEF2F6] px-2 py-0.5 font-cairo text-[11px] font-bold text-[#667085]">
                           {fields.length}
                         </span>
                       </div>
@@ -701,14 +701,14 @@ export default function ContentTemplateFormDialog({
                       </div>
                     )}
                     {typeof errors.fields?.message === "string" ? (
-                      <p className="mt-3 text-right font-cairo text-[12px] font-bold text-red-600">
+                      <p className="mt-3 text-start font-cairo text-[12px] font-bold text-red-600">
                         {errors.fields.message}
                       </p>
                     ) : null}
                   </div>
 
                   {activeMut.isError ? (
-                    <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-right font-cairo text-[12px] font-bold text-red-600">
+                    <div className="rounded-[12px] border border-[#FECDCA] bg-red-50 px-4 py-3 text-start font-cairo text-[12px] font-bold text-red-600">
                       {userFacingErrorMessage(
                         activeMut.error,
                         isEdit

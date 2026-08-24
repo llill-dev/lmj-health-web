@@ -49,7 +49,7 @@ export function ClinicalLibraryTemplateApplyDialog({
       maxWidthClass="max-w-[560px]"
       headerPattern
     >
-      <div dir={dir} lang={locale} className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-start">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           تم تحميل مسودة جاهزة من القالب. يمكنك نسخها أو استخدامها عند إنشاء
           وصفة أو طلب في الزيارة الطبية.
@@ -103,7 +103,7 @@ export function ClinicalLibraryTemplateApplyDialog({
               نسخ
             </button>
           </div>
-          <pre className="max-h-[220px] overflow-auto rounded-[12px] border border-[#EEF2F6] bg-[#F9FAFB] p-4 text-left font-mono text-[11px] leading-relaxed text-[#344054]">
+          <pre className="max-h-[220px] overflow-auto rounded-[12px] border border-[#EEF2F6] bg-[#F9FAFB] p-4 text-end font-mono text-[11px] leading-relaxed text-[#344054]">
             {jsonPreview}
           </pre>
         </div>

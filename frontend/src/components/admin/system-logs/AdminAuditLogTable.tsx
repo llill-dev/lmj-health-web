@@ -38,13 +38,13 @@ export function AdminAuditLogTable({
       />
 
       <div className='grid grid-cols-12 gap-2 border-b border-[#EEF2F6] px-6 py-3'>
-        <div className='col-span-3 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
+        <div className='col-span-3 text-start font-cairo text-[12px] font-extrabold text-[#667085]'>
           {t('adminAuditLog.table.actionCategory')}
         </div>
-        <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>{t('adminAuditLog.table.user')}</div>
-        <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>{t('adminAuditLog.table.outcome')}</div>
-        <div className='col-span-2 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>IP</div>
-        <div className='col-span-3 text-right font-cairo text-[12px] font-extrabold text-[#667085]'>
+        <div className='col-span-2 text-start font-cairo text-[12px] font-extrabold text-[#667085]'>{t('adminAuditLog.table.user')}</div>
+        <div className='col-span-2 text-start font-cairo text-[12px] font-extrabold text-[#667085]'>{t('adminAuditLog.table.outcome')}</div>
+        <div className='col-span-2 text-start font-cairo text-[12px] font-extrabold text-[#667085]'>IP</div>
+        <div className='col-span-3 text-start font-cairo text-[12px] font-extrabold text-[#667085]'>
           {t('adminAuditLog.table.dateTime')}
         </div>
       </div>

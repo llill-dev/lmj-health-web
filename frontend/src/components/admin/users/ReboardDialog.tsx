@@ -60,7 +60,7 @@ export default function ReboardDialog({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+            className="fixed start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
             style={{ margin: "auto" }}
           >
             <div className="bg-white rounded-[16px] shadow-2xl overflow-hidden">

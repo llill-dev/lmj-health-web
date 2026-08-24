@@ -96,7 +96,7 @@ export default function ContentBlockEditor<
   return (
     <div className="rounded-[14px] border border-[#E6ECF2] bg-[#FBFCFD] p-4">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="text-right">
+        <div className="text-start">
           <h3 className="font-cairo text-[15px] font-extrabold text-primary">
             {resolvedTitle}
           </h3>
@@ -396,11 +396,11 @@ export default function ContentBlockEditor<
                     />
                   </AdminFormField>
                   {linkCardUrlMessage ? (
-                    <p className="mt-1 text-right font-cairo text-[12px] font-bold text-red-600">
+                    <p className="mt-1 text-start font-cairo text-[12px] font-bold text-red-600">
                       {linkCardUrlMessage}
                     </p>
                   ) : (
-                    <p className="mt-1 text-right font-cairo text-[11px] font-semibold text-[#667085]">
+                    <p className="mt-1 text-start font-cairo text-[11px] font-semibold text-[#667085]">
                       {t("contentBlockEditor.field.linkCardUrl.hint")}
                     </p>
                   )}
@@ -526,13 +526,13 @@ export default function ContentBlockEditor<
               ) : null}
 
               {blockType === "divider" ? (
-                <div className="rounded-[10px] border border-dashed border-[#D0D5DD] bg-[#F9FAFB] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#667085]">
+                <div className="rounded-[10px] border border-dashed border-[#D0D5DD] bg-[#F9FAFB] px-4 py-3 text-start font-cairo text-[12px] font-bold text-[#667085]">
                   {t("contentBlockEditor.dividerNote")}
                 </div>
               ) : null}
 
               {blockError ? (
-                <p className="mt-3 text-right font-cairo text-[12px] font-bold text-red-600">
+                <p className="mt-3 text-start font-cairo text-[12px] font-bold text-red-600">
                   {blockError}
                 </p>
               ) : null}
@@ -542,7 +542,7 @@ export default function ContentBlockEditor<
       </div>
 
       {errorMessage ? (
-        <p className="mt-4 text-right font-cairo text-[12px] font-bold text-red-600">
+        <p className="mt-4 text-start font-cairo text-[12px] font-bold text-red-600">
           {errorMessage}
         </p>
       ) : null}

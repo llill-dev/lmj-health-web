@@ -145,11 +145,11 @@ export default function DashboardHeader({
             }}
           />
           <div
-            className="pointer-events-none absolute -left-16 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-[#14b8a6]/18 blur-3xl"
+            className="pointer-events-none absolute -start-16 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-[#14b8a6]/18 blur-3xl"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute -right-12 top-0 h-28 w-28 rounded-full bg-[#0f766e]/12 blur-2xl"
+            className="pointer-events-none absolute -end-12 top-0 h-28 w-28 rounded-full bg-[#0f766e]/12 blur-2xl"
             aria-hidden
           />
 
@@ -175,7 +175,7 @@ export default function DashboardHeader({
                 />
               </div>
 
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-1 text-right">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-1 text-start">
                 {backLink ? (
                   <Link
                     to={backLink.href}
@@ -218,7 +218,7 @@ export default function DashboardHeader({
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2 border-r border-[#e2e8f0]/80 pr-2 sm:gap-2.5 sm:pr-4">
+            <div className="flex shrink-0 items-center gap-2 border-e border-[#e2e8f0]/80 pe-2 sm:gap-2.5 sm:pe-4">
               {showNotifications ? (
                 <button
                   type="button"
@@ -229,14 +229,14 @@ export default function DashboardHeader({
                 >
                   <Bell className="h-[17px] w-[17px]" strokeWidth={2.25} />
                   {showUnreadBadge && unreadAwaiting ? (
-                    <span className="absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100">
+                    <span className="absolute -start-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100">
                       <Loader2
                         className="h-3 w-3 animate-spin text-gray-500"
                         aria-hidden
                       />
                     </span>
                   ) : showUnreadBadge && unreadBadge ? (
-                    <span className="absolute -left-1 -top-1 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-cairo text-[10px] font-bold text-white shadow-md">
+                    <span className="absolute -start-1 -top-1 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-cairo text-[10px] font-bold text-white shadow-md">
                       {unreadBadge}
                     </span>
                   ) : null}

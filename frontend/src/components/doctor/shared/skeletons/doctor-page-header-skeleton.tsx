@@ -10,7 +10,7 @@ export function DoctorPageHeaderSkeleton({
   return (
     <DoctorLoadingShell label="جارٍ تحميل عنوان الصفحة…">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2 text-right">
+        <div className="space-y-2 text-start">
           <SkeletonBlock className="h-8 w-48 sm:w-56" />
           <SkeletonBlock className="h-4 w-64 max-w-full" />
         </div>

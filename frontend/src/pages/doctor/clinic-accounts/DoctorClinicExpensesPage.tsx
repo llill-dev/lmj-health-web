@@ -272,7 +272,7 @@ export default function DoctorClinicExpensesPage() {
           }
         />
         {!canManageExpenses ? (
-          <p className="mt-4 text-right font-cairo text-[12px] font-semibold text-[#667085]">
+          <p className="mt-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
             {tr(
               "يمكنك عرض المصاريف فقط، بينما إضافة مصروف جديد تتطلب صلاحية إدارة.",
               "You can only view expenses; adding a new expense requires the management permission.",
@@ -336,7 +336,7 @@ export default function DoctorClinicExpensesPage() {
         >
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
+              <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
                 {tr("العنوان", "Title")}
               </label>
               <input
@@ -346,7 +346,7 @@ export default function DoctorClinicExpensesPage() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
+              <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
                 {tr("الفئة", "Category")}
               </label>
               <select
@@ -368,7 +368,7 @@ export default function DoctorClinicExpensesPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
+                <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
                   {tr("المبلغ", "Amount")}
                 </label>
                 <input
@@ -378,7 +378,7 @@ export default function DoctorClinicExpensesPage() {
                 />
               </div>
               <div>
-                <label className="mb-2 block text-right font-cairo text-[12px] font-bold text-[#667085]">
+                <label className="mb-2 block text-start font-cairo text-[12px] font-bold text-[#667085]">
                   {tr("التاريخ", "Date")}
                 </label>
                 <input

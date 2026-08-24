@@ -37,7 +37,7 @@ export function RadiologyViewerDialog({
           }
         />
 
-        <section className="text-right">
+        <section className="text-start">
           <div className="mb-2 flex items-center justify-end gap-2 font-cairo text-[13px] font-extrabold text-[#111827]">
             <span>التقرير</span>
             <ClipboardList className="h-4 w-4 text-primary" aria-hidden />

@@ -253,7 +253,7 @@ export default function ConsultationReplyPanel({
                     });
                     setPickerOpen(false);
                   }}
-                  className="flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-right font-cairo text-[12px] font-semibold text-[#111827] hover:bg-white disabled:opacity-50"
+                  className="flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-start font-cairo text-[12px] font-semibold text-[#111827] hover:bg-white disabled:opacity-50"
                 >
                   <span className="truncate">{file.originalName || 'ملف بدون اسم'}</span>
                   {selected ? (

@@ -30,7 +30,7 @@ export function MedicalHistoryRecordCard({
         }}
       />
       <div
-        className="pointer-events-none absolute inset-y-5 right-0 w-[3px] rounded-full bg-gradient-to-b from-primary via-[#14b8a6] to-[#0f766e] opacity-95 shadow-[0_0_12px_rgba(15,143,139,0.35)]"
+        className="pointer-events-none absolute inset-y-5 end-0 w-[3px] rounded-full bg-gradient-to-b from-primary via-[#14b8a6] to-[#0f766e] opacity-95 shadow-[0_0_12px_rgba(15,143,139,0.35)]"
         aria-hidden
       />
 
@@ -49,7 +49,7 @@ export function MedicalHistoryRecordCard({
             </span>
           </div>
 
-          <div className="flex-1 space-y-3 min-w-0 text-right">
+          <div className="flex-1 space-y-3 min-w-0 text-start">
             <div className="flex flex-wrap gap-3 justify-between items-start">
               <div className="flex-1 space-y-2 min-w-0">
                 <div className="flex flex-wrap gap-2 justify-start items-center">

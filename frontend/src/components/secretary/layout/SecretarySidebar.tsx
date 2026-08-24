@@ -105,10 +105,10 @@ export default function SecretarySidebar({
                   </span>
                 </div>
                 <div className="flex-1">
-                  <div className="text-right font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]">
+                  <div className="text-start font-cairo text-[14px] font-extrabold leading-[18px] text-[#111827]">
                     {profileName}
                   </div>
-                  <div className="mt-1 text-right font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
+                  <div className="mt-1 text-start font-cairo text-[12px] font-medium leading-[16px] text-[#667085]">
                     {profileEmail}
                   </div>
                 </div>

@@ -20,7 +20,7 @@ export function ClinicAccountsStatCard({
         className,
       )}
     >
-      <div className="flex items-start justify-start gap-3 text-right">
+      <div className="flex items-start justify-start gap-3 text-start">
         <Icon className="h-5 w-5 shrink-0 opacity-90" aria-hidden />
         <div className="min-w-0">
           <p className="font-cairo text-[12px] font-bold opacity-90">{label}</p>

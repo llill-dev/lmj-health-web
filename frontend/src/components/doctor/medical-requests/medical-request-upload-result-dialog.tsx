@@ -38,7 +38,7 @@ export function MedicalRequestUploadResultDialog({
       title="إضافة نتيجة"
       maxWidthClass="max-w-[520px]"
     >
-      <div className="space-y-5 text-right" dir={dir}>
+      <div className="space-y-5 text-start" dir={dir}>
         <p className="font-cairo text-[13px] font-semibold text-[#667085]">
           إضافة نتيجة لطلب المريض{' '}
           <span className="font-extrabold text-[#111827]">{patientName}</span>

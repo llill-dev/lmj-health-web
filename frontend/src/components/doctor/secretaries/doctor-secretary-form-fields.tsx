@@ -137,7 +137,7 @@ export function DoctorSecretaryFormFields({
                 <button
                   type="button"
                   onClick={onToggleShowPassword}
-                  className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-primary transition hover:bg-[#F0FDFA] hover:text-[#0b766e]"
+                  className="absolute start-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-primary transition hover:bg-[#F0FDFA] hover:text-[#0b766e]"
                   aria-label={
                     showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
                   }

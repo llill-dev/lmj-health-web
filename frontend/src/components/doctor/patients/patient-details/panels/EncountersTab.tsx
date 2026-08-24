@@ -72,7 +72,7 @@ export function EncountersTab({
         variants={TAB_STAGGER_ITEM}
         className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#E2E8F0]/90 bg-[linear-gradient(145deg,#fafefd_0%,#ffffff_60%,#f8fafc_100%)] px-4 py-3"
       >
-        <div className="text-right">
+        <div className="text-start">
           <p className="font-cairo text-[13px] font-extrabold text-[#0F172A]">
             {encounters.length} زيارة مسجّلة
           </p>

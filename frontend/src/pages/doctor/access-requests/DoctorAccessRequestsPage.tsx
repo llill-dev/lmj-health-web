@@ -162,7 +162,7 @@ export default function DoctorAccessRequestsPage() {
               <motion.button
                 type='button'
                 onClick={() => setMode('list')}
-                className='absolute left-4 top-4 flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:left-[16px] sm:top-[16px]'
+                className='absolute start-4 top-4 flex h-[40px] w-[40px] items-center justify-center rounded-[6px] bg-white shadow-[0_14px_24px_rgba(0,0,0,0.16)] sm:start-[16px] sm:top-[16px]'
                 aria-label={tr('إغلاق', 'Close')}
               >
                 <X className='h-5 w-5 text-[#0F8F8B]' />
@@ -175,7 +175,7 @@ export default function DoctorAccessRequestsPage() {
                 <div className='bg-[#FFFFFF33] w-[56px] h-[56px] flex items-center justify-center rounded-[6px]'>
                   <Shield className='text-white w-[28px] h-[28px]' />
                 </div>
-                <div className='flex flex-col gap-1 text-right'>
+                <div className='flex flex-col gap-1 text-start'>
                   <h1 className='font-cairo text-[12px] font-semibold leading-[18px] text-[#FFFFFFCC]'>
                     {tr('طلبات الوصول', 'Access requests')}
                   </h1>
@@ -270,14 +270,14 @@ export default function DoctorAccessRequestsPage() {
             >
               <section className='mb-6 rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-4 shadow-[0_12px_26px_rgba(0,0,0,0.08)] sm:px-5'>
                 <div className='relative'>
-                  <div className='pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
+                  <div className='pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-[#98A2B3]'>
                     <Search className='h-4 w-4' />
                   </div>
                   <input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder={tr('ابحث في الطلبات...', 'Search requests...')}
-                    className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
+                    className='h-[44px] w-full rounded-[6px] border border-[#E5E7EB] bg-white pe-4 ps-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]'
                   />
                 </div>
               </section>
@@ -317,7 +317,7 @@ export default function DoctorAccessRequestsPage() {
                               <div className='flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#0f8f8b_0%,#14b8a6_100%)] text-white shadow-[0_12px_22px_rgba(15,143,139,0.24)]'>
                                 <UserRound className='h-5 w-5' />
                               </div>
-                              <div className='text-right'>
+                              <div className='text-start'>
                                 <div className='font-cairo text-[15px] font-extrabold text-[#101828]'>
                                   {patientName}
                                 </div>
@@ -336,7 +336,7 @@ export default function DoctorAccessRequestsPage() {
 
                         <div className='px-6 py-5'>
                           <div className='grid grid-cols-1 gap-3 lg:grid-cols-3'>
-                            <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-right'>
+                            <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-start'>
                               <div className='flex items-center justify-start gap-2 font-cairo text-[11px] font-bold text-[#98A2B3]'>
                                 <FileText className='h-4 w-4' />
                                 <span>{tr('تاريخ الطلب', 'Request date')}</span>
@@ -346,7 +346,7 @@ export default function DoctorAccessRequestsPage() {
                               </div>
                             </div>
 
-                            <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-right'>
+                            <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-start'>
                               <div className='flex items-center justify-start gap-2 font-cairo text-[11px] font-bold text-[#98A2B3]'>
                                 <Shield className='h-4 w-4' />
                                 <span>{tr('نطاق الوصول', 'Access scope')}</span>
@@ -356,7 +356,7 @@ export default function DoctorAccessRequestsPage() {
                               </div>
                             </div>
 
-                            <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-right'>
+                            <div className='rounded-[16px] border border-[#EEF2F6] bg-[#F9FAFB] px-4 py-4 text-start'>
                               <div className='flex items-center justify-start gap-2 font-cairo text-[11px] font-bold text-[#98A2B3]'>
                                 <FileText className='h-4 w-4' />
                                 <span>{tr('مصدر الطلب', 'Request source')}</span>
@@ -367,7 +367,7 @@ export default function DoctorAccessRequestsPage() {
                             </div>
                           </div>
 
-                          <div className='mt-4 rounded-[18px] border border-[#E6F4F3] bg-[#F6FFFE] px-4 py-4 text-right'>
+                          <div className='mt-4 rounded-[18px] border border-[#E6F4F3] bg-[#F6FFFE] px-4 py-4 text-start'>
                             <div className='font-cairo text-[11px] font-bold text-primary/80'>
                               {tr('سبب الطلب', 'Request reason')}
                             </div>

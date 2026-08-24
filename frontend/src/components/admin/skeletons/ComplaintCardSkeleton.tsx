@@ -17,7 +17,7 @@ export function ComplaintCardSkeleton({ index = 0 }: { index?: number }) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-4">
             <div className="flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-[6px] bg-[#F3F4F6] animate-pulse" />
-            <div className="min-w-0 text-right space-y-2">
+            <div className="min-w-0 text-start space-y-2">
               <AdminSkeletonBlock className="h-5 w-40" />
               <AdminSkeletonBlock className="h-5 w-32" />
             </div>

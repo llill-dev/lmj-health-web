@@ -124,7 +124,7 @@ export default function DoctorPrescriptionPreviewPage() {
           onOpenChange={setFinalizeOpen}
           title="اعتماد نهائي"
           description={
-            <div className="space-y-2 text-right font-cairo text-[14px] font-semibold text-[#344054]">
+            <div className="space-y-2 text-start font-cairo text-[14px] font-semibold text-[#344054]">
               <p>هل تريد اعتماد الوصفة وإرسالها للمريض؟</p>
               <p>
                 المريض: <strong>{preview.previewVm?.patientName}</strong>

@@ -130,7 +130,7 @@ export function FacilityDirectoryCard({
         <button
           type="button"
           onClick={onToggle}
-          className="flex w-full items-center gap-4 px-4 py-4 text-right transition hover:bg-[#F9FAFB] sm:px-5"
+          className="flex w-full items-center gap-4 px-4 py-4 text-start transition hover:bg-[#F9FAFB] sm:px-5"
         >
           <div className="h-[72px] w-[96px] shrink-0 overflow-hidden rounded-[10px] border border-[#EEF2F6] bg-[#F3F4F6]">
             <img

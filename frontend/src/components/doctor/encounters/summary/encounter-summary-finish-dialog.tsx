@@ -37,7 +37,7 @@ export default function EncounterSummaryFinishDialog({
   const statusLabel = isClosed ? 'مغلقة' : 'مفتوحة';
 
   const description = (
-    <div className="space-y-4 text-right font-cairo">
+    <div className="space-y-4 text-start font-cairo">
       <p className="text-[14px] font-semibold leading-[22px] text-[#344054]">
         راجعت ملخص الزيارة. بالتأكيد ستُنهى المراجعة وتعود إلى قائمة
         الزيارات الطبية.

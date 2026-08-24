@@ -384,7 +384,7 @@ export default function LoginForm({
 
               <div className="gap-[16px] mt-4">
                 <div>
-                  <label className="block mb-1 text-right font-cairo text-[14px] font-bold text-[#101828]">
+                  <label className="block mb-1 text-start font-cairo text-[14px] font-bold text-[#101828]">
                     {methodLabel}
                   </label>
                   <AnimatePresence
@@ -424,13 +424,13 @@ export default function LoginForm({
                     </motion.div>
                   </AnimatePresence>
                   {errors.identifier ? (
-                    <div className="mt-2 break-words text-right font-cairo text-[12px] font-bold leading-snug text-[#D92D20]">
+                    <div className="mt-2 break-words text-start font-cairo text-[12px] font-bold leading-snug text-[#D92D20]">
                       {errors.identifier.message}
                     </div>
                   ) : null}
                 </div>
                 <div>
-                  <label className="mt-5 mb-1 block text-right font-cairo text-[14px] font-bold text-[#101828]">
+                  <label className="mt-5 mb-1 block text-start font-cairo text-[14px] font-bold text-[#101828]">
                     {t("auth.login.passwordLabel")}
                   </label>
                   <div className=" flex h-[35px] bg-[#F3F3F5] max-w-[330px] items-center rounded-[8px] px-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
@@ -464,7 +464,7 @@ export default function LoginForm({
                     />
                   </div>
                   {errors.password ? (
-                    <div className="mt-2 break-words text-right font-cairo text-[12px] font-bold leading-snug text-[#D92D20]">
+                    <div className="mt-2 break-words text-start font-cairo text-[12px] font-bold leading-snug text-[#D92D20]">
                       {errors.password.message}
                     </div>
                   ) : null}
@@ -480,7 +480,7 @@ export default function LoginForm({
                 {loginError && (
                   <div
                     role="alert"
-                    className="mt-3 break-words rounded-[6px] bg-[#FEF2F2] px-3 py-2 text-right font-cairo text-[13px] font-semibold leading-snug text-[#D92D20]"
+                    className="mt-3 break-words rounded-[6px] bg-[#FEF2F2] px-3 py-2 text-start font-cairo text-[13px] font-semibold leading-snug text-[#D92D20]"
                   >
                     {loginError}
                   </div>

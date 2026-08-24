@@ -181,14 +181,14 @@ export default function CreateTemporaryPatientDialog({
                   <Dialog.Close asChild>
                     <button
                       type='button'
-                      className='absolute left-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]'
+                      className='absolute start-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E4E7EC] bg-white/90 text-[#667085] shadow-sm transition-colors hover:bg-[#F9FAFB] hover:text-[#344054]'
                       aria-label={tr('إغلاق', 'Close')}
                     >
                       <X className='w-5 h-5' strokeWidth={2.25} />
                     </button>
                   </Dialog.Close>
 
-                  <div className='flex gap-2 text-right'>
+                  <div className='flex gap-2 text-start'>
                     <div className='flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-white shadow-[0_10px_24px_rgba(15,143,139,0.12)]'>
                       <UserRound
                         className='w-7 h-7 text-primary'
@@ -214,7 +214,7 @@ export default function CreateTemporaryPatientDialog({
                   {errors.root?.message ? (
                     <div
                       role='alert'
-                      className='mb-4 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3.5 text-right font-cairo text-[13px] font-semibold leading-relaxed text-[#B42318] shadow-sm'
+                      className='mb-4 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3.5 text-start font-cairo text-[13px] font-semibold leading-relaxed text-[#B42318] shadow-sm'
                     >
                       {errors.root.message}
                     </div>
@@ -267,7 +267,7 @@ export default function CreateTemporaryPatientDialog({
                 >
                   <div className='grid grid-cols-1 items-start gap-5 md:grid-cols-2 md:gap-6'>
                   <section className='rounded-[18px] border border-[#E6F7F6] bg-white/95 p-4 shadow-[0_10px_32px_rgba(15,143,139,0.07)]'>
-                    <p className='mb-3 text-right font-cairo text-[12px] font-black tracking-wide text-primary'>
+                    <p className='mb-3 text-start font-cairo text-[12px] font-black tracking-wide text-primary'>
                       {tr('خطوة ١ — الهوية', 'Step 1 — Identity')}
                     </p>
                     <label
@@ -278,7 +278,7 @@ export default function CreateTemporaryPatientDialog({
                     </label>
                     <div className='relative'>
                       <UserRound
-                        className='pointer-events-none absolute right-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary/65'
+                        className='pointer-events-none absolute end-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary/65'
                         aria-hidden
                       />
                       <input
@@ -297,14 +297,14 @@ export default function CreateTemporaryPatientDialog({
                       />
                     </div>
                     {errors.fullName ? (
-                      <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                      <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
                         {errors.fullName.message}
                       </div>
                     ) : null}
                   </section>
 
                   <section className='rounded-[18px] border border-[#E8ECF3] bg-gradient-to-br from-[#FAFBFC] to-white p-4 shadow-[0_8px_28px_rgba(15,23,42,0.05)]'>
-                    <p className='mb-3 text-right font-cairo text-[12px] font-black tracking-wide text-[#475467]'>
+                    <p className='mb-3 text-start font-cairo text-[12px] font-black tracking-wide text-[#475467]'>
                       {tr('خطوة ٢ — التواصل', 'Step 2 — Contact')}
                     </p>
 
@@ -312,13 +312,13 @@ export default function CreateTemporaryPatientDialog({
                       <div>
                         <label
                           htmlFor='temp-patient-email'
-                          className='mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]'
+                          className='mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]'
                         >
                           {tr('البريد الإلكتروني', 'Email')}
                         </label>
                         <div className='relative'>
                           <Mail
-                            className='pointer-events-none absolute right-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary/60'
+                            className='pointer-events-none absolute end-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-primary/60'
                             aria-hidden
                           />
                           <input
@@ -330,14 +330,14 @@ export default function CreateTemporaryPatientDialog({
                             {...register('email')}
                             className={cn(
                               inputBaseClass,
-                              'text-left',
+                              'text-end',
                               errors.email ? inputInvalidBorder : inputNormalBorder,
                             )}
                             aria-invalid={Boolean(errors.email)}
                           />
                         </div>
                         {errors.email ? (
-                          <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                          <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
                             {errors.email.message}
                           </div>
                         ) : null}
@@ -346,7 +346,7 @@ export default function CreateTemporaryPatientDialog({
                       <div>
                         <label
                           htmlFor='temp-patient-phone-local'
-                          className='mb-2 block text-right font-cairo text-[13px] font-extrabold text-[#344054]'
+                          className='mb-2 block text-start font-cairo text-[13px] font-extrabold text-[#344054]'
                         >
                           {tr('رقم الهاتف', 'Phone number')}
                         </label>
@@ -388,7 +388,7 @@ export default function CreateTemporaryPatientDialog({
                             </div>
                             <div className='relative flex min-h-[50px] items-stretch'>
                               <Phone
-                                className='pointer-events-none absolute right-3 top-1/2 h-[17px] w-[17px] z-[1] -translate-y-1/2 text-primary/55'
+                                className='pointer-events-none absolute end-3 top-1/2 h-[17px] w-[17px] z-[1] -translate-y-1/2 text-primary/55'
                                 aria-hidden
                               />
                               <input
@@ -409,7 +409,7 @@ export default function CreateTemporaryPatientDialog({
                           </div>
                         </div>
 
-                        <p className='mt-1.5 flex flex-wrap items-center justify-start gap-x-2 text-right font-cairo text-[10.5px] font-semibold leading-snug text-[#667085]'>
+                        <p className='mt-1.5 flex flex-wrap items-center justify-start gap-x-2 text-start font-cairo text-[10.5px] font-semibold leading-snug text-[#667085]'>
                           <span className='inline-flex items-center rounded-lg bg-[#EFF8FF] px-2 py-0.5 text-[10px] font-extrabold text-[#175CD3]'>
                             {tr('بدون الصفر الأول', 'Without leading zero')}
                           </span>
@@ -424,11 +424,11 @@ export default function CreateTemporaryPatientDialog({
                           </span>
                         </p>
                         {errors.phoneLocal ? (
-                          <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                          <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
                             {errors.phoneLocal.message}
                           </div>
                         ) : errors.phoneDialCode ? (
-                          <div className='mt-2 text-right font-cairo text-[12px] font-bold text-[#D92D20]'>
+                          <div className='mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]'>
                             {errors.phoneDialCode.message}
                           </div>
                         ) : null}

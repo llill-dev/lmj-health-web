@@ -313,7 +313,7 @@ export default function AddExceptionDialog({
                 transitionEnd: { visibility: "hidden" },
               },
             }}
-            className="fixed left-1/2 top-1/2 z-[10000] w-[520px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
+            className="fixed start-1/2 top-1/2 z-[10000] w-[520px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
             dir={dir}
             lang={locale}
           >
@@ -340,7 +340,7 @@ export default function AddExceptionDialog({
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]"
+                    className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]"
                     aria-label={tr("إغلاق", "Close")}
                   >
                     <X className="h-5 w-5" />
@@ -406,7 +406,7 @@ export default function AddExceptionDialog({
                   }}
                 >
                   <div>
-                    <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                    <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                       {tr("التاريخ", "Date")}
                     </div>
                     <input
@@ -420,7 +420,7 @@ export default function AddExceptionDialog({
                     {errors.date && (
                       <div className="mt-2 flex items-start gap-2 rounded-[6px] bg-[#FEF3F2] border border-[#FEE4E2] p-3">
                         <AlertCircle className="h-4 w-4 text-[#F04438] mt-0.5 shrink-0" />
-                        <p className="font-cairo text-[12px] font-semibold text-[#D92D20] text-right leading-relaxed">
+                        <p className="font-cairo text-[12px] font-semibold text-[#D92D20] text-start leading-relaxed">
                           {errors.date}
                         </p>
                       </div>
@@ -428,7 +428,7 @@ export default function AddExceptionDialog({
                   </div>
 
                   <div>
-                    <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                    <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                       {tr("نوع الاستثناء", "Exception type")}
                     </div>
                     <StyledSelect
@@ -458,7 +458,7 @@ export default function AddExceptionDialog({
                       ]}
                       listboxAriaLabel={tr("نوع الاستثناء", "Exception type")}
                     />
-                    <p className="mt-2 text-right font-cairo text-[11px] font-semibold text-[#667085]">
+                    <p className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#667085]">
                       {exceptionType === "closed"
                         ? tr(
                             "سيتم إغلاق هذا اليوم بالكامل ولن يكون متاحاً للحجز",
@@ -474,7 +474,7 @@ export default function AddExceptionDialog({
                   {exceptionType === "custom_hours" && (
                     <div>
                       <div className="mb-2 flex items-center justify-between">
-                        <div className="text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                        <div className="text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                           {tr("الفترات المتاحة", "Available slots")}
                         </div>
                         <button
@@ -522,12 +522,12 @@ export default function AddExceptionDialog({
                                       errors.slots?.[index]?.startTime
                                         ? "border-[#F04438]"
                                         : "border-primary"
-                                    } bg-white pl-3 pr-10 font-cairo text-[13px] font-bold text-[#111827] outline-none transition-colors`}
+                                    } bg-white ps-3 pe-10 font-cairo text-[13px] font-bold text-[#111827] outline-none transition-colors`}
                                   />
-                                  <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
+                                  <Clock className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
                                 </div>
                                 {errors.slots?.[index]?.startTime && (
-                                  <p className="mt-1 font-cairo text-[11px] font-semibold text-[#F04438] text-right">
+                                  <p className="mt-1 font-cairo text-[11px] font-semibold text-[#F04438] text-start">
                                     {errors.slots[index].startTime}
                                   </p>
                                 )}
@@ -570,12 +570,12 @@ export default function AddExceptionDialog({
                                       errors.slots?.[index]?.endTime
                                         ? "border-[#F04438]"
                                         : "border-primary"
-                                    } bg-white pl-3 pr-10 font-cairo text-[13px] font-bold text-[#111827] outline-none transition-colors`}
+                                    } bg-white ps-3 pe-10 font-cairo text-[13px] font-bold text-[#111827] outline-none transition-colors`}
                                   />
-                                  <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
+                                  <Clock className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
                                 </div>
                                 {errors.slots?.[index]?.endTime && (
-                                  <p className="mt-1 font-cairo text-[11px] font-semibold text-[#F04438] text-right">
+                                  <p className="mt-1 font-cairo text-[11px] font-semibold text-[#F04438] text-start">
                                     {errors.slots[index].endTime}
                                   </p>
                                 )}
@@ -599,7 +599,7 @@ export default function AddExceptionDialog({
                   )}
 
                   <div>
-                    <div className="mb-2 text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                    <div className="mb-2 text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                       {tr("ملاحظة (اختياري)", "Note (optional)")}
                     </div>
                     <textarea
@@ -617,7 +617,7 @@ export default function AddExceptionDialog({
                   {errors.general && (
                     <div className="flex items-start gap-2 rounded-[6px] bg-[#FEF3F2] border border-[#FEE4E2] p-3">
                       <AlertCircle className="h-4 w-4 text-[#F04438] mt-0.5 shrink-0" />
-                      <p className="font-cairo text-[12px] font-semibold text-[#D92D20] text-right leading-relaxed">
+                      <p className="font-cairo text-[12px] font-semibold text-[#D92D20] text-start leading-relaxed">
                         {errors.general}
                       </p>
                     </div>

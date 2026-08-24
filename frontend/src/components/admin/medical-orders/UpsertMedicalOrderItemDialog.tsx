@@ -99,7 +99,7 @@ export default function UpsertMedicalOrderItemDialog({
     : undefined;
 
   const inputClass =
-    'h-[42px] w-full rounded-[8px] border border-[#D0D5DD] bg-white px-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20';
+    'h-[42px] w-full rounded-[8px] border border-[#D0D5DD] bg-white px-3 text-start font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20';
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -226,7 +226,7 @@ export default function UpsertMedicalOrderItemDialog({
                 transitionEnd: { visibility: 'hidden' as const },
               },
             }}
-            className='fixed left-1/2 top-1/2 z-[10000] w-[760px] max-h-[85vh] max-w-[calc(100vw-24px)] overflow-y-auto rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
+            className='fixed start-1/2 top-1/2 z-[10000] w-[760px] max-h-[85vh] max-w-[calc(100vw-24px)] overflow-y-auto rounded-[16px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.22)] outline-none'
             dir={dir}
             lang={locale}
           >
@@ -253,7 +253,7 @@ export default function UpsertMedicalOrderItemDialog({
               <div className='space-y-4 px-5 py-4'>
                 <div className='grid gap-3 sm:grid-cols-2'>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       {t('adminMedicalOrders.field.displayName.label')}
                     </label>
                     <input
@@ -265,7 +265,7 @@ export default function UpsertMedicalOrderItemDialog({
                     />
                   </div>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       {t('adminMedicalOrders.field.category.label')}
                     </label>
                     <input
@@ -279,7 +279,7 @@ export default function UpsertMedicalOrderItemDialog({
 
                 <div className='grid gap-3 sm:grid-cols-2'>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       {t('adminMedicalOrders.field.nameAr.label')}
                     </label>
                     <input
@@ -290,7 +290,7 @@ export default function UpsertMedicalOrderItemDialog({
                     />
                   </div>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       {t('adminMedicalOrders.field.nameEn.label')}
                     </label>
                     <input
@@ -304,7 +304,7 @@ export default function UpsertMedicalOrderItemDialog({
 
                 <div className='grid gap-3 sm:grid-cols-2'>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       Code
                     </label>
                     <input
@@ -315,7 +315,7 @@ export default function UpsertMedicalOrderItemDialog({
                     />
                   </div>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       Short Code
                     </label>
                     <input
@@ -329,7 +329,7 @@ export default function UpsertMedicalOrderItemDialog({
 
                 <div className='grid gap-3 sm:grid-cols-3'>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       {t('adminMedicalOrders.field.priorityLevel.label')}
                     </label>
                     <StyledSelect
@@ -347,7 +347,7 @@ export default function UpsertMedicalOrderItemDialog({
                     />
                   </div>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       {t('adminMedicalOrders.field.sortOrder.label')}
                     </label>
                     <input
@@ -359,7 +359,7 @@ export default function UpsertMedicalOrderItemDialog({
                     />
                   </div>
                   <div>
-                    <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                    <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                       {t('adminMedicalOrders.field.synonyms.label')}
                     </label>
                     <input
@@ -433,30 +433,30 @@ export default function UpsertMedicalOrderItemDialog({
                       value={defaultPreparation}
                       onChange={(e) => setDefaultPreparation(e.target.value)}
                       placeholder={t('adminMedicalOrders.field.defaultPrep.placeholder')}
-                      className='min-h-[84px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
+                      className='min-h-[84px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-start font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
                     />
                     <textarea
                       value={defaultAftercare}
                       onChange={(e) => setDefaultAftercare(e.target.value)}
                       placeholder={t('adminMedicalOrders.field.postInstructions.placeholder')}
-                      className='min-h-[84px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
+                      className='min-h-[84px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-start font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
                     />
                   </div>
                 ) : null}
 
                 <div>
-                  <label className='mb-1.5 block text-right font-cairo text-[12px] font-bold text-[#344054]'>
+                  <label className='mb-1.5 block text-start font-cairo text-[12px] font-bold text-[#344054]'>
                     {t('adminMedicalOrders.field.notes.label')}
                   </label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder={t('adminMedicalOrders.field.notes.placeholder')}
-                    className='min-h-[72px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-right font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
+                    className='min-h-[72px] w-full rounded-[8px] border border-[#D0D5DD] bg-white p-3 text-start font-cairo text-[13px] font-semibold text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-primary/20'
                   />
                 </div>
                 {serverError && (
-                  <p className='mt-2 text-right font-cairo text-[12px] font-semibold text-[#D92D20]'>
+                  <p className='mt-2 text-start font-cairo text-[12px] font-semibold text-[#D92D20]'>
                     {serverError}
                   </p>
                 )}

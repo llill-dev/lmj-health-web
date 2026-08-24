@@ -116,7 +116,7 @@ export function EncounterCard({
       />
       <div
         className={cn(
-          "pointer-events-none absolute inset-y-5 right-0 w-[3px] rounded-full opacity-95 shadow-[0_0_12px_rgba(15,143,139,0.35)]",
+          "pointer-events-none absolute inset-y-5 end-0 w-[3px] rounded-full opacity-95 shadow-[0_0_12px_rgba(15,143,139,0.35)]",
           isOpen
             ? "bg-gradient-to-b from-[#10B981] via-primary to-[#0f766e]"
             : "bg-gradient-to-b from-[#94A3B8] via-[#CBD5E1] to-[#94A3B8]",
@@ -137,7 +137,7 @@ export function EncounterCard({
             >
               <Stethoscope className="h-[22px] w-[22px]" strokeWidth={2.25} aria-hidden />
               {isOpen ? (
-                <span className="absolute -left-0.5 -top-0.5 flex h-3 w-3">
+                <span className="absolute -start-0.5 -top-0.5 flex h-3 w-3">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#10B981] opacity-60" />
                   <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white bg-[#10B981]" />
                 </span>
@@ -145,7 +145,7 @@ export function EncounterCard({
             </div>
           </div>
 
-          <div className="min-w-0 flex-1 space-y-3 text-right">
+          <div className="min-w-0 flex-1 space-y-3 text-start">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-2">
                 <h3 className="font-cairo text-[16px] font-black leading-snug text-[#0f172a] sm:text-[17px]">
@@ -175,7 +175,7 @@ export function EncounterCard({
                 </div>
               </div>
 
-              <div className="shrink-0 rounded-xl border border-[#E2E8F0] bg-white/85 px-3 py-2 text-right shadow-sm backdrop-blur-sm">
+              <div className="shrink-0 rounded-xl border border-[#E2E8F0] bg-white/85 px-3 py-2 text-start shadow-sm backdrop-blur-sm">
                 <div className="flex items-center justify-start gap-1.5 font-cairo text-[10px] font-bold text-[#667085]">
                   <CalendarDays className="h-3 w-3" aria-hidden />
                   تاريخ البدء

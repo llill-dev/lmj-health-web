@@ -113,7 +113,7 @@ export default function DoctorSupportPage() {
               <Link
                 key={id}
                 to={href}
-                className="rounded-[14px] border border-[#D1FAE5] bg-white p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                className="rounded-[14px] border border-[#D1FAE5] bg-white p-5 text-start shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
                 <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[10px] bg-[#F0FDFA] text-primary">
                   <Icon className="h-5 w-5" aria-hidden />
@@ -130,7 +130,7 @@ export default function DoctorSupportPage() {
                 key={id}
                 type="button"
                 onClick={() => openModal(modal!)}
-                className="rounded-[14px] border border-[#D1FAE5] bg-white p-5 text-right shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                className="rounded-[14px] border border-[#D1FAE5] bg-white p-5 text-start shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
                 <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[10px] bg-[#F0FDFA] text-primary">
                   <Icon className="h-5 w-5" aria-hidden />
@@ -147,7 +147,7 @@ export default function DoctorSupportPage() {
         </div>
 
         <section className="mb-8 rounded-[14px] border border-[#D1FAE5] bg-white p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-2 text-right sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-5 flex flex-col gap-2 text-start sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-cairo text-[18px] font-extrabold text-primary">
               قنوات التواصل الرسمية
             </h2>
@@ -171,7 +171,7 @@ export default function DoctorSupportPage() {
         </section>
 
         <section className="mb-8 rounded-[14px] border border-[#D1FAE5] bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-right font-cairo text-[18px] font-extrabold text-primary">
+          <h2 className="mb-5 text-start font-cairo text-[18px] font-extrabold text-primary">
             إرسال طلب دعم
           </h2>
           <DoctorSupportContactForm
@@ -182,7 +182,7 @@ export default function DoctorSupportPage() {
         </section>
 
         <section className="mb-8 rounded-[14px] border border-[#D1FAE5] bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-right font-cairo text-[18px] font-extrabold text-primary">
+          <h2 className="mb-5 text-start font-cairo text-[18px] font-extrabold text-primary">
             الأسئلة الشائعة
           </h2>
           {support.isAwaitingFaqData ? (

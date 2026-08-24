@@ -49,7 +49,7 @@ export const AuditLogRow = memo(function AuditLogRow({
 
   return (
     <div className="grid grid-cols-12 gap-2 px-6 py-4 transition-colors hover:bg-[#FAFBFC]">
-      <div className="col-span-3 text-right">
+      <div className="col-span-3 text-start">
         <div className="break-all font-cairo text-[13px] font-black leading-snug text-[#111827]">
           {log.action}
         </div>
@@ -61,7 +61,7 @@ export const AuditLogRow = memo(function AuditLogRow({
         </span>
       </div>
 
-      <div className="col-span-2 text-right">
+      <div className="col-span-2 text-start">
         <div className="font-cairo text-[13px] font-bold leading-snug text-[#344054]">
           {log.actorUserName || "—"}
         </div>
@@ -79,7 +79,7 @@ export const AuditLogRow = memo(function AuditLogRow({
         </span>
       </div>
 
-      <div className="col-span-2 text-right">
+      <div className="col-span-2 text-start">
         <div
           className="font-cairo text-[12px] font-semibold leading-snug text-[#667085]"
           dir="ltr"
@@ -95,7 +95,7 @@ export const AuditLogRow = memo(function AuditLogRow({
         </button>
       </div>
 
-      <div className="col-span-3 text-right">
+      <div className="col-span-3 text-start">
         <div className="font-cairo text-[12px] font-bold text-[#344054]">
           {date}
         </div>

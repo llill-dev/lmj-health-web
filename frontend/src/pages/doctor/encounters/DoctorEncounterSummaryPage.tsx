@@ -116,19 +116,19 @@ export default function DoctorEncounterSummaryPage() {
         ) : (
           <>
             {profileDenied ? (
-              <div className="mb-4 rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B45309]">
+              <div className="mb-4 rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B45309]">
                 بعض بيانات الملف الكامل غير متاحة؛ يُعرض الملخص من بيانات الزيارة
                 والملف العام.
               </div>
             ) : null}
 
             {encounter.status !== 'closed' ? (
-              <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#1D4ED8]">
+              <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#1D4ED8]">
                 هذه الزيارة ما زالت مفتوحة. الملخص يعرض التوثيق الحالي قبل
                 الإغلاق النهائي.
               </div>
             ) : summary.closedAtLabel ? (
-              <div className="mb-4 rounded-[12px] border border-[#BFEDEC] bg-[#E6F4F3] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-primary">
+              <div className="mb-4 rounded-[12px] border border-[#BFEDEC] bg-[#E6F4F3] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-primary">
                 تم إغلاق الزيارة: {summary.closedAtLabel}
               </div>
             ) : null}

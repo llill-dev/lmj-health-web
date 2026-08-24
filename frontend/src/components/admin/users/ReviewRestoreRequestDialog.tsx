@@ -143,7 +143,7 @@ export default function ReviewRestoreRequestDialog({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2"
+            className="fixed start-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2"
           >
             <div className="overflow-hidden rounded-[16px] bg-white shadow-2xl">
               <div className="flex items-center justify-between border-b border-[#EEF2F6] px-6 py-4">

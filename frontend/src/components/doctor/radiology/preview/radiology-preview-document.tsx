@@ -5,7 +5,7 @@ import type { RadiologyPreviewVm } from './radiology-preview-types';
 function ClinicalRow({ label, value }: { label: string; value: string }) {
   if (!value?.trim() || value === '—') return null;
   return (
-    <div className="text-right">
+    <div className="text-start">
       <div className="font-cairo text-[11px] font-bold text-[#667085]">{label}:</div>
       <div className="mt-0.5 font-cairo text-[13px] font-extrabold text-[#101828]">{value}</div>
     </div>
@@ -16,13 +16,13 @@ export function RadiologyPreviewDocument({ vm }: { vm: RadiologyPreviewVm }) {
   return (
     <article className="rounded-[16px] border border-[#E4E7EC] bg-white px-5 py-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:px-8">
       <div className="mb-6 flex flex-col gap-4 border-b border-[#EEF2F6] pb-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="text-left">
+        <div className="text-end">
           <div className="font-cairo text-[12px] font-bold text-[#667085]">رقم الطلب</div>
           <div className="mt-1 font-cairo text-[18px] font-black text-[#101828]">
             {vm.orderCode}
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-start">
           <div className="font-cairo text-[18px] font-extrabold text-[#101828]">
             {vm.patientName}
           </div>

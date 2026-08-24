@@ -69,7 +69,7 @@ export function PatientFilesTab({
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <FileText className="h-5 w-5" />
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <div className="font-cairo text-[14px] font-extrabold text-[#0F172A]">
                     {file.originalName ?? "ملف"}
                   </div>

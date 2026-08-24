@@ -6,7 +6,7 @@ export function AdminAuditLogPrivacyNote() {
   return (
     <section className='mt-6 rounded-[12px] border border-[#FDE68A] bg-[#FFFBEB] px-6 py-4'>
       <div className='flex items-start justify-between gap-4'>
-        <div className='text-right'>
+        <div className='text-start'>
           <div className='font-cairo text-[14px] font-black text-[#92400E]'>{t('adminAuditLog.privacy.title')}</div>
           <div className='mt-1 font-cairo text-[12px] font-semibold leading-[20px] text-[#B45309]'>
             {t('adminAuditLog.privacy.body')}

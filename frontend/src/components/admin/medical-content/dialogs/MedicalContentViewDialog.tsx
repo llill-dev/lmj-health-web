@@ -75,7 +75,7 @@ function JsonPreview({
   }
 
   return (
-    <pre className="overflow-x-auto rounded-[12px] bg-[#0F172A] p-4 text-left font-mono text-[12px] leading-6 text-[#E2E8F0]">
+    <pre className="overflow-x-auto rounded-[12px] bg-[#0F172A] p-4 text-end font-mono text-[12px] leading-6 text-[#E2E8F0]">
       {text}
     </pre>
   );
@@ -172,7 +172,7 @@ export default function MedicalContentViewDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-[2px]" />
         <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-[9999] w-[1080px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none"
+          className="fixed start-1/2 top-1/2 z-[9999] w-[1080px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[18px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none"
           dir={dir}
           lang={locale}
         >

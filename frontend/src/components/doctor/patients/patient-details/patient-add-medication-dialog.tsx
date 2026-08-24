@@ -86,7 +86,7 @@ export function PatientAddMedicationDialog({
         <Dialog.Content
           dir={dir}
           lang={locale}
-          className="fixed left-1/2 top-1/2 z-[9999] w-[min(520px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 rounded-[12px] border border-[#E4E7EC] bg-white p-6 shadow-[0_24px_48px_rgba(15,23,42,0.18)]"
+          className="fixed start-1/2 top-1/2 z-[9999] w-[min(520px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 rounded-[12px] border border-[#E4E7EC] bg-white p-6 shadow-[0_24px_48px_rgba(15,23,42,0.18)]"
         >
           <div className="mb-5 flex items-center justify-between gap-3">
             <Dialog.Title className="font-cairo text-[18px] font-extrabold text-[#101828]">

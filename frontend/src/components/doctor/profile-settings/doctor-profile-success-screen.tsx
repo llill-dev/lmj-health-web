@@ -51,20 +51,20 @@ export default function DoctorProfileSuccessScreen({
       lang={locale}
       className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-primary px-6 py-16"
     >
-      <div className="pointer-events-none absolute -right-16 -top-16 h-[220px] w-[220px] rounded-full bg-white/10" />
-      <div className="pointer-events-none absolute -left-24 -bottom-24 h-[260px] w-[260px] rounded-full bg-white/10" />
-      <div className="pointer-events-none absolute left-1/4 top-1/3 h-[120px] w-[120px] rounded-full bg-white/5" />
+      <div className="pointer-events-none absolute -end-16 -top-16 h-[220px] w-[220px] rounded-full bg-white/10" />
+      <div className="pointer-events-none absolute -start-24 -bottom-24 h-[260px] w-[260px] rounded-full bg-white/10" />
+      <div className="pointer-events-none absolute start-1/4 top-1/3 h-[120px] w-[120px] rounded-full bg-white/5" />
 
-      <FloatingIcon className="left-[12%] top-[18%]">
+      <FloatingIcon className="start-[12%] top-[18%]">
         <Heart className="h-5 w-5" />
       </FloatingIcon>
-      <FloatingIcon className="right-[14%] top-[22%]">
+      <FloatingIcon className="end-[14%] top-[22%]">
         <Pill className="h-5 w-5" />
       </FloatingIcon>
-      <FloatingIcon className="left-[18%] bottom-[20%]">
+      <FloatingIcon className="start-[18%] bottom-[20%]">
         <Activity className="h-5 w-5" />
       </FloatingIcon>
-      <FloatingIcon className="right-[20%] bottom-[24%]">
+      <FloatingIcon className="end-[20%] bottom-[24%]">
         <Heart className="h-5 w-5" />
       </FloatingIcon>
 

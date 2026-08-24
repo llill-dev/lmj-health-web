@@ -157,13 +157,13 @@ export function EncounterOrderWorkspaceShell({
             'rounded-[12px] border border-[#F04438] bg-[#FFFBFB] p-3',
         )}
       >
-        <h2 className="mb-3 text-right font-cairo text-[14px] font-extrabold text-[#667085]">
+        <h2 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#667085]">
           {config.selectedSectionTitle(workspace.items.length)}
         </h2>
         {workspace.itemsSectionError ? (
           <p
             role="alert"
-            className="mb-3 text-right font-cairo text-[11px] font-bold text-[#D92D20]"
+            className="mb-3 text-start font-cairo text-[11px] font-bold text-[#D92D20]"
           >
             {workspace.itemsSectionError}
           </p>

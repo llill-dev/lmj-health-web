@@ -33,7 +33,7 @@ export default function DoctorProfileInfoBanner({
       />
       <p
         className={cn(
-          'text-right font-cairo text-[12px] font-semibold leading-[20px]',
+          'text-start font-cairo text-[12px] font-semibold leading-[20px]',
           isWarning ? 'text-[#92400E]' : 'text-[#0F766E]',
         )}
       >

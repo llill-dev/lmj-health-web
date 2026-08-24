@@ -136,7 +136,7 @@ export default function AdminSecretariesPage() {
               )}
               className="h-[42px] w-full rounded-[10px] border border-[#E5E7EB] bg-white px-4 pe-10 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
             />
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
           </div>
 
           <StyledSelect

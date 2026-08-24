@@ -228,7 +228,7 @@ export default function DoctorClinicFinancialReportsPage() {
         </div>
 
         {reportsQuery.mixedCurrencies ? (
-          <div className="mb-4 rounded-[12px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#B54708]">
+          <div className="mb-4 rounded-[12px] border border-[#FEDF89] bg-[#FFFAEB] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#B54708]">
             {tr(
               "هذا التقرير يحتوي على سجلات بعملات متعددة. الإجمالي المعروض ليس تحويلاً موحّداً — الأرقام تمثل العملة المحددة فقط دون تحويل سعر الصرف.",
               "This report contains records in multiple currencies. The total shown is not a unified conversion — figures reflect only the selected currency, with no exchange-rate conversion applied.",
@@ -277,7 +277,7 @@ export default function DoctorClinicFinancialReportsPage() {
 
         <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
               {tr("الدخل والمصاريف", "Income and expenses")}
             </h2>
             {reportsQuery.monthlyFinance.length === 0 ? (
@@ -289,7 +289,7 @@ export default function DoctorClinicFinancialReportsPage() {
             )}
           </div>
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
               {tr("اتجاه الربح", "Profit trend")}
             </h2>
             {reportsQuery.monthlyFinance.length === 0 ? (
@@ -303,7 +303,7 @@ export default function DoctorClinicFinancialReportsPage() {
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+          <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
             {tr("المصاريف حسب الفئة", "Expenses by category")}
           </h2>
           {reportsQuery.expenseBreakdown.length === 0 ? (
@@ -319,7 +319,7 @@ export default function DoctorClinicFinancialReportsPage() {
         </section>
 
         <section className="mt-6 rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+          <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
             {tr("تصدير التقرير", "Export report")}
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

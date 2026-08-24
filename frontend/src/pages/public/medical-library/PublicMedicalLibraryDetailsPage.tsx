@@ -395,7 +395,7 @@ function ContentBlockRenderer({ block }: { block: AdminContentBlock }) {
     const items = readStringList((block as { items?: unknown }).items);
     const ListTag = (block as { ordered?: boolean }).ordered ? "ol" : "ul";
     return (
-      <ListTag className="space-y-3 pr-5 font-cairo text-[15px] font-semibold leading-8 text-[#344054] marker:text-primary">
+      <ListTag className="space-y-3 pe-5 font-cairo text-[15px] font-semibold leading-8 text-[#344054] marker:text-primary">
         {items.map((item, index) => (
           <li key={`${item}-${index}`}>{item}</li>
         ))}

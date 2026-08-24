@@ -259,19 +259,19 @@ export default function PublicMedicalLibraryPage() {
             </div>
 
             <label className="relative block w-full max-w-[360px]">
-              <Search className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#98A2B3]" />
+              <Search className="pointer-events-none absolute end-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#98A2B3]" />
               <input
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="ابحث في المحتوى الطبي..."
-                className="h-12 w-full rounded-2xl border border-[#D0D5DD] bg-white pr-12 pl-12 text-right font-cairo text-[14px] font-semibold text-[#101828] outline-none transition focus:border-primary focus:ring-4 focus:ring-[#0F8F8B]/10"
+                className="h-12 w-full rounded-2xl border border-[#D0D5DD] bg-white pe-12 ps-12 text-start font-cairo text-[14px] font-semibold text-[#101828] outline-none transition focus:border-primary focus:ring-4 focus:ring-[#0F8F8B]/10"
               />
               {search.trim() ? (
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute left-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F2F4F7] hover:text-[#344054]"
+                  className="absolute start-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F2F4F7] hover:text-[#344054]"
                   aria-label="مسح البحث"
                 >
                   <X className="h-4 w-4" />

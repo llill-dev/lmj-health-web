@@ -33,7 +33,7 @@ type Props = {
 
 function InfoCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+    <div className="rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
       <div className="font-cairo text-[11px] font-bold text-[#667085]">{label}</div>
       <div className="mt-1 font-cairo text-[13px] font-extrabold text-[#101828]">
         {value}
@@ -77,7 +77,7 @@ export function RadiologyVisitExpandableCard({
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-gradient-to-br from-primary to-[#14b8a6] text-white">
             <UserRound className="h-5 w-5" aria-hidden />
           </div>
-          <div className="min-w-0 flex-1 text-right">
+          <div className="min-w-0 flex-1 text-start">
             <div className="truncate font-cairo text-[15px] font-black text-[#101828]">
               {visit.patientName}
             </div>

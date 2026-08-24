@@ -25,7 +25,7 @@ export function RadiologyPreviewBanner({
         aria-hidden
       />
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-1 items-start gap-3 text-right sm:gap-4">
+        <div className="flex min-w-0 flex-1 items-start gap-3 text-start sm:gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[6px] bg-primary shadow-[0px_4px_14px_rgba(15,143,139,0.35)] sm:h-16 sm:w-16">
             <Check className="h-7 w-7 text-white sm:h-8 sm:w-8" aria-hidden />
           </div>

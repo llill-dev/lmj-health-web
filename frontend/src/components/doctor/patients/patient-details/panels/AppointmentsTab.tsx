@@ -203,7 +203,7 @@ export function AppointmentsTab({
                 <div className="rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-3">
                   <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
                     <Calendar className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
-                    <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                    <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
                       <div className="font-cairo text-[16px] font-bold text-primary">التاريخ</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                         {formatAppointmentDate(appointment.date)}
@@ -212,7 +212,7 @@ export function AppointmentsTab({
                   </div>
                   <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
                     <Clock className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
-                    <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                    <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
                       <div className="font-cairo text-[16px] font-bold text-primary">الوقت</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                         {formatAppointmentTime(appointment.startTime ?? appointment.time)}
@@ -221,7 +221,7 @@ export function AppointmentsTab({
                   </div>
                   <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
                     <Check className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
-                    <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                    <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
                       <div className="font-cairo text-[16px] font-bold text-primary">الحالة</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                         {status.label}
@@ -231,7 +231,7 @@ export function AppointmentsTab({
                   {(appointment.appointmentTypeNameSnapshot ?? appointment.appointmentType?.name) ? (
                     <div className="flex items-start gap-3 py-3">
                       <Hospital className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
-                      <div className="flex min-w-0 flex-1 items-center gap-4 text-right">
+                      <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
                         <div className="font-cairo text-[16px] font-bold text-primary">نوع الموعد</div>
                         <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                           {appointment.appointmentTypeNameSnapshot ?? appointment.appointmentType?.name}

@@ -55,7 +55,7 @@ const KpiStatCard = memo<KpiCard>(
         style={{ borderBottomWidth: "4px", borderBottomColor: accent }}
       >
         <div className="flex justify-between items-start gap-5">
-          <div className="space-y-4 text-right">
+          <div className="space-y-4 text-start">
             <div className="font-cairo text-[16px] font-bold leading-[20px] text-[#243044]">
               {label}
             </div>
@@ -94,7 +94,7 @@ function SurfaceSection({
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
-        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+        <h2 className="text-start font-cairo text-[23px] font-black leading-none text-[#243044]">
           {title}
         </h2>
       </header>
@@ -307,7 +307,7 @@ export default function HomeDoctor() {
                         {row.initial}
                       </span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-start">
                       <div className="font-cairo text-[18px] font-black text-[#243044]">
                         {row.name}
                       </div>
@@ -316,7 +316,7 @@ export default function HomeDoctor() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right sm:text-left">
+                  <div className="text-start sm:text-end">
                     <div className="font-cairo text-[18px] font-black text-[#243044]">
                       {row.time}
                     </div>
@@ -372,7 +372,7 @@ export default function HomeDoctor() {
               className="rounded-[10px] bg-[#FFFFFF] px-4 py-5 shadow-[0px_1px_2px_-1px_rgba(0,0,0,0.10),0px_1px_3px_0px_rgba(0,0,0,0.10)] sm:px-6 sm:py-6 lg:px-8 lg:py-8"
             >
               <div className="flex items-center justify-between">
-                <div className="text-right">
+                <div className="text-start">
                   <div className="font-cairo text-[22px] font-black text-[#243044]">
                     {card.value}
                   </div>

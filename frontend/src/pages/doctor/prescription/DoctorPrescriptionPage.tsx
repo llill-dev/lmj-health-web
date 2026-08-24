@@ -191,7 +191,7 @@ export default function DoctorPrescriptionPage() {
             />
 
             {!editable ? (
-              <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-right font-cairo text-[12px] font-semibold text-[#1D4ED8]">
+              <div className="mb-4 rounded-[12px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-start font-cairo text-[12px] font-semibold text-[#1D4ED8]">
                 {tr('هذه الوصفة للعرض فقط (زيارة مغلقة أو وصفة معتمدة نهائياً).', 'This prescription is view-only (closed visit or finalized prescription).')}
               </div>
             ) : null}
@@ -310,7 +310,7 @@ export default function DoctorPrescriptionPage() {
           onOpenChange={setFinalizeOpen}
           title={tr('اعتماد نهائي', 'Finalize')}
           description={
-            <div className="space-y-2 text-right font-cairo text-[14px] font-semibold text-[#344054]">
+            <div className="space-y-2 text-start font-cairo text-[14px] font-semibold text-[#344054]">
               <p>
                 {tr('سيتم اعتماد الوصفة نهائياً للمريض', 'The prescription will be finalized for the patient')}{' '}
                 <strong>{patientName || '—'}</strong> {tr('ومزامنة الأدوية مع ملف المريض.', 'and sync the medications with the patient file.')}

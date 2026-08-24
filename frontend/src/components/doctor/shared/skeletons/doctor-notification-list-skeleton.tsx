@@ -9,7 +9,7 @@ export function DoctorNotificationListSkeleton({ rows = 5 }: { rows?: number }) 
         {Array.from({ length: rows }).map((_, index) => (
           <div key={index} className="flex items-start gap-4 px-5 py-4">
             <SkeletonBlock className="mt-1 h-10 w-10 shrink-0 rounded-full" />
-            <div className="flex-1 space-y-2 text-right">
+            <div className="flex-1 space-y-2 text-start">
               <SkeletonBlock className="h-4 w-3/4 max-w-sm" />
               <SkeletonBlock className="h-3 w-full max-w-md" />
               <SkeletonBlock className="h-3 w-24" />

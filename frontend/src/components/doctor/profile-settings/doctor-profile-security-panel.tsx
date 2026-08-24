@@ -346,7 +346,7 @@ export default function DoctorProfileSecurityPanel() {
               key={item.key}
               type="button"
               onClick={item.onClick}
-              className="flex w-full items-center justify-between px-6 py-4 text-right transition hover:bg-[#F9FAFB]"
+              className="flex w-full items-center justify-between px-6 py-4 text-start transition hover:bg-[#F9FAFB]"
             >
               <span className="flex items-center gap-3 font-cairo text-[13px] font-bold text-[#111827]">
                 <item.icon className="h-4 w-4 text-primary" />

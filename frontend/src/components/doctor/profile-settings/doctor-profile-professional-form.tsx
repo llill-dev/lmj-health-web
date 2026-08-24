@@ -119,7 +119,7 @@ export default function DoctorProfileProfessionalForm({
         {errors.root?.message ? (
           <p
             role="alert"
-            className="mt-4 rounded-[10px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-right font-cairo text-[12px] font-bold text-[#B42318]"
+            className="mt-4 rounded-[10px] border border-[#FECDCA] bg-[#FEF3F2] px-4 py-3 text-start font-cairo text-[12px] font-bold text-[#B42318]"
           >
             {errors.root.message}
           </p>
@@ -276,7 +276,7 @@ export default function DoctorProfileProfessionalForm({
               <p className="font-cairo text-[12px] font-extrabold text-[#92400E]">
                 كيفية الحصول على الإحداثيات:
               </p>
-              <ol className="mt-2 list-decimal space-y-1 ps-5 text-right font-cairo text-[11px] font-semibold leading-[18px] text-[#92400E]">
+              <ol className="mt-2 list-decimal space-y-1 ps-5 text-start font-cairo text-[11px] font-semibold leading-[18px] text-[#92400E]">
                 <li>افتح خرائط Google على جهازك</li>
                 <li>ابحث عن موقع العيادة أو انقر عليه</li>
                 <li>اضغط مطولاً على الموقع لإظهار الإحداثيات</li>

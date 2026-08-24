@@ -165,7 +165,7 @@ export function TimelineTab({
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFF1E8] text-[#C2410C] ring-1 ring-[#FED7AA]">
                 <Heart className="h-5 w-5" />
               </div>
-              <div className="text-right">
+              <div className="text-start">
                 <h3 className="font-cairo text-[15px] font-black text-[#9A3412]">
                   الحالات المرضية المرتبطة بالملف
                 </h3>
@@ -184,7 +184,7 @@ export function TimelineTab({
               >
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="text-right">
+                    <div className="text-start">
                       <div className="font-cairo text-[15px] font-black text-[#7C2D12]">
                         {condition}
                       </div>
@@ -229,7 +229,7 @@ export function TimelineTab({
                           آخر زيارة مرتبطة بالملف
                         </span>
                       </div>
-                      <div className="mt-3 text-right">
+                      <div className="mt-3 text-start">
                         <div className="font-cairo text-[13px] font-black text-[#0F172A]">
                           {latestEncounter
                             ? latestEncounter.status === "open"
@@ -252,7 +252,7 @@ export function TimelineTab({
                           آخر وصفة مرتبطة بالملف
                         </span>
                       </div>
-                      <div className="mt-3 text-right">
+                      <div className="mt-3 text-start">
                         <div className="font-cairo text-[13px] font-black text-[#0F172A]">
                           {latestPrescription
                             ? `${latestPrescription.items.length} دواء`
@@ -271,7 +271,7 @@ export function TimelineTab({
                           آخر طلب مرتبط بالملف
                         </span>
                       </div>
-                      <div className="mt-3 text-right">
+                      <div className="mt-3 text-start">
                         <div className="font-cairo text-[13px] font-black text-[#0F172A]">
                           {latestOrder?.title ?? "لا توجد طلبات بعد"}
                         </div>
@@ -282,7 +282,7 @@ export function TimelineTab({
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-dashed border-[#FDE7C2] bg-[#FFF9F3] px-4 py-3 text-right">
+                  <div className="rounded-2xl border border-dashed border-[#FDE7C2] bg-[#FFF9F3] px-4 py-3 text-start">
                     <div className="font-cairo text-[15px] font-black text-[#7C2D12]">
                       الربط السريري السريع
                     </div>
@@ -342,7 +342,7 @@ export function TimelineTab({
           return (
             <motion.div key={item.id} variants={TAB_STAGGER_ITEM} className="relative flex gap-4">
               {!isLast ? (
-                <div className="absolute right-[19px] top-[48px] h-[calc(100%+16px)] w-[2px] bg-gradient-to-b from-[#E2E8F0] to-transparent" />
+                <div className="absolute end-[19px] top-[48px] h-[calc(100%+16px)] w-[2px] bg-gradient-to-b from-[#E2E8F0] to-transparent" />
               ) : null}
               <div className="relative shrink-0">
                 <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shadow-lg", item.color)}>

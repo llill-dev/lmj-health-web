@@ -33,7 +33,7 @@ export function LegalDocumentDialog({
               </div>
             </div>
 
-            <p className="whitespace-pre-line text-right font-cairo text-[13px] font-semibold leading-[26px] text-[#667085]">
+            <p className="whitespace-pre-line text-start font-cairo text-[13px] font-semibold leading-[26px] text-[#667085]">
               {document.body}
             </p>
 

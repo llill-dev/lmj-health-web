@@ -17,7 +17,7 @@ function DetailLine({ label, value, mono }: { label: string; value: string; mono
     <div className='border-b border-[#F2F4F7] py-3 last:border-0'>
       <div className='font-cairo text-[11px] font-bold text-[#98A2B3]'>{label}</div>
       <div
-        className={`mt-1 break-all text-right font-cairo text-[13px] font-semibold ${muted ? 'text-[#98A2B3]' : 'text-[#111827]'} ${mono ? 'font-mono text-[12px]' : ''}`}
+        className={`mt-1 break-all text-start font-cairo text-[13px] font-semibold ${muted ? 'text-[#98A2B3]' : 'text-[#111827]'} ${mono ? 'font-mono text-[12px]' : ''}`}
         dir={mono ? 'ltr' : dir}
       >
         {display}
@@ -49,7 +49,7 @@ export function AuditLogDetailsDialog({
       <Dialog.Portal>
         <Dialog.Overlay className='fixed inset-0 z-[9998] bg-black/50 backdrop-blur-[2px]' />
         <Dialog.Content
-          className='fixed left-1/2 top-1/2 z-[9999] w-[min(100vw-24px,520px)] max-h-[min(90vh,640px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[16px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none'
+          className='fixed start-1/2 top-1/2 z-[9999] w-[min(100vw-24px,520px)] max-h-[min(90vh,640px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[16px] border border-[#EAECF0] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.35)] outline-none'
           dir={dir}
           lang={locale}
         >
@@ -58,7 +58,7 @@ export function AuditLogDetailsDialog({
               <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#E7FBFA] text-primary'>
                 <Info className='h-4 w-4' />
               </div>
-              <div className='min-w-0 text-right'>
+              <div className='min-w-0 text-start'>
                 <Dialog.Title className='font-cairo text-[16px] font-black text-[#111827]'>
                   {t('adminAuditLog.details.title')}
                 </Dialog.Title>

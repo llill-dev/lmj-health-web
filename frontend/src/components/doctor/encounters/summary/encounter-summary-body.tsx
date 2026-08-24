@@ -144,7 +144,7 @@ export function EncounterSummaryBody({
           }
         >
           {section.key === 'patient' ? (
-            <div className="space-y-2 text-right">
+            <div className="space-y-2 text-start">
               <DetailLine label="الاسم" value={summary.patient.name} />
               <DetailLine label="العمر" value={summary.patient.ageLabel} />
               <DetailLine label="رقم الملف" value={summary.patient.fileNumber} />
@@ -157,19 +157,19 @@ export function EncounterSummaryBody({
 
           {section.key === 'history' ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <div className="font-cairo text-[13px] font-extrabold text-primary">
                   العرض الحالي
                 </div>
                 <p className={WHITE_SURFACE}>{summary.history.currentIllness}</p>
               </div>
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <div className="font-cairo text-[13px] font-extrabold text-primary">
                   أمراض سابقة
                 </div>
                 <p className={WHITE_SURFACE}>{summary.history.pastIllnesses}</p>
               </div>
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <div className="font-cairo text-[13px] font-extrabold text-primary">
                   الأدوية
                 </div>
@@ -280,7 +280,7 @@ export function EncounterSummaryBody({
                   sectionKey="referrals"
                   className="flex gap-3 justify-between items-center"
                 >
-                  <div className="text-right">
+                  <div className="text-start">
                     <div className="font-cairo text-[14px] font-extrabold text-[#101828]">
                       {ref.specialty}
                     </div>

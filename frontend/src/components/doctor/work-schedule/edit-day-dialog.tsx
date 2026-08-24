@@ -269,7 +269,7 @@ export default function EditDayDialog({
                 transitionEnd: { visibility: "hidden" },
               },
             }}
-            className="fixed left-1/2 top-1/2 z-[10000] w-[580px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
+            className="fixed start-1/2 top-1/2 z-[10000] w-[580px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 rounded-[6px] bg-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] outline-none"
             dir={dir}
             lang={locale}
           >
@@ -296,7 +296,7 @@ export default function EditDayDialog({
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]"
+                    className="absolute start-6 top-6 flex h-9 w-9 items-center justify-center rounded-f6l text-[#667085] hover:bg-[#F2F4F7]"
                     aria-label={tr("إغلاق", "Close")}
                   >
                     <X className="h-5 w-5" />
@@ -316,7 +316,7 @@ export default function EditDayDialog({
                 <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
                   <div>
                     <div className="mb-3 flex items-center justify-between">
-                      <div className="text-right font-cairo text-[13px] font-extrabold text-[#111827]">
+                      <div className="text-start font-cairo text-[13px] font-extrabold text-[#111827]">
                         {tr("أوقات العمل", "Working hours")}
                       </div>
                       <button
@@ -342,7 +342,7 @@ export default function EditDayDialog({
                             <div className="flex-1 space-y-2">
                               {/* Start Time */}
                               <div>
-                                <div className="mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]">
+                                <div className="mb-1 text-start font-cairo text-[11px] font-bold text-[#667085]">
                                   {tr("من", "From")}
                                 </div>
                                 <div className="relative">
@@ -375,12 +375,12 @@ export default function EditDayDialog({
                                       errors[index]?.startTime
                                         ? "border-[#F04438]"
                                         : "border-primary"
-                                    } bg-white pl-3 pr-10 font-cairo text-[13px] font-extrabold text-[#111827] outline-none transition-colors`}
+                                    } bg-white ps-3 pe-10 font-cairo text-[13px] font-extrabold text-[#111827] outline-none transition-colors`}
                                   />
-                                  <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
+                                  <Clock className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
                                 </div>
                                 {errors[index]?.startTime && (
-                                  <p className="mt-1 font-cairo text-[10px] font-semibold text-[#F04438] text-right">
+                                  <p className="mt-1 font-cairo text-[10px] font-semibold text-[#F04438] text-start">
                                     {errors[index].startTime}
                                   </p>
                                 )}
@@ -388,7 +388,7 @@ export default function EditDayDialog({
 
                               {/* End Time */}
                               <div>
-                                <div className="mb-1 text-right font-cairo text-[11px] font-bold text-[#667085]">
+                                <div className="mb-1 text-start font-cairo text-[11px] font-bold text-[#667085]">
                                   {tr("إلى", "To")}
                                 </div>
                                 <div className="relative">
@@ -420,12 +420,12 @@ export default function EditDayDialog({
                                       errors[index]?.endTime
                                         ? "border-[#F04438]"
                                         : "border-primary"
-                                    } bg-white pl-3 pr-10 font-cairo text-[13px] font-extrabold text-[#111827] outline-none transition-colors`}
+                                    } bg-white ps-3 pe-10 font-cairo text-[13px] font-extrabold text-[#111827] outline-none transition-colors`}
                                   />
-                                  <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
+                                  <Clock className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#667085] pointer-events-none" />
                                 </div>
                                 {errors[index]?.endTime && (
-                                  <p className="mt-1 font-cairo text-[10px] font-semibold text-[#F04438] text-right">
+                                  <p className="mt-1 font-cairo text-[10px] font-semibold text-[#F04438] text-start">
                                     {errors[index].endTime}
                                   </p>
                                 )}

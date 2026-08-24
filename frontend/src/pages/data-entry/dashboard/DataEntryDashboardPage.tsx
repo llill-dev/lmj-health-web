@@ -146,7 +146,7 @@ export default function DataEntryDashboardPage() {
         ) : null}
 
         {hasBlockingError ? (
-          <section className="mt-5 rounded-[18px] border border-[#FECACA] bg-[#FFF7F7] px-5 py-5 text-right">
+          <section className="mt-5 rounded-[18px] border border-[#FECACA] bg-[#FFF7F7] px-5 py-5 text-start">
             <h2 className="font-cairo text-[15px] font-extrabold text-[#B42318]">
               {locale === "ar"
                 ? "تعذّر تحميل بعض بيانات لوحة الإدخال"
@@ -176,7 +176,7 @@ export default function DataEntryDashboardPage() {
               <Link
                 key={card.title}
                 to={card.href}
-                className="rounded-[18px] border border-[#E6EEF5] bg-white px-5 py-5 text-right shadow-[0_14px_30px_rgba(15,23,42,0.06)]"
+                className="rounded-[18px] border border-[#E6EEF5] bg-white px-5 py-5 text-start shadow-[0_14px_30px_rgba(15,23,42,0.06)]"
               >
                 <div className="flex items-center justify-start gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#ECFEFF] text-primary">
@@ -194,7 +194,7 @@ export default function DataEntryDashboardPage() {
           })}
         </section>
 
-        <section className="mt-5 rounded-[18px] border border-dashed border-[#BFE3E1] bg-[#F7FFFE] px-6 py-6 text-right">
+        <section className="mt-5 rounded-[18px] border border-dashed border-[#BFE3E1] bg-[#F7FFFE] px-6 py-6 text-start">
           <h2 className="font-cairo text-[15px] font-extrabold text-primary">
             {t("dataEntry.dashboard.notes.title")}
           </h2>

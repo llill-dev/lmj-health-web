@@ -11,7 +11,7 @@ type PatientQuickInfoProps = {
 
 function QuickInfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-right">
+    <div className="rounded-xl border border-[#E4E7EC] bg-[#F8FAFC] px-3 py-3 text-start">
       <div className="font-cairo text-[11px] font-bold text-[#667085]">
         {label}
       </div>

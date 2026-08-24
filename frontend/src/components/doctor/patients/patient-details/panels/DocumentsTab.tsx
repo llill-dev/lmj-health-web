@@ -193,7 +193,7 @@ export function DocumentsTab({
                   >
                     <Icon className={cn("h-5 w-5", doc.iconColor)} />
                   </div>
-                  <div className="min-w-0 text-right">
+                  <div className="min-w-0 text-start">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-cairo text-[14px] font-extrabold text-[#0F172A]">
                         {doc.title}

@@ -184,7 +184,7 @@ export default function ForgotPasswordRequest({
         className='mt-5'
         noValidate
       >
-        <label className='mb-2 block text-right font-cairo text-[14px] font-bold text-[#101828]'>
+        <label className='mb-2 block text-start font-cairo text-[14px] font-bold text-[#101828]'>
           {methodLabel}
         </label>
 
@@ -211,14 +211,14 @@ export default function ForgotPasswordRequest({
                 placeholder={methodPlaceholder}
                 autoComplete={method === 'email' ? 'email' : 'tel'}
                 {...register('identifier')}
-                className='h-full w-full bg-transparent px-3 text-right font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
+                className='h-full w-full bg-transparent px-3 text-start font-cairo text-[14px] font-semibold text-[#101828] outline-none placeholder:font-cairo placeholder:font-medium placeholder:text-[#B5B7BA]'
               />
             </div>
           </motion.div>
         </AnimatePresence>
 
         <div
-          className={`mt-2 min-h-[20px] text-right font-cairo text-[12px] font-semibold leading-snug ${inlineError ? 'text-[#D92D20]' : 'text-transparent'}`}
+          className={`mt-2 min-h-[20px] text-start font-cairo text-[12px] font-semibold leading-snug ${inlineError ? 'text-[#D92D20]' : 'text-transparent'}`}
           aria-live='polite'
         >
           {inlineError ?? '\u00A0'}

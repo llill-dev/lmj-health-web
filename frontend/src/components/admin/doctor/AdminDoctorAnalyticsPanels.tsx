@@ -53,7 +53,7 @@ function DiagnosisTooltip({
   const p = payload[0].payload;
   if (!p) return null;
   return (
-    <div className='rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-right font-cairo text-xs shadow-sm'>
+    <div className='rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-start font-cairo text-xs shadow-sm'>
       <div className='font-bold text-[#101828]'>
         {(p as { fullLabel?: string; label?: string }).fullLabel ?? p.label}
       </div>
@@ -85,7 +85,7 @@ function StatTooltip({
   const p = payload[0].payload;
   if (!p) return null;
   return (
-    <div className='rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-right font-cairo text-xs shadow-sm'>
+    <div className='rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-start font-cairo text-xs shadow-sm'>
       <div className='font-bold text-[#101828]'>
         {p.listName ?? p.name}
       </div>
@@ -179,7 +179,7 @@ export function AdminDoctorAnalyticsPanels({
                   {diagnosisItems.map((d, i) => (
                     <li
                       key={`${d.label}-${i}`}
-                      className='flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0 border-b border-[#F3F4F6] py-1.5 text-right last:border-0'
+                      className='flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0 border-b border-[#F3F4F6] py-1.5 text-start last:border-0'
                     >
                       <span className='min-w-0 break-words font-cairo text-sm font-bold text-primary sm:text-base'>
                         {d.label}

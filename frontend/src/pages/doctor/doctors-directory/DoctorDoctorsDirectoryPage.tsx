@@ -155,7 +155,7 @@ export default function DoctorDoctorsDirectoryPage() {
       <div dir={dir} lang={locale} className="pb-8 sm:pb-10">
         <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-4 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)] sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="text-right">
+            <div className="text-start">
               <div className="font-cairo text-[18px] font-extrabold text-[#111827]">
                 {tr("دليل الأطباء", "Doctors Directory")}
               </div>
@@ -174,7 +174,7 @@ export default function DoctorDoctorsDirectoryPage() {
 
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto_auto] md:items-center">
             <div className="relative">
-              <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+              <div className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
                 <Search className="w-4 h-4" />
               </div>
               <input
@@ -184,7 +184,7 @@ export default function DoctorDoctorsDirectoryPage() {
                   "ابحث باسم الطبيب أو تخصصه أو مدينته...",
                   "Search by doctor name, specialty, or city...",
                 )}
-                className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pr-4 pl-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
+                className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pe-4 ps-10 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3]"
               />
             </div>
 

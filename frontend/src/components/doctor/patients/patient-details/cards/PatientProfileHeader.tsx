@@ -74,7 +74,7 @@ export function PatientProfileHeader({
           <UserRound className="h-9 w-9" aria-hidden strokeWidth={1.75} />
         </div>
 
-        <div className="min-w-0 flex-1 space-y-3 text-right">
+        <div className="min-w-0 flex-1 space-y-3 text-start">
           <p className="font-cairo text-[12px] font-bold text-[#64748B]">
             ملف المريض
           </p>
@@ -117,7 +117,7 @@ export function PatientProfileHeader({
           <div className="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 font-cairo text-[13px] font-semibold text-[#667085]">
             <span className="inline-flex items-center gap-1.5">
               <Phone className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-              <span dir="ltr" className="text-left font-semibold text-[#344054]">
+              <span dir="ltr" className="text-end font-semibold text-[#344054]">
                 {phoneDisplay}
               </span>
             </span>

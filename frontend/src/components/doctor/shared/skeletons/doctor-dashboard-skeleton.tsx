@@ -15,7 +15,7 @@ export function DoctorDashboardSkeleton() {
             className="min-h-[180px] rounded-[16px] border border-[#E7EDF5] bg-white px-4 py-4 shadow-[0_10px_20px_rgba(15,23,42,0.04)]"
           >
             <div className="flex items-start justify-between gap-5">
-              <div className="space-y-4 text-right">
+              <div className="space-y-4 text-start">
                 <SkeletonBlock className="h-5 w-28" />
                 <SkeletonBlock className="h-8 w-16" />
               </div>

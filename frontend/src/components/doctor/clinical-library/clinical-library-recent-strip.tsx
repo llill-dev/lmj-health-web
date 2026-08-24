@@ -32,7 +32,7 @@ export function ClinicalLibraryRecentStrip({
         {items.map((item) => (
           <div
             key={item._id}
-            className='min-w-[180px] shrink-0 rounded-[10px] border border-[#E6F4F3] bg-[#F0FDFA] px-3 py-2 text-right'
+            className='min-w-[180px] shrink-0 rounded-[10px] border border-[#E6F4F3] bg-[#F0FDFA] px-3 py-2 text-start'
           >
             <div className='truncate font-cairo text-[12px] font-extrabold text-[#111827]'>
               {item.label ?? '—'}

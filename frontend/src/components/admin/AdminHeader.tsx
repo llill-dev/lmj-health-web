@@ -182,7 +182,7 @@ export default function AdminHeader({
           <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100'>
             <User className='h-4 w-4 text-blue-600' aria-hidden />
           </div>
-          <div className='min-w-0 text-right'>
+          <div className='min-w-0 text-start'>
             <div className='truncate text-sm font-medium text-gray-900'>
               {displayName}
             </div>

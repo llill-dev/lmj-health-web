@@ -267,7 +267,7 @@ export default function AdminAccessRequestsPage() {
                     }))
                   }
                 />
-                <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+                <div className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
                   <Search className="h-5 w-5" />
                 </div>
               </div>

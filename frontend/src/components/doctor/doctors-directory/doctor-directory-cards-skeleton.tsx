@@ -41,7 +41,7 @@ export function DoctorDirectoryCardsSkeleton({
       <div dir={dir} lang={locale} className="w-full">
         <section className="rounded-[6px] border border-[#EEF2F6] bg-white px-6 py-5 shadow-[0_18px_30px_rgba(0,0,0,0.10)]">
           <div className="flex items-start justify-between">
-            <div className="space-y-2 text-right">
+            <div className="space-y-2 text-start">
               <SkeletonBlock className="h-[20px] w-[120px]" />
               <SkeletonBlock className="h-[14px] w-[200px]" />
             </div>

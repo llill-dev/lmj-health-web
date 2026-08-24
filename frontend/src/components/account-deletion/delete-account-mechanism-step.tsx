@@ -26,7 +26,7 @@ export function DeleteAccountMechanismStep({
         قبل المتابعة، اقرأ بعناية كيف تعمل عملية الحذف
       </p>
 
-      <div className="mt-5 rounded-[12px] bg-[#FFF5F5] px-4 py-4 text-right">
+      <div className="mt-5 rounded-[12px] bg-[#FFF5F5] px-4 py-4 text-start">
         <ol className="space-y-4">
           <li className="flex items-start gap-3">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#14B8A6] font-cairo text-[13px] font-extrabold text-white">

@@ -623,7 +623,7 @@ export default function DoctorPatientDetailsPage() {
       >
         <div className="flex gap-3 items-start">
           <Icon className="mt-0.5 h-5 w-5 shrink-0" />
-          <div className="flex-1 text-right">
+          <div className="flex-1 text-start">
             <div className="font-cairo text-[14px] font-extrabold">
               {stateMessage.title}
             </div>
@@ -871,7 +871,7 @@ export default function DoctorPatientDetailsPage() {
 
       <div dir={dir} lang={locale} className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="text-right">
+          <div className="text-start">
             <div className="font-cairo text-[26px] font-black leading-[34px] text-[#111827]">
               {tr("ملف المريض", "Patient file")}
             </div>
@@ -1086,11 +1086,11 @@ export default function DoctorPatientDetailsPage() {
                 }}
               />
               <div
-                className="pointer-events-none absolute -left-24 top-1/3 h-52 w-52 rounded-full bg-[#14b8a6]/10 blur-3xl"
+                className="pointer-events-none absolute -start-24 top-1/3 h-52 w-52 rounded-full bg-[#14b8a6]/10 blur-3xl"
                 aria-hidden
               />
               <div
-                className="pointer-events-none absolute -right-20 bottom-0 h-44 w-44 rounded-full bg-primary/[0.09] blur-3xl"
+                className="pointer-events-none absolute -end-20 bottom-0 h-44 w-44 rounded-full bg-primary/[0.09] blur-3xl"
                 aria-hidden
               />
 

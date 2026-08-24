@@ -233,7 +233,7 @@ export default function DoctorClinicAccountsPage() {
 
         <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
               {tr("نظرة عامة", "Overview")}
             </h2>
             {dashboardQuery.isAwaitingData ? (
@@ -244,7 +244,7 @@ export default function DoctorClinicAccountsPage() {
           </div>
 
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+            <h2 className="mb-4 text-start font-cairo text-[16px] font-extrabold text-[#111827]">
               {tr("إجراءات سريعة", "Quick actions")}
             </h2>
             <div className="space-y-3">
@@ -314,7 +314,7 @@ export default function DoctorClinicAccountsPage() {
                 count={overdueQuery.total}
                 label={tr("فاتورة", "invoice")}
               />
-              <h2 className="text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+              <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#111827]">
                 {tr("فواتير متأخرة", "Overdue invoices")}
               </h2>
             </div>
@@ -341,7 +341,7 @@ export default function DoctorClinicAccountsPage() {
                             invoice.currency ?? currency,
                           )}
                         </span>
-                        <div className="text-right">
+                        <div className="text-start">
                           <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
                             {invoice.id}
                           </p>
@@ -369,7 +369,7 @@ export default function DoctorClinicAccountsPage() {
                 count={outstandingTotal}
                 label={tr("فاتورة", "invoice")}
               />
-              <h2 className="text-right font-cairo text-[16px] font-extrabold text-[#111827]">
+              <h2 className="text-start font-cairo text-[16px] font-extrabold text-[#111827]">
                 {tr("فواتير غير مسددة", "Outstanding invoices")}
               </h2>
             </div>
@@ -397,7 +397,7 @@ export default function DoctorClinicAccountsPage() {
                             invoice.currency ?? currency,
                           )}
                         </span>
-                        <div className="text-right">
+                        <div className="text-start">
                           <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
                             {invoice.id}
                           </p>

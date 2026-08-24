@@ -20,7 +20,7 @@ function SurfaceSection({
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
-        <h2 className="text-right font-cairo text-[23px] font-black leading-none text-[#243044]">
+        <h2 className="text-start font-cairo text-[23px] font-black leading-none text-[#243044]">
           {title}
         </h2>
       </header>
@@ -126,7 +126,7 @@ export default function SecretaryNotificationsPage() {
       <SurfaceSection title={tr("الإشعارات", "Notifications")}>
         <div className="px-4 py-5 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
           <div className="mb-6 flex items-center justify-between">
-            <div className="text-right">
+            <div className="text-start">
               <h3 className="font-cairo text-[18px] font-bold text-[#243044]">
                 {tr("الإشعارات", "Notifications")}
               </h3>
@@ -192,7 +192,7 @@ export default function SecretaryNotificationsPage() {
           ) : (
             <>
               {notificationsQuery.listQuery.isRefetching ? (
-                <div className="mb-3 text-right font-cairo text-[12px] font-semibold text-[#98A2B3]">
+                <div className="mb-3 text-start font-cairo text-[12px] font-semibold text-[#98A2B3]">
                   {tr("جاري تحديث الإشعارات...", "Refreshing notifications...")}
                 </div>
               ) : null}

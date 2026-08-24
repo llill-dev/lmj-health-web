@@ -77,7 +77,7 @@ export default function WaitlistSuggestionsDialog({
       maxWidthClass="max-w-[560px]"
       headerPattern
     >
-      <div dir={dir} lang={locale} className="space-y-5 text-right">
+      <div dir={dir} lang={locale} className="space-y-5 text-start">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
           اعرض الأوقات المتاحة في جدولك لمساعدتك على تنظيم المواعيد وخدمة
           مرضى قائمة الانتظار بسرعة.
@@ -139,7 +139,7 @@ export default function WaitlistSuggestionsDialog({
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white shadow-sm">
                     <Clock className="h-4 w-4 text-primary" aria-hidden />
                   </div>
-                  <div className="min-w-0 flex-1 text-right">
+                  <div className="min-w-0 flex-1 text-start">
                     <p className="font-cairo text-[13px] font-extrabold text-[#111827]">
                       {formatTime(slot.startTime)}
                     </p>

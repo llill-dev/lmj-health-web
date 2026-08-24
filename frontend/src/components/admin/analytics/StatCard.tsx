@@ -28,7 +28,7 @@ export default function StatCard({
       className={`h-[147px] rounded-[12px] border px-6 py-5 shadow-[0_14px_30px_rgba(0,0,0,0.06)] ${border} ${bg}`}
     >
       <div className='flex items-start justify-between'>
-        <div className='text-right'>
+        <div className='text-start'>
           <div className='font-cairo text-[12px] font-extrabold text-[#667085]'>
             {title}
           </div>

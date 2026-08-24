@@ -178,7 +178,7 @@ export default function AddAccessRequestForm({
     'min-h-[104px] w-full rounded-[6px] border border-[#E5E7EB] bg-white px-4 py-3 font-cairo text-[13px] font-semibold text-[#111827] outline-none placeholder:font-cairo placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2 focus:ring-[#0F8F8B] focus:ring-opacity-20';
 
   const labelBase =
-    'mb-2 text-right font-cairo text-[12px] font-extrabold text-[#111827]';
+    'mb-2 text-start font-cairo text-[12px] font-extrabold text-[#111827]';
 
   const submit = (values: AddAccessRequestValues) => {
     onSubmit?.({
@@ -192,7 +192,7 @@ export default function AddAccessRequestForm({
   return (
     <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
       <div className='border-b border-[#EEF2F6] px-8 py-5'>
-        <div className='text-right font-cairo text-[15px] font-extrabold text-[#111827]'>
+        <div className='text-start font-cairo text-[15px] font-extrabold text-[#111827]'>
           طلب وصول جديد
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function AddAccessRequestForm({
               )}
             />
             {errors.patientId?.message ? (
-              <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
+              <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
                 {errors.patientId.message}
               </div>
             ) : null}
@@ -231,7 +231,7 @@ export default function AddAccessRequestForm({
           <div className='rounded-[16px] border border-[#BFEDEC] bg-[#0F8F8B1A] px-5 py-4 shadow-[0_12px_28px_rgba(0,0,0,0.06)]'>
             <div className='flex w-full items-start justify-between gap-4'>
               <div className='flex flex-row-reverse items-start gap-3'>
-                <div className='text-right'>
+                <div className='text-start'>
                   <div className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                     {patientLabel || '-'}
                   </div>
@@ -300,7 +300,7 @@ export default function AddAccessRequestForm({
                     key={type}
                     type='button'
                     onClick={() => toggleItem(type)}
-                    className={`flex w-full items-center justify-between rounded-[6px] border px-4 py-2.5 text-right transition ${
+                    className={`flex w-full items-center justify-between rounded-[6px] border px-4 py-2.5 text-start transition ${
                       checked
                         ? 'border-primary bg-[#F0FDFA]'
                         : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
@@ -311,7 +311,7 @@ export default function AddAccessRequestForm({
                         {meta.icon}
                       </div>
 
-                      <div className='text-right'>
+                      <div className='text-start'>
                         <div className='font-cairo text-[12px] font-extrabold text-[#111827]'>
                           {meta.label}
                         </div>
@@ -338,11 +338,11 @@ export default function AddAccessRequestForm({
               })}
             </div>
             {errors.items?.message ? (
-              <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
+              <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
                 {errors.items.message}
               </div>
             ) : null}
-            <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+            <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]'>
               {selectedItems.length === 0
                 ? 'اختر نوع بيانات واحد أو أكثر'
                 : `تم اختيار ${selectedItems.length} من ${7} أنواع`}
@@ -364,11 +364,11 @@ export default function AddAccessRequestForm({
                 placeholder='اختر تاريخ انتهاء الصلاحية...'
               />
               <Calendar
-                className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]'
+                className='pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]'
                 aria-hidden
               />
             </div>
-            <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#98A2B3]'>
+            <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#98A2B3]'>
               إذا لم تحدد تاريخاً، سيكون الوصول دائماً (حتى يتم إلغاؤه)
             </div>
           </div>
@@ -381,13 +381,13 @@ export default function AddAccessRequestForm({
               placeholder='اشرح سبب طلب الوصول للبيانات الطبية...'
             />
             {errors.reason?.message ? (
-              <div className='mt-2 text-right font-cairo text-[11px] font-semibold text-[#E11D48]'>
+              <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
                 {errors.reason.message}
               </div>
             ) : null}
           </div>
 
-          <div className='rounded-[6px] bg-[#E9FFFE] px-5 py-4 text-right'>
+          <div className='rounded-[6px] bg-[#E9FFFE] px-5 py-4 text-start'>
             <div className='flex items-start justify-start gap-3'>
               <ShieldCheck className='h-4 w-4 text-[#0F8F8B]' />
               <div className='flex flex-col gap-1'>
