@@ -417,6 +417,42 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointmentCard.noShow": "عدم حضور",
     "doctor.appointmentCard.noShowBlocked": "لا يمكن تسجيل عدم حضور لموعد مستقبلي.",
     "doctor.appointmentCard.complete": "إكمال",
+    "doctor.dashboardPatientFilters.today": "اليوم",
+    "doctor.dashboardPatientFilters.upcoming": "القادم",
+    "doctor.dashboardPatientsSection.viewDetails": "عرض التفاصيل",
+    "doctor.dashboardPatientsSection.weeklyActivityTitle": "نشاط المرضى - آخر 7 أيام",
+    "doctor.dashboardPatientsSection.patientsAppointmentsCount":
+      "{patients} مريض • {appointments} موعد",
+    "doctor.dashboardPatientsSection.averagePerDay": "متوسط: {n} مريض/يوم",
+    "doctor.dashboardPatientsSection.peakDay": " • أعلى يوم: {n} موعد",
+    "doctor.dashboardPatientsSection.searchPlaceholder":
+      "ابحث بالاسم، الهاتف، البريد، أو رقم الملف…",
+    "doctor.dashboardPatientsSection.searchAria": "بحث عن مريض",
+    "doctor.dashboardPatientsSection.fullPatientsPage": "صفحة المرضى الكاملة",
+    "doctor.dashboardPatientsSection.emptyNoSearchMatch":
+      "لا توجد نتائج مطابقة لبحثك ضمن مرضى الطبيب.",
+    "doctor.dashboardPatientsSection.emptyToday": "لا يوجد مرضى لديهم مواعيد اليوم.",
+    "doctor.dashboardPatientsSection.emptyUpcoming":
+      "لا يوجد مرضى بمواعيد قادمة ضمن الفترة الحالية.",
+    "doctor.dashboardPatientsSection.emptyDefault":
+      "لا يوجد مرضى مرتبطون بحسابك بعد.",
+    "doctor.dashboardPatientsSection.patientNameColumn": "اسم المريض",
+    "doctor.dashboardPatientsSection.phoneNumberColumn": "رقم الهاتف",
+    "doctor.dashboardPatientsSection.lastVisitColumn": "آخر زيارة",
+    "doctor.dashboardPatientsSection.actionsColumn": "الإجراءات",
+    "doctor.dashboardPatientsSection.errorTitle": "تعذّر تحميل المرضى",
+    "doctor.dashboardPatientsSection.errorBrief":
+      "حدث خطأ أثناء جلب قائمة المرضى من الخادم.",
+    "doctor.dashboardPatientsSection.goToPatientsPage": "الانتقال إلى صفحة المرضى",
+    "doctor.dashboardPatientsSection.patientCount": "{n} مريض",
+    "doctor.dashboardPatientsSection.matchingSearch": " مطابق للبحث",
+    "doctor.dashboardPatientsSection.viewAllPatients": "عرض جميع المرضى ({n})",
+    "doctor.dashboardPatientsSection.notApprovedError":
+      "حساب الطبيب غير مُعتمد بعد، لذلك لا يمكن البحث عن المرضى.",
+    "doctor.dashboardPatientsSection.sessionExpiredError":
+      "انتهت صلاحية الجلسة. سجّل الدخول من جديد.",
+    "doctor.dashboardPatientsSection.noPermissionError":
+      "لا تملك صلاحية عرض مرضى الطبيب.",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -2286,6 +2322,44 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointmentCard.noShowBlocked":
       "A future appointment cannot be marked as no-show.",
     "doctor.appointmentCard.complete": "Complete",
+    "doctor.dashboardPatientFilters.today": "Today",
+    "doctor.dashboardPatientFilters.upcoming": "Upcoming",
+    "doctor.dashboardPatientsSection.viewDetails": "View details",
+    "doctor.dashboardPatientsSection.weeklyActivityTitle":
+      "Patient activity - last 7 days",
+    "doctor.dashboardPatientsSection.patientsAppointmentsCount":
+      "{patients} patients • {appointments} appointments",
+    "doctor.dashboardPatientsSection.averagePerDay": "Average: {n} patients/day",
+    "doctor.dashboardPatientsSection.peakDay": " • Peak day: {n} appointments",
+    "doctor.dashboardPatientsSection.searchPlaceholder":
+      "Search by name, phone, email, or file number…",
+    "doctor.dashboardPatientsSection.searchAria": "Search for a patient",
+    "doctor.dashboardPatientsSection.fullPatientsPage": "Full patients page",
+    "doctor.dashboardPatientsSection.emptyNoSearchMatch":
+      "No results match your search among the doctor's patients.",
+    "doctor.dashboardPatientsSection.emptyToday":
+      "No patients have appointments today.",
+    "doctor.dashboardPatientsSection.emptyUpcoming":
+      "No patients have upcoming appointments in the current period.",
+    "doctor.dashboardPatientsSection.emptyDefault":
+      "No patients are linked to your account yet.",
+    "doctor.dashboardPatientsSection.patientNameColumn": "Patient name",
+    "doctor.dashboardPatientsSection.phoneNumberColumn": "Phone number",
+    "doctor.dashboardPatientsSection.lastVisitColumn": "Last visit",
+    "doctor.dashboardPatientsSection.actionsColumn": "Actions",
+    "doctor.dashboardPatientsSection.errorTitle": "Failed to load patients",
+    "doctor.dashboardPatientsSection.errorBrief":
+      "An error occurred while fetching the patient list from the server.",
+    "doctor.dashboardPatientsSection.goToPatientsPage": "Go to patients page",
+    "doctor.dashboardPatientsSection.patientCount": "{n} patients",
+    "doctor.dashboardPatientsSection.matchingSearch": " matching the search",
+    "doctor.dashboardPatientsSection.viewAllPatients": "View all patients ({n})",
+    "doctor.dashboardPatientsSection.notApprovedError":
+      "The doctor account is not approved yet, so patients cannot be searched.",
+    "doctor.dashboardPatientsSection.sessionExpiredError":
+      "The session has expired. Please sign in again.",
+    "doctor.dashboardPatientsSection.noPermissionError":
+      "You do not have permission to view the doctor's patients.",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",
