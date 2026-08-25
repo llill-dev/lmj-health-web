@@ -529,6 +529,25 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.addAccessRequestForm.noteBody":
       "سيتم إرسال الطلب إلى المريض للموافقة، وعند الموافقة يمكنك الوصول إلى بياناته.",
     "doctor.addAccessRequestForm.sendRequest": "إرسال الطلب",
+    "doctor.profileConfirmDialog.navigatePersonal.description":
+      "ستنتقل إلى صفحة تعديل بياناتك الشخصية. التعديلات تُطبَّق فوراً بعد الحفظ.",
+    "doctor.profileConfirmDialog.navigateProfessional.description":
+      "ستنتقل إلى صفحة تعديل بياناتك المهنية. التغييرات تُرسل للمراجعة قبل التطبيق.",
+    "doctor.profileConfirmDialog.continue": "متابعة",
+    "doctor.profileConfirmDialog.savePersonal.title": "حفظ التغييرات",
+    "doctor.profileConfirmDialog.savePersonal.description":
+      "هل تريد حفظ التعديلات على معلوماتك الشخصية؟ سيتم تطبيقها فوراً.",
+    "doctor.profileConfirmDialog.cancelEdit.title": "إلغاء التعديل",
+    "doctor.profileConfirmDialog.cancelEdit.description":
+      "لديك تغييرات غير محفوظة. هل تريد المغادرة وتجاهل التعديلات؟",
+    "doctor.profileConfirmDialog.discardChanges": "تجاهل التغييرات",
+    "doctor.profileConfirmDialog.saveProfessional.title": "إرسال للمراجعة",
+    "doctor.profileConfirmDialog.saveProfessional.description":
+      "هل تريد إرسال التعديلات المهنية لفريق الإدارة؟ سيتم مراجعتها خلال 24–48 ساعة.",
+    "doctor.profileConfirmDialog.changePhoto.title": "تغيير الصورة الشخصية",
+    "doctor.profileConfirmDialog.changePhoto.description":
+      "هل تريد استبدال صورتك الشخصية بالصورة المختارة؟",
+    "doctor.profileConfirmDialog.changePhoto.confirmLabel": "تغيير الصورة",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -2527,6 +2546,25 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.addAccessRequestForm.noteBody":
       "The request will be sent to the patient for approval, and once approved you can access their data.",
     "doctor.addAccessRequestForm.sendRequest": "Send request",
+    "doctor.profileConfirmDialog.navigatePersonal.description":
+      "You will move to the personal information edit page. Changes apply immediately after saving.",
+    "doctor.profileConfirmDialog.navigateProfessional.description":
+      "You will move to the professional information edit page. Changes are sent for review before they take effect.",
+    "doctor.profileConfirmDialog.continue": "Continue",
+    "doctor.profileConfirmDialog.savePersonal.title": "Save changes",
+    "doctor.profileConfirmDialog.savePersonal.description":
+      "Do you want to save the changes to your personal information? They will be applied immediately.",
+    "doctor.profileConfirmDialog.cancelEdit.title": "Cancel edit",
+    "doctor.profileConfirmDialog.cancelEdit.description":
+      "You have unsaved changes. Do you want to leave and discard the edits?",
+    "doctor.profileConfirmDialog.discardChanges": "Discard changes",
+    "doctor.profileConfirmDialog.saveProfessional.title": "Submit for review",
+    "doctor.profileConfirmDialog.saveProfessional.description":
+      "Do you want to send the professional changes to the admin team? They will be reviewed within 24–48 hours.",
+    "doctor.profileConfirmDialog.changePhoto.title": "Change profile photo",
+    "doctor.profileConfirmDialog.changePhoto.description":
+      "Do you want to replace your profile photo with the selected one?",
+    "doctor.profileConfirmDialog.changePhoto.confirmLabel": "Change photo",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",

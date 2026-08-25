@@ -1,6 +1,7 @@
 'use client';
 
 import ConfirmActionDialog from '@/components/doctor/confirm-action-dialog';
+import { useI18n } from '@/i18n/provider';
 
 export type DoctorProfileConfirmKind =
   | 'navigate-personal-edit'
@@ -11,52 +12,52 @@ export type DoctorProfileConfirmKind =
   | 'cancel-professional'
   | 'change-photo';
 
-const CONFIRM_COPY: Record<
+type TFn = (key: string, fallback?: string) => string;
+
+function buildConfirmCopy(
+  t: TFn,
+): Record<
   DoctorProfileConfirmKind,
   { title: string; description: string; confirmLabel: string }
-> = {
-  'navigate-personal-edit': {
-    title: 'تعديل المعلومات الشخصية',
-    description:
-      'ستنتقل إلى صفحة تعديل بياناتك الشخصية. التعديلات تُطبَّق فوراً بعد الحفظ.',
-    confirmLabel: 'متابعة',
-  },
-  'navigate-professional-edit': {
-    title: 'تعديل المعلومات المهنية',
-    description:
-      'ستنتقل إلى صفحة تعديل بياناتك المهنية. التغييرات تُرسل للمراجعة قبل التطبيق.',
-    confirmLabel: 'متابعة',
-  },
-  'save-personal': {
-    title: 'حفظ التغييرات',
-    description:
-      'هل تريد حفظ التعديلات على معلوماتك الشخصية؟ سيتم تطبيقها فوراً.',
-    confirmLabel: 'حفظ',
-  },
-  'cancel-personal': {
-    title: 'إلغاء التعديل',
-    description:
-      'لديك تغييرات غير محفوظة. هل تريد المغادرة وتجاهل التعديلات؟',
-    confirmLabel: 'تجاهل التغييرات',
-  },
-  'save-professional': {
-    title: 'إرسال للمراجعة',
-    description:
-      'هل تريد إرسال التعديلات المهنية لفريق الإدارة؟ سيتم مراجعتها خلال 24–48 ساعة.',
-    confirmLabel: 'إرسال',
-  },
-  'cancel-professional': {
-    title: 'إلغاء التعديل',
-    description:
-      'لديك تغييرات غير محفوظة. هل تريد المغادرة وتجاهل التعديلات؟',
-    confirmLabel: 'تجاهل التغييرات',
-  },
-  'change-photo': {
-    title: 'تغيير الصورة الشخصية',
-    description: 'هل تريد استبدال صورتك الشخصية بالصورة المختارة؟',
-    confirmLabel: 'تغيير الصورة',
-  },
-};
+> {
+  return {
+    'navigate-personal-edit': {
+      title: t('doctor.personalProfileForm.title'),
+      description: t('doctor.profileConfirmDialog.navigatePersonal.description'),
+      confirmLabel: t('doctor.profileConfirmDialog.continue'),
+    },
+    'navigate-professional-edit': {
+      title: t('doctor.professionalProfileForm.title'),
+      description: t('doctor.profileConfirmDialog.navigateProfessional.description'),
+      confirmLabel: t('doctor.profileConfirmDialog.continue'),
+    },
+    'save-personal': {
+      title: t('doctor.profileConfirmDialog.savePersonal.title'),
+      description: t('doctor.profileConfirmDialog.savePersonal.description'),
+      confirmLabel: t('common.save'),
+    },
+    'cancel-personal': {
+      title: t('doctor.profileConfirmDialog.cancelEdit.title'),
+      description: t('doctor.profileConfirmDialog.cancelEdit.description'),
+      confirmLabel: t('doctor.profileConfirmDialog.discardChanges'),
+    },
+    'save-professional': {
+      title: t('doctor.profileConfirmDialog.saveProfessional.title'),
+      description: t('doctor.profileConfirmDialog.saveProfessional.description'),
+      confirmLabel: t('common.send'),
+    },
+    'cancel-professional': {
+      title: t('doctor.profileConfirmDialog.cancelEdit.title'),
+      description: t('doctor.profileConfirmDialog.cancelEdit.description'),
+      confirmLabel: t('doctor.profileConfirmDialog.discardChanges'),
+    },
+    'change-photo': {
+      title: t('doctor.profileConfirmDialog.changePhoto.title'),
+      description: t('doctor.profileConfirmDialog.changePhoto.description'),
+      confirmLabel: t('doctor.profileConfirmDialog.changePhoto.confirmLabel'),
+    },
+  };
+}
 
 export default function DoctorProfileConfirmDialog({
   kind,
@@ -71,8 +72,9 @@ export default function DoctorProfileConfirmDialog({
   onConfirm: () => void | Promise<void>;
   confirmDisabled?: boolean;
 }) {
+  const { t } = useI18n();
   if (!kind) return null;
-  const copy = CONFIRM_COPY[kind];
+  const copy = buildConfirmCopy(t)[kind];
 
   return (
     <ConfirmActionDialog
