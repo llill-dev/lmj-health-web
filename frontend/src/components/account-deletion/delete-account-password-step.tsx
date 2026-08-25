@@ -53,13 +53,13 @@ export function DeleteAccountPasswordStep({
         </label>
         <div className="relative">
           <Lock
-            className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+            className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
             aria-hidden
           />
           <button
             type="button"
             onClick={() => setVisible((value) => !value)}
-            className="absolute start-3 top-1/2 -translate-y-1/2 text-[#98A2B3] transition hover:text-[#667085]"
+            className="absolute end-3 top-1/2 -translate-y-1/2 text-[#98A2B3] transition hover:text-[#667085]"
             aria-label={visible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
           >
             {visible ? (

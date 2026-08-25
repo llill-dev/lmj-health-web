@@ -120,14 +120,14 @@ export function SecretaryDoctorAppointmentsPanel({
 
         <div className='flex flex-col gap-3 lg:flex-row lg:items-center'>
           <div className='relative flex-1'>
-            <Search className='pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
+            <Search className='pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]' />
             <input
               value={filters.search}
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, search: e.target.value }))
               }
               placeholder={t('adminSecretary.doctorAppointments.search.placeholder')}
-              className='h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white pe-10 ps-3 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
+              className='h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white ps-10 pe-3 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]'
             />
           </div>
           <input

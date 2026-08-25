@@ -285,7 +285,7 @@ export default function DoctorClinicFinancialReportsPage() {
                 {tr("لا توجد بيانات لهذه الفترة.", "No data for this period.")}
               </p>
             ) : (
-              <FinancialBarChart data={reportsQuery.monthlyFinance} />
+              <FinancialBarChart data={reportsQuery.monthlyFinance} currency={currency} />
             )}
           </div>
           <div className="rounded-[16px] border border-[#EEF2F6] bg-white p-6 shadow-sm">
@@ -297,7 +297,7 @@ export default function DoctorClinicFinancialReportsPage() {
                 {tr("لا توجد بيانات لهذه الفترة.", "No data for this period.")}
               </p>
             ) : (
-              <FinancialLineChart data={reportsQuery.monthlyFinance} />
+              <FinancialLineChart data={reportsQuery.monthlyFinance} currency={currency} />
             )}
           </div>
         </section>
@@ -312,8 +312,8 @@ export default function DoctorClinicFinancialReportsPage() {
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.2fr]">
-              <ExpensePieChart data={reportsQuery.expenseBreakdown} />
-              <ExpensePieLegend data={reportsQuery.expenseBreakdown} />
+              <ExpensePieChart data={reportsQuery.expenseBreakdown} currency={currency} />
+              <ExpensePieLegend data={reportsQuery.expenseBreakdown} currency={currency} />
             </div>
           )}
         </section>

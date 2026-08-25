@@ -1,15 +1,13 @@
-import { DoctorListFilterTabs } from '@/components/doctor/shared/doctor-list-filter-tabs';
-import { DoctorListSearchField } from '@/components/doctor/shared/doctor-list-search-field';
+import { DoctorListFilterTabs } from "@/components/doctor/shared/doctor-list-filter-tabs";
+import { DoctorListSearchField } from "@/components/doctor/shared/doctor-list-search-field";
+import { useI18n } from "@/i18n/provider";
 
-export type AppointmentTypeStatusFilter = 'all' | 'active' | 'inactive';
+export type AppointmentTypeStatusFilter = "all" | "active" | "inactive";
 
-const STATUS_FILTER_TABS: Array<{
-  value: AppointmentTypeStatusFilter;
-  label: string;
-}> = [
-  { value: 'all', label: 'الكل' },
-  { value: 'active', label: 'نشط' },
-  { value: 'inactive', label: 'غير نشط' },
+const STATUS_FILTER_CONFIG = [
+  { value: "all" as const },
+  { value: "active" as const },
+  { value: "inactive" as const },
 ];
 
 export function AppointmentTypesToolbar({
@@ -25,17 +23,24 @@ export function AppointmentTypesToolbar({
   statusFilter: AppointmentTypeStatusFilter;
   onStatusFilterChange: (value: AppointmentTypeStatusFilter) => void;
 }) {
+  const { t } = useI18n();
+
+  const statusFilterTabs = STATUS_FILTER_CONFIG.map((tab) => ({
+    ...tab,
+    label: t(`doctor.appointmentTypes.status.${tab.value}`),
+  }));
+
   return (
     <div className="space-y-4">
       <DoctorListSearchField
         value={search}
         onChange={onSearchChange}
-        placeholder="ابحث عن نوع موعد..."
-        ariaLabel="بحث في أنواع المواعيد"
+        placeholder={t("doctor.appointmentTypes.searchPlaceholder")}
+        ariaLabel={t("doctor.appointmentTypes.searchLabel")}
         onClear={onClear}
       />
       <DoctorListFilterTabs
-        tabs={STATUS_FILTER_TABS}
+        tabs={statusFilterTabs}
         value={statusFilter}
         onChange={onStatusFilterChange}
         columns={3}

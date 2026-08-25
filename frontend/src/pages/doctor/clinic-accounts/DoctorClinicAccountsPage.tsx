@@ -41,6 +41,7 @@ import {
 } from "@/lib/doctor/billing/format";
 import type { AccountsPeriod } from "@/lib/doctor/clinicAccounts/types";
 import { useBillingAccess } from "@/hooks/billing/useBillingAccess";
+import { resolveClientDateRangeForPeriod } from "@/lib/doctor/billing/periodParams";
 
 export default function DoctorClinicAccountsPage() {
   const { locale, dir } = useI18n();
@@ -66,12 +67,19 @@ export default function DoctorClinicAccountsPage() {
   const currency = settingsQuery.currency;
 
   const dashboardQuery = useBillingDashboard(period, currency);
+  // Every other billing query on this page derives its date range from the
+  // same `period` selector as the dashboard KPIs, so invoice previews and the
+  // recent-activity feed never silently show "all time" while the KPIs above
+  // them reflect a narrower period.
+  const periodRange = useMemo(() => resolveClientDateRangeForPeriod(period), [period]);
   const canLoadInvoiceLists = !isSecretary || canViewInvoices;
   const overdueQuery = useBillingInvoices(
     {
       status: "overdue",
       search,
       currency,
+      dateFrom: periodRange.dateFrom,
+      dateTo: periodRange.dateTo,
       page: 1,
       limit: PREVIEW_LIMIT,
     },
@@ -82,6 +90,8 @@ export default function DoctorClinicAccountsPage() {
       status: "issued",
       search,
       currency,
+      dateFrom: periodRange.dateFrom,
+      dateTo: periodRange.dateTo,
       page: 1,
       limit: PREVIEW_LIMIT,
     },
@@ -92,6 +102,8 @@ export default function DoctorClinicAccountsPage() {
       status: "partial",
       search,
       currency,
+      dateFrom: periodRange.dateFrom,
+      dateTo: periodRange.dateTo,
       page: 1,
       limit: PREVIEW_LIMIT,
     },
@@ -102,6 +114,8 @@ export default function DoctorClinicAccountsPage() {
       year: new Date().getFullYear(),
       month: "all",
       currency,
+      dateFrom: periodRange.dateFrom,
+      dateTo: periodRange.dateTo,
     },
     !isSecretary || canViewReports,
   );
@@ -239,7 +253,10 @@ export default function DoctorClinicAccountsPage() {
             {dashboardQuery.isAwaitingData ? (
               <div className="h-[220px] rounded-[12px] bg-[#F3F4F6]" />
             ) : (
-              <AccountsOverviewChart data={dashboardQuery.weeklyOverview} />
+              <AccountsOverviewChart
+                data={dashboardQuery.weeklyOverview}
+                currency={settingsQuery.currency}
+              />
             )}
           </div>
 

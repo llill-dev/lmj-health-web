@@ -430,7 +430,7 @@ export default function DataEntryMedicalContentPage() {
                 {search.trim()
                   ? t(
                       "dataEntry.medicalContent.list.emptySearchPageHint",
-                      "بحث النص محلي داخل الصفحة فقط لأن /api/admin/content/mine لا يدعم search.",
+                      "البحث يتم داخل الصفحة الحالية فقط. جرّب تغيير معايير البحث.",
                     )
                   : t(
                       "dataEntry.medicalContent.list.emptyHint",

@@ -35,6 +35,23 @@ export function waitlistUrgencyLabel(urgency?: string, tr: TrFn = defaultTr): st
   }
 }
 
+export function waitlistContactPreferenceLabel(preference?: string, tr: TrFn = defaultTr): string {
+  switch (preference) {
+    case 'call':
+      return tr('اتصال هاتفي', 'Phone call');
+    case 'sms':
+      return tr('رسالة نصية', 'SMS');
+    case 'whatsapp':
+      return tr('واتساب', 'WhatsApp');
+    case 'email':
+      return tr('بريد إلكتروني', 'Email');
+    default:
+      return preference?.trim() || '—';
+  }
+}
+
+export const WAITLIST_CONTACT_PREFERENCES = ['call', 'sms', 'whatsapp', 'email'] as const;
+
 export function isWaitlistActionable(status?: string): boolean {
   return status === 'active' || status === 'contacted';
 }

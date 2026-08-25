@@ -1,5 +1,6 @@
 import { Users, CheckCircle } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
+import { formatBillingAmount } from "@/lib/doctor/billing/format";
 
 interface AccountStatusCardProps {
   doctorName: string;
@@ -7,6 +8,7 @@ interface AccountStatusCardProps {
   rating: number;
   ratingCount: number;
   price: number;
+  currency?: string;
 }
 
 export default function AccountStatusCard({
@@ -15,6 +17,7 @@ export default function AccountStatusCard({
   rating,
   ratingCount,
   price,
+  currency,
 }: AccountStatusCardProps) {
   const { locale } = useI18n();
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
@@ -52,7 +55,7 @@ export default function AccountStatusCard({
                 </span>
               </div>
               <div className="font-cairo text-sm font-bold text-primary">
-                ${price}
+                {formatBillingAmount(price, currency)}
               </div>
             </div>
           </div>

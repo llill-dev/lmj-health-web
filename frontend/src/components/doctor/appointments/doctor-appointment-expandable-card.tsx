@@ -87,14 +87,16 @@ export type DoctorAppointmentExpandableCardProps = {
   };
   expanded: boolean;
   onToggle: () => void;
-  cancelling: boolean;
-  completing: boolean;
+  cancelling?: boolean;
+  completing?: boolean;
   rescheduling?: boolean;
   noShowing?: boolean;
-  onCancel: () => void;
-  onComplete: () => void;
-  onEdit: () => void;
-  onNoShow: () => void;
+  onCancel?: () => void;
+  /** Omit for roles (e.g. secretary) that cannot mark appointments completed. */
+  onComplete?: () => void;
+  onEdit?: () => void;
+  /** Omit for roles (e.g. secretary) that cannot record a no-show. */
+  onNoShow?: () => void;
   detailsLoading?: boolean;
   onUploadFile?: () => void;
   onOpenFile?: (fileId: string) => void;
@@ -325,49 +327,58 @@ export default function DoctorAppointmentExpandableCard({
                 )}
               </div>
 
-              {appointment.status === "scheduled" ? (
+              {appointment.status === "scheduled" &&
+              (onCancel || onNoShow || onEdit || onComplete) ? (
                 <div className="mt-5 flex flex-wrap justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={onCancel}
-                    disabled={cancelling}
-                    className="inline-flex h-11 min-w-[100px] flex-1 items-center justify-center gap-2 rounded-lg border-2 border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#D92D20] transition-colors hover:bg-[#FEF3F2] disabled:opacity-50 sm:flex-initial sm:px-6"
-                  >
-                    <X className="h-4 w-4" />
-                    {t("common.cancel")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onNoShow}
-                    disabled={noShowing || noShowBlockedForFuture}
-                    title={
-                      noShowBlockedForFuture
-                        ? t("doctor.appointmentCard.noShowBlocked")
-                        : undefined
-                    }
-                    className="inline-flex h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg border border-[#F59E0B] bg-[#FFF7ED] font-cairo text-[14px] font-extrabold text-[#B45309] transition-colors hover:bg-[#FFEDD5] disabled:opacity-50 sm:flex-initial sm:px-6"
-                  >
-                    <AlertTriangle className="h-4 w-4" />
-                    {t("doctor.appointmentCard.noShow")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onEdit}
-                    disabled={rescheduling}
-                    className="inline-flex h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition-colors hover:bg-[#0d7a77] disabled:opacity-50 sm:flex-initial sm:px-6"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    {t("doctor.appointmentCard.rescheduleAction")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onComplete}
-                    disabled={completing}
-                    className="inline-flex h-11 min-w-[100px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition-colors hover:bg-[#0d7a77] disabled:opacity-50 sm:flex-initial sm:px-6"
-                  >
-                    <Check className="h-4 w-4" />
-                    {t("doctor.appointmentCard.complete")}
-                  </button>
+                  {onCancel ? (
+                    <button
+                      type="button"
+                      onClick={onCancel}
+                      disabled={cancelling}
+                      className="inline-flex h-11 min-w-[100px] flex-1 items-center justify-center gap-2 rounded-lg border-2 border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#D92D20] transition-colors hover:bg-[#FEF3F2] disabled:opacity-50 sm:flex-initial sm:px-6"
+                    >
+                      <X className="h-4 w-4" />
+                      {t("common.cancel")}
+                    </button>
+                  ) : null}
+                  {onNoShow ? (
+                    <button
+                      type="button"
+                      onClick={onNoShow}
+                      disabled={noShowing || noShowBlockedForFuture}
+                      title={
+                        noShowBlockedForFuture
+                          ? t("doctor.appointmentCard.noShowBlocked")
+                          : undefined
+                      }
+                      className="inline-flex h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg border border-[#F59E0B] bg-[#FFF7ED] font-cairo text-[14px] font-extrabold text-[#B45309] transition-colors hover:bg-[#FFEDD5] disabled:opacity-50 sm:flex-initial sm:px-6"
+                    >
+                      <AlertTriangle className="h-4 w-4" />
+                      {t("doctor.appointmentCard.noShow")}
+                    </button>
+                  ) : null}
+                  {onEdit ? (
+                    <button
+                      type="button"
+                      onClick={onEdit}
+                      disabled={rescheduling}
+                      className="inline-flex h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition-colors hover:bg-[#0d7a77] disabled:opacity-50 sm:flex-initial sm:px-6"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      {t("doctor.appointmentCard.rescheduleAction")}
+                    </button>
+                  ) : null}
+                  {onComplete ? (
+                    <button
+                      type="button"
+                      onClick={onComplete}
+                      disabled={completing}
+                      className="inline-flex h-11 min-w-[100px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition-colors hover:bg-[#0d7a77] disabled:opacity-50 sm:flex-initial sm:px-6"
+                    >
+                      <Check className="h-4 w-4" />
+                      {t("doctor.appointmentCard.complete")}
+                    </button>
+                  ) : null}
                 </div>
               ) : null}
             </div>

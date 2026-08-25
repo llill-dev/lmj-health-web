@@ -9,40 +9,37 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { AdminContentType } from "@/lib/admin/types";
+import { useI18n } from "@/i18n/provider";
 
 type TypeFilterValue = "الكل" | AdminContentType;
 
-const TYPE_FILTERS: Array<{
-  value: TypeFilterValue;
-  icon: LucideIcon;
-  /** Matches the original markup: only the "All" icon inherits the button's
-   * text color (white when active); every other icon stays gray regardless
-   * of active state. Preserved as-is to avoid an unintended visual change. */
-  iconAdaptsToActive?: boolean;
-  ar: string;
-  en: string;
-}> = [
-  { value: "الكل", icon: BookOpen, iconAdaptsToActive: true, ar: "الكل", en: "All" },
-  { value: "CONDITION", icon: HeartPulse, ar: "الحالات الطبية", en: "Conditions" },
-  { value: "SYMPTOM", icon: FileText, ar: "الأعراض", en: "Symptoms" },
-  { value: "GENERAL_ADVICE", icon: Stethoscope, ar: "نصائح عامة", en: "General advice" },
-  { value: "NEWS", icon: Newspaper, ar: "الأخبار", en: "News" },
-  { value: "MEDICATION", icon: Pill, ar: "الأدوية", en: "Medications" },
-  { value: "SETTINGS_PAGE", icon: Settings, ar: "صفحات الإعدادات", en: "Settings pages" },
+const TYPE_FILTER_CONFIG = [
+  { value: "الكل" as const, icon: BookOpen, iconAdaptsToActive: true },
+  { value: "CONDITION" as const, icon: HeartPulse },
+  { value: "SYMPTOM" as const, icon: FileText },
+  { value: "GENERAL_ADVICE" as const, icon: Stethoscope },
+  { value: "NEWS" as const, icon: Newspaper },
+  { value: "MEDICATION" as const, icon: Pill },
+  { value: "SETTINGS_PAGE" as const, icon: Settings },
 ];
 
 export function AdminContentTypeFilterBar({
   activeType,
   onChange,
-  tr,
 }: {
   activeType: TypeFilterValue;
   onChange: (next: TypeFilterValue) => void;
-  tr: (ar: string, en: string) => string;
 }) {
+  const { t } = useI18n();
+
+  const typeFilters = TYPE_FILTER_CONFIG.map((filter) => ({
+    ...filter,
+    label: t(`adminMedicalContent.type.${filter.value}`),
+  }));
+
   return (
     <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
-      {TYPE_FILTERS.map((filter) => {
+      {typeFilters.map((filter) => {
         const Icon = filter.icon;
         const active = activeType === filter.value;
         return (
@@ -61,7 +58,7 @@ export function AdminContentTypeFilterBar({
                 filter.iconAdaptsToActive ? "h-4 w-4" : "h-4 w-4 text-[#667085]"
               }
             />
-            {tr(filter.ar, filter.en)}
+            {filter.label}
           </button>
         );
       })}

@@ -15,27 +15,26 @@ export default function TodayScheduleTable({
   appointments,
   onViewAppointment,
 }: TodayScheduleTableProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
 
   const getStatusBadge = (status: Appointment["status"]) => {
     switch (status) {
       case "scheduled":
         return (
           <span className="rounded-full bg-emerald-100 px-3 py-1 font-cairo text-xs font-bold text-emerald-700">
-            {tr("مجدول", "Scheduled")}
+            {t("secretary.dashboard.statusScheduled")}
           </span>
         );
       case "postponed":
         return (
           <span className="rounded-full bg-orange-100 px-3 py-1 font-cairo text-xs font-bold text-orange-700">
-            {tr("مؤجل", "Postponed")}
+            {t("secretary.dashboard.statusPostponed")}
           </span>
         );
       case "completed":
         return (
           <span className="rounded-full bg-blue-100 px-3 py-1 font-cairo text-xs font-bold text-blue-700">
-            {tr("مكتمل", "Completed")}
+            {t("secretary.dashboard.statusCompleted")}
           </span>
         );
       default:
@@ -47,7 +46,7 @@ export default function TodayScheduleTable({
     <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
       <div className="border-b border-[#e2e8f0] px-6 py-4">
         <h3 className="font-cairo text-lg font-bold text-[#0f172a]">
-          {tr("جدول اليوم", "Today's schedule")}
+          {t("secretary.dashboard.todaySchedule")}
         </h3>
       </div>
       <div className="overflow-x-auto">
@@ -55,16 +54,16 @@ export default function TodayScheduleTable({
           <thead>
             <tr className="border-b border-[#e2e8f0] bg-gray-50">
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("الوقت", "Time")}
+                {t("secretary.dashboard.time")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("اسم المريض", "Patient name")}
+                {t("secretary.dashboard.patientName")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("الحالة", "Status")}
+                {t("secretary.dashboard.status")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("الإجراءات", "Actions")}
+                {t("secretary.dashboard.actions")}
               </th>
             </tr>
           </thead>
@@ -72,7 +71,11 @@ export default function TodayScheduleTable({
             {appointments.map((appointment, index) => (
               <tr
                 key={index}
-                className={index !== appointments.length - 1 ? "border-b border-[#e2e8f0]" : ""}
+                className={
+                  index !== appointments.length - 1
+                    ? "border-b border-[#e2e8f0]"
+                    : ""
+                }
               >
                 <td className="px-6 py-4 font-cairo text-sm font-medium text-[#0f172a]">
                   {appointment.time}
@@ -80,13 +83,15 @@ export default function TodayScheduleTable({
                 <td className="px-6 py-4 font-cairo text-sm font-medium text-[#0f172a]">
                   {appointment.patientName}
                 </td>
-                <td className="px-6 py-4">{getStatusBadge(appointment.status)}</td>
+                <td className="px-6 py-4">
+                  {getStatusBadge(appointment.status)}
+                </td>
                 <td className="px-6 py-4">
                   <button
                     onClick={() => onViewAppointment?.(appointment)}
                     className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90"
                   >
-                    {tr("عرض", "View")}
+                    {t("secretary.dashboard.view")}
                   </button>
                 </td>
               </tr>

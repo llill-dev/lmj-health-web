@@ -1,12 +1,13 @@
-import type { FieldErrors } from 'react-hook-form';
-import type { ToastOptions } from '@/components/ui/ToastProvider';
+import type { FieldErrors } from "react-hook-form";
+import type { ToastOptions } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 import {
   mapSecretaryFieldErrors,
   pickFirstSecretaryValidationMessage,
   type DoctorSecretaryCreateFormValues,
   type DoctorSecretaryEditFormValues,
   type SecretaryFormFieldErrors,
-} from '@/lib/doctor/secretaries/schema';
+} from "@/lib/doctor/secretaries/schema";
 
 export function toastSecretaryValidationErrors(
   toast: (message: string, options?: ToastOptions) => void,
@@ -14,18 +15,20 @@ export function toastSecretaryValidationErrors(
     | FieldErrors<DoctorSecretaryCreateFormValues>
     | FieldErrors<DoctorSecretaryEditFormValues>,
 ) {
+  const { t } = useI18n();
   const mapped = mapSecretaryFieldErrors(
     errors as Partial<
       Record<
-        keyof DoctorSecretaryCreateFormValues | keyof DoctorSecretaryEditFormValues,
+        | keyof DoctorSecretaryCreateFormValues
+        | keyof DoctorSecretaryEditFormValues,
         { message?: string }
       >
     >,
   );
 
   toast(pickFirstSecretaryValidationMessage(mapped), {
-    title: 'تحقق من البيانات',
-    variant: 'error',
+    title: t("common.validateData"),
+    variant: "error",
   });
 }
 
@@ -37,7 +40,8 @@ export function toSecretaryFormFieldErrors(
   return mapSecretaryFieldErrors(
     errors as Partial<
       Record<
-        keyof DoctorSecretaryCreateFormValues | keyof DoctorSecretaryEditFormValues,
+        | keyof DoctorSecretaryCreateFormValues
+        | keyof DoctorSecretaryEditFormValues,
         { message?: string }
       >
     >,

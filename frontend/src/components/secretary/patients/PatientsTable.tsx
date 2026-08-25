@@ -18,8 +18,7 @@ export default function PatientsTable({
   patients,
   onViewPatient,
 }: PatientsTableProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   const getInitials = (name: string) => {
     return name.charAt(0);
   };
@@ -31,19 +30,19 @@ export default function PatientsTable({
           <thead>
             <tr className="border-b border-[#e2e8f0] bg-gray-50">
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("الاسم", "Name")}
+                {t("secretary.patients.table.name")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("رقم الهاتف", "Phone number")}
+                {t("secretary.patients.table.phone")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("البريد الإلكتروني", "Email")}
+                {t("secretary.patients.table.email")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("تاريخ التسجيل", "Registration date")}
+                {t("secretary.patients.table.registrationDate")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                {tr("الإجراءات", "Actions")}
+                {t("secretary.patients.table.actions")}
               </th>
             </tr>
           </thead>
@@ -51,7 +50,11 @@ export default function PatientsTable({
             {patients.map((patient, index) => (
               <tr
                 key={patient.id}
-                className={index !== patients.length - 1 ? "border-b border-[#e2e8f0]" : ""}
+                className={
+                  index !== patients.length - 1
+                    ? "border-b border-[#e2e8f0]"
+                    : ""
+                }
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -88,7 +91,7 @@ export default function PatientsTable({
                     onClick={() => onViewPatient?.(patient)}
                     className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90"
                   >
-                    {tr("عرض", "View")}
+                    {t("secretary.patients.table.view")}
                   </button>
                 </td>
               </tr>

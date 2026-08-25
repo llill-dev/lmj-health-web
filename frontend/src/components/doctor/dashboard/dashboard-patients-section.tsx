@@ -127,9 +127,9 @@ function PatientsSearchInput({
         onChange={(event) => onChange(event.target.value)}
         placeholder={t("doctor.dashboardPatientsSection.searchPlaceholder")}
         aria-label={t("doctor.dashboardPatientsSection.searchAria")}
-        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
+        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white ps-10 pe-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
-      <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
+      <div className="pointer-events-none absolute start-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
         <Search className="h-5 w-5" />
       </div>
     </div>

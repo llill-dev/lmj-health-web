@@ -1,7 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronsRight, LogOut, Stethoscope, X } from "lucide-react";
+import {
+  ChevronsLeft,
+  ChevronsRight,
+  LogOut,
+  Stethoscope,
+  X,
+} from "lucide-react";
 import { type ComponentType, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -67,6 +73,7 @@ export default function Sidebar({
   items?: SidebarNavItem[];
 }) {
   const { locale, dir, t } = useI18n();
+  const isRTL = locale === "ar";
   const navItems = useMemo(() => {
     if (items?.length) return items;
     if (role === "admin") return adminSidebarItems;
@@ -120,8 +127,13 @@ export default function Sidebar({
   const desktopWidthClass = collapsed ? "lg:w-[88px]" : "lg:w-[320px]";
   const desktopOrderClass = "lg:order-first";
   const mobileAnchorClass = locale === "ar" ? "end-0" : "start-0";
-  const mobileClosedTransform =
-    locale === "ar" ? "translate-x-full" : "-translate-x-full";
+  // `end-0`/`start-0` are logical properties, but both resolve to the
+  // physical left edge here (inline-end is left in RTL, inline-start is
+  // left in LTR), so the closed-state slide must always be physical
+  // `-translate-x-full` regardless of locale. Flipping the sign for `ar`
+  // pushed the drawer *into* view instead of off-screen on medium/RTL
+  // viewports.
+  const mobileClosedTransform = "-translate-x-full";
   const expanded = !collapsed || mobileOpen;
 
   return (
@@ -212,7 +224,7 @@ export default function Sidebar({
                       : t("common.collapseSidebar")
                   }
                 >
-                  <ChevronsRight
+                  <ChevronsLeft
                     className={collapsed ? "w-5 h-5 rotate-180" : "w-5 h-5"}
                   />
                 </button>

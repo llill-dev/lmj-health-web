@@ -1,23 +1,16 @@
-'use client';
+"use client";
 
-import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Menu } from 'lucide-react';
-import { motion } from 'framer-motion';
-import type { DoctorFacility } from '@/lib/doctor/facilities/types';
-import { FacilityStatusBadge } from '@/components/doctor/facilities/facility-status-badge';
-
-const TABLE_COLUMNS = [
-  'اسم منشأة',
-  'العنوان',
-  'الهاتف',
-  'الحالة',
-  'الإجراءات',
-] as const;
+import { createPortal } from "react-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Menu } from "lucide-react";
+import { motion } from "framer-motion";
+import type { DoctorFacility } from "@/lib/doctor/facilities/types";
+import { FacilityStatusBadge } from "@/components/doctor/facilities/facility-status-badge";
+import { useI18n } from "@/i18n/provider";
 
 const thClass =
-  'px-3 py-3 text-center align-middle font-cairo text-[11px] font-extrabold text-[#0F766E] sm:px-4 sm:text-[12px]';
-const tdClass = 'px-3 py-3 text-center align-middle sm:px-4 sm:py-4';
+  "px-3 py-3 text-center align-middle font-cairo text-[11px] font-extrabold text-[#0F766E] sm:px-4 sm:text-[12px]";
+const tdClass = "px-3 py-3 text-center align-middle sm:px-4 sm:py-4";
 
 type ActionsMenuState = {
   rowId: string;
@@ -34,8 +27,17 @@ export function FacilitiesTable({
   onEdit: (facility: DoctorFacility) => void;
   onUnlink?: (facility: DoctorFacility) => void;
 }) {
+  const { t } = useI18n();
   const [menu, setMenu] = useState<ActionsMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const TABLE_COLUMNS = [
+    t("doctor.facilities.table.name"),
+    t("doctor.facilities.table.address"),
+    t("doctor.facilities.table.phone"),
+    t("doctor.facilities.table.status"),
+    t("doctor.facilities.table.actions"),
+  ] as const;
 
   const activeRow = useMemo(
     () => rows.find((row) => row.id === menu?.rowId) ?? null,
@@ -52,21 +54,18 @@ export function FacilitiesTable({
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenu(null);
+      if (event.key === "Escape") setMenu(null);
     };
 
-    window.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener('mousedown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [menu]);
 
-  const openActionsMenu = (
-    row: DoctorFacility,
-    button: HTMLButtonElement,
-  ) => {
+  const openActionsMenu = (row: DoctorFacility, button: HTMLButtonElement) => {
     const rect = button.getBoundingClientRect();
     setMenu({
       rowId: row.id,
@@ -103,7 +102,9 @@ export function FacilitiesTable({
                   >
                     {row.name}
                   </td>
-                  <td className={`${tdClass} font-cairo text-[12px] font-semibold text-[#475467]`}>
+                  <td
+                    className={`${tdClass} font-cairo text-[12px] font-semibold text-[#475467]`}
+                  >
                     {row.city}
                   </td>
                   <td
@@ -127,7 +128,7 @@ export function FacilitiesTable({
                         openActionsMenu(row, button);
                       }}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-primary transition hover:border-primary/30"
-                      aria-label="إجراءات المنشأة"
+                      aria-label={t("doctor.facilities.table.actionsLabel")}
                       aria-expanded={menu?.rowId === row.id}
                     >
                       <Menu className="h-4 w-4" aria-hidden />
@@ -162,7 +163,7 @@ export function FacilitiesTable({
                   onEdit(activeRow);
                 }}
               >
-                تعديل المنشأة
+                {t("doctor.facilities.table.editFacility")}
               </button>
               {activeRow.isOwned === false && onUnlink ? (
                 <button
@@ -174,7 +175,7 @@ export function FacilitiesTable({
                     onUnlink(activeRow);
                   }}
                 >
-                  إلغاء ربط المنشأة
+                  {t("doctor.facilities.table.unlinkFacility")}
                 </button>
               ) : null}
             </motion.div>,

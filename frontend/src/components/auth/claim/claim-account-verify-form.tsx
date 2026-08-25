@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { CircleCheck, Eye, EyeOff } from 'lucide-react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { ClipboardEvent, KeyboardEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { CircleCheck, Eye, EyeOff } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { ClipboardEvent, KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   VERIFY_CODE_SCHEMA_HINT_AR,
   formatVerifyFlowError,
-} from '@/lib/auth/signupMessaging';
-import { useToast } from '@/components/ui/ToastProvider';
-import { useI18n } from '@/i18n/provider';
+} from "@/lib/auth/signupMessaging";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useI18n } from "@/i18n/provider";
 
 const claimVerifySchema = z
   .object({
-    code: z.string().regex(new RegExp('^\\d{6}$'), VERIFY_CODE_SCHEMA_HINT_AR),
-    password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-    confirmPassword: z.string().min(1, 'يرجى تأكيد كلمة المرور'),
+    code: z.string().regex(new RegExp("^\\d{6}$"), VERIFY_CODE_SCHEMA_HINT_AR),
+    password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+    confirmPassword: z.string().min(1, "يرجى تأكيد كلمة المرور"),
   })
   .refine((values) => values.password === values.confirmPassword, {
-    message: 'كلمتا المرور غير متطابقتين',
-    path: ['confirmPassword'],
+    message: "كلمتا المرور غير متطابقتين",
+    path: ["confirmPassword"],
   });
 
 type ClaimVerifyValues = z.infer<typeof claimVerifySchema>;
@@ -37,8 +37,7 @@ export default function ClaimAccountVerifyForm({
   onSubmit: (values: ClaimVerifyValues) => void | Promise<void>;
   onResend?: () => void | Promise<void>;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
+  const { locale, dir, t } = useI18n();
 
   const {
     register,
@@ -48,12 +47,12 @@ export default function ClaimAccountVerifyForm({
     formState: { errors },
   } = useForm<ClaimVerifyValues>({
     resolver: zodResolver(claimVerifySchema),
-    defaultValues: { code: '', password: '', confirmPassword: '' },
-    mode: 'onSubmit',
+    defaultValues: { code: "", password: "", confirmPassword: "" },
+    mode: "onSubmit",
   });
 
   const [code, setCode] = useState<string[]>(
-    Array.from({ length: 6 }, () => ''),
+    Array.from({ length: 6 }, () => ""),
   );
   const [secondsLeft, setSecondsLeft] = useState(60);
   const [isResending, setIsResending] = useState(false);
@@ -64,8 +63,8 @@ export default function ClaimAccountVerifyForm({
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const { toast } = useToast();
 
-  const passwordValue = watch('password');
-  const confirmPasswordValue = watch('confirmPassword');
+  const passwordValue = watch("password");
+  const confirmPasswordValue = watch("confirmPassword");
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -75,23 +74,23 @@ export default function ClaimAccountVerifyForm({
   }, []);
 
   const handleChange = (index: number, value: string) => {
-    const next = value.replace(/\D/g, '').slice(-1);
+    const next = value.replace(/\D/g, "").slice(-1);
     setCode((prev) => {
       const copy = [...prev];
       copy[index] = next;
       return copy;
     });
-    const merged = code.map((c, i) => (i === index ? next : c)).join('');
-    setValue('code', merged, { shouldDirty: true });
+    const merged = code.map((c, i) => (i === index ? next : c)).join("");
+    setValue("code", merged, { shouldDirty: true });
     if (next && index < 5) inputsRef.current[index + 1]?.focus();
   };
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Backspace') return;
+    if (e.key !== "Backspace") return;
     if (code[index]) {
-      const nextDigits = code.map((c, i) => (i === index ? '' : c));
+      const nextDigits = code.map((c, i) => (i === index ? "" : c));
       setCode(nextDigits);
-      setValue('code', nextDigits.join(''), { shouldDirty: true });
+      setValue("code", nextDigits.join(""), { shouldDirty: true });
       return;
     }
     if (index > 0) inputsRef.current[index - 1]?.focus();
@@ -100,13 +99,13 @@ export default function ClaimAccountVerifyForm({
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pasted = e.clipboardData
-      .getData('text')
-      .replace(/\D/g, '')
+      .getData("text")
+      .replace(/\D/g, "")
       .slice(0, 6);
     if (!pasted) return;
-    const next = Array.from({ length: 6 }, (_, i) => pasted[i] ?? '');
+    const next = Array.from({ length: 6 }, (_, i) => pasted[i] ?? "");
     setCode(next);
-    setValue('code', next.join(''), { shouldDirty: true });
+    setValue("code", next.join(""), { shouldDirty: true });
     const lastFilled = Math.min(pasted.length, 6) - 1;
     if (lastFilled >= 0) inputsRef.current[lastFilled]?.focus();
   };
@@ -119,9 +118,9 @@ export default function ClaimAccountVerifyForm({
     } catch (error) {
       const formatted = formatVerifyFlowError(error);
       setFlowError(formatted);
-      toast(formatted.replace(/\s+/g, ' ').trim().slice(0, 220), {
-        title: tr('تعذّر تفعيل الحساب', 'Account activation failed'),
-        variant: 'error',
+      toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
+        title: t("auth.claim.activationFailed"),
+        variant: "error",
         durationMs: 4800,
       });
     } finally {
@@ -136,7 +135,11 @@ export default function ClaimAccountVerifyForm({
     flowError;
 
   return (
-    <section dir={dir} lang={locale} className="mx-auto flex flex-col items-center">
+    <section
+      dir={dir}
+      lang={locale}
+      className="mx-auto flex flex-col items-center"
+    >
       <div className="my-[50px]">
         <img
           src="/images/syr-health-logo.png"
@@ -149,7 +152,7 @@ export default function ClaimAccountVerifyForm({
       </div>
 
       <h1 className="my-4 text-center font-cairo text-[28px] font-bold leading-tight text-[#1F2937]">
-        {tr('تفعيل حسابك', 'Activate your account')}
+        {t("auth.claim.title")}
       </h1>
 
       <div className="relative">
@@ -165,16 +168,13 @@ export default function ClaimAccountVerifyForm({
             <form onSubmit={handleSubmit(submitForm)}>
               <div className="text-center">
                 <p className="font-cairo text-[15px] font-semibold leading-[24px] text-[#374151]">
-                  {tr('أدخل الرمز المرسل إلى', 'Enter the code sent to')}
+                  {t("auth.claim.enterCodeSentTo")}
                 </p>
                 <p className="mt-2 font-cairo text-[16px] font-bold leading-snug text-[#101828]">
                   {destination}
                 </p>
                 <p className="mt-3 font-cairo text-[13px] font-semibold text-[#6B7280]">
-                  {tr(
-                    'ثم عيّن كلمة مرور جديدة لتفعيل حسابك.',
-                    'Then set a new password to activate your account.',
-                  )}
+                  {t("auth.claim.setPasswordToActivate")}
                 </p>
               </div>
 
@@ -200,12 +200,12 @@ export default function ClaimAccountVerifyForm({
               <div className="mt-6 space-y-4">
                 <div>
                   <label className="block text-start font-cairo text-[14px] font-bold text-[#1F2937]">
-                    {tr('كلمة المرور', 'Password')}
+                    {t("auth.password")}
                   </label>
                   <div className="mt-2 flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] px-[12px] py-[4px]">
                     <input
-                      type={showPassword ? 'text' : 'password'}
-                      {...register('password')}
+                      type={showPassword ? "text" : "password"}
+                      {...register("password")}
                       disabled={isSubmitting}
                       className="h-full w-full bg-transparent px-2 font-cairo text-[14px] font-semibold text-[#101828] outline-none"
                     />
@@ -216,8 +216,8 @@ export default function ClaimAccountVerifyForm({
                         className="shrink-0 text-[#98A2B3] hover:text-[#667085]"
                         aria-label={
                           showPassword
-                            ? tr('إخفاء كلمة المرور', 'Hide password')
-                            : tr('إظهار كلمة المرور', 'Show password')
+                            ? t("auth.hidePassword")
+                            : t("auth.showPassword")
                         }
                       >
                         {showPassword ? (
@@ -232,12 +232,12 @@ export default function ClaimAccountVerifyForm({
 
                 <div>
                   <label className="block text-start font-cairo text-[14px] font-bold text-[#1F2937]">
-                    {tr('تأكيد كلمة المرور', 'Confirm password')}
+                    {t("auth.confirmPassword")}
                   </label>
                   <div className="mt-2 flex h-[36px] items-center rounded-[6px] border-[1.82px] border-[#E5E7EB] bg-[#F3F4F6] px-[12px] py-[4px]">
                     <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      {...register('confirmPassword')}
+                      type={showConfirmPassword ? "text" : "password"}
+                      {...register("confirmPassword")}
                       disabled={isSubmitting}
                       className="h-full w-full bg-transparent px-2 font-cairo text-[14px] font-semibold text-[#101828] outline-none"
                     />
@@ -248,8 +248,8 @@ export default function ClaimAccountVerifyForm({
                         className="shrink-0 text-[#98A2B3] hover:text-[#667085]"
                         aria-label={
                           showConfirmPassword
-                            ? tr('إخفاء كلمة المرور', 'Hide password')
-                            : tr('إظهار كلمة المرور', 'Show password')
+                            ? t("auth.hidePassword")
+                            : t("auth.showPassword")
                         }
                       >
                         {showConfirmPassword ? (
@@ -264,10 +264,10 @@ export default function ClaimAccountVerifyForm({
               </div>
 
               <div
-                className={`mx-auto mt-3 min-h-[22px] w-full max-w-[340px] text-center font-cairo text-[13px] font-semibold leading-snug ${inlineError ? 'text-red-500' : 'text-transparent'}`}
+                className={`mx-auto mt-3 min-h-[22px] w-full max-w-[340px] text-center font-cairo text-[13px] font-semibold leading-snug ${inlineError ? "text-red-500" : "text-transparent"}`}
                 aria-live="polite"
               >
-                {inlineError ?? '\u00A0'}
+                {inlineError ?? "\u00A0"}
               </div>
 
               <div className="mt-6 flex w-full items-center justify-center">
@@ -278,8 +278,8 @@ export default function ClaimAccountVerifyForm({
                 >
                   <CircleCheck className="h-4 w-4 shrink-0" />
                   {isSubmitting
-                    ? tr('جاري التفعيل…', 'Activating…')
-                    : tr('تفعيل الحساب', 'Activate account')}
+                    ? t("auth.activating")
+                    : t("auth.claim.activateAccount")}
                 </button>
               </div>
 
@@ -289,14 +289,14 @@ export default function ClaimAccountVerifyForm({
                   onClick={onBack}
                   className="font-cairo text-[14px] font-semibold text-[#6B7280] transition-colors hover:text-primary"
                 >
-                  {tr('رجوع', 'Back')}
+                  {t("common.back")}
                 </button>
                 <div className="font-cairo text-[13px] font-semibold text-[#9CA3AF]">
                   {secondsLeft > 0 ? (
                     <span>
-                      {tr(
-                        `لم تستلم الرمز؟ يمكن الإرسال مجدداً خلال ${secondsLeft} ث`,
-                        `Didn't get the code? Resend in ${secondsLeft}s`,
+                      {t("auth.claim.resendIn").replace(
+                        "{seconds}",
+                        String(secondsLeft),
                       )}
                     </span>
                   ) : (
@@ -310,28 +310,19 @@ export default function ClaimAccountVerifyForm({
                           await onResend();
                           setFlowError(null);
                           setSecondsLeft(60);
-                          toast(
-                            tr(
-                              'تم إرسال رمز تحقّق جديد.',
-                              'A new verification code was sent.',
-                            ),
-                            {
-                              title: tr('أُعيد الإرسال', 'Code resent'),
-                              variant: 'success',
-                              durationMs: 3200,
-                            },
-                          );
+                          toast(t("auth.claim.codeResent"), {
+                            title: t("auth.claim.resent"),
+                            variant: "success",
+                            durationMs: 3200,
+                          });
                         } catch (error) {
                           const formatted = formatVerifyFlowError(error);
                           setFlowError(formatted);
                           toast(
-                            formatted.replace(/\s+/g, ' ').trim().slice(0, 220),
+                            formatted.replace(/\s+/g, " ").trim().slice(0, 220),
                             {
-                              title: tr(
-                                'تعذّر إعادة الإرسال',
-                                'Resend failed',
-                              ),
-                              variant: 'error',
+                              title: t("auth.claim.resendFailed"),
+                              variant: "error",
                               durationMs: 4800,
                             },
                           );
@@ -342,8 +333,8 @@ export default function ClaimAccountVerifyForm({
                       className="text-primary transition-colors hover:text-[#14B3AE] disabled:opacity-60"
                     >
                       {isResending
-                        ? tr('جاري الإرسال…', 'Sending…')
-                        : tr('إعادة إرسال الرمز', 'Resend code')}
+                        ? t("auth.sending")
+                        : t("auth.claim.resendCode")}
                     </button>
                   )}
                 </div>

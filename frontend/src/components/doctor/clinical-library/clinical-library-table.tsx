@@ -1,17 +1,11 @@
-import { Pencil, Play, Star, Trash2 } from 'lucide-react';
+import { Pencil, Play, Star, Trash2 } from "lucide-react";
 import {
   DOCTOR_MINT_TABLE_TD,
   DoctorMintTableShell,
-} from '@/components/doctor/shared/doctor-mint-table';
-import type { DoctorLibraryItem } from '@/lib/doctor/library/libraryTypes';
-import { cn } from '@/lib/utils/utils';
-
-const TABLE_COLUMNS = [
-  'العنوان',
-  'النوع',
-  'مفضّل',
-  'الإجراءات',
-] as const;
+} from "@/components/doctor/shared/doctor-mint-table";
+import type { DoctorLibraryItem } from "@/lib/doctor/library/libraryTypes";
+import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 export function ClinicalLibraryItemsTable({
   items,
@@ -26,6 +20,15 @@ export function ClinicalLibraryItemsTable({
   onToggleFavorite?: (itemId: string, isFavorite: boolean) => void;
   togglingFavoriteId?: string | null;
 }) {
+  const { t } = useI18n();
+
+  const TABLE_COLUMNS = [
+    t("doctor.clinicalLibrary.table.title"),
+    t("doctor.clinicalLibrary.table.type"),
+    t("doctor.clinicalLibrary.table.favorite"),
+    t("doctor.clinicalLibrary.table.actions"),
+  ] as const;
+
   return (
     <DoctorMintTableShell columns={[...TABLE_COLUMNS]} isEmpty={!items.length}>
       {items.map((item) => (
@@ -35,40 +38,42 @@ export function ClinicalLibraryItemsTable({
         >
           <td className={DOCTOR_MINT_TABLE_TD}>
             <div className="max-w-[220px] break-words font-cairo text-[13px] font-extrabold text-[#101828] sm:max-w-none">
-              {item.label ?? '—'}
+              {item.label ?? "—"}
             </div>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
             <div className="inline-flex items-center justify-center gap-1.5 font-cairo text-[12px] font-bold text-[#344054]">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
-              <span>{item.type ? typeLabels[item.type] ?? item.type : '—'}</span>
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                aria-hidden
+              />
+              <span>
+                {item.type ? (typeLabels[item.type] ?? item.type) : "—"}
+              </span>
             </div>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
             <button
               type="button"
-              onClick={() =>
-                onToggleFavorite?.(item._id, !item.isFavorite)
-              }
-              disabled={
-                !onToggleFavorite || togglingFavoriteId === item._id
-              }
+              onClick={() => onToggleFavorite?.(item._id, !item.isFavorite)}
+              disabled={!onToggleFavorite || togglingFavoriteId === item._id}
               className={cn(
-                'inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold transition disabled:opacity-50',
+                "inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold transition disabled:opacity-50",
                 item.isFavorite
-                  ? 'text-[#D97706]'
-                  : 'text-[#98A2B3] hover:text-[#D97706]',
+                  ? "text-[#D97706]"
+                  : "text-[#98A2B3] hover:text-[#D97706]",
               )}
-              aria-label={item.isFavorite ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
+              aria-label={
+                item.isFavorite
+                  ? t("doctor.clinicalLibrary.table.removeFromFavorites")
+                  : t("doctor.clinicalLibrary.table.addToFavorites")
+              }
             >
               <Star
-                className={cn(
-                  'h-4 w-4',
-                  item.isFavorite && 'fill-[#D97706]',
-                )}
+                className={cn("h-4 w-4", item.isFavorite && "fill-[#D97706]")}
                 aria-hidden
               />
-              <span>{item.isFavorite ? 'نعم' : 'لا'}</span>
+              <span>{item.isFavorite ? t("common.yes") : t("common.no")}</span>
             </button>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
@@ -78,7 +83,7 @@ export function ClinicalLibraryItemsTable({
               className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:text-[#912018]"
             >
               <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span>أرشفة</span>
+              <span>{t("doctor.clinicalLibrary.table.archive")}</span>
             </button>
           </td>
         </tr>
@@ -86,13 +91,6 @@ export function ClinicalLibraryItemsTable({
     </DoctorMintTableShell>
   );
 }
-
-const TEMPLATE_TABLE_COLUMNS = [
-  'اسم القالب',
-  'النوع',
-  'الوصف',
-  'الإجراءات',
-] as const;
 
 export function ClinicalLibraryTemplatesTable({
   templates,
@@ -114,6 +112,15 @@ export function ClinicalLibraryTemplatesTable({
   onEdit: (templateId: string) => void;
   onDelete: (templateId: string) => void;
 }) {
+  const { t } = useI18n();
+
+  const TEMPLATE_TABLE_COLUMNS = [
+    t("doctor.clinicalLibrary.table.templateName"),
+    t("doctor.clinicalLibrary.table.type"),
+    t("doctor.clinicalLibrary.table.description"),
+    t("doctor.clinicalLibrary.table.actions"),
+  ] as const;
+
   return (
     <DoctorMintTableShell
       columns={[...TEMPLATE_TABLE_COLUMNS]}
@@ -126,22 +133,24 @@ export function ClinicalLibraryTemplatesTable({
         >
           <td className={DOCTOR_MINT_TABLE_TD}>
             <div className="max-w-[220px] break-words font-cairo text-[13px] font-extrabold text-[#101828] sm:max-w-none">
-              {template.name ?? '—'}
+              {template.name ?? "—"}
             </div>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
             <span
               className={cn(
-                'inline-flex min-w-[88px] items-center justify-center rounded-[6px] px-3 py-1 font-cairo text-[11px] font-extrabold',
-                'border-2 border-primary bg-white text-primary',
+                "inline-flex min-w-[88px] items-center justify-center rounded-[6px] px-3 py-1 font-cairo text-[11px] font-extrabold",
+                "border-2 border-primary bg-white text-primary",
               )}
             >
-              {template.type ? typeLabels[template.type] ?? template.type : '—'}
+              {template.type
+                ? (typeLabels[template.type] ?? template.type)
+                : "—"}
             </span>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
             <div className="mx-auto max-w-[240px] font-cairo text-[12px] font-semibold leading-relaxed text-[#667085]">
-              {template.description?.trim() || '—'}
+              {template.description?.trim() || "—"}
             </div>
           </td>
           <td className={DOCTOR_MINT_TABLE_TD}>
@@ -153,7 +162,11 @@ export function ClinicalLibraryTemplatesTable({
                 className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-[#14B3AE] disabled:opacity-50"
               >
                 <Play className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span>{applyingTemplateId === template._id ? '…' : 'استخدام'}</span>
+                <span>
+                  {applyingTemplateId === template._id
+                    ? "…"
+                    : t("doctor.clinicalLibrary.table.use")}
+                </span>
               </button>
               <button
                 type="button"
@@ -161,7 +174,7 @@ export function ClinicalLibraryTemplatesTable({
                 className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-[#344054] transition hover:text-primary"
               >
                 <Pencil className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span>تعديل</span>
+                <span>{t("common.edit")}</span>
               </button>
               <button
                 type="button"
@@ -169,7 +182,7 @@ export function ClinicalLibraryTemplatesTable({
                 className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-[#B42318] transition hover:text-[#912018]"
               >
                 <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span>حذف</span>
+                <span>{t("common.delete")}</span>
               </button>
             </div>
           </td>

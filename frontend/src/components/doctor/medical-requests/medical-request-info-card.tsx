@@ -1,7 +1,7 @@
-import { Calendar } from 'lucide-react';
-import type { ReactNode } from 'react';
-import type { MedicalRequestDetailVm } from './map-doctor-medical-requests';
-import { useI18n } from '@/i18n/provider';
+import { Calendar } from "lucide-react";
+import type { ReactNode } from "react";
+import type { MedicalRequestDetailVm } from "./map-doctor-medical-requests";
+import { useI18n } from "@/i18n/provider";
 
 export function MedicalRequestInfoCard({
   vm,
@@ -10,7 +10,7 @@ export function MedicalRequestInfoCard({
   vm: MedicalRequestDetailVm;
   subtitle?: ReactNode;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   return (
     <div className="rounded-[8px] bg-[#E6F4F3] px-4 py-4">
       <div dir={dir} className="flex items-start gap-4 text-start">
@@ -29,10 +29,14 @@ export function MedicalRequestInfoCard({
           <p className="mt-2 font-cairo text-[12px] font-semibold leading-6 text-[#475467]">
             {subtitle ?? (
               <>
-                <span className="font-extrabold text-[#344054]">النوع:</span>{' '}
+                <span className="font-extrabold text-[#344054]">
+                  {t("doctor.medicalRequests.typeLabel")}:
+                </span>{" "}
                 {vm.typeDetail}
                 <span className="mx-2 text-[#D0D5DD]">|</span>
-                <span className="font-extrabold text-[#344054]">الحالة:</span>{' '}
+                <span className="font-extrabold text-[#344054]">
+                  {t("doctor.medicalRequests.statusLabel")}:
+                </span>{" "}
                 {vm.statusLabel}
               </>
             )}

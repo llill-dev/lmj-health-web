@@ -1,6 +1,8 @@
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 export function MedicalRequestsPageHeader() {
+  const { t } = useI18n();
   return (
     <section className="relative mb-6 overflow-hidden rounded-[6px] px-6 py-7 shadow-[0px_8px_10px_-6px_rgba(0,0,0,0.1),0px_20px_25px_-5px_rgba(0,0,0,0.1)] sm:px-8 sm:py-8">
       <div
@@ -22,10 +24,10 @@ export function MedicalRequestsPageHeader() {
           </div>
           <div className="min-w-0">
             <h1 className="font-cairo text-[26px] font-black leading-[32px] text-primary sm:text-[30px] sm:leading-[36px]">
-              الطلبات الطبية
+              {t("doctor.medicalRequests.pageTitle")}
             </h1>
             <p className="mt-1 font-cairo text-[14px] font-bold leading-[22px] text-primary/90 sm:text-[16px]">
-              متابعة طلبات التحاليل والأشعة والإجراءات
+              {t("doctor.medicalRequests.pageSubtitle")}
             </p>
           </div>
         </div>

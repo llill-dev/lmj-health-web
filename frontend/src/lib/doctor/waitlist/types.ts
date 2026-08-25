@@ -63,13 +63,16 @@ export type WaitlistDetailResponse = {
   waitlistRequest?: WaitlistRequest;
 };
 
+export type WaitlistContactPreference = 'call' | 'sms' | 'whatsapp' | 'email';
+
 export type CreateWaitlistRequestBody = {
+  doctorId?: string;
   patientId?: string;
   preferredDateFrom?: string;
   preferredDateTo?: string;
   preferredTimeWindows?: WaitlistTimeWindow[];
   urgencyLevel?: WaitlistUrgency | string;
-  contactPreference?: string;
+  contactPreference?: WaitlistContactPreference | string;
   reason?: string;
   notes?: string;
 };

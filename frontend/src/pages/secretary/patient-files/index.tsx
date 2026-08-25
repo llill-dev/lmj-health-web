@@ -1,21 +1,30 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import {
   Search,
   FileText,
   Calendar,
   Download,
   Eye,
+  Loader2,
+  Trash2,
+  Upload,
 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
-import { useDoctorPatientFiles, useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
+import {
+  useDeleteDoctorPatientFile,
+  useDoctorPatientFiles,
+  useDoctorPatients,
+  useUploadDoctorPatientFile,
+} from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { doctorApi } from "@/lib/doctor/client";
 import { ApiError } from "@/lib/api";
-import { getPatientFileAccessErrorMessage } from "@/lib/doctor/writeFlowErrors";
+import { getPatientFileAccessErrorMessage, getPatientFileMutationErrorMessage } from "@/lib/doctor/writeFlowErrors";
 import { triggerBrowserFileDownload, triggerBrowserFileDownloadAndOpen } from "@/lib/files/triggerBrowserFileDownload";
 import { useI18n } from "@/i18n/provider";
 import StyledSelect from "@/components/ui/styled-select";
+import { MedicalRecordsPagination } from "@/components/doctor/medical-records/medical-records-pagination";
 
 function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
@@ -98,9 +107,11 @@ const PatientFileRow = memo<{
   };
   onView: (fileId: string) => void;
   onDownload: (fileId: string) => void;
+  onDelete?: (fileId: string) => void;
   locale: "ar" | "en";
   disabled?: boolean;
-}>(function PatientFileRow({ file, onView, onDownload, locale, disabled }) {
+  deleting?: boolean;
+}>(function PatientFileRow({ file, onView, onDownload, onDelete, locale, disabled, deleting }) {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
@@ -149,6 +160,21 @@ const PatientFileRow = memo<{
         >
           <Download className="h-4 w-4" />
         </button>
+        {onDelete ? (
+          <button
+            type="button"
+            onClick={() => onDelete(file.id)}
+            disabled={disabled || deleting}
+            className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#F04438] bg-white text-[#D92D20] transition hover:bg-[#FEF3F2] disabled:cursor-not-allowed disabled:opacity-60"
+            title={tr("حذف", "Delete")}
+          >
+            {deleting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -161,10 +187,13 @@ export default function SecretaryPatientFilesPage() {
   const [patientId, setPatientId] = useState("");
   const [category, setCategory] = useState("");
   const [archived, setArchived] = useState<"all" | "active" | "archived">("active");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const { toast } = useToast();
   const assignedDoctorQuery = useSecretaryAssignedDoctor();
   const { hasPermission } = useSecretaryPermissions();
   const canViewFiles = hasPermission("patients:files:view");
+  const canManageFiles = hasPermission("patients:files:upload");
   const doctorId = assignedDoctorQuery.assignedDoctor?._id ?? "";
   const canLoadPatientFiles = canViewFiles && Boolean(doctorId);
   const patientsQuery = useDoctorPatients(
@@ -178,8 +207,17 @@ export default function SecretaryPatientFilesPage() {
       search: searchInput.trim() || undefined,
       category: category || undefined,
       archived: archived === "all" ? undefined : archived === "archived",
+      page,
+      limit: pageSize,
     },
   );
+  const uploadFile = useUploadDoctorPatientFile(patientId);
+  const deleteFile = useDeleteDoctorPatientFile(patientId);
+  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPage(1);
+  }, [patientId, searchInput, category, archived, pageSize]);
   // The backend enforces a per-patient profile-access guard in addition to the
   // secretary's global patients:files:view + assigned-doctor check — a patient
   // can be selectable in the dropdown yet still 403 once files are requested.
@@ -281,6 +319,48 @@ export default function SecretaryPatientFilesPage() {
     }
   }
 
+  async function handleUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !patientId) return;
+    try {
+      await uploadFile.mutateAsync({ file });
+      toast(tr("تم رفع الملف بنجاح.", "The file was uploaded successfully."), {
+        variant: "success",
+      });
+    } catch (error) {
+      toast(getPatientFileMutationErrorMessage(error, "upload", locale), {
+        title: tr("فشل رفع الملف", "Upload failed"),
+        variant: "error",
+      });
+    }
+  }
+
+  async function handleDelete(fileId: string) {
+    if (
+      !window.confirm(
+        tr(
+          "هل تريد بالتأكيد أرشفة هذا الملف؟",
+          "Are you sure you want to archive this file?",
+        ),
+      )
+    ) {
+      return;
+    }
+    setDeletingFileId(fileId);
+    try {
+      await deleteFile.mutateAsync(fileId);
+      toast(tr("تم حذف الملف.", "The file was deleted."), { variant: "success" });
+    } catch (error) {
+      toast(getPatientFileMutationErrorMessage(error, "delete", locale), {
+        title: tr("فشل حذف الملف", "Delete failed"),
+        variant: "error",
+      });
+    } finally {
+      setDeletingFileId(null);
+    }
+  }
+
   // search/category/archived are now sent to the backend via useDoctorPatientFiles params.
   const searchedFiles = files;
 
@@ -332,6 +412,17 @@ export default function SecretaryPatientFilesPage() {
               listboxAriaLabel={tr("حالة الأرشفة", "Archive status")}
             />
           </div>
+          {canManageFiles && patientId ? (
+            <label className="inline-flex h-[40px] cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-primary px-4 font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_20px_rgba(15,143,139,0.24)] transition-colors hover:bg-primary/90 lg:shrink-0">
+              {uploadFile.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
+              {tr("رفع ملف", "Upload file")}
+              <input type="file" className="hidden" onChange={(event) => void handleUpload(event)} />
+            </label>
+          ) : null}
         </div>
 
         <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
@@ -436,9 +527,29 @@ export default function SecretaryPatientFilesPage() {
                 locale={locale}
                 onView={(fileId) => handleView(fileId, file.filename)}
                 onDownload={(fileId) => handleDownload(fileId, file.filename)}
+                onDelete={canManageFiles ? (fileId) => void handleDelete(fileId) : undefined}
+                deleting={deletingFileId === file.id}
                 disabled={Boolean(fileActionsDisabledReason)}
               />
             ))}
+            {filesQuery.total > filesQuery.files.length || page > 1 ? (
+              <div className="px-4 py-4 sm:px-6 lg:px-8">
+                <MedicalRecordsPagination
+                  page={page}
+                  totalPages={Math.max(1, Math.ceil(filesQuery.total / pageSize))}
+                  showingFrom={filesQuery.total === 0 ? 0 : (page - 1) * pageSize + 1}
+                  showingTo={Math.min(page * pageSize, filesQuery.total)}
+                  total={filesQuery.total}
+                  pageSize={pageSize}
+                  itemLabel={tr("ملف", "file")}
+                  onPageChange={setPage}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setPage(1);
+                  }}
+                />
+              </div>
+            ) : null}
           </>
         )}
       </SurfaceSection>

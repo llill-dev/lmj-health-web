@@ -12,7 +12,7 @@ import { useDoctorAppointmentsApi } from "@/hooks/doctor/appointments/useDoctorA
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssignedDoctor";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
-import { SECRETARY_PERMISSION_LABELS } from "@/lib/doctor/secretaries/permissionsUi";
+import { secretaryPermissionLabel } from "@/lib/doctor/secretaries/permissionsUi";
 import { useI18n } from "@/i18n/provider";
 
 function SurfaceSection({
@@ -172,8 +172,8 @@ export default function SecretaryProfilePage() {
     },
   ];
 
-  const permissions = secretaryPermissions.permissions.map(
-    (permission) => SECRETARY_PERMISSION_LABELS[permission] ?? permission,
+  const permissions = secretaryPermissions.permissions.map((permission) =>
+    secretaryPermissionLabel(permission, tr),
   );
   const unsupportedPermissions = secretaryPermissions.unsupportedPermissions;
 

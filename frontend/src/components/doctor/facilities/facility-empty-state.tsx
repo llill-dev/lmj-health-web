@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { Building2, ClipboardList, Link2, Search } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Building2, ClipboardList, Link2, Search } from "lucide-react";
+import { motion } from "framer-motion";
+import { useI18n } from "@/i18n/provider";
 
 export function FacilityEmptyState({
   onAdd,
@@ -12,6 +13,7 @@ export function FacilityEmptyState({
   onLink?: () => void;
   onSuggest?: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -21,14 +23,17 @@ export function FacilityEmptyState({
     >
       <div className="relative mx-auto mb-6 flex h-28 w-28 items-center justify-center">
         <div className="absolute inset-0 rounded-full bg-[#F0FDFA]" />
-        <ClipboardList className="relative h-12 w-12 text-primary/70" aria-hidden />
+        <ClipboardList
+          className="relative h-12 w-12 text-primary/70"
+          aria-hidden
+        />
         <Search
           className="absolute -bottom-1 -start-1 h-8 w-8 rounded-full border border-[#EEF2F6] bg-white p-1.5 text-[#98A2B3]"
           aria-hidden
         />
       </div>
       <p className="font-cairo text-[16px] font-extrabold text-[#667085]">
-        لا يوجد منشأة حالياً
+        {t("doctor.facilities.emptyStateTitle")}
       </p>
       <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
         {onLink ? (
@@ -38,7 +43,7 @@ export function FacilityEmptyState({
             className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] border border-primary/25 bg-[#E6F4F3] px-6 font-cairo text-[14px] font-extrabold text-primary"
           >
             <Link2 className="h-4 w-4" aria-hidden />
-            ربط منشأة موجودة
+            {t("doctor.facilities.linkFacility")}
           </button>
         ) : null}
         <button
@@ -47,7 +52,7 @@ export function FacilityEmptyState({
           className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary px-8 font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)]"
         >
           <Building2 className="h-4 w-4" aria-hidden />
-          إضافة منشأة
+          {t("doctor.facilities.addFacility")}
         </button>
         {onSuggest ? (
           <button
@@ -55,7 +60,7 @@ export function FacilityEmptyState({
             onClick={onSuggest}
             className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-[#E5E7EB] bg-white px-6 font-cairo text-[14px] font-extrabold text-[#344054]"
           >
-            اقتراح منشأة
+            {t("doctor.facilities.suggestFacility")}
           </button>
         ) : null}
       </div>

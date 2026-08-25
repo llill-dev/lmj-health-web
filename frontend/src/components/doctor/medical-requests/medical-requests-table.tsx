@@ -1,27 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Calendar, Menu } from 'lucide-react';
-import type { MedicalRequestRowVm } from './map-doctor-medical-requests';
-import { MedicalRequestsStatusBadge } from './medical-requests-status-badge';
-
-const TABLE_COLUMNS = [
-  'System ID',
-  'اسم المريض',
-  'النوع',
-  'التاريخ',
-  'الحالة',
-  'الإجراءات',
-] as const;
-
-const thClass =
-  'px-4 py-3 text-center align-middle font-cairo text-[12px] font-extrabold text-[#0F766E]';
-const tdClass = 'px-4 py-4 text-center align-middle';
-
-type ActionsMenuState = {
-  rowId: string;
-  top: number;
-  left: number;
-};
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Calendar, Menu } from "lucide-react";
+import type { MedicalRequestRowVm } from "./map-doctor-medical-requests";
+import { MedicalRequestsStatusBadge } from "./medical-requests-status-badge";
+import { useI18n } from "@/i18n/provider";
 
 export function MedicalRequestsTable({
   rows,
@@ -34,8 +16,28 @@ export function MedicalRequestsTable({
   onOpenLabResult: (row: MedicalRequestRowVm) => void;
   onOpenRadiologyViewer: (row: MedicalRequestRowVm) => void;
 }) {
+  const { t } = useI18n();
   const [menu, setMenu] = useState<ActionsMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const TABLE_COLUMNS = [
+    t("doctor.medicalRequests.table.systemId"),
+    t("doctor.medicalRequests.table.patientName"),
+    t("doctor.medicalRequests.table.type"),
+    t("doctor.medicalRequests.table.date"),
+    t("doctor.medicalRequests.table.status"),
+    t("doctor.medicalRequests.table.actions"),
+  ] as const;
+
+  const thClass =
+    "px-4 py-3 text-center align-middle font-cairo text-[12px] font-extrabold text-[#0F766E]";
+  const tdClass = "px-4 py-4 text-center align-middle";
+
+  type ActionsMenuState = {
+    rowId: string;
+    top: number;
+    left: number;
+  };
 
   useEffect(() => {
     if (!menu) return;
@@ -47,14 +49,14 @@ export function MedicalRequestsTable({
     };
 
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenu(null);
+      if (event.key === "Escape") setMenu(null);
     };
 
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', onKey);
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener('mousedown', close);
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", onKey);
     };
   }, [menu]);
 
@@ -63,7 +65,7 @@ export function MedicalRequestsTable({
   if (!rows.length) {
     return (
       <div className="rounded-[12px] border border-dashed border-[#E2E8F0] bg-white px-6 py-14 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        لا توجد طلبات تطابق البحث أو الفلتر الحالي
+        {t("doctor.medicalRequests.table.emptyState")}
       </div>
     );
   }
@@ -105,7 +107,9 @@ export function MedicalRequestsTable({
                   key={row.id}
                   className="border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60"
                 >
-                  <td className={`${tdClass} font-cairo text-[12px] font-extrabold text-primary`}>
+                  <td
+                    className={`${tdClass} font-cairo text-[12px] font-extrabold text-primary`}
+                  >
                     {row.systemId}
                   </td>
                   <td className={tdClass}>
@@ -154,7 +158,9 @@ export function MedicalRequestsTable({
                         openActionsMenu(row, button);
                       }}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#667085] transition hover:border-primary/30 hover:text-primary"
-                      aria-label="إجراءات الطلب"
+                      aria-label={t(
+                        "doctor.medicalRequests.table.actionsLabel",
+                      )}
                       aria-expanded={menu?.rowId === row.id}
                     >
                       <Menu className="h-4 w-4" aria-hidden />
@@ -184,9 +190,9 @@ export function MedicalRequestsTable({
                   onOpenDetails(activeRow);
                 }}
               >
-                تفاصيل الطلب
+                {t("doctor.medicalRequests.table.menuDetails")}
               </button>
-              {activeRow.category === 'lab' ? (
+              {activeRow.category === "lab" ? (
                 <button
                   type="button"
                   role="menuitem"
@@ -196,10 +202,10 @@ export function MedicalRequestsTable({
                     onOpenLabResult(activeRow);
                   }}
                 >
-                  نتيجة تحاليل
+                  {t("doctor.medicalRequests.table.menuLabResult")}
                 </button>
               ) : null}
-              {activeRow.category === 'radiology' ? (
+              {activeRow.category === "radiology" ? (
                 <button
                   type="button"
                   role="menuitem"
@@ -209,7 +215,7 @@ export function MedicalRequestsTable({
                     onOpenRadiologyViewer(activeRow);
                   }}
                 >
-                  عارض الأشعة
+                  {t("doctor.medicalRequests.table.menuRadiologyViewer")}
                 </button>
               ) : null}
             </div>,

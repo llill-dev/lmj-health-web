@@ -23,28 +23,23 @@ export function MedicalRequestsToolbar({
   tab: Exclude<DoctorOrderCategory, "all">;
   onTabChange: (tab: Exclude<DoctorOrderCategory, "all">) => void;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const resolveTabLabel = (id: Exclude<DoctorOrderCategory, "all">) => {
-    if (id === "lab") return tr("تحاليل", "Lab");
-    if (id === "radiology") return tr("أشعة", "Radiology");
-    if (id === "procedure") return tr("إجراءات", "Procedures");
-    return tr("إحالات", "Referrals");
-  };
+  const { dir, t } = useI18n();
 
   return (
     <div className="space-y-4">
       <label className="relative block" dir={dir}>
-        <span className="sr-only">{tr("بحث عن مريض", "Search patient")}</span>
+        <span className="sr-only">
+          {t("doctor.medicalRequests.searchLabel")}
+        </span>
         <input
           type="search"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={tr("ابحث عن مريض...", "Search patient...")}
-          className="h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-4 pe-11 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/20 placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2"
+          placeholder={t("doctor.medicalRequests.searchPlaceholder")}
+          className="h-[48px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/20 placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary focus:ring-2"
         />
         <Search
-          className="pointer-events-none absolute end-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+          className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
           aria-hidden
         />
       </label>
@@ -62,7 +57,7 @@ export function MedicalRequestsToolbar({
                 : "bg-transparent text-[#475467] hover:bg-white",
             )}
           >
-            {resolveTabLabel(item.id)}
+            {t(`doctor.medicalRequests.category.${item.id}`)}
           </button>
         ))}
       </div>

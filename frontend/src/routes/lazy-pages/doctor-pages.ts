@@ -129,6 +129,9 @@ export const DoctorClinicExpensesPage = lazy(
 export const DoctorClinicAddPaymentPage = lazy(
   () => import("@/pages/doctor/clinic-accounts/DoctorClinicAddPaymentPage"),
 );
+export const DoctorClinicPaymentsPage = lazy(
+  () => import("@/pages/doctor/clinic-accounts/DoctorClinicPaymentsPage"),
+);
 export const DoctorClinicFinancialReportsPage = lazy(
   () =>
     import("@/pages/doctor/clinic-accounts/DoctorClinicFinancialReportsPage"),

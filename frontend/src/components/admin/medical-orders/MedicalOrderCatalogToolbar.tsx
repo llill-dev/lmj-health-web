@@ -37,7 +37,7 @@ export default function MedicalOrderCatalogToolbar({
     <div className="grid w-full min-w-0 grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
       <div className="relative min-w-0 sm:col-span-2">
         <Search
-          className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+          className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
           aria-hidden
         />
         <input
@@ -52,7 +52,7 @@ export default function MedicalOrderCatalogToolbar({
       </div>
       <div className="relative min-w-0">
         <SlidersHorizontal
-          className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+          className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
           aria-hidden
         />
         <input

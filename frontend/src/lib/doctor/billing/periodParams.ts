@@ -90,6 +90,38 @@ export function resolveBillingReportPeriodParams(input: {
   };
 }
 
+/**
+ * Client-computed date range matching the dashboard's `period` selector, for
+ * endpoints that only accept plain dateFrom/dateTo (e.g. the invoice list and
+ * reports endpoints) and have no server-side "period" concept of their own.
+ * Keeps every billing query on a page in sync with the same period control
+ * instead of each one silently defaulting to "all time".
+ */
+export function resolveClientDateRangeForPeriod(
+  period: AccountsPeriod,
+  anchor = new Date(),
+): { dateFrom: string; dateTo: string } {
+  const dateTo = isoDateOnly(anchor);
+
+  switch (period) {
+    case 'day':
+      return { dateFrom: dateTo, dateTo };
+    case 'week': {
+      const from = new Date(anchor);
+      from.setUTCDate(from.getUTCDate() - 6);
+      return { dateFrom: isoDateOnly(from), dateTo };
+    }
+    case 'month':
+    case 'custom':
+    default: {
+      const from = new Date(
+        Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), 1),
+      );
+      return { dateFrom: isoDateOnly(from), dateTo };
+    }
+  }
+}
+
 export function buildBillingQueryString(params: BillingQueryParams): string {
   const qs = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {

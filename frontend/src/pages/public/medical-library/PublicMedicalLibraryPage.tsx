@@ -259,7 +259,7 @@ export default function PublicMedicalLibraryPage() {
             </div>
 
             <label className="relative block w-full max-w-[360px]">
-              <Search className="pointer-events-none absolute end-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#98A2B3]" />
+              <Search className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#98A2B3]" />
               <input
                 type="search"
                 value={search}
@@ -271,7 +271,7 @@ export default function PublicMedicalLibraryPage() {
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute start-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F2F4F7] hover:text-[#344054]"
+                  className="absolute end-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F2F4F7] hover:text-[#344054]"
                   aria-label="مسح البحث"
                 >
                   <X className="h-4 w-4" />

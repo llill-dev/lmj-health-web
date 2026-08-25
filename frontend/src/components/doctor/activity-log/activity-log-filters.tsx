@@ -5,11 +5,11 @@ import type { ActivityLogPeriod } from "@/lib/doctor/activityLog/types";
 import { cn } from "@/lib/utils/utils";
 import { useI18n } from "@/i18n/provider";
 
-const PERIOD_OPTIONS: Array<{ id: ActivityLogPeriod; label: string }> = [
-  { id: "all", label: "الكل" },
-  { id: "today", label: "اليوم" },
-  { id: "week", label: "هذا الأسبوع" },
-  { id: "month", label: "هذا الشهر" },
+const PERIOD_OPTIONS_CONFIG = [
+  { id: "all" as const },
+  { id: "today" as const },
+  { id: "week" as const },
+  { id: "month" as const },
 ];
 
 export function ActivityLogFilters({
@@ -23,7 +23,13 @@ export function ActivityLogFilters({
   period: ActivityLogPeriod;
   onPeriodChange: (value: ActivityLogPeriod) => void;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
+
+  const periodOptions = PERIOD_OPTIONS_CONFIG.map((option) => ({
+    ...option,
+    label: t(`doctor.activityLog.period.${option.id}`),
+  }));
+
   return (
     <div
       dir={dir}
@@ -34,13 +40,13 @@ export function ActivityLogFilters({
         <input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="بحث في النشاطات..."
+          placeholder={t("doctor.activityLog.searchPlaceholder")}
           className="h-[46px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none transition focus:border-primary"
         />
       </div>
 
       <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
-        {PERIOD_OPTIONS.map((option) => (
+        {periodOptions.map((option) => (
           <button
             key={option.id}
             type="button"

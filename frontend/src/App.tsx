@@ -395,6 +395,10 @@ export default function App() {
               element={<DoctorPages.DoctorClinicExpensesPage />}
             />
             <Route
+              path="accounts/payments"
+              element={<DoctorPages.DoctorClinicPaymentsPage />}
+            />
+            <Route
               path="accounts/payments/new"
               element={<DoctorPages.DoctorClinicAddPaymentPage />}
             />
@@ -822,6 +826,21 @@ export default function App() {
                 element={
                   <Suspense fallback={<SecretaryRouteFallback />}>
                     <DoctorPages.DoctorClinicExpensesPage />
+                  </Suspense>
+                }
+              />
+            </Route>
+            <Route
+              path="accounts/payments"
+              element={
+                <SecretaryPermissionRoute required={["billing:payments:view"]} />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<SecretaryRouteFallback />}>
+                    <DoctorPages.DoctorClinicPaymentsPage />
                   </Suspense>
                 }
               />

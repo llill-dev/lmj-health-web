@@ -27,8 +27,7 @@ export default function SecretarySidebar({
   profileName,
   profileEmail,
 }: SecretarySidebarProps) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
   const secretaryInitial =
     profileName.charAt(0).toUpperCase() || (locale === "ar" ? "س" : "S");
 
@@ -75,7 +74,7 @@ export default function SecretarySidebar({
                       LMJ HEALTH
                     </div>
                     <div className="mt-1 max-w-[220px] line-clamp-2 font-cairo text-[12px] font-bold leading-[14px] text-primary">
-                      {tr("بوابة السكرتير", "Secretary portal")}
+                      {t("secretary.sidebar.portal")}
                     </div>
                   </div>
                 </motion.div>
@@ -85,7 +84,7 @@ export default function SecretarySidebar({
                 type="button"
                 onClick={onCloseMobile}
                 className="mt-1 flex h-9 w-9 items-center justify-center rounded-full text-[#667085] hover:bg-[#F2F4F7] lg:hidden"
-                aria-label={tr("إغلاق القائمة", "Close menu")}
+                aria-label={t("common.closeMenu")}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -179,7 +178,7 @@ export default function SecretarySidebar({
               className="flex w-full items-center justify-start gap-2 font-cairo text-[14px] font-extrabold text-[#E11D48] hover:text-[#BE123C]"
             >
               <LogOut className="h-4 w-4" />
-              {tr("تسجيل الخروج", "Log out")}
+              {t("common.logout")}
             </button>
           </div>
         </div>

@@ -1,8 +1,20 @@
 import { memo, useMemo, useState } from "react";
-import { Search, Calendar, Clock, ChevronRight, Plus } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  Clock,
+  ChevronRight,
+  Plus,
+  Download,
+  Eye,
+  FileText,
+  Loader2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   useDoctorAppointmentsApi,
+  useDoctorAppointmentDetailsApi,
+  useDoctorAppointmentFilesApi,
   useCancelDoctorAppointmentApi,
   useRescheduleDoctorAppointmentApi,
 } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
@@ -11,10 +23,16 @@ import { useSecretaryAssignedDoctor } from "@/hooks/secretary/useSecretaryAssign
 import type { DoctorAppointmentStatus } from "@/lib/doctor/types";
 import { useI18n } from "@/i18n/provider";
 import { useToast } from "@/components/ui/ToastProvider";
-import { getAppointmentWriteErrorMessage } from "@/lib/doctor/writeFlowErrors";
+import {
+  getAppointmentFileAccessErrorMessage,
+  getAppointmentWriteErrorMessage,
+} from "@/lib/doctor/writeFlowErrors";
+import { doctorAppointmentsApi } from "@/lib/doctor/client";
+import { triggerBrowserFileDownload } from "@/lib/files/triggerBrowserFileDownload";
 import CancelAppointmentDialog from "@/components/admin/appointments/dialogs/CancelAppointmentDialog";
 import RescheduleAppointmentDialog from "@/components/doctor/appointments/reschedule-appointment-dialog";
 import DoctorTablePagination from "@/components/doctor/shared/doctor-table-pagination";
+import { formatAppointmentDate } from "@/lib/shared/formatAppointmentDateTime";
 
 function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
@@ -107,8 +125,14 @@ function AppointmentsSearchInput({
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={tr("ابحث بالاسم أو رقم الملف…", "Search by name or file number…")}
-        aria-label={tr("بحث عن موعد", "Search appointment")}
+        placeholder={tr(
+          "بحث ضمن هذه الصفحة بالاسم أو رقم الملف…",
+          "Search on this page by name or file number…",
+        )}
+        aria-label={tr(
+          "بحث ضمن مواعيد هذه الصفحة فقط",
+          "Search within this page's appointments only",
+        )}
         className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
       <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
@@ -128,6 +152,12 @@ type AppointmentRowData = {
   rawStatus: DoctorAppointmentStatus;
 };
 
+type AppointmentDetailFile = {
+  id: string;
+  name: string;
+  date: string;
+};
+
 const AppointmentTableRow = memo<{
   appointment: AppointmentRowData;
   expanded: boolean;
@@ -137,6 +167,12 @@ const AppointmentTableRow = memo<{
   canCancel: boolean;
   canReschedule: boolean;
   locale: "ar" | "en";
+  detailsLoading: boolean;
+  detailNotes?: string;
+  detailFiles: AppointmentDetailFile[];
+  fileActionKey: string | null;
+  onOpenFile: (fileId: string) => void;
+  onDownloadFile: (fileId: string) => void;
 }>(function AppointmentTableRow({
   appointment,
   expanded,
@@ -146,6 +182,12 @@ const AppointmentTableRow = memo<{
   canCancel,
   canReschedule,
   locale,
+  detailsLoading,
+  detailNotes,
+  detailFiles,
+  fileActionKey,
+  onOpenFile,
+  onDownloadFile,
 }) {
   const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const status = appointmentStatusPresentation(appointment.status, locale);
@@ -203,13 +245,85 @@ const AppointmentTableRow = memo<{
       </div>
 
       {expanded ? (
-        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#EEF2F6] bg-[#F8FAFC] px-4 py-4 sm:px-8">
-          {!isActionable ? (
-            <p className="font-cairo text-[13px] font-bold text-[#98A2B3]">
-              {tr("لا توجد إجراءات متاحة لهذا الموعد.", "No actions available for this appointment.")}
-            </p>
-          ) : (
-            <>
+        <div className="border-t border-[#EEF2F6] bg-[#F8FAFC] px-4 py-4 sm:px-8">
+          <div className="rounded-[10px] border border-[#EEF2F6] bg-white px-3">
+            <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
+              <FileText className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
+              <div className="flex min-w-0 flex-1 flex-col gap-1 text-start sm:flex-row sm:items-center sm:gap-4">
+                <div className="font-cairo text-[14px] font-bold text-primary">
+                  {tr("سبب الزيارة", "Reason for visit")}
+                </div>
+                <div className="mt-0.5 break-words font-cairo text-[14px] font-normal text-[#1F2937]">
+                  {detailsLoading
+                    ? tr("جاري التحميل...", "Loading...")
+                    : detailNotes?.trim() || tr("لم يُذكر سبب", "No reason given")}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="mb-2 font-cairo text-[13px] font-extrabold text-[#101828]">
+              {tr("ملفات الموعد", "Appointment files")}
+            </div>
+            {detailsLoading ? (
+              <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-white px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
+                {tr("جاري تحميل الملفات...", "Loading files...")}
+              </p>
+            ) : detailFiles.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-white px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
+                {tr("لا توجد ملفات مرفقة بهذا الموعد.", "No files attached to this appointment.")}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {detailFiles.map((file) => {
+                  const isBusy = fileActionKey === file.id;
+                  return (
+                    <div
+                      key={file.id}
+                      className="flex flex-col gap-3 rounded-lg border border-[#D6F5F3] bg-[#F0FDFC] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0 text-start">
+                        <div className="font-cairo text-[13px] font-bold text-[#101828]">
+                          {file.name}
+                        </div>
+                        <div className="mt-0.5 font-cairo text-[12px] font-semibold text-[#667085]">
+                          {formatAppointmentDate(file.date)}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onOpenFile(file.id)}
+                          disabled={isBusy}
+                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isBusy ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Eye className="h-3.5 w-3.5" />
+                          )}
+                          {tr("عرض", "View")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDownloadFile(file.id)}
+                          disabled={isBusy}
+                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          {tr("تحميل", "Download")}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {isActionable && (canReschedule || canCancel) ? (
+            <div className="mt-4 flex flex-wrap items-center justify-end gap-3 border-t border-[#EEF2F6] pt-4">
               {canReschedule ? (
                 <button
                   type="button"
@@ -228,8 +342,8 @@ const AppointmentTableRow = memo<{
                   {tr("إلغاء الموعد", "Cancel appointment")}
                 </button>
               ) : null}
-            </>
-          )}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -255,9 +369,69 @@ export default function SecretaryAppointmentsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [fileActionKey, setFileActionKey] = useState<string | null>(null);
 
   const [cancelTarget, setCancelTarget] = useState<AppointmentRowData | null>(null);
   const [rescheduleTarget, setRescheduleTarget] = useState<AppointmentRowData | null>(null);
+
+  const detailsQuery = useDoctorAppointmentDetailsApi(expandedId ?? "");
+  const appointmentFilesQuery = useDoctorAppointmentFilesApi(
+    expandedId ?? "",
+    Boolean(expandedId),
+  );
+  const expandedDetailFiles = useMemo<AppointmentDetailFile[]>(() => {
+    const source =
+      appointmentFilesQuery.files.length > 0
+        ? appointmentFilesQuery.files
+        : detailsQuery.files;
+    return source.map((file) => ({
+      id: file._id,
+      name: file.originalName ?? tr("ملف", "File"),
+      date: (file.linkedAt ?? "").slice(0, 10),
+    }));
+  }, [appointmentFilesQuery.files, detailsQuery.files, tr]);
+
+  async function handleOpenAppointmentFile(fileId: string) {
+    if (!expandedId || fileActionKey) return;
+    setFileActionKey(fileId);
+    try {
+      const response = await doctorAppointmentsApi.getFileDownloadUrl(expandedId, fileId);
+      const fileUrl = response.url ?? response.downloadUrl;
+      if (!fileUrl) throw new Error("missing download url");
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      toast(getAppointmentFileAccessErrorMessage(error, "open"), {
+        title: tr("تعذر فتح الملف", "Could not open the file"),
+        variant: "error",
+      });
+    } finally {
+      setFileActionKey(null);
+    }
+  }
+
+  async function handleDownloadAppointmentFile(fileId: string) {
+    if (!expandedId || fileActionKey) return;
+    setFileActionKey(fileId);
+    try {
+      const [downloadResponse, fileResponse] = await Promise.all([
+        doctorAppointmentsApi.getFileDownloadUrl(expandedId, fileId),
+        doctorAppointmentsApi.getFile(expandedId, fileId),
+      ]);
+      const fileUrl = downloadResponse.url ?? downloadResponse.downloadUrl;
+      if (!fileUrl) throw new Error("missing download url");
+      await triggerBrowserFileDownload(
+        fileUrl,
+        fileResponse.file?.originalName ?? "appointment-file",
+      );
+    } catch (error) {
+      toast(getAppointmentFileAccessErrorMessage(error, "download"), {
+        title: tr("تعذر تحميل الملف", "Could not download the file"),
+        variant: "error",
+      });
+    } finally {
+      setFileActionKey(null);
+    }
+  }
 
   const selectedStatus: DoctorAppointmentStatus | undefined =
     filter === "all"
@@ -450,19 +624,33 @@ export default function SecretaryAppointmentsPage() {
           </div>
         ) : (
           <>
-            {searchedAppointments.map((appointment) => (
-              <AppointmentTableRow
-                key={appointment.id}
-                appointment={appointment}
-                locale={locale}
-                expanded={expandedId === appointment.id}
-                onToggle={handleToggle}
-                onCancel={setCancelTarget}
-                onReschedule={setRescheduleTarget}
-                canCancel={canCancelAppointments}
-                canReschedule={canRescheduleAppointments}
-              />
-            ))}
+            {searchedAppointments.map((appointment) => {
+              const isExpanded = expandedId === appointment.id;
+              return (
+                <AppointmentTableRow
+                  key={appointment.id}
+                  appointment={appointment}
+                  locale={locale}
+                  expanded={isExpanded}
+                  onToggle={handleToggle}
+                  onCancel={setCancelTarget}
+                  onReschedule={setRescheduleTarget}
+                  canCancel={canCancelAppointments}
+                  canReschedule={canRescheduleAppointments}
+                  detailsLoading={
+                    isExpanded &&
+                    (detailsQuery.isAwaitingData || appointmentFilesQuery.isAwaitingData)
+                  }
+                  detailNotes={
+                    isExpanded ? detailsQuery.appointment?.notes : undefined
+                  }
+                  detailFiles={isExpanded ? expandedDetailFiles : []}
+                  fileActionKey={isExpanded ? fileActionKey : null}
+                  onOpenFile={(fileId) => void handleOpenAppointmentFile(fileId)}
+                  onDownloadFile={(fileId) => void handleDownloadAppointmentFile(fileId)}
+                />
+              );
+            })}
           </>
         )}
       </SurfaceSection>

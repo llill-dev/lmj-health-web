@@ -6,18 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { useI18n } from "@/i18n/provider";
 
-const greetingWord = (locale: string): string => {
+const greetingWord = (
+  t: (key: string, fallback?: string) => string,
+): string => {
   const h = new Date().getHours();
-  if (locale === "ar") {
-    if (h >= 5 && h < 12) return "صباح الخير";
-    if (h >= 12 && h < 17) return "طاب يومك";
-    if (h >= 17 && h < 23) return "مساء الخير";
-    return "أهلاً بك";
-  }
-  if (h >= 5 && h < 12) return "Good morning";
-  if (h >= 12 && h < 17) return "Good afternoon";
-  if (h >= 17 && h < 23) return "Good evening";
-  return "Welcome";
+  if (h >= 5 && h < 12) return t("doctor.greeting.morning");
+  if (h >= 12 && h < 17) return t("doctor.greeting.noon");
+  if (h >= 17 && h < 23) return t("doctor.greeting.evening");
+  return t("doctor.greeting.default");
 };
 
 const initialsFromName = (name: string, fallback: string): string => {
@@ -41,28 +37,24 @@ export default function SecretaryHeader({
   onMenuClick,
   title,
 }: SecretaryHeaderProps) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
+  const isRTL = locale === "ar";
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-  const resolvedTitle = title ?? tr("لوحة السكرتير", "Secretary dashboard");
+  const resolvedTitle = title ?? t("secretary.dashboard.title");
 
   const displayName = useMemo(() => {
     const n = user?.name?.trim();
     if (n) return n;
-    return tr("السكرتير", "Secretary");
-  }, [user?.name, locale]);
+    return t("secretary.dashboard.defaultName");
+  }, [user?.name, t]);
 
   const initials = useMemo(
-    () =>
-      initialsFromName(
-        user?.name?.trim() ?? "",
-        locale === "ar" ? "س" : "S",
-      ),
-    [user?.name, locale],
+    () => initialsFromName(user?.name?.trim() ?? "", "S"),
+    [user?.name],
   );
 
-  const greeting = greetingWord(locale);
+  const greeting = greetingWord(t);
 
   const handleNotificationsClick = () => {
     navigate("/secretary/notifications");
@@ -98,7 +90,7 @@ export default function SecretaryHeader({
               type="button"
               onClick={onMenuClick}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
-              aria-label={tr("فتح القائمة", "Open menu")}
+              aria-label={t("common.openMenu")}
             >
               <Menu className="h-[18px] w-[18px]" strokeWidth={2.25} />
             </button>
@@ -111,7 +103,7 @@ export default function SecretaryHeader({
                 <span
                   className="absolute -bottom-px -left-px h-3 w-3 rounded-full border-2 border-white bg-emerald-400 shadow-sm"
                   aria-hidden
-                  title={tr("متصل", "Online")}
+                  title={t("common.connected")}
                 />
               </div>
 
@@ -133,18 +125,22 @@ export default function SecretaryHeader({
                   <span className="mx-1.5 text-[#cbd5e1]" aria-hidden>
                     ·
                   </span>
-                  <span className="text-[#94a3b8]">{tr("إدارة المواعيد والمرضى", "Manage appointments and patients")}</span>
+                  <span className="text-[#94a3b8]">
+                    {t("secretary.dashboard.subtitle")}
+                  </span>
                 </p>
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2 border-e border-[#e2e8f0]/80 pe-2 sm:gap-2.5 sm:pe-4">
+            <div
+              className={`flex shrink-0 items-center gap-2 ${isRTL ? "border-e" : "border-s"} border-[#e2e8f0]/80 ${isRTL ? "pe-2" : "ps-2"} sm:gap-2.5 ${isRTL ? "sm:pe-4" : "sm:ps-4"}`}
+            >
               <button
                 type="button"
                 onClick={handleNotificationsClick}
                 className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]"
-                aria-label={tr("الإشعارات", "Notifications")}
-                title={tr("الإشعارات", "Notifications")}
+                aria-label={t("header.notifications")}
+                title={t("header.notifications")}
               >
                 <Bell className="h-[17px] w-[17px]" strokeWidth={2.25} />
               </button>

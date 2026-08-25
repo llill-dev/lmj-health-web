@@ -7,15 +7,51 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "language.ar": "العربية",
     "language.en": "English",
     "language.switch.aria": "تبديل لغة الواجهة",
+    "auth.signup.passwordRequirements":
+      "8+ أحرف وتتضمن حرفاً كبيراً وحرفاً صغيراً ورقماً واحداً على الأقل",
+    "auth.verify.title": "تحقّق من حسابك",
+    "auth.verify.enterCodeSentTo": "أدخل الرمز المكوّن من ٦ أرقام الذي وصل إلى",
+    "auth.verify.confirm": "تأكيد",
+    "auth.resetPassword.enterVerificationCode": "أدخل رمز التحقق",
+    "auth.resetPassword.codeSentTo": "أرسلنا رمزاً مكوناً من 6 أرقام إلى",
+    "auth.resetPassword.verificationFailed": "تعذّر التحقق",
+    "auth.resetPassword.verifyCode": "تحقق من الرمز",
+    "auth.resetPassword.changeChannel": "تغيير قناة التحقق",
+    "auth.claim.didntReceiveCode": "لم تستلم الرمز؟",
+    "auth.verifying": "جارٍ التحقق…",
+    "auth.claim.title": "تفعيل حسابك",
+    "auth.claim.enterCodeSentTo": "أدخل الرمز المرسل إلى",
+    "auth.claim.setPasswordToActivate": "ثم عيّن كلمة مرور جديدة لتفعيل حسابك.",
+    "auth.claim.activationFailed": "تعذّر تفعيل الحساب",
+    "auth.claim.activateAccount": "تفعيل الحساب",
+    "auth.claim.resendIn":
+      "لم تستلم الرمز؟ يمكن الإرسال مجدداً خلال {seconds} ث",
+    "auth.claim.codeResent": "تم إرسال رمز تحقّق جديد.",
+    "auth.claim.resent": "أُعيد الإرسال",
+    "auth.claim.resendFailed": "تعذّر إعادة الإرسال",
+    "auth.claim.resendCode": "إعادة إرسال الرمز",
+    "auth.password": "كلمة المرور",
+    "auth.confirmPassword": "تأكيد كلمة المرور",
+    "auth.showPassword": "إظهار كلمة المرور",
+    "auth.hidePassword": "إخفاء كلمة المرور",
+    "auth.activating": "جاري التفعيل…",
+    "auth.sending": "جاري الإرسال…",
+    "common.closeMenu": "إغلاق القائمة",
+    "secretary.sidebar.portal": "بوابة السكرتير",
     "common.close": "إغلاق",
     "common.cancel": "إلغاء",
     "common.logout": "تسجيل الخروج",
     "common.connected": "متصل",
+    "common.validateData": "تحقق من البيانات",
     "common.openMenu": "فتح القائمة",
     "common.openSidebar": "فتح القائمة",
     "common.closeSidebar": "إغلاق القائمة",
     "common.collapseSidebar": "طي القائمة",
     "common.expandSidebar": "فتح القائمة",
+    "common.searchPlaceholder": "ابحث...",
+    "common.search": "بحث",
+    "common.clearSearch": "مسح البحث",
+    "common.back": "رجوع",
     "common.all": "الكل",
     "common.active": "نشط",
     "common.disabled": "معطّل",
@@ -33,7 +69,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "common.uploadFile": "رفع ملف",
     "common.optional": "اختياري",
     "common.loading": "جارٍ التحميل...",
+    "common.pagination.summary": "الصفحة {page} من {total}",
+    "common.pagination.itemsPerPage": "عدد العناصر في الصفحة",
+    "common.pagination.previous": "السابق",
+    "common.pagination.next": "التالي",
     "common.retry": "إعادة المحاولة",
+    "common.additionalDetails": "تفاصيل إضافية",
     "common.retrying": "جارٍ إعادة المحاولة...",
     "common.add": "إضافة",
     "common.edit": "تعديل",
@@ -184,15 +225,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.personalProfileForm.photo.change": "تغيير الصورة",
     "doctor.personalProfileForm.fields.fullName.placeholder": "د. خالد عبدالله",
     "doctor.personalProfileForm.fields.dateOfBirth.label": "تاريخ الميلاد",
-    "doctor.personalProfileForm.fields.address.placeholder": "أدخل العنوان الكامل",
+    "doctor.personalProfileForm.fields.address.placeholder":
+      "أدخل العنوان الكامل",
     "doctor.personalProfileForm.fields.bio.label": "نبذة تعريفية",
     "doctor.personalProfileForm.fields.bio.hint": "اختياري — حتى 200 حرف",
     "doctor.personalProfileForm.fields.bio.placeholder":
       "اكتب نبذة تعريفية عنك...",
-    "doctor.personalProfileForm.fields.consultationFee.label": "تكلفة الاستشارة",
+    "doctor.personalProfileForm.fields.consultationFee.label":
+      "تكلفة الاستشارة",
     "doctor.personalProfileForm.fields.consultationFee.hint":
       "اختياري — بالليرة السورية",
-    "doctor.personalProfileForm.fields.consultationMode.label": "نوع الاستشارات",
+    "doctor.personalProfileForm.fields.consultationMode.label":
+      "نوع الاستشارات",
     "doctor.personalProfileForm.consultationMode.offline": "حضورية فقط",
     "doctor.personalProfileForm.consultationMode.online": "عن بعد فقط",
     "doctor.personalProfileForm.consultationMode.both": "حضورية + عن بعد",
@@ -219,10 +263,205 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointmentsTab.fields.date": "التاريخ",
     "doctor.appointmentsTab.fields.time": "الوقت",
     "doctor.appointmentsTab.fields.status": "الحالة",
+    "doctor.clinicAccounts.period.week": "الأسبوع",
+    "doctor.clinicAccounts.period.month": "الشهر",
+    "doctor.clinicAccounts.period.custom": "مخصص",
+    "doctor.clinicAccounts.period.day": "اليوم",
+    "doctor.activityLog.infoText":
+      "يتم تسجيل جميع عمليات الوصول إلى السجلات الطبية والبيانات الحساسة لضمان الأمان والامتثال القانوني. يمكنك مراجعة هذه السجلات في أي وقت.",
+    "doctor.activityLog.searchPlaceholder": "بحث في النشاطات...",
+    "doctor.activityLog.period.all": "الكل",
+    "doctor.activityLog.period.today": "اليوم",
+    "doctor.activityLog.period.week": "هذا الأسبوع",
+    "doctor.activityLog.period.month": "هذا الشهر",
+    "doctor.encounters.filterLabel": "تصفية الزيارات الطبية",
+    "doctor.encounters.searchLabel": "بحث في الزيارات",
+    "doctor.encounters.searchPlaceholder":
+      "ابحث باسم المريض أو رقم الملف أو نوع الزيارة...",
+    "doctor.encounters.fromDate": "من",
+    "doctor.encounters.toDate": "إلى",
+    "doctor.encounters.sortLabel": "الترتيب",
+    "doctor.encounters.sortPlaceholder": "الترتيب",
+    "doctor.encounters.sort.startedAt-desc": "الأحدث أولاً (تاريخ البدء)",
+    "doctor.encounters.sort.startedAt-asc": "الأقدم أولاً (تاريخ البدء)",
+    "doctor.encounters.sort.createdAt-desc": "الأحدث (تاريخ الإنشاء)",
+    "doctor.encounters.sort.createdAt-asc": "الأقدم (تاريخ الإنشاء)",
+    "adminMedicalContent.type.الكل": "الكل",
+    "adminMedicalContent.type.CONDITION": "الحالات الطبية",
+    "adminMedicalContent.type.SYMPTOM": "الأعراض",
+    "adminMedicalContent.type.GENERAL_ADVICE": "نصائح عامة",
+    "adminMedicalContent.type.NEWS": "الأخبار",
+    "adminMedicalContent.type.MEDICATION": "الأدوية",
+    "adminMedicalContent.type.SETTINGS_PAGE": "صفحات الإعدادات",
+    "adminMedicalContent.status.الكل": "الكل",
+    "adminMedicalContent.status.منشور": "منشور",
+    "adminMedicalContent.status.قيد المراجعة": "قيد المراجعة",
+    "adminMedicalContent.status.مسودة": "مسودة",
+    "adminMedicalContent.status.مؤرشف": "مؤرشف",
+    "adminMedicalContent.mineOnlyHint":
+      "وضع (محتواي فقط) يعرض فقط: الكل، مسودة، قيد المراجعة.",
+    "network.offlineTitle": "لا يوجد اتصال",
+    "network.offlineMessage":
+      "تعذّر الوصول إلى الإنترنت. تحقق من الشبكة ثم أعد محاولة العملية.",
+    "network.onlineTitle": "تم استعادة الاتصال",
+    "network.onlineMessage": "عاد الاتصال. يمكنك متابعة العمل بشكل طبيعي.",
+    "doctor.facilities.table.name": "اسم منشأة",
+    "doctor.facilities.table.address": "العنوان",
+    "doctor.facilities.table.phone": "الهاتف",
+    "doctor.facilities.table.status": "الحالة",
+    "doctor.facilities.table.actions": "الإجراءات",
+    "doctor.facilities.table.actionsLabel": "إجراءات المنشأة",
+    "doctor.facilities.table.editFacility": "تعديل المنشأة",
+    "doctor.facilities.table.unlinkFacility": "إلغاء ربط المنشأة",
+    "accountDeletion.confirmLabel": "تأكيد المتابعة",
+    "accountDeletion.executing": "جارٍ التنفيذ…",
+    "accountDeletion.reasons.privacy": "مخاوف تتعلق بالخصوصية",
+    "accountDeletion.reasons.notUseful": "التطبيق غير مفيد لي",
+    "accountDeletion.reasons.betterAlternative": "وجدت بديل أفضل",
+    "accountDeletion.reasons.technical": "مشاكل تقنية",
+    "accountDeletion.reasons.other": "أسباب أخرى",
+    "accountDeletion.feedback.title": "ساعدنا في التحسين",
+    "accountDeletion.feedback.subtitle": "لماذا تريد حذف حسابك؟ (اختياري)",
+    "accountDeletion.feedback.notesLabel": "ملاحظات إضافية (اختياري)",
+    "accountDeletion.feedback.placeholder":
+      "شاركنا تجربتك أو اقتراحاتك للتحسين...",
+    "accountDeletion.feedback.skip": "تخطي",
+    "accountDeletion.feedback.delete": "حذف الحساب",
+    "accountDeletion.feedback.deleting": "جارٍ الحذف…",
+    "doctor.facilities.linkFacility": "ربط منشأة موجودة",
+    "doctor.facilities.addFacility": "إضافة منشأة",
+    "doctor.facilities.suggestFacility": "اقتراح منشأة",
+    "doctor.appointments.emptyStateAlt": "لا توجد مواعيد محجوزة",
+    "doctor.appointments.emptyStateTitle": "لا يوجد مواعيد محجوزة بعد",
+    "doctor.appointments.emptyStateSubtitle": "قم بحجز موعد الآن",
+    "doctor.appointments.bookAppointment": "حجز موعد",
+    "doctor.prescriptionsHub.table.systemId": "الرقم النظامي",
+    "doctor.prescriptionsHub.table.patientName": "اسم المريض",
+    "doctor.prescriptionsHub.table.facility": "المنشأة",
+    "doctor.prescriptionsHub.table.date": "التاريخ",
+    "doctor.prescriptionsHub.table.status": "الحالة",
+    "doctor.prescriptionsHub.table.actions": "الإجراءات",
+    "doctor.prescriptionsHub.table.emptyState":
+      "لا توجد وصفات تطابق البحث الحالي",
+    "doctor.prescriptionsHub.table.viewPrescription": "عرض الوصفة",
+    "doctor.prescriptionsHub.pageTitle": "الوصفات الطبية",
+    "doctor.prescriptionsHub.pageSubtitle": "توثيق الوصفات",
+    "doctor.prescriptionsHub.addNewPrescription": "إضافة وصفة جديدة",
+    "doctor.prescriptionsHub.addHint":
+      "تُنشأ الوصفة من داخل زيارة المريض — سننقلك إلى قائمة الزيارات لاختيار الزيارة أولاً.",
+    "doctor.prescription.defaultTitle": "الوصفة الطبية",
+    "doctor.prescription.defaultStatus": "مسودة",
+    "common.fileNumberLabel": "رقم الملف:",
+    "doctor.radiology.defaultTitle": "طلبات الأشعة",
+    "doctor.medicalRequests.table.systemId": "الرقم النظامي",
+    "doctor.medicalRequests.table.patientName": "اسم المريض",
+    "doctor.medicalRequests.table.type": "النوع",
+    "doctor.medicalRequests.table.date": "التاريخ",
+    "doctor.medicalRequests.table.status": "الحالة",
+    "doctor.medicalRequests.table.actions": "الإجراءات",
+    "doctor.medicalRequests.table.emptyState":
+      "لا توجد طلبات تطابق البحث أو الفلتر الحالي",
+    "doctor.medicalRequests.table.actionsLabel": "إجراءات الطلب",
+    "doctor.medicalRequests.table.menuDetails": "تفاصيل الطلب",
+    "doctor.medicalRequests.table.menuLabResult": "نتيجة تحاليل",
+    "doctor.medicalRequests.table.menuRadiologyViewer": "عارض الأشعة",
+    "doctor.medicalRequests.pageTitle": "الطلبات الطبية",
+    "doctor.medicalRequests.pageSubtitle":
+      "متابعة طلبات التحاليل والأشعة والإجراءات",
+    "doctor.medicalRequests.searchLabel": "بحث عن مريض",
+    "doctor.medicalRequests.searchPlaceholder": "بحث عن مريض...",
+    "doctor.medicalRequests.category.lab": "تحاليل",
+    "doctor.medicalRequests.category.radiology": "أشعة",
+    "doctor.medicalRequests.category.procedure": "إجراءات",
+    "doctor.medicalRequests.category.referral": "إحالات",
+    "doctor.medicalRequests.typeLabel": "النوع",
+    "doctor.medicalRequests.statusLabel": "الحالة",
+    "doctor.medicalRecords.table.systemId": "الرقم النظامي",
+    "doctor.medicalRecords.table.patientName": "اسم المريض",
+    "doctor.medicalRecords.table.diagnosis": "التشخيص",
+    "doctor.medicalRecords.table.facility": "المنشأة",
+    "doctor.medicalRecords.table.date": "التاريخ",
+    "doctor.medicalRecords.table.status": "الحالة",
+    "doctor.medicalRecords.table.actions": "الإجراءات",
+    "doctor.medicalRecords.table.emptyFilteredTitle":
+      "لا توجد سجلات تطابق البحث الحالي",
+    "doctor.medicalRecords.table.emptyTitle": "لا توجد سجلات طبية بعد",
+    "doctor.medicalRecords.table.emptyFilteredSubtitle":
+      "جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج",
+    "doctor.medicalRecords.table.emptySubtitle":
+      "أنشئ سجلات طبية للمرضى لتوثيق التشخيصات والعلاجات",
+    "doctor.medicalRecords.table.createRecord": "إنشاء سجل جديد",
+    "doctor.medicalRecords.table.downloadPdf": "تحميل PDF",
+    "doctor.medicalRecords.table.editRecord": "تعديل السجل",
+    "doctor.medicalRecords.table.edit": "تعديل",
+    "doctor.medicalRecords.table.viewDetails": "عرض التفاصيل",
+    "doctor.medicalRecords.searchLabel": "بحث عن مريض",
+    "doctor.medicalRecords.searchPlaceholder": "ابحث عن مريض...",
+    "doctor.clinicalLibrary.table.title": "العنوان",
+    "doctor.clinicalLibrary.table.type": "النوع",
+    "doctor.clinicalLibrary.table.favorite": "مفضّل",
+    "doctor.clinicalLibrary.table.actions": "الإجراءات",
+    "doctor.clinicalLibrary.table.removeFromFavorites": "إزالة من المفضلة",
+    "doctor.clinicalLibrary.table.addToFavorites": "إضافة للمفضلة",
+    "doctor.clinicalLibrary.table.archive": "أرشفة",
+    "doctor.clinicalLibrary.table.templateName": "اسم القالب",
+    "doctor.clinicalLibrary.table.description": "الوصف",
+    "doctor.clinicalLibrary.table.use": "استخدام",
+    "doctor.clinicalLibrary.section.library": "المكتبة السريرية",
+    "doctor.clinicalLibrary.section.templates": "القوالب",
+    "doctor.clinicalLibrary.libraryType.all": "الكل",
+    "doctor.clinicalLibrary.libraryType.MEDICATION": "أدوية",
+    "doctor.clinicalLibrary.libraryType.LAB": "تحاليل",
+    "doctor.clinicalLibrary.libraryType.IMAGING": "أشعة",
+    "doctor.clinicalLibrary.libraryType.PROCEDURE": "إجراءات",
+    "doctor.clinicalLibrary.templateType.all": "الكل",
+    "doctor.clinicalLibrary.templateType.PRESCRIPTION": "وصفة",
+    "doctor.clinicalLibrary.templateType.LAB_ORDER": "طلب مخبري",
+    "doctor.clinicalLibrary.templateType.IMAGING_ORDER": "طلب أشعة",
+    "doctor.clinicalLibrary.templateType.PROCEDURE_ORDER": "طلب إجراء",
+    "doctor.clinicalLibrary.templateType.REFERRAL_ORDER": "إحالة",
+    "doctor.clinicalLibrary.searchLibraryPlaceholder":
+      "ابحث في المكتبة السريرية...",
+    "doctor.clinicalLibrary.searchTemplatesPlaceholder": "ابحث في القوالب...",
+    "doctor.clinicalLibrary.searchLabel": "بحث في المكتبة السريرية",
+    "doctor.appointmentTypes.table.name": "اسم النوع",
+    "doctor.appointmentTypes.table.price": "السعر",
+    "doctor.appointmentTypes.table.visibleToPatient": "مرئي للمريض",
+    "doctor.appointmentTypes.table.status": "الحالة",
+    "doctor.appointmentTypes.table.actions": "الإجراءات",
+    "doctor.appointmentTypes.status.all": "الكل",
+    "doctor.appointmentTypes.status.active": "نشط",
+    "doctor.appointmentTypes.status.inactive": "غير نشط",
+    "doctor.appointmentTypes.searchPlaceholder": "ابحث عن نوع موعد...",
+    "doctor.appointmentTypes.searchLabel": "بحث في أنواع المواعيد",
+    "doctor.encounters.status.all": "الكل",
+    "doctor.encounters.status.open": "نشطة",
+    "doctor.encounters.status.closed": "مغلقة",
+    "doctor.encounters.status.filterLabel": "تصفية حالة الزيارة",
+    "doctor.consultations.status.waiting": "جديدة",
+    "doctor.consultations.status.in_progress": "نشطة",
+    "doctor.consultations.status.closed": "مغلقة",
+    "doctor.consultations.status.dismissed": "مرفوضة",
+    "doctor.consultations.status.filterLabel": "تصفية حالة الاستشارة",
+    "doctor.waitlist.table.publicId": "الرقم العام",
+    "doctor.waitlist.table.patientName": "اسم المريض",
+    "doctor.waitlist.table.priority": "الأولوية",
+    "doctor.waitlist.table.preferredPeriod": "الفترة المفضلة",
+    "doctor.waitlist.table.status": "الحالة",
+    "doctor.waitlist.table.actions": "الإجراءات",
+    "doctor.waitlist.actions.label": "إجراءات الطلب",
+    "doctor.waitlist.actions.viewDetails": "عرض التفاصيل",
+    "doctor.waitlist.actions.viewAppointment": "عرض الموعد",
+    "doctor.waitlist.actions.bookAppointment": "حجز موعد",
+    "doctor.waitlist.actions.contacted": "تم التواصل",
+    "doctor.waitlist.actions.closeRequest": "إغلاق الطلب",
+    "doctor.waitlist.searchPlaceholder": "ابحث بالاسم أو الرقم العام...",
+    "doctor.waitlist.search": "بحث في قائمة الانتظار",
     "doctor.supportContactForm.requestType.technical": "مشكلة تقنية",
     "doctor.supportContactForm.requestType.account": "الحساب والأمان",
     "doctor.supportContactForm.requestType.billing": "الفوترة والاشتراك",
-    "doctor.supportContactForm.requestType.verification": "التحقق والملف المهني",
+    "doctor.supportContactForm.requestType.verification":
+      "التحقق والملف المهني",
     "doctor.supportContactForm.requestType.other": "أخرى",
     "doctor.supportContactForm.missingFieldsToast": "يرجى كتابة تفاصيل طلبك.",
     "doctor.supportContactForm.missingFieldsTitle": "حقول ناقصة",
@@ -232,7 +471,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.supportContactForm.infoBanner":
       "طلبات الدعم للأطباء تُرسل عبر البريد الرسمي للمنصة (حسب إعدادات CMS). مسار الشكاوى عبر API مخصّص للمرضى فقط.",
     "doctor.supportContactForm.fields.requestType.label": "نوع الطلب",
-    "doctor.supportContactForm.fields.requestType.placeholder": "اختر نوع الطلب",
+    "doctor.supportContactForm.fields.requestType.placeholder":
+      "اختر نوع الطلب",
     "doctor.supportContactForm.fields.subject.label": "الموضوع",
     "doctor.supportContactForm.fields.subject.placeholder": "موضوع الرسالة",
     "doctor.supportContactForm.fields.fullName.placeholder": "اسم الطبيب",
@@ -246,20 +486,23 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.consultationReplyPanel.actions.lab": "طلب تحاليل",
     "doctor.consultationReplyPanel.actions.imaging": "طلب أشعة",
     "doctor.consultationReplyPanel.actions.prescription": "الوصفة الطبية",
-    "doctor.consultationReplyPanel.uploadAttachmentName": "مرفق استشارة أونلاين",
+    "doctor.consultationReplyPanel.uploadAttachmentName":
+      "مرفق استشارة أونلاين",
     "doctor.consultationReplyPanel.fileAttachedToast": "تم إرفاق الملف.",
     "doctor.consultationReplyPanel.uploadFileTitle": "رفع الملف",
     "doctor.consultationReplyPanel.uploadFailedTitle": "تعذّر رفع الملف",
     "doctor.consultationReplyPanel.sendReply": "إرسال رد",
     "doctor.consultationReplyPanel.sendReplyAria": "إرسال الرد",
-    "doctor.consultationReplyPanel.disabledPlaceholder": "لا يمكن الرد على هذه الاستشارة",
+    "doctor.consultationReplyPanel.disabledPlaceholder":
+      "لا يمكن الرد على هذه الاستشارة",
     "doctor.consultationReplyPanel.replyPlaceholder": "اكتب ردك...",
     "doctor.consultationReplyPanel.uploadFile": "رفع ملف",
     "doctor.consultationReplyPanel.removeAttachment": "إزالة المرفق",
     "doctor.consultationReplyPanel.hidePatientFiles": "إخفاء ملفات المريض",
     "doctor.consultationReplyPanel.choosePatientFile": "اختيار من ملفات المريض",
     "doctor.consultationReplyPanel.loadingFiles": "جاري تحميل الملفات…",
-    "doctor.consultationReplyPanel.noLinkedFiles": "لا توجد ملفات مرتبطة بهذا المريض.",
+    "doctor.consultationReplyPanel.noLinkedFiles":
+      "لا توجد ملفات مرتبطة بهذا المريض.",
     "doctor.consultationReplyPanel.patientFileFallback": "ملف مريض",
     "doctor.consultationReplyPanel.unnamedFile": "ملف بدون اسم",
     "doctor.consultationReplyPanel.added": "مضاف",
@@ -286,7 +529,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.orderCard.orderDetails": "تفاصيل الطلب",
     "doctor.orderCard.generalDescription":
       "طلب طبي مسجّل ضمن ملف المريض — يمكن متابعة حالته من مركز الطلبات الطبية.",
-    "doctor.orderCard.typedDescription": "طلب من نوع «{kind}» — الحالة الحالية: {status}.",
+    "doctor.orderCard.typedDescription":
+      "طلب من نوع «{kind}» — الحالة الحالية: {status}.",
     "doctor.facilityForm.fields.name.label": "اسم المنشأة",
     "doctor.facilityForm.fields.name.placeholder": "أدخل اسم المنشأة",
     "doctor.facilityForm.fields.type.label": "نوع المنشأة",
@@ -311,7 +555,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.facilityForm.fields.address.placeholder": "أدخل العنوان التفصيلي",
     "doctor.facilityForm.attributes.title": "سمات المنشأة",
     "doctor.facilityForm.attributes.addLabel": "إضافة سمة",
-    "doctor.facilityForm.attributes.addHint": "مثال: night_shift أو echo_available",
+    "doctor.facilityForm.attributes.addHint":
+      "مثال: night_shift أو echo_available",
     "doctor.facilityForm.attributes.removeAria": "إزالة {attr}",
     "doctor.facilityForm.attributes.empty": "لا توجد سمات مضافة بعد.",
     "doctor.facilityForm.status.label": "حالة المنشأة",
@@ -321,7 +566,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.patientsFiltersSection.clearFilters": "مسح الفلاتر",
     "doctor.patientsFiltersSection.results": "نتيجة",
     "doctor.patientsFiltersSection.searchLabel": "البحث عن المريض",
-    "doctor.patientsFiltersSection.searchHint": "الاسم · البريد · الهاتف · الرقم العام",
+    "doctor.patientsFiltersSection.searchHint":
+      "الاسم · البريد · الهاتف · الرقم العام",
     "doctor.patientsFiltersSection.searchPlaceholder":
       "ابدأ بالكتابة: الاسم، البريد، الهاتف، أو الرقم العام...",
     "doctor.patientsFiltersSection.diagnosisLabel": "التشخيص / الملاحظات",
@@ -374,13 +620,16 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "التعديلات على المعلومات المهنية تتطلب موافقة الإدارة قبل تطبيقها",
     "doctor.professionalProfileForm.reviewNote":
       "ملاحظة مهمة: سيتم مراجعة التغييرات من قبل فريق الإدارة خلال 24–48 ساعة. سيتم إشعارك بنتيجة المراجعة.",
-    "doctor.professionalProfileForm.fields.licenseNumber.label": "رقم الشهادة الطبية",
+    "doctor.professionalProfileForm.fields.licenseNumber.label":
+      "رقم الشهادة الطبية",
     "doctor.professionalProfileForm.fields.specialization.label": "التخصص",
-    "doctor.professionalProfileForm.fields.specialization.placeholder": "طب القلب",
+    "doctor.professionalProfileForm.fields.specialization.placeholder":
+      "طب القلب",
     "doctor.professionalProfileForm.fields.education.label": "التعليم",
     "doctor.professionalProfileForm.fields.education.placeholder":
       "مثال: بكالوريوس طب وجراحة — جامعة الملك سعود",
-    "doctor.professionalProfileForm.fields.clinicAddress.label": "عنوان العيادة",
+    "doctor.professionalProfileForm.fields.clinicAddress.label":
+      "عنوان العيادة",
     "doctor.professionalProfileForm.fields.clinicAddress.placeholder":
       "أدخل عنوان العيادة بالكامل",
     "doctor.professionalProfileForm.clinicLocation.title": "موقع العيادة",
@@ -392,14 +641,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "اختياري — يمكن الحصول على الإحداثيات من خرائط جوجل",
     "doctor.professionalProfileForm.fields.latitude.label": "خط العرض",
     "doctor.professionalProfileForm.fields.longitude.label": "خط الطول",
-    "doctor.professionalProfileForm.coordinates.howToTitle": "كيفية الحصول على الإحداثيات:",
-    "doctor.professionalProfileForm.coordinates.step1": "افتح خرائط Google على جهازك",
-    "doctor.professionalProfileForm.coordinates.step2": "ابحث عن موقع العيادة أو انقر عليه",
+    "doctor.professionalProfileForm.coordinates.howToTitle":
+      "كيفية الحصول على الإحداثيات:",
+    "doctor.professionalProfileForm.coordinates.step1":
+      "افتح خرائط Google على جهازك",
+    "doctor.professionalProfileForm.coordinates.step2":
+      "ابحث عن موقع العيادة أو انقر عليه",
     "doctor.professionalProfileForm.coordinates.step3":
       "اضغط مطولاً على الموقع لإظهار الإحداثيات",
     "doctor.professionalProfileForm.coordinates.step4":
       "انسخ خط العرض (Latitude) وخط الطول (Longitude)",
-    "doctor.professionalProfileForm.coordinates.step5": "الصق القيم في الحقول أعلاه",
+    "doctor.professionalProfileForm.coordinates.step5":
+      "الصق القيم في الحقول أعلاه",
     "doctor.professionalProfileForm.submitForReview": "إرسال للمراجعة",
     "doctor.appointmentCard.collapseDetails": "طي التفاصيل",
     "doctor.appointmentCard.viewFullDetails": "عرض التفاصيل الكاملة",
@@ -415,12 +668,14 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointmentCard.loadingDetails": "جارٍ تحميل تفاصيل الموعد...",
     "doctor.appointmentCard.noFilesAttached": "لا توجد ملفات مرفقة لهذا الموعد",
     "doctor.appointmentCard.noShow": "عدم حضور",
-    "doctor.appointmentCard.noShowBlocked": "لا يمكن تسجيل عدم حضور لموعد مستقبلي.",
+    "doctor.appointmentCard.noShowBlocked":
+      "لا يمكن تسجيل عدم حضور لموعد مستقبلي.",
     "doctor.appointmentCard.complete": "إكمال",
     "doctor.dashboardPatientFilters.today": "اليوم",
     "doctor.dashboardPatientFilters.upcoming": "القادم",
     "doctor.dashboardPatientsSection.viewDetails": "عرض التفاصيل",
-    "doctor.dashboardPatientsSection.weeklyActivityTitle": "نشاط المرضى - آخر 7 أيام",
+    "doctor.dashboardPatientsSection.weeklyActivityTitle":
+      "نشاط المرضى - آخر 7 أيام",
     "doctor.dashboardPatientsSection.patientsAppointmentsCount":
       "{patients} مريض • {appointments} موعد",
     "doctor.dashboardPatientsSection.averagePerDay": "متوسط: {n} مريض/يوم",
@@ -431,7 +686,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.dashboardPatientsSection.fullPatientsPage": "صفحة المرضى الكاملة",
     "doctor.dashboardPatientsSection.emptyNoSearchMatch":
       "لا توجد نتائج مطابقة لبحثك ضمن مرضى الطبيب.",
-    "doctor.dashboardPatientsSection.emptyToday": "لا يوجد مرضى لديهم مواعيد اليوم.",
+    "doctor.dashboardPatientsSection.emptyToday":
+      "لا يوجد مرضى لديهم مواعيد اليوم.",
     "doctor.dashboardPatientsSection.emptyUpcoming":
       "لا يوجد مرضى بمواعيد قادمة ضمن الفترة الحالية.",
     "doctor.dashboardPatientsSection.emptyDefault":
@@ -443,7 +699,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.dashboardPatientsSection.errorTitle": "تعذّر تحميل المرضى",
     "doctor.dashboardPatientsSection.errorBrief":
       "حدث خطأ أثناء جلب قائمة المرضى من الخادم.",
-    "doctor.dashboardPatientsSection.goToPatientsPage": "الانتقال إلى صفحة المرضى",
+    "doctor.dashboardPatientsSection.goToPatientsPage":
+      "الانتقال إلى صفحة المرضى",
     "doctor.dashboardPatientsSection.patientCount": "{n} مريض",
     "doctor.dashboardPatientsSection.matchingSearch": " مطابق للبحث",
     "doctor.dashboardPatientsSection.viewAllPatients": "عرض جميع المرضى ({n})",
@@ -463,7 +720,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.timelineTab.emptySubtitle":
       "سيظهر هنا التسلسل الزمني لجميع نشاطات المريض عند إضافتها",
     "doctor.timelineTab.addMedicalRecord": "إضافة سجل طبي",
-    "doctor.timelineTab.conditionsSectionTitle": "الحالات المرضية المرتبطة بالملف",
+    "doctor.timelineTab.conditionsSectionTitle":
+      "الحالات المرضية المرتبطة بالملف",
     "doctor.timelineTab.conditionsSectionBody":
       "هذه الحالات تظهر ضمن الملف الطبي الحالي، ويمكنك متابعة نشاطها السريري عبر الزيارات والوصفات والطلبات.",
     "doctor.timelineTab.chronicConditionNote":
@@ -482,7 +740,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.timelineTab.activityCount": "{n} نشاط",
     "doctor.timelineTab.noFilterMatch": "لا توجد نشاطات تطابق الفلتر المحدد",
     "doctor.addAccessRequestForm.errors.selectPatient": "اختر المريض",
-    "doctor.addAccessRequestForm.errors.selectDataType": "اختر نوع بيانات واحد على الأقل",
+    "doctor.addAccessRequestForm.errors.selectDataType":
+      "اختر نوع بيانات واحد على الأقل",
     "doctor.addAccessRequestForm.errors.reasonRequired": "سبب الطلب مطلوب",
     "doctor.addAccessRequestForm.dataType.medications.label": "الأدوية",
     "doctor.addAccessRequestForm.dataType.medications.subtitle":
@@ -496,7 +755,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.addAccessRequestForm.dataType.diagnoses.label": "التشخيصات",
     "doctor.addAccessRequestForm.dataType.diagnoses.subtitle":
       "التشخيصات الطبية السابقة",
-    "doctor.addAccessRequestForm.dataType.prescriptions.label": "الوصفات الطبية",
+    "doctor.addAccessRequestForm.dataType.prescriptions.label":
+      "الوصفات الطبية",
     "doctor.addAccessRequestForm.dataType.prescriptions.subtitle":
       "الوصفات الطبية المسجلة",
     "doctor.addAccessRequestForm.dataType.encounters.label": "الزيارات الطبية",
@@ -509,17 +769,22 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.addAccessRequestForm.selectPatientLabel": "اختر المريض",
     "doctor.addAccessRequestForm.selectPatientPlaceholder": "اختر المريض...",
     "doctor.addAccessRequestForm.noPatientsInList": "لا يوجد مرضى في القائمة",
-    "doctor.addAccessRequestForm.noPatientsAvailable": "لا يوجد مرضى متاحين للاختيار.",
+    "doctor.addAccessRequestForm.noPatientsAvailable":
+      "لا يوجد مرضى متاحين للاختيار.",
     "doctor.addAccessRequestForm.selectPatientAria": "اختيار المريض",
-    "doctor.addAccessRequestForm.patientGeneralInfo": "معلومات المريض الطبية العامة",
+    "doctor.addAccessRequestForm.patientGeneralInfo":
+      "معلومات المريض الطبية العامة",
     "doctor.addAccessRequestForm.medicalRecord": "سجل طبي",
     "doctor.addAccessRequestForm.medication": "دواء",
     "doctor.addAccessRequestForm.diagnosis": "تشخيص",
     "doctor.addAccessRequestForm.requestedDataScope": "نطاق البيانات المطلوبة",
-    "doctor.addAccessRequestForm.selectAtLeastOne": "اختر نوع بيانات واحد أو أكثر",
-    "doctor.addAccessRequestForm.typesSelected": "تم اختيار {selected} من {total} أنواع",
+    "doctor.addAccessRequestForm.selectAtLeastOne":
+      "اختر نوع بيانات واحد أو أكثر",
+    "doctor.addAccessRequestForm.typesSelected":
+      "تم اختيار {selected} من {total} أنواع",
     "doctor.addAccessRequestForm.expirationDate": "تاريخ انتهاء الصلاحية",
-    "doctor.addAccessRequestForm.expirationDatePlaceholder": "اختر تاريخ انتهاء الصلاحية...",
+    "doctor.addAccessRequestForm.expirationDatePlaceholder":
+      "اختر تاريخ انتهاء الصلاحية...",
     "doctor.addAccessRequestForm.expirationNote":
       "إذا لم تحدد تاريخاً، سيكون الوصول دائماً (حتى يتم إلغاؤه)",
     "doctor.addAccessRequestForm.reasonLabel": "سبب الطلب",
@@ -556,7 +821,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.encounterSummaryFinishDialog.patient": "المريض",
     "doctor.encounterSummaryFinishDialog.visitStatus": "حالة الزيارة",
     "doctor.encounterSummaryFinishDialog.closedAt": "تاريخ الإغلاق",
-    "doctor.encounterSummaryFinishDialog.clinicalDocSummary": "ملخص التوثيق السريري",
+    "doctor.encounterSummaryFinishDialog.clinicalDocSummary":
+      "ملخص التوثيق السريري",
     "doctor.encounterSummaryFinishDialog.labs": "التحاليل",
     "doctor.encounterSummaryFinishDialog.radiology": "الأشعة",
     "doctor.encounterSummaryFinishDialog.referrals": "التحويلات",
@@ -573,11 +839,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.encounterSummaryBody.assessmentAndDiagnosis": "التقييم والتشخيص",
     "doctor.encounterSummaryBody.currentPresentation": "العرض الحالي",
     "doctor.encounterSummaryBody.pastIllnesses": "أمراض سابقة",
-    "doctor.encounterSummaryBody.noDiagnoses": "لا توجد تشخيصات مسجّلة لهذه الزيارة.",
-    "doctor.encounterSummaryBody.noMedications": "لا توجد أدوية موثّقة في وصفات هذه الزيارة.",
+    "doctor.encounterSummaryBody.noDiagnoses":
+      "لا توجد تشخيصات مسجّلة لهذه الزيارة.",
+    "doctor.encounterSummaryBody.noMedications":
+      "لا توجد أدوية موثّقة في وصفات هذه الزيارة.",
     "doctor.encounterSummaryBody.noLabs": "لا توجد تحاليل مسجّلة لهذه الزيارة.",
-    "doctor.encounterSummaryBody.noRadiology": "لا توجد طلبات أشعة مسجّلة لهذه الزيارة.",
-    "doctor.encounterSummaryBody.noReferrals": "لا توجد تحويلات مسجّلة لهذه الزيارة.",
+    "doctor.encounterSummaryBody.noRadiology":
+      "لا توجد طلبات أشعة مسجّلة لهذه الزيارة.",
+    "doctor.encounterSummaryBody.noReferrals":
+      "لا توجد تحويلات مسجّلة لهذه الزيارة.",
     "doctor.encounterSummaryBody.referralTo": "إلى {name}",
     "doctor.documentsTab.clinicalEncounterOpen": "زيارة سريرية (مفتوحة)",
     "doctor.documentsTab.clinicalEncounterClosed": "زيارة سريرية (مغلقة)",
@@ -596,7 +866,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.createMedicalRecordForm.defaultSubmitLabel": "حفظ السجل",
     "doctor.createMedicalRecordForm.defaultTitle": "إنشاء سجل طبي جديد",
     "doctor.createMedicalRecordForm.recordTitleLabel": "عنوان السجل",
-    "doctor.createMedicalRecordForm.recordTitlePlaceholder": "مثال: متابعة ضغط الدم",
+    "doctor.createMedicalRecordForm.recordTitlePlaceholder":
+      "مثال: متابعة ضغط الدم",
     "doctor.createMedicalRecordForm.diagnosisLabel": "التشخيص",
     "doctor.createMedicalRecordForm.diagnosisPlaceholder":
       "اكتب التشخيص الطبي كما سيُحفَظ في السجل...",
@@ -604,6 +875,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.createMedicalRecordForm.prescriptionsPlaceholder":
       "أدخل كل وصفة في سطر مستقل، مثال:&#10;Paracetamol 500mg&#10;Vitamin D 1000 IU",
     "doctor.createMedicalRecordForm.needsFollowUp": "يحتاج متابعة",
+    "doctor.medicalRecordDetailsDialog.title": "تفاصيل السجل الطبي",
+    "doctor.medicalRecordDetailsDialog.diagnosis": "التشخيص",
+    "doctor.medicalRecordDetailsDialog.symptoms": "الأعراض",
+    "doctor.medicalRecordDetailsDialog.vitals": "العلامات الحيوية",
+    "doctor.medicalRecordDetailsDialog.prescriptionsCount":
+      "الوصفات الطبية ({n})",
+    "doctor.medicalRecordDetailsDialog.dosage": "الجرعة:",
+    "doctor.medicalRecordDetailsDialog.duration": "المدة:",
+    "doctor.medicalRecordDetailsDialog.notes": "ملاحظات:",
+    "doctor.medicalRecordDetailsDialog.frequency": "التكرار :",
+    "doctor.medicalRecordDetailsDialog.suggestedDate": "الموعد المقترح:",
+    "doctor.medicalRecordDetailsDialog.additionalNotes": "ملاحظات إضافية",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -635,7 +918,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.dashboard.notes.title": "ملاحظات تشغيلية",
     "dataEntry.dashboard.notes.body":
       "تم بناء هذه الواجهة على endpoints المعتمدة لدور مدخل البيانات فقط، مع الحفاظ على نفس أسلوب التصميم والكتابة في الموقع لضمان تجربة متناسقة وواضحة.",
-    "dataEntry.page.medicalContent.title": "المحتوى الطبي • مدخل البيانات • LMJ Health",
+    "dataEntry.page.medicalContent.title":
+      "المحتوى الطبي • مدخل البيانات • LMJ Health",
     "dataEntry.medicalContent.hero.title": "محتواي الطبي",
     "dataEntry.medicalContent.hero.subtitle":
       "إدارة عناصر المحتوى التي ينشئها فريق مدخل البيانات",
@@ -652,7 +936,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.medicalContent.error.loadTitle": "تعذر تحميل المحتوى.",
     "dataEntry.medicalContent.error.loadBody": "أعد المحاولة بعد قليل.",
     "dataEntry.medicalContent.list.title": "قائمة المحتوى",
-    "dataEntry.medicalContent.list.empty": "لا توجد عناصر مطابقة للفلاتر الحالية.",
+    "dataEntry.medicalContent.list.empty":
+      "لا توجد عناصر مطابقة للفلاتر الحالية.",
     "dataEntry.medicalContent.actions.view": "عرض",
     "dataEntry.medicalContent.actions.edit": "تعديل",
     "dataEntry.medicalContent.actions.submitReview": "إرسال للمراجعة",
@@ -662,7 +947,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.medicalContent.toast.reviewFailed.title": "تعذر الإرسال",
     "dataEntry.medicalContent.toast.reviewFailed.body":
       "تعذر إرسال العنصر للمراجعة. تحقق من البيانات ثم حاول مرة أخرى.",
-    "dataEntry.page.contentTemplates.title": "قوالب المحتوى • مدخل البيانات • LMJ Health",
+    "dataEntry.page.contentTemplates.title":
+      "قوالب المحتوى • مدخل البيانات • LMJ Health",
     "dataEntry.contentTemplates.hero.title": "قوالب المحتوى المتاحة",
     "dataEntry.contentTemplates.hero.subtitle":
       "مرجع سريع لحقول القوالب التي يستخدمها فريق مدخل البيانات",
@@ -677,21 +963,25 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "لا توجد قوالب مطابقة للفلاتر الحالية.",
     "dataEntry.contentTemplates.list.emptyHint":
       "جرّب تغيير الفلاتر لعرض القوالب المعتمدة المرتبطة بهذا النوع أو الحالة.",
-    "dataEntry.contentTemplates.reference.title": "مرجع قوالب المحتوى للقراءة فقط",
+    "dataEntry.contentTemplates.reference.title":
+      "مرجع قوالب المحتوى للقراءة فقط",
     "dataEntry.contentTemplates.reference.body":
       "هذه الشاشة توضح الحقول والبنية المعتمدة للقوالب حتى يستخدمها فريق مدخل البيانات بشكل صحيح، دون تعديل مباشر على القوالب من هنا.",
     "dataEntry.contentTemplates.reference.badge": "مرجع فقط",
     "dataEntry.contentTemplates.fieldsCount": "حقل",
-    "dataEntry.page.serviceProviders.title": "مزودو الخدمة • مدخل البيانات • LMJ Health",
+    "dataEntry.page.serviceProviders.title":
+      "مزودو الخدمة • مدخل البيانات • LMJ Health",
     "dataEntry.serviceProviders.hero.title": "مزودو الخدمة",
     "dataEntry.serviceProviders.hero.selectedTypePrefix": "نوع الخدمة",
-    "dataEntry.serviceProviders.hero.selectTypeHint": "اختر نوع خدمة لعرض المزودين",
+    "dataEntry.serviceProviders.hero.selectTypeHint":
+      "اختر نوع خدمة لعرض المزودين",
     "dataEntry.serviceProviders.hero.addAction": "إضافة مزود",
     "dataEntry.serviceProviders.filters.serviceType": "نوع الخدمة",
     "dataEntry.serviceProviders.filters.selectType": "اختر نوع الخدمة…",
     "dataEntry.serviceProviders.error.typesLoad":
       "تعذر تحميل أنواع الخدمات. أعد المحاولة لاحقًا.",
-    "dataEntry.serviceProviders.empty.selectType": "اختر نوع خدمة من القائمة أعلاه.",
+    "dataEntry.serviceProviders.empty.selectType":
+      "اختر نوع خدمة من القائمة أعلاه.",
     "dataEntry.serviceProviders.empty.noProviders":
       "لا يوجد مزودون منشورون لهذا النوع حاليًا.",
     "dataEntry.serviceProviders.empty.noProvidersHint":
@@ -715,7 +1005,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "content.language.all": "كل اللغات",
     "dashboard.title.default": "لوحة التحكم",
     "logout.title": "تأكيد تسجيل الخروج",
-    "logout.description": "اختر نطاق تسجيل الخروج. الخيار الافتراضي ينهي هذه الجلسة فقط.",
+    "logout.description":
+      "اختر نطاق تسجيل الخروج. الخيار الافتراضي ينهي هذه الجلسة فقط.",
     "logout.scope.current": "هذا الجهاز فقط",
     "logout.scope.all": "جميع الأجهزة",
     "logout.pending": "جاري تسجيل الخروج…",
@@ -735,12 +1026,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.validation.required": "هذا الحقل مطلوب",
     "auth.validation.passwordMin6": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
     "auth.validation.emailInvalid": "يرجى إدخال بريد إلكتروني صالح",
-    "auth.validation.phoneMin10": "رقم الهاتف يجب أن يحتوي على 10 أرقام على الأقل",
-    "auth.validation.phoneE164": "أدخل رقم هاتف صحيح بصيغة دولية مثل +963912345678",
+    "auth.validation.phoneMin10":
+      "رقم الهاتف يجب أن يحتوي على 10 أرقام على الأقل",
+    "auth.validation.phoneE164":
+      "أدخل رقم هاتف صحيح بصيغة دولية مثل +963912345678",
     "auth.common.showPassword": "إظهار كلمة المرور",
     "auth.common.hidePassword": "إخفاء كلمة المرور",
     "auth.login.title": "تسجيل الدخول",
-    "auth.login.subtitle": "مرحبًا بعودتك، سجّل دخولك لمتابعة مواعيدك وبياناتك الصحية بأمان",
+    "auth.login.subtitle":
+      "مرحبًا بعودتك، سجّل دخولك لمتابعة مواعيدك وبياناتك الصحية بأمان",
     "auth.login.method.phone": "رقم الهاتف",
     "auth.login.method.email": "البريد الإلكتروني",
     "auth.login.placeholder.phone": "+963912345678",
@@ -754,31 +1048,46 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.login.noAccount": "ليس لديك حساب؟",
     "auth.login.createAccount": "إنشاء حساب جديد",
     "auth.login.success.title": "مرحبًا",
-    "auth.login.success.admin": "تم تسجيل الدخول بنجاح. مرحبًا بك في لوحة إدارة LMJ Health.",
-    "auth.login.success.doctor": "تم تسجيل الدخول بنجاح. مرحبًا بك في LMJ Health.",
+    "auth.login.success.admin":
+      "تم تسجيل الدخول بنجاح. مرحبًا بك في لوحة إدارة LMJ Health.",
+    "auth.login.success.doctor":
+      "تم تسجيل الدخول بنجاح. مرحبًا بك في LMJ Health.",
     "auth.login.success.secretary": "تم تسجيل الدخول بنجاح. مرحبًا بك.",
     "auth.login.success.patient": "تم تسجيل الدخول بنجاح. مرحبًا بك.",
     "auth.login.success.dataEntry": "تم تسجيل الدخول بنجاح. مرحبًا بك.",
     "auth.login.success.default": "تم تسجيل الدخول بنجاح. مرحبًا بك.",
     "auth.login.recoveryActive.title": "طلب حذف نشط",
-    "auth.login.recoveryActive.body": "حسابك في فترة استرجاع. يمكنك إلغاء طلب الحذف الآن.",
+    "auth.login.recoveryActive.body":
+      "حسابك في فترة استرجاع. يمكنك إلغاء طلب الحذف الآن.",
     "auth.login.error.title": "تعذّر تسجيل الدخول",
     "auth.login.error.accountBlocked.title": "حساب موقوف",
     "auth.login.error.accountBlocked.body": "حسابك موقوف من قبل الإدارة.",
-    "auth.login.error.deletionRecoveryExpired": "تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.",
-    "auth.login.error.phone.invalidCredentials": "رقم الهاتف أو كلمة المرور غير صحيحة",
-    "auth.login.error.phone.notVerified": "الحساب المرتبط بهذا الرقم غير موثّق بعد. أكمل التحقق برمز OTP على هاتفك.",
+    "auth.login.error.deletionRecoveryExpired":
+      "تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.",
+    "auth.login.error.phone.invalidCredentials":
+      "رقم الهاتف أو كلمة المرور غير صحيحة",
+    "auth.login.error.phone.notVerified":
+      "الحساب المرتبط بهذا الرقم غير موثّق بعد. أكمل التحقق برمز OTP على هاتفك.",
     "auth.login.error.phone.deleted": "تم إيقاف الحساب المرتبط بهذا الرقم.",
-    "auth.login.error.email.invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-    "auth.login.error.email.notVerified": "الحساب غير موثّق، يرجى التحقق من بريدك الإلكتروني",
-    "auth.login.error.email.deleted": "تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.",
+    "auth.login.error.email.invalidCredentials":
+      "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "auth.login.error.email.notVerified":
+      "الحساب غير موثّق، يرجى التحقق من بريدك الإلكتروني",
+    "auth.login.error.email.deleted":
+      "تم حذف هذا الحساب أو انتهت فترة الاسترجاع. لا يمكن تسجيل الدخول.",
     "auth.login.error.common.inactive": "الحساب غير نشط، تواصل مع الدعم",
-    "auth.login.error.common.pendingApproval": "حساب الطبيب في انتظار موافقة الإدارة",
-    "auth.login.error.common.notAllowed": "هذا الحساب غير مسموح له باستخدام هذا التطبيق",
-    "auth.login.error.common.temporary": "حسابك غير مفعّل بعد. سيتم توجيهك لصفحة التفعيل.",
-    "auth.login.error.common.locked": "الحساب مقفول. قد تتمكن من تسجيل الدخول خلال فترة الاسترجاع (7 أيام).",
-    "auth.login.error.common.deletionRecovery": "حسابك في فترة استرجاع (7 أيام). سيتم توجيهك لصفحة استعادة الحساب.",
-    "auth.login.error.common.network": "تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة.",
+    "auth.login.error.common.pendingApproval":
+      "حساب الطبيب في انتظار موافقة الإدارة",
+    "auth.login.error.common.notAllowed":
+      "هذا الحساب غير مسموح له باستخدام هذا التطبيق",
+    "auth.login.error.common.temporary":
+      "حسابك غير مفعّل بعد. سيتم توجيهك لصفحة التفعيل.",
+    "auth.login.error.common.locked":
+      "الحساب مقفول. قد تتمكن من تسجيل الدخول خلال فترة الاسترجاع (7 أيام).",
+    "auth.login.error.common.deletionRecovery":
+      "حسابك في فترة استرجاع (7 أيام). سيتم توجيهك لصفحة استعادة الحساب.",
+    "auth.login.error.common.network":
+      "تعذّر الوصول إلى الخادم. تحقّق من الإنترنت ثم أعد المحاولة.",
     "auth.login.error.common.unknown": "حدث خطأ غير متوقع، حاول مجددًا",
     "auth.signup.header": "تسجيل حساب طبيب جديد",
     "auth.signup.haveAccount": "لديك حساب بالفعل؟",
@@ -787,7 +1096,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.signup.error.submitTitle": "تعذّر إنشاء الحساب",
     "auth.signup.error.submitFallback": "تعذّر إكمال التسجيل",
     "auth.signup.verifySent.title": "تحقّق من الحساب",
-    "auth.signup.verifySent.body": "تم إرسال طلب التسجيل. أدخل رمز التحقق الوارد على بريدك أو واتساب.",
+    "auth.signup.verifySent.body":
+      "تم إرسال طلب التسجيل. أدخل رمز التحقق الوارد على بريدك أو واتساب.",
     "auth.signup.step.account": "الحساب",
     "auth.signup.step.personal": "الشخصية",
     "auth.signup.step.professional": "المهنية",
@@ -795,49 +1105,103 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.signup.step.legal": "القانونية",
     "auth.page.verifyOtp.title": "التحقق من الرمز • LMJ Health",
     "auth.page.forgotPassword.title": "نسيت كلمة المرور • LMJ Health",
-    "auth.page.verifyResetOtp.title": "التحقق من رمز إعادة التعيين • LMJ Health",
+    "auth.page.verifyResetOtp.title":
+      "التحقق من رمز إعادة التعيين • LMJ Health",
     "auth.page.resetPassword.title": "تعيين كلمة المرور • LMJ Health",
     "auth.page.signupSuccess.title": "نجاح التسجيل • LMJ Health",
     "auth.verifyOtp.completing": "جاري إكمال التحقق…",
     "auth.verifyOtp.success.title": "تم التحقق",
-    "auth.verifyOtp.success.body": "تم تأكيد رمز التسجيل. يمكنك المتابعة إلى لوحة التحكم.",
+    "auth.verifyOtp.success.body":
+      "تم تأكيد رمز التسجيل. يمكنك المتابعة إلى لوحة التحكم.",
     "auth.verifyOtp.success.completedTitle": "اكتمل التحقق",
     "auth.verifyOtp.pending.title": "تم تأكيد رمز التسجيل",
-    "auth.verifyOtp.pending.body": "تم تأكيد الرمز. حساب الطبيب في انتظار موافقة الإدارة قبل الدخول الكامل.",
+    "auth.verifyOtp.pending.body":
+      "تم تأكيد الرمز. حساب الطبيب في انتظار موافقة الإدارة قبل الدخول الكامل.",
     "auth.verifyOtp.pending.badge": "في انتظار الموافقة",
     "auth.forgotPassword.otpSent.title": "تحقّق من بريدك/هاتفك",
     "auth.forgotPassword.otpSent.body": "تم إرسال رمز إعادة تعيين كلمة المرور.",
-    "auth.forgotPassword.error.sendFailed": "تعذّر إرسال رمز إعادة التعيين. حاول مجددًا.",
+    "auth.forgotPassword.error.sendFailed":
+      "تعذّر إرسال رمز إعادة التعيين. حاول مجددًا.",
     "auth.resetVerify.success.title": "تم التحقق",
-    "auth.resetVerify.success.body": "تم التحقق من الرمز. يمكنك الآن تعيين كلمة مرور جديدة.",
+    "auth.resetVerify.success.body":
+      "تم التحقق من الرمز. يمكنك الآن تعيين كلمة مرور جديدة.",
     "auth.resetPassword.error.title": "تعذّر التحديث",
-    "auth.resetPassword.error.fallback": "لا يوجد أي تطابق مع البيانات المدخلة. يرجى التحقق من المعلومات وإعادة المحاولة.",
+    "auth.resetPassword.error.fallback":
+      "لا يوجد أي تطابق مع البيانات المدخلة. يرجى التحقق من المعلومات وإعادة المحاولة.",
+    "auth.resetPassword.fieldRequired": "هذا الحقل مطلوب",
+    "auth.resetPassword.invalidPhone":
+      "أدخل رقم هاتف صحيح بصيغة دولية مثل +963912345678 أو 009639912345678",
+    "auth.resetPassword.phoneMethod": "رقم الهاتف",
+    "auth.resetPassword.emailMethod": "البريد الإلكتروني",
+    "auth.resetPassword.enterPhone": "أدخل رقم هاتفك",
+    "auth.resetPassword.enterEmail": "أدخل بريدك الإلكتروني",
+    "auth.resetPassword.verifyIdentity": "سنرسل لك رمز التحقق للتأكد من هويتك",
+    "auth.resetPassword.sending": "جارٍ الإرسال…",
+    "auth.resetPassword.backToLogin": "العودة لتسجيل الدخول",
+    "auth.resetPassword.sendFailed":
+      "تعذّر إرسال رمز إعادة التعيين. حاول مجدداً.",
+    "auth.resetPassword.sendCode": "إرسال رمز التحقق",
+    "auth.resetPassword.newPasswordTitle": "إنشاء كلمة مرور جديدة",
+    "auth.resetPassword.newPasswordSubtitle":
+      "اختر كلمة مرور قوية لحماية حسابك",
+    "auth.resetPassword.newPasswordLabel": "كلمة المرور الجديدة",
+    "auth.resetPassword.confirmPasswordLabel": "تأكيد كلمة المرور",
+    "auth.resetPassword.passwordRequirements": "متطلبات كلمة المرور:",
+    "auth.resetPassword.minLength": "لا تقل عن 8 أحرف",
+    "auth.resetPassword.uppercase": "تحتوي على حرف كبير",
+    "auth.resetPassword.number": "تحتوي على رقم",
+    "auth.resetPassword.match": "كلمتا المرور متطابقتان",
+    "auth.resetPassword.saving": "جارٍ الحفظ…",
+    "auth.resetPassword.setPassword": "تعيين كلمة المرور",
+    "auth.resetPassword.noMatch":
+      "لا يوجد أي تطابق مع البيانات المدخلة. يرجى التحقق من المعلومات وإعادة المحاولة.",
+    "auth.resetPassword.passwordMinLength":
+      "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+    "auth.resetPassword.passwordUppercase": "يجب أن تحتوي على حرف كبير",
+    "auth.resetPassword.passwordNumber": "يجب أن تحتوي على رقم",
+    "auth.resetPassword.confirmRequired": "يرجى تأكيد كلمة المرور",
+    "auth.resetPassword.passwordMismatch": "كلمتا المرور غير متطابقتين",
     "auth.signupSuccess.default.title": "أهلاً وسهلاً بك في LMJ HEALTH",
-    "auth.signupSuccess.default.message": "تم إنشاء الحساب بنجاح؛ يُرجى الأنتظار حتى يتم التحقق من حسابك من قبل الأدمن.",
+    "auth.signupSuccess.default.message":
+      "تم إنشاء الحساب بنجاح؛ يُرجى الأنتظار حتى يتم التحقق من حسابك من قبل الأدمن.",
     "auth.signupSuccess.default.continue": "الذهاب للصفحة الرئيسية",
     "auth.signupSuccess.pending.title": "تم تأكيد رمز التسجيل",
-    "auth.signupSuccess.pending.message": "تم التحقق من الرمز وفق الخادم. حساب الطبيب قيد موافقة الإدارة قبل تفعيله بالكامل في المنصة؛ يمكنك لاحقاً تسجيل الدخول عند التفعيل.",
+    "auth.signupSuccess.pending.message":
+      "تم التحقق من الرمز وفق الخادم. حساب الطبيب قيد موافقة الإدارة قبل تفعيله بالكامل في المنصة؛ يمكنك لاحقاً تسجيل الدخول عند التفعيل.",
     "auth.signupSuccess.pending.continue": "تسجيل الدخول",
-    "auth.signupSuccess.pending.autoRedirect": "سيتم تحويلك تلقائياً إلى تسجيل الدخول خلال {seconds} ثوانٍ…",
+    "auth.signupSuccess.pending.autoRedirect":
+      "سيتم تحويلك تلقائياً إلى تسجيل الدخول خلال {seconds} ثوانٍ…",
     "auth.signupSuccess.ready.title": "اكتمل التحقق",
-    "auth.signupSuccess.ready.message": "تم إنشاء الحساب بنجاح؛ يُرجى الانتظار حتى يتم التحقق من حسابك من قبل الإدارة.",
+    "auth.signupSuccess.ready.message":
+      "تم إنشاء الحساب بنجاح؛ يُرجى الانتظار حتى يتم التحقق من حسابك من قبل الإدارة.",
     "auth.signupSuccess.ready.continue": "الذهاب للصفحة الرئيسية",
-    "auth.signupSuccess.ready.autoRedirect": "سيتم تحويلك تلقائياً خلال {seconds} ثانية…",
-    "api.messageKey.errors.validationFailed": "فشل التحقق من البيانات. راجع الحقول المطلوبة ثم أعد المحاولة.",
-    "api.messageKey.errors.auth.invalidCredentials": "بيانات تسجيل الدخول غير صحيحة.",
-    "api.messageKey.errors.auth.sessionExpired": "انتهت صلاحية جلسة الدخول. سجّل الدخول مجددًا.",
-    "api.messageKey.errors.auth.unauthorized": "يلزم تسجيل الدخول لإتمام هذا الإجراء.",
+    "auth.signupSuccess.ready.autoRedirect":
+      "سيتم تحويلك تلقائياً خلال {seconds} ثانية…",
+    "api.messageKey.errors.validationFailed":
+      "فشل التحقق من البيانات. راجع الحقول المطلوبة ثم أعد المحاولة.",
+    "api.messageKey.errors.auth.invalidCredentials":
+      "بيانات تسجيل الدخول غير صحيحة.",
+    "api.messageKey.errors.auth.sessionExpired":
+      "انتهت صلاحية جلسة الدخول. سجّل الدخول مجددًا.",
+    "api.messageKey.errors.auth.unauthorized":
+      "يلزم تسجيل الدخول لإتمام هذا الإجراء.",
     "api.messageKey.errors.auth.forbidden": "لا تملك صلاحية تنفيذ هذا الإجراء.",
-    "api.messageKey.errors.auth.accountDisabled": "هذا الحساب معطّل. تواصل مع الإدارة.",
+    "api.messageKey.errors.auth.accountDisabled":
+      "هذا الحساب معطّل. تواصل مع الإدارة.",
     "api.messageKey.errors.auth.otpInvalid": "رمز التحقق غير صحيح.",
-    "api.messageKey.errors.auth.otpExpired": "انتهت صلاحية رمز التحقق. اطلب رمزًا جديدًا.",
-    "api.messageKey.errors.rateLimit.tooManyRequests": "تم إرسال طلبات كثيرة خلال وقت قصير. حاول لاحقًا.",
-    "api.messageKey.errors.resource.notFound": "العنصر المطلوب غير موجود أو تم حذفه.",
-    "api.messageKey.errors.conflict.duplicate": "يوجد تعارض في البيانات (العنصر موجود مسبقًا).",
+    "api.messageKey.errors.auth.otpExpired":
+      "انتهت صلاحية رمز التحقق. اطلب رمزًا جديدًا.",
+    "api.messageKey.errors.rateLimit.tooManyRequests":
+      "تم إرسال طلبات كثيرة خلال وقت قصير. حاول لاحقًا.",
+    "api.messageKey.errors.resource.notFound":
+      "العنصر المطلوب غير موجود أو تم حذفه.",
+    "api.messageKey.errors.conflict.duplicate":
+      "يوجد تعارض في البيانات (العنصر موجود مسبقًا).",
 
     "contentTemplateDialog.title.create": "إضافة قالب بيانات",
     "contentTemplateDialog.title.edit": "تعديل قالب البيانات",
-    "contentTemplateDialog.subtitle": "عرّف حقول البيانات الوصفية التي يملؤها فريق المحتوى لهذا النوع.",
+    "contentTemplateDialog.subtitle":
+      "عرّف حقول البيانات الوصفية التي يملؤها فريق المحتوى لهذا النوع.",
     "contentTemplateDialog.close": "إغلاق",
     "contentTemplateDialog.field.nameAr.label": "اسم القالب (عربي)",
     "contentTemplateDialog.field.nameAr.placeholder": "اسم واضح للقالب",
@@ -850,11 +1214,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentTemplateDialog.parentType.generalAdvice": "نصائح عامة",
     "contentTemplateDialog.parentType.medication": "الأدوية",
     "contentTemplateDialog.field.slug.label": "Slug (اختياري)",
-    "contentTemplateDialog.field.slug.hint": "يُقترح تلقائيًا من الاسم الإنجليزي حتى تعدّله يدويًا.",
+    "contentTemplateDialog.field.slug.hint":
+      "يُقترح تلقائيًا من الاسم الإنجليزي حتى تعدّله يدويًا.",
     "contentTemplateDialog.field.slug.placeholder": "my-template",
     "contentTemplateDialog.section.fields.title": "حقول القالب",
     "contentTemplateDialog.action.addField": "إضافة حقل",
-    "contentTemplateDialog.empty.noFields": "لا توجد حقول بعد. أضف حقلاً لتعريف بنية البيانات.",
+    "contentTemplateDialog.empty.noFields":
+      "لا توجد حقول بعد. أضف حقلاً لتعريف بنية البيانات.",
     "contentTemplateDialog.field.key.label": "المفتاح",
     "contentTemplateDialog.field.key.placeholder": "fieldKey",
     "contentTemplateDialog.field.labelAr.label": "التسمية العربية",
@@ -866,8 +1232,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentTemplateDialog.field.required.label": "إلزامي",
     "contentTemplateDialog.action.deleteField": "حذف الحقل",
     "contentTemplateDialog.field.options.label": "خيارات القائمة (اختياري)",
-    "contentTemplateDialog.field.options.hint": "افصل بين القيم بفاصلة لإتاحة قائمة اختيار محددة بدل إدخال حر.",
-    "contentTemplateDialog.field.options.placeholder": "option1, option2, option3",
+    "contentTemplateDialog.field.options.hint":
+      "افصل بين القيم بفاصلة لإتاحة قائمة اختيار محددة بدل إدخال حر.",
+    "contentTemplateDialog.field.options.placeholder":
+      "option1, option2, option3",
     "contentTemplateDialog.action.cancel": "إلغاء",
     "contentTemplateDialog.action.saveCreate": "حفظ القالب",
     "contentTemplateDialog.action.saveEdit": "حفظ التعديلات",
@@ -884,20 +1252,28 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentTemplateDialog.schemaTypes.array": "قائمة",
     "contentTemplateDialog.schemaTypes.object": "كائن",
     "contentTemplateDialog.validation.keyRequired": "مفتاح الحقل مطلوب",
-    "contentTemplateDialog.validation.keyPattern": "المفتاح: حروف لاتينية وأرقام وشرطة سفلية",
-    "contentTemplateDialog.validation.labelArInvalid": "الرجاء إدخال نص صالح للتسمية العربية",
-    "contentTemplateDialog.validation.labelEnInvalid": "الرجاء إدخال نص صالح للتسمية الإنجليزية",
+    "contentTemplateDialog.validation.keyPattern":
+      "المفتاح: حروف لاتينية وأرقام وشرطة سفلية",
+    "contentTemplateDialog.validation.labelArInvalid":
+      "الرجاء إدخال نص صالح للتسمية العربية",
+    "contentTemplateDialog.validation.labelEnInvalid":
+      "الرجاء إدخال نص صالح للتسمية الإنجليزية",
     "contentTemplateDialog.validation.typeInvalid": "اختر نوع حقل صالح",
-    "contentTemplateDialog.validation.requiredInvalid": "قيمة غير صالحة لخيار الإلزامية",
-    "contentTemplateDialog.validation.optionsInvalid": "الرجاء إدخال نص صالح لخيارات القائمة",
+    "contentTemplateDialog.validation.requiredInvalid":
+      "قيمة غير صالحة لخيار الإلزامية",
+    "contentTemplateDialog.validation.optionsInvalid":
+      "الرجاء إدخال نص صالح لخيارات القائمة",
     "contentTemplateDialog.validation.labelRequired": "تسمية الحقل مطلوبة",
-    "contentTemplateDialog.validation.nameInvalid": "الرجاء إدخال نص صالح لاسم القالب",
+    "contentTemplateDialog.validation.nameInvalid":
+      "الرجاء إدخال نص صالح لاسم القالب",
     "contentTemplateDialog.validation.parentTypeInvalid": "اختر النوع الأب",
-    "contentTemplateDialog.validation.fieldsMinOne": "أضف حقلاً واحداً على الأقل",
+    "contentTemplateDialog.validation.fieldsMinOne":
+      "أضف حقلاً واحداً على الأقل",
     "contentTemplateDialog.validation.nameRequired": "اسم القالب مطلوب",
 
     "contentBlockEditor.title": "محتوى المقال",
-    "contentBlockEditor.description": "أنشئ البلوكات الفعلية للمقال مع إبقاء جسم المقال منفصلًا عن بيانات القالب.",
+    "contentBlockEditor.description":
+      "أنشئ البلوكات الفعلية للمقال مع إبقاء جسم المقال منفصلًا عن بيانات القالب.",
     "contentBlockEditor.action.addBlock": "إضافة بلوك",
     "contentBlockEditor.blockType.paragraph": "فقرة",
     "contentBlockEditor.blockType.heading": "عنوان فرعي",
@@ -920,51 +1296,73 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentBlockEditor.field.headingText.label": "نص العنوان",
     "contentBlockEditor.field.headingText.placeholder": "أدخل العنوان الفرعي",
     "contentBlockEditor.field.paragraphText.label": "النص",
-    "contentBlockEditor.field.paragraphText.placeholder": "اكتب الفقرة الأساسية للمقال…",
+    "contentBlockEditor.field.paragraphText.placeholder":
+      "اكتب الفقرة الأساسية للمقال…",
     "contentBlockEditor.field.listItems.label": "عناصر القائمة",
     "contentBlockEditor.field.listItems.placeholder": "ضع كل عنصر في سطر مستقل",
     "contentBlockEditor.field.listOrdered.label": "قائمة مرقّمة",
     "contentBlockEditor.field.calloutVariant.label": "نوع التنبيه",
     "contentBlockEditor.field.calloutVariant.placeholder": "نوع التنبيه",
     "contentBlockEditor.field.calloutTitle.label": "عنوان التنبيه",
-    "contentBlockEditor.field.calloutTitle.placeholder": "مثال: متى يجب طلب المساعدة؟",
+    "contentBlockEditor.field.calloutTitle.placeholder":
+      "مثال: متى يجب طلب المساعدة؟",
     "contentBlockEditor.field.calloutText.label": "النص",
-    "contentBlockEditor.field.calloutText.placeholder": "اكتب محتوى التنبيه أو المعلومة…",
+    "contentBlockEditor.field.calloutText.placeholder":
+      "اكتب محتوى التنبيه أو المعلومة…",
     "contentBlockEditor.field.linkCardTitle.label": "عنوان البطاقة",
-    "contentBlockEditor.field.linkCardTitle.placeholder": "مثال: رابط إرشادي موثوق",
+    "contentBlockEditor.field.linkCardTitle.placeholder":
+      "مثال: رابط إرشادي موثوق",
     "contentBlockEditor.field.linkCardDescription.label": "وصف مختصر",
-    "contentBlockEditor.field.linkCardDescription.placeholder": "ملخص قصير لما سيفتحه الرابط...",
+    "contentBlockEditor.field.linkCardDescription.placeholder":
+      "ملخص قصير لما سيفتحه الرابط...",
     "contentBlockEditor.field.linkCardUrl.label": "الرابط",
-    "contentBlockEditor.field.linkCardUrl.hint": "يُفضّل استخدام روابط عامة موثوقة تبدأ بـ https://",
+    "contentBlockEditor.field.linkCardUrl.hint":
+      "يُفضّل استخدام روابط عامة موثوقة تبدأ بـ https://",
     "contentBlockEditor.field.faqItems.label": "الأسئلة والإجابات",
-    "contentBlockEditor.field.faqItems.hint": "أضف كل سؤال مع إجابته بشكل منفصل لرفع جودة المحتوى.",
+    "contentBlockEditor.field.faqItems.hint":
+      "أضف كل سؤال مع إجابته بشكل منفصل لرفع جودة المحتوى.",
     "contentBlockEditor.faq.itemLabel": "عنصر FAQ {index}",
     "contentBlockEditor.action.deleteFaqItem": "حذف",
     "contentBlockEditor.field.faqQuestion.placeholder": "السؤال",
     "contentBlockEditor.field.faqAnswer.placeholder": "الإجابة",
     "contentBlockEditor.action.addFaqItem": "إضافة سؤال",
     "contentBlockEditor.dividerNote": "سيتم إدراج فاصل بصري بين أجزاء المقال.",
-    "contentBlockEditor.validation.urlNoSpaces": "الرابط يجب ألا يحتوي على مسافات.",
-    "contentBlockEditor.validation.urlProtocolRequired": "أضف البروتوكول الكامل للرابط مثل https://",
-    "contentBlockEditor.validation.urlHttpOnly": "استخدم رابطًا يبدأ بـ http:// أو https:// فقط.",
-    "contentBlockEditor.validation.urlInvalid": "صيغة الرابط غير صحيحة. مثال صحيح: https://example.com",
-    "contentBlockEditor.validation.headingTextRequired": "أدخل نص العنوان الفرعي.",
+    "contentBlockEditor.validation.urlNoSpaces":
+      "الرابط يجب ألا يحتوي على مسافات.",
+    "contentBlockEditor.validation.urlProtocolRequired":
+      "أضف البروتوكول الكامل للرابط مثل https://",
+    "contentBlockEditor.validation.urlHttpOnly":
+      "استخدم رابطًا يبدأ بـ http:// أو https:// فقط.",
+    "contentBlockEditor.validation.urlInvalid":
+      "صيغة الرابط غير صحيحة. مثال صحيح: https://example.com",
+    "contentBlockEditor.validation.headingTextRequired":
+      "أدخل نص العنوان الفرعي.",
     "contentBlockEditor.validation.paragraphTextRequired": "أدخل نص الفقرة.",
-    "contentBlockEditor.validation.listItemRequired": "أضف عنصرًا واحدًا على الأقل في القائمة.",
-    "contentBlockEditor.validation.calloutBothRequired": "أدخل عنوان التنبيه ونصه معًا — كلاهما مطلوب.",
-    "contentBlockEditor.validation.linkCardBothRequired": "أدخل عنوان البطاقة والرابط معًا — كلاهما مطلوب.",
-    "contentBlockEditor.validation.faqPairRequired": "أضف سؤالًا وإجابة واحدة على الأقل.",
+    "contentBlockEditor.validation.listItemRequired":
+      "أضف عنصرًا واحدًا على الأقل في القائمة.",
+    "contentBlockEditor.validation.calloutBothRequired":
+      "أدخل عنوان التنبيه ونصه معًا — كلاهما مطلوب.",
+    "contentBlockEditor.validation.linkCardBothRequired":
+      "أدخل عنوان البطاقة والرابط معًا — كلاهما مطلوب.",
+    "contentBlockEditor.validation.faqPairRequired":
+      "أضف سؤالًا وإجابة واحدة على الأقل.",
 
-    "governancePanel.dynamicData.invalidJson": "تعذّر قراءة JSON الخاص بالبيانات الديناميكية، لذلك تظهر هذه المنطقة كمرجع فقط.",
-    "governancePanel.dynamicData.empty": "لا توجد بيانات ديناميكية مرتبطة بهذا المحتوى.",
+    "governancePanel.dynamicData.invalidJson":
+      "تعذّر قراءة JSON الخاص بالبيانات الديناميكية، لذلك تظهر هذه المنطقة كمرجع فقط.",
+    "governancePanel.dynamicData.empty":
+      "لا توجد بيانات ديناميكية مرتبطة بهذا المحتوى.",
     "governancePanel.dynamicData.moreItems": "+ عناصر إضافية في السجل الخام.",
     "governancePanel.dynamicData.itemsCount": "{count} عنصر",
     "governancePanel.dynamicData.fieldsCount": "{count} حقول",
     "governancePanel.checklist.sources": "إضافة مصدر واحد موثوق على الأقل",
-    "governancePanel.checklist.disclaimerVersion": "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
-    "governancePanel.checklist.seekHelp": "إضافة بلوك تنبيه (callout) بنوع warn/danger وعنوان يوضّح ضرورة مراجعة الطبيب",
-    "governancePanel.checklist.newsSourceUrl": "وجود رابط المصدر للخبر (news.sourceUrl)",
-    "governancePanel.checklist.newsPublishedAt": "تحديد تاريخ نشر الخبر الأصلي (news.publishedAt)",
+    "governancePanel.checklist.disclaimerVersion":
+      "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+    "governancePanel.checklist.seekHelp":
+      "إضافة بلوك تنبيه (callout) بنوع warn/danger وعنوان يوضّح ضرورة مراجعة الطبيب",
+    "governancePanel.checklist.newsSourceUrl":
+      "وجود رابط المصدر للخبر (news.sourceUrl)",
+    "governancePanel.checklist.newsPublishedAt":
+      "تحديد تاريخ نشر الخبر الأصلي (news.publishedAt)",
     "governancePanel.section.safetyStatus": "حالة السلامة",
     "governancePanel.field.disclaimerVersion": "إصدار التنبيه",
     "governancePanel.field.notSet": "غير محدد",
@@ -981,10 +1379,14 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "governancePanel.categories.empty": "لا توجد فئات.",
     "governancePanel.field.relatedContent": "المحتوى المرتبط",
     "governancePanel.relatedContent.empty": "لا توجد معرفات محتوى مرتبطة.",
-    "governancePanel.section.readinessChecklist": "قائمة جاهزية الحوكمة قبل المراجعة",
-    "governancePanel.readiness.warning": "تحذير جاهزية: {count} متطلبات غير مكتملة قبل إرسال المراجعة.",
-    "governancePanel.readiness.ready": "جاهز للمراجعة: تم استكمال مؤشرات الحوكمة الأساسية.",
-    "governancePanel.readiness.note": "هذه إشارات تنبيهية فقط ولا تمنع عرض أو تصفح السجل. الإيقاف يتم عند محاولة \"إرسال للمراجعة\" فقط.",
+    "governancePanel.section.readinessChecklist":
+      "قائمة جاهزية الحوكمة قبل المراجعة",
+    "governancePanel.readiness.warning":
+      "تحذير جاهزية: {count} متطلبات غير مكتملة قبل إرسال المراجعة.",
+    "governancePanel.readiness.ready":
+      "جاهز للمراجعة: تم استكمال مؤشرات الحوكمة الأساسية.",
+    "governancePanel.readiness.note":
+      'هذه إشارات تنبيهية فقط ولا تمنع عرض أو تصفح السجل. الإيقاف يتم عند محاولة "إرسال للمراجعة" فقط.',
     "governancePanel.readiness.done": "مكتمل",
     "governancePanel.readiness.pending": "بحاجة لاستكمال",
     "governancePanel.section.sources": "المصادر والمرجعيات",
@@ -992,7 +1394,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "governancePanel.sources.empty": "لا توجد مصادر مضافة بعد.",
     "governancePanel.sources.untitled": "مصدر بدون عنوان",
     "governancePanel.sources.noLink": "لا يوجد رابط مباشر.",
-    "governancePanel.sources.addBeforeApproval": "أضف مصادر موثوقة قبل الاعتماد أو النشر.",
+    "governancePanel.sources.addBeforeApproval":
+      "أضف مصادر موثوقة قبل الاعتماد أو النشر.",
     "governancePanel.section.dynamicData": "البيانات الديناميكية",
     "governancePanel.section.newsSummary": "ملخص الخبر",
     "governancePanel.news.sourceName": "اسم المصدر",
@@ -1002,14 +1405,20 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "governancePanel.emptyValue": "—",
 
     "createContentDialog.title": "إضافة محتوى طبي",
-    "createContentDialog.subtitle": "أنشئ مسودة حقيقية بالمحتوى الأساسي والقالب المناسب ثم أكمل المراجعة والنشر لاحقًا.",
+    "createContentDialog.subtitle":
+      "أنشئ مسودة حقيقية بالمحتوى الأساسي والقالب المناسب ثم أكمل المراجعة والنشر لاحقًا.",
     "createContentDialog.close": "إغلاق",
     "createContentDialog.validation.titleRequired": "عنوان المحتوى مطلوب",
-    "createContentDialog.validation.sourceUrlInvalid": "أدخل رابط مصدر خارجي صحيح يبدأ بـ http:// أو https://،  .",
-    "createContentDialog.validation.pageVersionRequired": "إصدار الصفحة مطلوب لصفحات الإعدادات",
-    "createContentDialog.validation.titleEnRequired": "العنوان بالإنجليزية مطلوب لصفحات الإعدادات",
-    "createContentDialog.validation.blocksRequired": "أضف على الأقل بلوك محتوى واحدًا فعليًا قبل حفظ المسودة.",
-    "createContentDialog.validation.templateRequired": "اختر قالبًا مناسبًا قبل حفظ المسودة.",
+    "createContentDialog.validation.sourceUrlInvalid":
+      "أدخل رابط مصدر خارجي صحيح يبدأ بـ http:// أو https://،  .",
+    "createContentDialog.validation.pageVersionRequired":
+      "إصدار الصفحة مطلوب لصفحات الإعدادات",
+    "createContentDialog.validation.titleEnRequired":
+      "العنوان بالإنجليزية مطلوب لصفحات الإعدادات",
+    "createContentDialog.validation.blocksRequired":
+      "أضف على الأقل بلوك محتوى واحدًا فعليًا قبل حفظ المسودة.",
+    "createContentDialog.validation.templateRequired":
+      "اختر قالبًا مناسبًا قبل حفظ المسودة.",
     "createContentDialog.type.condition": "الحالات الطبية",
     "createContentDialog.type.symptom": "الأعراض",
     "createContentDialog.type.generalAdvice": "نصائح عامة",
@@ -1033,28 +1442,42 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "createContentDialog.field.slug.label": "Slug (اختياري)",
     "createContentDialog.field.slug.placeholder": "my-article",
     "createContentDialog.field.coverImage.label": "صورة الغلاف (اختياري)",
-    "createContentDialog.field.coverImage.hint": "رابط خارجي لصورة الغلاف المستخدمة في المعاينة.",
+    "createContentDialog.field.coverImage.hint":
+      "رابط خارجي لصورة الغلاف المستخدمة في المعاينة.",
     "createContentDialog.section.template.title": "القالب والبيانات المنظمة",
-    "createContentDialog.section.template.description": "اختر قالبًا نشطًا لهذا النوع لإدخال البيانات الطبية المنظمة من البداية.",
+    "createContentDialog.section.template.description":
+      "اختر قالبًا نشطًا لهذا النوع لإدخال البيانات الطبية المنظمة من البداية.",
     "createContentDialog.field.template.label": "القالب",
-    "createContentDialog.field.template.hintLoading": "جارٍ تحميل القوالب المتاحة…",
-    "createContentDialog.field.template.hintAvailable": "اختر القالب الأنسب ثم أكمل الحقول الإلزامية.",
-    "createContentDialog.field.template.hintNone": "لا توجد قوالب نشطة لهذا النوع حاليًا، ويمكنك المتابعة بدون قالب.",
-    "createContentDialog.field.template.placeholderLoading": "جارٍ تحميل القوالب...",
+    "createContentDialog.field.template.hintLoading":
+      "جارٍ تحميل القوالب المتاحة…",
+    "createContentDialog.field.template.hintAvailable":
+      "اختر القالب الأنسب ثم أكمل الحقول الإلزامية.",
+    "createContentDialog.field.template.hintNone":
+      "لا توجد قوالب نشطة لهذا النوع حاليًا، ويمكنك المتابعة بدون قالب.",
+    "createContentDialog.field.template.placeholderLoading":
+      "جارٍ تحميل القوالب...",
     "createContentDialog.field.template.placeholder": "اختر قالبًا",
     "createContentDialog.field.sourceTitle.label": "اسم المصدر",
-    "createContentDialog.field.sourceTitle.placeholder": "مثال: WHO أو Mayo Clinic",
+    "createContentDialog.field.sourceTitle.placeholder":
+      "مثال: WHO أو Mayo Clinic",
     "createContentDialog.field.sourceUrl.label": "رابط المصدر",
-    "createContentDialog.field.sourceUrl.hint": "أدخل رابط الخبر الأصلي من موقع خارجي، وليس رابطاً من لوحة التحكم أو localhost.",
-    "createContentDialog.field.sourceUrl.placeholder": "https://example.com/news",
+    "createContentDialog.field.sourceUrl.hint":
+      "أدخل رابط الخبر الأصلي من موقع خارجي، وليس رابطاً من لوحة التحكم أو localhost.",
+    "createContentDialog.field.sourceUrl.placeholder":
+      "https://example.com/news",
     "createContentDialog.field.originalTitle.label": "العنوان الأصلي",
-    "createContentDialog.field.originalTitle.hint": "سيُستخدم داخل بيانات الخبر إذا اختلف عن عنوان المحتوى.",
-    "createContentDialog.field.originalTitle.placeholder": "عنوان المادة كما نُشرت في المصدر",
+    "createContentDialog.field.originalTitle.hint":
+      "سيُستخدم داخل بيانات الخبر إذا اختلف عن عنوان المحتوى.",
+    "createContentDialog.field.originalTitle.placeholder":
+      "عنوان المادة كما نُشرت في المصدر",
     "createContentDialog.field.publishedAt.label": "تاريخ النشر",
-    "createContentDialog.blockEditor.description": "أنشئ البلوكات الفعلية للمقال الآن بدل الاعتماد على مسودة افتراضية فارغة.",
+    "createContentDialog.blockEditor.description":
+      "أنشئ البلوكات الفعلية للمقال الآن بدل الاعتماد على مسودة افتراضية فارغة.",
     "createContentDialog.field.pageVersion.label": "إصدار الصفحة (اختياري)",
-    "createContentDialog.field.pageVersion.hintSettings": "هذا الحقل مطلوب لصفحات الإعدادات.",
-    "createContentDialog.field.pageVersion.hintOther": "استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE.",
+    "createContentDialog.field.pageVersion.hintSettings":
+      "هذا الحقل مطلوب لصفحات الإعدادات.",
+    "createContentDialog.field.pageVersion.hintOther":
+      "استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE.",
     "createContentDialog.section.classification": "التصنيف والحوكمة",
     "createContentDialog.field.tags.label": "الوسوم",
     "createContentDialog.field.categories.label": "الفئات",
@@ -1072,35 +1495,49 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "createContentDialog.field.requiresSeekHelp.label": "يتطلب Seek Help Block",
     "createContentDialog.field.isFeatured.label": "محتوى مميز",
     "createContentDialog.readiness.title": "جاهزية المسودة",
-    "createContentDialog.readiness.description": "يساعدك هذا الملخص على التقاط النواقص قبل إرسال المحتوى للمراجعة لاحقًا.",
+    "createContentDialog.readiness.description":
+      "يساعدك هذا الملخص على التقاط النواقص قبل إرسال المحتوى للمراجعة لاحقًا.",
     "createContentDialog.readiness.done": "مكتمل",
     "createContentDialog.readiness.pending": "بحاجة لاستكمال",
-    "createContentDialog.readiness.contentBlocks": "إضافة محتوى فعلي داخل المقال",
+    "createContentDialog.readiness.contentBlocks":
+      "إضافة محتوى فعلي داخل المقال",
     "createContentDialog.readiness.sources": "إضافة مصدر موثوق واحد على الأقل",
-    "createContentDialog.readiness.disclaimerVersion": "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
-    "createContentDialog.readiness.seekHelp": "إضافة بلوك تنبيه (callout) بنوع warn/danger وعنوان يوضّح ضرورة مراجعة الطبيب",
-    "createContentDialog.readiness.newsMetadata": "استكمال بيانات الخبر الأساسية",
+    "createContentDialog.readiness.disclaimerVersion":
+      "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+    "createContentDialog.readiness.seekHelp":
+      "إضافة بلوك تنبيه (callout) بنوع warn/danger وعنوان يوضّح ضرورة مراجعة الطبيب",
+    "createContentDialog.readiness.newsMetadata":
+      "استكمال بيانات الخبر الأساسية",
     "createContentDialog.readiness.template": "اختيار قالب مناسب عند توفره",
-    "createContentDialog.readiness.templateFields": "استكمال الحقول الإلزامية في القالب",
-    "createContentDialog.section.reviewPreview.title": "مراجعة الحوكمة والمعاينة",
-    "createContentDialog.section.reviewPreview.description": "معاينة سريعة تساعدك على التأكد من جاهزية المسودة للمراجعة دون تعطيل الحفظ كـ DRAFT.",
+    "createContentDialog.readiness.templateFields":
+      "استكمال الحقول الإلزامية في القالب",
+    "createContentDialog.section.reviewPreview.title":
+      "مراجعة الحوكمة والمعاينة",
+    "createContentDialog.section.reviewPreview.description":
+      "معاينة سريعة تساعدك على التأكد من جاهزية المسودة للمراجعة دون تعطيل الحفظ كـ DRAFT.",
     "createContentDialog.error.createFailed": "تعذر الإنشاء",
     "createContentDialog.toast.created.title": "تم إضافة المحتوى",
-    "createContentDialog.toast.created.message": "أُضيفت مسودة «{title}» إلى المحتوى الطبي.",
+    "createContentDialog.toast.created.message":
+      "أُضيفت مسودة «{title}» إلى المحتوى الطبي.",
     "createContentDialog.action.cancel": "إلغاء",
     "createContentDialog.action.saving": "جارٍ الحفظ…",
     "createContentDialog.action.save": "حفظ كمسودة",
 
     "editContentDialog.title": "تعديل المحتوى الطبي",
-    "editContentDialog.subtitle": "حدّث البيانات الأساسية، والحقول الديناميكية، ومحتوى المقال من نفس النافذة.",
+    "editContentDialog.subtitle":
+      "حدّث البيانات الأساسية، والحقول الديناميكية، ومحتوى المقال من نفس النافذة.",
     "editContentDialog.close": "إغلاق",
     "editContentDialog.loading": "جارٍ تحميل بيانات المحتوى...",
     "editContentDialog.loadError": "تعذر تحميل بيانات المحتوى للتعديل.",
     "editContentDialog.validation.titleRequired": "عنوان المحتوى مطلوب",
-    "editContentDialog.validation.pageVersionRequired": "إصدار الصفحة مطلوب لصفحات الإعدادات",
-    "editContentDialog.validation.titleEnRequired": "العنوان بالإنجليزية مطلوب لصفحات الإعدادات",
-    "editContentDialog.validation.blocksRequired": "أضف على الأقل بلوك محتوى واحدًا فعليًا قبل حفظ التعديلات.",
-    "editContentDialog.validation.templateDataInvalid": "تحقق من بيانات القالب.",
+    "editContentDialog.validation.pageVersionRequired":
+      "إصدار الصفحة مطلوب لصفحات الإعدادات",
+    "editContentDialog.validation.titleEnRequired":
+      "العنوان بالإنجليزية مطلوب لصفحات الإعدادات",
+    "editContentDialog.validation.blocksRequired":
+      "أضف على الأقل بلوك محتوى واحدًا فعليًا قبل حفظ التعديلات.",
+    "editContentDialog.validation.templateDataInvalid":
+      "تحقق من بيانات القالب.",
     "editContentDialog.section.basicInfo": "البيانات الأساسية",
     "editContentDialog.field.type.label": "نوع المحتوى",
     "editContentDialog.field.type.placeholder": "اختر نوع المحتوى",
@@ -1115,31 +1552,48 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "editContentDialog.field.summary.placeholder": "مقدمة قصيرة تصف المحتوى…",
     "editContentDialog.field.slug.label": "Slug (اختياري)",
     "editContentDialog.field.pageVersion.label": "إصدار الصفحة (اختياري)",
-    "editContentDialog.field.pageVersion.hintSettings": "مطلوب لصفحات الإعدادات (SETTINGS_PAGE).",
-    "editContentDialog.field.pageVersion.hintOther": "استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE.",
+    "editContentDialog.field.pageVersion.hintSettings":
+      "مطلوب لصفحات الإعدادات (SETTINGS_PAGE).",
+    "editContentDialog.field.pageVersion.hintOther":
+      "استخدمه عند الحاجة، ويصبح مطلوبًا مع SETTINGS_PAGE.",
     "editContentDialog.field.template.label": "القالب",
-    "editContentDialog.field.template.hintLoading": "جارٍ تحميل القوالب المتاحة…",
-    "editContentDialog.field.template.hintSwitchable": "يمكنك تبديل القالب عند الحاجة، وسيتم تحديث الحقول الديناميكية أدناه.",
-    "editContentDialog.field.template.hintNone": "لا توجد قوالب نشطة لهذا النوع حالياً.",
-    "editContentDialog.field.template.hintUnsupportedType": "هذا النوع لا يستخدم قوالب ديناميكية حالياً.",
-    "editContentDialog.field.template.placeholderLoading": "جارٍ تحميل القوالب...",
+    "editContentDialog.field.template.hintLoading":
+      "جارٍ تحميل القوالب المتاحة…",
+    "editContentDialog.field.template.hintSwitchable":
+      "يمكنك تبديل القالب عند الحاجة، وسيتم تحديث الحقول الديناميكية أدناه.",
+    "editContentDialog.field.template.hintNone":
+      "لا توجد قوالب نشطة لهذا النوع حالياً.",
+    "editContentDialog.field.template.hintUnsupportedType":
+      "هذا النوع لا يستخدم قوالب ديناميكية حالياً.",
+    "editContentDialog.field.template.placeholderLoading":
+      "جارٍ تحميل القوالب...",
     "editContentDialog.field.template.placeholder": "اختر قالبًا",
     "editContentDialog.field.template.inactiveSuffix": "(غير نشط)",
     "editContentDialog.field.coverImage.label": "رابط صورة الغلاف",
-    "editContentDialog.section.dynamicAndContent": "الحقول الديناميكية ومحتوى المقال",
-    "editContentDialog.templateFields.title": "القالب المختار والبيانات المنظمة",
-    "editContentDialog.templateFields.description": "هذا المحرر يعكس الحقول المعروفة في القالب، بينما يبقى JSON الخام متاحًا كخيار احتياطي أدناه.",
-    "editContentDialog.field.dataJsonAdvanced.label": "البيانات الديناميكية (JSON متقدم)",
-    "editContentDialog.field.dataJsonAdvanced.hintWithTemplate": "حقل متقدم للتوافق مع بيانات قديمة أو حالات لا تغطيها الحقول المنظمة أعلاه — التعديل هنا يُطبَّق مباشرة.",
-    "editContentDialog.field.dataJsonAdvanced.hintNoTemplate": "لا يوجد قالب لهذا المحتوى، لذا هذا هو الحقل الوحيد لتحرير بياناته الديناميكية.",
-    "editContentDialog.blockEditor.description": "حدّث ترتيب البلوكات ومحتوى المقال من هنا مع إبقاء البيانات الديناميكية منفصلة.",
+    "editContentDialog.section.dynamicAndContent":
+      "الحقول الديناميكية ومحتوى المقال",
+    "editContentDialog.templateFields.title":
+      "القالب المختار والبيانات المنظمة",
+    "editContentDialog.templateFields.description":
+      "هذا المحرر يعكس الحقول المعروفة في القالب، بينما يبقى JSON الخام متاحًا كخيار احتياطي أدناه.",
+    "editContentDialog.field.dataJsonAdvanced.label":
+      "البيانات الديناميكية (JSON متقدم)",
+    "editContentDialog.field.dataJsonAdvanced.hintWithTemplate":
+      "حقل متقدم للتوافق مع بيانات قديمة أو حالات لا تغطيها الحقول المنظمة أعلاه — التعديل هنا يُطبَّق مباشرة.",
+    "editContentDialog.field.dataJsonAdvanced.hintNoTemplate":
+      "لا يوجد قالب لهذا المحتوى، لذا هذا هو الحقل الوحيد لتحرير بياناته الديناميكية.",
+    "editContentDialog.blockEditor.description":
+      "حدّث ترتيب البلوكات ومحتوى المقال من هنا مع إبقاء البيانات الديناميكية منفصلة.",
     "editContentDialog.section.classification": "التصنيف والحوكمة",
     "editContentDialog.readiness.title": "متطلبات الجاهزية قبل المراجعة",
     "editContentDialog.readiness.done": "مكتمل",
     "editContentDialog.readiness.pending": "بحاجة لاستكمال",
-    "editContentDialog.readiness.sources": "إضافة مصدر موثوق واحد على الأقل قبل الإرسال للمراجعة",
-    "editContentDialog.readiness.disclaimerVersion": "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
-    "editContentDialog.readiness.seekHelp": "إضافة بلوك تنبيه (callout) بنوع warn/danger وعنوان يوضّح ضرورة مراجعة الطبيب",
+    "editContentDialog.readiness.sources":
+      "إضافة مصدر موثوق واحد على الأقل قبل الإرسال للمراجعة",
+    "editContentDialog.readiness.disclaimerVersion":
+      "تحديد إصدار التنبيه الطبي (Disclaimer Version)",
+    "editContentDialog.readiness.seekHelp":
+      "إضافة بلوك تنبيه (callout) بنوع warn/danger وعنوان يوضّح ضرورة مراجعة الطبيب",
     "editContentDialog.field.tags.label": "الوسوم",
     "editContentDialog.field.categories.label": "الفئات",
     "editContentDialog.field.riskFlags.label": "Risk Flags",
@@ -1164,15 +1618,20 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "editContentDialog.field.newsImportedAt.label": "Imported At",
     "editContentDialog.field.newsAiSummary.label": "AI Summary",
     "editContentDialog.section.reviewPreview.title": "مراجعة الحوكمة والمعاينة",
-    "editContentDialog.section.reviewPreview.description": "هذه المعاينة تساعد على التأكد من وضوح المصادر وعناصر السلامة وشكل العرض قبل الحفظ.",
-    "editContentDialog.warning.invalidDynamicData": "JSON الخاص بالبيانات الديناميكية غير صالح ولن ينعكس بدقة في المعاينة.",
-    "editContentDialog.warning.noContentBlocks": "لا توجد بلوكات محتوى فعليّة متاحة حاليًا.",
+    "editContentDialog.section.reviewPreview.description":
+      "هذه المعاينة تساعد على التأكد من وضوح المصادر وعناصر السلامة وشكل العرض قبل الحفظ.",
+    "editContentDialog.warning.invalidDynamicData":
+      "JSON الخاص بالبيانات الديناميكية غير صالح ولن ينعكس بدقة في المعاينة.",
+    "editContentDialog.warning.noContentBlocks":
+      "لا توجد بلوكات محتوى فعليّة متاحة حاليًا.",
     "editContentDialog.warning.noSources": "لا توجد مراجع مصادر مرفقة حاليًا.",
     "editContentDialog.warning.noDisclaimer": "إصدار التنبيه الطبي غير مضاف.",
-    "editContentDialog.warning.seekHelp": "أضف بلوك تنبيه (callout) بنوع warn أو danger وعنوان يوضّح ضرورة مراجعة الطبيب — تفعيل الخيار وحده لا يكفي.",
+    "editContentDialog.warning.seekHelp":
+      "أضف بلوك تنبيه (callout) بنوع warn أو danger وعنوان يوضّح ضرورة مراجعة الطبيب — تفعيل الخيار وحده لا يكفي.",
     "editContentDialog.error.updateFailed": "تعذر التعديل",
     "editContentDialog.toast.updated.title": "تم تحديث المحتوى",
-    "editContentDialog.toast.updated.message": "تم حفظ التعديلات على «{title}».",
+    "editContentDialog.toast.updated.message":
+      "تم حفظ التعديلات على «{title}».",
     "editContentDialog.action.cancel": "إلغاء",
     "editContentDialog.action.saving": "جارٍ الحفظ…",
     "editContentDialog.action.save": "حفظ التعديلات",
@@ -1190,7 +1649,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "viewContentDialog.status.draft": "مسودة",
     "viewContentDialog.diagnosticBadge": "تشخيصي",
     "viewContentDialog.title": "معاينة المحتوى الطبي",
-    "viewContentDialog.description": "عرض تفاصيل المحتوى قبل التعديل أو الاعتماد",
+    "viewContentDialog.description":
+      "عرض تفاصيل المحتوى قبل التعديل أو الاعتماد",
     "viewContentDialog.close": "إغلاق",
     "viewContentDialog.loading": "جارِ تحميل تفاصيل المحتوى...",
     "viewContentDialog.loadError": "تعذّر تحميل تفاصيل المحتوى.",
@@ -1239,18 +1699,23 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminFacilityDialog.action.addTag": "إضافة سمة",
     "adminServiceProviderDialog.create.ariaLabel": "إنشاء مزود خدمة جديد",
     "adminServiceProviderDialog.edit.ariaLabel": "تعديل بيانات مزود الخدمة",
-    "adminServiceProviderDialog.changeStatus.ariaLabel": "تغيير حالة مزود الخدمة",
+    "adminServiceProviderDialog.changeStatus.ariaLabel":
+      "تغيير حالة مزود الخدمة",
     "adminServiceProviderDialog.toast.created": "تم إنشاء مزود الخدمة بنجاح",
-    "adminServiceProviderDialog.toast.updated": "تم تحديث بيانات مزود الخدمة بنجاح",
-    "adminServiceProviderDialog.toast.statusUpdated": "تم تحديث حالة مزود الخدمة بنجاح",
-    "adminServiceProviderDialog.field.serviceType.placeholder": "اختر نوع الخدمة",
+    "adminServiceProviderDialog.toast.updated":
+      "تم تحديث بيانات مزود الخدمة بنجاح",
+    "adminServiceProviderDialog.toast.statusUpdated":
+      "تم تحديث حالة مزود الخدمة بنجاح",
+    "adminServiceProviderDialog.field.serviceType.placeholder":
+      "اختر نوع الخدمة",
     "adminServiceProviderDialog.field.name.placeholder": "أدخل اسم مزود الخدمة",
     "adminServiceProviderDialog.field.altName.placeholder": "أضف اسماً بديلاً",
     "adminServiceProviderDialog.action.addAltName": "إضافة اسم بديل",
     "adminSecretaryDialog.create.ariaLabel": "إنشاء حساب سكرتير جديد",
     "adminSecretaryDialog.edit.ariaLabel": "تعديل بيانات السكرتير",
     "adminSecretaryDialog.offboard.ariaLabel": "إيقاف الحساب نهائياً",
-    "adminSecretaryDialog.offboard.reason.placeholder": "اكتب سبب إيقاف الحساب...",
+    "adminSecretaryDialog.offboard.reason.placeholder":
+      "اكتب سبب إيقاف الحساب...",
     "adminNotifications.card.markRead": "تعليم كمقروء",
     "adminNotifications.heading": "الإشعارات",
     "adminNotifications.empty.ariaLabel": "لا توجد إشعارات",
@@ -1258,28 +1723,35 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminNotifications.broadcast.toast.sent": "تم إرسال الإشعار بنجاح",
     "adminNotifications.broadcast.field.group.placeholder": "اختر المجموعة",
     "adminNotifications.broadcast.field.type.placeholder": "اختر النوع",
-    "adminNotifications.broadcast.field.title.placeholder": "أدخل عنوان الإشعار",
+    "adminNotifications.broadcast.field.title.placeholder":
+      "أدخل عنوان الإشعار",
     "adminNotifications.broadcast.field.body.placeholder": "أدخل محتوى الإشعار",
-    "adminNotifications.broadcast.field.extraData.placeholder": "بيانات إضافية بصيغة JSON (اختياري)",
+    "adminNotifications.broadcast.field.extraData.placeholder":
+      "بيانات إضافية بصيغة JSON (اختياري)",
     "adminMedicalContentDialog.reject.ariaLabel": "رفض المحتوى",
-    "adminMedicalContentDialog.reject.reason.placeholder": "وضّح ما يجب تعديله…",
+    "adminMedicalContentDialog.reject.reason.placeholder":
+      "وضّح ما يجب تعديله…",
     "adminMedicalContent.field.selectValue.placeholder": "اختر القيمة",
     "adminMedicalContent.field.listItems.placeholder": "عنصر أول&#10;عنصر ثانٍ",
     "adminMedicalContent.field.labelAr.placeholder": "العربية",
     "adminMedicalContent.field.enterValue.placeholder": "أدخل القيمة",
-    "adminMedicalContent.languageToggle.ariaLabel": "تبديل لغة العرض: العربية أو English",
+    "adminMedicalContent.languageToggle.ariaLabel":
+      "تبديل لغة العرض: العربية أو English",
     "adminMedicalOrders.toolbar.search.placeholder": "بحث في القائمة…",
     "adminMedicalOrders.toolbar.search.ariaLabel": "بحث في كتالوج الطلبات",
     "adminMedicalOrders.toolbar.category.placeholder": "الفئة (category)",
     "adminMedicalOrders.toolbar.category.ariaLabel": "فلتر الفئة",
     "adminMedicalOrders.categoryTabs.ariaLabel": "فئات كتالوج الطلبات الطبية",
-    "adminMedicalOrders.field.exampleName.placeholder": "مثال: complete blood count (CBC)",
+    "adminMedicalOrders.field.exampleName.placeholder":
+      "مثال: complete blood count (CBC)",
     "adminMedicalOrders.field.nameAr.placeholder": "اسم الطلب بالعربية",
     "adminMedicalOrders.field.specimenType.placeholder": "نوع العينة",
     "adminMedicalOrders.field.resultType.placeholder": "نوع النتيجة",
     "adminMedicalOrders.field.bodyRegion.placeholder": "منطقة الجسم",
-    "adminMedicalOrders.field.defaultPrep.placeholder": "التحضير الافتراضي قبل الإجراء",
-    "adminMedicalOrders.field.postInstructions.placeholder": "تعليمات ما بعد الإجراء",
+    "adminMedicalOrders.field.defaultPrep.placeholder":
+      "التحضير الافتراضي قبل الإجراء",
+    "adminMedicalOrders.field.postInstructions.placeholder":
+      "تعليمات ما بعد الإجراء",
     "adminMedicalOrders.field.notes.placeholder": "أي ملاحظات إضافية للبند",
     "adminServiceTypeDialog.field.nameAr.ariaLabel": "الاسم (عربي)",
     "adminServiceTypeDialog.field.nameAr.placeholder": "مثال: مختبرات",
@@ -1298,44 +1770,62 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminUsersDialog.field.role.placeholder": "اختر الدور",
     "adminUsersDialog.reboard.toast": "تم تفعيل حساب المستخدم بنجاح",
     "adminUsersDialog.restore.toast.selectDecision": "يجب اختيار القرار أولاً.",
-    "adminUsersDialog.restore.toast.noteRequired": "يجب إضافة ملاحظة عند رفض الطلب.",
-    "adminUsersDialog.restore.toast.noRequest": "تعذر تحديد طلب الاستعادة المطلوب. أعد تحميل القائمة ثم حاول مرة أخرى.",
+    "adminUsersDialog.restore.toast.noteRequired":
+      "يجب إضافة ملاحظة عند رفض الطلب.",
+    "adminUsersDialog.restore.toast.noRequest":
+      "تعذر تحديد طلب الاستعادة المطلوب. أعد تحميل القائمة ثم حاول مرة أخرى.",
     "adminUsersDialog.restore.field.decision.placeholder": "اختر القرار",
-    "adminUsersDialog.restore.field.note.placeholder": "أضف ملاحظة حول القرار...",
+    "adminUsersDialog.restore.field.note.placeholder":
+      "أضف ملاحظة حول القرار...",
     "adminAccessRequests.details.ariaLabel": "تفاصيل طلب الوصول",
-    "adminAppointments.cancel.reason.placeholder": "اكتب سبب إلغاء الموعد هنا...",
-    "adminDoctorProfileChangeRequests.toast.decisionRequired": "يجب اختيار القرار (موافقة أو رفض)",
-    "adminDoctorProfileChangeRequests.toast.noteRequired": "يجب إضافة ملاحظة عند رفض الطلب",
-    "adminDoctorProfileChangeRequests.field.decision.placeholder": "اختر القرار",
+    "adminAppointments.cancel.reason.placeholder":
+      "اكتب سبب إلغاء الموعد هنا...",
+    "adminDoctorProfileChangeRequests.toast.decisionRequired":
+      "يجب اختيار القرار (موافقة أو رفض)",
+    "adminDoctorProfileChangeRequests.toast.noteRequired":
+      "يجب إضافة ملاحظة عند رفض الطلب",
+    "adminDoctorProfileChangeRequests.field.decision.placeholder":
+      "اختر القرار",
     "adminPatients.toast.activated": "تم تفعيل حساب المريض بنجاح.",
-    "adminPatients.toast.reactivatedAfterAppeal": "تمت إعادة تفعيل الحساب بعد رفع التعليق.",
-    "adminPatients.appointmentsNote.title": "الأرقام محسوبة من أحدث 500 موعد. الـ API لا يدعم فلترة بـ patientId مباشرة.",
+    "adminPatients.toast.reactivatedAfterAppeal":
+      "تمت إعادة تفعيل الحساب بعد رفع التعليق.",
+    "adminPatients.appointmentsNote.title":
+      "الأرقام محسوبة من أحدث 500 موعد. الـ API لا يدعم فلترة بـ patientId مباشرة.",
     "adminPatients.suspend.reason.placeholder": "اكتب سبب التعليق...",
     "adminMedicalFileOptions.toast.nameRequired": "أدخل اسم الخيار أولًا.",
     "adminMedicalFileOptions.toast.added": "تمت إضافة الخيار.",
     "adminMedicalFileOptions.toast.deleted": "تم حذف الخيار.",
-    "adminMedicalFileOptions.toast.newNameRequired": "أدخل الاسم الجديد للخيار أولًا.",
+    "adminMedicalFileOptions.toast.newNameRequired":
+      "أدخل الاسم الجديد للخيار أولًا.",
     "adminMedicalFileOptions.toast.updated": "تم تحديث الخيار.",
     "adminMedicalFileOptions.header.title": "خيارات الملف الطبي",
-    "adminMedicalFileOptions.header.subtitle": "إضافة وإدارة الخيارات ضمن الملف الطبي للمريض",
+    "adminMedicalFileOptions.header.subtitle":
+      "إضافة وإدارة الخيارات ضمن الملف الطبي للمريض",
     "adminMedicalFileOptions.section.chronicDiseases": "الأمراض المزمنة",
     "adminMedicalFileOptions.section.allergyTypes": "أنواع الحساسية",
     "adminMedicalFileOptions.section.bloodTypes": "فصائل الدم",
-    "adminMedicalFileOptions.field.newOption.placeholder": "ادخل الخيار الجديد...",
+    "adminMedicalFileOptions.field.newOption.placeholder":
+      "ادخل الخيار الجديد...",
     "adminMedicalFileOptions.action.add": "إضافة",
     "adminMedicalFileOptions.updateDialog.title": "تحديث الخيار",
     "adminMedicalFileOptions.field.newName.placeholder": "الاسم الجديد...",
     "adminMedicalFileOptions.deleteDialog.title": "حذف الخيار",
-    "adminComplaintDetails.toast.attachmentMissing": "تعذّر العثور على بيانات المرفق المطلوبة لهذه الشكوى.",
-    "adminComplaintDetails.toast.noValidLink": "لم يُرجع الخادم رابطًا صالحًا لهذا المرفق.",
-    "adminComplaintDetails.toast.openedInNewTab": "تم فتح المرفق في تبويب جديد.",
+    "adminComplaintDetails.toast.attachmentMissing":
+      "تعذّر العثور على بيانات المرفق المطلوبة لهذه الشكوى.",
+    "adminComplaintDetails.toast.noValidLink":
+      "لم يُرجع الخادم رابطًا صالحًا لهذا المرفق.",
+    "adminComplaintDetails.toast.openedInNewTab":
+      "تم فتح المرفق في تبويب جديد.",
     "adminComplaintDetails.toast.downloadStarted": "بدأ تنزيل المرفق.",
     "adminComplaintDetails.attachment.view.ariaLabel": "عرض الملف",
     "adminComplaintDetails.attachment.download.ariaLabel": "تحميل الملف",
     "adminComplaintDetails.reply.placeholder": "نص الرد للمريض...",
-    "adminComplaintDetails.confirmStatusDialog.title": "تأكيد تحديث حالة الشكوى",
-    "adminSecretary.doctorAppointments.search.placeholder": "بحث باسم المريض أو المعرّف…",
-    "adminVerificationRequests.field.specializationExample.placeholder": "طب الأسنان",
+    "adminComplaintDetails.confirmStatusDialog.title":
+      "تأكيد تحديث حالة الشكوى",
+    "adminSecretary.doctorAppointments.search.placeholder":
+      "بحث باسم المريض أو المعرّف…",
+    "adminVerificationRequests.field.specializationExample.placeholder":
+      "طب الأسنان",
     "common.statusLabel": "الحالة",
     "adminFacility.type.hospital": "مستشفى",
     "adminFacility.type.clinic": "عيادة",
@@ -1368,27 +1858,35 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminFacilityDialog.field.phone.label": "رقم الهاتف",
     "adminFacilityDialog.field.address.label": "العنوان",
     "adminFacilityDialog.field.description.label": "الوصف",
-    "adminFacilityDialog.field.description.hint": "أدخل وصفاً للمنشأة (اختياري)",
+    "adminFacilityDialog.field.description.hint":
+      "أدخل وصفاً للمنشأة (اختياري)",
     "adminFacilityDialog.field.ownerDoctor.label": "الطبيب المالك",
-    "adminFacilityDialog.field.ownerDoctor.hint": "اختر الطبيب المالك (اختياري)",
+    "adminFacilityDialog.field.ownerDoctor.hint":
+      "اختر الطبيب المالك (اختياري)",
     "adminFacilityDialog.field.attributes.label": "السمات والخصائص",
-    "adminFacilityDialog.field.attributes.hint": "سيتم حفظ السمات بصيغة مفاتيح مثل night_shift و echo_available.",
+    "adminFacilityDialog.field.attributes.hint":
+      "سيتم حفظ السمات بصيغة مفاتيح مثل night_shift و echo_available.",
     "adminFacilityDialog.attributes.empty": "لا توجد سمات مضافة بعد.",
     "adminFacilityDialog.attributes.removeAria": "إزالة {name}",
     "adminFacilityDialog.action.creating": "جارٍ الإنشاء…",
     "adminFacilityDialog.action.create": "إنشاء المنشأة",
     "adminFacilityDialog.action.updating": "جارٍ التحديث…",
     "adminFacilityDialog.action.saveChanges": "حفظ التغييرات",
-    "adminFacilityDialog.delete.confirmQuestion": "هل أنت متأكد من حذف هذه المنشأة؟",
-    "adminFacilityDialog.delete.warning": "الحذف هنا حذف منطقي فقط، وسيؤدي أيضًا إلى إزالة ربط الأطباء بهذه المنشأة.",
+    "adminFacilityDialog.delete.confirmQuestion":
+      "هل أنت متأكد من حذف هذه المنشأة؟",
+    "adminFacilityDialog.delete.warning":
+      "الحذف هنا حذف منطقي فقط، وسيؤدي أيضًا إلى إزالة ربط الأطباء بهذه المنشأة.",
     "adminFacilityDialog.delete.confirmLabel": "اكتب اسم المنشأة للتأكيد",
     "adminFacilityDialog.delete.confirmButton": "حذف",
     "adminFacilityDialog.delete.deleting": "جاري الحذف...",
     "adminFacilityDialog.changeStatus.newStatusLabel": "الحالة الجديدة",
-    "adminFacilityDialog.changeStatus.explain": "أنت تغيّر حالة سجل المنشأة نفسه. هذا لا يحرر بيانات المنشأة، لكنه قد يغيّر ظهورها أو علاقتها التشغيلية مع الأطباء.",
+    "adminFacilityDialog.changeStatus.explain":
+      "أنت تغيّر حالة سجل المنشأة نفسه. هذا لا يحرر بيانات المنشأة، لكنه قد يغيّر ظهورها أو علاقتها التشغيلية مع الأطباء.",
     "adminFacilityDialog.changeStatus.currentStatusPrefix": "الحالة الحالية: ",
-    "adminFacilityDialog.changeStatus.deletedWarning": "تعيين الحالة إلى \"محذوف\" سيؤدي إلى فك ارتباط الأطباء بهذه المنشأة حسب عقد الـ API.",
-    "adminFacilityDialog.changeStatus.pendingSaveNote": "سيتم حفظ الحالة الجديدة فقط عند الضغط على زر \"تغيير الحالة\".",
+    "adminFacilityDialog.changeStatus.deletedWarning":
+      'تعيين الحالة إلى "محذوف" سيؤدي إلى فك ارتباط الأطباء بهذه المنشأة حسب عقد الـ API.',
+    "adminFacilityDialog.changeStatus.pendingSaveNote":
+      'سيتم حفظ الحالة الجديدة فقط عند الضغط على زر "تغيير الحالة".',
     "adminFacilityDialog.changeStatus.saving": "جاري الحفظ...",
     "adminFacilityDialog.changeStatus.submit": "تغيير الحالة",
     "adminFacilityDialog.details.doctorCount": "عدد الأطباء المرتبطين",
@@ -1399,33 +1897,49 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminFacilityDialog.doctors.ariaLabelTemplate": "الأطباء في {name}",
     "adminFacilityDialog.doctors.fallbackName": "المنشأة",
     "adminFacilityDialog.doctors.noMatch": "لا يوجد أطباء يطابقون البحث الحالي",
-    "adminFacilityDialog.doctors.noneInFacility": "لا يوجد أطباء في هذه المنشأة",
+    "adminFacilityDialog.doctors.noneInFacility":
+      "لا يوجد أطباء في هذه المنشأة",
     "common.operationFailed": "فشلت العملية",
     "common.location": "الموقع",
     "adminServiceProvider.status.draft": "مسودة",
-    "adminServiceProviderDialog.field.serviceType.hint": "اختر التصنيف المرجعي الذي سيظهر هذا المزوّد تحته داخل الإدارة.",
+    "adminServiceProviderDialog.field.serviceType.hint":
+      "اختر التصنيف المرجعي الذي سيظهر هذا المزوّد تحته داخل الإدارة.",
     "adminServiceProviderDialog.field.name.label": "الاسم",
-    "adminServiceProviderDialog.validation.serviceTypeRequired": "يجب اختيار نوع الخدمة",
+    "adminServiceProviderDialog.validation.serviceTypeRequired":
+      "يجب اختيار نوع الخدمة",
     "adminServiceProviderDialog.validation.nameRequired": "الاسم مطلوب",
     "adminServiceProviderDialog.validation.countryRequired": "البلد مطلوب",
     "adminServiceProviderDialog.validation.jsonInvalid": "صيغة JSON غير صالحة",
     "adminServiceProviderDialog.section.dataFor": "بيانات {name}",
-    "adminServiceProviderDialog.inactiveTypeWarning.create": "هذا النوع غير مُفعّل حاليًا. يمكنك إنشاء مزودين، لكن لن يظهروا للمستخدمين حتى يُفعَّل النوع.",
-    "adminServiceProviderDialog.inactiveTypeWarning.edit": "نوع الخدمة هذا غير مُفعّل حاليًا. يمكنك تعديل بيانات المزود أو تعطيله، لكن لا يمكن تفعيله قبل تفعيل النوع.",
-    "adminServiceProviderDialog.field.advancedToggle": "متقدّم: تحرير JSON مباشرةً (اختياري)",
-    "adminServiceProviderDialog.field.advancedJson.label": "بيانات إضافية (JSON)",
-    "adminServiceProviderDialog.field.advancedJson.hint": "يستبدل الحقول المولدة أعلاه عند الحفظ.",
+    "adminServiceProviderDialog.inactiveTypeWarning.create":
+      "هذا النوع غير مُفعّل حاليًا. يمكنك إنشاء مزودين، لكن لن يظهروا للمستخدمين حتى يُفعَّل النوع.",
+    "adminServiceProviderDialog.inactiveTypeWarning.edit":
+      "نوع الخدمة هذا غير مُفعّل حاليًا. يمكنك تعديل بيانات المزود أو تعطيله، لكن لا يمكن تفعيله قبل تفعيل النوع.",
+    "adminServiceProviderDialog.field.advancedToggle":
+      "متقدّم: تحرير JSON مباشرةً (اختياري)",
+    "adminServiceProviderDialog.field.advancedJson.label":
+      "بيانات إضافية (JSON)",
+    "adminServiceProviderDialog.field.advancedJson.hint":
+      "يستبدل الحقول المولدة أعلاه عند الحفظ.",
     "adminServiceProviderDialog.field.aliases.label": "الأسماء البديلة",
-    "adminServiceProviderDialog.field.aliases.hint": "تُستخدم لتوسيع البحث أو حفظ صيغ كتابة مختلفة لنفس المزوّد.",
-    "adminServiceProviderDialog.aliases.empty": "لا توجد أسماء بديلة مضافة بعد.",
-    "adminServiceProviderDialog.status.hint": "مسودة للمراجعة الداخلية، نشط للظهور والاستخدام، معطّل لإخفائه دون حذف السجل.",
-    "adminServiceProviderDialog.create.description": "أنشئ هنا سجل مزوّد الخدمة نفسه وربطه بنوع خدمة واحد. الحقول الأساسية الظاهرة في الكروت والقوائم تؤخذ من هذا النموذج، أما حقل JSON فهو فقط لبيانات إضافية لا تظهر مباشرة للمستخدم.",
-    "adminServiceProviderDialog.edit.description": "هذه النافذة تعدّل سجل مزوّد الخدمة الحالي فقط. نوع الخدمة المرجعي ثابت هنا، وأي تعديل على الاسم أو الحالة سينعكس على القوائم والكروت المرتبطة بهذا المزوّد.",
+    "adminServiceProviderDialog.field.aliases.hint":
+      "تُستخدم لتوسيع البحث أو حفظ صيغ كتابة مختلفة لنفس المزوّد.",
+    "adminServiceProviderDialog.aliases.empty":
+      "لا توجد أسماء بديلة مضافة بعد.",
+    "adminServiceProviderDialog.status.hint":
+      "مسودة للمراجعة الداخلية، نشط للظهور والاستخدام، معطّل لإخفائه دون حذف السجل.",
+    "adminServiceProviderDialog.create.description":
+      "أنشئ هنا سجل مزوّد الخدمة نفسه وربطه بنوع خدمة واحد. الحقول الأساسية الظاهرة في الكروت والقوائم تؤخذ من هذا النموذج، أما حقل JSON فهو فقط لبيانات إضافية لا تظهر مباشرة للمستخدم.",
+    "adminServiceProviderDialog.edit.description":
+      "هذه النافذة تعدّل سجل مزوّد الخدمة الحالي فقط. نوع الخدمة المرجعي ثابت هنا، وأي تعديل على الاسم أو الحالة سينعكس على القوائم والكروت المرتبطة بهذا المزوّد.",
     "adminServiceProviderDialog.edit.serviceType.hint": "لا يمكن التعديل",
-    "adminServiceProviderDialog.edit.loadError": "تعذر تحميل بيانات مزود الخدمة.",
+    "adminServiceProviderDialog.edit.loadError":
+      "تعذر تحميل بيانات مزود الخدمة.",
     "adminServiceProviderDialog.action.create": "إنشاء مزود الخدمة",
-    "adminServiceProviderDialog.changeStatus.inactiveTypeHint": "نوع الخدمة غير مُفعّل حاليًا، لذا لا يمكن تفعيل هذا المزود قبل تفعيل النوع.",
-    "adminServiceProviderDialog.changeStatus.warning": "سيؤثر تغيير الحالة على إمكانية عرض مزود الخدمة للمستخدمين. تأكد من صحة القرار قبل المتابعة.",
+    "adminServiceProviderDialog.changeStatus.inactiveTypeHint":
+      "نوع الخدمة غير مُفعّل حاليًا، لذا لا يمكن تفعيل هذا المزود قبل تفعيل النوع.",
+    "adminServiceProviderDialog.changeStatus.warning":
+      "سيؤثر تغيير الحالة على إمكانية عرض مزود الخدمة للمستخدمين. تأكد من صحة القرار قبل المتابعة.",
     "adminServiceProviderDialog.changeStatus.confirmButton": "تأكيد التغيير",
     "common.genderLabel": "الجنس",
     "common.cannotEdit": "لا يمكن التعديل",
@@ -1433,22 +1947,29 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminSecretaryDialog.field.gender.female": "أنثى",
     "adminSecretaryDialog.validation.fullNameRequired": "الاسم الكامل مطلوب",
     "adminSecretaryDialog.validation.emailRequired": "البريد الإلكتروني مطلوب",
-    "adminSecretaryDialog.validation.emailInvalid": "البريد الإلكتروني غير صالح",
+    "adminSecretaryDialog.validation.emailInvalid":
+      "البريد الإلكتروني غير صالح",
     "adminSecretaryDialog.validation.passwordRequired": "كلمة المرور مطلوبة",
-    "adminSecretaryDialog.validation.passwordTooShort": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+    "adminSecretaryDialog.validation.passwordTooShort":
+      "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
     "adminSecretaryDialog.validation.phoneRequired": "رقم الهاتف مطلوب",
-    "adminSecretaryDialog.validation.permissionsRequired": "يجب اختيار صلاحية واحدة على الأقل",
+    "adminSecretaryDialog.validation.permissionsRequired":
+      "يجب اختيار صلاحية واحدة على الأقل",
     "adminSecretaryDialog.field.fullName.label": "الاسم الكامل",
     "adminSecretaryDialog.field.email.label": "البريد الإلكتروني",
     "adminSecretaryDialog.field.password.label": "كلمة المرور",
     "adminSecretaryDialog.field.permissions.label": "الصلاحيات",
     "adminSecretaryDialog.action.unavailable": "غير متاح حالياً",
     "adminSecretaryDialog.action.createAccount": "إنشاء الحساب",
-    "adminSecretaryDialog.offboard.description.secretary": "وإلغاء ارتباطه بالطبيب وإلغاء جميع مواعيده النشطة.",
-    "adminSecretaryDialog.offboard.description.doctor": "وإخفاؤه من البحث وإلغاء مواعيده المستقبلية وإغلاق الاستشارات النشطة.",
-    "adminSecretaryDialog.offboard.description.staff": "وتعطيل وصوله إلى المنصة.",
+    "adminSecretaryDialog.offboard.description.secretary":
+      "وإلغاء ارتباطه بالطبيب وإلغاء جميع مواعيده النشطة.",
+    "adminSecretaryDialog.offboard.description.doctor":
+      "وإخفاؤه من البحث وإلغاء مواعيده المستقبلية وإغلاق الاستشارات النشطة.",
+    "adminSecretaryDialog.offboard.description.staff":
+      "وتعطيل وصوله إلى المنصة.",
     "adminSecretaryDialog.offboard.willSuspend": "سيتم إيقاف حساب",
-    "adminSecretaryDialog.offboard.irreversible": "هذا الإجراء لا يمكن التراجع عنه.",
+    "adminSecretaryDialog.offboard.irreversible":
+      "هذا الإجراء لا يمكن التراجع عنه.",
     "adminSecretaryDialog.offboard.reasonRequired": "سبب الإيقاف مطلوب",
     "adminSecretaryDialog.offboard.field.reason.label": "سبب الإيقاف",
     "adminSecretaryDialog.offboard.error.generic": "حدث خطأ أثناء إيقاف الحساب",
@@ -1460,24 +1981,33 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminNotifications.kpi.unread": "غير مقروءة",
     "adminNotifications.card.new": "جديد",
     "adminNotifications.broadcast.ariaLabel": "بث إشعار للمستخدمين",
-    "adminNotifications.broadcast.warning.confirm": "سيتم إرسال البث إلى المجموعة المحددة فور التأكيد. راجع المحتوى بعناية قبل الإرسال.",
+    "adminNotifications.broadcast.warning.confirm":
+      "سيتم إرسال البث إلى المجموعة المحددة فور التأكيد. راجع المحتوى بعناية قبل الإرسال.",
     "adminNotifications.broadcast.field.group.label": "المجموعة المستهدفة",
     "adminNotifications.broadcast.field.type.label": "نوع الإشعار",
     "adminNotifications.broadcast.field.title.label": "عنوان الإشعار",
     "adminNotifications.broadcast.field.body.label": "محتوى الإشعار",
-    "adminNotifications.broadcast.field.extraData.label": "بيانات إضافية (اختياري)",
-    "adminNotifications.broadcast.field.extraData.hint": "يمكنك إضافة بيانات إضافية بصيغة JSON",
-    "adminNotifications.broadcast.warning.sendAll": "سيتم إرسال هذا الإشعار إلى جميع المستخدمين في المجموعة المحددة. تأكد من صحة المحتوى قبل الإرسال.",
+    "adminNotifications.broadcast.field.extraData.label":
+      "بيانات إضافية (اختياري)",
+    "adminNotifications.broadcast.field.extraData.hint":
+      "يمكنك إضافة بيانات إضافية بصيغة JSON",
+    "adminNotifications.broadcast.warning.sendAll":
+      "سيتم إرسال هذا الإشعار إلى جميع المستخدمين في المجموعة المحددة. تأكد من صحة المحتوى قبل الإرسال.",
     "adminNotifications.broadcast.sending": "جارٍ الإرسال...",
     "adminNotifications.broadcast.submit": "إرسال الإشعار",
     "adminNotifications.broadcast.toast.sentTitle": "تم الإرسال",
-    "adminNotifications.broadcast.validation.groupRequired": "يجب اختيار المجموعة المستهدفة",
-    "adminNotifications.broadcast.validation.typeRequired": "يجب اختيار نوع الإشعار",
+    "adminNotifications.broadcast.validation.groupRequired":
+      "يجب اختيار المجموعة المستهدفة",
+    "adminNotifications.broadcast.validation.typeRequired":
+      "يجب اختيار نوع الإشعار",
     "adminNotifications.broadcast.validation.titleRequired": "العنوان مطلوب",
-    "adminNotifications.broadcast.validation.titleTooLong": "العنوان يجب أن يكون أقل من 100 حرف",
+    "adminNotifications.broadcast.validation.titleTooLong":
+      "العنوان يجب أن يكون أقل من 100 حرف",
     "adminNotifications.broadcast.validation.bodyRequired": "المحتوى مطلوب",
-    "adminNotifications.broadcast.validation.bodyTooLong": "المحتوى يجب أن يكون أقل من 500 حرف",
-    "adminNotifications.broadcast.validation.dataInvalid": "البيانات الإضافية يجب أن تكون بصيغة JSON صحيحة",
+    "adminNotifications.broadcast.validation.bodyTooLong":
+      "المحتوى يجب أن يكون أقل من 500 حرف",
+    "adminNotifications.broadcast.validation.dataInvalid":
+      "البيانات الإضافية يجب أن تكون بصيغة JSON صحيحة",
     "adminNotifications.group.all": "جميع المستخدمين",
     "adminNotifications.group.doctors": "الأطباء",
     "adminNotifications.group.patients": "المرضى",
@@ -1492,8 +2022,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminNotifications.action.markAllRead": "تحديد الكل كمقروء",
     "adminMedicalContentDialog.reject.willReject": "سيتم رفض:",
     "adminMedicalContentDialog.reject.field.label": "سبب الرفض",
-    "adminMedicalContentDialog.reject.validation.tooShort": "أدخل سبباً واضحاً (4 أحرف على الأقل)",
-    "adminMedicalContentDialog.reject.validation.tooLong": "الحد الأقصى 2000 حرف",
+    "adminMedicalContentDialog.reject.validation.tooShort":
+      "أدخل سبباً واضحاً (4 أحرف على الأقل)",
+    "adminMedicalContentDialog.reject.validation.tooLong":
+      "الحد الأقصى 2000 حرف",
     "adminMedicalContentDialog.reject.rejecting": "جاري الرفض…",
     "adminMedicalContentDialog.reject.confirmButton": "تأكيد الرفض",
     "adminMedicalContent.languageToggle.label": "لغة المحتوى",
@@ -1524,8 +2056,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalOrders.category.empty": "لا توجد عناصر في هذه الفئة بعد.",
     "adminMedicalOrders.upsert.editTitle": "تعديل نوع الطلب",
     "adminMedicalOrders.upsert.createTitle": "إضافة نوع جديد",
-    "adminMedicalOrders.upsert.editDescription": "تعديل تسمية بند في كتالوج الطلبات الطبية.",
-    "adminMedicalOrders.upsert.createDescription": "إضافة بند جديد إلى كتالوج الطلبات الطبية.",
+    "adminMedicalOrders.upsert.editDescription":
+      "تعديل تسمية بند في كتالوج الطلبات الطبية.",
+    "adminMedicalOrders.upsert.createDescription":
+      "إضافة بند جديد إلى كتالوج الطلبات الطبية.",
     "adminMedicalOrders.field.displayName.label": "الاسم المعروض",
     "adminMedicalOrders.field.category.label": "الفئة (Category)",
     "adminMedicalOrders.field.nameAr.label": "الاسم العربي",
@@ -1535,16 +2069,19 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalOrders.field.sortOrder.label": "الترتيب (sortOrder)",
     "adminMedicalOrders.field.synonyms.label": "مرادفات (synonyms)",
     "adminMedicalOrders.field.fastingRequired.label": "يتطلب صيام",
-    "adminMedicalOrders.field.supportsContrast.label": "يدعم حقن المادة الظليلة",
+    "adminMedicalOrders.field.supportsContrast.label":
+      "يدعم حقن المادة الظليلة",
     "adminMedicalOrders.field.notes.label": "ملاحظات",
     "adminMedicalOrders.field.isActive.label": "العنصر نشط",
     "adminMedicalOrders.field.isVisible.label": "العنصر ظاهر للأطباء",
     "adminMedicalOrders.upsert.saving": "جاري الحفظ…",
     "adminMedicalOrders.upsert.saveEdit": "حفظ التعديل",
     "adminMedicalOrders.toast.updated.title": "تم حفظ التعديل",
-    "adminMedicalOrders.toast.updated.body": "تم تحديث بند «{name}» ضمن فئة {kind} في كتالوج الطلبات.",
+    "adminMedicalOrders.toast.updated.body":
+      "تم تحديث بند «{name}» ضمن فئة {kind} في كتالوج الطلبات.",
     "adminMedicalOrders.toast.created.title": "تمت الإضافة",
-    "adminMedicalOrders.toast.created.body": "أُضيف بند «{name}» إلى كتالوج {kind}. سيظهر للأطباء عند طلباتهم.",
+    "adminMedicalOrders.toast.created.body":
+      "أُضيف بند «{name}» إلى كتالوج {kind}. سيظهر للأطباء عند طلباتهم.",
     "common.yes": "نعم",
     "common.no": "لا",
     "common.visible": "ظاهر",
@@ -1563,11 +2100,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalOrders.details.id": "المعرّف",
     "adminMedicalOrders.details.supportsContrast": "يدعم المادة الظليلة",
     "common.required": "مطلوب",
-    "adminServiceTypeDialog.validation.enScriptOnly": "يجب أن يكون النص بالإنجليزية فقط: لا تُدخل حروفًا عربية في الحقول الإنجليزية.",
-    "adminServiceTypeDialog.validation.arScriptOnly": "يجب أن يكون النص بالعربية فقط: لا تُدخل حروفًا لاتينية (إنجليزية) في الحقول العربية.",
+    "adminServiceTypeDialog.validation.enScriptOnly":
+      "يجب أن يكون النص بالإنجليزية فقط: لا تُدخل حروفًا عربية في الحقول الإنجليزية.",
+    "adminServiceTypeDialog.validation.arScriptOnly":
+      "يجب أن يكون النص بالعربية فقط: لا تُدخل حروفًا لاتينية (إنجليزية) في الحقول العربية.",
     "adminServiceTypeDialog.validation.fieldKeyRequired": "مفتاح الحقل مطلوب",
-    "adminServiceTypeDialog.validation.fieldKeyPattern": "يجب أن يبدأ المفتاح بحرف لاتيني، ثم حروف/أرقام/شرطة سفلية فقط",
-    "adminServiceTypeDialog.validation.atLeastOneField": "أضف حقلاً schema واحداً على الأقل",
+    "adminServiceTypeDialog.validation.fieldKeyPattern":
+      "يجب أن يبدأ المفتاح بحرف لاتيني، ثم حروف/أرقام/شرطة سفلية فقط",
+    "adminServiceTypeDialog.validation.atLeastOneField":
+      "أضف حقلاً schema واحداً على الأقل",
     "adminServiceTypeDialog.fieldType.string": "نص",
     "adminServiceTypeDialog.fieldType.number": "رقم",
     "adminServiceTypeDialog.fieldType.boolean": "نعم/لا",
@@ -1575,7 +2116,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminServiceTypeDialog.fieldType.object": "كائن",
     "adminServiceTypeDialog.editTitle": "تعديل نوع الخدمة",
     "adminServiceTypeDialog.createTitle": "إضافة نوع خدمة",
-    "adminServiceTypeDialog.field.slug.hint": "لا يُنصح بتغيير الـ slug بعد الربط.",
+    "adminServiceTypeDialog.field.slug.hint":
+      "لا يُنصح بتغيير الـ slug بعد الربط.",
     "adminServiceTypeDialog.section.schemaFields": "حقول الـ schema",
     "adminServiceTypeDialog.action.addField": "إضافة حقل",
     "adminServiceTypeDialog.field.fieldNumber": "حقل {n}",
@@ -1590,10 +2132,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminServiceTypeDialog.action.saving": "جاري الحفظ…",
     "adminServiceTypeDialog.action.create": "إنشاء",
     "adminServiceTypeDialog.toast.updated.title": "تم التعديل",
-    "adminServiceTypeDialog.toast.updated.body": "تم حفظ تعديلات نوع الخدمة «{name}» والحقول المرتبطة به.",
-    "adminServiceTypeDialog.toast.created.body": "أُضيف نوع الخدمة «{name}» إلى النظام. راجع حالة التفعيل عند الحاجة.",
+    "adminServiceTypeDialog.toast.updated.body":
+      "تم حفظ تعديلات نوع الخدمة «{name}» والحقول المرتبطة به.",
+    "adminServiceTypeDialog.toast.created.body":
+      "أُضيف نوع الخدمة «{name}» إلى النظام. راجع حالة التفعيل عند الحاجة.",
     "adminServiceTypeDialog.field.enum.label": "القيم المسموحة (enum)",
-    "adminServiceTypeDialog.field.enum.hint": "افصل بفاصلة، اتركه فارغاً إن لم يكن مطلوباً",
+    "adminServiceTypeDialog.field.enum.hint":
+      "افصل بفاصلة، اتركه فارغاً إن لم يكن مطلوباً",
     "adminServiceTypeDialog.field.enum.ariaLabel": "enum حقل {n}",
     "adminServiceTypeDialog.field.regex.label": "النمط (regex)",
     "adminServiceTypeDialog.field.regex.ariaLabel": "regex حقل {n}",
@@ -1601,31 +2146,45 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminServiceTypeDialog.field.min.ariaLabel": "min حقل {n}",
     "adminServiceTypeDialog.field.max.label": "الحد الأقصى (max)",
     "adminServiceTypeDialog.field.max.ariaLabel": "max حقل {n}",
-    "adminServiceTypeDialog.statusDialog.description": "تأكيد تغيير حالة تفعيل نوع الخدمة في النظام.",
+    "adminServiceTypeDialog.statusDialog.description":
+      "تأكيد تغيير حالة تفعيل نوع الخدمة في النظام.",
     "adminServiceTypeDialog.statusDialog.deactivateTitle": "تعطيل نوع الخدمة",
     "adminServiceTypeDialog.statusDialog.activateTitle": "تفعيل نوع الخدمة",
-    "adminServiceTypeDialog.statusDialog.deactivateBody": "سيتم إخفاء نوع الخدمة «{name}» عن القوائم العامة (isActive: false). يمكنك إعادة تفعيله لاحقاً.",
-    "adminServiceTypeDialog.statusDialog.activateBody": "سيتم تفعيل نوع الخدمة «{name}» مرة أخرى.",
-    "adminServiceTypeDialog.statusDialog.note": "هذا الإجراء يغيّر حالة النوع المرجعي فقط. لا يحذف المزوّدين أو المنشآت المرتبطين به، لكنه قد يغيّر ظهوره كخيار متاح في النماذج المرتبطة.",
+    "adminServiceTypeDialog.statusDialog.deactivateBody":
+      "سيتم إخفاء نوع الخدمة «{name}» عن القوائم العامة (isActive: false). يمكنك إعادة تفعيله لاحقاً.",
+    "adminServiceTypeDialog.statusDialog.activateBody":
+      "سيتم تفعيل نوع الخدمة «{name}» مرة أخرى.",
+    "adminServiceTypeDialog.statusDialog.note":
+      "هذا الإجراء يغيّر حالة النوع المرجعي فقط. لا يحذف المزوّدين أو المنشآت المرتبطين به، لكنه قد يغيّر ظهوره كخيار متاح في النماذج المرتبطة.",
     "adminServiceTypeDialog.statusDialog.executing": "جاري التنفيذ…",
     "adminServiceTypeDialog.statusDialog.deactivateAction": "تعطيل",
     "adminServiceTypeDialog.statusDialog.activateAction": "تفعيل",
     "adminServiceTypeDialog.toggle.deactivateItem": "تعطيل العنصر",
     "adminServiceTypeDialog.toggle.activateItem": "تفعيل العنصر",
-    "adminUsersDialog.validation.nameMinLength": "الاسم يجب أن يكون حرفين على الأقل",
-    "adminUsersDialog.validation.nameMaxLength": "الاسم يجب أن لا يتجاوز 100 حرف",
-    "adminUsersDialog.validation.nameLettersOnly": "الاسم يجب أن يحتوي على أحرف فقط",
+    "adminUsersDialog.validation.nameMinLength":
+      "الاسم يجب أن يكون حرفين على الأقل",
+    "adminUsersDialog.validation.nameMaxLength":
+      "الاسم يجب أن لا يتجاوز 100 حرف",
+    "adminUsersDialog.validation.nameLettersOnly":
+      "الاسم يجب أن يحتوي على أحرف فقط",
     "adminUsersDialog.validation.emailTooLong": "البريد الإلكتروني طويل جداً",
     "adminUsersDialog.validation.dialCodeUnsupported": "رمز النداء غير مدعوم",
     "adminUsersDialog.validation.phoneTooLong": "رقم الهاتف طويل جداً",
-    "adminUsersDialog.validation.phoneDigitsOnly": "رقم الهاتف يجب أن يحتوي على أرقام فقط",
+    "adminUsersDialog.validation.phoneDigitsOnly":
+      "رقم الهاتف يجب أن يحتوي على أرقام فقط",
     "adminUsersDialog.validation.passwordTooLong": "كلمة المرور طويلة جداً",
-    "adminUsersDialog.validation.passwordLowercase": "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل",
-    "adminUsersDialog.validation.passwordUppercase": "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل",
-    "adminUsersDialog.validation.passwordDigit": "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل",
-    "adminUsersDialog.validation.passwordSymbol": "كلمة المرور يجب أن تحتوي على رمز واحد على الأقل",
-    "adminUsersDialog.create.description": "قم بملء البيانات التالية لإنشاء حساب إداري جديد في النظام",
-    "adminUsersDialog.password.requirementsIntro": "يجب أن تحتوي كلمة المرور على:",
+    "adminUsersDialog.validation.passwordLowercase":
+      "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل",
+    "adminUsersDialog.validation.passwordUppercase":
+      "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل",
+    "adminUsersDialog.validation.passwordDigit":
+      "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل",
+    "adminUsersDialog.validation.passwordSymbol":
+      "كلمة المرور يجب أن تحتوي على رمز واحد على الأقل",
+    "adminUsersDialog.create.description":
+      "قم بملء البيانات التالية لإنشاء حساب إداري جديد في النظام",
+    "adminUsersDialog.password.requirementsIntro":
+      "يجب أن تحتوي كلمة المرور على:",
     "adminUsersDialog.password.req.length": "8 أحرف على الأقل",
     "adminUsersDialog.password.req.uppercase": "حرف كبير واحد على الأقل (A-Z)",
     "adminUsersDialog.password.req.lowercase": "حرف صغير واحد على الأقل (a-z)",
@@ -1637,7 +2196,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminUsersDialog.action.save": "حفظ",
     "adminUsersDialog.action.saving": "جارٍ الحفظ…",
     "adminUsersDialog.reboard.title": "تفعيل حساب المستخدم",
-    "adminUsersDialog.reboard.warning": "سيتم تفعيل حساب هذا المستخدم وستتم استعادة جميع صلاحياته.",
+    "adminUsersDialog.reboard.warning":
+      "سيتم تفعيل حساب هذا المستخدم وستتم استعادة جميع صلاحياته.",
     "adminUsersDialog.reboard.activating": "جاري التفعيل...",
     "adminUsersDialog.reboard.confirmButton": "تفعيل الحساب",
     "adminUsersDialog.reboard.toast.activatedTitle": "تم التفعيل",
@@ -1646,21 +2206,25 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminUsersDialog.restore.title": "مراجعة طلب استعادة الحساب",
     "adminUsersDialog.restore.toast.validationErrorTitle": "خطأ في التحقق",
     "adminUsersDialog.restore.toast.cannotCompleteTitle": "تعذر إكمال العملية",
-    "adminUsersDialog.restore.toast.approvedBody": "تمت الموافقة على طلب استعادة الحساب.",
+    "adminUsersDialog.restore.toast.approvedBody":
+      "تمت الموافقة على طلب استعادة الحساب.",
     "adminUsersDialog.restore.toast.rejectedBody": "تم رفض طلب استعادة الحساب.",
     "adminUsersDialog.restore.toast.approvedTitle": "تمت الموافقة",
     "adminUsersDialog.restore.toast.rejectedTitle": "تم الرفض",
-    "adminUsersDialog.restore.toast.reviewFailedFallback": "تعذر مراجعة طلب الاستعادة حالياً.",
+    "adminUsersDialog.restore.toast.reviewFailedFallback":
+      "تعذر مراجعة طلب الاستعادة حالياً.",
     "adminUsersDialog.restore.requestDatePrefix": "تاريخ الطلب:",
     "adminUsersDialog.restore.reasonPrefix": "سبب الطلب:",
     "adminUsersDialog.restore.deletionReasonPrefix": "سبب الحذف:",
     "adminUsersDialog.restore.decisionLabel": "القرار *",
     "adminUsersDialog.restore.noteLabel": "ملاحظة المراجعة",
-    "adminUsersDialog.restore.approveWarning": "سيتم تفعيل حساب المستخدم واستعادة صلاحياته المرتبطة بالحساب.",
+    "adminUsersDialog.restore.approveWarning":
+      "سيتم تفعيل حساب المستخدم واستعادة صلاحياته المرتبطة بالحساب.",
     "adminUsersDialog.restore.sending": "جارٍ الإرسال...",
     "adminUsersDialog.restore.submitDecision": "إرسال القرار",
     "adminVerificationRequests.validation.fieldRequired": "هذا الحقل مطلوب",
-    "adminVerificationRequests.validation.rejectReasonRequired": "سبب الرفض مطلوب",
+    "adminVerificationRequests.validation.rejectReasonRequired":
+      "سبب الرفض مطلوب",
     "adminVerificationRequests.title.approve": "قبول طلب التحقق",
     "adminVerificationRequests.title.reject": "رفض طلب التحقق",
     "adminVerificationRequests.title.mapView": "عرض الخريطة",
@@ -1669,32 +2233,47 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminVerificationRequests.map.coordinates": "الإحداثيات",
     "adminVerificationRequests.map.address": "العنوان",
     "adminVerificationRequests.map.viewInGoogleMaps": "عرض في Google Maps",
-    "adminVerificationRequests.specialization.newKeyRequired": "أدخل مفتاح التخصص (إنجليزي) والاسم العربي لإنشاء تخصص جديد.",
-    "adminVerificationRequests.specialization.mustResolve": "يجب اختيار تخصص مُدار من القائمة أو إنشاء تخصص جديد قبل الموافقة.",
+    "adminVerificationRequests.specialization.newKeyRequired":
+      "أدخل مفتاح التخصص (إنجليزي) والاسم العربي لإنشاء تخصص جديد.",
+    "adminVerificationRequests.specialization.mustResolve":
+      "يجب اختيار تخصص مُدار من القائمة أو إنشاء تخصص جديد قبل الموافقة.",
     "adminVerificationRequests.toast.approvedDone": "تم قبول الطلب بنجاح",
-    "adminVerificationRequests.toast.approvedBody": "تم قبول طلب التحقق للطبيب «{name}» وتحديث حالته إلى «مقبول». يمكن متابعة ملف الطبيب أو انتظار الخطوة التالية من مسار المنصة.",
+    "adminVerificationRequests.toast.approvedBody":
+      "تم قبول طلب التحقق للطبيب «{name}» وتحديث حالته إلى «مقبول». يمكن متابعة ملف الطبيب أو انتظار الخطوة التالية من مسار المنصة.",
     "adminVerificationRequests.toast.approvedTitle": "تم قبول طلب التحقق",
     "adminVerificationRequests.toast.rejectedDone": "تم رفض الطلب",
-    "adminVerificationRequests.toast.rejectedBody": "تم رفض طلب التحقق للطبيب «{name}» وتحديث حالته إلى «مرفوض».",
-    "adminVerificationRequests.specialization.linkBeforeApprove": "ربط التخصص قبل الموافقة",
-    "adminVerificationRequests.specialization.createNewInsteadOfExisting": "إنشاء تخصص جديد بدلاً من اختيار موجود",
-    "adminVerificationRequests.specialization.keyEnLabel": "مفتاح التخصص (إنجليزي)",
+    "adminVerificationRequests.toast.rejectedBody":
+      "تم رفض طلب التحقق للطبيب «{name}» وتحديث حالته إلى «مرفوض».",
+    "adminVerificationRequests.specialization.linkBeforeApprove":
+      "ربط التخصص قبل الموافقة",
+    "adminVerificationRequests.specialization.createNewInsteadOfExisting":
+      "إنشاء تخصص جديد بدلاً من اختيار موجود",
+    "adminVerificationRequests.specialization.keyEnLabel":
+      "مفتاح التخصص (إنجليزي)",
     "adminVerificationRequests.specialization.nameArLabel": "الاسم بالعربية",
-    "adminVerificationRequests.specialization.nameEnLabel": "الاسم بالإنجليزية (اختياري)",
-    "adminVerificationRequests.specialization.chooseFromList": "اختر تخصصاً من القائمة",
+    "adminVerificationRequests.specialization.nameEnLabel":
+      "الاسم بالإنجليزية (اختياري)",
+    "adminVerificationRequests.specialization.chooseFromList":
+      "اختر تخصصاً من القائمة",
     "adminVerificationRequests.specialization.loading": "جارٍ تحميل التخصصات…",
-    "adminVerificationRequests.specialization.choosePlaceholder": "— اختر التخصص —",
-    "adminVerificationRequests.specialization.loadError": "تعذّر تحميل قائمة التخصصات. يمكنك إنشاء تخصص جديد أو إعادة فتح نافذة المراجعة.",
+    "adminVerificationRequests.specialization.choosePlaceholder":
+      "— اختر التخصص —",
+    "adminVerificationRequests.specialization.loadError":
+      "تعذّر تحميل قائمة التخصصات. يمكنك إنشاء تخصص جديد أو إعادة فتح نافذة المراجعة.",
     "adminVerificationRequests.adminNoteLabel": "ملاحظة الإدارة:",
-    "adminVerificationRequests.field.adminNote.approvePlaceholder": "مثال: تم التحقق من الترخيص والموقع",
-    "adminVerificationRequests.field.adminNote.rejectPlaceholder": "اكتب سبب الرفض...",
+    "adminVerificationRequests.field.adminNote.approvePlaceholder":
+      "مثال: تم التحقق من الترخيص والموقع",
+    "adminVerificationRequests.field.adminNote.rejectPlaceholder":
+      "اكتب سبب الرفض...",
     "adminVerificationRequests.field.clinicLat.label": "clinicLat (اختياري)",
     "adminVerificationRequests.field.clinicLng.label": "clinicLng (اختياري)",
-    "adminVerificationRequests.field.confirmClinicLocation": "تأكيد موقع العيادة",
+    "adminVerificationRequests.field.confirmClinicLocation":
+      "تأكيد موقع العيادة",
     "adminVerificationRequests.action.approve": "قبول",
     "adminVerificationRequests.action.reject": "رفض",
     "adminDoctorProfileChangeRequests.field.specialization": "التخصص",
-    "adminDoctorProfileChangeRequests.field.medicalLicenseNumber": "رقم الترخيص الطبي",
+    "adminDoctorProfileChangeRequests.field.medicalLicenseNumber":
+      "رقم الترخيص الطبي",
     "adminDoctorProfileChangeRequests.field.education": "التعليم",
     "adminDoctorProfileChangeRequests.field.clinicAddress": "عنوان العيادة",
     "adminDoctorProfileChangeRequests.field.locationCountry": "الدولة",
@@ -1703,25 +2282,35 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminDoctorProfileChangeRequests.field.clinicLat": "خط عرض العيادة",
     "adminDoctorProfileChangeRequests.field.clinicLng": "خط طول العيادة",
     "adminDoctorProfileChangeRequests.title": "مراجعة طلب تغيير البيانات",
-    "adminDoctorProfileChangeRequests.subtitle": "راجع التغييرات المطلوبة وقرر الموافقة أو الرفض",
+    "adminDoctorProfileChangeRequests.subtitle":
+      "راجع التغييرات المطلوبة وقرر الموافقة أو الرفض",
     "adminDoctorProfileChangeRequests.licenseNumberPrefix": "رقم الترخيص: ",
     "adminDoctorProfileChangeRequests.requestedByPrefix": "طلب بواسطة: ",
     "adminDoctorProfileChangeRequests.requestedChanges": "التغييرات المطلوبة",
     "adminDoctorProfileChangeRequests.currentValue": "القيمة الحالية",
     "adminDoctorProfileChangeRequests.newValue": "القيمة الجديدة",
-    "adminDoctorProfileChangeRequests.noChangeDetails": "لا توجد تفاصيل التغييرات متاحة",
+    "adminDoctorProfileChangeRequests.noChangeDetails":
+      "لا توجد تفاصيل التغييرات متاحة",
     "adminDoctorProfileChangeRequests.adminNoteLabel": "ملاحظة الإدارة",
-    "adminDoctorProfileChangeRequests.field.note.denyPlaceholder": "أدخل سبب الرفض...",
-    "adminDoctorProfileChangeRequests.field.note.optionalPlaceholder": "أضف ملاحظة اختيارية...",
-    "adminDoctorProfileChangeRequests.approveWarning": "سيتم تحديث بيانات الطبيب فوراً بعد الموافقة. تأكد من صحة جميع التغييرات.",
+    "adminDoctorProfileChangeRequests.field.note.denyPlaceholder":
+      "أدخل سبب الرفض...",
+    "adminDoctorProfileChangeRequests.field.note.optionalPlaceholder":
+      "أضف ملاحظة اختيارية...",
+    "adminDoctorProfileChangeRequests.approveWarning":
+      "سيتم تحديث بيانات الطبيب فوراً بعد الموافقة. تأكد من صحة جميع التغييرات.",
     "adminDoctorProfileChangeRequests.processing": "جارٍ المعالجة...",
     "adminDoctorProfileChangeRequests.approveAndUpdate": "موافقة وتحديث",
     "adminDoctorProfileChangeRequests.rejectRequest": "رفض الطلب",
-    "adminDoctorProfileChangeRequests.toast.approvedBody": "تمت الموافقة على طلب تغيير بيانات الطبيب «{name}» وتحديث حالته إلى «موافق عليه».",
-    "adminDoctorProfileChangeRequests.toast.rejectedBody": "تم رفض طلب تغيير بيانات الطبيب «{name}» وتحديث حالته إلى «مرفوض».",
-    "adminDoctorProfileChangeRequests.toast.genericError": "حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.",
-    "adminNotifications.toast.newSingle": "وصلك إشعار جديد. افتح صفحة «الإشعارات» لمراجعته.",
-    "adminNotifications.toast.newMultiple": "وصلتك {count} إشعارات جديدة غير مقروءة.",
+    "adminDoctorProfileChangeRequests.toast.approvedBody":
+      "تمت الموافقة على طلب تغيير بيانات الطبيب «{name}» وتحديث حالته إلى «موافق عليه».",
+    "adminDoctorProfileChangeRequests.toast.rejectedBody":
+      "تم رفض طلب تغيير بيانات الطبيب «{name}» وتحديث حالته إلى «مرفوض».",
+    "adminDoctorProfileChangeRequests.toast.genericError":
+      "حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.",
+    "adminNotifications.toast.newSingle":
+      "وصلك إشعار جديد. افتح صفحة «الإشعارات» لمراجعته.",
+    "adminNotifications.toast.newMultiple":
+      "وصلتك {count} إشعارات جديدة غير مقروءة.",
     "adminNotifications.toast.newAlertTitle": "تنبيه — إشعار جديد",
     "common.specialtyLabel": "الاختصاص",
     "common.fullNameLabel": "الاسم الكامل",
@@ -1731,7 +2320,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAccessRequests.loadingDetails": "جارِ تحميل التفاصيل...",
     "adminAccessRequests.loadError": "تعذّر تحميل تفاصيل الطلب.",
     "adminAccessRequests.incompleteData.title": "بعض البيانات غير مكتملة",
-    "adminAccessRequests.incompleteData.body": "الاستجابة الحالية لا تحتوي على جميع حقول الطبيب أو المريض المتوقعة. يتم عرض القيم المتوفرة فقط لتجنّب إظهار معلومات غير مؤكدة.",
+    "adminAccessRequests.incompleteData.body":
+      "الاستجابة الحالية لا تحتوي على جميع حقول الطبيب أو المريض المتوقعة. يتم عرض القيم المتوفرة فقط لتجنّب إظهار معلومات غير مؤكدة.",
     "adminAccessRequests.requestStatusLabel": "حالة الطلب",
     "adminAccessRequests.requestType.label": "نوع الطلب",
     "adminAccessRequests.requestType.value": "طلب وصول لبيانات مريض",
@@ -1739,9 +2329,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAccessRequests.currentAction.pending": "مراجعة القرار من قبل الإدارة",
     "adminAccessRequests.currentAction.approved": "تم قبول الطلب",
     "adminAccessRequests.currentAction.rejected": "تم رفض الطلب",
-    "adminAccessRequests.contextNote.pending": "هذه النافذة مخصّصة لمراجعة طلب الوصول قبل اعتماد القرار النهائي، مع عرض القيم المتوفرة فقط إذا كانت بعض الحقول ناقصة من الاستجابة.",
-    "adminAccessRequests.contextNote.approved": "تم قبول هذا الطلب سابقًا، لذلك تُعرض النافذة الآن كمرجع لبيانات الطلب والحالة النهائية دون إجراءات إضافية.",
-    "adminAccessRequests.contextNote.rejected": "تم رفض هذا الطلب سابقًا، لذلك تُستخدم النافذة الآن لمراجعة سبب الطلب والبيانات المرتبطة به فقط.",
+    "adminAccessRequests.contextNote.pending":
+      "هذه النافذة مخصّصة لمراجعة طلب الوصول قبل اعتماد القرار النهائي، مع عرض القيم المتوفرة فقط إذا كانت بعض الحقول ناقصة من الاستجابة.",
+    "adminAccessRequests.contextNote.approved":
+      "تم قبول هذا الطلب سابقًا، لذلك تُعرض النافذة الآن كمرجع لبيانات الطلب والحالة النهائية دون إجراءات إضافية.",
+    "adminAccessRequests.contextNote.rejected":
+      "تم رفض هذا الطلب سابقًا، لذلك تُستخدم النافذة الآن لمراجعة سبب الطلب والبيانات المرتبطة به فقط.",
     "adminAccessRequests.doctorInfo.title": "معلومات الطبيب",
     "adminAccessRequests.phoneLabel": "الهاتف",
     "adminAccessRequests.patientInfo.title": "معلومات المريض",
@@ -1754,20 +2347,25 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminComplaints.summary.total": "إجمالي الشكاوي",
     "adminComplaints.summary.closed": "مغلقة",
     "adminComplaints.summary.review": "قيد المراجعة",
-    "adminAppointments.panel.noDoctorAssigned": "لا يوجد طبيب مرتبط بهذا السكرتير. عيّن طبيباً أولاً لعرض المواعيد ضمن نطاقه.",
+    "adminAppointments.panel.noDoctorAssigned":
+      "لا يوجد طبيب مرتبط بهذا السكرتير. عيّن طبيباً أولاً لعرض المواعيد ضمن نطاقه.",
     "adminAppointments.panel.viewingFor": "عرض مواعيد الطبيب المرتبط:",
-    "adminAppointments.panel.manageHint": " — يمكنك الإلغاء وعرض التفاصيل وفق صلاحيات الإدارة.",
+    "adminAppointments.panel.manageHint":
+      " — يمكنك الإلغاء وعرض التفاصيل وفق صلاحيات الإدارة.",
     "adminAppointments.panel.statusFilter.ariaLabel": "حالة الموعد",
     "adminAppointments.panel.loading": "جارٍ تحميل المواعيد…",
     "adminAppointments.panel.loadError": "تعذّر تحميل المواعيد.",
-    "adminAppointments.panel.noneMatching": "لا توجد مواعيد مطابقة لهذا الطبيب.",
-    "adminAppointments.panel.tryOtherPage": "قد تكون النتائج في صفحة أخرى من القائمة العامة — جرّب تغيير التاريخ أو الحالة.",
+    "adminAppointments.panel.noneMatching":
+      "لا توجد مواعيد مطابقة لهذا الطبيب.",
+    "adminAppointments.panel.tryOtherPage":
+      "قد تكون النتائج في صفحة أخرى من القائمة العامة — جرّب تغيير التاريخ أو الحالة.",
     "adminAppointments.panel.patientLabel": "المريض:",
     "adminAppointments.panel.doctorLabel": "الطبيب:",
     "adminAppointments.panel.specializationLabel": "التخصص:",
     "adminAppointments.panel.detailsButton": "التفاصيل",
     "adminAppointments.panel.cancelToast.title": "تم إلغاء الموعد",
-    "adminAppointments.panel.cancelToast.message": "سُجّل إلغاء الموعد في النظام.",
+    "adminAppointments.panel.cancelToast.message":
+      "سُجّل إلغاء الموعد في النظام.",
     "adminAppointments.details.title": "تفاصيل الموعد",
     "adminAppointments.details.loading": "جارِ التحميل...",
     "adminAppointments.details.loadError": "تعذّر تحميل تفاصيل الموعد.",
@@ -1783,7 +2381,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAppointments.details.closedAt": "أُغلق في",
     "adminAppointments.details.attachments": "المرفقات المرتبطة بالموعد",
     "adminAppointments.details.archived": "مؤرشف",
-    "adminAppointments.cancel.validation.reasonTooLong": "سبب الإلغاء يجب ألا يتجاوز 300 حرف.",
+    "adminAppointments.cancel.validation.reasonTooLong":
+      "سبب الإلغاء يجب ألا يتجاوز 300 حرف.",
     "adminAppointments.cancel.title": "إلغاء الموعد",
     "adminAppointments.cancel.targetLabel": "الهدف",
     "adminAppointments.cancel.reasonLabel": "سبب الإلغاء",
@@ -1824,8 +2423,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAuditLog.filters.field.ip": "عنوان IP",
     "adminAuditLog.pagination.summary": "عرض {from}–{to} من {total} سجل",
     "adminAuditLog.privacy.title": "ملاحظة الخصوصية والامتثال",
-    "adminAuditLog.privacy.body": "لا تتضمن سجلات التدقيق أي محتوى حساس للمرضى (لا مرفقات، لا رسائل استشارة، لا نصوص تشخيص أو وصفات). يتم تتبع الأنشطة فقط للأغراض الأمنية والإدارية والامتثال القانوني.",
-    "adminAuditLog.privacy.retention": "مدد الاحتفاظ: AUTH / AUTHZ / DATA / ADMIN — 3 سنوات | PHI — 7 سنوات | SYSTEM — سنة واحدة.",
+    "adminAuditLog.privacy.body":
+      "لا تتضمن سجلات التدقيق أي محتوى حساس للمرضى (لا مرفقات، لا رسائل استشارة، لا نصوص تشخيص أو وصفات). يتم تتبع الأنشطة فقط للأغراض الأمنية والإدارية والامتثال القانوني.",
+    "adminAuditLog.privacy.retention":
+      "مدد الاحتفاظ: AUTH / AUTHZ / DATA / ADMIN — 3 سنوات | PHI — 7 سنوات | SYSTEM — سنة واحدة.",
     "adminAuditLog.stats.total": "إجمالي السجلات",
     "adminAuditLog.stats.failed": "إجراءات فاشلة",
     "adminAuditLog.stats.denied": "محاولات مرفوضة",
@@ -1837,12 +2438,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAuditLog.table.loadError": "تعذّر تحميل السجلات",
     "adminAuditLog.table.connectionErrorFallback": "خطأ في الاتصال بالخادم",
     "adminAuditLog.table.noMatches": "لا توجد سجلات مطابقة",
-    "adminAuditLog.table.tryChangingFilters": "جرّب تغيير الفلاتر أو امسحها لعرض نتائج أوسع.",
-    "adminAuditLog.table.noRecordsInScope": "لا توجد سجلات لعرضها ضمن النطاق الحالي.",
+    "adminAuditLog.table.tryChangingFilters":
+      "جرّب تغيير الفلاتر أو امسحها لعرض نتائج أوسع.",
+    "adminAuditLog.table.noRecordsInScope":
+      "لا توجد سجلات لعرضها ضمن النطاق الحالي.",
     "adminAuditLog.table.clearFilters": "مسح الفلاتر",
     "adminAuditLog.row.technicalDetails": "تفاصيل تقنية",
     "adminAuditLog.details.title": "تفاصيل تقنية للسجل",
-    "adminAuditLog.details.description": "معلومات الطلب والمسار للمراجعة والامتثال — لا تُعرض في الجدول الرئيسي لتقليل الازدحام وتقليل كشف هيكل الـ API.",
+    "adminAuditLog.details.description":
+      "معلومات الطلب والمسار للمراجعة والامتثال — لا تُعرض في الجدول الرئيسي لتقليل الازدحام وتقليل كشف هيكل الـ API.",
     "adminAuditLog.details.recordId": "معرّف السجل",
     "adminAuditLog.details.action": "الإجراء (action)",
     "adminAuditLog.details.categoryLabel": "الفئة",
@@ -1858,7 +2462,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAuditLog.details.patientLabel": "المريض",
     "adminAuditLog.details.targetUser": "المستخدم المستهدف",
     "adminSystemLogs.page.title": "سجلات النظام",
-    "adminSystemLogs.page.subtitle": "مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي",
+    "adminSystemLogs.page.subtitle":
+      "مراجعة جميع الأنشطة والحركات في النظام بالوقت الفعلي",
     "common.undetermined": "غير محدد",
     "adminDashboard.contentStatus.DRAFT": "مسودة",
     "adminDashboard.contentStatus.IN_REVIEW": "قيد المراجعة",
@@ -1894,11 +2499,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminContent.language.arabic": "العربية",
     "editContentDialog.validation.invalidJson": "صيغة JSON غير صالحة.",
     "adminDoctorLookup.validation.keyRequired": "المفتاح مطلوب",
-    "adminDoctorLookup.validation.keyPattern": "حروف إنجليزية صغيرة، أرقام، شرطة سفلية",
+    "adminDoctorLookup.validation.keyPattern":
+      "حروف إنجليزية صغيرة، أرقام، شرطة سفلية",
     "adminDoctorLookup.validation.arabicNameRequired": "الاسم العربي مطلوب",
     "adminDoctorLookup.toast.updatedTitle": "تم الحفظ",
     "adminDoctorLookup.toast.updatedBody": "تم تحديث التخصص «{name}».",
-    "adminDoctorLookup.toast.createdBody": "تمت إضافة التخصص «{name}» إلى الكتالوج.",
+    "adminDoctorLookup.toast.createdBody":
+      "تمت إضافة التخصص «{name}» إلى الكتالوج.",
     "adminDoctorLookup.editTitle": "تعديل تخصص",
     "adminDoctorLookup.createTitle": "إضافة تخصص طبيب",
     "adminDoctorLookup.action.generateNewKey": "توليد مفتاح جديد",
@@ -1926,7 +2533,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminSecretaryPermissions.perm.waitlist_manage": "إدارة قائمة الانتظار",
     "adminSecretaryPermissions.perm.waitlist_book": "حجز من قائمة الانتظار",
     "adminSecretaryPermissions.perm.patients_view": "عرض المرضى",
-    "adminSecretaryPermissions.perm.patients_temporary_create": "إنشاء مريض مؤقت",
+    "adminSecretaryPermissions.perm.patients_temporary_create":
+      "إنشاء مريض مؤقت",
     "adminSecretaryPermissions.perm.patients_files_view": "عرض ملفات المرضى",
     "adminSecretaryPermissions.perm.patients_files_upload": "رفع ملفات المرضى",
     "adminSecretaryPermissions.perm.schedule_view": "عرض الجدول",
@@ -1950,7 +2558,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminDoctorAnalytics.statsPanelTitle": "الإحصائيات",
     "adminDoctorAnalytics.loadingDiagnoses": "جاري تحميل التشخيصات…",
     "adminDoctorAnalytics.diagnosesLoadError": "تعذر تحميل بيانات التشخيصات.",
-    "adminDoctorAnalytics.noDiagnosesInPeriod": "لا توجد تشخيصات في هذه الفترة.",
+    "adminDoctorAnalytics.noDiagnosesInPeriod":
+      "لا توجد تشخيصات في هذه الفترة.",
     "adminDoctorAnalytics.caseWord": "حالة",
     "adminDoctorAnalytics.chartFallback": "المخطط",
     "adminDoctorAnalytics.loadingStats": "جاري تحميل الإحصائيات…",
@@ -1966,31 +2575,44 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminDoctorAnalytics.stat.medicalRecords.chart": "السجلات",
     "adminDoctorAnalytics.stat.ratings.name": "التقييمات",
     "adminDoctorAnalytics.stat.ratings.chart": "التقييمات",
-    "adminServices.header.subtitle": "تصفح مزوّدي كل نوع خدمة وإدارتهم؛ إدارة تعريف أنواع الخدمات نفسها متاحة من شاشة أنواع الخدمات",
+    "adminServices.header.subtitle":
+      "تصفح مزوّدي كل نوع خدمة وإدارتهم؛ إدارة تعريف أنواع الخدمات نفسها متاحة من شاشة أنواع الخدمات",
     "adminPatients.suspend.title": "تعليق الحساب",
     "adminPatients.suspend.validation.reasonRequired": "سبب التعليق مطلوب",
     "adminServiceProviderDialog.field.rangeLabel": "المدى: {min} إلى {max}",
-    "adminServiceProviderDialog.noExtraFields": "لا توجد حقول إضافية معرّفة لهذا النوع.",
-    "adminVerificationRequests.specBanner.catalogTitle": "التخصص مرتبط بالقائمة المعتمدة",
-    "adminVerificationRequests.specBanner.catalogBody": "التخصص الرسمي: {label}",
-    "adminVerificationRequests.specBanner.customPendingTitle": "تخصص يدوي — يلزم الربط قبل الموافقة",
-    "adminVerificationRequests.specBanner.customPendingBody": "أدخل الطبيب التخصص «{label}» يدوياً. قبل قبول الطلب، اختر تخصصاً مطابقاً من القائمة المعتمدة أو أضف تخصصاً جديداً إلى النظام.",
-    "adminVerificationRequests.specBanner.unresolvedTitle": "يلزم مراجعة التخصص قبل الموافقة",
-    "adminVerificationRequests.specBanner.unresolvedSpecialtyPrefix": "التخصص الظاهر في ملف الطبيب: «{label}». ",
-    "adminVerificationRequests.specBanner.unresolvedBody": "تعذّر التحقق من التخصص المرتبط بهذا الطبيب. يرجى ربطه بتخصص رسمي من القائمة قبل قبول الطلب.",
+    "adminServiceProviderDialog.noExtraFields":
+      "لا توجد حقول إضافية معرّفة لهذا النوع.",
+    "adminVerificationRequests.specBanner.catalogTitle":
+      "التخصص مرتبط بالقائمة المعتمدة",
+    "adminVerificationRequests.specBanner.catalogBody":
+      "التخصص الرسمي: {label}",
+    "adminVerificationRequests.specBanner.customPendingTitle":
+      "تخصص يدوي — يلزم الربط قبل الموافقة",
+    "adminVerificationRequests.specBanner.customPendingBody":
+      "أدخل الطبيب التخصص «{label}» يدوياً. قبل قبول الطلب، اختر تخصصاً مطابقاً من القائمة المعتمدة أو أضف تخصصاً جديداً إلى النظام.",
+    "adminVerificationRequests.specBanner.unresolvedTitle":
+      "يلزم مراجعة التخصص قبل الموافقة",
+    "adminVerificationRequests.specBanner.unresolvedSpecialtyPrefix":
+      "التخصص الظاهر في ملف الطبيب: «{label}». ",
+    "adminVerificationRequests.specBanner.unresolvedBody":
+      "تعذّر التحقق من التخصص المرتبط بهذا الطبيب. يرجى ربطه بتخصص رسمي من القائمة قبل قبول الطلب.",
     "adminVerificationRequests.specBanner.manageLink": "إدارة التخصصات",
     "adminMedicalFileOptions.kpi.chronicDiseases": "أمراض مزمنة",
     "adminMedicalFileOptions.kpi.allergyTypes": "أنواع حساسية",
     "adminMedicalFileOptions.kpi.bloodTypes": "فصائل دم",
-    "adminMedicalFileOptions.banner": "هذه الشاشة مخصّصة لإدارة القيم المرجعية التي تظهر داخل الملف الطبي مثل الأمراض المزمنة والحساسيات وفصائل الدم. أي تعديل هنا ينعكس على النماذج المرتبطة، لذلك تُستخدم لإدارة الخيارات نفسها لا لإدخال بيانات المرضى.",
+    "adminMedicalFileOptions.banner":
+      "هذه الشاشة مخصّصة لإدارة القيم المرجعية التي تظهر داخل الملف الطبي مثل الأمراض المزمنة والحساسيات وفصائل الدم. أي تعديل هنا ينعكس على النماذج المرتبطة، لذلك تُستخدم لإدارة الخيارات نفسها لا لإدخال بيانات المرضى.",
     "adminMedicalFileOptions.filter.currentLangOnly": "نص اللغة الحالية فقط",
     "adminMedicalFileOptions.filter.showDisabled": "عرض الخيارات المعطلة",
     "adminMedicalFileOptions.action.refreshing": "جارٍ التحديث...",
-    "adminMedicalFileOptions.refreshingBanner": "جارٍ تحديث خيارات الملف الطبي...",
+    "adminMedicalFileOptions.refreshingBanner":
+      "جارٍ تحديث خيارات الملف الطبي...",
     "adminMedicalFileOptions.loadError": "تعذر تحميل خيارات الملف الطبي.",
     "adminMedicalFileOptions.retrying": "جارٍ إعادة المحاولة...",
-    "adminMedicalFileOptions.loadingOptions": "جاري تحميل خيارات الملف الطبي...",
-    "adminMedicalFileOptions.noOptionsRegistered": "لا توجد خيارات مسجلة حالياً في الملف الطبي.",
+    "adminMedicalFileOptions.loadingOptions":
+      "جاري تحميل خيارات الملف الطبي...",
+    "adminMedicalFileOptions.noOptionsRegistered":
+      "لا توجد خيارات مسجلة حالياً في الملف الطبي.",
     "adminMedicalFileOptions.action.addDisease": "إضافة مرض",
     "adminMedicalFileOptions.action.addAllergy": "إضافة حساسية",
     "adminMedicalFileOptions.manageOptionsTitle": "إدارة الخيارات",
@@ -1999,8 +2621,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalFileOptions.categoryAriaLabel": "فئة الخيار",
     "adminMedicalFileOptions.quickAdd.prefix": "إضافة سريعة لفئة",
     "adminMedicalFileOptions.quickAdd.suffix": "— اكتب الاسم واضغط إضافة.",
-    "adminMedicalFileOptions.editDialog.description": "عدّل اسم الخيار ثم احفظ التغييرات.",
-    "adminMedicalFileOptions.deleteDialog.confirmQuestion": "هل تريد حذف «{name}» من خيارات الملف الطبي؟",
+    "adminMedicalFileOptions.editDialog.description":
+      "عدّل اسم الخيار ثم احفظ التغييرات.",
+    "adminMedicalFileOptions.deleteDialog.confirmQuestion":
+      "هل تريد حذف «{name}» من خيارات الملف الطبي؟",
     "adminMedicalFileOptions.toast.addFailedTitle": "تعذّر الإضافة",
     "adminMedicalFileOptions.toast.deleteFailedTitle": "تعذّر الحذف",
     "adminMedicalFileOptions.toast.updateFailedTitle": "تعذّر التحديث",
@@ -2013,17 +2637,21 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminPatientDetails.loading": "جارِ تحميل تفاصيل المريض...",
     "adminPatientDetails.loadError": "تعذّر تحميل تفاصيل المريض",
     "adminPatientDetails.notFound.title": "لم يُعثر على بيانات هذا المريض",
-    "adminPatientDetails.notFound.body": "قد يكون الـ ID غير صحيح، أو أن المريض محذوف. جرّب العودة لقائمة المرضى والضغط على \"عرض التفاصيل\" مباشرةً.",
+    "adminPatientDetails.notFound.body":
+      'قد يكون الـ ID غير صحيح، أو أن المريض محذوف. جرّب العودة لقائمة المرضى والضغط على "عرض التفاصيل" مباشرةً.',
     "adminPatientDetails.notFound.backButton": "العودة لقائمة المرضى",
     "adminPatientDetails.summary.recordType": "نوع السجل",
     "adminPatientDetails.summary.recordTypeValue": "ملف مريض",
     "adminPatientDetails.summary.accountStatus": "حالة الحساب",
     "adminPatientDetails.summary.scope": "نطاق الشاشة",
-    "adminPatientDetails.summary.scopeValue": "مراجعة إدارية للبيانات والمواعيد",
+    "adminPatientDetails.summary.scopeValue":
+      "مراجعة إدارية للبيانات والمواعيد",
     "adminPatientDetails.summary.currentAction": "الإجراء الحالي",
     "adminPatientDetails.summary.action.followUpOnly": "متابعة السجل فقط",
-    "adminPatientDetails.summary.action.unsuspendOrReactivate": "رفع التعليق أو إعادة التفعيل",
-    "adminPatientDetails.summary.action.reactivateWhenNeeded": "إعادة تفعيل الحساب عند الحاجة",
+    "adminPatientDetails.summary.action.unsuspendOrReactivate":
+      "رفع التعليق أو إعادة التفعيل",
+    "adminPatientDetails.summary.action.reactivateWhenNeeded":
+      "إعادة تفعيل الحساب عند الحاجة",
     "adminPatientDetails.patientIdLabel": "رقم المريض: {id}",
     "adminPatientDetails.claimed.yes": "الحساب مُفعّل (Claimed)",
     "adminPatientDetails.claimed.no": "الحساب غير مُطالب به",
@@ -2036,34 +2664,181 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminPatientDetails.toast.activatedTitle": "تم التفعيل",
     "adminPatientDetails.toast.unsuspendedTitle": "تم رفع التعليق",
     "adminPatientDetails.toast.errorTitle": "خطأ",
-    "adminPatientDetails.toast.activateFailed": "تعذر تفعيل حساب المريض حاليًا.",
-    "adminPatientDetails.toast.unsuspendFailed": "تعذر رفع تعليق الحساب حاليًا.",
-    "adminPatientDetails.readOnlyNotice.title": "صلاحيات الإدارة في هذه الشاشة للقراءة والمتابعة فقط",
-    "adminPatientDetails.readOnlyNotice.body": "تعرض هذه الصفحة بيانات المريض، المواعيد، وسجل النشاط المرتبط به للمراجعة الإدارية. لا تُستخدم هذه الواجهة كمسار لرفع أو حذف ملفات المريض الحساسة من حساب الإدارة.",
+    "adminPatientDetails.toast.activateFailed":
+      "تعذر تفعيل حساب المريض حاليًا.",
+    "adminPatientDetails.toast.unsuspendFailed":
+      "تعذر رفع تعليق الحساب حاليًا.",
+    "adminPatientDetails.readOnlyNotice.title":
+      "صلاحيات الإدارة في هذه الشاشة للقراءة والمتابعة فقط",
+    "adminPatientDetails.readOnlyNotice.body":
+      "تعرض هذه الصفحة بيانات المريض، المواعيد، وسجل النشاط المرتبط به للمراجعة الإدارية. لا تُستخدم هذه الواجهة كمسار لرفع أو حذف ملفات المريض الحساسة من حساب الإدارة.",
     "adminPatientDetails.stats.upcoming": "مواعيد قادمة",
     "adminPatientDetails.stats.completed": "مواعيد مكتملة",
     "adminPatientDetails.stats.cancelled": "مواعيد ملغاة",
     "adminPatientDetails.stats.noShow": "لم يحضر (No-show)",
-    "adminPatientDetails.appointmentsSection.title": "آخر المواعيد المرتبطة بالمريض",
+    "adminPatientDetails.appointmentsSection.title":
+      "آخر المواعيد المرتبطة بالمريض",
     "adminPatientDetails.appointmentsSection.loading": "جارِ التحميل...",
     "adminPatientDetails.appointmentsSection.itemsCount": "{count} عنصر",
     "adminPatientDetails.appointmentsSection.approxBadge": "تقريبي",
-    "adminPatientDetails.appointmentsSection.loadingAppointments": "جارِ تحميل المواعيد...",
-    "adminPatientDetails.appointmentsSection.empty": "لا توجد مواعيد مرتبطة بهذا المريض ضمن البيانات الحالية.",
-    "adminPatientDetails.auditSection.title": "سجل النشاط المرتبط بالمريض (Audit)",
+    "adminPatientDetails.appointmentsSection.loadingAppointments":
+      "جارِ تحميل المواعيد...",
+    "adminPatientDetails.appointmentsSection.empty":
+      "لا توجد مواعيد مرتبطة بهذا المريض ضمن البيانات الحالية.",
+    "adminPatientDetails.auditSection.title":
+      "سجل النشاط المرتبط بالمريض (Audit)",
     "adminPatientDetails.auditSection.loadingLogs": "جارِ تحميل السجلات...",
-    "adminPatientDetails.auditSection.empty": "لا توجد سجلات نشاط ظاهرة لهذا المريض ضمن آخر النتائج.",
+    "adminPatientDetails.auditSection.empty":
+      "لا توجد سجلات نشاط ظاهرة لهذا المريض ضمن آخر النتائج.",
     "adminPatientDetails.auditSection.eventsCount": "{count} حدث",
+    "adminMedicalContent.all": "الكل",
+    "adminMedicalContent.published": "منشور",
+    "adminMedicalContent.inReview": "قيد المراجعة",
+    "adminMedicalContent.draft": "مسودة",
+    "adminMedicalContent.archived": "مؤرشف",
+    "doctor.temporaryPatient.step1Identity": "خطوة ١ — الهوية",
+    "doctor.temporaryPatient.step2Contact": "خطوة ٢ — التواصل",
+    "doctor.dashboard.activeConsultations.title": "الاستشارات النشطة",
+    "doctor.dashboard.activeConsultations.viewAll": "عرض الكل",
+    "doctor.dashboard.activeConsultations.defaultTitle": "استشارة نشطة",
+    "doctor.dashboard.activeConsultations.consultation": "استشارة نشطة",
+    "doctor.dashboard.activeConsultations.continueAria": "متابعة الاستشارة",
+    "doctor.dashboard.activeConsultations.empty":
+      "لا توجد استشارات نشطة تحتاج متابعتك الآن.",
+    "doctor.dashboard.waitingList.title": "قائمة الانتظار",
+    "doctor.dashboard.waitingList.viewAll": "عرض الكل",
+    "doctor.dashboard.waitingList.defaultTitle": "طلب انتظار",
+    "doctor.dashboard.waitingList.request": "طلب انتظار",
+    "doctor.dashboard.waitingList.closestRequest": "أقرب طلب في قائمة الانتظار",
+    "doctor.dashboard.waitingList.empty": "لا توجد طلبات انتظار حالياً.",
+    "doctor.dashboard.diagnosisAnalytics.title": "تشخيصات الأسبوع",
+    "doctor.dashboard.diagnosisAnalytics.loading": "جارٍ تحميل التحليلات...",
+    "doctor.dashboard.diagnosisAnalytics.noData":
+      "لا توجد سجلات تشخيص في هذه الفترة.",
+    "doctor.dashboard.diagnosisAnalytics.totalRecords": "إجمالي السجلات الطبية",
+    "doctor.dashboard.diagnosisAnalytics.dependencyNote":
+      "يعتمد على إنشاء السجلات الطبية (API-3)",
+    "doctor.dashboard.quickActions.startVisit": "بدء زيارة",
+    "doctor.dashboard.quickActions.startVisitDesc": "الفحوصات الطبية",
+    "doctor.dashboard.quickActions.startConsultation": "بدء استشارة",
+    "doctor.dashboard.quickActions.startConsultationDesc": "محادثات المرضى",
+    "doctor.dashboard.quickActions.searchPatient": "بحث عن مريض",
+    "doctor.dashboard.quickActions.searchPatientDesc": "البحث عن المرضى",
+    "doctor.dashboard.quickActions.addPatient": "إضافة مريض",
+    "doctor.dashboard.quickActions.addPatientDesc": "إضافة مريض جديد",
+    "doctor.dashboard.quickActions.medicalLibrary": "المكتبة الطبية",
+    "doctor.dashboard.quickActions.medicalLibraryDesc":
+      "تجمع الأدوية والتحاليل والإجراءات",
+    "doctor.dashboard.quickActions.medicalServicesGuide": "دليل الخدمات الطبية",
+    "doctor.dashboard.quickActions.medicalServicesGuideDesc":
+      "للوصول للخدمات المتاحة",
+    "doctor.dashboard.quickActions.facilities": "المنشآت",
+    "doctor.dashboard.quickActions.facilitiesDesc":
+      "إدارة منشأتك وربطها بحسابك",
+    "doctor.dashboard.quickActions.title": "الإجراءات السريعة",
+    "doctor.listError.retry": "إعادة المحاولة",
+    "secretary.dashboard.quickActions": "الإجراءات السريعة",
+    "secretary.dashboard.title": "لوحة السكرتير",
+    "secretary.dashboard.todaySchedule": "جدول اليوم",
+    "secretary.dashboard.time": "الوقت",
+    "secretary.dashboard.patientName": "اسم المريض",
+    "secretary.dashboard.status": "الحالة",
+    "secretary.dashboard.actions": "الإجراءات",
+    "secretary.dashboard.view": "عرض",
+    "secretary.dashboard.statusScheduled": "مجدول",
+    "secretary.dashboard.statusPostponed": "مؤجل",
+    "secretary.dashboard.statusCompleted": "مكتمل",
+    "secretary.dashboard.accountActive": "حالة الحساب نشط /",
+    "secretary.dashboard.responsibleDoctor": "الطبيب المسؤول",
+    "secretary.dashboard.reviews": "التقييمات",
+    "secretary.patients.table.name": "الاسم",
+    "secretary.patients.table.phone": "رقم الهاتف",
+    "secretary.patients.table.email": "البريد الإلكتروني",
+    "secretary.patients.table.registrationDate": "تاريخ التسجيل",
+    "secretary.patients.table.actions": "الإجراءات",
+    "secretary.patients.table.view": "عرض",
+    "secretary.temporaryPatient.validation.fullNameRequired":
+      "الاسم الكامل مطلوب",
+    "secretary.temporaryPatient.validation.fullNameTooLong":
+      "الاسم الكامل طويل جداً",
+    "secretary.temporaryPatient.validation.emailRequired":
+      "البريد الإلكتروني مطلوب",
+    "secretary.temporaryPatient.validation.emailInvalid":
+      "عنوان بريد إلكتروني غير صالح",
+    "secretary.temporaryPatient.validation.dialCodeRequired":
+      "يرجى اختيار رمز دولة صالح",
+    "secretary.temporaryPatient.validation.phoneRequired": "رقم الهاتف مطلوب",
+    "secretary.temporaryPatient.validation.phoneDigitsOnly":
+      "أدخل أرقاماً فقط بدون مسافات أو رمز الدولة",
+    "secretary.temporaryPatient.validation.phoneNoLeadingZero":
+      "أدخل الرقم المحلي بدون الصفر الأول",
+    "secretary.temporaryPatient.validation.phoneNoCountryCode":
+      "أدخل رقم الهاتف بدون رمز الدولة",
+    "secretary.temporaryPatient.title": "إضافة مريض مؤقت",
+    "secretary.temporaryPatient.description":
+      "أنشئ سجلاً مؤقتاً واربطه بحسابك لمواصلة الزيارات والتواصل.",
+    "secretary.temporaryPatient.createError": "تعذّر إنشاء المريض المؤقت",
+    "secretary.temporaryPatient.fullNameLabel": "الاسم الكامل",
+    "secretary.temporaryPatient.fullNamePlaceholder":
+      "مثال: سارة عبد الله العلي",
+    "secretary.temporaryPatient.emailLabel": "البريد الإلكتروني",
+    "secretary.temporaryPatient.phoneLabel": "رقم الهاتف",
+    "secretary.temporaryPatient.dialCodeLabel": "رمز الاتصال",
+    "secretary.temporaryPatient.withoutLeadingZero": "بدون الصفر الأول",
+    "secretary.temporaryPatient.internationalFormatNote":
+      "يُرسل للخادم بصيغة دولية مثل",
+    "secretary.temporaryPatient.saveButton": "حفظ وربط بالعيادة",
+    "secretary.bookAppointment.validation.patientRequired": "يرجى اختيار مريض.",
+    "secretary.bookAppointment.validation.dateRequired":
+      "يرجى اختيار تاريخ الموعد.",
+    "secretary.bookAppointment.validation.dateFormat": "تنسيق تاريخ غير صالح.",
+    "secretary.bookAppointment.validation.timeRequired":
+      "يرجى اختيار وقت الموعد.",
+    "secretary.bookAppointment.validation.timeFormat": "تنسيق وقت غير صالح.",
+    "secretary.bookAppointment.validation.notesTooLong":
+      "الحد الأقصى لطول الملاحظات هو 500 حرف.",
   },
   en: {
     "language.ar": "Arabic",
     "language.en": "English",
     "language.switch.aria": "Switch application language",
+    "auth.signup.passwordRequirements":
+      "8+ characters including uppercase, lowercase, and at least one number",
+    "auth.verify.title": "Verify your account",
+    "auth.verify.enterCodeSentTo": "Enter the 6-digit code sent to",
+    "auth.verify.confirm": "Confirm",
+    "auth.resetPassword.enterVerificationCode": "Enter verification code",
+    "auth.resetPassword.codeSentTo": "We sent a 6-digit code to",
+    "auth.resetPassword.verificationFailed": "Verification failed",
+    "auth.resetPassword.verifyCode": "Verify code",
+    "auth.resetPassword.changeChannel": "Change verification channel",
+    "auth.claim.didntReceiveCode": "Didn't get the code?",
+    "auth.verifying": "Verifying…",
+    "auth.claim.title": "Activate your account",
+    "auth.claim.enterCodeSentTo": "Enter the code sent to",
+    "auth.claim.setPasswordToActivate":
+      "Then set a new password to activate your account.",
+    "auth.claim.activationFailed": "Account activation failed",
+    "auth.claim.activateAccount": "Activate account",
+    "auth.claim.resendIn": "Didn't get the code? Resend in {seconds}s",
+    "auth.claim.codeResent": "A new verification code was sent.",
+    "auth.claim.resent": "Code resent",
+    "auth.claim.resendFailed": "Resend failed",
+    "auth.claim.resendCode": "Resend code",
+    "auth.password": "Password",
+    "auth.confirmPassword": "Confirm password",
+    "auth.showPassword": "Show password",
+    "auth.hidePassword": "Hide password",
+    "auth.activating": "Activating…",
+    "auth.sending": "Sending…",
+    "common.closeMenu": "Close menu",
+    "secretary.sidebar.portal": "Secretary portal",
     "common.close": "Close",
     "common.cancel": "Cancel",
     "common.optional": "optional",
     "common.logout": "Log out",
     "common.connected": "Online",
+    "common.validateData": "Validate data",
     "common.openMenu": "Open menu",
     "common.openSidebar": "Open sidebar",
     "common.closeSidebar": "Close sidebar",
@@ -2074,7 +2849,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "common.disabled": "Disabled",
     "common.refresh": "Refresh",
     "common.loadMore": "Load more",
-    "header.quickSearchPlaceholder": "Quick search… press Enter to jump to patients",
+    "header.quickSearchPlaceholder":
+      "Quick search… press Enter to jump to patients",
     "header.adminSupport": "Complaints & support",
     "header.backToSection": "Back to {section}",
     "header.notifications": "Notifications",
@@ -2212,15 +2988,19 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.personalProfileForm.photo.change": "Change photo",
     "doctor.personalProfileForm.fields.fullName.placeholder": "Dr. John Doe",
     "doctor.personalProfileForm.fields.dateOfBirth.label": "Date of birth",
-    "doctor.personalProfileForm.fields.address.placeholder": "Enter the full address",
+    "doctor.personalProfileForm.fields.address.placeholder":
+      "Enter the full address",
     "doctor.personalProfileForm.fields.bio.label": "Bio",
-    "doctor.personalProfileForm.fields.bio.hint": "Optional — up to 200 characters",
+    "doctor.personalProfileForm.fields.bio.hint":
+      "Optional — up to 200 characters",
     "doctor.personalProfileForm.fields.bio.placeholder":
       "Write a short bio about yourself...",
-    "doctor.personalProfileForm.fields.consultationFee.label": "Consultation fee",
+    "doctor.personalProfileForm.fields.consultationFee.label":
+      "Consultation fee",
     "doctor.personalProfileForm.fields.consultationFee.hint":
       "Optional — in Syrian pounds",
-    "doctor.personalProfileForm.fields.consultationMode.label": "Consultation type",
+    "doctor.personalProfileForm.fields.consultationMode.label":
+      "Consultation type",
     "doctor.personalProfileForm.consultationMode.offline": "In-person only",
     "doctor.personalProfileForm.consultationMode.online": "Remote only",
     "doctor.personalProfileForm.consultationMode.both": "In-person + remote",
@@ -2248,6 +3028,174 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointmentsTab.fields.date": "Date",
     "doctor.appointmentsTab.fields.time": "Time",
     "doctor.appointmentsTab.fields.status": "Status",
+    "doctor.clinicAccounts.period.week": "Week",
+    "doctor.clinicAccounts.period.month": "Month",
+    "doctor.clinicAccounts.period.custom": "Custom",
+    "doctor.clinicAccounts.period.day": "Day",
+    "doctor.activityLog.infoText":
+      "All access to medical records and sensitive data is logged to ensure security and legal compliance. You can review these logs at any time.",
+    "doctor.activityLog.searchPlaceholder": "Search activities...",
+    "doctor.activityLog.period.all": "All",
+    "doctor.activityLog.period.today": "Today",
+    "doctor.activityLog.period.week": "This week",
+    "doctor.activityLog.period.month": "This month",
+    "doctor.encounters.filterLabel": "Filter visits",
+    "doctor.encounters.searchLabel": "Search visits",
+    "doctor.encounters.searchPlaceholder":
+      "Search by patient name, file number, or visit type...",
+    "doctor.encounters.fromDate": "From",
+    "doctor.encounters.toDate": "To",
+    "doctor.encounters.sortLabel": "Sort",
+    "doctor.encounters.sortPlaceholder": "Sort",
+    "doctor.encounters.sort.startedAt-desc": "Newest first (start date)",
+    "doctor.encounters.sort.startedAt-asc": "Oldest first (start date)",
+    "doctor.encounters.sort.createdAt-desc": "Newest (creation date)",
+    "doctor.encounters.sort.createdAt-asc": "Oldest (creation date)",
+    "adminMedicalContent.type.الكل": "All",
+    "adminMedicalContent.type.CONDITION": "Conditions",
+    "adminMedicalContent.type.SYMPTOM": "Symptoms",
+    "adminMedicalContent.type.GENERAL_ADVICE": "General advice",
+    "adminMedicalContent.type.NEWS": "News",
+    "adminMedicalContent.type.MEDICATION": "Medications",
+    "adminMedicalContent.type.SETTINGS_PAGE": "Settings pages",
+    "adminMedicalContent.status.الكل": "All",
+    "adminMedicalContent.status.منشور": "Published",
+    "adminMedicalContent.status.قيد المراجعة": "In review",
+    "adminMedicalContent.status.مسودة": "Draft",
+    "adminMedicalContent.status.مؤرشف": "Archived",
+    "adminMedicalContent.mineOnlyHint":
+      "My-content mode shows only: All, Draft, In review.",
+    "network.offlineTitle": "No connection",
+    "network.offlineMessage":
+      "Unable to access the internet. Check your network and try again.",
+    "network.onlineTitle": "Connection restored",
+    "network.onlineMessage":
+      "Connection is back. You can continue working normally.",
+    "doctor.facilities.table.name": "Facility name",
+    "doctor.facilities.table.address": "Address",
+    "doctor.facilities.table.phone": "Phone",
+    "doctor.facilities.table.status": "Status",
+    "doctor.facilities.table.actions": "Actions",
+    "doctor.facilities.table.actionsLabel": "Facility actions",
+    "doctor.facilities.table.editFacility": "Edit facility",
+    "doctor.facilities.table.unlinkFacility": "Unlink facility",
+    "accountDeletion.confirmLabel": "Confirm continuation",
+    "accountDeletion.executing": "Executing…",
+    "accountDeletion.reasons.privacy": "Privacy concerns",
+    "accountDeletion.reasons.notUseful": "App is not useful to me",
+    "accountDeletion.reasons.betterAlternative": "Found a better alternative",
+    "accountDeletion.reasons.technical": "Technical issues",
+    "accountDeletion.reasons.other": "Other reasons",
+    "accountDeletion.feedback.title": "Help us improve",
+    "accountDeletion.feedback.subtitle":
+      "Why do you want to delete your account? (optional)",
+    "accountDeletion.feedback.notesLabel": "Additional notes (optional)",
+    "accountDeletion.feedback.placeholder":
+      "Share your experience or suggestions for improvement...",
+    "accountDeletion.feedback.skip": "Skip",
+    "accountDeletion.feedback.delete": "Delete account",
+    "accountDeletion.feedback.deleting": "Deleting…",
+    "doctor.facilities.linkFacility": "Link existing facility",
+    "doctor.facilities.addFacility": "Add facility",
+    "doctor.facilities.suggestFacility": "Suggest facility",
+    "doctor.appointments.emptyStateAlt": "No appointments booked",
+    "doctor.appointments.emptyStateTitle": "No appointments booked yet",
+    "doctor.appointments.emptyStateSubtitle": "Book an appointment now",
+    "doctor.appointments.bookAppointment": "Book appointment",
+    "doctor.prescriptionsHub.table.systemId": "System ID",
+    "doctor.prescriptionsHub.table.patientName": "Patient name",
+    "doctor.prescriptionsHub.table.facility": "Facility",
+    "doctor.prescriptionsHub.table.date": "Date",
+    "doctor.prescriptionsHub.table.status": "Status",
+    "doctor.prescriptionsHub.table.actions": "Actions",
+    "doctor.prescriptionsHub.table.emptyState":
+      "No prescriptions match the current search",
+    "doctor.prescriptionsHub.table.viewPrescription": "View prescription",
+    "doctor.prescriptionsHub.pageTitle": "Prescriptions",
+    "doctor.prescriptionsHub.pageSubtitle": "Prescription documentation",
+    "doctor.prescriptionsHub.addNewPrescription": "Add new prescription",
+    "doctor.prescriptionsHub.addHint":
+      "Prescriptions are created from within a patient visit — you'll be taken to the encounters list to pick one first.",
+    "doctor.prescription.defaultTitle": "Prescription",
+    "doctor.prescription.defaultStatus": "Draft",
+    "common.fileNumberLabel": "File number:",
+    "common.back": "Back",
+    "common.fileNumber": "File number",
+    "doctor.radiology.defaultTitle": "Radiology orders",
+    "doctor.radiology.defaultStatus": "Draft",
+    "doctor.medicalRequests.pageTitle": "Medical Requests",
+    "doctor.medicalRequests.pageSubtitle":
+      "Track lab, imaging, and procedure requests",
+    "doctor.medicalRequests.searchLabel": "Search patient",
+    "doctor.medicalRequests.searchPlaceholder": "Search patient...",
+    "doctor.medicalRequests.category.lab": "Lab",
+    "doctor.medicalRequests.category.radiology": "Radiology",
+    "doctor.medicalRequests.category.procedure": "Procedures",
+    "doctor.medicalRequests.category.referral": "Referrals",
+    "doctor.medicalRequests.typeLabel": "Type",
+    "doctor.medicalRequests.statusLabel": "Status",
+    "doctor.medicalRecords.searchLabel": "Search patient",
+    "doctor.medicalRecords.searchPlaceholder": "Search patient...",
+    "doctor.clinicalLibrary.table.title": "Title",
+    "doctor.clinicalLibrary.table.type": "Type",
+    "doctor.clinicalLibrary.table.favorite": "Favorite",
+    "doctor.clinicalLibrary.table.actions": "Actions",
+    "doctor.clinicalLibrary.table.removeFromFavorites": "Remove from favorites",
+    "doctor.clinicalLibrary.table.addToFavorites": "Add to favorites",
+    "doctor.clinicalLibrary.table.archive": "Archive",
+    "doctor.clinicalLibrary.table.templateName": "Template name",
+    "doctor.clinicalLibrary.table.description": "Description",
+    "doctor.clinicalLibrary.table.use": "Use",
+    "doctor.clinicalLibrary.section.library": "Clinical Library",
+    "doctor.clinicalLibrary.section.templates": "Templates",
+    "doctor.clinicalLibrary.libraryType.all": "All",
+    "doctor.clinicalLibrary.libraryType.MEDICATION": "Medications",
+    "doctor.clinicalLibrary.libraryType.LAB": "Labs",
+    "doctor.clinicalLibrary.libraryType.IMAGING": "Imaging",
+    "doctor.clinicalLibrary.libraryType.PROCEDURE": "Procedures",
+    "doctor.clinicalLibrary.templateType.all": "All",
+    "doctor.clinicalLibrary.templateType.PRESCRIPTION": "Prescription",
+    "doctor.clinicalLibrary.templateType.LAB_ORDER": "Lab order",
+    "doctor.clinicalLibrary.templateType.IMAGING_ORDER": "Imaging order",
+    "doctor.clinicalLibrary.templateType.PROCEDURE_ORDER": "Procedure order",
+    "doctor.clinicalLibrary.templateType.REFERRAL_ORDER": "Referral",
+    "doctor.clinicalLibrary.searchLibraryPlaceholder":
+      "Search clinical library...",
+    "doctor.clinicalLibrary.searchTemplatesPlaceholder": "Search templates...",
+    "doctor.clinicalLibrary.searchLabel": "Search clinical library",
+    "doctor.appointmentTypes.table.name": "Type name",
+    "doctor.appointmentTypes.table.price": "Price",
+    "doctor.appointmentTypes.table.visibleToPatient": "Visible to patient",
+    "doctor.appointmentTypes.table.status": "Status",
+    "doctor.appointmentTypes.table.actions": "Actions",
+    "doctor.appointmentTypes.status.all": "All",
+    "doctor.appointmentTypes.status.active": "Active",
+    "doctor.appointmentTypes.status.inactive": "Inactive",
+    "doctor.appointmentTypes.searchPlaceholder": "Search appointment type...",
+    "doctor.appointmentTypes.searchLabel": "Search appointment types",
+    "doctor.encounters.status.all": "All",
+    "doctor.encounters.status.open": "Active",
+    "doctor.encounters.status.closed": "Closed",
+    "doctor.encounters.status.filterLabel": "Filter visit status",
+    "doctor.consultations.status.waiting": "New",
+    "doctor.consultations.status.in_progress": "Active",
+    "doctor.consultations.status.closed": "Closed",
+    "doctor.consultations.status.dismissed": "Dismissed",
+    "doctor.consultations.status.filterLabel": "Filter consultation status",
+    "doctor.waitlist.table.publicId": "Public ID",
+    "doctor.waitlist.table.patientName": "Patient name",
+    "doctor.waitlist.table.priority": "Priority",
+    "doctor.waitlist.table.preferredPeriod": "Preferred period",
+    "doctor.waitlist.table.status": "Status",
+    "doctor.waitlist.table.actions": "Actions",
+    "doctor.waitlist.actions.label": "Request actions",
+    "doctor.waitlist.actions.viewDetails": "View details",
+    "doctor.waitlist.actions.viewAppointment": "View appointment",
+    "doctor.waitlist.actions.bookAppointment": "Book appointment",
+    "doctor.waitlist.actions.contacted": "Contacted",
+    "doctor.waitlist.actions.closeRequest": "Close request",
+    "doctor.waitlist.searchPlaceholder": "Search by name or public ID...",
+    "doctor.waitlist.search": "Search the waitlist",
     "doctor.supportContactForm.requestType.technical": "Technical issue",
     "doctor.supportContactForm.requestType.account": "Account & security",
     "doctor.supportContactForm.requestType.billing": "Billing & subscription",
@@ -2338,7 +3286,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "If you cannot find the facility in the list, send a suggestion and it will be reviewed and added to the system after approval.",
     "doctor.suggestFacilityDialog.descriptionPlaceholder":
       "Enter the facility description or any additional notes",
-    "doctor.suggestFacilityDialog.addressPlaceholder": "Enter the detailed address",
+    "doctor.suggestFacilityDialog.addressPlaceholder":
+      "Enter the detailed address",
     "doctor.suggestFacilityDialog.sending": "Sending…",
     "doctor.suggestFacilityDialog.submit": "Send suggestion",
     "doctor.suggestFacilityDialog.errors.nameRequired":
@@ -2349,10 +3298,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.facilityForm.fields.description.placeholder":
       "Enter the facility description",
     "doctor.facilityForm.fields.country.placeholder": "Enter the country",
-    "doctor.facilityForm.fields.address.placeholder": "Enter the detailed address",
+    "doctor.facilityForm.fields.address.placeholder":
+      "Enter the detailed address",
     "doctor.facilityForm.attributes.title": "Facility attributes",
     "doctor.facilityForm.attributes.addLabel": "Add attribute",
-    "doctor.facilityForm.attributes.addHint": "e.g. night_shift or echo_available",
+    "doctor.facilityForm.attributes.addHint":
+      "e.g. night_shift or echo_available",
     "doctor.facilityForm.attributes.removeAria": "Remove {attr}",
     "doctor.facilityForm.attributes.empty": "No attributes added yet.",
     "doctor.facilityForm.status.label": "Facility status",
@@ -2463,8 +3414,7 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.appointmentCard.priceSar": "{price} SAR",
     "doctor.appointmentCard.location": "Location",
     "doctor.appointmentCard.reasonForVisit": "Reason for visit",
-    "doctor.appointmentCard.noReasonGiven":
-      "No reason for the visit was given",
+    "doctor.appointmentCard.noReasonGiven": "No reason for the visit was given",
     "doctor.appointmentCard.appointmentFiles": "Appointment files:",
     "doctor.appointmentCard.loadingDetails": "Loading appointment details...",
     "doctor.appointmentCard.noFilesAttached":
@@ -2480,7 +3430,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Patient activity - last 7 days",
     "doctor.dashboardPatientsSection.patientsAppointmentsCount":
       "{patients} patients • {appointments} appointments",
-    "doctor.dashboardPatientsSection.averagePerDay": "Average: {n} patients/day",
+    "doctor.dashboardPatientsSection.averagePerDay":
+      "Average: {n} patients/day",
     "doctor.dashboardPatientsSection.peakDay": " • Peak day: {n} appointments",
     "doctor.dashboardPatientsSection.searchPlaceholder":
       "Search by name, phone, email, or file number…",
@@ -2504,7 +3455,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.dashboardPatientsSection.goToPatientsPage": "Go to patients page",
     "doctor.dashboardPatientsSection.patientCount": "{n} patients",
     "doctor.dashboardPatientsSection.matchingSearch": " matching the search",
-    "doctor.dashboardPatientsSection.viewAllPatients": "View all patients ({n})",
+    "doctor.dashboardPatientsSection.viewAllPatients":
+      "View all patients ({n})",
     "doctor.dashboardPatientsSection.notApprovedError":
       "The doctor account is not approved yet, so patients cannot be searched.",
     "doctor.dashboardPatientsSection.sessionExpiredError":
@@ -2560,22 +3512,19 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.addAccessRequestForm.dataType.diagnoses.label": "Diagnoses",
     "doctor.addAccessRequestForm.dataType.diagnoses.subtitle":
       "Previous medical diagnoses",
-    "doctor.addAccessRequestForm.dataType.prescriptions.label":
-      "Prescriptions",
+    "doctor.addAccessRequestForm.dataType.prescriptions.label": "Prescriptions",
     "doctor.addAccessRequestForm.dataType.prescriptions.subtitle":
       "Recorded prescriptions",
     "doctor.addAccessRequestForm.dataType.encounters.label":
       "Medical encounters",
     "doctor.addAccessRequestForm.dataType.encounters.subtitle":
       "Encounter and appointment history",
-    "doctor.addAccessRequestForm.dataType.files.label":
-      "Files and attachments",
+    "doctor.addAccessRequestForm.dataType.files.label": "Files and attachments",
     "doctor.addAccessRequestForm.dataType.files.subtitle":
       "Medical documents and files",
     "doctor.addAccessRequestForm.title": "New access request",
     "doctor.addAccessRequestForm.selectPatientLabel": "Select patient",
-    "doctor.addAccessRequestForm.selectPatientPlaceholder":
-      "Select patient...",
+    "doctor.addAccessRequestForm.selectPatientPlaceholder": "Select patient...",
     "doctor.addAccessRequestForm.noPatientsInList": "No patients in the list",
     "doctor.addAccessRequestForm.noPatientsAvailable":
       "No patients are available to select.",
@@ -2638,35 +3587,43 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "Notice: the encounter is still open. It's best to close it from the workspace before finalizing the summary.",
     "doctor.encounterSummaryFinishDialog.emptyNotice":
       "The summary does not contain any prescriptions or orders yet. You can come back later to complete the documentation.",
-    "doctor.encounterSummaryFinishDialog.title": "Finish and save the medical encounter",
-    "doctor.encounterSummaryFinishDialog.confirmLabel": "Confirm finish and save",
+    "doctor.encounterSummaryFinishDialog.title":
+      "Finish and save the medical encounter",
+    "doctor.encounterSummaryFinishDialog.confirmLabel":
+      "Confirm finish and save",
     "doctor.encounterSummaryBody.urgent": "Urgent",
     "doctor.encounterSummaryBody.patientInfo": "Patient information",
     "doctor.encounterSummaryBody.chiefComplaint": "Chief complaint",
     "doctor.encounterSummaryBody.pastHistory": "History",
-    "doctor.encounterSummaryBody.assessmentAndDiagnosis": "Assessment and diagnosis",
+    "doctor.encounterSummaryBody.assessmentAndDiagnosis":
+      "Assessment and diagnosis",
     "doctor.encounterSummaryBody.currentPresentation": "Current presentation",
     "doctor.encounterSummaryBody.pastIllnesses": "Past illnesses",
     "doctor.encounterSummaryBody.noDiagnoses":
       "No diagnoses recorded for this encounter.",
     "doctor.encounterSummaryBody.noMedications":
       "No medications documented in this encounter's prescriptions.",
-    "doctor.encounterSummaryBody.noLabs": "No labs recorded for this encounter.",
+    "doctor.encounterSummaryBody.noLabs":
+      "No labs recorded for this encounter.",
     "doctor.encounterSummaryBody.noRadiology":
       "No imaging orders recorded for this encounter.",
     "doctor.encounterSummaryBody.noReferrals":
       "No referrals recorded for this encounter.",
     "doctor.encounterSummaryBody.referralTo": "To {name}",
     "doctor.documentsTab.clinicalEncounterOpen": "Clinical encounter (open)",
-    "doctor.documentsTab.clinicalEncounterClosed": "Clinical encounter (closed)",
-    "doctor.documentsTab.recordedClinicalEncounter": "Recorded clinical encounter",
-    "doctor.documentsTab.prescriptionMedCount": "Prescription — {n} medication(s)",
+    "doctor.documentsTab.clinicalEncounterClosed":
+      "Clinical encounter (closed)",
+    "doctor.documentsTab.recordedClinicalEncounter":
+      "Recorded clinical encounter",
+    "doctor.documentsTab.prescriptionMedCount":
+      "Prescription — {n} medication(s)",
     "doctor.documentsTab.emptyTitle": "No clinical documents yet",
     "doctor.documentsTab.emptySubtitle":
       "Encounters, records, prescriptions, and medical orders will appear here automatically once added",
     "doctor.documentsTab.viewFiles": "View files",
     "doctor.documentsTab.documentCount": "{n} documents",
-    "doctor.documentsTab.noFilterMatch": "No documents match the selected filter",
+    "doctor.documentsTab.noFilterMatch":
+      "No documents match the selected filter",
     "doctor.documentsTab.files": "Files",
     "doctor.createMedicalRecordForm.errors.selectPatient": "Select the patient",
     "doctor.createMedicalRecordForm.errors.titleRequired":
@@ -2685,6 +3642,18 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.createMedicalRecordForm.prescriptionsPlaceholder":
       "Enter each prescription on its own line, e.g.:&#10;Paracetamol 500mg&#10;Vitamin D 1000 IU",
     "doctor.createMedicalRecordForm.needsFollowUp": "Needs follow-up",
+    "doctor.medicalRecordDetailsDialog.title": "Medical record details",
+    "doctor.medicalRecordDetailsDialog.diagnosis": "Diagnosis",
+    "doctor.medicalRecordDetailsDialog.symptoms": "Symptoms",
+    "doctor.medicalRecordDetailsDialog.vitals": "Vitals",
+    "doctor.medicalRecordDetailsDialog.prescriptionsCount":
+      "Prescriptions ({n})",
+    "doctor.medicalRecordDetailsDialog.dosage": "Dosage:",
+    "doctor.medicalRecordDetailsDialog.duration": "Duration:",
+    "doctor.medicalRecordDetailsDialog.notes": "Notes:",
+    "doctor.medicalRecordDetailsDialog.frequency": "Frequency:",
+    "doctor.medicalRecordDetailsDialog.suggestedDate": "Suggested date:",
+    "doctor.medicalRecordDetailsDialog.additionalNotes": "Additional notes",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",
@@ -2701,10 +3670,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.dashboard.kpi.myContent": "My medical items",
     "dataEntry.dashboard.kpi.templates": "Available templates",
     "dataEntry.dashboard.kpi.orders": "Catalog items",
-    "dataEntry.dashboard.cards.medicalContent.title": "Medical Content Management",
+    "dataEntry.dashboard.cards.medicalContent.title":
+      "Medical Content Management",
     "dataEntry.dashboard.cards.medicalContent.description":
       "Create, edit, and track your medical content, then send items to review from one place.",
-    "dataEntry.dashboard.cards.contentTemplates.title": "Content Templates Reference",
+    "dataEntry.dashboard.cards.contentTemplates.title":
+      "Content Templates Reference",
     "dataEntry.dashboard.cards.contentTemplates.description":
       "View ready templates and fields to speed up consistent data entry.",
     "dataEntry.dashboard.cards.medicalOrders.title": "Medical Orders Catalog",
@@ -2716,7 +3687,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.dashboard.notes.title": "Operational Notes",
     "dataEntry.dashboard.notes.body":
       "This interface is built for Data Entry role endpoints while keeping the same LMJ design style for a consistent experience.",
-    "dataEntry.page.medicalContent.title": "Medical Content • Data Entry • LMJ Health",
+    "dataEntry.page.medicalContent.title":
+      "Medical Content • Data Entry • LMJ Health",
     "dataEntry.medicalContent.hero.title": "My Medical Content",
     "dataEntry.medicalContent.hero.subtitle":
       "Manage content items created by the Data Entry team",
@@ -2733,7 +3705,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.medicalContent.error.loadTitle": "Could not load content.",
     "dataEntry.medicalContent.error.loadBody": "Please try again shortly.",
     "dataEntry.medicalContent.list.title": "Content List",
-    "dataEntry.medicalContent.list.empty": "No items match the current filters.",
+    "dataEntry.medicalContent.list.empty":
+      "No items match the current filters.",
     "dataEntry.medicalContent.actions.view": "View",
     "dataEntry.medicalContent.actions.edit": "Edit",
     "dataEntry.medicalContent.actions.submitReview": "Send for review",
@@ -2743,7 +3716,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "dataEntry.medicalContent.toast.reviewFailed.title": "Submission failed",
     "dataEntry.medicalContent.toast.reviewFailed.body":
       "Could not submit item for review. Please check data and try again.",
-    "dataEntry.page.contentTemplates.title": "Content Templates • Data Entry • LMJ Health",
+    "dataEntry.page.contentTemplates.title":
+      "Content Templates • Data Entry • LMJ Health",
     "dataEntry.contentTemplates.hero.title": "Available Content Templates",
     "dataEntry.contentTemplates.hero.subtitle":
       "A quick reference for template fields used by the Data Entry team",
@@ -2765,7 +3739,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "This page explains the approved template fields and structure so the data entry team can use them correctly without editing templates here.",
     "dataEntry.contentTemplates.reference.badge": "Reference only",
     "dataEntry.contentTemplates.fieldsCount": "field",
-    "dataEntry.page.serviceProviders.title": "Service Providers • Data Entry • LMJ Health",
+    "dataEntry.page.serviceProviders.title":
+      "Service Providers • Data Entry • LMJ Health",
     "dataEntry.serviceProviders.hero.title": "Service Providers",
     "dataEntry.serviceProviders.hero.selectedTypePrefix": "Service type",
     "dataEntry.serviceProviders.hero.selectTypeHint":
@@ -2800,7 +3775,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "content.language.all": "All languages",
     "dashboard.title.default": "Dashboard",
     "logout.title": "Confirm logout",
-    "logout.description": "Choose logout scope. Default signs out only this session.",
+    "logout.description":
+      "Choose logout scope. Default signs out only this session.",
     "logout.scope.current": "This device only",
     "logout.scope.all": "All devices",
     "logout.pending": "Logging out…",
@@ -2809,7 +3785,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "logout.toast.success.title": "Logged out",
     "logout.toast.success.body": "See you next time.",
     "logout.toast.error.title": "Logout failed",
-    "logout.toast.error.body": "Could not complete logout right now. Please try again.",
+    "logout.toast.error.body":
+      "Could not complete logout right now. Please try again.",
     "admin.meta.default.title": "Dashboard",
     "admin.meta.default.subtitle": "LMJ Health Admin System",
     "admin.meta.overview.title": "Overview",
@@ -2820,12 +3797,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.validation.required": "This field is required",
     "auth.validation.passwordMin6": "Password must be at least 6 characters",
     "auth.validation.emailInvalid": "Please enter a valid email address",
-    "auth.validation.phoneMin10": "Phone number must contain at least 10 digits",
-    "auth.validation.phoneE164": "Enter a valid international phone number like +963912345678",
+    "auth.validation.phoneMin10":
+      "Phone number must contain at least 10 digits",
+    "auth.validation.phoneE164":
+      "Enter a valid international phone number like +963912345678",
     "auth.common.showPassword": "Show password",
     "auth.common.hidePassword": "Hide password",
     "auth.login.title": "Login",
-    "auth.login.subtitle": "Welcome back, sign in to continue managing appointments and health data securely.",
+    "auth.login.subtitle":
+      "Welcome back, sign in to continue managing appointments and health data securely.",
     "auth.login.method.phone": "Phone number",
     "auth.login.method.email": "Email address",
     "auth.login.placeholder.phone": "+963912345678",
@@ -2839,31 +3819,46 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.login.noAccount": "Don't have an account?",
     "auth.login.createAccount": "Create new account",
     "auth.login.success.title": "Welcome",
-    "auth.login.success.admin": "Login successful. Welcome to LMJ Health Admin.",
+    "auth.login.success.admin":
+      "Login successful. Welcome to LMJ Health Admin.",
     "auth.login.success.doctor": "Login successful. Welcome to LMJ Health.",
     "auth.login.success.secretary": "Login successful. Welcome.",
     "auth.login.success.patient": "Login successful. Welcome.",
     "auth.login.success.dataEntry": "Login successful. Welcome.",
     "auth.login.success.default": "Login successful. Welcome.",
     "auth.login.recoveryActive.title": "Active deletion request",
-    "auth.login.recoveryActive.body": "Your account is in recovery period. You can cancel the deletion request now.",
+    "auth.login.recoveryActive.body":
+      "Your account is in recovery period. You can cancel the deletion request now.",
     "auth.login.error.title": "Login failed",
     "auth.login.error.accountBlocked.title": "Account blocked",
     "auth.login.error.accountBlocked.body": "Your account is blocked by admin.",
-    "auth.login.error.deletionRecoveryExpired": "This account was deleted or its recovery period expired. Login is not allowed.",
-    "auth.login.error.phone.invalidCredentials": "Phone number or password is incorrect",
-    "auth.login.error.phone.notVerified": "The account linked to this phone is not verified yet. Complete OTP verification.",
-    "auth.login.error.phone.deleted": "The account linked to this phone is suspended.",
-    "auth.login.error.email.invalidCredentials": "Email or password is incorrect",
-    "auth.login.error.email.notVerified": "Account is not verified. Please verify via email.",
-    "auth.login.error.email.deleted": "This account was deleted or its recovery period expired. Login is not allowed.",
+    "auth.login.error.deletionRecoveryExpired":
+      "This account was deleted or its recovery period expired. Login is not allowed.",
+    "auth.login.error.phone.invalidCredentials":
+      "Phone number or password is incorrect",
+    "auth.login.error.phone.notVerified":
+      "The account linked to this phone is not verified yet. Complete OTP verification.",
+    "auth.login.error.phone.deleted":
+      "The account linked to this phone is suspended.",
+    "auth.login.error.email.invalidCredentials":
+      "Email or password is incorrect",
+    "auth.login.error.email.notVerified":
+      "Account is not verified. Please verify via email.",
+    "auth.login.error.email.deleted":
+      "This account was deleted or its recovery period expired. Login is not allowed.",
     "auth.login.error.common.inactive": "Account is inactive. Contact support.",
-    "auth.login.error.common.pendingApproval": "Doctor account is pending admin approval.",
-    "auth.login.error.common.notAllowed": "This account is not allowed to use this app.",
-    "auth.login.error.common.temporary": "Your account is not activated yet. You will be redirected to activation flow.",
-    "auth.login.error.common.locked": "Account is locked. You may still sign in during recovery period (7 days).",
-    "auth.login.error.common.deletionRecovery": "Your account is in recovery period (7 days). You will be redirected to restore flow.",
-    "auth.login.error.common.network": "Could not reach server. Check your internet and try again.",
+    "auth.login.error.common.pendingApproval":
+      "Doctor account is pending admin approval.",
+    "auth.login.error.common.notAllowed":
+      "This account is not allowed to use this app.",
+    "auth.login.error.common.temporary":
+      "Your account is not activated yet. You will be redirected to activation flow.",
+    "auth.login.error.common.locked":
+      "Account is locked. You may still sign in during recovery period (7 days).",
+    "auth.login.error.common.deletionRecovery":
+      "Your account is in recovery period (7 days). You will be redirected to restore flow.",
+    "auth.login.error.common.network":
+      "Could not reach server. Check your internet and try again.",
     "auth.login.error.common.unknown": "Unexpected error. Please try again.",
     "auth.signup.header": "Create doctor account",
     "auth.signup.haveAccount": "Already have an account?",
@@ -2872,7 +3867,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.signup.error.submitTitle": "Sign-up failed",
     "auth.signup.error.submitFallback": "Could not complete sign-up",
     "auth.signup.verifySent.title": "Verify account",
-    "auth.signup.verifySent.body": "Your sign-up request was sent. Enter the verification code sent to email or WhatsApp.",
+    "auth.signup.verifySent.body":
+      "Your sign-up request was sent. Enter the verification code sent to email or WhatsApp.",
     "auth.signup.step.account": "Account",
     "auth.signup.step.personal": "Personal",
     "auth.signup.step.professional": "Professional",
@@ -2885,44 +3881,97 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.page.signupSuccess.title": "Signup Success • LMJ Health",
     "auth.verifyOtp.completing": "Completing verification…",
     "auth.verifyOtp.success.title": "Verified",
-    "auth.verifyOtp.success.body": "Signup code confirmed. You can continue to your dashboard.",
+    "auth.verifyOtp.success.body":
+      "Signup code confirmed. You can continue to your dashboard.",
     "auth.verifyOtp.success.completedTitle": "Verification complete",
     "auth.verifyOtp.pending.title": "Signup code confirmed",
-    "auth.verifyOtp.pending.body": "Code confirmed. Doctor account is pending admin approval before full access.",
+    "auth.verifyOtp.pending.body":
+      "Code confirmed. Doctor account is pending admin approval before full access.",
     "auth.verifyOtp.pending.badge": "Pending approval",
     "auth.forgotPassword.otpSent.title": "Check your email/phone",
     "auth.forgotPassword.otpSent.body": "Password reset code has been sent.",
-    "auth.forgotPassword.error.sendFailed": "Could not send reset code. Please try again.",
+    "auth.forgotPassword.error.sendFailed":
+      "Could not send reset code. Please try again.",
     "auth.resetVerify.success.title": "Verified",
-    "auth.resetVerify.success.body": "Code verified. You can now set a new password.",
+    "auth.resetVerify.success.body":
+      "Code verified. You can now set a new password.",
     "auth.resetPassword.error.title": "Update failed",
-    "auth.resetPassword.error.fallback": "No matching record found for the provided data. Please verify and try again.",
+    "auth.resetPassword.error.fallback":
+      "No matching record found for the provided data. Please verify and try again.",
+    "auth.resetPassword.fieldRequired": "This field is required",
+    "auth.resetPassword.invalidPhone":
+      "Enter a valid phone number in international format like +963912345678 or 009639912345678",
+    "auth.resetPassword.phoneMethod": "Phone number",
+    "auth.resetPassword.emailMethod": "Email",
+    "auth.resetPassword.enterPhone": "Enter your phone number",
+    "auth.resetPassword.enterEmail": "Enter your email",
+    "auth.resetPassword.verifyIdentity":
+      "We will send you a verification code to verify your identity",
+    "auth.resetPassword.sending": "Sending…",
+    "auth.resetPassword.backToLogin": "Back to login",
+    "auth.resetPassword.sendFailed":
+      "Could not send reset code. Please try again.",
+    "auth.resetPassword.sendCode": "Send verification code",
+    "auth.resetPassword.newPasswordTitle": "Create new password",
+    "auth.resetPassword.newPasswordSubtitle":
+      "Choose a strong password to protect your account",
+    "auth.resetPassword.newPasswordLabel": "New password",
+    "auth.resetPassword.confirmPasswordLabel": "Confirm password",
+    "auth.resetPassword.passwordRequirements": "Password requirements:",
+    "auth.resetPassword.minLength": "At least 8 characters",
+    "auth.resetPassword.uppercase": "Contains uppercase letter",
+    "auth.resetPassword.number": "Contains number",
+    "auth.resetPassword.match": "Passwords match",
+    "auth.resetPassword.saving": "Saving…",
+    "auth.resetPassword.setPassword": "Set password",
+    "auth.resetPassword.noMatch":
+      "No matching record found for the provided data. Please verify and try again.",
+    "auth.resetPassword.passwordMinLength":
+      "Password must be at least 8 characters",
+    "auth.resetPassword.passwordUppercase": "Must contain uppercase letter",
+    "auth.resetPassword.passwordNumber": "Must contain number",
+    "auth.resetPassword.confirmRequired": "Please confirm password",
+    "auth.resetPassword.passwordMismatch": "Passwords do not match",
     "auth.signupSuccess.default.title": "Welcome to LMJ HEALTH",
-    "auth.signupSuccess.default.message": "Your account was created successfully. Please wait for admin verification.",
+    "auth.signupSuccess.default.message":
+      "Your account was created successfully. Please wait for admin verification.",
     "auth.signupSuccess.default.continue": "Go to home",
     "auth.signupSuccess.pending.title": "Signup code confirmed",
-    "auth.signupSuccess.pending.message": "Verification succeeded. Doctor account is pending admin approval before full activation.",
+    "auth.signupSuccess.pending.message":
+      "Verification succeeded. Doctor account is pending admin approval before full activation.",
     "auth.signupSuccess.pending.continue": "Login",
-    "auth.signupSuccess.pending.autoRedirect": "You will be redirected to login in {seconds} seconds…",
+    "auth.signupSuccess.pending.autoRedirect":
+      "You will be redirected to login in {seconds} seconds…",
     "auth.signupSuccess.ready.title": "Verification complete",
     "auth.signupSuccess.ready.message": "Account created successfully.",
     "auth.signupSuccess.ready.continue": "Go to dashboard",
-    "auth.signupSuccess.ready.autoRedirect": "You will be redirected in {seconds} seconds…",
-    "api.messageKey.errors.validationFailed": "Validation failed. Please review required fields and try again.",
-    "api.messageKey.errors.auth.invalidCredentials": "Invalid login credentials.",
-    "api.messageKey.errors.auth.sessionExpired": "Your session has expired. Please sign in again.",
+    "auth.signupSuccess.ready.autoRedirect":
+      "You will be redirected in {seconds} seconds…",
+    "api.messageKey.errors.validationFailed":
+      "Validation failed. Please review required fields and try again.",
+    "api.messageKey.errors.auth.invalidCredentials":
+      "Invalid login credentials.",
+    "api.messageKey.errors.auth.sessionExpired":
+      "Your session has expired. Please sign in again.",
     "api.messageKey.errors.auth.unauthorized": "You must sign in to continue.",
-    "api.messageKey.errors.auth.forbidden": "You are not allowed to perform this action.",
-    "api.messageKey.errors.auth.accountDisabled": "This account is disabled. Please contact support.",
+    "api.messageKey.errors.auth.forbidden":
+      "You are not allowed to perform this action.",
+    "api.messageKey.errors.auth.accountDisabled":
+      "This account is disabled. Please contact support.",
     "api.messageKey.errors.auth.otpInvalid": "Invalid verification code.",
-    "api.messageKey.errors.auth.otpExpired": "Verification code expired. Request a new one.",
-    "api.messageKey.errors.rateLimit.tooManyRequests": "Too many requests in a short time. Please try again later.",
-    "api.messageKey.errors.resource.notFound": "Requested resource was not found.",
-    "api.messageKey.errors.conflict.duplicate": "Data conflict: record already exists.",
+    "api.messageKey.errors.auth.otpExpired":
+      "Verification code expired. Request a new one.",
+    "api.messageKey.errors.rateLimit.tooManyRequests":
+      "Too many requests in a short time. Please try again later.",
+    "api.messageKey.errors.resource.notFound":
+      "Requested resource was not found.",
+    "api.messageKey.errors.conflict.duplicate":
+      "Data conflict: record already exists.",
 
     "contentTemplateDialog.title.create": "Add data template",
     "contentTemplateDialog.title.edit": "Edit data template",
-    "contentTemplateDialog.subtitle": "Define the metadata fields the content team fills in for this type.",
+    "contentTemplateDialog.subtitle":
+      "Define the metadata fields the content team fills in for this type.",
     "contentTemplateDialog.close": "Close",
     "contentTemplateDialog.field.nameAr.label": "Template name (Arabic)",
     "contentTemplateDialog.field.nameAr.placeholder": "اسم واضح للقالب",
@@ -2935,11 +3984,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentTemplateDialog.parentType.generalAdvice": "General advice",
     "contentTemplateDialog.parentType.medication": "Medications",
     "contentTemplateDialog.field.slug.label": "Slug (optional)",
-    "contentTemplateDialog.field.slug.hint": "Auto-suggested from the English name until you edit it manually.",
+    "contentTemplateDialog.field.slug.hint":
+      "Auto-suggested from the English name until you edit it manually.",
     "contentTemplateDialog.field.slug.placeholder": "my-template",
     "contentTemplateDialog.section.fields.title": "Template fields",
     "contentTemplateDialog.action.addField": "Add field",
-    "contentTemplateDialog.empty.noFields": "No fields yet. Add one to define the data structure.",
+    "contentTemplateDialog.empty.noFields":
+      "No fields yet. Add one to define the data structure.",
     "contentTemplateDialog.field.key.label": "Key",
     "contentTemplateDialog.field.key.placeholder": "fieldKey",
     "contentTemplateDialog.field.labelAr.label": "Arabic label",
@@ -2951,8 +4002,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentTemplateDialog.field.required.label": "Required",
     "contentTemplateDialog.action.deleteField": "Delete field",
     "contentTemplateDialog.field.options.label": "List options (optional)",
-    "contentTemplateDialog.field.options.hint": "Separate values with a comma to offer a fixed choice list instead of free text.",
-    "contentTemplateDialog.field.options.placeholder": "option1, option2, option3",
+    "contentTemplateDialog.field.options.hint":
+      "Separate values with a comma to offer a fixed choice list instead of free text.",
+    "contentTemplateDialog.field.options.placeholder":
+      "option1, option2, option3",
     "contentTemplateDialog.action.cancel": "Cancel",
     "contentTemplateDialog.action.saveCreate": "Save template",
     "contentTemplateDialog.action.saveEdit": "Save changes",
@@ -2960,29 +4013,40 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentTemplateDialog.error.updateFailed": "Could not update",
     "contentTemplateDialog.error.createFailed": "Could not create",
     "contentTemplateDialog.toast.updated.title": "Updated",
-    "contentTemplateDialog.toast.updated.message": "Template “{name}” was updated.",
+    "contentTemplateDialog.toast.updated.message":
+      "Template “{name}” was updated.",
     "contentTemplateDialog.toast.created.title": "Created",
-    "contentTemplateDialog.toast.created.message": "Template “{name}” was added.",
+    "contentTemplateDialog.toast.created.message":
+      "Template “{name}” was added.",
     "contentTemplateDialog.schemaTypes.string": "Text",
     "contentTemplateDialog.schemaTypes.number": "Number",
     "contentTemplateDialog.schemaTypes.boolean": "Boolean",
     "contentTemplateDialog.schemaTypes.array": "List",
     "contentTemplateDialog.schemaTypes.object": "Object",
     "contentTemplateDialog.validation.keyRequired": "Field key is required",
-    "contentTemplateDialog.validation.keyPattern": "Key: Latin letters, digits, and underscore only",
-    "contentTemplateDialog.validation.labelArInvalid": "Enter a valid Arabic label",
-    "contentTemplateDialog.validation.labelEnInvalid": "Enter a valid English label",
+    "contentTemplateDialog.validation.keyPattern":
+      "Key: Latin letters, digits, and underscore only",
+    "contentTemplateDialog.validation.labelArInvalid":
+      "Enter a valid Arabic label",
+    "contentTemplateDialog.validation.labelEnInvalid":
+      "Enter a valid English label",
     "contentTemplateDialog.validation.typeInvalid": "Choose a valid field type",
-    "contentTemplateDialog.validation.requiredInvalid": "Invalid value for the required option",
-    "contentTemplateDialog.validation.optionsInvalid": "Enter valid text for the list options",
+    "contentTemplateDialog.validation.requiredInvalid":
+      "Invalid value for the required option",
+    "contentTemplateDialog.validation.optionsInvalid":
+      "Enter valid text for the list options",
     "contentTemplateDialog.validation.labelRequired": "Field label is required",
-    "contentTemplateDialog.validation.nameInvalid": "Enter a valid template name",
-    "contentTemplateDialog.validation.parentTypeInvalid": "Choose the parent type",
+    "contentTemplateDialog.validation.nameInvalid":
+      "Enter a valid template name",
+    "contentTemplateDialog.validation.parentTypeInvalid":
+      "Choose the parent type",
     "contentTemplateDialog.validation.fieldsMinOne": "Add at least one field",
-    "contentTemplateDialog.validation.nameRequired": "Template name is required",
+    "contentTemplateDialog.validation.nameRequired":
+      "Template name is required",
 
     "contentBlockEditor.title": "Article content",
-    "contentBlockEditor.description": "Build the article's real blocks, keeping the article body separate from template data.",
+    "contentBlockEditor.description":
+      "Build the article's real blocks, keeping the article body separate from template data.",
     "contentBlockEditor.action.addBlock": "Add block",
     "contentBlockEditor.blockType.paragraph": "Paragraph",
     "contentBlockEditor.blockType.heading": "Heading",
@@ -3005,51 +4069,75 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "contentBlockEditor.field.headingText.label": "Heading text",
     "contentBlockEditor.field.headingText.placeholder": "Enter the subheading",
     "contentBlockEditor.field.paragraphText.label": "Text",
-    "contentBlockEditor.field.paragraphText.placeholder": "Write the article's main paragraph…",
+    "contentBlockEditor.field.paragraphText.placeholder":
+      "Write the article's main paragraph…",
     "contentBlockEditor.field.listItems.label": "List items",
     "contentBlockEditor.field.listItems.placeholder": "One item per line",
     "contentBlockEditor.field.listOrdered.label": "Numbered list",
     "contentBlockEditor.field.calloutVariant.label": "Callout type",
     "contentBlockEditor.field.calloutVariant.placeholder": "Callout type",
     "contentBlockEditor.field.calloutTitle.label": "Callout title",
-    "contentBlockEditor.field.calloutTitle.placeholder": "e.g. When should you seek help?",
+    "contentBlockEditor.field.calloutTitle.placeholder":
+      "e.g. When should you seek help?",
     "contentBlockEditor.field.calloutText.label": "Text",
-    "contentBlockEditor.field.calloutText.placeholder": "Write the callout or info content…",
+    "contentBlockEditor.field.calloutText.placeholder":
+      "Write the callout or info content…",
     "contentBlockEditor.field.linkCardTitle.label": "Card title",
-    "contentBlockEditor.field.linkCardTitle.placeholder": "e.g. A trusted reference link",
+    "contentBlockEditor.field.linkCardTitle.placeholder":
+      "e.g. A trusted reference link",
     "contentBlockEditor.field.linkCardDescription.label": "Short description",
-    "contentBlockEditor.field.linkCardDescription.placeholder": "A short summary of what the link opens...",
+    "contentBlockEditor.field.linkCardDescription.placeholder":
+      "A short summary of what the link opens...",
     "contentBlockEditor.field.linkCardUrl.label": "URL",
-    "contentBlockEditor.field.linkCardUrl.hint": "Prefer trusted public links starting with https://",
+    "contentBlockEditor.field.linkCardUrl.hint":
+      "Prefer trusted public links starting with https://",
     "contentBlockEditor.field.faqItems.label": "Questions and answers",
-    "contentBlockEditor.field.faqItems.hint": "Add each question with its answer separately to improve content quality.",
+    "contentBlockEditor.field.faqItems.hint":
+      "Add each question with its answer separately to improve content quality.",
     "contentBlockEditor.faq.itemLabel": "FAQ item {index}",
     "contentBlockEditor.action.deleteFaqItem": "Delete",
     "contentBlockEditor.field.faqQuestion.placeholder": "Question",
     "contentBlockEditor.field.faqAnswer.placeholder": "Answer",
     "contentBlockEditor.action.addFaqItem": "Add question",
-    "contentBlockEditor.dividerNote": "A visual divider will be inserted between article sections.",
-    "contentBlockEditor.validation.urlNoSpaces": "The URL must not contain spaces.",
-    "contentBlockEditor.validation.urlProtocolRequired": "Add the full protocol, e.g. https://",
-    "contentBlockEditor.validation.urlHttpOnly": "Use a URL starting with http:// or https:// only.",
-    "contentBlockEditor.validation.urlInvalid": "Invalid URL format. Valid example: https://example.com",
-    "contentBlockEditor.validation.headingTextRequired": "Enter the heading text.",
-    "contentBlockEditor.validation.paragraphTextRequired": "Enter the paragraph text.",
-    "contentBlockEditor.validation.listItemRequired": "Add at least one list item.",
-    "contentBlockEditor.validation.calloutBothRequired": "Enter both the callout title and text — both are required.",
-    "contentBlockEditor.validation.linkCardBothRequired": "Enter both the card title and URL — both are required.",
-    "contentBlockEditor.validation.faqPairRequired": "Add at least one question and answer.",
+    "contentBlockEditor.dividerNote":
+      "A visual divider will be inserted between article sections.",
+    "contentBlockEditor.validation.urlNoSpaces":
+      "The URL must not contain spaces.",
+    "contentBlockEditor.validation.urlProtocolRequired":
+      "Add the full protocol, e.g. https://",
+    "contentBlockEditor.validation.urlHttpOnly":
+      "Use a URL starting with http:// or https:// only.",
+    "contentBlockEditor.validation.urlInvalid":
+      "Invalid URL format. Valid example: https://example.com",
+    "contentBlockEditor.validation.headingTextRequired":
+      "Enter the heading text.",
+    "contentBlockEditor.validation.paragraphTextRequired":
+      "Enter the paragraph text.",
+    "contentBlockEditor.validation.listItemRequired":
+      "Add at least one list item.",
+    "contentBlockEditor.validation.calloutBothRequired":
+      "Enter both the callout title and text — both are required.",
+    "contentBlockEditor.validation.linkCardBothRequired":
+      "Enter both the card title and URL — both are required.",
+    "contentBlockEditor.validation.faqPairRequired":
+      "Add at least one question and answer.",
 
-    "governancePanel.dynamicData.invalidJson": "Could not parse the dynamic data JSON, so this area is shown for reference only.",
-    "governancePanel.dynamicData.empty": "No dynamic data is linked to this content.",
-    "governancePanel.dynamicData.moreItems": "+ additional items in the raw record.",
+    "governancePanel.dynamicData.invalidJson":
+      "Could not parse the dynamic data JSON, so this area is shown for reference only.",
+    "governancePanel.dynamicData.empty":
+      "No dynamic data is linked to this content.",
+    "governancePanel.dynamicData.moreItems":
+      "+ additional items in the raw record.",
     "governancePanel.dynamicData.itemsCount": "{count} items",
     "governancePanel.dynamicData.fieldsCount": "{count} fields",
     "governancePanel.checklist.sources": "Attach at least one trusted source",
     "governancePanel.checklist.disclaimerVersion": "Set the disclaimer version",
-    "governancePanel.checklist.seekHelp": "Add a callout block with a warn/danger variant and a title that says to seek help",
-    "governancePanel.checklist.newsSourceUrl": "Has a news source URL (news.sourceUrl)",
-    "governancePanel.checklist.newsPublishedAt": "Set the original news publish date (news.publishedAt)",
+    "governancePanel.checklist.seekHelp":
+      "Add a callout block with a warn/danger variant and a title that says to seek help",
+    "governancePanel.checklist.newsSourceUrl":
+      "Has a news source URL (news.sourceUrl)",
+    "governancePanel.checklist.newsPublishedAt":
+      "Set the original news publish date (news.publishedAt)",
     "governancePanel.section.safetyStatus": "Safety status",
     "governancePanel.field.disclaimerVersion": "Disclaimer version",
     "governancePanel.field.notSet": "Not set",
@@ -3066,10 +4154,14 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "governancePanel.categories.empty": "No categories.",
     "governancePanel.field.relatedContent": "Related content",
     "governancePanel.relatedContent.empty": "No related content IDs.",
-    "governancePanel.section.readinessChecklist": "Governance readiness checklist before review",
-    "governancePanel.readiness.warning": "Readiness warning: {count} requirements incomplete before submitting for review.",
-    "governancePanel.readiness.ready": "Ready for review: core governance signals are complete.",
-    "governancePanel.readiness.note": "These are informational signals only and do not block viewing or browsing the record. Blocking applies only when attempting \"submit for review\".",
+    "governancePanel.section.readinessChecklist":
+      "Governance readiness checklist before review",
+    "governancePanel.readiness.warning":
+      "Readiness warning: {count} requirements incomplete before submitting for review.",
+    "governancePanel.readiness.ready":
+      "Ready for review: core governance signals are complete.",
+    "governancePanel.readiness.note":
+      'These are informational signals only and do not block viewing or browsing the record. Blocking applies only when attempting "submit for review".',
     "governancePanel.readiness.done": "Done",
     "governancePanel.readiness.pending": "Needs completion",
     "governancePanel.section.sources": "Sources and references",
@@ -3077,7 +4169,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "governancePanel.sources.empty": "No sources added yet.",
     "governancePanel.sources.untitled": "Untitled source",
     "governancePanel.sources.noLink": "No direct link.",
-    "governancePanel.sources.addBeforeApproval": "Add trusted sources before approval or publishing.",
+    "governancePanel.sources.addBeforeApproval":
+      "Add trusted sources before approval or publishing.",
     "governancePanel.section.dynamicData": "Dynamic data",
     "governancePanel.section.newsSummary": "News summary",
     "governancePanel.news.sourceName": "Source name",
@@ -3087,14 +4180,20 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "governancePanel.emptyValue": "—",
 
     "createContentDialog.title": "Add medical content",
-    "createContentDialog.subtitle": "Create a real draft with core content and a matching template, then complete review and publishing later.",
+    "createContentDialog.subtitle":
+      "Create a real draft with core content and a matching template, then complete review and publishing later.",
     "createContentDialog.close": "Close",
     "createContentDialog.validation.titleRequired": "Content title is required",
-    "createContentDialog.validation.sourceUrlInvalid": "Enter a valid external source URL starting with http:// or https://.",
-    "createContentDialog.validation.pageVersionRequired": "Page version is required for settings pages",
-    "createContentDialog.validation.titleEnRequired": "English title is required for settings pages",
-    "createContentDialog.validation.blocksRequired": "Add at least one real content block before saving the draft.",
-    "createContentDialog.validation.templateRequired": "Choose a suitable template before saving the draft.",
+    "createContentDialog.validation.sourceUrlInvalid":
+      "Enter a valid external source URL starting with http:// or https://.",
+    "createContentDialog.validation.pageVersionRequired":
+      "Page version is required for settings pages",
+    "createContentDialog.validation.titleEnRequired":
+      "English title is required for settings pages",
+    "createContentDialog.validation.blocksRequired":
+      "Add at least one real content block before saving the draft.",
+    "createContentDialog.validation.templateRequired":
+      "Choose a suitable template before saving the draft.",
     "createContentDialog.type.condition": "Conditions",
     "createContentDialog.type.symptom": "Symptoms",
     "createContentDialog.type.generalAdvice": "General advice",
@@ -3109,7 +4208,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "createContentDialog.field.titleEn.label": "Title (English)",
     "createContentDialog.field.titleEn.placeholder": "Clear English title",
     "createContentDialog.field.summary.label": "Summary",
-    "createContentDialog.field.summary.placeholder": "A short intro describing the content…",
+    "createContentDialog.field.summary.placeholder":
+      "A short intro describing the content…",
     "createContentDialog.field.language.label": "Language",
     "createContentDialog.field.language.placeholder": "Choose language",
     "createContentDialog.field.language.ariaLabel": "Content language",
@@ -3118,29 +4218,45 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "createContentDialog.field.slug.label": "Slug (optional)",
     "createContentDialog.field.slug.placeholder": "my-article",
     "createContentDialog.field.coverImage.label": "Cover image (optional)",
-    "createContentDialog.field.coverImage.hint": "External URL for the cover image used in the preview.",
-    "createContentDialog.section.template.title": "Template and structured data",
-    "createContentDialog.section.template.description": "Choose an active template for this type to enter structured medical data from the start.",
+    "createContentDialog.field.coverImage.hint":
+      "External URL for the cover image used in the preview.",
+    "createContentDialog.section.template.title":
+      "Template and structured data",
+    "createContentDialog.section.template.description":
+      "Choose an active template for this type to enter structured medical data from the start.",
     "createContentDialog.field.template.label": "Template",
-    "createContentDialog.field.template.hintLoading": "Loading available templates…",
-    "createContentDialog.field.template.hintAvailable": "Choose the best-fit template, then complete its required fields.",
-    "createContentDialog.field.template.hintNone": "No active templates for this type yet — you can continue without one.",
-    "createContentDialog.field.template.placeholderLoading": "Loading templates...",
+    "createContentDialog.field.template.hintLoading":
+      "Loading available templates…",
+    "createContentDialog.field.template.hintAvailable":
+      "Choose the best-fit template, then complete its required fields.",
+    "createContentDialog.field.template.hintNone":
+      "No active templates for this type yet — you can continue without one.",
+    "createContentDialog.field.template.placeholderLoading":
+      "Loading templates...",
     "createContentDialog.field.template.placeholder": "Choose a template",
     "createContentDialog.field.sourceTitle.label": "Source name",
-    "createContentDialog.field.sourceTitle.placeholder": "e.g. WHO or Mayo Clinic",
+    "createContentDialog.field.sourceTitle.placeholder":
+      "e.g. WHO or Mayo Clinic",
     "createContentDialog.field.sourceUrl.label": "Source URL",
-    "createContentDialog.field.sourceUrl.hint": "Enter the original news link from an external site — not a control-panel or localhost link.",
-    "createContentDialog.field.sourceUrl.placeholder": "https://example.com/news",
+    "createContentDialog.field.sourceUrl.hint":
+      "Enter the original news link from an external site — not a control-panel or localhost link.",
+    "createContentDialog.field.sourceUrl.placeholder":
+      "https://example.com/news",
     "createContentDialog.field.originalTitle.label": "Original title",
-    "createContentDialog.field.originalTitle.hint": "Used in the news data if it differs from the content title.",
-    "createContentDialog.field.originalTitle.placeholder": "Article title as published at the source",
+    "createContentDialog.field.originalTitle.hint":
+      "Used in the news data if it differs from the content title.",
+    "createContentDialog.field.originalTitle.placeholder":
+      "Article title as published at the source",
     "createContentDialog.field.publishedAt.label": "Published date",
-    "createContentDialog.blockEditor.description": "Build the article's real blocks now instead of relying on an empty placeholder draft.",
+    "createContentDialog.blockEditor.description":
+      "Build the article's real blocks now instead of relying on an empty placeholder draft.",
     "createContentDialog.field.pageVersion.label": "Page version (optional)",
-    "createContentDialog.field.pageVersion.hintSettings": "This field is required for settings pages.",
-    "createContentDialog.field.pageVersion.hintOther": "Use when needed — becomes required with SETTINGS_PAGE.",
-    "createContentDialog.section.classification": "Classification and governance",
+    "createContentDialog.field.pageVersion.hintSettings":
+      "This field is required for settings pages.",
+    "createContentDialog.field.pageVersion.hintOther":
+      "Use when needed — becomes required with SETTINGS_PAGE.",
+    "createContentDialog.section.classification":
+      "Classification and governance",
     "createContentDialog.field.tags.label": "Tags",
     "createContentDialog.field.categories.label": "Categories",
     "createContentDialog.field.riskFlags.label": "Risk flags",
@@ -3154,38 +4270,56 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "createContentDialog.action.deleteSource": "Delete source",
     "createContentDialog.field.disclaimerVersion.label": "Disclaimer version",
     "createContentDialog.field.disclaimerVersion.placeholder": "v1 / 2026-08",
-    "createContentDialog.field.requiresSeekHelp.label": "Requires Seek Help block",
+    "createContentDialog.field.requiresSeekHelp.label":
+      "Requires Seek Help block",
     "createContentDialog.field.isFeatured.label": "Featured content",
     "createContentDialog.readiness.title": "Draft readiness",
-    "createContentDialog.readiness.description": "This summary helps you catch gaps before later submitting the content for review.",
+    "createContentDialog.readiness.description":
+      "This summary helps you catch gaps before later submitting the content for review.",
     "createContentDialog.readiness.done": "Done",
     "createContentDialog.readiness.pending": "Needs completion",
-    "createContentDialog.readiness.contentBlocks": "Add real content inside the article",
-    "createContentDialog.readiness.sources": "Attach at least one trusted source",
-    "createContentDialog.readiness.disclaimerVersion": "Set the disclaimer version",
-    "createContentDialog.readiness.seekHelp": "Add a callout block with a warn/danger variant and a title that says to seek help",
-    "createContentDialog.readiness.newsMetadata": "Complete the core news metadata",
-    "createContentDialog.readiness.template": "Choose a suitable template where available",
-    "createContentDialog.readiness.templateFields": "Complete the template's required fields",
-    "createContentDialog.section.reviewPreview.title": "Governance review and preview",
-    "createContentDialog.section.reviewPreview.description": "A quick preview to help confirm draft readiness for review without blocking the DRAFT save.",
+    "createContentDialog.readiness.contentBlocks":
+      "Add real content inside the article",
+    "createContentDialog.readiness.sources":
+      "Attach at least one trusted source",
+    "createContentDialog.readiness.disclaimerVersion":
+      "Set the disclaimer version",
+    "createContentDialog.readiness.seekHelp":
+      "Add a callout block with a warn/danger variant and a title that says to seek help",
+    "createContentDialog.readiness.newsMetadata":
+      "Complete the core news metadata",
+    "createContentDialog.readiness.template":
+      "Choose a suitable template where available",
+    "createContentDialog.readiness.templateFields":
+      "Complete the template's required fields",
+    "createContentDialog.section.reviewPreview.title":
+      "Governance review and preview",
+    "createContentDialog.section.reviewPreview.description":
+      "A quick preview to help confirm draft readiness for review without blocking the DRAFT save.",
     "createContentDialog.error.createFailed": "Could not create",
     "createContentDialog.toast.created.title": "Content added",
-    "createContentDialog.toast.created.message": "Draft “{title}” was added to medical content.",
+    "createContentDialog.toast.created.message":
+      "Draft “{title}” was added to medical content.",
     "createContentDialog.action.cancel": "Cancel",
     "createContentDialog.action.saving": "Saving…",
     "createContentDialog.action.save": "Save as draft",
 
     "editContentDialog.title": "Edit medical content",
-    "editContentDialog.subtitle": "Update the core data, dynamic fields, and article content from the same window.",
+    "editContentDialog.subtitle":
+      "Update the core data, dynamic fields, and article content from the same window.",
     "editContentDialog.close": "Close",
     "editContentDialog.loading": "Loading content data...",
-    "editContentDialog.loadError": "Could not load the content data for editing.",
+    "editContentDialog.loadError":
+      "Could not load the content data for editing.",
     "editContentDialog.validation.titleRequired": "Content title is required",
-    "editContentDialog.validation.pageVersionRequired": "Page version is required for settings pages",
-    "editContentDialog.validation.titleEnRequired": "English title is required for settings pages",
-    "editContentDialog.validation.blocksRequired": "Add at least one real content block before saving changes.",
-    "editContentDialog.validation.templateDataInvalid": "Check the template data.",
+    "editContentDialog.validation.pageVersionRequired":
+      "Page version is required for settings pages",
+    "editContentDialog.validation.titleEnRequired":
+      "English title is required for settings pages",
+    "editContentDialog.validation.blocksRequired":
+      "Add at least one real content block before saving changes.",
+    "editContentDialog.validation.templateDataInvalid":
+      "Check the template data.",
     "editContentDialog.section.basicInfo": "Basic data",
     "editContentDialog.field.type.label": "Content type",
     "editContentDialog.field.type.placeholder": "Choose content type",
@@ -3197,34 +4331,52 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "editContentDialog.field.title.placeholder": "A clear content title",
     "editContentDialog.field.titleEn.label": "Title (English)",
     "editContentDialog.field.summary.label": "Summary",
-    "editContentDialog.field.summary.placeholder": "A short intro describing the content…",
+    "editContentDialog.field.summary.placeholder":
+      "A short intro describing the content…",
     "editContentDialog.field.slug.label": "Slug (optional)",
     "editContentDialog.field.pageVersion.label": "Page version (optional)",
-    "editContentDialog.field.pageVersion.hintSettings": "Required for settings pages (SETTINGS_PAGE).",
-    "editContentDialog.field.pageVersion.hintOther": "Use when needed — becomes required with SETTINGS_PAGE.",
+    "editContentDialog.field.pageVersion.hintSettings":
+      "Required for settings pages (SETTINGS_PAGE).",
+    "editContentDialog.field.pageVersion.hintOther":
+      "Use when needed — becomes required with SETTINGS_PAGE.",
     "editContentDialog.field.template.label": "Template",
-    "editContentDialog.field.template.hintLoading": "Loading available templates…",
-    "editContentDialog.field.template.hintSwitchable": "You can switch the template when needed — the dynamic fields below will update.",
-    "editContentDialog.field.template.hintNone": "No active templates for this type right now.",
-    "editContentDialog.field.template.hintUnsupportedType": "This type doesn't use dynamic templates currently.",
-    "editContentDialog.field.template.placeholderLoading": "Loading templates...",
+    "editContentDialog.field.template.hintLoading":
+      "Loading available templates…",
+    "editContentDialog.field.template.hintSwitchable":
+      "You can switch the template when needed — the dynamic fields below will update.",
+    "editContentDialog.field.template.hintNone":
+      "No active templates for this type right now.",
+    "editContentDialog.field.template.hintUnsupportedType":
+      "This type doesn't use dynamic templates currently.",
+    "editContentDialog.field.template.placeholderLoading":
+      "Loading templates...",
     "editContentDialog.field.template.placeholder": "Choose a template",
     "editContentDialog.field.template.inactiveSuffix": "(inactive)",
     "editContentDialog.field.coverImage.label": "Cover image URL",
-    "editContentDialog.section.dynamicAndContent": "Dynamic fields and article content",
-    "editContentDialog.templateFields.title": "Selected template and structured data",
-    "editContentDialog.templateFields.description": "This editor reflects the fields known to the template, while the raw JSON stays available as a fallback below.",
-    "editContentDialog.field.dataJsonAdvanced.label": "Dynamic data (advanced JSON)",
-    "editContentDialog.field.dataJsonAdvanced.hintWithTemplate": "An advanced field for compatibility with legacy data or cases the structured fields above don't cover — edits here apply directly.",
-    "editContentDialog.field.dataJsonAdvanced.hintNoTemplate": "This content has no template, so this is the only field to edit its dynamic data.",
-    "editContentDialog.blockEditor.description": "Update the block order and article content here while keeping the dynamic data separate.",
+    "editContentDialog.section.dynamicAndContent":
+      "Dynamic fields and article content",
+    "editContentDialog.templateFields.title":
+      "Selected template and structured data",
+    "editContentDialog.templateFields.description":
+      "This editor reflects the fields known to the template, while the raw JSON stays available as a fallback below.",
+    "editContentDialog.field.dataJsonAdvanced.label":
+      "Dynamic data (advanced JSON)",
+    "editContentDialog.field.dataJsonAdvanced.hintWithTemplate":
+      "An advanced field for compatibility with legacy data or cases the structured fields above don't cover — edits here apply directly.",
+    "editContentDialog.field.dataJsonAdvanced.hintNoTemplate":
+      "This content has no template, so this is the only field to edit its dynamic data.",
+    "editContentDialog.blockEditor.description":
+      "Update the block order and article content here while keeping the dynamic data separate.",
     "editContentDialog.section.classification": "Classification and governance",
     "editContentDialog.readiness.title": "Readiness requirements before review",
     "editContentDialog.readiness.done": "Done",
     "editContentDialog.readiness.pending": "Needs completion",
-    "editContentDialog.readiness.sources": "Attach at least one trusted source before submitting for review",
-    "editContentDialog.readiness.disclaimerVersion": "Set the disclaimer version",
-    "editContentDialog.readiness.seekHelp": "Add a callout block with a warn/danger variant and a title that says to seek help",
+    "editContentDialog.readiness.sources":
+      "Attach at least one trusted source before submitting for review",
+    "editContentDialog.readiness.disclaimerVersion":
+      "Set the disclaimer version",
+    "editContentDialog.readiness.seekHelp":
+      "Add a callout block with a warn/danger variant and a title that says to seek help",
     "editContentDialog.field.tags.label": "Tags",
     "editContentDialog.field.categories.label": "Categories",
     "editContentDialog.field.riskFlags.label": "Risk flags",
@@ -3238,7 +4390,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "editContentDialog.action.deleteSource": "Delete source",
     "editContentDialog.field.disclaimerVersion.label": "Disclaimer version",
     "editContentDialog.field.disclaimerVersion.placeholder": "v1 / 2026-08",
-    "editContentDialog.field.requiresSeekHelp.label": "Requires Seek Help block",
+    "editContentDialog.field.requiresSeekHelp.label":
+      "Requires Seek Help block",
     "editContentDialog.field.isFeatured.label": "Featured content",
     "editContentDialog.section.newsData": "News data",
     "editContentDialog.field.newsSourceName.label": "Source name",
@@ -3248,16 +4401,23 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "editContentDialog.field.newsDedupeHash.label": "Dedupe hash",
     "editContentDialog.field.newsImportedAt.label": "Imported at",
     "editContentDialog.field.newsAiSummary.label": "AI summary",
-    "editContentDialog.section.reviewPreview.title": "Governance review and preview",
-    "editContentDialog.section.reviewPreview.description": "This preview helps confirm clear sources, safety elements, and display shape before saving.",
-    "editContentDialog.warning.invalidDynamicData": "Dynamic data JSON is invalid and will not be reflected accurately.",
-    "editContentDialog.warning.noContentBlocks": "No meaningful content blocks are currently available.",
-    "editContentDialog.warning.noSources": "No source references are currently attached.",
+    "editContentDialog.section.reviewPreview.title":
+      "Governance review and preview",
+    "editContentDialog.section.reviewPreview.description":
+      "This preview helps confirm clear sources, safety elements, and display shape before saving.",
+    "editContentDialog.warning.invalidDynamicData":
+      "Dynamic data JSON is invalid and will not be reflected accurately.",
+    "editContentDialog.warning.noContentBlocks":
+      "No meaningful content blocks are currently available.",
+    "editContentDialog.warning.noSources":
+      "No source references are currently attached.",
     "editContentDialog.warning.noDisclaimer": "Disclaimer version is missing.",
-    "editContentDialog.warning.seekHelp": "Add a callout block with a warn/danger variant and a title that says to seek help — a toggle alone does not satisfy this.",
+    "editContentDialog.warning.seekHelp":
+      "Add a callout block with a warn/danger variant and a title that says to seek help — a toggle alone does not satisfy this.",
     "editContentDialog.error.updateFailed": "Could not update",
     "editContentDialog.toast.updated.title": "Content updated",
-    "editContentDialog.toast.updated.message": "Changes to “{title}” were saved.",
+    "editContentDialog.toast.updated.message":
+      "Changes to “{title}” were saved.",
     "editContentDialog.action.cancel": "Cancel",
     "editContentDialog.action.saving": "Saving…",
     "editContentDialog.action.save": "Save changes",
@@ -3275,7 +4435,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "viewContentDialog.status.draft": "Draft",
     "viewContentDialog.diagnosticBadge": "Diagnostic",
     "viewContentDialog.title": "Medical content preview",
-    "viewContentDialog.description": "View content details before editing or approving",
+    "viewContentDialog.description":
+      "View content details before editing or approving",
     "viewContentDialog.close": "Close",
     "viewContentDialog.loading": "Loading content details...",
     "viewContentDialog.loadError": "Could not load content details.",
@@ -3290,7 +4451,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "viewContentDialog.field.disclaimerVersion": "Disclaimer version",
     "viewContentDialog.field.coverImage": "Cover image",
     "viewContentDialog.rejectionReason": "Rejection reason",
-    "viewContentDialog.section.patientPreview": "Preview as shown to the patient",
+    "viewContentDialog.section.patientPreview":
+      "Preview as shown to the patient",
     "viewContentDialog.section.templateInfo": "Template information",
     "viewContentDialog.field.templateName": "Template name",
     "viewContentDialog.field.templateType": "Template type",
@@ -3300,9 +4462,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "viewContentDialog.dynamicData.empty": "No dynamic data.",
     "viewContentDialog.section.rawTemplateJson": "Raw template data (JSON)",
     "viewContentDialog.field.templateId": "Template ID",
-    "viewContentDialog.rawTemplate.empty": "No additional template data available.",
+    "viewContentDialog.rawTemplate.empty":
+      "No additional template data available.",
     "viewContentDialog.section.governanceSafety": "Governance and safety",
-    "viewContentDialog.section.rawRecord": "Raw record (internal IDs and fields)",
+    "viewContentDialog.section.rawRecord":
+      "Raw record (internal IDs and fields)",
     "common.selectStatus": "Select status",
     "common.enterCity": "Enter city",
     "common.enterCountry": "Enter country",
@@ -3314,28 +4478,42 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminFacilityDialog.details.ariaLabel": "Medical facility details",
     "adminFacilityDialog.delete.ariaLabel": "Delete facility",
     "adminFacilityDialog.changeStatus.ariaLabel": "Change facility status",
-    "adminFacilityDialog.toast.created": "Medical facility created successfully",
-    "adminFacilityDialog.toast.updated": "Facility details updated successfully",
+    "adminFacilityDialog.toast.created":
+      "Medical facility created successfully",
+    "adminFacilityDialog.toast.updated":
+      "Facility details updated successfully",
     "adminFacilityDialog.field.name.placeholder": "Enter facility name",
     "adminFacilityDialog.field.type.placeholder": "Select facility type",
     "adminFacilityDialog.field.address.placeholder": "Enter full address",
-    "adminFacilityDialog.field.description.placeholder": "Enter a facility description",
-    "adminFacilityDialog.field.tag.placeholder": "Add a tag (e.g. Emergency, ICU)",
+    "adminFacilityDialog.field.description.placeholder":
+      "Enter a facility description",
+    "adminFacilityDialog.field.tag.placeholder":
+      "Add a tag (e.g. Emergency, ICU)",
     "adminFacilityDialog.action.addTag": "Add tag",
-    "adminServiceProviderDialog.create.ariaLabel": "Create a new service provider",
-    "adminServiceProviderDialog.edit.ariaLabel": "Edit service provider details",
-    "adminServiceProviderDialog.changeStatus.ariaLabel": "Change service provider status",
-    "adminServiceProviderDialog.toast.created": "Service provider created successfully",
-    "adminServiceProviderDialog.toast.updated": "Service provider details updated successfully",
-    "adminServiceProviderDialog.toast.statusUpdated": "Service provider status updated successfully",
-    "adminServiceProviderDialog.field.serviceType.placeholder": "Select service type",
-    "adminServiceProviderDialog.field.name.placeholder": "Enter service provider name",
-    "adminServiceProviderDialog.field.altName.placeholder": "Add an alternative name",
+    "adminServiceProviderDialog.create.ariaLabel":
+      "Create a new service provider",
+    "adminServiceProviderDialog.edit.ariaLabel":
+      "Edit service provider details",
+    "adminServiceProviderDialog.changeStatus.ariaLabel":
+      "Change service provider status",
+    "adminServiceProviderDialog.toast.created":
+      "Service provider created successfully",
+    "adminServiceProviderDialog.toast.updated":
+      "Service provider details updated successfully",
+    "adminServiceProviderDialog.toast.statusUpdated":
+      "Service provider status updated successfully",
+    "adminServiceProviderDialog.field.serviceType.placeholder":
+      "Select service type",
+    "adminServiceProviderDialog.field.name.placeholder":
+      "Enter service provider name",
+    "adminServiceProviderDialog.field.altName.placeholder":
+      "Add an alternative name",
     "adminServiceProviderDialog.action.addAltName": "Add alternative name",
     "adminSecretaryDialog.create.ariaLabel": "Create a new secretary account",
     "adminSecretaryDialog.edit.ariaLabel": "Edit secretary details",
     "adminSecretaryDialog.offboard.ariaLabel": "Permanently deactivate account",
-    "adminSecretaryDialog.offboard.reason.placeholder": "Write the reason for deactivating the account...",
+    "adminSecretaryDialog.offboard.reason.placeholder":
+      "Write the reason for deactivating the account...",
     "adminNotifications.card.markRead": "Mark as read",
     "adminNotifications.heading": "Notifications",
     "adminNotifications.empty.ariaLabel": "No notifications",
@@ -3343,29 +4521,40 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminNotifications.broadcast.toast.sent": "Notification sent successfully",
     "adminNotifications.broadcast.field.group.placeholder": "Select group",
     "adminNotifications.broadcast.field.type.placeholder": "Select type",
-    "adminNotifications.broadcast.field.title.placeholder": "Enter notification title",
-    "adminNotifications.broadcast.field.body.placeholder": "Enter notification content",
-    "adminNotifications.broadcast.field.extraData.placeholder": "Extra data in JSON format (optional)",
+    "adminNotifications.broadcast.field.title.placeholder":
+      "Enter notification title",
+    "adminNotifications.broadcast.field.body.placeholder":
+      "Enter notification content",
+    "adminNotifications.broadcast.field.extraData.placeholder":
+      "Extra data in JSON format (optional)",
     "adminMedicalContentDialog.reject.ariaLabel": "Reject content",
-    "adminMedicalContentDialog.reject.reason.placeholder": "Explain what needs to be changed…",
+    "adminMedicalContentDialog.reject.reason.placeholder":
+      "Explain what needs to be changed…",
     "adminMedicalContent.field.selectValue.placeholder": "Select value",
-    "adminMedicalContent.field.listItems.placeholder": "First item&#10;Second item",
+    "adminMedicalContent.field.listItems.placeholder":
+      "First item&#10;Second item",
     "adminMedicalContent.field.labelAr.placeholder": "Arabic",
     "adminMedicalContent.field.enterValue.placeholder": "Enter value",
-    "adminMedicalContent.languageToggle.ariaLabel": "Toggle display language: Arabic or English",
+    "adminMedicalContent.languageToggle.ariaLabel":
+      "Toggle display language: Arabic or English",
     "adminMedicalOrders.toolbar.search.placeholder": "Search the list…",
     "adminMedicalOrders.toolbar.search.ariaLabel": "Search the order catalog",
     "adminMedicalOrders.toolbar.category.placeholder": "Category",
     "adminMedicalOrders.toolbar.category.ariaLabel": "Filter by category",
-    "adminMedicalOrders.categoryTabs.ariaLabel": "Medical order catalog categories",
-    "adminMedicalOrders.field.exampleName.placeholder": "Example: complete blood count (CBC)",
+    "adminMedicalOrders.categoryTabs.ariaLabel":
+      "Medical order catalog categories",
+    "adminMedicalOrders.field.exampleName.placeholder":
+      "Example: complete blood count (CBC)",
     "adminMedicalOrders.field.nameAr.placeholder": "Order name in Arabic",
     "adminMedicalOrders.field.specimenType.placeholder": "Specimen type",
     "adminMedicalOrders.field.resultType.placeholder": "Result type",
     "adminMedicalOrders.field.bodyRegion.placeholder": "Body region",
-    "adminMedicalOrders.field.defaultPrep.placeholder": "Default preparation before the procedure",
-    "adminMedicalOrders.field.postInstructions.placeholder": "Post-procedure instructions",
-    "adminMedicalOrders.field.notes.placeholder": "Any additional notes for the item",
+    "adminMedicalOrders.field.defaultPrep.placeholder":
+      "Default preparation before the procedure",
+    "adminMedicalOrders.field.postInstructions.placeholder":
+      "Post-procedure instructions",
+    "adminMedicalOrders.field.notes.placeholder":
+      "Any additional notes for the item",
     "adminServiceTypeDialog.field.nameAr.ariaLabel": "Name (Arabic)",
     "adminServiceTypeDialog.field.nameAr.placeholder": "e.g. Laboratories",
     "adminServiceTypeDialog.field.nameEn.ariaLabel": "Name (English)",
@@ -3382,45 +4571,67 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminUsersDialog.field.fullName.placeholder": "Enter the user's full name",
     "adminUsersDialog.field.role.placeholder": "Select role",
     "adminUsersDialog.reboard.toast": "User account activated successfully",
-    "adminUsersDialog.restore.toast.selectDecision": "You must select a decision first.",
-    "adminUsersDialog.restore.toast.noteRequired": "You must add a note when rejecting the request.",
-    "adminUsersDialog.restore.toast.noRequest": "Could not identify the restore request. Reload the list and try again.",
+    "adminUsersDialog.restore.toast.selectDecision":
+      "You must select a decision first.",
+    "adminUsersDialog.restore.toast.noteRequired":
+      "You must add a note when rejecting the request.",
+    "adminUsersDialog.restore.toast.noRequest":
+      "Could not identify the restore request. Reload the list and try again.",
     "adminUsersDialog.restore.field.decision.placeholder": "Select decision",
-    "adminUsersDialog.restore.field.note.placeholder": "Add a note about the decision...",
+    "adminUsersDialog.restore.field.note.placeholder":
+      "Add a note about the decision...",
     "adminAccessRequests.details.ariaLabel": "Access request details",
-    "adminAppointments.cancel.reason.placeholder": "Write the reason for cancelling the appointment here...",
-    "adminDoctorProfileChangeRequests.toast.decisionRequired": "You must select a decision (approve or reject)",
-    "adminDoctorProfileChangeRequests.toast.noteRequired": "You must add a note when rejecting the request",
-    "adminDoctorProfileChangeRequests.field.decision.placeholder": "Select decision",
+    "adminAppointments.cancel.reason.placeholder":
+      "Write the reason for cancelling the appointment here...",
+    "adminDoctorProfileChangeRequests.toast.decisionRequired":
+      "You must select a decision (approve or reject)",
+    "adminDoctorProfileChangeRequests.toast.noteRequired":
+      "You must add a note when rejecting the request",
+    "adminDoctorProfileChangeRequests.field.decision.placeholder":
+      "Select decision",
     "adminPatients.toast.activated": "Patient account activated successfully.",
-    "adminPatients.toast.reactivatedAfterAppeal": "The account was reactivated after the suspension was lifted.",
-    "adminPatients.appointmentsNote.title": "Figures are calculated from the latest 500 appointments. The API does not support filtering by patientId directly.",
-    "adminPatients.suspend.reason.placeholder": "Write the suspension reason...",
-    "adminMedicalFileOptions.toast.nameRequired": "Enter the option name first.",
+    "adminPatients.toast.reactivatedAfterAppeal":
+      "The account was reactivated after the suspension was lifted.",
+    "adminPatients.appointmentsNote.title":
+      "Figures are calculated from the latest 500 appointments. The API does not support filtering by patientId directly.",
+    "adminPatients.suspend.reason.placeholder":
+      "Write the suspension reason...",
+    "adminMedicalFileOptions.toast.nameRequired":
+      "Enter the option name first.",
     "adminMedicalFileOptions.toast.added": "Option added.",
     "adminMedicalFileOptions.toast.deleted": "Option deleted.",
-    "adminMedicalFileOptions.toast.newNameRequired": "Enter the new option name first.",
+    "adminMedicalFileOptions.toast.newNameRequired":
+      "Enter the new option name first.",
     "adminMedicalFileOptions.toast.updated": "Option updated.",
     "adminMedicalFileOptions.header.title": "Medical file options",
-    "adminMedicalFileOptions.header.subtitle": "Add and manage options within the patient's medical file",
+    "adminMedicalFileOptions.header.subtitle":
+      "Add and manage options within the patient's medical file",
     "adminMedicalFileOptions.section.chronicDiseases": "Chronic diseases",
     "adminMedicalFileOptions.section.allergyTypes": "Allergy types",
     "adminMedicalFileOptions.section.bloodTypes": "Blood types",
-    "adminMedicalFileOptions.field.newOption.placeholder": "Enter the new option...",
+    "adminMedicalFileOptions.field.newOption.placeholder":
+      "Enter the new option...",
     "adminMedicalFileOptions.action.add": "Add",
     "adminMedicalFileOptions.updateDialog.title": "Update option",
     "adminMedicalFileOptions.field.newName.placeholder": "New name...",
     "adminMedicalFileOptions.deleteDialog.title": "Delete option",
-    "adminComplaintDetails.toast.attachmentMissing": "Could not find the required attachment data for this complaint.",
-    "adminComplaintDetails.toast.noValidLink": "The server did not return a valid link for this attachment.",
-    "adminComplaintDetails.toast.openedInNewTab": "The attachment was opened in a new tab.",
-    "adminComplaintDetails.toast.downloadStarted": "The attachment download has started.",
+    "adminComplaintDetails.toast.attachmentMissing":
+      "Could not find the required attachment data for this complaint.",
+    "adminComplaintDetails.toast.noValidLink":
+      "The server did not return a valid link for this attachment.",
+    "adminComplaintDetails.toast.openedInNewTab":
+      "The attachment was opened in a new tab.",
+    "adminComplaintDetails.toast.downloadStarted":
+      "The attachment download has started.",
     "adminComplaintDetails.attachment.view.ariaLabel": "View file",
     "adminComplaintDetails.attachment.download.ariaLabel": "Download file",
     "adminComplaintDetails.reply.placeholder": "Reply text for the patient...",
-    "adminComplaintDetails.confirmStatusDialog.title": "Confirm complaint status update",
-    "adminSecretary.doctorAppointments.search.placeholder": "Search by patient name or ID…",
-    "adminVerificationRequests.field.specializationExample.placeholder": "Dentistry",
+    "adminComplaintDetails.confirmStatusDialog.title":
+      "Confirm complaint status update",
+    "adminSecretary.doctorAppointments.search.placeholder":
+      "Search by patient name or ID…",
+    "adminVerificationRequests.field.specializationExample.placeholder":
+      "Dentistry",
     "common.statusLabel": "Status",
     "adminFacility.type.hospital": "Hospital",
     "adminFacility.type.clinic": "Clinic",
@@ -3437,12 +4648,14 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminFacility.status.deleted": "Deleted",
     "adminApproval.approved": "Approved",
     "adminApproval.rejected": "Rejected",
-    "adminFacilityDialog.field.ownerDoctor.placeholder": "Select the owning doctor",
+    "adminFacilityDialog.field.ownerDoctor.placeholder":
+      "Select the owning doctor",
     "adminFacilityDialog.field.ownerDoctor.empty": "No doctors available",
     "adminFacilityDialog.field.ownerDoctor.none": "No owning doctor",
     "adminFacilityDialog.validation.nameRequired": "Facility name is required",
     "adminFacilityDialog.validation.cityRequired": "City is required",
-    "adminFacilityDialog.validation.typeRequired": "You must select a facility type",
+    "adminFacilityDialog.validation.typeRequired":
+      "You must select a facility type",
     "adminFacilityDialog.validation.phoneInvalid": "Invalid phone number",
     "adminFacilityDialog.toast.createdTitle": "Created",
     "adminFacilityDialog.toast.updatedTitle": "Updated",
@@ -3453,27 +4666,36 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminFacilityDialog.field.phone.label": "Phone number",
     "adminFacilityDialog.field.address.label": "Address",
     "adminFacilityDialog.field.description.label": "Description",
-    "adminFacilityDialog.field.description.hint": "Enter a facility description (optional)",
+    "adminFacilityDialog.field.description.hint":
+      "Enter a facility description (optional)",
     "adminFacilityDialog.field.ownerDoctor.label": "Owning doctor",
-    "adminFacilityDialog.field.ownerDoctor.hint": "Select the owning doctor (optional)",
+    "adminFacilityDialog.field.ownerDoctor.hint":
+      "Select the owning doctor (optional)",
     "adminFacilityDialog.field.attributes.label": "Tags and attributes",
-    "adminFacilityDialog.field.attributes.hint": "Tags are saved as key-style values such as night_shift and echo_available.",
+    "adminFacilityDialog.field.attributes.hint":
+      "Tags are saved as key-style values such as night_shift and echo_available.",
     "adminFacilityDialog.attributes.empty": "No tags added yet.",
     "adminFacilityDialog.attributes.removeAria": "Remove {name}",
     "adminFacilityDialog.action.creating": "Creating…",
     "adminFacilityDialog.action.create": "Create facility",
     "adminFacilityDialog.action.updating": "Updating…",
     "adminFacilityDialog.action.saveChanges": "Save changes",
-    "adminFacilityDialog.delete.confirmQuestion": "Are you sure you want to delete this facility?",
-    "adminFacilityDialog.delete.warning": "This is a soft delete only, and it will also remove doctors' links to this facility.",
-    "adminFacilityDialog.delete.confirmLabel": "Type the facility name to confirm",
+    "adminFacilityDialog.delete.confirmQuestion":
+      "Are you sure you want to delete this facility?",
+    "adminFacilityDialog.delete.warning":
+      "This is a soft delete only, and it will also remove doctors' links to this facility.",
+    "adminFacilityDialog.delete.confirmLabel":
+      "Type the facility name to confirm",
     "adminFacilityDialog.delete.confirmButton": "Delete",
     "adminFacilityDialog.delete.deleting": "Deleting...",
     "adminFacilityDialog.changeStatus.newStatusLabel": "New status",
-    "adminFacilityDialog.changeStatus.explain": "You are changing the status of the facility record itself. This does not edit the facility's data, but it may change its visibility or its operational relationship with doctors.",
+    "adminFacilityDialog.changeStatus.explain":
+      "You are changing the status of the facility record itself. This does not edit the facility's data, but it may change its visibility or its operational relationship with doctors.",
     "adminFacilityDialog.changeStatus.currentStatusPrefix": "Current status: ",
-    "adminFacilityDialog.changeStatus.deletedWarning": "Setting the status to \"Deleted\" will unlink doctors from this facility per the API contract.",
-    "adminFacilityDialog.changeStatus.pendingSaveNote": "The new status is only saved when you press the \"Change status\" button.",
+    "adminFacilityDialog.changeStatus.deletedWarning":
+      'Setting the status to "Deleted" will unlink doctors from this facility per the API contract.',
+    "adminFacilityDialog.changeStatus.pendingSaveNote":
+      'The new status is only saved when you press the "Change status" button.',
     "adminFacilityDialog.changeStatus.saving": "Saving...",
     "adminFacilityDialog.changeStatus.submit": "Change status",
     "adminFacilityDialog.details.doctorCount": "Linked doctors",
@@ -3483,34 +4705,50 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminFacilityDialog.doctors.titleGeneric": "Doctors at the facility",
     "adminFacilityDialog.doctors.ariaLabelTemplate": "Doctors at {name}",
     "adminFacilityDialog.doctors.fallbackName": "the facility",
-    "adminFacilityDialog.doctors.noMatch": "No doctors match the current search",
+    "adminFacilityDialog.doctors.noMatch":
+      "No doctors match the current search",
     "adminFacilityDialog.doctors.noneInFacility": "No doctors at this facility",
     "common.operationFailed": "The operation failed",
     "common.location": "Location",
     "adminServiceProvider.status.draft": "Draft",
-    "adminServiceProviderDialog.field.serviceType.hint": "Choose the reference category this provider will appear under in admin.",
+    "adminServiceProviderDialog.field.serviceType.hint":
+      "Choose the reference category this provider will appear under in admin.",
     "adminServiceProviderDialog.field.name.label": "Name",
-    "adminServiceProviderDialog.validation.serviceTypeRequired": "You must select a service type",
+    "adminServiceProviderDialog.validation.serviceTypeRequired":
+      "You must select a service type",
     "adminServiceProviderDialog.validation.nameRequired": "Name is required",
-    "adminServiceProviderDialog.validation.countryRequired": "Country is required",
+    "adminServiceProviderDialog.validation.countryRequired":
+      "Country is required",
     "adminServiceProviderDialog.validation.jsonInvalid": "Invalid JSON format",
     "adminServiceProviderDialog.section.dataFor": "{name} data",
-    "adminServiceProviderDialog.inactiveTypeWarning.create": "This type is not currently active. You can create providers, but they won't be visible to users until the type is activated.",
-    "adminServiceProviderDialog.inactiveTypeWarning.edit": "This service type is not currently active. You can edit or deactivate the provider's data, but it cannot be activated before the type is activated.",
-    "adminServiceProviderDialog.field.advancedToggle": "Advanced: edit JSON directly (optional)",
+    "adminServiceProviderDialog.inactiveTypeWarning.create":
+      "This type is not currently active. You can create providers, but they won't be visible to users until the type is activated.",
+    "adminServiceProviderDialog.inactiveTypeWarning.edit":
+      "This service type is not currently active. You can edit or deactivate the provider's data, but it cannot be activated before the type is activated.",
+    "adminServiceProviderDialog.field.advancedToggle":
+      "Advanced: edit JSON directly (optional)",
     "adminServiceProviderDialog.field.advancedJson.label": "Extra data (JSON)",
-    "adminServiceProviderDialog.field.advancedJson.hint": "Replaces the generated fields above when saved.",
+    "adminServiceProviderDialog.field.advancedJson.hint":
+      "Replaces the generated fields above when saved.",
     "adminServiceProviderDialog.field.aliases.label": "Alternative names",
-    "adminServiceProviderDialog.field.aliases.hint": "Used to broaden search or store different spellings for the same provider.",
-    "adminServiceProviderDialog.aliases.empty": "No alternative names added yet.",
-    "adminServiceProviderDialog.status.hint": "Draft for internal review, active to appear and be usable, inactive to hide it without deleting the record.",
-    "adminServiceProviderDialog.create.description": "Create the service provider's own record here and link it to one service type. The core fields shown on cards and lists come from this form; the JSON field is only for extra data not shown directly to users.",
-    "adminServiceProviderDialog.edit.description": "This window edits only the current service provider record. The reference service type is fixed here, and any change to the name or status will reflect on lists and cards linked to this provider.",
+    "adminServiceProviderDialog.field.aliases.hint":
+      "Used to broaden search or store different spellings for the same provider.",
+    "adminServiceProviderDialog.aliases.empty":
+      "No alternative names added yet.",
+    "adminServiceProviderDialog.status.hint":
+      "Draft for internal review, active to appear and be usable, inactive to hide it without deleting the record.",
+    "adminServiceProviderDialog.create.description":
+      "Create the service provider's own record here and link it to one service type. The core fields shown on cards and lists come from this form; the JSON field is only for extra data not shown directly to users.",
+    "adminServiceProviderDialog.edit.description":
+      "This window edits only the current service provider record. The reference service type is fixed here, and any change to the name or status will reflect on lists and cards linked to this provider.",
     "adminServiceProviderDialog.edit.serviceType.hint": "Cannot be edited",
-    "adminServiceProviderDialog.edit.loadError": "Failed to load service provider data.",
+    "adminServiceProviderDialog.edit.loadError":
+      "Failed to load service provider data.",
     "adminServiceProviderDialog.action.create": "Create service provider",
-    "adminServiceProviderDialog.changeStatus.inactiveTypeHint": "This service type is not currently active, so this provider cannot be activated before the type is activated.",
-    "adminServiceProviderDialog.changeStatus.warning": "Changing the status will affect whether the service provider can be shown to users. Make sure the decision is correct before continuing.",
+    "adminServiceProviderDialog.changeStatus.inactiveTypeHint":
+      "This service type is not currently active, so this provider cannot be activated before the type is activated.",
+    "adminServiceProviderDialog.changeStatus.warning":
+      "Changing the status will affect whether the service provider can be shown to users. Make sure the decision is correct before continuing.",
     "adminServiceProviderDialog.changeStatus.confirmButton": "Confirm change",
     "common.genderLabel": "Gender",
     "common.cannotEdit": "Cannot be edited",
@@ -3520,24 +4758,34 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminSecretaryDialog.validation.emailRequired": "Email is required",
     "adminSecretaryDialog.validation.emailInvalid": "Invalid email address",
     "adminSecretaryDialog.validation.passwordRequired": "Password is required",
-    "adminSecretaryDialog.validation.passwordTooShort": "Password must be at least 8 characters",
+    "adminSecretaryDialog.validation.passwordTooShort":
+      "Password must be at least 8 characters",
     "adminSecretaryDialog.validation.phoneRequired": "Phone number is required",
-    "adminSecretaryDialog.validation.permissionsRequired": "You must select at least one permission",
+    "adminSecretaryDialog.validation.permissionsRequired":
+      "You must select at least one permission",
     "adminSecretaryDialog.field.fullName.label": "Full name",
     "adminSecretaryDialog.field.email.label": "Email",
     "adminSecretaryDialog.field.password.label": "Password",
     "adminSecretaryDialog.field.permissions.label": "Permissions",
     "adminSecretaryDialog.action.unavailable": "Currently unavailable",
     "adminSecretaryDialog.action.createAccount": "Create account",
-    "adminSecretaryDialog.offboard.description.secretary": "and unlink them from the doctor and cancel all their active appointments.",
-    "adminSecretaryDialog.offboard.description.doctor": "and hide them from search, cancel their upcoming appointments, and close active consultations.",
-    "adminSecretaryDialog.offboard.description.staff": "and disable their access to the platform.",
-    "adminSecretaryDialog.offboard.willSuspend": "The account will be suspended for",
-    "adminSecretaryDialog.offboard.irreversible": "This action cannot be undone.",
-    "adminSecretaryDialog.offboard.reasonRequired": "A suspension reason is required",
+    "adminSecretaryDialog.offboard.description.secretary":
+      "and unlink them from the doctor and cancel all their active appointments.",
+    "adminSecretaryDialog.offboard.description.doctor":
+      "and hide them from search, cancel their upcoming appointments, and close active consultations.",
+    "adminSecretaryDialog.offboard.description.staff":
+      "and disable their access to the platform.",
+    "adminSecretaryDialog.offboard.willSuspend":
+      "The account will be suspended for",
+    "adminSecretaryDialog.offboard.irreversible":
+      "This action cannot be undone.",
+    "adminSecretaryDialog.offboard.reasonRequired":
+      "A suspension reason is required",
     "adminSecretaryDialog.offboard.field.reason.label": "Suspension reason",
-    "adminSecretaryDialog.offboard.error.generic": "An error occurred while suspending the account",
-    "adminSecretaryDialog.offboard.success": "The account was suspended successfully",
+    "adminSecretaryDialog.offboard.error.generic":
+      "An error occurred while suspending the account",
+    "adminSecretaryDialog.offboard.success":
+      "The account was suspended successfully",
     "adminSecretaryDialog.offboard.confirming": "Suspending…",
     "adminSecretaryDialog.offboard.confirmButton": "Confirm suspension",
     "adminNotifications.subtitle": "You have {count} new notifications",
@@ -3545,24 +4793,35 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminNotifications.kpi.unread": "Unread",
     "adminNotifications.card.new": "New",
     "adminNotifications.broadcast.ariaLabel": "Broadcast notification to users",
-    "adminNotifications.broadcast.warning.confirm": "The broadcast will be sent to the selected group immediately upon confirmation. Review the content carefully before sending.",
+    "adminNotifications.broadcast.warning.confirm":
+      "The broadcast will be sent to the selected group immediately upon confirmation. Review the content carefully before sending.",
     "adminNotifications.broadcast.field.group.label": "Target group",
     "adminNotifications.broadcast.field.type.label": "Notification type",
     "adminNotifications.broadcast.field.title.label": "Notification title",
     "adminNotifications.broadcast.field.body.label": "Notification content",
-    "adminNotifications.broadcast.field.extraData.label": "Extra data (optional)",
-    "adminNotifications.broadcast.field.extraData.hint": "You can add extra data in JSON format",
-    "adminNotifications.broadcast.warning.sendAll": "This notification will be sent to all users in the selected group. Make sure the content is correct before sending.",
+    "adminNotifications.broadcast.field.extraData.label":
+      "Extra data (optional)",
+    "adminNotifications.broadcast.field.extraData.hint":
+      "You can add extra data in JSON format",
+    "adminNotifications.broadcast.warning.sendAll":
+      "This notification will be sent to all users in the selected group. Make sure the content is correct before sending.",
     "adminNotifications.broadcast.sending": "Sending...",
     "adminNotifications.broadcast.submit": "Send notification",
     "adminNotifications.broadcast.toast.sentTitle": "Sent",
-    "adminNotifications.broadcast.validation.groupRequired": "You must select the target group",
-    "adminNotifications.broadcast.validation.typeRequired": "You must select the notification type",
-    "adminNotifications.broadcast.validation.titleRequired": "Title is required",
-    "adminNotifications.broadcast.validation.titleTooLong": "Title must be less than 100 characters",
-    "adminNotifications.broadcast.validation.bodyRequired": "Content is required",
-    "adminNotifications.broadcast.validation.bodyTooLong": "Content must be less than 500 characters",
-    "adminNotifications.broadcast.validation.dataInvalid": "Extra data must be valid JSON",
+    "adminNotifications.broadcast.validation.groupRequired":
+      "You must select the target group",
+    "adminNotifications.broadcast.validation.typeRequired":
+      "You must select the notification type",
+    "adminNotifications.broadcast.validation.titleRequired":
+      "Title is required",
+    "adminNotifications.broadcast.validation.titleTooLong":
+      "Title must be less than 100 characters",
+    "adminNotifications.broadcast.validation.bodyRequired":
+      "Content is required",
+    "adminNotifications.broadcast.validation.bodyTooLong":
+      "Content must be less than 500 characters",
+    "adminNotifications.broadcast.validation.dataInvalid":
+      "Extra data must be valid JSON",
     "adminNotifications.group.all": "All users",
     "adminNotifications.group.doctors": "Doctors",
     "adminNotifications.group.patients": "Patients",
@@ -3577,8 +4836,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminNotifications.action.markAllRead": "Mark all as read",
     "adminMedicalContentDialog.reject.willReject": "This will reject:",
     "adminMedicalContentDialog.reject.field.label": "Rejection reason",
-    "adminMedicalContentDialog.reject.validation.tooShort": "Enter a clear reason (at least 4 characters)",
-    "adminMedicalContentDialog.reject.validation.tooLong": "Maximum 2000 characters",
+    "adminMedicalContentDialog.reject.validation.tooShort":
+      "Enter a clear reason (at least 4 characters)",
+    "adminMedicalContentDialog.reject.validation.tooLong":
+      "Maximum 2000 characters",
     "adminMedicalContentDialog.reject.rejecting": "Rejecting…",
     "adminMedicalContentDialog.reject.confirmButton": "Confirm rejection",
     "adminMedicalContent.languageToggle.label": "Content language",
@@ -3590,11 +4851,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalOrders.toolbar.priority.ariaLabel": "Filter by priority level",
     "adminMedicalOrders.toolbar.visibility.visible": "Visible to doctors",
     "adminMedicalOrders.toolbar.visibility.hidden": "Hidden from doctors",
-    "adminMedicalOrders.toolbar.visibility.ariaLabel": "Filter by visibility to doctors",
+    "adminMedicalOrders.toolbar.visibility.ariaLabel":
+      "Filter by visibility to doctors",
     "adminMedicalOrders.toolbar.active.allStatuses": "All statuses",
     "adminMedicalOrders.toolbar.active.activeOnly": "Active only",
     "adminMedicalOrders.toolbar.active.inactiveOnly": "Inactive only",
-    "adminMedicalOrders.toolbar.active.ariaLabel": "Filter by activation status",
+    "adminMedicalOrders.toolbar.active.ariaLabel":
+      "Filter by activation status",
     "adminMedicalOrders.toolbar.sort.none": "No specific order",
     "adminMedicalOrders.toolbar.sort.nameEn": "Name (English)",
     "adminMedicalOrders.toolbar.sort.nameAr": "Name (Arabic)",
@@ -3609,8 +4872,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalOrders.category.empty": "No items in this category yet.",
     "adminMedicalOrders.upsert.editTitle": "Edit order type",
     "adminMedicalOrders.upsert.createTitle": "Add new type",
-    "adminMedicalOrders.upsert.editDescription": "Edit an item's label in the medical order catalog.",
-    "adminMedicalOrders.upsert.createDescription": "Add a new item to the medical order catalog.",
+    "adminMedicalOrders.upsert.editDescription":
+      "Edit an item's label in the medical order catalog.",
+    "adminMedicalOrders.upsert.createDescription":
+      "Add a new item to the medical order catalog.",
     "adminMedicalOrders.field.displayName.label": "Display name",
     "adminMedicalOrders.field.category.label": "Category",
     "adminMedicalOrders.field.nameAr.label": "Arabic name",
@@ -3620,16 +4885,19 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalOrders.field.sortOrder.label": "Sort order",
     "adminMedicalOrders.field.synonyms.label": "Synonyms",
     "adminMedicalOrders.field.fastingRequired.label": "Fasting required",
-    "adminMedicalOrders.field.supportsContrast.label": "Supports contrast injection",
+    "adminMedicalOrders.field.supportsContrast.label":
+      "Supports contrast injection",
     "adminMedicalOrders.field.notes.label": "Notes",
     "adminMedicalOrders.field.isActive.label": "Item is active",
     "adminMedicalOrders.field.isVisible.label": "Item is visible to doctors",
     "adminMedicalOrders.upsert.saving": "Saving…",
     "adminMedicalOrders.upsert.saveEdit": "Save changes",
     "adminMedicalOrders.toast.updated.title": "Changes saved",
-    "adminMedicalOrders.toast.updated.body": "Item “{name}” in the {kind} category was updated in the order catalog.",
+    "adminMedicalOrders.toast.updated.body":
+      "Item “{name}” in the {kind} category was updated in the order catalog.",
     "adminMedicalOrders.toast.created.title": "Added",
-    "adminMedicalOrders.toast.created.body": "Item “{name}” was added to the {kind} catalog. It will appear to doctors when ordering.",
+    "adminMedicalOrders.toast.created.body":
+      "Item “{name}” was added to the {kind} catalog. It will appear to doctors when ordering.",
     "common.yes": "Yes",
     "common.no": "No",
     "common.visible": "Visible",
@@ -3648,11 +4916,16 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalOrders.details.id": "ID",
     "adminMedicalOrders.details.supportsContrast": "Supports contrast",
     "common.required": "Required",
-    "adminServiceTypeDialog.validation.enScriptOnly": "Text must be English only: don't enter Arabic characters in English fields.",
-    "adminServiceTypeDialog.validation.arScriptOnly": "Text must be Arabic only: don't enter Latin (English) characters in Arabic fields.",
-    "adminServiceTypeDialog.validation.fieldKeyRequired": "Field key is required",
-    "adminServiceTypeDialog.validation.fieldKeyPattern": "The key must start with a Latin letter, followed only by letters/digits/underscores",
-    "adminServiceTypeDialog.validation.atLeastOneField": "Add at least one schema field",
+    "adminServiceTypeDialog.validation.enScriptOnly":
+      "Text must be English only: don't enter Arabic characters in English fields.",
+    "adminServiceTypeDialog.validation.arScriptOnly":
+      "Text must be Arabic only: don't enter Latin (English) characters in Arabic fields.",
+    "adminServiceTypeDialog.validation.fieldKeyRequired":
+      "Field key is required",
+    "adminServiceTypeDialog.validation.fieldKeyPattern":
+      "The key must start with a Latin letter, followed only by letters/digits/underscores",
+    "adminServiceTypeDialog.validation.atLeastOneField":
+      "Add at least one schema field",
     "adminServiceTypeDialog.fieldType.string": "Text",
     "adminServiceTypeDialog.fieldType.number": "Number",
     "adminServiceTypeDialog.fieldType.boolean": "Yes/No",
@@ -3660,7 +4933,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminServiceTypeDialog.fieldType.object": "Object",
     "adminServiceTypeDialog.editTitle": "Edit service type",
     "adminServiceTypeDialog.createTitle": "Add service type",
-    "adminServiceTypeDialog.field.slug.hint": "Changing the slug after linking is not recommended.",
+    "adminServiceTypeDialog.field.slug.hint":
+      "Changing the slug after linking is not recommended.",
     "adminServiceTypeDialog.section.schemaFields": "Schema fields",
     "adminServiceTypeDialog.action.addField": "Add field",
     "adminServiceTypeDialog.field.fieldNumber": "Field {n}",
@@ -3668,17 +4942,22 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminServiceTypeDialog.field.type.label": "Type",
     "adminServiceTypeDialog.field.type.ariaLabel": "Type of field {n}",
     "adminServiceTypeDialog.field.labelAr.label": "Label (Arabic)",
-    "adminServiceTypeDialog.field.labelAr.ariaLabel": "Arabic label for field {n}",
-    "adminServiceTypeDialog.field.labelEn.ariaLabel": "English label for field {n}",
+    "adminServiceTypeDialog.field.labelAr.ariaLabel":
+      "Arabic label for field {n}",
+    "adminServiceTypeDialog.field.labelEn.ariaLabel":
+      "English label for field {n}",
     "adminServiceTypeDialog.field.isPublic.label": "Public field (isPublic)",
     "adminServiceTypeDialog.schemaVersionPrefix": "Current schemaVersion: ",
     "adminServiceTypeDialog.action.saving": "Saving…",
     "adminServiceTypeDialog.action.create": "Create",
     "adminServiceTypeDialog.toast.updated.title": "Updated",
-    "adminServiceTypeDialog.toast.updated.body": "The changes to service type “{name}” and its fields were saved.",
-    "adminServiceTypeDialog.toast.created.body": "Service type “{name}” was added to the system. Review its activation status when needed.",
+    "adminServiceTypeDialog.toast.updated.body":
+      "The changes to service type “{name}” and its fields were saved.",
+    "adminServiceTypeDialog.toast.created.body":
+      "Service type “{name}” was added to the system. Review its activation status when needed.",
     "adminServiceTypeDialog.field.enum.label": "Allowed values (enum)",
-    "adminServiceTypeDialog.field.enum.hint": "Separate with a comma, leave empty if not required",
+    "adminServiceTypeDialog.field.enum.hint":
+      "Separate with a comma, leave empty if not required",
     "adminServiceTypeDialog.field.enum.ariaLabel": "enum of field {n}",
     "adminServiceTypeDialog.field.regex.label": "Pattern (regex)",
     "adminServiceTypeDialog.field.regex.ariaLabel": "regex of field {n}",
@@ -3686,34 +4965,51 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminServiceTypeDialog.field.min.ariaLabel": "min of field {n}",
     "adminServiceTypeDialog.field.max.label": "Maximum (max)",
     "adminServiceTypeDialog.field.max.ariaLabel": "max of field {n}",
-    "adminServiceTypeDialog.statusDialog.description": "Confirm changing the service type's activation status in the system.",
-    "adminServiceTypeDialog.statusDialog.deactivateTitle": "Deactivate service type",
-    "adminServiceTypeDialog.statusDialog.activateTitle": "Activate service type",
-    "adminServiceTypeDialog.statusDialog.deactivateBody": "Service type “{name}” will be hidden from public lists (isActive: false). You can reactivate it later.",
-    "adminServiceTypeDialog.statusDialog.activateBody": "Service type “{name}” will be activated again.",
-    "adminServiceTypeDialog.statusDialog.note": "This action only changes the reference type's status. It does not delete linked providers or facilities, but it may change its availability as an option in linked forms.",
+    "adminServiceTypeDialog.statusDialog.description":
+      "Confirm changing the service type's activation status in the system.",
+    "adminServiceTypeDialog.statusDialog.deactivateTitle":
+      "Deactivate service type",
+    "adminServiceTypeDialog.statusDialog.activateTitle":
+      "Activate service type",
+    "adminServiceTypeDialog.statusDialog.deactivateBody":
+      "Service type “{name}” will be hidden from public lists (isActive: false). You can reactivate it later.",
+    "adminServiceTypeDialog.statusDialog.activateBody":
+      "Service type “{name}” will be activated again.",
+    "adminServiceTypeDialog.statusDialog.note":
+      "This action only changes the reference type's status. It does not delete linked providers or facilities, but it may change its availability as an option in linked forms.",
     "adminServiceTypeDialog.statusDialog.executing": "Processing…",
     "adminServiceTypeDialog.statusDialog.deactivateAction": "Deactivate",
     "adminServiceTypeDialog.statusDialog.activateAction": "Activate",
     "adminServiceTypeDialog.toggle.deactivateItem": "Deactivate item",
     "adminServiceTypeDialog.toggle.activateItem": "Activate item",
-    "adminUsersDialog.validation.nameMinLength": "Name must be at least 2 characters",
-    "adminUsersDialog.validation.nameMaxLength": "Name must not exceed 100 characters",
-    "adminUsersDialog.validation.nameLettersOnly": "Name must contain letters only",
+    "adminUsersDialog.validation.nameMinLength":
+      "Name must be at least 2 characters",
+    "adminUsersDialog.validation.nameMaxLength":
+      "Name must not exceed 100 characters",
+    "adminUsersDialog.validation.nameLettersOnly":
+      "Name must contain letters only",
     "adminUsersDialog.validation.emailTooLong": "Email is too long",
     "adminUsersDialog.validation.dialCodeUnsupported": "Unsupported dial code",
     "adminUsersDialog.validation.phoneTooLong": "Phone number is too long",
-    "adminUsersDialog.validation.phoneDigitsOnly": "Phone number must contain digits only",
+    "adminUsersDialog.validation.phoneDigitsOnly":
+      "Phone number must contain digits only",
     "adminUsersDialog.validation.passwordTooLong": "Password is too long",
-    "adminUsersDialog.validation.passwordLowercase": "Password must contain at least one lowercase letter",
-    "adminUsersDialog.validation.passwordUppercase": "Password must contain at least one uppercase letter",
-    "adminUsersDialog.validation.passwordDigit": "Password must contain at least one digit",
-    "adminUsersDialog.validation.passwordSymbol": "Password must contain at least one symbol",
-    "adminUsersDialog.create.description": "Fill in the following details to create a new admin account in the system",
+    "adminUsersDialog.validation.passwordLowercase":
+      "Password must contain at least one lowercase letter",
+    "adminUsersDialog.validation.passwordUppercase":
+      "Password must contain at least one uppercase letter",
+    "adminUsersDialog.validation.passwordDigit":
+      "Password must contain at least one digit",
+    "adminUsersDialog.validation.passwordSymbol":
+      "Password must contain at least one symbol",
+    "adminUsersDialog.create.description":
+      "Fill in the following details to create a new admin account in the system",
     "adminUsersDialog.password.requirementsIntro": "The password must contain:",
     "adminUsersDialog.password.req.length": "At least 8 characters",
-    "adminUsersDialog.password.req.uppercase": "At least one uppercase letter (A-Z)",
-    "adminUsersDialog.password.req.lowercase": "At least one lowercase letter (a-z)",
+    "adminUsersDialog.password.req.uppercase":
+      "At least one uppercase letter (A-Z)",
+    "adminUsersDialog.password.req.lowercase":
+      "At least one lowercase letter (a-z)",
     "adminUsersDialog.password.req.digit": "At least one digit (0-9)",
     "adminUsersDialog.password.req.symbol": "At least one symbol (!@#$%^&*)",
     "adminUsersDialog.field.role.label": "Role",
@@ -3722,7 +5018,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminUsersDialog.action.save": "Save",
     "adminUsersDialog.action.saving": "Saving…",
     "adminUsersDialog.reboard.title": "Activate user account",
-    "adminUsersDialog.reboard.warning": "This user's account will be activated and all their permissions restored.",
+    "adminUsersDialog.reboard.warning":
+      "This user's account will be activated and all their permissions restored.",
     "adminUsersDialog.reboard.activating": "Activating...",
     "adminUsersDialog.reboard.confirmButton": "Activate account",
     "adminUsersDialog.reboard.toast.activatedTitle": "Activated",
@@ -3730,22 +5027,29 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminUsersDialog.restore.decisionOption.rejected": "Reject",
     "adminUsersDialog.restore.title": "Review account restore request",
     "adminUsersDialog.restore.toast.validationErrorTitle": "Validation error",
-    "adminUsersDialog.restore.toast.cannotCompleteTitle": "Could not complete the action",
-    "adminUsersDialog.restore.toast.approvedBody": "The account restore request was approved.",
-    "adminUsersDialog.restore.toast.rejectedBody": "The account restore request was rejected.",
+    "adminUsersDialog.restore.toast.cannotCompleteTitle":
+      "Could not complete the action",
+    "adminUsersDialog.restore.toast.approvedBody":
+      "The account restore request was approved.",
+    "adminUsersDialog.restore.toast.rejectedBody":
+      "The account restore request was rejected.",
     "adminUsersDialog.restore.toast.approvedTitle": "Approved",
     "adminUsersDialog.restore.toast.rejectedTitle": "Rejected",
-    "adminUsersDialog.restore.toast.reviewFailedFallback": "Could not review the restore request right now.",
+    "adminUsersDialog.restore.toast.reviewFailedFallback":
+      "Could not review the restore request right now.",
     "adminUsersDialog.restore.requestDatePrefix": "Request date:",
     "adminUsersDialog.restore.reasonPrefix": "Request reason:",
     "adminUsersDialog.restore.deletionReasonPrefix": "Deletion reason:",
     "adminUsersDialog.restore.decisionLabel": "Decision *",
     "adminUsersDialog.restore.noteLabel": "Review note",
-    "adminUsersDialog.restore.approveWarning": "The user's account will be activated and its associated permissions restored.",
+    "adminUsersDialog.restore.approveWarning":
+      "The user's account will be activated and its associated permissions restored.",
     "adminUsersDialog.restore.sending": "Sending...",
     "adminUsersDialog.restore.submitDecision": "Submit decision",
-    "adminVerificationRequests.validation.fieldRequired": "This field is required",
-    "adminVerificationRequests.validation.rejectReasonRequired": "Rejection reason is required",
+    "adminVerificationRequests.validation.fieldRequired":
+      "This field is required",
+    "adminVerificationRequests.validation.rejectReasonRequired":
+      "Rejection reason is required",
     "adminVerificationRequests.title.approve": "Approve verification request",
     "adminVerificationRequests.title.reject": "Reject verification request",
     "adminVerificationRequests.title.mapView": "View map",
@@ -3754,59 +5058,88 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminVerificationRequests.map.coordinates": "Coordinates",
     "adminVerificationRequests.map.address": "Address",
     "adminVerificationRequests.map.viewInGoogleMaps": "View in Google Maps",
-    "adminVerificationRequests.specialization.newKeyRequired": "Enter the specialization key (English) and the Arabic name to create a new specialization.",
-    "adminVerificationRequests.specialization.mustResolve": "You must select a managed specialization from the list or create a new one before approving.",
-    "adminVerificationRequests.toast.approvedDone": "Request approved successfully",
-    "adminVerificationRequests.toast.approvedBody": "The verification request for Dr. “{name}” was approved and its status updated to “Approved”. You can continue reviewing the doctor's profile or wait for the platform's next step.",
-    "adminVerificationRequests.toast.approvedTitle": "Verification request approved",
+    "adminVerificationRequests.specialization.newKeyRequired":
+      "Enter the specialization key (English) and the Arabic name to create a new specialization.",
+    "adminVerificationRequests.specialization.mustResolve":
+      "You must select a managed specialization from the list or create a new one before approving.",
+    "adminVerificationRequests.toast.approvedDone":
+      "Request approved successfully",
+    "adminVerificationRequests.toast.approvedBody":
+      "The verification request for Dr. “{name}” was approved and its status updated to “Approved”. You can continue reviewing the doctor's profile or wait for the platform's next step.",
+    "adminVerificationRequests.toast.approvedTitle":
+      "Verification request approved",
     "adminVerificationRequests.toast.rejectedDone": "Request rejected",
-    "adminVerificationRequests.toast.rejectedBody": "The verification request for Dr. “{name}” was rejected and its status updated to “Rejected”.",
-    "adminVerificationRequests.specialization.linkBeforeApprove": "Link a specialization before approving",
-    "adminVerificationRequests.specialization.createNewInsteadOfExisting": "Create a new specialization instead of selecting an existing one",
-    "adminVerificationRequests.specialization.keyEnLabel": "Specialization key (English)",
+    "adminVerificationRequests.toast.rejectedBody":
+      "The verification request for Dr. “{name}” was rejected and its status updated to “Rejected”.",
+    "adminVerificationRequests.specialization.linkBeforeApprove":
+      "Link a specialization before approving",
+    "adminVerificationRequests.specialization.createNewInsteadOfExisting":
+      "Create a new specialization instead of selecting an existing one",
+    "adminVerificationRequests.specialization.keyEnLabel":
+      "Specialization key (English)",
     "adminVerificationRequests.specialization.nameArLabel": "Arabic name",
-    "adminVerificationRequests.specialization.nameEnLabel": "English name (optional)",
-    "adminVerificationRequests.specialization.chooseFromList": "Choose a specialization from the list",
-    "adminVerificationRequests.specialization.loading": "Loading specializations…",
-    "adminVerificationRequests.specialization.choosePlaceholder": "— Select specialization —",
-    "adminVerificationRequests.specialization.loadError": "Failed to load the specializations list. You can create a new specialization or reopen the review window.",
+    "adminVerificationRequests.specialization.nameEnLabel":
+      "English name (optional)",
+    "adminVerificationRequests.specialization.chooseFromList":
+      "Choose a specialization from the list",
+    "adminVerificationRequests.specialization.loading":
+      "Loading specializations…",
+    "adminVerificationRequests.specialization.choosePlaceholder":
+      "— Select specialization —",
+    "adminVerificationRequests.specialization.loadError":
+      "Failed to load the specializations list. You can create a new specialization or reopen the review window.",
     "adminVerificationRequests.adminNoteLabel": "Admin note:",
-    "adminVerificationRequests.field.adminNote.approvePlaceholder": "Example: license and location were verified",
-    "adminVerificationRequests.field.adminNote.rejectPlaceholder": "Write the rejection reason...",
+    "adminVerificationRequests.field.adminNote.approvePlaceholder":
+      "Example: license and location were verified",
+    "adminVerificationRequests.field.adminNote.rejectPlaceholder":
+      "Write the rejection reason...",
     "adminVerificationRequests.field.clinicLat.label": "clinicLat (optional)",
     "adminVerificationRequests.field.clinicLng.label": "clinicLng (optional)",
-    "adminVerificationRequests.field.confirmClinicLocation": "Confirm clinic location",
+    "adminVerificationRequests.field.confirmClinicLocation":
+      "Confirm clinic location",
     "adminVerificationRequests.action.approve": "Approve",
     "adminVerificationRequests.action.reject": "Reject",
     "adminDoctorProfileChangeRequests.field.specialization": "Specialization",
-    "adminDoctorProfileChangeRequests.field.medicalLicenseNumber": "Medical license number",
+    "adminDoctorProfileChangeRequests.field.medicalLicenseNumber":
+      "Medical license number",
     "adminDoctorProfileChangeRequests.field.education": "Education",
     "adminDoctorProfileChangeRequests.field.clinicAddress": "Clinic address",
     "adminDoctorProfileChangeRequests.field.locationCountry": "Country",
     "adminDoctorProfileChangeRequests.field.bio": "Bio",
-    "adminDoctorProfileChangeRequests.field.consultationFee": "Consultation fee",
+    "adminDoctorProfileChangeRequests.field.consultationFee":
+      "Consultation fee",
     "adminDoctorProfileChangeRequests.field.clinicLat": "Clinic latitude",
     "adminDoctorProfileChangeRequests.field.clinicLng": "Clinic longitude",
     "adminDoctorProfileChangeRequests.title": "Review profile change request",
-    "adminDoctorProfileChangeRequests.subtitle": "Review the requested changes and decide to approve or reject",
+    "adminDoctorProfileChangeRequests.subtitle":
+      "Review the requested changes and decide to approve or reject",
     "adminDoctorProfileChangeRequests.licenseNumberPrefix": "License number: ",
     "adminDoctorProfileChangeRequests.requestedByPrefix": "Requested by: ",
     "adminDoctorProfileChangeRequests.requestedChanges": "Requested changes",
     "adminDoctorProfileChangeRequests.currentValue": "Current value",
     "adminDoctorProfileChangeRequests.newValue": "New value",
-    "adminDoctorProfileChangeRequests.noChangeDetails": "No change details available",
+    "adminDoctorProfileChangeRequests.noChangeDetails":
+      "No change details available",
     "adminDoctorProfileChangeRequests.adminNoteLabel": "Admin note",
-    "adminDoctorProfileChangeRequests.field.note.denyPlaceholder": "Enter the rejection reason...",
-    "adminDoctorProfileChangeRequests.field.note.optionalPlaceholder": "Add an optional note...",
-    "adminDoctorProfileChangeRequests.approveWarning": "The doctor's data will be updated immediately after approval. Make sure all changes are correct.",
+    "adminDoctorProfileChangeRequests.field.note.denyPlaceholder":
+      "Enter the rejection reason...",
+    "adminDoctorProfileChangeRequests.field.note.optionalPlaceholder":
+      "Add an optional note...",
+    "adminDoctorProfileChangeRequests.approveWarning":
+      "The doctor's data will be updated immediately after approval. Make sure all changes are correct.",
     "adminDoctorProfileChangeRequests.processing": "Processing...",
     "adminDoctorProfileChangeRequests.approveAndUpdate": "Approve and update",
     "adminDoctorProfileChangeRequests.rejectRequest": "Reject request",
-    "adminDoctorProfileChangeRequests.toast.approvedBody": "The doctor profile change request for “{name}” was approved and its status updated to “Approved”.",
-    "adminDoctorProfileChangeRequests.toast.rejectedBody": "The doctor profile change request for “{name}” was rejected and its status updated to “Rejected”.",
-    "adminDoctorProfileChangeRequests.toast.genericError": "An error occurred while processing the request. Please try again.",
-    "adminNotifications.toast.newSingle": "You have a new notification. Open the “Notifications” page to review it.",
-    "adminNotifications.toast.newMultiple": "You have {count} new unread notifications.",
+    "adminDoctorProfileChangeRequests.toast.approvedBody":
+      "The doctor profile change request for “{name}” was approved and its status updated to “Approved”.",
+    "adminDoctorProfileChangeRequests.toast.rejectedBody":
+      "The doctor profile change request for “{name}” was rejected and its status updated to “Rejected”.",
+    "adminDoctorProfileChangeRequests.toast.genericError":
+      "An error occurred while processing the request. Please try again.",
+    "adminNotifications.toast.newSingle":
+      "You have a new notification. Open the “Notifications” page to review it.",
+    "adminNotifications.toast.newMultiple":
+      "You have {count} new unread notifications.",
     "adminNotifications.toast.newAlertTitle": "Alert — new notification",
     "common.specialtyLabel": "Specialty",
     "common.fullNameLabel": "Full name",
@@ -3816,7 +5149,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAccessRequests.loadingDetails": "Loading details...",
     "adminAccessRequests.loadError": "Failed to load request details.",
     "adminAccessRequests.incompleteData.title": "Some data is incomplete",
-    "adminAccessRequests.incompleteData.body": "The current response does not contain all the expected doctor or patient fields. Only the available values are shown to avoid displaying unconfirmed information.",
+    "adminAccessRequests.incompleteData.body":
+      "The current response does not contain all the expected doctor or patient fields. Only the available values are shown to avoid displaying unconfirmed information.",
     "adminAccessRequests.requestStatusLabel": "Request status",
     "adminAccessRequests.requestType.label": "Request type",
     "adminAccessRequests.requestType.value": "Patient data access request",
@@ -3824,9 +5158,12 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAccessRequests.currentAction.pending": "Under review by admin",
     "adminAccessRequests.currentAction.approved": "Request approved",
     "adminAccessRequests.currentAction.rejected": "Request rejected",
-    "adminAccessRequests.contextNote.pending": "This window is for reviewing the access request before finalizing the decision, showing only the available values if some fields are missing from the response.",
-    "adminAccessRequests.contextNote.approved": "This request was previously approved, so the window now shows the request data and final status for reference only, with no further actions.",
-    "adminAccessRequests.contextNote.rejected": "This request was previously rejected, so the window is now used only to review the request reason and its associated data.",
+    "adminAccessRequests.contextNote.pending":
+      "This window is for reviewing the access request before finalizing the decision, showing only the available values if some fields are missing from the response.",
+    "adminAccessRequests.contextNote.approved":
+      "This request was previously approved, so the window now shows the request data and final status for reference only, with no further actions.",
+    "adminAccessRequests.contextNote.rejected":
+      "This request was previously rejected, so the window is now used only to review the request reason and its associated data.",
     "adminAccessRequests.doctorInfo.title": "Doctor information",
     "adminAccessRequests.phoneLabel": "Phone",
     "adminAccessRequests.patientInfo.title": "Patient information",
@@ -3839,23 +5176,30 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminComplaints.summary.total": "Total complaints",
     "adminComplaints.summary.closed": "Closed",
     "adminComplaints.summary.review": "Under review",
-    "adminAppointments.panel.noDoctorAssigned": "No doctor is linked to this secretary. Assign a doctor first to view appointments within their scope.",
-    "adminAppointments.panel.viewingFor": "Viewing appointments for the linked doctor:",
-    "adminAppointments.panel.manageHint": " — you can cancel and view details per admin permissions.",
+    "adminAppointments.panel.noDoctorAssigned":
+      "No doctor is linked to this secretary. Assign a doctor first to view appointments within their scope.",
+    "adminAppointments.panel.viewingFor":
+      "Viewing appointments for the linked doctor:",
+    "adminAppointments.panel.manageHint":
+      " — you can cancel and view details per admin permissions.",
     "adminAppointments.panel.statusFilter.ariaLabel": "Appointment status",
     "adminAppointments.panel.loading": "Loading appointments…",
     "adminAppointments.panel.loadError": "Failed to load appointments.",
-    "adminAppointments.panel.noneMatching": "No appointments match this doctor.",
-    "adminAppointments.panel.tryOtherPage": "Results may be on another page of the general list — try changing the date or status.",
+    "adminAppointments.panel.noneMatching":
+      "No appointments match this doctor.",
+    "adminAppointments.panel.tryOtherPage":
+      "Results may be on another page of the general list — try changing the date or status.",
     "adminAppointments.panel.patientLabel": "Patient:",
     "adminAppointments.panel.doctorLabel": "Doctor:",
     "adminAppointments.panel.specializationLabel": "Specialization:",
     "adminAppointments.panel.detailsButton": "Details",
     "adminAppointments.panel.cancelToast.title": "Appointment cancelled",
-    "adminAppointments.panel.cancelToast.message": "The appointment cancellation was recorded in the system.",
+    "adminAppointments.panel.cancelToast.message":
+      "The appointment cancellation was recorded in the system.",
     "adminAppointments.details.title": "Appointment details",
     "adminAppointments.details.loading": "Loading...",
-    "adminAppointments.details.loadError": "Failed to load appointment details.",
+    "adminAppointments.details.loadError":
+      "Failed to load appointment details.",
     "adminAppointments.details.noData": "No data available.",
     "adminAppointments.details.dateTime": "Date/Time",
     "adminAppointments.details.cancelReasonPrefix": "Cancellation reason: ",
@@ -3866,9 +5210,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAppointments.details.statusSourceLabel": "Status / Source",
     "adminAppointments.details.startedAt": "Started at",
     "adminAppointments.details.closedAt": "Closed at",
-    "adminAppointments.details.attachments": "Attachments linked to the appointment",
+    "adminAppointments.details.attachments":
+      "Attachments linked to the appointment",
     "adminAppointments.details.archived": "Archived",
-    "adminAppointments.cancel.validation.reasonTooLong": "Cancellation reason must not exceed 300 characters.",
+    "adminAppointments.cancel.validation.reasonTooLong":
+      "Cancellation reason must not exceed 300 characters.",
     "adminAppointments.cancel.title": "Cancel appointment",
     "adminAppointments.cancel.targetLabel": "Target",
     "adminAppointments.cancel.reasonLabel": "Cancellation reason",
@@ -3907,10 +5253,13 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAuditLog.filters.field.action.placeholder": "e.g. AUTH_LOGIN_FAILED",
     "adminAuditLog.filters.field.requestId": "Request ID",
     "adminAuditLog.filters.field.ip": "IP address",
-    "adminAuditLog.pagination.summary": "Showing {from}–{to} of {total} records",
+    "adminAuditLog.pagination.summary":
+      "Showing {from}–{to} of {total} records",
     "adminAuditLog.privacy.title": "Privacy and compliance note",
-    "adminAuditLog.privacy.body": "Audit logs do not include any sensitive patient content (no attachments, no consultation messages, no diagnosis or prescription text). Activity is tracked only for security, administrative, and legal compliance purposes.",
-    "adminAuditLog.privacy.retention": "Retention periods: AUTH / AUTHZ / DATA / ADMIN — 3 years | PHI — 7 years | SYSTEM — 1 year.",
+    "adminAuditLog.privacy.body":
+      "Audit logs do not include any sensitive patient content (no attachments, no consultation messages, no diagnosis or prescription text). Activity is tracked only for security, administrative, and legal compliance purposes.",
+    "adminAuditLog.privacy.retention":
+      "Retention periods: AUTH / AUTHZ / DATA / ADMIN — 3 years | PHI — 7 years | SYSTEM — 1 year.",
     "adminAuditLog.stats.total": "Total records",
     "adminAuditLog.stats.failed": "Failed actions",
     "adminAuditLog.stats.denied": "Denied attempts",
@@ -3922,12 +5271,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAuditLog.table.loadError": "Failed to load logs",
     "adminAuditLog.table.connectionErrorFallback": "Server connection error",
     "adminAuditLog.table.noMatches": "No matching logs",
-    "adminAuditLog.table.tryChangingFilters": "Try changing or clearing the filters to see broader results.",
-    "adminAuditLog.table.noRecordsInScope": "No records to show within the current scope.",
+    "adminAuditLog.table.tryChangingFilters":
+      "Try changing or clearing the filters to see broader results.",
+    "adminAuditLog.table.noRecordsInScope":
+      "No records to show within the current scope.",
     "adminAuditLog.table.clearFilters": "Clear filters",
     "adminAuditLog.row.technicalDetails": "Technical details",
     "adminAuditLog.details.title": "Technical log details",
-    "adminAuditLog.details.description": "Request and route information for review and compliance — not shown in the main table to reduce clutter and API structure exposure.",
+    "adminAuditLog.details.description":
+      "Request and route information for review and compliance — not shown in the main table to reduce clutter and API structure exposure.",
     "adminAuditLog.details.recordId": "Record ID",
     "adminAuditLog.details.action": "Action",
     "adminAuditLog.details.categoryLabel": "Category",
@@ -3943,7 +5295,8 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminAuditLog.details.patientLabel": "Patient",
     "adminAuditLog.details.targetUser": "Target user",
     "adminSystemLogs.page.title": "System logs",
-    "adminSystemLogs.page.subtitle": "Review all system activity and events in near real time",
+    "adminSystemLogs.page.subtitle":
+      "Review all system activity and events in near real time",
     "common.undetermined": "Undetermined",
     "adminDashboard.contentStatus.DRAFT": "Draft",
     "adminDashboard.contentStatus.IN_REVIEW": "In review",
@@ -3979,11 +5332,15 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminContent.language.arabic": "Arabic",
     "editContentDialog.validation.invalidJson": "Invalid JSON format.",
     "adminDoctorLookup.validation.keyRequired": "Key is required",
-    "adminDoctorLookup.validation.keyPattern": "Lowercase English letters, digits, underscores only",
-    "adminDoctorLookup.validation.arabicNameRequired": "Arabic name is required",
+    "adminDoctorLookup.validation.keyPattern":
+      "Lowercase English letters, digits, underscores only",
+    "adminDoctorLookup.validation.arabicNameRequired":
+      "Arabic name is required",
     "adminDoctorLookup.toast.updatedTitle": "Saved",
-    "adminDoctorLookup.toast.updatedBody": "Specialization “{name}” was updated.",
-    "adminDoctorLookup.toast.createdBody": "Specialization “{name}” was added to the catalog.",
+    "adminDoctorLookup.toast.updatedBody":
+      "Specialization “{name}” was updated.",
+    "adminDoctorLookup.toast.createdBody":
+      "Specialization “{name}” was added to the catalog.",
     "adminDoctorLookup.editTitle": "Edit specialization",
     "adminDoctorLookup.createTitle": "Add doctor specialization",
     "adminDoctorLookup.action.generateNewKey": "Generate new key",
@@ -4011,9 +5368,11 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminSecretaryPermissions.perm.waitlist_manage": "Manage waitlist",
     "adminSecretaryPermissions.perm.waitlist_book": "Book from waitlist",
     "adminSecretaryPermissions.perm.patients_view": "View patients",
-    "adminSecretaryPermissions.perm.patients_temporary_create": "Create temporary patient",
+    "adminSecretaryPermissions.perm.patients_temporary_create":
+      "Create temporary patient",
     "adminSecretaryPermissions.perm.patients_files_view": "View patient files",
-    "adminSecretaryPermissions.perm.patients_files_upload": "Upload patient files",
+    "adminSecretaryPermissions.perm.patients_files_upload":
+      "Upload patient files",
     "adminSecretaryPermissions.perm.schedule_view": "View schedule",
     "adminDoctors.status.pendingApproval": "Pending approval",
     "adminDoctors.status.suspended": "Suspended",
@@ -4045,37 +5404,58 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminDoctorAnalytics.ratingAriaLabel": "Rating {value} out of 5",
     "adminDoctorAnalytics.stat.newPatients.name": "New patients",
     "adminDoctorAnalytics.stat.newPatients.chart": "Patients",
-    "adminDoctorAnalytics.stat.completedAppointments.name": "Completed appointments",
+    "adminDoctorAnalytics.stat.completedAppointments.name":
+      "Completed appointments",
     "adminDoctorAnalytics.stat.completedAppointments.chart": "Appointments",
     "adminDoctorAnalytics.stat.medicalRecords.name": "Medical records",
     "adminDoctorAnalytics.stat.medicalRecords.chart": "Records",
     "adminDoctorAnalytics.stat.ratings.name": "Ratings",
     "adminDoctorAnalytics.stat.ratings.chart": "Ratings",
-    "adminServices.header.subtitle": "Browse and manage each service type's providers; managing the service type definitions themselves is available from the service types screen",
+    "adminServices.header.subtitle":
+      "Browse and manage each service type's providers; managing the service type definitions themselves is available from the service types screen",
     "adminPatients.suspend.title": "Suspend account",
-    "adminPatients.suspend.validation.reasonRequired": "Suspension reason is required",
+    "adminPatients.suspend.validation.reasonRequired":
+      "Suspension reason is required",
     "adminServiceProviderDialog.field.rangeLabel": "Range: {min} to {max}",
-    "adminServiceProviderDialog.noExtraFields": "No additional fields are defined for this type.",
-    "adminVerificationRequests.specBanner.catalogTitle": "Specialization is linked to the approved list",
-    "adminVerificationRequests.specBanner.catalogBody": "Official specialization: {label}",
-    "adminVerificationRequests.specBanner.customPendingTitle": "Manual specialization — linking required before approval",
-    "adminVerificationRequests.specBanner.customPendingBody": "The doctor entered the specialization “{label}” manually. Before approving the request, select a matching specialization from the approved list or add a new one to the system.",
-    "adminVerificationRequests.specBanner.unresolvedTitle": "Specialization review required before approval",
-    "adminVerificationRequests.specBanner.unresolvedSpecialtyPrefix": "Specialization shown on the doctor's profile: “{label}”. ",
-    "adminVerificationRequests.specBanner.unresolvedBody": "Could not verify the specialization linked to this doctor. Please link it to an official specialization from the list before approving the request.",
+    "adminServiceProviderDialog.noExtraFields":
+      "No additional fields are defined for this type.",
+    "adminVerificationRequests.specBanner.catalogTitle":
+      "Specialization is linked to the approved list",
+    "adminVerificationRequests.specBanner.catalogBody":
+      "Official specialization: {label}",
+    "adminVerificationRequests.specBanner.customPendingTitle":
+      "Manual specialization — linking required before approval",
+    "adminVerificationRequests.specBanner.customPendingBody":
+      "The doctor entered the specialization “{label}” manually. Before approving the request, select a matching specialization from the approved list or add a new one to the system.",
+    "adminVerificationRequests.specBanner.unresolvedTitle":
+      "Specialization review required before approval",
+    "adminVerificationRequests.specBanner.unresolvedSpecialtyPrefix":
+      "Specialization shown on the doctor's profile: “{label}”. ",
+    "adminVerificationRequests.specBanner.unresolvedBody":
+      "Could not verify the specialization linked to this doctor. Please link it to an official specialization from the list before approving the request.",
     "adminVerificationRequests.specBanner.manageLink": "Manage specializations",
     "adminMedicalFileOptions.kpi.chronicDiseases": "Chronic diseases",
     "adminMedicalFileOptions.kpi.allergyTypes": "Allergy types",
     "adminMedicalFileOptions.kpi.bloodTypes": "Blood types",
-    "adminMedicalFileOptions.banner": "This screen manages the reference values shown inside the medical file, such as chronic diseases, allergies, and blood types. Any change here affects the linked forms, so it's used to manage the options themselves, not to enter patient data.",
-    "adminMedicalFileOptions.filter.currentLangOnly": "Current language text only",
+    "adminMedicalFileOptions.banner":
+      "This screen manages the reference values shown inside the medical file, such as chronic diseases, allergies, and blood types. Any change here affects the linked forms, so it's used to manage the options themselves, not to enter patient data.",
+    "adminMedicalFileOptions.filter.currentLangOnly":
+      "Current language text only",
     "adminMedicalFileOptions.filter.showDisabled": "Show disabled options",
     "adminMedicalFileOptions.action.refreshing": "Refreshing...",
-    "adminMedicalFileOptions.refreshingBanner": "Refreshing medical file options...",
+    "adminMedicalFileOptions.refreshingBanner":
+      "Refreshing medical file options...",
     "adminMedicalFileOptions.loadError": "Failed to load medical file options.",
-    "adminMedicalFileOptions.retrying": "Retrying...",
+    "common.pagination.summary": "Page {page} of {total}",
+    "common.pagination.itemsPerPage": "Items per page",
+    "common.pagination.previous": "Previous",
+    "common.pagination.next": "Next",
+    "common.retry": "Retry",
+    "common.additionalDetails": "Additional details",
+    "common.retrying": "Retrying...",
     "adminMedicalFileOptions.loadingOptions": "Loading medical file options...",
-    "adminMedicalFileOptions.noOptionsRegistered": "No options are currently registered in the medical file.",
+    "adminMedicalFileOptions.noOptionsRegistered":
+      "No options are currently registered in the medical file.",
     "adminMedicalFileOptions.action.addDisease": "Add disease",
     "adminMedicalFileOptions.action.addAllergy": "Add allergy",
     "adminMedicalFileOptions.manageOptionsTitle": "Manage options",
@@ -4084,8 +5464,10 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminMedicalFileOptions.categoryAriaLabel": "Option category",
     "adminMedicalFileOptions.quickAdd.prefix": "Quick add for category",
     "adminMedicalFileOptions.quickAdd.suffix": "— type the name and press Add.",
-    "adminMedicalFileOptions.editDialog.description": "Edit the option's name, then save the changes.",
-    "adminMedicalFileOptions.deleteDialog.confirmQuestion": "Delete “{name}” from the medical file options?",
+    "adminMedicalFileOptions.editDialog.description":
+      "Edit the option's name, then save the changes.",
+    "adminMedicalFileOptions.deleteDialog.confirmQuestion":
+      "Delete “{name}” from the medical file options?",
     "adminMedicalFileOptions.toast.addFailedTitle": "Failed to add",
     "adminMedicalFileOptions.toast.deleteFailedTitle": "Failed to delete",
     "adminMedicalFileOptions.toast.updateFailedTitle": "Failed to update",
@@ -4097,18 +5479,24 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminPatientDetails.header.back": "Back to list",
     "adminPatientDetails.loading": "Loading patient details...",
     "adminPatientDetails.loadError": "Failed to load patient details",
-    "adminPatientDetails.notFound.title": "This patient's data could not be found",
-    "adminPatientDetails.notFound.body": "The ID may be incorrect, or the patient may have been deleted. Try going back to the patients list and clicking \"View details\" directly.",
+    "adminPatientDetails.notFound.title":
+      "This patient's data could not be found",
+    "adminPatientDetails.notFound.body":
+      'The ID may be incorrect, or the patient may have been deleted. Try going back to the patients list and clicking "View details" directly.',
     "adminPatientDetails.notFound.backButton": "Back to patients list",
     "adminPatientDetails.summary.recordType": "Record type",
     "adminPatientDetails.summary.recordTypeValue": "Patient file",
     "adminPatientDetails.summary.accountStatus": "Account status",
     "adminPatientDetails.summary.scope": "Screen scope",
-    "adminPatientDetails.summary.scopeValue": "Administrative review of data and appointments",
+    "adminPatientDetails.summary.scopeValue":
+      "Administrative review of data and appointments",
     "adminPatientDetails.summary.currentAction": "Current action",
-    "adminPatientDetails.summary.action.followUpOnly": "Follow up on the record only",
-    "adminPatientDetails.summary.action.unsuspendOrReactivate": "Unsuspend or reactivate",
-    "adminPatientDetails.summary.action.reactivateWhenNeeded": "Reactivate the account when needed",
+    "adminPatientDetails.summary.action.followUpOnly":
+      "Follow up on the record only",
+    "adminPatientDetails.summary.action.unsuspendOrReactivate":
+      "Unsuspend or reactivate",
+    "adminPatientDetails.summary.action.reactivateWhenNeeded":
+      "Reactivate the account when needed",
     "adminPatientDetails.patientIdLabel": "Patient number: {id}",
     "adminPatientDetails.claimed.yes": "Account activated (Claimed)",
     "adminPatientDetails.claimed.no": "Account not yet claimed",
@@ -4121,27 +5509,149 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "adminPatientDetails.toast.activatedTitle": "Activated",
     "adminPatientDetails.toast.unsuspendedTitle": "Suspension lifted",
     "adminPatientDetails.toast.errorTitle": "Error",
-    "adminPatientDetails.toast.activateFailed": "Could not activate the patient's account right now.",
-    "adminPatientDetails.toast.unsuspendFailed": "Could not lift the account suspension right now.",
-    "adminPatientDetails.readOnlyNotice.title": "Admin permissions on this screen are read/follow-up only",
-    "adminPatientDetails.readOnlyNotice.body": "This page shows the patient's data, appointments, and related activity log for administrative review. This interface is not used as a path to upload or delete the patient's sensitive files from the admin account.",
+    "adminPatientDetails.toast.activateFailed":
+      "Could not activate the patient's account right now.",
+    "adminPatientDetails.toast.unsuspendFailed":
+      "Could not lift the account suspension right now.",
+    "adminPatientDetails.readOnlyNotice.title":
+      "Admin permissions on this screen are read/follow-up only",
+    "adminPatientDetails.readOnlyNotice.body":
+      "This page shows the patient's data, appointments, and related activity log for administrative review. This interface is not used as a path to upload or delete the patient's sensitive files from the admin account.",
     "adminPatientDetails.stats.upcoming": "Upcoming appointments",
     "adminPatientDetails.stats.completed": "Completed appointments",
     "adminPatientDetails.stats.cancelled": "Cancelled appointments",
     "adminPatientDetails.stats.noShow": "No-show",
-    "adminPatientDetails.appointmentsSection.title": "Latest appointments linked to the patient",
+    "adminPatientDetails.appointmentsSection.title":
+      "Latest appointments linked to the patient",
     "adminPatientDetails.appointmentsSection.loading": "Loading...",
     "adminPatientDetails.appointmentsSection.itemsCount": "{count} items",
     "adminPatientDetails.appointmentsSection.approxBadge": "Approximate",
-    "adminPatientDetails.appointmentsSection.loadingAppointments": "Loading appointments...",
-    "adminPatientDetails.appointmentsSection.empty": "No appointments linked to this patient within the current data.",
-    "adminPatientDetails.auditSection.title": "Activity log linked to the patient (Audit)",
+    "adminPatientDetails.appointmentsSection.loadingAppointments":
+      "Loading appointments...",
+    "adminPatientDetails.appointmentsSection.empty":
+      "No appointments linked to this patient within the current data.",
+    "adminPatientDetails.auditSection.title":
+      "Activity log linked to the patient (Audit)",
     "adminPatientDetails.auditSection.loadingLogs": "Loading logs...",
-    "adminPatientDetails.auditSection.empty": "No activity logs visible for this patient within the latest results.",
+    "adminPatientDetails.auditSection.empty":
+      "No activity logs visible for this patient within the latest results.",
     "adminPatientDetails.auditSection.eventsCount": "{count} events",
+    "adminMedicalContent.all": "All",
+    "adminMedicalContent.published": "Published",
+    "adminMedicalContent.inReview": "In Review",
+    "adminMedicalContent.draft": "Draft",
+    "adminMedicalContent.archived": "Archived",
+    "doctor.temporaryPatient.step1Identity": "Step 1 — Identity",
+    "doctor.temporaryPatient.step2Contact": "Step 2 — Contact",
+    "doctor.dashboard.activeConsultations.title": "Active Consultations",
+    "doctor.dashboard.activeConsultations.viewAll": "View All",
+    "doctor.dashboard.activeConsultations.consultation": "Active consultation",
+    "doctor.dashboard.activeConsultations.continueAria":
+      "Continue consultation",
+    "doctor.dashboard.activeConsultations.empty":
+      "No active consultations need your attention right now.",
+    "doctor.dashboard.waitingList.title": "Waiting List",
+    "doctor.dashboard.waitingList.viewAll": "View All",
+    "doctor.dashboard.waitingList.request": "Waiting request",
+    "doctor.dashboard.waitingList.closestRequest":
+      "Closest request in waiting list",
+    "doctor.dashboard.waitingList.empty": "No waiting requests currently.",
+    "doctor.dashboard.diagnosisAnalytics.title": "Weekly Diagnoses",
+    "doctor.dashboard.diagnosisAnalytics.loading": "Loading analytics...",
+    "doctor.dashboard.diagnosisAnalytics.noData":
+      "No diagnosis records in this period.",
+    "doctor.dashboard.diagnosisAnalytics.totalRecords": "Total Medical Records",
+    "doctor.dashboard.diagnosisAnalytics.dependencyNote":
+      "Depends on medical record creation (API-3)",
+    "doctor.dashboard.quickActions.startVisit": "Start Visit",
+    "doctor.dashboard.quickActions.startVisitDesc": "Medical examinations",
+    "doctor.dashboard.quickActions.startConsultation": "Start Consultation",
+    "doctor.dashboard.quickActions.startConsultationDesc":
+      "Patient conversations",
+    "doctor.dashboard.quickActions.searchPatient": "Search Patient",
+    "doctor.dashboard.quickActions.searchPatientDesc": "Search for patients",
+    "doctor.dashboard.quickActions.addPatient": "Add Patient",
+    "doctor.dashboard.quickActions.addPatientDesc": "Add new patient",
+    "doctor.dashboard.quickActions.medicalLibrary": "Medical Library",
+    "doctor.dashboard.quickActions.medicalLibraryDesc":
+      "Collection of medications, labs, and procedures",
+    "doctor.dashboard.quickActions.medicalServicesGuide":
+      "Medical Services Guide",
+    "doctor.dashboard.quickActions.medicalServicesGuideDesc":
+      "Access available services",
+    "doctor.dashboard.quickActions.facilities": "Facilities",
+    "doctor.dashboard.quickActions.facilitiesDesc":
+      "Manage your facilities and link to your account",
+    "doctor.dashboard.quickActions.title": "Quick Actions",
+    "doctor.listError.retry": "Retry",
+    "secretary.dashboard.quickActions": "Quick Actions",
+    "secretary.dashboard.title": "Secretary dashboard",
+    "secretary.dashboard.todaySchedule": "Today's Schedule",
+    "secretary.dashboard.time": "Time",
+    "secretary.dashboard.patientName": "Patient Name",
+    "secretary.dashboard.status": "Status",
+    "secretary.dashboard.actions": "Actions",
+    "secretary.dashboard.view": "View",
+    "secretary.dashboard.statusScheduled": "Scheduled",
+    "secretary.dashboard.statusPostponed": "Postponed",
+    "secretary.dashboard.statusCompleted": "Completed",
+    "secretary.dashboard.accountActive": "Account status active /",
+    "secretary.dashboard.responsibleDoctor": "Responsible Doctor",
+    "secretary.dashboard.reviews": "Reviews",
+    "secretary.patients.table.name": "Name",
+    "secretary.patients.table.phone": "Phone",
+    "secretary.patients.table.email": "Email",
+    "secretary.patients.table.registrationDate": "Registration Date",
+    "secretary.patients.table.actions": "Actions",
+    "secretary.patients.table.view": "View",
+    "secretary.temporaryPatient.validation.fullNameRequired":
+      "Full name is required",
+    "secretary.temporaryPatient.validation.fullNameTooLong":
+      "Full name is too long",
+    "secretary.temporaryPatient.validation.emailRequired": "Email is required",
+    "secretary.temporaryPatient.validation.emailInvalid":
+      "Invalid email address",
+    "secretary.temporaryPatient.validation.dialCodeRequired":
+      "Please select a valid country code",
+    "secretary.temporaryPatient.validation.phoneRequired":
+      "Phone number is required",
+    "secretary.temporaryPatient.validation.phoneDigitsOnly":
+      "Enter digits only without spaces or country code",
+    "secretary.temporaryPatient.validation.phoneNoLeadingZero":
+      "Enter local number without leading zero",
+    "secretary.temporaryPatient.validation.phoneNoCountryCode":
+      "Enter phone number without country code",
+    "secretary.temporaryPatient.title": "Add temporary patient",
+    "secretary.temporaryPatient.description":
+      "Create a temporary record and link it to continue visits and communication.",
+    "secretary.temporaryPatient.createError":
+      "Could not create temporary patient",
+    "secretary.temporaryPatient.fullNameLabel": "Full name",
+    "secretary.temporaryPatient.fullNamePlaceholder":
+      "Example: Sara Abdullah Ali",
+    "secretary.temporaryPatient.emailLabel": "Email",
+    "secretary.temporaryPatient.phoneLabel": "Phone number",
+    "secretary.temporaryPatient.dialCodeLabel": "Dial code",
+    "secretary.temporaryPatient.withoutLeadingZero": "Without leading zero",
+    "secretary.temporaryPatient.internationalFormatNote":
+      "Sent to the server in international format like",
+    "secretary.temporaryPatient.saveButton": "Save and link to clinic",
+    "secretary.bookAppointment.validation.patientRequired":
+      "Please select a patient.",
+    "secretary.bookAppointment.validation.dateRequired":
+      "Please select appointment date.",
+    "secretary.bookAppointment.validation.dateFormat": "Invalid date format.",
+    "secretary.bookAppointment.validation.timeRequired":
+      "Please select appointment time.",
+    "secretary.bookAppointment.validation.timeFormat": "Invalid time format.",
+    "secretary.bookAppointment.validation.notesTooLong":
+      "Maximum notes length is 500 characters.",
   },
 };
 
-export function getTranslationValue(locale: AppLocale, key: string): string | null {
+export function getTranslationValue(
+  locale: AppLocale,
+  key: string,
+): string | null {
   return translations[locale][key] ?? null;
 }

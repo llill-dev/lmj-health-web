@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/ToastProvider";
-import BookAppointmentDialog from "@/components/doctor/appointments/book-appointment-dialog";
+import BookAppointmentPanel from "@/components/secretary/appointments/book-appointment-panel";
 import { useAvailableAppointmentTypes } from "@/hooks/doctor/appointments/useAppointmentTypes";
 import { useBookDoctorAppointmentApi } from "@/hooks/doctor/appointments/useDoctorAppointmentsApi";
 import { useDoctorPatients } from "@/hooks/doctor/patients/useDoctorPatients";
@@ -129,14 +129,11 @@ export default function SecretaryBookAppointmentPage() {
   }
 
   return (
-    <div dir={dir} lang={locale} className="pb-6 sm:pb-8">
-      <BookAppointmentDialog
-        open
-        onOpenChange={(open) => {
-          if (!open) navigate("/secretary/appointments");
-        }}
+    <div dir={dir} lang={locale} className="mx-auto w-full max-w-5xl pb-6 sm:pb-8">
+      <BookAppointmentPanel
         patients={patients}
         onSubmit={handleBook}
+        onCancel={() => navigate("/secretary/appointments")}
         doctorId={doctorId}
         submitDisabledReason={bookingBlockMessage}
       />

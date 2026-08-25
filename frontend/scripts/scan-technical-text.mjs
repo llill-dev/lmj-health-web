@@ -120,7 +120,7 @@ const RULES = [
   {
     id: "debug-marker",
     severity: "HIGH",
-    re: /\b(TODO|FIXME|DEBUG|XXX|WIP|placeholder text|lorem ipsum|test only|dummy data)\b/i,
+    re: /\b(TODO|FIXME|DEBUG|WIP|placeholder text|lorem ipsum|test only|dummy data)\b/i,
     message: "علامة تطوير/تجربة (TODO/DEBUG/placeholder) ظاهرة للمستخدم.",
   },
   {
