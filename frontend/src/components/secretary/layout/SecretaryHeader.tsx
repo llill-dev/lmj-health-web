@@ -98,7 +98,7 @@ export default function SecretaryHeader({
               type="button"
               onClick={onMenuClick}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
-              aria-label="فتح القائمة"
+              aria-label={tr("فتح القائمة", "Open menu")}
             >
               <Menu className="h-[18px] w-[18px]" strokeWidth={2.25} />
             </button>
@@ -111,7 +111,7 @@ export default function SecretaryHeader({
                 <span
                   className="absolute -bottom-px -left-px h-3 w-3 rounded-full border-2 border-white bg-emerald-400 shadow-sm"
                   aria-hidden
-                  title="متصل"
+                  title={tr("متصل", "Online")}
                 />
               </div>
 
@@ -133,7 +133,7 @@ export default function SecretaryHeader({
                   <span className="mx-1.5 text-[#cbd5e1]" aria-hidden>
                     ·
                   </span>
-                  <span className="text-[#94a3b8]">إدارة المواعيد والمرضى</span>
+                  <span className="text-[#94a3b8]">{tr("إدارة المواعيد والمرضى", "Manage appointments and patients")}</span>
                 </p>
               </div>
             </div>
@@ -143,8 +143,8 @@ export default function SecretaryHeader({
                 type="button"
                 onClick={handleNotificationsClick}
                 className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/85 bg-white/90 text-primary shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur-md transition hover:border-primary/22 hover:bg-white hover:shadow-[0_10px_24px_rgba(15,143,139,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-[42px] sm:w-[42px] sm:rounded-[13px]"
-                aria-label="الإشعارات"
-                title="الإشعارات"
+                aria-label={tr("الإشعارات", "Notifications")}
+                title={tr("الإشعارات", "Notifications")}
               >
                 <Bell className="h-[17px] w-[17px]" strokeWidth={2.25} />
               </button>

@@ -1,4 +1,5 @@
 import { Users, CheckCircle } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface AccountStatusCardProps {
   doctorName: string;
@@ -15,6 +16,8 @@ export default function AccountStatusCard({
   ratingCount,
   price,
 }: AccountStatusCardProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#e8faf8] via-white to-[#f0fdf9] p-6 shadow-[0_14px_36px_-14px_rgba(15,143,139,0.2)]">
       <div
@@ -30,11 +33,11 @@ export default function AccountStatusCard({
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle className="h-5 w-5 text-primary" />
               <span className="font-cairo text-sm font-bold text-primary">
-                حالة الحساب نشط /
+                {tr("حالة الحساب نشط /", "Account status active /")}
               </span>
             </div>
             <h2 className="font-cairo text-lg font-bold text-[#0f172a] mb-1">
-              الطبيب المسؤول {doctorName}
+              {tr(`الطبيب المسؤول ${doctorName}`, `Responsible doctor ${doctorName}`)}
             </h2>
             <p className="font-cairo text-sm font-medium text-[#64748b] mb-3">
               {specialty}
@@ -45,7 +48,7 @@ export default function AccountStatusCard({
                   {rating}
                 </span>
                 <span className="font-cairo text-xs font-medium text-[#64748b]">
-                  ({ratingCount} تقييم)
+                  {tr(`(${ratingCount} تقييم)`, `(${ratingCount} reviews)`)}
                 </span>
               </div>
               <div className="font-cairo text-sm font-bold text-primary">
