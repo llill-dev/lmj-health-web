@@ -31,30 +31,29 @@ function isFutureAppointmentSlot(date?: string, startTime?: string): boolean {
   return slotDateTime > new Date();
 }
 
-type TrFn = (ar: string, en: string) => string;
-const defaultTr: TrFn = (ar) => ar;
+type TFn = (key: string, fallback?: string) => string;
 
-function statusLabelAr(status: string, tr: TrFn = defaultTr): string {
+function statusLabelAr(status: string, t: TFn): string {
   switch (status) {
     case "scheduled":
-      return tr("مؤكد", "Confirmed");
+      return t("doctor.appointmentsTab.status.scheduled");
     case "completed":
-      return tr("مكتمل", "Completed");
+      return t("doctor.appointmentsTab.status.completed");
     case "cancelled":
-      return tr("ملغي", "Cancelled");
+      return t("doctor.appointmentsTab.status.cancelled");
     case "no-show":
-      return tr("لم يحضر", "No-show");
+      return t("doctor.appointmentsTab.status.noShow");
     case "rescheduled":
-      return tr("إعادة جدولة", "Rescheduled");
+      return t("doctor.appointmentCard.rescheduledStatus");
     default:
       return status;
   }
 }
 
-function visitKindLabel(type: string | undefined, tr: TrFn = defaultTr): string {
-  if (type === "video") return tr("استشارة", "Consultation");
-  if (type === "home") return tr("زيارة منزلية", "Home visit");
-  return tr("مراجعة", "Follow-up");
+function visitKindLabel(type: string | undefined, t: TFn): string {
+  if (type === "video") return t("doctor.appointmentsTab.kind.consultation");
+  if (type === "home") return t("doctor.appointmentsTab.kind.homeVisit");
+  return t("doctor.appointmentsTab.kind.followUp");
 }
 
 const DetailRow = memo<{
@@ -123,12 +122,11 @@ export default function DoctorAppointmentExpandableCard({
   onUnlinkFile,
   fileActionKey,
 }: DoctorAppointmentExpandableCardProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const patientName = appointment.patient?.userId?.fullName ?? tr("مريض", "Patient");
+  const { t } = useI18n();
+  const patientName = appointment.patient?.userId?.fullName ?? t("doctor.appointmentCard.patientFallback");
   const patientInitials = patientName.charAt(0);
   const phone = "—";
-  const modeLine = tr("عيادة", "Clinic");
+  const modeLine = t("doctor.appointmentsTab.mode.clinic");
   const files = (appointment.appointmentFiles ?? []) as Array<{
     id?: string;
     name: string;
@@ -136,9 +134,9 @@ export default function DoctorAppointmentExpandableCard({
     url?: string;
   }>;
   const detailDate = formatAppointmentDate(appointment.date);
-  const location = tr("عيادة", "Clinic");
-  const reason = appointment.notes?.trim() || tr("لم يذكر سبب الزيارة", "No reason for the visit was given");
-  const kindLabel = tr("مراجعة", "Follow-up");
+  const location = t("doctor.appointmentsTab.mode.clinic");
+  const reason = appointment.notes?.trim() || t("doctor.appointmentCard.noReasonGiven");
+  const kindLabel = t("doctor.appointmentsTab.kind.followUp");
   const time = formatAppointmentTime(appointment.startTime);
   const noShowBlockedForFuture = isFutureAppointmentSlot(
     appointment.date,
@@ -194,7 +192,11 @@ export default function DoctorAppointmentExpandableCard({
             <button
               type="button"
               aria-expanded={expanded}
-              aria-label={expanded ? tr("طي التفاصيل", "Collapse details") : tr("عرض التفاصيل الكاملة", "View full details")}
+              aria-label={
+                expanded
+                  ? t("doctor.appointmentCard.collapseDetails")
+                  : t("doctor.appointmentCard.viewFullDetails")
+              }
               onClick={onToggle}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#344054] transition-colors hover:border-primary hover:text-primary"
             >
@@ -217,17 +219,17 @@ export default function DoctorAppointmentExpandableCard({
           <div className="min-h-0 overflow-hidden">
             <div className="mt-4 border-t border-[#EEF2F6] pt-4">
               <div className="rounded-[10px] border border-[#EEF2F6] bg-[#FAFBFC] px-3">
-                <DetailRow icon={Calendar} label={tr("التاريخ", "Date")} value={detailDate} />
-                <DetailRow icon={Clock} label={tr("الوقت", "Time")} value={time} />
+                <DetailRow icon={Calendar} label={t("common.date")} value={detailDate} />
+                <DetailRow icon={Clock} label={t("common.time")} value={time} />
                 <DetailRow
                   icon={Check}
-                  label={tr("الحالة", "Status")}
-                  value={statusLabelAr(appointment.status, tr)}
+                  label={t("doctor.appointmentsTab.fields.status")}
+                  value={statusLabelAr(appointment.status, t)}
                 />
                 {appointment.appointmentTypeNameSnapshot && (
                   <DetailRow
                     icon={Hospital}
-                    label={tr("نوع الموعد", "Appointment type")}
+                    label={t("doctor.encounterCard.fields.appointmentType")}
                     value={appointment.appointmentTypeNameSnapshot}
                   />
                 )}
@@ -235,18 +237,21 @@ export default function DoctorAppointmentExpandableCard({
                   appointment.priceVisibleToPatientSnapshot && (
                     <DetailRow
                       icon={AlertTriangle}
-                      label={tr("السعر", "Price")}
-                      value={tr(`${appointment.priceSnapshot} ريال`, `${appointment.priceSnapshot} SAR`)}
+                      label={t("doctor.appointmentCard.price")}
+                      value={t("doctor.appointmentCard.priceSar").replace(
+                        "{price}",
+                        String(appointment.priceSnapshot),
+                      )}
                     />
                   )}
-                <DetailRow icon={MapPin} label={tr("الموقع", "Location")} value={location} />
-                <DetailRow icon={Hospital} label={tr("سبب الزيارة", "Reason for visit")} value={reason} />
+                <DetailRow icon={MapPin} label={t("doctor.appointmentCard.location")} value={location} />
+                <DetailRow icon={Hospital} label={t("doctor.appointmentCard.reasonForVisit")} value={reason} />
               </div>
 
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
-                    {tr("ملفات الموعد:", "Appointment files:")}
+                    {t("doctor.appointmentCard.appointmentFiles")}
                   </div>
                   <button
                     type="button"
@@ -255,16 +260,16 @@ export default function DoctorAppointmentExpandableCard({
                     className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 font-cairo text-[12px] font-bold text-white transition-colors hover:bg-[#0d7a77] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Upload className="h-3.5 w-3.5" />
-                    {tr("رفع ملف", "Upload file")}
+                    {t("common.uploadFile")}
                   </button>
                 </div>
                 {detailsLoading ? (
                   <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                    {tr("جارٍ تحميل تفاصيل الموعد...", "Loading appointment details...")}
+                    {t("doctor.appointmentCard.loadingDetails")}
                   </p>
                 ) : files.length === 0 ? (
                   <p className="rounded-lg border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-                    {tr("لا توجد ملفات مرفقة لهذا الموعد", "No files are attached to this appointment")}
+                    {t("doctor.appointmentCard.noFilesAttached")}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -292,7 +297,7 @@ export default function DoctorAppointmentExpandableCard({
                               className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <Eye className="h-3.5 w-3.5" />
-                              {tr("عرض", "View")}
+                              {t("common.view")}
                             </button>
                             <button
                               type="button"
@@ -301,7 +306,7 @@ export default function DoctorAppointmentExpandableCard({
                               className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <Download className="h-3.5 w-3.5" />
-                              {tr("تحميل", "Download")}
+                              {t("common.download")}
                             </button>
                             <button
                               type="button"
@@ -310,7 +315,7 @@ export default function DoctorAppointmentExpandableCard({
                               className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#F04438] bg-white px-3 font-cairo text-[12px] font-bold text-[#D92D20] transition-colors hover:bg-[#FEF3F2] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
-                              {tr("فك الربط", "Unlink")}
+                              {t("common.unlink")}
                             </button>
                           </div>
                         </div>
@@ -329,7 +334,7 @@ export default function DoctorAppointmentExpandableCard({
                     className="inline-flex h-11 min-w-[100px] flex-1 items-center justify-center gap-2 rounded-lg border-2 border-[#F04438] bg-white font-cairo text-[14px] font-extrabold text-[#D92D20] transition-colors hover:bg-[#FEF3F2] disabled:opacity-50 sm:flex-initial sm:px-6"
                   >
                     <X className="h-4 w-4" />
-                    {tr("إلغاء", "Cancel")}
+                    {t("common.cancel")}
                   </button>
                   <button
                     type="button"
@@ -337,13 +342,13 @@ export default function DoctorAppointmentExpandableCard({
                     disabled={noShowing || noShowBlockedForFuture}
                     title={
                       noShowBlockedForFuture
-                        ? tr("لا يمكن تسجيل عدم حضور لموعد مستقبلي.", "A future appointment cannot be marked as no-show.")
+                        ? t("doctor.appointmentCard.noShowBlocked")
                         : undefined
                     }
                     className="inline-flex h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg border border-[#F59E0B] bg-[#FFF7ED] font-cairo text-[14px] font-extrabold text-[#B45309] transition-colors hover:bg-[#FFEDD5] disabled:opacity-50 sm:flex-initial sm:px-6"
                   >
                     <AlertTriangle className="h-4 w-4" />
-                    {tr("عدم حضور", "No-show")}
+                    {t("doctor.appointmentCard.noShow")}
                   </button>
                   <button
                     type="button"
@@ -352,7 +357,7 @@ export default function DoctorAppointmentExpandableCard({
                     className="inline-flex h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition-colors hover:bg-[#0d7a77] disabled:opacity-50 sm:flex-initial sm:px-6"
                   >
                     <Pencil className="h-4 w-4" />
-                    {tr("إعادة جدولة", "Reschedule")}
+                    {t("doctor.appointmentCard.rescheduleAction")}
                   </button>
                   <button
                     type="button"
@@ -361,7 +366,7 @@ export default function DoctorAppointmentExpandableCard({
                     className="inline-flex h-11 min-w-[100px] flex-1 items-center justify-center gap-2 rounded-lg bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.22)] transition-colors hover:bg-[#0d7a77] disabled:opacity-50 sm:flex-initial sm:px-6"
                   >
                     <Check className="h-4 w-4" />
-                    {tr("إكمال", "Complete")}
+                    {t("doctor.appointmentCard.complete")}
                   </button>
                 </div>
               ) : null}
