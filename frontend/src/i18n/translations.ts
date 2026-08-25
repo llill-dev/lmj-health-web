@@ -481,6 +481,54 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "يتيح لك هذا القسم متابعة الحالة المرضية ضمن سياق الملف الحالي، ثم الانتقال مباشرة إلى الزيارات أو الوصفات أو الطلبات لمراجعة التفاصيل التشغيلية.",
     "doctor.timelineTab.activityCount": "{n} نشاط",
     "doctor.timelineTab.noFilterMatch": "لا توجد نشاطات تطابق الفلتر المحدد",
+    "doctor.addAccessRequestForm.errors.selectPatient": "اختر المريض",
+    "doctor.addAccessRequestForm.errors.selectDataType": "اختر نوع بيانات واحد على الأقل",
+    "doctor.addAccessRequestForm.errors.reasonRequired": "سبب الطلب مطلوب",
+    "doctor.addAccessRequestForm.dataType.medications.label": "الأدوية",
+    "doctor.addAccessRequestForm.dataType.medications.subtitle":
+      "الأدوية النشطة والتاريخ الدوائي",
+    "doctor.addAccessRequestForm.dataType.labResults.label": "نتائج المختبر",
+    "doctor.addAccessRequestForm.dataType.labResults.subtitle":
+      "التحاليل والفحوصات المخبرية",
+    "doctor.addAccessRequestForm.dataType.imaging.label": "الأشعة والتصوير",
+    "doctor.addAccessRequestForm.dataType.imaging.subtitle":
+      "نتائج التصوير الطبي والأشعة",
+    "doctor.addAccessRequestForm.dataType.diagnoses.label": "التشخيصات",
+    "doctor.addAccessRequestForm.dataType.diagnoses.subtitle":
+      "التشخيصات الطبية السابقة",
+    "doctor.addAccessRequestForm.dataType.prescriptions.label": "الوصفات الطبية",
+    "doctor.addAccessRequestForm.dataType.prescriptions.subtitle":
+      "الوصفات الطبية المسجلة",
+    "doctor.addAccessRequestForm.dataType.encounters.label": "الزيارات الطبية",
+    "doctor.addAccessRequestForm.dataType.encounters.subtitle":
+      "سجل الزيارات والمواعيد",
+    "doctor.addAccessRequestForm.dataType.files.label": "الملفات والمرفقات",
+    "doctor.addAccessRequestForm.dataType.files.subtitle":
+      "المستندات والملفات الطبية",
+    "doctor.addAccessRequestForm.title": "طلب وصول جديد",
+    "doctor.addAccessRequestForm.selectPatientLabel": "اختر المريض",
+    "doctor.addAccessRequestForm.selectPatientPlaceholder": "اختر المريض...",
+    "doctor.addAccessRequestForm.noPatientsInList": "لا يوجد مرضى في القائمة",
+    "doctor.addAccessRequestForm.noPatientsAvailable": "لا يوجد مرضى متاحين للاختيار.",
+    "doctor.addAccessRequestForm.selectPatientAria": "اختيار المريض",
+    "doctor.addAccessRequestForm.patientGeneralInfo": "معلومات المريض الطبية العامة",
+    "doctor.addAccessRequestForm.medicalRecord": "سجل طبي",
+    "doctor.addAccessRequestForm.medication": "دواء",
+    "doctor.addAccessRequestForm.diagnosis": "تشخيص",
+    "doctor.addAccessRequestForm.requestedDataScope": "نطاق البيانات المطلوبة",
+    "doctor.addAccessRequestForm.selectAtLeastOne": "اختر نوع بيانات واحد أو أكثر",
+    "doctor.addAccessRequestForm.typesSelected": "تم اختيار {selected} من {total} أنواع",
+    "doctor.addAccessRequestForm.expirationDate": "تاريخ انتهاء الصلاحية",
+    "doctor.addAccessRequestForm.expirationDatePlaceholder": "اختر تاريخ انتهاء الصلاحية...",
+    "doctor.addAccessRequestForm.expirationNote":
+      "إذا لم تحدد تاريخاً، سيكون الوصول دائماً (حتى يتم إلغاؤه)",
+    "doctor.addAccessRequestForm.reasonLabel": "سبب الطلب",
+    "doctor.addAccessRequestForm.reasonPlaceholder":
+      "اشرح سبب طلب الوصول للبيانات الطبية...",
+    "doctor.addAccessRequestForm.note": "ملاحظة",
+    "doctor.addAccessRequestForm.noteBody":
+      "سيتم إرسال الطلب إلى المريض للموافقة، وعند الموافقة يمكنك الوصول إلى بياناته.",
+    "doctor.addAccessRequestForm.sendRequest": "إرسال الطلب",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -2420,6 +2468,65 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.timelineTab.activityCount": "{n} activities",
     "doctor.timelineTab.noFilterMatch":
       "No activities match the selected filter",
+    "doctor.addAccessRequestForm.errors.selectPatient": "Select the patient",
+    "doctor.addAccessRequestForm.errors.selectDataType":
+      "Select at least one data type",
+    "doctor.addAccessRequestForm.errors.reasonRequired":
+      "A reason for the request is required",
+    "doctor.addAccessRequestForm.dataType.medications.label": "Medications",
+    "doctor.addAccessRequestForm.dataType.medications.subtitle":
+      "Active medications and medication history",
+    "doctor.addAccessRequestForm.dataType.labResults.label": "Lab results",
+    "doctor.addAccessRequestForm.dataType.labResults.subtitle":
+      "Lab tests and analyses",
+    "doctor.addAccessRequestForm.dataType.imaging.label": "Imaging",
+    "doctor.addAccessRequestForm.dataType.imaging.subtitle":
+      "Medical imaging and radiology results",
+    "doctor.addAccessRequestForm.dataType.diagnoses.label": "Diagnoses",
+    "doctor.addAccessRequestForm.dataType.diagnoses.subtitle":
+      "Previous medical diagnoses",
+    "doctor.addAccessRequestForm.dataType.prescriptions.label":
+      "Prescriptions",
+    "doctor.addAccessRequestForm.dataType.prescriptions.subtitle":
+      "Recorded prescriptions",
+    "doctor.addAccessRequestForm.dataType.encounters.label":
+      "Medical encounters",
+    "doctor.addAccessRequestForm.dataType.encounters.subtitle":
+      "Encounter and appointment history",
+    "doctor.addAccessRequestForm.dataType.files.label":
+      "Files and attachments",
+    "doctor.addAccessRequestForm.dataType.files.subtitle":
+      "Medical documents and files",
+    "doctor.addAccessRequestForm.title": "New access request",
+    "doctor.addAccessRequestForm.selectPatientLabel": "Select patient",
+    "doctor.addAccessRequestForm.selectPatientPlaceholder":
+      "Select patient...",
+    "doctor.addAccessRequestForm.noPatientsInList": "No patients in the list",
+    "doctor.addAccessRequestForm.noPatientsAvailable":
+      "No patients are available to select.",
+    "doctor.addAccessRequestForm.selectPatientAria": "Select patient",
+    "doctor.addAccessRequestForm.patientGeneralInfo":
+      "Patient's general medical information",
+    "doctor.addAccessRequestForm.medicalRecord": "Medical record",
+    "doctor.addAccessRequestForm.medication": "Medication",
+    "doctor.addAccessRequestForm.diagnosis": "Diagnosis",
+    "doctor.addAccessRequestForm.requestedDataScope": "Requested data scope",
+    "doctor.addAccessRequestForm.selectAtLeastOne":
+      "Select one or more data types",
+    "doctor.addAccessRequestForm.typesSelected":
+      "{selected} of {total} types selected",
+    "doctor.addAccessRequestForm.expirationDate": "Expiration date",
+    "doctor.addAccessRequestForm.expirationDatePlaceholder":
+      "Select an expiration date...",
+    "doctor.addAccessRequestForm.expirationNote":
+      "If you do not set a date, access will be permanent (until revoked)",
+    "doctor.addAccessRequestForm.reasonLabel": "Reason for the request",
+    "doctor.addAccessRequestForm.reasonPlaceholder":
+      "Explain the reason for requesting access to the medical data...",
+    "doctor.addAccessRequestForm.note": "Note",
+    "doctor.addAccessRequestForm.noteBody":
+      "The request will be sent to the patient for approval, and once approved you can access their data.",
+    "doctor.addAccessRequestForm.sendRequest": "Send request",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",
