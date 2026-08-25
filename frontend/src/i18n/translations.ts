@@ -548,6 +548,24 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.profileConfirmDialog.changePhoto.description":
       "هل تريد استبدال صورتك الشخصية بالصورة المختارة؟",
     "doctor.profileConfirmDialog.changePhoto.confirmLabel": "تغيير الصورة",
+    "doctor.encounterSummaryFinishDialog.statusOpen": "مفتوحة",
+    "doctor.encounterSummaryFinishDialog.statusClosed": "مغلقة",
+    "doctor.encounterSummaryFinishDialog.description":
+      "راجعت ملخص الزيارة. بالتأكيد ستُنهى المراجعة وتعود إلى قائمة الزيارات الطبية.",
+    "doctor.encounterSummaryFinishDialog.visitDataTitle": "بيانات الزيارة",
+    "doctor.encounterSummaryFinishDialog.patient": "المريض",
+    "doctor.encounterSummaryFinishDialog.visitStatus": "حالة الزيارة",
+    "doctor.encounterSummaryFinishDialog.closedAt": "تاريخ الإغلاق",
+    "doctor.encounterSummaryFinishDialog.clinicalDocSummary": "ملخص التوثيق السريري",
+    "doctor.encounterSummaryFinishDialog.labs": "التحاليل",
+    "doctor.encounterSummaryFinishDialog.radiology": "الأشعة",
+    "doctor.encounterSummaryFinishDialog.referrals": "التحويلات",
+    "doctor.encounterSummaryFinishDialog.openWarning":
+      "تنبيه: الزيارة ما زالت مفتوحة. يُفضَّل إغلاقها من مساحة العمل قبل اعتماد الملخص النهائي.",
+    "doctor.encounterSummaryFinishDialog.emptyNotice":
+      "الملخص لا يحتوي على وصفات أو طلبات مسجّلة بعد. يمكنك العودة لاحقاً لإكمال التوثيق.",
+    "doctor.encounterSummaryFinishDialog.title": "إنهاء وحفظ الزيارة الطبية",
+    "doctor.encounterSummaryFinishDialog.confirmLabel": "تأكيد الإنهاء والحفظ",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -2565,6 +2583,25 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.profileConfirmDialog.changePhoto.description":
       "Do you want to replace your profile photo with the selected one?",
     "doctor.profileConfirmDialog.changePhoto.confirmLabel": "Change photo",
+    "doctor.encounterSummaryFinishDialog.statusOpen": "Open",
+    "doctor.encounterSummaryFinishDialog.statusClosed": "Closed",
+    "doctor.encounterSummaryFinishDialog.description":
+      "You have reviewed the encounter summary. Confirming will finish the review and return you to the medical encounters list.",
+    "doctor.encounterSummaryFinishDialog.visitDataTitle": "Encounter data",
+    "doctor.encounterSummaryFinishDialog.patient": "Patient",
+    "doctor.encounterSummaryFinishDialog.visitStatus": "Encounter status",
+    "doctor.encounterSummaryFinishDialog.closedAt": "Closed at",
+    "doctor.encounterSummaryFinishDialog.clinicalDocSummary":
+      "Clinical documentation summary",
+    "doctor.encounterSummaryFinishDialog.labs": "Labs",
+    "doctor.encounterSummaryFinishDialog.radiology": "Radiology",
+    "doctor.encounterSummaryFinishDialog.referrals": "Referrals",
+    "doctor.encounterSummaryFinishDialog.openWarning":
+      "Notice: the encounter is still open. It's best to close it from the workspace before finalizing the summary.",
+    "doctor.encounterSummaryFinishDialog.emptyNotice":
+      "The summary does not contain any prescriptions or orders yet. You can come back later to complete the documentation.",
+    "doctor.encounterSummaryFinishDialog.title": "Finish and save the medical encounter",
+    "doctor.encounterSummaryFinishDialog.confirmLabel": "Confirm finish and save",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",
