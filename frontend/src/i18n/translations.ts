@@ -453,6 +453,34 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "انتهت صلاحية الجلسة. سجّل الدخول من جديد.",
     "doctor.dashboardPatientsSection.noPermissionError":
       "لا تملك صلاحية عرض مرضى الطبيب.",
+    "doctor.timelineTab.medicalEncounter": "زيارة طبية",
+    "doctor.timelineTab.clinicalEncounter": "زيارة سريرية",
+    "doctor.timelineTab.newFile": "ملف جديد",
+    "doctor.timelineTab.medicalOrder": "طلب طبي",
+    "doctor.timelineTab.prescription": "وصفة طبية",
+    "doctor.timelineTab.medicationCount": "{n} دواء",
+    "doctor.timelineTab.emptyTitle": "لا توجد نشاطات مسجّلة بعد",
+    "doctor.timelineTab.emptySubtitle":
+      "سيظهر هنا التسلسل الزمني لجميع نشاطات المريض عند إضافتها",
+    "doctor.timelineTab.addMedicalRecord": "إضافة سجل طبي",
+    "doctor.timelineTab.conditionsSectionTitle": "الحالات المرضية المرتبطة بالملف",
+    "doctor.timelineTab.conditionsSectionBody":
+      "هذه الحالات تظهر ضمن الملف الطبي الحالي، ويمكنك متابعة نشاطها السريري عبر الزيارات والوصفات والطلبات.",
+    "doctor.timelineTab.chronicConditionNote":
+      "حالة مرضية مزمنة ظاهرة في بيانات المريض الأساسية.",
+    "doctor.timelineTab.lastEncounterTitle": "آخر زيارة مرتبطة بالملف",
+    "doctor.timelineTab.currentlyOpenEncounter": "زيارة مفتوحة حاليًا",
+    "doctor.timelineTab.lastClinicalEncounter": "آخر زيارة سريرية",
+    "doctor.timelineTab.noEncountersYet": "لا توجد زيارات بعد",
+    "doctor.timelineTab.lastPrescriptionTitle": "آخر وصفة مرتبطة بالملف",
+    "doctor.timelineTab.noPrescriptionsYet": "لا توجد وصفات بعد",
+    "doctor.timelineTab.lastOrderTitle": "آخر طلب مرتبط بالملف",
+    "doctor.timelineTab.noOrdersYet": "لا توجد طلبات بعد",
+    "doctor.timelineTab.quickLinkTitle": "الربط السريري السريع",
+    "doctor.timelineTab.quickLinkBody":
+      "يتيح لك هذا القسم متابعة الحالة المرضية ضمن سياق الملف الحالي، ثم الانتقال مباشرة إلى الزيارات أو الوصفات أو الطلبات لمراجعة التفاصيل التشغيلية.",
+    "doctor.timelineTab.activityCount": "{n} نشاط",
+    "doctor.timelineTab.noFilterMatch": "لا توجد نشاطات تطابق الفلتر المحدد",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -2360,6 +2388,38 @@ export const translations: Record<AppLocale, TranslationTree> = {
       "The session has expired. Please sign in again.",
     "doctor.dashboardPatientsSection.noPermissionError":
       "You do not have permission to view the doctor's patients.",
+    "doctor.timelineTab.medicalEncounter": "Medical encounter",
+    "doctor.timelineTab.clinicalEncounter": "Clinical encounter",
+    "doctor.timelineTab.newFile": "New file",
+    "doctor.timelineTab.medicalOrder": "Medical order",
+    "doctor.timelineTab.prescription": "Prescription",
+    "doctor.timelineTab.medicationCount": "{n} medication(s)",
+    "doctor.timelineTab.emptyTitle": "No activity recorded yet",
+    "doctor.timelineTab.emptySubtitle":
+      "The patient's activity timeline will appear here once added",
+    "doctor.timelineTab.addMedicalRecord": "Add medical record",
+    "doctor.timelineTab.conditionsSectionTitle":
+      "Medical conditions linked to this record",
+    "doctor.timelineTab.conditionsSectionBody":
+      "These conditions appear within the current medical record, and you can follow their clinical activity through encounters, prescriptions, and orders.",
+    "doctor.timelineTab.chronicConditionNote":
+      "A chronic condition shown in the patient's core data.",
+    "doctor.timelineTab.lastEncounterTitle":
+      "Last encounter linked to this record",
+    "doctor.timelineTab.currentlyOpenEncounter": "Currently open encounter",
+    "doctor.timelineTab.lastClinicalEncounter": "Last clinical encounter",
+    "doctor.timelineTab.noEncountersYet": "No encounters yet",
+    "doctor.timelineTab.lastPrescriptionTitle":
+      "Last prescription linked to this record",
+    "doctor.timelineTab.noPrescriptionsYet": "No prescriptions yet",
+    "doctor.timelineTab.lastOrderTitle": "Last order linked to this record",
+    "doctor.timelineTab.noOrdersYet": "No orders yet",
+    "doctor.timelineTab.quickLinkTitle": "Quick clinical link",
+    "doctor.timelineTab.quickLinkBody":
+      "This section lets you follow the condition within the current record's context, then jump directly to encounters, prescriptions, or orders to review operational details.",
+    "doctor.timelineTab.activityCount": "{n} activities",
+    "doctor.timelineTab.noFilterMatch":
+      "No activities match the selected filter",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",
