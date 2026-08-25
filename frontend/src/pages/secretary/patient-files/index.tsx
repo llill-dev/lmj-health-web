@@ -24,12 +24,12 @@ function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): s
   return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
-function patientInitials(name: string): string {
+function patientInitials(name: string, locale: "ar" | "en" = "ar"): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
-  return name.slice(0, 2).toUpperCase() || "م";
+  return name.slice(0, 2).toUpperCase() || (locale === "ar" ? "م" : "P");
 }
 
 function SurfaceSection({
@@ -43,6 +43,8 @@ function SurfaceSection({
   count?: number;
   searchMatch?: boolean;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <header className="border-b border-[#EDF2F7] px-4 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
@@ -51,8 +53,8 @@ function SurfaceSection({
         </h2>
         {count !== undefined && (
           <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-            {count} ملف
-            {searchMatch ? " مطابق للبحث" : ""}
+            {tr(`${count} ملف`, `${count} files`)}
+            {searchMatch ? tr(" مطابق للبحث", " matching the search") : ""}
           </p>
         )}
       </header>
@@ -68,13 +70,15 @@ function FilesSearchInput({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="relative min-w-0">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="ابحث بالاسم، نوع الملف، أو التاريخ…"
-        aria-label="بحث عن ملف"
+        placeholder={tr("ابحث بالاسم، نوع الملف، أو التاريخ…", "Search by name, file type, or date…")}
+        aria-label={tr("بحث عن ملف", "Search for a file")}
         className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
       <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
@@ -103,7 +107,7 @@ const PatientFileRow = memo<{
       <div className="flex items-center gap-4 lg:col-span-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
           <span className="font-cairo text-[20px] font-black">
-            {patientInitials(file.patientName)}
+            {patientInitials(file.patientName, locale)}
           </span>
         </div>
         <div className="min-w-0 text-start">

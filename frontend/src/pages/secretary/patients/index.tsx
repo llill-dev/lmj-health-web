@@ -15,12 +15,12 @@ function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): s
   return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
-function patientInitials(name: string): string {
+function patientInitials(name: string, locale: "ar" | "en" = "ar"): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
-  return name.slice(0, 2).toUpperCase() || "م";
+  return name.slice(0, 2).toUpperCase() || (locale === "ar" ? "م" : "P");
 }
 
 function accountStatusPresentation(
@@ -124,7 +124,7 @@ const PatientTableRow = memo<{
         <div className="flex gap-4 items-center lg:col-span-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
             <span className="font-cairo text-[20px] font-black">
-              {patientInitials(patient.name)}
+              {patientInitials(patient.name, locale)}
             </span>
           </div>
           <div className="min-w-0 text-start">
@@ -209,12 +209,16 @@ const PatientTableRow = memo<{
   );
 });
 
-const ACCOUNT_STATUS_OPTIONS: Array<{ value: DoctorPatientAccountStatus; label: string }> = [
-  { value: "all", label: "الكل" },
-  { value: "active", label: "نشط" },
-  { value: "temporary", label: "مؤقت" },
-  { value: "suspended", label: "معلّق" },
-];
+function buildAccountStatusOptions(
+  tr: (ar: string, en: string) => string,
+): Array<{ value: DoctorPatientAccountStatus; label: string }> {
+  return [
+    { value: "all", label: tr("الكل", "All") },
+    { value: "active", label: tr("نشط", "Active") },
+    { value: "temporary", label: tr("مؤقت", "Temporary") },
+    { value: "suspended", label: tr("معلّق", "Suspended") },
+  ];
+}
 
 export default function SecretaryPatientsPage() {
   const { locale, dir } = useI18n();
@@ -318,19 +322,7 @@ export default function SecretaryPatientsPage() {
                 setAccountStatus(value as DoctorPatientAccountStatus);
                 resetToFirstPage();
               }}
-              options={ACCOUNT_STATUS_OPTIONS.map((option) => ({
-                value: option.value,
-                label: tr(
-                  option.label,
-                  option.value === "all"
-                    ? "All"
-                    : option.value === "active"
-                      ? "Active"
-                      : option.value === "temporary"
-                        ? "Temporary"
-                        : "Suspended",
-                ),
-              }))}
+              options={buildAccountStatusOptions(tr)}
               listboxAriaLabel={tr("حالة الحساب", "Account status")}
             />
           </div>

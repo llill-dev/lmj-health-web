@@ -23,12 +23,12 @@ function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): s
   return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
-function patientInitials(name: string): string {
+function patientInitials(name: string, locale: "ar" | "en" = "ar"): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
-  return name.slice(0, 2).toUpperCase() || "م";
+  return name.slice(0, 2).toUpperCase() || (locale === "ar" ? "م" : "P");
 }
 
 function appointmentStatusPresentation(
@@ -158,7 +158,7 @@ const AppointmentTableRow = memo<{
         <div className="flex items-center gap-4 lg:col-span-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
             <span className="font-cairo text-[20px] font-black">
-              {patientInitials(appointment.patientName)}
+              {patientInitials(appointment.patientName, locale)}
             </span>
           </div>
           <div className="min-w-0 text-start">
