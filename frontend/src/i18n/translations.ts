@@ -369,6 +369,38 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.overviewTab.noAllergies": "لا توجد حساسية مسجلة",
     "doctor.overviewTab.chronicConditions": "الأمراض المزمنة",
     "doctor.overviewTab.noChronicConditions": "لا توجد حالات مزمنة مسجلة",
+    "doctor.professionalProfileForm.title": "تعديل المعلومات المهنية",
+    "doctor.professionalProfileForm.approvalBanner":
+      "التعديلات على المعلومات المهنية تتطلب موافقة الإدارة قبل تطبيقها",
+    "doctor.professionalProfileForm.reviewNote":
+      "ملاحظة مهمة: سيتم مراجعة التغييرات من قبل فريق الإدارة خلال 24–48 ساعة. سيتم إشعارك بنتيجة المراجعة.",
+    "doctor.professionalProfileForm.fields.licenseNumber.label": "رقم الشهادة الطبية",
+    "doctor.professionalProfileForm.fields.specialization.label": "التخصص",
+    "doctor.professionalProfileForm.fields.specialization.placeholder": "طب القلب",
+    "doctor.professionalProfileForm.fields.education.label": "التعليم",
+    "doctor.professionalProfileForm.fields.education.placeholder":
+      "مثال: بكالوريوس طب وجراحة — جامعة الملك سعود",
+    "doctor.professionalProfileForm.fields.clinicAddress.label": "عنوان العيادة",
+    "doctor.professionalProfileForm.fields.clinicAddress.placeholder":
+      "أدخل عنوان العيادة بالكامل",
+    "doctor.professionalProfileForm.clinicLocation.title": "موقع العيادة",
+    "doctor.professionalProfileForm.fields.country.label": "البلد",
+    "doctor.professionalProfileForm.fields.country.placeholder": "سوريا",
+    "doctor.professionalProfileForm.fields.city.placeholder": "الرياض",
+    "doctor.professionalProfileForm.coordinates.title": "إحداثيات العيادة",
+    "doctor.professionalProfileForm.coordinates.hint":
+      "اختياري — يمكن الحصول على الإحداثيات من خرائط جوجل",
+    "doctor.professionalProfileForm.fields.latitude.label": "خط العرض",
+    "doctor.professionalProfileForm.fields.longitude.label": "خط الطول",
+    "doctor.professionalProfileForm.coordinates.howToTitle": "كيفية الحصول على الإحداثيات:",
+    "doctor.professionalProfileForm.coordinates.step1": "افتح خرائط Google على جهازك",
+    "doctor.professionalProfileForm.coordinates.step2": "ابحث عن موقع العيادة أو انقر عليه",
+    "doctor.professionalProfileForm.coordinates.step3":
+      "اضغط مطولاً على الموقع لإظهار الإحداثيات",
+    "doctor.professionalProfileForm.coordinates.step4":
+      "انسخ خط العرض (Latitude) وخط الطول (Longitude)",
+    "doctor.professionalProfileForm.coordinates.step5": "الصق القيم في الحقول أعلاه",
+    "doctor.professionalProfileForm.submitForReview": "إرسال للمراجعة",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -2179,6 +2211,46 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.overviewTab.noAllergies": "No allergies recorded",
     "doctor.overviewTab.chronicConditions": "Chronic conditions",
     "doctor.overviewTab.noChronicConditions": "No chronic conditions recorded",
+    "doctor.professionalProfileForm.title": "Edit professional information",
+    "doctor.professionalProfileForm.approvalBanner":
+      "Changes to professional information require admin approval before they take effect",
+    "doctor.professionalProfileForm.reviewNote":
+      "Important note: changes will be reviewed by the admin team within 24–48 hours. You will be notified of the review outcome.",
+    "doctor.professionalProfileForm.fields.licenseNumber.label":
+      "Medical license number",
+    "doctor.professionalProfileForm.fields.specialization.label":
+      "Specialization",
+    "doctor.professionalProfileForm.fields.specialization.placeholder":
+      "Cardiology",
+    "doctor.professionalProfileForm.fields.education.label": "Education",
+    "doctor.professionalProfileForm.fields.education.placeholder":
+      "e.g. Bachelor of Medicine and Surgery — King Saud University",
+    "doctor.professionalProfileForm.fields.clinicAddress.label":
+      "Clinic address",
+    "doctor.professionalProfileForm.fields.clinicAddress.placeholder":
+      "Enter the full clinic address",
+    "doctor.professionalProfileForm.clinicLocation.title": "Clinic location",
+    "doctor.professionalProfileForm.fields.country.label": "Country",
+    "doctor.professionalProfileForm.fields.country.placeholder": "Syria",
+    "doctor.professionalProfileForm.fields.city.placeholder": "Riyadh",
+    "doctor.professionalProfileForm.coordinates.title": "Clinic coordinates",
+    "doctor.professionalProfileForm.coordinates.hint":
+      "Optional — coordinates can be obtained from Google Maps",
+    "doctor.professionalProfileForm.fields.latitude.label": "Latitude",
+    "doctor.professionalProfileForm.fields.longitude.label": "Longitude",
+    "doctor.professionalProfileForm.coordinates.howToTitle":
+      "How to get the coordinates:",
+    "doctor.professionalProfileForm.coordinates.step1":
+      "Open Google Maps on your device",
+    "doctor.professionalProfileForm.coordinates.step2":
+      "Search for the clinic location or tap it",
+    "doctor.professionalProfileForm.coordinates.step3":
+      "Press and hold the location to reveal the coordinates",
+    "doctor.professionalProfileForm.coordinates.step4":
+      "Copy the latitude and longitude",
+    "doctor.professionalProfileForm.coordinates.step5":
+      "Paste the values into the fields above",
+    "doctor.professionalProfileForm.submitForReview": "Submit for review",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",
