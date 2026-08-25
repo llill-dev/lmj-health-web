@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface Patient {
   id: string;
@@ -17,6 +18,8 @@ export default function PatientsTable({
   patients,
   onViewPatient,
 }: PatientsTableProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const getInitials = (name: string) => {
     return name.charAt(0);
   };
@@ -28,19 +31,19 @@ export default function PatientsTable({
           <thead>
             <tr className="border-b border-[#e2e8f0] bg-gray-50">
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                الاسم
+                {tr("الاسم", "Name")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                رقم الهاتف
+                {tr("رقم الهاتف", "Phone number")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                البريد الإلكتروني
+                {tr("البريد الإلكتروني", "Email")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                تاريخ التسجيل
+                {tr("تاريخ التسجيل", "Registration date")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                الإجراءات
+                {tr("الإجراءات", "Actions")}
               </th>
             </tr>
           </thead>
@@ -85,7 +88,7 @@ export default function PatientsTable({
                     onClick={() => onViewPatient?.(patient)}
                     className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90"
                   >
-                    عرض
+                    {tr("عرض", "View")}
                   </button>
                 </td>
               </tr>

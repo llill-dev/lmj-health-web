@@ -1,15 +1,18 @@
 import { ShieldCheck } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface PermissionsCardProps {
   permissions: string[];
 }
 
 export default function PermissionsCard({ permissions }: PermissionsCardProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
       <h3 className="font-cairo text-lg font-bold text-[#0f172a] mb-4 flex items-center gap-2">
         <ShieldCheck className="h-5 w-5 text-primary" />
-        الصلاحيات
+        {tr("الصلاحيات", "Permissions")}
       </h3>
       <div className="space-y-2">
         {permissions.map((permission, index) => (
