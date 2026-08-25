@@ -48,12 +48,11 @@ export default function DoctorPatientsFiltersSection({
   onFromChange,
   onToChange,
 }: DoctorPatientsFiltersSectionProps) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   return (
     <section
       className="my-5 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_50px_rgba(15,143,139,0.08),0_2px_8px_rgba(0,0,0,0.04)]"
-      aria-label={tr("تصفية قائمة المرضى", "Filter patients list")}
+      aria-label={t("doctor.patientsFiltersSection.title")}
     >
       <div className="border-b border-[#EEF2F6] bg-gradient-to-l from-primary/[0.07] via-[#F8FAFC] to-white px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -66,7 +65,7 @@ export default function DoctorPatientsFiltersSection({
             </div>
             <div className="min-w-0 text-start">
               <h2 className="font-cairo text-[16px] font-black leading-tight text-[#111827] sm:text-[17px]">
-                {tr("تصفية قائمة المرضى", "Filter patients list")}
+                {t("doctor.patientsFiltersSection.title")}
               </h2>
             </div>
           </div>
@@ -82,7 +81,7 @@ export default function DoctorPatientsFiltersSection({
                   : "inline-flex h-[40px] min-w-[132px] items-center justify-center rounded-xl border border-primary/30 bg-white px-4 font-cairo text-[12px] font-extrabold text-primary shadow-[0_1px_2px_rgba(15,143,139,0.12)] transition-all hover:bg-primary/[0.06] hover:shadow-[0_4px_14px_rgba(15,143,139,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               }
             >
-              {tr("مسح الفلاتر", "Clear filters")}
+              {t("doctor.patientsFiltersSection.clearFilters")}
             </button>
 
             <output
@@ -92,7 +91,7 @@ export default function DoctorPatientsFiltersSection({
               <span className="text-primary">
                 {patientsListFailed ? "—" : total || 0}
               </span>
-              <span className="font-extrabold text-[#667085]">{tr("نتيجة", "results")}</span>
+              <span className="font-extrabold text-[#667085]">{t("doctor.patientsFiltersSection.results")}</span>
             </output>
           </div>
         </div>
@@ -107,10 +106,10 @@ export default function DoctorPatientsFiltersSection({
             >
               <span className="inline-flex items-center gap-1.5 font-cairo text-[12px] font-extrabold text-[#111827]">
                 <Users className="h-3.5 w-3.5 text-primary" aria-hidden />
-                {tr("البحث عن المريض", "Search for a patient")}
+                {t("doctor.patientsFiltersSection.searchLabel")}
               </span>
               <span className="hidden font-cairo text-[10px] font-bold uppercase tracking-wider text-[#98A2B3] sm:inline">
-                {tr("الاسم · البريد · الهاتف · الرقم العام", "Name · Email · Phone · Public ID")}
+                {t("doctor.patientsFiltersSection.searchHint")}
               </span>
             </label>
             <div className="relative group">
@@ -119,7 +118,7 @@ export default function DoctorPatientsFiltersSection({
                 type="search"
                 enterKeyHint="search"
                 autoComplete="off"
-                placeholder={tr("ابدأ بالكتابة: الاسم، البريد، الهاتف، أو الرقم العام...", "Start typing: name, email, phone, or public ID...")}
+                placeholder={t("doctor.patientsFiltersSection.searchPlaceholder")}
                 className="h-[48px] w-full rounded-xl border-2 border-[#E8ECF3] bg-gradient-to-b from-[#FBFCFD] to-white pe-12 ps-4 font-cairo text-[13px] font-bold text-[#111827] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] outline-none transition-[border-color,box-shadow,background] placeholder:text-[#98A2B3] hover:border-[#D0D8E6] focus:border-primary focus:bg-white focus:shadow-[0_0_0_4px_rgba(15,143,139,0.12),inset_0_1px_2px_rgba(0,0,0,0.02)]"
                 value={filters.search}
                 onChange={(e) => onSearchChange(e.target.value)}
@@ -137,12 +136,12 @@ export default function DoctorPatientsFiltersSection({
                 className="mb-2 flex items-center gap-1.5 font-cairo text-[11px] font-extrabold text-[#667085]"
               >
                 <Stethoscope className="h-3.5 w-3.5 text-primary/80 shrink-0" aria-hidden />
-                {tr("التشخيص / الملاحظات", "Diagnosis / Notes")}
+                {t("doctor.patientsFiltersSection.diagnosisLabel")}
               </label>
               <input
                 id="doctor-patients-diagnosis"
                 type="text"
-                placeholder={tr("كلمة في التشخيص...", "A word in the diagnosis...")}
+                placeholder={t("doctor.patientsFiltersSection.diagnosisPlaceholder")}
                 value={filters.diagnosis}
                 onChange={(e) => onDiagnosisChange(e.target.value)}
                 className="h-[42px] w-full rounded-xl border border-[#E5E7EB] bg-white px-3.5 text-start font-cairo text-[12px] font-bold text-[#111827] shadow-sm outline-none transition-all placeholder:text-[#98A2B3] hover:border-[#D0D5DD] focus:border-primary/45 focus:ring-2 focus:ring-primary/12"
@@ -154,7 +153,7 @@ export default function DoctorPatientsFiltersSection({
                 htmlFor="doctor-patients-account-status"
                 className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
               >
-                {tr("حالة الحساب", "Account status")}
+                {t("doctor.patientsFiltersSection.accountStatusLabel")}
               </label>
               <StyledSelect
                 id="doctor-patients-account-status"
@@ -167,12 +166,12 @@ export default function DoctorPatientsFiltersSection({
                   )
                 }
                 options={[
-                  { value: "all", label: tr("جميع الحالات", "All statuses") },
-                  { value: "active", label: tr("نشط", "Active") },
-                  { value: "temporary", label: tr("مؤقت", "Temporary") },
-                  { value: "suspended", label: tr("معلق", "Suspended") },
+                  { value: "all", label: t("doctor.patientsFiltersSection.accountStatus.all") },
+                  { value: "active", label: t("common.active") },
+                  { value: "temporary", label: t("doctor.patientsFiltersSection.temporary") },
+                  { value: "suspended", label: t("doctor.patientsFiltersSection.accountStatus.suspended") },
                 ]}
-                listboxAriaLabel={tr("حالة الحساب", "Account status")}
+                listboxAriaLabel={t("doctor.patientsFiltersSection.accountStatusLabel")}
               />
             </div>
 
@@ -181,7 +180,7 @@ export default function DoctorPatientsFiltersSection({
                 htmlFor="doctor-patients-relationship"
                 className="mb-2 block font-cairo text-[11px] font-extrabold text-[#667085]"
               >
-                {tr("علاقة الوصول", "Access relationship")}
+                {t("doctor.patientsFiltersSection.relationshipLabel")}
               </label>
               <StyledSelect
                 id="doctor-patients-relationship"
@@ -195,19 +194,19 @@ export default function DoctorPatientsFiltersSection({
                 }
                 className="lg:min-w-0"
                 options={[
-                  { value: "all", label: tr("كل العلاقات", "All relationships") },
-                  { value: "full-access", label: tr("وصول كامل", "Full access") },
-                  { value: "linked-only", label: tr("مرتبط فقط", "Linked only") },
-                  { value: "temporary", label: tr("مؤقت", "Temporary") },
-                  { value: "access-pending", label: tr("قيد الانتظار", "Pending") },
-                  { value: "active-encounter", label: tr("زيارة جارية", "Active encounter") },
-                  { value: "restricted", label: tr("محجوب", "Restricted") },
+                  { value: "all", label: t("doctor.patientsFiltersSection.relationship.all") },
+                  { value: "full-access", label: t("doctor.patientsFiltersSection.relationship.fullAccess") },
+                  { value: "linked-only", label: t("doctor.patientsFiltersSection.relationship.linkedOnly") },
+                  { value: "temporary", label: t("doctor.patientsFiltersSection.temporary") },
+                  { value: "access-pending", label: t("doctor.patientsFiltersSection.relationship.pending") },
+                  { value: "active-encounter", label: t("doctor.patientsFiltersSection.relationship.activeEncounter") },
+                  { value: "restricted", label: t("doctor.patientsFiltersSection.relationship.restricted") },
                   {
                     value: "relationship-indeterminate",
-                    label: tr("لم تُعرَف بعد (وسّع البطاقة)", "Not determined yet (expand the card)"),
+                    label: t("doctor.patientsFiltersSection.relationship.indeterminate"),
                   },
                 ]}
-                listboxAriaLabel={tr("علاقة الوصول", "Access relationship")}
+                listboxAriaLabel={t("doctor.patientsFiltersSection.relationshipLabel")}
               />
             </div>
           </div>
@@ -217,13 +216,13 @@ export default function DoctorPatientsFiltersSection({
           <div className="flex flex-wrap gap-2 items-center mb-3 text-start">
             <Calendar className="w-4 h-4 text-primary shrink-0" aria-hidden />
             <span className="font-cairo text-[12px] font-extrabold text-[#344054]">
-              {tr("نطاق تاريخ آخر زيارة", "Last visit date range")}
+              {t("doctor.patientsFiltersSection.dateRangeLabel")}
             </span>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-5">
             <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
               <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                {tr("من تاريخ", "From date")}
+                {t("doctor.patientsFiltersSection.fromDate")}
               </span>
               <input
                 type="date"
@@ -240,7 +239,7 @@ export default function DoctorPatientsFiltersSection({
             </span>
             <div className="flex min-w-[200px] flex-1 flex-col gap-1.5 sm:max-w-xs">
               <span className="font-cairo text-[10px] font-extrabold uppercase tracking-wide text-[#667085]">
-                {tr("إلى تاريخ", "To date")}
+                {t("doctor.patientsFiltersSection.toDate")}
               </span>
               <input
                 type="date"
