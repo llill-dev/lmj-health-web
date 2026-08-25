@@ -19,6 +19,7 @@ import type {
 import { EncounterSummaryInnerCard } from './encounter-summary-inner-card';
 import { EncounterSummarySection } from './encounter-summary-section';
 import { ENCOUNTER_SUMMARY_HEADER_BG } from './encounter-summary-themes';
+import { useI18n } from '@/i18n/provider';
 
 const WHITE_SURFACE =
   'rounded-[10px] border-[0.5px] border-[#0F8F8B] bg-white px-4 py-3 font-cairo text-[14px] font-semibold leading-[24px] text-[#101828]';
@@ -42,9 +43,10 @@ function badgeClass(tone: EncounterSummaryDiagnosisBadge['tone']) {
 }
 
 function UrgentBadge() {
+  const { t } = useI18n();
   return (
     <span className="inline-flex rounded-full bg-[#E7000B] px-2.5 py-1 font-cairo text-[11px] font-extrabold text-[#FFFFFF]">
-      عاجل
+      {t('doctor.encounterSummaryBody.urgent')}
     </span>
   );
 }
@@ -71,6 +73,7 @@ export function EncounterSummaryBody({
 }: {
   summary: EncounterSummaryViewModel;
 }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(DEFAULT_EXPANDED);
 
   const sections = useMemo(
@@ -78,50 +81,50 @@ export function EncounterSummaryBody({
       [
         {
           key: 'patient' as const,
-          title: 'معلومات المريض',
+          title: t('doctor.encounterSummaryBody.patientInfo'),
           icon: UserRound,
         },
         {
           key: 'complaint' as const,
-          title: 'الشكوى الرئيسية',
+          title: t('doctor.encounterSummaryBody.chiefComplaint'),
           icon: Activity,
         },
         {
           key: 'history' as const,
-          title: 'القصة المرضية',
+          title: t('doctor.encounterSummaryBody.pastHistory'),
           icon: FileText,
         },
         {
           key: 'diagnosis' as const,
-          title: 'التقييم والتشخيص',
+          title: t('doctor.encounterSummaryBody.assessmentAndDiagnosis'),
           icon: Stethoscope,
         },
         {
           key: 'medications' as const,
-          title: `الأدوية`,
+          title: t('doctor.addAccessRequestForm.dataType.medications.label'),
           icon: Pill,
           count: summary.medications.length,
         },
         {
           key: 'labs' as const,
-          title: `التحاليل`,
+          title: t('doctor.encounterSummaryFinishDialog.labs'),
           icon: FlaskConical,
           count: summary.labs.length,
         },
         {
           key: 'radiology' as const,
-          title: `الأشعة`,
+          title: t('doctor.encounterSummaryFinishDialog.radiology'),
           icon: ScanLine,
           count: summary.radiology.length,
         },
         {
           key: 'referrals' as const,
-          title: 'التحويلات',
+          title: t('doctor.encounterSummaryFinishDialog.referrals'),
           icon: Users,
           count: summary.referrals.length,
         },
       ],
-    [summary],
+    [summary, t],
   );
 
   const toggle = (key: EncounterSummarySectionKey) => {
@@ -145,9 +148,9 @@ export function EncounterSummaryBody({
         >
           {section.key === 'patient' ? (
             <div className="space-y-2 text-start">
-              <DetailLine label="الاسم" value={summary.patient.name} />
-              <DetailLine label="العمر" value={summary.patient.ageLabel} />
-              <DetailLine label="رقم الملف" value={summary.patient.fileNumber} />
+              <DetailLine label={t('doctor.encounterCard.fields.name')} value={summary.patient.name} />
+              <DetailLine label={t('doctor.encounterCard.fields.age')} value={summary.patient.ageLabel} />
+              <DetailLine label={t('doctor.encounterCard.fields.fileNumber')} value={summary.patient.fileNumber} />
             </div>
           ) : null}
 
@@ -159,19 +162,19 @@ export function EncounterSummaryBody({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-2 text-start">
                 <div className="font-cairo text-[13px] font-extrabold text-primary">
-                  العرض الحالي
+                  {t('doctor.encounterSummaryBody.currentPresentation')}
                 </div>
                 <p className={WHITE_SURFACE}>{summary.history.currentIllness}</p>
               </div>
               <div className="space-y-2 text-start">
                 <div className="font-cairo text-[13px] font-extrabold text-primary">
-                  أمراض سابقة
+                  {t('doctor.encounterSummaryBody.pastIllnesses')}
                 </div>
                 <p className={WHITE_SURFACE}>{summary.history.pastIllnesses}</p>
               </div>
               <div className="space-y-2 text-start">
                 <div className="font-cairo text-[13px] font-extrabold text-primary">
-                  الأدوية
+                  {t('doctor.addAccessRequestForm.dataType.medications.label')}
                 </div>
                 <p className={WHITE_SURFACE}>{summary.history.medications}</p>
               </div>
@@ -180,7 +183,7 @@ export function EncounterSummaryBody({
 
           {section.key === 'diagnosis' ? (
             summary.diagnoses.length === 0 ? (
-              <SectionEmpty message="لا توجد تشخيصات مسجّلة لهذه الزيارة." />
+              <SectionEmpty message={t('doctor.encounterSummaryBody.noDiagnoses')} />
             ) : (
             <div className="space-y-3">
               {summary.diagnoses.map((item) => (
@@ -210,7 +213,7 @@ export function EncounterSummaryBody({
 
           {section.key === 'medications' ? (
             summary.medications.length === 0 ? (
-              <SectionEmpty message="لا توجد أدوية موثّقة في وصفات هذه الزيارة." />
+              <SectionEmpty message={t('doctor.encounterSummaryBody.noMedications')} />
             ) : (
             <div className="space-y-3">
               {summary.medications.map((med) => (
@@ -229,7 +232,7 @@ export function EncounterSummaryBody({
 
           {section.key === 'labs' ? (
             summary.labs.length === 0 ? (
-              <SectionEmpty message="لا توجد تحاليل مسجّلة لهذه الزيارة." />
+              <SectionEmpty message={t('doctor.encounterSummaryBody.noLabs')} />
             ) : (
             <div className="space-y-3">
               {summary.labs.map((item) => (
@@ -250,7 +253,7 @@ export function EncounterSummaryBody({
 
           {section.key === 'radiology' ? (
             summary.radiology.length === 0 ? (
-              <SectionEmpty message="لا توجد طلبات أشعة مسجّلة لهذه الزيارة." />
+              <SectionEmpty message={t('doctor.encounterSummaryBody.noRadiology')} />
             ) : (
             <div className="space-y-3">
               {summary.radiology.map((item) => (
@@ -271,7 +274,7 @@ export function EncounterSummaryBody({
 
           {section.key === 'referrals' ? (
             summary.referrals.length === 0 ? (
-              <SectionEmpty message="لا توجد تحويلات مسجّلة لهذه الزيارة." />
+              <SectionEmpty message={t('doctor.encounterSummaryBody.noReferrals')} />
             ) : (
             <div className="space-y-3">
               {summary.referrals.map((ref) => (
@@ -285,7 +288,7 @@ export function EncounterSummaryBody({
                       {ref.specialty}
                     </div>
                     <div className="mt-1 font-cairo text-[13px] font-semibold text-[#667085]">
-                      إلى {ref.doctorName}
+                      {t('doctor.encounterSummaryBody.referralTo').replace('{name}', ref.doctorName)}
                     </div>
                   </div>
                   {ref.urgent ? <UrgentBadge /> : null}
