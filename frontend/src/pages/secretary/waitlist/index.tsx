@@ -227,8 +227,8 @@ export default function SecretaryWaitlistPage() {
               <WaitlistTable
                 requests={list.requests}
                 busy={mutations.isBusy}
-                urgencyLabel={waitlistUrgencyLabel}
-                statusLabel={waitlistStatusLabel}
+                urgencyLabel={(urgency) => waitlistUrgencyLabel(urgency, tr)}
+                statusLabel={(status) => waitlistStatusLabel(status, tr)}
                 onNavigateAppointments={() => navigate("/secretary/appointments")}
                 onContacted={(request) => void handleContacted(request)}
                 onBook={handleBookClick}

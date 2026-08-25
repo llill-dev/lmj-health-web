@@ -1,32 +1,35 @@
 import type { WaitlistStatus, WaitlistUrgency } from '@/lib/doctor/waitlist/types';
 
-export function waitlistStatusLabel(status?: string): string {
+type TrFn = (ar: string, en: string) => string;
+const defaultTr: TrFn = (ar) => ar;
+
+export function waitlistStatusLabel(status?: string, tr: TrFn = defaultTr): string {
   switch (status) {
     case 'active':
-      return 'نشط';
+      return tr('نشط', 'Active');
     case 'contacted':
-      return 'تم التواصل';
+      return tr('تم التواصل', 'Contacted');
     case 'booked':
-      return 'محجوز';
+      return tr('محجوز', 'Booked');
     case 'closed':
-      return 'مغلق';
+      return tr('مغلق', 'Closed');
     case 'cancelled':
-      return 'ملغى';
+      return tr('ملغى', 'Cancelled');
     case 'expired':
-      return 'منتهي';
+      return tr('منتهي', 'Expired');
     default:
       return status?.trim() || '—';
   }
 }
 
-export function waitlistUrgencyLabel(urgency?: string): string {
+export function waitlistUrgencyLabel(urgency?: string, tr: TrFn = defaultTr): string {
   switch (urgency) {
     case 'high':
-      return 'عاجل';
+      return tr('عاجل', 'Urgent');
     case 'medium':
-      return 'متوسط';
+      return tr('متوسط', 'Medium');
     case 'low':
-      return 'منخفض';
+      return tr('منخفض', 'Low');
     default:
       return urgency?.trim() || '—';
   }
@@ -36,13 +39,14 @@ export function isWaitlistActionable(status?: string): boolean {
   return status === 'active' || status === 'contacted';
 }
 
-export const WAITLIST_STATUS_TABS: Array<{
-  value: 'all' | WaitlistStatus;
-  label: string;
-}> = [
-  { value: 'all', label: 'الكل' },
-  { value: 'active', label: 'نشط' },
-  { value: 'contacted', label: 'تم التواصل' },
-  { value: 'booked', label: 'محجوز' },
-  { value: 'closed', label: 'مغلق' },
-];
+export function buildWaitlistStatusTabs(
+  tr: TrFn = defaultTr,
+): Array<{ value: 'all' | WaitlistStatus; label: string }> {
+  return [
+    { value: 'all', label: tr('الكل', 'All') },
+    { value: 'active', label: tr('نشط', 'Active') },
+    { value: 'contacted', label: tr('تم التواصل', 'Contacted') },
+    { value: 'booked', label: tr('محجوز', 'Booked') },
+    { value: 'closed', label: tr('مغلق', 'Closed') },
+  ];
+}

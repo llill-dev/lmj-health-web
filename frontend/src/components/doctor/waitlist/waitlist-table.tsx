@@ -16,15 +16,18 @@ import {
   WaitlistStatusBadge,
   WaitlistUrgencyBadge,
 } from './waitlist-status-badge';
+import { useI18n } from '@/i18n/provider';
 
-const TABLE_COLUMNS = [
-  'الرقم العام',
-  'اسم المريض',
-  'الأولوية',
-  'الفترة المفضلة',
-  'الحالة',
-  'الإجراءات',
-] as const;
+function buildTableColumns(tr: (ar: string, en: string) => string): string[] {
+  return [
+    tr('الرقم العام', 'Public ID'),
+    tr('اسم المريض', 'Patient name'),
+    tr('الأولوية', 'Priority'),
+    tr('الفترة المفضلة', 'Preferred period'),
+    tr('الحالة', 'Status'),
+    tr('الإجراءات', 'Actions'),
+  ];
+}
 
 type ActionsMenuState = {
   requestId: string;
@@ -32,12 +35,13 @@ type ActionsMenuState = {
   left: number;
 };
 
-function formatPreferredRange(request: WaitlistRequest): string {
+function formatPreferredRange(request: WaitlistRequest, locale: string): string {
+  const localeTag = locale === 'ar' ? 'ar' : 'en';
   const from = request.preferredDateFrom
-    ? new Date(request.preferredDateFrom).toLocaleDateString('ar')
+    ? new Date(request.preferredDateFrom).toLocaleDateString(localeTag)
     : '—';
   const to = request.preferredDateTo
-    ? new Date(request.preferredDateTo).toLocaleDateString('ar')
+    ? new Date(request.preferredDateTo).toLocaleDateString(localeTag)
     : from;
   return from === to ? from : `${from} – ${to}`;
 }
@@ -63,6 +67,8 @@ export function WaitlistTable({
   onBook: (request: WaitlistRequest) => void;
   onClose: (request: WaitlistRequest) => void;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const [menu, setMenu] = useState<ActionsMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const highlightRef = useRef<HTMLTableRowElement | null>(null);
@@ -119,7 +125,7 @@ export function WaitlistTable({
 
   return (
     <>
-      <DoctorMintTableShell columns={[...TABLE_COLUMNS]} isEmpty={!requests.length}>
+      <DoctorMintTableShell columns={buildTableColumns(tr)} isEmpty={!requests.length}>
         {requests.map((request) => {
           const actionable = isWaitlistActionable(request.status);
           const appointmentId =
@@ -161,7 +167,7 @@ export function WaitlistTable({
                     className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]"
                     aria-hidden
                   />
-                  <span className="break-words">{formatPreferredRange(request)}</span>
+                  <span className="break-words">{formatPreferredRange(request, locale)}</span>
                 </div>
               </td>
               <td className={DOCTOR_MINT_TABLE_TD}>
@@ -184,7 +190,7 @@ export function WaitlistTable({
                       openActionsMenu(request, button);
                     }}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#667085] transition hover:border-primary/30 hover:text-primary disabled:opacity-60"
-                    aria-label="إجراءات الطلب"
+                    aria-label={tr('إجراءات الطلب', 'Request actions')}
                     aria-expanded={menu?.requestId === request._id}
                   >
                     <Menu className="h-4 w-4" aria-hidden />
@@ -196,7 +202,7 @@ export function WaitlistTable({
                     className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-primary/80"
                   >
                     <CalendarClock className="h-4 w-4 shrink-0" aria-hidden />
-                    <span>عرض الموعد</span>
+                    <span>{tr('عرض الموعد', 'View appointment')}</span>
                   </button>
                 ) : (
                   <span className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
@@ -227,7 +233,7 @@ export function WaitlistTable({
                   onBook(activeRequest);
                 }}
               >
-                حجز موعد
+                {tr('حجز موعد', 'Book appointment')}
               </button>
               <button
                 type="button"
@@ -241,7 +247,7 @@ export function WaitlistTable({
               >
                 <span className="inline-flex items-center justify-center gap-1.5">
                   <Phone className="h-3.5 w-3.5" aria-hidden />
-                  تم التواصل
+                  {tr('تم التواصل', 'Contacted')}
                 </span>
               </button>
               {typeof activeRequest.appointment === 'string' ||
@@ -255,7 +261,7 @@ export function WaitlistTable({
                     onNavigateAppointments();
                   }}
                 >
-                  عرض الموعد
+                  {tr('عرض الموعد', 'View appointment')}
                 </button>
               ) : null}
               <button
@@ -270,7 +276,7 @@ export function WaitlistTable({
               >
                 <span className="inline-flex items-center justify-center gap-1.5">
                   <XCircle className="h-3.5 w-3.5" aria-hidden />
-                  إغلاق الطلب
+                  {tr('إغلاق الطلب', 'Close request')}
                 </span>
               </button>
             </div>,

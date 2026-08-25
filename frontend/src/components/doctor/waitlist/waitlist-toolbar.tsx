@@ -1,6 +1,7 @@
 import { DoctorListToolbar } from '@/components/doctor/shared/doctor-list-toolbar';
-import { WAITLIST_STATUS_TABS } from '@/lib/doctor/waitlist/labels';
+import { buildWaitlistStatusTabs } from '@/lib/doctor/waitlist/labels';
 import type { WaitlistStatus } from '@/lib/doctor/waitlist/types';
+import { useI18n } from '@/i18n/provider';
 
 export function WaitlistToolbar({
   search,
@@ -15,14 +16,16 @@ export function WaitlistToolbar({
   statusTab: 'all' | WaitlistStatus;
   onStatusTabChange: (value: 'all' | WaitlistStatus) => void;
 }) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   return (
     <DoctorListToolbar
       search={search}
       onSearchChange={onSearchChange}
-      searchPlaceholder="ابحث بالاسم أو الرقم العام..."
-      searchAriaLabel="بحث في قائمة الانتظار"
+      searchPlaceholder={tr('ابحث بالاسم أو الرقم العام...', 'Search by name or public ID...')}
+      searchAriaLabel={tr('بحث في قائمة الانتظار', 'Search the waitlist')}
       onClear={onClear}
-      filterTabs={WAITLIST_STATUS_TABS}
+      filterTabs={buildWaitlistStatusTabs(tr)}
       filterValue={statusTab}
       onFilterChange={onStatusTabChange}
       filterColumns={5}
