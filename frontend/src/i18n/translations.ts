@@ -590,6 +590,20 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.documentsTab.documentCount": "{n} وثيقة",
     "doctor.documentsTab.noFilterMatch": "لا توجد وثائق تطابق الفلتر المحدد",
     "doctor.documentsTab.files": "الملفات",
+    "doctor.createMedicalRecordForm.errors.selectPatient": "اختر المريض",
+    "doctor.createMedicalRecordForm.errors.titleRequired": "عنوان السجل مطلوب",
+    "doctor.createMedicalRecordForm.errors.diagnosisRequired": "التشخيص مطلوب",
+    "doctor.createMedicalRecordForm.defaultSubmitLabel": "حفظ السجل",
+    "doctor.createMedicalRecordForm.defaultTitle": "إنشاء سجل طبي جديد",
+    "doctor.createMedicalRecordForm.recordTitleLabel": "عنوان السجل",
+    "doctor.createMedicalRecordForm.recordTitlePlaceholder": "مثال: متابعة ضغط الدم",
+    "doctor.createMedicalRecordForm.diagnosisLabel": "التشخيص",
+    "doctor.createMedicalRecordForm.diagnosisPlaceholder":
+      "اكتب التشخيص الطبي كما سيُحفَظ في السجل...",
+    "doctor.createMedicalRecordForm.prescriptionsLabel": "الوصفات الطبية",
+    "doctor.createMedicalRecordForm.prescriptionsPlaceholder":
+      "أدخل كل وصفة في سطر مستقل، مثال:&#10;Paracetamol 500mg&#10;Vitamin D 1000 IU",
+    "doctor.createMedicalRecordForm.needsFollowUp": "يحتاج متابعة",
     "secretary.dashboard.defaultName": "السكرتير",
     "secretary.dashboard.subtitle": "إدارة المواعيد والمرضى",
     "dataEntry.dashboard.defaultName": "مدخل البيانات",
@@ -2654,6 +2668,23 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "doctor.documentsTab.documentCount": "{n} documents",
     "doctor.documentsTab.noFilterMatch": "No documents match the selected filter",
     "doctor.documentsTab.files": "Files",
+    "doctor.createMedicalRecordForm.errors.selectPatient": "Select the patient",
+    "doctor.createMedicalRecordForm.errors.titleRequired":
+      "A record title is required",
+    "doctor.createMedicalRecordForm.errors.diagnosisRequired":
+      "A diagnosis is required",
+    "doctor.createMedicalRecordForm.defaultSubmitLabel": "Save record",
+    "doctor.createMedicalRecordForm.defaultTitle": "Create new medical record",
+    "doctor.createMedicalRecordForm.recordTitleLabel": "Record title",
+    "doctor.createMedicalRecordForm.recordTitlePlaceholder":
+      "e.g. Blood pressure follow-up",
+    "doctor.createMedicalRecordForm.diagnosisLabel": "Diagnosis",
+    "doctor.createMedicalRecordForm.diagnosisPlaceholder":
+      "Write the medical diagnosis as it will be saved in the record...",
+    "doctor.createMedicalRecordForm.prescriptionsLabel": "Prescriptions",
+    "doctor.createMedicalRecordForm.prescriptionsPlaceholder":
+      "Enter each prescription on its own line, e.g.:&#10;Paracetamol 500mg&#10;Vitamin D 1000 IU",
+    "doctor.createMedicalRecordForm.needsFollowUp": "Needs follow-up",
     "secretary.dashboard.defaultName": "Secretary",
     "secretary.dashboard.subtitle": "Manage appointments and patients",
     "dataEntry.dashboard.defaultName": "Data Entry",
