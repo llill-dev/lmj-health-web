@@ -185,9 +185,9 @@ export default function AdminDoctorRestoreRequestsPage() {
                   "ابحث بالاسم أو البريد أو الهاتف…",
                   "Search by name, email, or phone…",
                 )}
-                className="h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3.5 pe-10 font-cairo text-[12px] font-bold text-[#111827] outline-none placeholder:text-[#98A2B3] focus:border-primary"
+                className="h-[40px] w-full rounded-[8px] border border-[#E5E7EB] bg-white px-3.5 ps-10 font-cairo text-[12px] font-bold text-[#111827] outline-none placeholder:text-[#98A2B3] focus:border-primary"
               />
-              <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+              <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
             </div>
             <label className="flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] bg-white px-3.5">
               <span className="shrink-0 font-cairo text-[11px] font-extrabold text-[#667085]">

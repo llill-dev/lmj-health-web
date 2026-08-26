@@ -25,8 +25,7 @@ export type DashboardPatientsSearchState = ReturnType<
   typeof useDashboardPatientsSearch
 >;
 
-type TrFn = (ar: string, en: string) => string;
-const defaultTr: TrFn = (ar) => ar;
+type TFn = (key: string, fallback?: string) => string;
 
 function formatIsoDate(value: string | null | undefined, locale: string): string {
   if (!value) return "—";
@@ -35,17 +34,17 @@ function formatIsoDate(value: string | null | undefined, locale: string): string
   return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
-function patientInitials(name: string, tr: TrFn = defaultTr): string {
+function patientInitials(name: string, t: TFn): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
-  return name.slice(0, 2).toUpperCase() || tr("م", "P");
+  return name.slice(0, 2).toUpperCase() || t("doctor.appointmentsTab.initialsFallback");
 }
 
 function accountStatusPresentation(
   patient: DoctorPatientListItem,
-  tr: TrFn = defaultTr,
+  t: TFn,
 ): {
   label: string;
   className: string;
@@ -56,42 +55,39 @@ function accountStatusPresentation(
 
   if (status === "temporary" || patient.isTemporary) {
     return {
-      label: tr("مؤقت", "Temporary"),
+      label: t("doctor.patientsFiltersSection.temporary"),
       className: "bg-[#FFF7ED] text-[#C2410C]",
     };
   }
 
   if (status === "suspended") {
     return {
-      label: tr("معلّق", "Suspended"),
+      label: t("doctor.patientsFiltersSection.accountStatus.suspended"),
       className: "bg-[#FEE2E2] text-[#B42318]",
     };
   }
 
   return {
-    label: tr("نشط", "Active"),
+    label: t("common.active"),
     className: "bg-[#ECFDF3] text-[#16A34A]",
   };
 }
 
-function getPatientsSearchErrorMessage(error: unknown, tr: TrFn = defaultTr): string {
+function getPatientsSearchErrorMessage(error: unknown, t: TFn): string {
   if (!(error instanceof ApiError)) {
     return getUserFacingRequestErrorMessage(error);
   }
 
   if (error.messageKey === "errors.doctor.notApproved") {
-    return tr(
-      "حساب الطبيب غير مُعتمد بعد، لذلك لا يمكن البحث عن المرضى.",
-      "The doctor account is not approved yet, so patients cannot be searched.",
-    );
+    return t("doctor.dashboardPatientsSection.notApprovedError");
   }
 
   if (error.status === 401) {
-    return tr("انتهت صلاحية الجلسة. سجّل الدخول من جديد.", "The session has expired. Please sign in again.");
+    return t("doctor.dashboardPatientsSection.sessionExpiredError");
   }
 
   if (error.status === 403) {
-    return error.message || tr("لا تملك صلاحية عرض مرضى الطبيب.", "You do not have permission to view the doctor's patients.");
+    return error.message || t("doctor.dashboardPatientsSection.noPermissionError");
   }
 
   return error.message || getUserFacingRequestErrorMessage(error);
@@ -123,18 +119,17 @@ function PatientsSearchInput({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   return (
     <div className="relative min-w-0">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={tr("ابحث بالاسم، الهاتف، البريد، أو رقم الملف…", "Search by name, phone, email, or file number…")}
-        aria-label={tr("بحث عن مريض", "Search for a patient")}
-        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white pe-10 ps-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
+        placeholder={t("doctor.dashboardPatientsSection.searchPlaceholder")}
+        aria-label={t("doctor.dashboardPatientsSection.searchAria")}
+        className="h-[40px] w-full rounded-[12px] border border-[#DCE3EC] bg-white ps-10 pe-4 font-cairo text-[14px] font-bold text-[#111827] shadow-[0_3px_8px_rgba(15,23,42,0.03)] outline-none placeholder:font-cairo placeholder:text-[14px] placeholder:font-semibold placeholder:text-[#98A2B3] focus:border-primary"
       />
-      <div className="pointer-events-none absolute end-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
+      <div className="pointer-events-none absolute start-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[#98A2B3]">
         <Search className="h-5 w-5" />
       </div>
     </div>
@@ -145,16 +140,15 @@ const PatientTableRow = memo<{
   patient: DoctorPatientListItem;
   onOpen: (patientId: string) => void;
 }>(function PatientTableRow({ patient, onOpen }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const status = accountStatusPresentation(patient, tr);
+  const { locale, t } = useI18n();
+  const status = accountStatusPresentation(patient, t);
 
   return (
     <div className="grid grid-cols-1 gap-4 border-b border-[#EEF2F6] px-4 py-4 last:border-b-0 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8 lg:py-5">
       <div className="flex items-center gap-4 lg:col-span-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary text-white shadow-[0_14px_28px_rgba(15,143,139,0.22)]">
           <span className="font-cairo text-[20px] font-black">
-            {patientInitials(patient.user.fullName, tr)}
+            {patientInitials(patient.user.fullName, t)}
           </span>
         </div>
         <div className="min-w-0 text-start">
@@ -186,7 +180,7 @@ const PatientTableRow = memo<{
           onClick={() => onOpen(patient._id)}
           className="inline-flex items-center gap-2 font-cairo text-[15px] font-black text-primary transition-colors hover:text-[#0A7A77]"
         >
-          {tr("عرض التفاصيل", "View details")}
+          {t("doctor.dashboardPatientsSection.viewDetails")}
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -205,22 +199,23 @@ const PatientsWeeklyActivityChart = memo<{
   totalUniquePatients,
   isLoading,
 }) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   const maxCount = Math.max(...bars.map((bar) => bar.value), 0);
 
   return (
     <div className="mt-5 flex min-h-[270px] flex-col justify-between rounded-[18px] bg-[#E3F6F8] px-6 py-6">
       <div className="flex items-start justify-between gap-3 text-start">
         <div className="font-cairo text-[16px] font-bold text-[#A3B2BF]">
-          {tr("نشاط المرضى - آخر 7 أيام", "Patient activity - last 7 days")}
+          {t("doctor.dashboardPatientsSection.weeklyActivityTitle")}
         </div>
         {!isLoading ? (
           <div className="font-cairo text-[12px] font-bold text-[#64748B]">
-            {tr(
-              `${totalUniquePatients} مريض • ${bars.reduce((sum, bar) => sum + bar.value, 0)} موعد`,
-              `${totalUniquePatients} patients • ${bars.reduce((sum, bar) => sum + bar.value, 0)} appointments`,
-            )}
+            {t("doctor.dashboardPatientsSection.patientsAppointmentsCount")
+              .replace("{patients}", String(totalUniquePatients))
+              .replace(
+                "{appointments}",
+                String(bars.reduce((sum, bar) => sum + bar.value, 0)),
+              )}
           </div>
         ) : null}
       </div>
@@ -250,10 +245,9 @@ const PatientsWeeklyActivityChart = memo<{
                 <div
                   key={item.isoDate}
                   className="flex h-full flex-1 flex-col items-center justify-end gap-2"
-                  title={tr(
-                    `${item.patientCount} مريض • ${item.appointmentCount} موعد`,
-                    `${item.patientCount} patients • ${item.appointmentCount} appointments`,
-                  )}
+                  title={t("doctor.dashboardPatientsSection.patientsAppointmentsCount")
+                    .replace("{patients}", String(item.patientCount))
+                    .replace("{appointments}", String(item.appointmentCount))}
                 >
                   {item.value > 0 ? (
                     <span className="font-cairo text-[11px] font-black text-primary">
@@ -277,9 +271,15 @@ const PatientsWeeklyActivityChart = memo<{
           </div>
 
           <div className="mt-4 text-center font-cairo text-[13px] font-semibold text-[#9AA9B5]">
-            {tr(`متوسط: ${averagePatientsPerDay} مريض/يوم`, `Average: ${averagePatientsPerDay} patients/day`)}
+            {t("doctor.dashboardPatientsSection.averagePerDay").replace(
+              "{n}",
+              String(averagePatientsPerDay),
+            )}
             {maxCount > 0
-              ? tr(` • أعلى يوم: ${maxCount} موعد`, ` • Peak day: ${maxCount} appointments`)
+              ? t("doctor.dashboardPatientsSection.peakDay").replace(
+                  "{n}",
+                  String(maxCount),
+                )
               : ""}
           </div>
         </div>
@@ -293,8 +293,7 @@ export function DashboardPatientsSearchCard({
   setSearchInput,
   patientsQuery,
 }: DashboardPatientsSearchState) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t } = useI18n();
   const { chart, appointmentsQuery } = useDashboardPatientsWeeklyActivity();
   const chartAwaitingData =
     isAwaitingInitialQueryData(
@@ -303,7 +302,7 @@ export function DashboardPatientsSearchCard({
     ) && !appointmentsQuery.isError;
 
   return (
-    <SurfaceSection title={tr("المرضى", "Patients")}>
+    <SurfaceSection title={t("sidebar.item.patients")}>
       <div className="px-4 py-5 sm:px-5 sm:py-6">
         <PatientsSearchInput value={searchInput} onChange={setSearchInput} />
 
@@ -319,7 +318,7 @@ export function DashboardPatientsSearchCard({
             to="/doctor/patients"
             className="inline-flex font-cairo text-[13px] font-black text-primary hover:underline"
           >
-            {tr("صفحة المرضى الكاملة", "Full patients page")}
+            {t("doctor.dashboardPatientsSection.fullPatientsPage")}
           </Link>
         </div>
       </div>
@@ -333,12 +332,11 @@ export function DashboardPatientsTable({
   setFilter,
   patientsQuery,
 }: DashboardPatientsSearchState) {
-  const { locale } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, t } = useI18n();
   const navigate = useNavigate();
 
   const filterTabs = useMemo(() => {
-    const labels = buildDashboardPatientFilterLabels(tr);
+    const labels = buildDashboardPatientFilterLabels(t);
     return (Object.keys(labels) as DashboardPatientFilter[]).map((key) => ({
       key,
       label: labels[key],
@@ -353,24 +351,27 @@ export function DashboardPatientsTable({
   const hasSearch = Boolean(debouncedSearch.trim());
 
   const emptyMessage = hasSearch
-    ? tr("لا توجد نتائج مطابقة لبحثك ضمن مرضى الطبيب.", "No results match your search among the doctor's patients.")
+    ? t("doctor.dashboardPatientsSection.emptyNoSearchMatch")
     : filter === "today"
-      ? tr("لا يوجد مرضى لديهم مواعيد اليوم.", "No patients have appointments today.")
+      ? t("doctor.dashboardPatientsSection.emptyToday")
       : filter === "upcoming"
-        ? tr("لا يوجد مرضى بمواعيد قادمة ضمن الفترة الحالية.", "No patients have upcoming appointments in the current period.")
-        : tr("لا يوجد مرضى مرتبطون بحسابك بعد.", "No patients are linked to your account yet.");
+        ? t("doctor.dashboardPatientsSection.emptyUpcoming")
+        : t("doctor.dashboardPatientsSection.emptyDefault");
 
   return (
     <section className="overflow-hidden rounded-[20px] border border-[#E8EEF6] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <div className="flex flex-col gap-4 border-b border-[#EEF2F6] px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
         <div className="text-start">
           <h2 className="font-cairo text-[23px] font-black text-[#243044]">
-            {tr("المرضى", "Patients")}
+            {t("sidebar.item.patients")}
           </h2>
           {!patientsQuery.isError ? (
             <p className="mt-1 font-cairo text-[13px] font-semibold text-[#98A2B3]">
-              {tr(`${patientsQuery.total} مريض`, `${patientsQuery.total} patients`)}
-              {hasSearch ? tr(" مطابق للبحث", " matching the search") : ""}
+              {t("doctor.dashboardPatientsSection.patientCount").replace(
+                "{n}",
+                String(patientsQuery.total),
+              )}
+              {hasSearch ? t("doctor.dashboardPatientsSection.matchingSearch") : ""}
             </p>
           ) : null}
         </div>
@@ -398,20 +399,20 @@ export function DashboardPatientsTable({
 
       <div className="hidden border-b border-[#EEF2F6] px-8 py-4 lg:block">
         <div className="grid grid-cols-12 gap-4 text-start font-cairo text-[14px] font-bold text-[#A1AAB9]">
-          <div className="col-span-4">{tr("اسم المريض", "Patient name")}</div>
-          <div className="col-span-3">{tr("رقم الهاتف", "Phone number")}</div>
-          <div className="col-span-2">{tr("آخر زيارة", "Last visit")}</div>
-          <div className="col-span-1">{tr("الحالة", "Status")}</div>
-          <div className="col-span-2">{tr("الإجراءات", "Actions")}</div>
+          <div className="col-span-4">{t("doctor.dashboardPatientsSection.patientNameColumn")}</div>
+          <div className="col-span-3">{t("doctor.dashboardPatientsSection.phoneNumberColumn")}</div>
+          <div className="col-span-2">{t("doctor.dashboardPatientsSection.lastVisitColumn")}</div>
+          <div className="col-span-1">{t("doctor.appointmentsTab.fields.status")}</div>
+          <div className="col-span-2">{t("doctor.dashboardPatientsSection.actionsColumn")}</div>
         </div>
       </div>
 
       {patientsQuery.isError ? (
         <div className="px-6 py-8">
           <DoctorListErrorState
-            title={tr("تعذّر تحميل المرضى", "Failed to load patients")}
-            brief={tr("حدث خطأ أثناء جلب قائمة المرضى من الخادم.", "An error occurred while fetching the patient list from the server.")}
-            detail={getPatientsSearchErrorMessage(patientsQuery.error, tr)}
+            title={t("doctor.dashboardPatientsSection.errorTitle")}
+            brief={t("doctor.dashboardPatientsSection.errorBrief")}
+            detail={getPatientsSearchErrorMessage(patientsQuery.error, t)}
             retrying={retryingPatients}
             onRetry={() => {
               void retryPatients();
@@ -448,7 +449,7 @@ export function DashboardPatientsTable({
             to="/doctor/patients"
             className="font-cairo text-[14px] font-black text-primary hover:underline"
           >
-            {tr("الانتقال إلى صفحة المرضى", "Go to patients page")}
+            {t("doctor.dashboardPatientsSection.goToPatientsPage")}
           </Link>
         </div>
       ) : (
@@ -467,7 +468,10 @@ export function DashboardPatientsTable({
                 to="/doctor/patients"
                 className="inline-flex items-center gap-2 font-cairo text-[14px] font-black text-primary hover:underline"
               >
-                {tr(`عرض جميع المرضى (${patientsQuery.total})`, `View all patients (${patientsQuery.total})`)}
+                {t("doctor.dashboardPatientsSection.viewAllPatients").replace(
+                  "{n}",
+                  String(patientsQuery.total),
+                )}
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </div>

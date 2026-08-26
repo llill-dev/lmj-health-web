@@ -21,10 +21,10 @@ export function RadiologyPageHeader({
   subtitle?: string;
   icon?: LucideIcon;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
-  const resolvedTitle = title ?? tr("طلبات الأشعة", "Radiology orders");
-  const resolvedStatusLabel = statusLabel ?? tr("مسودة", "Draft");
+  const { dir, t } = useI18n();
+  const resolvedTitle = title ?? t("doctor.radiology.defaultTitle");
+  const resolvedStatusLabel =
+    statusLabel ?? t("doctor.radiology.defaultStatus");
   const resolvedSubtitle =
     subtitle ?? buildRadiologyPatientSubtitle(patientName);
 
@@ -56,7 +56,7 @@ export function RadiologyPageHeader({
             </p>
             {fileNumber ? (
               <p className="mt-0.5 font-cairo text-[12px] font-semibold text-primary/75">
-                {tr("رقم الملف", "File number")}: {fileNumber}
+                {t("common.fileNumber")}: {fileNumber}
               </p>
             ) : null}
           </div>
@@ -67,7 +67,7 @@ export function RadiologyPageHeader({
             to={backTo}
             className="inline-flex items-center gap-1 font-cairo text-[13px] font-extrabold text-primary transition hover:text-[#0A7A77]"
           >
-            <span>{tr("رجوع", "Back")}</span>
+            <span>{t("common.back")}</span>
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </Link>
           <span className="inline-flex rounded-full bg-[#FEF3C7] px-3 py-1 font-cairo text-[11px] font-extrabold text-[#B45309]">

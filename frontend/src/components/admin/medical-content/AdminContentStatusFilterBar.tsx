@@ -1,33 +1,34 @@
 import type { UiContentStatus } from "@/components/admin/medical-content/contentListUtils";
+import { useI18n } from "@/i18n/provider";
 
-const STATUS_FILTERS: Array<{
-  value: UiContentStatus;
-  ar: string;
-  en: string;
-  disableWhenMine?: boolean;
-}> = [
-  { value: "الكل", ar: "الكل", en: "All" },
-  { value: "منشور", ar: "منشور", en: "Published", disableWhenMine: true },
-  { value: "قيد المراجعة", ar: "قيد المراجعة", en: "In review" },
-  { value: "مسودة", ar: "مسودة", en: "Draft" },
-  { value: "مؤرشف", ar: "مؤرشف", en: "Archived", disableWhenMine: true },
+const STATUS_FILTER_CONFIG = [
+  { value: "الكل" as const },
+  { value: "منشور" as const, disableWhenMine: true },
+  { value: "قيد المراجعة" as const },
+  { value: "مسودة" as const },
+  { value: "مؤرشف" as const, disableWhenMine: true },
 ];
 
 export function AdminContentStatusFilterBar({
   activeStatus,
   onChange,
   showMineOnly,
-  tr,
 }: {
   activeStatus: UiContentStatus;
   onChange: (next: UiContentStatus) => void;
   showMineOnly: boolean;
-  tr: (ar: string, en: string) => string;
 }) {
+  const { t } = useI18n();
+
+  const statusFilters = STATUS_FILTER_CONFIG.map((filter) => ({
+    ...filter,
+    label: t(`adminMedicalContent.status.${filter.value}`),
+  }));
+
   return (
     <>
       <div className="mt-1.5 flex flex-wrap content-start justify-start gap-2 rounded-[10px] border border-[#F2F4F7] bg-[#FAFAFB] p-2">
-        {STATUS_FILTERS.map((filter) => {
+        {statusFilters.map((filter) => {
           const active = activeStatus === filter.value;
           const disabled = Boolean(filter.disableWhenMine && showMineOnly);
           return (
@@ -42,17 +43,14 @@ export function AdminContentStatusFilterBar({
                   : "inline-flex h-[30px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] disabled:cursor-not-allowed disabled:opacity-40"
               }
             >
-              {tr(filter.ar, filter.en)}
+              {filter.label}
             </button>
           );
         })}
       </div>
       {showMineOnly ? (
         <div className="mt-2 font-cairo text-[11px] font-bold text-[#98A2B3]">
-          {tr(
-            "واجهة (محتواي فقط) مرتبطة بمسار /api/admin/content/mine وتدعم فقط: الكل، مسودة، قيد المراجعة.",
-            "My-content mode is backed by /api/admin/content/mine and supports only: All, Draft, In review.",
-          )}
+          {t("adminMedicalContent.mineOnlyHint")}
         </div>
       ) : null}
     </>

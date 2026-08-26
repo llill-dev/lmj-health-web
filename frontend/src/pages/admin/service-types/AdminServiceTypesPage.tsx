@@ -211,9 +211,9 @@ export default function AdminServiceTypesPage() {
                   "ابحث باسم النوع أو الـ slug...",
                   "Search by type name or slug…",
                 )}
-                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white pe-11 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
+                className="h-[44px] w-full rounded-[10px] border border-[#E5E7EB] bg-white ps-11 pe-4 text-start font-cairo text-[12px] font-bold text-[#111827] outline-none transition focus:border-primary placeholder:text-[#98A2B3]"
               />
-              <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
+              <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]" />
             </div>
 
             <select

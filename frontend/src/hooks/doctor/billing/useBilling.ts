@@ -264,10 +264,14 @@ export function useBillingExpenses(params: BillingExpensesListParams = {}) {
   };
 }
 
-export function useBillingPayments(params: BillingPaymentsListParams = {}) {
+export function useBillingPayments(
+  params: BillingPaymentsListParams = {},
+  enabled = true,
+) {
   const query = useQuery({
     queryKey: billingQueryKeys.payments(params),
     queryFn: () => billingApi.payments.list(params),
+    enabled,
     staleTime: STALE_MS,
   });
 
@@ -277,7 +281,7 @@ export function useBillingPayments(params: BillingPaymentsListParams = {}) {
     total: query.data?.total ?? 0,
     page: query.data?.page ?? params.page ?? 1,
     limit: query.data?.limit ?? params.limit ?? 50,
-    isAwaitingData: isAwaitingInitialQueryData(query.data, query.isError),
+    isAwaitingData: enabled && isAwaitingInitialQueryData(query.data, query.isError),
   };
 }
 

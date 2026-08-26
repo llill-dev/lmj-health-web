@@ -1,19 +1,7 @@
-import { Calendar, ChevronLeft, MapPin } from 'lucide-react';
-import type { PrescriptionHubRowVm } from './map-prescriptions-hub';
-import { PrescriptionsHubStatusBadge } from './prescriptions-hub-status-badge';
-
-const TABLE_COLUMNS = [
-  'System ID',
-  'اسم المريض',
-  'المنشأة',
-  'التاريخ',
-  'الحالة',
-  'الإجراءات',
-] as const;
-
-const thClass =
-  'px-4 py-3 text-center align-middle font-cairo text-[12px] font-extrabold text-[#0F766E]';
-const tdClass = 'px-4 py-4 text-center align-middle';
+import { Calendar, ChevronLeft, MapPin } from "lucide-react";
+import type { PrescriptionHubRowVm } from "./map-prescriptions-hub";
+import { PrescriptionsHubStatusBadge } from "./prescriptions-hub-status-badge";
+import { useI18n } from "@/i18n/provider";
 
 export function PrescriptionsHubTable({
   rows,
@@ -22,10 +10,25 @@ export function PrescriptionsHubTable({
   rows: PrescriptionHubRowVm[];
   onViewPrescription: (row: PrescriptionHubRowVm) => void;
 }) {
+  const { t } = useI18n();
+
+  const TABLE_COLUMNS = [
+    t("doctor.prescriptionsHub.table.systemId"),
+    t("doctor.prescriptionsHub.table.patientName"),
+    t("doctor.prescriptionsHub.table.facility"),
+    t("doctor.prescriptionsHub.table.date"),
+    t("doctor.prescriptionsHub.table.status"),
+    t("doctor.prescriptionsHub.table.actions"),
+  ] as const;
+
+  const thClass =
+    "px-4 py-3 text-center align-middle font-cairo text-[12px] font-extrabold text-[#0F766E]";
+  const tdClass = "px-4 py-4 text-center align-middle";
+
   if (!rows.length) {
     return (
       <div className="rounded-[12px] border border-dashed border-[#E2E8F0] bg-white px-6 py-14 text-center font-cairo text-[14px] font-semibold text-[#667085]">
-        لا توجد وصفات تطابق البحث الحالي
+        {t("doctor.prescriptionsHub.table.emptyState")}
       </div>
     );
   }
@@ -94,7 +97,9 @@ export function PrescriptionsHubTable({
                     onClick={() => onViewPrescription(row)}
                     className="inline-flex items-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-[#0A7A77]"
                   >
-                    <span>عرض الوصفه</span>
+                    <span>
+                      {t("doctor.prescriptionsHub.table.viewPrescription")}
+                    </span>
                     <ChevronLeft className="h-4 w-4" aria-hidden />
                   </button>
                 </td>

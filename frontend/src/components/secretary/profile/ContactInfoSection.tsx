@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface ContactInfoItem {
   icon: LucideIcon;
@@ -11,10 +12,12 @@ interface ContactInfoSectionProps {
 }
 
 export default function ContactInfoSection({ items }: ContactInfoSectionProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
       <h3 className="font-cairo text-lg font-bold text-[#0f172a] mb-4">
-        معلومات الاتصال
+        {tr("معلومات الاتصال", "Contact information")}
       </h3>
       <div className="space-y-3">
         {items.map((item, index) => {

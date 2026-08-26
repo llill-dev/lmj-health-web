@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/ToastProvider";
-import CreateTemporaryPatientDialog from "@/components/doctor/patients/create-temporary-patient-dialog";
+import CreateTemporaryPatientPanel from "@/components/secretary/patients/create-temporary-patient-panel";
 import { useCreateTemporaryDoctorPatient } from "@/hooks/doctor/patients/useDoctorPatients";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
 import { useI18n } from "@/i18n/provider";
@@ -39,14 +39,11 @@ export default function SecretaryCreateTemporaryPatientPage() {
   }
 
   return (
-    <div dir={dir} lang={locale} className="pb-6 sm:pb-8">
+    <div dir={dir} lang={locale} className="mx-auto w-full max-w-5xl pb-6 sm:pb-8">
       {canCreateTemporaryPatient ? (
-        <CreateTemporaryPatientDialog
-          open
-          onOpenChange={(open) => {
-            if (!open) navigate("/secretary/patients");
-          }}
+        <CreateTemporaryPatientPanel
           onSubmit={handleSubmit}
+          onCancel={() => navigate("/secretary/patients")}
           busy={createTemporaryPatient.isPending}
         />
       ) : (

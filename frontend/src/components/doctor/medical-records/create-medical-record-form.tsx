@@ -7,21 +7,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { AppCheckbox } from '@/components/ui';
 import StyledSelect from '@/components/ui/styled-select';
+import { useI18n } from '@/i18n/provider';
+
+type TFn = (key: string, fallback?: string) => string;
 
 type PatientOption = {
   id: string;
   name: string;
 };
 
-const medicalRecordSchema = z.object({
-  patientId: z.string().min(1, 'اختر المريض'),
-  title: z.string().trim().min(2, 'عنوان السجل مطلوب'),
-  diagnosis: z.string().trim().min(2, 'التشخيص مطلوب'),
-  prescriptionsText: z.string().trim().optional().default(''),
-  followUpRequired: z.boolean().default(false),
-});
+function buildMedicalRecordSchema(t: TFn) {
+  return z.object({
+    patientId: z.string().min(1, t('doctor.createMedicalRecordForm.errors.selectPatient')),
+    title: z.string().trim().min(2, t('doctor.createMedicalRecordForm.errors.titleRequired')),
+    diagnosis: z.string().trim().min(2, t('doctor.createMedicalRecordForm.errors.diagnosisRequired')),
+    prescriptionsText: z.string().trim().optional().default(''),
+    followUpRequired: z.boolean().default(false),
+  });
+}
 
-type MedicalRecordFormValues = z.input<typeof medicalRecordSchema>;
+type MedicalRecordFormValues = z.input<ReturnType<typeof buildMedicalRecordSchema>>;
 
 export type MedicalRecordFormPayload = {
   patientId: string;
@@ -37,8 +42,8 @@ export default function CreateMedicalRecordForm({
   patients,
   onCancel,
   onSave,
-  submitLabel = 'حفظ السجل',
-  title = 'إنشاء سجل طبي جديد',
+  submitLabel,
+  title,
   description,
   initialValues,
   patientLocked = false,
@@ -52,6 +57,10 @@ export default function CreateMedicalRecordForm({
   initialValues?: InitialValues;
   patientLocked?: boolean;
 }) {
+  const { locale, t } = useI18n();
+  const medicalRecordSchema = useMemo(() => buildMedicalRecordSchema(t), [locale]);
+  const resolvedSubmitLabel = submitLabel ?? t('doctor.createMedicalRecordForm.defaultSubmitLabel');
+  const resolvedTitle = title ?? t('doctor.createMedicalRecordForm.defaultTitle');
   const {
     register,
     control,
@@ -113,7 +122,7 @@ export default function CreateMedicalRecordForm({
     <section className='mt-5 rounded-[18px] border border-[#EEF2F6] bg-white shadow-[0_18px_30px_rgba(0,0,0,0.10)]'>
       <div className='relative border-b border-[#EEF2F6] px-8 py-5'>
         <div className='text-start font-cairo text-[16px] font-extrabold text-[#111827]'>
-          {title}
+          {resolvedTitle}
         </div>
         {description ? (
           <p className='mt-2 max-w-2xl text-start font-cairo text-[12px] font-semibold leading-6 text-[#667085]'>
@@ -124,7 +133,7 @@ export default function CreateMedicalRecordForm({
           type='button'
           onClick={onCancel}
           className='absolute start-6 top-1/2 -translate-y-1/2 flex h-[36px] w-[36px] items-center justify-center rounded-[6px] border border-[#EEF2F6] bg-white text-[#667085]'
-          aria-label='إغلاق'
+          aria-label={t('common.close')}
         >
           <X className='w-4 h-4' />
         </button>
@@ -133,7 +142,7 @@ export default function CreateMedicalRecordForm({
       <form onSubmit={handleSubmit(onSubmit)} className='px-8 pt-6 pb-8'>
         <div className='grid grid-cols-1 gap-5'>
           <div>
-            <div className={labelBase}>اختر المريض</div>
+            <div className={labelBase}>{t('doctor.addAccessRequestForm.selectPatientLabel')}</div>
             <Controller
               name='patientId'
               control={control}
@@ -143,12 +152,12 @@ export default function CreateMedicalRecordForm({
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  placeholder='اختر المريض...'
+                  placeholder={t('doctor.addAccessRequestForm.selectPatientPlaceholder')}
                   error={Boolean(errors.patientId)}
                   disabled={patientLocked}
-                  emptyTriggerLabel='لا يوجد مرضى في القائمة'
-                  emptyState='لا يوجد مرضى متاحين للاختيار.'
-                  listboxAriaLabel='اختيار المريض'
+                  emptyTriggerLabel={t('doctor.addAccessRequestForm.noPatientsInList')}
+                  emptyState={t('doctor.addAccessRequestForm.noPatientsAvailable')}
+                  listboxAriaLabel={t('doctor.addAccessRequestForm.selectPatientAria')}
                 />
               )}
             />
@@ -165,11 +174,11 @@ export default function CreateMedicalRecordForm({
           </div>
 
           <div>
-            <div className={labelBase}>عنوان السجل</div>
+            <div className={labelBase}>{t('doctor.createMedicalRecordForm.recordTitleLabel')}</div>
             <input
               {...register('title')}
               className={inputBase}
-              placeholder='مثال: متابعة ضغط الدم'
+              placeholder={t('doctor.createMedicalRecordForm.recordTitlePlaceholder')}
             />
             {errors.title?.message ? (
               <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
@@ -179,11 +188,11 @@ export default function CreateMedicalRecordForm({
           </div>
 
           <div>
-            <div className={labelBase}>التشخيص</div>
+            <div className={labelBase}>{t('doctor.createMedicalRecordForm.diagnosisLabel')}</div>
             <textarea
               {...register('diagnosis')}
               className={textAreaBase}
-              placeholder='اكتب التشخيص الطبي كما سيُحفَظ في السجل...'
+              placeholder={t('doctor.createMedicalRecordForm.diagnosisPlaceholder')}
             />
             {errors.diagnosis?.message ? (
               <div className='mt-2 text-start font-cairo text-[11px] font-semibold text-[#E11D48]'>
@@ -193,18 +202,18 @@ export default function CreateMedicalRecordForm({
           </div>
 
           <div>
-            <div className={labelBase}>الوصفات الطبية</div>
+            <div className={labelBase}>{t('doctor.createMedicalRecordForm.prescriptionsLabel')}</div>
             <textarea
               {...register('prescriptionsText')}
               className={textAreaBase}
-              placeholder='أدخل كل وصفة في سطر مستقل، مثال:&#10;Paracetamol 500mg&#10;Vitamin D 1000 IU'
+              placeholder={t('doctor.createMedicalRecordForm.prescriptionsPlaceholder')}
             />
           </div>
 
           <label className='flex items-center justify-between rounded-[10px] border border-[#D6F5F3] bg-[#F0FDFC] px-4 py-4'>
             <div className='text-start'>
               <div className='font-cairo text-[13px] font-extrabold text-[#111827]'>
-                يحتاج متابعة
+                {t('doctor.createMedicalRecordForm.needsFollowUp')}
               </div>
             </div>
             <AppCheckbox
@@ -222,7 +231,7 @@ export default function CreateMedicalRecordForm({
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
             >
-              إلغاء
+              {t('common.cancel')}
             </motion.button>
 
             <motion.button
@@ -234,7 +243,7 @@ export default function CreateMedicalRecordForm({
               transition={{ duration: 0.12, ease: 'easeOut' }}
             >
               <Save className='w-4 h-4' />
-              {submitLabel}
+              {resolvedSubmitLabel}
             </motion.button>
           </div>
         </div>

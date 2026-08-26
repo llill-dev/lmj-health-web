@@ -193,7 +193,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 initial={{ scaleX: 1 }}
                 animate={{ scaleX: 0 }}
                 transition={{ duration: t.durationMs / 1000, ease: "linear" }}
-                style={{ transformOrigin: "right" }}
+                style={{ transformOrigin: dir === "rtl" ? "right" : "left" }}
               />
             </motion.div>
           ))}

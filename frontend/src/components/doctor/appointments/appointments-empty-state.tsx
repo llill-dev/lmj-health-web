@@ -1,4 +1,6 @@
-'use client';
+"use client";
+
+import { useI18n } from "@/i18n/provider";
 
 type Props = {
   onBookClick: () => void;
@@ -15,34 +17,35 @@ export default function AppointmentsEmptyState({
   title,
   subtitle,
 }: Props) {
+  const { t } = useI18n();
   return (
-    <div className='flex flex-col items-center px-6 py-14 text-center'>
-      <div className='mb-8 flex w-full max-w-[280px] justify-center sm:max-w-[320px]'>
+    <div className="flex flex-col items-center px-6 py-14 text-center">
+      <div className="mb-8 flex w-full max-w-[280px] justify-center sm:max-w-[320px]">
         <img
-          src='/images/image-notFound_appotemint.png'
-          alt='لا توجد مواعيد محجوزة'
-          className='h-auto w-full select-none object-contain'
+          src="/images/image-notFound_appotemint.png"
+          alt={t("doctor.appointments.emptyStateAlt")}
+          className="h-auto w-full select-none object-contain"
           width={320}
           height={280}
-          loading='lazy'
-          decoding='async'
+          loading="lazy"
+          decoding="async"
         />
       </div>
 
-      <h3 className='font-cairo text-[17px] font-bold leading-[28px] text-[#101828] sm:text-[18px]'>
-        {title ?? 'لا يوجد مواعيد محجوزة بعد .'}
+      <h3 className="font-cairo text-[17px] font-bold leading-[28px] text-[#101828] sm:text-[18px]">
+        {title ?? t("doctor.appointments.emptyStateTitle")}
       </h3>
 
-      <p className='mt-3 font-cairo text-[14px] font-semibold leading-[22px] text-[#667085]'>
-        {subtitle ?? 'قم بحجز موعد الآن'}
+      <p className="mt-3 font-cairo text-[14px] font-semibold leading-[22px] text-[#667085]">
+        {subtitle ?? t("doctor.appointments.emptyStateSubtitle")}
       </p>
 
       <button
-        type='button'
+        type="button"
         onClick={onBookClick}
-        className='mt-8 min-h-[48px] min-w-[180px] rounded-[8px] bg-primary px-8 font-cairo text-[15px] font-bold text-white shadow-[0px_12px_24px_-4px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE]'
+        className="mt-8 min-h-[48px] min-w-[180px] rounded-[8px] bg-primary px-8 font-cairo text-[15px] font-bold text-white shadow-[0px_12px_24px_-4px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE]"
       >
-        حجز موعد
+        {t("doctor.appointments.bookAppointment")}
       </button>
     </div>
   );

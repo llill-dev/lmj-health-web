@@ -1,5 +1,6 @@
-import StyledSelect from '@/components/ui/styled-select';
-import { cn } from '@/lib/utils/utils';
+import StyledSelect from "@/components/ui/styled-select";
+import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 type DoctorTablePaginationProps = {
   page: number;
@@ -15,7 +16,7 @@ type DoctorTablePaginationProps = {
 };
 
 /**
- * تصفح الجداول — نفس نمط صفحات المرضى والمواعيد (خارج الجدول، هوية الموقع).
+ * Table pagination — same pattern as patient and appointment pages (outside table, site identity).
  */
 export default function DoctorTablePagination({
   page,
@@ -29,11 +30,13 @@ export default function DoctorTablePagination({
   onPageChange,
   onPageSizeChange,
 }: DoctorTablePaginationProps) {
+  const { t } = useI18n();
   const safeTotalPages = Math.max(1, totalPages);
 
   const summary = (
     <div className="font-cairo text-[12px] font-bold text-[#667085]">
-      {summaryLabel ?? `الصفحة ${page} من ${safeTotalPages}`}
+      {summaryLabel ??
+        t("common.pagination.summary", `Page ${page} of ${safeTotalPages}`)}
     </div>
   );
 
@@ -50,7 +53,7 @@ export default function DoctorTablePagination({
             value: String(size),
             label: String(size),
           }))}
-          listboxAriaLabel="عدد العناصر في الصفحة"
+          listboxAriaLabel={t("common.pagination.itemsPerPage")}
         />
       </div>
 
@@ -60,7 +63,7 @@ export default function DoctorTablePagination({
         disabled={disabled || page <= 1}
         className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        السابق
+        {t("common.pagination.previous")}
       </button>
 
       <button
@@ -69,7 +72,7 @@ export default function DoctorTablePagination({
         disabled={disabled || page >= safeTotalPages}
         className="inline-flex h-[36px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 font-cairo text-[12px] font-extrabold text-[#111827] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        التالي
+        {t("common.pagination.next")}
       </button>
     </div>
   );
@@ -77,7 +80,7 @@ export default function DoctorTablePagination({
   return (
     <section
       className={cn(
-        'flex w-full items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]',
+        "flex w-full items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-white px-6 py-4 shadow-[0_14px_30px_rgba(0,0,0,0.06)]",
         className,
       )}
     >

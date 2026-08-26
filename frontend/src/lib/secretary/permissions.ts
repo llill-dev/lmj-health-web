@@ -41,6 +41,7 @@ const SECRETARY_BILLING_FALLBACKS: Array<{
   },
   { path: "/secretary/accounts/services", required: ["billing:services:view"] },
   { path: "/secretary/accounts/expenses", required: ["billing:expenses:view"] },
+  { path: "/secretary/accounts/payments", required: ["billing:payments:view"] },
   {
     path: "/secretary/accounts/payments/new",
     required: ["billing:payments:manage"],

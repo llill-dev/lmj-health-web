@@ -12,6 +12,7 @@ export function ClinicAccountsSubNav() {
     basePath,
     canViewDashboard,
     canViewInvoices,
+    canViewPayments,
     canViewServices,
     canViewExpenses,
     canViewReports,
@@ -24,6 +25,9 @@ export function ClinicAccountsSubNav() {
       : null,
     canViewInvoices
       ? { to: `${basePath}/invoices`, label: tr('الفواتير', 'Invoices'), end: false }
+      : null,
+    canViewPayments
+      ? { to: `${basePath}/payments`, label: tr('المدفوعات', 'Payments'), end: false }
       : null,
     canViewServices
       ? { to: `${basePath}/services`, label: tr('الخدمات', 'Services'), end: false }
@@ -41,7 +45,7 @@ export function ClinicAccountsSubNav() {
 
   return (
     <nav
-      className="mb-6 grid grid-cols-2 gap-2 rounded-[12px] border border-[#EEF2F6] bg-white p-2 shadow-sm sm:grid-cols-3 lg:grid-cols-6"
+      className="mb-6 grid grid-cols-2 gap-2 rounded-[12px] border border-[#EEF2F6] bg-white p-2 shadow-sm sm:grid-cols-3 lg:grid-cols-7"
       aria-label={tr('تنقل الحسابات', 'Accounts navigation')}
     >
       {links.map((link) => (

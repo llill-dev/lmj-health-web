@@ -7,8 +7,7 @@ export function PrescriptionsHubPageHeader({
 }: {
   addHref?: string;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { dir, locale, t } = useI18n();
 
   return (
     <section
@@ -35,10 +34,10 @@ export function PrescriptionsHubPageHeader({
           </div>
           <div className="min-w-0">
             <h1 className="font-cairo text-[26px] font-black leading-[32px] text-primary sm:text-[30px] sm:leading-[36px]">
-              {tr("الوصفات الطبية", "Prescriptions")}
+              {t("doctor.prescriptionsHub.pageTitle")}
             </h1>
             <p className="mt-1 font-cairo text-[14px] font-bold leading-[22px] text-primary/90 sm:text-[16px]">
-              {tr("توثيق الوصفات", "Prescription documentation")}
+              {t("doctor.prescriptionsHub.pageSubtitle")}
             </p>
           </div>
         </div>
@@ -50,14 +49,11 @@ export function PrescriptionsHubPageHeader({
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden />
             <span className="whitespace-nowrap">
-              {tr("إضافة وصفة جديدة", "Add new prescription")}
+              {t("doctor.prescriptionsHub.addNewPrescription")}
             </span>
           </Link>
           <p className="max-w-[220px] text-end font-cairo text-[11px] font-semibold leading-relaxed text-primary/80">
-            {tr(
-              "تُنشأ الوصفة من داخل زيارة المريض — سننقلك إلى قائمة الزيارات لاختيار الزيارة أولاً.",
-              "Prescriptions are created from within a patient visit — you'll be taken to the encounters list to pick one first.",
-            )}
+            {t("doctor.prescriptionsHub.addHint")}
           </p>
         </div>
       </div>

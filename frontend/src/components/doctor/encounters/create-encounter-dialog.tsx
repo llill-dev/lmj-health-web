@@ -48,14 +48,18 @@ type EncounterFormErrors = Partial<Record<keyof EncounterFormValues, string>>;
 type TrFn = (ar: string, en: string) => string;
 const defaultTr: TrFn = (ar) => ar;
 
-function buildOriginOptions(
-  tr: TrFn = defaultTr,
-): Array<{ value: DoctorEncounterOrigin; label: string }> {
+function buildOriginOptions(): Array<{
+  value: DoctorEncounterOrigin;
+  label: string;
+}> {
   return [
-    { value: "manual", label: tr("زيارة يدوية", "Manual encounter") },
-    { value: "appointment", label: tr("مرتبطة بموعد", "Linked to appointment") },
-    { value: "walk_in", label: tr("زيارة مباشرة", "Walk-in") },
-    { value: "follow_up", label: tr("متابعة", "Follow-up") },
+    { value: "manual", label: "doctor.encounters.create.origin.manual" },
+    {
+      value: "appointment",
+      label: "doctor.encounters.create.origin.appointment",
+    },
+    { value: "walk_in", label: "doctor.encounters.create.origin.walkIn" },
+    { value: "follow_up", label: "doctor.encounters.create.origin.followUp" },
   ];
 }
 
@@ -69,33 +73,36 @@ const INITIAL_VALUES: EncounterFormValues = {
 function validateField(
   name: keyof EncounterFormValues,
   values: EncounterFormValues,
-  tr: TrFn = defaultTr,
 ): string {
   switch (name) {
     case "patientId":
-      return values.patientId ? "" : tr("يرجى اختيار المريض قبل إنشاء الزيارة.", "Please select a patient before creating the encounter.");
+      return values.patientId
+        ? ""
+        : "doctor.encounters.create.validation.patientRequired";
     case "origin":
-      return values.origin ? "" : tr("يرجى اختيار نوع الزيارة.", "Please select the encounter type.");
+      return values.origin
+        ? ""
+        : "doctor.encounters.create.validation.originRequired";
     case "appointmentId": {
       const trimmed = values.appointmentId.trim();
       if (values.origin === "appointment" && !trimmed) {
-        return tr("رقم الموعد مطلوب عند اختيار زيارة مرتبطة بموعد.", "The appointment id is required when the encounter is linked to an appointment.");
+        return "doctor.encounters.create.validation.appointmentIdRequired";
       }
       if (trimmed && !isValidAppointmentObjectId(trimmed)) {
-        return tr("رقم الموعد غير صالح. أدخل معرّف الموعد كاملاً (24 حرفاً hex) من نظام المواعيد.", "Invalid appointment id. Enter the full appointment id (24 hex characters) from the appointments system.");
+        return "doctor.encounters.create.validation.invalidAppointmentId";
       }
       return "";
     }
     case "notes": {
       const trimmed = values.notes.trim();
       if (!trimmed) {
-        return tr("يرجى كتابة ملاحظات افتتاحية مختصرة عن سبب الزيارة.", "Please write a short opening note about the reason for the encounter.");
+        return "doctor.encounters.create.validation.notesRequired";
       }
       if (trimmed.length < 10) {
-        return tr("الملاحظات يجب أن تكون أوضح قليلًا، 10 أحرف على الأقل.", "The notes need to be a bit clearer, at least 10 characters.");
+        return "doctor.encounters.create.validation.notesTooShort";
       }
       if (trimmed.length > 500) {
-        return tr("الملاحظات طويلة جدًا. الحد الأقصى 500 حرف.", "The notes are too long. Maximum 500 characters.");
+        return "doctor.encounters.create.validation.notesTooLong";
       }
       return "";
     }
@@ -104,12 +111,12 @@ function validateField(
   }
 }
 
-function validateForm(values: EncounterFormValues, tr: TrFn = defaultTr): EncounterFormErrors {
+function validateForm(values: EncounterFormValues): EncounterFormErrors {
   return {
-    patientId: validateField("patientId", values, tr) || undefined,
-    origin: validateField("origin", values, tr) || undefined,
-    appointmentId: validateField("appointmentId", values, tr) || undefined,
-    notes: validateField("notes", values, tr) || undefined,
+    patientId: validateField("patientId", values) || undefined,
+    origin: validateField("origin", values) || undefined,
+    appointmentId: validateField("appointmentId", values) || undefined,
+    notes: validateField("notes", values) || undefined,
   };
 }
 
@@ -125,8 +132,7 @@ export function CreateEncounterDialog({
   submitting = false,
   onSubmit,
 }: CreateEncounterDialogProps) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { t, locale, dir } = useI18n();
   const { toast } = useToast();
   const selectListboxOutletRef = useRef<HTMLDivElement>(null);
   const valuesRef = useRef<EncounterFormValues>(INITIAL_VALUES);
@@ -156,18 +162,19 @@ export function CreateEncounterDialog({
             </div>
             <div className="flex-1 min-w-0 text-start">
               <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
-                {patient.user?.fullName ?? tr("مريض", "Patient")}
+                {patient.user?.fullName ??
+                  t("doctor.encounters.create.patientDefault")}
               </div>
               <div className="mt-0.5 font-cairo text-[11px] font-semibold text-[#667085]">
                 {patient.publicId
-                  ? tr(`رقم الملف: ${patient.publicId}`, `File number: ${patient.publicId}`)
-                  : tr("بدون رقم ملف ظاهر", "No visible file number")}
+                  ? `${t("doctor.encounters.create.fileNumber")}: ${patient.publicId}`
+                  : t("doctor.encounters.create.noVisibleFileNumber")}
               </div>
             </div>
           </div>
         ),
       })),
-    [sortedPatients, locale],
+    [sortedPatients, t],
   );
 
   useEffect(() => {
@@ -226,15 +233,14 @@ export function CreateEncounterDialog({
     setTouched((prev) => ({ ...prev, [field]: true }));
     setErrors((prev) => ({
       ...prev,
-      [field]:
-        validateField(field, valuesRef.current, tr) || undefined,
+      [field]: validateField(field, valuesRef.current, tr) || undefined,
     }));
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nextErrors = validateForm(values, tr);
+    const nextErrors = validateForm(values);
     setTouched({
       patientId: true,
       origin: true,
@@ -244,10 +250,16 @@ export function CreateEncounterDialog({
     setErrors(nextErrors);
 
     if (hasErrors(nextErrors)) {
-      toast(tr("يرجى مراجعة الحقول المعلّمة بالأحمر قبل إنشاء الزيارة.", "Please review the fields marked in red before creating the encounter."), {
-        title: tr("بيانات ناقصة أو غير صحيحة", "Missing or invalid data"),
-        variant: "warning",
-      });
+      toast(
+        tr(
+          "يرجى مراجعة الحقول المعلّمة بالأحمر قبل إنشاء الزيارة.",
+          "Please review the fields marked in red before creating the encounter.",
+        ),
+        {
+          title: tr("بيانات ناقصة أو غير صحيحة", "Missing or invalid data"),
+          variant: "warning",
+        },
+      );
       return;
     }
 
@@ -342,10 +354,19 @@ export function CreateEncounterDialog({
                       value={values.patientId}
                       onChange={(next) => setFieldValue("patientId", next)}
                       onBlur={() => markTouched("patientId")}
-                      placeholder={tr("اختر المريض الذي ستبدأ له الزيارة", "Select the patient to start the encounter for")}
+                      placeholder={tr(
+                        "اختر المريض الذي ستبدأ له الزيارة",
+                        "Select the patient to start the encounter for",
+                      )}
                       error={Boolean(errors.patientId)}
-                      emptyTriggerLabel={tr("لا يوجد مرضى متاحون", "No patients available")}
-                      emptyState={tr("لا يوجد مرضى متاحون حاليًا لإنشاء زيارة جديدة.", "No patients are currently available to create a new encounter.")}
+                      emptyTriggerLabel={tr(
+                        "لا يوجد مرضى متاحون",
+                        "No patients available",
+                      )}
+                      emptyState={tr(
+                        "لا يوجد مرضى متاحون حاليًا لإنشاء زيارة جديدة.",
+                        "No patients are currently available to create a new encounter.",
+                      )}
                       listboxAriaLabel={tr("اختيار المريض", "Select patient")}
                       triggerClassName="rounded-[14px]"
                       dropdownMaxHeight={240}
@@ -371,9 +392,15 @@ export function CreateEncounterDialog({
                         setFieldValue("origin", next as DoctorEncounterOrigin)
                       }
                       onBlur={() => markTouched("origin")}
-                      placeholder={tr("اختر نوع الزيارة", "Select the encounter type")}
+                      placeholder={tr(
+                        "اختر نوع الزيارة",
+                        "Select the encounter type",
+                      )}
                       error={Boolean(errors.origin)}
-                      listboxAriaLabel={tr("اختيار نوع الزيارة", "Select encounter type")}
+                      listboxAriaLabel={tr(
+                        "اختيار نوع الزيارة",
+                        "Select encounter type",
+                      )}
                       triggerClassName="rounded-[14px]"
                       dropdownMaxHeight={240}
                       listboxPortalRef={selectListboxOutletRef}
@@ -405,8 +432,14 @@ export function CreateEncounterDialog({
                       onBlur={() => markTouched("appointmentId")}
                       placeholder={
                         values.origin === "appointment"
-                          ? tr("أدخل معرّف الموعد (24 حرفاً) من نظام المواعيد", "Enter the appointment id (24 characters) from the appointments system")
-                          : tr("اختياري — اتركه فارغاً إن لم تربط بموعد", "Optional — leave empty if not linked to an appointment")
+                          ? tr(
+                              "أدخل معرّف الموعد (24 حرفاً) من نظام المواعيد",
+                              "Enter the appointment id (24 characters) from the appointments system",
+                            )
+                          : tr(
+                              "اختياري — اتركه فارغاً إن لم تربط بموعد",
+                              "Optional — leave empty if not linked to an appointment",
+                            )
                       }
                       className="h-12 w-full border-0 bg-transparent px-0 text-start font-cairo text-[14px] font-bold text-[#101828] outline-none placeholder:font-semibold placeholder:text-[#98A2B3]"
                       aria-invalid={Boolean(errors.appointmentId)}
@@ -420,8 +453,14 @@ export function CreateEncounterDialog({
                 ) : (
                   <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#667085]">
                     {values.origin === "appointment"
-                      ? tr("عند اختيار «مرتبطة بموعد» يصبح معرّف الموعد مطلوباً.", "When \"Linked to appointment\" is selected, the appointment id becomes required.")
-                      : tr("إذا أدخلت معرّف موعد، يجب أن يكون صالحاً بالكامل.", "If you enter an appointment id, it must be fully valid.")}
+                      ? tr(
+                          "عند اختيار «مرتبطة بموعد» يصبح معرّف الموعد مطلوباً.",
+                          'When "Linked to appointment" is selected, the appointment id becomes required.',
+                        )
+                      : tr(
+                          "إذا أدخلت معرّف موعد، يجب أن يكون صالحاً بالكامل.",
+                          "If you enter an appointment id, it must be fully valid.",
+                        )}
                   </div>
                 )}
               </div>
@@ -432,7 +471,10 @@ export function CreateEncounterDialog({
                   </div>
                   <div>
                     <div className="font-cairo text-[13px] font-extrabold text-[#101828]">
-                      {tr("تهيئة احترافية للزيارة", "Professional encounter setup")}
+                      {tr(
+                        "تهيئة احترافية للزيارة",
+                        "Professional encounter setup",
+                      )}
                     </div>
                     <div className="mt-1 font-cairo text-[11px] font-semibold leading-6 text-[#667085]">
                       {tr(
@@ -475,7 +517,10 @@ export function CreateEncounterDialog({
                     </div>
                   ) : (
                     <div className="text-start font-cairo text-[11px] font-semibold text-[#667085]">
-                      {tr("يفضّل أن تكون الملاحظات مباشرة وواضحة منذ بداية الزيارة.", "It's best for the notes to be direct and clear from the start of the encounter.")}
+                      {tr(
+                        "يفضّل أن تكون الملاحظات مباشرة وواضحة منذ بداية الزيارة.",
+                        "It's best for the notes to be direct and clear from the start of the encounter.",
+                      )}
                     </div>
                   )}
                   <div className="shrink-0 font-cairo text-[11px] font-semibold text-[#98A2B3]">

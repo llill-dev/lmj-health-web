@@ -2,17 +2,16 @@ import type { DoctorPatientsListParams } from '@/lib/doctor/types';
 
 export type DashboardPatientFilter = 'all' | 'today' | 'active' | 'upcoming';
 
-type TrFn = (ar: string, en: string) => string;
-const defaultTr: TrFn = (ar) => ar;
+type TFn = (key: string, fallback?: string) => string;
 
 export function buildDashboardPatientFilterLabels(
-  tr: TrFn = defaultTr,
+  t: TFn,
 ): Record<DashboardPatientFilter, string> {
   return {
-    all: tr('الكل', 'All'),
-    today: tr('اليوم', 'Today'),
-    active: tr('نشط', 'Active'),
-    upcoming: tr('القادم', 'Upcoming'),
+    all: t('common.all'),
+    today: t('doctor.dashboardPatientFilters.today'),
+    active: t('common.active'),
+    upcoming: t('doctor.dashboardPatientFilters.upcoming'),
   };
 }
 

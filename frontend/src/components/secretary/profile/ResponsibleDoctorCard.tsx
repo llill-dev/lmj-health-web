@@ -1,4 +1,5 @@
 import { Stethoscope, Star } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface ResponsibleDoctorCardProps {
   doctorName: string;
@@ -13,10 +14,12 @@ export default function ResponsibleDoctorCard({
   rating,
   ratingCount,
 }: ResponsibleDoctorCardProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
       <h3 className="font-cairo text-lg font-bold text-[#0f172a] mb-4">
-        الطبيب المسؤول
+        {tr("الطبيب المسؤول", "Responsible doctor")}
       </h3>
       <div className="flex items-start gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
@@ -35,7 +38,7 @@ export default function ResponsibleDoctorCard({
               {rating}
             </span>
             <span className="font-cairo text-xs font-medium text-[#64748b]">
-              ({ratingCount} تقييم)
+              {tr(`(${ratingCount} تقييم)`, `(${ratingCount} reviews)`)}
             </span>
           </div>
         </div>

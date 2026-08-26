@@ -1,8 +1,13 @@
-import { Activity, Ban, CheckCircle2, Clock } from 'lucide-react';
-import { LayoutGroup, motion } from 'framer-motion';
-import { cn } from '@/lib/utils/utils';
+import { Activity, Ban, CheckCircle2, Clock } from "lucide-react";
+import { LayoutGroup, motion } from "framer-motion";
+import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
-export type ConsultationStatusTab = 'waiting' | 'in_progress' | 'closed' | 'dismissed';
+export type ConsultationStatusTab =
+  | "waiting"
+  | "in_progress"
+  | "closed"
+  | "dismissed";
 
 type TabCounts = {
   waiting: number;
@@ -11,15 +16,11 @@ type TabCounts = {
   dismissed: number;
 };
 
-const TABS: {
-  id: ConsultationStatusTab;
-  label: string;
-  icon: typeof Clock;
-}[] = [
-  { id: 'waiting', label: 'جديدة', icon: Clock },
-  { id: 'in_progress', label: 'نشطة', icon: Activity },
-  { id: 'closed', label: 'مغلقة', icon: CheckCircle2 },
-  { id: 'dismissed', label: 'مرفوضة', icon: Ban },
+const TABS_CONFIG = [
+  { id: "waiting" as const, icon: Clock },
+  { id: "in_progress" as const, icon: Activity },
+  { id: "closed" as const, icon: CheckCircle2 },
+  { id: "dismissed" as const, icon: Ban },
 ];
 
 export function ConsultationsStatusTabs({
@@ -33,14 +34,21 @@ export function ConsultationsStatusTabs({
   counts: TabCounts;
   disabled?: boolean;
 }) {
+  const { t } = useI18n();
+
+  const tabs = TABS_CONFIG.map((tab) => ({
+    ...tab,
+    label: t(`doctor.consultations.status.${tab.id}`),
+  }));
+
   return (
     <LayoutGroup id="consultations-status-tabs">
       <div
         role="tablist"
-        aria-label="تصفية حالة الاستشارة"
+        aria-label={t("doctor.consultations.status.filterLabel")}
         className="relative grid grid-cols-4 gap-1 rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] p-1"
       >
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const active = value === tab.id;
           const Icon = tab.icon;
           const count = counts[tab.id];
@@ -55,11 +63,11 @@ export function ConsultationsStatusTabs({
               onClick={() => onChange(tab.id)}
               whileTap={disabled ? undefined : { scale: 0.98 }}
               className={cn(
-                'relative flex h-[42px] items-center justify-center gap-2 rounded-[8px] px-2 font-cairo text-[12px] font-extrabold transition-colors duration-200 sm:text-[13px]',
-                disabled && 'pointer-events-none opacity-70',
+                "relative flex h-[42px] items-center justify-center gap-2 rounded-[8px] px-2 font-cairo text-[12px] font-extrabold transition-colors duration-200 sm:text-[13px]",
+                disabled && "pointer-events-none opacity-70",
                 active
-                  ? 'text-white'
-                  : 'text-[#667085] hover:bg-white/80 hover:text-[#101828]',
+                  ? "text-white"
+                  : "text-[#667085] hover:bg-white/80 hover:text-[#101828]",
               )}
             >
               {active ? (
@@ -67,7 +75,7 @@ export function ConsultationsStatusTabs({
                   layoutId="consultations-status-tab-pill"
                   className="absolute inset-0 rounded-[8px] bg-primary shadow-[0_8px_20px_-6px_rgba(15,143,139,0.45)]"
                   transition={{
-                    type: 'spring',
+                    type: "spring",
                     stiffness: 400,
                     damping: 32,
                   }}

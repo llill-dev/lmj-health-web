@@ -1,30 +1,35 @@
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Calendar, CalendarClock, Menu, Phone, XCircle } from 'lucide-react';
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Calendar, CalendarClock, Eye, Menu, Phone, XCircle } from "lucide-react";
 import {
   DOCTOR_MINT_TABLE_TD,
   DoctorMintTableShell,
-} from '@/components/doctor/shared/doctor-mint-table';
+} from "@/components/doctor/shared/doctor-mint-table";
 import {
   resolveWaitlistPatientName,
   resolveWaitlistPatientPublicId,
-} from '@/hooks/doctor/waitlist/useDoctorWaitlist';
-import { isWaitlistActionable } from '@/lib/doctor/waitlist/labels';
-import type { WaitlistRequest } from '@/lib/doctor/waitlist/types';
-import { cn } from '@/lib/utils/utils';
+} from "@/hooks/doctor/waitlist/useDoctorWaitlist";
+import { isWaitlistActionable } from "@/lib/doctor/waitlist/labels";
+import type { WaitlistRequest } from "@/lib/doctor/waitlist/types";
+import { cn } from "@/lib/utils/utils";
 import {
   WaitlistStatusBadge,
   WaitlistUrgencyBadge,
-} from './waitlist-status-badge';
+} from "./waitlist-status-badge";
+import { useI18n } from "@/i18n/provider";
 
-const TABLE_COLUMNS = [
-  'الرقم العام',
-  'اسم المريض',
-  'الأولوية',
-  'الفترة المفضلة',
-  'الحالة',
-  'الإجراءات',
-] as const;
+function buildTableColumns(
+  t: (key: string, fallback?: string) => string,
+): string[] {
+  return [
+    t("doctor.waitlist.table.publicId"),
+    t("doctor.waitlist.table.patientName"),
+    t("doctor.waitlist.table.priority"),
+    t("doctor.waitlist.table.preferredPeriod"),
+    t("doctor.waitlist.table.status"),
+    t("doctor.waitlist.table.actions"),
+  ];
+}
 
 type ActionsMenuState = {
   requestId: string;
@@ -32,12 +37,16 @@ type ActionsMenuState = {
   left: number;
 };
 
-function formatPreferredRange(request: WaitlistRequest): string {
+function formatPreferredRange(
+  request: WaitlistRequest,
+  locale: string,
+): string {
+  const localeTag = locale === "ar" ? "ar" : "en";
   const from = request.preferredDateFrom
-    ? new Date(request.preferredDateFrom).toLocaleDateString('ar')
-    : '—';
+    ? new Date(request.preferredDateFrom).toLocaleDateString(localeTag)
+    : "—";
   const to = request.preferredDateTo
-    ? new Date(request.preferredDateTo).toLocaleDateString('ar')
+    ? new Date(request.preferredDateTo).toLocaleDateString(localeTag)
     : from;
   return from === to ? from : `${from} – ${to}`;
 }
@@ -52,6 +61,7 @@ export function WaitlistTable({
   onContacted,
   onBook,
   onClose,
+  onViewDetails,
 }: {
   requests: WaitlistRequest[];
   busy: boolean;
@@ -62,7 +72,10 @@ export function WaitlistTable({
   onContacted: (request: WaitlistRequest) => void;
   onBook: (request: WaitlistRequest) => void;
   onClose: (request: WaitlistRequest) => void;
+  /** Optional — shows a "view details" action (contact preference, notes, history) in the row menu. */
+  onViewDetails?: (request: WaitlistRequest) => void;
 }) {
+  const { locale, t } = useI18n();
   const [menu, setMenu] = useState<ActionsMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const highlightRef = useRef<HTMLTableRowElement | null>(null);
@@ -70,8 +83,8 @@ export function WaitlistTable({
   useEffect(() => {
     if (!highlightRequestId) return;
     highlightRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
+      behavior: "smooth",
+      block: "center",
     });
   }, [highlightRequestId, requests]);
 
@@ -85,14 +98,14 @@ export function WaitlistTable({
     };
 
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenu(null);
+      if (event.key === "Escape") setMenu(null);
     };
 
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', onKey);
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener('mousedown', close);
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", onKey);
     };
   }, [menu]);
 
@@ -119,22 +132,27 @@ export function WaitlistTable({
 
   return (
     <>
-      <DoctorMintTableShell columns={[...TABLE_COLUMNS]} isEmpty={!requests.length}>
+      <DoctorMintTableShell
+        columns={buildTableColumns(t)}
+        isEmpty={!requests.length}
+      >
         {requests.map((request) => {
           const actionable = isWaitlistActionable(request.status);
           const appointmentId =
-            typeof request.appointment === 'string'
+            typeof request.appointment === "string"
               ? request.appointment
               : request.appointment?._id;
 
           return (
             <tr
               key={request._id}
-              ref={highlightRequestId === request._id ? highlightRef : undefined}
+              ref={
+                highlightRequestId === request._id ? highlightRef : undefined
+              }
               className={cn(
-                'border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60',
+                "border-b border-[#F2F4F7] last:border-b-0 hover:bg-[#F0FDFA]/60",
                 highlightRequestId === request._id &&
-                  'bg-[#F0FDFA] ring-2 ring-inset ring-primary/40',
+                  "bg-[#F0FDFA] ring-2 ring-inset ring-primary/40",
               )}
             >
               <td
@@ -161,7 +179,9 @@ export function WaitlistTable({
                     className="h-3.5 w-3.5 shrink-0 text-[#98A2B3]"
                     aria-hidden
                   />
-                  <span className="break-words">{formatPreferredRange(request)}</span>
+                  <span className="break-words">
+                    {formatPreferredRange(request, locale)}
+                  </span>
                 </div>
               </td>
               <td className={DOCTOR_MINT_TABLE_TD}>
@@ -171,7 +191,7 @@ export function WaitlistTable({
                 />
               </td>
               <td className={DOCTOR_MINT_TABLE_TD}>
-                {actionable ? (
+                {actionable || onViewDetails ? (
                   <button
                     type="button"
                     disabled={busy}
@@ -184,7 +204,7 @@ export function WaitlistTable({
                       openActionsMenu(request, button);
                     }}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#667085] transition hover:border-primary/30 hover:text-primary disabled:opacity-60"
-                    aria-label="إجراءات الطلب"
+                    aria-label={t("doctor.waitlist.actions.label")}
                     aria-expanded={menu?.requestId === request._id}
                   >
                     <Menu className="h-4 w-4" aria-hidden />
@@ -196,7 +216,7 @@ export function WaitlistTable({
                     className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-primary/80"
                   >
                     <CalendarClock className="h-4 w-4 shrink-0" aria-hidden />
-                    <span>عرض الموعد</span>
+                    <span>{t("doctor.waitlist.actions.viewAppointment")}</span>
                   </button>
                 ) : (
                   <span className="font-cairo text-[12px] font-semibold text-[#98A2B3]">
@@ -217,34 +237,54 @@ export function WaitlistTable({
               style={{ top: menu.top, left: menu.left }}
               role="menu"
             >
-              <button
-                type="button"
-                role="menuitem"
-                disabled={busy}
-                className="block w-full px-4 py-2.5 font-cairo text-[12px] font-extrabold text-primary hover:bg-[#F0FDFA] disabled:opacity-60"
-                onClick={() => {
-                  setMenu(null);
-                  onBook(activeRequest);
-                }}
-              >
-                حجز موعد
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                disabled={busy}
-                className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] hover:bg-[#F0FDFA] disabled:opacity-60"
-                onClick={() => {
-                  setMenu(null);
-                  onContacted(activeRequest);
-                }}
-              >
-                <span className="inline-flex items-center justify-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5" aria-hidden />
-                  تم التواصل
-                </span>
-              </button>
-              {typeof activeRequest.appointment === 'string' ||
+              {onViewDetails ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] hover:bg-[#F0FDFA]"
+                  onClick={() => {
+                    setMenu(null);
+                    onViewDetails(activeRequest);
+                  }}
+                >
+                  <span className="inline-flex items-center justify-center gap-1.5">
+                    <Eye className="h-3.5 w-3.5" aria-hidden />
+                    {t("doctor.waitlist.actions.viewDetails")}
+                  </span>
+                </button>
+              ) : null}
+              {isWaitlistActionable(activeRequest.status) ? (
+                <>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    disabled={busy}
+                    className="block w-full px-4 py-2.5 font-cairo text-[12px] font-extrabold text-primary hover:bg-[#F0FDFA] disabled:opacity-60"
+                    onClick={() => {
+                      setMenu(null);
+                      onBook(activeRequest);
+                    }}
+                  >
+                    {t("doctor.waitlist.actions.bookAppointment")}
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    disabled={busy}
+                    className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#344054] hover:bg-[#F0FDFA] disabled:opacity-60"
+                    onClick={() => {
+                      setMenu(null);
+                      onContacted(activeRequest);
+                    }}
+                  >
+                    <span className="inline-flex items-center justify-center gap-1.5">
+                      <Phone className="h-3.5 w-3.5" aria-hidden />
+                      {t("doctor.waitlist.actions.contacted")}
+                    </span>
+                  </button>
+                </>
+              ) : null}
+              {typeof activeRequest.appointment === "string" ||
               activeRequest.appointment?._id ? (
                 <button
                   type="button"
@@ -255,24 +295,26 @@ export function WaitlistTable({
                     onNavigateAppointments();
                   }}
                 >
-                  عرض الموعد
+                  {t("doctor.waitlist.actions.viewAppointment")}
                 </button>
               ) : null}
-              <button
-                type="button"
-                role="menuitem"
-                disabled={busy}
-                className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#B42318] hover:bg-[#FEF3F2] disabled:opacity-60"
-                onClick={() => {
-                  setMenu(null);
-                  onClose(activeRequest);
-                }}
-              >
-                <span className="inline-flex items-center justify-center gap-1.5">
-                  <XCircle className="h-3.5 w-3.5" aria-hidden />
-                  إغلاق الطلب
-                </span>
-              </button>
+              {isWaitlistActionable(activeRequest.status) ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={busy}
+                  className="block w-full px-4 py-2.5 font-cairo text-[12px] font-bold text-[#B42318] hover:bg-[#FEF3F2] disabled:opacity-60"
+                  onClick={() => {
+                    setMenu(null);
+                    onClose(activeRequest);
+                  }}
+                >
+                  <span className="inline-flex items-center justify-center gap-1.5">
+                    <XCircle className="h-3.5 w-3.5" aria-hidden />
+                    {t("doctor.waitlist.actions.closeRequest")}
+                  </span>
+                </button>
+              ) : null}
             </div>,
             document.body,
           )

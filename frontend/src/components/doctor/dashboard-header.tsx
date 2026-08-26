@@ -8,7 +8,9 @@ import { useAuthStore } from "@/store/authStore";
 import { useI18n } from "@/i18n/provider";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
-const greetingWord = (t: (key: string, fallback?: string) => string): string => {
+const greetingWord = (
+  t: (key: string, fallback?: string) => string,
+): string => {
   const h = new Date().getHours();
   if (h >= 5 && h < 12) return t("doctor.greeting.morning");
   if (h >= 12 && h < 17) return t("doctor.greeting.noon");
@@ -18,7 +20,7 @@ const greetingWord = (t: (key: string, fallback?: string) => string): string => 
 
 const initialsFromName = (name: string): string => {
   const t = name.trim();
-  if (!t) return "ط";
+  if (!t) return "د";
   const parts = t.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     const a = parts[0]?.[0] ?? "";
@@ -38,6 +40,7 @@ export default function DashboardHeader({
   onMenuClick?: () => void;
 }) {
   const { locale, t } = useI18n();
+  const isRTL = locale === "ar";
   const dir = locale === "ar" ? "rtl" : "ltr";
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
@@ -155,7 +158,9 @@ export default function DashboardHeader({
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2 border-e border-[#e2e8f0]/80 pe-2 sm:gap-2.5 sm:pe-4">
+            <div
+              className={`flex shrink-0 items-center gap-2 ${isRTL ? "border-e" : "border-s"} border-[#e2e8f0]/80 ${isRTL ? "pe-2" : "ps-2"} sm:gap-2.5 ${isRTL ? "sm:pe-4" : "sm:ps-4"}`}
+            >
               <button
                 type="button"
                 onClick={handleNotificationsClick}

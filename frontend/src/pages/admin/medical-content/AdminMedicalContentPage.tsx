@@ -493,9 +493,9 @@ export default function AdminMedicalContentPage() {
                 )}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white pe-12 ps-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
+                className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-white ps-12 pe-4 text-start font-cairo text-[12px] font-bold text-[#111827] placeholder:text-[#98A2B3]"
               />
-              <div className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
+              <div className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-[#98A2B3]">
                 <Search className="w-5 h-5" />
               </div>
             </div>
@@ -640,8 +640,8 @@ export default function AdminMedicalContentPage() {
                 <p className="mt-1 font-cairo text-[12px] font-semibold text-[#98A2B3]">
                   {query.trim()
                     ? tr(
-                        "هذا البحث نصّي محلي داخل الصفحة فقط لأن /api/admin/content و /api/admin/content/mine لا يدعمان search.",
-                        "This text search is local to the current page because /api/admin/content and /api/admin/content/mine do not support search.",
+                        "البحث يتم داخل الصفحة الحالية فقط. غيّر معايير البحث أو الفلاتر لعرض نتائج أوسع.",
+                        "The search only looks within the current page. Adjust your search or filters to see broader results.",
                       )
                     : tr(
                         "غيّر معايير البحث أو امسح الفلاتر لعرض نتائج أوسع.",

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import type { ClinicExpense, ExpenseCategory } from '@/lib/doctor/clinicAccounts/types';
 import { expenseCategoryLabel } from '@/lib/doctor/clinicAccounts/labels';
-import { formatUsd } from '@/lib/doctor/billing/format';
+import { formatBillingAmount } from '@/lib/doctor/billing/format';
 import { useI18n } from '@/i18n/provider';
 
 const CATEGORY_ICONS: Record<ExpenseCategory, LucideIcon> = {
@@ -23,9 +23,11 @@ const CATEGORY_ICONS: Record<ExpenseCategory, LucideIcon> = {
 export function ExpenseListItem({
   expense,
   index,
+  currency,
 }: {
   expense: ClinicExpense;
   index: number;
+  currency?: string;
 }) {
   const { locale } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
@@ -51,7 +53,7 @@ export function ExpenseListItem({
         </p>
       </div>
       <span className="font-cairo text-[22px] font-black text-primary">
-        {formatUsd(expense.amount)}
+        {formatBillingAmount(expense.amount, currency)}
       </span>
     </motion.div>
   );

@@ -30,8 +30,7 @@ export default function VerifyAccount({
   onVerify?: (code: string) => void | Promise<void>;
   onResend?: () => void | Promise<void>;
 }) {
-  const { locale, dir } = useI18n();
-  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
+  const { locale, dir, t } = useI18n();
 
   const {
     handleSubmit,
@@ -108,7 +107,7 @@ export default function VerifyAccount({
       const formatted = formatVerifyFlowError(error);
       setFlowError(formatted);
       toast(formatted.replace(/\s+/g, " ").trim().slice(0, 220), {
-        title: tr("تعذّر التحقق", "Verification failed"),
+        title: t("auth.resetPassword.verificationFailed"),
         variant: "error",
         durationMs: 4800,
       });
@@ -120,7 +119,11 @@ export default function VerifyAccount({
   const inlineError = errors.code?.message ?? flowError;
 
   return (
-    <section dir={dir} lang={locale} className="mx-auto flex flex-col items-center">
+    <section
+      dir={dir}
+      lang={locale}
+      className="mx-auto flex flex-col items-center"
+    >
       <div className="my-[50px]">
         <img
           src="/images/syr-health-logo.png"
@@ -132,7 +135,7 @@ export default function VerifyAccount({
         />
       </div>
       <h1 className="my-6 text-center text-[28px] font-bold leading-tight text-[#1F2937]">
-        {tr("تحقّق من حسابك", "Verify your account")}
+        {t("auth.verify.title")}
       </h1>
       <div className="relative">
         <div className="relative w-fit">
@@ -147,10 +150,7 @@ export default function VerifyAccount({
             <form onSubmit={handleSubmit(submitOtp)}>
               <div className="text-center">
                 <p className="font-cairo text-[15px] font-semibold leading-[24px] text-[#374151]">
-                  {tr(
-                    "أدخل الرمز المكوّن من ٦ أرقام الذي وصل إلى",
-                    "Enter the 6-digit code sent to",
-                  )}
+                  {t("auth.verify.enterCodeSentTo")}
                 </p>
                 <p className="mt-2 font-cairo text-[16px] font-bold leading-snug text-[#101828]">
                   {destination}
@@ -190,9 +190,7 @@ export default function VerifyAccount({
                   className="flex h-[43.98px] w-[341.22px] items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px] text-[#FFFFFF] shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60"
                 >
                   <CircleCheck className="h-4 w-4 shrink-0" />
-                  {isVerifying
-                    ? tr("جاري التحقق…", "Verifying…")
-                    : tr("تأكيد", "Confirm")}
+                  {isVerifying ? t("auth.verifying") : t("auth.verify.confirm")}
                 </button>
               </div>
 
@@ -202,14 +200,14 @@ export default function VerifyAccount({
                   onClick={onBack}
                   className="font-cairo text-[14px] font-semibold text-[#6B7280] transition-colors hover:text-primary"
                 >
-                  {tr("رجوع", "Back")}
+                  {t("common.back")}
                 </button>
                 <div className="font-cairo text-[13px] font-semibold text-[#9CA3AF]">
                   {secondsLeft > 0 ? (
                     <span>
-                      {tr(
-                        `لم تستلم الرمز؟ يمكن الإرسال مجدداً خلال ${secondsLeft} ث`,
-                        `Didn't get the code? Resend in ${secondsLeft}s`,
+                      {t("auth.claim.resendIn").replace(
+                        "{seconds}",
+                        String(secondsLeft),
                       )}
                     </span>
                   ) : (
@@ -223,27 +221,18 @@ export default function VerifyAccount({
                           await onResend();
                           setFlowError(null);
                           setSecondsLeft(60);
-                          toast(
-                            tr(
-                              "تم إرسال رمز تحقّق جديد.",
-                              "A new verification code was sent.",
-                            ),
-                            {
-                              title: tr("أُعيد الإرسال", "Code resent"),
-                              variant: "success",
-                              durationMs: 3200,
-                            },
-                          );
+                          toast(t("auth.claim.codeResent"), {
+                            title: t("auth.claim.resent"),
+                            variant: "success",
+                            durationMs: 3200,
+                          });
                         } catch (error) {
                           const formatted = formatVerifyFlowError(error);
                           setFlowError(formatted);
                           toast(
                             formatted.replace(/\s+/g, " ").trim().slice(0, 220),
                             {
-                              title: tr(
-                                "تعذّر إعادة الإرسال",
-                                "Resend failed",
-                              ),
+                              title: t("auth.claim.resendFailed"),
                               variant: "error",
                               durationMs: 4800,
                             },
@@ -255,8 +244,8 @@ export default function VerifyAccount({
                       className="text-primary transition-colors hover:text-[#14B3AE] disabled:opacity-60"
                     >
                       {isResending
-                        ? tr("جاري الإرسال…", "Sending…")
-                        : tr("إعادة إرسال الرمز", "Resend code")}
+                        ? t("auth.sending")
+                        : t("auth.claim.resendCode")}
                     </button>
                   )}
                 </div>

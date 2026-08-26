@@ -20,7 +20,7 @@ import type {
   MonthlyFinancePoint,
   WeeklyOverviewPoint,
 } from '@/lib/doctor/clinicAccounts/types';
-import { formatBillingNumber, formatUsd } from '@/lib/doctor/billing/format';
+import { formatBillingAmount, formatBillingNumber } from '@/lib/doctor/billing/format';
 import { useI18n } from '@/i18n/provider';
 
 const formatAxisTick = (value: number) =>
@@ -35,8 +35,10 @@ const TOOLTIP_STYLE = {
 
 export function AccountsOverviewChart({
   data,
+  currency,
 }: {
   data: WeeklyOverviewPoint[];
+  currency?: string;
 }) {
   const { locale } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
@@ -58,7 +60,10 @@ export function AccountsOverviewChart({
             tickLine={false}
             tickFormatter={formatAxisTick}
           />
-          <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
+          <Tooltip
+            contentStyle={TOOLTIP_STYLE}
+            formatter={(v) => formatBillingAmount(Number(v), currency)}
+          />
           <Legend
             wrapperStyle={{ fontFamily: 'Cairo', fontSize: 12 }}
             formatter={(value) =>
@@ -78,7 +83,13 @@ export function AccountsOverviewChart({
   );
 }
 
-export function FinancialBarChart({ data }: { data: MonthlyFinancePoint[] }) {
+export function FinancialBarChart({
+  data,
+  currency,
+}: {
+  data: MonthlyFinancePoint[];
+  currency?: string;
+}) {
   const { locale } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
 
@@ -99,7 +110,10 @@ export function FinancialBarChart({ data }: { data: MonthlyFinancePoint[] }) {
             tickLine={false}
             tickFormatter={formatAxisTick}
           />
-          <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
+          <Tooltip
+            contentStyle={TOOLTIP_STYLE}
+            formatter={(v) => formatBillingAmount(Number(v), currency)}
+          />
           <Legend wrapperStyle={{ fontFamily: 'Cairo', fontSize: 12 }} />
           <Bar
             dataKey="income"
@@ -119,7 +133,13 @@ export function FinancialBarChart({ data }: { data: MonthlyFinancePoint[] }) {
   );
 }
 
-export function FinancialLineChart({ data }: { data: MonthlyFinancePoint[] }) {
+export function FinancialLineChart({
+  data,
+  currency,
+}: {
+  data: MonthlyFinancePoint[];
+  currency?: string;
+}) {
   const { locale } = useI18n();
   const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
 
@@ -140,7 +160,10 @@ export function FinancialLineChart({ data }: { data: MonthlyFinancePoint[] }) {
             tickLine={false}
             tickFormatter={formatAxisTick}
           />
-          <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
+          <Tooltip
+            contentStyle={TOOLTIP_STYLE}
+            formatter={(v) => formatBillingAmount(Number(v), currency)}
+          />
           <Line
             type="monotone"
             dataKey="profit"
@@ -156,7 +179,13 @@ export function FinancialLineChart({ data }: { data: MonthlyFinancePoint[] }) {
   );
 }
 
-export function ExpensePieChart({ data }: { data: ExpenseBreakdownPoint[] }) {
+export function ExpensePieChart({
+  data,
+  currency,
+}: {
+  data: ExpenseBreakdownPoint[];
+  currency?: string;
+}) {
   return (
     <div className="h-[260px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -175,14 +204,23 @@ export function ExpensePieChart({ data }: { data: ExpenseBreakdownPoint[] }) {
               <Cell key={entry.category} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => formatUsd(Number(v))} />
+          <Tooltip
+            contentStyle={TOOLTIP_STYLE}
+            formatter={(v) => formatBillingAmount(Number(v), currency)}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>
   );
 }
 
-export function ExpensePieLegend({ data }: { data: ExpenseBreakdownPoint[] }) {
+export function ExpensePieLegend({
+  data,
+  currency,
+}: {
+  data: ExpenseBreakdownPoint[];
+  currency?: string;
+}) {
   return (
     <div className="mt-4 grid grid-cols-2 gap-3">
       {data.map((item) => (
@@ -191,7 +229,7 @@ export function ExpensePieLegend({ data }: { data: ExpenseBreakdownPoint[] }) {
           className="flex items-center justify-between gap-2 rounded-[10px] border border-[#EEF2F6] bg-[#FAFAFA] px-3 py-2"
         >
           <span className="font-cairo text-[13px] font-extrabold text-[#111827]">
-            {formatUsd(item.value)}
+            {formatBillingAmount(item.value, currency)}
           </span>
           <span className="flex items-center gap-2 font-cairo text-[12px] font-bold text-[#667085]">
             {item.label}

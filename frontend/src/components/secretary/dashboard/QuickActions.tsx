@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface QuickAction {
   icon: LucideIcon;
@@ -12,10 +13,12 @@ interface QuickActionsProps {
 }
 
 export default function QuickActions({ actions }: QuickActionsProps) {
+  const { locale } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   return (
     <div>
       <h3 className="font-cairo text-lg font-bold text-[#0f172a] mb-4">
-        أزرار سريعة
+        {tr("أزرار سريعة", "Quick actions")}
       </h3>
       <div className="flex flex-wrap gap-3">
         {actions.map((action, index) => {

@@ -24,10 +24,13 @@ import {
   formatAppointmentDate,
   formatAppointmentTime,
 } from "@/lib/shared/formatAppointmentDateTime";
+import { useI18n } from "@/i18n/provider";
 
-function patientInitialsFromName(name?: string): string {
+type TFn = (key: string, fallback?: string) => string;
+
+function patientInitialsFromName(name: string | undefined, t: TFn): string {
   const value = name?.trim() ?? "";
-  if (!value) return "م";
+  if (!value) return t("doctor.appointmentsTab.initialsFallback");
   const parts = value.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
@@ -54,14 +57,16 @@ export function AppointmentsTab({
   onOpenAppointments,
   formatIsoDate,
 }: AppointmentsTabProps) {
+  const { t } = useI18n();
+
   if (isAwaitingData) return <PatientDetailsTabSkeleton rows={3} />;
 
   if (isError) {
     return (
       <DoctorListErrorState
-        title="تعذّر تحميل المواعيد"
-        brief="حدث خطأ أثناء تحميل مواعيد المريض"
-        detail="حدث خطأ أثناء تحميل مواعيد المريض"
+        title={t("doctor.appointmentsTab.error.title")}
+        brief={t("doctor.appointmentsTab.error.message")}
+        detail={t("doctor.appointmentsTab.error.message")}
         retrying={retrying}
         onRetry={onRetry}
       />
@@ -82,9 +87,9 @@ export function AppointmentsTab({
             variant="teal"
             imageSrc="/images/photo-not-meduical-file.png"
             imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.12)]"
-            title="لا توجد مواعيد مسجّلة"
-            subtitle="لا توجد مواعيد محجوزة لهذا المريض حتى الآن"
-            actionLabel="حجز موعد جديد"
+            title={t("doctor.appointmentsTab.empty.title")}
+            subtitle={t("doctor.appointmentsTab.empty.subtitle")}
+            actionLabel={t("doctor.appointmentsTab.bookNew")}
             onAction={onOpenAppointments}
             actionIcon={<CalendarDays className="h-4 w-4" />}
           />
@@ -94,11 +99,11 @@ export function AppointmentsTab({
   }
 
   const statusMap: Record<string, { label: string; tone: string }> = {
-    scheduled: { label: "مؤكد", tone: "bg-primary text-white" },
-    completed: { label: "مكتمل", tone: "bg-[#ECFDF3] text-[#027A48] ring-1 ring-inset ring-[#ABEFC6]" },
-    cancelled: { label: "ملغي", tone: "bg-[#FEE2E2] text-[#991B1B] ring-1 ring-inset ring-[#FCA5A5]" },
-    no_show: { label: "لم يحضر", tone: "bg-[#F3F4F6] text-[#475467] ring-1 ring-inset ring-[#E5E7EB]" },
-    rescheduled: { label: "أعيدت جدولته", tone: "bg-[#FFF7ED] text-[#C2410C] ring-1 ring-inset ring-[#FDBA74]" },
+    scheduled: { label: t("doctor.appointmentsTab.status.scheduled"), tone: "bg-primary text-white" },
+    completed: { label: t("doctor.appointmentsTab.status.completed"), tone: "bg-[#ECFDF3] text-[#027A48] ring-1 ring-inset ring-[#ABEFC6]" },
+    cancelled: { label: t("doctor.appointmentsTab.status.cancelled"), tone: "bg-[#FEE2E2] text-[#991B1B] ring-1 ring-inset ring-[#FCA5A5]" },
+    no_show: { label: t("doctor.appointmentsTab.status.noShow"), tone: "bg-[#F3F4F6] text-[#475467] ring-1 ring-inset ring-[#E5E7EB]" },
+    rescheduled: { label: t("doctor.appointmentsTab.status.rescheduled"), tone: "bg-[#FFF7ED] text-[#C2410C] ring-1 ring-inset ring-[#FDBA74]" },
   };
 
   return (
@@ -113,20 +118,20 @@ export function AppointmentsTab({
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 font-cairo text-[13px] font-extrabold text-white shadow-[0_10px_24px_rgba(15,143,139,0.18)] transition-colors hover:bg-[#0d7a77]"
         >
           <Plus className="h-4 w-4" />
-          حجز موعد جديد
+          {t("doctor.appointmentsTab.bookNew")}
         </button>
       </motion.div>
 
       {appointments.map((appointment, index) => {
         const status = statusMap[appointment.status] ?? {
-          label: appointment.status ?? "غير معروف",
+          label: appointment.status ?? t("doctor.appointmentsTab.status.unknown"),
           tone: "bg-[#F3F4F6] text-[#475467] ring-1 ring-inset ring-[#E5E7EB]",
         };
         const patientName =
           appointment.patientName ??
           appointment.patient?.userId?.fullName ??
           appointment.patient?.fullName ??
-          "المريض";
+          t("doctor.appointmentsTab.patientFallback");
         const patientPhone =
           appointment.patientPhone ??
           appointment.patient?.userId?.phone ??
@@ -135,13 +140,16 @@ export function AppointmentsTab({
         const type =
           appointment.type ??
           (appointment.mode === "video" ? "video" : "clinic");
-        const modeLine = type === "video" ? "أونلاين" : "عيادة";
+        const modeLine =
+          type === "video"
+            ? t("doctor.appointmentsTab.mode.online")
+            : t("doctor.appointmentsTab.mode.clinic");
         const kindLabel =
           type === "video"
-            ? "استشارة"
+            ? t("doctor.appointmentsTab.kind.consultation")
             : type === "home"
-              ? "زيارة منزلية"
-              : "مراجعة";
+              ? t("doctor.appointmentsTab.kind.homeVisit")
+              : t("doctor.appointmentsTab.kind.followUp");
 
         return (
           <motion.article
@@ -153,7 +161,7 @@ export function AppointmentsTab({
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary font-cairo text-[18px] font-extrabold text-white shadow-[0_8px_18px_rgba(15,143,139,0.22)]">
-                    {patientInitialsFromName(patientName)}
+                    {patientInitialsFromName(patientName, t)}
                   </div>
 
                   <div className="min-w-0 flex-1 space-y-2">
@@ -204,7 +212,7 @@ export function AppointmentsTab({
                   <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
                     <Calendar className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
                     <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
-                      <div className="font-cairo text-[16px] font-bold text-primary">التاريخ</div>
+                      <div className="font-cairo text-[16px] font-bold text-primary">{t("doctor.appointmentsTab.fields.date")}</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                         {formatAppointmentDate(appointment.date)}
                       </div>
@@ -213,7 +221,7 @@ export function AppointmentsTab({
                   <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
                     <Clock className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
                     <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
-                      <div className="font-cairo text-[16px] font-bold text-primary">الوقت</div>
+                      <div className="font-cairo text-[16px] font-bold text-primary">{t("doctor.appointmentsTab.fields.time")}</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                         {formatAppointmentTime(appointment.startTime ?? appointment.time)}
                       </div>
@@ -222,7 +230,7 @@ export function AppointmentsTab({
                   <div className="flex items-start gap-3 border-b border-[#F2F4F7] py-3 last:border-b-0">
                     <Check className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
                     <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
-                      <div className="font-cairo text-[16px] font-bold text-primary">الحالة</div>
+                      <div className="font-cairo text-[16px] font-bold text-primary">{t("doctor.appointmentsTab.fields.status")}</div>
                       <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                         {status.label}
                       </div>
@@ -232,7 +240,7 @@ export function AppointmentsTab({
                     <div className="flex items-start gap-3 py-3">
                       <Hospital className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" />
                       <div className="flex min-w-0 flex-1 items-center gap-4 text-start">
-                        <div className="font-cairo text-[16px] font-bold text-primary">نوع الموعد</div>
+                        <div className="font-cairo text-[16px] font-bold text-primary">{t("doctor.encounterCard.fields.appointmentType")}</div>
                         <div className="mt-0.5 font-cairo text-[16px] font-normal text-[#1F2937]">
                           {appointment.appointmentTypeNameSnapshot ?? appointment.appointmentType?.name}
                         </div>

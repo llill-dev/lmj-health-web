@@ -78,6 +78,44 @@ export const genderSchema = z.enum(['male', 'female'], {
 /** مفاتيح كتالوج التخصصات كما تعيدها الخادم (مثل cardiology، demo_mok5ic19). ليست للنص العربي اليدوي. */
 export const doctorCatalogSpecializationKeyRegex = /^[a-zA-Z0-9_.-]+$/;
 
+/**
+ * بادئة "د./Dr." تُضاف تلقائياً في بداية الاسم الكامل عند التسجيل: "د." إن كان
+ * الاسم عربياً و"Dr." إن كان أجنبياً (لاتينياً)، حسب أول حرف فعلي يكتبه المستخدم.
+ * تبقى ثابتة داخل الحقل ولا يمكن حذفها، وتُرسل دائماً كجزء من `fullName`.
+ */
+export const SIGNUP_NAME_PREFIX_AR = 'د.';
+export const SIGNUP_NAME_PREFIX_EN = 'Dr.';
+
+/** يكتشف نص الاسم (عربي/أجنبي) من أول حرف أبجدي يكتبه المستخدم؛ الافتراضي عربي. */
+export function detectSignupNameScript(text: string): 'ar' | 'en' {
+  const firstLetter = text.match(/[A-Za-z؀-ۿ]/);
+  if (!firstLetter) return 'ar';
+  return /[؀-ۿ]/.test(firstLetter[0]) ? 'ar' : 'en';
+}
+
+/** يزيل بادئة "د."/"Dr." الموجودة مسبقاً من قيمة محفوظة (عند العودة لهذه الخطوة). */
+export function stripSignupNamePrefix(fullName: string): string {
+  const trimmed = fullName.trim();
+  if (trimmed.startsWith(SIGNUP_NAME_PREFIX_AR)) {
+    return trimmed.slice(SIGNUP_NAME_PREFIX_AR.length).trim();
+  }
+  if (/^dr\.?/i.test(trimmed)) {
+    return trimmed.replace(/^dr\.?/i, '').trim();
+  }
+  return trimmed;
+}
+
+/** يبني قيمة `fullName` الكاملة المرسلة للخادم من الاسم المكتوب بعد البادئة. */
+export function buildSignupFullName(nameRest: string): string {
+  const rest = nameRest.trim();
+  if (!rest) return '';
+  const prefix =
+    detectSignupNameScript(rest) === 'ar'
+      ? SIGNUP_NAME_PREFIX_AR
+      : SIGNUP_NAME_PREFIX_EN;
+  return `${prefix} ${rest}`;
+}
+
 const signupStringTrim = z.string().trim();
 
 const SIGNUP_PASSWORD_COMPLEXITY_REGEX =

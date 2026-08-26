@@ -172,8 +172,8 @@ export default function AdminDoctorsPage() {
           surface="mint"
           title={tr("إدارة الأطباء", "Doctors management")}
           subtitle={tr(
-            "عرض ومتابعة بيانات الأطباء. إيقاف وتفعيل الحسابات غير متاحين حالياً لأن مسارات هذا التدفق غير موثقة في swagger_api.md",
-            "View and monitor doctor records. Offboard/reboard flows are currently unavailable because those routes are not documented in swagger_api.md",
+            "عرض ومتابعة بيانات الأطباء",
+            "View and monitor doctor records",
           )}
           headerIcon={<Stethoscope className="h-8 w-8 text-white" />}
           kpiColumns={4}

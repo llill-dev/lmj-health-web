@@ -15,6 +15,7 @@ export {
 export { InvoiceStatusBadge } from '@/components/doctor/clinic-accounts/invoice-status-badge';
 export { InvoiceListItem } from '@/components/doctor/clinic-accounts/invoice-list-item';
 export { ExpenseListItem } from '@/components/doctor/clinic-accounts/expense-list-item';
+export { PaymentListItem } from '@/components/doctor/clinic-accounts/payment-list-item';
 export {
   InvoiceDetailsDialog,
   RecentActivityList,

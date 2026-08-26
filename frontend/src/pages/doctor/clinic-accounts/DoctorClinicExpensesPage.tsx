@@ -307,6 +307,7 @@ export default function DoctorClinicExpensesPage() {
                 key={expense.rawId ?? expense.id}
                 expense={expense}
                 index={index}
+                currency={settingsQuery.currency}
               />
             ))}
           </div>

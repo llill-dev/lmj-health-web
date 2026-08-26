@@ -3,6 +3,7 @@
 import { UserRound } from "lucide-react";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "@/i18n/provider";
 
 import DashboardSectionHeading from "@/components/doctor/dashboard/dashboard-section-heading";
 import { doctorWaitlistDeepLink } from "@/lib/doctor/dashboard/homeSnapshotMappers";
@@ -16,6 +17,7 @@ export default function ConsultationsWaitingSection({
   requestId?: string;
   urgencyLevel?: string;
 }) {
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const openWaitlist = useCallback(() => {
@@ -29,8 +31,8 @@ export default function ConsultationsWaitingSection({
   return (
     <section>
       <DashboardSectionHeading
-        title="قائمة الانتظار"
-        actionLabel="عرض الكل"
+        title={t("doctor.dashboard.waitingList.title")}
+        actionLabel={t("doctor.dashboard.waitingList.viewAll")}
         onActionClick={useCallback(
           () => navigate("/doctor/waitlist"),
           [navigate],
@@ -46,10 +48,10 @@ export default function ConsultationsWaitingSection({
             </div>
             <div className="flex-1 text-start">
               <h3 className="font-cairo text-[18px] font-black leading-none text-[#243044]">
-                {patientName ?? "طلب انتظار"}
+                {patientName ?? t("doctor.dashboard.waitingList.request")}
               </h3>
               <p className="mt-2 font-cairo text-[13px] font-semibold text-[#667085]">
-                أقرب طلب في قائمة الانتظار
+                {t("doctor.dashboard.waitingList.closestRequest")}
                 {urgencyLevel ? ` · ${urgencyLevel}` : ""}
               </p>
             </div>
@@ -58,13 +60,13 @@ export default function ConsultationsWaitingSection({
               onClick={openWaitlist}
               className="rounded-[6px] bg-primary px-4 py-2 font-cairo text-[13px] font-black text-white"
             >
-              متابعة
+              {t("common.continue")}
             </button>
           </div>
         </article>
       ) : (
         <div className="flex h-[160px] items-center justify-center rounded-[8px] border border-dashed border-[#D0D5DD] bg-white px-4 text-center font-cairo text-[13px] font-semibold text-[#667085]">
-          لا توجد طلبات انتظار حالياً.
+          {t("doctor.dashboard.waitingList.empty")}
         </div>
       )}
     </section>

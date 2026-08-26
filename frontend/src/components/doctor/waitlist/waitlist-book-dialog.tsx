@@ -51,6 +51,7 @@ export function WaitlistBookDialog({
   onBook: (body: WaitlistBookBody) => Promise<void>;
 }) {
   const { locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === 'ar' ? ar : en);
   const today = useMemo(() => formatLocalDate(new Date()), []);
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -113,7 +114,7 @@ export function WaitlistBookDialog({
   if (!request) return null;
 
   const typeOptions = [
-    { value: '', label: 'بدون نوع موعد (اختياري)' },
+    { value: '', label: tr('بدون نوع موعد (اختياري)', 'No appointment type (optional)') },
     ...appointmentTypes.map((type) => ({
       value: type._id,
       label: type.name?.trim() || type._id,
@@ -150,19 +151,19 @@ export function WaitlistBookDialog({
     <ClinicAccountsModalShell
       open={open}
       onClose={onClose}
-      title="حجز من قائمة الانتظار"
+      title={tr('حجز من قائمة الانتظار', 'Book from waitlist')}
       maxWidthClass="max-w-[520px]"
       headerPattern
     >
       <div dir={dir} lang={locale} className="space-y-4 text-start">
         <p className="rounded-[12px] border border-[#E6F4F3] bg-[#F0FDFA] px-4 py-3 font-cairo text-[13px] font-semibold leading-relaxed text-[#667085]">
-          حجز موعد للمريض{' '}
+          {tr('حجز موعد للمريض', 'Booking an appointment for patient')}{' '}
           <span className="font-extrabold text-[#111827]">
             {resolveWaitlistPatientName(request)}
           </span>
         </p>
 
-        <DoctorProfileFormField label="التاريخ" required>
+        <DoctorProfileFormField label={tr('التاريخ', 'Date')} required>
           <input
             type="date"
             min={today}
@@ -172,10 +173,10 @@ export function WaitlistBookDialog({
           />
         </DoctorProfileFormField>
 
-        <DoctorProfileFormField label="وقت البداية" required>
+        <DoctorProfileFormField label={tr('وقت البداية', 'Start time')} required>
           {isAwaitingSlots ? (
             <p className="font-cairo text-[13px] font-semibold text-[#667085]">
-              جارٍ تحميل الأوقات المتاحة...
+              {tr('جارٍ تحميل الأوقات المتاحة...', 'Loading available times...')}
             </p>
           ) : slotsLoadError ? (
             <p className="font-cairo text-[13px] font-semibold text-[#B42318]">
@@ -183,8 +184,10 @@ export function WaitlistBookDialog({
             </p>
           ) : availableTimes.length === 0 ? (
             <p className="rounded-[10px] border border-dashed border-[#FECACA] bg-[#FEF2F2] px-3 py-2 font-cairo text-[13px] font-semibold text-[#B42318]">
-              لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً آخر أو راجع جدول
-              العمل.
+              {tr(
+                'لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً آخر أو راجع جدول العمل.',
+                'No available times on this date. Choose another date or review the work schedule.',
+              )}
             </p>
           ) : (
             <StyledSelect
@@ -193,32 +196,32 @@ export function WaitlistBookDialog({
               value={startTime}
               onChange={setStartTime}
               options={timeOptions}
-              placeholder="اختر وقت الموعد"
-              listboxAriaLabel="وقت البداية"
+              placeholder={tr('اختر وقت الموعد', 'Select the appointment time')}
+              listboxAriaLabel={tr('وقت البداية', 'Start time')}
               listboxZIndex={200}
             />
           )}
           {!isAwaitingSlots && !slotsLoadError && availableTimes.length > 0 ? (
             <p className="mt-1.5 font-cairo text-[12px] font-semibold text-[#667085]">
-              {totalFreeSlots} وقت متاح في هذا اليوم
+              {tr(`${totalFreeSlots} وقت متاح في هذا اليوم`, `${totalFreeSlots} available times on this day`)}
             </p>
           ) : null}
         </DoctorProfileFormField>
 
-        <DoctorProfileFormField label="نوع الموعد">
+        <DoctorProfileFormField label={tr('نوع الموعد', 'Appointment type')}>
           <StyledSelect
             size="sm"
             tone="muted"
             value={appointmentTypeId}
             onChange={setAppointmentTypeId}
             options={typeOptions}
-            placeholder="اختر نوع الموعد"
-            listboxAriaLabel="نوع الموعد"
+            placeholder={tr('اختر نوع الموعد', 'Select the appointment type')}
+            listboxAriaLabel={tr('نوع الموعد', 'Appointment type')}
             listboxZIndex={200}
           />
         </DoctorProfileFormField>
 
-        <DoctorProfileFormField label="ملاحظات">
+        <DoctorProfileFormField label={tr('ملاحظات', 'Notes')}>
           <textarea
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
@@ -243,7 +246,7 @@ export function WaitlistBookDialog({
             disabled={busy}
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-extrabold text-[#667085] transition hover:bg-[#F9FAFB] disabled:opacity-60"
           >
-            إلغاء
+            {tr('إلغاء', 'Cancel')}
           </button>
           <button
             type="button"
@@ -251,7 +254,7 @@ export function WaitlistBookDialog({
             onClick={() => void handleSubmit()}
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] bg-primary font-cairo text-[14px] font-extrabold text-white shadow-[0_12px_24px_-4px_rgba(15,143,139,0.35)] transition hover:bg-[#14B3AE] disabled:opacity-60"
           >
-            {busy ? 'جارٍ الحجز...' : 'تأكيد الحجز'}
+            {busy ? tr('جارٍ الحجز...', 'Booking...') : tr('تأكيد الحجز', 'Confirm booking')}
           </button>
         </div>
       </div>

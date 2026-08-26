@@ -1,21 +1,12 @@
-import { Calendar, ChevronLeft, Plus, Edit2, FileDown } from 'lucide-react';
-import type { MedicalRecordRowVm } from './map-doctor-medical-records';
-import { MedicalRecordStatusBadge } from './medical-record-status-badge';
-import { DoctorListEmptyIllustration } from '@/components/doctor/shared/doctor-list-empty-illustration';
-
-const TABLE_COLUMNS = [
-  'System ID',
-  'اسم المريض',
-  'التشخيص',
-  'المنشأة',
-  'التاريخ',
-  'الحالة',
-  'الإجراءات',
-] as const;
+import { Calendar, ChevronLeft, Plus, Edit2, FileDown } from "lucide-react";
+import type { MedicalRecordRowVm } from "./map-doctor-medical-records";
+import { MedicalRecordStatusBadge } from "./medical-record-status-badge";
+import { DoctorListEmptyIllustration } from "@/components/doctor/shared/doctor-list-empty-illustration";
+import { useI18n } from "@/i18n/provider";
 
 const thClass =
-  'px-3 py-3 text-center align-middle font-cairo text-[11px] font-extrabold text-[#0F766E] sm:px-4 sm:text-[12px]';
-const tdClass = 'px-3 py-3 text-center align-middle sm:px-4 sm:py-4';
+  "px-3 py-3 text-center align-middle font-cairo text-[11px] font-extrabold text-[#0F766E] sm:px-4 sm:text-[12px]";
+const tdClass = "px-3 py-3 text-center align-middle sm:px-4 sm:py-4";
 
 export function MedicalRecordsTable({
   rows,
@@ -32,6 +23,18 @@ export function MedicalRecordsTable({
   onAddNew?: () => void;
   isFiltered?: boolean;
 }) {
+  const { t } = useI18n();
+
+  const TABLE_COLUMNS = [
+    t("doctor.medicalRecords.table.systemId"),
+    t("doctor.medicalRecords.table.patientName"),
+    t("doctor.medicalRecords.table.diagnosis"),
+    t("doctor.medicalRecords.table.facility"),
+    t("doctor.medicalRecords.table.date"),
+    t("doctor.medicalRecords.table.status"),
+    t("doctor.medicalRecords.table.actions"),
+  ] as const;
+
   if (!rows.length) {
     return (
       <DoctorListEmptyIllustration
@@ -40,15 +43,15 @@ export function MedicalRecordsTable({
         imageClassName="drop-shadow-[0_12px_32px_rgba(15,118,110,0.1)]"
         title={
           isFiltered
-            ? 'لا توجد سجلات تطابق البحث الحالي'
-            : 'لا توجد سجلات طبية بعد'
+            ? t("doctor.medicalRecords.table.emptyFilteredTitle")
+            : t("doctor.medicalRecords.table.emptyTitle")
         }
         subtitle={
           isFiltered
-            ? 'جرّب تعديل كلمات البحث أو إعادة ضبط الفلاتر لعرض النتائج'
-            : 'أنشئ سجلات طبية للمرضى لتوثيق التشخيصات والعلاجات'
+            ? t("doctor.medicalRecords.table.emptyFilteredSubtitle")
+            : t("doctor.medicalRecords.table.emptySubtitle")
         }
-        actionLabel="إنشاء سجل جديد"
+        actionLabel={t("doctor.medicalRecords.table.createRecord")}
         onAction={onAddNew ?? (() => {})}
         actionIcon={<Plus className="h-4 w-4" />}
       />
@@ -125,9 +128,12 @@ export function MedicalRecordsTable({
                         type="button"
                         onClick={() => onDownloadPdf(row)}
                         className="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 font-cairo text-[12px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDFA]"
-                        title="تحميل PDF"
+                        title={t("doctor.medicalRecords.table.downloadPdf")}
                       >
-                        <FileDown className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        <FileDown
+                          className="h-3.5 w-3.5 shrink-0"
+                          aria-hidden
+                        />
                         <span>PDF</span>
                       </button>
                     )}
@@ -136,10 +142,10 @@ export function MedicalRecordsTable({
                         type="button"
                         onClick={() => onEdit(row)}
                         className="inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 font-cairo text-[12px] font-extrabold text-[#0F766E] transition hover:bg-[#F0FDFA]"
-                        title="تعديل السجل"
+                        title={t("doctor.medicalRecords.table.editRecord")}
                       >
                         <Edit2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                        <span>تعديل</span>
+                        <span>{t("doctor.medicalRecords.table.edit")}</span>
                       </button>
                     )}
                     <button
@@ -147,7 +153,9 @@ export function MedicalRecordsTable({
                       onClick={() => onOpenDetails(row)}
                       className="inline-flex items-center justify-center gap-1 font-cairo text-[12px] font-extrabold text-primary transition hover:text-primary/80"
                     >
-                      <span>عرض التفاصيل</span>
+                      <span>
+                        {t("doctor.medicalRecords.table.viewDetails")}
+                      </span>
                       <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
                     </button>
                   </div>

@@ -99,10 +99,10 @@ export function RadiologyCatalogPicker({
               onChange={(e) => setSearch(e.target.value)}
               placeholder={searchPlaceholder}
               disabled={disabled}
-              className="h-11 w-full rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] ps-3 pe-10 font-cairo text-[13px] font-semibold text-[#101828] outline-none focus:border-primary"
+              className="h-11 w-full rounded-[10px] border border-[#E4E7EC] bg-[#F8FAFC] ps-10 pe-3 font-cairo text-[13px] font-semibold text-[#101828] outline-none focus:border-primary"
             />
             <Search
-              className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+              className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
               aria-hidden
             />
           </label>

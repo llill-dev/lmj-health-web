@@ -256,7 +256,7 @@ export default function AdminDoctorSpecializationsPage() {
         <div className="mt-6 flex flex-col gap-3 rounded-[14px] border border-[#E8ECEF] bg-white p-4 shadow-[0_14px_34px_rgba(15,23,42,0.06)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <label className="relative flex min-w-[200px] flex-1 items-center">
             <Search
-              className="pointer-events-none absolute end-3 h-4 w-4 text-[#98A2B3]"
+              className="pointer-events-none absolute start-3 h-4 w-4 text-[#98A2B3]"
               aria-hidden
             />
             <input
@@ -267,7 +267,7 @@ export default function AdminDoctorSpecializationsPage() {
                 "ابحث بالمفتاح أو الاسم العربي أو الإنجليزي…",
                 "Search by key, Arabic name, or English name…",
               )}
-              className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] py-2 pe-10 ps-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/0 transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/12"
+              className="h-[44px] w-full rounded-[12px] border border-[#E5E7EB] bg-[#F9FAFB] py-2 ps-10 pe-4 text-start font-cairo text-[13px] font-semibold text-[#111827] outline-none ring-primary/0 transition placeholder:text-[#98A2B3] focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/12"
             />
           </label>
 

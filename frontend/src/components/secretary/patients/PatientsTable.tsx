@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface Patient {
   id: string;
@@ -17,6 +18,7 @@ export default function PatientsTable({
   patients,
   onViewPatient,
 }: PatientsTableProps) {
+  const { t } = useI18n();
   const getInitials = (name: string) => {
     return name.charAt(0);
   };
@@ -28,19 +30,19 @@ export default function PatientsTable({
           <thead>
             <tr className="border-b border-[#e2e8f0] bg-gray-50">
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                الاسم
+                {t("secretary.patients.table.name")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                رقم الهاتف
+                {t("secretary.patients.table.phone")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                البريد الإلكتروني
+                {t("secretary.patients.table.email")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                تاريخ التسجيل
+                {t("secretary.patients.table.registrationDate")}
               </th>
               <th className="px-6 py-3 text-start font-cairo text-xs font-bold text-[#64748b]">
-                الإجراءات
+                {t("secretary.patients.table.actions")}
               </th>
             </tr>
           </thead>
@@ -48,7 +50,11 @@ export default function PatientsTable({
             {patients.map((patient, index) => (
               <tr
                 key={patient.id}
-                className={index !== patients.length - 1 ? "border-b border-[#e2e8f0]" : ""}
+                className={
+                  index !== patients.length - 1
+                    ? "border-b border-[#e2e8f0]"
+                    : ""
+                }
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -85,7 +91,7 @@ export default function PatientsTable({
                     onClick={() => onViewPatient?.(patient)}
                     className="rounded-lg bg-primary px-3 py-1.5 font-cairo text-xs font-bold text-white transition hover:bg-primary/90"
                   >
-                    عرض
+                    {t("secretary.patients.table.view")}
                   </button>
                 </td>
               </tr>

@@ -11,58 +11,62 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useI18n } from "@/i18n/provider";
 
 import DashboardSectionHeading from "@/components/doctor/dashboard/dashboard-section-heading";
 
 export default function QuickActionsSection() {
+  const { t } = useI18n();
   const quickActions = useMemo(
     () => [
       {
         id: "start-visit",
-        title: "بدء زيارة",
-        description: "الكشوفات الطبيه",
+        title: t("doctor.dashboard.quickActions.startVisit"),
+        description: t("doctor.dashboard.quickActions.startVisitDesc"),
         icon: CalendarPlus,
         href: "/doctor/encounters",
       },
       {
         id: "start-consultation",
-        title: "بدء استشارة",
-        description: "المحادثات الخاصه بالمرضى",
+        title: t("doctor.dashboard.quickActions.startConsultation"),
+        description: t("doctor.dashboard.quickActions.startConsultationDesc"),
         icon: MessageSquare,
         href: "/doctor/online-consultations",
       },
       {
         id: "search-patient",
-        title: "بحث عن مريض",
-        description: "البحث عن المرضى",
+        title: t("doctor.dashboard.quickActions.searchPatient"),
+        description: t("doctor.dashboard.quickActions.searchPatientDesc"),
         icon: Search,
         href: "/doctor/patients",
       },
       {
         id: "add-patient",
-        title: "اضافة مريض",
-        description: "اضافة مريض جديد",
+        title: t("doctor.dashboard.quickActions.addPatient"),
+        description: t("doctor.dashboard.quickActions.addPatientDesc"),
         icon: UsersRound,
         href: "/doctor/patients",
       },
       {
         id: "medical-library",
-        title: "مكتبتي الطبية",
-        description: "تجمع الأدوية والتحاليل والإجراءات",
+        title: t("doctor.dashboard.quickActions.medicalLibrary"),
+        description: t("doctor.dashboard.quickActions.medicalLibraryDesc"),
         icon: BookOpen,
         href: "/doctor/clinical-library",
       },
       {
         id: "medical-services-guide",
-        title: "دليل الخدمات الطبية",
-        description: "للوصول للخدمات المتاحة",
+        title: t("doctor.dashboard.quickActions.medicalServicesGuide"),
+        description: t(
+          "doctor.dashboard.quickActions.medicalServicesGuideDesc",
+        ),
         icon: BookMarked,
         href: "/doctor/medical-services-directory",
       },
       {
         id: "facilities",
-        title: "المنشآت",
-        description: "إدارة منشأتك وربطها بحسابك",
+        title: t("doctor.dashboard.quickActions.facilities"),
+        description: t("doctor.dashboard.quickActions.facilitiesDesc"),
         icon: Building2,
         href: "/doctor/facilities",
       },
@@ -72,7 +76,7 @@ export default function QuickActionsSection() {
   return (
     <section className="mt-6">
       <DashboardSectionHeading
-        title="الإجراءات السريعة"
+        title={t("doctor.dashboard.quickActions.title")}
         className="mb-[22px]"
       />
 

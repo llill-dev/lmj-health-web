@@ -9,9 +9,12 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 
 import { TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData } from "../types";
+
+type TFn = (key: string, fallback?: string) => string;
 
 interface MedicalOrderCardProps {
   order: FullProfileData["orders"][number];
@@ -33,49 +36,50 @@ type OrderKindMeta = {
   badgeRing: string;
 };
 
-const STATUS_STYLES: Record<
-  string,
-  { bg: string; text: string; ring: string; label: string }
-> = {
-  pending: {
-    bg: "bg-[#FEF3C7]/90",
-    text: "text-[#92400E]",
-    ring: "ring-[#FDE68A]/70",
-    label: "قيد الانتظار",
-  },
-  completed: {
-    bg: "bg-[#D1FAE5]/90",
-    text: "text-[#065F46]",
-    ring: "ring-[#86EFAC]/70",
-    label: "مكتمل",
-  },
-  cancelled: {
-    bg: "bg-[#FEE2E2]/90",
-    text: "text-[#991B1B]",
-    ring: "ring-[#FCA5A5]/70",
-    label: "ملغى",
-  },
-  in_progress: {
-    bg: "bg-[#DBEAFE]/90",
-    text: "text-[#1E40AF]",
-    ring: "ring-[#93C5FD]/70",
-    label: "جارٍ التنفيذ",
-  },
-  draft: {
-    bg: "bg-[#F3F4F6]/90",
-    text: "text-[#374151]",
-    ring: "ring-[#D1D5DB]/70",
-    label: "مسودة",
-  },
-  finalized: {
-    bg: "bg-[#D1FAE5]/90",
-    text: "text-[#065F46]",
-    ring: "ring-[#86EFAC]/70",
-    label: "معتمد",
-  },
-};
+function buildStatusStyles(
+  t: TFn,
+): Record<string, { bg: string; text: string; ring: string; label: string }> {
+  return {
+    pending: {
+      bg: "bg-[#FEF3C7]/90",
+      text: "text-[#92400E]",
+      ring: "ring-[#FDE68A]/70",
+      label: t("doctor.orderCard.status.pending"),
+    },
+    completed: {
+      bg: "bg-[#D1FAE5]/90",
+      text: "text-[#065F46]",
+      ring: "ring-[#86EFAC]/70",
+      label: t("doctor.orderCard.status.completed"),
+    },
+    cancelled: {
+      bg: "bg-[#FEE2E2]/90",
+      text: "text-[#991B1B]",
+      ring: "ring-[#FCA5A5]/70",
+      label: t("doctor.orderCard.status.cancelled"),
+    },
+    in_progress: {
+      bg: "bg-[#DBEAFE]/90",
+      text: "text-[#1E40AF]",
+      ring: "ring-[#93C5FD]/70",
+      label: t("doctor.orderCard.status.inProgress"),
+    },
+    draft: {
+      bg: "bg-[#F3F4F6]/90",
+      text: "text-[#374151]",
+      ring: "ring-[#D1D5DB]/70",
+      label: t("doctor.orderCard.status.draft"),
+    },
+    finalized: {
+      bg: "bg-[#D1FAE5]/90",
+      text: "text-[#065F46]",
+      ring: "ring-[#86EFAC]/70",
+      label: t("doctor.orderCard.status.finalized"),
+    },
+  };
+}
 
-function detectOrderKind(title: string): OrderKindMeta {
+function detectOrderKind(title: string, t: TFn): OrderKindMeta {
   const normalized = title.toLowerCase();
 
   if (
@@ -86,7 +90,7 @@ function detectOrderKind(title: string): OrderKindMeta {
   ) {
     return {
       kind: "lab",
-      label: "تحليل مخبري",
+      label: t("doctor.orderCard.kind.lab"),
       icon: FlaskConical,
       accent: "from-[#CA8A04] via-[#EAB308] to-[#F59E0B]",
       accentGlow: "rgba(234,179,8,0.35)",
@@ -106,7 +110,7 @@ function detectOrderKind(title: string): OrderKindMeta {
   ) {
     return {
       kind: "radiology",
-      label: "أشعة وتصوير",
+      label: t("doctor.orderCard.kind.radiology"),
       icon: ScanLine,
       accent: "from-[#2563EB] via-[#3B82F6] to-[#60A5FA]",
       accentGlow: "rgba(59,130,246,0.35)",
@@ -125,7 +129,7 @@ function detectOrderKind(title: string): OrderKindMeta {
   ) {
     return {
       kind: "procedure",
-      label: "إجراء طبي",
+      label: t("doctor.orderCard.kind.procedure"),
       icon: Syringe,
       accent: "from-[#E11D48] via-[#F43F5E] to-[#FB7185]",
       accentGlow: "rgba(244,63,94,0.32)",
@@ -144,7 +148,7 @@ function detectOrderKind(title: string): OrderKindMeta {
   ) {
     return {
       kind: "referral",
-      label: "تحويل طبي",
+      label: t("doctor.orderCard.kind.referral"),
       icon: ArrowRightLeft,
       accent: "from-[#7C3AED] via-[#8B5CF6] to-[#A78BFA]",
       accentGlow: "rgba(139,92,246,0.32)",
@@ -158,7 +162,7 @@ function detectOrderKind(title: string): OrderKindMeta {
 
   return {
     kind: "general",
-    label: "طلب طبي",
+    label: t("doctor.orderCard.kind.general"),
     icon: Activity,
     accent: "from-primary via-[#14b8a6] to-[#0f766e]",
     accentGlow: "rgba(15,143,139,0.35)",
@@ -171,6 +175,7 @@ function detectOrderKind(title: string): OrderKindMeta {
 }
 
 export function MedicalOrderCard({ order, index }: MedicalOrderCardProps) {
+  const { t } = useI18n();
   const kindMeta =
     order.category !== "other"
       ? detectOrderKind(
@@ -181,17 +186,19 @@ export function MedicalOrderCard({ order, index }: MedicalOrderCardProps) {
               : order.category === "procedure"
                 ? "procedure_order"
                 : "referral_order",
+          t,
         )
-      : detectOrderKind(order.title);
+      : detectOrderKind(order.title, t);
   const Icon = kindMeta.icon;
   const normalizedStatus = order.status?.toLowerCase().replace(/[\s-]+/g, "_");
+  const statusStyles = buildStatusStyles(t);
   const currentStatus =
-    STATUS_STYLES[normalizedStatus] ??
+    statusStyles[normalizedStatus] ??
     ({
       bg: "bg-[#F3F4F6]/90",
       text: "text-[#374151]",
       ring: "ring-[#D1D5DB]/70",
-      label: order.status || "غير محدد",
+      label: order.status || t("doctor.orderCard.status.unspecified"),
     } as const);
 
   return (
@@ -268,7 +275,7 @@ export function MedicalOrderCard({ order, index }: MedicalOrderCardProps) {
 
               <div className="shrink-0 rounded-xl border border-[#E2E8F0] bg-white/85 px-3 py-2 text-start shadow-sm backdrop-blur-sm">
                 <div className="font-cairo text-[10px] font-bold text-[#667085]">
-                  رقم الطلب
+                  {t("doctor.orderCard.orderNumber")}
                 </div>
                 <div className="mt-1 font-cairo text-[12px] font-extrabold tabular-nums text-[#101828]">
                   #{index}
@@ -278,12 +285,14 @@ export function MedicalOrderCard({ order, index }: MedicalOrderCardProps) {
 
             <div className="rounded-[14px] border border-[#E8EDF3]/95 bg-[linear-gradient(145deg,#fafefd_0%,#ffffff_55%,#f8fafc_100%)] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
               <div className="mb-1.5 font-cairo text-[11px] font-extrabold uppercase tracking-wide text-[#64748b]">
-                تفاصيل الطلب
+                {t("doctor.orderCard.orderDetails")}
               </div>
               <p className="font-cairo text-[13px] font-semibold leading-[1.65] text-[#334155]">
                 {kindMeta.kind === "general"
-                  ? "طلب طبي مسجّل ضمن ملف المريض — يمكن متابعة حالته من مركز الطلبات الطبية."
-                  : `طلب من نوع «${kindMeta.label}» — الحالة الحالية: ${currentStatus.label}.`}
+                  ? t("doctor.orderCard.generalDescription")
+                  : t("doctor.orderCard.typedDescription")
+                      .replace("{kind}", kindMeta.label)
+                      .replace("{status}", currentStatus.label)}
               </p>
             </div>
 

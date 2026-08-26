@@ -1,8 +1,10 @@
 import { Search, Filter, Stethoscope, Star, MapPin, Phone, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDoctorDoctorsDirectory } from "@/hooks/doctor/directory/useDoctorDoctorsDirectory";
 import { useSecretaryPermissions } from "@/hooks/secretary/useSecretaryPermissions";
+import { MedicalRecordsPagination } from "@/components/doctor/medical-records/medical-records-pagination";
 import { useI18n } from "@/i18n/provider";
+
 
 const CONSULTATION_TYPE_OPTIONS: Array<{ value: "" | "online" | "offline"; label: [string, string] }> = [
   { value: "", label: ["الكل", "All"] },
@@ -20,6 +22,8 @@ export default function SecretaryDoctorsDirectoryPage() {
   const [country, setCountry] = useState("");
   const [consultationType, setConsultationType] = useState<"" | "online" | "offline">("");
   const [minRating, setMinRating] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(24);
   const { hasPermission } = useSecretaryPermissions();
   // Backend GET /doctors/internal/directory only requires Doctor/Secretary
   // role membership — no specific permission is enforced. We still require
@@ -38,8 +42,8 @@ export default function SecretaryDoctorsDirectoryPage() {
       country: country.trim() || undefined,
       consultationType: consultationType || undefined,
       minRating: minRating ? Number(minRating) : undefined,
-      page: 1,
-      limit: 24,
+      page,
+      limit: pageSize,
     },
     canViewDirectory,
   );
@@ -47,6 +51,10 @@ export default function SecretaryDoctorsDirectoryPage() {
     () => directoryQuery.doctors ?? [],
     [directoryQuery.doctors],
   );
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, specialization, city, country, consultationType, minRating, pageSize]);
 
   const clearFilters = () => {
     setSpecialization("");
@@ -238,6 +246,20 @@ export default function SecretaryDoctorsDirectoryPage() {
           </>
         )}
       </div>
+
+      {canViewDirectory && !directoryQuery.isError && directoryQuery.total > 0 ? (
+        <MedicalRecordsPagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(directoryQuery.total / pageSize))}
+          showingFrom={(page - 1) * pageSize + 1}
+          showingTo={Math.min(page * pageSize, directoryQuery.total)}
+          total={directoryQuery.total}
+          pageSize={pageSize}
+          itemLabel={tr("طبيب", "doctor")}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
+      ) : null}
     </div>
   );
 }

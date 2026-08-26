@@ -1,11 +1,12 @@
 import { LayoutGroup, motion } from "framer-motion";
 import { cn } from "@/lib/utils/utils";
+import { useI18n } from "@/i18n/provider";
 import type { MedicalVisitStatusFilter } from "./types";
 
-const TABS: { id: MedicalVisitStatusFilter; label: string }[] = [
-  { id: "all", label: "الكل" },
-  { id: "open", label: "نشطة" },
-  { id: "closed", label: "مغلقة" },
+const TABS_CONFIG = [
+  { id: "all" as const },
+  { id: "open" as const },
+  { id: "closed" as const },
 ];
 
 export function EncountersStatusTabs({
@@ -17,14 +18,21 @@ export function EncountersStatusTabs({
   onChange: (value: MedicalVisitStatusFilter) => void;
   disabled?: boolean;
 }) {
+  const { t } = useI18n();
+
+  const tabs = TABS_CONFIG.map((tab) => ({
+    ...tab,
+    label: t(`doctor.encounters.status.${tab.id}`),
+  }));
+
   return (
     <LayoutGroup id="encounters-status-tabs">
       <div
         role="tablist"
-        aria-label="تصفية حالة الزيارة"
+        aria-label={t("doctor.encounters.status.filterLabel")}
         className="relative mb-5 flex w-full rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFC] p-1"
       >
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const active = value === tab.id;
           return (
             <motion.button

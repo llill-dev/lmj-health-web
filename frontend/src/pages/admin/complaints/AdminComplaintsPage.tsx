@@ -304,9 +304,9 @@ export default function AdminComplaintsPage() {
                 "بحث (اسم، بريد، موضوع، النص...)",
                 "Search (name, email, subject, text...)",
               )}
-              className="h-11 w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] py-2.5 ps-3 pe-11 font-cairo text-[13px] font-medium text-[#111827] placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-11 w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] py-2.5 ps-11 pe-3 font-cairo text-[13px] font-medium text-[#111827] placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
-            <Search className="pointer-events-none absolute end-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#94A3B8]" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#94A3B8]" />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 text-[#64748B]">

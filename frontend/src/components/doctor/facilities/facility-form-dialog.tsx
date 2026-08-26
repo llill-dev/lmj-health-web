@@ -47,7 +47,7 @@ export function FacilityFormDialog({
   onClose: () => void;
   onSubmit: (values: DoctorFacilityFormSchemaValues) => void | Promise<void>;
 }) {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const {
     control,
     register,
@@ -111,7 +111,10 @@ export function FacilityFormDialog({
     };
   }, [open, onClose, submitting]);
 
-  const title = mode === 'edit' ? 'تعديل منشأة' : 'إضافة منشأة';
+  const title =
+    mode === 'edit'
+      ? t('doctor.facilityFormDialog.titleEdit')
+      : t('doctor.facilityFormDialog.titleCreate');
 
   return (
     <AnimatePresence>
@@ -150,7 +153,7 @@ export function FacilityFormDialog({
                 onClick={onClose}
                 disabled={submitting}
                 className="absolute start-6 top-6 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[#98A2B3] transition hover:bg-[#F3F4F6] hover:text-[#111827] disabled:opacity-50"
-                aria-label="إغلاق"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" aria-hidden />
               </button>
@@ -165,13 +168,13 @@ export function FacilityFormDialog({
               <div className="max-h-[calc(92vh-220px)] overflow-y-auto px-8 py-6">
                 <div className="space-y-5">
                 <DoctorProfileFormField
-                  label="اسم المنشأة"
+                  label={t('doctor.facilityForm.fields.name.label')}
                   required
                   error={errors.name?.message}
                 >
                   <input
                     {...register('name')}
-                    placeholder="أدخل اسم المنشأة"
+                    placeholder={t('doctor.facilityForm.fields.name.placeholder')}
                     className={profileFieldClass(
                       cn(profileInputClass, 'text-start placeholder:text-start'),
                       Boolean(errors.name),
@@ -180,7 +183,7 @@ export function FacilityFormDialog({
                 </DoctorProfileFormField>
 
                 <DoctorProfileFormField
-                  label="نوع المنشأة"
+                  label={t('doctor.facilityForm.fields.type.label')}
                   required
                   error={errors.facilityType?.message}
                 >
@@ -195,7 +198,7 @@ export function FacilityFormDialog({
                           value: option.value,
                           label: option.label,
                         }))}
-                        placeholder="اختر نوع المنشأة"
+                        placeholder={t('doctor.facilityForm.fields.type.placeholder')}
                         error={Boolean(errors.facilityType)}
                       />
                     )}
@@ -203,13 +206,13 @@ export function FacilityFormDialog({
                 </DoctorProfileFormField>
 
                 <DoctorProfileFormField
-                  label="الوصف"
+                  label={t('common.description')}
                   error={errors.description?.message}
                 >
                   <textarea
                     {...register('description')}
                     rows={3}
-                    placeholder="أدخل وصف المنشأة"
+                    placeholder={t('doctor.facilityForm.fields.description.placeholder')}
                     className={profileFieldClass(
                       cn(profileTextareaClass, 'text-start placeholder:text-start'),
                       Boolean(errors.description),
@@ -219,17 +222,17 @@ export function FacilityFormDialog({
 
                 <div>
                   <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                    الموقع
+                    {t('doctor.facilityForm.sections.location')}
                   </h3>
                   <div className="space-y-4">
                     <DoctorProfileFormField
-                      label="المدينة"
+                      label={t('common.city')}
                       required
                       error={errors.city?.message}
                     >
                       <input
                         {...register('city')}
-                        placeholder="أدخل المدينة"
+                        placeholder={t('doctor.facilityForm.fields.city.placeholder')}
                         className={profileFieldClass(
                           cn(profileInputClass, 'text-start placeholder:text-start'),
                           Boolean(errors.city),
@@ -238,13 +241,13 @@ export function FacilityFormDialog({
                     </DoctorProfileFormField>
 
                     <DoctorProfileFormField
-                      label="الدولة"
+                      label={t('common.country')}
                       required
                       error={errors.country?.message}
                     >
                       <input
                         {...register('country')}
-                        placeholder="أدخل الدولة"
+                        placeholder={t('doctor.facilityForm.fields.country.placeholder')}
                         className={profileFieldClass(
                           cn(profileInputClass, 'text-start placeholder:text-start'),
                           Boolean(errors.country),
@@ -253,13 +256,13 @@ export function FacilityFormDialog({
                     </DoctorProfileFormField>
 
                     <DoctorProfileFormField
-                      label="العنوان"
+                      label={t('common.address')}
                       required
                       error={errors.address?.message}
                     >
                       <input
                         {...register('address')}
-                        placeholder="أدخل العنوان التفصيلي"
+                        placeholder={t('doctor.facilityForm.fields.address.placeholder')}
                         className={profileFieldClass(
                           cn(profileInputClass, 'text-start placeholder:text-start'),
                           Boolean(errors.address),
@@ -271,10 +274,10 @@ export function FacilityFormDialog({
 
                 <div>
                   <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                    التواصل
+                    {t('doctor.facilityForm.sections.contact')}
                   </h3>
                   <DoctorProfileFormField
-                    label="الهاتف"
+                    label={t('common.phone')}
                     required
                     error={errors.phone?.message}
                   >
@@ -293,11 +296,11 @@ export function FacilityFormDialog({
                 {mode === 'edit' ? (
                   <div>
                     <h3 className="mb-3 text-start font-cairo text-[14px] font-extrabold text-[#111827]">
-                      سمات المنشأة
+                      {t('doctor.facilityForm.attributes.title')}
                     </h3>
                     <DoctorProfileFormField
-                      label="إضافة سمة"
-                      hint="مثال: night_shift أو echo_available"
+                      label={t('doctor.facilityForm.attributes.addLabel')}
+                      hint={t('doctor.facilityForm.attributes.addHint')}
                     >
                       <div className="flex gap-2 items-center">
                         <input
@@ -321,7 +324,7 @@ export function FacilityFormDialog({
                           onClick={addAttribute}
                           disabled={submitting || !attrInput.trim()}
                           className="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[10px] bg-primary text-white disabled:opacity-50"
-                          aria-label="إضافة سمة"
+                          aria-label={t('doctor.facilityForm.attributes.addLabel')}
                         >
                           <Plus className="w-4 h-4" aria-hidden />
                         </button>
@@ -340,7 +343,7 @@ export function FacilityFormDialog({
                               onClick={() => removeAttribute(attr)}
                               disabled={submitting}
                               className="text-primary/70 transition hover:text-[#B42318] disabled:opacity-50"
-                              aria-label={`إزالة ${attr}`}
+                              aria-label={t('doctor.facilityForm.attributes.removeAria').replace('{attr}', attr)}
                             >
                               <Trash2 className="w-3 h-3" aria-hidden />
                             </button>
@@ -349,7 +352,7 @@ export function FacilityFormDialog({
                       </div>
                     ) : (
                       <p className="mt-2 font-cairo text-[12px] font-semibold text-[#98A2B3]">
-                        لا توجد سمات مضافة بعد.
+                        {t('doctor.facilityForm.attributes.empty')}
                       </p>
                     )}
                   </div>
@@ -359,12 +362,12 @@ export function FacilityFormDialog({
                   <div className="flex items-center justify-between rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4">
                     <FacilityStatusBadge status={initialFacility.status} />
                     <span className="font-cairo text-[13px] font-extrabold text-[#667085]">
-                      حالة المنشأة
+                      {t('doctor.facilityForm.status.label')}
                     </span>
                   </div>
                 ) : (
                   <p className="rounded-[12px] border border-[#EEF2F6] bg-[#FAFAFA] px-4 py-4 text-start font-cairo text-[12px] font-semibold text-[#667085]">
-                    بعد الإنشاء تُفعَّل المنشأة تلقائياً وتظهر حالتها في الجدول.
+                    {t('doctor.facilityForm.postCreateNote')}
                   </p>
                 )}
                 </div>
@@ -377,7 +380,7 @@ export function FacilityFormDialog({
                   disabled={submitting}
                   className="inline-flex h-[48px] items-center justify-center rounded-[12px] border border-primary bg-white font-cairo text-[14px] font-extrabold text-primary disabled:opacity-50"
                 >
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -385,7 +388,7 @@ export function FacilityFormDialog({
                   className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[12px] bg-primary font-cairo text-[14px] font-extrabold text-white disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" aria-hidden />
-                  {submitting ? 'جارٍ الحفظ…' : 'حفظ'}
+                  {submitting ? t('common.saving') : t('common.save')}
                 </button>
               </div>
             </form>

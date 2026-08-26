@@ -12,6 +12,7 @@ import {
 import { PatientTabEmptyIllustration } from "@/components/doctor/patients/patient-tab-empty-illustration";
 import { cn } from "@/lib/utils/utils";
 import type { DoctorEncounterSummary } from "@/lib/doctor/types";
+import { useI18n } from "@/i18n/provider";
 
 import { TAB_STAGGER_CONTAINER, TAB_STAGGER_ITEM } from "../constants";
 import type { FullProfileData } from "../types";
@@ -27,20 +28,28 @@ type ClinicalDoc = {
   iconBg: string;
 };
 
-const KIND_LABELS: Record<ClinicalDoc["kind"], string> = {
-  prescription: "وصفة طبية",
-  order: "طلب طبي",
-  record: "سجل طبي",
-  encounter: "زيارة سريرية",
-};
+type TFn = (key: string, fallback?: string) => string;
 
-const KIND_FILTER_OPTIONS: Array<{ id: "all" | ClinicalDoc["kind"]; label: string }> = [
-  { id: "all", label: "الكل" },
-  { id: "encounter", label: "الزيارات" },
-  { id: "record", label: "السجلات" },
-  { id: "prescription", label: "الوصفات" },
-  { id: "order", label: "الطلبات" },
-];
+function buildKindLabels(t: TFn): Record<ClinicalDoc["kind"], string> {
+  return {
+    prescription: t("doctor.timelineTab.prescription"),
+    order: t("doctor.timelineTab.medicalOrder"),
+    record: t("doctor.addAccessRequestForm.medicalRecord"),
+    encounter: t("doctor.timelineTab.clinicalEncounter"),
+  };
+}
+
+function buildKindFilterOptions(
+  t: TFn,
+): Array<{ id: "all" | ClinicalDoc["kind"]; label: string }> {
+  return [
+    { id: "all", label: t("common.all") },
+    { id: "encounter", label: t("doctor.overviewTab.encounters") },
+    { id: "record", label: t("doctor.overviewTab.records") },
+    { id: "prescription", label: t("doctor.overviewTab.prescriptions") },
+    { id: "order", label: t("doctor.overviewTab.orders") },
+  ];
+}
 
 interface DocumentsTabProps {
   fullProfileData: FullProfileData;
@@ -55,14 +64,20 @@ export function DocumentsTab({
   onOpenFiles,
   onOpenEncountersPage,
 }: DocumentsTabProps) {
+  const { t } = useI18n();
   const [filter, setFilter] = useState<"all" | ClinicalDoc["kind"]>("all");
+  const kindLabels = buildKindLabels(t);
+  const kindFilterOptions = buildKindFilterOptions(t);
 
   const docs: ClinicalDoc[] = [
     ...encounters.map((enc): ClinicalDoc => ({
       id: enc._id,
       kind: "encounter",
-      title: `زيارة سريرية ${enc.status === "open" ? "(مفتوحة)" : "(مغلقة)"}`,
-      subtitle: enc.notes || "زيارة سريرية مسجلة",
+      title:
+        enc.status === "open"
+          ? t("doctor.documentsTab.clinicalEncounterOpen")
+          : t("doctor.documentsTab.clinicalEncounterClosed"),
+      subtitle: enc.notes || t("doctor.documentsTab.recordedClinicalEncounter"),
       date: enc.startedAt ?? enc.createdAt ?? "",
       icon: Stethoscope,
       iconColor: "text-[#0EA5E9]",
@@ -81,7 +96,10 @@ export function DocumentsTab({
     ...fullProfileData.prescriptions.map((presc): ClinicalDoc => ({
       id: presc.id,
       kind: "prescription",
-      title: `وصفة طبية — ${presc.items.length} دواء`,
+      title: t("doctor.documentsTab.prescriptionMedCount").replace(
+        "{n}",
+        String(presc.items.length),
+      ),
       subtitle:
         presc.items
           .slice(0, 2)
@@ -124,9 +142,9 @@ export function DocumentsTab({
             variant="violet"
             imageSrc="/images/photo-not-meduical-file.png"
             imageClassName="drop-shadow-[0_12px_32px_rgba(99,102,241,0.1)]"
-            title="لا توجد وثائق سريرية بعد"
-            subtitle="ستظهر هنا الزيارات والسجلات والوصفات والطلبات الطبية تلقائياً عند إضافتها"
-            actionLabel="عرض الملفات"
+            title={t("doctor.documentsTab.emptyTitle")}
+            subtitle={t("doctor.documentsTab.emptySubtitle")}
+            actionLabel={t("doctor.documentsTab.viewFiles")}
             onAction={onOpenFiles}
             actionIcon={<FileText className="h-4 w-4" />}
           />
@@ -144,7 +162,7 @@ export function DocumentsTab({
     >
       {/* فلاتر */}
       <motion.div variants={TAB_STAGGER_ITEM} className="flex flex-wrap items-center gap-2">
-        {KIND_FILTER_OPTIONS.map((opt) => (
+        {kindFilterOptions.map((opt) => (
           <button
             key={opt.id}
             type="button"
@@ -160,7 +178,7 @@ export function DocumentsTab({
           </button>
         ))}
         <div className="mr-auto font-cairo text-[12px] font-semibold text-[#64748B]">
-          {visible.length} وثيقة
+          {t("doctor.documentsTab.documentCount").replace("{n}", String(visible.length))}
         </div>
       </motion.div>
 
@@ -169,14 +187,14 @@ export function DocumentsTab({
         <motion.div variants={TAB_STAGGER_ITEM}>
           <div className="flex min-h-[160px] items-center justify-center rounded-2xl border-2 border-dashed border-[#E2E8F0] bg-[#F8FAFC]">
             <p className="font-cairo text-[14px] font-bold text-[#64748B]">
-              لا توجد وثائق تطابق الفلتر المحدد
+              {t("doctor.documentsTab.noFilterMatch")}
             </p>
           </div>
         </motion.div>
       ) : (
         visible.map((doc) => {
           const Icon = doc.icon;
-          const kindLabel = KIND_LABELS[doc.kind];
+          const kindLabel = kindLabels[doc.kind];
           return (
             <motion.article
               key={`${doc.kind}-${doc.id}`}
@@ -223,7 +241,7 @@ export function DocumentsTab({
                       className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 font-cairo text-[12px] font-bold text-[#475467] transition-colors hover:bg-[#F8FAFC]"
                     >
                       <Eye className="h-3.5 w-3.5" />
-                      عرض
+                      {t("common.view")}
                     </button>
                   ) : null}
                   {doc.kind === "prescription" || doc.kind === "order" ? (
@@ -233,7 +251,7 @@ export function DocumentsTab({
                       className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary bg-white px-3 font-cairo text-[12px] font-bold text-primary transition-colors hover:bg-[#F0F9F9]"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      الملفات
+                      {t("doctor.documentsTab.files")}
                     </button>
                   ) : null}
                 </div>

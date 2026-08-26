@@ -32,6 +32,7 @@ export const ASSIGNABLE_SECRETARY_PERMISSIONS = [
 export type AssignableSecretaryPermission =
   (typeof ASSIGNABLE_SECRETARY_PERMISSIONS)[number];
 
+/** @deprecated Arabic-only — use secretaryPermissionLabel(key, tr) for locale-aware rendering. */
 export const SECRETARY_PERMISSION_LABELS: Record<string, string> = {
   'appointments:book': 'حجز المواعيد',
   'appointments:view': 'عرض المواعيد',
@@ -61,6 +62,47 @@ export const SECRETARY_PERMISSION_LABELS: Record<string, string> = {
   'billing:services:view': 'عرض خدمات الفوترة',
   'billing:services:manage': 'إدارة خدمات الفوترة',
 };
+
+const SECRETARY_PERMISSION_LABELS_EN: Record<string, string> = {
+  'appointments:book': 'Book appointments',
+  'appointments:view': 'View appointments',
+  'appointments:edit': 'Edit appointments',
+  'appointments:cancel': 'Cancel appointments',
+  'waitlist:create': 'Create waitlist requests',
+  'waitlist:view': 'View waitlist',
+  'waitlist:manage': 'Manage waitlist',
+  'waitlist:book': 'Book from waitlist',
+  'patients:view': 'View patients',
+  'patients:temporary:create': 'Create temporary patient',
+  'patients:files:view': 'View medical records',
+  'patients:files:upload': 'Edit medical records',
+  'schedule:view': 'View schedule',
+  'billing:dashboard:view': 'View accounts dashboard',
+  'billing:invoices:view': 'View invoices',
+  'billing:invoices:manage': 'Manage invoices',
+  'billing:payments:view': 'View payments',
+  'billing:payments:manage': 'Manage payments',
+  'billing:refunds:manage': 'Manage refunds',
+  'billing:expenses:view': 'View expenses',
+  'billing:expenses:manage': 'Manage expenses',
+  'billing:reports:view': 'View financial reports',
+  'billing:reports:export': 'Export financial reports',
+  'billing:settings:view': 'View financial settings',
+  'billing:settings:manage': 'Manage financial settings',
+  'billing:services:view': 'View billing services',
+  'billing:services:manage': 'Manage billing services',
+};
+
+/** Locale-aware secretary permission label — pass the page's own `tr(ar, en)` helper. */
+export function secretaryPermissionLabel(
+  key: string,
+  tr: (ar: string, en: string) => string,
+): string {
+  return tr(
+    SECRETARY_PERMISSION_LABELS[key] ?? key,
+    SECRETARY_PERMISSION_LABELS_EN[key] ?? key,
+  );
+}
 
 /** Primary rows shown on secretary cards (API-supported permissions only). */
 export const SECRETARY_CARD_PERMISSION_ROWS: Array<{
