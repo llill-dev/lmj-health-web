@@ -25,6 +25,7 @@ import { triggerBrowserFileDownload, triggerBrowserFileDownloadAndOpen } from "@
 import { useI18n } from "@/i18n/provider";
 import StyledSelect from "@/components/ui/styled-select";
 import { MedicalRecordsPagination } from "@/components/doctor/medical-records/medical-records-pagination";
+import ConfirmActionDialog from "@/components/doctor/confirm-action-dialog";
 
 function formatIsoDate(value: string | null | undefined, locale: "ar" | "en"): string {
   if (!value) return "—";
@@ -214,6 +215,7 @@ export default function SecretaryPatientFilesPage() {
   const uploadFile = useUploadDoctorPatientFile(patientId);
   const deleteFile = useDeleteDoctorPatientFile(patientId);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; filename: string } | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -336,17 +338,13 @@ export default function SecretaryPatientFilesPage() {
     }
   }
 
-  async function handleDelete(fileId: string) {
-    if (
-      !window.confirm(
-        tr(
-          "هل تريد بالتأكيد أرشفة هذا الملف؟",
-          "Are you sure you want to archive this file?",
-        ),
-      )
-    ) {
-      return;
-    }
+  function requestDelete(fileId: string, filename: string) {
+    setDeleteTarget({ id: fileId, filename });
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const fileId = deleteTarget.id;
     setDeletingFileId(fileId);
     try {
       await deleteFile.mutateAsync(fileId);
@@ -356,6 +354,7 @@ export default function SecretaryPatientFilesPage() {
         title: tr("فشل حذف الملف", "Delete failed"),
         variant: "error",
       });
+      throw error;
     } finally {
       setDeletingFileId(null);
     }
@@ -527,7 +526,11 @@ export default function SecretaryPatientFilesPage() {
                 locale={locale}
                 onView={(fileId) => handleView(fileId, file.filename)}
                 onDownload={(fileId) => handleDownload(fileId, file.filename)}
-                onDelete={canManageFiles ? (fileId) => void handleDelete(fileId) : undefined}
+                onDelete={
+                  canManageFiles
+                    ? (fileId) => requestDelete(fileId, file.filename)
+                    : undefined
+                }
                 deleting={deletingFileId === file.id}
                 disabled={Boolean(fileActionsDisabledReason)}
               />
@@ -553,6 +556,21 @@ export default function SecretaryPatientFilesPage() {
           </>
         )}
       </SurfaceSection>
+
+      <ConfirmActionDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(next) => {
+          if (!next) setDeleteTarget(null);
+        }}
+        title={tr("حذف الملف", "Delete file")}
+        description={tr(
+          `هل تريد بالتأكيد حذف الملف "${deleteTarget?.filename ?? ""}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+          `Are you sure you want to delete "${deleteTarget?.filename ?? ""}"? This action cannot be undone.`,
+        )}
+        confirmLabel={tr("حذف", "Delete")}
+        confirmDisabled={deletingFileId === deleteTarget?.id}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

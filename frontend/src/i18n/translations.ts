@@ -1103,6 +1103,142 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.signup.step.professional": "المهنية",
     "auth.signup.step.additional": "الإضافية",
     "auth.signup.step.legal": "القانونية",
+    "auth.signup.legal.title": "الرسائل القانونية",
+    "auth.signup.legal.subtitle": "بمتابعة استخدامك للنظام، فإنك توافق على:",
+    "auth.signup.legal.termsOfUse": "شروط الاستخدام",
+    "auth.signup.legal.privacyPolicy": "سياسة الخصوصية",
+    "auth.signup.legal.dataProcessing": "معالجة البيانات",
+    "auth.signup.legal.agreementText":
+      "أوافق على جميع الشروط والأحكام المذكورة أعلاه وأقر بأني قرأتها وفهمتها بشكل كامل",
+    "auth.signup.legal.previous": "السابق",
+    "auth.signup.legal.submitting": "جاري إرسال الطلب…",
+    "auth.signup.legal.agree": "أوافق",
+    "auth.signup.legal.readCarefully":
+      "يرجى قراءة جميع المستندات بعناية قبل الموافقة",
+    "doctor.appointments.reschedule.title": "إعادة جدولة الموعد",
+    "doctor.appointments.reschedule.subtitle":
+      "اختر تاريخاً ووقتاً جديدين للموعد.",
+    "doctor.appointments.reschedule.close": "إغلاق",
+    "doctor.appointments.reschedule.date": "التاريخ",
+    "doctor.appointments.reschedule.time": "الوقت",
+    "doctor.appointments.reschedule.loadingSlots": "جارٍ تحميل الفترات...",
+    "doctor.appointments.reschedule.availableSlots": "فترات متاحة",
+    "doctor.appointments.reschedule.selectDateFirst":
+      "اختر التاريخ أولاً حتى تظهر لك المواعيد المتاحة.",
+    "doctor.appointments.reschedule.loadingTimes":
+      "جارٍ تحميل الأوقات المتاحة...",
+    "doctor.appointments.reschedule.loadTimesError":
+      "تعذر تحميل الأوقات المتاحة لهذا التاريخ.",
+    "doctor.appointments.reschedule.loadingTimesForDay":
+      "جارٍ تحميل الأوقات المتاحة لهذا اليوم...",
+    "doctor.appointments.reschedule.rescheduleReason": "سبب إعادة الجدولة",
+    "doctor.appointments.reschedule.optional": "اختياري...",
+    "doctor.appointments.reschedule.saveNewAppointment": "حفظ الموعد الجديد",
+    "doctor.appointments.reschedule.noTimesAvailable":
+      "لا توجد أوقات متاحة في هذا التاريخ. اختر تاريخاً آخر.",
+    "doctor.appointments.reschedule.selectAvailableTime":
+      "اختر وقتاً متاحاً...",
+    "doctor.appointments.reschedule.availableTimes": "الأوقات المتاحة",
+    "doctor.appointments.reschedule.openTimesList": "فتح قائمة الأوقات المتاحة",
+    "doctor.appointments.reschedule.closeTimesList":
+      "إغلاق قائمة الأوقات المتاحة",
+    "doctor.appointments.reschedule.selected": "محدد",
+    "doctor.appointments.reschedule.available": "متاح",
+    "doctor.appointments.reschedule.onlyAvailableShown":
+      "تظهر لك فقط الأوقات المتاحة حسب جدول الطبيب.",
+    "doctor.appointments.reschedule.timeNoLongerAvailable":
+      "الوقت المحدد لم يعد متاحاً. اختر وقتاً من الأوقات المتاحة.",
+    "doctor.appointments.reschedule.appointmentType": "نوع الموعد",
+    "doctor.appointments.reschedule.noTypeSelected": "بدون تحديد نوع",
+    "doctor.appointments.reschedule.keepCurrentTypeOrChoose":
+      "الإبقاء على النوع الحالي أو اختيار نوع متاح",
+    "doctor.appointments.reschedule.keepCurrentType":
+      "الإبقاء على النوع الحالي",
+    "doctor.appointments.reschedule.reason": "السبب",
+    "doctor.appointments.reschedule.reasonPlaceholder":
+      "أضف سبب إعادة الجدولة...",
+    "doctor.appointments.reschedule.reschedulingSummary": "ملخص إعادة الجدولة",
+    "doctor.appointments.reschedule.patient": "المريض",
+    "doctor.appointments.reschedule.originalDate": "التاريخ الأصلي",
+    "doctor.appointments.reschedule.originalTime": "الوقت الأصلي",
+    "doctor.appointments.reschedule.newDate": "التاريخ الجديد",
+    "doctor.appointments.reschedule.newTime": "الوقت الجديد",
+    "doctor.appointments.reschedule.cancel": "إلغاء",
+    "doctor.appointments.reschedule.rescheduling": "جارٍ إعادة الجدولة...",
+    "doctor.appointments.reschedule.confirmReschedule": "تأكيد إعادة الجدولة",
+    "doctor.appointments.reschedule.rescheduleFailed":
+      "تعذر إتمام إعادة الجدولة",
+    "doctor.appointments.reschedule.rescheduleNotReady":
+      "إعادة الجدولة غير جاهزة بعد",
+    "doctor.appointments.reschedule.validation.dateRequired":
+      "يرجى اختيار التاريخ.",
+    "doctor.appointments.reschedule.validation.invalidDateFormat":
+      "صيغة التاريخ غير صحيحة.",
+    "doctor.appointments.reschedule.validation.timeRequired":
+      "يرجى اختيار الوقت.",
+    "doctor.appointments.reschedule.validation.invalidTimeFormat":
+      "صيغة الوقت غير صحيحة.",
+    "doctor.appointments.reschedule.validation.reasonTooLong":
+      "الحد الأقصى 300 حرف للسبب.",
+    "doctor.encounters.create.title": "إنشاء زيارة طبية",
+    "doctor.encounters.create.subtitle":
+      "جهّز الزيارة بدقة من أول خطوة: اختر المريض، حدّد نوع الزيارة، وأضف ملاحظات افتتاحية واضحة قبل البدء.",
+    "doctor.encounters.create.close": "إغلاق",
+    "doctor.encounters.create.patient": "المريض",
+    "doctor.encounters.create.selectPatient":
+      "اختر المريض الذي ستبدأ له الزيارة",
+    "doctor.encounters.create.noPatientsAvailable": "لا يوجد مرضى متاحون",
+    "doctor.encounters.create.noPatientsAvailableMessage":
+      "لا يوجد مرضى متاحون حاليًا لإنشاء زيارة جديدة.",
+    "doctor.encounters.create.selectPatientAria": "اختيار المريض",
+    "doctor.encounters.create.patientDefault": "مريض",
+    "doctor.encounters.create.fileNumber": "رقم الملف",
+    "doctor.encounters.create.noVisibleFileNumber": "بدون رقم ملف ظاهر",
+    "doctor.encounters.create.encounterType": "نوع الزيارة",
+    "doctor.encounters.create.selectEncounterType": "اختر نوع الزيارة",
+    "doctor.encounters.create.selectEncounterTypeAria": "اختيار نوع الزيارة",
+    "doctor.encounters.create.origin.manual": "زيارة يدوية",
+    "doctor.encounters.create.origin.appointment": "مرتبطة بموعد",
+    "doctor.encounters.create.origin.walkIn": "زيارة مباشرة",
+    "doctor.encounters.create.origin.followUp": "متابعة",
+    "doctor.encounters.create.linkedAppointmentId": "رقم الموعد المرتبط",
+    "doctor.encounters.create.enterAppointmentId":
+      "أدخل معرّف الموعد (24 حرفاً) من نظام المواعيد",
+    "doctor.encounters.create.leaveEmptyOptional":
+      "اختياري — اتركه فارغاً إن لم تربط بموعد",
+    "doctor.encounters.create.appointmentIdRequired":
+      "عند اختيار «مرتبطة بموعد» يصبح معرّف الموعد مطلوباً.",
+    "doctor.encounters.create.appointmentIdMustBeValid":
+      "إذا أدخلت معرّف موعد، يجب أن يكون صالحاً بالكامل.",
+    "doctor.encounters.create.professionalSetup": "تهيئة احترافية للزيارة",
+    "doctor.encounters.create.openingNotesDescription":
+      "الملاحظات الأولية ستظهر ضمن تفاصيل الزيارة، لذلك اكتب سبب الزيارة أو الهدف الطبي بشكل مختصر وواضح.",
+    "doctor.encounters.create.openingNotes": "ملاحظات افتتاحية",
+    "doctor.encounters.create.openingNotesPlaceholder":
+      "اكتب ملخصًا افتتاحيًا يوضح سبب الزيارة، الشكوى الأساسية، أو الهدف من المتابعة.",
+    "doctor.encounters.create.notesDirectAndClear":
+      "يفضّل أن تكون الملاحظات مباشرة وواضحة منذ بداية الزيارة.",
+    "doctor.encounters.create.cancel": "إلغاء",
+    "doctor.encounters.create.createEncounter": "إنشاء الزيارة",
+    "doctor.encounters.create.validation.patientRequired":
+      "يرجى اختيار المريض قبل إنشاء الزيارة.",
+    "doctor.encounters.create.validation.originRequired":
+      "يرجى اختيار نوع الزيارة.",
+    "doctor.encounters.create.validation.appointmentIdRequired":
+      "رقم الموعد مطلوب عند اختيار زيارة مرتبطة بموعد.",
+    "doctor.encounters.create.validation.invalidAppointmentId":
+      "رقم الموعد غير صالح. أدخل معرّف الموعد كاملاً (24 حرفاً hex) من نظام المواعيد.",
+    "doctor.encounters.create.validation.notesRequired":
+      "يرجى كتابة ملاحظات افتتاحية مختصرة عن سبب الزيارة.",
+    "doctor.encounters.create.validation.notesTooShort":
+      "الملاحظات يجب أن تكون أوضح قليلًا، 10 أحرف على الأقل.",
+    "doctor.encounters.create.validation.notesTooLong":
+      "الملاحظات طويلة جدًا. الحد الأقصى 500 حرف.",
+    "doctor.encounters.create.validation.reviewFields":
+      "يرجى مراجعة الحقول المعلّمة بالأحمر قبل إنشاء الزيارة.",
+    "doctor.encounters.create.validation.missingOrInvalidData":
+      "بيانات ناقصة أو غير صحيحة",
+    "doctor.encounters.create.validation.failedToCreate": "تعذّر إنشاء الزيارة",
     "auth.page.verifyOtp.title": "التحقق من الرمز • LMJ Health",
     "auth.page.forgotPassword.title": "نسيت كلمة المرور • LMJ Health",
     "auth.page.verifyResetOtp.title":
@@ -3874,6 +4010,201 @@ export const translations: Record<AppLocale, TranslationTree> = {
     "auth.signup.step.professional": "Professional",
     "auth.signup.step.additional": "Additional",
     "auth.signup.step.legal": "Legal",
+    "auth.signup.legal.title": "Legal Messages",
+    "auth.signup.legal.subtitle":
+      "By continuing to use the system, you agree to:",
+    "auth.signup.legal.termsOfUse": "Terms of Use",
+    "auth.signup.legal.privacyPolicy": "Privacy Policy",
+    "auth.signup.legal.dataProcessing": "Data Processing",
+    "auth.signup.legal.agreementText":
+      "I agree to all the terms and conditions mentioned above and confirm that I have read and understood them fully",
+    "auth.signup.legal.previous": "Previous",
+    "auth.signup.legal.submitting": "Submitting request…",
+    "auth.signup.legal.agree": "Agree",
+    "auth.signup.legal.readCarefully":
+      "Please read all documents carefully before agreeing",
+    "doctor.appointments.book.title": "Book new appointment",
+    "doctor.appointments.book.subtitle":
+      "Choose the patient, date, and time, then confirm to create the appointment on the doctor's schedule.",
+    "doctor.appointments.book.close": "Close",
+    "doctor.appointments.book.selectPatient": "Select patient",
+    "doctor.appointments.book.select": "Select...",
+    "doctor.appointments.book.noPatients": "No patients in the list",
+    "doctor.appointments.book.noPatientsAvailable":
+      "No patients available to select.",
+    "doctor.appointments.book.date": "Date",
+    "doctor.appointments.book.availableTime": "Available time",
+    "doctor.appointments.book.loadingSlots": "Loading slots...",
+    "doctor.appointments.book.availableSlots": "available slots",
+    "doctor.appointments.book.selectDateFirst":
+      "Select a date first to see available appointments only.",
+    "doctor.appointments.book.loadingTimes": "Loading available times...",
+    "doctor.appointments.book.loadTimesError":
+      "Could not load available times for this date.",
+    "doctor.appointments.book.noTimesAvailable":
+      "No available times on this date. Choose another date.",
+    "doctor.appointments.book.selectAvailableTime":
+      "Select an available time...",
+    "doctor.appointments.book.availableTimes": "Available times",
+    "doctor.appointments.book.openTimesList": "Open available times list",
+    "doctor.appointments.book.closeTimesList": "Close available times list",
+    "doctor.appointments.book.selected": "Selected",
+    "doctor.appointments.book.available": "Available",
+    "doctor.appointments.book.onlyAvailableShown":
+      "Only available times from the doctor's schedule are shown.",
+    "doctor.appointments.book.timeNoLongerAvailable":
+      "Selected time is no longer available. Choose another available time.",
+    "doctor.appointments.book.appointmentType": "Appointment type",
+    "doctor.appointments.book.noTypeSelected": "No type selected",
+    "doctor.appointments.book.notes": "Notes",
+    "doctor.appointments.book.notesPlaceholder":
+      "Add internal notes for the doctor or secretary...",
+    "doctor.appointments.book.bookingSummary": "Booking summary",
+    "doctor.appointments.book.patient": "Patient",
+    "doctor.appointments.book.notSpecified": "Not specified",
+    "doctor.appointments.book.time": "Time",
+    "doctor.appointments.book.cancel": "Cancel",
+    "doctor.appointments.book.completePrerequisites":
+      "Complete prerequisites first",
+    "doctor.appointments.book.creating": "Creating appointment...",
+    "doctor.appointments.book.confirmBooking": "Confirm booking",
+    "doctor.appointments.book.bookingFailed": "Could not complete booking",
+    "doctor.appointments.book.bookingNotReady": "Booking is not ready yet",
+    "doctor.appointments.book.validation.patientRequired":
+      "Please select a patient.",
+    "doctor.appointments.book.validation.dateRequired": "Please select a date.",
+    "doctor.appointments.book.validation.invalidDateFormat":
+      "Invalid date format.",
+    "doctor.appointments.book.validation.timeRequired": "Please select a time.",
+    "doctor.appointments.book.validation.invalidTimeFormat":
+      "Invalid time format.",
+    "doctor.appointments.book.validation.notesTooLong":
+      "Maximum 500 characters for notes.",
+    "doctor.appointments.reschedule.title": "Reschedule appointment",
+    "doctor.appointments.reschedule.subtitle":
+      "Choose a new date and time for the appointment.",
+    "doctor.appointments.reschedule.close": "Close",
+    "doctor.appointments.reschedule.date": "Date",
+    "doctor.appointments.reschedule.time": "Time",
+    "doctor.appointments.reschedule.loadingSlots": "Loading slots...",
+    "doctor.appointments.reschedule.availableSlots": "available slots",
+    "doctor.appointments.reschedule.selectDateFirst":
+      "Select a date first to see available appointments.",
+    "doctor.appointments.reschedule.loadingTimes": "Loading available times...",
+    "doctor.appointments.reschedule.loadTimesError":
+      "Could not load available times for this date.",
+    "doctor.appointments.reschedule.loadingTimesForDay":
+      "Loading available times for this day...",
+    "doctor.appointments.reschedule.rescheduleReason": "Reschedule reason",
+    "doctor.appointments.reschedule.optional": "Optional...",
+    "doctor.appointments.reschedule.saveNewAppointment": "Save new appointment",
+    "doctor.appointments.reschedule.noTimesAvailable":
+      "No available times on this date. Choose another date.",
+    "doctor.appointments.reschedule.selectAvailableTime":
+      "Select an available time...",
+    "doctor.appointments.reschedule.availableTimes": "Available times",
+    "doctor.appointments.reschedule.openTimesList": "Open available times list",
+    "doctor.appointments.reschedule.closeTimesList":
+      "Close available times list",
+    "doctor.appointments.reschedule.selected": "Selected",
+    "doctor.appointments.reschedule.available": "Available",
+    "doctor.appointments.reschedule.onlyAvailableShown":
+      "Only available times from the doctor's schedule are shown.",
+    "doctor.appointments.reschedule.timeNoLongerAvailable":
+      "Selected time is no longer available. Choose another available time.",
+    "doctor.appointments.reschedule.appointmentType": "Appointment type",
+    "doctor.appointments.reschedule.noTypeSelected": "No type selected",
+    "doctor.appointments.reschedule.keepCurrentTypeOrChoose":
+      "Keep current type or choose another",
+    "doctor.appointments.reschedule.keepCurrentType": "Keep current type",
+    "doctor.appointments.reschedule.reason": "Reason",
+    "doctor.appointments.reschedule.reasonPlaceholder":
+      "Add reason for rescheduling...",
+    "doctor.appointments.reschedule.reschedulingSummary":
+      "Rescheduling summary",
+    "doctor.appointments.reschedule.patient": "Patient",
+    "doctor.appointments.reschedule.originalDate": "Original date",
+    "doctor.appointments.reschedule.originalTime": "Original time",
+    "doctor.appointments.reschedule.newDate": "New date",
+    "doctor.appointments.reschedule.newTime": "New time",
+    "doctor.appointments.reschedule.cancel": "Cancel",
+    "doctor.appointments.reschedule.rescheduling": "Rescheduling...",
+    "doctor.appointments.reschedule.confirmReschedule": "Confirm reschedule",
+    "doctor.appointments.reschedule.rescheduleFailed":
+      "Could not complete reschedule",
+    "doctor.appointments.reschedule.rescheduleNotReady":
+      "Reschedule is not ready yet",
+    "doctor.appointments.reschedule.validation.dateRequired":
+      "Please select a date.",
+    "doctor.appointments.reschedule.validation.invalidDateFormat":
+      "Invalid date format.",
+    "doctor.appointments.reschedule.validation.timeRequired":
+      "Please select a time.",
+    "doctor.appointments.reschedule.validation.invalidTimeFormat":
+      "Invalid time format.",
+    "doctor.appointments.reschedule.validation.reasonTooLong":
+      "Maximum 300 characters for reason.",
+    "doctor.encounters.create.title": "Create medical encounter",
+    "doctor.encounters.create.subtitle":
+      "Prepare the encounter carefully from the first step: choose the patient, set the encounter type, and add clear opening notes before you begin.",
+    "doctor.encounters.create.close": "Close",
+    "doctor.encounters.create.patient": "Patient",
+    "doctor.encounters.create.selectPatient":
+      "Select the patient to start the encounter for",
+    "doctor.encounters.create.noPatientsAvailable": "No patients available",
+    "doctor.encounters.create.noPatientsAvailableMessage":
+      "No patients are currently available to create a new encounter.",
+    "doctor.encounters.create.selectPatientAria": "Select patient",
+    "doctor.encounters.create.patientDefault": "Patient",
+    "doctor.encounters.create.fileNumber": "File number",
+    "doctor.encounters.create.noVisibleFileNumber": "No visible file number",
+    "doctor.encounters.create.encounterType": "Encounter type",
+    "doctor.encounters.create.selectEncounterType": "Select the encounter type",
+    "doctor.encounters.create.selectEncounterTypeAria": "Select encounter type",
+    "doctor.encounters.create.origin.manual": "Manual encounter",
+    "doctor.encounters.create.origin.appointment": "Linked to appointment",
+    "doctor.encounters.create.origin.walkIn": "Walk-in",
+    "doctor.encounters.create.origin.followUp": "Follow-up",
+    "doctor.encounters.create.linkedAppointmentId": "Linked appointment id",
+    "doctor.encounters.create.enterAppointmentId":
+      "Enter the appointment id (24 characters) from the appointments system",
+    "doctor.encounters.create.leaveEmptyOptional":
+      "Optional — leave empty if not linked to an appointment",
+    "doctor.encounters.create.appointmentIdRequired":
+      'When "Linked to appointment" is selected, the appointment id becomes required.',
+    "doctor.encounters.create.appointmentIdMustBeValid":
+      "If you enter an appointment id, it must be fully valid.",
+    "doctor.encounters.create.professionalSetup":
+      "Professional encounter setup",
+    "doctor.encounters.create.openingNotesDescription":
+      "The opening notes will appear within the encounter details, so write the reason for the encounter or the medical goal briefly and clearly.",
+    "doctor.encounters.create.openingNotes": "Opening notes",
+    "doctor.encounters.create.openingNotesPlaceholder":
+      "Write an opening summary explaining the reason for the encounter, the main complaint, or the follow-up goal.",
+    "doctor.encounters.create.notesDirectAndClear":
+      "It's best for the notes to be direct and clear from the start of the encounter.",
+    "doctor.encounters.create.cancel": "Cancel",
+    "doctor.encounters.create.createEncounter": "Create encounter",
+    "doctor.encounters.create.validation.patientRequired":
+      "Please select a patient before creating the encounter.",
+    "doctor.encounters.create.validation.originRequired":
+      "Please select the encounter type.",
+    "doctor.encounters.create.validation.appointmentIdRequired":
+      "The appointment id is required when the encounter is linked to an appointment.",
+    "doctor.encounters.create.validation.invalidAppointmentId":
+      "Invalid appointment id. Enter the full appointment id (24 hex characters) from the appointments system.",
+    "doctor.encounters.create.validation.notesRequired":
+      "Please write a short opening note about the reason for the encounter.",
+    "doctor.encounters.create.validation.notesTooShort":
+      "The notes need to be a bit clearer, at least 10 characters.",
+    "doctor.encounters.create.validation.notesTooLong":
+      "The notes are too long. Maximum 500 characters.",
+    "doctor.encounters.create.validation.reviewFields":
+      "Please review the fields marked in red before creating the encounter.",
+    "doctor.encounters.create.validation.missingOrInvalidData":
+      "Missing or invalid data",
+    "doctor.encounters.create.validation.failedToCreate":
+      "Failed to create the encounter",
     "auth.page.verifyOtp.title": "Verify OTP • LMJ Health",
     "auth.page.forgotPassword.title": "Forgot Password • LMJ Health",
     "auth.page.verifyResetOtp.title": "Verify Reset OTP • LMJ Health",

@@ -16,11 +16,11 @@ import { useI18n } from "@/i18n/provider";
 const claimVerifySchema = z
   .object({
     code: z.string().regex(new RegExp("^\\d{6}$"), VERIFY_CODE_SCHEMA_HINT_AR),
-    password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-    confirmPassword: z.string().min(1, "يرجى تأكيد كلمة المرور"),
+    password: z.string().min(6, "auth.resetPassword.passwordMinLength"),
+    confirmPassword: z.string().min(1, "auth.resetPassword.confirmRequired"),
   })
   .refine((values) => values.password === values.confirmPassword, {
-    message: "كلمتا المرور غير متطابقتين",
+    message: "auth.resetPassword.passwordMismatch",
     path: ["confirmPassword"],
   });
 
@@ -133,6 +133,9 @@ export default function ClaimAccountVerifyForm({
     errors.password?.message ??
     errors.confirmPassword?.message ??
     flowError;
+  const displayError = inlineError?.startsWith("auth.")
+    ? t(inlineError)
+    : inlineError;
 
   return (
     <section
@@ -267,7 +270,7 @@ export default function ClaimAccountVerifyForm({
                 className={`mx-auto mt-3 min-h-[22px] w-full max-w-[340px] text-center font-cairo text-[13px] font-semibold leading-snug ${inlineError ? "text-red-500" : "text-transparent"}`}
                 aria-live="polite"
               >
-                {inlineError ?? "\u00A0"}
+                {displayError ?? "\u00A0"}
               </div>
 
               <div className="mt-6 flex w-full items-center justify-center">

@@ -1,13 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ArrowRight, FileText, Loader2 } from 'lucide-react';
-
-const LEGAL_ROWS: { href: string; label: string }[] = [
-  { href: '#terms-of-use', label: 'شروط الاستخدام' },
-  { href: '#privacy-policy', label: 'سياسة الخصوصية' },
-  { href: '#data-processing', label: 'معالجة البيانات' },
-];
+import { useState } from "react";
+import { ArrowRight, FileText, Loader2 } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 export default function SignUpStep5Legal({
   onPrev,
@@ -18,7 +13,14 @@ export default function SignUpStep5Legal({
   onAgree: () => void;
   isSubmitting?: boolean;
 }) {
+  const { t } = useI18n();
   const [accepted, setAccepted] = useState(false);
+
+  const LEGAL_ROWS: { href: string; label: string }[] = [
+    { href: "#terms-of-use", label: t("auth.signup.legal.termsOfUse") },
+    { href: "#privacy-policy", label: t("auth.signup.legal.privacyPolicy") },
+    { href: "#data-processing", label: t("auth.signup.legal.dataProcessing") },
+  ];
 
   return (
     <>
@@ -27,10 +29,10 @@ export default function SignUpStep5Legal({
           <FileText className="h-9 w-9 text-white" strokeWidth={1.75} />
         </div>
         <h2 className="mt-5 font-cairo text-[26px] font-extrabold text-primary">
-          الرسائل القانونية
+          {t("auth.signup.legal.title")}
         </h2>
         <p className="mt-2 max-w-[560px] font-cairo text-[14px] font-semibold text-[#6B7280]">
-          بمتابعة استخدامك للنظام، فإنك توافق على:
+          {t("auth.signup.legal.subtitle")}
         </p>
 
         <ul className="mt-8 w-full max-w-[520px] space-y-3 text-start">
@@ -40,7 +42,10 @@ export default function SignUpStep5Legal({
                 href={row.href}
                 className="flex items-center gap-3 rounded-[10px] border border-transparent bg-[#F3F4F6] px-4 py-3.5 font-cairo text-[14px] font-bold text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition-colors hover:bg-[#EAECEF]"
               >
-                <span className="shrink-0 text-[18px] leading-none text-primary" aria-hidden>
+                <span
+                  className="shrink-0 text-[18px] leading-none text-primary"
+                  aria-hidden
+                >
                   •
                 </span>
                 <span>{row.label}</span>
@@ -51,8 +56,7 @@ export default function SignUpStep5Legal({
 
         <label className="mt-8 flex w-full max-w-[520px] cursor-pointer items-start justify-end gap-3 text-start">
           <span className="font-cairo text-[13px] font-semibold leading-7 text-[#374151]">
-            أوافق على جميع الشروط والأحكام المذكورة أعلاه وأقر بأني قرأتها وفهمتها بشكل
-            كامل
+            {t("auth.signup.legal.agreementText")}
           </span>
           <input
             type="checkbox"
@@ -72,7 +76,7 @@ export default function SignUpStep5Legal({
           className="flex h-[54px] items-center justify-center gap-2 rounded-[6px] border border-[#E5E7EB] bg-white font-cairo text-[14px] font-bold text-[#374151] shadow-[0_12px_24px_rgba(0,0,0,0.06)] disabled:pointer-events-none disabled:opacity-60"
         >
           <ArrowRight className="h-4 w-4" />
-          السابق
+          {t("auth.signup.legal.previous")}
         </button>
         <button
           type="button"
@@ -83,23 +87,26 @@ export default function SignUpStep5Legal({
           }}
           className={
             accepted && !isSubmitting
-              ? 'flex h-[54px] items-center justify-center rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:pointer-events-none'
-              : 'flex h-[54px] items-center justify-center rounded-[6px] bg-[#D1D5DB] font-cairo text-[14px] font-bold text-white shadow-none cursor-not-allowed'
+              ? "flex h-[54px] items-center justify-center rounded-[6px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15,143,139,0.35)] transition-colors hover:bg-[#14B3AE] disabled:pointer-events-none"
+              : "flex h-[54px] items-center justify-center rounded-[6px] bg-[#D1D5DB] font-cairo text-[14px] font-bold text-white shadow-none cursor-not-allowed"
           }
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="ms-2 h-5 w-5 shrink-0 animate-spin" aria-hidden />
-              جاري إرسال الطلب…
+              <Loader2
+                className="ms-2 h-5 w-5 shrink-0 animate-spin"
+                aria-hidden
+              />
+              {t("auth.signup.legal.submitting")}
             </>
           ) : (
-            'أوافق'
+            t("auth.signup.legal.agree")
           )}
         </button>
       </div>
 
       <p className="mt-6 text-center font-cairo text-[12px] font-semibold leading-5 text-[#98A2B3]">
-        يرجى قراءة جميع المستندات بعناية قبل الموافقة
+        {t("auth.signup.legal.readCarefully")}
       </p>
     </>
   );

@@ -146,7 +146,7 @@ export default function NewPassword({
               onClick={() => setShowPassword((value) => !value)}
               className="shrink-0 text-[#98A2B3] transition-colors hover:text-[#667085]"
               aria-label={
-                showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+                showPassword ? t("auth.hidePassword") : t("auth.showPassword")
               }
             >
               {showPassword ? (
@@ -159,8 +159,12 @@ export default function NewPassword({
         </div>
 
         <div>
-          <label className="mb-2 block text-start font-cairo text-[14px] font-bold text-[#101828]">
-            تأكيد كلمة المرور
+          <label
+            className="mb-2 block text-start font-cairo text-[14px] font-bold text-[#101828]"
+            dir={dir}
+            lang={locale}
+          >
+            {t("auth.resetPassword.confirmPasswordLabel")}
           </label>
           <div className="flex h-[40px] items-center rounded-[8px] border border-[#E5E7EB] bg-[#F3F3F5] px-3 shadow-[0_10px_24px_rgba(0,0,0,0.06)]">
             <LockKeyhole
@@ -180,7 +184,9 @@ export default function NewPassword({
               onClick={() => setShowConfirmPassword((value) => !value)}
               className="shrink-0 text-[#98A2B3] transition-colors hover:text-[#667085]"
               aria-label={
-                showConfirmPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+                showConfirmPassword
+                  ? t("auth.hidePassword")
+                  : t("auth.showPassword")
               }
             >
               {showConfirmPassword ? (
@@ -194,21 +200,24 @@ export default function NewPassword({
 
         <div className="rounded-[10px] border border-[#D9EEF0] bg-[#F0FAFA] px-4 py-3">
           <p className="mb-2 text-start font-cairo text-[12px] font-extrabold text-[#0F766E]">
-            متطلبات كلمة المرور:
+            {t("auth.resetPassword.passwordRequirements")}
           </p>
           <ul className="space-y-2">
             <RequirementRow
               met={requirements.minLength}
-              label="لا تقل عن 8 أحرف"
+              label={t("auth.resetPassword.minLength")}
             />
             <RequirementRow
               met={requirements.uppercase}
-              label="تحتوي على حرف كبير"
+              label={t("auth.resetPassword.uppercase")}
             />
-            <RequirementRow met={requirements.number} label="تحتوي على رقم" />
+            <RequirementRow
+              met={requirements.number}
+              label={t("auth.resetPassword.number")}
+            />
             <RequirementRow
               met={requirements.match}
-              label="كلمتا المرور متطابقتان"
+              label={t("auth.resetPassword.match")}
             />
           </ul>
         </div>
@@ -217,7 +226,7 @@ export default function NewPassword({
           className={`min-h-[20px] text-start font-cairo text-[12px] font-semibold leading-snug ${fieldError ? "text-[#D92D20]" : "text-transparent"}`}
           aria-live="polite"
         >
-          {fieldError ?? "\u00A0"}
+          {displayError ?? "\u00A0"}
         </div>
 
         <button
@@ -225,7 +234,11 @@ export default function NewPassword({
           disabled={isSubmitting}
           className="flex h-[42px] w-full items-center justify-center gap-2 rounded-[8px] bg-primary font-cairo text-[14px] font-bold text-white shadow-[0_18px_40px_rgba(15,143,139,0.32)] transition-colors hover:bg-[#14B3AE] disabled:opacity-60"
         >
-          <span>{isSubmitting ? "جارٍ الحفظ…" : "تعيين كلمة المرور"}</span>
+          <span>
+            {isSubmitting
+              ? t("auth.resetPassword.saving")
+              : t("auth.resetPassword.setPassword")}
+          </span>
           <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
         </button>
       </form>
