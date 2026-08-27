@@ -48,18 +48,21 @@ type EncounterFormErrors = Partial<Record<keyof EncounterFormValues, string>>;
 type TrFn = (ar: string, en: string) => string;
 const defaultTr: TrFn = (ar) => ar;
 
-function buildOriginOptions(): Array<{
+function buildOriginOptions(t: (key: string) => string): Array<{
   value: DoctorEncounterOrigin;
   label: string;
 }> {
   return [
-    { value: "manual", label: "doctor.encounters.create.origin.manual" },
+    { value: "manual", label: t("doctor.encounters.create.origin.manual") },
     {
       value: "appointment",
-      label: "doctor.encounters.create.origin.appointment",
+      label: t("doctor.encounters.create.origin.appointment"),
     },
-    { value: "walk_in", label: "doctor.encounters.create.origin.walkIn" },
-    { value: "follow_up", label: "doctor.encounters.create.origin.followUp" },
+    { value: "walk_in", label: t("doctor.encounters.create.origin.walkIn") },
+    {
+      value: "follow_up",
+      label: t("doctor.encounters.create.origin.followUp"),
+    },
   ];
 }
 
@@ -133,6 +136,7 @@ export function CreateEncounterDialog({
   onSubmit,
 }: CreateEncounterDialogProps) {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const { toast } = useToast();
   const selectListboxOutletRef = useRef<HTMLDivElement>(null);
   const valuesRef = useRef<EncounterFormValues>(INITIAL_VALUES);
@@ -217,10 +221,10 @@ export function CreateEncounterDialog({
 
       setErrors((prevErrors) => {
         const updated: EncounterFormErrors = { ...prevErrors };
-        updated[field] = validateField(field, next, tr) || undefined;
+        updated[field] = validateField(field, next) || undefined;
         if (field === "origin") {
           updated.appointmentId =
-            validateField("appointmentId", next, tr) || undefined;
+            validateField("appointmentId", next) || undefined;
         }
         return updated;
       });
@@ -233,7 +237,7 @@ export function CreateEncounterDialog({
     setTouched((prev) => ({ ...prev, [field]: true }));
     setErrors((prev) => ({
       ...prev,
-      [field]: validateField(field, valuesRef.current, tr) || undefined,
+      [field]: validateField(field, valuesRef.current) || undefined,
     }));
   };
 
@@ -375,7 +379,7 @@ export function CreateEncounterDialog({
                   </div>
                   {errors.patientId ? (
                     <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
-                      {errors.patientId}
+                      {t(errors.patientId)}
                     </div>
                   ) : null}
                 </div>
@@ -386,7 +390,7 @@ export function CreateEncounterDialog({
                   </label>
                   <div className={fieldShell(Boolean(errors.origin))}>
                     <StyledSelect
-                      options={buildOriginOptions(tr)}
+                      options={buildOriginOptions(t)}
                       value={values.origin}
                       onChange={(next) =>
                         setFieldValue("origin", next as DoctorEncounterOrigin)
@@ -408,7 +412,7 @@ export function CreateEncounterDialog({
                   </div>
                   {errors.origin ? (
                     <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
-                      {errors.origin}
+                      {t(errors.origin)}
                     </div>
                   ) : null}
                 </div>
@@ -448,7 +452,7 @@ export function CreateEncounterDialog({
                 </div>
                 {errors.appointmentId ? (
                   <div className="mt-2 text-start font-cairo text-[12px] font-bold text-[#D92D20]">
-                    {errors.appointmentId}
+                    {t(errors.appointmentId)}
                   </div>
                 ) : (
                   <div className="mt-2 text-start font-cairo text-[11px] font-semibold text-[#667085]">
@@ -513,7 +517,7 @@ export function CreateEncounterDialog({
                 <div className="flex gap-3 justify-between items-center mt-2">
                   {errors.notes ? (
                     <div className="text-start font-cairo text-[12px] font-bold text-[#D92D20]">
-                      {errors.notes}
+                      {t(errors.notes)}
                     </div>
                   ) : (
                     <div className="text-start font-cairo text-[11px] font-semibold text-[#667085]">

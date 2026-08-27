@@ -75,6 +75,7 @@ export default function BookAppointmentDialog({
   submitDisabledReason?: string | null;
 }) {
   const { t, locale, dir } = useI18n();
+  const tr = (ar: string, en: string) => (locale === "ar" ? ar : en);
   const bookSelectOutletRef = useRef<HTMLDivElement>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
